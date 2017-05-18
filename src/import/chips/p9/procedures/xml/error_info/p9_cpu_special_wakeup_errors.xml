@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,32 +26,135 @@
 <hwpErrors>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_SPCWKUP_TIMEOUT</rc>
-    <description>Special wakeup to targeted chiplet timed out.</description>
+    <rc>RC_SPCWKUP_EQ_TIMEOUT</rc>
+    <description>Special wakeup to EQ chiplet timed out.</description>
     <ffdc>POLLCOUNT</ffdc>
-    <ffdc>NETCTRL</ffdc>
-    <ffdc>SP_WKUP_REG_ADDRESS</ffdc>
+    <ffdc>QUAD_NETCTRL</ffdc>
     <ffdc>SP_WKUP_REG_VALUE</ffdc>
-    <ffdc>HISTORY_ADDRESS</ffdc>
-    <ffdc>HISTORY_VALUE</ffdc>
+    <ffdc>QUAD_HISTORY_VALUE</ffdc>
     <ffdc>ENTITY</ffdc>
-    <!--
+    <ffdc>GPMMR</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EX0_TARGET</ffdc>
+    <ffdc>EX1_TARGET</ffdc>
+    <ffdc>NUM_FUNC_EX</ffdc>
+    <ffdc>PROC_CHIP_TARGET</ffdc>
+    <ffdc>PPE_STATE_MODE</ffdc>
+    <ffdc>PPE_BASE_ADDRESS_LIST</ffdc>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_PCBS_REGISTERS</id>
-      <target>EX_IN_ERROR</target>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX0_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
+
     <collectRegisterFfdc>
-      <id>REG_FFDC_PROC_SLW_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_FIR_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PMC_REGISTERS</id>
-      <id>REG_FFDC_PROC_SLW_PBA_REGISTERS</id>
-      <target>CHIP</target>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX1_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
+
+    <collectRegisterFfdc>
+       <id>SGPE_FFDC_REGISTERS</id>
+       <target>PROC_CHIP_TARGET</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
     <callout>
-      <target>EX_IN_ERROR</target>
+      <target>EQ_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-     -->
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SPCWKUP_EX_TIMEOUT</rc>
+    <description>Special wakeup to EX chiplet timed out.</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>C0_NETCTRL</ffdc>
+    <ffdc>C1_NETCTRL</ffdc>
+    <ffdc>C0_SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>C1_SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>C0_HISTORY_VALUE</ffdc>
+    <ffdc>C1_HISTORY_VALUE</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>C0_CPMMR</ffdc>
+    <ffdc>C1_CPMMR</ffdc>
+    <ffdc>C0_GPMMR</ffdc>
+    <ffdc>C1_GPMMR</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>PROC_CHIP_TARGET</ffdc>
+    <ffdc>CME_STATE_MODE</ffdc>
+    <ffdc>SGPE_STATE_MODE</ffdc>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, CME_STATE_MODE, CME_BASE_ADDRESS</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, SGPE_STATE_MODE, SGPE_BASE_ADDRESS</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+
+    <collectRegisterFfdc>
+       <id>SGPE_FFDC_REGISTERS</id>
+       <target>PROC_CHIP_TARGET</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SPCWKUP_CORE_TIMEOUT</rc>
+    <description>Special wakeup to core chiplet timed out.</description>
+    <ffdc>POLLCOUNT</ffdc>
+    <ffdc>NETCTRL</ffdc>
+    <ffdc>SP_WKUP_REG_VALUE</ffdc>
+    <ffdc>HISTORY_VALUE</ffdc>
+    <ffdc>ENTITY</ffdc>
+    <ffdc>CPMMR</ffdc>
+    <ffdc>GPMMR</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>PROC_CHIP_TARGET</ffdc>
+    <ffdc>CME_STATE_MODE</ffdc>
+    <ffdc>SGPE_STATE_MODE</ffdc>
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, CME_STATE_MODE, CME_BASE_ADDRESS</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, SGPE_STATE_MODE, SGPE_BASE_ADDRESS</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX_TARGET</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+
+    <collectRegisterFfdc>
+       <id>SGPE_FFDC_REGISTERS</id>
+       <target>PROC_CHIP_TARGET</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INTERNAL_SPCWKUP_TIMEOUT</rc>
+    <description>Special wakeup for targeted chiplet timed out. It is an
+     internal return code and will not show up in platform error log.
+    </description>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
@@ -157,6 +260,12 @@
   <hwpError>
     <rc>RC_SPCWKUP_DD1_HW389511_TIMEOUT</rc>
     <description>Maximum number of retries reached for SCOM write (DD1 HW389511)
+    </description>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_INTERNAL_SPCWKUP_IN_PROGRESS</rc>
+    <description>Special wakeup is already in progress. Ignoring current request.
     </description>
   </hwpError>
   <!-- *********************************************************************** -->

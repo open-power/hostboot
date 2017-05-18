@@ -417,4 +417,49 @@
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CORE_INSIDE_SPECIAL_WAKEUP</id>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>Indicates that a special wakeup is in progress for a core.
+
+    Producer: p9_cpu_special_wakeup_core.C
+
+    Consumers: p9_cpu_special_wakeup_core.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EX_INSIDE_SPECIAL_WAKEUP</id>
+    <targetType>TARGET_TYPE_EX</targetType>
+    <description>Indicates that a special wakeup is in progress for an EX.
+
+    Producer: p9_cpu_special_wakeup_ex.C
+
+    Consumers: p9_cpu_special_wakeup_ex.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_EQ_INSIDE_SPECIAL_WAKEUP</id>
+    <targetType>TARGET_TYPE_EQ</targetType>
+    <description>Indicates that a special wakeup is in progress for an EQ
+
+    Producer: p9_cpu_special_wakeup_eq.C
+
+    Consumers: p9_cpu_special_wakeup_eq.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>

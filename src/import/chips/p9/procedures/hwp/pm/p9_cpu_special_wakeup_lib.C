@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,37 @@ const char* PROC_SPCWKUP_ENTITY_NAMES[] =
     "HOST",
     "SPW_ALL"
 };
+
+void blockWakeupRecurssion( const fapi2::Target <fapi2::TARGET_TYPE_EQ>&  i_quadTarget,
+                            RecurssionOp i_spWakeUpInProg )
+{
+    FAPI_INF(">> blockWakeupRecurssion" );
+    uint8_t attrVal = i_spWakeUpInProg;
+
+    auto l_func_ex_vector =
+        i_quadTarget.getChildren<fapi2::TARGET_TYPE_EX>( fapi2::TARGET_STATE_FUNCTIONAL );
+
+    FAPI_ATTR_SET( fapi2::ATTR_EQ_INSIDE_SPECIAL_WAKEUP,
+                   i_quadTarget,
+                   attrVal );
+
+    for( auto itEx : l_func_ex_vector )
+    {
+        auto l_func_core_vector =
+            itEx.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_FUNCTIONAL );
+
+        FAPI_ATTR_SET( fapi2::ATTR_EX_INSIDE_SPECIAL_WAKEUP,
+                       itEx,
+                       attrVal );
+
+        for( auto itCore : l_func_core_vector )
+        {
+            FAPI_ATTR_SET( fapi2::ATTR_CORE_INSIDE_SPECIAL_WAKEUP,
+                           itCore,
+                           attrVal );
+        }
+    }
+}
 
 }
 

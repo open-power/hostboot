@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,4 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_cpu_special_wakeup_lib
+WAKEUP_UTIL=$(ROOT_PATH)chips/p9/procedures/hwp/lib
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(WAKEUP_UTIL))
 $(call BUILD_PROCEDURE)

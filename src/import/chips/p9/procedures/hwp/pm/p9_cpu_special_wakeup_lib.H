@@ -31,7 +31,7 @@
 // *HWP HW Owner    :    Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner    :    Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team        :    PM
-// *HWP Level       :    2
+// *HWP Level       :    3
 // *HWP Consumed by :    OCC:FSP:HOST:CRO
 
 // -----------------------------------------------------------------------------
@@ -85,11 +85,19 @@ static const uint32_t GPMMR_SPWKUP_DONE_BIT = 0;
 static const uint32_t HIST_SPWKUP_DONE_BIT  = 1;
 static const uint32_t SGPE_ACTIVE_BIT       = 8;
 static const uint32_t CORES_PER_EX          = 2;
+static const uint32_t CORES_PER_EQ          = 4;
+static const uint64_t INIT_REG_PATT         = 0xDEADDEADDEADDEADll;
+
 
 namespace p9specialWakeup
 {
 extern const char* SPWK_MSG_LIST[];
 extern const char* PROC_SPCWKUP_ENTITY_NAMES[];
+enum RecurssionOp
+{
+    UNBLOCK     =   0,
+    BLOCK       =   1,
+};
 
 }
 
@@ -107,6 +115,8 @@ struct ProcessingValues_t
     uint64_t               gpmmr_address[CORES_PER_EX];
     uint64_t               history_address[CORES_PER_EX];
     uint64_t               netctrl_address[CORES_PER_EX];
+    uint32_t               poll_count;
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> procTgt;
 };
 
 // -----------------------------------------------------------------------------
@@ -175,6 +185,10 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> get_chip_target( const fapi2:
 /// ----------------------------------------------------------------------------
 ///
 /// @brief Set addresses based on the target type (Template)
+/// @param[in] i_target         target for special wakeup
+/// @param[in] i_structure      temp struct storing processing info
+/// @param[in] i_entity         entity to be considered for special wakeup.
+/// @return fapi2 return code.
 ///
 template< fapi2::TargetType K >
 fapi2::ReturnCode set_addresses(const fapi2::Target<K>& i_target,
@@ -183,6 +197,10 @@ fapi2::ReturnCode set_addresses(const fapi2::Target<K>& i_target,
 
 ///
 /// @brief Set addresses for a core target type
+/// @param[in] i_target         core target
+/// @param[in] i_structure      struct storing processing info
+/// @param[in] i_entity         entity to be considered for special wakeup.
+/// @return fapi2 return code.
 ///
 template<>
 fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
@@ -190,6 +208,10 @@ fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_
                                 const uint32_t i_entity );
 ///
 /// @brief Set addresses for an EQ target type
+/// @param[in] i_target         eq target
+/// @param[in] i_structure      struct storing processing info
+/// @param[in] i_entity         entity to be considered for special wakeup.
+/// @return fapi2 return code.
 ///
 template<>
 fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
@@ -197,11 +219,28 @@ fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_ta
                                 const uint32_t i_entity );
 ///
 /// @brief Set addresses for an EX
+/// @param[in] i_target         ex target
+/// @param[in] i_structure      struct storing processing info
+/// @param[in] i_entity         entity to be considered for special wakeup.
+/// @return fapi2 return code.
 ///
 template<>
 fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
                                 ProcessingValues_t& i_structure,
                                 const uint32_t i_entity );
+
+namespace p9specialWakeup
+{
+
+///
+/// @brief     enables or disables the recursive call of Special Wakeup HWP
+/// @param[in] i_quadTarget         fapi2 target for quad
+/// @param[in] i_recurOp            enables/disables recurssion
+///
+void blockWakeupRecurssion( const fapi2::Target <fapi2::TARGET_TYPE_EQ>&  i_quadTarget,
+                            RecurssionOp i_recurOp );
+
+}  //namespace p9specialWakeup ends
 
 // -----------------------------------------------------------------------------
 // Function Implementations
@@ -213,6 +252,7 @@ fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ta
 /// @param[in]   i_chipletTarget    fapi2 target
 /// @param[in]   i_entity           Entity to perform special wakeup upon.
 /// @param[in]   i_processing_info  Structure containing processing information
+/// @return fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode spwkup_setup_entity(  const fapi2::Target<K>& i_chipletTarget,
@@ -227,6 +267,7 @@ fapi2::ReturnCode spwkup_setup_entity(  const fapi2::Target<K>& i_chipletTarget,
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_parentTarget;
     // Get the parent chip to deal with chip level accesses
     l_parentTarget = get_chip_target<K> (i_chipletTarget);
+    i_processing_info.procTgt = l_parentTarget;
 
     i_processing_info.entity = i_entity;
     i_processing_info.b_ex_flag = ( l_chiplet_type == fapi2::TARGET_TYPE_EX ? true : false );
@@ -267,6 +308,7 @@ fapi_try_exit:
 /// @brief Check for checkstop and set flags
 /// @param[in]   i_chipletTarget    fapi2 target
 /// @param[in]   i_processing_info  Structure containing processing information
+/// @return fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode spwkup_check_xstop(   const fapi2::Target<K>& i_chipletTarget,
@@ -313,12 +355,14 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
 /// ----------------------------------------------------------------------------
 ///
 /// @brief Assert special wake-up and poll for done
 /// @param[in]   i_chipletTarget    fapi2 target
 /// @param[in]   i_processing_info  Structure containing processing information
 /// @param[in]   i_msgId              String to prepend to trace outputs
+/// @return fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
@@ -330,7 +374,7 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
     fapi2::buffer<uint64_t> l_gpmmr[2];
     fapi2::buffer<uint64_t> l_netctrl[2];
     fapi2::buffer<uint64_t> l_spwkup[2];
-
+    fapi2::ReturnCode       l_rc;
     uint32_t                l_pollcount = 0;
     bool                    b_poll_during_xstop_flag;
     uint8_t                 l_attr_ppm_reg_collision_hw389511 = 0;
@@ -338,6 +382,7 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
     // Get the parent chip to deal with chip level accesses
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_parentTarget;
     l_parentTarget = get_chip_target<K> (i_chipletTarget);
+
 
     uint32_t l_special_wakeup_poll_interval_ns = SPECIAL_WAKE_UP_POLL_INTERVAL_NS;
     /// Calculate the maximum number of polls until a timeout is thrown
@@ -463,16 +508,13 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
                     FAPI_TRY(spwkup_deassert(i_chipletTarget, i_processing_info, p9specialWakeup::SPWK_MSG_CLEAN_UP_DEASSERT));
                 }
 
-                FAPI_ASSERT(false,
-                            fapi2::SPCWKUP_TIMEOUT()
-                            .set_POLLCOUNT(l_pollcount)
-                            .set_NETCTRL(l_netctrl[i])
-                            .set_SP_WKUP_REG_ADDRESS(i_processing_info.spwkup_address[i])
-                            .set_SP_WKUP_REG_VALUE(l_spwkup[i])
-                            .set_SP_WKUP_REG_ADDRESS(i_processing_info.history_address[i])
-                            .set_SP_WKUP_REG_VALUE(l_stop_hist_state[i])
-                            .set_ENTITY(i_processing_info.entity),
-                            "Timed out in setting the CPU in Special wakeup");
+                i_processing_info.poll_count = l_pollcount;
+
+                //This RC will not be reported to caller. It is meant for
+                //use within the HWP.
+                fapi2::current_err = fapi2::RC_INTERNAL_SPCWKUP_TIMEOUT;
+                goto fapi_try_exit;
+
             }
         }  // Done checking
         else
@@ -486,7 +528,7 @@ fapi2::ReturnCode spwkup_assert(const fapi2::Target<K>& i_chipletTarget,
     } // num_addresses
 
 fapi_try_exit:
-    FAPI_INF("< spwkup_check_xstop" );
+    FAPI_INF("<< spwkup_check_xstop" );
     return fapi2::current_err;
 }
 
@@ -496,13 +538,14 @@ fapi_try_exit:
 /// @param[in]   i_chipletTarget    fapi2 target
 /// @param[in]   i_processing_info  Structure containing processing information
 /// @param[in]   i_msgId              String to prepend to trace outputs
+/// @return fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode _spwkup_deassert( const fapi2::Target<K>& i_chipletTarget,
                                     uint64_t i_address,
                                     p9specialWakeup::SpecialWakeUpMsg i_msgId)
 {
-    FAPI_INF("> spwkup_deassert" );
+    FAPI_INF(">> spwkup_deassert" );
 
     fapi2::buffer<uint64_t> l_data64 = 0;
     uint8_t                 l_attr_ppm_reg_collision_hw389511 = 0;
@@ -556,7 +599,7 @@ fapi2::ReturnCode _spwkup_deassert( const fapi2::Target<K>& i_chipletTarget,
              l_data64);
 
 fapi_try_exit:
-    FAPI_INF("< spwkup_deassert" );
+    FAPI_INF("<< spwkup_deassert" );
     return fapi2::current_err;
 }
 
@@ -565,6 +608,7 @@ fapi_try_exit:
 /// @param[in]   i_chipletTarget    fapi2 target
 /// @param[in]   i_processing_info  Structure containing processing information
 /// @param[in]   i_msgId             Id of the string to prepend to trace outputs
+/// @return fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode spwkup_deassert(  const fapi2::Target<K>& i_chipletTarget,
@@ -596,20 +640,22 @@ fapi2::ReturnCode spwkup_deassert(  const fapi2::Target<fapi2::TARGET_TYPE_CORE>
 /// ----------------------------------------------------------------------------
 ///
 /// @brief       Templated helper to assert/deassert the entity bit as targeted.
-/// @param[in]   i_chipletTarget    fapi2 target
-/// @param[in]   i_operation        special wakeup operations to be used.
-/// @param[in]   i_entity           entity to perform special wake-up upon
+/// @param[in]   i_chipletTarget        fapi2 target
+/// @param[in]   i_operation            Special Wakeup Operation i.e. assert or deassert
+/// @param[in]   i_entity               entity to perform special wake-up upon
+/// @param[in]   io_processing_values   structure containing processing info
+/// @return      fapi2 return code.
 ///
 template <fapi2::TargetType K>
 fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
                                   const p9specialWakeup::PROC_SPCWKUP_OPS i_operation,
-                                  const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity )
+                                  const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity,
+                                  ProcessingValues_t& io_processing_values )
 {
     FAPI_DBG(">> _special_wakeup");
 
     fapi2::ReturnCode       l_rc;
     fapi2::buffer<uint64_t> occFlagReg;
-    ProcessingValues_t     processing_info;
 
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_chipletTarget, l_targetStr, fapi2::MAX_ECMD_STRING_LEN);
@@ -639,7 +685,7 @@ fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
                 }
 
                 // Select the addresses to use based on the entity
-                FAPI_TRY(spwkup_setup_entity(i_chipletTarget, i_entity, processing_info),
+                FAPI_TRY(spwkup_setup_entity(i_chipletTarget, i_entity, io_processing_values),
                          "Error:  spwkup_setup_entity failed");
 
                 // Determine if xstop checking should be ignored based on a caller
@@ -649,12 +695,12 @@ fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
                 // will eventually clear the xstop condition.  However, to do so
                 // needs the xstop check to not keep the special wake-up operation
                 // from happening.
-                FAPI_TRY(spwkup_check_xstop(i_chipletTarget, processing_info));
+                FAPI_TRY(spwkup_check_xstop(i_chipletTarget, io_processing_values));
 
                 // Proceed
                 FAPI_INF("Setting Special Wake-up  ...") ;
 
-                FAPI_TRY(spwkup_assert(i_chipletTarget, processing_info, p9specialWakeup::SPWK_MSG_ASSERT ));
+                FAPI_TRY(spwkup_assert(i_chipletTarget, io_processing_values, p9specialWakeup::SPWK_MSG_ASSERT ));
 
                 break;
 
@@ -662,10 +708,10 @@ fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
                 FAPI_INF("Clearing Special Wake-up...");
 
                 // Select the addresses to use based on the entity
-                FAPI_TRY(spwkup_setup_entity(i_chipletTarget, i_entity, processing_info),
+                FAPI_TRY(spwkup_setup_entity(i_chipletTarget, i_entity, io_processing_values),
                          "Error:  spwkup_setup_entity failed");
 
-                FAPI_TRY(spwkup_deassert(i_chipletTarget, processing_info, p9specialWakeup::SPWK_MSG_DEASSERT ));
+                FAPI_TRY(spwkup_deassert(i_chipletTarget, io_processing_values, p9specialWakeup::SPWK_MSG_DEASSERT ));
 
                 break;
 
@@ -677,6 +723,6 @@ fapi2::ReturnCode _special_wakeup(const fapi2::Target<K>& i_chipletTarget,
     while(0);
 
 fapi_try_exit:
-    FAPI_INF("< p9_cpu_special_wakeup" );
+    FAPI_INF("<< p9_cpu_special_wakeup" );
     return fapi2::current_err;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,7 +30,7 @@
 // *HWP HW Owner    :    Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner    :    Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team        :    PM
-// *HWP Level       :    2
+// *HWP Level       :    3
 // *HWP Consumed by :    OCC:FSP:HOST:CRO
 
 // -----------------------------------------------------------------------------
@@ -38,33 +38,163 @@
 // -----------------------------------------------------------------------------
 #include <p9_cpu_special_wakeup.H>
 #include <p9_cpu_special_wakeup_lib.H>
+#include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
 
+fapi2::ReturnCode collectExTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_TYPE_EX>& i_target,
+        ProcessingValues_t i_processing_info );
 /// ----------------------------------------------------------------------------
-///
-/// @brief       Sets an EX "chiplet" into special wakeup state.
+/// @brief      Sets a normal eq chiplet into special wakeup state.
+/// @param[in]  i_target     eq target
+/// @param[in]  i_operation  Special Wakeup Operation i.e. assert or deassert
+/// @param[in]  i_entity     entity to be considered for special wakeup.
+/// @return     fapi2 return code.
 ///
 fapi2::ReturnCode p9_cpu_special_wakeup_ex(
     const fapi2::Target < fapi2::TARGET_TYPE_EX>& i_target,
     const p9specialWakeup::PROC_SPCWKUP_OPS i_operation,
     const p9specialWakeup::PROC_SPCWKUP_ENTITY i_entity )
 {
-    FAPI_DBG("> p9_cpu_special_wakeup_ex");
-    FAPI_TRY(_special_wakeup<fapi2::TARGET_TYPE_EX> (
-                 i_target,
-                 i_operation,
-                 i_entity ));
+    FAPI_INF(">> p9_cpu_special_wakeup_ex");
 
-fapi_try_exit:
-    FAPI_INF("< p9_cpu_special_wakeup_ex" );
+    fapi2::ReturnCode l_rc;
+    ProcessingValues_t l_processing_info;
+    uint8_t l_spWakeUpInProg = 0;
+    auto l_eqTarget = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
+
+    FAPI_ATTR_GET( fapi2::ATTR_EX_INSIDE_SPECIAL_WAKEUP,
+                   i_target,
+                   l_spWakeUpInProg );
+
+    //A special wakeup is already in progress. In all likelyhood, a special
+    // wakeup has timed out and we are in FFDC collection path. During this
+    // FFDC collection, we SCOMed a register which itself needs a special
+    // wakeup.
+
+    if( l_spWakeUpInProg )
+    {
+        FAPI_INF("exiting ex recurssion");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::BLOCK );
+
+    l_rc = _special_wakeup( i_target,
+                            i_operation,
+                            i_entity,
+                            l_processing_info );
+
+    if ( l_rc == (uint32_t)fapi2::RC_INTERNAL_SPCWKUP_TIMEOUT )
+    {
+        collectExTimeoutFailInfo( i_target, l_processing_info );
+    }
+
+    p9specialWakeup::blockWakeupRecurssion( l_eqTarget, p9specialWakeup::UNBLOCK );
+
+    FAPI_INF("<< p9_cpu_special_wakeup_ex" );
     return fapi2::current_err;
-
 }
 
 /// ----------------------------------------------------------------------------
 
+///
+/// @brief      Collect FFDC for EQ Special Wakeup timeout
+/// @param[in]  i_target     ex target
+/// @param[in]  i_operation  info pertaining to special wakeup
+/// @return     fapi2 return code.
+///
+fapi2::ReturnCode collectExTimeoutFailInfo( const fapi2::Target < fapi2::TARGET_TYPE_EX>& i_target,
+        ProcessingValues_t i_processing_info )
+{
+
+    FAPI_INF(">> collectExTimeoutFailInfo" );
+
+    fapi2::buffer<uint64_t> l_CPMMR[CORES_PER_EX];
+    fapi2::buffer<uint64_t> l_GPMMR[CORES_PER_EX];
+    fapi2::buffer<uint64_t> l_spWakeupRegVal[CORES_PER_EX];
+    fapi2::buffer<uint64_t> l_histRegVal[CORES_PER_EX];
+    fapi2::buffer<uint64_t> l_netCtrlVal[CORES_PER_EX];
+    uint32_t l_coreId = 0;
+
+    auto l_core_vector =
+        i_target.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_PRESENT );
+
+    for( uint8_t i = 0; i < CORES_PER_EX; i++ )
+    {
+        l_CPMMR[i].insert( INIT_REG_PATT, 0, 64 );
+        l_GPMMR[i].insert( INIT_REG_PATT, 0, 64 );
+        l_spWakeupRegVal[i].insert( INIT_REG_PATT, 0, 64 );
+        l_histRegVal[i].insert( INIT_REG_PATT, 0, 64 );
+    }
+
+    for ( auto it : l_core_vector )
+    {
+        if( it.isFunctional() )
+        {
+            fapi2::getScom( it, C_CPPM_CPMMR, l_CPMMR[l_coreId] );
+            fapi2::getScom( it, C_PPM_GPMMR_SCOM, l_GPMMR[l_coreId] );
+            fapi2::getScom( it, i_processing_info.spwkup_address[l_coreId], l_spWakeupRegVal[l_coreId] );
+            fapi2::getScom( it, i_processing_info.history_address[l_coreId], l_histRegVal[l_coreId] );
+            fapi2::getScom( it, i_processing_info.netctrl_address[l_coreId], l_netCtrlVal[l_coreId] );
+        }
+
+        l_coreId++;
+    }
+
+    uint8_t l_exPos = 0;
+    FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, i_target, l_exPos );
+
+    //For Special Wakeup of EX, in case of timeout, SGPE can't be halted.
+    //Hence, only XIRs will be collected for it. Whereas for CME, full PPE
+    //state dump is permissible. As a result, collect PPE State is getting called
+    //separately for CME and SGPE. Otherwise , collect PPE state expects a
+    //vector of base addresses.
+
+    std::vector<uint64_t> l_cmeBaseAddress;
+    std::vector<uint64_t> l_sgpeBaseAddress;
+    l_sgpeBaseAddress.push_back( SGPE_BASE_ADDRESS );
+    l_cmeBaseAddress.push_back( getCmeBaseAddress( l_exPos ) );
+
+    //From this point onwards, any usage of FAPI TRY in physical or
+    //logical path can be a serious problem. Hence, should not be used.
+
+    FAPI_ASSERT( false ,
+                 fapi2::SPCWKUP_EX_TIMEOUT().
+                 set_POLLCOUNT( i_processing_info.poll_count ).
+                 set_C0_NETCTRL( l_netCtrlVal[0] ).
+                 set_C1_NETCTRL( l_netCtrlVal[1] ).
+                 set_C0_SP_WKUP_REG_VALUE( l_spWakeupRegVal[0] ).
+                 set_C1_SP_WKUP_REG_VALUE( l_spWakeupRegVal[1] ).
+                 set_C0_HISTORY_VALUE( l_histRegVal[0] ).
+                 set_C1_HISTORY_VALUE( l_histRegVal[1] ).
+                 set_ENTITY( i_processing_info.entity ).
+                 set_C0_CPMMR( l_CPMMR[0] ).
+                 set_C1_CPMMR( l_CPMMR[1] ).
+                 set_C0_GPMMR( l_GPMMR[0] ).
+                 set_C1_GPMMR( l_GPMMR[1] ).
+                 set_EQ_TARGET( i_target.getParent<fapi2::TARGET_TYPE_EQ>() ).
+                 set_EX_TARGET( i_target ).
+                 set_PROC_CHIP_TARGET( i_processing_info.procTgt ).
+                 set_CME_BASE_ADDRESS( l_cmeBaseAddress ).
+                 set_SGPE_BASE_ADDRESS( l_sgpeBaseAddress ).
+                 set_CME_STATE_MODE( SNAPSHOT ).
+                 set_SGPE_STATE_MODE( XIRS ),
+                 "Timed Out In Setting The EX Special Wakeup" );
+
+fapi_try_exit:
+    FAPI_INF("<< collectExTimeoutFailInfo" );
+    return fapi2::current_err;
+}
+
+/// ----------------------------------------------------------------------------
+
+/// @param[in]  i_chipletTarget     ex target
+/// @param[in]  i_processing_info   struct storing processing info
+/// @param[in]  i_msgId             Id pertaining to debug message string.
+/// @return     fapi2 return code.
 fapi2::ReturnCode spwkup_deassert(  const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_chipletTarget,
                                     const ProcessingValues_t i_processing_info,
-                                    p9specialWakeup::SpecialWakeUpMsg i_msgId)
+                                    p9specialWakeup::SpecialWakeUpMsg i_msgId )
 {
     FAPI_INF("> spwkup_deassert core EX" );
 
@@ -83,6 +213,10 @@ fapi_try_exit:
 
 /// ----------------------------------------------------------------------------
 
+/// @param[in]  i_chipletTarget     ex target
+/// @param[in]  i_processing_info   struct storing processing info
+/// @param[in]  i_entity            .
+/// @return     fapi2 return code.
 template<>
 fapi2::ReturnCode set_addresses(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
                                 ProcessingValues_t& i_structure,

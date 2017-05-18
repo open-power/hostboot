@@ -238,4 +238,5 @@
       <scomRegister>PU_JTG_PIB_OJTDO</scomRegister>
       <scomRegister>PU_JTG_PIB_OJCFG</scomRegister>
   </registerFfdc>
+  <!-- ******************************************************************** -->
 </hwpErrors>
