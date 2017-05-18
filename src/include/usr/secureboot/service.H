@@ -31,6 +31,7 @@
 #include <utility>
 #include <cstdint>
 #include <securerom/sha512.H>
+#include <securerom/ROM.H>
 
 typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
 
@@ -198,6 +199,12 @@ namespace SECUREBOOT
     errlHndl_t getJumperState(SecureJumperState& o_state,
                 TARGETING::Target* i_pProc
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
+
+    /* Defition in securerommgr.H */
+    sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType);
+
+    /* Defition in securerommgr.H */
+    uint64_t getSecRomFuncOffset(const sbFuncType_t i_funcType);
 
     /**
      * @brief Verify Signed Container
