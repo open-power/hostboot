@@ -98,42 +98,6 @@ typedef union occ_flags
     } fields;
 } occ_flags_t;
 
-
-
-//
-//OCC SCRATCH2 defines
-//
-typedef union occ_scratch2
-{
-    uint32_t value;
-    struct
-    {
-#ifdef _BIG_ENDIAN
-        uint32_t pgpe_active                    : 1;
-        uint32_t pgpe_pstate_protocol_active    : 1;
-        uint32_t pgpe_safe_mode                 : 1;
-        uint32_t pm_complex_suspended           : 1;
-        uint32_t reserved0                      : 4;
-        uint32_t sgpe_debug_trap_enable         : 1;
-        uint32_t cme_debug_trap_enable          : 1;
-        uint32_t pgpe_debug_trap_enable         : 1;
-        uint32_t l3_contained_mode              : 1;
-        uint32_t reserved1                      : 20;
-#else
-        uint32_t reserved1                      : 20;
-        uint32_t l3_contained_mode              : 1;
-        uint32_t pgpe_debug_trap_enable         : 1;
-        uint32_t cme_debug_trap_enable          : 1;
-        uint32_t sgpe_debug_trap_enable         : 1;
-        uint32_t reserved0                      : 4;
-        uint32_t pm_complex_suspended           : 1;
-        uint32_t pgpe_safe_mode                 : 1;
-        uint32_t pgpe_pstate_protocol_active    : 1;
-        uint32_t pgpe_active                    : 1;
-#endif
-    } fields;
-} occ_scratch2_t;
-
 typedef union pgpe_flags
 {
     uint16_t value;
@@ -173,26 +137,6 @@ typedef union pgpe_flags
     } fields;
 } pgpe_flags_t;
 
-typedef union cme_flags
-{
-    uint32_t value;
-    struct
-    {
-        uint32_t  stop_ready                    : 1;
-        uint32_t  PStatePMCRReady               : 1;
-        uint32_t  PStateQuadMgrReady            : 1;
-        uint32_t  PStateQuadMgrMaster           : 1;
-        uint32_t  ResonantClockOperable         : 1;
-        uint32_t  iVRMsOperable                 : 1;
-        uint32_t  VDMsOperable                  : 1;
-        uint32_t  OCCHBSafeModeEngaged          : 1;
-        uint32_t  reserved_8_27                 : 20;
-        uint32_t  STOPEntryFirst0               : 1;
-        uint32_t  STOPEntryFirst1               : 1;
-        uint32_t  Core0Good                     : 1;
-        uint32_t  Core1Good                     : 1;
-    } fields;
-} cme_flags_t;
 
 #ifndef __PPE_PLAT
 namespace p9hcd
@@ -222,6 +166,7 @@ enum PM_GPE_OCCFLG_DEFS
     REQUESTED_ACTIVE_QUAD_UPDATE        = 30,
     REQUEST_OCC_SAFE_STATE              = 31
 };
+
 //
 //Enum form of OCC SCRATCH2.
 //
@@ -236,6 +181,42 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     PGPE_DEBUG_TRAP_ENABLE                      = 10,
     L3_CONTAINED_MODE                           = 11
 };
+
+//
+//Enum form of CME_FLAGS
+//
+enum PM_CME_FLAGS_DEFS
+{
+    CME_FLAGS_STOP_READY                    = 0,
+    CME_FLAGS_PMCR_READY                    = 1,
+    CME_FLAGS_QMGR_READY                    = 2,
+    CME_FLAGS_QMGR_MASTER                   = 3,
+    CME_FLAGS_RCLK_OPERABLE                 = 4,
+    CME_FLAGS_IVRM_OPERABLE                 = 5,
+    CME_FLAGS_VDM_OPERABLE                  = 6,
+    CME_FLAGS_OCC_HB_SAFE_MODE              = 7,
+    CME_FLAGS_BLOCK_WKUP_C0                 = 8,
+    CME_FLAGS_BLOCK_WKUP_C1                 = 9,
+    CME_FLAGS_PSTATES_ENABLED               = 24,
+    CME_FLAGS_FREQ_UPDT_DISABLE             = 25,
+    CME_FLAGS_EX_ID                         = 26,
+    CME_FLAGS_SIBLING_FUNCTIONAL            = 27,
+    CME_FLAGS_STOP_ENTRY_FIRST_C0           = 28,
+    CME_FLAGS_STOP_ENTRY_FIRST_C1           = 29,
+    CME_FLAGS_CORE0_GOOD                    = 30,
+    CME_FLAGS_CORE1_GOOD                    = 31
+};
+
+//
+//Enum form of CME_SCRATCH_
+//
+enum PM_CME_SCRATCH_DEFS
+{
+    CME_SCRATCH_LOCAL_PSTATE_IDX_START       = 26,
+    CME_SCRATCH_LOCAL_PSTATE_IDX_LENGTH      = 6
+};
+
+
 
 #ifndef __PPE_PLAT
 } //End p9hcd namespace
