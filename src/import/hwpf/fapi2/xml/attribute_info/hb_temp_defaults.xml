@@ -246,6 +246,14 @@
         <id>ATTR_MSS_INTERLEAVE_GRANULARITY</id>
         <default>0x00</default>
     </attribute>
+    <attribute>
+        <id>ATTR_IO_O_MFG_CHK</id>
+        <default>0x00</default>
+    </attribute>
+    <attribute>
+        <id>ATTR_IO_O_MFG_MIN_EYE_WIDTH</id>
+        <default>0x00</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
