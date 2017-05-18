@@ -44,6 +44,7 @@ extern "C"
 {
     fapi2::ReturnCode
     p9_collect_ppe_state ( const fapi2::ffdc_t& i_target,
+                           const fapi2::ffdc_t& i_mode,
                            const fapi2::ffdc_t& i_v_ppe_addresses,
                            fapi2::ReturnCode& o_rc )
     {
@@ -61,8 +62,7 @@ extern "C"
             *(reinterpret_cast<const std::vector<uint64_t>*>
               (i_v_ppe_addresses.ptr()));
 
-
-        PPE_DUMP_MODE l_mode = SNAPSHOT; // halt & restart PPE engine, if needed
+        const PPE_DUMP_MODE l_mode = *(reinterpret_cast<const PPE_DUMP_MODE*>(i_mode.ptr()));
 
         std::vector<PPERegValue_t> l_v_sprs;
         std::vector<PPERegValue_t> l_v_xirs;
