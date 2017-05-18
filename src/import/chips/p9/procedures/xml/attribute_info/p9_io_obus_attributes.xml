@@ -55,6 +55,32 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IO_O_MFG_CHK</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicate if manufcaturing tests should be taken pre / post linktraining.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_MFG_MIN_EYE_WIDTH</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Minimum eye width to allow passing through manufacturing.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_IO_OBUS_TX_MARGIN_RATIO</id>
   <targetType>TARGET_TYPE_OBUS</targetType>
   <description>
