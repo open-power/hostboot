@@ -513,8 +513,7 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
                  .set_NUM_LOOPS(l_num_loops)
                  .set_RP(i_rp)
                  .set_ABORT_ON_ERROR(i_abort_on_error)
-                 .set_TARGET_WITH_REGISTERS(i_target)
-                 .set_TARGET_WITH_REGISTERS(i_target),
+                 .set_MCA_TARGET(i_target),
                  "%s i_rp %lu DQS workaround failed! 10 loops reached without everything passing",
                  mss::c_str(i_target), i_rp);
 
