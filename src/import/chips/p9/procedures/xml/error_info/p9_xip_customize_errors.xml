@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -99,17 +99,6 @@
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>VPD_KEYWORD</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_MVPD_RING_ID_MESS</rc>
-    <description>Code bug: Wrong assumption about ringId</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
