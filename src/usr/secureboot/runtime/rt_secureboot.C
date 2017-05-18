@@ -32,9 +32,60 @@
 #include <config.h>
 
 #include "common/securetrace.H"
+#include <secureboot/service.H>
+#include <secureboot/secure_reasoncodes.H>
+
+#include <errl/errlmanager.H>
+#include <runtime/rt_targeting.H>
+#include <targeting/common/commontargeting.H>
+#include <targeting/common/targetservice.H>
+#include <devicefw/userif.H>
+
 
 namespace SECUREBOOT
 {
+using namespace TARGETING;
+
+#if defined(CONFIG_SECUREBOOT) && defined(__HOSTBOOT_RUNTIME)
+bool enabled()
+{
+    errlHndl_t l_errl = nullptr;
+    uint64_t l_regValue = 0;
+    size_t l_size = sizeof(l_regValue);
+
+    TargetService& tS = targetService();
+    Target* masterProcChipTargetHandle = nullptr;
+
+    do
+    {
+        l_errl = tS.queryMasterProcChipTargetHandle(
+                                            masterProcChipTargetHandle);
+
+        if (l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        l_errl = deviceRead(masterProcChipTargetHandle,
+                        &l_regValue, l_size,
+                        DEVICE_SCOM_ADDRESS(
+                          static_cast<uint64_t>(ProcSecurity::SwitchRegister)));
+        if (l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
+
+        assert(l_size == sizeof(l_regValue));
+    } while (0);
+
+    // if there was an error l_regValue is zero, so we return false.
+    // Unfortunately this is all we can do. These shouldn't fail.
+
+    return l_regValue & static_cast<uint64_t>(ProcSecurity::SabBit);
+}
+#endif
 
 int verify_container(
     const void*  i_pContainer,
@@ -58,6 +109,7 @@ int verify_container(
 
     return rc;
 }
+
 
 struct registerSecurebootRt
 {
