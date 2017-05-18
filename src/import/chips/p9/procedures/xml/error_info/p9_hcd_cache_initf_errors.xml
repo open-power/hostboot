@@ -26,11 +26,12 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_P9_HCD_CACHE_INITF_INCORRECT_EQ_SCAN64_VAL</rc>
+    <rc>RC_NDD1_CACHE_INITF_INCORRECT_EQ_SCAN64_VAL</rc>
     <description>
-        Data mis-match on EQ_SCAN64 
+        Data mis-match on EQ_SCAN64, for Nimbus DD1 MPIPL workaround only 
     </description>
     <ffdc>EQ_SCAN64_VAL</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
   </hwpError>  
   <!-- ********************************************************************* -->
 </hwpErrors>
