@@ -22,35 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef SHA512_H
-#define SHA512_H
 
-#define SHA512_BLOCK_LENGTH 128
-#define SHA512_DIGEST_LENGTH 64
-
-#include <stdlib.h>
-
-typedef uint8_t __attribute__((aligned(8))) \
-    sha2_hash_t[ SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
-
-typedef uint8_t  sha2_byte;     /* Exactly 1 byte */
-typedef uint32_t sha2_word32;   /* Exactly 4 bytes */
-typedef uint64_t sha2_word64;   /* Exactly 8 bytes */
-
-typedef struct _SHA512_CTX
-{
-    uint64_t state[8];
-    uint64_t bitcount[2];
-    uint8_t buffer[SHA512_BLOCK_LENGTH];
-} SHA512_CTX;
-
-extern "C"
-void SHA512_Init(SHA512_CTX* context);
-extern "C"
-void SHA512_Update(SHA512_CTX* context, const sha2_byte *data, size_t len);
-extern "C"
-void SHA512_Final(SHA512_CTX* context, sha2_hash_t *result);
-extern "C"
-void SHA512_Hash(const sha2_byte *data, size_t len, sha2_hash_t *result);
-
+#ifndef __SHA512_H
+#define __SHA512_H
+#include <securerom/contrib/sha512.H>
 #endif
