@@ -27,102 +27,100 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_DPLL_LOCK_TIMEOUT</rc>
+    <rc>RC_CACHE_DPLL_LOCK_TIMEOUT</rc>
     <description>
         DPLL is not locking.
     </description>
-    <ffdc>EQQPPMDPLLSTAT</ffdc>
+    <ffdc>EQ_QPPM_DPLL_STAT</ffdc>
+    <ffdc>DPLL_LOCK_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>DPLL_LOCK_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_DPLLCLKSTART_TIMEOUT</rc>
+    <rc>RC_CACHE_DPLL_CLK_START_TIMEOUT</rc>
     <description>
         dpll clock start timed out.
     </description>
-    <ffdc>EQCPLTSTAT</ffdc>
+    <ffdc>EQ_CPLT_STAT</ffdc>
+    <ffdc>DPLL_START_POLL_DELAY_HW_NS</ffdc>
+    <ffdc>DPLL_START_POLL_TIMEOUT_HW_NS</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_DPLLCLKSTART_FAILED</rc>
+    <rc>RC_CACHE_DPLL_CLK_START_FAILED</rc>
     <description>
         dpll clock start failed.
     </description>
-    <ffdc>EQCLKSTAT</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_ANEPCLKSTART_TIMEOUT</rc>
-    <description>
-        anep clock start timed out.
-    </description>
-    <ffdc>EQCPLTSTAT</ffdc>
+    <ffdc>EQ_CLK_STAT</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
     <callout>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
         <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
