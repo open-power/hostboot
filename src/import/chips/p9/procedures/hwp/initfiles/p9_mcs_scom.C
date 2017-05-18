@@ -36,10 +36,13 @@ constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_25 = 25;
 constexpr uint64_t literal_0b001111 = 0b001111;
 constexpr uint64_t literal_0b0001100000000 = 0b0001100000000;
+constexpr uint64_t literal_1350 = 1350;
+constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_0b0000000000001000 = 0b0000000000001000;
 
 fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
-                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2)
+                              const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2,
+                              const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT3)
 {
     {
         fapi2::ATTR_EC_Type   l_chip_ec;
@@ -50,6 +53,11 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW398139, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW398139));
         fapi2::ATTR_RISK_LEVEL_Type l_TGT1_ATTR_RISK_LEVEL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT1, l_TGT1_ATTR_RISK_LEVEL));
+        fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
+        fapi2::ATTR_MSS_FREQ_Type l_TGT3_ATTR_MSS_FREQ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_FREQ, TGT3, l_TGT3_ATTR_MSS_FREQ));
+        uint64_t l_def_mn_freq_ratio = ((literal_1000 * l_TGT3_ATTR_MSS_FREQ) / l_TGT1_ATTR_FREQ_PB_MHZ);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010810ull, l_scom_buffer ));
@@ -113,6 +121,17 @@ fapi2::ReturnCode p9_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
                 {
                     l_scom_buffer.insert<1, 13, 51, uint64_t>(literal_0b0001100000000 );
                 }
+            }
+
+            if ((l_def_mn_freq_ratio <= literal_1350))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF );
+            }
+            else if ((l_def_mn_freq_ratio > literal_1350))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON );
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )

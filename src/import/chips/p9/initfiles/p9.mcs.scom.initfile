@@ -52,6 +52,10 @@ SyntaxVersion = 3
 target_type 0 TARGET_TYPE_MCS;
 target_type 1 TARGET_TYPE_SYSTEM;
 target_type 2 TARGET_TYPE_PROC_CHIP;
+target_type 3 TARGET_TYPE_MCBIST;
+
+define SYS = TGT1; # If referencing Attr from system, add "SYS." in front
+define MCBIST = TGT3; # If referencing Attr from mcbist, add "MCBIST." in front
 
 
 #--******************************************************************************
@@ -113,6 +117,16 @@ ispy MC01.PBI01.SCOMFIR.MCPERF1_PF_DROP_CNT_THRESH [when=S] {
   spyv, expr;
   8,      (ATTR_CHIP_EC_FEATURE_HW398139==1); # dd1 (arbitrarily chosen, empirically found to be stable)
   25,     (ATTR_CHIP_EC_FEATURE_HW398139!=1); # dd2 (performance chosen)
+}
+
+# Temporary Boston Fix HW411339 for 1600 nest 2400 mem frequencies
+
+define def_mn_freq_ratio = (1000 * MCBIST.ATTR_MSS_FREQ) / SYS.ATTR_FREQ_PB_MHZ;
+
+espy MC01.PBI01.SCOMFIR.MCMODE2_FORCE_SFSTAT_ACTIVE [when=S] {
+  spyv, expr;
+  OFF,     (def_mn_freq_ratio<=1350); # 1333 which is 2666/2000 (and lower ratios) will work as normal
+  ON,      (def_mn_freq_ratio>1350);  # 1500 which is 2400/1600 will have sfsat/mdi always 1
 }
 
 ##################

@@ -77,10 +77,11 @@ constexpr uint64_t literal_14 = 14;
 constexpr uint64_t literal_597 = 597;
 constexpr uint64_t literal_768 = 768;
 constexpr uint64_t literal_939 = 939;
+constexpr uint64_t literal_1350 = 1350;
+constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_2000 = 2000;
 constexpr uint64_t literal_2400 = 2400;
 constexpr uint64_t literal_1250 = 1250;
-constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_963 = 963;
 constexpr uint64_t literal_1038 = 1038;
 constexpr uint64_t literal_1084 = 1084;
@@ -189,15 +190,15 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC));
         fapi2::ATTR_EFF_DRAM_TRFC_DLR_Type l_TGT2_ATTR_EFF_DRAM_TRFC_DLR;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EFF_DRAM_TRFC_DLR, TGT2, l_TGT2_ATTR_EFF_DRAM_TRFC_DLR));
-        fapi2::ATTR_RISK_LEVEL_Type l_TGT3_ATTR_RISK_LEVEL;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT3, l_TGT3_ATTR_RISK_LEVEL));
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT3_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT3, l_TGT3_ATTR_FREQ_PB_MHZ));
+        uint64_t l_def_mn_freq_ratio = ((literal_1000 * l_TGT1_ATTR_MSS_FREQ) / l_TGT3_ATTR_FREQ_PB_MHZ);
+        fapi2::ATTR_RISK_LEVEL_Type l_TGT3_ATTR_RISK_LEVEL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL, TGT3, l_TGT3_ATTR_RISK_LEVEL));
         uint64_t l_def_perf_tune_case = (((l_TGT1_ATTR_MSS_FREQ == literal_2400) && (l_TGT3_ATTR_FREQ_PB_MHZ == literal_2000))
                                          && (l_TGT3_ATTR_RISK_LEVEL > literal_0));
         fapi2::ATTR_MC_SYNC_MODE_Type l_TGT4_ATTR_MC_SYNC_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, TGT4, l_TGT4_ATTR_MC_SYNC_MODE));
-        uint64_t l_def_mn_freq_ratio = ((literal_1000 * l_TGT1_ATTR_MSS_FREQ) / l_TGT3_ATTR_FREQ_PB_MHZ);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
@@ -910,9 +911,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                if ((l_def_perf_tune_case == literal_0))
+                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1350)))
                 {
                     l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_3 );
+                }
+                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1350)))
+                {
+                    l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_6 );
                 }
                 else if ((l_def_perf_tune_case == literal_1))
                 {
@@ -922,9 +927,13 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                if ((l_def_perf_tune_case == literal_0))
+                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1350)))
                 {
                     l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
+                }
+                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1350)))
+                {
+                    l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_2 );
                 }
                 else if ((l_def_perf_tune_case == literal_1))
                 {
@@ -934,8 +943,16 @@ fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF = 0x0;
-                l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF );
+                if ((l_def_mn_freq_ratio <= literal_1350))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF = 0x0;
+                    l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF );
+                }
+                else if ((l_def_mn_freq_ratio > literal_1350))
+                {
+                    constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_ON = 0x1;
+                    l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_ON );
+                }
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
