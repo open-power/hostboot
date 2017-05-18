@@ -23,5 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_cpu_special_wakeup_core
+WAKEUP_UTIL=$(ROOTPATH)/chips/p9/procedures/hwp/lib
 lib$(PROCEDURE)_DEPLIBS+=p9_cpu_special_wakeup_lib
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(WAKEUP_UTIL))
 $(call BUILD_PROCEDURE)
