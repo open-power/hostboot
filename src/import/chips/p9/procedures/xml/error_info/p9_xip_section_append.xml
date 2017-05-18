@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,38 +24,14 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
     <hwpError>
-        <rc>RC_XIP_SECTION_APPEND_SANITY_SECTION</rc>
+        <rc>RC_XIP_SECTION_APPEND_INVALID_PARAMETERS</rc>
         <description>
-            Error calling p9_xip_section_append when checking i_section
+            Error calling p9_xip_section_append when checking input parameters 
         </description>
         <ffdc>SECTION</ffdc>
-    </hwpError>
-    <hwpError>
-        <rc>RC_XIP_SECTION_APPEND_SANITY_SECTION_SIZE</rc>
-        <description>
-            Error calling p9_xip_section_append when checking i_section_size
-        </description>
         <ffdc>SECTION_SIZE</ffdc>
-    </hwpError>
-    <hwpError>
-        <rc>RC_XIP_SECTION_APPEND_SANITY_SECTION_ID</rc>
-        <description>
-            Error calling p9_xip_section_append when checking i_section_id
-        </description>
         <ffdc>SECTION_ID</ffdc>
-    </hwpError>
-    <hwpError>
-        <rc>RC_XIP_SECTION_APPEND_SANITY_IMAGE</rc>
-        <description>
-            Error calling p9_xip_section_append when checking i_image
-        </description>
         <ffdc>IMAGE</ffdc>
-    </hwpError>
-    <hwpError>
-        <rc>RC_XIP_SECTION_APPEND_SANITY_IMAGE_SIZE</rc>
-        <description>
-            Error calling p9_xip_section_append when checking io_image_size
-        </description>
         <ffdc>IMAGE_SIZE</ffdc>
     </hwpError>
     <hwpError>

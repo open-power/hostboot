@@ -39,36 +39,26 @@ fapi2::ReturnCode p9_xip_section_append(
 
     FAPI_DBG(">>p9_xip_section_append");
 
-    fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_ASSERT((i_section != NULL),
-                fapi2::XIP_SECTION_APPEND_SANITY_SECTION().
-                set_SECTION(i_section),
-                "Section pointer not valid (0x%x)", i_section);
-    FAPI_ASSERT((i_section_size > 0),
-                fapi2::XIP_SECTION_APPEND_SANITY_SECTION_SIZE().
-                set_SECTION_SIZE(i_section_size),
-                "Section size not valid (%d)", i_section_size);
-    FAPI_ASSERT((i_section_id < P9_XIP_SECTIONS),
-                fapi2::XIP_SECTION_APPEND_SANITY_SECTION_ID().
-                set_SECTION_ID(i_section_id),
-                "Section ID not valid (%d)", i_section_id);
-    FAPI_ASSERT((i_image != NULL),
-                fapi2::XIP_SECTION_APPEND_SANITY_IMAGE().
-                set_IMAGE(i_image),
-                "Image pointer not valid (0x%x)", i_image);
-    FAPI_ASSERT((io_image_size > 0),
-                fapi2::XIP_SECTION_APPEND_SANITY_IMAGE_SIZE().
+    FAPI_ASSERT((i_section != NULL) &&
+                (i_section_size > 0) &&
+                (i_section_id < P9_XIP_SECTIONS) &&
+                (i_image != NULL) &&
+                (io_image_size > 0),
+                fapi2::XIP_SECTION_APPEND_INVALID_PARAMETERS().
+                set_SECTION(i_section).
+                set_SECTION_SIZE(i_section_size).
+                set_SECTION_ID(i_section_id).
+                set_IMAGE(i_image).
                 set_IMAGE_SIZE(io_image_size),
-                "Size of available image space not valid (%d)", io_image_size);
+                "at least one input parameter not valid")
 
     FAPI_DBG("i_section 0x%x", i_section);
     FAPI_DBG("i_section_size %d", i_section_size);
     FAPI_DBG("i_section_id %d", i_section_id);
     FAPI_DBG("i_image 0x%x", i_image);
     FAPI_DBG("io_image_size %d", io_image_size);
-
-    fapi2::current_err = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
 
     rc = p9_xip_append(i_image, i_section_id, i_section, i_section_size,
                        io_image_size, &unused_param, 0);
@@ -92,8 +82,6 @@ fapi2::ReturnCode p9_xip_section_append(
                 set_IMAGE(i_image).
                 set_IMAGE_SIZE(io_image_size),
                 "Failed to determine new image size (rc=%d)", rc);
-
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     FAPI_DBG("<<p9_xip_section_append");
