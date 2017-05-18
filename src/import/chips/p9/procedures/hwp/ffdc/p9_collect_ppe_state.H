@@ -48,6 +48,7 @@
 typedef fapi2::ReturnCode (*p9_collect_ppe_state_FP_t) (
     const fapi2::ffdc_t&,
     const fapi2::ffdc_t&,
+    const fapi2::ffdc_t&,
     fapi2::ReturnCode&
 );
 
@@ -60,12 +61,14 @@ extern "C"
 /// @brief HWP to collect PPE internal register (SPRs, XIRs and GPRs) state as
 ///        FFDC associated to the input ReturnCode object
 /// @param [in] i_target           TARGET_TYPE_PROC_CHIP
+/// @param [in] i_dumpMode         refer to PPE_DUMP_MODE in p9_ppe_utils.H
 /// @param [in] i_v_ppe_addresses  Vector of addresses of PPEs, whose states
 ///                                are to be collected. See p9_ppe_defs.H
 /// @param[out] io_rc               Return code to add FFDC data to
 /// @return FAPI2_RC_SUCCESS       Always succeeds
     fapi2::ReturnCode
     p9_collect_ppe_state ( const fapi2::ffdc_t& i_target,
+                           const fapi2::ffdc_t& i_mode,
                            const fapi2::ffdc_t& i_v_ppe_addresses,
                            fapi2::ReturnCode& io_rc );
 
