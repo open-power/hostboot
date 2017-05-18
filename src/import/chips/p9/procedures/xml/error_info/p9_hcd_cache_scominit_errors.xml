@@ -27,11 +27,23 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_CACHESCOMINIT_NOGOODCOREINEX</rc>
+    <rc>RC_CACHE_SCOMINIT_NO_GOOD_CORE_IN_EX</rc>
     <description>
         no partial good core in partial good ex, check qcsr configuration
     </description>
     <ffdc>QCSR</ffdc>
+    <ffdc>CACHE_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP_IN_ERROR</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
