@@ -311,6 +311,7 @@
         <id>ATTR_IO_O_MFG_MIN_EYE_WIDTH</id>
         <default>0x00</default>
     </attribute>
+
     <attribute>
         <id>ATTR_START_CBS_FIFO_RESET_SKIP</id>
         <default>0x00</default>
@@ -319,13 +320,30 @@
         <id>ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
         <default>0x0</default>
     </attribute>
+
     <attribute>
         <id>ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE</id>
         <default>0x0</default>
     </attribute>
+
     <attribute>
         <id>ATTR_MC_PLL_BUCKET</id>
         <default>0x05</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EQ_INSIDE_SPECIAL_WAKEUP</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_CORE_INSIDE_SPECIAL_WAKEUP</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EX_INSIDE_SPECIAL_WAKEUP</id>
+        <default>0x00</default>
     </attribute>
 
 <!-- =====================================================================
