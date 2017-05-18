@@ -417,9 +417,11 @@ namespace HTMGT
             /**
              * @brief Query the functional OCCs and build OCC objects
              *
+             * @param[in] i_occStart  true if call is being made after
+             *                        OCCs have just been started.
              * @return NULL on success, or error handle on failure
              */
-            static errlHndl_t buildOccs();
+            static errlHndl_t buildOccs(const bool i_occStart = false);
 
 
             /**
@@ -652,7 +654,7 @@ namespace HTMGT
 
 
             /* See buildOccs() above */
-            errlHndl_t _buildOccs();
+            errlHndl_t _buildOccs(const bool i_occStart = false);
 
 
             /* See getNumOccs() above */

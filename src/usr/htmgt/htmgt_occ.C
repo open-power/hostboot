@@ -401,7 +401,7 @@ namespace HTMGT
 
 
     // Query the functional OCCs and build OCC objects
-    errlHndl_t OccManager::_buildOccs()
+    errlHndl_t OccManager::_buildOccs(const bool i_occStart)
     {
         errlHndl_t err = nullptr;
         bool safeModeNeeded = false;
@@ -549,6 +549,19 @@ namespace HTMGT
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE);
             }
             safeModeNeeded = true;
+        }
+
+        if ((false == i_occStart) && (nullptr == err))
+        {
+            // Send poll to query state of all OCCs
+            // and flush any errors reported by the OCCs
+            err = sendOccPoll(true);
+            if (err)
+            {
+                TMGT_ERR("_buildOccs: Poll all OCCs failed");
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
+            _syncOccStates();
         }
 
         if (safeModeNeeded)
@@ -1318,7 +1331,8 @@ namespace HTMGT
         {
             if (iv_state != currentState)
             {
-                TMGT_INF("syncOccStates: All OCCs are in 0x%02X", currentState);
+                TMGT_INF("_syncOccStates: All OCCs are in 0x%02X",
+                         currentState);
                 iv_state = currentState;
             }
         }
@@ -1373,9 +1387,9 @@ namespace HTMGT
     }
 
 
-    errlHndl_t OccManager::buildOccs()
+    errlHndl_t OccManager::buildOccs(const bool i_occStart)
     {
-        return Singleton<OccManager>::instance()._buildOccs();
+        return Singleton<OccManager>::instance()._buildOccs(i_occStart);
     }
 
 

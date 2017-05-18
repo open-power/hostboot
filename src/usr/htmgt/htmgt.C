@@ -67,8 +67,8 @@ namespace HTMGT
         {
             if (i_startCompleted)
             {
-                // Query functional OCCs
-                l_err = OccManager::buildOccs();
+                // Query functional OCCs (OCCs have just been started)
+                l_err = OccManager::buildOccs(true);
                 if (nullptr == l_err)
                 {
                     if (nullptr != OccManager::getMasterOcc())
