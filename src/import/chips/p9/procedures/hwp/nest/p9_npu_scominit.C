@@ -65,8 +65,9 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
     auto l_perv_tgt = i_target.getChildren<fapi2::TARGET_TYPE_PERV>
                       (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL);
 
-    // Get attribute to check if it is dd1 or dd2
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES, i_target, l_dd1));
+    // read attribute to determine if NDD1 addresses need to be used
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR, i_target, l_dd1),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR");
 
     //Check to see if NPU is valid in PG (N3 chiplet)
     for (auto l_tgt : l_perv_tgt)
@@ -104,7 +105,7 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
         else
         {
             FAPI_TRY(fapi2::putScomUnderMask(i_target, NOTP9NDD1_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
-                     "Error from putScomUnderMask (PU_NPU_SM2_XTS_ATRMISS)");
+                     "Error from putScomUnderMask (NOTP9NDD1_NPU_SM2_XTS_ATRMISS)");
         }
 
 
