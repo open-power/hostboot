@@ -199,6 +199,12 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > DATA_BIT_ENABLE0_REG;
         static const std::vector< uint64_t > DATA_BIT_ENABLE1_REG;
 
+        // Reset on read in DD1 registers
+        static const std::vector< uint64_t > RD_LVL_STATUS0_REG;
+        static const std::vector< uint64_t > RD_LVL_STATUS2_REG;
+        static const std::vector< uint64_t > RD_STATUS0_REG;
+        static const std::vector< uint64_t > WR_ERROR0_REG;
+
         // Definitions of the gate delay and waterfall bits' locations
         constexpr static const uint64_t GATE_DELAY_BIT_POS[NUM_QUAD_PER_DP16] =
         {
@@ -2096,6 +2102,87 @@ inline void set_blue_waterfall_range( const fapi2::Target<T>& i_target,
 
     io_data.insertFromRight<TT::DD2_WATERFALL_RNG, TT::DD2_WATERFALL_RNG_LEN>(i_value);
     FAPI_INF("set_blue_waterfall_range: 0x%01lx", i_value);
+}
+
+///
+/// @brief Reset rd_lvl_status0 registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_rd_lvl_status0( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY(mss::scom_blastah(i_target, TT::RD_LVL_STATUS0_REG, 0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset rd_lvl_status2 registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_rd_lvl_status2( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY(mss::scom_blastah(i_target, TT::RD_LVL_STATUS2_REG, 0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset rd_status0 registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_rd_status0( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY(mss::scom_blastah(i_target, TT::RD_STATUS0_REG, 0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset wr_error0 registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_wr_error0( const fapi2::Target<T>& i_target )
+{
+    FAPI_TRY(mss::scom_blastah(i_target, TT::WR_ERROR0_REG, 0));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets the RD VREF error registers
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode reset_rd_vref_errors( const fapi2::Target<T>& i_target )
+{
+    // Indiscrementantly blast all errors to 0's
+    FAPI_TRY(mss::scom_blastah(i_target, TT::RD_VREF_CAL_ERROR_REG, 0));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 } // close namespace dp16

@@ -262,8 +262,10 @@ inline fapi2::ReturnCode reset_err( const fapi2::Target<T>& i_target )
     l_data.clearBit<TT::RESET_ERR_RPT>();
     FAPI_TRY( write_config0(i_target, l_data) );
 
-    // We have to read ERR_STATUS0. It resets when read.
-    FAPI_TRY( read_error_status0(i_target, l_data) );
+    // Now we need to reset the ERROR_STATUS0 register
+    l_data = 0;
+    FAPI_TRY( write_error_status0(i_target, l_data), "%s failed to clear APB error register via write",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
