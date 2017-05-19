@@ -94,3 +94,76 @@ fapi2::ReturnCode p9_procedureFfdc_fail()
 
     return l_rc;
 }
+
+
+//******************************************************************************
+// p9_gardAndDeconfig
+// Force a test return code that deconfigures the target and gards it
+//******************************************************************************
+fapi2::ReturnCode p9_gardAndDeconfig(
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target)
+{
+    FAPI_INF("Enter p9_gardAndDeconfig...");
+
+    FAPI_ASSERT(0, fapi2::TEST_ERROR_GARD_DECONFIG().set_TARGET(i_proc_target));
+
+  fapi_try_exit:
+
+    FAPI_INF("Exiting p9_gardAndDeconfig...");
+
+    return fapi2::current_err;
+}
+
+//******************************************************************************
+// p9_deconfig
+// Force a test return code that deconfigures the target
+//******************************************************************************
+fapi2::ReturnCode p9_deconfigCallout(
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target)
+{
+    FAPI_INF("Enter p9_deconfigCallout...");
+
+    FAPI_ASSERT(0, fapi2::TEST_ERROR_DECONFIG().set_TARGET(i_dimm_target));
+
+  fapi_try_exit:
+
+    FAPI_INF("Exiting p9_deconfigCallout...");
+
+    return fapi2::current_err;
+}
+
+//******************************************************************************
+// p9_procedureCallout
+// Force a test return code that creates a procedure callout
+//******************************************************************************
+fapi2::ReturnCode p9_procedureCallout()
+{
+    FAPI_INF("Enter p9_procedureCallout...");
+
+    FAPI_ASSERT(0, fapi2::TEST_ERROR_PROCEDURE_CALLOUT());
+
+  fapi_try_exit:
+
+    FAPI_INF("Exiting p9_procedureCallout...");
+
+    return fapi2::current_err;
+}
+
+//******************************************************************************
+// p9_hwCallout
+// Force a test return code that creates a hw callout
+//******************************************************************************
+fapi2::ReturnCode p9_hwCallout(
+    fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target)
+{
+    FAPI_INF("Enter p9_hwCallout...");
+
+    FAPI_ASSERT(0, fapi2::TEST_ERROR_HW_CALLOUT().set_TARGET(i_core_target));
+
+  fapi_try_exit:
+
+    FAPI_INF("Exiting p9_hwCallout...");
+
+    return fapi2::current_err;
+}
+
