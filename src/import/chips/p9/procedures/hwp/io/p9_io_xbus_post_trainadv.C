@@ -73,7 +73,8 @@ fapi2::ReturnCode getDebugInfo(
 }
 
 fapi2::ReturnCode checkEyeWidth(
-    const fapi2::Target<fapi2::TARGET_TYPE_XBUS> i_tgt,
+    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_tgt,
+    const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_ctgt,
     const uint8_t i_grp )
 {
     FAPI_IMP("Entering...");
@@ -110,7 +111,8 @@ fapi2::ReturnCode checkEyeWidth(
 
     // Check if the historical eye width is less then the manufacturing minimum eye width
     FAPI_ASSERT( ( io::get( EDIP_RX_HIST_MIN_EYE_WIDTH, data64 ) >= minMfgEyeWidth ),
-                 fapi2::IO_XBUS_MFG_RX_EYE_WIDTH_FAILURE().set_TARGET( i_tgt ).set_GROUP( i_grp )
+                 fapi2::IO_XBUS_MFG_RX_EYE_WIDTH_FAILURE().set_RXTARGET(i_tgt)
+                 .set_TXTARGET(i_ctgt).set_GROUP(i_grp)
                  .set_EYE_WIDTH( io::get( EDIP_RX_HIST_MIN_EYE_WIDTH, data64 ) )
                  .set_EYE_WIDTH_LANE( io::get( EDIP_RX_HIST_MIN_EYE_WIDTH_LANE, data64 ) )
                  .set_EYE_WIDTH_VALID( io::get( EDIP_RX_HIST_MIN_EYE_WIDTH_VALID, data64 ) )
@@ -160,8 +162,8 @@ fapi2::ReturnCode p9_io_xbus_post_trainadv(
 
     if(l_status == fapi2::ENUM_ATTR_IO_X_MFG_CHK_TRUE)
     {
-        FAPI_TRY( checkEyeWidth( i_tgt, i_grp ) );
-        FAPI_TRY( checkEyeWidth( i_ctgt, i_cgrp ) );
+        FAPI_TRY( checkEyeWidth( i_tgt, i_ctgt, i_grp ) );
+        FAPI_TRY( checkEyeWidth( i_ctgt, i_tgt, i_cgrp ) );
     }
 
 
