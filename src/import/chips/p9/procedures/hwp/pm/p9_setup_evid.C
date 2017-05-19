@@ -183,6 +183,12 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     uint32_t attr_mvpd_data[PV_D][PV_W];
     uint32_t valid_pdv_points;
     uint8_t present_chiplets;
+    PSTATE_attribute_state l_state;
+    l_state.iv_pstates_enabled = true;
+    l_state.iv_resclk_enabled  = true;
+    l_state.iv_vdm_enabled     = true;
+    l_state.iv_ivrm_enabled    = true;
+    l_state.iv_wof_enabled     = true;
 
 #define DATABLOCK_GET_ATTR(_attr_name, _target, _attr_assign) \
     FAPI_TRY(FAPI_ATTR_GET(fapi2::_attr_name, _target, _attr_assign),"Attribute read failed"); \
@@ -220,8 +226,13 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             uint8_t l_poundv_bucketId = 0;
             fapi2::voltageBucketData_t l_poundv_data;
             // Get #V data from MVPD for VDD/VDN and VCS voltage values
-            FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_data, &valid_pdv_points, &present_chiplets, l_poundv_bucketId,
-                                        &l_poundv_data));
+            FAPI_TRY(proc_get_mvpd_data(i_target,
+                                        attr_mvpd_data,
+                                        &valid_pdv_points,
+                                        &present_chiplets,
+                                        l_poundv_bucketId,
+                                        &l_poundv_data,
+                                        &l_state          ));
 
             // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
             if (attrs->vdd_voltage_mv)
