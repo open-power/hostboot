@@ -120,7 +120,6 @@ extern "C"
             // so we don't add it in the PHY calibration setup and do it separately here.
             FAPI_TRY( mss::setup_and_execute_zqcal(p, l_cal_steps_enabled) );
 
-            FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_ERROR_P0, 0) );
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 
             // Disable port fails as it doesn't appear the MC handles initial cal timeouts
@@ -138,8 +137,14 @@ extern "C"
             // Get our rank pairs.
             FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
-            // Setup the config register
+            // Hits the resets iff zqcal is set so we don't unnecessarily reset errors
+            if  ((l_cal_steps_enabled.getBit<mss::cal_steps::DRAM_ZQCAL>()) ||
+                 (l_cal_steps_enabled.getBit<mss::cal_steps::DB_ZQCAL>()))
+            {
+                FAPI_TRY(mss::clear_initial_cal_errors(p), "%s error resetting errors prior to init cal", mss::c_str(p));
+            }
 
+            // Check to see if we're supposed to reset the delay values before starting training
             // don't reset if we're running special training - assumes there's a checkpoint which has valid state.
             if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL_YES) && (i_special_training == 0))
             {
