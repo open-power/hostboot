@@ -811,13 +811,13 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_PUMP_MODE_MODE");
 
-    //Attribute set to 0x01 for CHIP_IS_NODE
-    if( attrVal )
+    //Attribute set to 0x01 for CHIP_IS_NODE, 0x02 for CHIP_IS_GROUP
+    if( attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE )
     {
         sgpeFlag |= SGPE_PROC_FAB_PUMP_MODE_BIT_POS;
     }
 
-    FAPI_DBG("FAB_PUMP_MODE       :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("FAB_PUMP_MODE       :   %s", (attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED,
                            FAPI_SYSTEM,
