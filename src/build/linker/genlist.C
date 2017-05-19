@@ -82,7 +82,7 @@ string find_symbol_name(uint64_t i_addr, bool i_match = false);
  *
  *  @return Pointer to a string containing the module's listing.
  */
-void* read_module_content(void*);
+char* read_module_content(void*);
 
     /** Module information parsed from modinfo.  <Module, Offset> */
 vector<pair<string, uint64_t> > g_modules;
@@ -121,7 +121,6 @@ int main(int argc, char** argv)
     parse_syms_file(g_imageName);
 
     // Create threads for each ELF object in the image to get their listing.
-    vector<pthread_t*> threads;
     for(vector<pair<string, uint64_t> >::const_iterator i = g_modules.begin();
         i != g_modules.end(); ++i)
     {
@@ -130,25 +129,10 @@ int main(int argc, char** argv)
         if (strstr(m.c_str(), ".o") || strstr(m.c_str(), ".elf") ||
             strstr(m.c_str(), ".so"))
         {
-            pthread_t* thread = new pthread_t;
-            pthread_create(thread, NULL, read_module_content,
-                           new pair<string,uint64_t>(*i));
-            threads.push_back(thread);
-        }
-    }
-
-    // Wait for all threads to finish and display listing result from each.
-    //    Since we started in the address order and join in that same order
-    //    the output becomes in-order as well.
-    for (vector<pthread_t*>::const_iterator i = threads.begin();
-         i != threads.end(); ++i)
-    {
-        char* result;
-        pthread_join(*(*i), (void**)&result);
-        if (result)
-        {
-            printf("%s", result);
-            free(result);
+	    char *result;
+	    result = read_module_content(new pair<string,uint64_t>(*i));
+	    printf("%s", result);
+	    free(result);
         }
     }
 
@@ -298,7 +282,7 @@ string find_symbol_name(uint64_t addr, bool match)
     }
 }
 
-void* read_module_content(void* input)
+char* read_module_content(void* input)
 {
     // Get module name and offset from input parameter.
     pair<string, uint64_t>* mod_info =
