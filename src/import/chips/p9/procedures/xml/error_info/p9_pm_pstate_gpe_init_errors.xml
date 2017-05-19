@@ -58,6 +58,22 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_GPE_INIT_PSTATE_AUTOSTART_TIMEOUT</rc>
+    <description> Pstate GPE Protocol Auto Start timeout.  This is only
+    used in lab test modes.
+    </description>
+    <collectRegisterFfdc>
+      <id>PGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_GPE_INIT_DEBUG_HALT</rc>
     <description> Pstate GPE init detected a Debug Halt condition.  This should only
     assert in a development debug environment.
@@ -74,7 +90,7 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
-    </callout>	
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
