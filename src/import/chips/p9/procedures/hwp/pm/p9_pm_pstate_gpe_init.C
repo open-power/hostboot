@@ -37,6 +37,7 @@
 //  Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_pstate_gpe_init.H>
+#include <p9_pm_hcd_flags.h>
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -71,11 +72,15 @@ fapi2::ReturnCode pstate_gpe_init(
     fapi2::buffer<uint64_t> l_xcr;
     fapi2::buffer<uint64_t> l_xsr;
     fapi2::buffer<uint64_t> l_ivpr;
-    uint32_t                l_ivpr_offset = 0;
     uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
-    uint8_t                 l_avsbus_number = 0;
-    uint8_t                 l_avsbus_rail = 0;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>      FAPI_SYSTEM;
+    fapi2::ATTR_PSTATEGPE_BOOT_COPIER_IVPR_OFFSET_Type  l_ivpr_offset = 0;
+    fapi2::ATTR_VDD_AVSBUS_BUSNUM_Type                  l_avsbus_number = 0;
+    fapi2::ATTR_VDD_AVSBUS_RAIL_Type                    l_avsbus_rail = 0;
+    fapi2::ATTR_SYSTEM_PSTATES_MODE_Type                l_pstates_mode = 0;
+
 
     FAPI_IMP(">> pstate_gpe_init......");
 
@@ -87,13 +92,13 @@ fapi2::ReturnCode pstate_gpe_init(
 
     // Program PGPE IVPR
     l_ivpr.flush<0>().insertFromRight<0, 32>(l_ivpr_offset);
-    FAPI_INF("   Writing IVPR with 0x%16llX", l_ivpr);
+    FAPI_INF("  Writing IVPR with 0x%16llX", l_ivpr);
     FAPI_TRY(putScom(i_target, PU_GPE2_GPEIVPR_SCOM, l_ivpr));
 
     // Set up the OCC Scratch 2 register before PGPE boot
     FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
 
-    FAPI_INF("   Clear PGPE_ACTIVE in OCC Scratch 2 Register...");
+    FAPI_INF("  Clear PGPE_ACTIVE in OCC Scratch 2 Register...");
     l_occ_scratch2.clearBit<p9hcd::PGPE_ACTIVE>();
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_VDD_AVSBUS_BUSNUM,
@@ -108,69 +113,114 @@ fapi2::ReturnCode pstate_gpe_init(
     l_occ_scratch2.insertFromRight<27, 1>(l_avsbus_number)
     .insertFromRight<28, 4>(l_avsbus_rail);
 
-    FAPI_INF("   AVSBus VDD topology set in OCC Scratch 2 Register:  Bus = %d, Rail = %d ...",
+    FAPI_INF("  AVSBus VDD topology set in OCC Scratch 2 Register:  Bus = %d, Rail = %d ...",
              l_avsbus_number, l_avsbus_rail);
 
     FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
 
-    // Program XCR to ACTIVATE PGPE
-    // @todo RTC 146665 Operations to PPEs should use a p9ppe namespace
-    FAPI_INF("   Starting the PGPE...");
-    l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1, 3);
-    FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
-    l_xcr.flush<0>().insertFromRight(p9hcd::TOGGLE_XSR_TRH, 1 , 3);
-    FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
-    l_xcr.flush<0>().insertFromRight(p9hcd::RESUME, 1, 3);
-    FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
 
-    // Now wait for PGPE to boot
-    FAPI_DBG("   Poll for PGPE Active for %d ms", PGPE_TIMEOUT_MS);
-    l_occ_scratch2.flush<0>();
-    l_xsr.flush<0>();
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATES_MODE,
+                            FAPI_SYSTEM,
+                            l_pstates_mode),
+              "Error getting ATTR_SYSTEM_PSTATES_MODE");
 
-    do
+    // Boot if not OFF
+    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
     {
-        FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
-        FAPI_TRY(getScom(i_target, PU_GPE2_GPEXIXSR_SCOM, l_xsr));
-        FAPI_DBG("OCC Scratch2: 0x%016lx; XSR: 0x%016lx Timeout: %d",
-                 l_occ_scratch2, l_xsr, l_timeout_counter);
-        // fapi2::delay takes ns as the arg
-        fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        // Set auto mode if needed
+        if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
+        {
+            FAPI_INF("  Pstate Auto Start Mode Enabled...");
+            FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM2, BIT(p9hcd::PGPE_PSTATE_PROTOCOL_AUTO_ACTIVATE)));
+        }
+
+        // Program XCR to ACTIVATE PGPE
+        // @todo RTC 146665 Operations to PPEs should use a p9ppe namespace
+        FAPI_INF("   Starting the PGPE...");
+        l_xcr.flush<0>().insertFromRight(p9hcd::HARD_RESET, 1, 3);
+        FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
+        l_xcr.flush<0>().insertFromRight(p9hcd::TOGGLE_XSR_TRH, 1 , 3);
+        FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
+        l_xcr.flush<0>().insertFromRight(p9hcd::RESUME, 1, 3);
+        FAPI_TRY(putScom(i_target, PU_GPE2_PPE_XIXCR, l_xcr));
+
+        // Now wait for PGPE to boot
+        FAPI_DBG("   Poll for PGPE Active for %d ms", PGPE_TIMEOUT_MS);
+        l_occ_scratch2.flush<0>();
+        l_xsr.flush<0>();
+
+        do
+        {
+            FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
+            FAPI_TRY(getScom(i_target, PU_GPE2_GPEXIXSR_SCOM, l_xsr));
+            FAPI_DBG("OCC Scratch2: 0x%016lx; XSR: 0x%016lx Timeout: %d",
+                     l_occ_scratch2, l_xsr, l_timeout_counter);
+            // fapi2::delay takes ns as the arg
+            fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
+        }
+        while((l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() != 1) &&
+              (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
+              (--l_timeout_counter != 0));
+
+        // Extract the halt condition
+        l_xsr.extractToRight<uint32_t>(l_xsr_halt_condition,
+                                       p9hcd::HALT_CONDITION_START,
+                                       p9hcd::HALT_CONDITION_LEN);
+        FAPI_DBG("halt state: XSR: 0x%016lx condition: %d",
+                 l_xsr, l_xsr_halt_condition);
+
+        // Check for a debug halt condition
+        FAPI_ASSERT(!((l_xsr.getBit<p9hcd::HALTED_STATE>() == 1) &&
+                      ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
+                        l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
+                    fapi2::PSTATE_GPE_INIT_DEBUG_HALT()
+                    .set_CHIP(i_target),
+                    "Pstate GPE Debug Halt detected");
+
+        // @todo 146665 Need to collect PGPE state. Operations to PPEs should
+        // use a p9ppe namespace class when created
+
+        // When PGPE fails to boot, assert out
+        FAPI_ASSERT((l_timeout_counter != 0 &&
+                     l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() == 1 &&
+                     l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
+                    fapi2::PSTATE_GPE_INIT_TIMEOUT()
+                    .set_CHIP(i_target),
+                    "Pstate GPE Init timeout");
+
+        if(l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>())
+        {
+            FAPI_INF("  PGPE was activated successfully!!!!");
+        }
+
+        if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
+        {
+            do
+            {
+                FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
+                // fapi2::delay takes ns as the arg
+                fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
+            }
+            while((l_occ_scratch2.getBit<p9hcd::PGPE_PSTATE_PROTOCOL_ACTIVE>() != 1) &&
+                  (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
+                  (--l_timeout_counter != 0));
+
+            // When Pstate protocol fails to start, assert out
+            FAPI_ASSERT((l_timeout_counter != 0 &&
+                         l_occ_scratch2.getBit<p9hcd::PGPE_PSTATE_PROTOCOL_ACTIVE>() == 1 &&
+                         l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
+                        fapi2::PSTATE_GPE_INIT_PSTATE_AUTOSTART_TIMEOUT()
+                        .set_CHIP(i_target),
+                        "Pstate GPE Protocol Auto Start timeout");
+
+            FAPI_INF("  Pstate Auto Start Mode Complete!!!!");
+        }
     }
-    while((l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() != 1) &&
-          (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
-          (--l_timeout_counter != 0));
-
-    // Extract the halt condition
-    l_xsr.extractToRight<uint32_t>(l_xsr_halt_condition,
-                                   p9hcd::HALT_CONDITION_START,
-                                   p9hcd::HALT_CONDITION_LEN);
-    FAPI_DBG("halt state: XSR: 0x%016lx condition: %d",
-             l_xsr, l_xsr_halt_condition);
-
-    // Check for a debug halt condition
-    FAPI_ASSERT(!((l_xsr.getBit<p9hcd::HALTED_STATE>() == 1) &&
-                  ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
-                    l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
-                fapi2::PSTATE_GPE_INIT_DEBUG_HALT()
-                .set_CHIP(i_target),
-                "Pstate GPE Debug Halt detected");
-
-    // @todo 146665 Need to collect PGPE state. Operations to PPEs should
-    // use a p9ppe namespace class when created
-
-    // When PGPE fails to boot, assert out
-    FAPI_ASSERT((l_timeout_counter != 0 &&
-                 l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() == 1 &&
-                 l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
-                fapi2::PSTATE_GPE_INIT_TIMEOUT()
-                .set_CHIP(i_target),
-                "Pstate GPE Init timeout");
-
-    if(( 1 == l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() ))
+    else
     {
-        FAPI_INF("  PGPE was activated successfully!!!!");
+        FAPI_INF("  PGPE booting is disabled and is NOT running!!!!");
     }
+
 
 fapi_try_exit:
     FAPI_IMP("<< pstate_gpe_init......");
