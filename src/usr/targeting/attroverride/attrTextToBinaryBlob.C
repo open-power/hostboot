@@ -950,7 +950,9 @@ bool AttrTextToBinaryBlob::attrFileAttrLinesToData(
             }
         }
 
-        if ((l_valString[0] == '0') && (l_valString[1] == 'x'))
+        // Expect 0x<> for unsigned and -<> for signed attribute
+        if ((l_valString[0] == '0') && (l_valString[1] == 'x') ||
+           (l_valString[0] == '-'))
         {
             // Value string is a value
             l_attrVal = strtoull(l_valString.c_str(), NULL, 0);
