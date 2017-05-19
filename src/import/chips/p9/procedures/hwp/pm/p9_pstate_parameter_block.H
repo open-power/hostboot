@@ -82,6 +82,15 @@ typedef struct
 
 } OperatingPoint;
 
+typedef struct
+{
+    bool iv_pstates_enabled;
+    bool iv_resclk_enabled;
+    bool iv_vdm_enabled;
+    bool iv_ivrm_enabled;
+    bool iv_wof_enabled;
+} PSTATE_attribute_state;
+
 
 /// Constants required to compute and interpolate operating points
 ///
@@ -157,7 +166,6 @@ typedef struct
 
 // IQ Keyword Sizes
 #define IQ_BUFFER_SIZE      9
-//#define IQ_BUFFER_ALLOC     64
 #define IQ_BUFFER_ALLOC     255
 // END OF PARMS REQUIRED VPD parsing procedures
 
@@ -166,7 +174,6 @@ typedef struct
 typedef struct
 {
 
-    //uint32_t attr_freq_core_max; - P8 attribute
     uint32_t attr_freq_core_ceiling_mhz;
 
 // Loadline, Distribution loss and Distribution offset attributes
@@ -221,24 +228,30 @@ typedef struct
     uint32_t attr_boot_freq_mhz;
     uint32_t attr_nest_freq_mhz;
 
-// Resonant clock frequency attrmbutes
+// Resonant clock frequency attributes
     uint32_t attr_pm_resonant_clock_full_clock_sector_buffer_frequency_khz;
     uint32_t attr_pm_resonant_clock_low_band_lower_frequency_khz;
     uint32_t attr_pm_resonant_clock_low_band_upper_frequency_khz;
     uint32_t attr_pm_resonant_clock_high_band_lower_frequency_khz;
     uint32_t attr_pm_resonant_clock_high_band_upper_frequency_khz;
 
-    uint8_t  attr_system_wof_enabled;
-    uint8_t  attr_system_ivrms_enabled;
     uint32_t attr_tdp_rdp_current_factor;
 
-    uint8_t attr_resclk_enable;
+    uint8_t attr_resclk_disable;
     uint8_t attr_dpll_dynamic_fmax_enable;
     uint8_t attr_dpll_dynamic_fmin_enable;
     uint8_t attr_dpll_droop_protect_enable;
 
     uint8_t attr_nest_leakage_percent;
 
+// Control attributes
+    uint8_t attr_system_ivrm_disable;
+    uint8_t attr_systemp_resclk_disable;
+    uint8_t attr_system_wof_disable;
+    uint8_t attr_system_vdm_disable;
+
+    uint8_t attr_dd_wof_not_supported;
+    uint8_t attr_pstate_mode;
 
 } AttributeList;
 
@@ -287,7 +300,8 @@ proc_get_mvpd_data ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      uint32_t* o_valid_pdv_points,
                      uint8_t* o_present_chiplets,
                      uint8_t&      o_bucketId,
-                     fapi2::voltageBucketData_t* o_poundv_data);
+                     fapi2::voltageBucketData_t* o_poundv_data,
+                     PSTATE_attribute_state* o_state);
 
 /// -------------------------------------------------------------------
 /// @brief Perform data validity check on #V data
@@ -303,7 +317,8 @@ proc_chk_valid_poundv ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
                         const uint32_t i_chiplet_mvpd_data[PV_D][PV_W],
                         uint32_t* o_valid_pdv_points,
                         const uint8_t i_chiplet_num,
-                        const uint8_t i_bucket_id);
+                        const uint8_t i_bucket_id,
+                        PSTATE_attribute_state* o_state);
 
 
 /// ----------------------------------------------------------------
@@ -315,7 +330,8 @@ proc_chk_valid_poundv ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
 fapi2::ReturnCode
 proc_get_mvpd_iddq ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     IddqTable* io_iddqt);
+                     IddqTable* io_iddqt,
+                     PSTATE_attribute_state* o_state);
 /// ----------------------------------------------------------------
 /// @brief Get #W data and put into array
 /// @param[in]    i_target          => Chip Target
@@ -330,7 +346,8 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      uint8_t       i_poundv_bucketId,
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_poundw_data,
-                     fapi2::voltageBucketData_t i_poundv_data
+                     fapi2::voltageBucketData_t i_poundv_data,
+                     PSTATE_attribute_state* o_state
                     );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
@@ -426,14 +443,15 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
 /// ----------------------------------------------------------------
 /// @brief Get VDM parameters from attributes
 /// @param[in]    i_target          => Chip Target
+/// @param[in]   *i_attr            => pointer to attribute list structure
 /// @param[out]   o_vdmpb           => VDM parameter block
 /// @return   FAPI2::SUCCESS
 /// ----------------------------------------------------------------
 
 fapi2::ReturnCode
 proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                     const AttributeList* i_attr,
                      GP_VDMParmBlock* o_vdmpb);
-
 
 /// ----------------------------------------------------------------
 /// @brief Get resonant clocking parameters from attributes
@@ -450,14 +468,17 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
 /// ----------------------------------------------------------------
 /// @brief Get IVRM parameters from attributes
-/// @param[in]    i_target          => Chip Target
-/// @param[out]   o_ivrmpb          => IVRM parameter block
+/// @param[in]     i_target          => Chip Target
+/// @param[in]    *i_attr            => pointer to attribute list structure
+/// @param[out]    o_ivrmpb          => IVRM parameter block
 /// @return   FAPI2::SUCCESS
 /// ----------------------------------------------------------------
 
 fapi2::ReturnCode
 proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                      IvrmParmBlock* o_ivrmpb);
+                      const AttributeList* i_attr,
+                      IvrmParmBlock* o_ivrmpb,
+                      PSTATE_attribute_state* o_state);
 
 /// -------------------------------------------------------------------
 /// @brief Set Resonant Clocking "array"/"table" attributes using p9_resclk_defines.h
@@ -531,25 +552,25 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock*  i_gppb,
                            uint32_t i_reference_freq);
 
 /**
- * calculate_effective_capacitance
- *
- * Description: Generic function to perform the effective capacitance
- *              calculations.
- *              C_eff = I / (V^1.3 * F)
- *
- *              I is the AC component of Idd in 0.01 Amps (or10 mA)
- *              V is the silicon voltage in 100 uV
- *              F is the frequency in MHz
- *
- *              Note: Caller must ensure they check for a 0 return value
- *                    and disable wof if that is the case
- *
- * Param[in]: i_iAC - the AC component
- * Param[in]: i_voltage - the voltage component in 100uV
- * Param[in]: i_frequency - the frequency component
- *
- * Return: The calculated effective capacitance
- */
+* calculate_effective_capacitance
+*
+* Description: Generic function to perform the effective capacitance
+*              calculations.
+*              C_eff = I / (V^1.3 * F)
+*
+*              I is the AC component of Idd in 0.01 Amps (or10 mA)
+*              V is the silicon voltage in 100 uV
+*              F is the frequency in MHz
+*
+*              Note: Caller must ensure they check for a 0 return value
+*                    and disable wof if that is the case
+*
+* Param[in]: i_iAC - the AC component
+* Param[in]: i_voltage - the voltage component in 100uV
+* Param[in]: i_frequency - the frequency component
+*
+* Return: The calculated effective capacitance
+*/
 uint16_t pstate_calculate_effective_capacitance( uint16_t i_iAC,
         uint16_t i_voltage,
         uint16_t i_frequency );
@@ -580,9 +601,22 @@ void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
 
 // p9_pstate_compute_PsVDMThreshSlopes
 //
-void p9_pstate_compute_PsVDMThreshSlopes(
-    LocalPstateParmBlock* io_lppb,
-    uint8_t* i_pstate);
+void p9_pstate_compute_PsVDMThreshSlopes(LocalPstateParmBlock* io_lppb,
+        uint8_t* i_pstate);
+
+// p9_pstate_wof_initialization
+void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
+                                   uint8_t* o_buf,
+                                   uint32_t& io_size,
+                                   PSTATE_attribute_state* o_state,
+                                   const uint32_t i_base_state_frequency);
+
+// p9_pstate_set_global_feature_attributes
+fapi2::ReturnCode
+p9_pstate_set_global_feature_attributes(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    PSTATE_attribute_state i_state,
+    QuadManagerFlags* o_qm_flags);
 
 /// @typedef p9_pstate_parameter_block_FP_t
 /// function pointer typedef definition for HWP call support
@@ -616,3 +650,4 @@ extern "C"
 #endif
 
 #endif  // __P9_PSTATE_PARAMETER_BLOCK_H__
+

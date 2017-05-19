@@ -295,19 +295,18 @@ typedef struct __attribute__((packed)) VFRTHeaderLayout
     // VFRT Magic code "VT"
     uint16_t magic_number;
 
-    uint16_t reserved_1;
+    uint16_t reserved;
     // 0:System type, 1:Homer type (0:3)
     // if version 1: VFRT size is 12 row(voltage) X 11 column(freq) of size uint8_t
     // (4:7)
     // if version 2: VFRT size is 24 row(Voltage) X 5 column (Freq) of size uint8_t
     uint8_t  type_version;
-    //Reserved
-    uint8_t reserved_2;
-    //Identifies the Vdn assumptions tht went in this VFRT (4:7)
+    //Identifies the Vdn assumptions tht went in this VFRT (0:7)
     uint8_t res_vdnId;
-    //Identifies the Vdd assumptions tht went in this VFRT (0:4)
-    //Identifies the Quad Active assumptions tht went in this VFRT (5:7)
+    //Identifies the Vdd assumptions tht went in this VFRT (0:7)
     uint8_t VddId_QAId;
+    //Identifies the Quad Active assumptions tht went in this VFRT (5:7)
+    uint8_t rsvd_QAId;
 } VFRTHeaderLayout_t;// WOF Tables Header
 
 typedef struct __attribute__((packed, aligned(128))) WofTablesHeader

@@ -396,7 +396,9 @@ void* call_host_voltage_config( void *io_pArgs )
                         "Error in call_host_voltage_config::p9_setup_evid");
 
                 // Create IStep error log and cross reference occurred error
-                l_stepError.addErrorDetails( l_err );
+                //@fixme-RTC:176741-Ignore these logs until HWPs are fixed
+                //l_stepError.addErrorDetails( l_err );
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
 
                 // Commit Error
                 errlCommit( l_err, ISTEP_COMP_ID );

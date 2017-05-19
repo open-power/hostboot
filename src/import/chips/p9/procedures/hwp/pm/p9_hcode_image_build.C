@@ -736,40 +736,34 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
                            FAPI_SYSTEM,
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_STOP4_DISABLE");
-
     if( attrVal )
     {
         cmeFlag |= CME_STOP_4_TO_2_BIT_POS;
         sgpeFlag |= SGPE_STOP_4_TO_2_BIT_POS;
     }
-
-    FAPI_DBG("STOP_4_to_2           :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("STOP_4_to_2                   :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP5_DISABLE,
                            FAPI_SYSTEM,
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_STOP5_DISABLE");
-
     if( attrVal )
     {
         cmeFlag |= CME_STOP_5_TO_4_BIT_POS;
         sgpeFlag |= SGPE_STOP_5_TO_4_BIT_POS;
     }
-
-    FAPI_DBG("STOP_5_to_4           :   %s", attrVal ? "TRUE" : "FALSE");
+    FAPI_DBG("STOP_5_to_4                   :   %s", attrVal ? "TRUE" : "FALSE");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP8_DISABLE,
                            FAPI_SYSTEM,
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_STOP8_DISABLE");
-
     if( attrVal )
     {
         cmeFlag |= CME_STOP_8_TO_5_BIT_POS;
         sgpeFlag |= SGPE_STOP_8_TO_5_BIT_POS;
     }
-
-    FAPI_DBG("STOP_8_to_5           :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("STOP_8_to_5                   :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP11_DISABLE,
                            FAPI_SYSTEM,
@@ -806,7 +800,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         sgpeFlag |= SGPE_ENABLE_CHTM_TRACE_CME_BIT_POS;
     }
 
-    FAPI_DBG("CME CHTM Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("CME CHTM Trace Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_MEMORY_CONFIG,
                            i_procTgt,
@@ -818,12 +812,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pSgpeHdr->g_sgpe_chtm_mem_cfg = SWIZZLE_8_BYTE(chtmVal);
     }
 
-    FAPI_DBG("CME CHTM Memory Config :   %016llx", chtmVal);
+    FAPI_DBG("CME CHTM Memory Config        :   %016llx", chtmVal);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_ENABLE,
-                           FAPI_SYSTEM,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RESCLK_ENABLED,
+                           i_procTgt,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_RESCLK_ENABLE" );
+             "Error from FAPI_ATTR_GET for attribute ATTR_RESCLK_ENABLED" );
 
     if( attrVal )
     {
@@ -831,12 +825,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.resclk_enable = 1;
     }
 
-    FAPI_DBG("Resonant Clock Enable  :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("Resonant Clock Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IVRMS_ENABLED,
-                           FAPI_SYSTEM,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRMS_ENABLED,
+                           i_procTgt,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_IVRMS_ENABLED" );
+             "Error from FAPI_ATTR_GET for attribute ATTR_IVRMS_ENABLED" );
 
     if( attrVal )
     {
@@ -844,12 +838,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.ivrm_enable = 1;
     }
 
-    FAPI_DBG("System IVRM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("IVRM Enabled                  :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,
-                           FAPI_SYSTEM,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED,
+                           i_procTgt,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLE" );
+             "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLED" );
 
     if( attrVal )
     {
@@ -858,25 +852,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.vdm_enable = 1;
     }
 
-    FAPI_DBG("System VDM Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("VDM Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
-                           FAPI_SYSTEM,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED,
+                           i_procTgt,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_PUMP_MODE_MODE");
-
-    //Attribute set to 0x01 for CHIP_IS_NODE, 0x02 for CHIP_IS_GROUP
-    if( attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE )
-    {
-        sgpeFlag |= SGPE_PROC_FAB_PUMP_MODE_BIT_POS;
-    }
-
-    FAPI_DBG("FAB_PUMP_MODE       :   %s", (attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? "TRUE" : "FALSE" );
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED,
-                           FAPI_SYSTEM,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_WOF_ENABLED" );
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_ENABLED" );
 
     if( attrVal )
     {
@@ -884,7 +865,21 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.wof_enable = 1;
     }
 
-    FAPI_DBG("System WOF Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("WOF Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_PUMP_MODE_MODE");
+    FAPI_DBG("Fabric Pump Attr Value :   %d", attrVal );
+    //Attribute set to 0x01 for CHIP_IS_NODE
+    if( attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE )
+    {
+        sgpeFlag |= SGPE_PROC_FAB_PUMP_MODE_BIT_POS;
+    }
+
+    FAPI_DBG("Fabric Pump Mode              :   %s", (
+    attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? "TRUE" : "FALSE" );
 
     // Set PGPE Header Flags from Attributes
     FAPI_DBG(" -------------------- PGPE Flags -----------------");
@@ -899,7 +894,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.occ_ipc_immed_response = 1;
     }
 
-    FAPI_DBG("PGPE Hcode Mode        :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
+    FAPI_DBG("PGPE Hcode Mode               :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_FRATIO,
                            FAPI_SYSTEM,
@@ -911,7 +906,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.enable_fratio = 1;
     }
 
-    FAPI_DBG("System FRATIO ENABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("System Frequency Ratio Enable :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_VRATIO,
                            FAPI_SYSTEM,
@@ -923,7 +918,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.enable_vratio = 1;
     }
 
-    FAPI_DBG("System VRATIO ENABLE   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("System Voltage Ratio Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_VRATIO_SELECT,
                            FAPI_SYSTEM,
@@ -935,7 +930,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         pgpeFlags.fields.vratio_modifier = 1;
     }
 
-    FAPI_DBG("System VRATIO SELECT:   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("System Voltage Ratio Select   :   %s", attrVal ? "FULL" : "ACTIVE CORES" );
 
 
 
@@ -945,12 +940,12 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
     pPgpeHdr->g_pgpe_flags          =   SWIZZLE_2_BYTE(pgpeFlags.value);
 
-    FAPI_INF("CME Flag Value        : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
-    FAPI_INF("CME QM Flag Value     : 0x%08x", SWIZZLE_2_BYTE(pCmeHdr->g_cme_qm_mode_flags));
-    FAPI_INF("SGPE Flag Value       : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
-    FAPI_INF("SGPE Chtm Config      : 0x%016llx", SWIZZLE_8_BYTE(pSgpeHdr->g_sgpe_chtm_mem_cfg));
-    FAPI_INF("PGPE Flag Value       : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
-    FAPI_DBG(" -------------------- CME/SGPE Flags Ends ---------------==");
+    FAPI_INF("CME Flag Value                : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
+    FAPI_INF("CME QM Flag Value             : 0x%08x", SWIZZLE_2_BYTE(pCmeHdr->g_cme_qm_mode_flags));
+    FAPI_INF("SGPE Flag Value               : 0x%08x", SWIZZLE_4_BYTE(pSgpeHdr->g_sgpe_reserve_flags));
+    FAPI_INF("SGPE Chtm Config              : 0x%016llx", SWIZZLE_8_BYTE(pSgpeHdr->g_sgpe_chtm_mem_cfg));
+    FAPI_INF("PGPE Flag Value               : 0x%08x", SWIZZLE_2_BYTE(pPgpeHdr->g_pgpe_flags));
+    FAPI_DBG(" -------------------- CME/SGPE Flags Ends -----------------");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1855,8 +1850,8 @@ void updatePgpeHeader( void* const i_pHomer )
     pPgpeHdr->g_quad_status_addr                  =     0;
     pPgpeHdr->g_pgpe_wof_state_address            =     0;
     pPgpeHdr->g_pgpe_req_active_quad_address      =     0;
-    pPgpeHdr->g_wof_table_addr                    =     0;
-    pPgpeHdr->g_wof_table_length                  =     0;
+    pPgpeHdr->g_wof_table_addr                    =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_offset);
+    pPgpeHdr->g_wof_table_length                  =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_length);
 
     //Finally handling the endianess
     pPgpeHdr->g_pgpe_gppb_sram_addr                 =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr);
@@ -1949,6 +1944,7 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
         PPMRLayout_t*  pPpmr = (PPMRLayout_t*) &pHomerLayout->ppmrRegion;
         cmeHeader_t* pCmeHdr = (cmeHeader_t*) &pHomerLayout->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
+        fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
 
         uint32_t ppmrRunningOffset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_offset) +
                                      SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
@@ -1972,7 +1968,9 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
                        &pStateSupStruct, (uint8_t*)i_pBuf1, wofTableSize );
         FAPI_TRY(retCode);
 
-        //Check if WOF Table is copied properly
+        //Check if WOF Table is copied properly even if WOF is disabled.
+        //As this is memory range check, we don't want memory corruption
+        //issues to go unnoticed as this should not EVER happen.
         FAPI_ASSERT( ( wofTableSize <= OCC_WOF_TABLES_SIZE ),
                      fapi2::PARAM_WOF_TABLE_SIZE_ERR()
                      .set_ACTUAL_WOF_TABLE_SIZE(wofTableSize)
@@ -2073,8 +2071,11 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         io_ppmrHdr.g_ppmr_wof_table_offset  =   OCC_WOF_TABLES_PPMR_OFFSET;
         io_ppmrHdr.g_ppmr_wof_table_length  =   OCC_WOF_TABLES_SIZE;
 
-        memcpy( &pPpmr->wofTableSize, i_pBuf1, wofTableSize );
-
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, i_procTgt, l_wof_enabled));
+        if (l_wof_enabled)
+        {
+            memcpy( &pPpmr->wofTableSize, i_pBuf1, wofTableSize );
+        }
         //------------------------------ Copying WOF Table ----------------------------------------------
 
         //------------------------------ Calculating total PGPE Image Size in SRAM ----------------------
@@ -2088,7 +2089,7 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         //Finally let us handle endianess
         //CME Header
         pCmeHdr->g_cme_pstate_region_length  =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_pstate_region_length);
-        pCmeHdr->g_cme_common_ring_offset    = SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset);
+        pCmeHdr->g_cme_common_ring_offset    =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_common_ring_offset);
 
         //PPMR Header
         io_ppmrHdr.g_ppmr_gppb_offset        =   SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_gppb_offset);
