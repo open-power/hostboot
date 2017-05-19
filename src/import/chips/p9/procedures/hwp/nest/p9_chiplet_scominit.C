@@ -67,8 +67,7 @@ const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FFFCULL;
 const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF000CULL;
 
 // link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
-const uint64_t FBC_IOO_DL_FIR_MASK_SIM_DD1 = 0xFCFC3FFFFCFF000FULL;
-const uint64_t OBUS_3_LL3_FIR_MASK_SIM_DD1 = 0x300000000000000FULL;
+const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF000FULL;
 
 static const uint8_t OBRICK0_POS  = 0x0;
 static const uint8_t OBRICK1_POS  = 0x1;
@@ -97,15 +96,13 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>> l_obrick_targets;
     fapi2::buffer<uint64_t> l_ob0data(0x0);
     fapi2::buffer<uint64_t> l_ob3data(0x0);
-    uint8_t l_dd1 = 0;
-    uint8_t l_ndl_iovalid = 0;
+    uint8_t l_no_ndl_iovalid = 0;
     uint8_t l_is_simulation = 0;
 
     FAPI_DBG("Start");
-    // Get attribute to check if it is dd1 or dd2
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES, i_target, l_dd1));
-    // Get attribute to check if NDL IOValids need set (dd2+)
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9_NDL_IOVALID, i_target, l_ndl_iovalid));
+
+    // Get attribute to check if NDL IOValids need to be set (dd2+)
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9_NO_NDL_IOVALID, i_target, l_no_ndl_iovalid));
     // Get simulation indicator attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_is_simulation));
 
@@ -113,7 +110,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     fapi2::toString(i_target, l_procTargetStr, sizeof(l_procTargetStr));
 
 
-    if (l_ndl_iovalid)
+    if (!l_no_ndl_iovalid)
     {
 
         l_obrick_targets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>();
@@ -234,9 +231,9 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_PB_IOOL_FIR_ACTION1_REG, FBC_IOO_DL_FIR_ACTION1),
                  "Error from putScom (OBUS_LL0_PB_IOOL_FIR_ACTION1_REG)");
 
-        if ((l_dd1 != 0) && (l_is_simulation == 1))
+        if (l_is_simulation == 1)
         {
-            FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG, FBC_IOO_DL_FIR_MASK_SIM_DD1),
+            FAPI_TRY(fapi2::putScom(*l_iter, OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG, FBC_IOO_DL_FIR_MASK_SIM),
                      "Error from putScom (OBUS_LL0_LL0_LL0_PB_IOOL_FIR_MASK_REG_SIM_DD1)");
         }
         else

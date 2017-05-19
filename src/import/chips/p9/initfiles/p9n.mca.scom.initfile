@@ -767,7 +767,7 @@ define def_perf_tune_case = (MCBIST.ATTR_MSS_FREQ==2400) && (SYS.ATTR_FREQ_PB_MH
 # DD1
 
 # "L" field
-ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
   #3,      (def_perf_tune_case==0); # untuned
@@ -778,7 +778,7 @@ ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEAT
 }
 
 # "D" field
-ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
   #0,      (def_perf_tune_case==0); # untuned
@@ -789,7 +789,7 @@ ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC
 }
 
 # "dn" field
-espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
   #spyv;
   #OFF; # untuned and tuned same value
@@ -799,7 +799,7 @@ espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATUR
 }
 
 # "h" field
-espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES] {
+espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv;
   OFF; # untuned and tuned same value
 }
@@ -809,7 +809,7 @@ espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE
 # (note hierarchies for ECC scoms are slightly different in dd2)
 
 # "L" field
-ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD2_SPY_NAMES] {
+ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   5,      (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
   5,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio < 1250); # async 2400m/2000n and below
@@ -817,7 +817,7 @@ ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_
 }
 
 # "T" field (new for DD2)
-espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_BYPASS_TENURE_3 [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_BYPASS_TENURE_3 [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   OFF,    (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
   OFF,    (PROC.ATTR_MC_SYNC_MODE==0)                                && (def_mn_freq_ratio <  963); # async 1866m/2000n
@@ -829,7 +829,7 @@ espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_BYPASS_TENURE_3 [when=S && ATTR_CHIP_EC_FE
 }
 
 # "D" field
-ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD2_SPY_NAMES] {
+ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   0,      (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
   2,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio <  963); # async 1866m/2000n
@@ -841,13 +841,13 @@ ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHI
 }
 
 # "dn" field
-espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD2_SPY_NAMES] {
+espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv;
   ON; # same across all frequency settings
 }
 
 # "h" field
-espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE_P9N_DD2_SPY_NAMES] {
+espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
   OFF,    (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
   OFF,    (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio <  963); # async 1866m/2000n

@@ -31,11 +31,10 @@
 <attributes>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_P9N_DD1_SPY_NAMES</id>
+    <id>ATTR_CHIP_EC_FEATURE_P9_NO_NDL_IOVALID</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Returns true if spy name has changed from dd1 to dd2.
-      Less than Nimbus ec 0x20
+      Returns true if the chip has no NDL IOValid bits
     </description>
     <chipEcFeature>
       <chip>
@@ -43,42 +42,6 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_P9N_DD2_SPY_NAMES</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Returns true if spy name has changed from dd1 to dd2.
-      Greater than or equal to 0x20
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_P9_NDL_IOVALID</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Returns true if the chip has NDL IOValid bits
-      P9N dd2
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -102,18 +65,18 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_CORE_TRACE_SCOMABLE</id>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Returns true if the core trace arrays are dumpable via SCOM.
-      Nimbus EC 0x20 or greater
+      Returns true if the core trace arrays are not dumpable via SCOM.
+      Nimbus EC 0x10
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1691,24 +1654,17 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_NMMU_DMT_DD2</id>
+    <id>ATTR_CHIP_EC_FEATURE_NMMU_NDD1</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Sets inits for DD2, also DMT mode
+      Configure NMMU for Nimbus DD1
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -1749,24 +1705,18 @@
   </attribute>
   <!-- ******************************************************************** -->
     <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_NMMU_ISS734_DD2_1</id>
+    <id>ATTR_CHIP_EC_FEATURE_NMMU_NOT_ISS734</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      issue734 dial, exists dd2.1+
+      NMMU does not require application of issue734 fixes
+      Issue734 exists on Nimbus dd2.1+
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x21</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2002,7 +1952,7 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW396230_SCAN_ONLY</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW396230</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD1 only: set L3/NCU skip group scope via scan only
@@ -2013,30 +1963,6 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW396230_SCOM</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD2+: able to set L3/NCU skip group scope via SCOM
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2061,10 +1987,10 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_OPTIMAL_LCO_SCAN_ONLY</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW386657</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1 only: set the optimal dial setups for LCO's
+      Nimbus DD1 only: set the optimal dial setups for LCO's via scan
     </description>
     <chipEcFeature>
       <chip>
@@ -2072,30 +1998,6 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_OPTIMAL_LCO_SCOM</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD2+: set the optimal dial setups for LCO's
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2119,31 +2021,24 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_OPTIMAL_LARX_STCX_PERF</id>
+    <id>ATTR_CHIP_EC_FEATURE_UNTUNED_LARX_STCX_PERF</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD2+: set the optimal dial setups for larx/stcx
+      Nimbus DD1: Larx/stcx dials are non performance tuned
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW409069</id>
+    <id>ATTR_CHIP_EC_FEATURE_NOT_HW409069</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD2+: HW409069 load_larx protection not activated because of dtag_data_resp
@@ -2154,14 +2049,7 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>LESS_THAN</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -3148,6 +3036,113 @@
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW391162</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 only: spoof pb_init in cache contained mode
+      Enables L2 checkers to monitor for transactions arbitrating
+      to broadcast onto the fabric
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SCAN_SICR_TLBIE_QUIESCE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 only: scan ON NCU_TLBIE_QUISCE fence
+      for non-cache contained modes.  Flush state corrected in HW
+      for future revisions
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CXA_P9NDD1_SPY_NAMES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Use Nimbus DD1 CXA spy register definition names
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_DDRPHY_P9NDD1_SPY_NAMES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Use Nimbus DD1 DDR PHY spy register definition names
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Program MCA ECC logic to support Nimbus DD1
+      asynchronus boundary crossing requirements
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_CORE_P9NDD1</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD1 core spy behavior qualifier
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ******************************************************************** -->
   <!-- Memory Section                                                       -->
   <!-- ******************************************************************** -->
@@ -3524,7 +3519,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW404176_ASSERT_SCAN_CLK</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Only MC in Cumulus need to generate scan clock in even cycle instead of odd
+      Cumulus only: MC chiplet requires scan clock in even cycle instead of odd
     </description>
     <chipEcFeature>
       <chip>
@@ -3541,7 +3536,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW406337</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Cumulus only dropping MC chiplet fence during arrayinit
+      Cumulus only: dropping MC chiplet fence during arrayinit
     </description>
     <chipEcFeature>
       <chip>
@@ -3640,24 +3635,6 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_POSTDD1N_DPLL_SETTINGS</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Post DD1 update : Used for new DD2 settings such as ..._EXTERNAL_JUMP_VALUES latch is new for DD2. True if:
-      Nimbus EC greater than or equal to 20
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>

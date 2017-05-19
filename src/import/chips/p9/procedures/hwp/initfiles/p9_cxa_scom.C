@@ -108,14 +108,29 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010819ull, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x201081bull, l_scom_buffer ));
+
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                FAPI_TRY(fapi2::getScom( TGT0, 0x201081bull, l_scom_buffer ));
-
                 l_scom_buffer.insert<45, 3, 61, uint64_t>(literal_0b111 );
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0010 );
-                FAPI_TRY(fapi2::putScom(TGT0, 0x201081bull, l_scom_buffer));
             }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<45, 3, 61, uint64_t>(literal_0b111 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0010 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0010 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x201081bull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x201081cull, l_scom_buffer ));
