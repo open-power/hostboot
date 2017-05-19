@@ -55,45 +55,45 @@ typedef union occ_flags
     struct
     {
 #ifdef _BIG_ENDIAN
-        uint32_t  pgpe_StartNonStop             : 1;
-        uint32_t  pgpe_PStateProtocolActivate   : 1;
-        uint32_t  pgpe_PStateSafeMode           : 1;
-        uint32_t  pm_ComplexSuspend             : 1;
-        uint32_t  reserved1                     : 4;
-        uint32_t  sgpe_Active                   : 1;
-        uint32_t  sgpe_IgnoreStopExits          : 1;
-        uint32_t  sgpe_IgnoreStopEntry          : 1;
-        uint32_t  sgpe_StopExitsIgnored         : 1;
-        uint32_t  sgpe_StopEntryIgnored         : 1;
-        uint32_t  reserved2                     : 1;
-        uint32_t  sgpe_Aux_Activate             : 1;
-        uint32_t  sgpe_Aux_Active               : 1;
-        uint32_t  pib_I2CMasterEngine1Lock      : 2;
-        uint32_t  pib_I2CMasterEngine2Lock      : 2;
-        uint32_t  pib_I2CMasterEngine3Lock      : 2;
-        uint32_t  undefined                     : 8;
-        uint32_t  requested_ActiveQuadUpdate    : 1;
-        uint32_t  requested_OccSafeState        : 1;
+        uint32_t  pgpe_StartNonStop                 : 1;
+        uint32_t  pgpe_PStateProtocolAutoActivate   : 1;
+        uint32_t  pgpe_PStateSafeMode               : 1;
+        uint32_t  pm_ComplexSuspend                 : 1;
+        uint32_t  reserved1                         : 4;
+        uint32_t  sgpe_Active                       : 1;
+        uint32_t  sgpe_IgnoreStopExits              : 1;
+        uint32_t  sgpe_IgnoreStopEntry              : 1;
+        uint32_t  sgpe_StopExitsIgnored             : 1;
+        uint32_t  sgpe_StopEntryIgnored             : 1;
+        uint32_t  reserved2                         : 1;
+        uint32_t  sgpe_Aux_Activate                 : 1;
+        uint32_t  sgpe_Aux_Active                   : 1;
+        uint32_t  pib_I2CMasterEngine1Lock          : 2;
+        uint32_t  pib_I2CMasterEngine2Lock          : 2;
+        uint32_t  pib_I2CMasterEngine3Lock          : 2;
+        uint32_t  undefined                         : 8;
+        uint32_t  requested_ActiveQuadUpdate        : 1;
+        uint32_t  requested_OccSafeState            : 1;
 #else
-        uint32_t  requested_OccSafeState        : 1;
-        uint32_t  requested_ActiveQuadUpdate    : 1;
-        uint32_t  undefined                     : 8;
-        uint32_t  pib_I2CMasterEngine3Lock      : 2;
-        uint32_t  pib_I2CMasterEngine2Lock      : 2;
-        uint32_t  pib_I2CMasterEngine1Lock      : 2;
-        uint32_t  sgpe_Aux_Active               : 1;
-        uint32_t  sgpe_Aux_Activate             : 1;
-        uint32_t  reserved2                     : 1;
-        uint32_t  sgpe_StopEntryIgnored         : 1;
-        uint32_t  sgpe_StopExitsIgnored         : 1;
-        uint32_t  sgpe_IgnoreStopEntry          : 1;
-        uint32_t  sgpe_IgnoreStopExits          : 1;
-        uint32_t  sgpe_Active                   : 1;
-        uint32_t  reserved1                     : 4;
-        uint32_t  pm_ComplexSuspend             : 1;
-        uint32_t  pgpe_PStateSafeMode           : 1;
-        uint32_t  pgpe_PStateProtocolActivate   : 1;
-        uint32_t  pgpe_StartNonStop             : 1;
+        uint32_t  requested_OccSafeState            : 1;
+        uint32_t  requested_ActiveQuadUpdate        : 1;
+        uint32_t  undefined                         : 8;
+        uint32_t  pib_I2CMasterEngine3Lock          : 2;
+        uint32_t  pib_I2CMasterEngine2Lock          : 2;
+        uint32_t  pib_I2CMasterEngine1Lock          : 2;
+        uint32_t  sgpe_Aux_Active                   : 1;
+        uint32_t  sgpe_Aux_Activate                 : 1;
+        uint32_t  reserved2                         : 1;
+        uint32_t  sgpe_StopEntryIgnored             : 1;
+        uint32_t  sgpe_StopExitsIgnored             : 1;
+        uint32_t  sgpe_IgnoreStopEntry              : 1;
+        uint32_t  sgpe_IgnoreStopExits              : 1;
+        uint32_t  sgpe_Active                       : 1;
+        uint32_t  reserved1                         : 4;
+        uint32_t  pm_ComplexSuspend                 : 1;
+        uint32_t  pgpe_PStateSafeMode               : 1;
+        uint32_t  pgpe_PStateProtocolAutoActivate   : 1;
+        uint32_t  pgpe_StartNonStop                 : 1;
 #endif // _BIG_ENDIAN
     } fields;
 } occ_flags_t;
@@ -104,35 +104,35 @@ typedef union pgpe_flags
     struct
     {
 #ifdef _BIG_ENDIAN
-        uint16_t  resclk_enable                 : 1;
-        uint16_t  ivrm_enable                   : 1;
-        uint16_t  vdm_enable                    : 1;
-        uint16_t  wof_enable                    : 1;
-        uint16_t  dpll_dynamic_fmax_enable      : 1;
-        uint16_t  dpll_dynamic_fmin_enable      : 1;
-        uint16_t  dpll_droop_protect_enable     : 1;
-        uint16_t  reserved7                     : 1;
-        uint16_t  occ_ipc_immed_response        : 1;
-        uint16_t  wof_ipc_immed_response        : 1;
-        uint16_t  enable_fratio                 : 1;
-        uint16_t  enable_vratio                 : 1;
-        uint16_t  vratio_modifier               : 1;
-        uint16_t  reserved_13_15                : 7;
+        uint16_t  resclk_enable                     : 1;
+        uint16_t  ivrm_enable                       : 1;
+        uint16_t  vdm_enable                        : 1;
+        uint16_t  wof_enable                        : 1;
+        uint16_t  dpll_dynamic_fmax_enable          : 1;
+        uint16_t  dpll_dynamic_fmin_enable          : 1;
+        uint16_t  dpll_droop_protect_enable         : 1;
+        uint16_t  reserved7                         : 1;
+        uint16_t  occ_ipc_immed_response            : 1;
+        uint16_t  wof_ipc_immed_response            : 1;
+        uint16_t  enable_fratio                     : 1;
+        uint16_t  enable_vratio                     : 1;
+        uint16_t  vratio_modifier                   : 1;
+        uint16_t  reserved_13_15                    : 7;
 #else
-        uint16_t  reserved_13_15                : 7;
-        uint16_t  vratio_modifier               : 1;
-        uint16_t  enable_vratio                 : 1;
-        uint16_t  enable_fratio                 : 1;
-        uint16_t  wof_ipc_immed_response        : 1;
-        uint16_t  occ_ipc_immed_response        : 1;
-        uint16_t  reserved7                     : 1;
-        uint16_t  dpll_droop_protect_enable     : 1;
-        uint16_t  dpll_dynamic_fmin_enable      : 1;
-        uint16_t  dpll_dynamic_fmax_enable      : 1;
-        uint16_t  wof_enable                    : 1;
-        uint16_t  vdm_enable                    : 1;
-        uint16_t  ivrm_enable                   : 1;
-        uint16_t  resclk_enable                 : 1;
+        uint16_t  reserved_13_15                    : 7;
+        uint16_t  vratio_modifier                   : 1;
+        uint16_t  enable_vratio                     : 1;
+        uint16_t  enable_fratio                     : 1;
+        uint16_t  wof_ipc_immed_response            : 1;
+        uint16_t  occ_ipc_immed_response            : 1;
+        uint16_t  reserved7                         : 1;
+        uint16_t  dpll_droop_protect_enable         : 1;
+        uint16_t  dpll_dynamic_fmin_enable          : 1;
+        uint16_t  dpll_dynamic_fmax_enable          : 1;
+        uint16_t  wof_enable                        : 1;
+        uint16_t  vdm_enable                        : 1;
+        uint16_t  ivrm_enable                       : 1;
+        uint16_t  resclk_enable                     : 1;
 #endif
     } fields;
 } pgpe_flags_t;
@@ -147,7 +147,8 @@ namespace p9hcd
 enum PM_GPE_OCCFLG_DEFS
 {
     PGPE_START_NOT_STOP                 = 0,
-    PGPE_PSTATE_PROTOCOL_ACTIVATE       = 1,
+    PGPE_PSTATE_PROTOCOL_AUTO_ACTIVATE  = 1,
+    PGPE_PSTATE_PROTOCOL_ACTIVATE       = 1,  // @todo PGPE Hcode dependencies
     PGPE_SAFE_MODE                      = 2,
     PM_COMPLEX_SUSPEND                  = 3,
     SGPE_ACTIVE                         = 8,
