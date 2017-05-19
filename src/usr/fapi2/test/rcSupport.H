@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,5 +54,31 @@ fapi2::ReturnCode p9_registerFfdc_fail(
 //******************************************************************************
 fapi2::ReturnCode p9_procedureFfdc_fail(void);
 
+//******************************************************************************
+// p9_gardAndDeconfig
+// Force a test return code that deconfigures the target and gards it
+//******************************************************************************
+fapi2::ReturnCode p9_gardAndDeconfig(
+               fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target);
+
+//******************************************************************************
+// p9_deconfigCallout
+// Force a test return code that deconfigures the target
+//******************************************************************************
+fapi2::ReturnCode p9_deconfigCallout(
+               fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target);
+
+//******************************************************************************
+// p9_procedureCallout
+// Force a test return code that creates a procedure callout
+//******************************************************************************
+fapi2::ReturnCode p9_procedureCallout();
+
+//******************************************************************************
+// p9_hwCallout
+// Force a test return code that creates a hw callout
+//******************************************************************************
+fapi2::ReturnCode p9_hwCallout(
+               fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target);
 
 #endif
