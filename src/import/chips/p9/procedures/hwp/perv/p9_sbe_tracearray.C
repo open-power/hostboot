@@ -249,16 +249,16 @@ fapi2::ReturnCode p9_sbe_tracearray(
      * Check an EC feature to see if that's fixed. */
     if (ta_type == fapi2::TARGET_TYPE_CORE)
     {
-        uint8_t l_core_trace_scomable = 0;
+        uint8_t l_core_trace_not_scomable = 0;
 
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> proc_target =
             i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_CORE_TRACE_SCOMABLE,
-                               proc_target, l_core_trace_scomable),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE,
+                               proc_target, l_core_trace_not_scomable),
                  "Failed to query chip EC feature "
-                 "ATTR_CHIP_EC_FEATURE_CORE_TRACE_SCOMABLE");
+                 "ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE");
 
-        if (!l_core_trace_scomable)
+        if (l_core_trace_not_scomable)
         {
             FAPI_ERR("Core arrays cannot be dumped in this chip EC; "
                      "please use fastarray instead.");
