@@ -7,6 +7,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2012,2017
+# [+] Google Inc.
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +32,7 @@
 # numbers cannot be over 32 bits
 
 use strict;
+use bytes;
 use Data::Dumper;
 use File::Basename;
 use Cwd qw(abs_path);
@@ -56,10 +58,30 @@ my %SideOptions = (
         B => "B",
         sideless => "sideless",
     );
+my %bbinfo = (
+        "board" => "no-such-board",
+        "version" => "0.0.0",
+        "lock" => "dev",
+    );
+$bbinfo{timestamp} = gmtime;
 
 if ($#ARGV < 0) {
     usage();
     exit;
+}
+
+#Parse environment variables
+if (exists $ENV{BBINFO_BOARD}) {
+    $bbinfo{board} = $ENV{BBINFO_BOARD}
+}
+if (exists $ENV{BBINFO_VERSION}) {
+    $bbinfo{version} = $ENV{BBINFO_VERSION}
+}
+if (exists $ENV{BBINFO_LOCK}) {
+    $bbinfo{lock} = $ENV{BBINFO_LOCK}
+}
+if (exists $ENV{BBINFO_TIMESTAMP}) {
+    $bbinfo{timestamp} = $ENV{BBINFO_TIMESTAMP}
 }
 
 #Parse the commandline args
@@ -95,10 +117,22 @@ for (my $i=0; $i < $#ARGV + 1; $i++)
     elsif($ARGV[$i] =~ /--test/) {
         $testRun = 1;
     }
+    elsif($ARGV[$i] =~ /--bbinfoBoard/) {
+        $bbinfo{board} = $ARGV[++$i];
+    }
+    elsif($ARGV[$i] =~ /--bbinfoVersion/) {
+        $bbinfo{version} = $ARGV[++$i];
+    }
+    elsif($ARGV[$i] =~ /--bbinfoLock/) {
+        $bbinfo{lock} = $ARGV[++$i];
+    }
+    elsif($ARGV[$i] =~ /--bbinfoTimestamp/) {
+        $bbinfo{timestamp} = $ARGV[++$i];
+    }
     else {
         traceErr("Unrecognized Input: $ARGV[$i]");
         exit 1;
-	#Error!!
+    #Error!!
     }
 }
 
@@ -154,6 +188,10 @@ foreach my $sideId ( keys %{$pnorLayout{metadata}{sides}} )
 
     fillPnorImage($pnorBinName, \%pnorLayout, \%binFiles, $sideId, $tocOffset);
 }
+
+# Potentially add FMAP Section
+my $rc = addFMAPToPnorImage($pnorBinName, \%pnorLayout, \%bbinfo, \%PhysicalOffsets);
+die "ERROR: Call to addFMAPToPnorImage() failed. Aborting!" if($rc);
 
 exit 0;
 
@@ -485,6 +523,84 @@ sub fillPnorImage
      }
 }
 
+#################################################################################
+# addFMAPToPnorImage - Add FMAP structure (https://github.com/dhendrix/flashmap).
+#################################################################################
+sub addFMAPToPnorImage
+{
+    my ($i_pnorBinName, $i_pnorLayoutRef, $bbinfoRef, $i_physicalOffsetsRef) = @_;
+    my $imageSize = $$i_pnorLayoutRef{metadata}{imageSize};
+
+    trace(1, "Testing for existence of FMAP section");
+    my %i_eyecatches = %{$$i_physicalOffsetsRef{side}{(keys %{$$i_pnorLayoutRef{metadata}{sides}})[0]}{eyecatch}};
+    if (not exists $i_eyecatches{FMAP})
+    {
+        return 0;
+    }
+	my $fmapOffset = $i_eyecatches{FMAP};
+    trace(1, "Adding fmap to image");
+
+    my %sectionHash = %{$$i_pnorLayoutRef{sections}};
+    my $key;
+    my $numSections = keys(%sectionHash);
+
+    if ($sectionHash{$fmapOffset}{side} ne "sideless")
+    {
+        trace(0, "FMAP section must be sideless");
+        return 1;
+    }
+
+    my $fmap = pack("a8ccVVVa32v", "__FMAP__", 1, 2, 0, 0, $imageSize, $$bbinfoRef{board}, $numSections);
+    my $endOfMap = 0;
+    for $key ( sort {$a<=> $b} keys %sectionHash)
+    {
+        my $description = $sectionHash{$key}{eyeCatch};
+        my $physicalOffset = $sectionHash{$key}{physicalOffset};
+        my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
+        my $flags = ($sectionHash{$key}{readOnly} eq "yes" ? 1 : 0);
+        trace(3, "flags:$flags writeable:$sectionHash{$key}{readOnly}");
+
+        $endOfMap = $physicalOffset + $physicalRegionSize;
+        $fmap .= pack("VVa32v", $physicalOffset, $physicalRegionSize, $description, $flags);
+    }
+
+    # Align hash structure on 16 byte boundary
+    my $align = bytes::length($fmap) & 15;
+    if ($align != 0)
+    {
+        $fmap .= "\0" x (16 - $align);
+    }
+
+    $fmap .= pack("a8ccva32a128", "__HASH__", 1, 0, $numSections, "SHA512", "\0");
+    for $key ( sort {$a<=> $b} keys %sectionHash)
+    {
+        my $description = $sectionHash{$key}{eyeCatch};
+        my $physicalOffset = $sectionHash{$key}{physicalOffset};
+        my $physicalRegionSize = $sectionHash{$key}{physicalRegionSize};
+        $fmap .= pack("VVa32a128", $physicalOffset, $physicalRegionSize, $description, "\0");
+    }
+
+    # Align BBINFO on a 16 byte boundary
+    my $align = bytes::length($fmap) & 15;
+    if ($align != 0)
+    {
+        $fmap .= "\0" x (16 - $align);
+    }
+    $fmap .= "BBINFO__\0";
+    $fmap .= "board:$$bbinfoRef{board}\0";
+    $fmap .= "version:$$bbinfoRef{version}\0";
+    $fmap .= "lock:$$bbinfoRef{lock}\0";
+    $fmap .= "timestamp:$$bbinfoRef{timestamp}\0\0";
+
+    my $maxSize = $sectionHash{$fmapOffset}{physicalRegionSize};
+    my $fmapSize = bytes::length($fmap);
+    die "FMAP of size=$fmapSize is too large for pnor allocation area of $maxSize" if ($fmapSize > $maxSize);
+    open(PIPE, " | dd of=$i_pnorBinName conv=notrunc bs=1 seek=$fmapOffset count=$fmapSize >& /dev/null");
+    print(PIPE $fmap);
+    close(PIPE);
+    return 0;
+}
+
 ################################################################################
 # saveInputFile - save inputfile name into binFiles array
 ################################################################################
@@ -607,6 +723,10 @@ print <<"ENDUSAGE";
     --fpartCmd          invoke string for executing the fpart tool
     --fcpCmd            invoke string for executing the fcp tool
     --test              Output test-only sections.
+    --bbinfoBoard       board name for BBINFO structure, only needed if you have an FMAP.
+    --bbinfoVersion     version string for BBINFO structure, only needed if you have an FMAP.
+    --bbinfoLock        lock string for BBINFO structure, only needed if you have an FMAP.
+    --bbinfoTimestamp   timestamp for BBINFO structure, only needed if you have an FMAP.
 
   Current Limitations:
       --TOC Records must be 4 or 8 bytes in length
