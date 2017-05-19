@@ -174,7 +174,8 @@ namespace pc
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG1_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG1_REG, o_data), "%s failed to read pc_config1 register",
+              mss::c_str(i_target) );
     FAPI_INF("pc_config1: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -194,7 +195,8 @@ inline fapi2::ReturnCode write_config1( const fapi2::Target<T>& i_target,
                                         const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("pc_config1: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG1_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG1_REG, i_data), "%s failed to write pc_config1 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -221,7 +223,8 @@ fapi2::ReturnCode reset_config1( const fapi2::Target<T>& i_target );
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG0_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_CONFIG0_REG, o_data), "%s failed to read pc_config0 register",
+              mss::c_str(i_target) );
     FAPI_INF("pc_config0: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -241,7 +244,8 @@ inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target,
                                         const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("pc_config0: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG0_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_CONFIG0_REG, i_data), "%s failed to write pc_config0 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -268,7 +272,8 @@ fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target );
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_init_cal_config1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, o_data), "%s failed to read pc_init_cal_config1 register",
+              mss::c_str(i_target) );
     FAPI_INF("Read pc_init_cal_config1: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -288,7 +293,8 @@ inline fapi2::ReturnCode write_init_cal_config1( const fapi2::Target<T>& i_targe
         const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("Writing to pc_init_cal_config1: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_CONFIG1_REG, i_data),
+              "%s failed to write pc_init_cal_config1 register", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -382,7 +388,8 @@ inline void set_refresh_interval( fapi2::buffer<uint64_t>& o_data, const uint64_
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_dll_zcal_status( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_DLL_ZCAL_CAL_STATUS_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_DLL_ZCAL_CAL_STATUS_REG, o_data),
+              "%s failed to read pc_dll_zcal_status register", mss::c_str(i_target) );
     FAPI_INF("pc_dll_zcal_status: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -504,7 +511,8 @@ inline mss::states get_zcal_status( const fapi2::buffer<uint64_t>& i_data )
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_ERROR_STATUS0_REG, o_data), "%s failed to read pc_error_status0 register",
+              mss::c_str(i_target) );
     FAPI_INF("pc_error_status0: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -524,7 +532,8 @@ inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("pc_error_status0: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_ERROR_STATUS0_REG, i_data), "%s failed to write pc_error_status0 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -540,7 +549,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode reset_error_status0( const fapi2::Target<T>& i_target )
 {
-    FAPI_TRY( write_error_status0(i_target, 0) );
+    FAPI_TRY( write_error_status0(i_target, 0), "%s failed to clear pc_error_status0 register via write",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -557,7 +567,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_init_cal_error( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_INIT_CAL_ERROR_REG, o_data), "%s failed to read pc_init_cal_error register",
+              mss::c_str(i_target) );
     FAPI_INF("pc_init_cal_error: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -575,7 +586,8 @@ inline fapi2::ReturnCode write_init_cal_error( const fapi2::Target<T>& i_target,
         const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("pc_init_cal_error: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_INIT_CAL_ERROR_REG, i_data), "%s failed to write pc_init_cal_error register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -591,7 +603,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode reset_init_cal_error( const fapi2::Target<T>& i_target )
 {
-    FAPI_TRY( write_init_cal_error(i_target, 0) );
+    FAPI_TRY( write_init_cal_error(i_target, 0), "%s failed to clear pc_init_cal_error register via write",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -627,7 +640,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode read_resets( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::PC_RESETS_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::PC_RESETS_REG, o_data), "%s failed to read pc_resets register",
+              mss::c_str(i_target) );
     FAPI_INF("pc_resets: 0x%016llx", o_data);
 
 fapi_try_exit:
@@ -644,7 +658,8 @@ template< fapi2::TargetType T, typename TT = pcTraits<T> >
 inline fapi2::ReturnCode write_resets( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_INF("pc_resets: 0x%016llx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::PC_RESETS_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::PC_RESETS_REG, i_data), "%s failed to write pc_resets register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
