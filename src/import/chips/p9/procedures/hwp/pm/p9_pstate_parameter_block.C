@@ -39,6 +39,8 @@
 ///   - Read VPD and attributes to create the Pstate Parameter Block(s) (one each for PGPE,OCC and CMEs).
 /// @endverbatim
 
+// *INDENT-OFF*
+//
 // ----------------------------------------------------------------------
 // Includes
 // ----------------------------------------------------------------------
@@ -112,6 +114,35 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54, 0x00, 0x00, 0x02, 0x01, 0x01, 0x06, /// V
                            0xB1, 0xB1, 0xB0, 0xAF, 0xA9, 0xA1, 0x97, 0x8E, 0x86, 0x7F, 0x78, 0x73, 0x6D, 0x68, 0x63, 0x5F, 0x5B, 0x57, 0x53, 0x4E, 0x4D, 0x4D, 0x4D, 0x4D
                           };
 
+#define VALIDATE_VID_VALUES(w,x,y,z,state) \
+    if (!((w < x) && (x < y) && (y < z)))  \
+       {state = 0;}
+
+#define VALIDATE_THRESHOLD_VALUES(w,x,y,z,state) \
+    if ((w > 0x7 && w != 0xC) || /* overvolt */ \
+        (x == 8) ||  (x == 9) || (x > 0xF) ||  \
+        (y == 8) ||  (y == 9) || (y > 0xF) ||  \
+        (z == 8) ||  (z == 9) || (z > 0xF)   ) \
+       {state = 0;}
+
+//w => N_L (w > 7 is invalid)
+//x => N_S (x > N_L is invalid)
+//y => L_S (y > (N_L - S_N) is invalid)
+//z => S_N (z > N_S is invalid
+#define VALIDATE_FREQUENCY_DROP_VALUES(w,x,y,z,state) \
+    if ((w > 7)         ||  \
+        (x > w)         ||  \
+        (y > (w - z))   ||  \
+        (z > x)         ||  \
+        ((w | x | y | z) == 0)) \
+       {state = 0; }
+
+#define VALIDATE_WOF_HEADER_DATA(a,b,c,d,e,f,g,state) \
+    if ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g))   \
+       {state = 0; }
+
+// Struct Variable for all attributes
+AttributeList attr;
 
 // START OF PSTATE PARAMETER BLOCK function
 
@@ -128,13 +159,13 @@ fapi2::ReturnCode
 p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                            PstateSuperStructure* io_pss, uint8_t* o_buf, uint32_t& io_size)
 {
-    int rc;
     FAPI_INF("> p9_pstate_parameter_block");
-
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ReturnCode l_rc         = 0;
 
     do
     {
-        FAPI_TRY(proc_set_resclk_table_attrs(i_target), "proc_set_resclk_table_attrs failed");
+
         // -----------------------------------------------------------
         // Clear the PstateSuperStructure and install the magic number
         //----------------------------------------------------------
@@ -151,15 +182,21 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // OCC content
         OCCPstateParmBlock l_occppb;
+        PSTATE_attribute_state l_state;
+        l_state.iv_pstates_enabled = true;
+        l_state.iv_resclk_enabled  = true;
+        l_state.iv_vdm_enabled     = true;
+        l_state.iv_ivrm_enabled    = true;
+        l_state.iv_wof_enabled     = true;
+
 
         memset (&l_globalppb, 0, sizeof(GlobalPstateParmBlock));
         memset (&l_localppb, 0, sizeof(LocalPstateParmBlock));
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock));
 
         PoundW_data l_poundw_data;
+        memset (&l_poundw_data,0,sizeof(l_poundw_data));
 
-        // Struct Variable for all attributes
-        AttributeList attr;
         //ChipCharacterization* characterization;
 
         // MVPD #V variables
@@ -193,9 +230,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // VPD voltage and frequency biases
         VpdBias l_vpdbias[NUM_OP_POINTS];
 
-        // Quad Manager Flags
-        QuadManagerFlags l_qm_flags;
-        fapi2::buffer<uint16_t> l_data16;
 
         // -------------------------
         // Get all attributes needed
@@ -203,6 +237,15 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         FAPI_INF("Getting Attributes to build Pstate Superstructure");
 
         FAPI_TRY(proc_get_attributes(i_target, &attr), "Get attributes function failed");
+
+        //if PSTATES_MODE is off then we dont need to execute further to collect
+        //the data.
+        if (attr.attr_pstate_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
+        {
+            FAPI_INF("Requested for not to boot the PGPE, So PPB won't be initialized");
+            break;
+        }
+
 
         // ----------------
         // get #V data
@@ -215,16 +258,27 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         fapi2::voltageBucketData_t l_poundv_data;
 
 
-        FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
-                                     l_poundv_bucketId, &l_poundv_data),
-                 "Get MVPD #V data failed");
+        l_rc = proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
+                                   l_poundv_bucketId, &l_poundv_data, &l_state);
+
+        if(l_rc)
+        {
+            FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_GET_MVPD_FOR_POUND_V_FAILED()
+                        .set_CHIP_TARGET(i_target)
+                        .set_PRESENT_CHIPLETS(present_chiplets),
+                        "proc_get_mvpd_data function failed to retrieve porund V data");
+        }
 
         if (!present_chiplets)
         {
-            FAPI_ERR("**** ERROR : There are no cores present");
-            break;
-            //const uint8_t& PRESENT_CHIPLETS = present_chiplets;      //const Target&  CHIP_TARGET = i_target;
-            //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_NO_CORES_PRESENT_ERROR);     //break;
+            FAPI_ERR("**** ERROR : There are eq chiplets present");
+
+            FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_NO_PRESENT_CHIPLETS_ERROR()
+                        .set_CHIP_TARGET(i_target)
+                        .set_PRESENT_CHIPLETS(present_chiplets),
+                        "No eq chiplets are present for a give proc target");
         }
 
         // ---------------------------------------------
@@ -253,36 +307,63 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_vdn_sysparm.distloss_uohm = revle32(attr.attr_proc_r_distloss_vdn_uohm);
         l_vdn_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vdn_uv);
 
-        // ----------------
-        // get IQ (IDDQ) data
-        // ----------------
-        FAPI_INF("Getting IQ (IDDQ) Data");
-        FAPI_TRY(proc_get_mvpd_iddq(i_target, &l_iddqt));
+        //if wof is disabled.. don't call IQ function
+        if (attr.attr_system_wof_disable == fapi2::ENUM_ATTR_SYSTEM_WOF_DISABLE_OFF)
+        {
+            // ----------------
+            // get IQ (IDDQ) data
+            // ----------------
+            FAPI_INF("Getting IQ (IDDQ) Data");
+            l_rc = proc_get_mvpd_iddq(i_target, &l_iddqt, &l_state);
+
+            if (l_rc)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(i_target)
+                                   .set_FAPI_RC(l_rc),
+                                   "Pstate Parameter Block proc_get_mvpd_iddq funciton failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+        else
+        {
+            l_state.iv_wof_enabled = false;
+        }
 
         // ----------------
         // get VDM Parameters data
         // ----------------
         FAPI_INF("Getting VDM Parameters Data");
-        FAPI_TRY(proc_get_vdm_parms(i_target, &l_gp_vdmpb));
+        FAPI_TRY(proc_get_vdm_parms(i_target, &attr, &l_gp_vdmpb));
 
-        FAPI_INF("Getting VDM points (#W) Data");
-        FAPI_TRY(proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data));
+        // if vdm is disabled.. don't call pound w funcion
+        if (attr.attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
+        {
+            FAPI_INF("Getting WOF data and VDM points (#W) Data");
+            l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state);
+
+            if (l_rc)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(i_target)
+                                   .set_FAPI_RC(l_rc),
+                                   "Pstate Parameter Block proc_get_mvpd_poundw function failed");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+        else
+        {
+            l_state.iv_wof_enabled = false;
+            l_state.iv_vdm_enabled = false;
+        }
 
         // ----------------
         // get IVRM Parameters data
         // ----------------
         FAPI_INF("Getting IVRM Parameters Data");
-        FAPI_TRY(proc_get_ivrm_parms(i_target, &l_ivrmpb));
-
-        l_data16.flush<0>();
-        l_data16.insertFromRight<0, 1>(attr.attr_resclk_enable);
-        l_data16.insertFromRight<1, 1>(attr.attr_system_ivrms_enabled);
-        l_data16.insertFromRight<2, 1>(attr.attr_system_wof_enabled);
-        l_data16.insertFromRight<3, 1>(attr.attr_dpll_dynamic_fmax_enable);
-        l_data16.insertFromRight<4, 1>(attr.attr_dpll_dynamic_fmin_enable);
-        l_data16.insertFromRight<5, 1>(attr.attr_dpll_droop_protect_enable);
-
-        l_qm_flags.value = revle16(l_data16);
+        FAPI_TRY(proc_get_ivrm_parms(i_target, &attr, &l_ivrmpb, &l_state));
 
         // -----------------------------------------------
         // Global parameter block
@@ -343,17 +424,30 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // safe_frequency_khz
         l_globalppb.safe_frequency_khz = revle32(attr.attr_pm_safe_frequency_mhz / 1000);
 
-
-        // @todo RTC 161279
-        l_globalppb.ext_vrm_transition_start_ns = revle32(8000);
-        l_globalppb.ext_vrm_transition_rate_inc_uv_per_us = revle32(10);
-        l_globalppb.ext_vrm_transition_rate_dec_uv_per_us = revle32(10);
-        l_globalppb.ext_vrm_stabilization_time_us = revle32(5);
-        l_globalppb.ext_vrm_step_size_mv = revle32(50);
-
         // vrm_stepdelay_range -@todo RTC 161279 potential attributes to be defined
 
         // vrm_stepdelay_value -@todo RTC 161279 potential attributes to be defined
+
+        // ----------------
+        // get Resonant clocking attributes
+        // ----------------
+        {
+            if (attr.attr_resclk_disable == fapi2::ENUM_ATTR_SYSTEM_RESCLK_DISABLE_OFF)
+            {
+                FAPI_TRY(proc_set_resclk_table_attrs(i_target), "proc_set_resclk_table_attrs failed");
+                FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup, &l_globalppb));
+                l_localppb.resclk = l_resclk_setup;
+                l_globalppb.resclk = l_resclk_setup;
+                l_state.iv_resclk_enabled = true;
+
+                FAPI_INF("Resonant Clocks are enabled");
+            }
+            else
+            {
+                l_state.iv_resclk_enabled = false;
+                FAPI_INF("Resonant Clocks are disabled.  Skipping setup.");
+            }
+        }
 
         // VDMParmBlock vdm
         l_globalppb.vdm = l_gp_vdmpb;
@@ -382,15 +476,10 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X", revle32(l_globalppb.dpll_pstate0_value));
 
-
-
         // -----------------------------------------------
         // Local parameter block
         // -----------------------------------------------
         l_localppb.magic = revle64(LOCAL_PARMSBLOCK_MAGIC);
-
-        // QuadManagerFlags
-        l_localppb.qmflags = l_qm_flags;
 
         // VPD operating point
         FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_localppb.operating_points, l_frequency_step_khz),
@@ -441,7 +530,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_occppb.iddq = l_iddqt;
 
         //WOFElements - @todo RTC 161279 (VID Modification table not populated)
-        l_occppb.wof.wof_enabled = attr.attr_system_wof_enabled;
+
         l_occppb.wof.tdp_rdp_factor = revle32(attr.attr_tdp_rdp_current_factor);
 
         // frequency_min_khz - Value from Power save operating point after biases
@@ -479,22 +568,34 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         uint8_t l_nest_leakage_for_occ = 75;
 
-        uint16_t l_iac_tdp_vdn = get_iac_vdn_value (l_vpd_vdn_mv, l_iddqt, l_nest_leakage_for_occ,
-                                 l_vpd_idn_100ma);
+        if (attr.attr_system_wof_disable == fapi2::ENUM_ATTR_SYSTEM_WOF_DISABLE_OFF)
+        {
+            uint16_t l_iac_tdp_vdn = get_iac_vdn_value (l_vpd_vdn_mv, l_iddqt, l_nest_leakage_for_occ,
+                                     l_vpd_idn_100ma);
 
-        FAPI_INF("l_iac_tdp_vdn %x", l_iac_tdp_vdn);
-
-        l_occppb.ceff_tdp_vdn =  revle16(pstate_calculate_effective_capacitance(l_iac_tdp_vdn,
-                                         l_vpd_vdn_mv * 1000,
-                                         l_pbus_nest_freq));
-
-        FAPI_INF("l_occppb.ceff_tdp_vdn %x", revle16(l_occppb.ceff_tdp_vdn));
+            if (!l_iac_tdp_vdn)
+            {
+                l_state.iv_wof_enabled = false;
+            }
+            else
+            {
+                l_occppb.ceff_tdp_vdn =  revle16(pstate_calculate_effective_capacitance(l_iac_tdp_vdn,
+                                             l_vpd_vdn_mv * 1000,
+                                             l_pbus_nest_freq));
+            }
+            FAPI_INF("l_iac_tdp_vdn %x", l_iac_tdp_vdn);
+            FAPI_INF("l_occppb.ceff_tdp_vdn %x", revle16(l_occppb.ceff_tdp_vdn));
+        }
+        else
+        {
+            l_state.iv_wof_enabled = false;
+        }
 
 
         // @todo RTC 161279 - Need Pstate 0 definition and freq2pstate function to be coded
 
         Pstate pstate_min;
-        rc = freq2pState(&l_globalppb, revle32(l_occppb.frequency_min_khz), &pstate_min);
+        int rc = freq2pState(&l_globalppb, revle32(l_occppb.frequency_min_khz), &pstate_min);
 
         switch (rc)
         {
@@ -516,107 +617,40 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // pstate_max
 
-        // ----------------
-        // get Resonant clocking attributes
-        // ----------------
-        FAPI_INF("Getting Resonant Clocking Parameters Data");
-        FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup, &l_globalppb));
-        // Resonant Clock Grid Management Setup
-        l_localppb.resclk = l_resclk_setup;
-        l_globalppb.resclk = l_resclk_setup;
-
         gppb_print(&(l_globalppb));
         oppb_print(&(l_occppb));
+
+
+        //Check WOF is enabled or not
+        io_size = 0;
+
+        if (!attr.attr_system_wof_disable && l_state.iv_wof_enabled)
+        {
+            p9_pstate_wof_initialization(&l_globalppb,
+                                         o_buf,
+                                         io_size,
+                                         &l_state,
+                                         attr_mvpd_voltage_control[VPD_PV_ULTRA][0]);
+        }
+        else
+        {
+            FAPI_INF("WOF is not enabled");
+            l_state.iv_wof_enabled = false;
+        }
+
+        l_occppb.wof.wof_enabled = l_state.iv_wof_enabled;
+        // QuadManagerFlags
+        QuadManagerFlags l_qm_flags;
+        FAPI_TRY(p9_pstate_set_global_feature_attributes(i_target,
+                 l_state,
+                 &l_qm_flags));
+        l_localppb.qmflags = l_qm_flags;
         // -----------------------------------------------
         // Populate Global,local and OCC parameter blocks into Pstate super structure
         // -----------------------------------------------
         (*io_pss).globalppb = l_globalppb;
         (*io_pss).localppb = l_localppb;
         (*io_pss).occppb = l_occppb;
-
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-        fapi2::ATTR_SYSTEM_WOF_ENABLED_Type l_wof_state;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED, FAPI_SYSTEM,
-                               l_wof_state), "fapiGetAttribute of ATTR_SYSTEM_WOF_ENABLED failed");
-
-        //Check WOF is enabled or not
-        if (!l_wof_state)
-        {
-            FAPI_INF("WOF is not enabled");
-            io_size = 0;
-            break;
-        }
-
-        //If this attribute is set then read the VFRT data from static table.
-        uint8_t l_sys_vfrt_static_data = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYS_VFRT_STATIC_DATA_ENABLE,
-                               FAPI_SYSTEM,
-                               l_sys_vfrt_static_data),
-                 "Error from FAPI_ATTR_GET for attribute ATTR_SYS_VFRT_STATIC_DATA_ENABLE");
-
-        //this structure has VFRT header + data
-        HomerVFRTLayout_t l_vfrt;
-        memset (&l_vfrt, 0, sizeof(l_vfrt));
-        uint32_t l_base_state_frequency = attr_mvpd_voltage_control[VPD_PV_ULTRA][0];
-        FAPI_INF("Entering WOF initialization part");
-
-        if (l_sys_vfrt_static_data)
-        {
-            FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is SET");
-            // Copy WOF header data
-            FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
-            memcpy (o_buf, g_wofData, sizeof(g_wofData));
-            uint32_t l_index = sizeof(g_wofData);
-
-            WofTablesHeader_t* p_wfth;
-            p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
-            FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
-
-            for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
-            {
-                p9_pstate_update_vfrt (&l_globalppb, g_sysvfrtData, &l_vfrt, l_base_state_frequency);
-
-                memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
-                l_index += sizeof (l_vfrt);
-            }
-
-            io_size = l_index;
-        }
-        else
-        {
-            // Read System VFRT data
-            // Use new to avoid over-running the stack
-            fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
-                (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA, FAPI_SYSTEM,
-                                   (*l_wof_table_data)), "fapiGetAttribute of ATTR_WOF_TABLE_DATA failed");
-
-            FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is not SET");
-            // Copy WOF header data
-            FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
-            memcpy (o_buf, (*l_wof_table_data), sizeof(WofTablesHeader_t));
-            uint32_t l_wof_table_index = sizeof(WofTablesHeader_t);
-            uint32_t l_index = sizeof(WofTablesHeader_t);
-
-            WofTablesHeader_t* p_wfth;
-            p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
-            FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
-
-            // Convert system vfrt to homer vfrt
-            for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
-            {
-
-                p9_pstate_update_vfrt (&l_globalppb, ((*l_wof_table_data) + l_wof_table_index), &l_vfrt, l_base_state_frequency);
-                l_wof_table_index += 128; //System vFRT size is 128B..hence need to jump after each VFRT entry
-
-                memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
-                l_index += sizeof (l_vfrt);
-            }
-
-            io_size = l_index;
-
-            delete l_wof_table_data;
-        }
     }
     while(0);
 
@@ -627,6 +661,136 @@ fapi_try_exit:
 }
 // END OF PSTATE PARAMETER BLOCK function
 
+
+void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
+                                   uint8_t* o_buf,
+                                   uint32_t& io_size,
+                                   PSTATE_attribute_state* o_state,
+                                   const uint32_t i_base_state_frequency)
+{
+    fapi2::ReturnCode l_rc = 0;
+    //If this attribute is set then read the VFRT data from static table.
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t l_sys_vfrt_static_data = 0;
+    FAPI_ATTR_GET(fapi2::ATTR_SYS_VFRT_STATIC_DATA_ENABLE,
+                  FAPI_SYSTEM,
+                  l_sys_vfrt_static_data);
+
+    //this structure has VFRT header + data
+    HomerVFRTLayout_t l_vfrt;
+    memset (&l_vfrt, 0, sizeof(l_vfrt));
+    FAPI_INF("Entering WOF initialization part");
+
+    if (l_sys_vfrt_static_data)
+    {
+        FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is SET");
+        // Copy WOF header data
+        FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
+        memcpy (o_buf, g_wofData, sizeof(g_wofData));
+        uint32_t l_index = sizeof(g_wofData);
+
+        WofTablesHeader_t* p_wfth;
+        p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
+        FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
+
+        for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
+        {
+            p9_pstate_update_vfrt (i_gppb,
+                                   g_sysvfrtData,
+                                   &l_vfrt,
+                                   i_base_state_frequency);
+
+            memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
+            l_index += sizeof (l_vfrt);
+        }
+        io_size = l_index;
+    }
+    else
+    {
+        FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is not SET");
+
+        do
+        {
+            // Read System VFRT data
+            // Use new to avoid over-running the stack
+            fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
+                (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
+            l_rc = FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA,
+                                 FAPI_SYSTEM,
+                                 (*l_wof_table_data));
+            if (l_rc)
+            {
+                o_state->iv_wof_enabled = false;
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(FAPI_SYSTEM)
+                                   .set_FAPI_RC(l_rc),
+                                   "Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute failed");
+                break;
+            }
+
+            // Copy WOF header data
+            FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
+            memcpy (o_buf, (*l_wof_table_data), sizeof(WofTablesHeader_t));
+            uint32_t l_wof_table_index = sizeof(WofTablesHeader_t);
+            uint32_t l_index = sizeof(WofTablesHeader_t);
+
+            //Validate WOF header part
+            WofTablesHeader_t* p_wfth;
+            p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
+            FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
+
+            bool l_wof_header_data_state = 1;
+            VALIDATE_WOF_HEADER_DATA(p_wfth->magic_number,
+                                     p_wfth->reserved_version,
+                                     p_wfth->vfrt_block_size,
+                                     p_wfth->vfrt_block_header_size,
+                                     p_wfth->vfrt_data_size,
+                                     p_wfth->quads_active_size,
+                                     p_wfth->core_count,
+                                     l_wof_header_data_state);
+
+            if (!l_wof_header_data_state)
+            {
+                o_state->iv_wof_enabled = false;
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_WOF_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(FAPI_SYSTEM)
+                                   .set_MAGIC_NUMBER(p_wfth->magic_number)
+                                   .set_VERSION(p_wfth->reserved_version)
+                                   .set_VFRT_BLOCK_SIZE(p_wfth->vfrt_block_size)
+                                   .set_VFRT_HEADER_SIZE(p_wfth->vfrt_block_header_size)
+                                   .set_VFRT_DATA_SIZE(p_wfth->vfrt_data_size)
+                                   .set_QUADS_ACTIVE_SIZE(p_wfth->quads_active_size)
+                                   .set_CORE_COUNT(p_wfth->core_count),
+                                   "Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute failed");
+                break;
+
+            }
+
+            // Convert system vfrt to homer vfrt
+            for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
+            {
+
+                p9_pstate_update_vfrt (i_gppb,
+                                       ((*l_wof_table_data) + l_wof_table_index),
+                                       &l_vfrt,
+                                       i_base_state_frequency);
+                l_wof_table_index += 128; //System vFRT size is 128B..hence need to jump after each VFRT entry
+
+                memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
+                l_index += sizeof (l_vfrt);
+            }
+
+            io_size = l_index;
+
+            delete l_wof_table_data;
+        } while(0);
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    }
+}
 // START OF GET ATTRIBUTES function
 
 fapi2::ReturnCode
@@ -638,6 +802,9 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     const uint32_t EXT_VRM_TRANSITION_RATE_DEC_UV_PER_US = 10000;
     const uint32_t EXT_VRM_STABILIZATION_TIME_NS = 5;
     const uint32_t EXT_VRM_STEPSIZE_MV = 50;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
     // --------------------------
     // attributes not yet defined
     // --------------------------
@@ -666,8 +833,8 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     // attributes currently defined
     // ----------------------------
 #define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, io_attr->attr_assign),"Attribute read failed"); \
-    FAPI_INF("%-60s = 0x%08x %u", #attr_name, io_attr->attr_assign, io_attr->attr_assign);
+FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, io_attr->attr_assign),"Attribute read failed"); \
+FAPI_INF("%-60s = 0x%08x %u", #attr_name, io_attr->attr_assign, io_attr->attr_assign);
 
     // Frequency Bias attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS_ULTRATURBO, i_target, attr_freq_bias_ultraturbo);
@@ -689,15 +856,13 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     DATABLOCK_GET_ATTR(ATTR_VOLTAGE_INT_VDD_BIAS_POWERSAVE, i_target, attr_voltage_int_vdd_bias_powersave);
 
     // Frequency attributes
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_freq_proc_refclock_khz);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_PB_MHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_nest_frequency_mhz);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_freq_core_ceiling_mhz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PB_MHZ, FAPI_SYSTEM, attr_nest_frequency_mhz);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ, FAPI_SYSTEM, attr_freq_core_ceiling_mhz);
     // @todo RTC 169768 Safe mode and use of boot mode
-//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY_MHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_pm_safe_frequency_mhz);
-//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_VOLTAGE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_pm_safe_voltage_mv);
-    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_freq_core_floor_mhz);
+//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY_MHZ, FAPI_SYSTEM, attr_pm_safe_frequency_mhz);
+//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_VOLTAGE_MV, FAPI_SYSTEM, attr_pm_safe_voltage_mv);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ, FAPI_SYSTEM, attr_freq_core_floor_mhz);
 
     // Loadline, Distribution loss and Distribution offset attributes
     DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD_UOHM, i_target, attr_proc_r_loadline_vdd_uohm);
@@ -711,16 +876,15 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS_UV, i_target, attr_proc_vrm_voffset_vcs_uv);
 
     // Read IVRM,WOF and DPLL attributes
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_IVRMS_ENABLED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_system_ivrms_enabled);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOF_ENABLED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), attr_system_wof_enabled);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMAX_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_dpll_dynamic_fmax_enable);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMIN_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_dpll_dynamic_fmin_enable);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DROOP_PROTECT_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_dpll_droop_protect_enable);
-    DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_resclk_enable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_IVRM_DISABLE, FAPI_SYSTEM, attr_system_ivrm_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE, FAPI_SYSTEM, attr_system_wof_disable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_VDM_DISABLE, FAPI_SYSTEM, attr_system_vdm_disable);
+    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMAX_ENABLE, FAPI_SYSTEM, attr_dpll_dynamic_fmax_enable);
+    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMIN_ENABLE, FAPI_SYSTEM, attr_dpll_dynamic_fmin_enable);
+    DATABLOCK_GET_ATTR(ATTR_DPLL_DROOP_PROTECT_ENABLE, FAPI_SYSTEM, attr_dpll_droop_protect_enable);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
+    DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, i_target, attr_dd_wof_not_supported);
+    DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE, FAPI_SYSTEM, attr_pstate_mode);
 
     DATABLOCK_GET_ATTR(ATTR_TDP_RDP_CURRENT_FACTOR, i_target, attr_tdp_rdp_current_factor);
 
@@ -731,19 +895,17 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     io_attr->attr_pm_safe_frequency_mhz = io_attr->attr_freq_core_floor_mhz;
 
 
-    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, FAPI_SYSTEM,
                        attr_ext_vrm_transition_start_ns);
-    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_RATE_INC_UV_PER_US, FAPI_SYSTEM,
                        attr_ext_vrm_transition_rate_inc_uv_per_us);
-    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_RATE_DEC_UV_PER_US, FAPI_SYSTEM,
                        attr_ext_vrm_transition_rate_dec_uv_per_us);
-    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_STABILIZATION_TIME_NS, FAPI_SYSTEM,
                        attr_ext_vrm_stabilization_time_us);
-    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_STEPSIZE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_ext_vrm_step_size_mv);
+    DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_STEPSIZE, FAPI_SYSTEM, attr_ext_vrm_step_size_mv);
 
-    DATABLOCK_GET_ATTR(ATTR_NEST_LEAKAGE_PERCENT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                       attr_nest_leakage_percent);
+    DATABLOCK_GET_ATTR(ATTR_NEST_LEAKAGE_PERCENT, FAPI_SYSTEM, attr_nest_leakage_percent);
 
     io_attr->attr_ext_vrm_transition_start_ns =
         (io_attr->attr_ext_vrm_transition_start_ns) ? io_attr->attr_ext_vrm_transition_start_ns : EXT_VRM_TRANSITION_START_NS;
@@ -773,15 +935,17 @@ fapi_try_exit:
 
 fapi2::ReturnCode
 proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                   uint32_t      o_attr_mvpd_data[PV_D][PV_W],
-                   uint32_t*     o_valid_pdv_points,
-                   uint8_t*      o_present_chiplets,
-                   uint8_t&      o_bucketId,
-                   fapi2::voltageBucketData_t* o_poundv_data)
+                   uint32_t       o_attr_mvpd_data[PV_D][PV_W],
+                   uint32_t*      o_valid_pdv_points,
+                   uint8_t*       o_present_chiplets,
+                   uint8_t&       o_bucketId,
+                   fapi2::voltageBucketData_t* o_poundv_data,
+                   PSTATE_attribute_state* o_state)
 {
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::voltageBucketData_t l_poundv_data;
+    fapi2::Target<fapi2::TARGET_TYPE_EQ> l_firstEqChiplet;
     uint8_t*   l_buffer         =  reinterpret_cast<uint8_t*>(malloc(sizeof(l_poundv_data)) );
     uint8_t*   l_buffer_inc;
     uint32_t   chiplet_mvpd_data[PV_D][PV_W];
@@ -855,22 +1019,13 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                             chiplet_mvpd_data,
                                             o_valid_pdv_points,
                                             l_chipNum,
-                                            bucket_id));
-
-            //@todo-L3 - Error handling from check routine
-            // if (l_rc == RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_UT_ERROR)
-            // {
-            //     // Disable WOF
-            //     i_attr->attr_system_wof_enabled = 0;
-            // }
-            // else if (l_rc)
-            // {
-            //     break;
-            // }
+                                            bucket_id,
+                                            o_state));
 
             // on first chiplet put each bucket's data into attr_mvpd_voltage_control
             if (first_chplt)
             {
+                l_firstEqChiplet = l_eqChiplets[j];
                 o_bucketId = bucket_id;
 
                 for (i = 0; i <= 4; i++)
@@ -892,16 +1047,16 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      (o_attr_mvpd_data[3][0] != chiplet_mvpd_data[3][0]) ||
                      (o_attr_mvpd_data[4][0] != chiplet_mvpd_data[4][0]) )
                 {
-                    //@todo-L3
-                    //const uint32_t &ATTR_MVPD_DATA_0 = o_attr_mvpd_data[0][0];
-                    //const uint32_t &ATTR_MVPD_DATA_1 = o_attr_mvpd_data[1][0];
-                    //const uint32_t &ATTR_MVPD_DATA_2 = o_attr_mvpd_data[2][0];
-                    //const uint32_t &ATTR_MVPD_DATA_3 = o_attr_mvpd_data[3][0];
-                    //const uint32_t &ATTR_MVPD_DATA_4 = o_attr_mvpd_data[4][0];
-                    FAPI_ERR("**** ERROR : frequencies are not the same for each operating point for each chiplet");
-                    //const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& CHIP_TARGET= i_target;
-                    //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL);
-                    break;
+                    o_state->iv_pstates_enabled = false;
+                    // Error out has Pstate and all dependent functions are suspious.
+                    FAPI_ASSERT(false,
+                                fapi2::PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL()
+                                .set_CHIP_TARGET(i_target)
+                                .set_CURRENT_EQ_CHIPLET_TARGET(l_eqChiplets[j])
+                                .set_FIRST_EQ_CHIPLET_TARGET(l_firstEqChiplet)
+                                .set_BUCKET(bucket_id),
+                                "frequencies are not the same for each operating point for each chiplet");
+
                 }
             }
 
@@ -925,6 +1080,12 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     free (l_buffer);
 
 fapi_try_exit:
+
+    if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+    {
+        o_state->iv_pstates_enabled = false;
+    }
+
     return fapi2::current_err;
 
 } // end proc_get_mvpd_data
@@ -934,336 +1095,269 @@ fapi_try_exit:
 
 fapi2::ReturnCode
 proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                    IddqTable* io_iddqt)
+                    IddqTable* io_iddqt,
+                    PSTATE_attribute_state* o_state)
 {
 
     uint8_t*        l_buffer_iq_c =  reinterpret_cast<uint8_t*>(malloc(IQ_BUFFER_ALLOC));
     uint32_t        l_record = 0;
-    uint8_t*        l_buffer_iq_inc;
     uint32_t        l_bufferSize_iq  = IQ_BUFFER_ALLOC;
     uint8_t         i, j;
-    uint8_t         l_buffer_data;
-    iddq_entry_t    l_iddq_data;
-    avgtemp_entry_t l_avgtemp_data;
     const char*     idd_meas_str[IDDQ_MEASUREMENTS] = IDDQ_ARRAY_VOLTAGES_STR;
-    char            l_buffer_str[128];   // Temporary formatting string buffer
-    char            l_line_str[128];     // Formatted output line string
+    char            l_buffer_str[256];   // Temporary formatting string buffer
+    char            l_line_str[256];     // Formatted output line string
 
-// --------------------------------------------
-// Process IQ Keyword (IDDQ) Data
-// --------------------------------------------
+    static const uint32_t IDDQ_DESC_SIZE = 56;
+    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
+                                            strlen("Quad X:");
 
-    do
+    // --------------------------------------------
+    // Process IQ Keyword (IDDQ) Data
+    // --------------------------------------------
+
+    // clear out buffer to known value before calling fapiGetMvpdField
+    memset(l_buffer_iq_c, 0, IQ_BUFFER_ALLOC);
+
+    // set l_record to appropriate cprx record
+    l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
+    l_bufferSize_iq = IQ_BUFFER_ALLOC;
+
+    //First read is to get size of vpd record, note the o_buffer is NULL
+    FAPI_TRY( getMvpdField((fapi2::MvpdRecord)l_record,
+                           fapi2::MVPD_KEYWORD_IQ,
+                           i_target,
+                           NULL,
+                           l_bufferSize_iq) );
+
+    //Allocate memory for vpd data
+    l_buffer_iq_c = reinterpret_cast<uint8_t*>(malloc(l_bufferSize_iq));
+
+    // Get Chip IQ MVPD data from the CRPx records
+    FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
+                          fapi2::MVPD_KEYWORD_IQ,
+                          i_target,
+                          l_buffer_iq_c,
+                          l_bufferSize_iq));
+
+    //copy VPD data to IQ structure table
+    memcpy(io_iddqt, l_buffer_iq_c, l_bufferSize_iq);
+
+    //Verify Payload header data.
+    if ( !(io_iddqt->iddq_version) ||
+         !(io_iddqt->good_quads_per_sort) ||
+         !(io_iddqt->good_normal_cores_per_sort) ||
+         !(io_iddqt->good_caches_per_sort))
     {
-        // clear out buffer to known value before calling fapiGetMvpdField
-        memset(l_buffer_iq_c, 0, IQ_BUFFER_ALLOC);
-
-        // set l_record to appropriate cprx record
-        l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
-        l_bufferSize_iq = IQ_BUFFER_ALLOC;
-
-        FAPI_DBG("getMvpdField(record %X, keyword %X, iq %p, size %d)", l_record,
-                 (uint32_t)fapi2::MVPD_KEYWORD_IQ,
-                 l_buffer_iq_c,
-                 l_bufferSize_iq);
-
-        // Get Chip IQ MVPD data from the CRPx records
-        FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
-                              fapi2::MVPD_KEYWORD_IQ,
-                              i_target,
-                              l_buffer_iq_c,
-                              l_bufferSize_iq));
-
-        // check buffer size, ssrivath, @TODO L3
-        if (l_bufferSize_iq < IQ_BUFFER_SIZE)
-        {
-            FAPI_ERR("**** ERROR : Wrong size buffer returned from getMvpdField for IQ => %d", l_bufferSize_iq );
-            //const uint32_t& BUFFER_SIZE = l_bufferSize_iq;
-            //const Target&  CHIP_TARGET = i_target;
-            //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_IQ_BUFFER_SIZE_ERROR);
-            break;
-        }
-
-        // use copy of allocated buffer pointer to increment through buffer
-        l_buffer_iq_inc = l_buffer_iq_c;
-
-        // get IQ version and advance pointer 1-byte
-        uint8_t l_iddq_version = *l_buffer_iq_inc;
-        io_iddqt->iddq_version = l_iddq_version ;
-        FAPI_INF("  IDDQ Version Number = %u", l_iddq_version);
-        l_buffer_iq_inc++;
-
-        // get number of good quads per sort
-        uint8_t l_good_quads_per_sort = *l_buffer_iq_inc;
-        io_iddqt->good_quads_per_sort = l_good_quads_per_sort ;
-        l_buffer_iq_inc++;
-
-        // get number of normal cores per sort
-        uint8_t l_good_normal_cores_per_sort = *l_buffer_iq_inc;
-        io_iddqt->good_normal_cores_per_sort = l_good_normal_cores_per_sort ;
-        l_buffer_iq_inc++;
-
-        // get number of good caches per sort
-        uint8_t l_good_caches_per_sort = *l_buffer_iq_inc;
-        io_iddqt->good_caches_per_sort = l_good_caches_per_sort ;
-        l_buffer_iq_inc++;
-        FAPI_INF("  Sort Info:         Good Quads = %02d Good Caches = %02d Good Cores = %02d",
-                 l_good_quads_per_sort,
-                 l_good_caches_per_sort,
-                 l_good_normal_cores_per_sort);
-
-        // get number of good normal cores in each quad
-        strcpy(l_line_str, "  Good normal cores:");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < MAXIMUM_QUADS; i++)
-        {
-            l_buffer_data = *l_buffer_iq_inc;
-            io_iddqt->good_normal_cores[i] = l_buffer_data;
-            sprintf(l_buffer_str, " Quad %d = %u ", i, l_buffer_data);
-            strcat(l_line_str, l_buffer_str);
-            l_buffer_iq_inc++;
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-
-        // get number of good caches in each quad
-        strcpy(l_line_str, "  Good caches:      ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < MAXIMUM_QUADS; i++)
-        {
-            l_buffer_data = *l_buffer_iq_inc;
-            io_iddqt->good_caches[i] = l_buffer_data;
-            sprintf(l_buffer_str, " Quad %d = %u ", i, l_buffer_data);
-            strcat(l_line_str, l_buffer_str);
-            l_buffer_iq_inc++;
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get RDP TO TDP scalling factor
-        uint16_t l_rdp_to_tdp_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
-        io_iddqt->rdp_to_tdp_scale_factor = revle16(l_rdp_to_tdp_scale_factor);
-        FAPI_INF("  RDP TO TDP scalling factor = %u", io_iddqt->rdp_to_tdp_scale_factor);
-        l_buffer_iq_inc += 2;
-
-        // get WOF IDDQ margin factor
-        uint16_t l_wof_iddq_margin_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
-        io_iddqt->wof_iddq_margin_factor = revle16(l_wof_iddq_margin_factor);
-        FAPI_INF("  WOF IDDQ margin factor     = %u", io_iddqt->wof_iddq_margin_factor);
-        l_buffer_iq_inc += 2;
-
-        // get VDD Temperature scaling factor
-        uint16_t l_temperature_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
-        io_iddqt->vdd_temperature_scale_factor = revle16(l_temperature_scale_factor);
-        FAPI_INF(" VDD  Temperature scaling factor = %u", io_iddqt->vdd_temperature_scale_factor);
-        l_buffer_iq_inc += 2;
-
-        // get VDN Temperature scaling factor
-        l_temperature_scale_factor = *(reinterpret_cast<uint16_t*>(l_buffer_iq_inc));
-        io_iddqt->vdn_temperature_scale_factor = revle16(l_temperature_scale_factor);
-        FAPI_INF(" VDN  Temperature scaling factor = %u", io_iddqt->vdn_temperature_scale_factor);
-        l_buffer_iq_inc += 2;
-
-        // get spare data - 8B
-        for (i = 0; i < 8; i++)
-        {
-            l_buffer_data = *l_buffer_iq_inc;
-            io_iddqt->spare[i] = l_buffer_data;
-            l_buffer_iq_inc++;
-        }
-
-        // Put out the measurement voltages to the trace.
-        strcpy(l_line_str, "  Measurment voltages:                           ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            sprintf(l_buffer_str, "  %sV", idd_meas_str[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
-        // consume these at 1mA values.  thus, all values are multiplied by
-        // 5 upon installation into the paramater block.
-        static const uint32_t CONST_5MA_1MA = 5;
-        FAPI_INF("IDDQ data is converted 5mA units to 1mA units");
-
-
-        // get IVDDQ measurements with all good cores ON
-        strcpy(l_line_str, "  IDDQ all good cores ON:                        ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
-            l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_on_caches_on[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get IVDDQ measurements with all cores and caches OFF
-        strcpy(l_line_str, "  IVDDQ all cores and caches OFF:                ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
-            l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_cores_off_caches_off[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);;
-
-        // get IVDDQ measurements with all good cores OFF and caches ON
-        strcpy(l_line_str, "  IVDDQ all good cores OFF and caches ON:        ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] =
-                revle16(l_iddq_data) * CONST_5MA_1MA;
-            l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_off_good_caches_on[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get IVDDQ measurements with all good cores in each quad
-        for (i = 0; i < MAXIMUM_QUADS; i++)
-        {
-            strcpy(l_line_str, "  IVDDQ all good cores ON and caches ON: ");
-            strcpy(l_buffer_str, "");
-            sprintf(l_buffer_str, "Quad %d:", i);
-            strcat(l_line_str, l_buffer_str);
-
-            for (j = 0; j < IDDQ_MEASUREMENTS; j++)
-            {
-                l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-                io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] =
-                    revle16(l_iddq_data) * CONST_5MA_1MA;
-                l_buffer_iq_inc += sizeof(iddq_entry_t);
-                sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j]);
-                strcat(l_line_str, l_buffer_str);
-            }
-
-            FAPI_INF("%s", l_line_str);
-        }
-
-        // get IVDN data
-        strcpy(l_line_str, "  IVDN                                           ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdn[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
-            l_buffer_iq_inc += sizeof(iddq_entry_t);
-            sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdn[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get average temperature measurements with all good cores ON
-        strcpy(l_line_str, "  Measurment voltages:                           ");
-        strcpy(l_line_str, "  Average temp all good cores ON:                ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_all_good_cores_on[i] = l_avgtemp_data;
-            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_good_cores_on[i]);
-            strcat(l_line_str, l_buffer_str);
-            l_buffer_iq_inc += sizeof(l_avgtemp_data);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get average temperature measurements with all cores and caches OFF
-        strcpy(l_line_str, "  Average temp all cores OFF, caches OFF:        ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_all_cores_off_caches_off[i] = l_avgtemp_data;
-            l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_cores_off_caches_off[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get average temperature measurements with all good cores OFF and caches ON
-        strcpy(l_line_str, "  Average temp all good cores OFF, caches ON:    ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_all_good_cores_off[i] = l_avgtemp_data;
-            l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_all_good_cores_off[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
-        // get average temperature measurements with all good cores in each quad
-        for (i = 0; i < MAXIMUM_QUADS; i++)
-        {
-            strcpy(l_line_str, "  Average temp all good cores ON: ");
-            strcpy(l_buffer_str, "");
-            sprintf(l_buffer_str, "Quad %d:        ", i);
-            strcat(l_line_str, l_buffer_str);
-
-            for (j = 0; j < IDDQ_MEASUREMENTS; j++)
-            {
-                l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-                io_iddqt->avgtemp_quad_good_cores_on[i][j] = l_avgtemp_data;
-                l_buffer_iq_inc += sizeof(l_avgtemp_data);
-                sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_quad_good_cores_on[i][j]);
-                strcat(l_line_str, l_buffer_str);
-            }
-
-            FAPI_INF("%s", l_line_str);
-        }
-
-        // get average nest temperature nest
-        strcpy(l_line_str, "  Average temp Nest:                             ");
-        strcpy(l_buffer_str, "");
-
-        for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-        {
-            l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_vdn[i] = l_avgtemp_data;
-            l_buffer_iq_inc += sizeof(l_avgtemp_data);
-            sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_vdn[i]);
-            strcat(l_line_str, l_buffer_str);
-        }
-
-        FAPI_INF("%s", l_line_str);
-
+        o_state->iv_wof_enabled = false;
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::PSTATE_PB_IQ_VPD_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_CHIP_TARGET(i_target)
+                           .set_VERSION(io_iddqt->iddq_version)
+                           .set_GOOD_QUADS_PER_SORT(io_iddqt->good_quads_per_sort)
+                           .set_GOOD_NORMAL_CORES_PER_SORT(io_iddqt->good_normal_cores_per_sort)
+                           .set_GOOD_CACHES_PER_SORT(io_iddqt->good_caches_per_sort),
+                           "Pstate Parameter Block IQ Payload data error being logged");
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
-    while(0);
+
+    // get IQ version and advance pointer 1-byte
+    FAPI_INF("  IDDQ Version Number = %u", io_iddqt->iddq_version);
+    FAPI_INF("  Sort Info:         Good Quads = %02d Good Cores = %02d Good Caches = %02d",
+             io_iddqt->good_quads_per_sort,
+             io_iddqt->good_normal_cores_per_sort,
+             io_iddqt->good_caches_per_sort);
+
+    // get number of good normal cores in each quad
+    strcpy(l_line_str, "  Good normal cores:");
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        sprintf(l_buffer_str, " Quad %d = %u ", i, io_iddqt->good_normal_cores[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get number of good caches in each quad
+    strcpy(l_line_str, "  Good caches:      ");
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        sprintf(l_buffer_str, " Quad %d = %u ", i, io_iddqt->good_caches[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get RDP TO TDP scalling factor
+    FAPI_INF("  RDP TO TDP scalling factor = %u", revle16(io_iddqt->rdp_to_tdp_scale_factor));
+
+    // get WOF IDDQ margin factor
+    FAPI_INF("  WOF IDDQ margin factor     = %u", revle16(io_iddqt->wof_iddq_margin_factor));
+
+    // get VDD Temperature scaling factor
+    FAPI_INF("  VDD  Temperature scaling factor = %u", revle16(io_iddqt->vdd_temperature_scale_factor));
+
+    // get VDN Temperature scaling factor
+    FAPI_INF("  VDN  Temperature scaling factor = %u", revle16(io_iddqt->vdn_temperature_scale_factor));
+
+    // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
+    // consume these at 1mA values.  thus, all values are multiplied by
+    // 5 upon installation into the paramater block.
+    static const uint32_t CONST_5MA_1MA = 5;
+    FAPI_INF("  IDDQ data is converted 5mA units to 1mA units");
+
+    // Put out the measurement voltages to the trace.
+    strcpy(l_line_str, "  Measurement voltages:");
+    sprintf(l_buffer_str, "%-*s", IDDQ_DESC_SIZE, l_line_str);
+    strcpy(l_line_str, l_buffer_str);
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        sprintf(l_buffer_str, "  %sV", idd_meas_str[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+#define IDDQ_CURRENT_EXTRACT(_member) \
+        io_iddqt->_member = revle16(io_iddqt->_member) * CONST_5MA_1MA;     \
+        sprintf(l_buffer_str, "  %04u ", io_iddqt->_member);                \
+        strcat(l_line_str, l_buffer_str);
+
+#define IDDQ_TEMP_EXTRACT(_member) \
+        sprintf(l_buffer_str, "  %04u ", io_iddqt->_member);                \
+        strcat(l_line_str, l_buffer_str);
+
+#define IDDQ_TRACE(string, size) \
+        strcpy(l_line_str, string); \
+        sprintf(l_buffer_str, "%-*s", size, l_line_str);\
+        strcpy(l_line_str, l_buffer_str); \
+        strcpy(l_buffer_str, "");        
+
+    // get IVDDQ measurements with all good cores ON
+    IDDQ_TRACE ("  IDDQ all good cores ON:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_on_caches_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get IVDDQ measurements with all cores and caches OFF
+    IDDQ_TRACE ("  IVDDQ all cores and caches OFF:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+       IDDQ_CURRENT_EXTRACT(ivdd_all_cores_off_caches_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);;
+
+    // get IVDDQ measurements with all good cores OFF and caches ON
+    IDDQ_TRACE ("  IVDDQ all good cores OFF and caches ON:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_off_good_caches_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get IVDDQ measurements with all good cores in each quad
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        IDDQ_TRACE ("  IVDDQ all good cores ON and caches ON ", IDDQ_QUAD_SIZE);
+        sprintf(l_buffer_str, "Quad %d:", i);
+        strcat(l_line_str, l_buffer_str);
+
+        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
+        {
+            IDDQ_CURRENT_EXTRACT(ivdd_quad_good_cores_on_good_caches_on[i][j]);
+        }
+
+        FAPI_INF("%s", l_line_str);
+    }
+
+    // get IVDN data
+    IDDQ_TRACE ("  IVDN", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdn[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores ON
+    IDDQ_TRACE ("  Average temp all good cores ON:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+         IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all cores and caches OFF
+    IDDQ_TRACE ("  Average temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_all_cores_off_caches_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores OFF and caches ON
+    IDDQ_TRACE ("  Average temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores in each quad
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        IDDQ_TRACE ("  Average temp all good cores ON, good caches ON ",IDDQ_QUAD_SIZE);
+        sprintf(l_buffer_str, "Quad %d:", i);
+        strcat(l_line_str, l_buffer_str);
+
+        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
+        {
+            IDDQ_TEMP_EXTRACT(avgtemp_quad_good_cores_on[i][j]);
+        }
+
+        FAPI_INF("%s", l_line_str);
+    }
+
+    // get average nest temperature nest
+    IDDQ_TRACE ("  Average temp Nest:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_vdn[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+fapi_try_exit:
 
     // Free up memory buffer
     free(l_buffer_iq_c);
 
-fapi_try_exit:
+    if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+    {
+        o_state->iv_wof_enabled = false;
+    }
+
     return fapi2::current_err;
 } // proc_get_mvdp_iddq
 
@@ -1394,150 +1488,178 @@ proc_get_extint_bias( uint32_t io_attr_mvpd_data[PV_D][PV_W],
 /// ssrivath END OF BIAS APPLICATION FUNCTION
 
 
+bool
+is_wof_enabled()
+{
+    return (!(attr.attr_system_wof_disable) && !(attr.attr_dd_wof_not_supported)) ? true : false;
+}
+
+
 fapi2::ReturnCode
 proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                       const uint32_t i_chiplet_mvpd_data[PV_D][PV_W],
                       uint32_t*      o_valid_pdv_points,
                       const uint8_t  i_chiplet_num,
-                      const uint8_t  i_bucket_id)
+                      const uint8_t  i_bucket_id,
+                      PSTATE_attribute_state* o_state)
 {
-
     const uint8_t pv_op_order[NUM_OP_POINTS] = VPD_PV_ORDER;
-    const char*    pv_op_str[NUM_OP_POINTS] = VPD_PV_ORDER_STR;
-    uint8_t       i = 0;
-    bool          suspend_ut_check = false;
-    uint8_t  l_attr_system_wof_enabled;
+    const char*     pv_op_str[NUM_OP_POINTS] = VPD_PV_ORDER_STR;
+    uint8_t         i = 0;
+    bool            suspend_ut_check = false;
 
-    do
+    FAPI_INF(">> proc_chk_valid_poundv");
+
+    // check for non-zero freq, voltage, or current in valid operating points
+    for (i = 0; i <= NUM_OP_POINTS - 1; i++)
+    {
+        FAPI_INF("Checking for Zero valued data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
+                 pv_op_str[pv_op_order[i]],
+                 i_chiplet_mvpd_data[pv_op_order[i]][0],
+                 i_chiplet_mvpd_data[pv_op_order[i]][1],
+                 i_chiplet_mvpd_data[pv_op_order[i]][2],
+                 i_chiplet_mvpd_data[pv_op_order[i]][3],
+                 i_chiplet_mvpd_data[pv_op_order[i]][4]);
+
+        if (is_wof_enabled() && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+        {
+
+            if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
+            {
+
+                FAPI_INF("**** WARNING: WOF is enabled but zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
+                         i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
+                FAPI_INF("**** WARNING: Disabling WOF and continuing");
+                suspend_ut_check = true;
+
+                // Set ATTR_WOF_ENABLED so the caller can set header flags
+                {
+                    o_state->iv_wof_enabled = false;
+                }
+
+                // Take out an informational error log and then keep going.
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_POUNDV_WOF_UT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(i_target)
+                                   .set_CHIPLET_NUMBER(i_chiplet_num)
+                                   .set_BUCKET(i_bucket_id)
+                                   .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                                   .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                                   .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                                   .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                                   .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                                   "Pstate Parameter Block WOF #V UT error being logged");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+        else if ((!is_wof_enabled()) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+        {
+            FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
+            suspend_ut_check = true;
+        }
+        else
+        {
+
+            if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
+                i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
+            {
+
+                FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
+                         i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
+
+                {
+                    o_state->iv_pstates_enabled = false;
+                }
+
+                // Error out has Pstate and all dependent functions are suspious.
+                FAPI_ASSERT(false,
+                            fapi2::PSTATE_PB_POUNDV_ZERO_ERROR()
+                            .set_CHIP_TARGET(i_target)
+                            .set_CHIPLET_NUMBER(i_chiplet_num)
+                            .set_BUCKET(i_bucket_id)
+                            .set_POINT(i)
+                            .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                            .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                            .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                            .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                            .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                            "Pstate Parameter Block #V Zero contents error being logged");
+            }
+        }
+    }
+
+    // Adjust the valid operating point based on UltraTurbo presence
+    // and WOF enablement
+    *o_valid_pdv_points = NUM_OP_POINTS;
+
+    if (suspend_ut_check)
+    {
+        (*o_valid_pdv_points)--;
+    }
+
+    FAPI_DBG("o_valid_pdv_points = %d", *o_valid_pdv_points);
+
+    // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
+    for (i = 1; i <= (*o_valid_pdv_points) - 1; i++)
     {
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_ENABLED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                               l_attr_system_wof_enabled));
+        FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
+                 pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]]);
+        FAPI_INF("   f=%u <= f=%u",               i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
+                 i_chiplet_mvpd_data[pv_op_order[i]][0]);
+        FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
+                 i_chiplet_mvpd_data[pv_op_order[i]][1], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
+                 i_chiplet_mvpd_data[pv_op_order[i]][2]);
+        FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
+                 i_chiplet_mvpd_data[pv_op_order[i]][3], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
+                 i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
-        // check for non-zero freq, voltage, or current in valid operating points
-        for (i = 0; i <= NUM_OP_POINTS - 1; i++)
+        // Only skip checkinug for WOF not enabled and UltraTurbo.
+        if (is_wof_enabled() || (!( !is_wof_enabled() && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))))
         {
-            FAPI_INF("Checking for Zero valued data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
-                     pv_op_str[pv_op_order[i]],
-                     i_chiplet_mvpd_data[pv_op_order[i]][0],
-                     i_chiplet_mvpd_data[pv_op_order[i]][1],
-                     i_chiplet_mvpd_data[pv_op_order[i]][2],
-                     i_chiplet_mvpd_data[pv_op_order[i]][3],
-                     i_chiplet_mvpd_data[pv_op_order[i]][4]);
-
-            if (l_attr_system_wof_enabled && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+            if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
+                i_chiplet_mvpd_data[pv_op_order[i - 1]][1] > i_chiplet_mvpd_data[pv_op_order[i]][1]  ||
+                i_chiplet_mvpd_data[pv_op_order[i - 1]][2] > i_chiplet_mvpd_data[pv_op_order[i]][2]  ||
+                i_chiplet_mvpd_data[pv_op_order[i - 1]][3] > i_chiplet_mvpd_data[pv_op_order[i]][3]  ||
+                i_chiplet_mvpd_data[pv_op_order[i - 1]][4] > i_chiplet_mvpd_data[pv_op_order[i]][4]    )
             {
 
-                if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
-                {
+                FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s <= %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
+                         pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
+                         pv_op_order[i]);
 
-                    FAPI_INF("**** WARNING: WOF is enabled but zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                             i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
-                    FAPI_INF("**** WARNING: Disabling WOF and continuing");
-                    //@todo-L3
-                    //const uint8_t& OP_POINT    = pv_op_order[i];
-                    //const uint8_t& CHIPLET_NUM = i_chiplet_num;
-                    //const uint8_t& BUCKET_ID   = i_bucket_id;
-                    //const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& CHIP_TARGET= i_target;
-                    //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_UT_ERROR);
-                    suspend_ut_check = true;
-                }
-            }
-            else if ((!l_attr_system_wof_enabled) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
-            {
-                FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
-                suspend_ut_check = true;
-            }
-            else
-            {
 
-                if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
-                    i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
-                {
-
-                    FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                             i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
-                    //@todo-L3
-                    //const uint8_t& OP_POINT    = pv_op_order[i];
-                    //const uint8_t& CHIPLET_NUM = i_chiplet_num;
-                    //const uint8_t& BUCKET_ID   = i_bucket_id;
-                    //const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& CHIP_TARGET= i_target;
-                    //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_ZERO_DATA_ERROR);
-                    break;
-                }
+                // Error out has Pstate and all dependent functions are suspious.
+                FAPI_ASSERT(false,
+                            fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR()
+                            .set_CHIP_TARGET(i_target)
+                            .set_CHIPLET_NUMBER(i_chiplet_num)
+                            .set_BUCKET(i_bucket_id)
+                            .set_POINT(i)
+                            .set_FREQUENCY_A(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                            .set_VDD_A(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                            .set_IDD_A(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                            .set_VCS_A(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                            .set_ICS_A(i_chiplet_mvpd_data[pv_op_order[i]][4])
+                            .set_FREQUENCY_B(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                            .set_VDD_B(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                            .set_IDD_B(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                            .set_VCS_B(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                            .set_ICS_B(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                            "Pstate Parameter Block #V Zero contents error being logged");
             }
         }
-
-        //@todo - L3
-        // if (l_rc)
-        // {
-        //     // If an error was found where suspension was flagged, keep going.
-        //     // If not, break to exit point.
-        //     if (!suspend_ut_check)
-        //         break;
-        // }
-
-
-        // Adjust the valid operating point based on UltraTurbo presence
-        // and WOF enablement
-        *o_valid_pdv_points = NUM_OP_POINTS;
-
-        if (suspend_ut_check)
-        {
-            (*o_valid_pdv_points)--;
-        }
-
-        FAPI_DBG("o_valid_pdv_points = %d", *o_valid_pdv_points);
-
-        // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
-        for (i = 1; i <= (*o_valid_pdv_points) - 1; i++)
-        {
-
-            FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
-                     pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]]);
-            FAPI_INF("   f=%u <= f=%u",               i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
-                     i_chiplet_mvpd_data[pv_op_order[i]][0]);
-            FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
-                     i_chiplet_mvpd_data[pv_op_order[i]][1], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
-                     i_chiplet_mvpd_data[pv_op_order[i]][2]);
-            FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
-                     i_chiplet_mvpd_data[pv_op_order[i]][3], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
-                     i_chiplet_mvpd_data[pv_op_order[i]][4]);
-
-            if (l_attr_system_wof_enabled && strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") && !suspend_ut_check )
-            {
-                if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
-                    i_chiplet_mvpd_data[pv_op_order[i - 1]][1] > i_chiplet_mvpd_data[pv_op_order[i]][1]  ||
-                    i_chiplet_mvpd_data[pv_op_order[i - 1]][2] > i_chiplet_mvpd_data[pv_op_order[i]][2]  ||
-                    i_chiplet_mvpd_data[pv_op_order[i - 1]][3] > i_chiplet_mvpd_data[pv_op_order[i]][3]  ||
-                    i_chiplet_mvpd_data[pv_op_order[i - 1]][4] > i_chiplet_mvpd_data[pv_op_order[i]][4]    )
-                {
-
-                    FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s <= %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
-                             pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
-                             pv_op_order[i]);
-                    //@todo-L3
-                    //const uint8_t& OP_POINT    = pv_op_order[i];
-                    //const uint8_t& CHIPLET_NUM = i_chiplet_num;
-                    //const uint8_t& BUCKET_ID   = i_bucket_id;
-                    //const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& CHIP_TARGET= i_target;
-                    //FAPI_SET_HWP_ERROR(l_rc, RC_PROCPM_PSTATE_DATABLOCK_PDV_OPPOINT_ORDER_ERROR);
-                    break;
-                }
-            }
-        }
-
     }
-    while(0);
 
 fapi_try_exit:
+    FAPI_INF("<< proc_chk_valid_poundv");
     return fapi2::current_err;
 }
 
@@ -1562,9 +1684,9 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
     for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
     {
         o_dest[i].frequency_mhz  = revle32(i_src[pv_op_order[i]][0]);
-        o_dest[i].vdd_mv        = revle32(i_src[pv_op_order[i]][1]);
+        o_dest[i].vdd_mv         = revle32(i_src[pv_op_order[i]][1]);
         o_dest[i].idd_100ma      = revle32(i_src[pv_op_order[i]][2]);
-        o_dest[i].vcs_mv        = revle32(i_src[pv_op_order[i]][3]);
+        o_dest[i].vcs_mv         = revle32(i_src[pv_op_order[i]][3]);
         o_dest[i].ics_100ma      = revle32(i_src[pv_op_order[i]][4]);
         o_dest[i].pstate = (i_src[ULTRA][0] - i_src[pv_op_order[i]][0]) * 1000 / i_frequency_step_khz;
     }
@@ -1574,28 +1696,47 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
 } // end load_mvpd_operating_point
 
 fapi2::ReturnCode
-proc_get_vdm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                     GP_VDMParmBlock* o_vdmpb)
+proc_get_vdm_parms (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                    const AttributeList* i_attr,
+                    GP_VDMParmBlock* o_vdmpb)
 {
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_SMALL_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->droop_small_override));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_LARGE_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->droop_large_override));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_DROOP_EXTREME_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->droop_extreme_override));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_OVERVOLT_OVERRIDE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->overvolt_override));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMIN_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->fmin_override_khz));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_FMAX_OVERRIDE_KHZ, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->fmax_override_khz));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_VID_COMPARE_OVERRIDE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->vid_compare_override_mv));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DPLL_VDM_RESPONSE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_vdmpb->vdm_response));
+    FAPI_INF(">> proc_get_vdm_parms");
 
+    if (i_attr->attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
+    {
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_DROOP_SMALL_OVERRIDE,
+                                FAPI_SYSTEM,
+                                o_vdmpb->droop_small_override));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_DROOP_LARGE_OVERRIDE,
+                                FAPI_SYSTEM,
+                                o_vdmpb->droop_large_override));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_DROOP_EXTREME_OVERRIDE,
+                                FAPI_SYSTEM,
+                                o_vdmpb->droop_extreme_override));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_OVERVOLT_OVERRIDE,
+                                FAPI_SYSTEM,
+                                o_vdmpb->overvolt_override));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_FMIN_OVERRIDE_KHZ,
+                                FAPI_SYSTEM,
+                                o_vdmpb->fmin_override_khz));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_FMAX_OVERRIDE_KHZ,
+                                FAPI_SYSTEM,
+                                o_vdmpb->fmax_override_khz));
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_VDM_VID_COMPARE_OVERRIDE_MV,
+                                FAPI_SYSTEM,
+                                o_vdmpb->vid_compare_override_mv));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DPLL_VDM_RESPONSE,
+                               FAPI_SYSTEM,
+                               o_vdmpb->vdm_response));
+    }
+    else
+    {
+        FAPI_DBG("   VDM is diabled.  Skipping VDM attribute accesses");
+    }
 
 fapi_try_exit:
+    FAPI_INF("<< proc_get_vdm_parms");
     return fapi2::current_err;
 
 }
@@ -1614,8 +1755,11 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
     uint16_t l_resclk_freq_regions[RESCLK_FREQ_REGIONS];
     uint32_t l_ultra_turbo_freq_khz = revle32(i_gppb->reference_frequency_khz);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_STEP_DELAY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           l_step_delay_ns));
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_SYSTEM_RESCLK_STEP_DELAY,
+                            FAPI_SYSTEM,
+                            l_step_delay_ns));
     o_resclk_setup->step_delay_ns = revle16(l_step_delay_ns);
 
     // Resonant Clocking Frequency and Index arrays
@@ -1672,6 +1816,8 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
         o_resclk_setup->resclk_freq[i] = pstate;
         o_resclk_setup->resclk_index[i] = idx;
+
+        FAPI_DBG("Resclk:  pstate = %d; idx = %d", pstate, idx);
     }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
@@ -1697,26 +1843,53 @@ fapi_try_exit:
 
 fapi2::ReturnCode
 proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                      IvrmParmBlock* o_ivrmpb)
+                      const AttributeList* i_attr,
+                      IvrmParmBlock* o_ivrmpb,
+                      PSTATE_attribute_state* o_state)
 {
     FAPI_INF(">> proc_get_ivrm_parms");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STRENGTH_LOOKUP, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->strength_lookup));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MULTIPLIER, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->vin_multiplier));
+    if (i_attr->attr_system_ivrm_disable == fapi2::ENUM_ATTR_SYSTEM_IVRM_DISABLE_OFF)
+    {
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MAX_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->vin_max_mv));
+        FAPI_INF(">> proc_get_ivrm_parms");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STRENGTH_LOOKUP, FAPI_SYSTEM,
+                               o_ivrmpb->strength_lookup));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STEP_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->step_delay_ns));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MULTIPLIER, FAPI_SYSTEM,
+                               o_ivrmpb->vin_multiplier));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STABILIZATION_DELAY_NS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->stablization_delay_ns));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_VIN_MAX_MV, FAPI_SYSTEM,
+                               o_ivrmpb->vin_max_mv));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_DEADZONE_MV, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                           o_ivrmpb->deadzone_mv));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STEP_DELAY_NS, FAPI_SYSTEM,
+                               o_ivrmpb->step_delay_ns));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_STABILIZATION_DELAY_NS, FAPI_SYSTEM,
+                               o_ivrmpb->stablization_delay_ns));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_DEADZONE_MV, FAPI_SYSTEM,
+                               o_ivrmpb->deadzone_mv));
+
+
+        // @todo  this is presently hardcoded to FALSE until validation code is in
+        // place to ensure turning IVRM on is a good thing.  This attribute write is
+        // needed to allocate the HWP attribute in Cronus.
+
+        // Indicate that IVRM is good to be enabled (or not)
+        FAPI_INF("   NOTE: This level of code is forcing the iVRM to OFF");
+        {
+            fapi2::ATTR_IVRMS_ENABLED_Type l_ivrm_enabled =
+                (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_FALSE;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRMS_ENABLED, i_target, l_ivrm_enabled));
+        }
+    }
+    else
+    {
+        FAPI_DBG("   IVRM is diabled.  Skipping IVRM attribute accesses");
+        o_state->iv_ivrm_enabled = false;
+    }
 
 fapi_try_exit:
     FAPI_INF("<< proc_get_ivrm_parms");
@@ -2455,9 +2628,10 @@ oppb_print(OCCPstateParmBlock* i_oppb)
 ///
 /// \param stream The output stream
 
-int freq2pState (const GlobalPstateParmBlock* gppb,
-                 const uint32_t freq_khz,
-                 Pstate* pstate)
+int
+freq2pState (const GlobalPstateParmBlock* gppb,
+             const uint32_t freq_khz,
+             Pstate* pstate)
 {
     int rc = 0;
     float pstate32 = 0;
@@ -2486,12 +2660,15 @@ int freq2pState (const GlobalPstateParmBlock* gppb,
 
     return rc;
 }
+
+
 fapi2::ReturnCode
 proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      uint8_t       i_poundv_bucketId,
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_data,
-                     fapi2::voltageBucketData_t i_poundv_data)
+                     fapi2::voltageBucketData_t i_poundv_data,
+                     PSTATE_attribute_state* o_state)
 {
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::vdmData_t l_vdmBuf;
@@ -2568,6 +2745,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         memcpy (&(o_data->poundw[VPD_PV_POWERSAVE]), &l_tmp_data, sizeof(poundw_entry_t));
 
 
+        FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
+        FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
+        FAPI_INF("TURBO.vdm_vid_compare_ivid %d",o_data->poundw[TURBO].vdm_vid_compare_ivid);
+        FAPI_INF("ULTRA_TURBO.vdm_vid_compare_ivid %d",o_data->poundw[ULTRA].vdm_vid_compare_ivid);
         //Validation of VPD Data
         //
         //If all VID compares are zero then use #V VDD voltage to populate local
@@ -2593,10 +2774,102 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                   !(o_data->poundw[TURBO].vdm_vid_compare_ivid) ||
                   !(o_data->poundw[ULTRA].vdm_vid_compare_ivid))
         {
+            o_state->iv_vdm_enabled = false;
             FAPI_ERR("Pound W data contains invalid values");
-            break;
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::PSTATE_PB_POUND_W_INVALID_VID_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_target)
+                               .set_NOMINAL_VID_COMPARE_IVID_VALUE(o_data->poundw[NOMINAL].vdm_vid_compare_ivid)
+                               .set_POWERSAVE_VID_COMPARE_IVID_VALUE(o_data->poundw[POWERSAVE].vdm_vid_compare_ivid)
+                               .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
+                               .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
+                               "Pstate Parameter Block #W : one of the VID compare value is zero");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
+        FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
+        FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
+        FAPI_INF("TURBO.vdm_vid_compare_ivid %d",o_data->poundw[TURBO].vdm_vid_compare_ivid);
+        FAPI_INF("ULTRA_TURBO.vdm_vid_compare_ivid %d",o_data->poundw[ULTRA].vdm_vid_compare_ivid);
+
+        // validate vid values
+        bool l_compare_vid_value_state = 1;
+        VALIDATE_VID_VALUES (o_data->poundw[POWERSAVE].vdm_vid_compare_ivid,
+                             o_data->poundw[NOMINAL].vdm_vid_compare_ivid,
+                             o_data->poundw[TURBO].vdm_vid_compare_ivid,
+                             o_data->poundw[ULTRA].vdm_vid_compare_ivid,
+                             l_compare_vid_value_state);
+
+        if (!l_compare_vid_value_state)
+        {
+            o_state->iv_vdm_enabled = false;
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::PSTATE_PB_POUND_W_INVALID_VID_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_target)
+                               .set_NOMINAL_VID_COMPARE_IVID_VALUE(o_data->poundw[NOMINAL].vdm_vid_compare_ivid)
+                               .set_POWERSAVE_VID_COMPARE_IVID_VALUE(o_data->poundw[POWERSAVE].vdm_vid_compare_ivid)
+                               .set_TURBO_VID_COMPARE_IVID_VALUE(o_data->poundw[TURBO].vdm_vid_compare_ivid)
+                               .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
+                               "Pstate Parameter Block #W VID compare data are not in increasing order");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // validate threshold values
+        bool l_threshold_value_state = 1;
+
+        for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
+        {
+            FAPI_INF("o_data->poundw[%d].vdm_overvolt_thresholds %d",p,(o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_small_thresholds %d",p,(o_data->poundw[p].vdm_overvolt_small_thresholds ) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_large_thresholds %d",p,(o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_extreme_thresholds %d",p,(o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F);
+            VALIDATE_THRESHOLD_VALUES(((o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F), // overvolt
+                                      ((o_data->poundw[p].vdm_overvolt_small_thresholds) & 0x0F), //small
+                                      ((o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F), //large
+                                      ((o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F), //extreme
+                                      l_threshold_value_state);
+
+            if (!l_threshold_value_state)
+            {
+                o_state->iv_vdm_enabled = false;
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(i_target)
+                                   .set_OP_POINT_TYPE(p)
+                                   .set_VDM_OVERVOLT((o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F)
+                                   .set_VDM_SMALL(o_data->poundw[p].vdm_overvolt_small_thresholds & 0x0F)
+                                   .set_VDM_EXTREME((o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F)
+                                   .set_VDM_LARGE((o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F),
+                                   "Pstate Parameter Block #W VDM threshold data are invalid");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+
+        bool l_frequency_value_state = 1;
+
+        for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
+        {
+            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F), // N_L
+                                           ((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F), //N_S
+                                           ((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F), //L_S
+                                           ((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F), //S_N
+                                           l_frequency_value_state);
+
+            if (!l_frequency_value_state)
+            {
+                o_state->iv_vdm_enabled = false;
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(i_target)
+                                   .set_OP_POINT_TYPE(p)
+                                   .set_VDM_NORMAL_SMALL((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F)
+                                   .set_VDM_NORMAL_LARGE(o_data->poundw[p].vdm_small_large_normal_freq & 0x0F)
+                                   .set_VDM_LARGE_SMALL((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F)
+                                   .set_VDM_SMALL_NORMAL((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F),
+                                   "Pstate Parameter Block #W VDM frequency drop data are invalid");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
 
         //Biased compare vid data
         fapi2::ATTR_VDM_VID_COMPARE_BIAS_0P5PCT_Type l_bias_value;
@@ -2625,6 +2898,12 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
 
 fapi_try_exit:
+
+    if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+    {
+        o_state->iv_vdm_enabled = false;
+    }
+
     return fapi2::current_err;
 
 }
@@ -2639,23 +2918,25 @@ proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
     uint16_t l_resclk_value[RESCLK_STEPS];
     uint16_t l_l3_threshold_mv;
 
-    // Perform some basic sanity checks on the header datastructures (since
+    // Perform some basic sanity checks on the header data structures (since
     // the header values are provided by another team)
-    if (p9_resclk_defines::RESCLK_INDEX_VEC.size() != RESCLK_FREQ_REGIONS)
-    {
-        FAPI_ERR("p9_resclk_defines.h RESCLK_INDEX_VEC.size()=%d != p9_pstates.h RESCLK_FREQ_REGIONS=%d",
-                 p9_resclk_defines::RESCLK_INDEX_VEC.size(), RESCLK_FREQ_REGIONS);
-    }
-    else if (p9_resclk_defines::RESCLK_TABLE_VEC.size() != RESCLK_STEPS)
-    {
-        FAPI_ERR("p9_resclk_defines.h RESCLK_TABLE_VEC.size()=%d != p9_pstates.h RESCLK_STEPS=%d",
-                 p9_resclk_defines::RESCLK_TABLE_VEC.size(), RESCLK_STEPS);
-    }
-    else if (p9_resclk_defines::L3CLK_TABLE_VEC.size() != RESCLK_L3_STEPS)
-    {
-        FAPI_ERR("p9_resclk_defines.h L3CLK_TABLE_VEC.size()=%d != p9_pstates.h RESCLK_L3_STEPS=%d",
-                 p9_resclk_defines::L3CLK_TABLE_VEC.size(), RESCLK_L3_STEPS);
-    }
+    FAPI_ASSERT((p9_resclk_defines::RESCLK_INDEX_VEC.size() == RESCLK_FREQ_REGIONS),
+                fapi2::PSTATE_PB_RESCLK_INDEX_ERROR()
+                .set_FREQ_REGIONS(RESCLK_FREQ_REGIONS)
+                .set_INDEX_VEC_SIZE(p9_resclk_defines::RESCLK_INDEX_VEC.size()),
+                "p9_resclk_defines.h RESCLK_INDEX_VEC.size() mismatch");
+
+    FAPI_ASSERT((p9_resclk_defines::RESCLK_TABLE_VEC.size() == RESCLK_STEPS),
+                fapi2::PSTATE_PB_RESCLK_TABLE_ERROR()
+                .set_STEPS(RESCLK_STEPS)
+                .set_TABLE_VEC_SIZE(p9_resclk_defines::RESCLK_TABLE_VEC.size()),
+                "p9_resclk_defines.h RESCLK_TABLE_VEC.size() mismatch");
+
+    FAPI_ASSERT((p9_resclk_defines::L3CLK_TABLE_VEC.size() == RESCLK_L3_STEPS),
+                fapi2::PSTATE_PB_RESCLK_L3_TABLE_ERROR()
+                .set_L3_STEPS(RESCLK_L3_STEPS)
+                .set_L3_VEC_SIZE(p9_resclk_defines::L3CLK_TABLE_VEC.size()),
+                "p9_resclk_defines.h L3CLK_TABLE_VEC.size() mismatch");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
                            l_l3_steparray));
@@ -2735,16 +3016,17 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
     //Initialize VFRT header
     o_vfrt_data->vfrtHeader.magic_number = revle16(UINT16_GET(i_pBuffer));
     i_pBuffer += 2;
-    o_vfrt_data->vfrtHeader.reserved_1 = revle16(UINT16_GET(i_pBuffer));
+    o_vfrt_data->vfrtHeader.reserved     = revle16(UINT16_GET(i_pBuffer));
     i_pBuffer += 2;
     o_vfrt_data->vfrtHeader.type_version = *i_pBuffer;
     i_pBuffer++;
-    o_vfrt_data->vfrtHeader.reserved_2   = *i_pBuffer;
+    o_vfrt_data->vfrtHeader.res_vdnId    = *i_pBuffer;  // @todo this name is not accurate
     i_pBuffer++;
-    o_vfrt_data->vfrtHeader.res_vdnId    = *i_pBuffer;
+    o_vfrt_data->vfrtHeader.VddId_QAId   = *i_pBuffer;  // @todo this name is not accurate
     i_pBuffer++;
-    o_vfrt_data->vfrtHeader.VddId_QAId   = *i_pBuffer;
+    o_vfrt_data->vfrtHeader.rsvd_QAId    = *i_pBuffer;
     i_pBuffer++;
+
 
     //find type
     l_type = (o_vfrt_data->vfrtHeader.type_version) >> 4;
@@ -2754,16 +3036,16 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
     // This function should exit if the input type is not "SYSTEM"
     // Correct in Level 3 update.
 
-    char            l_buffer_str[256];   // Temporary formatting string buffer
-    char            l_line_str[256];     // Formatted output line string
+    char            l_buffer_str[512];   // Temporary formatting string buffer
+    char            l_line_str[512];     // Formatted output line string
 
     strcpy(l_line_str, "VFRT:");
     sprintf(l_buffer_str, " %X Ver/Type %X B5 %X B6 %X  B7 %X",
             revle16(o_vfrt_data->vfrtHeader.magic_number),
             revle16(o_vfrt_data->vfrtHeader.type_version),
-            o_vfrt_data->vfrtHeader.reserved_2,   /// BUG:  this should be VDN!!!
-            o_vfrt_data->vfrtHeader.res_vdnId,    /// BUG:  this should be VDD!!!
-            o_vfrt_data->vfrtHeader.VddId_QAId);  /// BUG:  this should be resvQID!!!
+            o_vfrt_data->vfrtHeader.res_vdnId,   /// BUG:  this should be VDN!!!
+            o_vfrt_data->vfrtHeader.VddId_QAId,    /// BUG:  this should be VDD!!!
+            o_vfrt_data->vfrtHeader.rsvd_QAId);  /// BUG:  this should be resvQID!!!
     strcat(l_line_str, l_buffer_str);
     FAPI_INF("%s", l_line_str);
 
@@ -2841,49 +3123,79 @@ uint16_t get_iac_vdn_value (uint16_t i_vpd_vdn_mv,
     uint16_t l_iq_mv[2] = {0};
     l_iq_mv[0] = IDDQ_MIN_VOLT_LEVEL + (100 * i);
     l_iq_mv[1] = IDDQ_MIN_VOLT_LEVEL + (100 * (i + 1));
-
-    if (!l_bounding_value)
+    uint8_t l_diff_value = 0;
+    do
     {
-
-        //Read measured temp
-        l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
-
-        //Read ivdnq_5ma
-        l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
-
-        //Scale each bounding Ivdnq_5ma value to 75C in mA
-
-        l_scaled_leakage_ma[0] = l_Ivdnq_5ma[0] * 5 * pow (1.3, (l_measured_temp_C[0] - nest_leakage_percent) / 10);
-
-        l_Ivdnq_vpd_ma = l_scaled_leakage_ma[0];
-
-        l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
-    }
-    else
-    {
-        //Read measured temp
-        l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
-        l_measured_temp_C[1] = i_iddq.avgtemp_vdn[i + 1];
-
-        //Read ivdnq_5ma
-        l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
-        l_Ivdnq_5ma[1] = i_iddq.ivdn[i + 1];
-
-        //Scale each bounding Ivdnq_5ma value to 75C in mA
-
-        for (j = 0; j < 2; j++)
+        if (!l_bounding_value)
         {
-            l_scaled_leakage_ma[j] = l_Ivdnq_5ma[j] * 5 * pow (1.3, (l_measured_temp_C[j] - nest_leakage_percent) / 10);
+            //Read measured temp
+            l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
+
+            if ((l_measured_temp_C[0] == 0))
+            {
+                FAPI_INF("Non Bounded measured temp value is 0");
+                break;
+            }
+            else if (l_measured_temp_C[0] < nest_leakage_percent)
+            {
+                l_diff_value = nest_leakage_percent - l_measured_temp_C[0];
+            }
+            else
+            {
+                l_diff_value = l_measured_temp_C[0] - nest_leakage_percent;
+            }
+
+            //Read ivdnq_5ma
+            l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
+
+            //Scale each bounding Ivdnq_5ma value to 75C in mA
+
+            l_scaled_leakage_ma[0] = l_Ivdnq_5ma[0] * 5 * pow (1.3, (l_diff_value / 10));
+
+            l_Ivdnq_vpd_ma = l_scaled_leakage_ma[0];
+
+            l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
         }
+        else
+        {
+            //Read measured temp
+            l_measured_temp_C[0] = i_iddq.avgtemp_vdn[i];
+            l_measured_temp_C[1] = i_iddq.avgtemp_vdn[i + 1];
 
-        //Interpolate between scaled_leakage_ma[i] and scaled_leakage_ma[i+1]
-        //using the same ratio as the VPD voltage is to the bounding volages) to
-        //arrive at  Ivdnq_vpd_ma
-        l_Ivdnq_vpd_ma = l_scaled_leakage_ma[i] + roundUp((i_vpd_vdn_mv - 600 + (100 * i)) / ((l_iq_mv[1] - l_iq_mv[0]) *
-                         (l_scaled_leakage_ma[1] - l_scaled_leakage_ma[0])));
+            //Read ivdnq_5ma
+            l_Ivdnq_5ma[0] = i_iddq.ivdn[i];
+            l_Ivdnq_5ma[1] = i_iddq.ivdn[i + 1];
 
-        l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
-    }
+            //Scale each bounding Ivdnq_5ma value to 75C in mA
+
+            for (j = 0; j < 2; j++)
+            {
+                if ((l_measured_temp_C[j] == 0))
+                {
+                    FAPI_INF("Bounded measured temp value is 0");
+                    break;
+                }
+                else if (l_measured_temp_C[j] < nest_leakage_percent)
+                {
+                    l_diff_value = nest_leakage_percent - l_measured_temp_C[j];
+                }
+                else
+                {
+                    l_diff_value = l_measured_temp_C[j] - nest_leakage_percent;
+                }
+
+                l_scaled_leakage_ma[j] = l_Ivdnq_5ma[j] * 5 * pow (1.3, (l_diff_value / 10));
+            }
+
+            //Interpolate between scaled_leakage_ma[i] and scaled_leakage_ma[i+1]
+            //using the same ratio as the VPD voltage is to the bounding volages) to
+            //arrive at  Ivdnq_vpd_ma
+            l_Ivdnq_vpd_ma = l_scaled_leakage_ma[i] + roundUp((i_vpd_vdn_mv - 600 + (100 * i)) / ((l_iq_mv[1] - l_iq_mv[0]) *
+                             (l_scaled_leakage_ma[1] - l_scaled_leakage_ma[0])));
+
+            l_ac_vdn_value = (i_vpd_idn_100ma * 10) - (l_Ivdnq_vpd_ma * 10);
+        }
+    }while(0);
 
     return l_ac_vdn_value;
 }
@@ -2989,6 +3301,7 @@ void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
 
     do
     {
+
         //
         //BIASED VPD PTS SLOPES
         //
@@ -3095,3 +3408,81 @@ void p9_pstate_compute_PsVDMThreshSlopes(
     }
     while(0);
 }
+
+
+
+// p9_pstate_set_global_feature_attributes
+fapi2::ReturnCode
+p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                        PSTATE_attribute_state i_state,
+                                        QuadManagerFlags* o_qm_flags)
+{
+    // Quad Manager Flags
+    fapi2::buffer<uint16_t> l_data16;
+
+    fapi2::ATTR_PSTATES_ENABLED_Type l_ps_enabled =
+        (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_FALSE;
+
+    fapi2::ATTR_RESCLK_ENABLED_Type l_resclk_enabled =
+        (fapi2::ATTR_RESCLK_ENABLED_Type)fapi2::ENUM_ATTR_RESCLK_ENABLED_FALSE;
+
+    fapi2::ATTR_VDM_ENABLED_Type l_vdm_enabled =
+        (fapi2::ATTR_VDM_ENABLED_Type)fapi2::ENUM_ATTR_VDM_ENABLED_FALSE;
+
+    fapi2::ATTR_IVRM_ENABLED_Type l_ivrm_enabled =
+        (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_FALSE;
+
+    fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
+        (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
+
+    if (i_state.iv_pstates_enabled)
+    {
+        l_ps_enabled = (fapi2::ATTR_PSTATES_ENABLED_Type)fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE;
+    }
+
+    if (i_state.iv_resclk_enabled)
+    {
+        l_resclk_enabled = (fapi2::ATTR_RESCLK_ENABLED_Type)fapi2::ENUM_ATTR_RESCLK_ENABLED_TRUE;
+    }
+
+    if (i_state.iv_vdm_enabled)
+    {
+        l_vdm_enabled = (fapi2::ATTR_VDM_ENABLED_Type)fapi2::ENUM_ATTR_VDM_ENABLED_TRUE;
+    }
+
+    if (i_state.iv_ivrm_enabled)
+    {
+        l_ivrm_enabled = (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_TRUE;
+    }
+
+    if (i_state.iv_wof_enabled)
+    {
+        l_wof_enabled = (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_TRUE;
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PSTATES_ENABLED, i_target, l_ps_enabled));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_RESCLK_ENABLED, i_target, l_resclk_enabled));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDM_ENABLED, i_target, l_vdm_enabled));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRMS_ENABLED, i_target, l_ivrm_enabled));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED, i_target, l_wof_enabled));
+
+
+    // ----------------
+    // set CME QM flags
+    // ----------------
+    l_data16.flush<0>();
+
+    l_data16.insertFromRight<0, 1>(l_resclk_enabled);
+    l_data16.insertFromRight<1, 1>(l_ivrm_enabled);
+    l_data16.insertFromRight<2, 1>(l_wof_enabled);
+
+    l_data16.insertFromRight<3, 1>(attr.attr_dpll_dynamic_fmax_enable);
+    l_data16.insertFromRight<4, 1>(attr.attr_dpll_dynamic_fmin_enable);
+    l_data16.insertFromRight<5, 1>(attr.attr_dpll_droop_protect_enable);
+
+    o_qm_flags->value = revle16(l_data16);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+// *INDENT-ON*
