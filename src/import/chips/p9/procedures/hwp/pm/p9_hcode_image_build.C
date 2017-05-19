@@ -838,6 +838,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     if( attrVal )
     {
         qmFlags |= CME_QM_FLAG_SYS_VDM_ENABLE;
+        sgpeFlag |= SGPE_VDM_ENABLE_BIT_POS;
         pgpeFlags.fields.vdm_enable = 1;
     }
 
