@@ -1112,30 +1112,38 @@ void tpmVerifyFunctionalTpmExists()
         }
         else if (l_state == SECUREBOOT::SecureJumperState::SECURITY_ASSERTED)
         {
-            /*@
-             * @errortype
-             * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
-             * @severity       ERRL_SEV_UNRECOVERABLE
-             * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
-             * @userdata1      0
-             * @userdata2      0
-             * @devdesc        No functional TPMs exist in the system
-             */
-            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           MOD_TPM_VERIFYFUNCTIONAL,
-                                           RC_TPM_NOFUNCTIONALTPM_FAIL,
-                                           0, 0,
-                                           true /*Add HB SW Callout*/ );
-
-            err->collectTrace( SECURE_COMP_NAME );
-            uint32_t errPlid = err->plid();
-
-            // Log this failure here
-            errlCommit(err, SECURE_COMP_ID);
-
             if (isTpmRequired())
-
             {
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPM_NOFUNCTIONALTPM_FAIL
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_TPM_VERIFYFUNCTIONAL
+                 * @userdata1      0
+                 * @userdata2      0
+                 * @devdesc        No functional TPMs exist in the system
+                 */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              MOD_TPM_VERIFYFUNCTIONAL,
+                                              RC_TPM_NOFUNCTIONALTPM_FAIL);
+
+                // Add low priority HB SW callout
+                err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                         HWAS::SRCI_PRIORITY_LOW);
+                err->collectTrace( SECURE_COMP_NAME );
+                uint32_t errPlid = err->plid();
+
+                // HW callout TPMs
+                TARGETING::TargetHandleList l_tpmList;
+                TRUSTEDBOOT::getTPMs(l_tpmList, TPM_FILTER::ALL_IN_BLUEPRINT);
+                for(const auto &tpm : l_tpmList)
+                {
+                    err->addHwCallout(tpm,
+                                      HWAS::SRCI_PRIORITY_HIGH,
+                                      HWAS::NO_DECONFIG,
+                                      HWAS::GARD_NULL);
+                }
+                errlCommit(err, SECURE_COMP_ID);
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
                 INITSERVICE::doShutdown(errPlid);
