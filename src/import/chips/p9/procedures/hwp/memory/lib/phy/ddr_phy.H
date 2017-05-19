@@ -127,6 +127,15 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<T>& i_target );
 
 ///
+/// @brief Clears all training related errors
+/// @tparam T the type of the target in question
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<T>& i_target );
+
+///
 /// @brief Setup all the cal config register
 /// @tparam T, the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal setup
