@@ -25,4 +25,244 @@
 
 <!-- Error definitions for p9_pstate_parameter_block procedure -->
 <hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_GET_MVPD_FOR_POUND_V_FAILED</rc>
+    <description>MVPD function failed to read #V VPD</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PRESENT_CHIPLETS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_NO_PRESENT_CHIPLETS_ERROR</rc>
+    <description>No cores are present from which to read #V VPD</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PRESENT_CHIPLETS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUNDV_WOF_UT_ERROR</rc>
+    <description>WOF was intending to be enable but could not due to #V validity
+    checking issue of the UltraTurbo content.  The machine continues as
+    functional but with WOF disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>VDD</ffdc>
+    <ffdc>IDD</ffdc>
+    <ffdc>VCS</ffdc>
+    <ffdc>ICS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_WOF_HEADER_DATA_INVALID</rc>
+    <description>WOF Header data is invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MAGIC_NUMBER</ffdc>
+    <ffdc>VERSION</ffdc>
+    <ffdc>VFRT_BLOCK_SIZE</ffdc>
+    <ffdc>VFRT_HEADER_SIZE</ffdc>
+    <ffdc>VFRT_DATA_SIZE</ffdc>
+    <ffdc>QUADS_ACTIVE_SIZE</ffdc>
+    <ffdc>CORE_COUNT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_VFRT_HEADER_DATA_INVALID</rc>
+    <description>VFRT Header data is invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MAGIC_NUMBER</ffdc>
+    <ffdc>TYPE_VERSION</ffdc>
+    <ffdc>VDN_ID</ffdc>
+    <ffdc>VDD_ID</ffdc>
+    <ffdc>QUAD_ID</ffdc>
+    <ffdc>WOF_TABLE_INDEX</ffdc>
+    <ffdc>VFRT_TABLE_INDEX</ffdc>
+  </hwpError>
+
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_FUNCTION_FAIL</rc>
+    <description>pstate parameter sub function failed
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FAPI_RC</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
+    <description>#V data is not same across EQ chiplets</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CURRENT_EQ_CHIPLET_TARGET</ffdc>
+    <ffdc>FIRST_EQ_CHIPLET_TARGET</ffdc>
+    <ffdc>BUCKET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_IQ_VPD_ERROR</rc>
+    <description>#IQ data payload header is invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>VERSION</ffdc>
+    <ffdc>GOOD_QUADS_PER_SORT</ffdc>
+    <ffdc>GOOD_NORMAL_CORES_PER_SORT</ffdc>
+    <ffdc>GOOD_CACHES_PER_SORT</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUND_W_INVALID_VID_VALUE</rc>
+    <description>#W vid compare ivid value is zero</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>NOMINAL_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>ULTRA_VID_COMPARE_IVID_VALUE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE</rc>
+    <description>#W threshold values are invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OP_POINT_TYPE</ffdc>
+    <ffdc>VDM_OVERVOLT</ffdc>
+    <ffdc>VDM_SMALL</ffdc>
+    <ffdc>VDM_EXTREME</ffdc>
+    <ffdc>VDM_LARGE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE</rc>
+    <description>#W freq drop values are invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OP_POINT_TYPE</ffdc>
+    <ffdc>VDM_NORMAL_SMALL</ffdc>
+    <ffdc>VDM_NORMAL_LARGE</ffdc>
+    <ffdc>VDM_LARGE_SMALL</ffdc>
+    <ffdc>VDM_SMALL_NORMAL</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUNDV_ZERO_ERROR</rc>
+    <description>During #V validity checking, one or more required fields
+    were found to contain zero contents.  Pstates are being disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>VDD</ffdc>
+    <ffdc>IDD</ffdc>
+    <ffdc>VCS</ffdc>
+    <ffdc>ICS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUNDV_SLOPE_ERROR</rc>
+    <description>During #V validity checking, the data did not have at or
+    increasing slopes (eg Power Save LE Nominal LE Turbo LE UltraTurbo).
+    Pstates are being disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY_A</ffdc>
+    <ffdc>VDD_A</ffdc>
+    <ffdc>IDD_A</ffdc>
+    <ffdc>VCS_A</ffdc>
+    <ffdc>ICS_A</ffdc>
+    <ffdc>FREQUENCY_B</ffdc>
+    <ffdc>VDD_B</ffdc>
+    <ffdc>IDD_B</ffdc>
+    <ffdc>VCS_B</ffdc>
+    <ffdc>ICS_B</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_WOF_VFRT_ERROR</rc>
+    <description>The WOF VFRT
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_RESCLK_INDEX_ERROR</rc>
+    <description>The resonant clock index vector size is not expected.
+    </description>
+    <ffdc>FREQ_REGIONS</ffdc>
+    <ffdc>INDEX_VEC_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_RESCLK_TABLE_ERROR</rc>
+    <description>The resonant clock table vector size is not expected.
+    </description>
+    <ffdc>STEPS</ffdc>
+    <ffdc>TABLE_VEC_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_RESCLK_L3_TABLE_ERROR</rc>
+    <description>The resonant clock L3 table vector size is not expected.
+    </description>
+    <ffdc>L3_STEPS</ffdc>
+    <ffdc>L3_VEC_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_FREQ2PS_LT_PSTATE_MIN_ERROR</rc>
+    <description>The calculated Pstate is less than the allowed minimum..
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>PSTATE32</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_FREQ2PS_GT_PSTATE_MAX_ERROR</rc>
+    <description>The calculated Pstate is greater than the allowed maximum.
+    </description>
+    <ffdc>FREQ</ffdc>
+    <ffdc>PSTATE32</ffdc>
+    <ffdc>PSTATE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
