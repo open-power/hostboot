@@ -20094,11 +20094,11 @@ Measured in GB</description>
 
     Consumer:  p8_hcode_image_build.C
 
-    Platform default: ON
+    Platform default: OFF
     </description>
     <simpleType>
         <uint8_t>
-          <default>1</default>
+          <default>0</default>
         </uint8_t>
     </simpleType>
     <hwpfToHbAttrMap>
