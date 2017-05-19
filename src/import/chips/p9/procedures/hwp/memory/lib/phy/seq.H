@@ -138,7 +138,8 @@ uint64_t exp_helper( const uint64_t i_value );
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode read_config0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::SEQ_CONFIG0_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_CONFIG0_REG, o_data), "%s failed to read seq_config0 register",
+              mss::c_str(i_target) );
     FAPI_DBG("seq_config0: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -156,7 +157,8 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode write_config0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_DBG("seq_config0: 0x%016lx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_CONFIG0_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_CONFIG0_REG, i_data), "%s failed to write seq_config0 register",
+              mss::c_str(i_target) );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -172,13 +174,57 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode read_error_status0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::SEQ_ERROR0_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_ERROR0_REG, o_data), "%s failed to read seq_error_status0 register",
+              mss::c_str(i_target) );
     FAPI_DBG("seq_error_status0: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-// SEQ_ERROR_STATUS0 is read-only
+///
+/// @brief Write SEQ_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note SEQ_ERROR_STATUS0 is read-only in DD1 only, so we'll ignore this in DD2
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode write_error_status0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    // Skips if we're a DD1 part, as this means we can't write to this register
+    if(mss::chip_ec_nimbus_lt_2_0(i_target))
+    {
+        FAPI_INF("%s is a DD1 part, so wc_error_status 0 is a read only register - skipping the write", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Does the write
+    FAPI_DBG("error_status0: 0x%016lx", i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_ERROR0_REG, i_data), "%s failed to write seq_error_status0 register",
+              mss::c_str(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief reset SEQ_ERROR_STATUS0
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode reset_error_status0( const fapi2::Target<T>& i_target )
+{
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY( write_error_status0(i_target, l_data), "%s failed to clear SEQ error_status0 register via write",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Read SEQ_MEM_TIMING_PARAM0
@@ -191,7 +237,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode read_timing0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING0_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING0_REG, o_data), "%s failed to read seq_timing0 register",
+              mss::c_str(i_target) );
     FAPI_DBG("seq_timing0: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -209,7 +256,8 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode write_timing0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_DBG("seq_timing0: 0x%016lx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING0_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING0_REG, i_data), "%s failed to write seq_timing0 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -241,7 +289,8 @@ inline void set_trfc_cycles( fapi2::buffer<uint64_t>& io_data, const uint64_t i_
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode read_timing1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING1_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING1_REG, o_data), "%s failed to read seq_timing1 register",
+              mss::c_str(i_target) );
     FAPI_DBG("seq_timing1: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -259,7 +308,8 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode write_timing1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_DBG("seq_timing1: 0x%016lx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING1_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING1_REG, i_data), "%s failed to write seq_timing1 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -276,7 +326,8 @@ fapi_try_exit:
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode read_timing2( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
-    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING2_REG, o_data) );
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_TIMING2_REG, o_data), "%s failed to read seq_timing2 register",
+              mss::c_str(i_target) );
     FAPI_DBG("seq_timing2: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
@@ -294,7 +345,8 @@ template< fapi2::TargetType T, typename TT = seqTraits<T> >
 inline fapi2::ReturnCode write_timing2( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_DBG("seq_timing2: 0x%016lx", i_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING2_REG, i_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING2_REG, i_data), "%s failed to write seq_timing2 register",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -328,11 +380,13 @@ fapi2::ReturnCode reset_rd_wr_data( const fapi2::Target<T>& i_target )
 
     l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR01_PATTERN);
     FAPI_INF("seq_rd_wr0 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA0, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA0, l_data), "%s failed to reset seq_rd_wr0 register via write",
+              mss::c_str(i_target) );
 
     l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR23_PATTERN);
     FAPI_INF("seq_rd_wr1 0x%llx", l_data);
-    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA1, l_data) );
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA1, l_data), "%s failed to reset seq_rd_wr1 register via write",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -354,7 +408,7 @@ inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 
     // DDR4 needs delayed partiy TK for DDR5/DDR3 ...
     l_data.setBit<TT::DELAYED_PARITY>();
-    FAPI_TRY( write_config0(i_target, l_data) );
+    FAPI_TRY( write_config0(i_target, l_data), "%s failed to reset seq_config0 register via write", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
