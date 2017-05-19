@@ -107,4 +107,43 @@
     </collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INVALID_CORE_EX_CONFIG</rc>
+    <description> Invalid configuration of good core and bad EX detected
+    </description>
+    <ffdc>CORE</ffdc>
+    <ffdc>EX</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INVALID_CORE_EQ_CONFIG</rc>
+    <description> Invalid configuration of good core and bad EQ detected
+    </description>
+    <ffdc>CORE</ffdc>
+    <ffdc>EQ</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_STOP_GPE_INVALID_EX_CORE_CONFIG</rc>
+    <description> Invalid configuration of good EX and no functional cores detected
+    </description>
+    <ffdc>EX</ffdc>
+    <collectRegisterFfdc>
+      <id>SGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
 </hwpErrors>

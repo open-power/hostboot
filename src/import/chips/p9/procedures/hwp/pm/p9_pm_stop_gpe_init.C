@@ -131,6 +131,49 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
                                fusedModeState),
                  "Error from FAPI_ATTR_GET for attribute ATTR_FUSED_CORE_MODE");
 
+        // Check each core has a functional EX and EQ
+        auto l_functional_core_vector =
+            i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+            (fapi2::TARGET_STATE_FUNCTIONAL);
+
+        for(auto l_core_trgt : l_functional_core_vector)
+        {
+            auto l_ex_trgt = l_core_trgt.getParent<fapi2::TARGET_TYPE_EX>();
+            FAPI_ASSERT(l_ex_trgt.isFunctional() == true,
+                        fapi2::STOP_GPE_INVALID_CORE_EX_CONFIG()
+                        .set_CORE(l_core_trgt)
+                        .set_EX(l_ex_trgt)
+                        .set_CHIP(i_target),
+                        "Invalid Config - good core without functional EX");
+
+            auto l_eq_trgt = l_core_trgt.getParent<fapi2::TARGET_TYPE_EQ>();
+            FAPI_ASSERT(l_eq_trgt.isFunctional() == true,
+                        fapi2::STOP_GPE_INVALID_CORE_EQ_CONFIG()
+                        .set_CORE(l_core_trgt)
+                        .set_EQ(l_eq_trgt)
+                        .set_CHIP(i_target),
+                        "Invalid Config - good core without functional EQ");
+        }
+
+        // Check each functional EX has at least one functional core
+        auto l_functional_ex_vector =
+            i_target.getChildren<fapi2::TARGET_TYPE_EX>
+            (fapi2::TARGET_STATE_FUNCTIONAL);
+
+        for(auto l_ex_trgt : l_functional_ex_vector)
+        {
+            auto l_functional_core_vector = l_ex_trgt.getChildren<fapi2::TARGET_TYPE_CORE>
+                                            (fapi2::TARGET_STATE_FUNCTIONAL);
+            FAPI_ASSERT(l_functional_core_vector.empty() == false,
+                        fapi2::STOP_GPE_INVALID_EX_CORE_CONFIG()
+                        .set_EX(l_ex_trgt)
+                        .set_CHIP(i_target),
+                        "Invalid Config - good EX without any functional cores");
+        }
+
+
+
+
         //Additional settings for fused mode
         if (fusedModeState == 1)
         {
