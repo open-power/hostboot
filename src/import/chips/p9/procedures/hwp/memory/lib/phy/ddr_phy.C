@@ -71,6 +71,55 @@ namespace mss
 {
 
 ///
+/// @brief Clears all training related errors - specialization for MCA
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< >
+fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    FAPI_INF("%s resetting errors", mss::c_str(i_target));
+
+    // Reset DPs first
+    FAPI_TRY(mss::dp16::reset_rd_vref_errors(i_target), "%s error resetting RD VREF errors", mss::c_str(i_target));
+    FAPI_TRY(mss::dp16::reset_wr_error0(i_target), "%s error resetting DP16 WR error0", mss::c_str(i_target));
+    FAPI_TRY(mss::dp16::reset_rd_status0(i_target), "%s error resetting DP16 RD LVL errors", mss::c_str(i_target));
+    FAPI_TRY(mss::dp16::reset_rd_lvl_status2(i_target), "%s error resetting DP16 RD LVL status2", mss::c_str(i_target));
+    FAPI_TRY(mss::dp16::reset_rd_lvl_status0(i_target), "%s error resetting DP16 RD LVL status0", mss::c_str(i_target));
+    FAPI_TRY(mss::dp16::reset_wr_vref_error(i_target), "%s error resetting DP16 WR VREF errors", mss::c_str(i_target));
+
+    // Now APB/RC/WC/SEQ
+    FAPI_TRY(mss::apb::reset_err(i_target), "%s error resetting APB errors", mss::c_str(i_target));
+    FAPI_TRY(mss::rc::reset_error_status0(i_target), "%s error resetting RC errors status0", mss::c_str(i_target));
+    FAPI_TRY(mss::seq::reset_error_status0(i_target), "%s error resetting SEQ error status0", mss::c_str(i_target));
+    FAPI_TRY(mss::wc::reset_error_status0(i_target), "%s error resetting WC error status0", mss::c_str(i_target));
+
+    // Now the control
+    FAPI_TRY(mss::pc::reset_error_status0(i_target), "%s error resetting PC error status0", mss::c_str(i_target));
+    FAPI_TRY(mss::pc::reset_init_cal_error(i_target), "%s error resetting PC init cal errors", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears all training related errors - specialization for MCBIST
+/// @param[in] i_target the port in question
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
+///
+template< >
+fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
+{
+    for (const auto& p : mss::find_targets_with_magic<TARGET_TYPE_MCA>(i_target))
+    {
+        FAPI_TRY(clear_initial_cal_errors(p), "%s Error processing init cal errors", mss::c_str(p));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief change resetn to the given state
 /// @param[in] i_target the mcbist
 /// @param[in] i_state the desired state
