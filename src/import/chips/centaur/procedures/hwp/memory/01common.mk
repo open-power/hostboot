@@ -28,6 +28,7 @@ CEN_INCLUDES += $(ROOTPATH)/chips/centaur/common/include
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
+CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/initfiles/
 
 CEN_CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
 
