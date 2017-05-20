@@ -22,6 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Common include macro for Centaur
+-include 01common.mk
+
 PROCEDURE=cen_arrayinit
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 OBJS+=cen_common_funcs.o
 $(call BUILD_PROCEDURE)

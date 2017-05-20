@@ -22,6 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Common include macro for Centaur
+-include 01common.mk
+
 PROCEDURE=cen_pll_initf
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/centaur/procedures/hwp/initfiles)
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

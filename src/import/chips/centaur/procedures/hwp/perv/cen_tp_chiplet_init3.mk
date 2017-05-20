@@ -22,5 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Common include macro for Centaur
+-include 01common.mk
+
 PROCEDURE=cen_tp_chiplet_init3
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
