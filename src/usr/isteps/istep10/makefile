@@ -99,8 +99,8 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_nv_ref_clk_enable.mk
 # proc_pcie_scominit : Apply scom inits to PCIe chiplets
 include ${PROCEDURES_PATH}/hwp/nest/p9_pcie_scominit.mk
 
-# p9_mcs_scom
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcs_scom.mk
+# p9n_mcs_scom
+include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcs_scom.mk
 
 # proc_scomoverride_chiplets : Apply sequenced scom inits
 include ${PROCEDURES_PATH}/hwp/nest/p9_scomoverride_chiplets.mk
