@@ -77,9 +77,9 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
 
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_ddrphy_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mca_scom.mk
-include ${PROCEDURES_PATH}/hwp/initfiles/p9_mcbist_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mcbist_scom.mk
 
 #Dram init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_mcbist_scom.C $ */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_mcbist_scom.C $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "p9_mcbist_scom.H"
+#include "p9n_mcbist_scom.H"
 #include <stdint.h>
 #include <stddef.h>
 #include <fapi2.H>
@@ -41,7 +41,7 @@ constexpr uint64_t literal_0b00001000000000000000 = 0b00001000000000000000;
 constexpr uint64_t literal_0b100 = 0b100;
 constexpr uint64_t literal_0b0100 = 0b0100;
 
-fapi2::ReturnCode p9_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT0)
+fapi2::ReturnCode p9n_mcbist_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT0)
 {
     {
         fapi2::buffer<uint64_t> l_scom_buffer;

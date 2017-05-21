@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_mca_scom.mk $
+# $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_mcbist_scom.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,6 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_mca_scom
+PROCEDURE=p9n_mcbist_scom
 lib$(PROCEDURE)_COMMONFLAGS+=-fno-var-tracking-assignments
 $(call BUILD_PROCEDURE)

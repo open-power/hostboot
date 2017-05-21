@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_mc_scan.mk $
+# $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_ddrphy_scom.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,15 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE=p9_mc_scan
-lib$(PROCEDURE)_COMMONFLAGS+=-DFAPI_SUPPORT_SPY_AS_STRING=1
-$(call BUILD_PROCEDURE)
-
-PROCEDURE=p9_mc_scan_ifCompiler
-lib$(PROCEDURE)_COMMONFLAGS+=-DFAPI_SUPPORT_SPY_AS_STRING=1
-lib$(PROCEDURE)_COMMONFLAGS+=-DIFCOMPILER_PLAT=1
-FAPI=2_IFCOMPILER
-OBJS+=p9_mc_scan.o
-lib$(PROCEDURE)_LIBPATH=$(LIBPATH)/ifCompiler
+PROCEDURE=p9n_ddrphy_scom
 lib$(PROCEDURE)_COMMONFLAGS+=-fno-var-tracking-assignments
 $(call BUILD_PROCEDURE)

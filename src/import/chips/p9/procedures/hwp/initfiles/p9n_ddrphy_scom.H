@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_ddrphy_scom.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_ddrphy_scom.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _INIT_P9_DDRPHY_SCOM_PROCEDURE_H_
-#define _INIT_P9_DDRPHY_SCOM_PROCEDURE_H_
+#ifndef _INIT_P9N_DDRPHY_SCOM_PROCEDURE_H_
+#define _INIT_P9N_DDRPHY_SCOM_PROCEDURE_H_
 
 
 #include <stddef.h>
@@ -31,14 +31,14 @@
 #include <fapi2.H>
 
 
-typedef fapi2::ReturnCode (*p9_ddrphy_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&,
+typedef fapi2::ReturnCode (*p9n_ddrphy_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&,
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
-                                     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1);
+    fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
+                                      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1);
 
 }
 

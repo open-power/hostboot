@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_mc_scan.C $   */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_mc_scan.C $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "p9_mc_scan.H"
+#include "p9n_mc_scan.H"
 #include <stdint.h>
 #include <stddef.h>
 #include <fapi2.H>
@@ -34,7 +34,7 @@ constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_1 = 1;
 
-fapi2::ReturnCode p9_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
+fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0)
 {
     {
         fapi2::ATTR_EC_Type   l_chip_ec;

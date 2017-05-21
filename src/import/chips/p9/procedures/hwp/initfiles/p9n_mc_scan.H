@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9_mca_scom.H $  */
+/* $Source: src/import/chips/p9/procedures/hwp/initfiles/p9n_mc_scan.H $  */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,25 +22,25 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef _INIT_P9_MCA_SCOM_PROCEDURE_H_
-#define _INIT_P9_MCA_SCOM_PROCEDURE_H_
+#ifndef _INIT_P9N_MC_SCAN_PROCEDURE_H_
+#define _INIT_P9N_MC_SCAN_PROCEDURE_H_
 
 
 #include <stddef.h>
 #include <stdint.h>
 #include <fapi2.H>
 
+#ifdef IFCOMPILER_PLAT
+#define INITFILE_PROCEDURE \
+    p9n_mc_scan(TGT0);
+#endif
 
-typedef fapi2::ReturnCode (*p9_mca_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MCA>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&, const fapi2::Target<fapi2::TARGET_TYPE_MCS>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9n_mc_scan_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
-    fapi2::ReturnCode p9_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0,
-                                  const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT2,
-                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT3, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT4);
+    fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0);
 
 }
 

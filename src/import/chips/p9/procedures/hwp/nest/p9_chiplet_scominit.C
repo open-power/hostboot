@@ -42,7 +42,7 @@
 #include <p9_chiplet_scominit.H>
 #include <p9_fbc_ioo_tl_scom.H>
 #include <p9_fbc_ioo_dl_scom.H>
-#include <p9_mcs_scom.H>
+#include <p9n_mcs_scom.H>
 #include <p9_cxa_scom.H>
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
@@ -187,7 +187,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     {
         fapi2::toString(l_mcs_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
         FAPI_DBG("Invoking p9.mcs.scom.initfile on target %s...", l_chipletTargetStr);
-        FAPI_EXEC_HWP(l_rc, p9_mcs_scom, l_mcs_target, FAPI_SYSTEM, i_target,
+        FAPI_EXEC_HWP(l_rc, p9n_mcs_scom, l_mcs_target, FAPI_SYSTEM, i_target,
                       l_mcs_target.getParent<fapi2::TARGET_TYPE_MCBIST>());
 
         if (l_rc)
