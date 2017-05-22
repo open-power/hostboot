@@ -41,6 +41,7 @@
 #include <sys/mm.h>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
+#include <config.h>
 #include <pnor/ecc.H>
 #include "../pnorrp.H"
 #include "../pnor_common.H"
@@ -78,7 +79,18 @@ class PnorRpTest : public CxxTest::TestSuite
 
         for( uint64_t idx = 0; idx < numSections; idx++)
         {
+            // RINGOVD is not supported when secureboot is enabled, but rather
+            // than looking for the expected fail like non-test code does, just
+            // skip testing RINGOVD in this scenario
+            if ( ( testSections[idx] == PNOR::RINGOVD ) &&
+                 ( SECUREBOOT::enabled() ) )
+            {
+                TRACFCOMP(g_trac_pnor, "PnorRpTest::test_sectionInfo> Skipping RINGOVD since Security is enabled");
+                continue;
+            }
+
             total++;
+
             errhdl = PNOR::getSectionInfo( testSections[idx], info );
             if( errhdl )
             {

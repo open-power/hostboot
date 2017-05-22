@@ -896,6 +896,7 @@ namespace SBE
         PNOR::SectionInfo_t l_pnorRingOvd;
 
         do {
+
             l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
             if(l_err)
             {
@@ -903,7 +904,8 @@ namespace SBE
                 l_err = NULL;
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"ringOvd():Error trying to read RINGOVD "
-                           "from PNOR.  It is optional, continuing");
+                           "from PNOR. Could be blocked in secure mode. "
+                           "It is optional, continuing");
                 io_ovdImgSize = 0;
                 break;
             }
