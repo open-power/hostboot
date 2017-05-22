@@ -750,16 +750,12 @@ sub setupBars
     $targetObj->{TOPOLOGY}->{$group}->{$proc}++;
 
     my @bars=(  "FSP_BASE_ADDR",
-                "PSI_BRIDGE_BASE_ADDR",
-                "INTP_BASE_ADDR",
                 "VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR",
                 "VAS_USER_WINDOW_CONTEXT_ADDR",
                 "NVIDIA_NPU_PRIVILEGED_ADDR",
                 "NVIDIA_NPU_USER_REG_ADDR",
                 "NVIDIA_PHY0_REG_ADDR",
                 "NVIDIA_PHY1_REG_ADDR",
-                "PSI_HB_ESB_ADDR",
-                "XIVE_CONTROLLER_BAR_ADDR",
                 "NX_RNG_ADDR");
 
     # Attribute only valid in naples-based systems
@@ -773,6 +769,18 @@ sub setupBars
     }
     if (!$targetObj->isBadAttribute($target,"XSCOM_BASE_ADDRESS") ) {
           push(@bars,"XSCOM_BASE_ADDRESS");
+    }
+    if (!$targetObj->isBadAttribute($target,"PSI_BRIDGE_BASE_ADDR") ) {
+          push(@bars,"PSI_BRIDGE_BASE_ADDR");
+    }
+    if (!$targetObj->isBadAttribute($target,"INTP_BASE_ADDR") ) {
+          push(@bars,"INTP_BASE_ADDR");
+    }
+    if (!$targetObj->isBadAttribute($target,"PSI_HB_ESB_ADDR") ) {
+          push(@bars,"PSI_HB_ESB_ADDR");
+    }
+    if (!$targetObj->isBadAttribute($target,"XIVE_CONTROLLER_BAR_ADDR") ) {
+          push(@bars,"XIVE_CONTROLLER_BAR_ADDR");
     }
 
     foreach my $bar (@bars)
