@@ -220,21 +220,44 @@ namespace Bootloader{
                                    &l_hw_parms);
             if (l_rc != 0)
             {
+                // Get first 4 bytes of Container that failed verification
+                uint32_t l_beginContainer = 0;
+                memcpy(&l_beginContainer, i_pContainer,
+                       sizeof(l_beginContainer));
+
+                // Get first 4 bytes of system's hw keys' hash
+                uint32_t l_beginHwKeysHash = 0;
+                memcpy(&l_beginHwKeysHash, g_blData->blToHbData.hwKeysHash,
+                       sizeof(l_beginHwKeysHash));
+
+                // Read SBE HB shared data.
+                const auto l_blConfigData = reinterpret_cast<
+                                    BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
+
                 // Verification of Container failed.
                 BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_FAIL);
                 /*@
                  * @errortype
                  * @moduleid     Bootloader::MOD_BOOTLOADER_VERIFY
                  * @reasoncode   SECUREBOOT::RC_ROM_VERIFY
-                 * @userdata1    ROM return code
-                 * @userdata2    ROM_hw_params log
+                 * @userdata1[0:15]   TI_WITH_SRC
+                 * @userdata1[16:31]  TI_BOOTLOADER
+                 * @userdata1[32:63]  Failing address = 0
+                 * @userdata2[0:31]   First 4 bytes System's HW keys' Hash
+                 * @userdata2[32:63]  First 4 bytes of Container Header
+                 * @errorInfo[0:15]   SBE Boot Side
+                 * @errorInfo[16:31]  ROM_hw_params log
                  * @devdesc      ROM verification failed
                  * @custdesc     Platform security violation detected
                  */
                 bl_terminate(MOD_BOOTLOADER_VERIFY,
                              SECUREBOOT::RC_ROM_VERIFY,
-                             l_rc,
-                             l_hw_parms.log);
+                             l_beginHwKeysHash,
+                             l_beginContainer,
+                             true,
+                             0,
+                             TWO_UINT16_TO_UINT32(l_blConfigData->sbeBootSide,
+                                                  l_hw_parms.log));
 
             }
 
