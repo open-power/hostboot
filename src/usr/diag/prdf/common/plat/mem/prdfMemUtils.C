@@ -98,10 +98,6 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
         TargetHandle_t mcaTrgt = i_chip->getTrgt();
         ExtensibleChip * mcbChip = getConnectedParent( i_chip, TYPE_MCBIST );
 
-        uint8_t mcaPos = getTargetPosition( mcaTrgt );
-
-        PRDF_ASSERT( MAX_MCA_PER_MCBIST > mcaPos );
-
         const bool isX4 = isDramWidthX4(mcaTrgt);
 
         // Use this map to keep track of the total counts per DRAM.
