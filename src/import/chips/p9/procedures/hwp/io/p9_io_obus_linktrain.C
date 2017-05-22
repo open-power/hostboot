@@ -484,7 +484,7 @@ fapi2::ReturnCode linktrain_poll(
  * @param[in] i_ctgt  Reference to the Connected Target
  * @retval    ReturnCode
  */
-fapi2::ReturnCode p9_io_xbus_linktrain(const OBUS_TGT& i_tgt, const OBUS_TGT& i_ctgt)
+fapi2::ReturnCode p9_io_obus_linktrain(const OBUS_TGT& i_tgt, const OBUS_TGT& i_ctgt)
 {
     FAPI_IMP("p9_io_obus_linktrain: P9 I/O OPT Abus Entering");
 
