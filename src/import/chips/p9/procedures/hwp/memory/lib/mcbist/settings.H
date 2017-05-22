@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ class stop_conditions
             uint64_t l_thresh = 0;
             iv_value.extractToRight<F, L>(l_thresh);
 
-            if (l_thresh != DISABLE)
+            if (l_thresh == DISABLE)
             {
                 // Note the threshold field is an exponent, so this is 2^0, or 1 count
                 iv_value.insertFromRight<F, L>(0);
@@ -473,92 +473,92 @@ class stop_conditions
 
         ///
         /// @brief set_pause_on_sce
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on SCE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_sce( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_sce( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_SCE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_SCE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_mce
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on MCE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_mce( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_mce( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_MCE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_MCE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_mpe
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on MPE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_mpe( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_mpe( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_MPE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_MPE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_ue
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on UE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_ue( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_ue( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_UE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_UE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_sue
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on SUE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_sue( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_sue( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_SUE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_SUE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_aue
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on AUE error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_aue( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_aue( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_AUE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_AUE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_on_rcd
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause on RCD error. When enabled, MCBIST will pause at the boundary
         /// configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_on_rcd( const uint64_t i_value )
+        inline stop_conditions& set_pause_on_rcd( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_RCD>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_ON_RCD>(i_on_or_off);
             return *this;
         }
 
@@ -580,117 +580,117 @@ class stop_conditions
 
         ///
         /// @brief set_nce_soft_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables soft NCEs to trigger per symbol NCE error counting Only applies to
         /// scrub where we have different types of NCE. Non scrub counts all NCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_nce_soft_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_nce_soft_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_SOFT_SYMBOL_COUNT_ENABLE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_SOFT_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_nce_inter_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables intermittent NCEs to trigger per symbol NCE error counting Only applies
         /// to scrub where we have different types of NCE. Non scrub counts all NCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_nce_inter_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_nce_inter_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_INTER_SYMBOL_COUNT_ENABLE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_INTER_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_nce_hard_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables hard NCEs to trigger per symbol NCE error counting Only applies to
         /// scrub where we have different types of NCE. Non scrub counts all NCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_nce_hard_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_nce_hard_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_HARD_SYMBOL_COUNT_ENABLE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_NCE_HARD_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_mcb_error
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause when MCBIST error is logged. When enabled, MCBIST will pause at
         /// the boundary configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_mcb_error( const uint64_t i_value )
+        inline stop_conditions& set_pause_mcb_error( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_MCB_ERROR>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_MCB_ERROR>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_pause_mcb_log_full
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enable pause when MCBIST log is full. When enabled, MCBIST will pause at the
         /// boundary configured if this error is seen.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_pause_mcb_log_full( const uint64_t i_value )
+        inline stop_conditions& set_pause_mcb_log_full( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_MCB_LOG_FULL>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_PAUSE_MCB_LOG_FULL>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_maint_rce_with_ce
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// cfg_maint_rce_with_ce - not implemented. Need to investigate if needed for nimbus.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_maint_rce_with_ce( const uint64_t i_value )
+        inline stop_conditions& set_maint_rce_with_ce( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MAINT_RCE_WITH_CE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MAINT_RCE_WITH_CE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_mce_soft_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables soft MCEs to trigger per symbol MCE error counting Only applies to
         /// scrub where we have different types of MCE. Non scrub counts all MCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_mce_soft_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_mce_soft_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_SOFT_SYMBOL_COUNT_ENABLE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_SOFT_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_mce_inter_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables intermittent MCEs to trigger per symbol MCE error counting Only applies
         /// to scrub where we have different types of MCE. Non scrub counts all MCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_mce_inter_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_mce_inter_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_INTER_SYMBOL_COUNT_ENABLE>(i_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_INTER_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
         ///
         /// @brief set_mce_hard_symbol_count_enable
-        /// @param[in] i_value the value of the field
+        /// @param[in] i_on_or_off - the desired state.
         /// Enables hard MCEs to trigger per symbol MCE error counting Only applies to
         /// scrub where we have different types of MCE. Non scrub counts all MCE.
         /// @return fapi2::buffer<uint64_t>& this->iv_value useful for method chaining
         ///
-        inline stop_conditions& set_mce_hard_symbol_count_enable( const uint64_t i_value )
+        inline stop_conditions& set_mce_hard_symbol_count_enable( const states i_on_or_off )
         {
-            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_HARD_SYMBOL_COUNT_ENABLE>(iv_value);
+            iv_value.writeBit<MCBIST_MBSTRQ_CFG_MCE_HARD_SYMBOL_COUNT_ENABLE>(i_on_or_off);
             return *this;
         }
 
@@ -791,4 +791,3 @@ struct constraints
 } // namespace
 } // namespace
 #endif
-
