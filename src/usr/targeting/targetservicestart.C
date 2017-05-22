@@ -497,6 +497,63 @@ static void adjustMemoryMap( TargetService& i_targetService )
             TARG_ASSERT(false,"Mismatch between LPC and XSCOM BARs");
         }
 
+        //Setup Interrupt Related Bars
+        ATTR_PSI_BRIDGE_BASE_ADDR_type l_psiBridgeBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_BRIDGE_BASE_ADDR,
+                                  l_groupId,
+                                  l_chipId);
+        TARG_INF( " PSI_BRIDGE_BAR =%.16llX", l_psiBridgeBAR );
+        l_procChip->setAttr<ATTR_PSI_BRIDGE_BASE_ADDR>(l_psiBridgeBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_PSI_BRIDGE_BASE_ADDR] = l_psiBridgeBAR;
+        }
+
+        ATTR_XIVE_CONTROLLER_BAR_ADDR_type l_xiveCtrlBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR,
+                                   l_groupId,
+                                   l_chipId);
+        TARG_INF( " XIVE_CONTROLLER_BAR =%.16llX", l_xiveCtrlBAR );
+        l_procChip->setAttr<ATTR_XIVE_CONTROLLER_BAR_ADDR>(l_xiveCtrlBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_XIVE_CONTROLLER_BAR_ADDR] = l_xiveCtrlBAR;
+        }
+
+        ATTR_XIVE_THREAD_MGMT1_BAR_ADDR_type l_xiveThreadMgmtBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR,
+                                   l_groupId,
+                                   l_chipId);
+        TARG_INF( " XIVE_THREAD_MGMT1_BAR =%.16llX", l_xiveThreadMgmtBAR );
+        l_procChip->setAttr<ATTR_XIVE_THREAD_MGMT1_BAR_ADDR>(l_xiveThreadMgmtBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_XIVE_THREAD_MGMT1_BAR_ADDR] = l_xiveThreadMgmtBAR;
+        }
+
+        ATTR_PSI_HB_ESB_ADDR_type l_psiHbEsbBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR,
+                                   l_groupId,
+                                   l_chipId);
+        TARG_INF( " PSI_HB_ESB_BAR =%.16llX", l_psiHbEsbBAR );
+        l_procChip->setAttr<ATTR_PSI_HB_ESB_ADDR>(l_psiHbEsbBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_PSI_HB_ESB_ADDR] = l_psiHbEsbBAR;
+        }
+
+        ATTR_INTP_BASE_ADDR_type l_intpBAR =
+            computeMemoryMapOffset(MMIO_GROUP0_CHIP0_INTP_BASE_ADDR,
+                                   l_groupId,
+                                   l_chipId);
+        TARG_INF( " INTP_BAR =%.16llX", l_intpBAR );
+        l_procChip->setAttr<ATTR_INTP_BASE_ADDR>(l_intpBAR);
+        if( l_swapVictim == l_procChip)
+        {
+            l_swapAttrs[ATTR_INTP_BASE_ADDR] = l_intpBAR;
+        }
+        //finished setting up interrupt bars
+
         // Set the rest of the BARs...
     }
 
@@ -514,6 +571,16 @@ static void adjustMemoryMap( TargetService& i_targetService )
         SWAP_ATTRIBUTE( ATTR_XSCOM_BASE_ADDRESS, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         SWAP_ATTRIBUTE( ATTR_LPC_BUS_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_PSI_BRIDGE_BASE_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_XIVE_CONTROLLER_BAR_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_XIVE_THREAD_MGMT1_BAR_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_PSI_HB_ESB_ADDR, l_pMasterProcChip,
+                        l_swapVictim, l_swapAttrs );
+        SWAP_ATTRIBUTE( ATTR_INTP_BASE_ADDR, l_pMasterProcChip,
                         l_swapVictim, l_swapAttrs );
         // Handle the rest of the BARs...
     }

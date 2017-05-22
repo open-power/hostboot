@@ -3884,7 +3884,6 @@ sub generate_proc
 
     # Calculate the FSP and PSI BRIGDE BASE ADDR
     my $fspBase = 0;
-    my $psiBase = 0;
     foreach my $i (@{$psiBus->{'psi-bus'}})
     {
         if (($i->{'processor'}->{target}->{position} eq $proc) &&
@@ -3892,9 +3891,6 @@ sub generate_proc
         {
             #FSP MMIO address
             $fspBase = 0x0006030100000000 + $nodeSize*$lognode +
-                         $chipSize*$logid;
-            #PSI Link address
-            $psiBase = 0x0006030203000000 + $nodeSize*$lognode +
                          $chipSize*$logid;
             last;
         }
@@ -3905,10 +3901,6 @@ sub generate_proc
     printf( "        <default>0x%016X</default>\n", $fspBase );
     printf( "    </attribute>\n" );
 
-    # PSI Link address
-    printf( "    <attribute><id>PSI_BRIDGE_BASE_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n", $psiBase );
-    printf( "    </attribute>\n" );
 
     #VAS Hypervisor Window Contexts address
     printf( "    <attribute><id>VAS_HYPERVISOR_WINDOW_CONTEXT_ADDR</id>\n" );
@@ -3946,23 +3938,6 @@ sub generate_proc
        0x0006030201400000 + $nodeSize*$lognode + $chipSize*$logid );
     printf( "    </attribute>\n" );
 
-    #XIVE - Controller Bar address
-    printf( "    <attribute><id>XIVE_CONTROLLER_BAR_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006030203100000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #XIVE - Thread Management Bar Address register 1
-    printf( "    <attribute><id>XIVE_THREAD_MGMT1_BAR_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x0006020000000000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
-
-    #PSI HB - ESP space address
-    printf( "    <attribute><id>PSI_HB_ESB_ADDR</id>\n" );
-    printf( "        <default>0x%016X</default>\n",
-       0x00060302031C0000 + $nodeSize*$lognode + $chipSize*$logid );
-    printf( "    </attribute>\n" );
 
     #NX - RNG space address
     printf( "    <attribute><id>NX_RNG_ADDR</id>\n" );

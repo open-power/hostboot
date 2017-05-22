@@ -3579,8 +3579,9 @@
             <default>0xFFFFFFFFFFFFFFFF</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_PROC_PSI_BRIDGE_BAR_BASE_ADDR</id>
         <macro>DIRECT</macro>
@@ -3597,12 +3598,9 @@
             <default>0xFFFFFFFFFFFFFFFF</default>
         </uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_PROC_INTP_BAR_BASE_ADDR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -18959,8 +18957,9 @@ Measured in GB</description>
     <simpleType>
         <uint64_t></uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -18971,8 +18970,9 @@ Measured in GB</description>
     <simpleType>
         <uint64_t></uint64_t>
     </simpleType>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile-zeroed</persistency>
     <readable/>
+    <writeable/>
 </attribute>
 
 
@@ -18985,6 +18985,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>
