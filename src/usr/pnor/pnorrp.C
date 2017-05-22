@@ -509,17 +509,17 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
             || l_inhibited
         )
         {
-            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d", i_section );
+            TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> Invalid Section Requested : i_section=%d (%s)", i_section, SectionIdToString(id));
             #ifdef CONFIG_SECUREBOOT
             if (l_inhibited)
             {
                 TRACFCOMP( g_trac_pnor, "PnorRP::getSectionInfo> "
-                "attribute override inhibited by secureboot");
+                "attribute overrides inhibited by secureboot");
             }
             #endif
             uint64_t size = iv_TOC[i_section].size;
-            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d }",
-                             iv_TOC[i_section].id, size );
+            TRACFCOMP(g_trac_pnor, "o_info={ id=%d, size=%d , name=%s}",
+                             iv_TOC[i_section].id, size, SectionIdToString(id) );
             /*@
              * @errortype
              * @moduleid         PNOR::MOD_PNORRP_GETSECTIONINFO

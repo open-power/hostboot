@@ -1056,14 +1056,6 @@ namespace HBPM
             break;
 #endif
 
-            // No overrides in secure mode
-            if( SECUREBOOT::enabled() )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd(): No overrides in secure mode");
-                break;
-            }
-
             PNOR::SectionInfo_t l_pnorRingOvd;
             l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
             if(l_err)
@@ -1071,8 +1063,8 @@ namespace HBPM
                 delete l_err;
                 l_err = NULL;
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd(): RINGOVD section not found, "
-                           "it is optional");
+                           INFO_MRK"getRingOvd(): RINGOVD section not found or "
+                           "is blocked in secure mode. it is optional");
                 break;
             }
             if(l_pnorRingOvd.size == 0)

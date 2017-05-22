@@ -387,7 +387,8 @@ bool PNOR::isInhibitedSection(const uint32_t i_section)
 {
 #ifdef CONFIG_SECUREBOOT
     return (i_section == ATTR_PERM ||
-            i_section == ATTR_TMP) &&
+            i_section == ATTR_TMP  ||
+            i_section == RINGOVD ) &&
             SECUREBOOT::enabled();
 #else
     return false;
