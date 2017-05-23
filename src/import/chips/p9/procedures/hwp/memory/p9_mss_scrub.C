@@ -89,11 +89,20 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
     if (l_sim)
     {
+        fapi2::ReturnCode l_rc;
+
         // Use some sort of pattern in sim in case the verification folks need to look for something
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
         // have a good pattern for verification defined.
         FAPI_INF("running mss sim init in place of scrub");
-        return mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_0);
+        l_rc = mss::mcbist::sim::sf_init(i_target, mss::mcbist::PATTERN_0);
+
+        // Unmask firs and turn off FIFO mode before returning
+        FAPI_TRY ( mss::unmask::after_memdiags( i_target ) );
+        FAPI_TRY ( mss::unmask::after_background_scrub( i_target ) );
+        FAPI_TRY ( mss::reset_reorder_queue_settings(i_target) );
+
+        return l_rc;
     }
 
     // In Cronus on hardware (which is how we got here - f/w doesn't call this) we want
