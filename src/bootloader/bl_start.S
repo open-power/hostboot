@@ -393,11 +393,6 @@ switchToHBB:
 kernel_other_thread_spinlock:
     .space 8
 
-    .balign 16
-.global hbi_ImageId
-hbi_ImageId:
-    .space 128
-
 .global bootloader_end_address
 bootloader_end_address:
     .quad HBBL_END_ADDRESS
