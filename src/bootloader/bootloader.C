@@ -112,6 +112,36 @@ namespace Bootloader{
         const auto l_pSecRomInfo = reinterpret_cast<const SecureRomInfo*>(
                                                                    l_pRomStart);
 
+        // Set the MMIO BAR information as is appropriate
+        if (l_blConfigData->version >= MMIO_BARS_ADDED)
+        {
+            // Translate SBE to BL version into BL to HB version
+            switch(l_blConfigData->version)
+            {
+                // Add cases as additional versions are created
+                default:
+                    g_blData->blToHbData.version = BLTOHB_MMIOBARS;
+                    break;
+            }
+
+            // Copy values for MMIO BARs
+            g_blData->blToHbData.xscomBAR = l_blConfigData->xscomBAR;
+            g_blData->blToHbData.lpcBAR = l_blConfigData->lpcBAR;
+        }
+        else
+        {
+            // Use MMIO BARs version since default values are being set
+            g_blData->blToHbData.version = BLTOHB_MMIOBARS;
+
+            // Set default values for MMIO BARs
+            // @TODO RTC: 173526 or RTC: 173525
+            // Use constants MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR and
+            // MMIO_GROUP0_CHIP0_LPC_BASE_ADDR from
+            // src/include/arch/memorymap.H for setting values
+            g_blData->blToHbData.xscomBAR = 0x000603FC00000000;
+            g_blData->blToHbData.lpcBAR = 0x0006030000000000;
+        }
+
         // Only set rest of BlToHbData if SecureROM is valid
         if ( secureRomInfoValid(l_pSecRomInfo) )
         {
@@ -120,14 +150,6 @@ namespace Bootloader{
             g_blData->secureRomValid = true;
 
             g_blData->blToHbData.eyeCatch = BLTOHB_EYECATCHER;
-            if (l_blConfigData->version == BLTOHB_SAB + 1 /* MMIO_BARS_ADDED @TODO RTC:173526*/ )
-            {
-                g_blData->blToHbData.version = BLTOHB_MMIOBARS;
-            }
-            else
-            {
-                g_blData->blToHbData.version = BLTOHB_SAB;
-            }
             g_blData->blToHbData.branchtableOffset =
                                                l_pSecRomInfo->branchtableOffset;
             g_blData->blToHbData.secureRom = l_pRomStart;
@@ -140,14 +162,6 @@ namespace Bootloader{
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
             g_blData->blToHbData.hbbHeaderSize = PAGE_SIZE;
-
-            // Set the MMIO BAR information if appropriate
-            if (l_blConfigData->version >= BLTOHB_SAB + 1 /* MMIO_BARS_ADDED @TODO RTC:173526*/ )
-            {
-                g_blData->blToHbData.xscomBAR = 0x000603FC00000000 /* l_blConfigData->xscomBAR @TODO RTC:173526*/ ;
-                g_blData->blToHbData.lpcBAR = 0x0006030000000000 /* l_blConfigData->lpcBAR @TODO RTC:173526*/ ;
-            }
-
         }
 
         // Place structure into proper location for HB to find
