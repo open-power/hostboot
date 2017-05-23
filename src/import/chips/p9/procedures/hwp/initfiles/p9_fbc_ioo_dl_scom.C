@@ -55,7 +55,7 @@ fapi2::ReturnCode p9_fbc_ioo_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS
             FAPI_TRY(fapi2::putScom(TGT0, 0x901080aull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x901080cull, l_scom_buffer ));
 
