@@ -386,7 +386,7 @@ RingBucket::RingBucket( PlatId i_plat, uint8_t* i_pRingStart, RingDebugMode_t i_
             { ec_repr, 23 },
         };
 
-        for( ringIndex = 0; ringIndex < EC::g_ecData.iv_num_common_rings; ringIndex++ )
+        for( ringIndex = 0; ringIndex < MAX_HOMER_CORE_CMN_RINGS; ringIndex++ )
         {
             iv_cmnRingMap[ringIndex] = l_coreCmnRings[ringIndex];
         }
