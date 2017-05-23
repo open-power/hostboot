@@ -1153,7 +1153,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1168,7 +1168,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1183,7 +1183,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1198,7 +1198,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1213,7 +1213,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1228,7 +1228,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1243,7 +1243,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1258,7 +1258,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1273,7 +1273,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1288,7 +1288,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1303,7 +1303,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1318,7 +1318,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1333,7 +1333,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1348,7 +1348,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1363,7 +1363,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1378,7 +1378,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1393,7 +1393,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1408,7 +1408,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1423,7 +1423,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1438,7 +1438,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1453,7 +1453,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1468,7 +1468,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1483,7 +1483,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1498,7 +1498,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
@@ -1705,12 +1705,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00009010c3full, l_scom_buffer));
         }
         {
@@ -1720,12 +1720,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00109010c3full, l_scom_buffer));
         }
         {
@@ -1735,12 +1735,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00209010c3full, l_scom_buffer));
         }
         {
@@ -1750,12 +1750,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00309010c3full, l_scom_buffer));
         }
         {
@@ -1765,12 +1765,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00409010c3full, l_scom_buffer));
         }
         {
@@ -1780,12 +1780,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00509010c3full, l_scom_buffer));
         }
         {
@@ -1795,12 +1795,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00609010c3full, l_scom_buffer));
         }
         {
@@ -1810,12 +1810,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00709010c3full, l_scom_buffer));
         }
         {
@@ -1825,12 +1825,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00809010c3full, l_scom_buffer));
         }
         {
@@ -1840,12 +1840,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00909010c3full, l_scom_buffer));
         }
         {
@@ -1855,12 +1855,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00a09010c3full, l_scom_buffer));
         }
         {
@@ -1870,12 +1870,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00b09010c3full, l_scom_buffer));
         }
         {
@@ -1885,12 +1885,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00c09010c3full, l_scom_buffer));
         }
         {
@@ -1900,12 +1900,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00d09010c3full, l_scom_buffer));
         }
         {
@@ -1915,12 +1915,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00e09010c3full, l_scom_buffer));
         }
         {
@@ -1930,12 +1930,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a00f09010c3full, l_scom_buffer));
         }
         {
@@ -1945,12 +1945,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01009010c3full, l_scom_buffer));
         }
         {
@@ -1960,12 +1960,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01109010c3full, l_scom_buffer));
         }
         {
@@ -1975,12 +1975,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01209010c3full, l_scom_buffer));
         }
         {
@@ -1990,12 +1990,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01309010c3full, l_scom_buffer));
         }
         {
@@ -2005,12 +2005,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01409010c3full, l_scom_buffer));
         }
         {
@@ -2020,12 +2020,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01509010c3full, l_scom_buffer));
         }
         {
@@ -2035,12 +2035,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01609010c3full, l_scom_buffer));
         }
         {
@@ -2050,12 +2050,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000a01709010c3full, l_scom_buffer));
         }
         {
@@ -2257,12 +2257,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80009010c3full, l_scom_buffer));
         }
         {
@@ -2272,12 +2272,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80109010c3full, l_scom_buffer));
         }
         {
@@ -2287,12 +2287,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80209010c3full, l_scom_buffer));
         }
         {
@@ -2302,12 +2302,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80309010c3full, l_scom_buffer));
         }
         {
@@ -2317,12 +2317,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80409010c3full, l_scom_buffer));
         }
         {
@@ -2332,12 +2332,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80509010c3full, l_scom_buffer));
         }
         {
@@ -2347,12 +2347,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80609010c3full, l_scom_buffer));
         }
         {
@@ -2362,12 +2362,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80709010c3full, l_scom_buffer));
         }
         {
@@ -2377,12 +2377,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80809010c3full, l_scom_buffer));
         }
         {
@@ -2392,12 +2392,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80909010c3full, l_scom_buffer));
         }
         {
@@ -2407,12 +2407,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80a09010c3full, l_scom_buffer));
         }
         {
@@ -2422,12 +2422,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80b09010c3full, l_scom_buffer));
         }
         {
@@ -2437,12 +2437,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80c09010c3full, l_scom_buffer));
         }
         {
@@ -2452,12 +2452,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80d09010c3full, l_scom_buffer));
         }
         {
@@ -2467,12 +2467,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80e09010c3full, l_scom_buffer));
         }
         {
@@ -2482,12 +2482,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c80f09010c3full, l_scom_buffer));
         }
         {
@@ -2497,12 +2497,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81009010c3full, l_scom_buffer));
         }
         {
@@ -2512,12 +2512,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81109010c3full, l_scom_buffer));
         }
         {
@@ -2527,12 +2527,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81209010c3full, l_scom_buffer));
         }
         {
@@ -2542,12 +2542,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81309010c3full, l_scom_buffer));
         }
         {
@@ -2557,12 +2557,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81409010c3full, l_scom_buffer));
         }
         {
@@ -2572,12 +2572,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81509010c3full, l_scom_buffer));
         }
         {
@@ -2587,12 +2587,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81609010c3full, l_scom_buffer));
         }
         {
@@ -2602,12 +2602,12 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b0011 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b0011 );
             }
 
-            l_scom_buffer.insert<52, 4, 60, uint64_t>(literal_0b1010 );
+            l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1010 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c81709010c3full, l_scom_buffer));
         }
         {
