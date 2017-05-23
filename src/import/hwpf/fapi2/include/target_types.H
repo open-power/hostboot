@@ -68,8 +68,6 @@ enum TargetType
     TARGET_TYPE_CAPP          = 0x00008000, ///< CAPP target
     TARGET_TYPE_DMI           = 0x00010000, ///< DMI type
     TARGET_TYPE_OBUS          = 0x00020000, ///< OBUS type
-    //@TODO RTC:173529 -- Remove TARGET_TYPE_NV once it is in an ecmd release
-    TARGET_TYPE_NV            = 0x00040000, ///< NV Bus type
     TARGET_TYPE_OBUS_BRICK    = 0x00040000, ///< OBUS BRICK type
     TARGET_TYPE_SBE           = 0x00080000, ///< SBE type
     TARGET_TYPE_PPE           = 0x00100000, ///< PPE type
