@@ -69,7 +69,7 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
             {
                 l_scom_buffer.insert<8, 2, 62, uint64_t>(literal_0b11 );
             }
-            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0b11 );
             }

@@ -351,189 +351,192 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f2005011c11ull, l_scom_buffer));
         }
         {
-            l_scom_buffer.flush<0> ();
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.flush<0> ();
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<12, 3, 61, uint64_t>(literal_0b000 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<12, 3, 61, uint64_t>(literal_0b000 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<15, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<15, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<16, 2, 62, uint64_t>(literal_0b00 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<16, 2, 62, uint64_t>(literal_0b00 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<18, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<18, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<19, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<19, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<20, 1, 63, uint64_t>(literal_0b1 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<20, 1, 63, uint64_t>(literal_0b1 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<21, 2, 62, uint64_t>(literal_0b00 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<21, 2, 62, uint64_t>(literal_0b00 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<23, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<23, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if (((l_def_SAFE_MODE == literal_1) || (l_def_CORE_CEILING_RATIO_8_8 == literal_1)))
-            {
-                l_scom_buffer.insert<24, 2, 62, uint64_t>(literal_0b00 );
-            }
-            else if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<24, 2, 62, uint64_t>(literal_0b11 );
-            }
+                if (((l_def_SAFE_MODE == literal_1) || (l_def_CORE_CEILING_RATIO_8_8 == literal_1)))
+                {
+                    l_scom_buffer.insert<24, 2, 62, uint64_t>(literal_0b00 );
+                }
+                else if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<24, 2, 62, uint64_t>(literal_0b11 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<26, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<27, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<27, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_SAFE_MODE == literal_1))
-            {
-                l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b00 );
-            }
-            else if ((l_def_CORE_CEILING_RATIO_8_8 == literal_1))
-            {
-                l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b11 );
-            }
-            else if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b10 );
-            }
+                if ((l_def_SAFE_MODE == literal_1))
+                {
+                    l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b00 );
+                }
+                else if ((l_def_CORE_CEILING_RATIO_8_8 == literal_1))
+                {
+                    l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b11 );
+                }
+                else if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_0b10 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<30, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<30, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<31, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<31, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_SAFE_MODE == literal_1))
-            {
-                l_scom_buffer.insert<32, 2, 62, uint64_t>(literal_0b00 );
-            }
-            else if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<32, 2, 62, uint64_t>(literal_0b11 );
-            }
+                if ((l_def_SAFE_MODE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 2, 62, uint64_t>(literal_0b00 );
+                }
+                else if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<32, 2, 62, uint64_t>(literal_0b11 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<34, 3, 61, uint64_t>(literal_0b111 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<34, 3, 61, uint64_t>(literal_0b111 );
+                }
 
-            if ((l_def_SAFE_MODE == literal_1))
-            {
-                l_scom_buffer.insert<37, 2, 62, uint64_t>(literal_0b00 );
-            }
-            else if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<37, 2, 62, uint64_t>(literal_0b11 );
-            }
+                if ((l_def_SAFE_MODE == literal_1))
+                {
+                    l_scom_buffer.insert<37, 2, 62, uint64_t>(literal_0b00 );
+                }
+                else if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<37, 2, 62, uint64_t>(literal_0b11 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<39, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<39, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<41, 1, 63, uint64_t>(literal_0b1 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<41, 1, 63, uint64_t>(literal_0b1 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<42, 1, 63, uint64_t>(literal_0b1 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<42, 1, 63, uint64_t>(literal_0b1 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<43, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<43, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if (((l_def_SAFE_MODE == literal_1) || (l_def_CORE_CEILING_RATIO_8_8 == literal_1)))
-            {
-                l_scom_buffer.insert<44, 2, 62, uint64_t>(literal_0b00 );
-            }
-            else if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<44, 2, 62, uint64_t>(literal_0b11 );
-            }
+                if (((l_def_SAFE_MODE == literal_1) || (l_def_CORE_CEILING_RATIO_8_8 == literal_1)))
+                {
+                    l_scom_buffer.insert<44, 2, 62, uint64_t>(literal_0b00 );
+                }
+                else if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<44, 2, 62, uint64_t>(literal_0b11 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<46, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<46, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<47, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<47, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b00 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b00 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<51, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<51, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b0 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b0 );
+                }
 
-            if ((l_def_TRUE == literal_1))
-            {
-                l_scom_buffer.insert<54, 10, 54, uint64_t>(literal_0x000 );
-            }
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<54, 10, 54, uint64_t>(literal_0x000 );
+                }
 
-            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005011811ull, l_scom_buffer));
-            FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer));
+                FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005011811ull, l_scom_buffer));
+                FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer));
+            }
         }
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
