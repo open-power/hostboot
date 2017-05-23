@@ -2139,7 +2139,7 @@ uint32_t layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             break;
         }
 
-        for( uint32_t ringIndex = 0; ringIndex < EC::g_ecData.iv_num_common_rings;
+        for( uint32_t ringIndex = 0; ringIndex < MAX_HOMER_CORE_CMN_RINGS;
              ringIndex++ )
         {
             ringSize = i_ringData.iv_sizeWorkBuf1;
@@ -2395,7 +2395,7 @@ uint32_t layoutCmeScanOverride( Homerlayout_t*   i_pHomer,
         uint8_t* pOverrideRingPayload = pOverrideStart + CORE_COMMON_RING_INDEX_SIZE;
         bool overrideNotFound = true;
 
-        for( uint8_t ringIndex = 0; ringIndex < EC::g_ecData.iv_num_common_rings;
+        for( uint8_t ringIndex = 0; ringIndex < MAX_HOMER_CORE_CMN_RINGS;
              ringIndex++ )
         {
             tempBufSize = i_ringData.iv_sizeWorkBuf2;
