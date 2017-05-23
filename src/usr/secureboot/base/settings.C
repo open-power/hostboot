@@ -32,7 +32,6 @@
 #include <initservice/initserviceif.H>
 #include <secureboot/settings.H>
 #include <config.h>
-#include <errl/errludlogregister.H>
 #include <console/consoleif.H>
 
 // SECUREBOOT : General driver traces
@@ -45,10 +44,10 @@ namespace SECUREBOOT
 
     void Settings::_init()
     {
-        uint64_t l_regValue = 0;
+        uint64_t securitySwitchValue = 0;
 
         // read security switch register
-        auto l_errl = getSecuritySwitch(l_regValue,
+        auto l_errl = getSecuritySwitch(securitySwitchValue,
                                         MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
         if (NULL != l_errl)
@@ -64,79 +63,40 @@ namespace SECUREBOOT
         }
 
         // cache only the enabled flag
-        iv_enabled = (0 != (l_regValue &
+        iv_enabled = (0 != (securitySwitchValue &
                             static_cast<uint64_t>(ProcSecurity::SabBit)));
 
         SB_INF("getEnabled() state:%i",iv_enabled);
 
-        // send informational log if secure boot is disabled
+        // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
         if (!iv_enabled)
         {
             #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(SECURE_COMP_NAME, "Booting in non-secure mode.");
             #endif
-            /*@
-             * @errortype
-             * @reasoncode       SECUREBOOT::RC_SECURE_BOOT_DISABLED
-             * @moduleid         SECUREBOOT::MOD_SECURE_SETTINGS_INIT
-             * @severity         ERRL_SEV_INFORMATIONAL
-             * @userdata1        Security switch register value
-             * @devdesc          Secureboot has been disabled.
-             * @custdesc         Platform security informational message
-             */
-            auto err = new ERRORLOG::ErrlEntry(
-                ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                SECUREBOOT::MOD_SECURE_SETTINGS_INIT,
-                SECUREBOOT::RC_SECURE_BOOT_DISABLED,
-                l_regValue,
-                0,
-                false);
 
-            err->collectTrace(SECURE_COMP_NAME);
-
-            // we can't call getAllSecurityRegisters from here because it
-            // will deadlock when it circles back to getSecuritySwitch - the
-            // call to retreive the singleton for Settings class will hang.
-            // So, we just log the security switch and cbs control registers
-            ERRORLOG::ErrlUserDetailsLogRegister l_logReg(
-                MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                &l_regValue,
-                sizeof(l_regValue),
-                DEVICE_SCOM_ADDRESS(
-                    static_cast<uint64_t>(ProcSecurity::SwitchRegister)
-                ));
-            l_logReg.addToLog(err);
-
-            uint64_t l_cbsReg = 0;
-            auto l_cbsErrl = getProcCbsControlRegister(
-                l_cbsReg,
+            uint64_t cbsValue = 0;
+            l_errl = getProcCbsControlRegister(
+                cbsValue,
                 MASTER_PROCESSOR_CHIP_TARGET_SENTINEL);
 
-            if (l_cbsErrl)
+            if (l_errl)
             {
-                // link the CBS control register erorr plid to the original err
-                err->plid(l_cbsErrl->plid());
+                SB_ERR("getEnabled(): Failed in call to "
+                    "getProcCbsControlRegister().");
 
                 // commit the CBS control register error
-                ERRORLOG::errlCommit(l_cbsErrl, SECURE_COMP_ID);
+                ERRORLOG::errlCommit(l_errl, SECURE_COMP_ID);
 
                 // we're already in the error path so we just keep going
-                // without the register
-            }
-            else
-            {
-                ERRORLOG::ErrlUserDetailsLogRegister l_logCbsReg(
-                    MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
-                    &l_cbsReg,
-                    sizeof(l_cbsReg),
-                    DEVICE_SCOM_ADDRESS(
-                        static_cast<uint64_t>(ProcCbsControl::StatusRegister)
-                    ));
-                l_logCbsReg.addToLog(err);
+                // knowing the register is suspect
             }
 
-            ERRORLOG::errlCommit(err, SECURE_COMP_ID);
+            SB_INF("Booting in non-secure mode. "
+                "CBS Control/Status Register (0x50001) = 0x%016llX, "
+                "Security Switch Register (0x10005) = 0x%016llX.",
+                securitySwitchValue,cbsValue);
         }
         #endif
     }
