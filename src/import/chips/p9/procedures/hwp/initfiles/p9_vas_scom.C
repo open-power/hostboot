@@ -132,10 +132,13 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putScom(TGT0, 0x301184eull, l_scom_buffer));
         }
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x301184full, l_scom_buffer ));
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                FAPI_TRY(fapi2::getScom( TGT0, 0x301184full, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0x1 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x301184full, l_scom_buffer));
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0x1 );
+                FAPI_TRY(fapi2::putScom(TGT0, 0x301184full, l_scom_buffer));
+            }
         }
 
     };
