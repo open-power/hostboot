@@ -334,6 +334,8 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
             .set_thresh_nce_hard(1)
             .set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
+            .set_nce_inter_symbol_count_enable(mss::ON)
+            .set_nce_soft_symbol_count_enable(mss::ON)
             .set_nce_hard_symbol_count_enable(mss::ON);
 
     // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs.
