@@ -62,7 +62,7 @@ errlHndl_t PNOR::getSectionInfo( PNOR::SectionId i_section,
 }
 
 /**
- * @brief  Write the data for a given sectino into PNOR
+ * @brief  Write the data for a given section into PNOR
  */
 errlHndl_t PNOR::flush( PNOR::SectionId i_section)
 {
