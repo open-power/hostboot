@@ -89,6 +89,13 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
     PRDF_SET_RC(errl, PRD_ASSERT);
     PRDF_COLLECT_TRACE(errl, 256);
     PRDF_SET_TERM_STATE( errl );
+
+    const size_t sz_msg = 256;
+    char msg[sz_msg];
+    size_t msize = snprintf( msg, sz_msg, "prdfAssert(%s) in %s line %d",
+                                 i_exp, i_file, i_line );
+
+    PRDF_ADD_FFDC( errl, msg, msize, ErrlVer1, ErrlString);
     PRDF_COMMIT_ERRL(errl, ERRL_ACTION_SA);
 
     #ifdef  __HOSTBOOT_MODULE
@@ -96,11 +103,6 @@ void prdfAssert( const char * i_exp, const char * i_file, int i_line )
     assert(0);
 
     #else
-
-    const size_t sz_msg = 160;
-    char msg[sz_msg];
-    errlslen_t msize = snprintf( msg, sz_msg, "prdfAssert(%s) in %s line %d",
-                                 i_exp, i_file, i_line );
 
     percAbend(PRDF_COMP_ID, msg, msize+1, 0, 0);
     abort();
