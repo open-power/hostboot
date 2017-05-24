@@ -60,6 +60,7 @@ const uint32_t eq_clk_l2_pos[] = {8, 9};
 const uint32_t eq_clk_l3_pos[] = {6, 7};
 const uint32_t SSH_REG_STOP_LEVEL = 8;
 const uint32_t SSH_REG_STOP_LEVEL_LEN = 4;
+const uint32_t SSH_REG_STOP_GATED = 0;
 
 // ----------------------------------------------------------------------
 // Procedure Function
@@ -115,57 +116,61 @@ p9_query_cache_access_state(
     o_l3_is_scomable = 1;
     o_l3_is_scannable = 1;
 
-    // STOP8 - Half Quad Deep Sleep
-    //   VSU, ISU are powered off
-    //   IFU, LSU are powered off
-    //   PC, Core EPS are powered off
-    //   L20-EX0 is clocked off if both cores are >= 8
-    //   L20-EX1 is clocked off if both cores are >= 8
-    if (l_quadStopLevel >= 8)
+    //Looking at the stop states is only valid if quad is stop gated -- else it is fully running
+    if (l_qsshsrc.getBit(SSH_REG_STOP_GATED))
     {
-        o_l2_is_scomable = 0;
-    }
-
-    // STOP9 - Fast Winkle (lab use only)
-    // Both cores and cache are clocked off
-    if (l_quadStopLevel >= 9)
-    {
-        o_l3_is_scomable = 0;
-    }
-
-    // STOP11 - Deep Winkle
-    // Both cores and cache are powered off
-    if (l_quadStopLevel >= 11)
-    {
-        o_l2_is_scannable = 0;
-        o_l3_is_scannable = 0;
-    }
-    else
-    {
-        //Read clock status to confirm stop state history is accurate
-        //If we trust the stop state history, this could be removed to save on code size
-        //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
-
-        FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
-                 "Error: Failed to get the position of the EX:0x%08X", i_target);
-        l_exPos = l_chpltNumber % 2;
-
-        l_is_scomable = !l_data64.getBit(eq_clk_l2_pos[l_exPos]);
-
-        if (o_l2_is_scomable != l_is_scomable)
+        // STOP8 - Half Quad Deep Sleep
+        //   VSU, ISU are powered off
+        //   IFU, LSU are powered off
+        //   PC, Core EPS are powered off
+        //   L20-EX0 is clocked off if both cores are >= 8
+        //   L20-EX1 is clocked off if both cores are >= 8
+        if (l_quadStopLevel >= 8)
         {
-            FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-            o_l2_is_scomable = l_is_scomable;
+            o_l2_is_scomable = 0;
         }
 
-        l_is_scomable = !l_data64.getBit(eq_clk_l3_pos[l_exPos]);
-
-        if (o_l3_is_scomable != l_is_scomable)
+        // STOP9 - Fast Winkle (lab use only)
+        // Both cores and cache are clocked off
+        if (l_quadStopLevel >= 9)
         {
-            FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-            o_l3_is_scomable = l_is_scomable;
+            o_l3_is_scomable = 0;
+        }
+
+        // STOP11 - Deep Winkle
+        // Both cores and cache are powered off
+        if (l_quadStopLevel >= 11)
+        {
+            o_l2_is_scannable = 0;
+            o_l3_is_scannable = 0;
+        }
+        else
+        {
+            //Read clock status to confirm stop state history is accurate
+            //If we trust the stop state history, this could be removed to save on code size
+            //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
+
+            FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
+                     "Error: Failed to get the position of the EX:0x%08X", i_target);
+            l_exPos = l_chpltNumber % 2;
+
+            l_is_scomable = !l_data64.getBit(eq_clk_l2_pos[l_exPos]);
+
+            if (o_l2_is_scomable != l_is_scomable)
+            {
+                FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
+                o_l2_is_scomable = l_is_scomable;
+            }
+
+            l_is_scomable = !l_data64.getBit(eq_clk_l3_pos[l_exPos]);
+
+            if (o_l3_is_scomable != l_is_scomable)
+            {
+                FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
+                o_l3_is_scomable = l_is_scomable;
+            }
         }
     }
 
