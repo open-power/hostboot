@@ -186,6 +186,7 @@ typedef struct
     /// VPD operating points are stored without load-line correction.  Frequencies
     /// are in MHz, voltages are specified in units of 5mV, and currents are
     /// in units of 500mA.
+    /// \todo Remove this. RTC: 174743
     VpdOperatingPoint operating_points[NUM_OP_POINTS];
 
     /// Biases
@@ -260,9 +261,11 @@ typedef struct
     uint32_t nest_frequency_mhz;
 
     /// Precalculated Pstate-Voltage Slopes
+    /// \todo Remove this. RTC: 174743
     uint16_t PsVSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
     /// Precalculated Voltage-Pstates Slopes
+    /// \todo Remove this. RTC: 174743
     uint16_t VPsSlopes[VPD_NUM_SLOPES_SET][VPD_NUM_SLOPES_REGION];
 
     /// All operating points
@@ -270,6 +273,13 @@ typedef struct
 
     //DPLL pstate 0 value
     uint32_t dpll_pstate0_value;
+
+    /// Precalculated Pstate-Voltage Slopes
+    uint16_t PStateVSlopes[NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+
+    /// Precalculated Voltage-Pstates Slopes
+    uint16_t VPStateSlopes[NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
+
 
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 

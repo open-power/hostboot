@@ -350,7 +350,12 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         memcpy(l_globalppb.operating_points_set, l_operating_points, sizeof(l_operating_points));
 
         // Calculate pre-calculated slopes
-        p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb);
+        p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb); //Remote this RTC: 174743
+
+        p9_pstate_compute_PStateV_slope(VPD_PT_SET_RAW, l_operating_points, &l_globalppb);
+        p9_pstate_compute_PStateV_slope(VPD_PT_SET_SYSP, l_operating_points, &l_globalppb);
+        p9_pstate_compute_PStateV_slope(VPD_PT_SET_BIASED, l_operating_points, &l_globalppb);
+        p9_pstate_compute_PStateV_slope(VPD_PT_SET_BIASED_SYSP, l_operating_points, &l_globalppb);
 
         l_globalppb.dpll_pstate0_value = revle32((revle32(l_globalppb.reference_frequency_khz) + revle32(
                                              l_globalppb.frequency_step_khz) - 1) / revle32(
@@ -1688,15 +1693,15 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
         o_operating_points[VPD_PT_SET_SYSP][p].vdd_mv =
-            revle32((revle32(i_gppb->operating_points[p].vdd_mv) * 1000 +
-                     (revle32(i_gppb->operating_points[p].idd_100ma) * 100 * revle32(i_gppb->vdd_sysparm.loadline_uohm +
-                             i_gppb->vdd_sysparm.distloss_uohm)) / 1000 +
-                     revle32(i_gppb->vdd_sysparm.distoffset_uv)) / 1000) ;
+            revle32(revle32(i_gppb->operating_points[p].vdd_mv) +
+                    (((revle32(i_gppb->operating_points[p].idd_100ma) * 100) *
+                      (revle32(i_gppb->vdd_sysparm.loadline_uohm) + revle32(i_gppb->vdd_sysparm.distloss_uohm))) / 1000 +
+                     (revle32(i_gppb->vdd_sysparm.distoffset_uv))) / 1000) ;
         o_operating_points[VPD_PT_SET_SYSP][p].vcs_mv =
-            revle32( (revle32(i_gppb->operating_points[p].vcs_mv) * 1000 +
-                      (revle32(i_gppb->operating_points[p].ics_100ma) * 100 * (i_gppb->vcs_sysparm.loadline_uohm +
-                              i_gppb->vcs_sysparm.distloss_uohm) / 1000) +
-                      (i_gppb->vcs_sysparm.distoffset_uv)) / 1000) ;
+            revle32(revle32(i_gppb->operating_points[p].vcs_mv) +
+                    (((revle32(i_gppb->operating_points[p].ics_100ma) * 100) *
+                      (revle32(i_gppb->vcs_sysparm.loadline_uohm) + revle32(i_gppb->vcs_sysparm.distloss_uohm))) / 1000 +
+                     (revle32(i_gppb->vcs_sysparm.distoffset_uv))) / 1000) ;
         o_operating_points[VPD_PT_SET_SYSP][p].idd_100ma = (i_gppb->operating_points[p].idd_100ma);
         o_operating_points[VPD_PT_SET_SYSP][p].ics_100ma = (i_gppb->operating_points[p].ics_100ma);
         o_operating_points[VPD_PT_SET_SYSP][p].frequency_mhz = (i_gppb->operating_points[p].frequency_mhz);
@@ -1745,14 +1750,14 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
         o_operating_points[VPD_PT_SET_BIASED_SYSP][p].vdd_mv =
-            revle32(((revle32(o_operating_points[VPD_PT_SET_BIASED][p].vdd_mv) * 1000) +
-                     ((revle32(o_operating_points[VPD_PT_SET_BIASED][p].idd_100ma) * 100) *
-                      (revle32(i_gppb->vdd_sysparm.loadline_uohm + i_gppb->vdd_sysparm.distloss_uohm))) / 1000 +
-                     (revle32(i_gppb->vdd_sysparm.distoffset_uv))) / 1000 );
+            revle32(revle32(o_operating_points[VPD_PT_SET_BIASED][p].vdd_mv)  +
+                    (((revle32(o_operating_points[VPD_PT_SET_BIASED][p].idd_100ma) * 100) *
+                      (revle32(i_gppb->vdd_sysparm.loadline_uohm) + revle32(i_gppb->vdd_sysparm.distloss_uohm))) / 1000 +
+                     (revle32(i_gppb->vdd_sysparm.distoffset_uv))) / 1000);
         o_operating_points[VPD_PT_SET_BIASED_SYSP][p].vcs_mv =
-            revle32(((revle32(o_operating_points[VPD_PT_SET_BIASED][p].vcs_mv) * 1000) +
-                     ((revle32(o_operating_points[VPD_PT_SET_BIASED][p].ics_100ma) * 100) *
-                      (revle32(i_gppb->vcs_sysparm.loadline_uohm + i_gppb->vcs_sysparm.distloss_uohm))) / 1000 +
+            revle32(revle32(o_operating_points[VPD_PT_SET_BIASED][p].vcs_mv)  +
+                    (((revle32(o_operating_points[VPD_PT_SET_BIASED][p].ics_100ma) * 100) *
+                      (revle32(i_gppb->vcs_sysparm.loadline_uohm) + revle32(i_gppb->vcs_sysparm.distloss_uohm))) / 1000 +
                      (revle32(i_gppb->vcs_sysparm.distoffset_uv))) / 1000 );
         o_operating_points[VPD_PT_SET_BIASED_SYSP][p].idd_100ma =
             (o_operating_points[VPD_PT_SET_BIASED][p].idd_100ma);
@@ -1788,6 +1793,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
 //Inflection Point 1 is NOMINAL
 //Inflection Point 0 is POWERSAVE
 //
+//\todo: Remove this. RTC: 174743
 void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
                                   GlobalPstateParmBlock* o_gppb)
 {
@@ -1965,6 +1971,90 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
                   (revle16(o_gppb->VPsSlopes[VPD_SLOPES_BIASED][REGION_TURBO_ULTRA])), revle32(tmp));
     }
     while(0);
+}
+
+//This fills up the PStateVSlopes and VPStatesSlopes in GlobalParmBlock
+//Going forward this method should be retained in favor of the p9_pstate_compute_PsVSlopes
+void p9_pstate_compute_PStateV_slope(uint32_t pt_set, VpdOperatingPoint i_operating_points[][4],
+                                     GlobalPstateParmBlock* o_gppb)
+{
+
+    uint32_t tmp;
+    uint32_t eVidFP[NUM_OP_POINTS];
+    char const* vpdSetStr[NUM_VPD_PTS_SET] = VPD_PT_SET_ORDER_STR;
+
+    //convert to a fixed-point number
+    eVidFP[POWERSAVE] = revle32(revle32(i_operating_points[pt_set][POWERSAVE].vdd_mv) << VID_SLOPE_FP_SHIFT_12);
+    eVidFP[NOMINAL] = revle32(revle32(i_operating_points[pt_set][NOMINAL].vdd_mv) << VID_SLOPE_FP_SHIFT_12);
+    eVidFP[TURBO] = revle32(revle32(i_operating_points[pt_set][TURBO].vdd_mv) << VID_SLOPE_FP_SHIFT_12);
+    eVidFP[ULTRA] = revle32(revle32(i_operating_points[pt_set][ULTRA].vdd_mv) << VID_SLOPE_FP_SHIFT_12);
+
+    FAPI_INF("eVidFP[POWERSAVE] %x %04x", revle32(eVidFP[POWERSAVE]),
+             revle32(i_operating_points[pt_set][POWERSAVE].vdd_mv));
+    FAPI_INF("eVidFP[NOMINAL] %x %04x", revle32(eVidFP[NOMINAL]), revle32(i_operating_points[pt_set][NOMINAL].vdd_mv));
+    FAPI_INF("eVidFP[TURBO] %x %04x", revle32(eVidFP[TURBO]), revle32(i_operating_points[pt_set][TURBO].vdd_mv));
+    FAPI_INF("eVidFP[ULTRA] %x %04x", revle32(eVidFP[ULTRA]), revle32(i_operating_points[pt_set][ULTRA].vdd_mv));
+
+    // ULTRA TURBO pstate check is not required..because it's pstate will be
+    // 0
+    if (!(i_operating_points[pt_set][POWERSAVE].pstate) ||
+        !(i_operating_points[pt_set][NOMINAL].pstate) ||
+        !(i_operating_points[pt_set][TURBO].pstate))
+    {
+        FAPI_ERR("PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
+        return;
+    }
+
+    //Calculate slopes
+    tmp = revle32((revle32(eVidFP[NOMINAL]) - revle32(eVidFP[POWERSAVE])) /
+                  ((uint32_t)(-i_operating_points[pt_set][NOMINAL].pstate +
+                              i_operating_points[pt_set][POWERSAVE].pstate)));
+    o_gppb->PStateVSlopes[pt_set][REGION_POWERSAVE_NOMINAL] = revle16( revle32(tmp));
+    FAPI_INF("PStateVSlopes[%s][REGION_POWERSAVE_NOMINAL] %X tmp %X ", vpdSetStr[pt_set],
+             revle16(o_gppb->PStateVSlopes[pt_set][REGION_POWERSAVE_NOMINAL]), revle32(tmp));
+
+
+    tmp = revle32((revle32(eVidFP[TURBO]) - revle32(eVidFP[NOMINAL])) /
+                  ((uint32_t)(-i_operating_points[pt_set][TURBO].pstate +
+                              i_operating_points[pt_set][NOMINAL].pstate)));
+    o_gppb->PStateVSlopes[pt_set][REGION_NOMINAL_TURBO] = revle16( revle32(tmp));
+    FAPI_INF("PStateVSlopes[%s][REGION_NOMINAL_TURBO] %X tmp %X ", vpdSetStr[pt_set],
+             revle16(o_gppb->PStateVSlopes[pt_set][REGION_NOMINAL_TURBO]), revle32(tmp));
+
+
+    tmp = revle32((revle32(eVidFP[ULTRA]) - revle32(eVidFP[TURBO])) /
+                  ((uint32_t)(-i_operating_points[pt_set][ULTRA].pstate +
+                              i_operating_points[pt_set][TURBO].pstate)));
+    o_gppb->PStateVSlopes[pt_set][REGION_TURBO_ULTRA] = revle16( revle32(tmp));
+    FAPI_INF("PStateVSlopes[%s][REGION_TURBO_ULTRA] %X tmp %X ", vpdSetStr[pt_set],
+             revle16(o_gppb->PStateVSlopes[pt_set][REGION_TURBO_ULTRA]), revle32(tmp));
+
+    //Calculate inverted slopes
+    tmp =  revle32((uint32_t)((-i_operating_points[pt_set][NOMINAL].pstate +
+                               i_operating_points[pt_set][POWERSAVE].pstate) << VID_SLOPE_FP_SHIFT_12)
+                   / (uint32_t) (revle32(i_operating_points[pt_set][NOMINAL].vdd_mv) -
+                                 revle32(i_operating_points[pt_set][POWERSAVE].vdd_mv)));
+    o_gppb->VPStateSlopes[pt_set][REGION_POWERSAVE_NOMINAL] = revle16( revle32(tmp));
+    FAPI_INF("VPStateSlopes[%s][REGION_POWERSAVE_NOMINAL] %X tmp %X", vpdSetStr[pt_set],
+             (revle16(o_gppb->VPStateSlopes[pt_set][REGION_POWERSAVE_NOMINAL])), revle32(tmp));
+
+
+    tmp =  revle32((uint32_t)((-i_operating_points[pt_set][TURBO].pstate +
+                               i_operating_points[pt_set][NOMINAL].pstate) << VID_SLOPE_FP_SHIFT_12)
+                   / (uint32_t) (revle32(i_operating_points[pt_set][TURBO].vdd_mv) -
+                                 revle32(i_operating_points[pt_set][NOMINAL].vdd_mv)));
+    o_gppb->VPStateSlopes[pt_set][REGION_NOMINAL_TURBO] = revle16( revle32(tmp));
+    FAPI_INF("VPStateSlopes[%s][REGION_NOMINAL_TURBO] %X tmp %X", vpdSetStr[pt_set],
+             (revle16(o_gppb->VPStateSlopes[pt_set][REGION_NOMINAL_TURBO])), revle32(tmp));
+
+
+    tmp =  revle32((uint32_t)((-i_operating_points[pt_set][ULTRA].pstate +
+                               i_operating_points[pt_set][TURBO].pstate) << VID_SLOPE_FP_SHIFT_12)
+                   / (uint32_t) (revle32(i_operating_points[pt_set][ULTRA].vdd_mv) -
+                                 revle32(i_operating_points[pt_set][TURBO].vdd_mv)));
+    o_gppb->VPStateSlopes[pt_set][REGION_TURBO_ULTRA] = revle16( revle32(tmp));
+    FAPI_INF("VPStateSlopes[%s][REGION_TURBO_ULTRA] %X tmp %X", vpdSetStr[pt_set],
+             (revle16(o_gppb->VPStateSlopes[pt_set][REGION_TURBO_ULTRA])), revle32(tmp));
 }
 
 /// Print a GlobalPstateParameterBlock structure on a given stream
@@ -2789,7 +2879,7 @@ void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
         //convert to fixed-point number
         for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
         {
-            cVidFP[p] = revle32((io_lppb->vid_point_set[p]) << VID_SLOPE_FP_SHIFT);
+            cVidFP[p] = revle32((io_lppb->vid_point_set[p]) << VID_SLOPE_FP_SHIFT_12);
         }
 
 
