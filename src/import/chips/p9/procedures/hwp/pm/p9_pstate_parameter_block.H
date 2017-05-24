@@ -493,6 +493,10 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
 void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
                                   GlobalPstateParmBlock* o_gppb);
 
+void p9_pstate_compute_PStateV_slope(uint32_t i_pt_set, VpdOperatingPoint i_operating_points[][4],
+                                     GlobalPstateParmBlock* o_gppb);
+
+
 /// Print a GlobalPstateParameterBlock structure on a given stream
 ///
 /// @param[in] gppb The Global Pstate Parameter Block to print
