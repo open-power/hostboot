@@ -63,6 +63,7 @@
 #include <arch/memorymap.H>
 #include <lpc/lpcif.H>
 #include <xscom/xscomif.H>
+#include <bootloader/bootloaderif.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -152,6 +153,11 @@ static void initTargeting(errlHndl_t& io_pError)
         TARG_INF("WARNING: External tool asked master proc to disable "
             "security.");
     }
+    if(l_scratch3.allowAttrOverrides)
+    {
+        TARG_INF("WARNING: External tool asked master proc to allow "
+            "attribute overrides even in secure mode.");
+    }
 
     AttrRP::init(io_pError, l_isMpipl);
 
@@ -189,6 +195,24 @@ static void initTargeting(errlHndl_t& io_pError)
             INITSERVICE::doShutdown(plid, true);
         }
 #endif
+
+        // Handle possibility of Attribute Overrides allowed in secure mode
+        bool l_allow_attr_overrides =
+            g_BlToHbDataManager.getAllowAttrOverrides();
+        if (l_allow_attr_overrides)
+        {
+            TARG_INF("Allow Attribute Overrides In Secure Mode: %d",
+                l_allow_attr_overrides);
+            l_pTopLevel->setAttr<
+                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(
+                    l_allow_attr_overrides);
+        }
+        else
+        {
+            // Hardcode to zero to be safe
+            l_pTopLevel->setAttr<
+                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(0x0);
+        }
 
 // No error module loaded in VPO to save load time
 #ifndef CONFIG_VPO_COMPILE

@@ -108,6 +108,12 @@ void* call_host_slave_sbe_config(void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
             "WARNING: Requesting security disable on non-master processors.");
     }
+    if(l_scratch3.allowAttrOverrides)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+            "WARNING: Requesting allowing Attribute Overrides on "
+            "non-master processors even if secure mode.");
+    }
 
     // grab the boot flags from the master proc
     INITSERVICE::SPLESS::MboxScratch5_t l_scratch5;

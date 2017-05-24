@@ -38,6 +38,14 @@
 #include <secureboot/trustedbootif.H>
 #include <devicefw/driverif.H>
 
+#ifndef __HOSTBOOT_RUNTIME
+#include <kernel/bltohbdatamgr.H>
+#else
+#include <targeting/common/targetservice.H>
+#include <targeting/common/target.H>
+#include <util/misc.H>
+#endif
+
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
 TRAC_INIT(&g_trac_pnor, PNOR_COMP_NAME, 4*KILOBYTE, TRACE::BUFFER_SLOW); //4K
@@ -386,10 +394,52 @@ errlHndl_t PNOR::extendHash(uint64_t i_addr,
 bool PNOR::isInhibitedSection(const uint32_t i_section)
 {
 #ifdef CONFIG_SECUREBOOT
-    return (i_section == ATTR_PERM ||
-            i_section == ATTR_TMP  ||
-            i_section == RINGOVD ) &&
-            SECUREBOOT::enabled();
+    bool retVal = false;
+
+    if ((i_section == ATTR_PERM ||
+         i_section == ATTR_TMP  ||
+         i_section == RINGOVD )
+         && SECUREBOOT::enabled() )
+    {
+        // Default to these sections not being allowed in secure mode
+        retVal = true;
+
+
+#ifndef __HOSTBOOT_RUNTIME
+        // This is the scenario where a section might be inhibited so check
+        // global struct from bootloader for this setting
+        retVal = ! ( g_BlToHbDataManager.getAllowAttrOverrides() );
+
+        TRACFCOMP(g_trac_pnor, INFO_MRK"PNOR::isInhibitedSection: "
+                  "Inside Attr check: retVal=0x%X, i_section=%s",
+                  retVal,
+                  PNOR::SectionIdToString(i_section));
+
+#else
+        // This is the scenario where a section might be inhibited so check
+        // attribute to determine if these sections are allowed
+        if ( Util::isTargetingLoaded() )
+        {
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target* sys = nullptr;
+            (void) tS.getTopLevelTarget( sys );
+            assert(sys, "PNOR::isInhibitedSection() system target is NULL");
+
+            retVal = ! (sys->getAttr<
+                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>());
+
+            TRACFCOMP(g_trac_pnor, INFO_MRK"PNOR::isInhibitedSection: "
+                      "Inside Attr check: retVal=0x%X, attr=0x%X, i_section=%s",
+                      retVal,
+                      sys->getAttr<
+                        TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(),
+                      PNOR::SectionIdToString(i_section));
+       }
+#endif
+
+    }
+
+    return retVal;
 #else
     return false;
 #endif
