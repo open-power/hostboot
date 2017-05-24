@@ -1193,4 +1193,26 @@
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id>
+    <description>
+        Indicates if Attribute Overrides are allowed when the system is booted
+        in secure mode.  The default is 0x0, where attribute overrides are not
+        allowed.  However, the SBE can read mailbox scratch register 3 bit 7
+        to set it to 0x1, meaning that attribute overrides are allowed. The SBE
+        passes this information up to hostboot via the bootloader.
+            0x00 = Attribute Overrides are not allowed (default)
+            0x01 = Attribute Overrides are allowed
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0x00</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <writeable/>
+    <readable/>
+    <hbOnly/>
+</attribute>
+
 </attributes>

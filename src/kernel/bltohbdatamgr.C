@@ -27,6 +27,7 @@
 #include <kernel/console.H>
 #include <assert.h>
 #include <arch/memorymap.H>
+#include <bootloader/bootloaderif.H>
 
 // Global and only BlToHbDataManager instance
 BlToHbDataManager g_BlToHbDataManager;
@@ -57,7 +58,9 @@ void BlToHbDataManager::print() const
 
     if(iv_data.version >= Bootloader::BLTOHB_SAB)
     {
-        printkd("-- secureAccessBit = 0x%X\n", iv_data.secureAccessBit);
+        printkd("-- secureSettings: SAB=%d, SecOvrd=%d, AllowAttrOvrd=%d\n",
+                iv_data.secureAccessBit, iv_data.securityOverride,
+                iv_data.allowAttrOverrides);
     }
     if(iv_dataValid)
     {
@@ -124,10 +127,12 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.hbbHeaderSize = i_data.hbbHeaderSize;
 
 printk("Version=%lX\n",i_data.version);
-    // Ensure Bootloader to HB structure has the SAB member
+    // Ensure Bootloader to HB structure has the Secure Settings
     if(iv_data.version >= Bootloader::BLTOHB_SAB)
     {
         iv_data.secureAccessBit = i_data.secureAccessBit;
+        iv_data.securityOverride = i_data.securityOverride;
+        iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
     }
 
     // Ensure Bootloader to HB structure has the MMIO members
@@ -245,6 +250,18 @@ const bool BlToHbDataManager::getSecureAccessBit() const
 {
     validAssert();
     return iv_data.secureAccessBit;
+}
+
+const bool BlToHbDataManager::getSecurityOverride() const
+{
+    validAssert();
+    return iv_data.securityOverride;
+}
+
+const bool BlToHbDataManager::getAllowAttrOverrides() const
+{
+    validAssert();
+    return iv_data.allowAttrOverrides;
 }
 
 const size_t BlToHbDataManager::getPreservedSize() const

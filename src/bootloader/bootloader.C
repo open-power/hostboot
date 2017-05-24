@@ -84,12 +84,17 @@ namespace Bootloader{
         // Read SBE HB shared data.
         const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
                                                               SBE_HB_COMM_ADDR);
-        // Set secure Access Bit
+        // Set Secure Settings
         // Ensure SBE to Bootloader structure has the SAB member
+        //   and other Secure Settings
         if (l_blConfigData->version >= SAB_ADDED)
         {
             g_blData->blToHbData.secureAccessBit =
                 l_blConfigData->secureSettings.secureAccessBit;
+            g_blData->blToHbData.securityOverride =
+                l_blConfigData->secureSettings.securityOverride;
+            g_blData->blToHbData.allowAttrOverrides =
+                l_blConfigData->secureSettings.allowAttrOverrides;
         }
 
         // Find secure ROM addr

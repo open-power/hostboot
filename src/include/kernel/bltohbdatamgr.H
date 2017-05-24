@@ -143,11 +143,26 @@ class BlToHbDataManager
         const size_t getHbbHeaderSize() const;
 
         /*
-         * @brief Returns internal secure access bit
+         * @brief Returns internal Secure Setting: Secure Access Bit
          *
-         * @return bool     secure access bit
+         * @return bool     Secure Access Bit
          */
         const bool getSecureAccessBit() const;
+
+        /*
+         * @brief Returns internal Secure Setting: Security Override
+         *
+         * @return bool     Security Override Setting
+         */
+        const bool getSecurityOverride() const;
+
+        /*
+         * @brief Returns internal Secure Setting: Allow Attribute Overrides
+         *        in Secure Mode
+         *
+         * @return bool      Allow Attribute Overrides Setting
+         */
+        const bool getAllowAttrOverrides() const;
 
         /*
          * @brief Returns internal preserved size

@@ -75,7 +75,8 @@ struct BlToHbData
                    branchtableOffset(0), secureRom(nullptr),
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
-                   hbbHeaderSize(0), secureAccessBit(false),
+                   hbbHeaderSize(0), secureAccessBit(0),
+                   securityOverride(0), allowAttrOverrides(0),
                    xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR) {}
 
@@ -97,8 +98,12 @@ struct BlToHbData
     const void* hbbHeader;
     // size of Hostboot base header
     size_t hbbHeaderSize;
-    // Secure Access Bit
+    // Secure Setting - Secure Access Bit
     bool secureAccessBit;
+    // Secure Setting - Security Override
+    bool securityOverride;
+    // Secure Setting - Allow Attribute Overrides in Securemode
+    bool allowAttrOverrides;
     // XSCOM MMIO BAR
     uint64_t xscomBAR;
     // LPC MMIO BAR
