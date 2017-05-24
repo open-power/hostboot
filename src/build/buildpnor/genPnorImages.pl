@@ -550,6 +550,7 @@ sub manipulateImages
         #$isNormalSecure ||= ($eyeCatch eq "CAPP");
         #$isNormalSecure ||= ($eyeCatch eq "BOOTKERNEL");
         $isNormalSecure ||= ($eyeCatch eq "HCODE");
+        $isNormalSecure ||= ($eyeCatch eq "WOFDATA");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
