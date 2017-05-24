@@ -66,4 +66,4 @@ extern "C"
 
 } // extern C
 
-#endif  // __P9_PPE_DUMP_H__
+#endif  // __P9_PPE_STATE_H__
