@@ -56,6 +56,7 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <p9_pm_cme_firinit.H>
+#include <p9_query_cache_access_state.H>
 
 // ----------------------------------------------------------------------
 // Constant Definitions
@@ -223,34 +224,68 @@ fapi2::ReturnCode pm_cme_fir_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_IMP("pm_cme_fir_reset start");
-
     uint8_t l_firinit_done_flag;
-    auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
+    auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
                            i_target, l_firinit_done_flag),
              "ERROR: Failed to fetch the entry status of FIRINIT");
 
-    for (auto l_ex_chplt : l_exChiplets)
+    for (auto l_eq_chplt : l_eqChiplets)
     {
-        p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
+        //We cannot rely on the HWAS state because during an MPIPL
+        //the cores get stopped and the SP doesnt know until an
+        //attr sync occurs with the platform. We must use the
+        //query_cache_state to safely determine if we can scom
+        //the ex targets
+        fapi2::ReturnCode l_rc;
+        bool l_l2_is_scanable = false;
+        bool l_l3_is_scanable = false;
+        bool l_l2_is_scomable = false;
+        bool l_l3_is_scomable = false;
+        uint8_t l_chip_unit_pos;
 
-        if (l_firinit_done_flag == 1)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_eq_chplt, l_chip_unit_pos),
+                 "ERROR: Failed to get the chip unit pos attribute from the eq");
+
+        FAPI_EXEC_HWP(l_rc, p9_query_cache_access_state, l_eq_chplt,
+                      l_l2_is_scomable, l_l2_is_scanable,
+                      l_l3_is_scomable, l_l3_is_scanable);
+        FAPI_TRY(l_rc, "ERROR: failed to query cache access state for EQ %d",
+                 l_chip_unit_pos);
+
+        //If this cache isnt scommable continue to the next EQ
+        if(!l_l3_is_scomable)
         {
-            FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
-                     "ERROR: Failed to get the CME FIR MASK value");
-
-            /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
-            FAPI_TRY(l_cmeFir.saveMask(),
-                     "ERROR: Failed to save CME FIR Mask to the attribute");
+            continue;
         }
 
-        FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
-                 "ERROR: Faled to set the CME FIR MASK");
+        auto l_exChiplets = l_eq_chplt.getChildren<fapi2::TARGET_TYPE_EX>
+                            (fapi2::TARGET_STATE_FUNCTIONAL);
 
-        FAPI_TRY(l_cmeFir.put(),
-                 "ERROR:Failed to write to the CME FIR MASK");
+        for(auto l_ex_chplt : l_exChiplets)
+        {
+            p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
+
+            if (l_firinit_done_flag == 1)
+            {
+                FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
+                         "ERROR: Failed to get the CME FIR MASK value");
+
+                /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
+                FAPI_TRY(l_cmeFir.saveMask(),
+                         "ERROR: Failed to save CME FIR Mask to the attribute");
+            }
+
+            FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
+                     "ERROR: Faled to set the CME FIR MASK");
+
+            FAPI_TRY(l_cmeFir.put(),
+                     "ERROR:Failed to write to the CME FIR MASK");
+        }
+
     }
 
 fapi_try_exit:
