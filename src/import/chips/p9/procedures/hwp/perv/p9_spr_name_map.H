@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(DSCR     ,17  , ECP.LS.LSPRQX_DSCR<??T>                          ,FLAG_READ_WRITE ,SPR_PER_PT         ,25)\
     _op_(DSISR    ,18  , ECP.LS.T<??T>_DSISR                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,32)\
     _op_(DAR      ,19  , ECP.LS.T<??T>_DAR                                ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
-    _op_(DEC      ,22  , EXP.EC.CC.PCC<??C>.V<??T>_DEC                    ,FLAG_READ_WRITE ,SPR_PER_VT         ,32)\
+    _op_(DEC      ,22  , EXP.EC.CC.PCC<??C>.V<??T>_DEC                    ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
     _op_(SDR1     ,25  , ECP.LS.V<??T>_SDR1_MASTER                        ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
     _op_(SRR0     ,26  , ECP.IFU.T<??T>_SRR0                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SRR1     ,27  , ECP.SD.T<??T>_SRR1                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
@@ -145,7 +145,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(HDAR     ,307 , ECP.LS.T<??T>_HDAR                               ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(SPURR    ,308 , EXP.EC.CC.PCC<??C>.V<??T>_SPURR                  ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
     _op_(PURR     ,309 , EXP.EC.CC.PCC<??C>.V<??T>_PURR                   ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
-    _op_(HDEC     ,310 , EXP.EC.CC.PCC<??C>.L<??T>_HDEC                   ,FLAG_READ_WRITE ,SPR_PER_LPAR_VT    ,32)\
+    _op_(HDEC     ,310 , EXP.EC.CC.PCC<??C>.L<??T>_HDEC                   ,FLAG_READ_WRITE ,SPR_PER_LPAR_VT    ,64)\
     _op_(HRMOR    ,313 , ECP.LS.HRMOR                                     ,FLAG_READ_WRITE ,SPR_SHARED         ,64)\
     _op_(HSRR0    ,314 , ECP.IFU.T<??T>_HSRR0                             ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(HSRR1    ,315 , ECP.SD.T<??T>_HSRR1                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
