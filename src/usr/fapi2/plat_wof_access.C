@@ -112,6 +112,9 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     getChildChiplets(pECList, l_mProc, TARGETING::TYPE_CORE, false);
     uint32_t l_numCores = pECList.size();
 
+    // Choose a sort freq
+    uint32_t l_sortFreq = 0;
+
     // Get the socket power
     uint32_t l_socketPower = 0;
     uint8_t l_wofPowerLimit =
@@ -121,23 +124,23 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     {
         l_socketPower =
                 l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_TURBO>();
+        l_sortFreq = l_sys->getAttr<TARGETING::ATTR_FREQ_CORE_MAX>();
     }
     else
     {
         l_socketPower =
                 l_sys->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
+        l_sortFreq = l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
     }
 
     // Get the frequencies
     uint32_t l_nestFreq =
                 l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-    uint32_t l_nomFreq =
-                l_sys->getAttr<TARGETING::ATTR_NOMINAL_FREQ_MHZ>();
 
     // Trace the input params
     FAPI_INF("WOF table search: "
-             "Cores %d SocketPower 0x%X NestFreq 0x%X NomFreq 0x%X",
-             l_numCores, l_socketPower, l_nestFreq, l_nomFreq);
+             "Cores %d SocketPower 0x%X NestFreq 0x%X SortFreq 0x%X",
+             l_numCores, l_socketPower, l_nestFreq, l_sortFreq);
 
     void* l_pWofImage = nullptr;
     size_t l_lidImageSize = 0;
@@ -336,7 +339,7 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             if( (l_wth->core_count == l_numCores) &&
                 (l_wth->socket_power_w == l_socketPower) &&
                 (l_wth->nest_frequency_mhz == l_nestFreq) &&
-                (l_wth->sort_power_freq_mhz == l_nomFreq) )
+                (l_wth->sort_power_freq_mhz == l_sortFreq) )
             {
                 // Found a match
                 FAPI_INF("Found a WOF table match");
@@ -368,10 +371,11 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             * @errortype
             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
             * @reasoncode        fapi2::RC_WOF_TABLE_NOT_FOUND
-            * @userdata1[00:31]  Number of cores
+            * @userdata1[00:15]  Number of cores
+            * @userdata1[16:31]  WOF Power Mode (0=Nominal,1=Turbo)
             * @userdata1[32:63]  Socket power
             * @userdata2[00:31]  Nest frequency
-            * @userdata2[32:63]  Nominal frequency
+            * @userdata2[32:63]  Sort frequency
             * @devdesc           No WOF table match found
             * @custdesc          Firmware Error
             */
@@ -379,12 +383,13 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
                             fapi2::RC_WOF_TABLE_NOT_FOUND,
-                            TWO_UINT32_TO_UINT64(
+                            TWO_UINT16_ONE_UINT32_TO_UINT64(
                                     l_numCores,
+                                    l_wofPowerLimit,
                                     l_socketPower),
                             TWO_UINT32_TO_UINT64(
                                     l_nestFreq,
-                                    l_nomFreq),
+                                    l_sortFreq),
                             true); //software callout
             l_errl->collectTrace(FAPI_TRACE_NAME);
 
