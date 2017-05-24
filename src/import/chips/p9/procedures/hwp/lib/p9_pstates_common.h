@@ -118,13 +118,18 @@
 #define VPD_PV_VDN_MV           1
 #define VPD_PV_IDN_100MA        2
 
-#define VPD_NUM_SLOPES_SET  2
-#define VPD_SLOPES_RAW      0
-#define VPD_SLOPES_BIASED   1
+//Remove this. RTC: 174743
+#define VPD_NUM_SLOPES_SET      2
+#define VPD_SLOPES_RAW          0
+#define VPD_SLOPES_BIASED       1
+//Remove until here. RTC: 174743
+
 #define VPD_NUM_SLOPES_REGION       3
 #define REGION_POWERSAVE_NOMINAL    0
 #define REGION_NOMINAL_TURBO        1
 #define REGION_TURBO_ULTRA          2
+#define VPD_OP_SLOPES_REGION_ORDER {REGION_POWERSAVE_NOMINAL,REGION_NOMINAL_TURBO,REGION_TURBO_ULTRA}
+#define VPD_OP_SLOPES_REGION_ORDER_STR {"POWERSAVE_NOMINAL", "NOMINAL_TURBO    ","TURBO_ULTRA      "}
 
 // Different points considered for calculating slopes
 #define NUM_VPD_PTS_SET             4
@@ -133,13 +138,14 @@
 #define VPD_PT_SET_BIASED           2
 #define VPD_PT_SET_BIASED_SYSP      3
 #define VPD_PT_SET_ORDER {VPD_PT_SET_RAW, VPD_PT_SET_SYSP, VPD_PT_SET_BIASED, VPD_PT_SET_BIASED_SYSP}
-#define VPD_PT_SET_ORDER_STR {"Raw          ", "SysParam       ","Biased        ", "Biased/SysParam"}
+#define VPD_PT_SET_ORDER_STR {"Raw", "SysParam","Biased", "Biased/SysParam"}
 
-#define VID_SLOPE_FP_SHIFT         13
+#define VID_SLOPE_FP_SHIFT          13 //TODO: Remove this. RTC 174743
+#define VID_SLOPE_FP_SHIFT_12       12
 #define THRESH_SLOPE_FP_SHIFT       12
 
 // 0 = PowerSave, 1 = Nominal; 2 = Turbo; 3 = UltraTurbo; 4 = Enable
-#define VDM_DROOP_OP_POINTS   5
+#define VDM_DROOP_OP_POINTS         5
 
 
 
