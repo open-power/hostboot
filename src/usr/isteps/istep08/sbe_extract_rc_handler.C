@@ -124,6 +124,46 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
                             TARGETING::Target * i_target,
                             uint8_t i_prev_error)
 {
+    errlHndl_t l_errl = NULL;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+            l_fapi2_proc_target (i_target);
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Running p9_start_cbs HWP on processor target %.8X",
+               TARGETING::get_huid(i_target));
+
+    FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
+    if(l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                 "ERROR: call p9_start_cbs, "
+                 "PLID=0x%x", l_errl->plid() );
+        l_errl->collectTrace( "ISTEPS_TRACE", 256);
+
+        errlCommit(l_errl, ISTEP_COMP_ID);
+
+        // Get SBE extract rc
+        P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
+                P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+        FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                        l_fapi2_proc_target, l_rcAction);
+
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : p9_extract_sbe_rc HWP returning errorlog "
+                      "PLID-0x%x", l_errl->plid());
+
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+
+        return l_rcAction;
+    }
+
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 
@@ -131,6 +171,69 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
                          TARGETING::Target * i_target,
                          uint8_t i_prev_error)
 {
+    errlHndl_t l_errl = NULL;
+
+    // Get other proc
+    TARGETING::Target * sys = NULL;
+    TARGETING::targetService().getTopLevelTarget(sys);
+
+    TARGETING::PredicateCTM predProc(TARGETING::CLASS_CHIP,
+                   TARGETING::TYPE_PROC);
+    TARGETING::TargetHandleList l_procs;
+    TARGETING::targetService().getAssociated(l_procs, sys,
+                    TARGETING::TargetService::CHILD,
+                    TARGETING::TargetService::ALL,&predProc);
+
+    for(auto childItr = l_procs.begin();
+        childItr != l_procs.end(); ++childItr)
+    {
+        if( (*childItr) == i_target)
+        {
+            continue;
+        }
+        else
+        {
+            // Run HWP, but from the other side.
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2_proc_target(*childItr);
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Running p9_start_cbs HWP on processor target %.8X",
+                       TARGETING::get_huid(*childItr));
+
+            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "ERROR: call p9_start_cbs, "
+                          "PLID=0x%x",l_errl->plid() );
+                l_errl->collectTrace( "ISTEPS_TRACE", 256);
+
+                errlCommit(l_errl, ISTEP_COMP_ID);
+
+                // Get SBE extract rc
+                P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
+                        P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                                l_fapi2_proc_target, l_rcAction);
+
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR : p9_extract_sbe_rc HWP returning errorlog "
+                      "PLID-0x%x", l_errl->plid());
+
+                    // capture the target data in the elog
+                    ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+
+                    // Commit error log
+                    errlCommit( l_errl, HWPF_COMP_ID );
+                }
+
+                return l_rcAction;
+            }
+        }
+    }
+
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 
@@ -138,6 +241,34 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION working_exit_state(
                            TARGETING::Target * i_target,
                            uint8_t i_prev_error)
 {
+    errlHndl_t l_errl = NULL;
+
+    // If we came from the other side, create info log
+    // to say we booted on an unexpected side
+    if(i_prev_error == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
+    {
+        // Information log
+        /* @
+         * @errortype
+         * @moduleid    MOD_SBE_THRESHOLD_FSM
+         * @reasoncode  RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP,
+         * @userdata1   0
+         * @userdata2   HUID
+         * @devdesc     The SBE has booted on an unexpected side
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        ISTEP::MOD_SBE_THRESHOLD_FSM,
+                        ISTEP::RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP,
+                        0,
+                        get_huid(i_target));
+
+        l_errl->collectTrace( "ISTEPS_TRACE", 256);
+
+        errlCommit(l_errl, ISTEP_COMP_ID);
+
+    }
+
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 
@@ -145,6 +276,47 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
                            TARGETING::Target * i_target,
                            uint8_t i_prev_error)
 {
+    errlHndl_t l_errl = NULL;
+
+    // Look at current error (1-6)
+    // Error is 1,2 or 4.  Escalate to REIPL_BKP_SEEPROM (recall fcn)
+    if( (i_prev_error == P9_EXTRACT_SBE_RC::RESTART_SBE) ||
+        (i_prev_error == P9_EXTRACT_SBE_RC::RESTART_CBS) ||
+        (i_prev_error == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM) )
+    {
+        proc_extract_sbe_handler(i_target, i_prev_error,
+                        P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
+    }
+    // Error is 3 or 6. Gard and callout proc, return back to 8.4
+    else if(i_prev_error == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
+    {
+        // There is no action possible. Gard and Callout the proc
+        /* @
+         * @errortype  ERRL_SEV_UNRECOVERABLE
+         * @moduleid   MOD_SBE_EXTRACT_RC_HANDLER
+         * @reasoncode RC_NO_RECOVERY_ACTION
+         * @userdata1  SBE current error
+         * @userdata2  HUID of proc
+         * @devdesc    There is no recovery action on the SBE.
+         *             We're garding this proc
+             */
+        l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        ISTEP::MOD_SBE_THRESHOLD_FSM,
+                        ISTEP::RC_NO_RECOVERY_ACTION,
+                        i_prev_error,
+                        TARGETING::get_huid(i_target));
+        l_errl->collectTrace( "ISTEPS_TRACE", 246);
+        l_errl->addHwCallout( i_target,
+                              HWAS::SRCI_PRIORITY_HIGH,
+                              HWAS::DECONFIG,
+                              HWAS::GARD_Predictive );
+        errlCommit(l_errl, ISTEP_COMP_ID);
+
+    }
+
+    // 5 will never happen. If it does, just return back to 8.4
+
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 // end FSM
@@ -284,10 +456,10 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                         //    an unexpected side
                         // if it fails, call the threshold handler
                     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                            l_fapi2_proc_target((*childItr));
+                            l_fapi2_proc_target(*childItr);
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "Running p9_start_cbs HWP on processor target %.8X",
-                            TARGETING::get_huid((*childItr)));
+                            TARGETING::get_huid(*childItr));
 
                     FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
                                     l_fapi2_proc_target, true);
@@ -382,10 +554,10 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                         // if it fails, escalate to RE_IPL_SEEPROM and call
                         //   this function again.
                     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                            l_fapi2_proc_target((*childItr));
+                            l_fapi2_proc_target(*childItr);
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "Running p9_start_cbs HWP on processor target %.8X",
-                           TARGETING::get_huid((*childItr)));
+                           TARGETING::get_huid(*childItr));
 
                     FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
                                     l_fapi2_proc_target, true);
