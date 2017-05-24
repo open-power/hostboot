@@ -107,13 +107,14 @@ namespace ISTEP
         RC_SLAVE_PROC_CBS_CONTROL_READ_FAIL      = ISTEP_COMP_ID | 0x27,
         RC_PROC_SECURITY_STATE_MISMATCH          = ISTEP_COMP_ID | 0x28,
         RC_MIN_HW_CHECK_FAILED                   = ISTEP_COMP_ID | 0x29,
-        RC_SBE_BOOTED_UNEXPECTED_SIDE            = ISTEP_COMP_ID | 0x2A,
+        RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP        = ISTEP_COMP_ID | 0x2A,
         RC_SBE_EXTRACT_RC_ERROR                  = ISTEP_COMP_ID | 0x2B,
         RC_BOOT_FROM_BKP_SEEPROM                 = ISTEP_COMP_ID | 0x2C,
         RC_NO_RECOVERY_ACTION                    = ISTEP_COMP_ID | 0x2D,
         RC_INCORRECT_FCN_CALL                    = ISTEP_COMP_ID | 0x2E,
         RC_HWSV_COLLECT_SBE_RC                   = ISTEP_COMP_ID | 0x2F,
         RC_PROC_EXTRACT_SBE_MAIN_ERROR           = ISTEP_COMP_ID | 0x30,
+        RC_SBE_BOOTED_UNEXPECTED_SIDE_UPD        = ISTEP_COMP_ID | 0x31,
     };
 
 };
