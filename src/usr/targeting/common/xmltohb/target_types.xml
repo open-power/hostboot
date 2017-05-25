@@ -2141,7 +2141,54 @@
     <attribute><id>CDM_DOMAIN</id><default>IO</default></attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION_GEN3</id></attribute>
     <attribute><id>PROC_PCIE_LANE_EQUALIZATION_GEN4</id></attribute>
-
+    <attribute>
+        <id>PCIE_CAPABILITES</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>MGC_LOAD_SOURCE</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>SLOT_NAME</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>SLOT_INDEX</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>HDDW_ORDER</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>PCIE_32BIT_MMIO_SIZE</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>PCIE_64BIT_MMIO_SIZE</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>PCIE_32BIT_DMA_SIZE</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>PCIE_64BIT_DMA_SIZE</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>MAX_POWER</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>VENDOR_ID</id>
+        <default></default>
+    </attribute>
+    <attribute>
+        <id>DEVICE_ID</id>
+        <default></default>
+    </attribute>
 </targetType><!-- unit-phb-power9 -->
 
 <targetType>

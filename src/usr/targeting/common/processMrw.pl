@@ -1182,6 +1182,187 @@ sub processPec
                         $lane_mask_attr);
                     $targetObj->setAttribute($target,
                         "PEC_PCIE_LANE_MASK_NON_BIFURCATED", $lane_mask_attr);
+
+                    # Only compute the HDAT attributes if they are available
+                    # and have default values
+                    if (!($targetObj->isBadAttribute($phb_config_child,
+                                                        "ENABLE_LSI")))
+                    {
+                        # Get capabilites, and bit shift them correctly
+                        # Set the CAPABILITES attribute for evey PHB
+                        my $lsiSupport = $targetObj->getAttribute
+                                         ($phb_config_child, "ENABLE_LSI");
+                        my $capiSupport = ($targetObj->getAttribute
+                                      ($phb_config_child, "ENABLE_CAPI")) << 1;
+                        my $cableCardSupport = ($targetObj->getAttribute
+                                 ($phb_config_child, "ENABLE_CABLECARD")) << 2;
+                        my $hotPlugSupport = ($targetObj->getAttribute
+                                   ($phb_config_child, "ENABLE_HOTPLUG")) << 3;
+                        my $sriovSupport = ($targetObj->getAttribute
+                                     ($phb_config_child, "ENABLE_SRIOV")) << 4;
+                        my $elLocoSupport = ($targetObj->getAttribute
+                                    ($phb_config_child, "ENABLE_ELLOCO")) << 5;
+                        my $nvLinkSupport = ($targetObj->getAttribute
+                                    ($phb_config_child, "ENABLE_NVLINK")) << 6;
+                        my $capabilites = sprintf("0x%X", ($nvLinkSupport |
+                            $elLocoSupport | $sriovSupport | $hotPlugSupport |
+                            $cableCardSupport | $capiSupport | $lsiSupport));
+
+
+                        $targetObj->setAttribute($phb_child, "PCIE_CAPABILITES",
+                            $capabilites);
+
+                        # Set MGC_LOAD_SOURCE for every PHB
+                        my $mgc_load_source = $targetObj->getAttribute
+                           ($phb_config_child, "MGC_LOAD_SOURCE");
+
+                        $targetObj->setAttribute($phb_child, "MGC_LOAD_SOURCE",
+                            $mgc_load_source);
+
+                        # Find if this PHB has a pcieslot connection
+                        my $pcieBusConnection =
+                            $targetObj->findConnections($phb_child,"PCIE","");
+
+                        # Inspect the connection and set appropriate attributes
+                        foreach my $pcieBus (@{$pcieBusConnection->{CONN}})
+                        {
+                            # Check if destination is a switch(PEX) or built in
+                            # device(USB) and set entry type attribute
+                            my $destTargetType = $targetObj->getTargetType
+                                ($pcieBus->{DEST_PARENT});
+                            if ($destTargetType eq "chip-PEX8725")
+                            {
+                                # Destination is a switch upleg. Set entry type
+                                # that corresponds to switch upleg.
+                                $targetObj->setAttribute($phb_child,
+                                    "ENTRY_TYPE","0x01");
+
+                                # Set Station ID (only valid for switch upleg)
+                                my $stationId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST}, "STATION");
+
+                                $targetObj->setAttribute($phb_child,
+                                    "STATION_ID",$stationId);
+                                # Set device and vendor ID from the switch
+                                my $vendorId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST_PARENT}, "VENDOR_ID");
+                                my $deviceId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST_PARENT}, "DEVICE_ID");
+                                $targetObj->setAttribute($phb_child,
+                                    "VENDOR_ID",$vendorId);
+                                $targetObj->setAttribute($phb_child,
+                                    "DEVICE_ID",$deviceId);
+                            }
+                            elsif ($destTargetType eq "chip-TUSB7340")
+                            {
+                                # Destination is a built in device. Set entry
+                                # type that corresponds to built in device
+                                $targetObj->setAttribute($phb_child,
+                                    "ENTRY_TYPE","0x03");
+                                # Set device and vendor ID from the device
+                                my $vendorId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST_PARENT}, "VENDOR_ID");
+                                my $deviceId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST_PARENT}, "DEVICE_ID");
+                                $targetObj->setAttribute($phb_child,
+                                    "VENDOR_ID",$vendorId);
+                                $targetObj->setAttribute($phb_child,
+                                    "DEVICE_ID",$deviceId);
+                            }
+
+                            # If the source is a PEX chip, its a switch downleg
+                            # Set entry type accordingly
+                            my $sourceTargetType = $targetObj->getTargetType
+                                ($pcieBus->{SOURCE_PARENT});
+                            if ($sourceTargetType eq "chip-PEX8725")
+                            {
+                                # Destination is a switch downleg.
+                                $targetObj->setAttribute($phb_child,
+                                    "ENTRY_TYPE","0x02");
+
+                                # Set Ports which this downleg switch connects
+                                # to. Only valid for switch downleg
+                                my $portId = $targetObj->getAttribute
+                                   ($pcieBus->{DEST}, "PORT");
+
+                                $targetObj->setAttribute($phb_child, "PORT_ID",
+                                    $portId);
+
+                                # Set device and vendor ID from the device
+                                my $vendorId = $targetObj->getAttribute
+                                   ($pcieBus->{SOURCE_PARENT}, "VENDOR_ID");
+                                my $deviceId = $targetObj->getAttribute
+                                   ($pcieBus->{SOURCE_PARENT}, "DEVICE_ID");
+                                $targetObj->setAttribute($phb_child,
+                                    "VENDOR_ID",$vendorId);
+                                $targetObj->setAttribute($phb_child,
+                                    "DEVICE_ID",$deviceId);
+                            }
+
+                            # Get the parent of the DEST_PARENT, and chek its
+                            # instance type
+                            my $parent_target =
+                              $targetObj->getTargetParent($pcieBus->{DEST_PARENT});
+                            my $parentTargetType =
+                                $targetObj->getTargetType($parent_target);
+                            if ($parentTargetType eq "slot-pcieslot-generic")
+                            {
+                                # Set these attributes only if we are in a pcie
+                                # slot connection
+                                my $hddw_order = $targetObj->getAttribute
+                                    ($parent_target, "HDDW_ORDER");
+                                my $slot_index = $targetObj->getAttribute
+                                    ($parent_target, "SLOT_INDEX");
+                                my $slot_name = $targetObj->getAttribute
+                                    ($parent_target, "SLOT_NAME");
+                                my $mmio_size_32 = $targetObj->getAttribute
+                                    ($parent_target, "32BIT_MMIO_SIZE");
+                                my $mmio_size_64 = $targetObj->getAttribute
+                                    ($parent_target, "64BIT_MMIO_SIZE");
+                                my $dma_size_32 = $targetObj->getAttribute
+                                    ($parent_target, "32BIT_DMA_SIZE");
+                                my $dma_size_64 = $targetObj->getAttribute
+                                    ($parent_target, "64BIT_DMA_SIZE");
+
+                                $targetObj->setAttribute($phb_child, "HDDW_ORDER",
+                                    $hddw_order);
+                                $targetObj->setAttribute($phb_child, "SLOT_INDEX",
+                                    $slot_index);
+                                $targetObj->setAttribute($phb_child, "SLOT_NAME",
+                                    $slot_name);
+                                $targetObj->setAttribute($phb_child,
+                                    "PCIE_32BIT_MMIO_SIZE", $mmio_size_32);
+                                $targetObj->setAttribute($phb_child,
+                                    "PCIE_64BIT_MMIO_SIZE", $mmio_size_64);
+                                $targetObj->setAttribute($phb_child,
+                                    "PCIE_32BIT_DMA_SIZE", $dma_size_32);
+                                $targetObj->setAttribute($phb_child,
+                                    "PCIE_64BIT_DMA_SIZE", $dma_size_64);
+                                $targetObj->setAttribute($phb_child,
+                                    "ENTRY_FEATURES", "0x0001");
+
+                                # Only set MAX_POWER if it exisits in the system
+                                # xml. TODO to remove this check when system xml
+                                # is upated: RTC:175319
+                                if (!($targetObj->isBadAttribute
+                                    ($parent_target,"MAX_POWER")))
+                                {
+                                    my $maxSlotPower = $targetObj->getAttribute
+                                    ($parent_target, "MAX_POWER");
+                                    $targetObj->setAttribute($phb_child,
+                                        "MAX_POWER",$maxSlotPower);
+                                }
+
+                            }
+                            else
+                            {
+                                # Set these attributes only for non-pcie slot
+                                # connections
+                                $targetObj->setAttribute($phb_child,
+                                    "ENTRY_FEATURES", "0x0002");
+                            }
+                        }
+                    }
                 } # Found connection
             } # PHB bus loop
 
