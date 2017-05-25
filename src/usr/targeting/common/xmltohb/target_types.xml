@@ -922,6 +922,9 @@
     <attribute><id>SBE_SYS_CONFIG</id></attribute>
     <attribute><id>CP_REFCLOCK_RCVR_TERM</id></attribute>
     <attribute><id>IO_REFCLOCK_RCVR_TERM</id></attribute>
+    <attribute><id>SECTOR_BUFFER_STRENGTH</id></attribute>
+    <attribute><id>PULSE_MODE_ENABLE</id></attribute>
+    <attribute><id>PULSE_MODE_VALUE</id></attribute>
     <attribute><id>MSS_MRW_PWR_INTERCEPT</id></attribute>
     <attribute><id>MSS_MRW_PWR_SLOPE</id></attribute>
     <attribute><id>IVRM_STRENGTH_LOOKUP</id></attribute>
