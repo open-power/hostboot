@@ -177,6 +177,7 @@ enum cal_steps : uint64_t
     INITIAL_PAT_WR_TO_RD_CTR_LEN = inclusive_range(INITIAL_PAT_WR, READ_CTR),
     WR_VREF_TO_COARSE_RD_LEN = inclusive_range(WRITE_CTR_2D_VREF, COARSE_RD),
     RDCLK_ALIGN_TO_RD_CTR_LEN = inclusive_range(RDCLK_ALIGN, READ_CTR),
+    DRAM_ZQCAL_TO_WRITE_CTR_2D_VREF = inclusive_range(DRAM_ZQCAL, WRITE_CTR_2D_VREF),
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
