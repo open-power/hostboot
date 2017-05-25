@@ -675,6 +675,8 @@ void AttrOverrideSync::setAttrActions(const AttributeId i_attrId,
 //******************************************************************************
 void AttrOverrideSync::triggerAttrSync()
 {
+    uint8_t * l_buf = NULL;
+
     //Walk through all HB targets and see if there is a matching FAPI target
     //If so then get the list of ATTR for FAPI target and add to sync list
     for (TARGETING::TargetIterator target = TARGETING::targetService().begin();
@@ -735,7 +737,7 @@ void AttrOverrideSync::triggerAttrSync()
               l_attrs[i].iv_dims[3];
 
             //Get the data
-            uint8_t l_buf[l_bytes];
+            l_buf = reinterpret_cast<uint8_t *>(realloc(l_buf, l_bytes));
             ReturnCode l_rc =
               rawAccessAttr(
                         static_cast<fapi2::AttributeId>(l_attrs[i].iv_attrId),
@@ -750,6 +752,8 @@ void AttrOverrideSync::triggerAttrSync()
             }
         }
     }
+
+    free(l_buf);
 
     //Now push the data to the debug tool
     sendFapiAttrSyncs();
