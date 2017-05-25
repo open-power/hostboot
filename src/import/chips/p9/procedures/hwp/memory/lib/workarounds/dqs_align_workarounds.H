@@ -27,8 +27,6 @@
 #define _MSS_WORKAROUNDS_DQS_ALIGN
 
 #include <fapi2.H>
-#include <p9_mc_scom_addresses.H>
-#include <mss_attribute_accessors.H>
 
 namespace mss
 {
@@ -54,11 +52,25 @@ fapi2::ReturnCode set_timing0_trfc(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 fapi2::ReturnCode set_init_cal_refresh(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
 
 ///
+/// @brief Clear the PHY sequencer refresh
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode clear_init_cal_refresh(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
 /// @brief Set PHY sequencer to trigger refresh during init cal
 /// @param[in] i_target the fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode refresh(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+fapi2::ReturnCode turn_on_refresh(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Turn off refresh after dqs training has been run
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode turn_off_refresh(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
 
 }// dqs_align
 }// workarounds
