@@ -32942,6 +32942,57 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <!-- explicitly chose not to add support for this platInit attribute -->
+    <id>SECTOR_BUFFER_STRENGTH</id>
+    <description>
+        Sector buffer strength
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SECTOR_BUFFER_STRENGTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <!-- explicitly chose not to add support for this platInit attribute -->
+    <id>PULSE_MODE_ENABLE</id>
+    <description>
+        enable the pulse mode
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PULSE_MODE_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <!-- explicitly chose not to add support for this platInit attribute -->
+    <id>PULSE_MODE_VALUE</id>
+    <description>
+        value for pulse mode
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_PULSE_MODE_VALUE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>MSS_MRW_PWR_INTERCEPT</id>
     <description>
         Machine Readable Workbook Power Curve Intercept for DIMM
