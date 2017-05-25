@@ -45,6 +45,7 @@
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
+#include    <errl/errlreasoncodes.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initserviceif.H>
@@ -89,23 +90,47 @@ void* call_host_secure_rng( void *io_pArgs )
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
-      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
                 l_cpu_target);
 
-      TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-          "Running host_secure_rng HWP on processor target %.8X",
-          TARGETING::get_huid(l_cpu_target) );
+        // Check for functional NX
+        TARGETING::TargetHandleList l_nxTargetList;
+        getChildChiplets(l_nxTargetList, l_cpu_target, TYPE_NX, true);
+        if (l_nxTargetList.empty())
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+              "Running host_secure_rng; no functional NX found for proc %.8X",
+              TARGETING::get_huid(l_cpu_target));
+            continue;
+        }
 
-      FAPI_INVOKE_HWP(l_err, p9_rng_init_phase2, l_fapi2_proc_target);
-      if(l_err)
-      {
-          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR: call p9_rng_init_phase2, PLID=0x%x",
-                    l_err->plid());
-          l_StepError.addErrorDetails(l_err);
-          errlCommit(l_err, HWPF_COMP_ID);
-      }
+        FAPI_INVOKE_HWP(l_err, p9_rng_init_phase2, l_fapi2_proc_target);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "ERROR: call p9_rng_init_phase2, PLID=0x%x, rc=0x%.4X",
+                l_err->plid(), l_err->reasonCode());
 
+            for (const auto l_callout : l_err->getUDSections(
+                    HWPF_COMP_ID,
+                    ERRORLOG::ERRL_UDT_CALLOUT))
+            {
+                if(reinterpret_cast<HWAS::callout_ud_t*>
+                    (l_callout)->type == HWAS::HW_CALLOUT)
+                {
+                    for (const auto & l_nxTarget: l_nxTargetList)
+                    {
+                        l_err->addHwCallout( l_nxTarget,
+                            HWAS::SRCI_PRIORITY_HIGH,
+                            HWAS::DECONFIG,
+                            HWAS::GARD_NULL );
+                    }
+                 }
+            }
+
+            l_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
     } // end of going through all processors
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

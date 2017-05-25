@@ -1881,6 +1881,57 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
                 // errl is now NULL
             }
         }
+
+        // check for functional NX chiplets
+        TargetHandleList l_functionalNXChiplets;
+        getChildChiplets(l_functionalNXChiplets, pTop, TYPE_NX, true);
+        HWAS_DBG( "checkMinimumHardware: %d NX chiplets",
+                  l_functionalNXChiplets.size());
+
+        if (l_functionalNXChiplets.empty())
+        {
+            HWAS_ERR( "Insufficient hardware to continue IPL (NX chiplets)");
+
+            if(o_bootable)
+            {
+                *o_bootable = false;
+                break;
+            }
+            TargetHandleList l_presentNXChiplets;
+            getChildChiplets(l_presentNXChiplets, pTop, TYPE_NX, false);
+            uint32_t nx_present = l_presentNXChiplets.size();
+
+            /*@
+             * @errortype
+             * @severity           ERRL_SEV_UNRECOVERABLE
+             * @moduleid           MOD_CHECK_MIN_HW
+             * @reasoncode         RC_SYSAVAIL_NO_NX_FUNC
+             * @devdesc            checkMinimumHardware found no
+             *                     functional NX chiplets
+             * @custdesc           Insufficient hardware to continue IPL
+             * @userdata1[00:31]   HUID of node
+             * @userdata2[00:31]   number of present nonfunctional NX chiplets
+             */
+            const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(pTop)) << 32);
+            const uint64_t userdata2 =
+                (static_cast<uint64_t>(nx_present) << 32);
+            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
+                         MOD_CHECK_MIN_HW,
+                         RC_SYSAVAIL_NO_NX_FUNC,
+                         userdata1, userdata2);
+
+            //  call out the procedure to find the deconfigured part.
+            hwasErrorAddProcedureCallout( l_errl,
+                         EPUB_PRC_FIND_DECONFIGURED_PART,
+                         SRCI_PRIORITY_HIGH );
+
+            //  if we already have an error, link this one to the earlier;
+            //  if not, set the common plid
+            hwasErrorUpdatePlid( l_errl, l_commonPlid );
+            errlCommit(l_errl, HWAS_COMP_ID);
+        }
+
         //  ------------------------------------------------------------
         //  Check for Mirrored memory -
         //  If the user requests mirrored memory and we do not have it,
