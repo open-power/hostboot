@@ -59,4 +59,29 @@
     <ffdc>STOP_HISTORY</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_CHECK_MASTER_STOP15_FAILED</rc>
+    <description>
+      Indicates the targeted core(s) are no longer pending entering a STOP state
+      but the achieved level is not appropriate, or the deadman loop timed out.
+    </description>
+    <ffdc>SBE_CHK_MASTER_STOP15_RC</ffdc>
+    <ffdc>PU_OCB_OCI_OCCFLG__PU_OCB_OCI_CCSR</ffdc>
+    <ffdc>PU_OCB_OCI_QCSR__PU_OCB_OCI_QSSR</ffdc>
+    <ffdc>EQ_PPM_SSHSRC__EX_CME_SCOM_LFIR</ffdc>
+    <ffdc>EX_CME_SCOM_SICR_SCOM</ffdc>
+    <ffdc>EX_CME_LCL_SISR_SCOM</ffdc>
+    <ffdc>EQ_ATOMIC_LOCK_REG</ffdc>
+    <ffdc>C0_PPM_SSHSRC__C1_PPM_SSHSRC</ffdc>
+    <ffdc>SGPE_XSR__IAR</ffdc>
+    <ffdc>SGPE_IR__EDR</ffdc>
+    <ffdc>SGPE_LR__SPRG0</ffdc>
+    <ffdc>SGPE_SRR0__SRR1</ffdc>
+    <ffdc>CME_XSR__IAR</ffdc>
+    <ffdc>CME_IR__EDR</ffdc>
+    <ffdc>CME_LR__SPRG0</ffdc>
+    <ffdc>CME_SRR0__SRR1</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
