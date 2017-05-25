@@ -502,8 +502,10 @@ sub processProcessor
         }
     }
 
-    $targetObj->log($target,"Finding master proc");
-    my $lpcs=$targetObj->findConnections($target,"LPC","BMC");
+    # Both for FSP and BMC based systems, it's good  enough
+    # to look for processor with active LPC bus connected
+    $targetObj->log($target,"Finding master proc (looking for LPC Bus)");
+    my $lpcs=$targetObj->findConnections($target,"LPC","");
     if ($lpcs ne "")
     {
        $targetObj->log ($target, "Setting master proc to $target");
