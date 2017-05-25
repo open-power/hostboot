@@ -407,16 +407,17 @@ namespace SBE
                     sbeState.err_plid = err->plid();
                     sbeState.err_eid  = err->eid();
                     sbeState.err_rc   = err->reasonCode();
+                    sbeState.err_sev  = err->sev();
 
                     // Commit the error here and move on to the next target,
                     // or if no targets left, will just continue the IPL
                     TRACFCOMP( g_trac_sbe,
                                INFO_MRK"updateProcessorSbeSeeproms(): "
                                "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                               "plid=0x%.8X for Target UID=0x%X, but "
-                               "continuing procedure",
+                               "plid=0x%.8X sev=0x%.2X for Target UID=0x%X, "
+                               "but continuing procedure",
                                sbeState.err_rc, sbeState.err_eid,
-                               sbeState.err_plid,
+                               sbeState.err_plid, sbeState.err_sev,
                                TARGETING::get_huid(sbeState.target));
                     errlCommit( err, SBE_COMP_ID );
                 }
@@ -2332,7 +2333,7 @@ namespace SBE
                     // There is an ECC issue with this SEEPROM
 
                     TRACFCOMP( g_trac_sbe,ERR_MRK"updateSeepromSide() - ECC "
-                               "ERROR or Data Miscimpare On SBE Version Read "
+                               "ERROR or Data Miscompare On SBE Version Read "
                                "Back: eccStatus=%d, rc_ECC=%d,  "
                                "sI=%d, sI_ECC=%d, HUID=0x%.8X, side=%d",
                                eccStatus, rc_readBack_ECC_memcmp,
@@ -4310,11 +4311,13 @@ namespace SBE
                     TRACFCOMP( g_trac_sbe,ERR_MRK"masterVersionCompare() - "
                                "Error Associated with Updating Target "
                                "HUID=0x%.8X: plid=0x%.8X, eid=0x%.8X, "
-                               "rc=0x%.4X. Can't trust its SBE Version",
+                               "rc=0x%.4X, sev=0x%.2X. "
+                               "Can't trust its SBE Version",
                                TARGETING::get_huid(io_sbeStates_v[i].target),
                                io_sbeStates_v[i].err_plid,
                                io_sbeStates_v[i].err_eid,
-                               io_sbeStates_v[i].err_rc);
+                               io_sbeStates_v[i].err_rc,
+                               io_sbeStates_v[i].err_sev);
 
                     /*@
                      * @errortype
