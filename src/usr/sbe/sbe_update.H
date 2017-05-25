@@ -309,6 +309,7 @@ namespace SBE
         uint32_t                      err_plid;
         uint32_t                      err_eid;
         uint16_t                      err_rc;
+        ERRORLOG::errlSeverity_t      err_sev;
 
         // Constructor to default certain values
         sbeTargetState_t() :
@@ -316,7 +317,8 @@ namespace SBE
           seeprom_0_ver_ECC_fail(false), seeprom_1_ver_ECC_fail(false),
           customizedImage_size(0x0), customizedImage_crc(0x0),
           new_readBack_check(false),
-          err_plid(0x0), err_eid(0x0), err_rc(0x0)
+          err_plid(0x0), err_eid(0x0), err_rc(0x0),
+          err_sev(ERRORLOG::ERRL_SEV_UNKNOWN)
         {};
     };
 
