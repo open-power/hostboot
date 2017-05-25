@@ -50,6 +50,7 @@
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/workarounds/seq_workarounds.H>
+#include <lib/workarounds/dqs_align_workarounds.H>
 
 #include <lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
@@ -1074,7 +1075,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
         l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>(i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>());
 
-        FAPI_INF("%s Running DQS align on RP%d 0x%04x",
+        FAPI_INF("%s Running DQS align on RP%d 0x%08lx",
                  mss::c_str(i_target), i_rp, l_steps_to_execute);
 
         // Undertake the calibration steps
@@ -1083,11 +1084,16 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         // Now run the DQS align workaround
         FAPI_TRY(mss::workarounds::dp16::dqs_align::dqs_align_workaround(i_target, i_rp, i_abort_on_error),
                  "%s Failed to run dqs align workaround on rp %d", mss::c_str(i_target), i_rp);
+
+
     }
 
     // Run cal steps between RDCLK_ALIGN and RD_CTR if any are selected - note RDCLK_ALIGN takes place after WR_LEVEL
     if (i_cal_steps_enabled.getBit<mss::cal_steps::RDCLK_ALIGN, mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN>())
     {
+        // Turn off refresh
+        FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
+
         // Sets up the cal steps in the buffer
         fapi2::buffer<uint32_t> l_steps_to_execute;
 
@@ -1095,7 +1101,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
                                     mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN,
                                     mss::cal_steps::RDCLK_ALIGN>(l_steps_to_execute);
 
-        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%04x", mss::c_str(i_target), i_rp,
+        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%08lx", mss::c_str(i_target), i_rp,
                  l_steps_to_execute);
 
         // Undertake the calibration steps
@@ -1107,19 +1113,22 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
             FAPI_TRY(mss::workarounds::dp16::rd_dq::fix_delay_values(i_target, i_rp),
                      "%s Failed to run read centering workaround on rp %d", mss::c_str(i_target), i_rp);
         }
+
+        // Turn refresh back on
+        FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(i_target) );
     }
 
     // Run cal steps after RD_CTR if any are selected - note: WRITE_CTR takes place after RD_CTR
     if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::WR_VREF_TO_COARSE_RD_LEN>())
     {
-        FAPI_DBG("%s Running remaining cal steps on RP%d", mss::c_str(i_target), i_rp);
-        fapi2::buffer<uint32_t> l_steps_to_execute = i_cal_steps_enabled;
+        fapi2::buffer<uint32_t> l_steps_to_execute( i_cal_steps_enabled );
+        l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL, mss::cal_steps::DRAM_ZQCAL_TO_WRITE_CTR_2D_VREF>();
 
-        // Clear all steps we've run previously
-        l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL>()
-        .clearBit<mss::cal_steps::WR_LEVEL>()
-        .clearBit<mss::cal_steps::INITIAL_PAT_WR>()
-        .clearBit<mss::cal_steps::RDCLK_ALIGN, mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN>();
+        // Setting the WR_VREF_LATCH bit to run the WR_VREF workaround after wr_vref runs
+        // Gets set iff the bit is set in i_steps_to_execute
+        l_steps_to_execute.writeBit<WR_VREF_LATCH>( i_cal_steps_enabled.getBit<WR_VREF_LATCH>() );
+
+        FAPI_DBG("%s Running remaining cal steps on RP%d 0x%08lx", mss::c_str(i_target), i_rp, l_steps_to_execute);
 
         FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
     }
