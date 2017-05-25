@@ -40,6 +40,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/shared/mss_const.H>
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/fir/unmask.H>
 #include <lib/dimm/ddr4/zqcal.H>
 
@@ -147,6 +148,9 @@ extern "C"
             }
 
             FAPI_DBG("generating calibration CCS instructions: %d rank-pairs", l_pairs.size());
+
+            // Turn on refresh for training
+            FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(p) );
 
             // For each rank pair we need to calibrate, pop a ccs instruction in an array and execute it.
             // NOTE: IF YOU CALIBRATE MORE THAN ONE RANK PAIR PER CCS PROGRAM, MAKE SURE TO CHANGE
