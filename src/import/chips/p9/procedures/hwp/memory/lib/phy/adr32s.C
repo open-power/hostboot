@@ -27,7 +27,7 @@
 /// @file adr32s.C
 /// @brief Subroutines for the PHY ADR32S registers
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
@@ -35,8 +35,10 @@
 
 #include <fapi2.H>
 #include <lib/phy/adr32s.H>
+#include <lib/phy/dcd.H>
 #include <lib/workarounds/adr32s_workarounds.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/mss_attribute_accessors_manual.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_SYSTEM;
@@ -83,10 +85,7 @@ namespace adr32s
 ///
 fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
-    typedef adr32sTraits<TARGET_TYPE_MCA> TT;
-
     const auto l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
-    fapi2::buffer<uint64_t> l_read;
     uint8_t l_sim = 0;
 
     FAPI_TRY( mss::is_simulation( l_sim) );
@@ -110,21 +109,18 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
         return FAPI2_RC_SUCCESS;
     }
 
-    // Do a quick check to make sure this chip doesn't have the DCD logic built in (e.g., DD1 Nimbus)
-    // TODO RTC:159687 For DD2 all we need to do is kick off the h/w cal and wait. We can check any ADR_DCD
-    // register, they all should reflect the inclusion of the DCD logic.
-
-    FAPI_TRY( mss::getScom(l_mca[0], TT::DUTY_CYCLE_DISTORTION_REG[0], l_read) );
-
-    if (l_read.getBit<TT::DCD_CONTROL_DLL_CORRECT_EN>() == 1)
+    // Runs the proper DCD calibration for Nimbus DD1 vs DD2
+    if(mss::chip_ec_nimbus_lt_2_0(i_target))
     {
-        FAPI_ERR("seeing ADR DCD algorithm is in the logic but we didn't code it?");
-        fapi2::Assert(false);
+        // Runs the DD1 calibration
+        FAPI_TRY(mss::workarounds::adr32s::duty_cycle_distortion_calibration(i_target));
     }
 
-    // Runs the DD1 algorithm for now. The below TODO is to add in a switch to the DD2 algorithm
-    // TODO RTC:159687 For DD2 all we need to do is kick off the h/w cal and wait. We can check any ADR_DCD
-    FAPI_TRY(mss::workarounds::adr32s::duty_cycle_distortion_calibration(i_target));
+    else
+    {
+        // Runs the DD2 calibration algorithm
+        FAPI_TRY(mss::dcd::execute_hw_calibration(i_target));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
