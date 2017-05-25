@@ -113,6 +113,68 @@
     </collectRegisterFfdc>
 </hwpError>
 
+<hwpError>
+    <rc>RC_TEST_PROC_ERROR</rc>
+    <description>
+        Example error that calls a procedure with a parameter.
+        parm1 = uint32_t
+    </description>
+    <collectFfdc>p9_collect_some_ffdc,parm1</collectFfdc>
+</hwpError>
+
+<hwpError>
+    <rc>RC_TEST_ERROR_GARD_DECONFIG</rc>
+    <description>
+        Deconfigure and gard test error
+    </description>
+    <callout>
+        <target>TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET</target>
+    </gard>
+</hwpError>
+
+<hwpError>
+    <rc>RC_TEST_ERROR_PROCEDURE_CALLOUT</rc>
+    <description>
+        Procedure callout test error
+    </description>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_TEST_ERROR_DECONFIG</rc>
+    <description>
+        Deconfigure test error
+    </description>
+    <callout>
+        <target>TARGET</target>
+        <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+</hwpError>
+
+<hwpError>
+    <rc>RC_TEST_ERROR_HW_CALLOUT</rc>
+    <description>
+        Hardware callout test error
+    </description>
+    <callout>
+        <target>TARGET</target>
+        <priority>LOW</priority>
+    </callout>
+</hwpError>
+
 </hwpErrors>
 
 
