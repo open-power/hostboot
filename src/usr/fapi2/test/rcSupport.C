@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,9 +63,9 @@ fapi2::ReturnCode p9_registerFfdc_fail(
 {
     FAPI_INF("Enter p9_registerFfdc_fail...");
 
-    FAPI_ASSERT(0, fapi2::TEST_ERROR_A().set_TARGET(i_proc_target));
+    //FAPI_ASSERT(0, fapi2::TEST_ERROR_A().set_TARGET(i_proc_target));
 
-  fapi_try_exit:
+  //fapi_try_exit:
 
     FAPI_INF("Exiting p9_registerFfdc_fail...");
 
@@ -82,13 +82,13 @@ fapi2::ReturnCode p9_procedureFfdc_fail()
 {
     FAPI_INF("Enter p9_procedureFfdc_fail...");
 
-    uint32_t pib = 0x0001;
+    //uint32_t pib = 0x0001;
     fapi2::ReturnCode l_rc;
 
-    FAPI_ASSERT(0, fapi2::TEST_PROC_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED,
-                                          l_rc).set_parm1(pib));
+    //FAPI_ASSERT(0, fapi2::TEST_PROC_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED,
+    //                                      l_rc).set_parm1(pib));
 
-  fapi_try_exit:
+  //fapi_try_exit:
 
     FAPI_INF("Exiting p9_procedureFfdc_fail...");
 

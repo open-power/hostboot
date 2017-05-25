@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -168,7 +168,7 @@ uint32_t rcTestReturnCodeCreator()
         {
             // Set the return code to a HWP code (intentionally use function
             // that does not add error information).
-            l_rc._setHwpError(RC_TEST_ERROR_A);
+            //l_rc._setHwpError(RC_TEST_ERROR_A);
 
             // Ensure that the creator is HWP
             l_creator = l_rc.getCreator();
