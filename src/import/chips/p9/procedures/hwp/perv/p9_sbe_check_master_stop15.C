@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,10 @@
 #include <p9_sbe_check_master_stop15.H>
 #include <p9_pm_stop_history.H>
 #include <p9_quad_scom_addresses.H>
+
+#ifdef DD2
+    #include <p9_collect_deadman_ffdc.H>
+#endif
 
 // -----------------------------------------------------------------------------
 //  Function definitions
@@ -124,10 +128,17 @@ fapi2::ReturnCode p9_sbe_check_master_stop15(
     }
     else
     {
-        FAPI_ASSERT(false,
-                    fapi2::CHECK_MASTER_STOP15_INVALID_STATE()
-                    .set_STOP_HISTORY(l_data64),
-                    "STOP 15 error");
+#ifdef DD2
+        FAPI_TRY ( p9_collect_deadman_ffdc (
+                       i_target,
+                       CHECK_MASTER_STOP15_INVALID_STATE ));
+#else
+        // DD1 has a memory crunch on SBE
+        FAPI_ASSERT ( false,
+                      fapi2::CHECK_MASTER_STOP15_INVALID_STATE()
+                      .set_STOP_HISTORY(l_data64),
+                      "STOP 15 error" );
+#endif
     }
 
 // @todo RTC 162331 These should work but don't..... follow-up later
@@ -153,4 +164,3 @@ fapi_try_exit:
 
     return fapi2::current_err;
 } // END p9_sbe_check_master_stop15
-
