@@ -2751,7 +2751,7 @@ sub print_usage
 
   print STDERR
     "Usage:\n" .
-    "  wof-tables-img --create <image_file> <csv_file> [<csv_file> ...]\n" .
+    "  wof-tables-img --create <image_file> <csv_file>/<csv_dir> [<csv_file> ...]\n" .
     "  wof-tables-img --list <image_file>\n" .
     "  wof-tables-img --view <image_file> --core_count <number>\n" .
     "                   --socket_power <number> --nest_freq <number>\n" .
@@ -2763,7 +2763,7 @@ sub print_usage
     "                   --pdv_sort_power_target_freq <number> <output_file>\n" .
     "  wof-tables-img --help\n" .
     "Actions:\n" .
-    "  --create   Create a WOF Tables image file based on input CSV files.\n" .
+    "  --create   Create a WOF Tables image file based on input CSV files or directory.\n" .
     "  --list     List the contents of a WOF Tables image file.\n" .
     "  --view     View one VFRT within a WOF Tables image file.\n" .
     "  --extract  Extract one set of WOF Tables from an image file.\n" .
@@ -2802,13 +2802,30 @@ sub _verify_create_options
     }
   }
 
-  # Treat any remaining (unparsed) command line arguments as CSV files.
+  # Treat any remaining (unparsed) command line arguments as CSV files or
+  # CSV directory that contains the CSV files.
   # Verify that at least one was specified.
   if (scalar(@ARGV) == 0)
   {
-    die "Error: --create requires one or more CSV files.\n";
+    die "Error: --create requires one or more CSV files or one directory.\n";
   }
-  $self->{'csv_files'} = [ @ARGV ];
+
+  foreach my $filename (@ARGV)
+  {
+    if(-f $filename)
+    {
+        # The CSV files were given as files, return original array
+        $self->{'csv_files'} = [ @ARGV ];
+    }
+    if(-d $filename)
+    {
+        # The CSV files were given in a directory, pull out each filename
+        my @file_list = glob("$filename/*");
+        @file_list = grep {-f $_} @file_list;
+
+        $self->{'csv_files'} = [ @file_list ];
+    }
+  }
 }
 
 
