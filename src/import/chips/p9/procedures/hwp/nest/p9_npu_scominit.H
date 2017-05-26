@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,12 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_npu_scominit.C
-/// @brief Apply SCOM overrides for the NPU unit via an init file
+/// @brief Apply SCOM overrides for the NPU, enable NVLINK refclocks
 ///
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _PROC_NPU_SCOMINIT_H_
@@ -44,7 +44,8 @@
 // Structure definitions
 //------------------------------------------------------------------------------
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_npu_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_npu_scominit_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -57,7 +58,8 @@ extern "C"
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_npu_scominit(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 

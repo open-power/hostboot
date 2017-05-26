@@ -24,12 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_npu_scominit.C
-/// @brief Apply SCOM overrides for the NPU unit via an init file
+/// @brief Apply SCOM overrides for the NPU, enable NVLINK refclocks
 ///
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 //------------------------------------------------------------------------------
@@ -44,48 +44,60 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-const uint64_t NOTP9NDD1_NPU_SM2_XTS_ATRMISS =  0x501164AULL;
+const uint64_t PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1 = 0x501164AULL;
 
-///
-/// p9_npu_scominit HWP entry point (Defined in .H file)
-///
-fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                  & i_target)
+const uint8_t N3_PG_NPU_REGION_BIT = 7;
+
+
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+/// NOTE: description in header
+fapi2::ReturnCode p9_npu_scominit(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    fapi2::ReturnCode l_rc;
-    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::buffer<uint64_t> l_atrmiss  = 0;
-    fapi2::buffer<uint16_t> l_pg_value = 0xFFFF; //Init the pg value to bad
-    uint8_t l_attr_chip_unit_pos = 0;
-    uint8_t l_dd1 = 0;
-
     FAPI_DBG("Entering ...");
 
-    //Get perv target for later
-    auto l_perv_tgt = i_target.getChildren<fapi2::TARGET_TYPE_PERV>
-                      (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL);
+    // check to see if NPU region in N3 chiplet partial good data is enabled
+    // init PG data to disabled
+    fapi2::buffer<uint16_t> l_pg_value = 0xFFFF;
 
-    // read attribute to determine if NDD1 addresses need to be used
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR, i_target, l_dd1),
-             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR");
-
-    //Check to see if NPU is valid in PG (N3 chiplet)
-    for (auto l_tgt : l_perv_tgt)
+    for (auto l_tgt : i_target.getChildren<fapi2::TARGET_TYPE_PERV>
+         (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL))
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_tgt, l_attr_chip_unit_pos));
+        uint8_t l_attr_chip_unit_pos = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               l_tgt,
+                               l_attr_chip_unit_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
-        if (l_attr_chip_unit_pos == N3_CHIPLET_ID )
+        if (l_attr_chip_unit_pos == N3_CHIPLET_ID)
         {
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_tgt, l_pg_value));
             break;
         }
     }
 
-    //Bit7 == 0 means NPU is good
-    if (!l_pg_value.getBit<7>())
+    // a bit value of 0 in the PG attribute means the associated region is good
+    if (!l_pg_value.getBit<N3_PG_NPU_REGION_BIT>())
     {
+        fapi2::ReturnCode l_rc;
+        fapi2::buffer<uint64_t> l_atrmiss = 0;
+        fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR_Type l_npu_p9n_dd1;
+
+        // read attribute to determine if P9N DD1 NPU addresses should be used
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR,
+                               i_target,
+                               l_npu_p9n_dd1),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_SETUP_BARS_NPU_DD1_ADDR)");
+
+        // apply NPU SCOM inits from initfile
         FAPI_DBG("Invoking p9.npu.scom.initfile...");
-        FAPI_EXEC_HWP(l_rc, p9_npu_scom, i_target, FAPI_SYSTEM);
+        FAPI_EXEC_HWP(l_rc,
+                      p9_npu_scom,
+                      i_target,
+                      fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>());
 
         if (l_rc)
         {
@@ -94,21 +106,22 @@ fapi2::ReturnCode p9_npu_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
             goto fapi_try_exit;
         }
 
+        // apply additional SCOM inits
         l_atrmiss.setBit<PU_NPU_SM2_XTS_ATRMISS_FLAG_MAP>()
         .setBit<PU_NPU_SM2_XTS_ATRMISS_ENA>();
 
-        if (l_dd1)
-        {
-            FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
-                     "Error from putScomUnderMask (PU_NPU_SM2_XTS_ATRMISS)");
-        }
-        else
-        {
-            FAPI_TRY(fapi2::putScomUnderMask(i_target, NOTP9NDD1_NPU_SM2_XTS_ATRMISS, l_atrmiss, l_atrmiss),
-                     "Error from putScomUnderMask (NOTP9NDD1_NPU_SM2_XTS_ATRMISS)");
-        }
+        FAPI_TRY(fapi2::putScomUnderMask(i_target,
+                                         ((l_npu_p9n_dd1) ?
+                                          (PU_NPU_SM2_XTS_ATRMISS) :
+                                          (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)),
+                                         l_atrmiss,
+                                         l_atrmiss),
+                 "Error from putScomUnderMask (0x%08X)",
+                 ((l_npu_p9n_dd1) ?
+                  (PU_NPU_SM2_XTS_ATRMISS) :
+                  (PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1)));
 
-
+        // enable NVLINK refclocks
         FAPI_DBG("Invoking p9_nv_ref_clk_enable...");
         FAPI_EXEC_HWP(l_rc, p9_nv_ref_clk_enable, i_target);
 
