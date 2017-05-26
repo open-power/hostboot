@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,22 +24,23 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_attr_update.C
+/// @brief Stub HWP for FW to override attributes programmatically (FAPI2)
 ///
-/// @brief Stub HWP for FW to override attributes programmatically
+/// @author Joe McGill <jmcgill@us.ibm.com>
 ///
 
 //
-// *HWP HW Owner : Michael Dye <dyem@us.ibm.com>
+// *HWP HW Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 2
+// *HWP Level : 3
 // *HWP Consumed by : HB
 //
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "p9_attr_update.H"
+#include <p9_attr_update.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -48,11 +49,7 @@
 fapi2::ReturnCode
 p9_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_DBG("Entering ...");
-
-    FAPI_DBG("Exiting ...");
-
-//fapi_try_exit:
-    return fapi2::current_err;
-
+    FAPI_DBG("Start");
+    FAPI_DBG("End");
+    return fapi2::FAPI2_RC_SUCCESS;
 }

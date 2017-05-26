@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,18 +24,18 @@
 /* IBM_PROLOG_END_TAG                                                     */
 ///
 /// @file p9_attr_update.H
+/// @brief Stub HWP for FW to override attributes programmatically (FAPI2)
 ///
-/// @brief Stub HWP for FW to override attributes programmatically
+/// @author Joe McGill <jmcgill@us.ibm.com>
 ///
 
 //
-// *HWP HW Owner : Michael Dye <dyem@us.ibm.com>
+// *HWP HW Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 1
+// *HWP Level : 3
 // *HWP Consumed by : HB
 //
-
 
 #ifndef _P9_ATTR_UPDATE_H_
 #define _P9_ATTR_UPDATE_H_
@@ -48,8 +48,8 @@
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
-
-typedef fapi2::ReturnCode (*p9_attr_update_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_attr_update_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -58,11 +58,13 @@ typedef fapi2::ReturnCode (*p9_attr_update_FP_t)(const fapi2::Target<fapi2::TARG
 extern "C"
 {
 
+///
 /// @brief  Placeholder for attribute overrides
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode p9_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_attr_update(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,10 +26,11 @@
 /// @file p9_pcie_hotplug_control.H
 /// @brief Manage slot power on hot-plug controlled slots (FAPI2)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _P9_PCIE_HOTPLUG_CONTROL_H_
@@ -44,27 +45,27 @@
 // Structure definitions
 //-----------------------------------------------------------------------------------
 
-//function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_pcie_hotplug_control_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-        const bool);
-
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
-
-extern "C" {
+// function pointer typedef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_pcie_hotplug_control_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    const bool);
 
 //-----------------------------------------------------------------------------------
 // Function prototype
 //-----------------------------------------------------------------------------------
 
+extern "C" {
+
 /// @brief Enable/disable PCIE slot power
-/// @param[in] i_target => P9 chip target
-/// @param[in] i_enable_slot_power => boolean to control power state (true=enable, false=disable)
-/// @return FAPI_RC_SUCCESS if the setup completes successfully,
+/// @param[in] i_target P9 chip target
+/// @param[in] i_enable_slot_power boolean to control power state (true=enable,
+///            false=disable)
+/// @return FAPI_RC_SUCCESS if the setup completes successfully, else error
 //
-    fapi2::ReturnCode p9_pcie_hotplug_control(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-            const bool i_enable_slot_power);
+    fapi2::ReturnCode p9_pcie_hotplug_control(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_enable_slot_power);
+
 } //extern"C"
 
 #endif //_P9_PCIE_HOTPLUG_CONTROL_H_

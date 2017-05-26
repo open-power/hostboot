@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,25 +26,26 @@
 /// @file p9_pcie_hotplug_control.C
 /// @brief Manage slot power on hot-plug controlled slots (FAPI2)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <p9_pcie_hotplug_control.H>
 
-
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Function definitions
-//-----------------------------------------------------------------------------------
-fapi2::ReturnCode p9_pcie_hotplug_control(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const bool i_enable_slot_power)
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode p9_pcie_hotplug_control(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_enable_slot_power)
 {
-    FAPI_INF("Start");
-    FAPI_INF("End");
+    FAPI_DBG("Start");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }

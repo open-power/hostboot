@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,50 +22,43 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-
-///----------------------------------------------------------------------------
-/// @file p9_exit_cache_contained.C
 ///
-/// @brief  Contains inits to be performed before Hostboot expanded from
-///         running inside the confines of the L3 cache out to main memory.
-///----------------------------------------------------------------------------
+/// @file p9_exit_cache_contained.C
+/// @brief Placeholder to apply inits needed prior to HB expansion from L3
+/// cache to main memory (FAPI2)
+///
+/// @author Joe McGill <jmcgill@us.ibm.com>
+///
 
+//
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
-
+//
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_exit_cache_contained.H>
 
-extern "C"
+
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode
+p9_exit_cache_contained(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-///
-/// p9_exit_cache_contained HWP entry point (Defined in .H file)
-///
-    fapi2::ReturnCode p9_exit_cache_contained(const
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            & i_target)
-    {
-        fapi2::ReturnCode rc;
+    // This procedure is a placeholder to add inits that might need to be
+    // performed before Hostboot expanded from running inside the confines
+    // of the L3 cache out to main memory.
+    // There is nothing specific to be added for P9 at this point.
 
-        // Mark Entry
-        FAPI_INF("Entering ...");
+    FAPI_INF("Start");
+    FAPI_INF("End");
 
-        // This procedure is a placeholder to add inits that might need to be
-        // performed before Hostboot expanded from running inside the confines
-        // of the L3 cache out to main memory.
-        // There is nothing specific to be added for P9 at this point.
-
-
-        // Mark Exit
-        FAPI_INF("Exiting ...");
-
-        return rc;
-    }
-} // extern "C"
-/* End: */
+    return fapi2::FAPI2_RC_SUCCESS;
+}

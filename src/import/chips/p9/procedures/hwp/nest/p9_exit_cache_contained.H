@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,30 +23,37 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-
-///----------------------------------------------------------------------------
 /// @file p9_exit_cache_contained.H
+/// @brief Placeholder to apply inits needed prior to HB expansion from L3
+/// cache to main memory (FAPI2)
 ///
-/// @brief  Contains inits to be performed before Hostboot expanded from
-///         running inside the confines of the L3 cache out to main memory.
-///----------------------------------------------------------------------------
+/// @author Joe McGill <jmcgill@us.ibm.com>
+///
 
+//
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
+//
+///
 
 #ifndef _PROC_EXIT_CACHE_CONTAINED_H_
 #define _PROC_EXIT_CACHE_CONTAINED_H_
+
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi2.H>
 
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+
 // Function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)(
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -54,19 +61,15 @@ typedef fapi2::ReturnCode (*p9_exit_cache_contained_FP_t)(fapi2::Target<fapi2::T
 extern "C"
 {
 
-//------------------------------------------------------------------------------
-// Hardware Procedure
-//------------------------------------------------------------------------------
 ///
 /// @brief Placeholder for overrides needed to step the core from
 ///        cache-contained execution to expand to memory
 ///
 /// @param[in] i_target Reference to processor chip target
-///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_exit_cache_contained(const
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_exit_cache_contained(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 
