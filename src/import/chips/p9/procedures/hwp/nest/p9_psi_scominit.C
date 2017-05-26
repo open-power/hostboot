@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,49 +22,40 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// ----------------------------------------------------------------------------
-/// @file  p9_psi_scominit.H
 ///
-/// Initializes PSI SCOM of the target proc.
+/// @file p9_psi_scominit.C
+/// @brief Perform PSI SCOM initialization (FAPI2)
 ///
-/// ----------------------------------------------------------------------------
-/// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
-/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
-/// *HWP Team        : Nest
-/// *HWP Level       : 1
-/// *HWP Consumed by : HB
-/// ----------------------------------------------------------------------------
+/// @author Joe McGill <jmcgill@us.ibm.com>
+///
+
+//
+// *HWP HWP Owner : Joe McGill <jmcgill@us.ibm.com>
+// *HWP FW Owner : Thi Tran <thi@us.ibm.com>
+// *HWP Team : Nest
+// *HWP Level : 3
+// *HWP Consumed by : HB
+//
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_psi_scominit.H>
-#include "p9_psi_scom.H"
-///----------------------------------------------------------------------------
-/// Constant definitions
-///----------------------------------------------------------------------------
+#include <p9_psi_scom.H>
 
-extern "C" {
 
-///----------------------------------------------------------------------------
+///-----------------------------------------------------------------------------
 /// Function definitions
-///----------------------------------------------------------------------------
+///-----------------------------------------------------------------------------
 
-///
-/// @brief p9_psi_scominit procedure entry point
-/// See doxygen in p9_psi_scominit.H
-///
-    fapi2::ReturnCode p9_psi_scominit(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        FAPI_DBG("Entering p9_psi_scominit");
-        fapi2::ReturnCode rc;
+fapi2::ReturnCode
+p9_psi_scominit(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    fapi2::ReturnCode l_rc;
 
-        FAPI_EXEC_HWP(rc, p9_psi_scom, i_target);
-
-        FAPI_DBG("Exiting p9_psi_scominit");
-
-        return rc;
-    }
-
-} // extern "C"
+    FAPI_DBG("Start");
+    FAPI_EXEC_HWP(l_rc, p9_psi_scom, i_target);
+    FAPI_DBG("End");
+    return l_rc;
+}

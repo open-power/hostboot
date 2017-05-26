@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,20 +22,20 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// ----------------------------------------------------------------------------
+///
 /// @file  p9_psi_scominit.H
+/// @brief Perform PSI SCOM initialization (FAPI2)
 ///
-/// @brief p9_psi_scominit HWP
+/// @author Joe McGill <jmcgill@us.ibm.com>
 ///
-/// Initializes PSI SCOM of the target proc.
-///
-/// ----------------------------------------------------------------------------
-/// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
-/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
-/// *HWP Team        : Nest
-/// *HWP Level       : 1
-/// *HWP Consumed by : HB
-/// ----------------------------------------------------------------------------
+
+//
+// *HWP HWP Owner : Joe McGill <jmcgill@us.ibm.com>
+// *HWP FW Owner : Thi Tran <thi@us.ibm.com>
+// *HWP Team : Nest
+// *HWP Level : 3
+// *HWP Consumed by : HB
+//
 
 #ifndef _P9_PSI_SCOMINIT_H_
 #define _P9_PSI_SCOMINIT_H_
@@ -45,13 +45,13 @@
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
+
+//----------------------------------------------------------------------------
+// Structure definitions
+//----------------------------------------------------------------------------
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_psi_scominit_FP_t)(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
-
-//----------------------------------------------------------------------------
-// Constant definitions
-//----------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------
@@ -64,10 +64,9 @@ extern "C"
 ///
 /// @brief p9_psi_scominit procedure
 ///
-/// Initializes PSI SCOM of the target proc.
+/// Initializes PSI unit SCOM registers of the target processor
 ///
-/// @param[in]  i_target   Reference to TARGET_TYPE_PROC_CHIP target
-///
+/// @param[in] i_target Reference to TARGET_TYPE_PROC_CHIP target
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 
