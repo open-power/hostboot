@@ -181,19 +181,16 @@ void getMnfgMemCeTh( ExtensibleChip * i_chip, const MemRank & i_rank,
         uint8_t baseAllowed = baseTh - 1;
 
         // Calculate CEs per DRAM.
-        //   The DRAM size is in MBAXCR[6:7], where 0 = 2Gb, 1 = 4Gb, 2 = 8Gb,
-        //   and 3 = 16 Gb. So the allowed CEs per DRAM can be calculated with
-        //   the following:
-        //         perDram = base * 2^(MBAXCR[6:7]+1) * (9/16)
-        //     or, perDram = (base << MBAXCR[6:7]+1)  * (9/16)
-        uint32_t computeBase = (baseAllowed << (size+1)) * 9;
+        //      (base * dram size) * (9/16)
+        uint32_t computeBase = baseAllowed * size * 9;
         o_cePerDram = (computeBase + 8) / 16;
 
         // Calculate CEs per DIMM.
+        //      (base * dram size) * (2 + rank count) * (9/16)
         o_cePerDimm = ((computeBase * (2 + rankCount)) + 8) / 16;
 
         // Calculate CEs per rank per DIMM.
-        // Same as perDimm where rankCount is 1;
+        //      Same as per DIMM where rank count is 1
         o_cePerRank = ((computeBase * (2 + 1)) + 8) / 16;
     }
 }

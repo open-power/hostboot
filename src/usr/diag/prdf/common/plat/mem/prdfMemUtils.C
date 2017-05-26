@@ -416,34 +416,37 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 
     uint8_t o_rc = 0;
 
-    //TODO RTC 166802
-    //do
-    //{
-    //    CenMbaDataBundle * mbadb = getMbaDataBundle( i_chip );
-    //    ExtensibleChip * membufChip = mbadb->getMembChip();
-    //    if ( NULL == membufChip )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "getMembChip() failed: MBA=0x%08x",
-    //                  getHuid(mbaTrgt) );
-    //        o_rc = FAIL; break;
-    //    }
+    /* TODO RTC 166802 - consider using ATTR_EFF_DRAM_DENSITY as well.
+    do
+    {
+        CenMbaDataBundle * mbadb = getMbaDataBundle( i_chip );
+        ExtensibleChip * membufChip = mbadb->getMembChip();
+        if ( NULL == membufChip )
+        {
+            PRDF_ERR( PRDF_FUNC "getMembChip() failed: MBA=0x%08x",
+                      getHuid(mbaTrgt) );
+            o_rc = FAIL; break;
+        }
 
-    //    uint32_t pos = getTargetPosition(mbaTrgt);
-    //    // If we will still be using the register values for centaur, we will
-    //    // need to convert them to the appropriate enum
-    //    const char * reg_str = (0 == pos) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
+        uint32_t pos = getTargetPosition(mbaTrgt);
+        const char * reg_str = (0 == pos) ? "MBA0_MBAXCR" : "MBA1_MBAXCR";
 
-    //    SCAN_COMM_REGISTER_CLASS * reg = membufChip->getRegister( reg_str );
-    //    o_rc = reg->Read();
-    //    if ( SUCCESS != o_rc )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "Read() failed on %s. Target=0x%08x",
-    //                  reg_str, getHuid(mbaTrgt) );
-    //        break;
-    //    }
-    //    o_size = reg->GetBitFieldJustified( 6, 2 );
+        SCAN_COMM_REGISTER_CLASS * reg = membufChip->getRegister( reg_str );
+        o_rc = reg->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on %s. Target=0x%08x",
+                      reg_str, getHuid(mbaTrgt) );
+            break;
+        }
 
-    //} while(0);
+        // The value of MBAXCR[6:7] is 0 = 2Gb, 1 = 4Gb, 2 = 8Gb, and 3 = 16 Gb.
+        // Therefore, to get the DRAM size do the following:
+        //      DRAM size = 2 ^ (MBAXCR[6:7] + 1)
+        o_size = 1 << (reg->GetBitFieldJustified(6,2) + 1);
+
+    } while(0);
+    */
 
     return o_rc;
 
