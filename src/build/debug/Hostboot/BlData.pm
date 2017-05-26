@@ -29,6 +29,7 @@ package Hostboot::BlData;
 use Exporter;
 our @EXPORT_OK = ('main');
 
+# Format data into 4-byte segments and 16-byte lines for display
 sub formatData
 {
     my $data = shift;
@@ -56,31 +57,37 @@ sub main
 {
     ::setBootloader();
 
-    my $btLdrHrmor  = 0x0000000008200000;
+    my $btLdrHrmorOffset  = 0x0000000000200000;
 
     my ($dataSym, $dataSize) = ::findSymbolAddress("Bootloader::g_blData");
     if (not defined $dataSym) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $dataSymStr = sprintf("0x%08X", $dataSym);
+    my $dataAddr = ::read64($dataSym|$btLdrHrmorOffset);
+    my $dataAddrStr = sprintf("0x%016llX", $dataAddr);
 
     ::userDisplay "------------Bootloader Data------------";
     ::userDisplay "\nData Symbol Address: ";
     ::userDisplay $dataSymStr;
+    ::userDisplay "\nData Address: ";
+    ::userDisplay $dataAddrStr;
 
     my ($scratchSym, $scratchSize) =
         ::findSymbolAddress("Bootloader::g_blScratchSpace");
     if (not defined $scratchSym) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $scratchSymStr = sprintf("0x%08X", $scratchSym);
+    my $scratchAddr = ::read64($scratchSym|$btLdrHrmorOffset);
+    my $scratchAddrStr = sprintf("0x%016llX", $scratchAddr);
 
-    ::userDisplay "\nScratch Space Symbol Address: ";
+    ::userDisplay "\n\nScratch Space Symbol Address: ";
     ::userDisplay $scratchSymStr;
+    ::userDisplay "\nScratch Space Address: ";
+    ::userDisplay $scratchAddrStr;
     ::userDisplay "\n--------------------------------------------\n";
-
-    my $dataAddr = 0x0000000008208000;
 
     my $traceAddr = $dataAddr;
     my $traceAddrStr = sprintf("0x%08X", $traceAddr);
-    ::sendIPCMsg("read-data", "$traceAddr,64"); # Trace buffer is 64 bytes
-    my ($type1, $trace) = ::recvIPCMsg();
+    my $traceSize = 64;
+    my $trace = ::readData($traceAddr,$traceSize);
     my $traceData = formatData($trace);
 
     ::userDisplay "\nTrace Buffer Address: ";
@@ -92,10 +99,8 @@ sub main
 
     my $indexAddr = $dataAddr + 64;
     my $indexAddrStr = sprintf("0x%08X", $indexAddr);
-    ::sendIPCMsg("read-data", "$indexAddr,1"); # Trace index is 1 byte
-    my ($type2, $index) = ::recvIPCMsg();
-    $index =~ s/\0+//g; #strip off nulls
-    my $indexStr = sprintf("0x%02X", ord($index));
+    my $index = ::read8($indexAddr);
+    my $indexStr = sprintf("0x%02X", $index);
 
     ::userDisplay "\nTrace Index Address: ";
     ::userDisplay $indexAddrStr;
@@ -142,8 +147,8 @@ sub main
 
     my $tiDataAreaAddr = $dataAddr + 80;
     my $tiDataAreaAddrStr = sprintf("0x%08X", $tiDataAreaAddr);
-    ::sendIPCMsg("read-data", "$tiDataAreaAddr,48"); # TI Data Area is 48 bytes
-    my ($type6, $tiDataArea) = ::recvIPCMsg();
+    my $tiDataAreaSize = 48;
+    my $tiDataArea = ::readData($tiDataAreaAddr,$tiDataAreaSize);
     my $tiDataAreaData = formatData($tiDataArea);
 
     ::userDisplay "\nTI Data Area Address: ";
@@ -155,8 +160,8 @@ sub main
 
     my $hbbPnorSecAddr = $dataAddr + 128;
     my $hbbPnorSecAddrStr = sprintf("0x%08X", $hbbPnorSecAddr);
-    ::sendIPCMsg("read-data", "$hbbPnorSecAddr,32"); # Section data is 32 bytes
-    my ($type5, $hbbPnorSec) = ::recvIPCMsg();
+    my $hbbPnorSecSize = 32;
+    my $hbbPnorSec = ::readData($hbbPnorSecAddr,$hbbPnorSecSize);
     my $hbbPnorSecData = formatData($hbbPnorSec);
 
     ::userDisplay "\nHBB PNOR Section Data Address: ";
@@ -168,10 +173,8 @@ sub main
 
     my $secRomValAddr = $dataAddr + 160;
     my $secRomValAddrStr = sprintf("0x%08X", $secRomValAddr);
-    ::sendIPCMsg("read-data", "$secRomValAddr,1"); # Secure ROM Valid is 1 byte
-    my ($type4, $secRomVal) = ::recvIPCMsg();
-    $secRomVal =~ s/\0+//g; #strip off nulls
-    my $secRomValStr = sprintf("0x%02X", ord($secRomVal));
+    my $secRomVal = ::read8($secRomValAddr);
+    my $secRomValStr = sprintf("0x%02X", $secRomVal);
 
     ::userDisplay "\nSecure ROM Valid Address: ";
     ::userDisplay $secRomValAddrStr;
@@ -182,8 +185,8 @@ sub main
 
     my $blToHbAddr = $dataAddr + 176;
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
-    ::sendIPCMsg("read-data", "$blToHbAddr,89"); # BL to HB data is 89 bytes
-    my ($type3, $blToHb) = ::recvIPCMsg();
+    my $blToHbSize = 89;
+    my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
 
     ::userDisplay "\nBL to HB Data Address: ";
