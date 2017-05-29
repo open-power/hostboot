@@ -335,6 +335,7 @@
     <attribute><id>XIVE_HW_RESET</id></attribute>
     <attribute><id>DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE</id></attribute>
     <attribute><id>NDL_MESHCTRL_SETUP</id></attribute>
+    <attribute><id>PREVIOUS_SBE_ERROR</id></attribute>
 </targetType>
 
 <targetType>

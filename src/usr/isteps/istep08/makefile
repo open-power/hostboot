@@ -52,6 +52,7 @@ OBJS += call_proc_chiplet_fabric_scominit.o
 OBJS += call_proc_xbus_scominit.o
 OBJS += call_proc_xbus_enable_ridi.o
 OBJS += call_host_attnlisten_proc.o
+OBJS += sbe_extract_rc_handler.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
