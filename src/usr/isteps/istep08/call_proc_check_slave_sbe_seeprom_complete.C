@@ -58,10 +58,12 @@
 
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <return_code.H>
 
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_getecid.H>
+#include "sbe_extract_rc_handler.H"
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -176,7 +178,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             /*@
              * @errortype
              * @reasoncode  RC_SBE_SLAVE_TIMEOUT
-             * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
              * @moduleid    MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE
              * @userdata1   HUID of proc which had SBE timeout
              * @userdata2   SBE MSG Register
@@ -187,7 +189,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
              * @custdesc A processor in the system has failed to initialize
              */
             l_errl = new ErrlEntry(
-                    ERRL_SEV_UNRECOVERABLE,
+                    ERRL_SEV_INFORMATIONAL,
                     MOD_CHECK_SLAVE_SBE_SEEPROM_COMPLETE,
                     RC_SBE_SLAVE_TIMEOUT,
                     TARGETING::get_huid(l_cpu_target),
@@ -195,17 +197,56 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
             l_errl->collectTrace( "ISTEPS_TRACE", 256);
 
-            l_errl->addHwCallout( l_cpu_target,
-                                  HWAS::SRCI_PRIORITY_HIGH,
-                                  HWAS::DECONFIG,
-                                  HWAS::GARD_NULL );
-
-            // Create IStep error log and cross reference to error that occurred
-            l_stepError.addErrorDetails( l_errl );
-
             // Commit error and continue, this is not terminating since
             // we can still at least boot with master proc
             errlCommit(l_errl,ISTEP_COMP_ID);
+
+            // Setup for the HWP
+            P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
+                    P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+            FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                            l_cpu_target, l_rcAction);
+
+            if(l_errl)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                       "ERROR : proc_check_slave_sbe_seeprom_complete "
+                       "failed, p9_extract_sbe_rc HWP returning errorlog "
+                       "PLID=0x%x",l_errl->plid());
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
+
+                // Create IStep error log and cross reference to error
+                l_stepError.addErrorDetails( l_errl );
+
+                // Commit error log
+                errlCommit( l_errl, HWPF_COMP_ID );
+
+            }
+            else if(!l_errl && l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
+            {
+
+                if(INITSERVICE::spBaseServicesEnabled())
+                {
+                    // When we are on an FSP machine, we want to fail out of
+                    // hostboot and give control back to the FSP. They have
+                    // better diagnostics for this type of error.
+                    INITSERVICE::doShutdownWithError(RC_HWSV_COLLECT_SBE_RC,
+                                        TARGETING::get_huid(l_cpu_target));
+                }
+
+                // Pull out previous rc error for threshold
+                uint8_t l_prevError = (l_cpu_target)->getAttr<
+                        TARGETING::ATTR_PREVIOUS_SBE_ERROR>();
+                // Save the current rc error
+                (l_cpu_target)->setAttr<
+                        TARGETING::ATTR_PREVIOUS_SBE_ERROR>(l_rcAction);
+
+                proc_extract_sbe_handler( l_cpu_target,
+                                l_prevError, l_rcAction);
+            }
+
         }
         else if (l_errl)
         {

@@ -34686,6 +34686,20 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>PREVIOUS_SBE_ERROR</id>
+    <description>
+        Keeps track of the previous SBE error. We need to know
+        what last occurred to know what action we need to take.
+    </description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>CORE_THROTTLE_DEASSERT_COUNT</id>
     <description>
       The number of PGPE Fixed Timer Interrupts (see Hcode documentation for
