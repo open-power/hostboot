@@ -88,7 +88,7 @@ namespace Bootloader{
         if (l_blConfigData->version >= SAB_ADDED)
         {
             g_blData->blToHbData.secureAccessBit =
-                                                l_blConfigData->secureAccessBit;
+                l_blConfigData->secureSettings.secureAccessBit;
         }
 
         // Find secure ROM addr
