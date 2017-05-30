@@ -65,10 +65,10 @@ class FileScomAccessor : public ScomAccessor
      * @param BitString - holds data read or to write
      * @param register address
      * @param [READ|WRITE]
-     * @returns NULL if success, valid error handle otherwise
+     * @returns SUCCESS or PRD_SCANCOM_FAILURE
      * @pre bs.Length() must be size of register data to read/write
      */
-    virtual errlHndl_t Access(TARGETING::TargetHandle_t i_target,
+    virtual uint32_t Access(TARGETING::TargetHandle_t i_target,
                             BitString & bs,
                             uint64_t registerId,
                             MopRegisterAccess::Operation operation) const;

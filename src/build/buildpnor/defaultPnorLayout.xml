@@ -251,7 +251,7 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
-  <section>
+    <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
         <physicalOffset>0x2AD4000</physicalOffset>
@@ -269,6 +269,14 @@ Layout Description
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
+        <ecc/>
+    </section>
+    <section>
+        <description>FIRDATA (12K)</description>
+        <eyeCatch>FIRDATA</eyeCatch>
+        <physicalOffset>0x2EF4000</physicalOffset>
+        <physicalRegionSize>0x3000</physicalRegionSize>
+        <side>sideless</side>
         <ecc/>
     </section>
 </pnor>
