@@ -33,7 +33,7 @@
         <description>I/O Obus Rx Dccal(Offset calibration) Timeout</description>
         <callout>
             <target>TARGET</target>
-            <priority>MEDIUM</priority>
+            <priority>HIGH</priority>
         </callout>
         <deconfigure>
             <target>TARGET</target>
