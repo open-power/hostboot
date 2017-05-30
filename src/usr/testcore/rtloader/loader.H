@@ -44,6 +44,9 @@
 #include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
 #include <config.h>
+#include <util/runtime/util_rt.H>
+#include <sys/misc.h>
+
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 2*KILOBYTE);
@@ -175,6 +178,33 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         }
 
     private:
+        void tearDown()
+        {
+            if (cv_hb_data_addr != 0)
+            {
+                // unmap virtual memory
+                TRACFCOMP( g_trac_hbrt, "tearDown(): unmap hb_data virt addr %p",
+                       reinterpret_cast<void*>(cv_hb_data_addr));
+
+                int l_rc = mm_block_unmap(
+                                reinterpret_cast<void*>(cv_hb_data_addr));
+                if(l_rc)
+                {
+                    TRACFCOMP( g_trac_hbrt,
+                       "tearDown(): failed to unmap virt addr %p",
+                       reinterpret_cast<void*>(cv_hb_data_addr));
+                }
+                else
+                {
+                    cv_hb_data_addr = 0;
+                }
+            }
+            else
+            {
+                TRACFCOMP( g_trac_hbrt, "tearDown(): skipping unmap hb_data virt addr");
+            }
+        }
+
         uint64_t callViaCtr(uint64_t entry, void* param0, void* param1)
         {
             register uint64_t result = 0;
@@ -348,16 +378,81 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static uint64_t rt_get_reserved_mem(const char* i_region,
                                             uint32_t i_instance)
         {
-            if (0 == strcmp(i_region, HBRT_RSVD_MEM__VPD_CACHE))
-                return rt_get_vpd();
-            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__ATTRIBUTES))
-                return rt_get_targ();
-            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__OVERRIDES))
-                return rt_get_targ_override();
-            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__SBE_COMM))
+            if (0 == strcmp(i_region, HBRT_RSVD_MEM__SBE_COMM))
                 return rt_get_comm(i_instance);
+            else if (0 == strcmp(i_region, HBRT_RSVD_MEM__DATA))
+                return rt_get_hb_data(i_instance);
             else
                 return 0;
+        }
+
+        static uint64_t rt_get_hb_data(uint32_t i_instance)
+        {
+            TRACFCOMP( g_trac_hbrt, ENTER_MRK"rt_get_hb_data> i_instance=%d", i_instance );
+
+            uint64_t l_totalSize = 0;
+            uint64_t l_vAddr = 0;
+
+            if (cv_hb_data_addr != 0)
+            {
+                TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_get_hb_data: "
+                    "stored cv_hb_data_addr: 0x%.16llX",  cv_hb_data_addr);
+                return cv_hb_data_addr;
+            }
+
+
+            uint64_t l_physical_addr = cpu_spr_value(CPU_SPR_HRMOR) +
+                                        VMM_HB_DATA_TOC_START_OFFSET;
+
+            TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: "
+                "mapping physical address:0x%.1611X", l_physical_addr);
+
+            // Map to the virtual address to access data
+            l_vAddr = reinterpret_cast<uint64_t>(mm_block_map(
+                    reinterpret_cast<void*>(l_physical_addr),
+                    sizeof(hbrtTableOfContents_t)));
+
+            TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: mapped "
+                "physical address 0x%.16llX -> virtual address 0x%.16llX",
+                l_physical_addr, l_vAddr);
+
+            // check that map worked
+            assert(l_vAddr != 0,"rt_get_hb_data. Could not map HB DATA memory");
+
+            // find the total size
+            hbrtTableOfContents_t * toc_ptr =
+                    reinterpret_cast<hbrtTableOfContents_t *>(l_vAddr);
+            l_totalSize = toc_ptr->total_size;
+            TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: "
+                          "total_size for HB Data = %lld", l_totalSize);
+
+            // unmap
+            int l_rc = mm_block_unmap(reinterpret_cast<void*>(l_vAddr));
+            if(l_rc)
+            {
+                TRACFCOMP( g_trac_hbrt,
+                   "rt_get_hb_data. fail to unmap virt addr %p",
+                   reinterpret_cast<void*>(l_vAddr));
+                assert(false, "rt_get_hb_data. failed to unmap virt addr");
+            }
+
+            // Map to the virtual address to access ALL data
+            cv_hb_data_addr = reinterpret_cast<uint64_t>(mm_block_map(
+                    reinterpret_cast<void*>(l_physical_addr), l_totalSize));
+
+            TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: "
+              "mapped physical address:0x%.16llX -> virtual address 0x%.16llX",
+              l_physical_addr, cv_hb_data_addr);
+
+            // check that map worked
+            assert(cv_hb_data_addr != 0,
+                "rt_get_hb_data. Could not map entire HB DATA memory");
+
+            TRACFCOMP( g_trac_hbrt,
+                       EXIT_MRK"rt_get_hb_data> i_instance=%d, addr: 0x%.16llX",
+                       i_instance, cv_hb_data_addr);
+
+            return cv_hb_data_addr;
         }
 
 
@@ -512,104 +607,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         }
 
         //--------------------------------------------------------------------
-        static uint64_t rt_get_vpd()
-        {
-            if(cv_vpd_addr != 0)
-            {
-                return cv_vpd_addr;
-            }
-
-            // runtime VPD area not setup yet.
-            // Need to map the area into virtual memory
-            errlHndl_t err = VPD::vpd_load_rt_image(cv_vpd_phys_addr);
-
-            if(!err)
-            {
-
-                uint8_t * vpd_ptr =
-                    reinterpret_cast<uint8_t *>(cv_vpd_phys_addr);
-
-                void * vptr = mm_block_map(vpd_ptr, VMM_RT_VPD_SIZE);
-
-                assert(vptr != NULL,"rt_get_vpd. Could not map VPD memory");
-
-
-                // Store the address in a class variable so we only
-                // need to load vpd once.
-                cv_vpd_addr = reinterpret_cast<uint64_t>(vptr);
-            }
-            else
-            {
-                errlCommit(err,CXXTEST_COMP_ID);
-            }
-
-            return cv_vpd_addr;
-
-        }
-
-        //--------------------------------------------------------------------
-        static uint64_t rt_get_targ()
-        {
-            if (cv_targ_addr != 0)
-            {
-                return cv_targ_addr;
-            }
-
-            // Ensure cv_vpd_phys_addr is primed.
-            rt_get_vpd();
-
-            cv_targ_phys_addr = cv_vpd_phys_addr;
-            cv_targ_addr = reinterpret_cast<uint64_t>(
-                    TARGETING::AttrRP::save(cv_targ_phys_addr));
-
-            return cv_targ_addr;
-        }
-
-        //--------------------------------------------------------------------
-        static uint64_t rt_get_targ_override()
-        {
-            using namespace TARGETING;
-            if (cv_targ_over_addr != 0)
-            {
-                return cv_targ_over_addr;
-            }
-
-            // add an override to use in a later test
-            AttributeTank* l_tank =
-              &Target::theTargOverrideAttrTank();
-            ATTR_SCRATCH_INT32_1_type l_val = -99;
-            l_tank->setAttribute(ATTR_SCRATCH_INT32_1,
-                                 TYPE_SYS,
-                                 AttributeTank::ATTR_POS_NA,
-                                 AttributeTank::ATTR_UNIT_POS_NA,
-                                 AttributeTank::ATTR_NODE_NA,
-                                 0, sizeof(l_val), &l_val);
-
-            // copy overrides into local buffer
-            size_t l_actualSize = 64*KILOBYTE;
-            uint8_t* l_overrideData =
-              reinterpret_cast<uint8_t*>(malloc(l_actualSize));
-            errlHndl_t l_elog = TARGETING::AttrRP::saveOverrides(
-                                             l_overrideData,
-                                             l_actualSize );
-            if(l_elog)
-            {
-                TRACFCOMP( g_trac_hbrt, ERR_MRK" Attribute Overrides exceed allocated space" );
-                errlCommit( l_elog, CXXTEST_COMP_ID );
-            }
-            else if( l_actualSize == 0 )
-            {
-                TRACFCOMP( g_trac_hbrt, INFO_MRK" No Attribute Overrides Present" );
-            }
-            else
-            {
-                cv_targ_over_addr = reinterpret_cast<uint64_t>(l_overrideData);
-            }
-
-            return cv_targ_over_addr;
-        }
-
-        //--------------------------------------------------------------------
         static uint64_t rt_get_comm(uint32_t i_instance)
         {
             if (cv_comm_addr != 0)
@@ -688,12 +685,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             return l_plid;
         }
 
-
-        static uint64_t cv_vpd_addr;
-        static uint64_t cv_vpd_phys_addr;
-        static uint64_t cv_targ_addr;
-        static uint64_t cv_targ_phys_addr;
-        static uint64_t cv_targ_over_addr;
+        static uint64_t cv_hb_data_addr;
         static uint64_t cv_comm_addr;
         static uint64_t cv_comm_phys_addr;
 };
@@ -701,11 +693,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
 RuntimeLoaderTest::SCOM_MAP RuntimeLoaderTest::cv_scomMap;
 std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
-uint64_t RuntimeLoaderTest::cv_vpd_addr = 0;
-uint64_t RuntimeLoaderTest::cv_vpd_phys_addr = 0;
-uint64_t RuntimeLoaderTest::cv_targ_addr = 0;
-uint64_t RuntimeLoaderTest::cv_targ_phys_addr = 0;
-uint64_t RuntimeLoaderTest::cv_targ_over_addr = 0;
+
+uint64_t RuntimeLoaderTest::cv_hb_data_addr = 0;
 uint64_t RuntimeLoaderTest::cv_comm_addr = 0;
 uint64_t RuntimeLoaderTest::cv_comm_phys_addr = 0;
 

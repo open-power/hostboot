@@ -35,6 +35,8 @@
 #include <secureboot/service.H>
 #include <targeting/common/targreasoncodes.H>
 #include <devicefw/userif.H>
+#include <util/runtime/util_rt.H>
+
 
 using namespace TARGETING;
 
@@ -129,34 +131,29 @@ void applyTempOverrides()
     bool l_usingStash = false;
 
     // Get a pointer to the reserved memory where HB
-    //  saved the overrides during boot
-    uint64_t l_overAddr = 0;
-    uint8_t* l_overPtr = nullptr;
-    if( g_hostInterfaces != NULL &&
-        g_hostInterfaces->get_reserved_mem )
-    {
-        l_overAddr = g_hostInterfaces
-          ->get_reserved_mem("ibm,hbrt-targetoverride-image",0);
-        if( l_overAddr != 0 )
-        {
-            TRACFCOMP(g_trac_targeting, "Overrides found at %.16X", l_overAddr );
-            l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
-        }
-    }
+    // saved the overrides during boot
+    uint64_t l_overAttrSize = 0;
+    uint64_t l_overAddr = hb_get_rt_rsvd_mem(HBRT_MEM_LABEL_ATTROVER,
+                                             0, l_overAttrSize);
+
 
     // Having no overrides is a normal thing
-    if( l_overPtr == nullptr )
+    if( (l_overAddr == 0) )
     {
         TRACFCOMP(g_trac_targeting, "No Overrides found" );
         TRACFCOMP(g_trac_targeting, EXIT_MRK"applyTempOverrides");
         return;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_targeting, "Overrides found at %.16llX", l_overAddr );
     }
 
     // Use a faux PNOR Section that is associated
     //  with the data in mainstore
     PNOR::SectionInfo_t l_info;
     l_info.vaddr = l_overAddr;
-    l_info.size = 64*KILOBYTE; //@fixme-RTC:171863-use real size
+    l_info.size = l_overAttrSize;
     l_info.id = PNOR::ATTR_TMP;
     l_info.name = "HBRT Overrides";
 

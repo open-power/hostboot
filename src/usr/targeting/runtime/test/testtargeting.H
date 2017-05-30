@@ -126,6 +126,8 @@ class TargetingTestSuite : public CxxTest::TestSuite
         {
             using namespace TARGETING;
             TRACFCOMP(g_trac_targeting,"testIplOverrides");
+#if 0
+// @TODO RTC 144077 - rt_get_targ_override() no longer sets attribute up
 
             //See rt_get_targ_override() for setup details about setting
             // SYSTEM:ATTR_SCRATCH_INT32_1 = -99
@@ -146,7 +148,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     TS_FAIL("testIplOverrides> SCRATCH_INT32_1=%d, expected %d", l_val, -99 );
                 }
             }
+#endif
         }
+
 
         void testApplyAttrOverrides()
         {

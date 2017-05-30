@@ -57,6 +57,7 @@ enum PlatTargetingModuleId
     TARG_MOD_SET_MASTER_NODE                      = 0x81,
     TARG_MOD_ATTRRP_RT                            = 0x82,
     TARG_MOD_SAVE_OVERRIDE_TANK                   = 0x83,
+    TARG_MOD_SAVE_ATTR_TANK                       = 0x84,
 };
 
 /**

@@ -171,6 +171,19 @@ class AttrRP
         static void* save(uint64_t& io_addr);
 
         /**
+         *  @brief Copies all present attribute sections to memory.
+         *
+         *  @param[in] i_dest
+         *      Physical address to copy override data into
+         *  @param[in,out] io_size
+         *      in: Maximum size of allocated space in bytes
+         *      out: Actual number of bytes used (zero means no overrides)
+         *
+         *  @return Error log
+         */
+        static errlHndl_t save(uint8_t * i_dest, size_t & io_size);
+
+        /**
          *  @brief Returns size needed to save all attributes
          *
          *  HDAT requires up front knowledge of largest section
@@ -327,6 +340,9 @@ class AttrRP
 
         /** Internal implementation of save function. */
         void* _save(uint64_t&);
+
+        /** Internal implementation of save function. */
+        errlHndl_t _save(uint8_t* i_dest, size_t& io_size );
 
         /** Internal implementation of saveOverrides function. */
         errlHndl_t _saveOverrides( uint8_t* i_dest,
