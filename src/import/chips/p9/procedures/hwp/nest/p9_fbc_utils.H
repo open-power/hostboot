@@ -27,7 +27,6 @@
 /// @brief Fabric library functions/constants (FAPI2)
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
-/// @author Christy Graves <clgraves@us.ibm.com>
 ///
 
 //

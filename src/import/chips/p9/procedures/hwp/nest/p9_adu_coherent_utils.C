@@ -27,7 +27,7 @@
 /// @file p9_adu_coherent_utils.C
 /// @brief ADU alter/display library functions (FAPI)
 ///
-// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 3

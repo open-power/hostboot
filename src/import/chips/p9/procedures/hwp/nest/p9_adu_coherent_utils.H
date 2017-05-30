@@ -23,11 +23,11 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 //-----------------------------------------------------------------------------------
-// *!
+///
 /// @file p9_adu_coherent_utils.H
 /// @brief Common Code to support ADU get/putmem procedures (FAPI)
 ///
-// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 3
