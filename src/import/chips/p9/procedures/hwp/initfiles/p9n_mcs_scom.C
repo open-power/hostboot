@@ -123,15 +123,18 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
                 }
             }
 
-            if ((l_def_mn_freq_ratio <= literal_1350))
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF = 0x0;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF );
-            }
-            else if ((l_def_mn_freq_ratio > literal_1350))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON = 0x1;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON );
+                if ((l_def_mn_freq_ratio <= literal_1350))
+                {
+                    constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF = 0x0;
+                    l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_OFF );
+                }
+                else if ((l_def_mn_freq_ratio > literal_1350))
+                {
+                    constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON = 0x1;
+                    l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_FORCE_SFSTAT_ACTIVE_ON );
+                }
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
