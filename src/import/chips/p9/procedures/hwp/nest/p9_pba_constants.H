@@ -25,7 +25,7 @@
 /// @file p9_pba_constants.H
 /// @brief Constant enums to support PBA get/putmem procedures (FAPI)
 ///
-// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 3
