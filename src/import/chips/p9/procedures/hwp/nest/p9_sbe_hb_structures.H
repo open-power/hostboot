@@ -59,6 +59,20 @@ enum SbeBootloaderVersion
     MMIO_BARS_ADDED = 0x00090003,
 };
 
+union BootloaderSecureSettings
+{
+    uint8_t data8;
+    struct
+    {
+        // Bit Breakdown - sync with ATTR_SECURE_SETTINGS
+        uint8_t reserved           : 5; // reserved
+        uint8_t allowAttrOverrides : 1; // Allow Attribute Overrides in
+        // Secure Mode
+        uint8_t securityOverride   : 1; // Security Override
+        uint8_t secureAccessBit    : 1; // Secure Access Bit
+    } __attribute__((packed));
+};
+
 // Structure starts at the bootloader zero address
 struct BootloaderConfigData_t
 {
@@ -67,7 +81,7 @@ struct BootloaderConfigData_t
     uint8_t pnorBootSide;     // byte   9    0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
     uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB  [ATTR_PNOR_SIZE]
     uint64_t blLoadSize;      // bytes 12:19 Size of Load (Exception vectors and Bootloader)
-    uint8_t secureAccessBit;  // byte  20
+    BootloaderSecureSettings  secureSettings  ; // byte  20
     uint64_t xscomBAR;        // bytes 21:28 XSCOM MMIO BAR
     uint64_t lpcBAR;          // bytes 29:36 LPC MMIO BAR
 };
