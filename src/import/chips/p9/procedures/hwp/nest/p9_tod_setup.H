@@ -27,7 +27,7 @@
 /// @file p9_tod_setup.H
 /// @brief Procedures to configure the TOD topology
 ///
-// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 3
