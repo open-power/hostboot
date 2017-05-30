@@ -28,17 +28,24 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_CBS_ACK_NOT_HIGH_ERR</rc>
+    <rc>RC_CBS_ACK_NOT_SEEN_ERR</rc>
     <description>
-    CBS_ACK is not HIGH with in expected time, ReTry by adding more delay
+      CBS_ACK did not transition within timeout
     </description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_CBS_ACK_NOT_LOW_ERR</rc>
-    <description>
-    CBS_ACK is not LOW with in expected time, ReTry by adding more delay
-    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>EXPECTED_ACK_VALUE</ffdc>
+    <ffdc>CBS_CC_STAT</ffdc>
+    <ffdc>TIMEOUT</ffdc>
+    <ffdc>DELAY</ffdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
