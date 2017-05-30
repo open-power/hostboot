@@ -33,7 +33,7 @@ using namespace TARGETING;
 namespace PRDF
 {
 
-errlHndl_t FileScomAccessor::Access(
+uint32_t FileScomAccessor::Access(
                             TargetHandle_t i_target,
                             BitString & bs,
                             uint64_t registerId,
@@ -41,7 +41,7 @@ errlHndl_t FileScomAccessor::Access(
 {
     #define PRDF_FUNC "[FileScomAccessor::Access()] "
 
-    errlHndl_t errlH = NULL;
+    uint32_t rc = SUCCESS;
 
     PnorFirDataReader & firData = PnorFirDataReader::getPnorFirDataReader();
     uint64_t data = 0;
@@ -64,7 +64,7 @@ errlHndl_t FileScomAccessor::Access(
             PRDF_ERR(PRDF_FUNC "Wrong Operation:%u", operation);
     }
 
-    return errlH;
+    return rc;
 
     #undef PRDF_FUNC
 }

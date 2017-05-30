@@ -45,6 +45,10 @@
 #include    <p9_cpu_special_wakeup.H>
 #include    <p9_dump_stop_info.H>
 
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+  #include <isteps/pm/occCheckstop.H>
+#endif
+
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
@@ -132,7 +136,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                 fapi2::toString( l_fapi2ProcTarget,
                                  l_targName,
                                  sizeof(l_targName) );
-    
+
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "Call p9_dump_stop_info on processor %s", l_targName );
 
@@ -229,7 +233,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
-#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     if( l_stepError.isNull() )
     {
         // update firdata inputs for OCC

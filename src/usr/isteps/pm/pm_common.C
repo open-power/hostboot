@@ -193,12 +193,10 @@ namespace HBPM
         {
             l_config_data->firMaster = IS_FIR_MASTER;
 
-            // TODO: RTC 124683 The ability to write the HOMER data
-            //        is currently not available at runtime.
-#ifndef __HOSTBOOT_RUNTIME
+            #if !defined(__HOSTBOOT_RUNTIME) || defined(CONFIG_HBRT_PRD)
             l_errl = PRDF::writeHomerFirData( l_config_data->firdataConfig,
-                                          sizeof(config_data->firdataConfig) );
-#endif
+                                         sizeof(l_config_data->firdataConfig) );
+            #endif
 
         }
         else

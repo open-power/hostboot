@@ -58,9 +58,6 @@
 #endif
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-  #include <hwpf/hwp/occ/occ.H>
-  #include <hwpf/hwp/occ/occ_common.H>
-
   #include <diag/attn/attn.H>
 #endif
 
