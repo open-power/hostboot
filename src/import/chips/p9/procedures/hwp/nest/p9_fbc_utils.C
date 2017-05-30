@@ -32,7 +32,6 @@
 /// - Determination of the chip's base address in the real address map
 ///
 /// @author Joe McGill <jmcgill@us.ibm.com>
-/// @author Christy Graves <clgraves@us.ibm.com>
 ///
 
 //
