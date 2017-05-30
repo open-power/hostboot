@@ -322,6 +322,16 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DD2_RD_VREF_CNTRL_REG
     },
 };
 
+// Definition of the DP16 DRIFT_LIMITS registers
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DRIFT_LIMITS_REG =
+{
+    MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_0,
+    MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_1,
+    MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_2,
+    MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_3,
+    MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_4,
+};
+
 // Definition of the DP16 RD_VREF Calibration enable registers
 const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ENABLE_REG =
 {
