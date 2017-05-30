@@ -769,33 +769,24 @@ define def_perf_tune_case = (MCBIST.ATTR_MSS_FREQ==2400) && (SYS.ATTR_FREQ_PB_MH
 # "L" field
 ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
-  # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
-  #3,      (def_perf_tune_case==0); # untuned
-  #5,      (def_perf_tune_case==1); # tuned
-  3,      (def_perf_tune_case==0) && (def_mn_freq_ratio<=1350); # untuned and NOT boston 2400/1600 temp fix
-  6,      (def_perf_tune_case==0) && (def_mn_freq_ratio>1350);  # untuned and     boston 2400/1600 temp fix
+  3,      (def_perf_tune_case==0) && (def_mn_freq_ratio<=1200); # untuned and NOT boston 2400/1600 HW411339 fix
+  6,      (def_perf_tune_case==0) && (def_mn_freq_ratio>1200);  # untuned and     boston 2400/1600 HW411339 fix
   5,      (def_perf_tune_case==1); # tuned
 }
 
 # "D" field
 ispy MCP.PORT0.ECC64.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
-  # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
-  #0,      (def_perf_tune_case==0); # untuned
-  #1,      (def_perf_tune_case==1); # tuned
-  0,      (def_perf_tune_case==0) && (def_mn_freq_ratio<=1350); # untuned and NOT boston 2400/1600 temp fix
-  2,      (def_perf_tune_case==0) && (def_mn_freq_ratio>1350);  # untuned and     boston 2400/1600 temp fix
+  0,      (def_perf_tune_case==0) && (def_mn_freq_ratio<=1200); # untuned and NOT boston 2400/1600 HW411339 fix
+  2,      (def_perf_tune_case==0) && (def_mn_freq_ratio>1200);  # untuned and     boston 2400/1600 HW411339 fix
   1,      (def_perf_tune_case==1); # tuned
 }
 
 # "dn" field
 espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
-  # OLD - keeping here because this Boston 2400/1600 fix is likely temporary (HW411339)
-  #spyv;
-  #OFF; # untuned and tuned same value
   spyv, expr;
-  OFF,    (def_mn_freq_ratio<=1350); # NOT boston 2400/1600 temp fix
-  ON,     (def_mn_freq_ratio>1350);  #     boston 2400/1600 temp fix
+  OFF,    (def_mn_freq_ratio<=1200); # NOT boston 2400/1600 HW411339 fix
+  ON,     (def_mn_freq_ratio>1200);  #     boston 2400/1600 HW411339 fix
 }
 
 # "h" field
