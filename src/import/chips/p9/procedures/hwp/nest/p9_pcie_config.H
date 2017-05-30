@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,48 +22,45 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
 ///
 /// @file p9_pcie_config.H
 /// @brief Perform PCIE Phase2 init sequence (FAPI2)
 ///
 
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _P9_PCIE_CONFIG_H_
 #define _P9_PCIE_CONFIG_H_
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <fapi2.H>
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Structure definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_pcie_config_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_pcie_config_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
 
 extern "C" {
 
-//-----------------------------------------------------------------------------------
-// Function prototype
-//-----------------------------------------------------------------------------------
-
 /// @brief Perform PCIE Phase2 init sequence
-/// @param[in] i_target => P9 chip target
-/// @return FAPI_RC_SUCCESS if the setup completes successfully,
+/// @param[in] i_target P9 chip target
+/// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 //
-    fapi2::ReturnCode p9_pcie_config(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_pcie_config(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 } //extern"C"
 
 #endif //_P9_PCIE_CONFIG_H_
