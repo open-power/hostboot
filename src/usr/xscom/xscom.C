@@ -48,6 +48,9 @@
 #include <xscom/piberror.H>
 #include <arch/pirformat.H>
 #include <lpc/lpcif.H>
+#include <sys/mm.h>
+#include <kernel/bltohbdatamgr.H>
+#undef HMER // from securerom/ROM.H
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -321,8 +324,8 @@ errlHndl_t getTargetVirtualAddress(TARGETING::Target* i_target,
 
 
             // If the virtual address equals NULL(default) then this is the
-            // first XSCOM to this target so we need to calculate
-            // the virtual address and save it in the xscom address attribute.
+            // first XSCOM to this target so we need to map in the appropriate
+            // address
             if (o_virtAddr == NULL)
             {
                 uint64_t  xscomGroupId = 0;
@@ -522,13 +525,8 @@ uint64_t* getCpuIdVirtualAddress( XSComBase_t& o_mmioAddr )
 {
     uint64_t* o_virtAddr = 0;
 
-    // Get the CPU core this thread is running on
-    PIR_t cpuid = task_getcpuid();
-
-    // Target's XSCOM Base address
-    o_mmioAddr = MASTER_PROC_XSCOM_BASE_ADDR +
-      (MMIO_OFFSET_PER_GROUP * cpuid.groupId) +
-      (MMIO_OFFSET_PER_GROUP * cpuid.chipId);
+    // Read the MMIO setup by the SBE
+    o_mmioAddr = g_BlToHbDataManager.getXscomBAR();
 
     // Target's virtual address
     o_virtAddr = static_cast<uint64_t*>
@@ -842,5 +840,14 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
 
     return l_err;
 }
+
+/**
+ * @brief Return the value of the XSCOM BAR that the driver is using
+ */
+uint64_t get_master_bar( void )
+{
+    return mm_virt_to_phys(g_masterProcVirtAddr);
+}
+
 
 } // end namespace

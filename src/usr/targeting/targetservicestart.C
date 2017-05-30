@@ -62,6 +62,7 @@
 #include <map>
 #include <arch/memorymap.H>
 #include <lpc/lpcif.H>
+#include <xscom/xscomif.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -597,7 +598,14 @@ static void adjustMemoryMap( TargetService& i_targetService )
            LPC::get_lpc_bar() );
         TARG_ASSERT( true, "LPC BARs are inconsistent" );
     }
-    //@todo-RTC:173519-Add xscom cross-check
+    if( l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>()
+        != XSCOM::get_master_bar() )
+    {
+        TARG_ERR( "XSCOM attribute=%.16llX, live=%.16llX",
+           l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>(),
+           XSCOM::get_master_bar() );
+        TARG_ASSERT( true, "XSCOM BARs are inconsistent" );
+    }
 }
 
 

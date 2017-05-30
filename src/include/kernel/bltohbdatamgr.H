@@ -27,7 +27,6 @@
 #define __BLTOHBDATAMANAGER_H
 
 #include <stdint.h>
-#include <sys/mm.h>
 #include <bootloader/bootloaderif.H>
 
 // BlToHbDataManager class

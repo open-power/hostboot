@@ -34,11 +34,6 @@
 #include <arch/memorymap.H>
 
 /**
- *  @brief  The (fixed) base address value for master proc
- */
-constexpr uint64_t MASTER_PROC_XSCOM_BASE_ADDR = 0x000603FC00000000;
-
-/**
  *  @brief  Type definition for XSCom address and Base
  */
 typedef uint32_t XSComAddress_t;
