@@ -29,6 +29,7 @@
 #include <errl/errlentry.H>
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/targplatreasoncodes.H>
+#include <util/runtime/util_rt.H>
 
 #include "../attrrp_common.C"
 
@@ -43,10 +44,10 @@ namespace TARGETING
 
         do
         {
+            uint64_t attr_size = 0;
             TargetingHeader* l_header =
               reinterpret_cast<TargetingHeader*>(
-                g_hostInterfaces->
-                  get_reserved_mem(HBRT_RSVD_MEM__ATTRIBUTES,0));
+                  hb_get_rt_rsvd_mem(HBRT_MEM_LABEL_ATTR,0,attr_size));
 
             if ((NULL == l_header) ||
                 (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))

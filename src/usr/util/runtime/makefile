@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -33,6 +33,7 @@ OBJS += utillidmgr_rt.o
 OBJS += utilfile.o
 OBJS += utillidpnor.o
 OBJS += rt_cmds.o
+OBJS += util_rt.o
 
 SUBDIRS += test.d
 

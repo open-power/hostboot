@@ -55,6 +55,7 @@ namespace RUNTIME
         MOD_MAP_PHYS_ADDR                = 0x17,  /**< populate_hbruntime.C */
         MOD_UNMAP_VIRT_ADDR              = 0x18,  /**< populate_hbruntime.C */
         MOD_POPULATE_TPMINFOBYNODE       = 0x19,  /**< populate_hbruntime.C */
+        MOD_FILL_RSVMEM_HBDATA           = 0x20,  /**< populate_hbruntime.C */
     };
 
     enum RuntimeReasonCode
@@ -98,6 +99,7 @@ namespace RUNTIME
         RC_I2C_DEVICE_DUPLICATE_IN_MRW = RUNTIME_COMP_ID | 0x24,
         RC_EXTRA_I2C_DEVICE_IN_MRW     = RUNTIME_COMP_ID | 0x25,
         RC_GETTUPLE_UNSUPPORTED        = RUNTIME_COMP_ID | 0x26,
+        RC_EXCEEDED_MEMORY             = RUNTIME_COMP_ID | 0x27,
     };
 
     enum UserDetailsTypes

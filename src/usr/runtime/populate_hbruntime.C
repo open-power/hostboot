@@ -67,6 +67,7 @@
 #include <sbeio/sbe_psudd.H>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <kernel/bltohbdatamgr.H>
+#include <util/runtime/util_rt.H>
 
 
 namespace RUNTIME
@@ -508,6 +509,296 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
 }
 
 /**
+ *  @brief Load the HB_DATA section for reserved memory
+ *
+ *  -----  HB Data Layout -------
+ * io_start_address
+ *    -- HB Table of Contents
+ *    -- ATTR Override Data
+ *    -- ATTR Data
+ *    -- VPD
+ *    -- Padding
+ * io_end_address
+ *
+ * Either pass in a low starting physical address (io_start_address) or
+ * a high ending physical address (io_end_address).
+ * The function will then calculate the size of data and
+ * determine the opposite address.
+ * Set i_startAddressValid to true, if you set io_start_address.
+ * Set i_startAddressValid to false, if you set io_end_address.
+ *
+ *  @param[in/out]  io_start_address where to start loading data
+ *  @param[in/out]  io_end_address   where to stop loading data
+ *  @param[in]      i_startAddressValid Is io_start_address valid?
+ *  @param[out]     io_size if not zero, maxSize in bytes allowed
+ *                          returns Total 64kb aligned size for all the data
+ *  @return Error handle if error
+ */
+errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
+                              uint64_t & io_end_address,
+                              bool i_startAddressValid,
+                              uint64_t & io_size)
+{
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,startAddressValid=%d",
+                io_start_address, io_end_address, i_startAddressValid?1:0 );
+
+    errlHndl_t l_elog = nullptr;
+    uint64_t l_vAddr = 0x0;
+    uint64_t l_prevDataAddr = 0;
+    uint64_t l_prevDataSize = 0;
+
+    // TOC to be filled in and added to beginning of HB Data section
+    hbrtTableOfContents_t l_hbTOC;
+    strcpy(l_hbTOC.toc_header, "Hostboot Table of Contents");
+    l_hbTOC.toc_version = HBRT_TOC_VERSION_1;
+    l_hbTOC.total_entries = 0;
+
+    /////////////////////////////////////////////////////////////
+    // Figure out the total size needed so we can place the TOC
+    // at the beginning
+    /////////////////////////////////////////////////////////////
+    uint64_t l_totalSectionSize = 0;
+
+    // Begin with ATTROVER
+
+    // default to the minimum space we have to allocate anyway
+    size_t l_attrOverMaxSize = 64*KILOBYTE;
+
+    // copy overrides into local buffer
+    uint8_t* l_overrideData =
+      reinterpret_cast<uint8_t*>(malloc(l_attrOverMaxSize));
+    size_t l_actualSize = l_attrOverMaxSize;
+    l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
+                                               l_actualSize );
+    if( l_elog )
+    {
+        // check if the issue was a lack of space (unlikely)
+        if( unlikely( l_actualSize > 0 ) )
+        {
+            TRACFCOMP( g_trac_runtime, "Expanding override section to %d", l_actualSize );
+            free(l_overrideData);
+            l_overrideData =
+              reinterpret_cast<uint8_t*>(malloc(l_actualSize));
+            l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
+                                                       l_actualSize );
+        }
+
+        // overrides are not critical so just commit this
+        //  and keep going without any
+        if( l_elog )
+        {
+            TRACFCOMP( g_trac_runtime, "Errors applying overrides, just skipping" );
+            errlCommit( l_elog, RUNTIME_COMP_ID );
+            l_elog = NULL;
+            l_actualSize = 0;
+        }
+    }
+
+    // Should we create an ATTROVER section?
+    if (l_actualSize > 0)
+    {
+        l_hbTOC.entry[l_hbTOC.total_entries].label =
+                                                HBRT_MEM_LABEL_ATTROVER;
+        l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+        l_hbTOC.entry[l_hbTOC.total_entries].size = l_actualSize;
+        l_totalSectionSize += ALIGN_PAGE(l_actualSize);
+        l_hbTOC.total_entries++;
+    }
+
+    // Now calculate ATTR size
+    l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_ATTR;
+    l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+    l_hbTOC.entry[l_hbTOC.total_entries].size =
+        TARGETING::AttrRP::maxSize();
+    l_totalSectionSize +=
+        ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+    l_hbTOC.total_entries++;
+
+    // Fill in VPD size
+    l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_VPD;
+    l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+    l_hbTOC.entry[l_hbTOC.total_entries].size = VMM_RT_VPD_SIZE;
+    l_totalSectionSize +=
+        ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+    l_hbTOC.total_entries++;
+
+    // Fill in PADDING size
+    // Now calculate how much padding is needed for 64KB alignment
+    // of the whole data section
+    size_t l_totalSizeAligned = ALIGN_X( l_totalSectionSize, 64*KILOBYTE );
+
+    // l_actualSizeAligned will bring section to 64k alignment
+    uint64_t l_actualSizeAligned = l_totalSizeAligned - l_totalSectionSize;
+
+    // Do we need a Padding section?
+    if (l_actualSizeAligned > 0)
+    {
+        // Add padding section
+        l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_PADDING;
+        l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+        l_hbTOC.entry[l_hbTOC.total_entries].size = l_actualSizeAligned;
+        l_hbTOC.total_entries++;
+    }
+
+    // Set total_size to the 64k aligned size
+    l_hbTOC.total_size = l_totalSizeAligned;
+
+    do {
+
+        if ((io_size != 0) && (io_size < l_totalSizeAligned))
+        {
+            // create an error
+            TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData - Will exceed max allowed size %lld, need %lld",
+                   io_size, l_totalSizeAligned);
+
+            /*@ errorlog tag
+             * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        RUNTIME::MOD_FILL_RSVMEM_HBDATA
+             * @reasoncode      RUNTIME::RC_EXCEEDED_MEMORY
+             * @userdata1       Total size needed
+             * @userdata2       Size allowed
+             *
+             * @devdesc         Unable to fill in HB data memory
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                RUNTIME::MOD_FILL_RSVMEM_HBDATA,
+                                RUNTIME::RC_EXCEEDED_MEMORY,
+                                l_totalSizeAligned,
+                                io_size,
+                                true);
+            break;
+        }
+
+        // update return size to amount filled in
+        io_size = l_totalSizeAligned;
+
+
+        // Figure out the start and end addresses
+        if (i_startAddressValid)
+        {
+            io_end_address = io_start_address + l_totalSizeAligned - 1;
+        }
+        else
+        {
+            io_start_address = io_end_address - l_totalSizeAligned + 1;
+        }
+
+
+        TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> mapping 0x%.16llX address, size %lld",
+                io_start_address, l_totalSizeAligned );
+
+        // Grab the virtual address for the entire HB Data section
+        l_elog = mapPhysAddr(io_start_address, l_totalSizeAligned, l_vAddr);
+        if(l_elog)
+        {
+            break;
+        }
+
+        TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> virtual start address: %p", l_vAddr);
+
+        // Skip TOC at the beginning, pretend it was added
+        l_prevDataAddr = l_vAddr;
+        l_prevDataSize = sizeof(l_hbTOC);
+        uint64_t l_offset = 0;
+
+        int i = 0;
+        while ( i < l_hbTOC.total_entries )
+        {
+            uint64_t actual_size = l_hbTOC.entry[i].size;
+            uint64_t aligned_size = ALIGN_PAGE(actual_size);
+
+            l_offset += l_prevDataSize;
+
+            // update offset to current data section
+            l_hbTOC.entry[i].offset = l_offset;
+
+            l_prevDataAddr += l_prevDataSize;
+            l_prevDataSize = aligned_size;
+
+            switch ( l_hbTOC.entry[i].label )
+            {
+                case HBRT_MEM_LABEL_ATTROVER:
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTROVER address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> memcpy %d size", actual_size);
+                    memcpy( reinterpret_cast<void*>(l_prevDataAddr),
+                            l_overrideData,
+                            actual_size);
+                    break;
+                case HBRT_MEM_LABEL_ATTR:
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTR address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    l_elog = TARGETING::AttrRP::save(
+                                reinterpret_cast<uint8_t*>(l_prevDataAddr),
+                                aligned_size);
+                    if(l_elog)
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                   "populate_HbRsvMem fail ATTR save call" );
+                        break;
+                    }
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TARGETING::AttrRP::save(0x%.16llX) done", l_prevDataAddr);
+                    break;
+                case HBRT_MEM_LABEL_VPD:
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    l_elog = VPD::vpd_load_rt_image(l_prevDataAddr, true);
+                    if(l_elog)
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                   "fill_RsvMem_hbData> failed VPD call" );
+                        break;
+                    }
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD address 0x%.16llX, size: %lld done", l_prevDataAddr, aligned_size);
+                    break;
+                default:
+                    break;
+            }
+            i++;
+        }
+
+        // exit if we hit an error
+        if(l_elog)
+        {
+            break;
+        }
+
+        TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TOC address 0x%.16llX, size: %lld", l_vAddr, sizeof(l_hbTOC));
+
+        // Now copy the TOC at the head of the HB Data section
+        memcpy( reinterpret_cast<void*>(l_vAddr),
+                &l_hbTOC,
+                sizeof(l_hbTOC));
+
+    } while (0);
+
+    if (l_vAddr != 0)
+    {
+        // release the virtual address
+        errlHndl_t l_errl = unmapVirtAddr(l_vAddr);
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> unmap %p failed", l_vAddr );
+            if (l_elog)
+            {
+                // Already have an error log so just commit this new one
+                errlCommit(l_errl, RUNTIME_COMP_ID);
+            }
+            else
+            {
+                l_elog = l_errl;
+            }
+        }
+        l_vAddr = 0;
+    }
+
+    // free ATTR_OVERRIDE memory
+    free(l_overrideData);
+
+    TRACFCOMP( g_trac_runtime,EXIT_MRK"fill_RsvMem_hbData> io_start_address=0x%.16llX,io_end_address=0x%.16llX,size=%lld",
+                io_start_address, io_end_address, io_size );
+    return l_elog;
+}
+
+/**
  *  @brief Load the HDAT HB Reserved Memory
  *         address range structures on given node
  *  @param[in]  i_nodeId Node ID
@@ -603,10 +894,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // -----HOMER_N----------
             // -----...--------------
             // -----HOMER_0----------
-            // -----VPD--------------
-            // -----ATTR Data------------
-            // -----ATTR Override Data---
-            // -----HBRT Image-----------
+            // -----HB Data ---------
+            //   -- VPD
+            //   -- ATTR Data
+            //   -- ATTR Override Data
+            //   -- HB TOC
+            // -----HBRT Image-------
             // -----SBE Comm---------
             // -----SBE FFDC---------
             // -----Secureboot cryptographic algorithms code---------
@@ -660,204 +953,59 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 #endif
         }
 
-        // Establish a couple variables to keep track of where the
-        //  next section lands as we deal with the less statically
-        //  sized areas.  These values must always remain 64KB
-        //  aligned
-        uint64_t l_prevDataAddr = 0;
-        uint64_t l_prevDataSize = 0;
+
+        ////////////////////////////////////////////////////
+        // HB Data area
+        ////////////////////////////////////////////////////
 
         //====================
         // Note that for PHYP we build up starting at the end of the
         //  previously allocated HOMER/OCC areas, for OPAL we build
         //  downwards from the top of memory where the HOMER/OCC
         //  areas were placed
-
-
-        ///////////////////////////////////////////////////
-        // VPD entry
-        uint64_t l_vpdAddr = 0x0;
+        uint64_t l_startAddr = 0;
+        uint64_t l_endAddr = 0;
+        uint64_t l_totalSizeAligned = 0;
+        bool startAddressValid = true;
 
         if(TARGETING::is_phyp_load())
         {
-            l_vpdAddr = cpu_spr_value(CPU_SPR_HRMOR)
-                    + VMM_VPD_START_OFFSET;
+            l_startAddr = cpu_spr_value(CPU_SPR_HRMOR)
+                    + VMM_HB_DATA_TOC_START_OFFSET;
         }
         else if(TARGETING::is_sapphire_load())
         {
-            // @todo RTC 170298 Reduce space allocated for VPD at runtime
-            l_vpdAddr = l_topMemAddr
-                    - VMM_RT_VPD_OFFSET;
+            l_endAddr = l_topMemAddr -
+                        VMM_ALL_HOMER_OCC_MEMORY_SIZE;
+            startAddressValid = false;
+        }
+
+        // fills in the reserved memory with HD Data and
+        // will update addresses and totalSize
+        l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
+                                startAddressValid, l_totalSizeAligned);
+
+        if (l_elog)
+        {
+            break;
         }
 
         l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                       i_nodeId,
-                                      l_vpdAddr,
-                                      VMM_RT_VPD_SIZE,
-                                      HBRT_RSVD_MEM__VPD_CACHE);
+                                      l_startAddr,
+                                      l_totalSizeAligned,
+                                      HBRT_RSVD_MEM__DATA);
         if(l_elog)
         {
             break;
         }
 
-        l_prevDataAddr = l_vpdAddr;
-        l_prevDataSize = VMM_RT_VPD_SIZE;
-
-        // Load the VPD into memory
-        l_elog = mapPhysAddr(l_vpdAddr, VMM_RT_VPD_SIZE, l_vAddr);
-        if(l_elog)
-        {
-            break;
-        }
-
-        l_elog = VPD::vpd_load_rt_image(l_vAddr);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime,
-                       "populate_HbRsvMem fail VPD call" );
-            break;
-        }
-
-        l_elog = unmapVirtAddr(l_vAddr);
-        if(l_elog)
-        {
-            break;
-        }
-
-
-        ///////////////////////////////////////////////////
-        // ATTR Data entry
-        uint64_t l_attrDataAddr = 0x0;
-        uint64_t l_attrSize = TARGETING::AttrRP::maxSize();
-
-        // Minimum 64K size for Opal
-        size_t l_attrSizeAligned = ALIGN_X( l_attrSize, 64*KILOBYTE );
-
-        if(TARGETING::is_phyp_load())
-        {
-            l_attrDataAddr = l_prevDataAddr + l_prevDataSize;
-        }
-        else if(TARGETING::is_sapphire_load())
-        {
-            l_attrDataAddr = l_prevDataAddr - l_attrSizeAligned;
-        }
-
-        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                      i_nodeId,
-                                      l_attrDataAddr,
-                                      l_attrSizeAligned,
-                                      HBRT_RSVD_MEM__ATTRIBUTES);
-        if(l_elog)
-        {
-            break;
-        }
-
-        l_prevDataAddr = l_attrDataAddr;
-        l_prevDataSize = l_attrSizeAligned;
-
-        // Load the attribute data into memory
-        l_elog = mapPhysAddr(l_attrDataAddr, l_attrSize, l_vAddr);
-        if(l_elog)
-        {
-            break;
-        }
-
-        TARGETING::AttrRP::save(l_vAddr);
-
-        l_elog = unmapVirtAddr(l_vAddr);
-        if(l_elog)
-        {
-            break;
-        }
-
-
-        ///////////////////////////////////////////////////
-        // ATTR Overrides entry
-        uint64_t l_attrOverDataAddr = 0x0;
-
-        // default to the minimum space we have to allocate anyway
-        size_t l_attrOverMaxSize = 64*KILOBYTE;
-        //@fixme-RTC:171863-fill in real size
-
-        // copy overrides into local buffer
-        uint8_t* l_overrideData =
-          reinterpret_cast<uint8_t*>(malloc(l_attrOverMaxSize));
-        size_t l_actualSize = l_attrOverMaxSize;
-        l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
-                                                   l_actualSize );
-        if( l_elog )
-        {
-            // check if the issue was a lack of space (unlikely)
-            if( unlikely( l_actualSize > 0 ) )
-            {
-                TRACFCOMP( g_trac_runtime, "Expanding override section to %d", l_actualSize );
-                free(l_overrideData);
-                l_overrideData =
-                  reinterpret_cast<uint8_t*>(malloc(l_actualSize));
-                l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
-                                                           l_actualSize );
-            }
-
-            // overrides are not critical so just commit this
-            //  and keep going without any
-            if( l_elog )
-            {
-                TRACFCOMP( g_trac_runtime, "Errors applying overrides, just skipping" );
-                errlCommit( l_elog, RUNTIME_COMP_ID );
-                l_elog = NULL;
-                l_actualSize = 0;
-            }
-        }
-
-        // only add a section if there are actually overrides
-        if( l_actualSize > 0 )
-        {
-            // Minimum 64K size for Opal
-            size_t l_actualSizeAligned = ALIGN_X( l_actualSize, 64*KILOBYTE );
-
-            // phyp/opal build in reverse...
-            if(TARGETING::is_phyp_load())
-            {
-                l_attrOverDataAddr = l_prevDataAddr + l_prevDataSize;
-            }
-            else if(TARGETING::is_sapphire_load())
-            {
-                l_attrOverDataAddr = l_prevDataAddr - l_actualSizeAligned;
-            }
-
-            l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          i_nodeId,
-                                          l_attrOverDataAddr,
-                                          l_actualSizeAligned,
-                                          HBRT_RSVD_MEM__OVERRIDES);
-            if(l_elog)
-            {
-                break;
-            }
-
-            l_prevDataAddr = l_attrOverDataAddr;
-            l_prevDataSize = l_actualSizeAligned;
-
-            // Load the attribute data into memory
-            l_elog = mapPhysAddr(l_attrOverDataAddr,
-                                 ALIGN_PAGE(l_actualSize),
-                                 l_vAddr);
-            if(l_elog)
-            {
-                break;
-            }
-
-            memcpy( reinterpret_cast<void*>(l_vAddr),
-                    l_overrideData,
-                    l_actualSize );
-            free(l_overrideData);
-
-            l_elog = unmapVirtAddr(l_vAddr);
-            if(l_elog)
-            {
-                break;
-            }
-        }
+        // Establish a couple variables to keep track of where the
+        // next section lands as we deal with the less statically
+        // sized areas.  These values must always remain 64KB
+        // aligned
+        uint64_t l_prevDataAddr = l_startAddr;
+        uint64_t l_prevDataSize = l_totalSizeAligned;
 
 
         ///////////////////////////////////////////////////
@@ -1903,6 +2051,22 @@ errlHndl_t populate_hbRuntimeData( void )
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "populate_HbRsvMem failed" );
+                }
+            }
+            else
+            {
+                // still fill in HB DATA for testing
+                uint64_t l_startAddr = cpu_spr_value(CPU_SPR_HRMOR) +
+                            VMM_HB_DATA_TOC_START_OFFSET;
+                uint64_t l_endAddr = 0;
+                uint64_t l_totalSizeAligned = 0;
+                bool startAddressValid = true;
+
+                l_elog = fill_RsvMem_hbData(l_startAddr, l_endAddr,
+                                startAddressValid, l_totalSizeAligned);
+                if(l_elog != nullptr)
+                {
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData failed" );
                 }
             }
             break;

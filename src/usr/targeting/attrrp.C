@@ -41,6 +41,7 @@
 #include <vmmconst.h>
 #include <targeting/adapters/assertadapter.H>
 #include <targeting/common/targreasoncodes.H>
+#include <targeting/targplatreasoncodes.H>
 #include <targeting/attrrp.H>
 #include <targeting/common/trace.H>
 #include <targeting/common/attributeTank.H>
@@ -650,6 +651,11 @@ namespace TARGETING
         return Singleton<AttrRP>::instance()._save(io_addr);
     }
 
+    errlHndl_t AttrRP::save( uint8_t* i_dest, size_t& io_size )
+    {
+        // Call save on singleton instance.
+        return Singleton<AttrRP>::instance()._save(i_dest,io_size);
+    }
 
     uint64_t  AttrRP::maxSize( )
     {
@@ -710,6 +716,67 @@ namespace TARGETING
         TRACFCOMP(g_trac_targeting, "AttrRP::save: bottom @ 0x%lx", io_addr);
         return region;
     }
+
+    errlHndl_t AttrRP::_save( uint8_t* i_dest, size_t& io_size )
+    {
+        TRACFCOMP( g_trac_targeting, ENTER_MRK"AttrRP::_save: i_dest=%p, io_size=%ld", i_dest, io_size );
+        errlHndl_t l_err = nullptr;
+        uint8_t* pointer = i_dest;
+        uint64_t l_totalSize = 0;
+        uint64_t l_maxSize = io_size;
+        uint64_t l_filledSize = 0;
+
+        // Copy content.
+        for (size_t i = 0; i < iv_sectionCount; ++i)
+        {
+            l_totalSize += iv_sections[i].size;
+            if (l_totalSize <= l_maxSize)
+            {
+                l_filledSize = l_totalSize;
+                memcpy(pointer,
+                       reinterpret_cast<void*>(iv_sections[i].vmmAddress),
+                       iv_sections[i].size);
+
+                pointer = &pointer[ALIGN_PAGE(iv_sections[i].size)];
+            }
+            else
+            {
+                // Need a larger buffer
+                TRACFCOMP( g_trac_targeting, ERR_MRK"AttrRP::_save - max size %d exceeded, missing section %d, size %d",
+                    io_size,i, iv_sections[i].size);
+            }
+        }
+
+        if (l_totalSize > io_size)
+        {
+            // Need to increase size of the buffer
+             /*@
+                 *   @errortype
+                 *   @moduleid          TARG_MOD_SAVE_ATTR_TANK
+                 *   @reasoncode        TARG_SPACE_OVERRUN
+                 *   @userdata1         Maximum Available size
+                 *   @userdata2         Required size
+                 *
+                 *   @devdesc   Size of attribute data exceeds available
+                 *              buffer space
+                 *
+                 *   @custdesc  Internal firmware error applying
+                 *              custom configuration settings
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      TARG_MOD_SAVE_ATTR_TANK,
+                                      TARG_SPACE_OVERRUN,
+                                      io_size,
+                                      l_totalSize,
+                                      true /*SW Error */);
+        }
+
+        io_size = l_filledSize;
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::_save: i_dest=%p, io_size=%ld, size needed=%ld", i_dest, io_size, l_totalSize );
+        return l_err;
+    }
+
 
 
     errlHndl_t AttrRP::_saveOverrides( uint8_t* i_dest, size_t& io_size )

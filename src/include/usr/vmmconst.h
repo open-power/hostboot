@@ -194,6 +194,15 @@ enum BlockPriority
 #define DUMP_TEST_MEMORY_ADDR \
  (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)   /* currently 202MB */
 #define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
+/** End of Dump Source Table = 206MB */
+
+/** Memory for hostboot data Table of Contents */
+#define VMM_HB_DATA_TOC_START_OFFSET \
+    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 206MB */
+#define VMM_HB_DATA_TOC_END_OFFSET (VMM_HB_DATA_TOC_START_OFFSET + (4*KILOBYTE))
+/** End of HB DATA TOC Area = 206MB + 4KB */
+
+
 
 /** Internode communication area outside of the HB image.
  * Preserved between mpipl.

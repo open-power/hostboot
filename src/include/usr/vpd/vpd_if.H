@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,10 +49,12 @@ namespace VPD
 
     /**
      * @brief Load the runtime VPD image into memory
-     * @param[out] The physical address of the VPD image
+     * @param[in/out] The physical or virtual address of the VPD image
+     * @param[in] Is the address virtual?
      * @return error handle if there was an error
      */
-    errlHndl_t vpd_load_rt_image(uint64_t & o_vpd_addr);
+    errlHndl_t vpd_load_rt_image(uint64_t & io_vpd_addr,
+                                 bool i_virtualAddr = false);
 
     /**
      * @brief This function checks to see if the given mvpd target
