@@ -50,6 +50,19 @@ namespace mss
 {
 
 ///
+/// @brief Enumeration of DD2_BLUE_EXTEND_RANGE settings in DP16_DRIFT_LIMITS reg
+/// @note Each name denotes the RDCLK phase shift lower and upper bounds, with
+///       setting '2' being invalid.
+///
+enum blue_waterfall_range : uint64_t
+{
+    ZERO_TO_THREE = 0,
+    ONE_TO_FOUR   = 1,
+    RESERVED      = 2,
+    TWO_TO_FIVE   = 3
+};
+
+///
 /// @brief Given a mt/s, create a PHY 'standard' bit field for that freq.
 /// @param[in] i_freq the value from mss::freq for your target
 /// @return uint64_t a right-aligned bitfield which can be inserted in to a buffer
@@ -166,6 +179,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > CTLE_CNTRL_REG;
         static const std::vector< uint64_t > DD1_RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DD2_RD_VREF_CNTRL_REG;
+        static const std::vector< uint64_t > DRIFT_LIMITS_REG;
 
         static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 
@@ -253,6 +267,10 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             GATE_DELAY_LEN = MCA_DDRPHY_DP16_DQS_GATE_DELAY_RP0_P0_0_01_N0_LEN,
             // Both blue and red waterfalls are the same number of bits
             WATERFALL_LEN = MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT0_LEN,
+
+            // These are only valid on Nimbus DD2 and later
+            DD2_WATERFALL_RNG = MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_0_01_DD2_BLUE_EXTEND_RANGE,
+            DD2_WATERFALL_RNG_LEN = MCA_DDRPHY_DP16_DRIFT_LIMITS_P0_0_01_DD2_BLUE_EXTEND_RANGE_LEN,
 
             ////////////////////////////////////////
             // WR VREF register field information //
@@ -1146,6 +1164,120 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Read DRIFT_LIMITS
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_drift_limits( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_TRY( mss::getScom(i_target, TT::DRIFT_LIMITS_REG[I], o_data) );
+    FAPI_INF("drift_limits dp16<%d>: 0x%016lx", I, o_data);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read DRIFT_LIMITS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the DP16 instance
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode read_drift_limits( const fapi2::Target<T>& i_target,
+        const uint64_t i_dp,
+        fapi2::buffer<uint64_t>& o_data )
+{
+    switch (i_dp)
+    {
+        case(0):
+            return ( read_drift_limits<0>(i_target, o_data) );
+
+        case(1):
+            return ( read_drift_limits<1>(i_target, o_data) );
+
+        case(2):
+            return ( read_drift_limits<2>(i_target, o_data) );
+
+        case(3):
+            return ( read_drift_limits<3>(i_target, o_data) );
+
+        case(4):
+            return ( read_drift_limits<4>(i_target, o_data) );
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
+///
+/// @brief Write DRIFT_LIMITS
+/// @tparam I DP16 instance
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< uint64_t I, fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_drift_limits( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    static_assert( I < TT::DP_COUNT, "dp16 instance out of range");
+
+    FAPI_INF("drift_limits dp16<%d>: 0x%016lx", I, i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::DRIFT_LIMITS_REG[I], i_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write DRIFT_LIMITS
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_dp the DP16 instance
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline fapi2::ReturnCode write_drift_limits( const fapi2::Target<T>& i_target,
+        const uint64_t i_dp,
+        const fapi2::buffer<uint64_t>& i_data )
+{
+    switch (i_dp)
+    {
+        case(0):
+            return ( write_drift_limits<0>(i_target, i_data) );
+
+        case(1):
+            return ( write_drift_limits<1>(i_target, i_data) );
+
+        case(2):
+            return ( write_drift_limits<2>(i_target, i_data) );
+
+        case(3):
+            return ( write_drift_limits<3>(i_target, i_data) );
+
+        case(4):
+            return ( write_drift_limits<4>(i_target, i_data) );
+
+        default:
+            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+    }
+}
+
 ////////////////////////////////////////
 //   all the WR VREF scom accessors   //
 ////////////////////////////////////////
@@ -1913,6 +2045,57 @@ inline void set_gate_delay( fapi2::buffer<uint64_t>& io_data, const uint64_t i_g
 
     static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "QUAD value is not less than the maximum value");
     io_data.insertFromRight<TT::GATE_DELAY_BIT_POS[QUAD], TT::GATE_DELAY_LEN>(i_gate_delay);
+}
+
+///
+/// @brief Get the blue waterfall extended range setting (DD2 and later only)
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @param[out] o_value the enumerated value of the range
+/// @note this will return the ZERO_TO_THREE enumeration for DD1
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline void get_blue_waterfall_range( const fapi2::Target<T>& i_target,
+                                      const fapi2::buffer<uint64_t>& i_data,
+                                      blue_waterfall_range& o_value )
+{
+    if (mss::chip_ec_nimbus_lt_2_0(i_target))
+    {
+        o_value = blue_waterfall_range::ZERO_TO_THREE;
+        FAPI_ERR("get_blue_waterfall_range called on DD1 part");
+        return;
+    }
+
+    uint64_t l_out = 0;
+    i_data.extractToRight<TT::DD2_WATERFALL_RNG, TT::DD2_WATERFALL_RNG_LEN>(l_out);
+    FAPI_INF("get_blue_waterfall_range: 0x%01lx", l_out);
+    o_value = static_cast<blue_waterfall_range>(l_out);
+}
+
+///
+/// @brief Set the blue waterfall extended range setting (DD2 and later only)
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in, out] io_data the value of the register
+/// @param[in] i_value the enumerated value of the range
+/// @note this will do nothing for a DD1 part
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+inline void set_blue_waterfall_range( const fapi2::Target<T>& i_target,
+                                      fapi2::buffer<uint64_t>& io_data,
+                                      const blue_waterfall_range i_value )
+{
+    if (mss::chip_ec_nimbus_lt_2_0(i_target))
+    {
+        FAPI_ERR("set_blue_waterfall_range called on DD1 part");
+        return;
+    }
+
+    io_data.insertFromRight<TT::DD2_WATERFALL_RNG, TT::DD2_WATERFALL_RNG_LEN>(i_value);
+    FAPI_INF("set_blue_waterfall_range: 0x%01lx", i_value);
 }
 
 } // close namespace dp16
