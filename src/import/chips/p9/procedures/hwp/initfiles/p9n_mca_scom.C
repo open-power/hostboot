@@ -80,7 +80,7 @@ constexpr uint64_t literal_14 = 14;
 constexpr uint64_t literal_597 = 597;
 constexpr uint64_t literal_768 = 768;
 constexpr uint64_t literal_939 = 939;
-constexpr uint64_t literal_1350 = 1350;
+constexpr uint64_t literal_1200 = 1200;
 constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_2000 = 2000;
 constexpr uint64_t literal_2400 = 2400;
@@ -936,11 +936,11 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1350)))
+                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1200)))
                 {
                     l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_3 );
                 }
-                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1350)))
+                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1200)))
                 {
                     l_scom_buffer.insert<16, 3, 61, uint64_t>(literal_6 );
                 }
@@ -952,11 +952,11 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1350)))
+                if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio <= literal_1200)))
                 {
                     l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_0 );
                 }
-                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1350)))
+                else if (((l_def_perf_tune_case == literal_0) && (l_def_mn_freq_ratio > literal_1200)))
                 {
                     l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_2 );
                 }
@@ -968,12 +968,12 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                if ((l_def_mn_freq_ratio <= literal_1350))
+                if ((l_def_mn_freq_ratio <= literal_1200))
                 {
                     constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF = 0x0;
                     l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_OFF );
                 }
-                else if ((l_def_mn_freq_ratio > literal_1350))
+                else if ((l_def_mn_freq_ratio > literal_1200))
                 {
                     constexpr auto l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_ON = 0x1;
                     l_scom_buffer.insert<22, 1, 63, uint64_t>(l_MCP_PORT0_ECC64_SCOM_MBSECCQ_DELAY_NONBYPASS_ON );
