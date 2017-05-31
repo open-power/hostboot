@@ -402,17 +402,19 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<T>& i_pr
                      fapi2::MSS_MCBIST_UNKNOWN_FAILURE()
                      .set_TARGET_IN_ERROR(i_target)
                      .set_STATUS_REGISTER(l_status),
-                     "MCBIST reported a fail, but process_errors didn't find it 0x%016llx", l_status );
+                     "%s MCBIST reported a fail, but process_errors didn't find it 0x%016llx",
+                     mss::c_str(i_target), l_status );
 
         // And if we're here all is good with the world.
         return fapi2::current_err;
     }
 
     FAPI_ASSERT(false,
-                fapi2::MSS_MCBIST_MULTIPLE_FAIL_BITS()
+                fapi2::MSS_MCBIST_DATA_FAIL()
                 .set_TARGET_IN_ERROR(i_target)
                 .set_STATUS_REGISTER(l_status),
-                "MCBIST executed <shrug>. Something's not good 0x%016llx", l_status );
+                "%s MCBIST executed but we got corrupted data in the control register 0x%016llx",
+                mss::c_str(i_target), l_status );
 
 fapi_try_exit:
     return fapi2::current_err;

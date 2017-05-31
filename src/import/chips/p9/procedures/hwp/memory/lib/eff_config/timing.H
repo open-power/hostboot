@@ -597,7 +597,7 @@ inline uint64_t tras(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TRAS)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -668,7 +668,7 @@ static fapi2::ReturnCode tfaw_half_kb_page_helper(const fapi2::Target<T>& i_targ
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TFAW_HALF_KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -722,7 +722,7 @@ static fapi2::ReturnCode tfaw_1kb_page_helper(const fapi2::Target<T>& i_target,
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TFAW_ONE_KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -775,7 +775,7 @@ static fapi2::ReturnCode tfaw_2kb_page_helper(const fapi2::Target<T>& i_target,
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TFAW_TW_KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -817,7 +817,7 @@ fapi2::ReturnCode tfaw( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_DRAM_WIDTH()
                          .set_DRAM_WIDTH(i_dram_width)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "Invalid DRAM width with %d for target %s",
                          i_dram_width,
                          mss::c_str(i_target));
@@ -896,7 +896,7 @@ static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>&
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TRRD_L_HALF_AND_1KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -982,7 +982,7 @@ fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_PAGE_SIZE()
                          .set_DRAM_WIDTH(i_dram_width)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Recieved an invalid page size: %lu",
                          mss::c_str(i_target),
                          i_dram_width);
@@ -1044,7 +1044,7 @@ static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>&
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TRRD_S_HALF_AND_1KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -1096,7 +1096,7 @@ static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target
                          fapi2::MSS_INVALID_FREQ_PASSED_IN()
                          .set_FREQ(l_freq)
                          .set_FUNCTION(TRRD_S_2KB_PAGE_HELPER)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Invalid frequency %lu",
                          mss::c_str(i_target),
                          l_freq);
@@ -1137,7 +1137,7 @@ fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_PAGE_SIZE()
                          .set_DRAM_WIDTH(i_dram_width)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "%s Recieved an invalid page size: %lu",
                          mss::c_str(i_target),
                          i_dram_width);

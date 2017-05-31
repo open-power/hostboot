@@ -181,7 +181,7 @@ fapi2::ReturnCode calc_trfc_dlr(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
                  fapi2::MSS_FAILED_TO_FIND_TRFC()
                  .set_SDRAM_DENSITY(i_density)
                  .set_REFRESH_MODE(i_refresh_mode)
-                 .set_TARGET(i_target),
+                 .set_DIMM_TARGET(i_target),
                  "%s: Unable to find tRFC (ps) from map with SDRAM density key %d with %d refresh mode",
                  mss::c_str(i_target),
                  i_density,

@@ -389,7 +389,7 @@ fapi2::ReturnCode eff_dimm::dram_width()
                  (l_decoder_val == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
                  fapi2::MSS_INVALID_DRAM_WIDTH()
                  .set_DRAM_WIDTH(l_decoder_val)
-                 .set_TARGET(iv_dimm),
+                 .set_DIMM_TARGET(iv_dimm),
                  "Unsupported DRAM width with %d for target %s",
                  l_decoder_val,
                  mss::c_str(iv_dimm));
@@ -563,7 +563,7 @@ fapi2::ReturnCode eff_dimm::dimm_size()
         FAPI_ASSERT( l_sdram_density != 0,
                      fapi2::MSS_BAD_SDRAM_DENSITY_DECODER()
                      .set_DRAM_DENSITY(l_sdram_density)
-                     .set_TARGET(iv_dimm),
+                     .set_DIMM_TARGET(iv_dimm),
                      "SPD decoder messed up and returned a 0. Should have been caught already %s",
                      mss::c_str(iv_dimm));
 
@@ -574,11 +574,12 @@ fapi2::ReturnCode eff_dimm::dimm_size()
 
         FAPI_ASSERT( (std::binary_search(l_dimm_sizes.begin(), l_dimm_sizes.end(), l_dimm_size) == true),
                      fapi2::MSS_INVALID_CALCULATED_DIMM_SIZE()
+                     .set_CALCULATED_SIZE(l_dimm_size)
                      .set_SDRAM_WIDTH(l_sdram_width)
                      .set_BUS_WIDTH(l_bus_width)
                      .set_DRAM_DENSITY(l_sdram_density)
                      .set_LOGICAL_RANKS(l_logical_rank_per_dimm)
-                     .set_TARGET(iv_dimm),
+                     .set_DIMM_TARGET(iv_dimm),
                      "Recieved an invalid dimm size (%d) for calculated DIMM_SIZE for target %s"
                      "(l_sdram_density %d * l_bus_width %d * l_logical_rank_per_dimm %d) / (8 * l_sdram_width %d",
                      l_dimm_size,
@@ -916,7 +917,7 @@ fapi2::ReturnCode eff_dimm::dram_dqs_time()
                  (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4),
                  fapi2::MSS_INVALID_DRAM_WIDTH()
                  .set_DRAM_WIDTH(l_dram_width)
-                 .set_TARGET(iv_dimm),
+                 .set_DIMM_TARGET(iv_dimm),
                  "Invalid DRAM width with %d for target %s",
                  l_dram_width,
                  mss::c_str(iv_dimm));
@@ -1250,7 +1251,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
                          .set_NUM_TOTAL_RANKS(l_total_ranks)
                          .set_NUM_MASTER_RANKS(l_master_ranks)
-                         .set_TARGET(iv_dimm),
+                         .set_DIMM_TARGET(iv_dimm),
                          "For target %s: Invalid total_ranks %d seen with %d master ranks",
                          mss::c_str(iv_dimm),
                          l_total_ranks,
@@ -1269,7 +1270,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
                          .set_NUM_TOTAL_RANKS(l_total_ranks)
                          .set_NUM_MASTER_RANKS(l_master_ranks)
-                         .set_TARGET(iv_dimm),
+                         .set_DIMM_TARGET(iv_dimm),
                          "For target %s: Invalid number of slave ranks calculated (%d) from (total_ranks %d / master %d)",
                          mss::c_str(iv_dimm),
                          l_num_slave_ranks,
@@ -1374,7 +1375,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc0a()
                          fapi2::MSS_INVALID_FREQ_RC()
                          .set_FREQ(iv_freq)
                          .set_RC_NUM(RC0A)
-                         .set_TARGET(iv_dimm),
+                         .set_DIMM_TARGET(iv_dimm),
                          "Invalid frequency for rc0a encoding received: %d", iv_freq);
             break;
     }
@@ -1607,7 +1608,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc3x()
                          fapi2::MSS_INVALID_FREQ_RC()
                          .set_FREQ(iv_freq)
                          .set_RC_NUM(RC3X)
-                         .set_TARGET(iv_dimm),
+                         .set_DIMM_TARGET(iv_dimm),
                          "%s: Invalid frequency for RC_3X encoding received: %d",
                          mss::c_str(iv_dimm),
                          iv_freq);
@@ -1942,7 +1943,8 @@ fapi2::ReturnCode eff_dimm::dram_cwl()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_MCA_TARGET(iv_mca),
+                 .set_DIMM_TARGET(iv_dimm)
+                 .set_MCS_TARGET(iv_mcs),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -2128,7 +2130,8 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_value()
     FAPI_ASSERT(l_train_value <= JEDEC_MAX_TRAIN_VALUE,
                 fapi2::MSS_INVALID_VPD_VREF_DRAM_WR_RANGE()
                 .set_MAX(JEDEC_MAX_TRAIN_VALUE)
-                .set_VALUE(l_train_value),
+                .set_VALUE(l_train_value)
+                .set_MCS_TARGET(iv_mcs),
                 "%s VPD DRAM VREF value out of range max 0x%02x value 0x%02x", mss::c_str(iv_dimm),
                 JEDEC_MAX_TRAIN_VALUE, l_train_value );
 
@@ -2441,7 +2444,8 @@ fapi2::ReturnCode eff_dimm::read_preamble()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_MCA_TARGET(iv_mca),
+                 .set_DIMM_TARGET(iv_mca)
+                 .set_MCS_TARGET(iv_mcs),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -2475,7 +2479,8 @@ fapi2::ReturnCode eff_dimm::write_preamble()
     FAPI_ASSERT( ((l_preamble == 0) || (l_preamble == 1)),
                  fapi2::MSS_INVALID_VPD_MT_PREAMBLE()
                  .set_VALUE(l_preamble)
-                 .set_MCA_TARGET(iv_mca),
+                 .set_DIMM_TARGET(iv_mca)
+                 .set_MCS_TARGET(iv_mcs),
                  "Target %s VPD_MT_PREAMBLE is invalid (not 1 or 0), value is %d",
                  mss::c_str(iv_dimm),
                  l_preamble );
@@ -3497,7 +3502,8 @@ fapi2::ReturnCode eff_rdimm::dram_rtt_nom()
                      fapi2::MSS_INVALID_RTT_NOM_CALCULATIONS()
                      .set_RANK(l_rank)
                      .set_RTT_NOM_INDEX(l_rtt_nom_index)
-                     .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)]),
+                     .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)])
+                     .set_DIMM_TARGET(iv_dimm),
                      "Error calculating RTT_NOM for target %s rank %d, rtt_nom from vpd is %d, index is %d",
                      mss::c_str(iv_dimm),
                      l_rank,
@@ -3749,7 +3755,8 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc00()
                  fapi2::MSS_INVALID_RTT_NOM_CALCULATIONS()
                  .set_RANK(l_rank)
                  .set_RTT_NOM_INDEX(l_rtt_nom_index)
-                 .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)]),
+                 .set_RTT_NOM_FROM_VPD(l_rtt_nom[mss::index(l_rank)])
+                 .set_DIMM_TARGET(iv_dimm),
                  "Error calculating RTT_NOM for target %s rank %d, rtt_nom from vpd is %d, index is %d",
                  mss::c_str(iv_dimm),
                  l_rank,
@@ -4180,7 +4187,7 @@ fapi2::ReturnCode eff_lrdimm::dimm_bc0a()
                  fapi2::MSS_INVALID_FREQ_BC()
                  .set_FREQ(iv_freq)
                  .set_BC_NUM(BC0A)
-                 .set_TARGET(iv_dimm),
+                 .set_DIMM_TARGET(iv_dimm),
                  "unknown FREQ %d for %s in bc0a",
                  iv_freq,
                  mss::c_str(iv_dimm));
@@ -4476,16 +4483,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
             }
 
             // Log any error code from getVPD separately in case the error code is meaningful
-            fapi2::ReturnCode l_rc = fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0]));
-
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                fapi2::logError(l_rc);
-                FAPI_ASSERT( false,
-                             fapi2::MSS_VPD_MT_LOAD_FAIL()
-                             .set_MCA_TARGET(p),
-                             "%s Failed to retrieve MT VPD", mss::c_str(p));
-            }
+            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
         }
 
         // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
@@ -4507,16 +4505,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
             }
 
             // Log any error code from getVPD separately in case the error code is meaningful
-            fapi2::ReturnCode l_rc = fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0]));
-
-            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                fapi2::logError(l_rc);
-                FAPI_ASSERT( false,
-                             fapi2::MSS_VPD_MR_LOAD_FAIL()
-                             .set_MCA_TARGET(p),
-                             "%s Failed to retrieve MR VPD", mss::c_str(p));
-            }
+            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
         }
     }// mca
 

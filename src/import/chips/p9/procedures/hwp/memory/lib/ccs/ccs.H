@@ -841,10 +841,11 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 ///
 /// @brief Execute a set of CCS instructions - single port
 /// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P the target of the CCS instruction (the port)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the vector of instructions
-/// @param[in] i_port the port
+/// @param[in] i_port The target that's being programmed by the array
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<T> >
@@ -860,13 +861,17 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 ///
 /// @brief Execute a CCS array already loaded in to the engine
 /// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P the target of the CCS instruction (the port)
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @param[in] i_port the port associated with the MCBIST array
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
-template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target, ccs::program<T>& i_program);
+template< fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<T> >
+fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
+                                     ccs::program<T>& i_program,
+                                     const fapi2::Target<P>& i_port);
 
 ///
 /// @brief Start or stop the CCS engine

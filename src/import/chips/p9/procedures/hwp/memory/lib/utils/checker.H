@@ -152,7 +152,7 @@ inline fapi2::ReturnCode fail_for_invalid_map(const fapi2::Target<fapi2::TARGET_
                 fapi2::MSS_INVALID_KEY().
                 set_KEY(i_key).
                 set_DATA(i_data).
-                set_TARGET(i_target),
+                set_DIMM_TARGET(i_target),
                 "%s. %s Could not find value from key %d. Returned data: %d.",
                 c_str(i_target),
                 i_err_str,

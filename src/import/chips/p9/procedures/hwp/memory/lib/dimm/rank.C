@@ -191,11 +191,11 @@ fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<TARGET_TYPE_MCA>
     bool l_got_one = false;
 
     // Make sure we get a valid DIMM index. If not, this is a programming error.
-    FAPI_ASSERT( (l_dimm_idx < l_dimms.size()),
+    FAPI_ASSERT( (l_dimm_idx < l_dimms.size() ),
                  fapi2::MSS_BAD_DIMM_INDEX_FOR_GIVEN_RANK()
                  .set_RANK(i_rank)
                  .set_DIMM_INDEX(l_dimm_idx)
-                 .set_TARGET(i_target),
+                 .set_MCA_TARGET(i_target),
                  "Invalid DIMM index (%d) found for provided rank (%d) in get_dimm_target_from_rank: %s",
                  l_dimm_idx,
                  i_rank,
@@ -221,7 +221,7 @@ fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<TARGET_TYPE_MCA>
                  fapi2::MSS_NO_DIMM_FOR_GIVEN_DIMM_INDEX()
                  .set_RANK(i_rank)
                  .set_DIMM_INDEX(l_dimm_idx)
-                 .set_TARGET(i_target),
+                 .set_MCA_TARGET(i_target),
                  "Couldn't find a DIMM to match given rank (%d) and DIMM position (%d): %s",
                  i_rank,
                  l_dimm_idx,
