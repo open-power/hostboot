@@ -4129,31 +4129,6 @@ sub generate_proc
     my $l3_voltage_thresh = $reqPol->{'system_resclk_l3_voltage_threshold_mv'};
     my $resclk_value      = $reqPol->{'system_resclk_value'};
 
-    print "    <attribute>\n";
-    print "        <id>SYSTEM_RESCLK_FREQ_REGIONS</id>\n";
-    print "        <default>$freq_regions</default>\n";
-    print "    </attribute>\n";
-
-    print "    <attribute>\n";
-    print "        <id>SYSTEM_RESCLK_FREQ_REGION_INDEX</id>\n";
-    print "        <default>$freq_region_index</default>\n";
-    print "    </attribute>\n";
-
-    print "    <attribute>\n";
-    print "        <id>SYSTEM_RESCLK_L3_VALUE</id>\n";
-    print "        <default>$l3_value</default>\n";
-    print "    </attribute>\n";
-
-    print "    <attribute>\n";
-    print "        <id>SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV</id>\n";
-    print "        <default>$l3_voltage_thresh</default>\n";
-    print "    </attribute>\n";
-
-    print "    <attribute>\n";
-    print "        <id>SYSTEM_RESCLK_VALUE</id>\n";
-    print "        <default>$resclk_value</default>\n";
-    print "    </attribute>\n";
-
     print "</targetInstance>\n";
 
 }
