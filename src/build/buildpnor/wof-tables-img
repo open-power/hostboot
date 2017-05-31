@@ -65,7 +65,7 @@
 # * The OO PERL convention of combining get/set methods is used for writable
 #   data members.  The methods provide an optional parameter that, when
 #   specified, provides the new value for the data member.
-# 
+#
 ################################################################################
 
 
@@ -208,7 +208,7 @@ sub is_complete
 # The first row of the CSV file must contain the list of column names.  The
 # columns must appear in the specified order within the CSV file.  The column
 # names are not case-sensitive.
-# 
+#
 # Each row following the first contains one entry (WOF frequency) in one VFRT.
 # There is no requirement on the order of the rows in the CSV file.  For
 # example, the rows representing one VFRT are not required to be adjacent.
@@ -583,7 +583,7 @@ sub _verify_first_row_columns
     $actual_name = $columns->[$i];
     if (lc($expected_name) ne lc($actual_name))
     {
-      die "Error: Did not find expected column name in first row of " . 
+      die "Error: Did not find expected column name in first row of " .
           $self->{'file_name'} . ".\nExpected column " . ($i + 1) .
           " to be '$expected_name' but found '$actual_name'.\n";
     }
@@ -739,7 +739,7 @@ sub _store_vfrt_scope_columns
   if (($fratio_index < 0) || ($fratio_index >= $VFRT_ROW_COUNT))
   {
     die "Error: Invalid fratio_index value $fratio_index in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get vratio_index value and verify it is valid.  This is the VFRT column index.
@@ -747,7 +747,7 @@ sub _store_vfrt_scope_columns
   if (($vratio_index < 0) || ($vratio_index >= $VFRT_COLUMN_COUNT))
   {
     die "Error: Invalid vratio_index value $vratio_index in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get wof_freq value and verify it is valid
@@ -755,7 +755,7 @@ sub _store_vfrt_scope_columns
   if ($wof_freq < 0)
   {
     die "Error: Invalid wof_freq value $wof_freq in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Set wof_freq value in VFRT
@@ -772,7 +772,7 @@ sub _get_vfrt
   if ($nest_ceff < 0)
   {
     die "Error: Invalid nest_ceff value $nest_ceff in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get nest_ceff_index value and verify it is valid
@@ -781,7 +781,7 @@ sub _get_vfrt
       ($nest_ceff_index >= $CSV_NEST_CEFF_INDEX_COUNT))
   {
     die "Error: Invalid nest_ceff_index value $nest_ceff_index in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Store nest_ceff value at correct index in our internal array
@@ -794,7 +794,7 @@ sub _get_vfrt
   if (!defined($expected_core_ceff_index))
   {
     die "Error: Invalid core_ceff value $core_ceff in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get core_ceff_index value and verify it matches expected value
@@ -802,7 +802,7 @@ sub _get_vfrt
   if ($core_ceff_index != $expected_core_ceff_index)
   {
     die "Error: Invalid core_ceff_index value $core_ceff_index in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get active_quads value
@@ -814,7 +814,7 @@ sub _get_vfrt
   if (!defined($active_quads_index))
   {
     die "Error: Invalid active_quads value $active_quads in row " .
-        "$row_number of file " . $self->{'file_name'} . ".\n"; 
+        "$row_number of file " . $self->{'file_name'} . ".\n";
   }
 
   # Get VFRT at the specified nest_ceff_index, core_ceff_index, and
@@ -926,7 +926,7 @@ sub read
 
   my $buffer;
   if ($length > 0)
-  { 
+  {
     my $bytes_read = $self->{'file'}->read($buffer, $length);
     if ($bytes_read != $length)
     {
@@ -966,14 +966,14 @@ sub read_uint8
 {
   my ($self) = @_;
   my $buffer = $self->read(1);
-  return unpack('C', $buffer); 
+  return unpack('C', $buffer);
 }
 
 
 sub write_uint8
 {
   my ($self, $uint8_value) = @_;
-  $self->write(pack('C', $uint8_value)); 
+  $self->write(pack('C', $uint8_value));
 }
 
 
@@ -981,14 +981,14 @@ sub read_uint16
 {
   my ($self) = @_;
   my $buffer = $self->read(2);
-  return unpack('S>', $buffer); 
+  return unpack('S>', $buffer);
 }
 
 
 sub write_uint16
 {
   my ($self, $uint16_value) = @_;
-  $self->write(pack('S>', $uint16_value)); 
+  $self->write(pack('S>', $uint16_value));
 }
 
 
@@ -996,14 +996,14 @@ sub read_uint32
 {
   my ($self) = @_;
   my $buffer = $self->read(4);
-  return unpack('L>', $buffer); 
+  return unpack('L>', $buffer);
 }
 
 
 sub write_uint32
 {
   my ($self, $uint32_value) = @_;
-  $self->write(pack('L>', $uint32_value)); 
+  $self->write(pack('L>', $uint32_value));
 }
 
 
@@ -1011,7 +1011,7 @@ sub read_ascii_text
 {
   my ($self, $field_length) = @_;
   my $buffer = $self->read($field_length);
-  return unpack('A' . $field_length, $buffer); 
+  return unpack('A' . $field_length, $buffer);
 }
 
 
@@ -1116,10 +1116,10 @@ sub read
   my ($self, $file) = @_;
 
   # Read field values from binary file
-  $self->{'magic_number'}              = $file->read_ascii_text(4); 
-  $self->{'version'}                   = $file->read_uint8(); 
-  $self->{'section_table_entry_count'} = $file->read_uint8(); 
-  $self->{'section_table_offset'}      = $file->read_uint32(); 
+  $self->{'magic_number'}              = $file->read_ascii_text(4);
+  $self->{'version'}                   = $file->read_uint8();
+  $self->{'section_table_entry_count'} = $file->read_uint8();
+  $self->{'section_table_offset'}      = $file->read_uint32();
 
   # Verify field values
   if ($self->{'magic_number'} ne $IMAGE_HEADER_MAGIC_NUMBER)
@@ -1140,10 +1140,10 @@ sub write
   my ($self, $file) = @_;
 
   # Write field values to binary file
-  $file->write_ascii_text($self->{'magic_number'}, 4); 
-  $file->write_uint8     ($self->{'version'}); 
-  $file->write_uint8     ($self->{'section_table_entry_count'}); 
-  $file->write_uint32    ($self->{'section_table_offset'}); 
+  $file->write_ascii_text($self->{'magic_number'}, 4);
+  $file->write_uint8     ($self->{'version'});
+  $file->write_uint8     ($self->{'section_table_entry_count'});
+  $file->write_uint32    ($self->{'section_table_offset'});
 }
 
 
@@ -1153,10 +1153,10 @@ sub print
 
   # Print header fields to stdout
   printf("Image Header:\n");
-  printf("  Magic Number             : %s\n",     $self->{'magic_number'}); 
-  printf("  Version                  : %u\n",     $self->{'version'}); 
-  printf("  Section Table Entry Count: %u\n",     $self->{'section_table_entry_count'}); 
-  printf("  Section Table Offset     : 0x%08X\n", $self->{'section_table_offset'}); 
+  printf("  Magic Number             : %s\n",     $self->{'magic_number'});
+  printf("  Version                  : %u\n",     $self->{'version'});
+  printf("  Section Table Entry Count: %u\n",     $self->{'section_table_entry_count'});
+  printf("  Section Table Offset     : 0x%08X\n", $self->{'section_table_offset'});
   printf("\n");
 }
 
@@ -1210,8 +1210,8 @@ sub read
   my ($self, $file) = @_;
 
   # Read field values from binary file
-  $self->{'section_offset'} = $file->read_uint32(); 
-  $self->{'section_size'}   = $file->read_uint32(); 
+  $self->{'section_offset'} = $file->read_uint32();
+  $self->{'section_size'}   = $file->read_uint32();
 }
 
 
@@ -1220,8 +1220,8 @@ sub write
   my ($self, $file) = @_;
 
   # Write field values to binary file
-  $file->write_uint32($self->{'section_offset'}); 
-  $file->write_uint32($self->{'section_size'}); 
+  $file->write_uint32($self->{'section_offset'});
+  $file->write_uint32($self->{'section_size'});
 }
 
 
@@ -1316,7 +1316,7 @@ sub print
     # Print section table entry fields to stdout
     my $entry = $self->get_entry($i);
     printf("     %2u      0x%08X    0x%08X\n",
-           $i, $entry->section_offset(), $entry->section_size()); 
+           $i, $entry->section_offset(), $entry->section_size());
   }
   printf("\n");
 }
@@ -1332,7 +1332,7 @@ package WOFTablesHeader;
 
 # Constants representing expected field values
 our $WOF_TABLES_HEADER_MAGIC_VALUE            = 'WFTH';
-our $WOF_TABLES_HEADER_VERSION                = 2;
+our $WOF_TABLES_HEADER_VERSION                = 1;
 our $WOF_TABLES_HEADER_VFRT_BLOCK_SIZE        = 128;
 our $WOF_TABLES_HEADER_VFRT_BLOCK_HEADER_SIZE = 8;
 our $WOF_TABLES_HEADER_VFRT_DATA_SIZE         = 1;
@@ -1632,7 +1632,7 @@ sub read
   my ($self, $file) = @_;
 
   # Read field values from binary file
-  $self->{'magic_value'}            = $file->read_ascii_text(4); 
+  $self->{'magic_value'}            = $file->read_ascii_text(4);
   $file->skip_bytes(3);             # Reserved
   $self->{'version'}                = $file->read_uint8();
   $self->{'vfrt_block_size'}        = $file->read_uint16();
@@ -1846,7 +1846,7 @@ sub read
   my ($self, $file) = @_;
 
   # Read field values from binary file
-  $self->{'magic_value'} = $file->read_ascii_text(2); 
+  $self->{'magic_value'} = $file->read_ascii_text(2);
   $file->skip_bytes(2);  # Reserved
   my $uint8_val          = $file->read_uint8();
   $self->{'type'}        = $uint8_val >> 4;
@@ -2144,7 +2144,7 @@ sub _update_section_table
   my ($self) = @_;
 
   # Get offset to the section table from the image header
-  my $section_table_offset = $self->{'image_header'}->section_table_offset(); 
+  my $section_table_offset = $self->{'image_header'}->section_table_offset();
 
   # Move to section table offset within image file
   $self->{'file'}->set_pos($section_table_offset);
@@ -2290,7 +2290,7 @@ sub _write_wof_tables_header
   for (my $i = 0; $i < $WOF_TABLES_HEADER_VDN_SIZE; $i++)
   {
     $wof_tables_header->vdn_percent        ($i, int($csv_file->nest_ceff($i) * 10000));
-  }                                                  
+  }
   $wof_tables_header->socket_power_w       ($csv_file->socket_power());
   $wof_tables_header->nest_frequency_mhz   ($csv_file->nest_freq());
   $wof_tables_header->sort_pwr_tgt_freq_mhz($csv_file->pdv_sort_power_target_freq());
@@ -2459,7 +2459,7 @@ sub _get_vfrt_offset
   # dimension is nest_ceff_index, the second is core_ceff_index, and the third
   # is active_quads_index.
   my $offset =
-    $self->{'file'}->get_pos() + 
+    $self->{'file'}->get_pos() +
     ($nest_ceff_index    * ($vdd_size * $quads_active_size * $vfrt_block_size)) +
     ($core_ceff_index    * ($quads_active_size * $vfrt_block_size)) +
     ($active_quads_index * ($vfrt_block_size));
