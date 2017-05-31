@@ -142,7 +142,7 @@ errlHndl_t SecureRomManager::initialize()
         if (!iv_secureromValid)
         {
             // The Secure ROM has already been initialized
-            TRACFCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM invalid, skipping functionality");
+            TRACDCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM invalid, skipping functionality");
 
 #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(SECURE_COMP_NAME, "SecureROM invalid - skipping functionality");
@@ -152,7 +152,7 @@ errlHndl_t SecureRomManager::initialize()
             break;
         }
 
-        TRACFCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM valid, enabling functionality");
+        TRACDCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM valid, enabling functionality");
 #ifdef CONFIG_CONSOLE
         CONSOLE::displayf(SECURE_COMP_NAME, "SecureROM valid - enabling functionality");
 #endif
@@ -218,7 +218,7 @@ errlHndl_t SecureRomManager::initialize()
         /***************************************************************/
         SecureRomManager::getHwKeyHash();
 
-        TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
+        TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SUCCESSFUL:"
         " iv_securerom=%p", iv_securerom);
 
     }while(0);

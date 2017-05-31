@@ -90,7 +90,7 @@ SPnorRP::SPnorRP()
 iv_msgQ(NULL)
 ,iv_startupRC(0)
 {
-    TRACFCOMP(g_trac_pnor, "SPnorRP::SPnorRP> " );
+    TRACDCOMP(g_trac_pnor, "SPnorRP::SPnorRP> " );
     // setup everything in a separate function
     initDaemon();
 
@@ -102,7 +102,7 @@ iv_msgQ(NULL)
  */
 SPnorRP::~SPnorRP()
 {
-    TRACFCOMP(g_trac_pnor, "SPnorRP::~SPnorRP> " );
+    TRACDCOMP(g_trac_pnor, "SPnorRP::~SPnorRP> " );
 
     // delete the message queue we created
     if( iv_msgQ )
@@ -120,7 +120,7 @@ SPnorRP::~SPnorRP()
         delete l_rec;
     }
 
-    TRACFCOMP(g_trac_pnor, "< SPnorRP::~SPnorRP" );
+    TRACDCOMP(g_trac_pnor, "< SPnorRP::~SPnorRP" );
 }
 
 /**
@@ -285,10 +285,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         if (!l_info.secure)
         {
 #ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-            TRACFCOMP(g_trac_pnor,"PNOR::loadSecureSection> called on unsecured section - Best effort policy skipping");
+            TRACDCOMP(g_trac_pnor,"PNOR::loadSecureSection> called on unsecured section - Best effort policy skipping");
             break;
 #else
-            TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> called on "
+            TRACDCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> called on "
                 "unsecured section");
 
             // TODO securebootp9 revisit this assert code and replace with error log
@@ -317,7 +317,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // calcluate unsecured address from temp address
         uint8_t* l_unsecuredAddr = l_tempAddr - VMM_VADDR_SPNOR_DELTA;
 
-        TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
+        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
                     "in temp space is 0x%.16llX, "
                     "section start address in unsecured space is 0x%.16llX, "
                     "l_info.size = 0x%.16llX, "
@@ -362,7 +362,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // store secure space pointer in load record
         o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr) + PAGESIZE;
 
-        TRACFCOMP(g_trac_pnor,"section start address in secure space is "
+        TRACDCOMP(g_trac_pnor,"section start address in secure space is "
                               "0x%.16llX",o_rec->secAddr);
 
         // verify while in temp space
@@ -436,7 +436,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
             - PAGESIZE - o_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
-            TRACFCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections "
+            TRACDCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections "
                 "creating unprotected area (%d bytes) for section %s",
                 unprotectedPayloadSize,
                 l_info.name);
@@ -470,7 +470,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
                 "creating unprotected area for section %s",
                 l_info.name);
         }
-        TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
+        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
                               "and register block complete");
     } while(0);
 
@@ -482,7 +482,6 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
         if (failedVerify)
         {
-            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections failed verify");
             SECUREBOOT::handleSecurebootFailure(l_errhdl,false);
         }
         else
@@ -502,7 +501,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
  */
 void SPnorRP::waitForMessage()
 {
-    TRACFCOMP(g_trac_pnor, "SPnorRP::waitForMessage>" );
+    TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage>" );
 
     errlHndl_t l_errhdl = NULL;
     msg_t* message = NULL;
@@ -696,7 +695,7 @@ void SPnorRP::waitForMessage()
         assert(message != NULL);
     }
 
-    TRACFCOMP(g_trac_pnor, "< SPnorRP::waitForMessage" );
+    TRACDCOMP(g_trac_pnor, "< SPnorRP::waitForMessage" );
 }
 
 /**
@@ -719,7 +718,7 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     msg->data[0] = static_cast<uint64_t>(i_section);
     int rc = msg_sendrecv(spnorQ, msg);
 
-    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
+    TRACDCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
               i_section,PNOR::SectionIdToString(i_section));
 
     // TODO securebootp9 - Need to be able to receive an error from the
@@ -811,7 +810,7 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
     errlHndl_t l_errl = NULL;
     assert(i_vaddr != NULL);
 
-    TRACFCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d (%s)",
+    TRACDCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d (%s)",
               i_secId,PNOR::SectionIdToString(i_secId));
 
     // Do any additional verification needed for a specific PNOR section
@@ -868,9 +867,9 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
                 HASH_PAGE_TABLE_ENTRY_SIZE) != 0 )
     {
         TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck Hostboot Base and Extended image mismatch");
-        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
+        TRACDBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
                             l_hashSwSigs, HASH_PAGE_TABLE_ENTRY_SIZE);
-        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
+        TRACDBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
                         l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
 
         // Memcpy needed for measured hash to avoid gcc error: dereferencing

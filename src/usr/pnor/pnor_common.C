@@ -138,7 +138,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         uint32_t l_errCode = 0;
         ffs_hdr* l_ffs_hdr = NULL;
 
-        TRACFCOMP(g_trac_pnor, "PNOR::parseTOC verifying TOC");
+        TRACDCOMP(g_trac_pnor, "PNOR::parseTOC verifying TOC");
 
         PNOR::checkForNullBuffer(i_tocBuffer, l_errCode, l_ffs_hdr);
         //Check if the buffer is null
@@ -229,7 +229,7 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
             break;
         }
 
-        TRACFCOMP(g_trac_pnor, "PNOR::parseTOC: FFS Block size=0x%.8X,"
+        TRACDCOMP(g_trac_pnor, "PNOR::parseTOC: FFS Block size=0x%.8X,"
         " Partition Table Size = 0x%.8x, entry_count=%d",
         l_ffs_hdr->block_size,l_ffs_hdr->size,l_ffs_hdr->entry_count);
 
@@ -286,12 +286,12 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
               continue;
             }
 
-            TRACFCOMP(g_trac_pnor,"PNOR::parseTOC: User Data %s",
+            TRACUCOMP(g_trac_pnor,"PNOR::parseTOC: User Data %s",
                       cur_entry->name);
 
             if (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT)
             {
-              TRACFCOMP(g_trac_pnor, "PNOR::TOC: ECC enabled for %s",
+              TRACUCOMP(g_trac_pnor, "PNOR::TOC: ECC enabled for %s",
                               cur_entry->name);
 
             }
