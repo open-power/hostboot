@@ -13,4 +13,7 @@ config SIO_ISTEP_CONTROL
     help
         Allows istep control via SIO scratch registers.
         Typical usage is via mailbox (scom) scratch registers.
-
+config PORT80_DEBUG
+    default n
+    help
+        Writes ISTEP progress to LPC port 80h.
