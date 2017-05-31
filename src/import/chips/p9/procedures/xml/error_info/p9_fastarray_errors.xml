@@ -1,0 +1,165 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_fastarray_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<hwpErrors>
+  <hwpError>
+    <rc>RC_FASTARRAY_ALL_PLUS_INDIVIDUAL_SPECIFIED</rc>
+    <description>Additional arrays were requested together with the special ALL value.</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_INVALID_ARRAY_ID</rc>
+    <description>An unknown array ID was requested.</description>
+    <ffdc>ARRAY_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_TARGET_MISMATCH</rc>
+    <description>An array ID was requested that does not belong to the target</description>
+    <ffdc>ARRAY_ID</ffdc>
+    <ffdc>TARGET_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_UNKNOWN_RING</rc>
+    <description>An array specified a ring ID that was not defined in the ring table</description>
+    <ffdc>ARRAY_ID</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_RS5_RANGE_OUT_OF_ORDER</rc>
+    <description>A range was added to an RS5 care list that violated the "in order of increasing start bit" requirement.</description>
+    <ffdc>FIRST_BIT</ffdc>
+    <ffdc>NBITS</ffdc>
+    <ffdc>PREV_FIRST_BIT</ffdc>
+    <ffdc>PREV_NBITS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_RS5_LENGTH_OVERFLOW</rc>
+    <description>An RS5 length value exceeded the maximum value for variable-length integers.</description>
+    <ffdc>LENGTH_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_INVALID_SWIZZLE_MODE</rc>
+    <description>An invalid row/bit swizzle mode has been used in a fastarray description.</description>
+    <ffdc>ARRAY_ID</ffdc>
+    <ffdc>MODE_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_SCAN_TIMEOUT</rc>
+    <description>A long rotate operation did not complete within 100ms</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_HEADER_CHECK_FAILED</rc>
+    <description>The header check failed after a scan operation</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_CLOCK_TIMEOUT</rc>
+    <description>An attempt to clock ABIST cycles did not complete within 100ms</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_CLEANUP_NOT_DONE</rc>
+    <description>ABIST_DONE did not assert within 64K cycles during fastarray cleanup</description>
+    <ffdc>TARGET</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_UNKNOWN_CHIP_EC</rc>
+    <description>There is no fastarray control data available for the requested chip type / EC</description>
+    <ffdc>CHIP_NAME</ffdc>
+    <ffdc>CHIP_EC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+<!-- template for copying
+  <hwpError>
+    <rc>RC_FASTARRAY_</rc>
+    <description></description>
+    <ffdc></ffdc>
+  </hwpError>
+-->
+</hwpErrors>
