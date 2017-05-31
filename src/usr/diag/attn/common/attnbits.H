@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,11 +186,31 @@ enum
     IPOLL_MASK_REG                   = 0x000F0033,
     // (IPOLL) Error status reg
     IPOLL_STATUS_REG                 = 0x000F0034,
-
 };
 
 
+/**
+ * @brief Values used to indicate the bits used in
+ *        the IPOLL mask and status registers.
+ */
+enum
+{
+    IPOLL_CHECK_STOP     = 0x8000000000000000ull,
+    IPOLL_RECOVERABLE    = 0x4000000000000000ull,
+    IPOLL_SPECIAL        = 0x2000000000000000ull,
+    IPOLL_UNIT_CS        = 0x1000000000000000ull,
+    IPOLL_HOST_ATTN      = 0x0800000000000000ull,
 
+    IPOLL_ROUTE_TO_HOST  = 0x0400000000000000ull,
+
+    IPOLL_SP_CHECK_STOP  = 0x0200000000000000ull,
+    IPOLL_SP_RECOVERABLE = 0x0100000000000000ull,
+    IPOLL_SP_SPECIAL     = 0x0080000000000000ull,
+    IPOLL_SP_UNIT_CS     = 0x0040000000000000ull,
+    IPOLL_SP_HOST_ATTN   = 0x0020000000000000ull,
+
+    IPOLL_ROUTE_TO_SP    = 0x0010000000000000ull
+};
 
 
 }

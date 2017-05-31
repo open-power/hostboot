@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,17 @@ class AttnTestRT: public CxxTest::TestSuite
             // just pass in some params for now
             int rc = rt_intf->handle_attns(NULL, 0, 0);
             ATTN_SLOW("handle_attns returned rc: %d", rc);
+        }
+
+        if (NULL == rt_intf->get_ipoll_events)
+        {
+            TS_FAIL("AttnTestRT: get_ipoll_events not set");
+        }
+        else
+        {
+            // just pass in some params for now
+            uint64_t l_bits = rt_intf->get_ipoll_events();
+            ATTN_SLOW("get_ipoll_events returned: %llx", l_bits);
         }
 
         ATTN_SLOW(EXIT_MRK"AttnTestRT::testAttnRtIntf");

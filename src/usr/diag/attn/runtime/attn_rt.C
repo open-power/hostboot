@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #include "runtime/attnsvc.H"
 #include "common/attntrace.H"
 #include "common/attnmem.H"
+#include "common/attnbits.H"
 #include <runtime/interface.h>
 #include <runtime/rt_targeting.H>
 #include <targeting/common/target.H>
@@ -158,6 +159,33 @@ namespace ATTN_RT
         return rc;
     }
 
+
+    /** brief  getIpollEvents
+     *
+     * Bits that are *set* in this bitmask represent events that will be
+     * allowed to flow to the HOST or Service Processor.
+     *
+     *  @return Value indicating which attention events should
+     *          be enabled in the IPOLL mask register.
+     */
+
+    uint64_t getIpollEvents( void )
+    {
+        uint64_t  l_ipollEvents = 0;
+
+        // Host side should allow 'Recov', 'UnitCs' and 'HostInt'
+        // SP side should allow 'Chkstop', 'Recov', 'Special'
+        // and maybe the mystery bit (route to SP).
+        l_ipollEvents = IPOLL_RECOVERABLE    | IPOLL_UNIT_CS       |
+                        IPOLL_HOST_ATTN      | IPOLL_SP_CHECK_STOP |
+                        IPOLL_SP_RECOVERABLE | IPOLL_SP_SPECIAL    |
+                        IPOLL_ROUTE_TO_SP ;
+
+        return(l_ipollEvents);
+
+    } // end getIpollEvents
+
+
     // register runtimeInterfaces
     struct registerAttn
     {
@@ -169,9 +197,10 @@ namespace ATTN_RT
                 return;
             }
 
-            rt_intf->enable_attns  = &enableAttns;
-            rt_intf->disable_attns = &disableAttns;
-            rt_intf->handle_attns  = &handleAttns;
+            rt_intf->enable_attns      = &enableAttns;
+            rt_intf->disable_attns     = &disableAttns;
+            rt_intf->handle_attns      = &handleAttns;
+            rt_intf->get_ipoll_events  = &getIpollEvents;
         }
     };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,15 +98,6 @@ const uint64_t address = IPOLL_MASK_REG;
 //       'routing to FSP' should be enabled.
 //      (along with all interrupt types to FSP)
 //  ---------------------------------------------
-//    {ROUTE_TO_HOST,    0x0400000000000000ull},
-//
-//    {TOSP_CHECK_STOP,  0x0200000000000000ull},
-//    {TOSP_RECOVERABLE, 0x0100000000000000ull},
-//    {TOSP_SPECIAL,     0x0080000000000000ull},
-//    {TOSP_UNIT_CS,     0x0040000000000000ull},
-//    {TOSP_HOST,        0x0020000000000000ull},
-//    {ROUTE_TO_SP,      0x0010000000000000ull},
-//  ---------------------------------------------
 
 void getCheckbitsAssociations(
         const RegAssoc * & o_first,
@@ -114,11 +105,11 @@ void getCheckbitsAssociations(
 {
     static const RegAssoc first[] = {
 
-        {CHECK_STOP,  0x8000000000000000ull},
-        {RECOVERABLE, 0x4000000000000000ull},
-        {SPECIAL,     0x2000000000000000ull},
-        {UNIT_CS,     0x1000000000000000ull},
-        {HOST_ATTN,   0x0800000000000000ull},
+        {CHECK_STOP,  IPOLL_CHECK_STOP},
+        {RECOVERABLE, IPOLL_RECOVERABLE},
+        {SPECIAL,     IPOLL_SPECIAL},
+        {UNIT_CS,     IPOLL_UNIT_CS},
+        {HOST_ATTN,   IPOLL_HOST_ATTN},
     };
 
     static const RegAssoc * last = first +
