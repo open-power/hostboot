@@ -30,6 +30,7 @@
  */
 
 #include <sys/mmio.h>
+#include <sys/mm.h>
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <string.h>
@@ -44,6 +45,7 @@
 #include <lpc/lpc_reasoncodes.H>
 #include <initservice/initserviceif.H>
 #include <kernel/console.H> //@todo - RTC:97495 -- Resolve console access
+#include <kernel/bltohbdatamgr.H>
 #include <errl/errludlogregister.H>
 #include <initservice/taskargs.H>
 #include <config.h>
@@ -385,8 +387,8 @@ void block_lpc_ops( bool i_block )
  */
 uint64_t get_lpc_bar( void )
 {
-    //@todo-RTC:173521-Return live value
-    return MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+    return mm_virt_to_phys( reinterpret_cast<void*>(
+    Singleton<LpcDD>::instance().getLPCBaseAddr() ));
 }
 
 
@@ -407,16 +409,13 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
 {
     TRACFCOMP(g_trac_lpc, "LpcDD::LpcDD> " );
     mutex_init( &iv_mutex );
-    LPCBase_t baseAddr = LPC::LPC_PHYS_BASE + LPC_ADDR_START;
-
-
-    setLPCBaseAddr( static_cast<uint64_t *>(
-                  mmio_dev_map(reinterpret_cast<void *>(baseAddr),
-                               LPC_SPACE_SIZE )));
+    LPCBase_t baseAddr;
 
     if( i_proc == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
         ivp_mutex = &cv_mutex;
+        //Retrieve the LPC phys base from the bootloader/hostboot data manager
+        baseAddr = g_BlToHbDataManager.getLpcBAR() + LPC_ADDR_START;
     }
     else
     {
@@ -428,7 +427,14 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
 
         // Just use the local mutex
         ivp_mutex = &iv_mutex;
+
+        //Correct LPC_BUS address attribute should be correct for alt_lpcdd
+        baseAddr =   i_proc->getAttr<TARGETING::ATTR_LPC_BUS_ADDR>() + LPC_ADDR_START;
     }
+
+    setLPCBaseAddr( static_cast<uint64_t *>(
+                  mmio_dev_map(reinterpret_cast<void *>(baseAddr),
+                               LPC_SPACE_SIZE )));
 
     //@todo RTC:126644
     // Initialize the hardware
