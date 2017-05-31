@@ -1011,7 +1011,7 @@ static fapi2::ReturnCode clock_enable_helper( const fapi2::Target<TARGET_TYPE_MC
                 FAPI_ASSERT( false,
                              fapi2::MSS_INVALID_DRAM_WIDTH().
                              set_DRAM_WIDTH(l_sdram_width).
-                             set_TARGET(d),
+                             set_DIMM_TARGET(d),
                              "Received in valid DRAM width: x%d for %s. "
                              "Expected x8 or x4 configuration.",
                              l_sdram_width, mss::c_str(d) );
@@ -2387,8 +2387,10 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
             l_dq_bad_bit_count = mss::bit_count(uint64_t(v.first));
             FAPI_INF("bad DQ count for port %d DP%d %d", l_which_port, l_which_dp, l_dq_bad_bit_count);
             FAPI_ASSERT(l_dq_bad_bit_count < MIN_BAD_BITS,
-                        fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                        "port %d DP%d too many bad DQ bits 0x%016lx", l_which_port, l_which_dp, v.first);
+                        fapi2::MSS_DISABLED_BITS()
+                        .set_MCA_TARGET(i_target)
+                        .set_DIMM_TARGET(i_dimm),
+                        "%s port %d DP%d too many bad DQ bits 0x%016lx", mss::c_str(i_dimm), l_which_port, l_which_dp, v.first);
 
             //
             // Find the DQS mask for this DP.
@@ -2409,8 +2411,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                 FAPI_INF("bad DQS count for port %d DP%d %d", l_which_port, l_which_dp, l_dqs_bad_bit_count);
                 FAPI_ASSERT(l_dqs_bad_bit_count <
                             ((l_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? MIN_BAD_X8_DQS : MIN_BAD_X4_DQS),
-                            fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                            "port %d DP%d too many bad DQS bits 0x%016lx", l_which_port, l_which_dp, v.second);
+                            fapi2::MSS_DISABLED_BITS().set_MCA_TARGET(i_target).set_DIMM_TARGET(i_dimm),
+                            "%s port %d DP%d too many bad DQS bits 0x%016lx", mss::c_str(i_dimm), l_which_port, l_which_dp, v.second);
 
                 // So there's no way to get here if we have a x8 config. Either we had no bad DQS, in which case
                 // we didn't come down here at all, or we have at least one bad DQS. And for x8 that means we have
@@ -2427,8 +2429,14 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                     // We shift it over to mask off the nibble we're checking
                     const uint16_t l_dqs_nibble_mask = 0b1100000000000000 >> (n * BITS_PER_DQS);
 
-                    FAPI_INF("port %d DP%d nibble %d (%d) mask: 0x%x dqs: 0x%x",
-                             l_which_port, l_which_dp, n, n + l_which_nibble, l_dqs_nibble_mask, v.second);
+                    FAPI_INF("%s port %d DP%d nibble %d (%d) mask: 0x%x dqs: 0x%x",
+                             mss::c_str(i_dimm),
+                             l_which_port,
+                             l_which_dp,
+                             n,
+                             n + l_which_nibble,
+                             l_dqs_nibble_mask,
+                             v.second);
 
                     if ((l_dqs_nibble_mask & v.second) != 0)
                     {
@@ -2441,8 +2449,12 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                 // Check to see if the DQ nibble processing found more than one bad nibble. If it did,
                 // we're done.
                 FAPI_ASSERT(l_bad_nibbles.size() <= MAX_BAD_NIBBLES,
-                            fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                            "port %d DP%d too many bad nibbles %d", l_which_port, l_which_nibble, l_bad_nibbles.size());
+                            fapi2::MSS_DISABLED_BITS().set_MCA_TARGET(i_target).set_DIMM_TARGET(i_dimm),
+                            "%s port %d DP%d too many bad nibbles %d",
+                            mss::c_str(i_dimm),
+                            l_which_port,
+                            l_which_nibble,
+                            l_bad_nibbles.size());
             }
 
             //
@@ -2463,8 +2475,8 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
                     // we add this bit to the total of bad singleton bits.
                     const uint64_t l_bit_count = mss::bit_count(l_dq_nibble_mask & v.first);
 
-                    FAPI_INF("port %d DP%d nibble %d (%d) mask: 0x%x dq: 0x%x c: %d",
-                             l_which_port, l_which_dp, n, n + l_which_nibble, l_dq_nibble_mask, v.first, l_bit_count);
+                    FAPI_INF("%s port %d DP%d nibble %d (%d) mask: 0x%x dq: 0x%x c: %d",
+                             mss::c_str(i_dimm), l_which_port, l_which_dp, n, n + l_which_nibble, l_dq_nibble_mask, v.first, l_bit_count);
 
 
                     // If we don't have any set bits, we're good to go. If we have more than the max bad bits,
@@ -2494,17 +2506,17 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         // counts as a bad nibble.
         //
         FAPI_ASSERT(l_bad_nibbles.size() <= MAX_BAD_NIBBLES,
-                    fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                    "port %d DP%d too many bad nibbles %d",
-                    l_which_port, l_which_dp, l_bad_nibbles.size());
+                    fapi2::MSS_DISABLED_BITS().set_MCA_TARGET(i_target).set_DIMM_TARGET(i_dimm),
+                    "%s port %d DP%d too many bad nibbles %d",
+                    mss::c_str(i_dimm), l_which_port, l_which_dp, l_bad_nibbles.size());
 
         // If we have one bad nibble, assert that we have one or fewer bad bits
         if (l_bad_nibbles.size() == MAX_BAD_NIBBLES)
         {
             FAPI_ASSERT(l_bad_bits <= MAX_BAD_BITS,
-                        fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                        "port %d DP%d bad nibbles %d + %d bad bits",
-                        l_which_port, l_which_dp, l_bad_nibbles.size(), l_bad_bits);
+                        fapi2::MSS_DISABLED_BITS().set_MCA_TARGET(i_target).set_DIMM_TARGET(i_dimm),
+                        "%s port %d DP%d bad nibbles %d + %d bad bits",
+                        mss::c_str(i_dimm), l_which_port, l_which_dp, l_bad_nibbles.size(), l_bad_bits);
         }
 
         // If we have no bad nibbles, assert we have 2 or fewer bad bits. This is a sly bad nibble
@@ -2512,9 +2524,9 @@ fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_targ
         if (l_bad_nibbles.size() == 0)
         {
             FAPI_ASSERT(l_bad_bits <= SLY_BAD_BITS,
-                        fapi2::MSS_DISABLED_BITS().set_TARGET_IN_ERROR(i_target),
-                        "port %d DP%d %d bad bits",
-                        l_which_port, l_which_dp, l_bad_bits);
+                        fapi2::MSS_DISABLED_BITS().set_MCA_TARGET(i_target).set_DIMM_TARGET(i_dimm),
+                        "%s port %d DP%d %d bad bits",
+                        mss::c_str(i_dimm), l_which_port, l_which_dp, l_bad_bits);
         }
 
         // We're all done. Clear the bit
@@ -2727,7 +2739,7 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
         // the errors and the disables there.
         FAPI_ASSERT_NOEXIT(v == 0,
                            fapi2::MSS_FAILED_RDVREF_CAL()
-                           .set_TARGET_IN_ERROR(i_target)
+                           .set_DIMM_TARGET(i_target)
                            .set_REGISTER(TT::RD_VREF_CAL_ERROR_REG[l_index])
                            .set_VALUE(v),
                            "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
@@ -2789,7 +2801,7 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
             // Now does bitwise anding to determine what's an actual error w/ the masking
             FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->first),
                                fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_TARGET_IN_ERROR(i_target)
+                               .set_DIMM_TARGET(i_target)
                                .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].first)
                                .set_VALUE(l_data_it->first)
                                .set_MASK(l_mask_it->first),
@@ -2802,7 +2814,7 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 
             FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->second),
                                fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_TARGET_IN_ERROR(i_target)
+                               .set_DIMM_TARGET(i_target)
                                .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].second)
                                .set_VALUE(l_data_it->second)
                                .set_MASK(l_mask_it->second),
