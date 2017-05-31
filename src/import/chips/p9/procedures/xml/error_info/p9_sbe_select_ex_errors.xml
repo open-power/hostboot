@@ -30,28 +30,73 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_SBE_SELECT_EX_NO_CORES</rc>
-    <description>No good cores were found in the Partial Good attribures</description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_SBE_SELECT_EX_NO_EQS</rc>
-    <description>No good cache chiplets were found in the Partial Good attribures</description>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_SBE_SELECT_EX_CORE_EQ_CONFIG_ERROR</rc>
-    <description>Did not find the matching EQ for the first core</description>
+    <description>Did not find the matching EQ for the first core.
+    </description>
+    <ffdc>CHIP</ffdc>
     <ffdc>CORE_NUM</ffdc>
     <ffdc>EQ_NUM</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_SBE_SELECT_EX_NO_CORE_AVAIL_ERROR</rc>
-    <description>No cores are configurable with current partial good and gard settings</description>
+    <description>No cores are configurable with current partial good and gard
+    settings
+    </description>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FUSED_NOT_EVEN_ERROR</rc>
+    <description>The first core found in fused mode was not an even core.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_NUM</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FUSED_ODD_ERROR</rc>
+    <description>The first core found in fused mode was even but the companion
+    odd core was not functional.
+    </description>
+    <ffdc>CHIP</ffdc>
+    <ffdc>CORE_NUM</ffdc>
+    <ffdc>MASTER_NUM</ffdc>
+    <callout>
+      <target>CODE</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
