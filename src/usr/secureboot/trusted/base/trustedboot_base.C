@@ -411,7 +411,7 @@ errlHndl_t extendBaseImage()
 
 #ifdef CONFIG_TPMDD
 
-    TRACFCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
+    TRACDCOMP(g_trac_trustedboot, ENTER_MRK " extendBaseImage()");
 
     do {
 
@@ -438,7 +438,7 @@ errlHndl_t extendBaseImage()
     if(!PNOR::cmpSecurebootMagicNumber(
            reinterpret_cast<const uint8_t*>(pHbbHeader)))
     {
-        TRACFCOMP(g_trac_trustedboot, INFO_MRK " HBB header is not a secure "
+        TRACDCOMP(g_trac_trustedboot, INFO_MRK " HBB header is not a secure "
             "header; inhibiting extending base image measurement");
         break;
     }
@@ -489,7 +489,7 @@ errlHndl_t extendBaseImage()
 
     } while(0);
 
-    TRACFCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
+    TRACDCOMP(g_trac_trustedboot, EXIT_MRK " extendBaseImage()");
 
 #endif
 

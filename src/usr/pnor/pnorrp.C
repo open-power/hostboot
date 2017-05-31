@@ -262,7 +262,7 @@ iv_TOC_used(TOC_0)
 ,iv_startupRC(0)
 ,iv_shutdown_pending(false)
 {
-    TRACFCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
+    TRACDCOMP(g_trac_pnor, "PnorRP::PnorRP> " );
     // setup everything in a separate function
     initDaemon();
 
@@ -274,7 +274,7 @@ iv_TOC_used(TOC_0)
  */
 PnorRP::~PnorRP()
 {
-    TRACFCOMP(g_trac_pnor, "PnorRP::~PnorRP> " );
+    TRACDCOMP(g_trac_pnor, "PnorRP::~PnorRP> " );
 
     // delete the message queue we created
     if( iv_msgQ )
@@ -284,7 +284,7 @@ PnorRP::~PnorRP()
 
     // should kill the task we spawned, but that isn't needed right now
 
-    TRACFCOMP(g_trac_pnor, "< PnorRP::~PnorRP" );
+    TRACDCOMP(g_trac_pnor, "< PnorRP::~PnorRP" );
 }
 
 /**
@@ -659,7 +659,7 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
  */
 errlHndl_t PnorRP::findTOC()
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorRP::findTOC...");
+    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorRP::findTOC...");
     errlHndl_t l_err             = NULL;
     do {
         const uint32_t l_shiftAmount = 32;
@@ -756,7 +756,7 @@ errlHndl_t PnorRP::findTOC()
         //found at least one TOC
         if(l_foundTOC)
         {
-            TRACFCOMP(g_trac_pnor, "findTOC> found at least one toc at 0x%X", l_toc);
+            TRACDCOMP(g_trac_pnor, "findTOC> found at least one toc at 0x%X", l_toc);
 
             //look for BACKUP_PART and read it
             uint64_t l_backupTOC = INVALID_OFFSET;
@@ -913,7 +913,7 @@ errlHndl_t PnorRP::findTOC()
         }
     } while (0);
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK"findTOC");
+    TRACDCOMP(g_trac_pnor, EXIT_MRK"findTOC");
     return l_err;
 }
 
@@ -1132,7 +1132,7 @@ errlHndl_t PnorRP::setSideInfo ()
         //char side
         iv_side[i].side =(ALIGN_DOWN_X(l_secOffset,32*MEGABYTE) == 0) ? 'A':'B';
 
-        TRACFCOMP(g_trac_pnor, "setSideInfo: sideId:%d, isGolden:%d, "
+        TRACDCOMP(g_trac_pnor, "setSideInfo: sideId:%d, isGolden:%d, "
               "isGuardPresent:%d, hasOtherSide:%d, primaryTOC: 0x%x, backupTOC"
               ":0x%X, HBB:0x%X, MMIO:0x%X",i, iv_side[i].isGolden,
               iv_side[i].isGuardPresent,iv_side[i].hasOtherSide,
@@ -1146,7 +1146,7 @@ errlHndl_t PnorRP::setSideInfo ()
  */
 void PnorRP::waitForMessage()
 {
-    TRACFCOMP(g_trac_pnor, "PnorRP::waitForMessage>" );
+    TRACDCOMP(g_trac_pnor, "PnorRP::waitForMessage>" );
 
     errlHndl_t l_errhdl = NULL;
     msg_t* message = NULL;
@@ -1301,7 +1301,7 @@ void PnorRP::waitForMessage()
     }
 
 
-    TRACFCOMP(g_trac_pnor, "< PnorRP::waitForMessage" );
+    TRACDCOMP(g_trac_pnor, "< PnorRP::waitForMessage" );
 }
 
 
@@ -1589,7 +1589,7 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
 
 errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)
 {
-    TRACFCOMP(g_trac_pnor, "PnorRP::clearSection Section id = %d", i_section);
+    TRACDCOMP(g_trac_pnor, "PnorRP::clearSection Section id = %d", i_section);
     errlHndl_t l_errl = NULL;
     const uint64_t CLEAR_BYTE = 0xFF;
     uint8_t* l_buf = new uint8_t[PAGESIZE];
@@ -1724,7 +1724,7 @@ errlHndl_t PnorRP::fixECC (PNOR::SectionId i_section)
     } while (0);
 
     delete [] l_buffer;
-    TRACFCOMP(g_trac_pnor, EXIT_MRK"PnorRP::fixECC");
+    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorRP::fixECC");
     return l_err;
 }
 
