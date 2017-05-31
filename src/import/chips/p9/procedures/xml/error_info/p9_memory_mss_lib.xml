@@ -27,7 +27,7 @@
 <!-- @file memory_mss_lib.xml -->
 <!-- @brief Error xml for MSS library routines -->
 <!-- -->
-<!-- *HWP HWP Owner:  Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP FW Owner: Brian Silver <bsilver@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 1 -->
@@ -164,7 +164,9 @@
 
   <hwpError>
     <rc>RC_MSS_CCS_READ_MISCOMPARE</rc>
-    <description>CCS reports a read miscompare.</description>
+    <description>
+        CCS reports a read miscompare.
+    </description>
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
@@ -172,17 +174,23 @@
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>MCA_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_CCS_UE_SUE</rc>
-    <description>CCS reports a UE or SUE</description>
+    <description>
+        CCS reports a UE or SUE in the CCS program array
+        Chould be an indicator of corruption in the CCS program
+    </description>
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
@@ -196,11 +204,16 @@
     <deconfigure>
       <target>TARGET_IN_ERROR</target>
     </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_CCS_CAL_TIMEOUT</rc>
-    <description>CCS reports a calibration operation timeout</description>
+    <description>
+        CCS reports never getting a response back from the PHY on a calibration command
+    </description>
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
@@ -208,17 +221,22 @@
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>MCA_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_CCS_HUNG</rc>
-    <description>CCS failed to return from in-progress status and failed to describe an error further</description>
+    <description>
+        Software reported that the machine is not seeing the CCS finish in the alloted time
+    </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
@@ -231,11 +249,17 @@
     <deconfigure>
       <target>TARGET_IN_ERROR</target>
     </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_CCS_HUNG_TRYING_TO_STOP</rc>
-    <description>CCS failed to return from in-progress status while trying to stop a previous program</description>
+    <description>
+        CCS failed to return from in-progress status while trying to stop a previous program
+        Software reported that CCS did not finish in alloted time after manually triggering stop
+    </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
@@ -248,11 +272,17 @@
     <deconfigure>
       <target>TARGET_IN_ERROR</target>
     </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MCBIST_TIMEOUT</rc>
-    <description>MCBIST program failed to return in the time allowed</description>
+    <description>
+        MCBIST program failed to return in the time allowed
+        Software timer, MCBIST has not finished in the time allowed
+    </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>TARGET_IN_ERROR</target>
@@ -262,11 +292,19 @@
       <target>TARGET_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_MCBIST_MULTIPLE_FAIL_BITS</rc>
-    <description>MCBIST program appeared to have failed, but set conflicting bits in the status register</description>
+    <rc>RC_MSS_MCBIST_DATA_FAIL</rc>
+    <description>
+        MCBIST program appeared to have failed, but set conflicting bits in the status register
+    </description>
     <ffdc>STATUS_REGISTER</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
@@ -277,6 +315,12 @@
       <target>TARGET_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -292,12 +336,22 @@
       <target>TARGET_IN_ERROR</target>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>TARGET_IN_ERROR</target>
+    </deconfigure>
+    <gard>
+        <target>TARGET_IN_ERROR</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
     <description>MCBIST program larger than currently supported size</description>
     <ffdc>PROGRAM_LENGTH</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -402,8 +456,13 @@
     <ffdc>DIMM_TYPE</ffdc>
     <ffdc>ROWS</ffdc>
     <ffdc>SIZE</ffdc>
+    <ffdc>DIMM_IN_ERROR</ffdc>
     <callout>
-      <target>DIMM_IN_ERROR</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -413,13 +472,11 @@
     <description>Indicates a fail when attempting to get a DIMM index for a given rank</description>
     <ffdc>RANK</ffdc>
     <ffdc>DIMM_INDEX</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -427,13 +484,11 @@
     <description>Indicates a fail when attempting to get a DIMM target for a given DIMM index</description>
     <ffdc>RANK</ffdc>
     <ffdc>DIMM_INDEX</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
 </hwpErrors>
