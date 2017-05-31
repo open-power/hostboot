@@ -48,7 +48,6 @@
            <target>MASTER_CHIP</target>
            <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
-      <ffdc>MASTER_CHIP</ffdc>
       <ffdc>STATUS_REGISTER_B</ffdc>
       <ffdc>LOOP_COUNT</ffdc>
       <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
@@ -92,7 +91,6 @@
            <target>MASTER_CHIP</target>
            <targetType>TARGET_TYPE_PROC_CHIP</targetType>
       </collectRegisterFfdc>
-      <ffdc>MASTER_CHIP</ffdc>
       <ffdc>DATA0TO7_REGISTER_B</ffdc>
       <ffdc>MAGIC_NUMBER_VALUE</ffdc>
       <ffdc>BACKUP_SEEPROM_ATTR</ffdc>
