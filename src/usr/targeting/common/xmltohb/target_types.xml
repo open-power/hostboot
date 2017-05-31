@@ -958,7 +958,6 @@
     <attribute><id>MSS_MRW_DRAM_WRITE_CRC</id></attribute>
     <attribute><id>POUND_W_STATIC_DATA_ENABLE</id></attribute>
     <attribute><id>PGPE_HCODE_FUNCTION_ENABLE</id></attribute>
-    <attribute><id>SYSTEM_DISABLE_QUEUED_SCAN</id></attribute>
     <attribute><id>PERF_24x7_INVOCATION_TIME_MS</id></attribute>
     <attribute><id>AUX_FUNC_INVOCATION_TIME_MS</id></attribute>
 </targetType>
@@ -2263,6 +2262,8 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!-- GARD -->
     </attribute>
+    <attribute><id>IO_O_MFG_CHK</id></attribute>
+    <attribute><id>IO_O_MFG_MIN_EYE_WIDTH</id></attribute>
 </targetType>
 
 <targetType>

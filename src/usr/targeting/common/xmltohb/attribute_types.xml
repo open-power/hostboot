@@ -23932,6 +23932,38 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>IO_O_MFG_CHK</id>
+    <description>
+        Indicate if manufcaturing tests should be taken pre / post linktraining.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_O_MFG_CHK</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IO_O_MFG_MIN_EYE_WIDTH</id>
+    <description>
+        Minimum eye width to allow passing through manufacturing.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IO_O_MFG_MIN_EYE_WIDTH</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>IO_XBUS_MASTER_MODE</id>
     <description>
        Flag to indicate if the target is a master.
@@ -34105,25 +34137,6 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
-<!-- @fixme RTC:166754 Remove old attribute -->
-<attribute>
-    <id>DO_MSS_VCCD_OVERRIDE</id>
-    <description>
-      Override VREG control information sub DD1.02
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_DO_MSS_VCCD_OVERRIDE</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
 <attribute>
     <id>SKIP_HW_VREF_CAL</id>
     <description>
@@ -34178,25 +34191,6 @@ Measured in GB</description>
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_DO_MSS_VREF_DAC</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<!-- @fixme RTC:166754 Remove old attribute -->
-<attribute>
-    <id>DO_MSS_VREG_COARSE</id>
-    <description>
-        VREG Coarse work-around for Nimbus sub DD1.02
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_DO_MSS_VREG_COARSE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -34535,27 +34529,6 @@ Measured in GB</description>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-</attribute>
-
-
-
-<attribute>
-    <id>SYSTEM_DISABLE_QUEUED_SCAN</id>
-    <description>
-    Queued scan mode disable status. This attribute eventually decides if queued
-    scan is to be supported by CME Hcode.
-
-    Consumers: p9_hcode_image_build
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SYSTEM_DISABLE_QUEUED_SCAN</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
