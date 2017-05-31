@@ -45,6 +45,11 @@
 
 #include <hbotcompid.H>
 
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+  #include <isteps/pm/occAccess.H>
+  #include <isteps/pm/occCheckstop.H>
+#endif
+
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -237,15 +242,19 @@ void* call_host_runtime_setup (void *io_pArgs)
             //0: mainstore, 1: SRAM. We want to use mainstore after this point
 
             //Get master proc
-            TargetService & tS = targetService();
+            TARGETING::TargetService & tS = TARGETING::targetService();
             TARGETING::Target* masterproc = NULL;
             tS.masterProcChipTargetHandle( masterproc );
 
             //Clear (up to and including the IPL flag)
+            size_t sz_data = HBOCC::OCC_OFFSET_IPL_FLAG + 6;
+            size_t sz_dw   = sizeof(uint64_t);
+            uint64_t l_occAppData[(sz_data+(sz_dw-1))/sz_dw];
+            memset( l_occAppData, 0x00, sizeof(l_occAppData) );
+
             const uint32_t l_SramAddrApp = HBOCC::OCC_SRAM_ADDRESS;
-            ecmdDataBufferBase l_occAppData((HBOCC::OCC_OFFSET_IPL_FLAG + 6)
-                                                * 8 /* bits */);
-            l_err = HBOCC::writeSRAM(masterproc, l_SramAddrApp, l_occAppData);
+            l_err = HBOCC::writeSRAM( masterproc, l_SramAddrApp, l_occAppData,
+                                      sz_data );
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

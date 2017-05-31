@@ -306,8 +306,7 @@ namespace HBOCC
 #endif
 
 // @todo RTC 155065 IPL Time Checkstop Analysis Enablement
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-#ifndef __HOSTBOOT_RUNTIME
+#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
     /**
      * @brief Sets up OCC Host data in SRAM
      */
@@ -402,7 +401,6 @@ namespace HBOCC
 
         return l_errl;
     } // loadHostDataToSRAM
-#endif
 #endif
 
 }  //end HBOCC namespace

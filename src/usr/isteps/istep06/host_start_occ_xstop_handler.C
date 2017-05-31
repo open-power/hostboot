@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
                     "MCS target HUID %.8X", l_currMcsHuid);
         } // for
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
         // update firdata inputs for OCC
         TARGETING::Target* masterproc = NULL;
         TARGETING::targetService().masterProcChipTargetHandle(masterproc);
