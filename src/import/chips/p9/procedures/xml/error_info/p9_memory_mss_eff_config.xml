@@ -37,12 +37,11 @@
 <hwpErrors>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_TEMP_REF_RANGE</rc>
+    <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
     <description>
-      Invalid Temperature refresh range recieved
-      from platform.
+      Invalid fine refresh mode received from the mrw
     </description>
-    <ffdc>TEMP_REF_RANGE</ffdc>
+    <ffdc>FINE_REF_MODE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -50,18 +49,9 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
-    <description>
-      Invalid fine refresh mode recieved
-      from platform.
-    </description>
-    <ffdc>FINE_REF_MODE</ffdc>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_FINE_REFRESH_MODE_WITH_TEMP_REFRESH_MODE_ENABLED</rc>
     <description>
-        Invalid fine refresh mode recieved due to temperature fresh mode being enabled
+        Invalid fine refresh mode received due to temperature refresh mode being enabled
         If ATTR_MSS_MRW_TEMP_REFRESH_MODE is enabled, only NORMAL mode is allowed for FINE_REFRESH_MODE
     </description>
     <ffdc>FINE_REF_MODE</ffdc>
@@ -79,47 +69,11 @@
     </description>
     <ffdc>KEY</ffdc>
     <ffdc>DATA</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <callout>
-        <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_VPD_MT_LOAD_FAIL</rc>
-    <description>
-      Loading of VPD MT keyword failed. Could be due to an invalid port configuration.
-    </description>
-    <ffdc>MCA_TARGET</ffdc>
-    <callout>
-      <target>MCA_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_VPD_MR_LOAD_FAIL</rc>
-    <description>
-      Loading of VPD MR keyword failed. Could be due to an invalid port configuration.
-    </description>
-    <ffdc>MCA_TARGET</ffdc>
-    <callout>
-      <target>MCA_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MCA_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -130,7 +84,10 @@
     <ffdc>MAX</ffdc>
     <ffdc>VALUE</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -141,12 +98,12 @@
       Value in the VPD for PREAMBLE is not 0 or 1.
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>MCA_TARGET</target>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
 </hwpError>
@@ -174,12 +131,15 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>DIMM_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -189,12 +149,20 @@
     </description>
     <ffdc>DATA_BUFFER_GEN</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -206,12 +174,20 @@
     <ffdc>DIMM_TYPE</ffdc>
     <ffdc>DRAM_GEN</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -233,13 +209,11 @@
         An invalid Freq value has been set
     </description>
     <ffdc>FREQ</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -249,17 +223,11 @@
     </description>
     <ffdc>FREQ</ffdc>
     <ffdc>BC_NUM</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -269,17 +237,11 @@
     </description>
     <ffdc>FREQ</ffdc>
     <ffdc>RC_NUM</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -289,56 +251,36 @@
     </description>
     <ffdc>FREQ</ffdc>
     <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <childTargets>
-        <parent>TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-      </childTargets>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-      <rc>RC_MSS_INVALID_SPEED_FOR_TSV</rc>
-    <description>
-        As of 2/2017 no JEDEC timing values for 2666 3DS dram stack type
-    </description>
-    <ffdc>FREQ</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_ERROR_CREATING_EFF_CONFIG_DIMM_OBJECT</rc>
     <description>
-        Failed to create a dimm object, probably due to bad attribute settings
+        Failed to create a dimm object, probably due to bad data from SPD (ie code doesn't support)
     </description>
     <ffdc>DIMM_TYPE</ffdc>
     <ffdc>DRAM_GEN</ffdc>
     <ffdc>REG_AND_BUFF_TYPE</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -348,12 +290,20 @@
     </description>
     <ffdc>STACK_TYPE</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -365,34 +315,46 @@
     <ffdc>NUM_TOTAL_RANKS</ffdc>
     <ffdc>NUM_MASTER_RANKS</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
     <callout>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
     <rc>RC_MSS_INVALID_CALCULATED_DIMM_SIZE</rc>
     <description>
-        Error calculating DIMM size
+        Error calculating DIMM size. Size is not supported
     </description>
+    <ffdc>CALCULATED_SIZE</ffdc>
     <ffdc>SDRAM_WIDTH</ffdc>
     <ffdc>BUS_WIDTH</ffdc>
     <ffdc>DRAM_DENSITY</ffdc>
     <ffdc>LOGICAL_RANKS</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -427,11 +389,11 @@
     <ffdc>SDRAM_DENSITY</ffdc>
     <ffdc>REFRESH_MODE</ffdc>
     <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
     <callout>
       <procedure>CODE</procedure>
@@ -446,16 +408,20 @@
     </description>
     <ffdc>DRAM_WIDTH</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
      <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -465,12 +431,20 @@
     </description>
     <ffdc>DRAM_WIDTH</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
     <deconfigure>
-      <target>TARGET</target>
+      <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -481,8 +455,12 @@
     <ffdc>RANK</ffdc>
     <ffdc>RTT_NOM_INDEX</ffdc>
     <ffdc>RTT_NOM_FROM_VPD</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
