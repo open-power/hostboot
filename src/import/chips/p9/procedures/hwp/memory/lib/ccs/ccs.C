@@ -74,29 +74,40 @@ fapi_try_exit:
 ///
 /// @brief Determine the CCS failure type
 /// @tparam T the fapi2 target type of the target for this error
-/// @param[in] i_target
+/// @param[in] i_target MCBIST target
 /// @param[in] i_type the failure type
+/// @param[in] i_mca The port the CCS instruction is training
 /// @return ReturnCode associated with the fail.
 /// @note FFDC is handled here, caller doesn't need to do it
 ///
-template< fapi2::TargetType T >
-fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target, const uint64_t& i_type )
+fapi2::ReturnCode fail_type( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                             const uint64_t& i_type,
+                             const fapi2::Target<TARGET_TYPE_MCA>& i_mca )
 {
+    // Including the MCA_TARGET here and below at CAL_TIMEOUT since these problems likely lie at the MCA level
+    // So we disable the PORT and hopefully that's it
+    // If the problem lies with the MCBIST, it'll just have to loop
     FAPI_ASSERT(STAT_READ_MISCOMPARE != i_type,
-                fapi2::MSS_CCS_READ_MISCOMPARE().set_TARGET_IN_ERROR(i_target),
-                "CCS FAIL Read Miscompare");
+                fapi2::MSS_CCS_READ_MISCOMPARE()
+                .set_TARGET_IN_ERROR(i_target)
+                .set_MCA_TARGET(i_mca),
+                "%s CCS FAIL Read Miscompare", mss::c_str(i_mca));
 
+    // This error is likely due to a bad CCS engine/ MCBIST
     FAPI_ASSERT(STAT_UE_SUE != i_type,
                 fapi2::MSS_CCS_UE_SUE().set_TARGET_IN_ERROR(i_target),
-                "CCS FAIL UE or SUE Error");
+                "%s CCS FAIL UE or SUE Error", mss::c_str(i_target));
 
     FAPI_ASSERT(STAT_CAL_TIMEOUT != i_type,
-                fapi2::MSS_CCS_CAL_TIMEOUT().set_TARGET_IN_ERROR(i_target),
-                "CCS FAIL Calibration Operation Time Out");
+                fapi2::MSS_CCS_CAL_TIMEOUT()
+                .set_TARGET_IN_ERROR(i_target)
+                .set_MCA_TARGET(i_mca),
+                "%s CCS FAIL Calibration Operation Time Out", mss::c_str(i_mca));
 
+    // Problem with the CCS engine
     FAPI_ASSERT(STAT_HUNG != i_type,
                 fapi2::MSS_CCS_HUNG().set_TARGET_IN_ERROR(i_target),
-                "CCS appears hung");
+                "%s CCS appears hung", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -105,11 +116,13 @@ fapi_try_exit:
 /// @brief Execute the contents of the CCS array
 /// @param[in] i_target The MCBIST containing the array
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @param[in] i_port The port target that the array is for
 /// @return FAPI2_RC_SUCCESS iff success
 ///
 template<>
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
-                                     ccs::program<TARGET_TYPE_MCBIST>& i_program)
+                                     ccs::program<TARGET_TYPE_MCBIST>& i_program,
+                                     const fapi2::Target<TARGET_TYPE_MCA>& i_port)
 {
     typedef ccsTraits<TARGET_TYPE_MCBIST> TT;
 
@@ -135,7 +148,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
 
     // So we failed or we're still in progress. Mask off the fail bits
     // and run this through the FFDC generator.
-    FAPI_TRY( fail_type(i_target, status & 0x1C00000000000000) );
+    FAPI_TRY( fail_type(i_target, status & 0x1C00000000000000, i_port) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -243,7 +256,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         {
             FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
             FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)) );
-            FAPI_TRY( execute_inst_array(i_target, i_program) );
+            FAPI_TRY( execute_inst_array(i_target, i_program, p) );
         }
     }
 
