@@ -35,6 +35,10 @@
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
 #include <lib/mc/port.H>          // for mss::reset_reorder_queue_settings
 
+#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
+  #include <isteps/pm/occCheckstop.H>
+#endif
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;

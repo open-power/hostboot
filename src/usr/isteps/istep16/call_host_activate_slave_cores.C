@@ -233,7 +233,7 @@ void* call_host_activate_slave_cores (void *io_pArgs)
     }
     // @@@@@    END CUSTOM BLOCK:   @@@@@
 
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
     if( l_stepError.isNull() )
     {
         // update firdata inputs for OCC

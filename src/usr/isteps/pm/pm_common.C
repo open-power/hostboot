@@ -655,7 +655,7 @@ namespace HBPM
                 break;
             }
 
-// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
+#if 0 // @todo RTC 155065 IPL Time Checkstop Analysis Enablement
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
             if (i_useSRAM)
             {
@@ -683,7 +683,7 @@ namespace HBPM
                 }
             }
 #endif
-
+#endif
             l_errl = loadOCCImageToHomer(i_target,
                                          l_occImgPaddr,
                                          l_occImgVaddr,
@@ -703,9 +703,8 @@ namespace HBPM
             void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
                                             HOMER_OFFSET_TO_OCC_HOST_DATA);
 
-// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-#ifndef __HOSTBOOT_RUNTIME
+#if 0 // @todo RTC 155065 IPL Time Checkstop Analysis Enablement
+#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
             if (i_useSRAM)
             {
                 //==============================
