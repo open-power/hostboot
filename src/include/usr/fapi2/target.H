@@ -784,6 +784,7 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
 
     if(!l_functional)
     {
+        // PERV targets use a special interface
         if(K == fapi2::TARGET_TYPE_PERV)
         {
             TARGETING::getPervasiveChildTargetsByState(l_childList,
@@ -792,6 +793,18 @@ FAPI_DBG(ENTER_MRK "getChildren. Type 0x%08x State:0x%08x", T, i_state);
                           l_type,
                           TARGETING::UTIL_FILTER_ALL);
         }
+        // DIMMs need to use PRESENT so that we don't report things
+        //  that aren't installed
+        else if(K == fapi2::TARGET_TYPE_DIMM)
+        {
+            TARGETING::getChildAffinityTargetsByState(l_childList,
+                          static_cast<TARGETING::Target*>(this->get()),
+                          TARGETING::CLASS_NA,
+                          l_type,
+                          TARGETING::UTIL_FILTER_PRESENT);
+        }
+        // All chiplets need to use ALL so that we report the architectural
+        //  limits, versus what PG might say
         else
         {
             TARGETING::getChildAffinityTargetsByState(l_childList,
