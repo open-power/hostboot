@@ -99,27 +99,33 @@
 
 <hwpError>
   <rc>RC_MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS</rc>
-  <description>Multiple training stesp failed for a given position within this calibration.</description>
+  <description>Multiple training steps failed for a given position within this calibration.</description>
   <ffdc>FAILED_STEPS</ffdc>
   <ffdc>PORT_POSITION</ffdc>
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -130,21 +136,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -155,21 +167,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -180,21 +198,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -221,6 +245,12 @@
     <target>MCA_TARGET</target>
     <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>MCA_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>MCA_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
     <priority>MEDIUM</priority>
@@ -234,21 +264,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -259,21 +295,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -284,21 +326,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -309,21 +357,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -334,21 +388,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>MEDIUM</priority>
   </callout>
 </hwpError>
 
@@ -359,21 +419,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 
@@ -384,21 +450,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 
@@ -409,21 +481,27 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
   </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 
@@ -434,67 +512,59 @@
   <ffdc>RANKGROUP_POSITION</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
-    <target>TARGET_WITH_REGISTERS</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
-  </callout>
-  <callout>
-    <procedure>CODE</procedure>
+    <target>DIMM_TARGET</target>
     <priority>HIGH</priority>
   </callout>
-</hwpError>
-
-<hwpError>
-  <rc>RC_MSS_DRAMINIT_PC_ERROR_INFO</rc>
-  <description>
-    The PHY control has noted an error. The details of the error are contianed
-    in this error log. If these errors caused an operation to fail, a subsequent
-    error will be logged indicating the failure.
-  </description>
-  <ffdc>PC_ERROR0</ffdc>
-  <collectRegisterFfdc>
-    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>TARGET_IN_ERROR</target>
-    <targetType>TARGET_TYPE_MCA</targetType>
-  </collectRegisterFfdc>
-  <callout>
-    <target>TARGET_IN_ERROR</target>
-    <priority>LOW</priority>
-  </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
   <callout>
     <procedure>CODE</procedure>
-    <priority>HIGH</priority>
+    <priority>LOW</priority>
   </callout>
 </hwpError>
 
 <hwpError>
   <rc>RC_MSS_DISABLED_BITS</rc>
   <description>
-    The PHY has disabled too many bits to continue
+    The PHY has disabled too many bits to continue (6 bits)
   </description>
+  <ffdc>DP</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
+  <callout>
+    <target>MCA_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <target>DIMM_TARGET</target>
+    <priority>MEDIUM</priority>
+  </callout>
   <deconfigure>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </deconfigure>
   <gard>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </gard>
 </hwpError>
 
@@ -507,19 +577,23 @@
   <ffdc>VALUE</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
+  <callout>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
   <deconfigure>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </deconfigure>
   <gard>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </gard>
 </hwpError>
 
@@ -529,17 +603,11 @@
     Tried to map rank pairs on a port without any DIMMS
   </description>
   <ffdc>FUNCTION</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
-    <priority>MEDIUM</priority>
-  </callout>
-  <callout>
-    <target>MCA_TARGET</target>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-    <target>MCA_TARGET</target>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
@@ -549,23 +617,11 @@
   </description>
   <ffdc>FUNCTION</ffdc>
   <ffdc>RANK_SIZE</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
-    <priority>MEDIUM</priority>
-  </callout>
-  <callout>
-    <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-     <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
@@ -575,23 +631,11 @@
   </description>
   <ffdc>FUNCTION</ffdc>
   <ffdc>RANK</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
-    <priority>MEDIUM</priority>
-  </callout>
-  <callout>
-    <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-     <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
@@ -601,23 +645,11 @@
   </description>
   <ffdc>RANK_PAIR</ffdc>
   <ffdc>FUNCTION</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
-    <priority>MEDIUM</priority>
-  </callout>
-  <callout>
-    <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-     <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
@@ -626,23 +658,11 @@
     No primary rank in rank pair
   </description>
   <ffdc>RANK_PAIR</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
-    <priority>MEDIUM</priority>
-  </callout>
-  <callout>
-    <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-     <childTargets>
-        <parent>MCA_TARGET</parent>
-        <childType>TARGET_TYPE_DIMM</childType>
-    </childTargets>
-  </deconfigure>
 </hwpError>
 
 <hwpError>
@@ -655,19 +675,19 @@
   <ffdc>MASK</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <deconfigure>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </deconfigure>
   <gard>
-    <target>TARGET_IN_ERROR</target>
+    <target>DIMM_TARGET</target>
   </gard>
 </hwpError>
 
