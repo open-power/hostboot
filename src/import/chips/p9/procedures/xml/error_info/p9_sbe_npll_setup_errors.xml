@@ -44,6 +44,20 @@
 	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
      </collectRegisterFfdc>
      <ffdc>SS_PLL_READ</ffdc>
+     <callout>
+       <target>MASTER_CHIP</target>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>MEDIUM</priority>
+     </callout>
+     <deconfigure>
+       <target>MASTER_CHIP</target>
+     </deconfigure>
+     <gard>
+       <target>MASTER_CHIP</target>
+     </gard>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -61,6 +75,20 @@
 	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
      </collectRegisterFfdc>
      <ffdc>CP_FILTER_PLL_READ</ffdc>
+     <callout>
+       <target>MASTER_CHIP</target>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>MEDIUM</priority>
+     </callout>
+     <deconfigure>
+       <target>MASTER_CHIP</target>
+     </deconfigure>
+     <gard>
+       <target>MASTER_CHIP</target>
+     </gard>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -81,6 +109,20 @@
      <ffdc>SS_FILTER_BYPASS_STATUS</ffdc>
      <ffdc>CP_FILTER_BYPASS_STATUS</ffdc>
      <ffdc>IO_FILTER_BYPASS_STATUS</ffdc>
+     <callout>
+       <target>MASTER_CHIP</target>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>MEDIUM</priority>
+     </callout>
+     <deconfigure>
+       <target>MASTER_CHIP</target>
+     </deconfigure>
+     <gard>
+       <target>MASTER_CHIP</target>
+     </gard>
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
@@ -98,6 +140,20 @@
 	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
      </collectRegisterFfdc>
      <ffdc>IO_FILTER_PLL_READ</ffdc>
+     <callout>
+       <target>MASTER_CHIP</target>
+       <priority>HIGH</priority>
+     </callout>
+     <callout>
+       <procedure>CODE</procedure>
+       <priority>MEDIUM</priority>
+     </callout>
+     <deconfigure>
+       <target>MASTER_CHIP</target>
+     </deconfigure>
+     <gard>
+       <target>MASTER_CHIP</target>
+     </gard>
    </hwpError>
    <!-- ******************************************************************** -->
 </hwpErrors>
