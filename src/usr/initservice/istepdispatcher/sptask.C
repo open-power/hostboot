@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,6 +114,14 @@ void handleControlCmd( SPLessCmd & io_cmd )
 
     case DUMP_FAPI_ATTR:
         fapi2::theAttrOverrideSync().triggerAttrSync();
+        break;
+
+    case SET_ATTR_OVERRIDES:
+        fapi2::theAttrOverrideSync().dynSetAttrOverrides();
+        break;
+
+    case CLEAR_ATTR_OVERRIDES:
+        fapi2::theAttrOverrideSync().clearAttrOverrides();
         break;
 
     default:

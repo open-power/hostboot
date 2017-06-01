@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ namespace Util
 
         MSG_TYPE_TRACE          =       0x00,
         MSG_TYPE_ATTRDUMP       =       0x01,
+        MSG_TYPE_ATTROVERRIDE   =       0x02,
 
     };
 

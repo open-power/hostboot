@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -220,15 +220,13 @@ sub writeData
 
     my $putmemcmd = "putmempba";
     if( $memMode =~ /adu/ ) { $putmemcmd = "putmemproc"; }
-    my $command = sprintf(
-          "$putmemcmd -n%d -p%d -cft -fb %s %x -quiet -mode inj > %s",
+    my $command = sprintf("%s -n%d -p%d -fb %s %x -quiet -mode inj > %s",
                           $putmemcmd,
                           $node,
                           $proc,
                           $filename,
                           $addr,
                           $debugfile);
-    ::userDisplay($command);
     if (system($command) != 0)
     {
         system("cat $debugfile");
