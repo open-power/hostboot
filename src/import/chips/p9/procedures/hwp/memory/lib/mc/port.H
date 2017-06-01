@@ -517,6 +517,7 @@ fapi_try_exit:
 /// @param[in] i_target the target
 /// @param[in] i_state the state
 /// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note Disable Port Fail after recurring RCD errors.
 ///
 template< fapi2::TargetType T, typename TT = portTraits<T> >
 fapi2::ReturnCode change_port_fail_disable( const fapi2::Target<T>& i_target, states i_state )
