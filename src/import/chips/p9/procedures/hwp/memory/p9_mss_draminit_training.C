@@ -35,6 +35,7 @@
 
 #include <fapi2.H>
 #include <mss.H>
+#include <vector>
 
 #include <p9_mss_draminit_training.H>
 #include <lib/utils/count_dimm.H>
@@ -61,8 +62,10 @@ extern "C"
             const uint8_t i_abort_on_error)
     {
         // Keep track of the last error seen by a port
-        fapi2::ReturnCode l_port_error = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::buffer<uint32_t> l_cal_steps_enabled = i_special_training;
+        fapi2::ReturnCode l_port_error ( fapi2::FAPI2_RC_SUCCESS );
+        fapi2::buffer<uint32_t> l_cal_steps_enabled( i_special_training );
+
+        std::vector<fapi2::ReturnCode> l_fails;
 
         FAPI_INF("Start draminit training");
 
@@ -170,43 +173,78 @@ extern "C"
                 }
 
                 // Execute selected cal steps
-                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, i_abort_on_error) );
+                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
 
-                // If we're aborting on error we can just FAPI_TRY. If we're not, we don't want to exit if there's
+                fapi2::ReturnCode l_rc (fapi2::current_err);
+
+                // If we're aborting on error we can just jump to the end.
+                // If we're not, we don't want to exit if there's
                 // an error but we want to log the error and keep on keeping on.
-                if ((fapi2::current_err = mss::process_initial_cal_errors(p)) != fapi2::FAPI2_RC_SUCCESS)
+                if ((l_rc = mss::process_initial_cal_errors(p)) != fapi2::FAPI2_RC_SUCCESS)
                 {
-                    fapi2::logError(fapi2::current_err);
-
                     if (l_cal_abort_on_error)
                     {
-                        goto fapi_try_exit;
+                        FAPI_TRY( l_rc );
                     }
 
+                    l_fails.push_back(l_rc);
+
                     // Keep tack of the last cal error we saw.
-                    l_rank_pair_error = fapi2::current_err;
+                    l_rank_pair_error = l_rc;
                 }
+
             }// rank pairs
 
-            // Conducts workarounds after training if needed
-            FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ) );
-
-            // Once we've trained all the rank pairs we can record the bad bits in the attributes if we have an error
-            // This error is the most recent error seen on a port, too, so we keep track of that.
-            if (l_rank_pair_error != fapi2::FAPI2_RC_SUCCESS)
             {
-                FAPI_TRY( mss::dp16::record_bad_bits(p) );
-                l_port_error = l_rank_pair_error;
+                fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
+                // Conducts workarounds after training if needed
+                l_rc = mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled );
+
+                if ( l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    l_fails.push_back(l_rc);
+                }
+
+                // Going to treat bad_bits errors as similar to training errors
+                // If we're in hostboot, we update the attribute and keep running
+                // If we're cronus, we'll error out
+                l_rc =  mss::dp16::record_bad_bits(p);
+
+                if ( l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    l_fails.push_back(l_rc);
+                }
             }
+
+            // Resetting current_err.
+            // The error has either already been "logged" or we have exited and returned the error up the call stack.
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
 
-        // So we're calibrated the entire port. If we're here either we didn't have any errors or the last error
-        // seen on a port is the error for this entire controller.
-        FAPI_TRY(l_port_error, "Seeing port error, exiting training");
+// So we want to record the errors as informational and not mess with current_err
+#ifdef __HOSTBOOT_MODULE
+
+        for (auto l_iter = l_fails.begin(); l_iter != l_fails.end(); ++l_iter)
+        {
+            // fapi2 doesn't have INFO flag, so the RECOVERED flag will do
+            // Same behavior (no printouts to the custonmer and no deconfigures/ fail outs)
+            // We want to have these fail logs for the future, but we'll let memdiags catch the errors
+            fapi2::logError(*l_iter, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        }
+
+// If we're in cronus, we're just going to bomb out. Error logging doesn't work as of 6/17 JLH
+// The errors should be printed out as FAPI_ERR's when the ReturnCode was made though
+#else
+        {
+            if (l_fails.size() != 0)
+            {
+                FAPI_TRY(l_fails[0]);
+            }
+        }
+#endif
 
         // Unmask FIR
         FAPI_TRY( mss::unmask::after_draminit_training(i_target) );
-
 
     fapi_try_exit:
         FAPI_INF("End draminit training");
