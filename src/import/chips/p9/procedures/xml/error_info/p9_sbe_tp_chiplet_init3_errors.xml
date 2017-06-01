@@ -33,26 +33,43 @@
     <rc>RC_MF_OSC_ERR</rc>
     <description>MF Oscillator error active</description>
     <collectRegisterFfdc>
-	  <id>ROOT_CTRL_REGISTERS</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>PERV_CTRL_REGISTERS</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>OSC_ERROR_HOLD</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>OSC_SWITCH_SENSE_REGISTER</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
+      <id>ROOT_CTRL_REGISTERS</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>PERV_CTRL_REGISTERS</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>OSC_ERROR_HOLD</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>OSC_SWITCH_SENSE_REGISTER</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
     <ffdc>READ_OSCERR_HOLD</ffdc>
+    <callout>
+      <hw>
+        <hwid>PCI_REF_CLOCK</hwid>
+        <refTarget>MASTER_CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MASTER_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MASTER_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MASTER_CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -60,26 +77,43 @@
     <rc>RC_MF_OSC_NOT_TOGGLE</rc>
     <description>MF Oscillator not toggling</description>
     <collectRegisterFfdc>
-	  <id>ROOT_CTRL_REGISTERS</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>PERV_CTRL_REGISTERS</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>OSC_ERROR_HOLD</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
-      <collectRegisterFfdc>
-	  <id>OSC_SWITCH_SENSE_REGISTER</id>
-	  <target>MASTER_CHIP</target>
-	  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      </collectRegisterFfdc>
+      <id>ROOT_CTRL_REGISTERS</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>PERV_CTRL_REGISTERS</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>OSC_ERROR_HOLD</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+    <collectRegisterFfdc>
+      <id>OSC_SWITCH_SENSE_REGISTER</id>
+      <target>MASTER_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
     <ffdc>READ_SNS1LTH</ffdc>
+    <callout>
+      <hw>
+        <hwid>PCI_REF_CLOCK</hwid>
+        <refTarget>MASTER_CHIP</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MASTER_CHIP</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MASTER_CHIP</target>
+    </deconfigure>
+    <gard>
+      <target>MASTER_CHIP</target>
+    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
