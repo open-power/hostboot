@@ -1483,15 +1483,15 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
             break;
         }
 
-        if( iv_spiraS )
+        if( iv_spiraS && l_spiraS != SPIRAS_INVALID )
         {
             o_tuple = &(iv_spiraS->hdatDataArea[l_spiraS]);
         }
-        else if( iv_spiraH )
+        else if( iv_spiraH && l_spiraH != SPIRAH_INVALID )
         {
             o_tuple = &(iv_spiraH->hdatDataArea[l_spiraH]);
         }
-        else if( unlikely(iv_spiraL != nullptr) )
+        else if( unlikely(iv_spiraL != nullptr && l_spiraL != SPIRAL_INVALID) )
         {
             o_tuple = &(iv_spiraL->hdatDataArea[l_spiraL]);
         }
