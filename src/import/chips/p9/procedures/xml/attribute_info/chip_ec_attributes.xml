@@ -3693,24 +3693,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_RTC_174656_SKIP_CUMULUS</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Only apply spy to Nimbus, skip for Cumulus.
-      This is because p9c_10.spydef doesn't have the spy yet.
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_P9C_SPY_ONLY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
