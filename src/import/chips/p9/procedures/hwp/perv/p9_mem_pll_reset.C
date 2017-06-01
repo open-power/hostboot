@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : HB
 //------------------------------------------------------------------------------
 
@@ -118,10 +118,10 @@ p9_mem_pll_reset_scan0_bndy(const fapi2::Target<fapi2::TARGET_TYPE_PERV>& i_targ
     }
 
     FAPI_ASSERT(l_timeout > 0,
-                fapi2::P9_MEM_PLL_RESET_SCAN0_DONE_POLL_THRESHOLD_ERR()
-                .set_TARGET(i_target)
+                fapi2::SBE_SCAN0_DONE_POLL_THRESHOLD_ERR()
+                .set_TARGET_CHIPLET(i_target)
                 .set_PERV_CPLT_STAT0(l_cplt_stat0)
-                .set_LOOP_COUNT(l_timeout)
+                .set_LOOP_COUNT(P9_OPCG_DONE_SCAN0_POLL_COUNT)
                 .set_HW_DELAY(P9_OPCG_DONE_SCAN0_HW_NS_DELAY),
                 "Timeout polling for OPCG_DONE for scan0 flush");
 
