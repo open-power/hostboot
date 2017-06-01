@@ -39,6 +39,7 @@
 #include <centaur_mba_scom.H>
 #include <centaur_mbs_scom.H>
 #include <centaur_ddrphy_scom.H>
+#include <centaur_dmi_scom.H>
 #include <fapi2.H>
 #include <dimmConsts.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -71,6 +72,16 @@ extern "C" {
                     set_MEMBUF(i_target).
                     set_NUM_L4S(l_l4_targets.size()),
                     "No present L4 found on centaur %s", mss::c_str(i_target));
+
+        //################ CENTAUR DMI ################
+        FAPI_EXEC_HWP(l_rc, centaur_dmi_scom, i_target , FAPI_SYSTEM);
+
+        if (l_rc)
+        {
+            FAPI_ERR("  !!!  Error running centaur dmi scom initfile on %s, RC = 0x%x\n",
+                     mss::c_str(i_target), static_cast<uint32_t>(l_rc));
+            return (l_rc);
+        }
 
         //################ DDRPHY ######################
         for (const auto& mba : l_mba_targets)
