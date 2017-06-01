@@ -168,13 +168,14 @@ struct ta_def
 class TraceArrayFinder
 {
     public:
+        bool valid;
         uint32_t mux_sel;
         uint32_t debug_scom_base;
         uint32_t trace_scom_base;
         uint32_t ex_odd_scom_offset;
 
         TraceArrayFinder(p9_tracearray_bus_id i_trace_bus) :
-            mux_sel(0), debug_scom_base(0),
+            valid(false), mux_sel(0), debug_scom_base(0),
             trace_scom_base(0), ex_odd_scom_offset(0)
         {
             for(auto& l_ta_def : ta_defs)
@@ -193,6 +194,7 @@ class TraceArrayFinder
                                            l_ta_def.base_multiplier);
                         ex_odd_scom_offset = l_ta_def.ex_odd_scom_offset;
                         mux_sel = sel;
+                        valid = true;
                         return;
                     }
                 }
@@ -226,23 +228,27 @@ fapi2::ReturnCode p9_sbe_tracearray(
     uint32_t tra_scom_offset = 0;
     uint32_t l_proc_offset = 0;
 
-    if ((arg_type & ta_type) == 0)
-    {
-        FAPI_ERR("Specified trace array requires target type 0x%X, "
-                 "but the supplied target is of type 0x%X", ta_type, arg_type);
-        return fapi2::RC_PROC_GETTRACEARRAY_INVALID_TARGET;
-    }
+    FAPI_ASSERT(l_ta_finder.valid, fapi2::PROC_GETTRACEARRAY_INVALID_BUS()
+                .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                "Invalid trace bus specified: 0x%X", i_args.trace_bus);
 
-    /* There is no support for OBUS and MCBIST on SBE.
-     * These are passed as PERV targets, but have to be converted to
-     * PROC with manual address offset for chiplet, as trace scoms
-     * are not allowed for PERV targets in Cronus */
-    const uint8_t l_chiplet_num = i_target.getChipletNumber();
+    FAPI_ASSERT((arg_type & ta_type) != 0, fapi2::PROC_GETTRACEARRAY_INVALID_TARGET()
+                .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus).set_REQUIRED_TYPE(ta_type),
+                "Specified trace bus requires target type 0x%X, but the supplied target is of type 0x%X",
+                ta_type, arg_type);
 
-    if(IS_MCBIST(l_chiplet_num) || IS_OBUS(l_chiplet_num))
     {
-        target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-        l_proc_offset = (l_chiplet_num << 24) - (TRACE_SCOM_BASE & 0xFF000000);
+        /* There is no support for OBUS and MCBIST on SBE.
+         * These are passed as PERV targets, but have to be converted to
+         * PROC with manual address offset for chiplet, as trace scoms
+         * are not allowed for PERV targets in Cronus */
+        const uint8_t l_chiplet_num = i_target.getChipletNumber();
+
+        if(IS_MCBIST(l_chiplet_num) || IS_OBUS(l_chiplet_num))
+        {
+            target = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+            l_proc_offset = (l_chiplet_num << 24) - (TRACE_SCOM_BASE & 0xFF000000);
+        }
     }
 
     /* Nimbus DD1 core traces can't be read out via SCOM.
@@ -258,12 +264,9 @@ fapi2::ReturnCode p9_sbe_tracearray(
                  "Failed to query chip EC feature "
                  "ATTR_CHIP_EC_FEATURE_CORE_TRACE_NOT_SCOMABLE");
 
-        if (l_core_trace_not_scomable)
-        {
-            FAPI_ERR("Core arrays cannot be dumped in this chip EC; "
-                     "please use fastarray instead.");
-            return fapi2::RC_PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE;
-        }
+        FAPI_ASSERT(!l_core_trace_not_scomable, fapi2::PROC_GETTRACEARRAY_CORE_NOT_DUMPABLE()
+                    .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                    "Core arrays cannot be dumped in this chip EC; please use fastarray instead.");
     }
 
     /* For convenience, we link Cache trace arrays to the virtual EX chiplets.
@@ -304,13 +307,10 @@ fapi2::ReturnCode p9_sbe_tracearray(
         uint32_t cur_sel = 0;
         buf.extractToRight<TRCTRL_MUX0_SEL, TRCTRL_MUX0_SEL_LEN>(cur_sel);
 
-        if (cur_sel != l_ta_finder.mux_sel)
-        {
-            FAPI_ERR("Primary trace mux is set to %d,"
-                     " but %d is needed for requested trace bus",
-                     cur_sel, l_ta_finder.mux_sel);
-            return fapi2::RC_PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT;
-        }
+        FAPI_ASSERT(cur_sel == l_ta_finder.mux_sel, fapi2::PROC_GETTRACEARRAY_TRACE_MUX_INCORRECT()
+                    .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus).set_MUX_SELECT(cur_sel),
+                    "Primary trace mux is set to %d, but %d is needed for requested trace bus",
+                    cur_sel, l_ta_finder.mux_sel);
     }
 
     /* If control is requested along with dump, pre dump condition
@@ -347,13 +347,10 @@ fapi2::ReturnCode p9_sbe_tracearray(
              * the array is currently running.
              * If it is, the read won't have incremented the address,
              * so it's okay to bail out. */
-            if (buf.getBit<TRACE_LO_DATA_RUNNING>())
-            {
-                FAPI_ERR("Trace array is still running --"
-                         " If you think you stopped it, maybe the controlling "
-                         "debug macro is slaved to another debug macro?");
-                return fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING;
-            }
+            FAPI_ASSERT(!buf.getBit<TRACE_LO_DATA_RUNNING>(), fapi2::PROC_GETTRACEARRAY_TRACE_RUNNING()
+                        .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                        "Trace array is still running -- If you think you stopped it, "
+                        "maybe the controlling debug macro is slaved to another debug macro?");
 
             *(o_ta_data + (2 * i + 1)) = buf;
         }
