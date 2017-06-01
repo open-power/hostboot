@@ -31,6 +31,10 @@
     <description>Unsupported Nest PLL bucket value</description>
     <ffdc>TARGET</ffdc>
     <ffdc>BUCKET_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
