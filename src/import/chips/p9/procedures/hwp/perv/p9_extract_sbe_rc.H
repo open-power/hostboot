@@ -46,6 +46,8 @@ namespace P9_EXTRACT_SBE_RC
 {
 enum RETURN_ACTION
 {
+    ERROR_RECOVERED    = 0, // Something happened with the SBE, we committed the errors involved
+    // (as informational), attempted and successfully rebooted the SBE
     RESTART_SBE        = 1, // Trigger external HRESET to reset SBE
     RESTART_CBS        = 2, // Trigger Warm ipl where we don't switch off VSB just toggle start_cbs from FSP
     REIPL_BKP_SEEPROM  = 3, // Run IPL by selecting backup seeprom
