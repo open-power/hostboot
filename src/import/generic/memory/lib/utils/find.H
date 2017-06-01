@@ -140,6 +140,109 @@ inline fapi2::Target<fapi2::TARGET_TYPE_MCBIST> find_target( const fapi2::Target
 }
 
 ///
+/// @brief find the PROC_CHIP given a MBA
+/// @param[in] i_target the fapi2 target MBA
+/// @return a DMI target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>()
+           .getParent<fapi2::TARGET_TYPE_DMI>()
+           .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+}
+
+///
+/// @brief find the DMI given an MBA
+/// @param[in] i_target the fapi2 target MBA
+/// @return a DMI target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_DMI> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>().getParent<fapi2::TARGET_TYPE_DMI>();
+}
+
+///
+/// @brief find the DMI given a MEMBUF
+/// @param[in] i_target the fapi2 target MEMBUF
+/// @return a DMI target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_DMI> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_DMI>();
+}
+
+///
+/// @brief find the PROC given a MEMBUF
+/// @param[in] i_target the fapi2 target MEMBUF
+/// @return a PROC target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>&
+        i_target)
+{
+    return i_target.getParent<fapi2::TARGET_TYPE_DMI>().getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+}
+
+///
+/// @brief find all the DMIs connected to an PROC_CHIP
+/// @param[in] i_target a fapi2::Target DMI
+/// @return a vector of fapi2::TARGET_TYPE_MBA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DMI> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
+}
+
+///
+/// @brief find all the MEMBUFs connected to an DMI
+/// @param[in] i_target a fapi2::Target DMI
+/// @return a vector of fapi2::TARGET_TYPE_MEMBUF_CHIP
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+}
+
+///
+/// @brief find all the MBAs connected to an MEMBUF
+/// @param[in] i_target a fapi2::Target MEMBUF_CHIP
+/// @return a vector of fapi2::TARGET_TYPE_MBA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target )
+{
+    return i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
+}
+
+///
+/// @brief find all the MBA connected to an DMI
+/// @param[in] i_target a fapi2::Target DMI
+/// @return a vector of fapi2::TARGET_TYPE_MBA
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MBA> > l_mbas;
+
+    for (const auto& membuf_chip : i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+    {
+        auto l_these_mbas( membuf_chip.getChildren<fapi2::TARGET_TYPE_MBA>() );
+        l_mbas.insert(l_mbas.end(), l_these_mbas.begin(), l_these_mbas.end());
+    }
+
+    return l_mbas;
+}
+
+///
 /// @brief find all the dimm connected to an MCS
 /// @param[in] i_target a fapi2::Target MCS
 /// @return a vector of fapi2::TARGET_TYPE_DIMM
@@ -234,14 +337,15 @@ inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 }
 
 ///
-/// @brief find all the MCA connected to an MCBIST
-/// @param[in] i_target a fapi2::Target MCBIST
+/// @brief find all the MCA connected to an MCA
+/// @param[in] i_target a fapi2::Target MCA
 /// @return a vector of fapi2::TARGET_TYPE_MCA
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > find_targets
 ( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
+    // TODO - RTC:174905. Find out if we really need a find API that returns a vector of MCA from an MCA
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCA> > l_temp  = {i_target};
     return l_temp;
 }
