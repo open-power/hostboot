@@ -30,6 +30,10 @@
     <description>Unsupported MSS_FREQ attribute value</description>
     <ffdc>TARGET</ffdc>
     <ffdc>MSS_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
