@@ -51,6 +51,7 @@
 #include <p9_infrastruct_help.H>
 #include <p9_xip_customize.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 #include <p9_fbc_utils.H>
 #include "p9_pstate_parameter_block.H"
 
@@ -3601,6 +3602,98 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+//---------------------------------------------------------------------------
+
+/**
+ * @brief   populate L3 Refresh Timer Control register
+ * @param   i_pChipHomer    points to start of P9 HOMER.
+ * @return  fapi2 return code.
+ */
+fapi2::ReturnCode populateL3RefreshScomReg( void*    i_pChipHomer )
+{
+    FAPI_DBG("> populateL3RefreshScomReg");
+
+    do
+    {
+        uint32_t l_nest_freq_mhz = 0;
+        uint32_t scomAddr = 0;
+        uint32_t rc = IMG_BUILD_SUCCESS;
+        uint64_t l_refreshScomVal ;
+        // set defaults:
+        // DIVIDE_MAJOR = DIV_BY_3
+        // DIVIDE_MINOR = DIV_BY_10
+        fapi2::buffer<uint64_t> refreshValBuf = 0x2000000000000000ULL;
+
+        //=====================================================================================
+        //Determine SCOM register data value for EX_DRAM_REF_REG by reading attributes
+        //=====================================================================================
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_nest_freq_mhz),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_PB_MHZ");
+
+        // above 2GHz, set DIVIDE_MINOR = DIV_BY_12 = 0x2
+        if (l_nest_freq_mhz >= 2000)
+        {
+            refreshValBuf.insertFromRight<EX_DRAM_REF_REG_L3_TIMER_DIVIDE_MINOR,
+                EX_DRAM_REF_REG_L3_TIMER_DIVIDE_MINOR_LEN>(0x2);
+        }
+
+        l_refreshScomVal = refreshValBuf();
+
+        //----------------------- Updating SCOM Registers using STOP API --------------------
+
+        for( uint32_t eqCnt = 0; eqCnt < MAX_QUADS_PER_CHIP; eqCnt++ )
+        {
+            scomAddr = (EX_DRAM_REF_REG | (eqCnt << QUAD_BIT_POS));
+
+            FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                     scomAddr, l_refreshScomVal);
+            rc = stopImageSection::p9_stop_save_scom( i_pChipHomer,
+                    scomAddr,
+                    l_refreshScomVal,
+                    stopImageSection::P9_STOP_SCOM_APPEND,
+                    stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+            if( rc )
+            {
+                FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                break;
+            }
+
+            scomAddr |= ODD_EVEN_EX_POS;
+            FAPI_DBG("Calling STOP API to update SCOM reg 0x%08x value 0x%016llx",
+                     scomAddr, l_refreshScomVal);
+            rc = stopImageSection::p9_stop_save_scom(   i_pChipHomer,
+                    scomAddr,
+                    l_refreshScomVal,
+                    stopImageSection::P9_STOP_SCOM_APPEND,
+                    stopImageSection::P9_STOP_SECTION_EQ_SCOM );
+
+            if( rc )
+            {
+                FAPI_DBG(" p9_stop_save_scom Failed rc 0x%08x", rc );
+                break;
+            }
+        }
+
+        FAPI_ASSERT( ( IMG_BUILD_SUCCESS == rc ),
+                     fapi2::REFRESH_SCOM_UPDATE_FAIL()
+                     .set_STOP_API_SCOM_ERR( rc )
+                     .set_REFRESH_REG_ADDR( scomAddr )
+                     .set_REFRESH_REG_DATA( l_refreshScomVal ),
+                     "Failed to create restore entry for L3 Refresh Timer Divider register" );
+    }
+    while(0);
+
+    FAPI_DBG("< populateL3RefreshScomReg");
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 //---------------------------------------------------------------------------
 
 /**
@@ -3930,6 +4023,10 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
         //Update L3 Epsilon SCOM Registers
         FAPI_TRY( populateEpsilonL3ScomReg( pChipHomer ),
                   "populateEpsilonL3ScomReg failed" );
+
+        //Update L3 Refresh Timer Control SCOM Registers
+        FAPI_TRY( populateL3RefreshScomReg( pChipHomer ),
+                  "populateL3RefreshScomReg failed" );
 
         //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
         FAPI_TRY( populateNcuRingBarScomReg( pChipHomer, i_procTgt ),
