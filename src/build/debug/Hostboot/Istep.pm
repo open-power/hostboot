@@ -97,6 +97,7 @@ my  $opt_command        =   0;
 my  $opt_list           =   0;
 my  $opt_resume         =   0;
 my  $opt_clear_trace    =   0;
+my  $attr_bin_file      =   "";
 
 my  $command            =   "";
 
@@ -245,6 +246,12 @@ sub main
             $opt_clear_trace    =   1;
             $options[$i]    =   "";
         }
+        if  ( m/^\-{0,2}attr_bin$/ )
+        {
+            $attr_bin_file  =   $args->{"attr_bin"};
+            $options[$i]    =   "";
+        }
+
     }   ##  endfor
 
     ##  if there's anything left after this, assume it is a single command
@@ -376,9 +383,10 @@ sub checkDebugBuf
 {
     my  $SCRATCH_MBOX1  =   0x00050038;
     my  $SCRATCH_MBOX2  =   0x00050039;
-    my  $MSG_TYPE_MASK  =   0xFF00000000000000;
-    my  $MSG_TYPE_TRACE =   0x0000000000000000;
-    my  $MSG_TYPE_ATTR  =   0x0100000000000000;
+    my  $MSG_TYPE_MASK      =   0xFF00000000000000;
+    my  $MSG_TYPE_TRACE     =   0x0000000000000000;
+    my  $MSG_TYPE_ATTR      =   0x0100000000000000;
+    my  $MSG_TYPE_SET_ATTR  =   0x0200000000000000;
     my  $dbgAddr      =   "";
     my  $dbgSize      =   "";
 
@@ -406,6 +414,10 @@ sub checkDebugBuf
         elsif ($msgType == $MSG_TYPE_ATTR)
         {
             handleAttrDump($buffAddr, $buffSize);
+        }
+        elsif ($msgType == $MSG_TYPE_SET_ATTR)
+        {
+            handleAttrOverride($buffAddr, $buffSize);
         }
 
         #Write 0 to let HB know we extracted buf and it can continue
@@ -480,6 +492,43 @@ sub handleAttrDump
         print $g_attr_fh (::readData($buffAddr, $buffSize));
     }
 }
+
+##  ---------------------------------------------------------------------------
+##  Push an ATTR override bin to memory
+##  ---------------------------------------------------------------------------
+sub handleAttrOverride
+{
+    my  $buffAddr      =   shift;
+    my  $buffSize      =   shift;
+
+    #Check to see if attr.bin file set
+    if ($attr_bin_file  eq "")
+    {
+        ::userDisplay   "\nATTR BIN File not set,
+              use [--tool-options='attr_bin=<file> set_attr_overrides']\n";
+        exit 1;
+    }
+
+    #Open the file, get the size
+    my $attrBinFile;
+    open ($attrBinFile, '<', $attr_bin_file) or
+                                      die "Can't open '$attr_bin_file' $!";
+    my $size = -s $attr_bin_file;
+
+    #Check that file size is less than HB allocated size
+    if ($size > $buffSize)
+    {
+        ::userDisplay  "BIN file [$attr_bin_file] too big, $size vs $buffSize";
+        exit 1;
+    }
+
+    #Read in file data and actually write to mem
+    my $contents;
+    read($attrBinFile,$contents,$size);
+    ::writeData($buffAddr, $size, $contents);
+    close $attrBinFile ;
+}
+
 
 
 ##  ---------------------------------------------------------------------------

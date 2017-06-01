@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,8 @@ namespace   INITSERVICE
     const   uint8_t     CTL_CONT_TRACE_ENABLE  =   0x01;
     const   uint8_t     FLUSH_TRACE_BUFS       =   0x02;
     const   uint8_t     DUMP_FAPI_ATTR         =   0x03;
+    const   uint8_t     SET_ATTR_OVERRIDES     =   0x04;
+    const   uint8_t     CLEAR_ATTR_OVERRIDES   =   0x05;
 
 
     const   TaskInfo    g_istep255[]  =   {
@@ -84,6 +86,16 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(255,3, "dump_fapi_attr"),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(255,4, "set_attr_overrides"),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(255,5, "clear_attr_overrides"),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },

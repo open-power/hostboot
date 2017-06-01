@@ -227,6 +227,23 @@ public:
     void triggerAttrSync();
 
     /**
+     * @brief This function will clear all attribute overrides in effect.
+     *        This function is called by the debug interface
+     *
+     */
+    void clearAttrOverrides();
+
+    /**
+     * @brief This function will allow the debug interface to set
+     *        attribut overrides "dynamically" at any point in the IPL
+     *        between isteps.  The debug interface is used to process
+     *        the attributes in the same format as the ATTR_TMP and ATTR_PERM
+     *        PNOR partition binary blobs
+     *
+     */
+    void dynSetAttrOverrides();
+
+    /**
      * @brief This function actually sends the FAPI Sync tank attributes
      *  across the debug interface
      */

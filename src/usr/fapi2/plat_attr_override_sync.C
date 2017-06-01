@@ -37,6 +37,8 @@
 #include <string.h>
 #include <vector>
 #include <sys/msg.h>
+#include <sys/mm.h>
+#include <errno.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <mbox/mboxif.H>
@@ -48,6 +50,7 @@
 #include <fapi2AttrSyncData.H>
 #include <fapi2_attribute_service.H>
 #include <util/utilmbox_scratch.H>
+#include <plat_utils.H>
 
 namespace fapi2
 {
@@ -736,7 +739,15 @@ void AttrOverrideSync::triggerAttrSync()
               l_attrs[i].iv_dims[1] * l_attrs[i].iv_dims[2] *
               l_attrs[i].iv_dims[3];
 
-            //Get the data
+            //Get the data -- limit this to ATTR less than 1K in size
+            //otherwise can cause memory fragmentation in cache contained HB.
+            //Specifically this is to weed out the WOF_TABLE_DATA (128K)
+            if(l_bytes > KILOBYTE)
+            {
+                FAPI_INF("triggerAttrSync: ATTR %x bigger [%x] than 1K... skipping",
+                         l_bytes);
+                continue;
+            }
             l_buf = reinterpret_cast<uint8_t *>(realloc(l_buf, l_bytes));
             ReturnCode l_rc =
               rawAccessAttr(
@@ -744,11 +755,16 @@ void AttrOverrideSync::triggerAttrSync()
                         l_fapiTarget, &l_buf[0]);
 
             // Write the attribute to the SyncAttributeTank to sync to Cronus
-            if(l_rc == FAPI2_RC_SUCCESS)
+            errlHndl_t l_pErr = fapi2::rcToErrl(l_rc);
+            if(!l_pErr)
             {
                 iv_syncTank.setAttribute(l_attrs[i].iv_attrId, l_fType,
                                          l_pos, l_unitPos, l_node, 0,
                                          l_bytes, l_buf);
+            }
+            else
+            {
+                delete l_pErr; //Debug tool, ignore errors
             }
         }
     }
@@ -758,6 +774,109 @@ void AttrOverrideSync::triggerAttrSync()
     //Now push the data to the debug tool
     sendFapiAttrSyncs();
 }
+
+//******************************************************************************
+void AttrOverrideSync::clearAttrOverrides()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    // Debug Channel is clearing all attribute overrides.
+    FAPI_INF("Debug Channel CLEAR_ALL_OVERRIDES");
+    iv_overrideTank.clearAllAttributes();
+    TARGETING::Target::theTargOverrideAttrTank().clearAllAttributes();
+#endif
+}
+
+//******************************************************************************
+void AttrOverrideSync::dynSetAttrOverrides()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    errlHndl_t err = NULL;
+    int64_t rc = 0;
+
+    do
+    {
+        // Create a memory block to serve as Debug Comm channel
+        // NOTE: using mm_alloc_block since this code is running before we
+        // have mainstore and we must have contiguous blocks of memory for
+        // Cronus putmempba
+        rc = mm_alloc_block( NULL,
+                             reinterpret_cast<void*>
+                             (VMM_VADDR_DEBUG_COMM),
+                             VMM_DEBUG_COMM_SIZE);
+        if(rc == -EALREADY)
+        {
+            //-EALREADY inidciates the block is already mapped -- ignore
+            rc = 0;
+        }
+
+        if( rc )
+        {
+            // This is a debug interface, just emit trace and exit
+            FAPI_ERR("dynSetAttrOverrides() - "
+                     "Error from mm_alloc_block : rc=%d", rc );
+            break;
+        }
+
+        rc = mm_set_permission(reinterpret_cast<void*>
+                               (VMM_VADDR_DEBUG_COMM),
+                               VMM_DEBUG_COMM_SIZE,
+                               WRITABLE | ALLOCATE_FROM_ZERO);
+        if( rc )
+        {
+            // This is a debug interface, just emit trace and exit
+            FAPI_ERR("dynSetAttrOverrides() - "
+                     "Error from mm_set_permission : rc=%d", rc );
+            break;
+        }
+
+        //Now masquerade this at the ATTR_TMP PNOR section so the underlying
+        //ATTR override and bin file can be used as is
+        PNOR::SectionInfo_t l_sectionInfo;
+        l_sectionInfo.id = PNOR::ATTR_TMP;
+        l_sectionInfo.name = "ATTR_TMP";
+        l_sectionInfo.vaddr = VMM_VADDR_DEBUG_COMM;
+        l_sectionInfo.flashAddr = 0xFFFFFFFF; //Not used
+        l_sectionInfo.size = VMM_DEBUG_COMM_SIZE;
+        l_sectionInfo.eccProtected = false;
+        l_sectionInfo.sha512Version = false;
+        l_sectionInfo.sha512perEC = false;
+        l_sectionInfo.readOnly = true;
+        l_sectionInfo.reprovision = false;
+        l_sectionInfo.secure = false;
+
+
+        //Send debug message to tool to update memory
+        //Must clear data to actually alloction phys pages
+        memset (reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM), 0xFF,
+                VMM_DEBUG_COMM_SIZE);
+        uint64_t l_addr =
+          mm_virt_to_phys(reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM));
+        FAPI_INF("virt[%llx] phys[%llx]", VMM_VADDR_DEBUG_COMM, l_addr);
+        Util::writeDebugCommRegs(Util::MSG_TYPE_ATTROVERRIDE,
+                                 l_addr,
+                                 VMM_DEBUG_COMM_SIZE);
+
+
+        FAPI_INF("init: processing dynamic overrides");
+        err = TARGETING::getAttrOverrides(l_sectionInfo, NULL);
+        if (err)
+        {
+            FAPI_ERR("Failed getAttrOverrides from dyanmic set");
+            errlCommit(err, HWPF_COMP_ID);
+            break;
+        }
+    }while(0);
+
+    // Attempt to clean up after ourselves.  Ignore errors on cleanup
+    // path in debug interface
+    //release all pages in page block
+    rc = mm_remove_pages(RELEASE, reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM),
+                         VMM_DEBUG_COMM_SIZE);
+    rc = mm_set_permission(reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM),
+                           VMM_DEBUG_COMM_SIZE, NO_ACCESS | ALLOCATE_FROM_ZERO);
+#endif
+}
+
 
 //******************************************************************************
 void AttrOverrideSync::setAttrActionsFunc(const AttributeId i_attrId,

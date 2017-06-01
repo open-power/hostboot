@@ -102,6 +102,10 @@
 #define VMM_VADDR_SBE_UPDATE (3 * GIGABYTE)
 #define VMM_SBE_UPDATE_SIZE (900 * KILOBYTE)
 #define VMM_VADDR_SBE_UPDATE_END (VMM_VADDR_SBE_UPDATE + VMM_SBE_UPDATE_SIZE)
+/** Debug Comm Channel is at 3.5GB, uses 32KB */
+#define VMM_VADDR_DEBUG_COMM ((3 * GIGABYTE) + (500 * MEGABYTE))
+#define VMM_DEBUG_COMM_SIZE (32 * KILOBYTE)
+#define VMM_VADDR_DEBUG_COMM_END (VMM_VADDR_DEBUG_COMM + VMM_DEBUG_COMM_SIZE)
 
 /** Attribute Resource Provider */
 // Note: Not simplified to make it easier to extract with the PNOR targeting
