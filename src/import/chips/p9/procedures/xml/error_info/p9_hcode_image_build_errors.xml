@@ -249,6 +249,18 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_REFRESH_SCOM_UPDATE_FAIL</rc>
+    <description>hcode image build procedure failed to create restore entry for L3 refresh timer divider register</description>
+    <ffdc>STOP_API_SCOM_ERR</ffdc>
+    <ffdc>REFRESH_REG_ADDR</ffdc>
+    <ffdc>REFRESH_REG_DATA</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_PARAM_BLOCK_SIZE_ERR</rc>
     <description>hcode image build procedure failed due to size error P-State parameter block super struct</description>
     <ffdc>SUPER_STRUCT_SIZE</ffdc>
