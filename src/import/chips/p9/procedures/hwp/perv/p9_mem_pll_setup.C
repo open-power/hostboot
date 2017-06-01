@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
 // *HWP FW Owner        : Sunil Kumar <skumar8j@in.ibm.com>
 // *HWP Team            : Perv
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : HB
 //------------------------------------------------------------------------------
 
@@ -103,8 +103,10 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                 FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_PLL_LOCK_REG,
                                         l_data64)); //l_read_reg = PERV.PLL_LOCK_REG
                 FAPI_ASSERT(l_data64.getBit<0>() == 1,
-                            fapi2::MEM_PLL_LOCK_ERR()
-                            .set_MEM_PLL_READ(l_data64),
+                            fapi2::PLL_LOCK_ERR()
+                            .set_TARGET_CHIPLET(l_chplt_trgt)
+                            .set_TARGET_CHIP(i_target_chip)
+                            .set_PLL_READ(l_data64),
                             "ERROR:MEM PLL LOCK NOT SET");
 
                 FAPI_DBG("Drop PLL Bypass");
