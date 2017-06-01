@@ -108,9 +108,13 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     TARGETING::targetService().masterProcChipTargetHandle( l_mProc );
 
     // Get the number of present cores
-    TARGETING::TargetHandleList pECList;
-    getChildChiplets(pECList, l_mProc, TARGETING::TYPE_CORE, false);
-    uint32_t l_numCores = pECList.size();
+    TARGETING::TargetHandleList l_coreTargetList;
+    TARGETING::getChildAffinityTargetsByState( l_coreTargetList,
+                                               l_mProc,
+                                               TARGETING::CLASS_UNIT,
+                                               TARGETING::TYPE_CORE,
+                                               TARGETING::UTIL_FILTER_PRESENT);
+    uint32_t l_numCores = l_coreTargetList.size();
 
     // Choose a sort freq
     uint32_t l_sortFreq = 0;
