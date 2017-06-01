@@ -31,6 +31,10 @@
     <description>Unsupported/unexpected pervasive chiplet instance</description>
     <ffdc>TARGET</ffdc>
     <ffdc>UNIT_POS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
