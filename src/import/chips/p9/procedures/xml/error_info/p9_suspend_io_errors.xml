@@ -28,7 +28,7 @@
   <hwpError>
     <rc>RC_P9_PBCQ_CQ_NOT_IDLE</rc>
     <description>
-      PBCQ CQ did not go to idle.
+      PBCQ CQ did not go to idle after getting reset.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NFIR_ADDR</ffdc>
@@ -52,7 +52,7 @@
   <hwpError>
     <rc>RC_P9_PHB_NFIR_NOT_CLEARED</rc>
     <description>
-      PCI Nest FIR Register did not clear.
+      Attempt to clear PCI Nest FIR Register is unsuccessful.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>NFIR_ADDR</ffdc>
