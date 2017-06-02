@@ -415,13 +415,15 @@ void* call_host_voltage_config( void *io_pArgs )
         l_sys->setAttr<ATTR_NOMINAL_FREQ_MHZ>( l_nominalFreq );
 
         // raise the min freq if there is a system policy for it
-        uint32_t l_dpoPercent = l_sys->getAttr<ATTR_DPO_MIN_FREQ_PERCENT>();
+        int32_t l_dpoPercent = l_sys->getAttr<ATTR_DPO_MIN_FREQ_PERCENT>();
         uint32_t l_dpoFreq = l_nominalFreq;
-        if( (l_dpoPercent != 0) && (l_dpoPercent < 100) )
+        if( (l_dpoPercent != 0) && (l_dpoPercent > -100) )
         {
-            l_dpoFreq = (l_nominalFreq*l_dpoPercent)/100;
+            uint32_t l_multiplierPercent =
+                static_cast<uint32_t>(100 + l_dpoPercent);
+            l_dpoFreq = (l_nominalFreq*l_multiplierPercent)/100;
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Computed floor=%d, DPO=%d (percent=-%d)",
+                      "Computed floor=%d, DPO=%d (percent=%d)",
                       l_floorFreq, l_dpoFreq, l_dpoPercent );
             l_floorFreq = std::max( l_floorFreq, l_dpoFreq );
         }
