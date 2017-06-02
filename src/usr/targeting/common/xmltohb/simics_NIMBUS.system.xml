@@ -99,7 +99,7 @@
     </attribute>
     <attribute>
         <id>DPO_MIN_FREQ_PERCENT</id>
-        <default>98</default>
+        <default>-2</default>
     </attribute>
     <attribute>
         <id>REQUIRED_SYNCH_MODE</id>
