@@ -34,6 +34,19 @@
 #include <rcSupport.H>
 #include <plat_hwp_invoker.H>
 
+#include <hwp_error_info.H>
+#include <hwp_ffdc_classes.H>
+
+const uint64_t FAPI2_TEST_BUFFER_VALUE = 0x123456789ABCDEF;
+const uint32_t FAPI2_TEST_VARIABLE_BUFFER_VALUE[] =
+                                                   {
+                                                        0x12345678,
+                                                        0x9ABCDEF
+                                                   };
+const uint32_t VARIABLE_BUFFER_ELEMENTS =
+            sizeof(FAPI2_TEST_VARIABLE_BUFFER_VALUE)/
+            sizeof(FAPI2_TEST_VARIABLE_BUFFER_VALUE[0]);
+
 
 //******************************************************************************
 // p9_ffdc_fail. Returns a fapi2::ReturnCode with an ffdc entry
@@ -65,10 +78,9 @@ fapi2::ReturnCode p9_registerFfdc_fail(
 
     FAPI_ASSERT(0, fapi2::TEST_ERROR_A().set_TARGET(i_proc_target));
 
-  fapi_try_exit:
+fapi_try_exit:
 
     FAPI_INF("Exiting p9_registerFfdc_fail...");
-
     return fapi2::current_err;
 }
 
@@ -166,4 +178,79 @@ fapi2::ReturnCode p9_hwCallout(
 
     return fapi2::current_err;
 }
+
+
+//****************************************************************************
+// p9ErrorWithBuffer
+// Force an error that will use a caller populated fapi2::buffer<>
+//****************************************************************************
+fapi2::ReturnCode p9ErrorWithBuffer(
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("Entering p9ErrorWithBuffer");
+
+    fapi2::buffer<uint64_t> l_userBuffer{FAPI2_TEST_BUFFER_VALUE};
+
+    //Parameter type for the p9_collect_some_ffdc function.
+    //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
+    //not related to this test.
+    uint32_t l_paramValue = 0x01;
+
+    fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
+
+    FAPI_ASSERT(false,
+                fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
+                                    .set_parm1(l_paramValue)
+                                    .set_UNIT_TEST_CHIP_TARGET(i_target),
+                "p9ErrorWithBuffer Unit Test"
+               );
+
+fapi_try_exit:
+    FAPI_INF("Exiting p9ErrorWithBuffer");
+    return fapi2::current_err;
+}
+
+#if 0
+//The generated classes in hwp_ffdc_classes.H are not produced to support
+//fapi2::variable_buffer.In order to enable the following function the
+//parseErrorInfo.pl script must be configured to use variable buffers.
+//To enable variable buffer support ensure that the parseErrorInfo_RUN
+//macro in import/hwpf/fapi2/tools/parseErrorInfo.mk is defined to
+//include the --use-variable-buffers option as shown below.
+//$(C1) $$< --use-variable-buffers --output-dir=$$($(GENERATED)_PATH) ...
+//
+//****************************************************************************
+// p9ErrorWithVariableBuffer
+// Force an error that will use a caller populated fapi2::variable_buffer
+//****************************************************************************
+fapi2::ReturnCode p9ErrorWithVariableBuffer(
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("Entering p9ErrorWithVariableBuffer");
+
+    fapi2::variable_buffer l_userBuffer(FAPI2_TEST_VARIABLE_BUFFER_VALUE,
+                                        VARIABLE_BUFFER_ELEMENTS,
+                                        VARIABLE_BUFFER_ELEMENTS*32
+                                        );
+
+    //Parameter type for the p9_collect_some_ffdc function.
+    //Can be 0x01 or 0x02. Has relevence for ErrorInfo objects
+    //not related to this test
+    uint32_t l_paramValue = 0x01;
+
+    fapi2::current_err = fapi2::FAPI2_RC_INVALID_PARAMETER;
+
+    FAPI_ASSERT(false,
+                fapi2::PROC_EXAMPLE_ERROR().set_BUFFER(l_userBuffer)
+                                    .set_parm1(l_paramValue)
+                                    .set_UNIT_TEST_CHIP_TARGET(i_target),
+                "p9ErrorWithVariableBuffer Unit Test"
+               );
+
+fapi_try_exit:
+    FAPI_INF("Exiting p9ErrorWithVariableBuffer");
+    return fapi2::current_err;
+}
+#endif
+
 
