@@ -666,22 +666,17 @@ sub processI2cSpeeds
     my @bus_speeds;
     my $bus_speed_attr=$targetObj->getAttribute($target,"I2C_BUS_SPEED_ARRAY");
     my @bus_speeds2 = split(/,/,$bus_speed_attr);
-    $bus_speeds[0][0] = $bus_speeds2[0];
-    $bus_speeds[0][1] = $bus_speeds2[1];
-    $bus_speeds[0][2] = $bus_speeds2[2];
-    $bus_speeds[0][3] = $bus_speeds2[3];
-    $bus_speeds[1][0] = $bus_speeds2[4];
-    $bus_speeds[1][1] = $bus_speeds2[5];
-    $bus_speeds[1][2] = $bus_speeds2[6];
-    $bus_speeds[1][3] = $bus_speeds2[7];
-    $bus_speeds[2][0] = $bus_speeds2[8];
-    $bus_speeds[2][1] = $bus_speeds2[9];
-    $bus_speeds[2][2] = $bus_speeds2[10];
-    $bus_speeds[2][3] = $bus_speeds2[11];
-    $bus_speeds[3][0] = $bus_speeds2[12];
-    $bus_speeds[3][1] = $bus_speeds2[13];
-    $bus_speeds[3][2] = $bus_speeds2[14];
-    $bus_speeds[3][3] = $bus_speeds2[15];
+
+    #need to create a 4X13 array
+    my $i = 0;
+    for my $engineIdx (0 .. 3)
+    {
+        for my $portIdx (0 .. 12)
+        {
+            $bus_speeds[$engineIdx][$portIdx] = $bus_speeds2[$i];
+            $i++;
+        }
+    }
 
     my $i2cs=$targetObj->findConnections($target,"I2C","");
     if ($i2cs ne "") {
@@ -715,22 +710,18 @@ sub processI2cSpeeds
             }
         }
     }
-    $bus_speed_attr = $bus_speeds[0][0].",".
-                      $bus_speeds[0][1].",".
-                      $bus_speeds[0][2].",".
-                      $bus_speeds[0][3].",".
-                      $bus_speeds[1][0].",".
-                      $bus_speeds[1][1].",".
-                      $bus_speeds[1][2].",".
-                      $bus_speeds[1][3].",".
-                      $bus_speeds[2][0].",".
-                      $bus_speeds[2][1].",".
-                      $bus_speeds[2][2].",".
-                      $bus_speeds[2][3].",".
-                      $bus_speeds[3][0].",".
-                      $bus_speeds[3][1].",".
-                      $bus_speeds[3][2].",".
-                      $bus_speeds[3][3];
+
+    #need to flatten 4x13 array
+    $bus_speed_attr = "";
+    for my $engineIdx (0 .. 3)
+    {
+        for my $portIdx (0 .. 12)
+        {
+            $bus_speed_attr .= $bus_speeds[$engineIdx][$portIdx] . ",";
+        }
+    }
+    #remove last ,
+    $bus_speed_attr =~ s/,$//;
 
     $targetObj->setAttribute($target,"I2C_BUS_SPEED_ARRAY",$bus_speed_attr);
 }

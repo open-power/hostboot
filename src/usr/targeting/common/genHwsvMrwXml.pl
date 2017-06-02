@@ -7043,9 +7043,11 @@ sub addI2cBusSpeedArray
     my $tmp_offset = 0x0;
     my $tmp_ct eq "";
 
-    # bus_speed_array[engine][port] is 4x4 array
-    my @speed_array = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
+    # bus_speed_array[engine][port] is 4x13 array
+    my @speed_array =  (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     # Loop through all i2c devices
     for my $i ( 0 .. $#I2Cdevices )
     {
@@ -7133,7 +7135,7 @@ sub addI2cBusSpeedArray
         $tmp_speed  = $I2Cdevices[$i]{i2c_speed};
         $tmp_engine = $I2Cdevices[$i]{i2c_engine};
         $tmp_port   = $I2Cdevices[$i]{i2c_port};
-        $tmp_offset = ($tmp_engine * 4) + $tmp_port;
+        $tmp_offset = ($tmp_engine * 13) + $tmp_port;
 
         # use the slower speed if there is a previous entry
         if ( ($speed_array[$tmp_offset] == 0) ||
@@ -7147,22 +7149,18 @@ sub addI2cBusSpeedArray
     print "     <attribute>\n";
     print "        <id>I2C_BUS_SPEED_ARRAY</id>\n";
     print "        <default>\n";
-    print "            $speed_array[0],\n";
-    print "            $speed_array[1],\n";
-    print "            $speed_array[2],\n";
-    print "            $speed_array[3],\n";
-    print "            $speed_array[4],\n";
-    print "            $speed_array[5],\n";
-    print "            $speed_array[6],\n";
-    print "            $speed_array[7],\n";
-    print "            $speed_array[8],\n";
-    print "            $speed_array[9],\n";
-    print "            $speed_array[10],\n";
-    print "            $speed_array[11],\n";
-    print "            $speed_array[12],\n";
-    print "            $speed_array[13],\n";
-    print "            $speed_array[14],\n";
-    print "            $speed_array[15],\n";
+
+    my $speed_array_len = scalar(@speed_array);
+    my $speed_array_str = "";
+    for my $i (0 .. $speed_array_len)
+    {
+        $speed_array_str .= "            $speed_array[$i],\n";
+    }
+
+    #remove last ","
+    $speed_array_str =~ s/,\n$/\n/;
+    print $speed_array_str;
+
     print "        </default>\n";
     print "    </attribute>\n";
 
