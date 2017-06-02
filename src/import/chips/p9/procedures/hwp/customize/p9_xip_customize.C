@@ -1583,7 +1583,6 @@ ReturnCode p9_xip_customize (
 
             FAPI_DBG("Image size before any VPD updates: %d", l_currentImageSize);
 
-#ifndef WIN32
             // Adjust the local size of MAX_SEEPROM_IMAGE_SIZE to accommodate enlarged image for Cronus
             l_fapiRc2 = FAPI_ATTR_GET(fapi2::ATTR_MAX_SBE_SEEPROM_SIZE, FAPI_SYSTEM, attrMaxSbeSeepromSize);
 
@@ -1617,9 +1616,6 @@ ReturnCode p9_xip_customize (
             }
 
             FAPI_DBG("Platform adjusted MAX_SEEPROM_IMAGE_SIZE: %d", l_maxImageSize);
-#else
-            l_maxImageSize = MAX_SEEPROM_IMAGE_SIZE;
-#endif
 
             // Make sure current image size isn't already too big for Seeprom
             FAPI_ASSERT( l_currentImageSize <= l_maxImageSize,
@@ -1886,7 +1882,6 @@ ReturnCode p9_xip_customize (
 
             l_hwRingsSection = (void*)((uintptr_t)io_image + l_xipRingsSection.iv_offset);
 
-#ifndef WIN32
             // Extract the DD level to enable retrieval of correct CME/SGPE ring blocks
             l_fapiRc = FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, i_procTarget, attrDdLevel);
 
@@ -1895,9 +1890,6 @@ ReturnCode p9_xip_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_OCCURRENCE(1),
                          "FAPI_ATTR_GET(ATTR_EC) failed." );
-#else
-            attrDdLevel = g_ddLevel;
-#endif
 
             FAPI_DBG("attrDdLevel = 0x%x", attrDdLevel);
 
