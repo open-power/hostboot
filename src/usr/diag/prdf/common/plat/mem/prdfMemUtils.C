@@ -127,6 +127,8 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
                 if ( 0 == count ) continue; // nothing to do
 
                 uint8_t sym  = baseSymbol + i;
+                PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
+
                 uint8_t dram = isX4 ? symbol2Nibble<TYPE_MCA>( sym )
                                     : symbol2Byte  <TYPE_MCA>( sym );
 
@@ -186,6 +188,8 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
         {
             uint8_t sym = isX4 ? nibble2Symbol<TYPE_MCA>( highestDram )
                                : byte2Symbol  <TYPE_MCA>( highestDram );
+            PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
+
             o_chipMark  = MemSymbol::fromSymbol( mcaTrgt, i_rank, sym );
         }
 

@@ -87,6 +87,8 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
         }
     }
 
+    PRDF_ASSERT( symbol < SYMBOLS_PER_RANK );
+
     // Get pins from mask.
     uint8_t pins = NO_SYMBOL_DQS;
     if ( TYPE_MBA == getTargetType(i_trgt) )
