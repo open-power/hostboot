@@ -165,93 +165,97 @@ use Getopt::Long;
 ################################################################################
 
 # a number is a hash with these members
-use constant NUM_VALUE => "num_value"; #numeric value
-use constant NUM_SIZE  => "num_size";  #number of bytes
+use constant NUM_VALUE => "num_value";    #numeric value
+use constant NUM_SIZE  => "num_size";     #number of bytes
 
 # a fileInfo is a hash with these members
-use constant FILE_NAME => "file_name"; #name of the binary file to write
-use constant FILE_SIZE => "file_size"; #final size to create
-use constant FILE_DATA => "file_data"; #array to hold data until written
-use constant FILE_PTR  => "file_ptr" ; #current end of data pointer
+use constant FILE_NAME => "file_name";    #name of the binary file to write
+use constant FILE_SIZE => "file_size";    #final size to create
+use constant FILE_DATA => "file_data";    #array to hold data until written
+use constant FILE_PTR  => "file_ptr";     #current end of data pointer
 
 # a configuration is a hash with these members
-use constant CONF_MCS  => "config_mcs_mask";
-use constant CONF_FREQ => "config_freq_mask";
-use constant CONF_RANK => "config_rank_mask";
-use constant CONF_KEY_CHAR => "config_keyword_character";
+use constant CONF_MCS           => "config_mcs_mask";
+use constant CONF_FREQ          => "config_freq_mask";
+use constant CONF_RANK          => "config_rank_mask";
+use constant CONF_KEY_CHAR      => "config_keyword_character";
 use constant CONF_VPD_TEXT_FILE => "config_vpd_text_file";
-use constant CONF_BIN_FILE => "config_bin_file";
+use constant CONF_BIN_FILE      => "config_bin_file";
 
 # global constants
-use constant VPD_BIN_FILE_SIZE => 255 ;   #all vpd binary key word file size
-use constant DQ_VPD_BIN_FILE_SIZE => 160 ;   # DQ vpd binary key word file size
-use constant DQ_Q0_BIN_FILE_SIZE => 36 ;   # DQ map file size (Q0)
-use constant CKE_VPD_BIN_DATA_SIZE => 16 ; # CKE "blob" size per MCS
-use constant CKE_BIN_FILE_SIZE => 136 ; # CKE full binary file size
+use constant VPD_BIN_FILE_SIZE     => 255;    #all vpd binary key word file size
+use constant DQ_VPD_BIN_FILE_SIZE  => 160;    # DQ vpd binary key word file size
+use constant DQ_Q0_BIN_FILE_SIZE   => 36;     # DQ map file size (Q0)
+use constant CKE_VPD_BIN_DATA_SIZE => 16;     # CKE "blob" size per MCS
+use constant CKE_BIN_FILE_SIZE     => 136;    # CKE full binary file size
+use constant VM_BIN_FILE_SIZE      => 4;      # VM (4-byte timestamp) binary file size
 
 ################################################################################
 # configuration structures.
 # These masks (and the version) are written to the binary mapping vpd keyword
 # and used by the decode hwp.
 ################################################################################
-use constant MAPPING_LAYOUT_VERSION => 1; #version of decode algorithm
+use constant MAPPING_LAYOUT_VERSION => 1;    #version of decode algorithm
 
-my %g_freqMask = (               #frequency index to mask
-                  1866 => 0x80,     #1866
-                  2133 => 0x40,     #2133
-                  2400 => 0x20,     #2400
-                  2666 => 0x10);    #2666
+my %g_freqMask = (                           #frequency index to mask
+    1866 => 0x80,                            #1866
+    2133 => 0x40,                            #2133
+    2400 => 0x20,                            #2400
+    2666 => 0x10
+);                                           #2666
 use constant FREQ_ALL => 0xf0;
 
-my %g_rankMask = (                #dimm rank count pair to mask
-                  0x00 => 0x8000,
-                  0x01 => 0x4000, #dimm0 rank count=0 dimm1 rank count=1
-                  0x02 => 0x2000,
-                  0x04 => 0x1000,
-                  0x10 => 0x0800,
-                  0x11 => 0x0400,
-                  0x12 => 0x0200, #dimm0 rank count=1 dimm1 rank count=2
-                  0x14 => 0x0100,
-                  0x20 => 0x0080,
-                  0x21 => 0x0040,
-                  0x22 => 0x0020,
-                  0x24 => 0x0010,
-                  0x40 => 0x0008,
-                  0x41 => 0x0004,
-                  0x42 => 0x0002, #dimm0 rank count=4 dimm1 rank count=2
-                  0x44 => 0x0001);
+my %g_rankMask = (                           #dimm rank count pair to mask
+    0x00 => 0x8000,
+    0x01 => 0x4000,                          #dimm0 rank count=0 dimm1 rank count=1
+    0x02 => 0x2000,
+    0x04 => 0x1000,
+    0x10 => 0x0800,
+    0x11 => 0x0400,
+    0x12 => 0x0200,                          #dimm0 rank count=1 dimm1 rank count=2
+    0x14 => 0x0100,
+    0x20 => 0x0080,
+    0x21 => 0x0040,
+    0x22 => 0x0020,
+    0x24 => 0x0010,
+    0x40 => 0x0008,
+    0x41 => 0x0004,
+    0x42 => 0x0002,                          #dimm0 rank count=4 dimm1 rank count=2
+    0x44 => 0x0001
+);
 
-use constant RANK_DROP1 => 0x7888; #pairs with just one dimm
-use constant RANK_DROP2 => 0x0777; #pairs with two dimms
+use constant RANK_DROP1 => 0x7888;           #pairs with just one dimm
+use constant RANK_DROP2 => 0x0777;           #pairs with two dimms
 
-my %g_mcsMask = (                #MCS MEMVPD_POS to mask
-                  0  => 0x8000,  #proc=0 mcs position=0 memvpd_pos=0
-                  1  => 0x4000,
-                  2  => 0x2000,
-                  3  => 0x1000,
-                  4  => 0x0800,  #proc=1 mcs position=0 memvpd_pos=4
-                  5  => 0x0400,
-                  6  => 0x0200,
-                  7  => 0x0100,
-                  8  => 0x0080,  #proc=2 mcs position=0 memvpd_pos=8
-                  9  => 0x0040,
-                  10 => 0x0020,
-                  11 => 0x0010,
-                  12 => 0x0008,  #proc=3 mcs position=0 memvpd_pos=12
-                  13 => 0x0004,
-                  14 => 0x0002,
-                  15 => 0x0001);
+my %g_mcsMask = (                            #MCS MEMVPD_POS to mask
+    0  => 0x8000,                            #proc=0 mcs position=0 memvpd_pos=0
+    1  => 0x4000,
+    2  => 0x2000,
+    3  => 0x1000,
+    4  => 0x0800,                            #proc=1 mcs position=0 memvpd_pos=4
+    5  => 0x0400,
+    6  => 0x0200,
+    7  => 0x0100,
+    8  => 0x0080,                            #proc=2 mcs position=0 memvpd_pos=8
+    9  => 0x0040,
+    10 => 0x0020,
+    11 => 0x0010,
+    12 => 0x0008,                            #proc=3 mcs position=0 memvpd_pos=12
+    13 => 0x0004,
+    14 => 0x0002,
+    15 => 0x0001
+);
 my $g_mcs_added_to_cfg = 0;
 
-use constant MCS_ALL => 0xffff;
+use constant MCS_ALL       => 0xffff;
 use constant MAX_NUM_PROCS => 4;
 use constant MAX_POSITION  => 3;
 
 ################################################################################
 # Global data
 ################################################################################
-my %g_configs = ();      #hash of configuration hashes (a list of all configs)
-my $g_tarType = "";      #supported target types (MR, MT, Q#, CK)
+my %g_configs = ();    #hash of configuration hashes (a list of all configs)
+my $g_tarType = "";    #supported target types (MR, MT, Q#, CK)
 
 ################################################################################
 # Main flow:
@@ -262,20 +266,22 @@ my $g_tarType = "";      #supported target types (MR, MT, Q#, CK)
 # - construct report
 ################################################################################
 
-sub main{ }
-my $cfgPrefix = undef;
+sub main { }
+my $cfgPrefix          = undef;
 my $cfgInputVpdTextDir = ".";
 my $cfgOutputVpdBinDir = ".";
-my $cfgHelp = 0;
-my $cfgVerbose = 0;
-my %ckeKeywordData; # CKE hash table (mcsMask -> hash ref with blob data for those masked mcs's)
+my $cfgHelp            = 0;
+my $cfgVerbose         = 0;
+my %ckeKeywordData;    # CKE hash table (mcsMask -> hash ref with blob data for those masked mcs's)
 
 # Process command line parameters, issue help text if needed
-GetOptions("prefix:s" => \$cfgPrefix,
-           "input-vpd-text-dir:s" => \$cfgInputVpdTextDir,
-           "output-vpd-bin-dir:s" => \$cfgOutputVpdBinDir,
-           "help" => \$cfgHelp,
-           "verbose" => \$cfgVerbose );
+GetOptions(
+    "prefix:s"             => \$cfgPrefix,
+    "input-vpd-text-dir:s" => \$cfgInputVpdTextDir,
+    "output-vpd-bin-dir:s" => \$cfgOutputVpdBinDir,
+    "help"                 => \$cfgHelp,
+    "verbose"              => \$cfgVerbose
+);
 
 if ($cfgHelp)
 {
@@ -284,12 +290,12 @@ if ($cfgHelp)
 }
 
 # Check mandatory parameters
-if ($cfgPrefix eq undef)
+if ( $cfgPrefix eq undef )
 {
     print STDERR "\n==>prefix is a required parameter\n";
 }
 
-if ($cfgPrefix eq undef)
+if ( $cfgPrefix eq undef )
 {
     display_help();
     exit(1);
@@ -297,21 +303,21 @@ if ($cfgPrefix eq undef)
 
 # Validate vpd type
 {
-    (my $system,$g_tarType) = $cfgPrefix =~ m/^(.*?)_(\S+)/;
+    ( my $system, $g_tarType ) = $cfgPrefix =~ m/^(.*?)_(\S+)/;
     $g_tarType = uc $g_tarType;
-    if ( ("MR" ne $g_tarType) &&
-         ("MT" ne $g_tarType) &&
-         ("CKE_MAP" ne $g_tarType) &&
-         ("DQ_MAP" ne $g_tarType) )
+    if (   ( "MR" ne $g_tarType )
+        && ( "MT" ne $g_tarType )
+        && ( "CKE_MAP" ne $g_tarType )
+        && ( "DQ_MAP" ne $g_tarType )
+        && ( "VM" ne $g_tarType ) )
     {
-        fatal("error in --prefix parameter: $cfgPrefix".
-              " unsupported target type = $g_tarType");
+        fatal( "error in --prefix parameter: $cfgPrefix" . " unsupported target type = $g_tarType" );
     }
 }
 
 # Ensure directories consistently end with a /
 {
-    local $/ = '/';  #use temporary version of $/ for the chomp
+    local $/ = '/';    #use temporary version of $/ for the chomp
     chomp($cfgInputVpdTextDir);
     $cfgInputVpdTextDir .= "/";
 
@@ -327,42 +333,58 @@ if ($cfgPrefix eq undef)
     verbose("    Ouput vpd bin file directory =  $cfgOutputVpdBinDir");
 }
 
-# Get the list of input vpd text files from the input directory
-my @vpdTextFiles = getVpdTextFileList($cfgInputVpdTextDir,$cfgPrefix);
+# skip vpd input files for VM type
+if ( "VM" ne $g_tarType )
 {
-    my $numVpdTextFiles = scalar(@vpdTextFiles);
-    if ($numVpdTextFiles == 0)
+    # Get the list of input vpd text files from the input directory
+    my @vpdTextFiles = getVpdTextFileList( $cfgInputVpdTextDir, $cfgPrefix );
     {
-       fatal("No input vpd text files");
+        my $numVpdTextFiles = scalar(@vpdTextFiles);
+        if ( $numVpdTextFiles == 0 )
+        {
+            fatal("No input vpd text files");
+        }
+        verbose("Input Vpd Text Files ($numVpdTextFiles)=");
+        foreach my $file (@vpdTextFiles)
+        {
+            verbose("    $file");
+        }
     }
-    verbose("Input Vpd Text Files ($numVpdTextFiles)=");
-    foreach my $file(@vpdTextFiles)
-    {
-        verbose("    $file");
-    }
-}
 
-# Process vpd text files
-foreach my $file(@vpdTextFiles)
-{
-    if ("CKE_MAP" eq $g_tarType)
+    # Process vpd text files
+    foreach my $file (@vpdTextFiles)
     {
-        processCkeVpdTextFile($file, \%ckeKeywordData);
-    }
-    else
-    {
-        processVpdTextFile($file);
+        if ( "CKE_MAP" eq $g_tarType )
+        {
+            processCkeVpdTextFile( $file, \%ckeKeywordData );
+        }
+        else
+        {
+            processVpdTextFile($file);
+        }
     }
 }
 
 # Create VPD mapping binary file
-if ("DQ_MAP" eq $g_tarType)
+if ( "DQ_MAP" eq $g_tarType )
 {
     createDqMappingFile();
 }
-elsif ("CKE_MAP" eq $g_tarType)
+elsif ( "CKE_MAP" eq $g_tarType )
 {
-    createCkBinaryFile(\%ckeKeywordData);
+    createCkBinaryFile( \%ckeKeywordData );
+    verbose("Output binary Vpd File=");
+    verbose( "    $cfgPrefix" . "_CKE.bin" );
+
+    verbose("Support files created(1)=");
+    verbose( "    $cfgPrefix" . "_trace.csv" );
+}
+elsif ( "VM" eq $g_tarType )
+{
+    createVMFile();
+    # createVMFile already reported created file
+    verbose("Support file created:");
+    verbose( "   $cfgPrefix" . "_trace.txt" );
 }
 else
 {
@@ -370,42 +392,35 @@ else
 }
 
 # Create report
-if ("CKE_MAP" ne $g_tarType)
+if ( ("CKE_MAP" ne $g_tarType) &&
+     ("VM" ne $g_tarType) )
 {
     createReport();
 
-# Show what files have been created
-{
-    my @keys = sort {$a <=> $b} keys %g_configs;
-    my $numBinVpdFiles = (scalar @keys) + 1;
-    verbose("Output binary Vpd Files ($numBinVpdFiles)=");
-    if ($g_tarType eq "DQ_MAP")
+    # Show what files have been created
     {
-        verbose("    $cfgPrefix"."_Q0.bin");
+        my @keys = sort { $a <=> $b } keys %g_configs;
+        my $numBinVpdFiles = ( scalar @keys ) + 1;
+        verbose("Output binary Vpd Files ($numBinVpdFiles)=");
+        if ( $g_tarType eq "DQ_MAP" )
+        {
+            verbose( "    $cfgPrefix" . "_Q0.bin" );
+        }
+        else
+        {
+            verbose( "    $cfgPrefix" . "_" . $g_tarType . ".bin" );
+        }
+        foreach my $key (@keys)
+        {
+            my $ref_config = $g_configs{$key};
+            verbose("    $ref_config->{CONF_BIN_FILE}");
+        }
+        verbose("Support files created(3)=");
+        verbose( "    $cfgPrefix" . "_map.csv" );
+        verbose( "    $cfgPrefix" . "_report.csv" );
+        verbose( "    $cfgPrefix" . "_trace.csv" );
     }
-    else
-    {
-        verbose("    $cfgPrefix"."_".$g_tarType.".bin");
-    }
-    foreach my $key (@keys)
-    {
-        my $ref_config = $g_configs{$key};
-        verbose("    $ref_config->{CONF_BIN_FILE}");
-    }
-    verbose("Support files created(3)=");
-    verbose("    $cfgPrefix"."_map.csv");
-    verbose("    $cfgPrefix"."_report.csv");
-    verbose("    $cfgPrefix"."_trace.csv");
-}
 
-}
-else
-{
-    verbose("Output binary Vpd File=");
-    verbose("    $cfgPrefix"."_CKE.bin");
-
-    verbose("Support files created(1)=");
-    verbose("    $cfgPrefix"."_trace.csv");
 }
 
 verbose("Successful completion");
@@ -422,40 +437,40 @@ exit(0);
 ################################################################################
 sub getVpdTextFileList
 {
-    my($inputVpdTextDir,$prefix) = @_;
+    my ( $inputVpdTextDir, $prefix ) = @_;
 
-    opendir(FILEDIR,$inputVpdTextDir) ||
-            fatal("Couldn't open input vpd text file dir $inputVpdTextDir: $!");
+    opendir( FILEDIR, $inputVpdTextDir )
+        || fatal("Couldn't open input vpd text file dir $inputVpdTextDir: $!");
+
     # get ALL the vpd files to find the largest vpd decode version
-    my @allVpdTextFiles = grep { /^$prefix.*vpd/ } readdir(FILEDIR);
-    my $largestDecode = "";
+    my @allVpdTextFiles    = grep {/^$prefix.*vpd/} readdir(FILEDIR);
+    my $largestDecode      = "";
     my $largestDecodeValue = -1;
     foreach my $vpdFile (@allVpdTextFiles)
     {
-         my ($system,$tarType) = $prefix =~ m/^(.*?)_(\S+)/;
-         my ($decode,$rest) = $vpdFile =~ m/^${prefix}_(.*?)_(\S+)/;
+        my ( $system, $tarType ) = $prefix =~ m/^(.*?)_(\S+)/;
+        my ( $decode, $rest )    = $vpdFile =~ m/^${prefix}_(.*?)_(\S+)/;
 
-         my $decodeValue = eval($decode);
-         if (undef eq $decodeValue)
-         {
+        my $decodeValue = eval($decode);
+        if ( undef eq $decodeValue )
+        {
             warning("decode $decode is not a number: $vpdFile SKIPPED");
-         }
-         if ($decodeValue > $largestDecodeValue)
-         {
-            $largestDecodeValue=$decodeValue;
-            $largestDecode     =$decode;
-         }
+        }
+        if ( $decodeValue > $largestDecodeValue )
+        {
+            $largestDecodeValue = $decodeValue;
+            $largestDecode      = $decode;
+        }
     }
 
     # only get files for the largest attribute decode version
     rewinddir(FILEDIR);
-    my $prefixDecode = $prefix."_".$largestDecode;
-    my @vpdTextFiles = grep { /^$prefixDecode.*vpd/ }
-                       readdir(FILEDIR);
+    my $prefixDecode = $prefix . "_" . $largestDecode;
+    my @vpdTextFiles = grep {/^$prefixDecode.*vpd/} readdir(FILEDIR);
 
     closedir FILEDIR;
 
-    return @vpdTextFiles
+    return @vpdTextFiles;
 }
 
 ################################################################################
@@ -468,67 +483,67 @@ sub getVpdTextFileList
 ################################################################################
 sub processCkeVpdTextFile
 {
-    my($vpdFile, $io_cke_entries) = @_;  # vpd text file, %hash ref to be appended (mscMask, hash ref with blob data)
+    my ( $vpdFile, $io_cke_entries ) = @_;  # vpd text file, %hash ref to be appended (mscMask, hash ref with blob data)
 
-    trace("Process cke vpd text file = ".$vpdFile);
+    trace( "Process cke vpd text file = " . $vpdFile );
 
-    my %config = ();   # configuration for current section
-    my %fileInfo = (); # fileInfo for current section
-    my $mcsMask  = 0;  # MCS mask for this target
-    my $row      = 0;  # row count for error message
+    my %config   = ();                      # configuration for current section
+    my %fileInfo = ();                      # fileInfo for current section
+    my $mcsMask  = 0;                       # MCS mask for this target
+    my $row      = 0;                       # row count for error message
 
     # Open vpd text file to parse
-    open(VPDINPUTTEXT,"<$cfgInputVpdTextDir$vpdFile")
-         or fatal("open failed for $cfgInputVpdTextDir$vpdFile: $!");
+    open( VPDINPUTTEXT, "<$cfgInputVpdTextDir$vpdFile" )
+        or fatal("open failed for $cfgInputVpdTextDir$vpdFile: $!");
 
     # State variables to control parsing the vpd text file
-    my $stateKeepReading = 1;   #keep reading lines until EOF
-    my $stateProcHeader = 1;    #process header lines until first target line
-    my $stateProcSection = 0;   #working on the attributes for a target line
+    my $stateKeepReading = 1;               #keep reading lines until EOF
+    my $stateProcHeader  = 1;               #process header lines until first target line
+    my $stateProcSection = 0;               #working on the attributes for a target line
 
     while ($stateKeepReading)
     {
         # Actions to be be performed based on this line of text
-        my $actionTarget=0;
-        my $actionAttr=0;
-        my $actionWriteFile=0;
+        my $actionTarget    = 0;
+        my $actionAttr      = 0;
+        my $actionWriteFile = 0;
 
         my $line = <VPDINPUTTEXT>;
         $line =~ s/(\r|\n)//g;
 
         $row++;
-        if ($line)  #determine all actions based on text line
+        if ($line)    #determine all actions based on text line
         {
-            if ($line =~ /ATTR_/)  #first since will be the most of these
+            if ( $line =~ /ATTR_/ )    #first since will be the most of these
             {
                 if ($stateProcHeader)
                 {
-                    fatal("ATTR before header complete:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "ATTR before header complete:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
-                $actionAttr=1;
+                $actionAttr = 1;
             }
-            elsif ($line =~ /target/)
+            elsif ( $line =~ /target/ )
             {
                 $stateProcHeader = 0;
-                $actionTarget=1;
+                $actionTarget    = 1;
 
                 if ($stateProcSection)
                 {
-                    $actionWriteFile=1; #process previous section before next
+                    $actionWriteFile = 1;    #process previous section before next
                 }
             }
+
             # At this point, everything of interest has been processed.
             # The only lines not processed above should be comment lines,
             # which can be ignored (skipped).
         }
-        else # determine actions based on hitting end of the text file
+        else    # determine actions based on hitting end of the text file
         {
-            $stateKeepReading=0;
+            $stateKeepReading = 0;
             if ($stateProcSection)
             {
-                $actionWriteFile=1;
+                $actionWriteFile = 1;
             }
         }
 
@@ -538,24 +553,28 @@ sub processCkeVpdTextFile
         # finish out before starting the next section.
         if ($actionWriteFile)
         {
-            $io_cke_entries->{$mcsMask} = { %fileInfo };
-            trace("Adding CKE entry ".sprintf("0x%02X",$mcsMask)." -> name: ".
-                $fileInfo{FILE_NAME} . ", size: ". $fileInfo{FILE_SIZE}
-                .", ptr: " . $fileInfo{FILE_PTR});
+            $io_cke_entries->{$mcsMask} = {%fileInfo};
+            trace(    "Adding CKE entry "
+                    . sprintf( "0x%02X", $mcsMask )
+                    . " -> name: "
+                    . $fileInfo{FILE_NAME}
+                    . ", size: "
+                    . $fileInfo{FILE_SIZE}
+                    . ", ptr: "
+                    . $fileInfo{FILE_PTR} );
         }
         if ($actionTarget)
         {
-            $mcsMask = procTarget($line,$vpdFile,$row);
+            $mcsMask          = procTarget( $line, $vpdFile, $row );
             $stateProcSection = 1;
-            %fileInfo = newFileInfo($vpdFile,
-                                    CKE_VPD_BIN_DATA_SIZE );
+            %fileInfo         = newFileInfo( $vpdFile, CKE_VPD_BIN_DATA_SIZE );
         }
         if ($actionAttr)
         {
-            my($attr,$type,$value) = split(/\s+/,$line);
-            my %num = newNum($value,$type);
+            my ( $attr, $type, $value ) = split( /\s+/, $line );
+            my %num = newNum( $value, $type );
             trace("   $attr $type $value bytes=$num{NUM_SIZE}");
-            filePushNum(\%fileInfo,\%num);
+            filePushNum( \%fileInfo, \%num );
         }
     }
 }
@@ -573,179 +592,171 @@ sub processCkeVpdTextFile
 
 sub processVpdTextFile
 {
-    my($vpdFile) = @_;
+    my ($vpdFile) = @_;
 
-    trace("Process file = ".$vpdFile);
+    trace( "Process file = " . $vpdFile );
 
-    my %config = ();   # configuration for current section
-    my %fileInfo = (); # fileInfo for current section
-    my $freqMask = 0;  # frequenices (data rates) for this vpd file
-    my $rankMask = 0;  # dimm rank count pairs for this vpd file
-    my $mcsMask  = 0;  # MCS mask for this target
-    my $row      = 0;  # row count for error message
+    my %config   = ();    # configuration for current section
+    my %fileInfo = ();    # fileInfo for current section
+    my $freqMask = 0;     # frequenices (data rates) for this vpd file
+    my $rankMask = 0;     # dimm rank count pairs for this vpd file
+    my $mcsMask  = 0;     # MCS mask for this target
+    my $row      = 0;     # row count for error message
 
     # Open vpd text file to parse
-    open(VPDINPUTTEXT,"<$cfgInputVpdTextDir$vpdFile")
-         or fatal("open failed for $cfgInputVpdTextDir$vpdFile: $!");
+    open( VPDINPUTTEXT, "<$cfgInputVpdTextDir$vpdFile" )
+        or fatal("open failed for $cfgInputVpdTextDir$vpdFile: $!");
 
     # State variables to control parsing the vpd text file
-    my $stateKeepReading = 1;   #keep reading lines until EOF
-    my $stateProcHeader = 1;    #process header lines until first target line
-    my $stateProcSection = 0;   #working on the attributes for a target line
-    my $stateDataRateSet = 0;   #Data Rate (frequency) as been found or default
-    my $stateRankConfigSet = 0; #Rank Count (drop) has been found
+    my $stateKeepReading   = 1;    #keep reading lines until EOF
+    my $stateProcHeader    = 1;    #process header lines until first target line
+    my $stateProcSection   = 0;    #working on the attributes for a target line
+    my $stateDataRateSet   = 0;    #Data Rate (frequency) as been found or default
+    my $stateRankConfigSet = 0;    #Rank Count (drop) has been found
 
     while ($stateKeepReading)
     {
         # Actions to be be performed based on this line of text
-        my $actionDataRate=0;
-        my $actionRankConfig=0;
-        my $actionDropConfig=0;
-        my $actionTarget=0;
-        my $actionAttr=0;
-        my $actionWriteFile=0;
+        my $actionDataRate   = 0;
+        my $actionRankConfig = 0;
+        my $actionDropConfig = 0;
+        my $actionTarget     = 0;
+        my $actionAttr       = 0;
+        my $actionWriteFile  = 0;
 
         my $line = <VPDINPUTTEXT>;
         $line =~ s/(\r|\n)//g;
 
         $row++;
-        if ($line)  #determine all actions based on text line
+        if ($line)    #determine all actions based on text line
         {
-            if ($line =~ /ATTR_/)  #first since will be the most of these
+            if ( $line =~ /ATTR_/ )    #first since will be the most of these
             {
                 if ($stateProcHeader)
                 {
-                    fatal("ATTR before header complete:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "ATTR before header complete:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
-                $actionAttr=1;
+                $actionAttr = 1;
             }
-            elsif ($line =~ /DATA_RATE/)
+            elsif ( $line =~ /DATA_RATE/ )
             {
-                if (!$stateProcHeader)
+                if ( !$stateProcHeader )
                 {
-                    fatal("DATA_RATE outside of header:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "DATA_RATE outside of header:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
-                $actionDataRate=1;
+                $actionDataRate = 1;
             }
-            elsif ($line =~ /RANK_CONFIG/)
+            elsif ( $line =~ /RANK_CONFIG/ )
             {
-                if (!$stateProcHeader)
+                if ( !$stateProcHeader )
                 {
-                    fatal("RANK_CONFIG outside of header:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "RANK_CONFIG outside of header:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
-                $actionRankConfig=1;
+                $actionRankConfig = 1;
             }
-            elsif ($line =~ /NUM_DROPS/)
+            elsif ( $line =~ /NUM_DROPS/ )
             {
-                if (!$stateProcHeader)
+                if ( !$stateProcHeader )
                 {
-                    fatal("NUM_DROPS outside of header:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "NUM_DROPS outside of header:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
-                $actionDropConfig=1;
+                $actionDropConfig = 1;
             }
-            elsif ($line =~ /target/)
+            elsif ( $line =~ /target/ )
             {
                 # MT files can default to all frequencies if not specified
-                if ((!$stateDataRateSet) &&
-                    ("MT" eq $g_tarType))
+                if (   ( !$stateDataRateSet )
+                    && ( "MT" eq $g_tarType ) )
                 {
                     $freqMask = FREQ_ALL;
-                    trace ("Freq Mask = 0x".sprintf("%02X",$freqMask).
-                           " - DEFAULT VALUE");
+                    trace( "Freq Mask = 0x" .
+                           sprintf( "%02X", $freqMask ) . " - DEFAULT VALUE" );
                     $stateDataRateSet = 1;
                 }
-                if (($stateDataRateSet and $stateRankConfigSet) ||
-                    ("DQ_MAP" eq $g_tarType))
+                if (   ( $stateDataRateSet and $stateRankConfigSet )
+                    || ( "DQ_MAP" eq $g_tarType ) )
                 {
                     $stateProcHeader = 0;
-                    $actionTarget=1;
+                    $actionTarget    = 1;
                 }
                 else
                 {
-                    fatal("target before header is complete:\n".
-                          "    $vpdFile\n".
-                          "    row $row:$line");
+                    fatal( "target before header is complete:\n" .
+                           "    $vpdFile\n" . "    row $row:$line" );
                 }
                 if ($stateProcSection)
                 {
-                    $actionWriteFile=1; #process previous section before next
+                    $actionWriteFile = 1;    #process previous section before next
                 }
             }
+
             # At this point, everthing of interest has been processed.
             # The only lines not processed above should be comment lines,
             # which can be ignored (skipped).
         }
-        else # determine actions based on hitting end of the text file
+        else    # determine actions based on hitting end of the text file
         {
-            $stateKeepReading=0;
+            $stateKeepReading = 0;
             if ($stateProcSection)
             {
-                $actionWriteFile=1;
+                $actionWriteFile = 1;
             }
         }
 
         # Process all actions needed based on text line
         if ($actionDataRate)
         {
-            $freqMask = procDataRate($line,$vpdFile,$row);
+            $freqMask = procDataRate( $line, $vpdFile, $row );
             $stateDataRateSet = 1;
         }
         if ($actionRankConfig)
         {
-            $rankMask = procRankConfig($line,$vpdFile,$row);
+            $rankMask = procRankConfig( $line, $vpdFile, $row );
             $stateRankConfigSet = 1;
         }
         if ($actionDropConfig)
         {
-            $rankMask = procDropConfig($line,$vpdFile,$row);
+            $rankMask = procDropConfig( $line, $vpdFile, $row );
             $stateRankConfigSet = 1;
         }
+
         # needs to be before target in case there is a previous target to
         # finish out before starting the next section.
         if ($actionWriteFile)
         {
-            trace("addConfiguration for ". $vpdFile . " -> " . $config{CONF_BIN_FILE});
-            addConfiguration(\%config); #capture final configuration
-            fileWrite(\%fileInfo);
+            trace( "addConfiguration for " . $vpdFile . " -> " . $config{CONF_BIN_FILE} );
+            addConfiguration( \%config );    #capture final configuration
+            fileWrite( \%fileInfo );
         }
         if ($actionTarget)
         {
-            $mcsMask = procTarget($line,$vpdFile,$row);
+            $mcsMask = procTarget( $line, $vpdFile, $row );
             $g_mcs_added_to_cfg |= $mcsMask;
             $stateProcSection = 1;
-            %config = ();
-            %config = newConfiguration($mcsMask,
-                                       $freqMask,
-                                       $rankMask,
-                                       $vpdFile);
-            %fileInfo = ();
-            if ("DQ_MAP" eq $g_tarType)
+            %config           = ();
+            %config           = newConfiguration( $mcsMask, $freqMask, $rankMask, $vpdFile );
+            %fileInfo         = ();
+            if ( "DQ_MAP" eq $g_tarType )
             {
-                %fileInfo = newFileInfo($config{CONF_BIN_FILE},
-                                        DQ_VPD_BIN_FILE_SIZE );
+                %fileInfo = newFileInfo( $config{CONF_BIN_FILE}, DQ_VPD_BIN_FILE_SIZE );
             }
             else
             {
-                %fileInfo = newFileInfo($config{CONF_BIN_FILE},
-                                        VPD_BIN_FILE_SIZE );
+                %fileInfo = newFileInfo( $config{CONF_BIN_FILE}, VPD_BIN_FILE_SIZE );
             }
 
-            traceConfig("createConfig:",\%config);
+            traceConfig( "createConfig:", \%config );
         }
         if ($actionAttr)
         {
-            my($attr,$type,$value) = split(/\s+/,$line);
-            my %num = newNum($value,$type);
+            my ( $attr, $type, $value ) = split( /\s+/, $line );
+            my %num = newNum( $value, $type );
             trace("   $attr $type $value bytes=$num{NUM_SIZE}");
-            filePushNum(\%fileInfo,\%num);
+            filePushNum( \%fileInfo, \%num );
         }
     }
 }
@@ -757,35 +768,33 @@ sub processVpdTextFile
 # at least one frequency, up to 4 frequencies
 sub procDataRate
 {
-    my($line,$file,$row) = @_;
+    my ( $line, $file, $row ) = @_;
 
     my $freqMask = 0;
 
-    (undef,my $rest) = split(/\=/,$line);
+    ( undef, my $rest ) = split( /\=/, $line );
 
-    my @freqs = split(/\,/,$rest);
+    my @freqs = split( /\,/, $rest );
     foreach my $freqText (@freqs)
     {
-        my $freq =eval($freqText);
-        if (undef eq $freq)
+        my $freq = eval($freqText);
+        if ( undef eq $freq )
         {
-            fatal("Invalid freq value = $freqText\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal( "Invalid freq value = $freqText\n" .
+                   "   $file\n" . "   row $row: $line" );
         }
 
-        if (undef eq $g_freqMask{$freq})
+        if ( undef eq $g_freqMask{$freq} )
         {
-            fatal("$freq not a supported value\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal( "$freq not a supported value\n" .
+                   "   $file\n" . "   row $row: $line" );
         }
         else
         {
             $freqMask |= $g_freqMask{$freq};
         }
     }
-    trace ("Freq Mask = 0x".sprintf("%02X",$freqMask));
+    trace( "Freq Mask = 0x" . sprintf( "%02X", $freqMask ) );
     return $freqMask;
 }
 
@@ -799,33 +808,32 @@ sub procDataRate
 # The first X is dimm0 rank count. Second is dimm1 rank count.
 sub procRankConfig
 {
-    my($line,$file,$row) = @_;
+    my ( $line, $file, $row ) = @_;
 
     my $rankMask = 0;
 
-    (undef,my $rest) = split(/\=/,$line);
+    ( undef, my $rest ) = split( /\=/, $line );
 
-    my @ranks = split(/\,/,$rest);
+    my @ranks = split( /\,/, $rest );
     foreach my $rankText (@ranks)
     {
-        my $rank =eval($rankText);
-        if (undef eq $rank)
+        my $rank = eval($rankText);
+        if ( undef eq $rank )
         {
-            fatal("Invalid rank value = $rankText\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal( "Invalid rank value = $rankText\n" .
+                   "   $file\n" . "   row $row: $line" );
         }
-        my $mask =  $g_rankMask{$rank};
-        if (undef == $mask)
+        my $mask = $g_rankMask{$rank};
+        if ( undef == $mask )
         {
-            fatal("Unsupported rank configuration = 0x".
-                       sprintf("%02X",$rank)."\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal(    "Unsupported rank configuration = 0x"
+                    . sprintf( "%02X", $rank ) . "\n"
+                    . "   $file\n"
+                    . "   row $row: $line" );
         }
         $rankMask |= $mask;
     }
-    trace ("Rank Config = 0x".sprintf("%04X",$rankMask));
+    trace( "Rank Config = 0x" . sprintf( "%04X", $rankMask ) );
     return $rankMask;
 }
 
@@ -836,38 +844,36 @@ sub procRankConfig
 # X = 0 or 1
 sub procDropConfig
 {
-    my($line,$file,$row) = @_;
+    my ( $line, $file, $row ) = @_;
 
     my $dropMask = 0;
 
-    (undef,my $rest) = split(/\=/,$line);
+    ( undef, my $rest ) = split( /\=/, $line );
 
-    my @drops = split(/\,/,$rest);
+    my @drops = split( /\,/, $rest );
     foreach my $dropText (@drops)
     {
-        my $drop =eval($dropText);
-        if (undef eq $drop)
+        my $drop = eval($dropText);
+        if ( undef eq $drop )
         {
-            fatal("Invalid drop value = $dropText\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal( "Invalid drop value = $dropText\n" .
+                   "   $file\n" . "   row $row: $line" );
         }
-        if (1 == $drop)
+        if ( 1 == $drop )
         {
             $dropMask |= RANK_DROP1;
         }
-        elsif (2 == $drop)
+        elsif ( 2 == $drop )
         {
             $dropMask |= RANK_DROP2;
         }
         else
         {
-            fatal("Unsupported drop configuration = $drop\n".
-                  "   $file\n".
-                  "   row $row: $line");
+            fatal( "Unsupported drop configuration = $drop\n" .
+                   "   $file\n" . "   row $row: $line" );
         }
     }
-    trace ("Num Drops Config = 0x".sprintf("%04X",$dropMask));
+    trace( "Num Drops Config = 0x" . sprintf( "%04X", $dropMask ) );
     return $dropMask;
 }
 
@@ -878,41 +884,41 @@ sub procDropConfig
 # XXX = all or a list of comma separated positions (0,1,2 or 3).
 sub procTarget
 {
-    my($line,$file,$row) = @_;
+    my ( $line, $file, $row ) = @_;
 
     my $mcsMask = 0;
 
-    (undef,my $rest) = split(/\=/,$line);
-    (undef,undef,undef,my $p9mcs,my $proc,my $chip) = split(/\:/,$line);
+    ( undef, my $rest ) = split( /\=/, $line );
+    ( undef, undef, undef, my $p9mcs, my $proc, my $chip ) = split( /\:/, $line );
 
-    if ( ("p9.mcs"  ne $p9mcs) &&
-         ("pu.mcs"  ne $p9mcs) &&
-         ("p9n.mcs" ne $p9mcs) )
+    if (   ( "p9.mcs" ne $p9mcs )
+        && ( "pu.mcs" ne $p9mcs )
+        && ( "p9n.mcs" ne $p9mcs ) )
     {
-        fatal("Invalid target value = $p9mcs, ".
-              "p9.mcs, pu.mcs or p9n.mcs expected\n".
-              "   $file\n".
-              "   row $row: $line");
+        fatal(    "Invalid target value = $p9mcs, "
+                . "p9.mcs, pu.mcs or p9n.mcs expected\n"
+                . "   $file\n"
+                . "   row $row: $line" );
     }
 
-    my @plist = procPositions($line,$file,$row,$proc,"p");
-    my @clist = procPositions($line,$file,$row,$chip,"c");
+    my @plist = procPositions( $line, $file, $row, $proc, "p" );
+    my @clist = procPositions( $line, $file, $row, $chip, "c" );
 
     #The MCS bit mask (g_mscMask) is based on the ATTR_MEMVPD_POS of the MCS.
     #The MEMVPD_POS is the hash key to find the mask value in g_mscMask.
     #Proc 0 MCS 0 is bit 0x8000. MEMVPD_POS = 0
     #Proc 0 MCS 1 is bit 0x4000. MEMVPD_POS = 1, ... etc.
     #MEMVPD_POS can be calculated by proc num * 4 + mcs position within the proc
-    foreach my $ppos(@plist)
+    foreach my $ppos (@plist)
     {
-        foreach my $cpos(@clist)
+        foreach my $cpos (@clist)
         {
-            my $memVpdPos = ($ppos * 4) + $cpos;
+            my $memVpdPos = ( $ppos * 4 ) + $cpos;
             $mcsMask |= $g_mcsMask{$memVpdPos};
         }
     }
 
-    trace("Target Mask = 0x".sprintf("%04X",$mcsMask));
+    trace( "Target Mask = 0x" . sprintf( "%04X", $mcsMask ) );
     return $mcsMask;
 }
 
@@ -927,12 +933,12 @@ sub convertMcsMaskToMemPosArray
 
     my %bitToPos = reverse %g_mcsMask;
 
-    foreach my $bitPos (keys %bitToPos)
+    foreach my $bitPos ( keys %bitToPos )
     {
-      if (($bitPos & $mcsMask) == $bitPos)
-      {
-        push(@aMemPos, $bitToPos{$bitPos});
-      }
+        if ( ( $bitPos & $mcsMask ) == $bitPos )
+        {
+            push( @aMemPos, $bitToPos{$bitPos} );
+        }
     }
     return @aMemPos;
 }
@@ -942,48 +948,47 @@ sub convertMcsMaskToMemPosArray
 # where XXX is "all" or a comma separated list of digits 0,1,2,3
 sub procPositions
 {
-    my($line,$file,$row,$position,$expected) = @_;
+    my ( $line, $file, $row, $position, $expected ) = @_;
 
     my @list = ();
 
-    my $type = substr($position,0,1);
-    my $rest = substr($position,1);
-    if ($type ne $expected)
+    my $type = substr( $position, 0, 1 );
+    my $rest = substr( $position, 1 );
+    if ( $type ne $expected )
     {
-        fatal("Invalid target specification $type, $expected expected\n".
-              "   $file\n".
-              "   row $row: $line");
+        fatal( "Invalid target specification $type, $expected expected\n" .
+               "   $file\n" . "   row $row: $line" );
     }
 
-    if ("ALL" eq uc($rest))
+    if ( "ALL" eq uc($rest) )
     {
-        for (my $i=0; $i< MAX_NUM_PROCS ; $i++)
+        for ( my $i = 0; $i < MAX_NUM_PROCS; $i++ )
         {
-            $list[$i]=$i;
+            $list[$i] = $i;
         }
     }
     else
     {
         my $i = 0;
-        my @positions = split(/\,/,$rest);
+        my @positions = split( /\,/, $rest );
         foreach my $posText (@positions)
         {
-            my $pos =eval($posText);
-            if (undef eq $pos)
+            my $pos = eval($posText);
+            if ( undef eq $pos )
             {
-                fatal("Invalid position value = $posText\n".
-                      "   $file\n".
-                      "   row $row: $line");
+                fatal( "Invalid position value = $posText\n" .
+                       "   $file\n" . "   row $row: $line" );
             }
-            if (MAX_POSITION < $pos)
+            if ( MAX_POSITION < $pos )
             {
-                fatal("Position out of 0 to ".MAX_POSITION.
-                      " range  = $posText\n".
-                      "   $file\n".
-                      "   row $row: $line");
+                fatal(    "Position out of 0 to "
+                        . MAX_POSITION
+                        . " range  = $posText\n"
+                        . "   $file\n"
+                        . "   row $row: $line" );
             }
-            $list[$i++]=$pos;
-         }
+            $list[ $i++ ] = $pos;
+        }
     }
     return @list;
 }
@@ -995,12 +1000,12 @@ sub procPositions
 # create a new file info
 sub newFileInfo
 {
-    my($fileName,$fileSize) = @_;
+    my ( $fileName, $fileSize ) = @_;
 
     my %fileInfo = ();
-    $fileInfo{FILE_NAME}=$fileName;
-    $fileInfo{FILE_SIZE}=$fileSize;
-    $fileInfo{FILE_PTR}=0;
+    $fileInfo{FILE_NAME} = $fileName;
+    $fileInfo{FILE_SIZE} = $fileSize;
+    $fileInfo{FILE_PTR}  = 0;
 
     return %fileInfo;
 }
@@ -1009,23 +1014,23 @@ sub newFileInfo
 sub filePushNum
 {
     my $ref_fileInfo = shift;
-    my $ref_num = shift;
+    my $ref_num      = shift;
 
     my $newPtr = $ref_fileInfo->{FILE_PTR} + $ref_num->{NUM_SIZE};
-    if($newPtr > $ref_fileInfo->{FILE_SIZE})
+    if ( $newPtr > $ref_fileInfo->{FILE_SIZE} )
     {
-        fatal("bin file size exceeded\n".
-              "    file=$ref_fileInfo->{FILE_NAME}\n".
-              "    limit=$ref_fileInfo->{FILE_SIZE}");
+        fatal(    "bin file size exceeded\n"
+                . "    file=$ref_fileInfo->{FILE_NAME}\n"
+                . "    limit=$ref_fileInfo->{FILE_SIZE}" );
     }
-    $ref_fileInfo->{FILE_PTR}=$newPtr;
+    $ref_fileInfo->{FILE_PTR} = $newPtr;
 
     my $fullValue = $ref_num->{NUM_VALUE};
     my $byteValue = $fullValue % 256;
-    for (my $i=0 ; $i < $ref_num->{NUM_SIZE} ; $i++)
+    for ( my $i = 0; $i < $ref_num->{NUM_SIZE}; $i++ )
     {
         $newPtr--;
-        $ref_fileInfo->{FILE_DATA}[$newPtr] = $byteValue; #big endian order
+        $ref_fileInfo->{FILE_DATA}[$newPtr] = $byteValue;    #big endian order
         $fullValue -= $byteValue;
         $fullValue /= 256;
         $byteValue = $fullValue % 256;
@@ -1037,23 +1042,23 @@ sub fileWrite
 {
     my $ref_fileInfo = shift;
 
-    my $outBinFile= $cfgOutputVpdBinDir.$ref_fileInfo->{FILE_NAME};
-    open(BIN_FILE,">:raw",$outBinFile) ||
-         fatal("couldn't open $outBinFile: $!");
+    my $outBinFile = $cfgOutputVpdBinDir . $ref_fileInfo->{FILE_NAME};
+    open( BIN_FILE, ">:raw", $outBinFile )
+        || fatal("couldn't open $outBinFile: $!");
 
-    for (my $i=0 ; $i<$ref_fileInfo->{FILE_PTR}; $i++)
+    for ( my $i = 0; $i < $ref_fileInfo->{FILE_PTR}; $i++ )
     {
-       print BIN_FILE pack('C',$ref_fileInfo->{FILE_DATA}[$i]);
+        print BIN_FILE pack( 'C', $ref_fileInfo->{FILE_DATA}[$i] );
     }
-    for (my $i=$ref_fileInfo->{FILE_PTR}; $i<$ref_fileInfo->{FILE_SIZE}; $i++)
+    for ( my $i = $ref_fileInfo->{FILE_PTR}; $i < $ref_fileInfo->{FILE_SIZE}; $i++ )
     {
-       print BIN_FILE pack('C',0)
+        print BIN_FILE pack( 'C', 0 );
     }
     close(BIN_FILE);
     my $pad = $ref_fileInfo->{FILE_SIZE} - $ref_fileInfo->{FILE_PTR};
 
-    trace("create bin file = $ref_fileInfo->{FILE_NAME} ".
-          "data=$ref_fileInfo->{FILE_PTR} pad = $pad");
+    trace( "create bin file = $ref_fileInfo->{FILE_NAME} " .
+           "data=$ref_fileInfo->{FILE_PTR} pad = $pad" );
 }
 
 ################################################################################
@@ -1062,30 +1067,31 @@ sub fileWrite
 
 # create a configuration
 my $static_keyChar = undef;
+
 sub newConfiguration
 {
-    my($mcsMask,$freqMask,$rankMask,$vpdFile) = @_;
+    my ( $mcsMask, $freqMask, $rankMask, $vpdFile ) = @_;
 
-    my %config= ();
-    $config{CONF_MCS}=$mcsMask;
-    $config{CONF_FREQ}=$freqMask;
-    $config{CONF_RANK}=$rankMask;
-    $config{CONF_VPD_TEXT_FILE}=$vpdFile;
+    my %config = ();
+    $config{CONF_MCS}           = $mcsMask;
+    $config{CONF_FREQ}          = $freqMask;
+    $config{CONF_RANK}          = $rankMask;
+    $config{CONF_VPD_TEXT_FILE} = $vpdFile;
 
-    if (undef eq $static_keyChar)
+    if ( undef eq $static_keyChar )
     {
         $static_keyChar = '0';
-        if ("DQ_MAP" eq $g_tarType)
+        if ( "DQ_MAP" eq $g_tarType )
         {
             # Q0 is reserved for mapping
             $static_keyChar = '1';
         }
     }
-    elsif ('9' eq $static_keyChar)
+    elsif ( '9' eq $static_keyChar )
     {
         $static_keyChar = 'A';
     }
-    elsif ('Z' eq $static_keyChar)
+    elsif ( 'Z' eq $static_keyChar )
     {
         fatal("Ran out of keyword characters");
     }
@@ -1093,26 +1099,26 @@ sub newConfiguration
     {
         $static_keyChar++;
     }
-    $config{CONF_KEY_CHAR}=ord($static_keyChar);
+    $config{CONF_KEY_CHAR} = ord($static_keyChar);
 
     my $binFileName = "";
-    if ("MR" eq uc $g_tarType)
+    if ( "MR" eq uc $g_tarType )
     {
-        $binFileName = $cfgPrefix.'_J'.$static_keyChar.".bin";
+        $binFileName = $cfgPrefix . '_J' . $static_keyChar . ".bin";
     }
-    elsif ("MT" eq uc $g_tarType)
+    elsif ( "MT" eq uc $g_tarType )
     {
-        $binFileName = $cfgPrefix.'_X'.$static_keyChar.".bin";
+        $binFileName = $cfgPrefix . '_X' . $static_keyChar . ".bin";
     }
-    elsif ("DQ_MAP" eq uc $g_tarType)
+    elsif ( "DQ_MAP" eq uc $g_tarType )
     {
-        $binFileName = $cfgPrefix.'_Q'.$static_keyChar.".bin";
+        $binFileName = $cfgPrefix . '_Q' . $static_keyChar . ".bin";
     }
     else
     {
         fatal("unsupported target type = $g_tarType");
     }
-    $config{CONF_BIN_FILE}=$binFileName;
+    $config{CONF_BIN_FILE} = $binFileName;
 
     return %config;
 }
@@ -1122,145 +1128,152 @@ sub addConfiguration
 {
     my $ref_config = shift;
 
-    my %config = %{$ref_config};  #create a copy
+    my %config = %{$ref_config};    #create a copy
 
-    $g_configs{$config{CONF_KEY_CHAR}}=\%config;
+    $g_configs{ $config{CONF_KEY_CHAR} } = \%config;
 }
-
 
 sub createCkBinaryFile
 {
     my ($rCkeKeywordData) = @_;
 
     # open file for binary version of mapping data
-    my %fileInfo = newFileInfo($cfgPrefix."_CK.bin", CKE_BIN_FILE_SIZE);
-    trace("Create output binary file: " . $fileInfo{FILE_NAME});
+    my %fileInfo = newFileInfo( $cfgPrefix . "_CK.bin", CKE_BIN_FILE_SIZE );
+    trace( "Create output binary file: " . $fileInfo{FILE_NAME} );
 
     # start with header
     #   - version
     #   - number of entries
     #   - size of data entries (blob size)
     #   - reserved
-    my %num = newNum(MAPPING_LAYOUT_VERSION,"u8");
-    filePushNum(\%fileInfo,\%num);
-    str2num(\%num,8,"u8");
-    filePushNum(\%fileInfo,\%num);
-    # bytes per data entry
-    str2num(\%num,16,"u8");
-    filePushNum(\%fileInfo,\%num);
-    str2num(\%num,0,"u8");
-    filePushNum(\%fileInfo,\%num);
+    my %num = newNum( MAPPING_LAYOUT_VERSION, "u8" );
+    filePushNum( \%fileInfo, \%num );
+    str2num( \%num, 8, "u8" );
+    filePushNum( \%fileInfo, \%num );
 
-    for (my $i=0; $i<8 ; $i++) # only room for 2 processors (4 pos per processor)
+    # bytes per data entry
+    str2num( \%num, 16, "u8" );
+    filePushNum( \%fileInfo, \%num );
+    str2num( \%num, 0, "u8" );
+    filePushNum( \%fileInfo, \%num );
+
+    for ( my $i = 0; $i < 8; $i++ )    # only room for 2 processors (4 pos per processor)
     {
-        my $mcsMaskBit = $g_mcsMask{$i};
+        my $mcsMaskBit  = $g_mcsMask{$i};
         my $added_entry = 0;
 
-        foreach my $key (keys %$rCkeKeywordData)
+        foreach my $key ( keys %$rCkeKeywordData )
         {
-            if (($key & $mcsMaskBit) == $mcsMaskBit)
+            if ( ( $key & $mcsMaskBit ) == $mcsMaskBit )
             {
                 my $newDataPtr = $fileInfo{FILE_PTR};
-                my $rblobData = $rCkeKeywordData->{$key};
+                my $rblobData  = $rCkeKeywordData->{$key};
 
                 trace("$i -- Found CKE entry:");
-                trace("Key ".sprintf("0x%02X", $key)." -> name: ".
-                    $rblobData->{FILE_NAME} . ", size: ". $rblobData->{FILE_SIZE}
-                    .", ptr: " . $rblobData->{FILE_PTR});
+                trace(    "Key "
+                        . sprintf( "0x%02X", $key )
+                        . " -> name: "
+                        . $rblobData->{FILE_NAME}
+                        . ", size: "
+                        . $rblobData->{FILE_SIZE}
+                        . ", ptr: "
+                        . $rblobData->{FILE_PTR} );
 
                 # add one glob of data for the section
-                for (my $i=0 ; $i< $rblobData->{FILE_PTR}; $i++)
+                for ( my $i = 0; $i < $rblobData->{FILE_PTR}; $i++ )
                 {
-                    trace("Adding " .
-                        sprintf("0x%02X",$rblobData->{FILE_DATA}[$i]) .
-                        " to index " . $newDataPtr);
-                    $fileInfo{FILE_DATA}[$newDataPtr++] = $rblobData->{FILE_DATA}[$i];
+                    trace( "Adding " . sprintf( "0x%02X", $rblobData->{FILE_DATA}[$i] ) .
+                           " to index " . $newDataPtr );
+                    $fileInfo{FILE_DATA}[ $newDataPtr++ ] = $rblobData->{FILE_DATA}[$i];
                 }
-                trace("File_ptr = ". $newDataPtr .", previously " . $fileInfo{FILE_PTR});
+                trace( "File_ptr = " . $newDataPtr . ", previously " . $fileInfo{FILE_PTR} );
                 $fileInfo{FILE_PTR} = $newDataPtr;
 
-                str2num(\%num,0,"u8");
-                for (my $i=$rblobData->{FILE_PTR}; $i<$rblobData->{FILE_SIZE}; $i++)
+                str2num( \%num, 0, "u8" );
+                for ( my $i = $rblobData->{FILE_PTR}; $i < $rblobData->{FILE_SIZE}; $i++ )
                 {
-                    filePushNum(\%fileInfo,\%num);
+                    filePushNum( \%fileInfo, \%num );
                 }
                 $added_entry = 1;
             }
         }
-        if ($added_entry == 0)
+        if ( $added_entry == 0 )
         {
-            trace("No entry found for $i ". sprintf("(0x%02X)",$mcsMaskBit));
+            trace( "No entry found for $i " . sprintf( "(0x%02X)", $mcsMaskBit ) );
 
             # add a blank entry for missing vpd
-            str2num(\%num,0,"u8");
-            for (my $i = 0; $i < CKE_VPD_BIN_DATA_SIZE; $i++)
+            str2num( \%num, 0, "u8" );
+            for ( my $i = 0; $i < CKE_VPD_BIN_DATA_SIZE; $i++ )
             {
-                filePushNum(\%fileInfo,\%num);
+                filePushNum( \%fileInfo, \%num );
             }
         }
     }
-    fileWrite(\%fileInfo);
+    fileWrite( \%fileInfo );
 }
 
 sub createDqMappingFile
 {
     # open file for human readable csv version of mapping data
-    (my $system,my $tarType) = $cfgPrefix =~ m/^(.*?)_(\S+)/;
-    my $outCsvFile= $cfgOutputVpdBinDir.$cfgPrefix."_map.csv";
+    ( my $system, my $tarType ) = $cfgPrefix =~ m/^(.*?)_(\S+)/;
+    my $outCsvFile = $cfgOutputVpdBinDir . $cfgPrefix . "_map.csv";
     trace("createDqMappingFile: $outCsvFile");
-    open(CSV_FILE,">$outCsvFile") ||
-         fatal("Couldn't open $outCsvFile: $!");
+    open( CSV_FILE, ">$outCsvFile" )
+        || fatal("Couldn't open $outCsvFile: $!");
     print CSV_FILE "MCS,KEYCHAR,VPDFILE\n";
 
     # open file for binary version of mapping data
-    my %fileInfo = newFileInfo($cfgPrefix."_Q0.bin", DQ_Q0_BIN_FILE_SIZE);
+    my %fileInfo = newFileInfo( $cfgPrefix . "_Q0.bin", DQ_Q0_BIN_FILE_SIZE );
 
     # start with header
     #   - version
     #   - number of mapped entries
     #   - size of data entries
     #   - reserved
-    my %num = newNum(MAPPING_LAYOUT_VERSION,"u8");
-    filePushNum(\%fileInfo,\%num);
+    my %num = newNum( MAPPING_LAYOUT_VERSION, "u8" );
+    filePushNum( \%fileInfo, \%num );
+
     # Number of map entries
     # i.e. count the number of bits set in $g_mcs_added_to_cfg (uint16 = 0..15)
-    my $totalMappedEntries = grep$g_mcs_added_to_cfg&1<<$_,0..15;
+    my $totalMappedEntries = grep $g_mcs_added_to_cfg & 1 << $_, 0 .. 15;
     trace("Adding $totalMappedEntries entries into map file");
-    str2num(\%num,$totalMappedEntries,"u8");
-    filePushNum(\%fileInfo,\%num);
-    # bytes per data entry
-    str2num(\%num,0,"u8");
-    filePushNum(\%fileInfo,\%num);
-    str2num(\%num,0,"u8");
-    filePushNum(\%fileInfo,\%num);
+    str2num( \%num, $totalMappedEntries, "u8" );
+    filePushNum( \%fileInfo, \%num );
 
-    my @keys = sort {$a <=> $b} keys %g_configs;
+    # bytes per data entry
+    str2num( \%num, 0, "u8" );
+    filePushNum( \%fileInfo, \%num );
+    str2num( \%num, 0, "u8" );
+    filePushNum( \%fileInfo, \%num );
+
+    my @keys = sort { $a <=> $b } keys %g_configs;
     foreach my $key (@keys)
     {
         my $ref_config = $g_configs{$key};
-        my $mcsMask  = $ref_config->{CONF_MCS};
-        my $keyChar  = $ref_config->{CONF_KEY_CHAR};
-        my $vpdFile  = $ref_config->{CONF_VPD_TEXT_FILE};
-        my $binFile  = $ref_config->{CONF_BIN_FILE};
+        my $mcsMask    = $ref_config->{CONF_MCS};
+        my $keyChar    = $ref_config->{CONF_KEY_CHAR};
+        my $vpdFile    = $ref_config->{CONF_VPD_TEXT_FILE};
+        my $binFile    = $ref_config->{CONF_BIN_FILE};
 
-
-        print CSV_FILE  "0x".sprintf("%04X",$mcsMask).",".
-                        "0x".sprintf("%02X",$keyChar).",".
-                        chr($keyChar)."-$vpdFile\n";
+        print CSV_FILE "0x"
+            . sprintf( "%04X", $mcsMask ) . "," . "0x"
+            . sprintf( "%02X", $keyChar ) . ","
+            . chr($keyChar)
+            . "-$vpdFile\n";
 
         my @memPositions = convertMcsMaskToMemPosArray($mcsMask);
         foreach my $mempos (@memPositions)
         {
-            print CSV_FILE $mempos. ", ". chr($keyChar). "\n";
+            print CSV_FILE $mempos . ", " . chr($keyChar) . "\n";
 
-            str2num(\%num,$mempos,"u8");
-            filePushNum(\%fileInfo,\%num);
-            str2num(\%num,$keyChar,"u8");
-            filePushNum(\%fileInfo,\%num);
+            str2num( \%num, $mempos, "u8" );
+            filePushNum( \%fileInfo, \%num );
+            str2num( \%num, $keyChar, "u8" );
+            filePushNum( \%fileInfo, \%num );
         }
     }
 
-    fileWrite(\%fileInfo);
+    fileWrite( \%fileInfo );
     close(CSV_FILE);
 }
 
@@ -1268,29 +1281,28 @@ sub createDqMappingFile
 sub createMappingFile
 {
     # open file for human readable csv version of mapping data
-    (my $system,my $tarType) = split(/\_/,$cfgPrefix);
-    my $outCsvFile= $cfgOutputVpdBinDir.$cfgPrefix."_map.csv";
+    ( my $system, my $tarType ) = split( /\_/, $cfgPrefix );
+    my $outCsvFile = $cfgOutputVpdBinDir . $cfgPrefix . "_map.csv";
     trace("createMappingFile: $outCsvFile");
-    open(CSV_FILE,">$outCsvFile") ||
-         fatal("Couldn't open $outCsvFile: $!");
+    open( CSV_FILE, ">$outCsvFile" )
+        || fatal("Couldn't open $outCsvFile: $!");
     print CSV_FILE "MCS,RANK,FREQ,KEYCHAR,VPDFILE\n";
 
     # open file for binary version of mapping data
-    my %fileInfo = newFileInfo($cfgPrefix."_".uc($tarType).".bin",
-                            VPD_BIN_FILE_SIZE );
+    my %fileInfo = newFileInfo( $cfgPrefix . "_" . uc($tarType) . ".bin", VPD_BIN_FILE_SIZE );
 
     # start with header
     #   - version
     #   - number of entries
     #   - reserved
-    my %num = newNum(MAPPING_LAYOUT_VERSION,"u8");
-    filePushNum(\%fileInfo,\%num);
-    str2num(\%num,scalar keys %g_configs,"u8");
-    filePushNum(\%fileInfo,\%num);
-    str2num(\%num,0,"u8");
-    filePushNum(\%fileInfo,\%num);
+    my %num = newNum( MAPPING_LAYOUT_VERSION, "u8" );
+    filePushNum( \%fileInfo, \%num );
+    str2num( \%num, scalar keys %g_configs, "u8" );
+    filePushNum( \%fileInfo, \%num );
+    str2num( \%num, 0, "u8" );
+    filePushNum( \%fileInfo, \%num );
 
-    my @keys = sort {$a <=> $b} keys %g_configs;
+    my @keys = sort { $a <=> $b } keys %g_configs;
     foreach my $key (@keys)
     {
         my $ref_config = $g_configs{$key};
@@ -1302,28 +1314,45 @@ sub createMappingFile
         my $vpdFile  = $ref_config->{CONF_VPD_TEXT_FILE};
         my $binFile  = $ref_config->{CONF_BIN_FILE};
 
-        print CSV_FILE  "0x".sprintf("%04X",$mcsMask).",".
-                        "0x".sprintf("%04X",$rankMask).",".
-                        "0x".sprintf("%02X",$freqMask).",".
-                        "0x".sprintf("%02X",$keyChar).",".
-                        chr($keyChar)."-$vpdFile\n";
+        print CSV_FILE "0x"
+            . sprintf( "%04X", $mcsMask ) . "," . "0x"
+            . sprintf( "%04X", $rankMask ) . "," . "0x"
+            . sprintf( "%02X", $freqMask ) . "," . "0x"
+            . sprintf( "%02X", $keyChar ) . ","
+            . chr($keyChar)
+            . "-$vpdFile\n";
 
         #write bin config line
         #  - MCS mask
         #  - Rank mask
         #  - Frequency mask
         #  - keyword character
-        str2num(\%num,$mcsMask,"u16");
-        filePushNum(\%fileInfo,\%num);
-        str2num(\%num,$rankMask,"u16");
-        filePushNum(\%fileInfo,\%num);
-        str2num(\%num,$freqMask,"u8");
-        filePushNum(\%fileInfo,\%num);
-        str2num(\%num,$keyChar,"u8");
-        filePushNum(\%fileInfo,\%num);
+        str2num( \%num, $mcsMask, "u16" );
+        filePushNum( \%fileInfo, \%num );
+        str2num( \%num, $rankMask, "u16" );
+        filePushNum( \%fileInfo, \%num );
+        str2num( \%num, $freqMask, "u8" );
+        filePushNum( \%fileInfo, \%num );
+        str2num( \%num, $keyChar, "u8" );
+        filePushNum( \%fileInfo, \%num );
     }
-    fileWrite(\%fileInfo);
+    fileWrite( \%fileInfo );
     close(CSV_FILE);
+}
+
+# create a file and add a 4-byte binary timestamp
+sub createVMFile
+{
+    # open file for binary version of mapping data
+    my %fileInfo = newFileInfo( $cfgPrefix . ".bin", VM_BIN_FILE_SIZE );
+    trace( "Create output binary file: " . $fileInfo{FILE_NAME} );
+
+    my $time = time;
+    my %num = newNum( $time, "u32" );
+    filePushNum( \%fileInfo, \%num );
+    fileWrite( \%fileInfo );
+    verbose( "\nTranslated VM timestamp in file: ". scalar localtime($num{NUM_VALUE}) );
+    verbose( "Created " . $cfgOutputVpdBinDir . $fileInfo{FILE_NAME} );
 }
 
 # create report
@@ -1334,67 +1363,65 @@ sub createReport
     my $numDup = 0;
 
     # open file for report. Report can be used to validate mapping.
-    my $outCsvFile= $cfgOutputVpdBinDir.$cfgPrefix."_report.csv";
-    open(CSV_FILE,">$outCsvFile") ||
-         fatal("Couldn't open $outCsvFile: $!");
+    my $outCsvFile = $cfgOutputVpdBinDir . $cfgPrefix . "_report.csv";
+    open( CSV_FILE, ">$outCsvFile" )
+        || fatal("Couldn't open $outCsvFile: $!");
     trace("createReport: $outCsvFile");
     print CSV_FILE "CHK,MCS,FREQ,RANK,BINFILE,VPDFILE\n";
 
-    my $numMCS = scalar keys %g_mcsMask;
+    my $numMCS  = scalar keys %g_mcsMask;
     my $numFreq = scalar keys %g_freqMask;
     my $numRank = scalar keys %g_rankMask;
 
-    for (my $i=0 ; $i<$numMCS ; $i++)
+    for ( my $i = 0; $i < $numMCS; $i++ )
     {
-        my @freqs = sort {$a <=> $b} keys %g_freqMask;
+        my @freqs = sort { $a <=> $b } keys %g_freqMask;
         foreach my $freq (@freqs)
         {
-            my @keys = sort {$a <=> $b} keys %g_rankMask;
+            my @keys = sort { $a <=> $b } keys %g_rankMask;
             foreach my $key (@keys)
             {
-               my @configList = checkConfig($g_mcsMask{$i},
-                                            $g_freqMask{$freq},
-                                            $g_rankMask{$key});
-               my $numHits = scalar @configList;
-               my $status = "";
-               if (0 == $numHits)
-               {
-                   $status = "UNF";
-                   print CSV_FILE "$status,$i,$freq,".
-                         "0x".sprintf("%02X",$key).',"",""'."\n";
-                   $numUnf++;
-               }
-               else
-               {
-                   if (1 == $numHits)
-                   {
-                       $status = "OK ";
-                       $numOK++;
-                   }
-                   else
-                   {
-                       $status = "DUP";
-                       $numDup++;
-                   }
-                   for (my $m=0; $m < $numHits ; $m++)
-                   {
-                       print CSV_FILE "$status,$i,$freq,".
-                         "0x".sprintf("%02X",$key).",".
-                         "$configList[$m]->{CONF_BIN_FILE},".
-                         "$configList[$m]->{CONF_VPD_TEXT_FILE}\n";
-                   }
-               }
+                my @configList = checkConfig( $g_mcsMask{$i}, $g_freqMask{$freq}, $g_rankMask{$key} );
+                my $numHits    = scalar @configList;
+                my $status     = "";
+                if ( 0 == $numHits )
+                {
+                    $status = "UNF";
+                    print CSV_FILE "$status,$i,$freq," . "0x" . sprintf( "%02X", $key ) . ',"",""' . "\n";
+                    $numUnf++;
+                }
+                else
+                {
+                    if ( 1 == $numHits )
+                    {
+                        $status = "OK ";
+                        $numOK++;
+                    }
+                    else
+                    {
+                        $status = "DUP";
+                        $numDup++;
+                    }
+                    for ( my $m = 0; $m < $numHits; $m++ )
+                    {
+                        print CSV_FILE "$status,$i,$freq," . "0x"
+                            . sprintf( "%02X", $key ) . ","
+                            . "$configList[$m]->{CONF_BIN_FILE},"
+                            . "$configList[$m]->{CONF_VPD_TEXT_FILE}\n";
+                    }
+                }
             }
         }
     }
-    verbose("Of the ".$numMCS*$numFreq*$numRank." combinations:");
-    verbose("    ".sprintf("%4D",$numOK)." are mapped to vpd data");
-    verbose("    ".sprintf("%4D",$numUnf)." are undefined");
-    verbose("    ".sprintf("%4D",$numDup)." are duplicated (should be 0)");
+    verbose( "Of the " . $numMCS * $numFreq * $numRank . " combinations:" );
+    verbose( "    " . sprintf( "%4D", $numOK ) . " are mapped to vpd data" );
+    verbose( "    " . sprintf( "%4D", $numUnf ) . " are undefined" );
+    verbose( "    " . sprintf( "%4D", $numDup ) . " are duplicated (should be 0)" );
     if ($numDup)
     {
-        warning("There are $numDup duplicate mappings, there should be none.\n".
-                "   Review $cfgPrefix"."_report.txt and correct the vpd files");
+        warning(  "There are $numDup duplicate mappings, there should be none.\n"
+                . "   Review $cfgPrefix"
+                . "_report.txt and correct the vpd files" );
 
     }
     close(CSV_FILE);
@@ -1405,39 +1432,42 @@ sub createReport
 # in the vpd text files
 sub checkConfig
 {
-    my($mcsMask,$freqMask,$rankMask) = @_;
+    my ( $mcsMask, $freqMask, $rankMask ) = @_;
 
     my @configList = ();
-    trace("checkConfig:".
-          " mcsMask=".sprintf("%04X",$mcsMask).
-          " freqMask=".sprintf("%02X",$freqMask).
-          " rankMask=".sprintf("%04X",$rankMask));
+    trace(    "checkConfig:"
+            . " mcsMask="
+            . sprintf( "%04X", $mcsMask )
+            . " freqMask="
+            . sprintf( "%02X", $freqMask )
+            . " rankMask="
+            . sprintf( "%04X", $rankMask ) );
 
-    my @keys = sort {$a <=> $b} keys %g_configs;
+    my @keys = sort { $a <=> $b } keys %g_configs;
     foreach my $key (@keys)
     {
         my $ref_config = $g_configs{$key};
-        my $status="UNF";
+        my $status     = "UNF";
 
-        my $mcsHit = $mcsMask & $ref_config->{CONF_MCS};
+        my $mcsHit  = $mcsMask & $ref_config->{CONF_MCS};
         my $freqHit = $freqMask & $ref_config->{CONF_FREQ};
         my $rankHit = $rankMask & $ref_config->{CONF_RANK};
-        if (($mcsHit && $freqHit && $rankHit) ||
-            (("DQ_MAP" eq $g_tarType) && $mcsHit))
+        if (   ( $mcsHit && $freqHit && $rankHit )
+            || ( ( "DQ_MAP" eq $g_tarType ) && $mcsHit ) )
         {
-            push  @configList, $ref_config;
-            $status="HIT";
+            push @configList, $ref_config;
+            $status = "HIT";
         }
-        trace("    $status==> ".$ref_config->{CONF_BIN_FILE});
-        trace("        mscHit=0x".sprintf("%04X",$mcsHit).
-              " 0x".sprintf("%04X",$ref_config->{CONF_MCS}));
-        trace("        freqHit=".sprintf("%02X",$freqHit).
-              " 0x".sprintf("%02X",$ref_config->{CONF_FREQ}));
-        trace("        rankHit=".sprintf("%04X",$rankHit).
-              " 0x".sprintf("%04X",$ref_config->{CONF_RANK}));
+        trace( "    $status==> " . $ref_config->{CONF_BIN_FILE} );
+        trace( "        mscHit=0x" . sprintf( "%04X", $mcsHit ) .
+               " 0x" . sprintf( "%04X", $ref_config->{CONF_MCS} ) );
+        trace( "        freqHit=" . sprintf( "%02X", $freqHit ) .
+               " 0x" . sprintf( "%02X", $ref_config->{CONF_FREQ} ) );
+        trace( "        rankHit=" . sprintf( "%04X", $rankHit ) .
+               " 0x" . sprintf( "%04X", $ref_config->{CONF_RANK} ) );
     }
 
-   return @configList;
+    return @configList;
 }
 
 ################################################################################
@@ -1447,14 +1477,14 @@ sub checkConfig
 # create a "number" hash
 sub newNum
 {
-    my($value,$type) = @_;
+    my ( $value, $type ) = @_;
 
-    my ($decSize)= $type =~ /u(\d+)/;
+    my ($decSize) = $type =~ /u(\d+)/;
     my $byteSize = $decSize / 8;
 
     my %number = ();
-    $number{NUM_VALUE}=str2value($value);
-    $number{NUM_SIZE}=$byteSize;
+    $number{NUM_VALUE} = str2value($value);
+    $number{NUM_SIZE}  = $byteSize;
 
     return %number;
 }
@@ -1466,20 +1496,20 @@ sub str2num
     my $value   = shift;
     my $type    = shift;
 
-    my ($decSize)= $type =~ /u(\d+)/;
+    my ($decSize) = $type =~ /u(\d+)/;
     my $byteSize = $decSize / 8;
 
-    $ref_num->{NUM_VALUE}=str2value($value);
-    $ref_num->{NUM_SIZE}=$byteSize;
+    $ref_num->{NUM_VALUE} = str2value($value);
+    $ref_num->{NUM_SIZE}  = $byteSize;
 }
 
 # Convert a string into a numeric value scalar
 sub str2value
 {
-    my($text) = @_;
+    my ($text) = @_;
 
-    my $value =eval($text);
-    if ($value eq undef)
+    my $value = eval($text);
+    if ( $value eq undef )
     {
         fatal("str2value: $text is not a number");
     }
@@ -1494,64 +1524,67 @@ sub str2value
 # verbose to STDOUT and trace
 sub verbose
 {
-    my($text) = @_;
+    my ($text) = @_;
 
-    if($cfgVerbose)
+    if ($cfgVerbose)
     {
-        print STDOUT $text."\n";
+        print STDOUT $text . "\n";
     }
-    trace ($text);
+    trace($text);
 }
 
 # trace
-my $static_traceInit=0;
+my $static_traceInit = 0;
+
 sub trace
 {
-    my($text) = @_;
+    my ($text) = @_;
 
-    if (0 == $static_traceInit)
+    if ( 0 == $static_traceInit )
     {
-       my $outTextFile= $cfgOutputVpdBinDir.$cfgPrefix."_trace.txt";
-       open(TRACE_FILE,">$outTextFile") ||
-            fatal("couldn't open $outTextFile: $!");
-       $static_traceInit = 1;
+        my $outTextFile = $cfgOutputVpdBinDir . $cfgPrefix . "_trace.txt";
+        open( TRACE_FILE, ">$outTextFile" )
+            || fatal("couldn't open $outTextFile: $!");
+        $static_traceInit = 1;
     }
-    print TRACE_FILE $text."\n";
+    print TRACE_FILE $text . "\n";
 }
 
 # add a configuration to the trace
 sub traceConfig
 {
-    my($tag,$ref_config) = @_;
+    my ( $tag, $ref_config ) = @_;
 
     my $mcsMask  = $ref_config->{CONF_MCS};
     my $freqMask = $ref_config->{CONF_FREQ};
     my $rankMask = $ref_config->{CONF_RANK};
-    my $keyChar  = chr($ref_config->{CONF_KEY_CHAR});
+    my $keyChar  = chr( $ref_config->{CONF_KEY_CHAR} );
     my $vpdFile  = $ref_config->{CONF_VPD_TEXT_FILE};
     my $binFile  = $ref_config->{CONF_BIN_FILE};
 
     trace("$tag $binFile");
-    trace("   key=$keyChar mcsMask=".sprintf("%04X",$mcsMask).
-          " freqMask=".sprintf("%02X",$freqMask).
-          " rankMask=".sprintf("%04X",$rankMask));
+    trace(    "   key=$keyChar mcsMask="
+            . sprintf( "%04X", $mcsMask )
+            . " freqMask="
+            . sprintf( "%02X", $freqMask )
+            . " rankMask="
+            . sprintf( "%04X", $rankMask ) );
     trace("   from= $vpdFile");
 }
 
 #warning error
 sub warning
 {
-    my($text) = @_;
+    my ($text) = @_;
 
     trace("[WARNING!] $text");
     print STDERR "[WARNING!] $text\n";
 }
 
-
 #fatal error
 sub fatal
 {
-    my($text) = @_;
+    my ($text) = @_;
 
     trace("[FATAL!] $text");
     print STDERR "[FATAL!] $text\n";
@@ -1572,7 +1605,8 @@ usage:
                 [--input-vpd-text-dir=./] [--output-vpd-bin-dir=./]
                 [--verbose]
         --prefix
-             Prefix of vpd input files to process (template_mr or template_mt)
+             Prefix of vpd input files to process (template_MR or template_MT)
+             Available kw = MR, MT, CKE_MAP, DQ_MAP and VM
         --input-vpd-text-dir
              Optional path to directory with input vpd files.
              Defaults to current directory (./)
