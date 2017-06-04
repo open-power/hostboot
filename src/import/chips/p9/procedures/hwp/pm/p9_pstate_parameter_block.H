@@ -517,7 +517,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
 void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
                                   GlobalPstateParmBlock* o_gppb);
 
-void p9_pstate_compute_PStateV_slope(uint32_t i_pt_set, VpdOperatingPoint i_operating_points[][4],
+void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
                                      GlobalPstateParmBlock* o_gppb);
 
 
