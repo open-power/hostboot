@@ -309,13 +309,13 @@ typedef struct
     CompareVIDPoints vid_point_set[NUM_OP_POINTS];
 
     // Biased Threshold operation points
-    int8_t threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
+    uint8_t threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
 
     //pstate-volt compare slopes
-    uint16_t PsVIDCompSlopes[VPD_NUM_SLOPES_REGION];
+    int16_t PsVIDCompSlopes[VPD_NUM_SLOPES_REGION];
 
     //pstate-volt threshold slopes
-    uint16_t PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
+    int16_t PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
 
 } LocalPstateParmBlock;
 
