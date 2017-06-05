@@ -165,6 +165,21 @@
 </hwpError>
 
 <hwpError>
+    <rc>RC_TEST_ERROR_DECONFIG_NO_CALLOUT</rc>
+    <description>
+        Deconfigure test error without a callout
+    </description>
+    <callout>
+        <target>TARGET</target>
+        <priority>NONE</priority>
+    </callout>
+    <deconfigure>
+        <target>TARGET</target>
+    </deconfigure>
+</hwpError>
+
+
+<hwpError>
     <rc>RC_TEST_ERROR_HW_CALLOUT</rc>
     <description>
         Hardware callout test error
