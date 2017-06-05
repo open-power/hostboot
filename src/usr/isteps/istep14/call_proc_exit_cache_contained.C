@@ -49,6 +49,7 @@
 #include <devicefw/userif.H>
 #include <config.h>
 #include <util/misc.H>
+#include <hwas/common/hwas.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -83,14 +84,39 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     targetService().getTopLevelTarget(l_sys);
     assert( l_sys != NULL );
 
-    errlHndl_t  l_errl  =   NULL;
-    uint8_t l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
+    //Check that minimum hardware requirement is meet.
+    //If not, log error and do not proceed
+    bool l_bootable;
+    errlHndl_t  l_errl = nullptr;
+    l_errl = HWAS::checkMinimumHardware(l_sys, &l_bootable);
+    if (!l_bootable && !l_errl)
+    {
+        /*@
+        *  @errortype      ERRL_SEV_UNRECOVERABLE
+        *  @moduleid       ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED
+        *  @reasoncode     ISTEP::RC_MIN_HW_CHECK_FAILED
+        *  @devdesc        call_proc_exit_cache_contained: did not
+        *                  find minimum hardware to continue
+        *  @custdesc       Host firmware did not find enough
+        *                  hardware to continue the boot
+        */
+        l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            ISTEP::MOD_PROC_EXIT_CACHE_CONTAINED,
+            ISTEP::RC_MIN_HW_CHECK_FAILED);
+    }
+
+    uint8_t l_mpipl = 0;
+    TARGETING::TargetHandleList l_procList;
+    if (!l_errl)
+    {
+        l_mpipl = l_sys->getAttr<ATTR_IS_MPIPL_HB>();
+        getAllChips(l_procList, TYPE_PROC);
+    }
+
     ATTR_PAYLOAD_BASE_type payloadBase = 0;
 
-    TARGETING::TargetHandleList l_procList;
-    getAllChips(l_procList, TYPE_PROC);
-
-    if(!l_mpipl)
+    if(!l_mpipl && !l_errl)
     {
         ATTR_PAYLOAD_IN_MIRROR_MEM_type l_mirrored = false;
 
