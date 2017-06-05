@@ -1260,7 +1260,7 @@ foreach my $argnum ( 0 .. $#ARGV )
             foreach my $cdg ( keys %cdgTargetHash )
             {
                 my $callout  = 0;
-                my $priority = 'LOW';
+                my $priority = 'NONE';
                 my $deconf   = 0;
                 my $gard     = 0;
 
@@ -1304,7 +1304,7 @@ foreach my $argnum ( 0 .. $#ARGV )
                 foreach my $childType ( keys %{ $cdgChildHash{$parent} } )
                 {
                     my $callout     = 0;
-                    my $priority    = 'LOW';
+                    my $priority    = 'NONE';
                     my $deconf      = 0;
                     my $gard        = 0;
                     my $childPort   = 0xFF;
