@@ -125,6 +125,7 @@ const DepModInfo  g_istep21Dependancies = {
         DEP_LIB(libpm.so),
 #ifdef CONFIG_HTMGT
         DEP_LIB(libhtmgt.so),
+        DEP_LIB(libisteps_mss.so),
 #endif
         NULL
     }

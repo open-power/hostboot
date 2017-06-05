@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,18 +25,23 @@
 #ifndef HTMGT_MEMTHROTTLES_H
 #define HTMGT_MEMTHROTTLES_H
 
+#include <errl/errlmanager.H>
 
 namespace HTMGT
 {
+    // NIMBUS:
+    const uint8_t TMGT_MAX_MCS_PER_MCBIST = 2;
+    const uint8_t TMGT_MAX_MCA_PER_MCS = 2;
+    const uint8_t TMGT_MAX_DIMM_PER_MCA = 2;
+    const uint8_t TMGT_MAX_DIMM_PER_MCS =
+        TMGT_MAX_DIMM_PER_MCA * TMGT_MAX_MCA_PER_MCS;
 
     /**
      * Calculates the memory throttling numerator values for the OT,
      * oversubscription, and redundant power cases.  The results are
      * stored in attributes under the corresponding MBAs.
      */
-    void calcMemThrottles();
-
-
+    errlHndl_t calcMemThrottles();
 
 };
 #endif

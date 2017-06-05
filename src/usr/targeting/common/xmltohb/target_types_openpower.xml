@@ -49,6 +49,9 @@
 
 <targetTypeExtension>
     <id>sys-sys-power9</id>
+    <attribute><id>OCC_CONTROL_DATA</id></attribute>
+    <attribute><id>HTMGT_INTERNAL_FLAGS</id></attribute>
+    <attribute><id>HTMGT_SAFEMODE</id></attribute>
     <attribute><id>ADC_CHANNEL_FUNC_IDS</id></attribute>
     <attribute><id>ADC_CHANNEL_SENSOR_NUMBERS</id></attribute>
     <attribute><id>ADC_CHANNEL_GNDS</id></attribute>
@@ -72,6 +75,8 @@
     <attribute><id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING</id></attribute>
+    <attribute><id>OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP</id></attribute>
+    <attribute><id>OPEN_POWER_VRM_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_PROC_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR</id></attribute>
     <attribute><id>OPEN_POWER_MIN_POWER_CAP_WATTS</id></attribute>
@@ -122,6 +127,31 @@
     <attribute><id>BMC_MANUFACTURER</id></attribute>
     <attribute><id>BMC_HW_CHIP_TYPE</id></attribute>
     <attribute><id>BMC_SW_TYPE</id></attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>occ</id>
+    <attribute>
+        <id>PSTATE_TABLE</id>
+    </attribute>
+    <attribute>
+        <id>PSTATE_TABLE_MFG</id>
+    </attribute>
+</targetTypeExtension>
+
+<targetTypeExtension>
+    <id>unit-mcs-power9</id>
+    <attribute><id>OT_MIN_N_PER_MBA</id></attribute>
+    <attribute><id>OT_MEM_POWER</id></attribute>
+    <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
+    <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
+    <attribute><id>N_PLUS_ONE_MEM_POWER</id></attribute>
+    <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
+    <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
+    <attribute><id>OVERSUB_MEM_POWER</id></attribute>
+    <attribute><id>POWERCAP_N_PER_MBA</id></attribute>
+    <attribute><id>POWERCAP_N_PER_CHIP</id></attribute>
+    <attribute><id>POWERCAP_MEM_POWER</id></attribute>
 </targetTypeExtension>
 
 </attributes>

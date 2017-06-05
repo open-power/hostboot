@@ -37,9 +37,6 @@
     <attribute><id>IBSCOM_ENABLE_OVERRIDE</id></attribute>
     <attribute><id>HB_MUTEX_TEST_LOCK</id></attribute>
     <attribute><id>HB_EXISTING_IMAGE</id></attribute>
-    <attribute><id>OCC_CONTROL_DATA</id></attribute>
-    <attribute><id>HTMGT_INTERNAL_FLAGS</id></attribute>
-    <attribute><id>HTMGT_SAFEMODE</id></attribute>
     <attribute><id>CLEAR_DIMM_SPD_ENABLE</id></attribute>
     <attribute><id>OCC_COMMON_AREA_PHYS_ADDR</id> </attribute>
     <attribute><id>ATTN_CHK_ALL_PROCS</id> </attribute>
@@ -231,16 +228,6 @@
 <targetTypeExtension>
     <id>unit-xbus-nimbus</id>
     <attribute><id>HB_TARGET_SCOMABLE</id></attribute>
-</targetTypeExtension>
-
-<targetTypeExtension>
-    <id>occ</id>
-    <attribute>
-        <id>PSTATE_TABLE</id>
-    </attribute>
-    <attribute>
-        <id>PSTATE_TABLE_MFG</id>
-    </attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
