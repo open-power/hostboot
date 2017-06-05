@@ -206,7 +206,7 @@ uint8_t symbol2Byte<TARGETING::TYPE_MCA>( uint8_t i_symbol )
 {
     return (SYMBOLS_PER_RANK > i_symbol)
             ? (symbol2Dq<TARGETING::TYPE_MCA>(i_symbol)/8)
-            : MCA_NIBBLES_PER_RANK;
+            : MCA_BYTES_PER_RANK;
 }
 
 } // namespace PARSERUTILS
