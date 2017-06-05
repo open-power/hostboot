@@ -518,6 +518,27 @@ ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 }
 
 //******************************************************************************
+// ATTR_BAD_DQ_BITMAP getter/setter constant definitions
+//******************************************************************************
+
+// define structure for the format of DIMM_BAD_DQ_DATA
+struct dimmBadDqDataFormat
+{
+    uint32_t iv_magicNumber;
+    uint8_t  iv_version;
+    uint8_t  iv_reserved1;
+    uint8_t  iv_reserved2;
+    uint8_t  iv_reserved3;
+    uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+};
+
+// constant definitions
+const uint8_t  SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 9;
+const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
+const uint8_t  DIMM_BAD_DQ_VERSION = 1;
+size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
+
+//******************************************************************************
 // fapi2::platAttrSvc::__getMcsAndPortSlct function
 //******************************************************************************
 ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
@@ -776,7 +797,6 @@ ReturnCode __dimmUpdateDqBitmapSpareByte(
     uint8_t (&o_data)[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT] )
 {
     ReturnCode l_rc;
-    const uint8_t SPARE_DRAM_DQ_BYTE_NUMBER_INDEX = 9;
 
     do
     {
@@ -929,22 +949,6 @@ ReturnCode fapiAttrGetBadDqBitmap(
     ATTR_BAD_DQ_BITMAP_Type (&o_data) )
 {
     FAPI_INF(">>fapiAttrGetBadDqBitmap: Getting bitmap");
-
-    // define structure for the format of DIMM_BAD_DQ_DATA
-    struct dimmBadDqDataFormat
-    {
-        uint32_t iv_magicNumber;
-        uint8_t  iv_version;
-        uint8_t  iv_reserved1;
-        uint8_t  iv_reserved2;
-        uint8_t  iv_reserved3;
-        uint8_t  iv_bitmaps[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
-    };
-
-    // constant definitions
-    const uint32_t DIMM_BAD_DQ_MAGIC_NUMBER = 0xbadd4471;
-    const uint8_t  DIMM_BAD_DQ_VERSION = 1;
-    size_t DIMM_BAD_DQ_SIZE_BYTES = 0x50;
 
     fapi2::ReturnCode l_rc;
     errlHndl_t l_errl = nullptr;
@@ -1104,12 +1108,175 @@ ReturnCode fapiAttrGetBadDqBitmap(
 // fapi2::platAttrSvc::fapiAttrSetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrSetBadDqBitmap(
-    const Target<TARGET_TYPE_ALL>& i_mcsFapiTarget,
+    const Target<TARGET_TYPE_ALL>& i_dimmFapiTarget,
     ATTR_BAD_DQ_BITMAP_Type (&i_data) )
 {
     fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+    TARGETING::TargetHandle_t l_dimmTarget = nullptr;
 
-    // TODO RTC 173476
+    do
+    {
+        l_errl = getTargetingTarget(i_dimmFapiTarget, l_dimmTarget);
+        if ( l_errl )
+        {
+            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error from getTargetingTarget" );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+        uint8_t  l_wiringData[mss::PORTS_PER_MCS][mss::MAX_DQ_BITS];
+        uint64_t l_allMnfgFlags;
+        uint32_t l_ps = 0;
+
+        l_rc = __badDqBitmapGetHelperAttrs( l_dimmTarget, l_wiringData,
+                                            l_allMnfgFlags, l_ps );
+
+        // Read current BadDqBitmap into l_prev_data
+        uint8_t l_prev_data[mss::MAX_RANK_PER_DIMM][mss::BAD_DQ_BYTE_COUNT];
+
+        bool badDqSet = false;
+        l_rc = FAPI_ATTR_GET( fapi2::ATTR_BAD_DQ_BITMAP, l_dimmTarget,
+                              l_prev_data );
+        if (l_rc)
+        {
+            FAPI_ERR("fapiAttrSetBadDqBitmap: Error getting DQ bitmap");
+            break;
+        }
+
+        // Flag to set if the discrepancies are found
+        bool mfgModeBadBitsPresent = false;
+
+        // Check if Bad DQ bit set
+        // Loop through all ranks
+        for ( uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++ )
+        {
+            // Loop through all DQs
+            for (uint8_t j = 0; j < mss::BAD_DQ_BYTE_COUNT; j++)
+            {
+                if ( i_data[i][j] != l_prev_data[i][j] )
+                {
+                    badDqSet = true;
+                    break;
+                }
+            }
+            if ( badDqSet ) break;
+        }
+
+        // Set ATTR_RECONFIGURE_LOOP to indicate a bad DqBitMap was set
+        if ( badDqSet )
+        {
+            FAPI_INF("fapiAttrSetBadDqBitmap: Reconfigure needed, Bad DQ set");
+
+            fapi2::ATTR_RECONFIGURE_LOOP_Type l_reconfigAttr = 0;
+            l_rc = FAPI_ATTR_GET( fapi2::ATTR_RECONFIGURE_LOOP,
+                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                  l_reconfigAttr );
+            if ( l_rc )
+            {
+                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting "
+                          "ATTR_RECONFIGURE_LOOP" );
+                break;
+            }
+
+            // 'OR' values in case of multiple reasons for reconfigure
+            l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
+
+            #ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
+            l_rc = FAPI_ATTR_SET( fapi2::ATTR_RECONFIGURE_LOOP,
+                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                  l_reconfigAttr );
+            if ( l_rc )
+            {
+                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error setting "
+                          "ATTR_RECONFIGURE_LOOP" );
+                break;
+            }
+            #endif
+        }
+
+        // If system is in DISABLE_DRAM_REPAIRS mode
+        if ( l_allMnfgFlags &
+             fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS )
+        {
+
+            uint8_t l_eccSpareBitmap[mss::MAX_RANK_PER_DIMM]
+                                    [mss::BAD_DQ_BYTE_COUNT];
+
+            l_rc = __compareEccAndSpare( l_dimmTarget, mfgModeBadBitsPresent,
+                                         i_data, l_eccSpareBitmap );
+            if ( l_rc )
+            {
+                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error comparing "
+                          "bitmap with ECC/Spare bits set with "
+                          "caller's data." );
+                break;
+            }
+            // Don't write bad dq bitmap if discrepancies are found
+            // Break out of do while loop
+            if ( mfgModeBadBitsPresent ) break;
+        }
+
+        // Set up the data to write to SPD
+        dimmBadDqDataFormat l_spdData;
+        l_spdData.iv_magicNumber = htobe32( DIMM_BAD_DQ_MAGIC_NUMBER );
+        l_spdData.iv_version = DIMM_BAD_DQ_VERSION;
+        l_spdData.iv_reserved1 = 0;
+        l_spdData.iv_reserved2 = 0;
+        l_spdData.iv_reserved3 = 0;
+        memset( l_spdData.iv_bitmaps, 0, sizeof(l_spdData.iv_bitmaps) );
+
+        // Get the spare byte
+        uint8_t spareByte[mss::MAX_RANK_PER_DIMM];
+        memset( spareByte, 0, sizeof(spareByte) );
+
+        l_rc = __dimmGetDqBitmapSpareByte( l_dimmTarget, spareByte );
+        if ( l_rc )
+        {
+            FAPI_ERR( "fapiAttrSetBadDqBitmap: Error getting spare byte" );
+            break;
+        }
+
+        // Translate bitmap from Centaur DQ to DIMM DQ point of view
+        // for each rank
+        for (uint8_t i = 0; i < mss::MAX_RANK_PER_DIMM; i++)
+        {
+            // Iterate through all the DQ bits in the rank
+            for (uint8_t j = 0; j < mss::MAX_DQ_BITS; j++)
+            {
+                if ((j/8) == SPARE_DRAM_DQ_BYTE_NUMBER_INDEX)
+                {
+                    // The spareByte can be one of: 0x00 0x0F 0xF0
+                    // 0xFF If a bit is set, then that spare is
+                    // unconnected so continue to the next num_dqs,
+                    // do not translate
+                    if (spareByte[i] & (0x80 >> (j % 8)))
+                    {
+                        continue;
+                    }
+                }
+                if ((i_data[i][j/8]) & (0x80 >> (j % 8)))
+                {
+                    // Centaur DQ bit set in callers data.
+                    // Set DIMM DQ bit in SPD data.
+                    // The wiring data maps Centaur DQ to DIMM DQ
+                    uint8_t dBit = l_wiringData[l_ps][j];
+                    l_spdData.iv_bitmaps[i][dBit/8] |= (0x80 >> (dBit % 8));
+                }
+            }
+        }
+
+        l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
+                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+        if ( l_errl )
+        {
+            FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to write DIMM "
+                      "Bad DQ data." );
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+
+    }while(0);
 
     return l_rc;
 }
