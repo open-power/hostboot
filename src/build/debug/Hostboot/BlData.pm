@@ -104,6 +104,42 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
+    my $savedAddr = $dataAddr + 66;
+    my $savedAddrStr = sprintf("0x%08X", $savedAddr);
+    my $saved = ::read8($savedAddr);
+    my $savedStr = sprintf("0x%02X", $saved);
+
+    ::userDisplay "\nSaved Trace Index Address: ";
+    ::userDisplay $savedAddrStr;
+    ::userDisplay "\n\nSaved Trace Index: ";
+    ::userDisplay $savedStr;
+    ::userDisplay "\n\n--------------------------------------------\n";
+
+
+    my $loopCntAddr = $dataAddr + 68;
+    my $loopCntAddrStr = sprintf("0x%08X", $loopCntAddr);
+    my $loopCnt = ::read32($loopCntAddr);
+    my $loopCntStr = sprintf("0x%08X", $loopCnt);
+
+    ::userDisplay "\nPNOR Loop Counter Address: ";
+    ::userDisplay $loopCntAddrStr;
+    ::userDisplay "\n\nPNOR Loop Counter: ";
+    ::userDisplay $loopCntStr;
+    ::userDisplay "\n\n--------------------------------------------\n";
+
+
+    my $pnorMmioAddr = $dataAddr + 72;
+    my $pnorMmioAddrStr = sprintf("0x%08X", $pnorMmioAddr);
+    my $pnorMmio = ::read64($pnorMmioAddr);
+    my $pnorMmioStr = sprintf("0x%016llX", $pnorMmio);
+
+    ::userDisplay "\nFirst PNOR MMIO Address: ";
+    ::userDisplay $pnorMmioAddrStr;
+    ::userDisplay "\n\nFirst PNOR MMIO: ";
+    ::userDisplay $pnorMmioStr;
+    ::userDisplay "\n\n--------------------------------------------\n";
+
+
     my $tiDataAreaAddr = $dataAddr + 80;
     my $tiDataAreaAddrStr = sprintf("0x%08X", $tiDataAreaAddr);
     ::sendIPCMsg("read-data", "$tiDataAreaAddr,48"); # TI Data Area is 48 bytes

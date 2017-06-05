@@ -280,6 +280,7 @@ namespace Bootloader{
         // Initialization
         g_blData = reinterpret_cast<blData_t *>(HBBL_DATA_ADDR);
         g_blData->bl_trace_index = 0;
+        g_blData->bl_trace_index_saved = BOOTLOADER_TRACE_SIZE;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
 
         //Set core scratch 3 to say bootloader is active
