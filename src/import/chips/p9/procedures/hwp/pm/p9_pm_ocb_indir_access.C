@@ -74,7 +74,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
     uint32_t&                     o_ocb_act_length,
     uint64_t*                     io_ocb_buffer)
 {
-    FAPI_IMP("Enter p9_pm_ocb_indir_access...");
+    FAPI_DBG("Enter p9_pm_ocb_indir_access...");
     FAPI_DBG("Channel : %d, Operation : %d, No.of 8B Blocks of Data: %d",
              i_ocb_chan, i_ocb_op, i_ocb_req_length);
 
@@ -253,7 +253,7 @@ fapi2::ReturnCode p9_pm_ocb_indir_access(
                  o_ocb_act_length);
     }
 
-    FAPI_IMP("Exit p9_pm_ocb_indir_access...");
+    FAPI_DBG("Exit p9_pm_ocb_indir_access...");
 
 fapi_try_exit:
     return fapi2::current_err;
