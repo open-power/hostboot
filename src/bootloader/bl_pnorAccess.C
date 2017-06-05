@@ -27,6 +27,7 @@
 #include <bootloader/bootloader_trace.H>
 #include <bootloader/hbblreasoncodes.H>
 #include <util/singleton.H>
+#include <util/align.H>
 #include <bootloader/bootloader.H>
 #include <lpc_const.H>
 #ifdef PNORUTILSTEST_H
@@ -196,6 +197,7 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
 
     //The first TOC is 1 TOC size + 1 page back from the end of the flash (+ 1)
     uint64_t l_mmioAddr = i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH;
+    l_mmioAddr = ALIGN_PAGE_DOWN(l_mmioAddr);
 
     do
     {
@@ -224,12 +226,37 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
                 // Use PNOR start address for next MMIO
                 BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_USE_PNOR_START);
                 l_mmioAddr = o_pnorStart;
+
+                // Reset saved trace index
+                Bootloader::g_blData->bl_trace_index_saved =
+                    BOOTLOADER_TRACE_SIZE;
             }
             else
             {
+                // Check if a trace index is not saved
+                if(Bootloader::g_blData->bl_trace_index_saved >=
+                   BOOTLOADER_TRACE_SIZE)
+                {
+                    // Save trace index for future passes through loop
+                    Bootloader::g_blData->bl_trace_index_saved =
+                        Bootloader::g_blData->bl_trace_index;
+
+                    // Save this PNOR MMIO address
+                    Bootloader::g_blData->bl_first_pnor_mmio = l_mmioAddr;
+                }
+                else // A trace index was saved
+                {
+                    // Replace trace index, reuse trace entries for this loop
+                    Bootloader::g_blData->bl_trace_index =
+                        Bootloader::g_blData->bl_trace_index_saved;
+                }
+
                 // Adjust to new location in PNOR flash for next MMIO
                 BOOTLOADER_TRACE(BTLDR_TRC_PA_FINDTOC_ADJUST_PNOR_ADDR);
                 l_mmioAddr -= PAGESIZE;
+
+                // Increment loop counter
+                Bootloader::g_blData->bl_pnor_loop_count++;
             }
 
             // Check that address is still in FW space

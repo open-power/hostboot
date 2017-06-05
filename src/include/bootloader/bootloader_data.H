@@ -53,7 +53,23 @@ namespace Bootloader{
         // @brief Index for Bootloader Trace entries
         // One-byte index for next entry to use in bootloader_trace.
         uint8_t bl_trace_index;
-        uint8_t bl_reserved1[15];
+        uint8_t bl_reserved1[1];
+
+        // @name bl_trace_index_saved
+        // @brief Saved index for Bootloader Trace entries
+        // One-byte index for a saved bootloader_trace entry.
+        uint8_t bl_trace_index_saved;
+        uint8_t bl_reserved2[1];
+
+        // @name bl_pnor_loop_count
+        // @brief Bootloader loop counter
+        // Counter for loop that walks PNOR to find a valid TOC.
+        uint32_t bl_pnor_loop_count;
+
+        // @name bl_first_pnor_mmio
+        // @brief Address used by first PNOR MMIO
+        // Address used on first attempt to read TOC from PNOR.
+        uint64_t bl_first_pnor_mmio;
 
         // Instance of the TI Data Area
         HB_TI_DataArea bl_TIDataArea;
@@ -63,7 +79,7 @@ namespace Bootloader{
 
         // Bool indicating if the secureROM is valid. Toggles verification.
         bool secureRomValid;
-        uint8_t bl_reserved2[15];
+        uint8_t bl_reserved3[15];
 
         // Object that will be stored where the SBE HB structure indicates
         BlToHbData blToHbData;
