@@ -68,11 +68,12 @@ enum throttle_enums
 
     MAXALL_MINALL = 0b000,
 
-    //wait 16 refresh intervals of idle before powering down all ranks
-    MIN_DOMAIN_REDUCTION_TIME = 0x10,
+    // Wait 959 refresh intervals of idle before powering down all ranks
+    MIN_DOMAIN_REDUCTION_TIME = 959,
 
-    //wait 64 refresh intervals of idle before going into STR on all ranks
-    ENTER_STR_TIME = 0x40
+    // Wait 1023 refresh intervals of idle before going into STR on all ranks
+    // 1023 is the max allowed value
+    ENTER_STR_TIME = 1023
 };
 
 ///
