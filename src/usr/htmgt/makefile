@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2016
+# Contributors Listed Below - COPYRIGHT 2014,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,15 @@ MODULE = htmgt
 
 # objects common to hostboot and hbrt
 include htmgt_common.mk
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import
+
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/memory
+include ${ROOTPATH}/procedure.rules.mk
+OBJS += $(PROCEDURES_PATH)/hwp/memory/p9_mss_utils_to_throttle.o
+OBJS += $(PROCEDURES_PATH)/hwp/memory/p9_mss_bulk_pwr_throttles.o
 
 # objects unique to hostboot
 OBJS += htmgt_memthrottles.o

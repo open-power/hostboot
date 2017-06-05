@@ -127,31 +127,37 @@ public:
         //Make sure all of the numerators are set
         for (mba=mbas.begin();mba!=mbas.end();++mba)
         {
-            if (0 == (*mba)->getAttr<ATTR_OT_MIN_N_PER_MBA>())
+            ATTR_OT_MIN_N_PER_MBA_type n;
+            (*mba)->tryGetAttr<ATTR_OT_MIN_N_PER_MBA>(n);
+            if ((0 == n[0]) && (0 == n[1]))
             {
                 TS_FAIL("MBA 0x%X has value of zero for OT_MIN_N_PER_MBA",
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            if (0 == (*mba)->getAttr<ATTR_N_PLUS_ONE_N_PER_MBA>())
+            (*mba)->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(n);
+            if ((0 == n[0]) && (0 == n[1]))
             {
                 TS_FAIL("MBA 0x%X has value of zero for N_PLUS_ONE_N_PER_MBA",
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            if (0 == (*mba)->getAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>())
+            (*mba)->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(n);
+            if ((0 == n[0]) && (0 == n[1]))
             {
                 TS_FAIL("MBA 0x%X has value of zero for N_PLUS_ONE_N_PER_CHIP",
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            if (0 == (*mba)->getAttr<ATTR_OVERSUB_N_PER_MBA>())
+            (*mba)->tryGetAttr<ATTR_OVERSUB_N_PER_MBA>(n);
+            if ((0 == n[0]) && (0 == n[1]))
             {
                 TS_FAIL("MBA 0x%X has value of zero for OVERSUB_N_PER_MBA",
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            if (0 == (*mba)->getAttr<ATTR_OVERSUB_N_PER_CHIP>())
+            (*mba)->tryGetAttr<ATTR_OVERSUB_N_PER_CHIP>(n);
+            if ((0 == n[0]) && (0 == n[1]))
             {
                 TS_FAIL("MBA 0x%X has value of zero for OVERSUB_N_PER_CHIP",
                         (*mba)->getAttr<ATTR_HUID>());
@@ -179,7 +185,7 @@ public:
         {
             memset(data, 0, 4*KILOBYTE);
 
-            getMemThrottleMessageData(*occ, data, size);
+            getMemThrottleMessageData(*occ, 0, data, size);
 
             if (data[0] != OCC_CFGDATA_MEM_THROTTLE)
             {

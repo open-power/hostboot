@@ -77,7 +77,11 @@ namespace HTMGT
                         {
 #ifndef __HOSTBOOT_RUNTIME
                             // Calc memory throttles (once per IPL)
-                            calcMemThrottles();
+                            l_err = calcMemThrottles();
+                            if( l_err )
+                            {
+                                break;
+                            }
 #endif
 
                             // Make sure OCCs are ready for communication

@@ -71,6 +71,7 @@ namespace HTMGT
         CFGDATA_FRU_TYPE_PROC   = 0x00,
         CFGDATA_FRU_TYPE_MEMBUF = 0x01,
         CFGDATA_FRU_TYPE_DIMM   = 0x02,
+        CFGDATA_FRU_TYPE_VRM    = 0x03,
 
         CFDATA_DVFS_NOT_DEFINED = 0xFF,
     };
@@ -146,11 +147,13 @@ namespace HTMGT
      * including the format and version numbers.
      *
      * @param[in] i_occ - the OCC to gather data for
+     * @param[in] i_occ_instance - OCC instance number
      * @param[in] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
      * @pre o_data is large enough.
      */
     void getMemThrottleMessageData(const TARGETING::TargetHandle_t i_occ,
+                                   const uint8_t i_occ_instance,
                                    uint8_t* o_data, uint64_t & o_size);
 
 

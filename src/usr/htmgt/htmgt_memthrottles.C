@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,8 +31,13 @@
 #include <targeting/common/attributes.H>
 #include <targeting/common/targetservice.H>
 #include <fapi2.H>
+#include <plat_hwp_invoker.H>
 
+// Hardware Procedures:
+#include <p9_mss_utils_to_throttle.H>
+#include <p9_mss_bulk_pwr_throttles.H>
 
+// See src/include/usr/targeting/common/utilFilter.H for handy target utilities
 
 using namespace TARGETING;
 
@@ -46,297 +51,184 @@ namespace HTMGT
 {
 
 /**
- * Helper function to run the hardware procedure to calculate the
- * throttle attributes for the Over Temp condition.
- * flow = htmgtCalcMemThrottle_OT
+ * Run hardware procedure to determine throttle/numerator/number of commands
+ * based on the specified utilization
  *
- * @param[in] i_mbas - list of functional MBAs
  * @param[in] i_utilization - Minimum utilization value required
- * @param[in] i_nSafeModeMBA - the safe mode MBA throttle numerator
+ * @param[in] i_watt_target - power target required for bulk_pwr_throttles
  */
-void memPowerThrottleOT(TargetHandleList & i_mbas,
-                        const uint32_t i_nSafeModeMBA,
-                        const uint8_t i_utilization)
+errlHndl_t call_utils_to_throttle(
+         std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
+                                  const uint32_t i_util,
+                                  const uint32_t i_watt_target = 0)
 {
-    bool useSafeMode = false;
-    bool throttleError = false;
-    uint32_t nUtilBased = 0;
-    uint32_t mbaHuid = 0;
-    Target* sys = NULL;
+    errlHndl_t err = NULL;
+    uint32_t utilization[TMGT_MAX_MCA_PER_MCS] = { i_util, i_util };
+    uint32_t l_watt_targets[TMGT_MAX_MCA_PER_MCS][TMGT_MAX_DIMM_PER_MCA] =
+        {i_watt_target, i_watt_target, i_watt_target, i_watt_target};
+    TMGT_INF("call_utils_to_throttle: utilization: 0x%04X, watt_target: "
+             "0x%04X", i_util, i_watt_target);
 
-    TMGT_INF(ENTER_MRK" memPowerThrottleOT");
-
-    targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
-
-    for( const auto & mba : i_mbas )
+    // Update input attributes for specified targets
+    for(const auto & l_fapi_target : i_fapi_target_list)
     {
-        mbaHuid = mba->getAttr<ATTR_HUID>();
-        useSafeMode = true;
-        nUtilBased = 0;
-
-        if (i_utilization != 0)
+        FAPI_ATTR_SET(fapi2::ATTR_MSS_DATABUS_UTIL, l_fapi_target, utilization);
+        if (i_watt_target)
         {
-            //Run a hardware procedure to calculate the lowest
-            //possible throttle setting based on the minimum
-            //utilization percentage.
-            errlHndl_t err = NULL;
-            const fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTarget(mba);
-
-            //Set this so the procedure can use it
-            mba->setAttr<ATTR_MSS_DATABUS_UTIL_PER_MBA>(i_utilization);
-
-/*          TODO: RTC 155033 - Memory Throttle Settings
-            FAPI_INVOKE_HWP(err, mss_util_to_throttle, fapiTarget);
-*/
-            if (err)
-            {
-                //Ignore the error and just use safe
-                //mode as the lowest throttle
-                TMGT_ERR("memPowerThrottleOT: Failed call to "
-                         "mss_util_to_throttle on MBA 0x%X",
-                         mbaHuid);
-
-                delete err;
-                err = NULL;
-            }
-            else
-            {
-                //get the procedure output
-                nUtilBased = mba->getAttr<ATTR_MSS_UTIL_N_PER_MBA>();
-
-                if (0 != nUtilBased)
-                {
-                    useSafeMode = false;
-                }
-                else
-                {
-                    TMGT_ERR("memPowerThrottleOT: mss_util_to_throttle"
-                             " calculated a numerator of 0, MBA 0x%X",
-                             mbaHuid);
-
-                    if (!throttleError)
-                    {
-                        throttleError = true;
-
-                        /*@
-                         * @errortype
-                         * @reasoncode       HTMGT_RC_OT_THROTTLE_INVALID_N
-                         * @severity         ERRL_SEV_UNRECOVERABLE
-                         * @moduleid         HTMGT_MOD_MEMTHROTTLE
-                         * @userdata1        MBA HUID
-                         * @devdesc          Overtemp Throttle HW procedure
-                         *                   calculated an invalid numerator
-                         *                   value.
-                         */
-                        err = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           HTMGT_MOD_MEMTHROTTLE,
-                                           HTMGT_RC_OT_THROTTLE_INVALID_N,
-                                           mbaHuid, 0, true);
-                        err->collectTrace(HTMGT_COMP_NAME);
-                        errlCommit(err, HTMGT_COMP_ID);
-                    }
-                }
-            }
+            FAPI_ATTR_SET(fapi2::ATTR_MSS_MEM_WATT_TARGET,
+                          l_fapi_target, l_watt_targets);
         }
-
-
-        if (useSafeMode)
-        {
-            nUtilBased = i_nSafeModeMBA;
-
-            TMGT_INF("memPowerThrottleOT: MBA 0x%X must use safemode"
-                     " numerator", mbaHuid);
-        }
-
-        TMGT_INF("memPowerThrottleOT: MBA 0x%X: N Util OT = 0x%X",
-                 mbaHuid, nUtilBased);
-
-        mba->setAttr<ATTR_OT_MIN_N_PER_MBA>(nUtilBased);
     }
 
+    // p9_mss_utils_to_throttle() - Sets number commands allowed within a
+    //                              given port databus utilization
+    // inputs: ATTR_MSS_DATABUS_UTIL
+    // outputs: ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+    //          ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT, and
+    //          ATTR_MSS_PORT_MAXPOWER
+    TMGT_INF("call_utils_to_throttle: Calling HWP:p9_mss_utils_to_throttle"
+             "(POWER) for %d MCS Targets", i_fapi_target_list.size());
+    {
+        FAPI_INVOKE_HWP(err, p9_mss_utils_to_throttle, i_fapi_target_list);
+    }
 
-}
+    if (NULL != err)
+    {
+        TMGT_ERR("call_utils_to_throttle: HWP:p9_mss_utils_to_throttle failed"
+                 " with rc=0x%04X", err->reasonCode());
+    }
 
+    return err;
 
+} // end call_utils_to_throttle()
 
 
 
 /**
- * Helper function to run the mss_bulk_pwr_throttles and
- * mss_util_to_throttle to calculate memory throttling
- * numerator values.
+ * Calculate throttles for over-temperture
  *
- * @param[in] i_mba - the MBA
- * @param[in] i_wattTarget - the power target for the MBA
- * @param[in] i_utilization - the utilization desired
- * @param[out] o_useSafeMode - will be set to true if safe mode
- *                             values should be used
- * @param[out] o_nMBA -  set to the N_PER_MBA  numerator value
- *                  (don't use if safemode=true)
- * @param[out] o_nChip - set to the N_PER_CHIP numerator value
- *                  (don't use if safemode=true)
+ * @param[in] i_fapi_target_list - list of FAPI MCS targets
+ * @param[in] i_utilization - Minimum utilization value required
  */
-void doMBAThrottleCalc(TARGETING::Target * i_mba,
-                       const uint32_t i_wattTarget,
-                       const uint8_t i_utilization,
-                       bool & o_useSafeMode,
-                       uint32_t & o_nMBA,
-                       uint32_t & o_nChip)
+errlHndl_t memPowerThrottleOT(
+       std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
+                                   const uint8_t i_utilization)
 {
     errlHndl_t err = NULL;
 
-    o_useSafeMode = false;
-    o_nMBA = 0;
-    o_nChip = 0;
+    TMGT_INF("memPowerThrottleOT: Calculating throttles for util: %d",
+             i_utilization);
 
-    TARGETING::ATTR_MSS_MEM_WATT_TARGET_type l_wattArray = {{i_wattTarget,
-                                                             i_wattTarget},
-                                                            {i_wattTarget,
-                                                             i_wattTarget}};
-    //Set the values the procedures need
-    i_mba->setAttr<ATTR_MSS_MEM_WATT_TARGET>(l_wattArray);
-    i_mba->setAttr<ATTR_MSS_DATABUS_UTIL_PER_MBA>(i_utilization);
-
-    const fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiTarget(i_mba);
-
-/*  TODO This hwp is changing for p9
-    FAPI_INVOKE_HWP(err, mss_bulk_pwr_throttles, fapiTarget);
-*/
-    if (err)
+    err = call_utils_to_throttle(i_fapi_target_list, i_utilization);
+    if (NULL == err)
     {
-        TMGT_ERR("doMBAThrottleCalc: Failed call to mss_bulk_pwr_throttles"
-                 " on MBA 0x%X",
-                 i_mba->getAttr<ATTR_HUID>());
+        uint32_t ot_mem_power = 0;
+        for(const auto & mcs_fapi_target : i_fapi_target_list)
+        {
+            // Read HWP outputs:
+            ATTR_OT_MIN_N_PER_MBA_type l_slot = {0};
+            ATTR_OT_MEM_POWER_type l_power = {0};
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+                          mcs_fapi_target, l_slot);
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
+                          mcs_fapi_target, l_power);
+            ot_mem_power += l_power[0] + l_power[1];
+
+            // Update MCS data (to be sent to OCC)
+            TARGETING::Target * mcs_target =
+                reinterpret_cast<TARGETING::Target *>(mcs_fapi_target.get());
+            ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+            assert(proc_target != nullptr);
+            const uint8_t occ_instance =
+                proc_target->getAttr<TARGETING::ATTR_POSITION>();
+            uint8_t mcs_unit = 0xFF;
+            mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
+            mcs_target->setAttr<ATTR_OT_MIN_N_PER_MBA>(l_slot);
+            mcs_target->setAttr<ATTR_OT_MEM_POWER>(l_power);
+            TMGT_INF("memPowerThrottleOT: MIN: OCC%d/MCS%d - "
+                     "N/slot: %d/%d, Power: %d/%dcW",
+                     occ_instance, mcs_unit, l_slot[0], l_slot[1],
+                     l_power[0], l_power[1]);
+        }
+        TMGT_INF("memPowerThrottleOT: Total Minimum Memory"
+                 " Power: %dW", ot_mem_power/100);
     }
     else
     {
-        //Get the procedure outputs
-        o_nMBA  = i_mba->getAttr<ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA>();
-        o_nChip = i_mba->getAttr<ATTR_MSS_MEM_THROTTLE_NUMERATOR_PER_CHIP>();
-
-        //Make sure neither are 0
-        if ((0 == o_nMBA) || (0 == o_nChip))
-        {
-            TMGT_ERR("doMBAThrottleCalc: mss_bulk_pwr_throttles calculated a"
-                     " numerator value of 0: nMBA = %d, nChip = %d, MBA 0x%X",
-                     o_nMBA, o_nChip, i_mba->getAttr<ATTR_HUID>());
-
-            /*@
-             * @errortype
-             * @reasoncode       HTMGT_RC_THROTTLE_INVALID_N
-             * @severity         ERRL_SEV_UNRECOVERABLE
-             * @moduleid         HTMGT_MOD_MEMTHROTTLE
-             * @userdata1        MBA HUID
-             * @userdata2[0:31]  MBA numerator
-             * @userdata2[32:63] Chip numerator
-             * @devdesc          Throttle HW procedure calculated
-             *                   an invalid numerator value.
-             */
-            uint64_t data = ((uint64_t)o_nMBA << 32) | o_nChip;
-            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          HTMGT_MOD_MEMTHROTTLE,
-                                          HTMGT_RC_THROTTLE_INVALID_N,
-                                          i_mba->getAttr<ATTR_HUID>(),
-                                          data, true);
-        }
-        else if (i_utilization != 0)
-        {
-            //Make sure the calculated throttles meet the min
-            //utilization, if provided.
-
-/*           TODO this hwp is changing for p9
-             FAPI_INVOKE_HWP(err, mss_util_to_throttle, fapiTarget);
-*/
-            if (err)
-            {
-                TMGT_ERR("doMBAThrottleCalc: Failed call to "
-                         "mss_util_to_throttle on MBA 0x%X",
-                         i_mba->getAttr<ATTR_HUID>());
-            }
-            else
-            {
-                //Get the value the procedure wrote
-                uint32_t nUtilMBA = i_mba->getAttr<ATTR_MSS_UTIL_N_PER_MBA>();
-
-                TRACUCOMP("doMBAThrottleCalc: mss_util_to_throttle"
-                          " calculated N = %d",
-                          nUtilMBA);
-
-                //If mss_bulk_pwr_throttles calculated a value
-                //that doesn't meet the minimum requested utilization,
-                //then we have a problem.
-                if (nUtilMBA > o_nMBA)
-                {
-                    TMGT_ERR("doMBAThrottleCalc: MSS_UTIL_N_PER_MBA 0x%X "
-                             "> MSS_MEM_THROTTLE_N_PER_MBA 0x%X on MBA 0x%X",
-                             nUtilMBA, o_nMBA,
-                             i_mba->getAttr<ATTR_HUID>());
-
-                    /*@
-                     * @errortype
-                     * @reasoncode       HTMGT_RC_THROTTLE_UTIL_ERROR
-                     * @severity         ERRL_SEV_UNRECOVERABLE
-                     * @moduleid         HTMGT_MOD_MEMTHROTTLE
-                     * @userdata1        MBA HUID
-                     * @userdata2[0:31]  util based N
-                     * @userdata2[32:63] calculated N
-                     * @devdesc          Throttle numerator calculated
-                     *                   doesn't meet min utilization
-                     */
-                    uint64_t data = ((uint64_t)nUtilMBA << 32) | o_nMBA;
-                    err = new ERRORLOG::ErrlEntry(
-                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           HTMGT_MOD_MEMTHROTTLE,
-                                           HTMGT_RC_THROTTLE_UTIL_ERROR,
-                                           i_mba->getAttr<ATTR_HUID>(),
-                                           data, true);
-                }
-            }
-        }
+        TMGT_ERR("memPowerThrottleOT: Failed to calculate over-temp"
+                 " memory throttles, rc=0x%04X",
+                 err->reasonCode());
     }
 
-    if (err)
-    {
-        err->collectTrace(HTMGT_COMP_NAME);
-        errlCommit(err, HTMGT_COMP_ID);
-        o_useSafeMode = true;
-    }
+    return err;
 
-}
+} // end memPowerThrottleOT()
+
 
 
 /**
- * Helper function to run the hardware procedures to calculate the
- * throttle attributes used for redundant power.
- * flow = htmgtCalcMemThrottle_redundantPwr
+ * Run the p9_mss_bulk_pwr_throttles hardware procedure
+ * to calculate memory throttling numerator values.
  *
- * @param[in] i_mbas - the list of functional MBAs
- * @param[in] i_nSafeModeMBA - the safe mode MBA throttle numerator
- * @param[in] i_nSafeModeChip - the safe mode MBA throttle numerator
+ * @param[in] i_fapi_target_list - list of FAPI MCS targets
+ * @param[in] i_wattTarget - the power target for the MCS
+ * @param[in] i_utilization - the utilization desired
+ */
+errlHndl_t call_bulk_pwr_throttles(
+      std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
+                       const uint32_t i_wattTarget,
+                       const uint8_t i_utilization)
+{
+    errlHndl_t err = NULL;
+
+    //Set the values the procedures need
+    err = call_utils_to_throttle(i_fapi_target_list,
+                                 i_utilization, i_wattTarget);
+    if (NULL == err)
+    {
+        TMGT_INF("call_bulk_pwr_throttles: Calling HWP:p9_mss_bulk_pwr_"
+                 "throttles(POWER) for MCS Targets");
+        FAPI_INVOKE_HWP(err, p9_mss_bulk_pwr_throttles, i_fapi_target_list,
+                        mss::throttle_type::POWER);
+        if (NULL != err)
+        {
+            TMGT_ERR("call_bulk_pwr_throttles: p9_mss_bulk_pwr_throttles "
+                     "failed with rc=0x%04X", err->reasonCode());
+        }
+    }
+    else
+    {
+        TMGT_ERR("call_bulk_pwr_throttles: call_utils_to_throttle failed with"
+                 " rc=0x%04X", err->reasonCode());
+    }
+
+    return err;
+
+} // end call_bulk_pwr_throttles()
+
+
+/**
+ * Calculate throttles for when system has redundant power (N+1 mode)
+ *
+ * @param[in] i_fapi_target_list - list of FAPI MCS targets
  * @param[in] i_utilization - Minimum utilization value required
  * @param[in] i_efficiency - the regulator efficiency
  */
-void memPowerThrottleRedPower(TargetHandleList & i_mbas,
-                              const uint32_t i_nSafeModeMBA,
-                              const uint32_t i_nSafeModeChip,
+errlHndl_t memPowerThrottleRedPower(
+         std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
                               const uint8_t i_utilization,
                               const uint8_t i_efficiency)
 {
+    errlHndl_t err = NULL;
     Target* sys = NULL;
     uint32_t power = 0;
     uint32_t wattTarget = 0;
-    uint32_t nChip = 0;
-    uint32_t nMBA = 0;
-    bool useSafeMode = false;
-
     targetService().getTopLevelTarget(sys);
     assert(sys != NULL);
 
-    //Get the max N+1 power allocated to memory
+    //Get the max redundant (N+1) power allocated to memory
     power = sys->getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
-    power *= 100; //centiWatts
+    power *= 100; // convert to centiWatts
 
     //Account for the regulator efficiency (percentage), if supplied
     if (i_efficiency != 0)
@@ -344,72 +236,86 @@ void memPowerThrottleRedPower(TargetHandleList & i_mbas,
         power = (power * i_efficiency) / 100;
     }
 
-    //Find the Watt target for each MBA
-    if (i_mbas.size())
+    //Find the Watt target for each MCS
+    if (i_fapi_target_list.size())
     {
-        wattTarget = power / i_mbas.size();
+        wattTarget = power / i_fapi_target_list.size();
     }
 
-    TMGT_INF("memPowerThrottleRedPower: power = %d, wattTarget = %d",
-             power, wattTarget);
+    TMGT_INF("memPowerThrottleRedPower: N+1 power: %dW / %dcW per MCS",
+             power/100, wattTarget);
 
-    for( const auto & mba : i_mbas )
+    //Calculate the throttles
+    err = call_bulk_pwr_throttles(i_fapi_target_list,
+                                  wattTarget,
+                                  i_utilization);
+    if (NULL == err)
     {
-        useSafeMode = false;
-        nMBA = nChip = 0;
-
-        //Run the calculations
-        doMBAThrottleCalc(mba, wattTarget, i_utilization,
-                          useSafeMode, nMBA, nChip);
-
-        if (useSafeMode)
+        uint32_t nominal_mem_power = 0;
+        for(auto & mcs_fapi_target : i_fapi_target_list)
         {
-            nMBA = i_nSafeModeMBA;
-            nChip  = i_nSafeModeChip;
-            TMGT_INF("memPowerThrottleRedPower: MBA 0x%X using safemode "
-                     "numerator",
-                     mba->getAttr<ATTR_HUID>());
+            // Read HWP output parms:
+            ATTR_N_PLUS_ONE_N_PER_MBA_type l_slot = {0};
+            ATTR_N_PLUS_ONE_N_PER_CHIP_type l_port = {0};
+            ATTR_N_PLUS_ONE_MEM_POWER_type l_power = {0};
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+                          mcs_fapi_target, l_slot);
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT,
+                          mcs_fapi_target, l_port);
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
+                          mcs_fapi_target, l_power);
+            nominal_mem_power += l_power[0] + l_power[1];
+
+            // Update MCS data (to be sent to OCC)
+            TARGETING::Target * mcs_target =
+                reinterpret_cast<TARGETING::Target *>(mcs_fapi_target.get());
+            ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+            assert(proc_target != nullptr);
+            const uint8_t occ_instance =
+                proc_target->getAttr<TARGETING::ATTR_POSITION>();
+            uint8_t mcs_unit = 0xFF;
+            mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
+            mcs_target->setAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(l_slot);
+            mcs_target->setAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(l_port);
+            mcs_target->setAttr<ATTR_N_PLUS_ONE_MEM_POWER>(l_power);
+
+            TMGT_INF("memPowerThrottleRedPower: NOMINAL: OCC%d/MCS%d - "
+                     "N/slot: %d/%d, N/port: %d/%d, Power: %d/%dcW",
+                     occ_instance, mcs_unit, l_slot[0], l_slot[1],
+                     l_port[0], l_port[1], l_power[0], l_power[1]);
         }
-
-        //Set the attributes we'll send to OCC later
-        TMGT_INF("memPowerThrottleRedPower: MBA 0x%X:  N_PER_MBA = 0x%X, "
-                 "N_PER_CHIP = 0x%X",
-                 mba->getAttr<ATTR_HUID>(), nMBA, nChip);
-
-        mba->setAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(nMBA);
-        mba->setAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(nChip);
-
+        TMGT_INF("memPowerThrottleRedPower: Total Redundant Memory Power: %dW",
+                 nominal_mem_power/100);
+    }
+    else
+    {
+        TMGT_ERR("memPowerThrottleRedPower: Failed to calculate redundant "
+                 "power memory throttles, rc=0x%04X",
+                 err->reasonCode());
     }
 
+    return err;
 
-}
+} // end memPowerThrottleRedPower()
 
 
 
 /**
- * Helper function to run the hardware procedures to calculate the
- * throttle attributes used for oversubscription.
- * flow = htmgtCalcMemThrottle_oversub
+ * Calculate throttles for when system is oversubscribed (N mode)
  *
- * @param[in] i_mbas - the list of functional MBAs
- * @param[in] i_nSafeModeMBA - the safe mode MBA throttle numerator
- * @param[in] i_nSafeModeChip - the safe mode MBA throttle numerator
+ * @param[in] i_fapi_target_list - list of FAPI MCS targets
  * @param[in] i_utilization - Minimum utilization value required
  * @param[in] i_efficiency - the regulator efficiency
  */
-void memPowerThrottleOverSub(TargetHandleList & i_mbas,
-                             const uint32_t i_nSafeModeMBA,
-                             const uint32_t i_nSafeModeChip,
-                             const uint8_t i_utilization,
-                             const uint8_t i_efficiency)
+errlHndl_t memPowerThrottleOverSub(
+         std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
+                                   const uint8_t i_utilization,
+                                   const uint8_t i_efficiency)
 {
+    errlHndl_t err = NULL;
     Target* sys = NULL;
     uint32_t power = 0;
     uint32_t wattTarget = 0;
-    uint32_t nChip = 0;
-    uint32_t nMBA = 0;
-    bool useSafeMode = false;
-
     targetService().getTopLevelTarget(sys);
     assert(sys != NULL);
 
@@ -423,87 +329,278 @@ void memPowerThrottleOverSub(TargetHandleList & i_mbas,
         power = (power * i_efficiency) / 100;
     }
 
-    //Find the Watt target for each MBA
-    if (i_mbas.size())
+    //Find the Watt target for each MCS
+    if (i_fapi_target_list.size())
     {
-        wattTarget = power / i_mbas.size();
+        wattTarget = power / i_fapi_target_list.size();
     }
 
-    TMGT_INF("memPowerThrottleOverSub: power = %d, wattTarget = %d",
-             power, wattTarget);
+    TMGT_INF("memPowerThrottleOverSub: N power: %dW / %dcW per MCS",
+             power/100, wattTarget);
 
-    for ( const auto & mba : i_mbas )
+    //Calculate the throttles
+    err = call_bulk_pwr_throttles(i_fapi_target_list,
+                                  wattTarget,
+                                  i_utilization);
+    if (NULL == err)
     {
-        useSafeMode = false;
-        nMBA = nChip = 0;
-
-        //Run the calculations
-        doMBAThrottleCalc(mba, wattTarget, i_utilization,
-                          useSafeMode, nMBA, nChip);
-
-        if (useSafeMode)
+        uint32_t oversub_mem_power = 0;
+        for(auto & mcs_fapi_target : i_fapi_target_list)
         {
-            nMBA = i_nSafeModeMBA;
-            nChip  = i_nSafeModeChip;
-            TMGT_INF("memPowerThrottleOverSub: MBA 0x%X using safemode "
-                     "numerator",
-                     mba->getAttr<ATTR_HUID>());
+            // Read HWP output parms:
+            ATTR_OVERSUB_N_PER_MBA_type l_slot = {0};
+            ATTR_OVERSUB_N_PER_CHIP_type l_port = {0};
+            ATTR_OVERSUB_MEM_POWER_type l_power = {0};
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+                          mcs_fapi_target, l_slot);
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT,
+                          mcs_fapi_target, l_port);
+            FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
+                          mcs_fapi_target, l_power);
+            oversub_mem_power += l_power[0] + l_power[1];
+
+            // Update MCS data (to be sent to OCC)
+            TARGETING::Target * mcs_target =
+                reinterpret_cast<TARGETING::Target *>(mcs_fapi_target.get());
+            ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+            assert(proc_target != nullptr);
+            const uint8_t occ_instance =
+                proc_target->getAttr<TARGETING::ATTR_POSITION>();
+            uint8_t mcs_unit = 0xFF;
+            mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
+            mcs_target->setAttr<ATTR_OVERSUB_N_PER_MBA>(l_slot);
+            mcs_target->setAttr<ATTR_OVERSUB_N_PER_CHIP>(l_port);
+            mcs_target->setAttr<ATTR_OVERSUB_MEM_POWER>(l_power);
+
+            TMGT_INF("memPowerThrottleOverSub: OVERSUB: OCC%d/MCS%d - "
+                     "N/slot: %d/%d, N/port: %d/%d, Power: %d/%dcW",
+                     occ_instance, mcs_unit, l_slot[0], l_slot[1],
+                     l_port[0], l_port[1], l_power[0], l_power[1]);
         }
-
-        //Set the attributes we'll send to OCC later
-        TMGT_INF("memPowerThrottleOverSub: MBA 0x%X:  N_PER_MBA = 0x%X, "
-                 "N_PER_CHIP = 0x%X",
-                 mba->getAttr<ATTR_HUID>(), nMBA, nChip);
-
-        mba->setAttr<ATTR_OVERSUB_N_PER_MBA>(nMBA);
-        mba->setAttr<ATTR_OVERSUB_N_PER_CHIP>(nChip);
-
+        TMGT_INF("memPowerThrottleOverSub: Total Oversubscription Memory"
+                 " Power: %dW", oversub_mem_power/100);
+    }
+    else
+    {
+        TMGT_ERR("memPowerThrottleOverSub: Failed to calculate redundant "
+                 "power memory throttles, rc=0x%04X",
+                 err->reasonCode());
     }
 
-}
+    return err;
+
+} // end memPowerThrottleOverSub()
 
 
 
-void calcMemThrottles()
+/**
+ * Run hardware procedures to calculate the throttles for power capping
+ *
+ * @param[in] i_fapi_target_list - list of FAPI MCS targets
+ * @param[in] i_utilization - Minimum utilization value required
+ */
+errlHndl_t memPowerThrottlePowercap(
+       std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
+                                    const uint8_t i_utilization)
+{
+    errlHndl_t err = NULL;
+
+    TMGT_INF("memPowerThrottlePowercap: Calculating throttles for util: %d",
+             i_utilization);
+
+    if (i_utilization != 0)
+    {
+        //Calculate the throttles
+        err = call_utils_to_throttle(i_fapi_target_list, i_utilization);
+    }
+    if (NULL == err)
+    {
+        uint32_t pcap_mem_power = 0;
+        for(auto & mcs_fapi_target : i_fapi_target_list)
+        {
+            TARGETING::Target * mcs_target =
+                reinterpret_cast<TARGETING::Target *>(mcs_fapi_target.get());
+            ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+            assert(proc_target != nullptr);
+            const uint8_t occ_instance =
+                proc_target->getAttr<TARGETING::ATTR_POSITION>();
+            uint8_t mcs_unit = 0xFF;
+            mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
+
+            // Read HWP output parms (if the procedure was run):
+            ATTR_POWERCAP_N_PER_MBA_type l_slot = {0xFF, 0xFF};
+            ATTR_POWERCAP_N_PER_CHIP_type l_port = {0xFF, 0xFF};
+            ATTR_POWERCAP_MEM_POWER_type l_power = {0};
+            if (i_utilization != 0)
+            {
+                FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
+                              mcs_fapi_target, l_slot);
+                FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT,
+                              mcs_fapi_target, l_port);
+                FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
+                              mcs_fapi_target, l_power);
+            }
+            // else N values will be 0xFF and will be overwritten below
+
+            // Validate pcap throttles are the lowest throttles
+            ATTR_N_PLUS_ONE_N_PER_MBA_type l_slot_redun = {0};
+            ATTR_N_PLUS_ONE_N_PER_CHIP_type l_port_redun = {0};
+            ATTR_N_PLUS_ONE_MEM_POWER_type l_power_redun = {0};
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(l_slot_redun);
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(l_port_redun);
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_MEM_POWER>(l_power_redun);
+            ATTR_OVERSUB_N_PER_MBA_type l_slot_oversub = {0};
+            ATTR_OVERSUB_N_PER_CHIP_type l_port_oversub = {0};
+            ATTR_OVERSUB_MEM_POWER_type l_power_oversub = {0};
+            mcs_target->tryGetAttr<ATTR_OVERSUB_N_PER_MBA>(l_slot_oversub);
+            mcs_target->tryGetAttr<ATTR_OVERSUB_N_PER_CHIP>(l_port_oversub);
+            mcs_target->tryGetAttr<ATTR_OVERSUB_MEM_POWER>(l_power_oversub);
+            unsigned int mca_index;
+            for (mca_index = 0; mca_index < TMGT_MAX_MCA_PER_MCS; ++mca_index)
+            {
+                if (l_slot[mca_index] > l_slot_oversub[mca_index])
+                {
+                    TMGT_INF("memPowerThrottlePowercap: MCS%d/MCA%d"
+                             " oversub throttle (%d) < pcap throttle (%d)",
+                             mcs_unit, mca_index,
+                             l_slot_oversub[mca_index], l_slot[mca_index]);
+                    l_slot[mca_index] = l_slot_oversub[mca_index];
+                    l_port[mca_index] = l_port_oversub[mca_index];
+                    l_power[mca_index] = l_power_oversub[mca_index];
+                }
+                if (l_slot[mca_index] > l_slot_redun[mca_index])
+                {
+                    TMGT_INF("memPowerThrottlePowercap: MCS%d/MCA%d - "
+                             " redun throttle (%d) < pcap throttle (%d)",
+                             mcs_unit, mca_index,
+                             l_slot_redun[mca_index], l_slot[mca_index]);
+                    l_slot[mca_index] = l_slot_redun[mca_index];
+                    l_port[mca_index] = l_port_redun[mca_index];
+                    l_power[mca_index] = l_power_redun[mca_index];
+                }
+            }
+
+            // Update MCS data (to be sent to OCC)
+            mcs_target->setAttr<ATTR_POWERCAP_N_PER_MBA>(l_slot);
+            mcs_target->setAttr<ATTR_POWERCAP_N_PER_CHIP>(l_port);
+            mcs_target->setAttr<ATTR_POWERCAP_MEM_POWER>(l_power);
+            pcap_mem_power += l_power[0] + l_power[1];
+
+            // Trace Results
+            TMGT_INF("memPowerThrottlePowercap: PCAP: OCC%d/MCS%d - "
+                     "N/slot: %d/%d, N/port: %d/%d, Power: %d/%dcW",
+                     occ_instance, mcs_unit, l_slot[0], l_slot[1],
+                     l_port[0], l_port[1], l_power[0], l_power[1]);
+        }
+        TMGT_INF("memPowerThrottlePowercap: Total PowerCap Memory"
+                 " Power: %dW", pcap_mem_power/100);
+    }
+    else
+    {
+        TMGT_ERR("memPowerThrottlePowercap: Failed to calculate powercap "
+                 "memory throttles, rc=0x%04X",
+                 err->reasonCode());
+    }
+
+    return err;
+
+} // end memPowerThrottlePowercap()
+
+
+
+errlHndl_t calcMemThrottles()
 {
     Target* sys = NULL;
-    TargetHandleList mbas;
 
     targetService().getTopLevelTarget(sys);
     assert(sys != NULL);
 
-    uint32_t nSafeModeMBA =
-        sys->getAttr<ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA>();
-
-    uint32_t nSafeModeChip =
-        sys->getAttr<ATTR_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP>();
-
-    uint8_t utilization =
+    uint8_t min_utilization =
         sys->getAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING>();
-
-    uint8_t efficiency =
+    if (min_utilization == 0)
+    {
+        uint32_t l_safe_n_per_mba =
+        sys->getAttr<ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT>();
+        TMGT_INF("MIN_MEM_UTILIZATION_THROTTLING is 0, so reading "
+                 "ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT:"
+                 " %d", l_safe_n_per_mba);
+        if (l_safe_n_per_mba == 0)
+        {
+            l_safe_n_per_mba = 10;
+            TMGT_ERR("ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT"
+                     " is 0!  Using %d", l_safe_n_per_mba);
+        }
+    }
+    const uint8_t efficiency =
         sys->getAttr<ATTR_OPEN_POWER_REGULATOR_EFFICIENCY_FACTOR>();
+    TMGT_INF("calcMemThrottles: Using min utilization=%d, efficiency=%d"
+             " percent", min_utilization, efficiency);
 
-    TMGT_INF("calcMemThrottles: Using nSafeModeMBA=0x%X, nSafeModeChip=0x%X",
-             nSafeModeMBA, nSafeModeChip);
+    //Get all functional MCSs
+    TargetHandleList mcs_list;
+    getAllChiplets(mcs_list, TYPE_MCS, true);
+    TMGT_INF("calcMemThrottles: found %d MCSs", mcs_list.size());
 
-    TMGT_INF("calcMemThrottles: Using utilization=%d, efficiency=%d percent",
-             utilization, efficiency);
+    // Create a FAPI Target list for HWP
+    std::vector < fapi2::Target< fapi2::TARGET_TYPE_MCS>> l_fapi_target_list;
+    for(const auto & mcs_target : mcs_list)
+    {
+        uint32_t mcs_huid = 0xFFFFFFFF;
+        uint8_t mcs_unit = 0xFF;
+        mcs_target->tryGetAttr<TARGETING::ATTR_HUID>(mcs_huid);
+        mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
 
+        // Query the functional MCAs for this MCS
+        TARGETING::TargetHandleList mca_list;
+        getChildAffinityTargetsByState(mca_list, mcs_target, CLASS_UNIT,
+                                       TYPE_MCA, UTIL_FILTER_FUNCTIONAL);
+        uint8_t occ_instance = 0xFF;
+        ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+        assert(proc_target != nullptr);
+        occ_instance = proc_target->getAttr<TARGETING::ATTR_POSITION>();
+        TMGT_INF("calcMemThrottles: OCC%d, MCS%d HUID:0x%08X has %d"
+                 " functional MCSs",
+                 occ_instance, mcs_unit, mcs_huid, mca_list.size());
 
-    //Get all functional MBAs
-    getAllChiplets(mbas, TYPE_MBA, true);
+        // Convert to FAPI target and add to list
+        fapi2::Target<fapi2::TARGET_TYPE_MCS> l_fapiTarget(mcs_target);
+        l_fapi_target_list.push_back(l_fapiTarget);
+    }
 
-    //Calculate Throttle settings for Over Temperature
-    memPowerThrottleOT(mbas, nSafeModeMBA, utilization);
+    errlHndl_t err = NULL;
+    do
+    {
+        //Calculate Throttle settings for Over Temperature
+        err = memPowerThrottleOT(l_fapi_target_list, min_utilization);
+        if (NULL != err) break;
 
-    //Calculate Throttle settings for Redundant Power
-    memPowerThrottleRedPower(mbas, nSafeModeMBA, nSafeModeChip,
-                             utilization, efficiency);
+        //Calculate Throttle settings for Nominal/Turbo
+        err = memPowerThrottleRedPower(l_fapi_target_list,
+                                       min_utilization, efficiency);
+        if (NULL != err) break;
 
-    //Calculate Throttle settings for Oversubscription
-    memPowerThrottleOverSub(mbas, nSafeModeMBA, nSafeModeChip,
-                            utilization, efficiency);
+        //Calculate Throttle settings for Oversubscription
+        err = memPowerThrottleOverSub(l_fapi_target_list,
+                                      min_utilization, efficiency);
+        if (NULL != err) break;
+
+        //Calculate Throttle settings for Power Capping
+        uint8_t pcap_min_utilization;
+        if (!sys->tryGetAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP>
+            (pcap_min_utilization))
+        {
+            pcap_min_utilization = 0;
+        }
+        err = memPowerThrottlePowercap(l_fapi_target_list,pcap_min_utilization);
+
+    } while(0);
+
+    if (err)
+    {
+        err->collectTrace(HTMGT_COMP_NAME);
+    }
+
+    return err;
 
 }
 }  // End namespace

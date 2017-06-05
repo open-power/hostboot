@@ -117,7 +117,7 @@ namespace HTMGT
     enum internalFlagTypes
     {
         FLAG_HALT_ON_OCC_SRC       = 0x00800000, // Prevent resets after SRC
-        FLAG_SEND_MEM_CONFIG       = 0x00000800, // Enables sending mem config
+        FLAG_DISABLE_MEM_CONFIG    = 0x00000800, // Disable sending mem config
         FLAG_HALT_ON_RESET_FAIL    = 0x00000100, // Stop additional resets
         FLAG_EXT_RESET_DISABLED    = 0x00000080, // Ignore opal-prd/BMC resets
         FLAG_DISABLE_MEM_THROTTLE  = 0x00000040,

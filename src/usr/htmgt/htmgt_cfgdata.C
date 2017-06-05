@@ -31,6 +31,7 @@
 #include "ipmi/ipmisensor.H"
 #include <htmgt/htmgt_reasoncodes.H>
 #include <fapi2_attribute_service.H>
+#include "htmgt_memthrottles.H"
 
 using namespace TARGETING;
 
@@ -159,10 +160,10 @@ namespace HTMGT
                                 break;
 
                             case OCC_CFGDATA_MEM_THROTTLE:
-                                if (int_flags_set(FLAG_SEND_MEM_CONFIG))
+                                if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
                                 {
                                     getMemThrottleMessageData(occ->getTarget(),
-                                                          cmdData, cmdDataLen);
+                                             occInstance, cmdData, cmdDataLen);
                                 }
                                 break;
 
@@ -238,10 +239,8 @@ enum occCfgDataVersion
 {
     OCC_CFGDATA_FREQ_POINT_VERSION    = 0x20,
     OCC_CFGDATA_APSS_VERSION          = 0x20,
-    OCC_CFGDATA_MEM_CONFIG_VERSION    = 0x21,
     OCC_CFGDATA_PCAP_CONFIG_VERSION   = 0x20,
     OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x20,
-    OCC_CFGDATA_MEM_THROTTLE_VERSION  = 0x20,
     OCC_CFGDATA_TCT_CONFIG_VERSION    = 0x20,
     OCC_CFGDATA_AVSBUS_CONFIG_VERSION = 0X01,
 };
@@ -289,7 +288,6 @@ void writeMemConfigData( uint8_t *& o_data,
     //Byte 11 Nimbus    DIMM Temp i2c address
     //        Cumulus   Reserved for Cumulus
     o_data[io_index++] = i_i2cDevAddr;
-
 }
 
 
@@ -301,7 +299,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
     assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
-    o_data[index++] = OCC_CFGDATA_MEM_CONFIG_VERSION;
+    o_data[index++] = 0x21; // version
 
     //System reference needed for these ATTR.
     Target* sys = nullptr;
@@ -328,7 +326,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
     //Byte 5:   Number of data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
 
-    if (int_flags_set(FLAG_SEND_MEM_CONFIG))
+    if (!int_flags_set(FLAG_DISABLE_MEM_CONFIG))
     {
         TargetHandleList centaurs;
         TargetHandleList mbas;
@@ -458,6 +456,7 @@ void getMemConfigMessageData(const TargetHandle_t i_occ,
 
 
 void getMemThrottleMessageData(const TargetHandle_t i_occ,
+                               const uint8_t i_occ_instance,
                                uint8_t* o_data, uint64_t & o_size)
 {
     uint8_t numSets = 0;
@@ -467,16 +466,16 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     assert(proc != nullptr);
     assert(o_data != nullptr);
 
-    TargetHandleList centaurs;
+    //Get all functional MCSs
+    TargetHandleList mcs_list;
+    getAllChiplets(mcs_list, TYPE_MCS, true);
+    TMGT_INF("calcMemThrottles: found %d MCSs", mcs_list.size());
 
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE;
-    o_data[index++] = OCC_CFGDATA_MEM_THROTTLE_VERSION;
+    o_data[index++] = 0x20; // version;
 
     //Byte 3:   Number of memory throttling data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
-
-
-    getChildAffinityTargets(centaurs, proc, CLASS_CHIP, TYPE_MEMBUF);
 
     //Next, the following format repeats per set/MBA:
     //Byte 0:       Cumulus: Centaur position 0-7
@@ -489,49 +488,112 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     //Bytes 8-9:    Turbo N_PER_CHIP
     //Bytes 10-11:  Max mem power with throttle @Turbo
     //Bytes 12-13:  Power Capping N_PER_MBA
-    //Bytes 14-15:  Power Capping N_PER_MBA
+    //Bytes 14-15:  Power Capping N_PER_CHIP
     //Bytes 16-17:  Max mem power with throttle @PowerCapping
     //Bytes 18-19:  Nominal Power N_PER_MBA
     //Bytes 20-21:  Nominal Power N_PER_CHIP
     //Bytes 22-23:  Max mem power with throttle @Nominal
     //Bytes 24-29:  Reserved
 
-    // Hard coding until we can get mem throttle cfg data
-    for (uint8_t entry = 0; entry < 2; ++entry)
+    for(const auto & mcs_target : mcs_list)
     {
-        o_data[index++] = 0x00; //MC01
-        o_data[index++] = entry; // Port
-        o_data[index++] = 0x44; // Min N Per MBA
-        o_data[index++] = 0x44;
-        o_data[index++] = 0x01; // Max mem pwr at min throttle
-        o_data[index++] = 0x00;
-        o_data[index++] = 0x45; // Turbo N per MBA
-        o_data[index++] = 0x56;
-        o_data[index++] = 0x55; // Turbo N per chip
-        o_data[index++] = 0x5F;
-        o_data[index++] = 0x01; // Max mem pwr at turbo
-        o_data[index++] = 0x10;
-        o_data[index++] = 0x45; // Power capping N per MBA
-        o_data[index++] = 0x56;
-        o_data[index++] = 0x55; // Power capping N per chip
-        o_data[index++] = 0x5F;
-        o_data[index++] = 0x01; // Max mem pwr at power capping
-        o_data[index++] = 0x20;
-        o_data[index++] = 0x45; // Nominal N per MBA
-        o_data[index++] = 0x56;
-        o_data[index++] = 0x55; // Nominal N per chip
-        o_data[index++] = 0x5F;
-        o_data[index++] = 0x01; // Max mem pwr at Nominal
-        o_data[index++] = 0x30;
-        o_data[index++] = 0x00; // reserved
-        o_data[index++] = 0x00;
-        o_data[index++] = 0x00;
-        o_data[index++] = 0x00;
-        o_data[index++] = 0x00;
-        o_data[index++] = 0x00;
-        ++numSets ;
-    }
+        uint8_t mcs_unit = 0xFF;
+        if (!mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit))
+        {
+            uint32_t mcs_huid = 0xFFFFFFFF;
+            mcs_target->tryGetAttr<TARGETING::ATTR_HUID>(mcs_huid);
+            TMGT_ERR("calcMemThrottles: Unable to determine MCS unit for HUID"
+                     " 0x%04X", mcs_huid);
+            continue;
+        }
+        ConstTargetHandle_t proc_target = getParentChip(mcs_target);
+        assert(proc_target != nullptr);
 
+        // Make sure this MCS is for the current OCC/Proc
+        if (i_occ_instance == proc_target->getAttr<TARGETING::ATTR_POSITION>())
+        {
+            // Read the throttle and power values for this MCS
+            ATTR_OT_MIN_N_PER_MBA_type npm_min;
+            ATTR_OT_MEM_POWER_type power_min;
+            mcs_target->tryGetAttr<ATTR_OT_MIN_N_PER_MBA>(npm_min);
+            mcs_target->tryGetAttr<ATTR_OT_MEM_POWER>(power_min);
+            ATTR_N_PLUS_ONE_N_PER_MBA_type npm_redun;
+            ATTR_N_PLUS_ONE_N_PER_CHIP_type npc_redun;
+            ATTR_N_PLUS_ONE_MEM_POWER_type power_redun;
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(npm_redun);
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(npc_redun);
+            mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_MEM_POWER>(power_redun);
+            ATTR_POWERCAP_N_PER_MBA_type npm_pcap;
+            ATTR_POWERCAP_N_PER_CHIP_type npc_pcap;
+            ATTR_POWERCAP_MEM_POWER_type power_pcap;
+            mcs_target->tryGetAttr<ATTR_POWERCAP_N_PER_MBA>(npm_pcap);
+            mcs_target->tryGetAttr<ATTR_POWERCAP_N_PER_CHIP>(npc_pcap);
+            mcs_target->tryGetAttr<ATTR_POWERCAP_MEM_POWER>(power_pcap);
+
+            // Query the functional MCAs for this MCS
+            TARGETING::TargetHandleList mca_list;
+            getChildAffinityTargetsByState(mca_list, mcs_target, CLASS_UNIT,
+                                           TYPE_MCA, UTIL_FILTER_FUNCTIONAL);
+            for(const auto & mca_target : mca_list)
+            {
+                // unit identifies unique MCA under a processor
+                uint8_t mca_unit = 0xFF;
+                mca_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mca_unit);
+                const uint8_t mca_rel_pos = mca_unit % 2;
+                if ((npm_min[mca_rel_pos] == 0) ||
+                    (npm_redun[mca_rel_pos] == 0) ||
+                    (npm_pcap[mca_rel_pos] == 0))
+                {
+                    TMGT_ERR("calcMemThrottles: MCS%d/MCA%d [%d]"
+                             " - Ignored due to null throttle",
+                             mcs_unit, mca_unit, mca_rel_pos);
+                    TMGT_ERR("N/slot: Min=%d, Turbo=%d, Pcap=%d",
+                             npm_min[mca_rel_pos], npm_redun[mca_rel_pos],
+                             npm_pcap[mca_rel_pos]);
+                    continue;
+                }
+                if (mca_rel_pos >= TMGT_MAX_MCA_PER_MCS)
+                {
+                    TMGT_ERR("calcMemThrottles: OCC%d / MCS%d / MCA%d"
+                             " - Ignored due invalid MCA position: %d",
+                             i_occ_instance, mcs_unit, mca_unit, mca_rel_pos);
+                    continue;
+                }
+                TMGT_INF("calcMemThrottles: OCC%d / MCS%d / MCA%d [%d]",
+                         i_occ_instance, mcs_unit, mca_unit, mca_rel_pos);
+                // OCC expects phyMC=0 for (MCS0-1) and 1 for (MCS2-3)
+                //  MCS   MCA  MCA    OCC   OCC
+                // unit  unit relPos phyMC phyPort
+                //   0     0    0      0     0
+                //   0     1    1      0     1
+                //   1     2    0      0     2
+                //   1     3    1      0     3
+                //   2     4    0      1     0
+                //   2     5    1      1     1
+                //   3     6    0      1     2
+                //   3     7    1      1     3
+                o_data[index] = mcs_unit >> 1; // MC (0-1)
+                o_data[index+1] = mca_unit % 4; // Phy Port (0-3)
+                // Minimum
+                UINT16_PUT(&o_data[index+ 2], npm_min[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+ 4], power_min[mca_rel_pos]);
+                // Turbo
+                UINT16_PUT(&o_data[index+ 6], npm_redun[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+ 8], npc_redun[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+10], power_redun[mca_rel_pos]);
+                // Power Capping
+                UINT16_PUT(&o_data[index+12], npm_pcap[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+14], npc_pcap[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+16], power_pcap[mca_rel_pos]);
+                // Nominal (same as Turbo)
+                UINT16_PUT(&o_data[index+18], npm_redun[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+20], npc_redun[mca_rel_pos]);
+                UINT16_PUT(&o_data[index+22], power_redun[mca_rel_pos]);
+                index += 30;
+                ++numSets ;
+            }
+        }
+    }
 
     TMGT_INF("getMemThrottleMessageData: returning %d"
              " sets of data for OCC 0x%X",
@@ -669,8 +731,13 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     index += 2;
 
     // Quick Power Drop Power Cap
-    ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap =
-        sys->getAttr<ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>();
+    ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS_type qpd_pcap;
+    if ( ! sys->tryGetAttr
+         <ATTR_OPEN_POWER_N_BULK_POWER_LIMIT_WATTS>(qpd_pcap))
+    {
+        // attr does not exist, so disable by sending 0
+        qpd_pcap = 0;
+    }
     UINT16_PUT(&o_data[index], qpd_pcap);
     index += 2;
 
@@ -846,7 +913,7 @@ void getThermalControlMessageData(uint8_t* o_data,
         l_numSets++;
     }
 
-    // Dimm
+    // DIMM
     o_data[index++] = CFGDATA_FRU_TYPE_DIMM;
     l_DVFS_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C>();
     l_ERR_temp =l_sys->getAttr<ATTR_OPEN_POWER_DIMM_ERROR_TEMP_DEG_C>();
@@ -863,6 +930,19 @@ void getThermalControlMessageData(uint8_t* o_data,
     o_data[index++] = OCC_NOT_DEFINED;     //PM_ERROR
     o_data[index++] = l_timeout;
     l_numSets++;
+
+    // VRM
+    l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_VRM_READ_TIMEOUT_SEC>();
+    if (l_timeout != 0)
+    {
+        o_data[index++] = CFGDATA_FRU_TYPE_VRM;
+        o_data[index++] = 0xFF;
+        o_data[index++] = 0xFF;
+        o_data[index++] = 0xFF;
+        o_data[index++] = 0xFF;
+        o_data[index++] = l_timeout;
+        l_numSets++;
+    }
 
     o_data[l_numSetsOffset] = l_numSets;
     o_size = index;
