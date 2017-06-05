@@ -55,6 +55,7 @@ namespace ISTEP
         MOD_VOLTAGE_CONFIG                                = 0x13,
         MOD_PM_VERIFY_OCC_CHKPT                           = 0x14,
         MOD_UPDATE_REDUNDANT_TPM                          = 0x15,
+        MOD_PROC_EXIT_CACHE_CONTAINED                     = 0x16,
     };
 
     /**
@@ -103,6 +104,7 @@ namespace ISTEP
         RC_SLAVE_PROC_BACKUP_HASH_READ_FAIL      = ISTEP_COMP_ID | 0x26,
         RC_SLAVE_PROC_CBS_CONTROL_READ_FAIL      = ISTEP_COMP_ID | 0x27,
         RC_PROC_SECURITY_STATE_MISMATCH          = ISTEP_COMP_ID | 0x28,
+        RC_MIN_HW_CHECK_FAILED                   = ISTEP_COMP_ID | 0x29,
     };
 
 };
