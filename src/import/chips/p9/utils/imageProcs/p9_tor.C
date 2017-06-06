@@ -129,7 +129,7 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
             return TOR_INVALID_CHIPLET;
         }
 
-        l_num_variant = (i_RingVariant == OVERRIDE) ? 1 : l_num_variant;
+        l_num_variant = (i_RingVariant == OVERRIDE || i_RingVariant == OVERLAY) ? 1 : l_num_variant;
 
         if (i_dbgl > 1)
         {
@@ -157,7 +157,7 @@ int get_ring_from_sbe_image( void*           i_ringSection,     // Ring section 
                 if ((strcmp( (ring_id_list_common + i)->ringName,
                              RING_PROPERTIES[i_ringId].iv_name) == 0)
                     && ( i_RingVariant == ring_variant_order->variant[iVariant]
-                         || (i_RingVariant == OVERRIDE && i_magic == P9_XIP_MAGIC_SEEPROM)))
+                         || ( (i_RingVariant == OVERRIDE || i_RingVariant == OVERLAY) && i_magic == P9_XIP_MAGIC_SEEPROM)))
                 {
                     strcpy(o_ringName, RING_PROPERTIES[i_ringId].iv_name);
 
