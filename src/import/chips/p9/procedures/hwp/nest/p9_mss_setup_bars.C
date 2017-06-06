@@ -282,7 +282,7 @@ fapi2::ReturnCode getMcMemSize(
 
         // Get the amount of memory behind this MCA target
         FAPI_TRY(mss::eff_memory_size(l_mca, l_mcaSize),
-                 "Error returned from eff_memory_size, l_rc 0x%.8X",
+                 "Error returned from eff_memory_size - MCA, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
         FAPI_INF("MCA %u: Total DIMM size %lu GB", l_mcaPos, l_mcaSize);
@@ -315,21 +315,10 @@ fapi2::ReturnCode getMcMemSize(
                  "Error getting ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
 
-//TODO: RTC 173371
-//      Need Memory team's supports for function to be called on a DMI target.
-#if 0
         // Get the amount of memory behind this DMI target
         FAPI_TRY(mss::eff_memory_size(l_dmi, l_dmiSize),
-                 "Error returned from eff_memory_size, l_rc 0x%.8X",
+                 "Error returned from eff_memory_size - DMI, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
-#endif
-
-//TODO: RTC 173371
-//      Fake data to test code on an AWAN
-        if ( (l_dmiPos >= 2) && (l_dmiPos <= 5) )
-        {
-            l_dmiSize = 64;
-        }
 
         FAPI_INF("DMI %u: Total DIMM size %lu GB", l_dmiPos, l_dmiSize);
         o_mcSize += l_dmiSize;

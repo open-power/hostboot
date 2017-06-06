@@ -23,8 +23,10 @@
 #
 # IBM_PROLOG_END_TAG
 
+# Include the macros and things for MSS procedures
 PROCEDURE=p9_mss_eff_grouping
+lib$(PROCEDURE)_DEPLIBS+=cen
 OBJS+=p9_fbc_utils.o
-$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/memory/)
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)
+

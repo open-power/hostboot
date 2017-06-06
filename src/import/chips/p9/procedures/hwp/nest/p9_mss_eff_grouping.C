@@ -391,7 +391,7 @@ struct EffGroupingDmiAttrs
     uint8_t iv_unitPos = 0;
 
     // Dimm size behind this DMI
-    uint32_t iv_dimmSize = 0;
+    uint64_t iv_dimmSize = 0;
 
     // The membuf chip associated with this DMI
     // (for deconfiguring if cannot group)
@@ -415,29 +415,15 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
         iv_membuf = l_attachedMembuf.front();
 
         // Get the amount of memory behind this DMI target
-
-//TODO: RTC 173371
-//      Need Memory team's supports for function to be called on a DMI target.
-#if 0
         FAPI_TRY(mss::eff_memory_size(i_target, iv_dimmSize),
                  "Error returned from eff_memory_size, l_rc 0x%.8X",
                  (uint64_t)fapi2::current_err);
-#endif
-
     }
 
     // Get the DMI unit position
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, iv_unitPos),
              "Error getting DMI ATTR_CHIP_UNIT_POS, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
-
-
-//TODO: RTC 173371
-//      Force data for testing on AWAN
-    if ( (iv_unitPos >= 2) && (iv_unitPos <= 5) )
-    {
-        iv_dimmSize = 64;
-    }
 
     // Display this DMI's attribute info
     FAPI_INF("EffGroupingDmiAttrs::getAttrs: DMI %d, Centaur attached %d, "

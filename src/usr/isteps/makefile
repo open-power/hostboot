@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -48,6 +48,10 @@ OBJS += hwpisteperror.o
 OBJS += hwpistepud.o
 OBJS += istepHelperFuncs.o
 OBJS += pbusLinkSvc.o
+
+#TODO: RTC 176018
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+OBJS += hb_temp_p9c_hwp_supports.o
 
 OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
 
