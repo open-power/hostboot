@@ -49,11 +49,11 @@ namespace mss
 ///
 /// @brief raw card C1 settings
 ///
-rcw_settings rdimm_rc_c1( 0x00, // RC00
-                          0x00, // RC01 (C might be the right answer?)
+rcw_settings rdimm_rc_c1( 0x02, // RC00
+                          0x0C, // RC01
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x00, // RC09
+                          0x0C, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
                           0x00, // RC0F
@@ -71,11 +71,11 @@ rcw_settings rdimm_rc_c1( 0x00, // RC00
 /// @brief raw card C2 settings
 /// @note same settings as C1
 ///
-rcw_settings rdimm_rc_c2( 0x00, // RC00
-                          0x00, // RC01 (C might be the right answer?)
+rcw_settings rdimm_rc_c2( 0x02, // RC00
+                          0x0C, // RC01
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x00, // RC09
+                          0x0C, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
                           0x00, // RC0F
@@ -92,11 +92,11 @@ rcw_settings rdimm_rc_c2( 0x00, // RC00
 ///
 /// @brief raw card A1 settings
 ///
-rcw_settings  rdimm_rc_a1( 0x00, // RC00
-                           0x00, // RC01 (C might be the right answer?)
+rcw_settings  rdimm_rc_a1( 0x02, // RC00
+                           0x00, // RC01
                            0x00, // RC02
                            0x0F, // RC06_07
-                           0x00, // RC09
+                           0x0C, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
                            0x00, // RC0F
@@ -114,11 +114,11 @@ rcw_settings  rdimm_rc_a1( 0x00, // RC00
 /// @brief raw card B1 settings
 /// @note need to verify, copy from b2, need to verify with b1 annex
 ///
-rcw_settings rdimm_rc_b1( 0x00, // RC00
-                          0x00, // RC01 (C might be the right answer?)
+rcw_settings rdimm_rc_b1( 0x02, // RC00
+                          0x00, // RC01
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x00, // RC09 //Should be set in eff_config for CKE power DOWN modep:q
+                          0x0C, // RC09 Could be set in eff_config for CKE power DOWN mode
                           0x0E, // RC0B
                           0x00, // RC0C
                           0x00, // RC0F
@@ -135,11 +135,11 @@ rcw_settings rdimm_rc_b1( 0x00, // RC00
 ///
 /// @brief raw card B2 settings
 ///
-rcw_settings rdimm_rc_b2( 0x00, // RC00
-                          0x00, // RC01 (C might be the right answer?)
+rcw_settings rdimm_rc_b2( 0x02, // RC00
+                          0x00, // RC01
                           0x00, // RC02
                           0x0F, // RC06_07
-                          0x00, // RC09
+                          0x0C, // RC09
                           0x0E, // RC0B
                           0x00, // RC0C
                           0x00, // RC0F
@@ -156,11 +156,11 @@ rcw_settings rdimm_rc_b2( 0x00, // RC00
 ////
 /// @brief raw card for custom dimms
 ///
-rcw_settings rdimm_rc_custom ( 0x00, // RC00
-                               0x00, // RC01 (C might be the right answer?)
+rcw_settings rdimm_rc_custom ( 0x02, // RC00
+                               0x00, // RC01
                                0x00, // RC02
                                0x0F, // RC06_07
-                               0x00, // RC09
+                               0x0C, // RC09
                                0x0E, // RC0B
                                0x00, // RC0C
                                0x00, // RC0F
@@ -174,14 +174,14 @@ rcw_settings rdimm_rc_custom ( 0x00, // RC00
                                0x00, // RCAX
                                0x07);// RCBX
 
-//
+///
 /// @brief raw card VBU settings
 ///
-rcw_settings rdimm_rc_vbu( 0x00, // RC00
+rcw_settings rdimm_rc_vbu( 0x02, // RC00
                            0x00, // RC01
                            0x00, // RC02
                            0x0F, // RC06_07
-                           0x00, // RC09
+                           0x0C, // RC09
                            0x0E, // RC0B
                            0x00, // RC0C
                            0x00, // RC0F
