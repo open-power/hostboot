@@ -24,8 +24,7 @@
 # IBM_PROLOG_END_TAG
 
 # Include the macros and things for MSS procedures
--include 00common.mk
-
 PROCEDURE=p9_mss_setup_bars
-$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
+lib$(PROCEDURE)_DEPLIBS+=cen
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH))
 $(call BUILD_PROCEDURE)
