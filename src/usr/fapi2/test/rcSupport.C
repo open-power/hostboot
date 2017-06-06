@@ -156,6 +156,25 @@ fapi2::ReturnCode p9_deconfigCallout(
 }
 
 //******************************************************************************
+// p9_deconfig_callout_none
+// Force a test return code that deconfigures the target
+//******************************************************************************
+fapi2::ReturnCode p9_deconfigCalloutNone(
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target)
+{
+    FAPI_INF("Enter p9_deconfigCalloutNone...");
+
+    FAPI_ASSERT(0,
+            fapi2::TEST_ERROR_DECONFIG_NO_CALLOUT().set_TARGET(i_dimm_target));
+
+  fapi_try_exit:
+
+    FAPI_INF("Exiting p9_deconfigCalloutNone...");
+
+    return fapi2::current_err;
+}
+
+//******************************************************************************
 // p9_procedureCallout
 // Force a test return code that creates a procedure callout
 //******************************************************************************

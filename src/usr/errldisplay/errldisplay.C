@@ -446,6 +446,7 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  GARD Error Type          : %s", #_t
         {
 #define case_PRIORITY(_type) \
 case HWAS::_type: CONSOLE::displayf(NULL, "  Priority                 : %s", #_type); break;
+            case_PRIORITY(SRCI_PRIORITY_NONE)
             case_PRIORITY(SRCI_PRIORITY_LOW)
             case_PRIORITY(SRCI_PRIORITY_MEDC)
             case_PRIORITY(SRCI_PRIORITY_MEDB)

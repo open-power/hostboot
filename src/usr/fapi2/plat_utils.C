@@ -88,7 +88,8 @@ HWAS::callOutPriority xlateCalloutPriority(
 
     const HWAS::callOutPriority HWAS_PRI[] = {HWAS::SRCI_PRIORITY_LOW,
                                               HWAS::SRCI_PRIORITY_MED,
-                                              HWAS::SRCI_PRIORITY_HIGH};
+                                              HWAS::SRCI_PRIORITY_HIGH,
+                                              HWAS::SRCI_PRIORITY_NONE};
 
     if (l_index < (sizeof(HWAS_PRI)/sizeof(HWAS::callOutPriority)))
     {

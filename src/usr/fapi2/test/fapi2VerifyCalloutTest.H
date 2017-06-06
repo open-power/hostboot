@@ -86,5 +86,18 @@ public:
             TS_FAIL("rcTestCalloutDeconfig. Fail l_res=%d", l_res);
         }
     }
+
+    /*
+     * @brief Test hw callout (none priority) with deconfig
+     */
+    void testCalloutNoneDeconfig(void)
+    {
+        uint32_t l_res = rcTestCalloutNoneDeconfig();
+
+        if(l_res != 0)
+        {
+            TS_FAIL("rcTestCalloutNoneDeconfig. Fail l_res=%d", l_res);
+        }
+    }
 };
 #endif
