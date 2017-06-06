@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -30,7 +30,7 @@ use Data::Dumper;
 use File::Basename;
 use Cwd qw(abs_path cwd);
 use lib dirname abs_path($0);
-use PnorUtils qw(loadPnorLayout checkFile);
+use PnorUtils qw(loadPnorLayout checkFile displayPnorLayout);
 use Getopt::Long qw(:config pass_through);
 
 ################################################################################
@@ -140,58 +140,5 @@ sub execute_display
     my $rc = loadPnorLayout($pnorFile, \%pnorLayout, \%PhysicalOffsets);
     die "Error detected from call to loadLayout()" if($rc);
 
-    if (!$verbose)
-    {
-        print "-------------------------------------------------------- \n";
-        print "Name-physicalOffset-physicalRegionSize-physicalRegionEnd \n";
-        print "-------------------------------------------------------- \n";
-    }
-
-    my $curOffset = 0;
-    my $totalFree = 0;
-    # Iterate through all sections of PNOR, including TOC's
-    foreach my $section (sort {$a <=> $b} keys %{$pnorLayout{sections}})
-    {
-        # Get hex format for each value
-        my $offset = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalOffset});
-        my $size = sprintf("0x%X",$pnorLayout{sections}{$section}{physicalRegionSize});
-        my $end = sprintf("0x%X",hex($offset)+hex($size));
-
-        # Check if there is a gap between sections
-        if ($gaps && ($curOffset < hex($offset)))
-        {
-            print "  > Gap Found: addr = ".sprintf("0x%X",$curOffset);
-
-            # Display address and size of gap
-            my $gapSize = hex($offset)-$curOffset;
-            print " size = ".sprintf("0x%X",$gapSize)."\n";
-            $totalFree += $gapSize;
-            $curOffset = hex($offset) + hex($size);
-        }
-        else
-        {
-            $curOffset += hex($size);
-        }
-
-        # Print sections
-        if ($verbose)
-        {
-            print $pnorLayout{sections}{$section}{eyeCatch}."\n";
-            print Dumper $pnorLayout{sections}{$section};
-            print "\n";
-        }
-        else
-        {
-            print $pnorLayout{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
-        }
-    }
-
-    # Display total free space
-    if($gaps)
-    {
-        my $hexVal = sprintf("0x%X",$totalFree);
-        my $kiloBytes = $totalFree/1024;
-        print "\n---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
-        print " (".$hexVal.")\n";
-    }
+    displayPnorLayout(\%pnorLayout, $gaps, $verbose);
 }
