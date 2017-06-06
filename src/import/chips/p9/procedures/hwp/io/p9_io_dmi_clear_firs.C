@@ -54,54 +54,52 @@
 //-----------------------------------------------------------------------------
 //  Definitions
 //-----------------------------------------------------------------------------
-fapi2::ReturnCode io_rx_fir_reset(
-    const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target);
+fapi2::ReturnCode io_dmi_proc_rx_fir_reset(const DMI_PROC_TGT& i_tgt);
+fapi2::ReturnCode io_dmi_proc_tx_fir_reset(const DMI_PROC_TGT& i_tgt);
 
-fapi2::ReturnCode io_tx_fir_reset(
-    const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target);
+fapi2::ReturnCode io_dmi_cn_rx_fir_reset(const DMI_CN_TGT& i_tgt);
+fapi2::ReturnCode io_dmi_cn_tx_fir_reset(const DMI_CN_TGT& i_tgt);
 
 /**
  * @brief Clears PHY Rx/Tx FIRs on the DMI(EDI+) specified target.  The FIRs
  *   are cleared by toggling a rx & tx fir reset bit.
- * @param[in] i_target         FAPI2 Target
+ * @param[in] i_tgt         FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode p9_io_dmi_clear_firs(
-    const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target)
+fapi2::ReturnCode p9_io_dmi_proc_clear_firs(const DMI_PROC_TGT& i_tgt)
 {
-    FAPI_IMP("I/O Start DMI Clear FIRs");
+    FAPI_IMP("I/O Start DMI Proc Clear FIRs");
 
-    FAPI_TRY(io_tx_fir_reset(i_target), "Tx Reset Failed");
+    FAPI_TRY(io_dmi_proc_tx_fir_reset(i_tgt), "Tx Reset Failed");
 
-    FAPI_TRY(io_rx_fir_reset(i_target), "Rx Reset Failed");
+    FAPI_TRY(io_dmi_proc_rx_fir_reset(i_tgt), "Rx Reset Failed");
 
 fapi_try_exit:
-    FAPI_IMP("I/O End DMI Clear FIRs");
+    FAPI_IMP("I/O End DMI Proc Clear FIRs");
     return fapi2::current_err;
 }
 
 /**
  * @brief This function resets the Rx Firs on a EDI+ DMI
- * @param[in] i_target       FAPI2 Target
+ * @param[in] i_tgt       FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode io_rx_fir_reset(
-    const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target)
+fapi2::ReturnCode io_dmi_proc_rx_fir_reset(const DMI_PROC_TGT& i_tgt)
 {
     const uint8_t GRP3 = 3;
     const uint8_t LN0 = 0;
     uint64_t l_data = 0;
 
-    FAPI_TRY(io::read(EDIP_RX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::read(EDIP_RX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_RX_FIR_RESET, 0, l_data);
-    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_RX_FIR_RESET, 1, l_data);
-    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_RX_FIR_RESET, 0, l_data);
-    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_RX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -109,26 +107,97 @@ fapi_try_exit:
 
 /**
  * @brief This function resets the Tx Firs on a EDI+ DMI
- * @param[in] i_target       FAPI2 Target
+ * @param[in] i_tgt       FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode io_tx_fir_reset(
-    const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target)
+fapi2::ReturnCode io_dmi_proc_tx_fir_reset(const DMI_PROC_TGT& i_tgt)
 {
     const uint8_t GRP3 = 3;
     const uint8_t LN0 = 0;
     uint64_t l_data = 0;
 
-    FAPI_TRY(io::read(EDIP_TX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::read(EDIP_TX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_TX_FIR_RESET, 0, l_data);
-    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_TX_FIR_RESET, 1, l_data);
-    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
 
     io::set (EDIP_TX_FIR_RESET, 0, l_data);
-    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_target, GRP3, LN0, l_data));
+    FAPI_TRY(io::write(EDIP_TX_FIR_RESET, i_tgt, GRP3, LN0, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+/**
+ * @brief Clears PHY Rx/Tx FIRs on the DMI Centaur(EDI) specified target.  The FIRs
+ *   are cleared by toggling a rx & tx fir reset bit.
+ * @param[in] i_tgt         FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode p9_io_dmi_cn_clear_firs(const DMI_CN_TGT& i_tgt)
+{
+    FAPI_IMP("I/O Start DMI Proc Clear FIRs");
+
+    FAPI_TRY(io_dmi_cn_tx_fir_reset(i_tgt), "Tx Reset Failed");
+
+    FAPI_TRY(io_dmi_cn_rx_fir_reset(i_tgt), "Rx Reset Failed");
+
+fapi_try_exit:
+    FAPI_IMP("I/O End DMI Proc Clear FIRs");
+    return fapi2::current_err;
+}
+
+/**
+ * @brief This function resets the Rx Firs on a EDI DMI Centaur
+ * @param[in] i_tgt       FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode io_dmi_cn_rx_fir_reset(const DMI_CN_TGT& i_tgt)
+{
+    const uint8_t GRP0 = 0;
+    const uint8_t LN0 = 0;
+    uint64_t l_data = 0;
+
+    FAPI_TRY(io::read(EDI_RX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_RX_FIR_RESET, 0, l_data);
+    FAPI_TRY(io::write(EDI_RX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_RX_FIR_RESET, 1, l_data);
+    FAPI_TRY(io::write(EDI_RX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_RX_FIR_RESET, 0, l_data);
+    FAPI_TRY(io::write(EDI_RX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+/**
+ * @brief This function resets the Tx Firs on a EDI DMI Centaur
+ * @param[in] i_tgt       FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode io_dmi_cn_tx_fir_reset(const DMI_CN_TGT& i_tgt)
+{
+    const uint8_t GRP0 = 0;
+    const uint8_t LN0 = 0;
+    uint64_t l_data = 0;
+
+    FAPI_TRY(io::read(EDI_TX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_TX_FIR_RESET, 0, l_data);
+    FAPI_TRY(io::write(EDI_TX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_TX_FIR_RESET, 1, l_data);
+    FAPI_TRY(io::write(EDI_TX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
+
+    io::set (EDI_TX_FIR_RESET, 0, l_data);
+    FAPI_TRY(io::write(EDI_TX_FIR_RESET, i_tgt, GRP0, LN0, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
