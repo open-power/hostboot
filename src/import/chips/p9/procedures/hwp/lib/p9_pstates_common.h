@@ -91,6 +91,7 @@
 
 /// VPD #V Data from keyword (eg VPD order)
 #define NUM_OP_POINTS 4
+#define NUM_JUMP_VALUES 4
 #define NUM_THRESHOLD_POINTS 4
 #define VPD_PV_POWERSAVE   1
 #define VPD_PV_NOMINAL     0

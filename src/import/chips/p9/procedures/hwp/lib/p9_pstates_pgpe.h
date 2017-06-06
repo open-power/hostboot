@@ -280,6 +280,24 @@ typedef struct
     /// Precalculated Voltage-Pstates Slopes
     uint16_t VPStateSlopes[NUM_VPD_PTS_SET][VPD_NUM_SLOPES_REGION];
 
+    // Biased Compare VID operating points
+    CompareVIDPoints vid_point_set[NUM_OP_POINTS];
+
+    // Biased Threshold operation points
+    uint8_t threshold_set[NUM_OP_POINTS][NUM_THRESHOLD_POINTS];
+
+    //pstate-volt compare slopes
+    int16_t PsVIDCompSlopes[VPD_NUM_SLOPES_REGION];
+
+    //pstate-volt threshold slopes
+    int16_t PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
+
+    //Jump value operating points
+    uint8_t jump_value_set[NUM_OP_POINTS][NUM_JUMP_VALUES];
+
+    //Jump-value slopes
+    int16_t PsVDMJumpSlopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
+
 
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 

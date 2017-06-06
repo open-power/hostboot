@@ -524,11 +524,23 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         if (attr.attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
         {
-           p9_pstate_compute_vdm_threshold_pts(l_poundw_data, &l_localppb);
+            p9_pstate_compute_vdm_threshold_pts(l_poundw_data, &l_localppb);
 
+           // VID slope calculation
            p9_pstate_compute_PsVIDCompSlopes_slopes(l_poundw_data, &l_localppb, l_biased_pstate);
 
+           // VDM threshold slope calculation
            p9_pstate_compute_PsVDMThreshSlopes(&l_localppb, l_biased_pstate);
+           // VDM Jump slope calculation
+           p9_pstate_compute_PsVDMJumpSlopes (&l_localppb, l_biased_pstate);
+
+
+           //Initializing threshold values for GPPB
+           memcpy (l_globalppb.vid_point_set,l_localppb.vid_point_set,sizeof(l_localppb.vid_point_set));
+           memcpy (l_globalppb.threshold_set, l_localppb.threshold_set, sizeof(l_localppb.threshold_set));
+           memcpy (l_globalppb.PsVIDCompSlopes, l_localppb.PsVIDCompSlopes,sizeof(l_localppb.PsVIDCompSlopes));
+           memcpy (l_globalppb.PsVDMThreshSlopes, l_localppb.PsVDMThreshSlopes, sizeof(l_localppb.PsVDMThreshSlopes));
+           memcpy (l_globalppb.PsVDMJumpSlopes, l_localppb.PsVDMJumpSlopes, sizeof(l_localppb.PsVDMJumpSlopes));
         }
         // -----------------------------------------------
         // OCC parameter block
@@ -2177,7 +2189,7 @@ void p9_pstate_compute_PsV_slopes(VpdOperatingPoint i_operating_points[][4],
             !(i_operating_points[pt_set][NOMINAL].pstate) ||
             !(i_operating_points[pt_set][TURBO].pstate))
         {
-            FAPI_ERR("PSTATE value shouldn't be zero for %s (%d)", vpdSetStr[pt_set], pt_set);
+            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s (%d)", vpdSetStr[pt_set], pt_set);
             break;
         }
 
@@ -2233,7 +2245,7 @@ void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
             !(i_operating_points[pt_set][NOMINAL].pstate) ||
             !(i_operating_points[pt_set][TURBO].pstate))
         {
-            FAPI_ERR("PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
+            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero for %s", vpdSetStr[pt_set]);
             return;
         }
 
@@ -2282,11 +2294,12 @@ void p9_pstate_compute_PStateV_slope(VpdOperatingPoint i_operating_points[][4],
 void
 gppb_print(GlobalPstateParmBlock* i_gppb)
 {
-
     static const uint32_t   BUFFSIZE = 256;
     char                    l_buffer[BUFFSIZE];
     char                    l_temp_buffer[BUFFSIZE];
-
+    const char*     pv_op_str[NUM_OP_POINTS] = PV_OP_ORDER_STR;
+    const char*     thresh_op_str[NUM_THRESHOLD_POINTS] = VPD_THRESHOLD_ORDER_STR;
+    const char*     slope_region_str[VPD_NUM_SLOPES_REGION] = VPD_OP_SLOPES_REGION_ORDER_STR;
     // Put out the endian-corrected scalars
     FAPI_INF("---------------------------------------------------------------------------------------");
     FAPI_INF("Global Pstate Parameter Block @ %p", i_gppb);
@@ -2503,6 +2516,64 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
             sprintf(l_temp_buffer, "%6s%04X%7s ",
                     " ",revle16(i_gppb->VPStateSlopes[i][j])," ");
             strcat(l_buffer, l_temp_buffer);
+        }
+        FAPI_INF("%s", l_buffer);
+    }
+    FAPI_INF ("VID OPERATING POINTS");
+
+    for (uint8_t i = 0; i < NUM_OP_POINTS; ++i)
+    {
+        sprintf (l_buffer, " %s :  %02X ",pv_op_str[i], i_gppb->vid_point_set[i]);
+        FAPI_INF("%s", l_buffer);
+    }
+
+
+    FAPI_INF ("THESHOLD OPERATING POINTS");
+    for (uint8_t i = 0; i < NUM_OP_POINTS; ++i)
+    {
+        strcpy(l_buffer,"");
+        sprintf (l_temp_buffer, " %s  ",pv_op_str[i]);
+        FAPI_INF("%s", l_temp_buffer);
+        for (uint8_t j = 0; j < NUM_THRESHOLD_POINTS; ++j)
+        {
+            sprintf (l_temp_buffer, "%s :  %02X   ",thresh_op_str[j], i_gppb->threshold_set[i][j]);
+            strcat (l_buffer,l_temp_buffer);
+        }
+        FAPI_INF("%s", l_buffer);
+    }
+
+    strcpy(l_buffer,"");
+    FAPI_INF ("VID COMPARE SLOPES");
+    for (uint8_t i = 0; i < VPD_NUM_SLOPES_REGION; ++i)
+    {
+        sprintf (l_buffer, " %s :  %02X ",slope_region_str[i], i_gppb->PsVIDCompSlopes[i]);
+        FAPI_INF("%s", l_buffer);
+    }
+    FAPI_INF ("VDM THRESHOLD SLOPES");
+
+    for (uint8_t i = 0; i < VPD_NUM_SLOPES_REGION; ++i)
+    {
+        strcpy(l_buffer,"");
+        sprintf (l_temp_buffer, " %s  ",slope_region_str[i]);
+        FAPI_INF("%s", l_temp_buffer);
+        for (uint8_t j = 0; j < NUM_THRESHOLD_POINTS; ++j)
+        {
+            sprintf (l_temp_buffer, " %s :  %02X   ",thresh_op_str[j], i_gppb->PsVDMThreshSlopes[i][j]);
+            strcat (l_buffer, l_temp_buffer);
+        }
+        FAPI_INF("%s", l_buffer);
+    }
+    FAPI_INF ("VDM JUMP SLOPES");
+
+    for (uint8_t i = 0; i < VPD_NUM_SLOPES_REGION; ++i)
+    {
+        strcpy(l_buffer,"");
+        sprintf (l_temp_buffer, " %s  ",slope_region_str[i]);
+        FAPI_INF("%s", l_temp_buffer);
+        for (uint8_t j = 0; j < NUM_JUMP_VALUES; ++j)
+        {
+            sprintf (l_temp_buffer, " %s :  %02X   ",thresh_op_str[j], i_gppb->PsVDMJumpSlopes[i][j]);
+            strcat (l_buffer, l_temp_buffer);
         }
         FAPI_INF("%s", l_buffer);
     }
@@ -3347,6 +3418,26 @@ void p9_pstate_compute_vdm_threshold_pts(PoundW_data i_data,
         FAPI_INF("Bi: EX TSHLD =%d", io_lppb->threshold_set[p][3]);
 
     }
+    // Jump value points
+    for (p = 0; p < NUM_OP_POINTS; p++)
+    {
+        // N_L value
+        io_lppb->jump_value_set[p][0] = (i_data.poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F;
+
+        FAPI_INF("Bi: N_S =%d", io_lppb->jump_value_set[p][0]);
+        // N_S value
+        io_lppb->jump_value_set[p][1] = i_data.poundw[p].vdm_small_large_normal_freq & 0x0F;
+
+        FAPI_INF("Bi: N_L =%d", io_lppb->jump_value_set[p][1]);
+        // L_S value
+        io_lppb->jump_value_set[p][2] =  (i_data.poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F;
+
+        FAPI_INF("Bi: L_S =%d", io_lppb->jump_value_set[p][2]);
+        // S_L value
+        io_lppb->jump_value_set[p][3] =  i_data.poundw[p].vdm_large_small_normal_freq & 0x0F;
+
+        FAPI_INF("Bi: S_L =%d", io_lppb->jump_value_set[p][3]);
+    }
 }
 //
 //
@@ -3369,7 +3460,7 @@ void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
             !(i_pstate[NOMINAL]) ||
             !(i_pstate[TURBO]))
         {
-            FAPI_ERR("PSTATE value shouldn't be zero");
+            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero");
             break;
         }
 
@@ -3407,7 +3498,7 @@ void p9_pstate_compute_PsVDMThreshSlopes(
             !(i_pstate[NOMINAL]) ||
             !(i_pstate[TURBO]))
         {
-            FAPI_ERR("PSTATE value shouldn't be zero");
+            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero");
             break;
         }
 
@@ -3436,7 +3527,51 @@ void p9_pstate_compute_PsVDMThreshSlopes(
     while(0);
 }
 
+//
+// p9_pstate_compute_PsVDMJumpSlopes
+//
+void p9_pstate_compute_PsVDMJumpSlopes(
+    LocalPstateParmBlock* io_lppb,
+    uint8_t* i_pstate)
+{
+    do
+    {
+        // ULTRA TURBO pstate check is not required..because its pstate will be
+        // 0
+        if (!(i_pstate[POWERSAVE]) ||
+            !(i_pstate[NOMINAL]) ||
+            !(i_pstate[TURBO]))
+        {
+            FAPI_ERR("Non-UltraTurbo PSTATE value shouldn't be zero");
+            break;
+        }
 
+        //Calculate slopes
+        //
+        for(auto region(REGION_POWERSAVE_NOMINAL); region <= REGION_TURBO_ULTRA; ++region)
+        {
+            for (uint8_t i = 0; i < NUM_JUMP_VALUES; ++i)
+            {
+                io_lppb->PsVDMJumpSlopes[region][i] =
+                  revle16(
+                        compute_slope_thresh(io_lppb->jump_value_set[region+1][i],
+                                             io_lppb->jump_value_set[region][i],
+                                             i_pstate[region],
+                                             i_pstate[region+1])
+                    );
+
+                FAPI_INF("PsVDMJumpSlopes %s %x N_S %d N_L %d L_S %d S_N %d",
+                         prt_region_names[region],
+                         revle16(io_lppb->PsVDMJumpSlopes[region][i]),
+                         io_lppb->jump_value_set[region+1][i],
+                         io_lppb->jump_value_set[region][i],
+                         i_pstate[region],
+                         i_pstate[region+1]);
+            }
+        }
+    }
+    while(0);
+}
 // p9_pstate_set_global_feature_attributes
 fapi2::ReturnCode
 p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,

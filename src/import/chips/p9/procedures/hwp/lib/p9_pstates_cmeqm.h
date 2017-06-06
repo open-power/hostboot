@@ -317,6 +317,12 @@ typedef struct
     //pstate-volt threshold slopes
     int16_t PsVDMThreshSlopes[VPD_NUM_SLOPES_REGION][NUM_THRESHOLD_POINTS];
 
+    //Jump value operating points
+    uint8_t jump_value_set[NUM_OP_POINTS][NUM_JUMP_VALUES];
+
+    //Jump-value slopes
+    int16_t PsVDMJumpSlopes[VPD_NUM_SLOPES_REGION][NUM_JUMP_VALUES];
+
 } LocalPstateParmBlock;
 
 #ifdef __cplusplus
