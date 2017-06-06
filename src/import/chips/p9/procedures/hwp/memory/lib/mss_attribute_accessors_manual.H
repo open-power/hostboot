@@ -481,6 +481,29 @@ fapi_try_exit:
     return false;
 }
 
+///
+/// @brief ATTR_CHIP_EC_FEATURE_MSS_DIS_CLK_IN_STR getter
+/// @tparam T the fapi2 target type of the target
+/// @param[in] const ref to the target
+/// @return bool true iff we're on a Nimbus < EC 2.0
+///
+template< fapi2::TargetType T >
+inline bool chip_ec_feature_mss_dis_clk_in_str(const fapi2::Target<T>& i_target)
+{
+    const auto l_chip = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+
+    uint8_t l_value = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_MSS_DIS_CLK_IN_STR, l_chip, l_value) );
+
+    return l_value != 0;
+
+fapi_try_exit:
+    FAPI_ERR("failed accessing ATTR_CHIP_EC_FEATURE_MSS_DIS_CLK_IN_STR: 0x%lx (target: %s)",
+             uint64_t(fapi2::current_err), mss::c_str(i_target));
+    fapi2::Assert(false);
+    return false;
+}
+
 } // close mss namespace
 
 #endif

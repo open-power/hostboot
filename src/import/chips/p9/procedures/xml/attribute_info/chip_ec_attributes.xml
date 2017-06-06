@@ -3426,6 +3426,23 @@
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_DIS_CLK_IN_STR</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Only set the disable memory clock stop when in STR for DD2.*
+      Doesn't work for DD1.*
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
