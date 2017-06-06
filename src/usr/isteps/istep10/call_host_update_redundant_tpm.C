@@ -466,7 +466,7 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     }
 
     // read the primary sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeSeeprom(
+    err = SBE::getHwKeyHashFromSbeImage(
                                      mProc,
                                      EEPROM::SBE_PRIMARY,
                                      l_masterHash);
@@ -492,7 +492,7 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
     }
 
     // read the backup sbe HW keys' hash for the master processor
-    err = SBE::getHwKeyHashFromSbeSeeprom(
+    err = SBE::getHwKeyHashFromSbeImage(
                                       mProc,
                                       EEPROM::SBE_BACKUP,
                                       l_backupHash);
@@ -589,7 +589,7 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
         }
 
         // read the primary sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeSeeprom(
+        err = SBE::getHwKeyHashFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_PRIMARY,
                                          l_slaveHashPri);
@@ -616,7 +616,7 @@ void* call_host_update_redundant_tpm (void *io_pArgs)
         }
 
         // read the backup sbe HW keys' hash for the current processor
-        err = SBE::getHwKeyHashFromSbeSeeprom(
+        err = SBE::getHwKeyHashFromSbeImage(
                                          pProc,
                                          EEPROM::SBE_BACKUP,
                                          l_slaveHashBac);
