@@ -45,8 +45,8 @@
 //-----------------------------------------------------------------------------
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*p9_io_dmi_clear_firs_FP_t)
-(const fapi2::Target < fapi2::TARGET_TYPE_DMI >&);
+typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_PROC_TGT;
+typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> DMI_CN_TGT;
 
 extern "C"
 {
@@ -57,8 +57,16 @@ extern "C"
      * @param[in] i_target         FAPI2 Target
      * @retval ReturnCode
      */
-    fapi2::ReturnCode p9_io_dmi_clear_firs(
-        const fapi2::Target < fapi2::TARGET_TYPE_DMI >& i_target);
+    fapi2::ReturnCode p9_io_dmi_proc_clear_firs(const DMI_PROC_TGT& i_tgt);
+
+    /**
+     * @brief Clears PHY Rx/Tx FIRs on the DMI Centaur(EDI) specified target.  The FIRs
+     *   are cleared by toggling a rx & tx fir reset bit.
+     * @param[in] i_target         FAPI2 Target
+     * @retval ReturnCode
+     */
+    fapi2::ReturnCode p9_io_dmi_cn_clear_firs(const DMI_CN_TGT& i_tgt);
+
 
 } // extern "C"
 
