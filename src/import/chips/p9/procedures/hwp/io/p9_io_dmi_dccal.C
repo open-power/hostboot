@@ -107,21 +107,21 @@ fapi2::ReturnCode p9_io_dmi_dccal(const DMI_TGT& i_tgt)
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString(i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
     FAPI_DBG("I/O EDI+ Dmi Dccal %s", l_tgtStr);
-    /*
-        // Runs Tx Zcal on a per bus basis
-        FAPI_TRY(tx_zcal_run_bus(i_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
 
-        // Sets Tx Zcal Group Settings based on the bus results
-        FAPI_TRY(tx_zcal_set_grp(i_tgt, i_grp), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
+    // Runs Tx Zcal on a per bus basis
+    FAPI_TRY(tx_zcal_run_bus(i_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
 
-        // Starts Rx Dccal on a per group basis
-        FAPI_TRY(rx_dccal_start_grp(i_tgt, i_grp), "I/O Edi+ Dmi Rx DC Cal Start Failed");
+    // Sets Tx Zcal Group Settings based on the bus results
+    FAPI_TRY(tx_zcal_set_grp(i_tgt), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
 
-        // Checks/polls Rx Dccal on a per group basis
-        FAPI_TRY(rx_dccal_poll_grp(i_tgt, i_grp), "I/O Edi+ Dmi Rx DC Cal Poll Failed");
+    // Starts Rx Dccal on a per group basis
+    FAPI_TRY(rx_dccal_start_grp(i_tgt), "I/O Edi+ Dmi Rx DC Cal Start Failed");
 
-    fapi_try_exit:
-    */
+    // Checks/polls Rx Dccal on a per group basis
+    FAPI_TRY(rx_dccal_poll_grp(i_tgt), "I/O Edi+ Dmi Rx DC Cal Poll Failed");
+
+fapi_try_exit:
+
     FAPI_IMP("p9_io_dmi_dccal: I/O EDI+ Dmi Exiting");
     return fapi2::current_err;
 }
@@ -219,7 +219,7 @@ fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
     const uint64_t DLY_10MIL_CYCLES = 10000000;
     const uint64_t DLY_1MIL_CYCLES  = 1000000;
     const uint32_t TIMEOUT          = 200;
-    const uint8_t GRP0              = 0;
+    const uint8_t GRP3              = 3;
     const uint8_t LN0               = 0;
     uint32_t l_count                = 0;
     uint64_t l_data                 = 0;
@@ -239,21 +239,18 @@ fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
         //   with these settings: 13 million cycles
         io::set(EDIP_TX_ZCAL_SM_MIN_VAL, 50, l_data);
         io::set(EDIP_TX_ZCAL_SM_MAX_VAL, 52, l_data);
-        FAPI_TRY(io::write(EDIP_TX_IMPCAL_SWO2_PB, i_tgt, GRP0, LN0, l_data));
+        FAPI_TRY(io::write(EDIP_TX_IMPCAL_SWO2_PB, i_tgt, GRP3, LN0, l_data));
     }
 
     // Request to start Tx Impedance Calibration
     // The Done bit is read only pulse, must use pie driver or system model in sim
-    FAPI_TRY(io::rmw(EDIP_TX_ZCAL_REQ, i_tgt, GRP0, LN0, 1),
-             "tx_zcal_run_sm: RMW Tx Zcal Req Failed");
+    FAPI_TRY(io::rmw(EDIP_TX_ZCAL_REQ, i_tgt, GRP3, LN0, 1));
 
     // Delay before we start polling.  20ms was use from past p8 learning
-    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES),
-             "tx_zcal_run_sm: Fapi Delay Failed.");
+    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
 
     // Poll Until Tx Impedance Calibration is done or errors out
-    FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data),
-             "tx_zcal_run_sm: Reading Tx Impcal Pb Failed");
+    FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP3, LN0, l_data));
 
     while((++l_count < TIMEOUT) &&
           !(io::get(EDIP_TX_ZCAL_DONE, l_data) || io::get(EDIP_TX_ZCAL_ERROR, l_data)))
@@ -261,11 +258,9 @@ fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
         FAPI_DBG("tx_zcal_run_sm: I/O EDI+ Dmi Tx Zcal Poll, Count(%d/%d).", l_count, TIMEOUT);
 
         // Delay for 10us between polls for a total of 22ms.
-        FAPI_TRY(fapi2::delay(DLY_10US, DLY_1MIL_CYCLES),
-                 "tx_zcal_run_sm: Fapi Delay Failed.");
+        FAPI_TRY(fapi2::delay(DLY_10US, DLY_1MIL_CYCLES));
 
-        FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data),
-                 "tx_zcal_run_sm: Reading Tx Impcal Pb Failed");
+        FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP3, LN0, l_data));
     }
 
 
@@ -301,7 +296,7 @@ fapi2::ReturnCode tx_zcal_apply(
     const uint32_t i_nval)
 {
     FAPI_IMP("tx_zcal_apply: I/O EDI+ Dmi Entering");
-    const uint8_t GRP0             = 0;
+    const uint8_t GRP3             = 3;
     const uint8_t LN0              = 0;
     const uint8_t PRE_WIDTH        = 5;
     const uint8_t MAIN_WIDTH       = 13;
@@ -510,18 +505,18 @@ fapi2::ReturnCode tx_zcal_apply(
     //   the entire register.  To convert the 4R values to needed register values,
     //   we will  add the appropriate amount and shift to convert to 1R or
     //   1R + a 2R.
-    FAPI_TRY(io::rmw(EDIP_TX_PSEG_PRE_EN, i_tgt, GRP0, LN0,  convert_4r_with_2r(p_en_pre, PRE_WIDTH)));
-    FAPI_TRY(io::rmw(EDIP_TX_PSEG_PRE_SEL, i_tgt, GRP0, LN0, convert_4r_with_2r(p_sel_pre, PRE_WIDTH)));
-    FAPI_TRY(io::rmw(EDIP_TX_NSEG_PRE_EN, i_tgt, GRP0, LN0, convert_4r_with_2r(n_en_pre, PRE_WIDTH)));
-    FAPI_TRY(io::rmw(EDIP_TX_NSEG_PRE_SEL, i_tgt, GRP0, LN0, convert_4r_with_2r(n_sel_pre, PRE_WIDTH)));
-    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MARGINPD_EN, i_tgt, GRP0, LN0, convert_4r(p_en_margin_pd)));
-    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MARGINPU_EN, i_tgt, GRP0, LN0, convert_4r(p_en_margin_pu)));
-    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MARGINPD_EN, i_tgt, GRP0, LN0, convert_4r(n_en_margin_pd)));
-    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MARGINPU_EN, i_tgt, GRP0, LN0, convert_4r(n_en_margin_pu)));
-    FAPI_TRY(io::rmw(EDIP_TX_MARGINPD_SEL, i_tgt, GRP0, LN0, convert_4r(sel_margin_pd)));
-    FAPI_TRY(io::rmw(EDIP_TX_MARGINPU_SEL, i_tgt, GRP0, LN0, convert_4r(sel_margin_pu)));
-    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MAIN_EN, i_tgt, GRP0, LN0, convert_4r_with_2r(p_en_main, MAIN_WIDTH)));
-    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MAIN_EN, i_tgt, GRP0, LN0, convert_4r_with_2r(n_en_main, MAIN_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_PSEG_PRE_EN, i_tgt, GRP3, LN0,  convert_4r_with_2r(p_en_pre, PRE_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_PSEG_PRE_SEL, i_tgt, GRP3, LN0, convert_4r_with_2r(p_sel_pre, PRE_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_NSEG_PRE_EN, i_tgt, GRP3, LN0, convert_4r_with_2r(n_en_pre, PRE_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_NSEG_PRE_SEL, i_tgt, GRP3, LN0, convert_4r_with_2r(n_sel_pre, PRE_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MARGINPD_EN, i_tgt, GRP3, LN0, convert_4r(p_en_margin_pd)));
+    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MARGINPU_EN, i_tgt, GRP3, LN0, convert_4r(p_en_margin_pu)));
+    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MARGINPD_EN, i_tgt, GRP3, LN0, convert_4r(n_en_margin_pd)));
+    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MARGINPU_EN, i_tgt, GRP3, LN0, convert_4r(n_en_margin_pu)));
+    FAPI_TRY(io::rmw(EDIP_TX_MARGINPD_SEL, i_tgt, GRP3, LN0, convert_4r(sel_margin_pd)));
+    FAPI_TRY(io::rmw(EDIP_TX_MARGINPU_SEL, i_tgt, GRP3, LN0, convert_4r(sel_margin_pu)));
+    FAPI_TRY(io::rmw(EDIP_TX_PSEG_MAIN_EN, i_tgt, GRP3, LN0, convert_4r_with_2r(p_en_main, MAIN_WIDTH)));
+    FAPI_TRY(io::rmw(EDIP_TX_NSEG_MAIN_EN, i_tgt, GRP3, LN0, convert_4r_with_2r(n_en_main, MAIN_WIDTH)));
 
 fapi_try_exit:
     FAPI_IMP("tx_zcal_apply: I/O EDI+ Dmi Exiting");
@@ -537,7 +532,7 @@ fapi2::ReturnCode tx_zcal_set_grp(const DMI_TGT i_tgt)
 {
     FAPI_IMP("tx_zcal_set_grp: I/O EDI+ Dmi Entering");
 
-    const uint8_t  GRP0             = 0;
+    const uint8_t  GRP3             = 3;
     const uint8_t  LN0              = 0;
     const uint32_t DEFAULT_SEGMENTS = 25 * 4; // Nominal 25 Segments 1R * 4 = 4R
     uint32_t       l_pval           = DEFAULT_SEGMENTS;
@@ -545,19 +540,18 @@ fapi2::ReturnCode tx_zcal_set_grp(const DMI_TGT i_tgt)
     uint64_t       l_data           = 0;
 
 
-    FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP0, LN0, l_data),
-             "tx_zcal_run_sm: Reading Tx Impcal Pb Failed");
+    FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP3, LN0, l_data));
 
     if(io::get(EDIP_TX_ZCAL_DONE, l_data) == 1)
     {
         FAPI_DBG("Using zCal Results.");
 
-        FAPI_TRY(io::read(EDIP_TX_ZCAL_P, i_tgt, GRP0, LN0, l_data));
+        FAPI_TRY(io::read(EDIP_TX_ZCAL_P, i_tgt, GRP3, LN0, l_data));
 
         // We need to convert the 8R value to a 4R equivalent
         l_pval = io::get(EDIP_TX_ZCAL_P, l_data) / 2;
 
-        FAPI_TRY(io::read(EDIP_TX_ZCAL_N, i_tgt, GRP0, LN0, l_data));
+        FAPI_TRY(io::read(EDIP_TX_ZCAL_N, i_tgt, GRP3, LN0, l_data));
 
         // We need to convert the 8R value to a 4R equivalent
         l_nval = io::get(EDIP_TX_ZCAL_N, l_data) / 2;
@@ -586,14 +580,14 @@ fapi_try_exit:
  */
 fapi2::ReturnCode set_lanes_invalid(const DMI_TGT i_tgt, const uint8_t  i_data)
 {
-    const uint8_t GRP0      = 0;
+    const uint8_t GRP3      = 3;
     const uint8_t DMI_LANES = 24;
 
     FAPI_IMP("set_lanes_invalid: I/O EDI+ Dmi Entering");
 
     for(uint8_t lane = 0; lane < DMI_LANES; ++lane)
     {
-        FAPI_TRY(io::rmw(EDIP_RX_LANE_INVALID, i_tgt, GRP0, lane, i_data));
+        FAPI_TRY(io::rmw(EDIP_RX_LANE_INVALID, i_tgt, GRP3, lane, i_data));
     }
 
 fapi_try_exit:
@@ -610,21 +604,21 @@ fapi2::ReturnCode start_cleanup_pll(const DMI_TGT i_tgt)
 {
     FAPI_IMP("start_cleanup_pll: I/O EDI+ Dmi Entering");
     const uint8_t LN0  = 0;
-    const uint8_t GRP0 = 0;
+    const uint8_t GRP3 = 3;
     uint64_t reg_data  = 0;
 
-    FAPI_TRY(io::read(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP0, LN0, reg_data),
+    FAPI_TRY(io::read(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP3, LN0, reg_data),
              "read edip_rx_ctl_cntl4_e_pg failed");
 
     io::set(EDIP_RX_WT_PLL_REFCLKSEL, 0x1, reg_data);
     io::set(EDIP_RX_PLL_REFCLKSEL_SCOM_EN, 0x1, reg_data);
 
-    FAPI_TRY(io::write(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP0, LN0, reg_data),
+    FAPI_TRY(io::write(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP3, LN0, reg_data),
              "write edip_rx_ctl_cntl4_e_pg failed");
 
     FAPI_TRY(fapi2::delay(150000, 0), " Fapi Delay Failed.");
 
-    FAPI_TRY(io::rmw(EDIP_RX_WT_CU_PLL_PGOOD, i_tgt, GRP0, LN0, 0x1),
+    FAPI_TRY(io::rmw(EDIP_RX_WT_CU_PLL_PGOOD, i_tgt, GRP3, LN0, 0x1),
              "rmw edip_rx_wt_cu_pll_pgood failed");
 
     FAPI_TRY(fapi2::delay(5000, 0), " Fapi Delay Failed.");
@@ -655,17 +649,17 @@ fapi_try_exit:
 fapi2::ReturnCode stop_cleanup_pll(const DMI_TGT i_tgt)
 {
     FAPI_IMP("stop_cleanup_pll: I/O EDI+ Dmi Entering");
-    const uint8_t GRP0 = 0;
+    const uint8_t GRP3 = 3;
     const uint8_t LN0  = 0;
     uint64_t reg_data  = 0;
 
-    FAPI_TRY(io::read(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP0, LN0, reg_data));
+    FAPI_TRY(io::read(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP3, LN0, reg_data));
 
     io::set(EDIP_RX_WT_PLL_REFCLKSEL,      0, reg_data);
     io::set(EDIP_RX_PLL_REFCLKSEL_SCOM_EN, 0, reg_data);
     io::set(EDIP_RX_WT_CU_PLL_PGOOD,       0, reg_data);
 
-    FAPI_TRY(io::write(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP0, LN0, reg_data));
+    FAPI_TRY(io::write(EDIP_RX_CTL_CNTL4_E_PG, i_tgt, GRP3, LN0, reg_data));
 
     FAPI_TRY(fapi2::delay(110500, 0), " Fapi Delay Failed.");
 
@@ -682,7 +676,7 @@ fapi_try_exit:
 fapi2::ReturnCode rx_dccal_start_grp(const DMI_TGT i_tgt)
 {
     FAPI_IMP("rx_dccal_start_grp: I/O EDI+ Dmi Entering");
-    const uint8_t GRP0 = 0;
+    const uint8_t GRP3 = 3;
     const uint8_t LN0  = 0;
 
     ///////////////////////////////////////////////////////////////////////////
@@ -705,10 +699,10 @@ fapi2::ReturnCode rx_dccal_start_grp(const DMI_TGT i_tgt)
     FAPI_TRY(start_cleanup_pll(i_tgt), "rx_dc_cal: Starting Cleanup Pll");
 
     // Clear the rx dccal done bit in case rx dccal was previously run.
-    FAPI_TRY(io::rmw(EDIP_RX_DC_CALIBRATE_DONE, i_tgt, GRP0, LN0, 0));
+    FAPI_TRY(io::rmw(EDIP_RX_DC_CALIBRATE_DONE, i_tgt, GRP3, LN0, 0));
 
     // Start DC Calibrate, this iniates the rx dccal state machine
-    FAPI_TRY(io::rmw(EDIP_RX_START_DC_CALIBRATE, i_tgt, GRP0, LN0, 1));
+    FAPI_TRY(io::rmw(EDIP_RX_START_DC_CALIBRATE, i_tgt, GRP3, LN0, 1));
 
     FAPI_DBG("I/O EDI+ Dmi Rx Dccal Complete");
 
@@ -734,7 +728,7 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
     const uint64_t DLY_100MS         = 100000000;
     const uint64_t DLY_10MS          = 10000000;
     const uint64_t DLY_1MIL_CYCLES   = 1000000;
-    const uint8_t  GRP0              = 0;
+    const uint8_t  GRP3              = 3;
     const uint8_t  LN0               = 0;
     uint8_t        l_poll_count      = 0;
     uint64_t       l_data            = 0;
@@ -755,15 +749,15 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
 
         FAPI_TRY(fapi2::delay(DLY_10MS, DLY_1MIL_CYCLES), "Fapi Delay Failed.");
 
-        FAPI_TRY(io::read(EDIP_RX_DC_CALIBRATE_DONE, i_tgt, GRP0, LN0, l_data));
+        FAPI_TRY(io::read(EDIP_RX_DC_CALIBRATE_DONE, i_tgt, GRP3, LN0, l_data));
     }
     while((++l_poll_count < TIMEOUT) && !io::get(EDIP_RX_DC_CALIBRATE_DONE, l_data));
 
     // TODO Add Dmi Error
-    //FAPI_ASSERT((io::get(EDIP_RX_DC_CALIBRATE_DONE, l_data) == 1),
-    //             fapi2::IO_DMI_RX_DCCAL_TIMEOUT().set_TARGET(i_tgt),
-    //             "Rx Dccal Timeout: Loops(%d) delay(%d ns, %d cycles)",
-    //             l_poll_count, DLY_10MS, DLY_1MIL_CYCLES);
+    FAPI_ASSERT((io::get(EDIP_RX_DC_CALIBRATE_DONE, l_data) == 1),
+                fapi2::IO_DMI_PROC_RX_DCCAL_TIMEOUT().set_TARGET(i_tgt),
+                "Rx Dccal Timeout: Loops(%d) delay(%d ns, %d cycles)",
+                l_poll_count, DLY_10MS, DLY_1MIL_CYCLES);
 
     FAPI_DBG("I/O EDI+ Dmi Rx Dccal Successful.");
 
@@ -772,7 +766,7 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
     ////////////////////////////////////////////////////////////////////////////
 
     // Stop DC Calibrate
-    FAPI_TRY(io::rmw(EDIP_RX_START_DC_CALIBRATE, i_tgt, GRP0, LN0, 0));
+    FAPI_TRY(io::rmw(EDIP_RX_START_DC_CALIBRATE, i_tgt, GRP3, LN0, 0));
 
     // We must stop the cleanup pll to cleanup after ourselves.  Wiretest will
     //  turn this back on.  This function will turn off the cleanup pll and
