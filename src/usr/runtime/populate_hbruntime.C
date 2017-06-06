@@ -905,11 +905,12 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_prevDataAddr);
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_hbrtImageAddr - l_imageSize);
             l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,64*KILOBYTE);
+            size_t l_hbrtImageSizeAligned = ALIGN_X( l_imageSize, 64*KILOBYTE );
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                           i_nodeId,
                                           l_hbrtImageAddr,
-                                          l_attrSizeAligned,
+                                          l_hbrtImageSizeAligned,
                                           HBRT_RSVD_MEM__CODE);
             if(l_elog)
             {
@@ -917,7 +918,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             l_prevDataAddr = l_hbrtImageAddr;
-            l_prevDataSize = l_attrSizeAligned;
+            l_prevDataSize = l_hbrtImageSizeAligned;
 
             // Load the HBRT image into memory
             l_elog = mapPhysAddr(l_hbrtImageAddr, l_imageSize, l_vAddr);
