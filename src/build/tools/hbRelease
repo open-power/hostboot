@@ -2567,6 +2567,9 @@ sub bq_add_releaseList
             $changenum = "%2D%2D%2D%2D%2D%2D%2D%2D%2D%20"; #---------
         }
         $note .= "$changenum$subject%20%20%0A";
+
+        # Adding in hb commit hash below the Commit number and subject
+        $note .= "%20%20%20%20%20%20%20%20%20%20$commit%0A";
     }
 
     # Login to BQ.
