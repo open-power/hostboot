@@ -30,8 +30,9 @@ use File::Basename;
 use Exporter 'import';
 @EXPORT_OK = qw(loadPnorLayout getNumber traceErr trace run_command PAGE_SIZE
                 loadBinFiles findLayoutKeyByEyeCatch checkSpaceConstraints
-                getSwSignatures getBinDataFromFile checkFile);
+                getSwSignatures getBinDataFromFile checkFile displayPnorLayout);
 use strict;
+use Data::Dumper;
 
 my $TRAC_ERR = 0;
 # 0=errors, >0 for more traces, leaving at 1 to keep key milestone traces.
@@ -89,7 +90,7 @@ sub loadPnorLayout
         my $numOfSides  = scalar (@{$metadataEl->{side}});
         my $sideSize = ($imageSize)/($numOfSides);
 
-        trace(1, " $this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize");
+        trace(2, " $this_func: metadata: imageSize = $imageSize, blockSize=$blockSize, arrangement = $arrangement, numOfSides: $numOfSides, sideSize: $sideSize, tocSize: $tocSize");
 
         #determine the TOC offsets from the arrangement and side Information
         #stored in the layout xml
@@ -113,7 +114,7 @@ sub loadPnorLayout
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
 
                 $count = $count + 1;
-                trace(1, "A-B-D: side:$sideId primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+                trace(2, "A-B-D: side:$sideId primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
             }
         }
         elsif ($arrangement eq "A-D-B")
@@ -132,7 +133,7 @@ sub loadPnorLayout
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{toc}{backup}  = $backupTOC;
                 $$i_pnorLayoutRef{metadata}{sides}{$sideId}{golden}       = $golden;
                 $count = $count + 1;
-                trace(1, "A-D-B: side:$sideId, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
+                trace(2, "A-D-B: side:$sideId, primaryTOC:$primaryTOC, backupTOC:$backupTOC, golden: $golden");
             }
         }
         else
@@ -507,4 +508,66 @@ sub checkFile
     }
 }
 
+###############################################################################
+# Display Pnor Layout -   Display XML pnor layout more simply
+################################################################################
+sub displayPnorLayout
+{
+    my ($i_pnorLayoutRef, $i_gaps, $i_verbose) = @_;
+
+    if (!$i_verbose)
+    {
+        print "-------------------------------------------------------- \n";
+        print "Name-physicalOffset-physicalRegionSize-physicalRegionEnd \n";
+        print "-------------------------------------------------------- \n";
+    }
+
+    my $curOffset = 0;
+    my $totalFree = 0;
+    # Iterate through all sections of PNOR, including TOC's
+    foreach my $section (sort {$a <=> $b} keys %{$$i_pnorLayoutRef{sections}})
+    {
+        # Get hex format for each value
+        my $offset = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalOffset});
+        my $size = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalRegionSize});
+        my $end = sprintf("0x%X",hex($offset)+hex($size));
+
+        # Check if there is a gap between sections
+        if ($i_gaps && ($curOffset < hex($offset)))
+        {
+            print "  > Gap Found: addr = ".sprintf("0x%X",$curOffset);
+
+            # Display address and size of gap
+            my $gapSize = hex($offset)-$curOffset;
+            print " size = ".sprintf("0x%X",$gapSize)."\n";
+            $totalFree += $gapSize;
+            $curOffset = hex($offset) + hex($size);
+        }
+        else
+        {
+            $curOffset += hex($size);
+        }
+
+        # Print sections
+        if ($i_verbose)
+        {
+            print $$i_pnorLayoutRef{sections}{$section}{eyeCatch}."\n";
+            print Dumper $$i_pnorLayoutRef{sections}{$section};
+            print "\n";
+        }
+        else
+        {
+            print $$i_pnorLayoutRef{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
+        }
+    }
+
+    # Display total free space
+    if($i_gaps)
+    {
+        my $hexVal = sprintf("0x%X",$totalFree);
+        my $kiloBytes = $totalFree/1024;
+        print "\n---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
+        print " (".$hexVal.")\n";
+    }
+}
 1;
