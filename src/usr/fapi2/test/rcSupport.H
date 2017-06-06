@@ -72,6 +72,13 @@ fapi2::ReturnCode p9_gardAndDeconfig(
 fapi2::ReturnCode p9_deconfigCallout(
                fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target);
 
+//******************************************************************************
+// p9_deconfigCalloutNone
+// Force a test return code that deconfigures the target
+//******************************************************************************
+fapi2::ReturnCode p9_deconfigCalloutNone(
+              fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm_target);
+
 //*****************************************************************************
 // p9_procedureCallout
 // Force a test return code that creates a procedure callout
@@ -84,6 +91,7 @@ fapi2::ReturnCode p9_procedureCallout();
 //*****************************************************************************
 fapi2::ReturnCode p9_hwCallout(
                fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_core_target);
+
 
 //****************************************************************************
 // p9ErrorWithBuffer

@@ -779,8 +779,8 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
             // figure out the highest priority callout, just grab
             // the first one if there are several with the same
             // priority.
-            if( highestPriorityCallout == NULL ||
-                  ( pData->priority > highestPriorityCallout->priority) )
+            if( (highestPriorityCallout == NULL) ||
+                (pData->priority > highestPriorityCallout->priority) )
             {
                 highestPriorityCallout = pData;
             }
@@ -789,7 +789,8 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
 
     // if this pointer is not null it will be pointing to the
     // highest priority entry
-    if( highestPriorityCallout == NULL  )
+    if((highestPriorityCallout == NULL) ||
+       (highestPriorityCallout->priority == HWAS::SRCI_PRIORITY_NONE) )
     {
         // no callouts in log, add default callout for hb code and
         // add trace

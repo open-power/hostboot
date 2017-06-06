@@ -334,3 +334,97 @@ uint32_t rcTestCalloutDeconfig()
     FAPI_INF("rcTestCalloutDeconfig finished");
     return l_result;
 }
+
+uint32_t rcTestCalloutNoneDeconfig()
+{
+    uint32_t l_result = 0;
+    errlHndl_t l_errl = NULL;
+    bool l_hw_callout_found = false;
+
+    FAPI_INF("rcTestCalloutNoneDeconfig running");
+
+    TARGETING::TargetHandleList l_dimmList;
+    TARGETING::getAllLogicalCards(l_dimmList, TARGETING::TYPE_DIMM, false);
+    TARGETING::Target * l_Dimm = NULL;
+
+    //Take the first dimm
+    if (l_dimmList.size() > 0)
+    {
+        l_Dimm = l_dimmList[0];
+    }
+    else
+    {
+        TS_FAIL("No dimms found");
+    }
+
+    //Convert to fapi2 target for the HWP below
+    fapi2::Target<fapi2::TARGET_TYPE_DIMM> fapi2_dimmTarget(l_Dimm);
+
+    FAPI_INVOKE_HWP(l_errl, p9_deconfigCalloutNone, fapi2_dimmTarget);
+
+    if(l_errl != NULL)
+    {
+        FAPI_INF("rcTestCalloutNoneDeconfig: p9_deconfigCalloutNone "
+                 "returned errl (expected)");
+
+        //Get the User Data fields of the errl. They are returned as
+        //vector<void*>, so iterate over them.
+        for( auto l_callout_raw : l_errl->
+                getUDSections( ERRL_COMP_ID, ERRORLOG::ERRL_UDT_CALLOUT ) )
+        {
+            HWAS::callout_ud_t* l_callout_entry =
+                           reinterpret_cast<HWAS::callout_ud_t*>(l_callout_raw);
+
+            if(l_callout_entry->type == HWAS::HW_CALLOUT)
+            {
+                l_hw_callout_found = true;
+                FAPI_INF("rcTestCalloutNoneDeconfig: hw callout found");
+                if(l_callout_entry->deconfigState == HWAS::DELAYED_DECONFIG)
+                {
+                   FAPI_INF("rcTestCalloutNoneDeconfig: Target is deconfigured");
+                }
+                else
+                {
+                    TS_FAIL("rcTestCalloutNoneDeconfig: Target is NOT deconfigured");
+                    l_result = 1;
+                    break;
+                }
+            }
+        }
+        if(!l_hw_callout_found)
+        {
+            TS_FAIL("rcTestCalloutNoneDeconfig: hw callout NOT found");
+            l_result = 2;
+        }
+    }
+    else
+    {
+        TS_FAIL("rcTestCalloutNoneDeconfig: No error was returned from"
+                                                 " p9_deconfigCalloutNone !!");
+        l_result = 3;
+    }
+
+    //l_errl->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+    //errlCommit(l_errl,CXXTEST_COMP_ID);
+    delete l_errl;
+    l_errl = NULL;
+
+    // Now try it the way HWP people do it
+    ReturnCode l_rc;
+    FAPI_EXEC_HWP(l_rc, p9_deconfigCalloutNone, fapi2_dimmTarget);
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        // log the error but don't fail the unit test
+        FAPI_INF("rcTestCalloutNoneDeconfig: logError called");
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED, true);
+    }
+    else
+    {
+        TS_FAIL("rcTestCalloutNoneDeconfig: No error was returned from "
+                                     "FAPI_EXEC_HWP p9_deconfigCalloutNone !!");
+        l_result = 4;
+    }
+
+    FAPI_INF("rcTestCalloutNoneDeconfig finished");
+    return l_result;
+}

@@ -659,6 +659,7 @@ bool parsePfaData( void * i_buffer, uint32_t i_buflen,
                 tmpStr = "Unknown Priority";
                 switch ( pfa.mruList[i].priority )
                 {
+                    case HWAS::SRCI_PRIORITY_NONE: tmpStr = "NONE";  break;
                     case HWAS::SRCI_PRIORITY_LOW:  tmpStr = "LOW";   break;
                     case HWAS::SRCI_PRIORITY_MEDC: tmpStr = "MED_C"; break;
                     case HWAS::SRCI_PRIORITY_MEDB: tmpStr = "MED_B"; break;

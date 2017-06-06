@@ -307,6 +307,7 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
         {
 #define case_PRIORITY(_type) \
 case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
+            case_PRIORITY(SRCI_PRIORITY_NONE)
             case_PRIORITY(SRCI_PRIORITY_LOW)
             case_PRIORITY(SRCI_PRIORITY_MEDC)
             case_PRIORITY(SRCI_PRIORITY_MEDB)
