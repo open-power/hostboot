@@ -196,6 +196,10 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
         poll_parameters& i_poll,
         const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
 {
+    // This should equal half of the minimum poll count of the quickest cal segment when in sim
+    // i.e. DQS_ALIGN + INITIAL_PAT_WR = 3 polls, so this should be 2
+    constexpr uint64_t MINIMUM_POLL_COUNT = 2;
+
     uint64_t l_write_cntr_cycles = 0;
     uint64_t l_total_cycles = 0;
     int64_t l_ns_left = 0;
@@ -246,8 +250,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     i_poll.iv_poll_count = l_ns_left / i_poll.iv_delay;
     i_poll.iv_poll_count += l_ns_left % i_poll.iv_delay ? 0 : 1;
 
-    // Don't let the poll count be 0 - that just makes for a bad day.
-    i_poll.iv_poll_count = (i_poll.iv_poll_count == 0) ? 1 : i_poll.iv_poll_count;
+    // Make the minimum poll count 2, as that's the value of the quickest cal step in sim
+    i_poll.iv_poll_count = (i_poll.iv_poll_count < MINIMUM_POLL_COUNT) ? MINIMUM_POLL_COUNT : i_poll.iv_poll_count;
 
     // Fudge some for sim irregularities. This will increase time to a complete timeout but won't
     // really effect valid training unless these cycles are needed. So this isn't a bad thing ...
