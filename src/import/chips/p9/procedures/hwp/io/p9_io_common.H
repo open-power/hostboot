@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,6 +52,8 @@
 #include <fapi2.H>
 
 typedef fapi2::Target<fapi2::TARGET_TYPE_XBUS> XBUS_TGT;
+typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_PROC_TGT;
+typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> DMI_CN_TGT;
 
 extern "C"
 {
@@ -64,9 +66,24 @@ extern "C"
      * @return Field Data
      */
     fapi2::ReturnCode p9_io_xbus_shorten_timers(
-        const XBUS_TGT i_tgt,
+        const XBUS_TGT& i_tgt,
         const uint8_t  i_grp );
 
-}
+    /**
+     * @brief Shorten timers if we are running in simulation
+     *        a right aligned value.
+     * @param[in] i_tgt     FAPI2 Target
+     * @return Field Data
+     */
+    fapi2::ReturnCode p9_io_dmi_proc_shorten_timers(const DMI_PROC_TGT& i_tgt);
+
+}    /**
+     * @brief Shorten timers if we are running in simulation
+     *        a right aligned value.
+     * @param[in] i_tgt     FAPI2 Target
+     * @return Field Data
+     */
+fapi2::ReturnCode p9_io_dmi_cn_shorten_timers(const DMI_CN_TGT& i_tgt);
+
 
 #endif /* P9_IO_COMMON_H_ */
