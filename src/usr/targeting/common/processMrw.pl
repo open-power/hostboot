@@ -290,24 +290,54 @@ sub processApss {
         {
             my $entity_id=$targetObj->
                  getAttribute($child,"IPMI_ENTITY_ID");
-            my $sensor_type=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_TYPE");
-            my $name=$targetObj->
-                 getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
             my $sensor_id=$targetObj->
                  getAttribute($child,"IPMI_SENSOR_ID");
+            my $sensor_type=$targetObj->
+                 getAttribute($child,"IPMI_SENSOR_TYPE");
             my $sensor_evt=$targetObj->
                  getAttribute($child,"IPMI_SENSOR_READING_TYPE");
-            my $channel = $targetObj->
-                 getAttribute($child,"ADC_CHANNEL_ASSIGNMENT");
-            my $channel_id = $targetObj->
-                 getAttribute($child,"ADC_CHANNEL_ID");
-            my $channel_gain = $targetObj->
-                 getAttribute($child,"ADC_CHANNEL_GAIN");
-            my $channel_offset = $targetObj->
-                 getAttribute($child,"ADC_CHANNEL_OFFSET");
-            my $channel_ground = $targetObj->
-                 getAttribute($child,"ADC_CHANNEL_GROUND");
+
+            #@fixme-RTC:175309-Remove deprecated support
+            my $name;
+            my $channel;
+            my $channel_id;
+            my $channel_gain;
+            my $channel_offset;
+            my $channel_ground;
+            # Temporarily allow both old and new attribute names until
+            #  all of the SW2 xmls get in sync
+            if (!$targetObj->isBadAttribute($child,"IPMI_SENSOR_NAME_SUFFIX") )
+            {
+                # Using deprecated names
+                $name = $targetObj->
+                  getAttribute($child,"IPMI_SENSOR_NAME_SUFFIX");
+                $channel = $targetObj->
+                  getAttribute($child,"ADC_CHANNEL_ASSIGNMENT");
+                $channel_id = $targetObj->
+                  getAttribute($child,"ADC_CHANNEL_ID");
+                $channel_gain = $targetObj->
+                  getAttribute($child,"ADC_CHANNEL_GAIN");
+                $channel_offset = $targetObj->
+                  getAttribute($child,"ADC_CHANNEL_OFFSET");
+                $channel_ground = $targetObj->
+                  getAttribute($child,"ADC_CHANNEL_GROUND");
+            }
+            else
+            {
+                # Using correct/new names
+                $name = $targetObj->
+                  getAttribute($child,"FUNCTION_NAME");
+                $channel = $targetObj->
+                  getAttribute($child,"CHANNEL");
+                $channel_id = $targetObj->
+                  getAttribute($child,"FUNCTION_ID");
+                $channel_gain = $targetObj->
+                  getAttribute($child,"GAIN");
+                $channel_offset = $targetObj->
+                  getAttribute($child,"OFFSET");
+                $channel_ground = $targetObj->
+                  getAttribute($child,"GND");
+            }
 
             $name=~s/\n//g;
             $name=~s/\s+//g;
