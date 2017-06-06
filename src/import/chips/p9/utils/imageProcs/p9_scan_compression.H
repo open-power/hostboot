@@ -279,6 +279,11 @@ int rs4_extract_cmsk(CompressedScanData* i_rs4,
 
 #endif  // __ASSEMBLER__
 
+// This function prints out the raw decompressed ring content in the same
+//   format that it appears as in EKB's ifCompiler generated raw ring
+//   files, i.e. *.bin.srd (DATA) and *.bin.srd.bitsModified (CARE).
+void print_raw_ring( uint8_t*  data, uint32_t  bits);
+
 
 /// \defgroup scan_compression_magic Scan Compression Magic Numbers
 ///

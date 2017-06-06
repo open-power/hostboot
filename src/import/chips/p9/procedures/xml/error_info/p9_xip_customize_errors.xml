@@ -179,6 +179,8 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -331,6 +333,76 @@
       <priority>HIGH</priority>
     </callout>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_GPTR_GET_SINGLE_RING_ERROR</rc>
+    <description>tor_get_single_ring() for gptr failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RS4_DECOMPRESS_ERROR</rc>
+    <description>rs4_decompress() for gptr failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_GPTR_RING_SIZES_MISMATCH_ERROR</rc>
+    <description>Vpd and Ovly ring sizes mismatch</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>VPD_SIZE</ffdc>
+    <ffdc>OVLY_SIZE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RS4_COMPRESS_ERROR</rc>
+    <description>rs4_compress() for gptr failed</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>LOCAL_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_RING_BUFFER_MISMATCH_ERROR</rc>
+    <description>process_gptr_rings(): Failed with ring buffers mismatch</description>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>RING_BUF2</ffdc>
+    <ffdc>RING_BUF2_LOCAL</ffdc>
+    <ffdc>RING_BUF3</ffdc>
+    <ffdc>RING_BUF3_LOCAL</ffdc>
     <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->

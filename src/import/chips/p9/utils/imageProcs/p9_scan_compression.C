@@ -157,6 +157,7 @@
 #include <string.h>
 #include <endian.h>
 #include "p9_scan_compression.H"
+#include "p9_infrastruct_help.H"
 
 // Diagnostic aids for debugging
 #ifdef DEBUG_P9_SCAN_COMPRESSION
@@ -989,5 +990,57 @@ rs4_extract_cmsk(CompressedScanData* i_rs4,
     (*io_rs4_stump)->iv_type = RS4_SCAN_DATA_TYPE_NON_CMSK;
 
     return SCAN_COMPRESSION_OK;
+}
+
+
+// This function prints out the raw decompressed ring content in the same
+//   format that it appears as in EKB's ifCompiler generated raw ring
+//   files, i.e. *.bin.srd (DATA) and *.bin.srd.bitsModified (CARE).
+void print_raw_ring( uint8_t*  data,
+                     uint32_t  bits )
+{
+    uint32_t i;
+    uint8_t  bytePerWordCount = 0; // Nibble count in each word
+    uint32_t bytePerLineCount = 0; // Column count
+    uint8_t  rem = bits % 8;      // Rem raw bits beyond 1-byte boundary
+    uint8_t  nibblesToPrint;      // The last 1 or 2 nibbles to dump
+
+    for (i = 0; i < bits / 8; i++)
+    {
+        MY_DBG("%02x", *(data + i));
+
+        if (++bytePerWordCount == 4)
+        {
+            MY_DBG(" ");
+            bytePerWordCount = 0;
+        }
+
+        if (++bytePerLineCount == 32)
+        {
+            MY_DBG("\n");
+            bytePerLineCount = 0;
+        }
+    }
+
+    // Dump remaining bits (in whole nibbles and with any
+    //   unused bits being zeroed)
+    if (rem)
+    {
+        // Ensure the rightmost (8-rem) unused bits are zeroed out
+        nibblesToPrint = (*(data + i) >> (8 - rem)) << (8 - rem);
+
+        if (rem <= 4)
+        {
+            // Content only in first nibble. Dump only first nibble
+            MY_DBG("%01x", nibblesToPrint >> 4);
+        }
+        else
+        {
+            // Content in both nibbles. Dump both nibbles
+            MY_DBG("%02x", nibblesToPrint);
+        }
+    }
+
+    MY_DBG("\n");
 }
 

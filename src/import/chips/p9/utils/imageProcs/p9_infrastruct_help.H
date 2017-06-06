@@ -72,7 +72,7 @@ enum MODEBUILD
 #if defined(__FAPI)
     #include <fapi2.H>
     #define MY_INF(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
-    #define MY_ERR(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
+    #define MY_ERR(_fmt_, _args_...) FAPI_ERR(_fmt_, ##_args_)
     #define MY_DBG(_fmt_, _args_...) FAPI_DBG(_fmt_, ##_args_)
 #else
     #ifdef WIN32
