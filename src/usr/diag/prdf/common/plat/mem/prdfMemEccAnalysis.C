@@ -950,54 +950,85 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru );
 
-        // if at any point there is more than one dram reporting an IMPE on a
-        // rank within the timebase of the threshold we make the error log
-        // predictive
-
-        // clear our vector of drams if the threshold time has elapsed
-        if ( db->iv_impeThMap[rank].timeElapsed(io_sc) )
-        {
-            db->iv_impeDramMap[rank].clear();
-        }
-
-        // if this DRAM hasn't already reported an IMPE on this rank
-        if ( std::find( db->iv_impeDramMap[rank].begin(),
-                        db->iv_impeDramMap[rank].end(), dram ) ==
-             db->iv_impeDramMap[rank].end() )
-        {
-            // if there is another DRAM reporting an IMPE on this rank as well
-            if ( 0 != db->iv_impeDramMap[rank].size() )
-            {
-                // Make the error log predictive
-                io_sc.service_data->setServiceCall();
-            }
-
-            // add the DRAM to the map
-            db->iv_impeDramMap[rank].push_back( dram );
-        }
-
-        // Initialize threshold if it doesn't exist yet
+        // Initialize threshold, if it doesn't exist yet.
         if ( 0 == db->iv_impeThMap.count(rank) )
         {
             db->iv_impeThMap[rank] = TimeBasedThreshold( getImpeTh() );
         }
 
-        // increment count for the given rank - check if at threshold
-        if ( db->iv_impeThMap[rank].inc(io_sc) )
+        // Clear out the list of DRAMs, if the threshold time has elapsed.
+        if ( db->iv_impeThMap[rank].timeElapsed(io_sc) )
         {
-            // place a chip mark on the failing DRAM
-            MemMark chipMark( trgt, rank, galois );
-            o_rc = MarkStore::writeChipMark<T>( i_chip, rank, chipMark );
+            db->iv_impeDramMap[rank].clear();
+        }
+
+        // Increment the count.
+        bool thReached = db->iv_impeThMap[rank].inc(io_sc);
+
+        // Update the DRAM list.
+        // Note that the value here is not important. The only reason to use the
+        // map verses a vector is to ensure unique entries in the DRAM list.
+        db->iv_impeDramMap[rank][dram] = 1;
+
+        if ( mfgMode() )
+        {
+            // Make the error log predictive if threshold is reached.
+            if ( thReached ) io_sc.service_data->setServiceCall();
+        }
+        else
+        {
+            // If at any point there is more than one DRAM reporting an IMPE on
+            // a rank, make the error log predictive.
+            if ( 1 < db->iv_impeDramMap[rank].size() )
+            {
+                io_sc.service_data->setServiceCall();
+            }
+            // Otherwise, place a chip mark on the failing DRAM if at threshold.
+            else if ( thReached )
+            {
+                MemMark chipMark( trgt, rank, galois );
+                o_rc = MarkStore::writeChipMark<T>( i_chip, rank, chipMark );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) failed",
+                              i_chip->getHuid(), rank.getKey() );
+                    break;
+                }
+
+                o_rc = MarkStore::balance<T>( i_chip, rank, io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "balance(0x%08x,0x%02x) failed",
+                              i_chip->getHuid(), rank.getKey() );
+                    break;
+                }
+
+                // Set the entire chip in DRAM Repairs VPD.
+                // TODO: RTC 169939
+
+                // Add a DRAM sparing procedure to the queue, if supported.
+                // TODO: RTC 157888
+            }
+        }
+
+        // If a predictive callout is made, mask both mainline and maintenance
+        // attentions.
+        if ( io_sc.service_data->queryServiceCall() )
+        {
+            SCAN_COMM_REGISTER_CLASS * mask
+                                  = i_chip->getRegister( "MCAECCFIR_MASK_OR" );
+            mask->SetBit(19); // mainline
+            mask->SetBit(39); // maintenance
+            o_rc = mask->Write();
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MarkStore::writeChipMark(0x%08x,m%ds%d) "
-                          "failed", i_chip->getHuid(), rank.getMaster(),
-                          rank.getSlave() );
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_OR: "
+                          "0x%08x", i_chip->getHuid() );
                 break;
             }
         }
 
-    }while(0);
+    } while (0);
 
     #endif
 

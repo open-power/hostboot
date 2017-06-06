@@ -127,7 +127,7 @@ class McaDataBundle : public DataBundle
     std::map<MemRank, TimeBasedThreshold> iv_impeThMap;
 
     /** Map to keep track of which DRAMs on which ranks have reported IMPEs */
-    std::map<MemRank, std::vector<uint8_t>> iv_impeDramMap;
+    std::map< MemRank, std::map<uint8_t, uint8_t> > iv_impeDramMap;
 
     #endif
 };
