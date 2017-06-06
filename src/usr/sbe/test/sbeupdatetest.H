@@ -822,14 +822,14 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
             total++;
             SHA512_t hash = {0};
-            err = getHwKeyHashFromSbeSeeprom(sbeState.target,
-                                             EEPROM::SBE_BACKUP,
-                                             hash);
+            err = getHwKeyHashFromSbeImage(sbeState.target,
+                                           EEPROM::SBE_BACKUP,
+                                           hash);
 
             if(err)
             {
                 fails++;
-                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeSeeprom() failed.");
+                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() failed.");
                 break;
             }
 
@@ -841,7 +841,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
                 TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
                            "HW Key Hashes do not match!");
                 fails++;
-                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeSeeprom() did not return system hash");
+                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() did not return system hash");
 
                 TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() hash",
                           hash, sizeof(SHA512_t));

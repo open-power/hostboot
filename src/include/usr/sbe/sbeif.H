@@ -103,22 +103,35 @@ namespace SBE
 
     /**
      * @brief Retrieves the HW Key Hash from the Bootloader (HBBL) Section
-     *        of the SBE Image located on a SBE Seeprom
+     *        of the SBE Image. By default, the image is read from a SBE
+     *        SEEPROM (where ECC is removed), but it also can be read from
+     *        a SBE Image in System Memory
      *
      * @param[in] i_target    Target Processor of the SBE SEEPPROM.
      *                        Assert if nullptr.
+     *                        NOTE: Ignored if i_image_ptr specifies an image
+     *                        (ie, != nullptr).
      *
      * @param[in] i_seeprom   Specific SEEPROM on the processor to read the
      *                        HW Key Hash from.
      *                        Assert if neither SBE_PRIMARY nor SBE_BACKUP.
+     *                        NOTE: Ignored if i_image_ptr specifies an image
+     *                        (ie, != nullptr).
      *
      * @param[out] o_hash     HW Key Hash returned from the Processor SEEPROM
      *
+     * @param[in] i_image_ptr  Defaults to nullptr.
+     *                         If nullptr, then read SBE Image from i_target
+     *                         and i_seeprom.
+     *                         If not nullptr, read SBE Image from system
+     *                         memory pointed to by this parameter.
+     *
      * @return errlHndl_t     Error log handle on failure; otherwise nullptr
      */
-    errlHndl_t getHwKeyHashFromSbeSeeprom(TARGETING::Target* i_target,
-                                          EEPROM::eeprom_chip_types_t i_seeprom,
-                                          SHA512_t o_hash);
+    errlHndl_t getHwKeyHashFromSbeImage(TARGETING::Target* i_target,
+                                        EEPROM::eeprom_chip_types_t i_seeprom,
+                                        SHA512_t o_hash,
+                                        const void * i_image_ptr = nullptr);
 
 } //end namespace SBE
 

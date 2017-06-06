@@ -40,7 +40,14 @@ typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
  */
 inline uint32_t sha512_to_u32(SHA512_t i_hash)
 {
-   return *(reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(i_hash)));
+   if (i_hash == nullptr)
+   {
+       return 0;
+   }
+   else
+   {
+       return *(reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(i_hash)));
+   }
 };
 
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
