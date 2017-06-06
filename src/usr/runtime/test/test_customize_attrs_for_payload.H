@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -278,7 +278,8 @@ class CustomizeAttrsForPayloadTest: public CxxTest::TestSuite
                 {
                     if(   (i_configForPhyp)
                        && (targetingTargetType==TARGETING::TYPE_CORE)
-                       && (uniqueRtTargetIds[rtTargetId] <= FOUND_ONE_ID))
+                       && (uniqueRtTargetIds[rtTargetId] <= FOUND_ONE_ID)
+                       && (TARGETING::is_fused_mode()))
                     {
                         uniqueRtTargetIds[rtTargetId]++;
                     }

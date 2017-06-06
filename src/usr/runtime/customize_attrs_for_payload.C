@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -374,20 +374,25 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                 break;
             }
 
-            // PHyp only operates on fused cores, so all core IDs
-            // must match that of the parent EX
             if(   (*pIt)->getAttr<TARGETING::ATTR_TYPE>()
                == TARGETING::TYPE_CORE)
             {
-                auto type = TARGETING::TYPE_EX;
-                const TARGETING::Target* pEx =
-                      TARGETING::getParent(*pIt,type);
+                if(TARGETING::is_fused_mode())
+                {
+                    // If we're in fused core mode, all core ID's must
+                    // match that of the parent EX
+                    auto type = TARGETING::TYPE_EX;
+                    const TARGETING::Target* pEx =
+                            TARGETING::getParent(*pIt,type);
 
-                // If this fails, everything is already hosed
-                assert(pEx != NULL);
+                    // If this fails, everything is already hosed
+                    assert(pEx != NULL);
 
-                hbrtHypId =
-                    pEx->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                    hbrtHypId = (pEx)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                }else
+                {
+                    hbrtHypId = (*pIt)->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+                }
             }
             else if( (*pIt)->getAttr<TARGETING::ATTR_TYPE>()
                      == TARGETING::TYPE_MEMBUF )
