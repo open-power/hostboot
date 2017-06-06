@@ -607,6 +607,12 @@ void p9_pstate_compute_PsVIDCompSlopes_slopes(PoundW_data i_data,
 void p9_pstate_compute_PsVDMThreshSlopes(LocalPstateParmBlock* io_lppb,
         uint8_t* i_pstate);
 
+// p9_pstate_compute_PsVDMJumpSlopes
+//
+void p9_pstate_compute_PsVDMJumpSlopes(
+    LocalPstateParmBlock* io_lppb,
+    uint8_t* i_pstate);
+
 // p9_pstate_wof_initialization
 void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
                                    uint8_t* o_buf,
