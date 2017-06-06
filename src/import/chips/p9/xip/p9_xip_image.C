@@ -2054,7 +2054,6 @@ p9_xip_get_section(const void* i_image,
 {
     int rc = 0;
     P9XipSection* imageSection;
-
     rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
 
     if (!rc)
@@ -2109,6 +2108,11 @@ p9_xip_get_section(const void* i_image,
                     break;
             }
         }
+    }
+    else
+    {
+        // Invalid arg, caller error or code bug.
+        rc = P9_XIP_INVALID_ARGUMENT;
     }
 
     return rc;
