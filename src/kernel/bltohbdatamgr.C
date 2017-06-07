@@ -147,6 +147,11 @@ printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
 
     }
 
+    //@fixme-RTC:149250-Remove this hack
+    iv_data.lpcBAR = MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+    iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+    printk( "Use default LPC/XSCOM\n" );
+
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
