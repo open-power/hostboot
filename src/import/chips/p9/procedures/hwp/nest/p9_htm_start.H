@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -66,7 +66,6 @@ typedef fapi2::ReturnCode (*p9_htm_start_FP_t)(
 ///
 extern "C"
 {
-
     fapi2::ReturnCode p9_htm_start(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -47,10 +47,10 @@
 // Function prototypes
 //------------------------------------------------------------------------------
 ///
-/// @brief Use ADU to trigger start/stop globally the NHTM engines
+/// @brief Use ADU to globally trigger start/stop NHTM engines
 ///
 /// @param[in] i_target        Reference to target
-/// @param[in] i_address       Address of PMISC command that should have
+/// @param[in] i_addr          Address of PMISC command that should have
 ///                            the start/stop/pause bits set accordingly.
 ///
 ///

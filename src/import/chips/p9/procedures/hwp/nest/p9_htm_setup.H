@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,8 +27,7 @@
 ///
 /// @brief Perform p9_htm_setup on a processor chip
 ///
-/// The purpose of this procedure is to setup HTM on a processor
-/// chip.
+/// The purpose of this procedure is to setup HTM on a processor chip.
 ///
 /// Some start/setup attributes are used as part of the setup process.
 ///
@@ -36,7 +35,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -80,11 +79,10 @@ extern "C"
 ///
 /// @brief p9_htm_setup procedure
 ///
-/// The purpose of this procedure is to setup HTM on a processor
-/// chip.
+/// The purpose of this procedure is to setup HTM on a processor chip.
 ///
 /// @param[in]    i_target   Reference to TARGET_TYPE_PROC_CHIP target.
-/// @param[in]    i_start    Start HTM after setup.
+/// @param[in]    i_start    Call HTM start after setting up.
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///

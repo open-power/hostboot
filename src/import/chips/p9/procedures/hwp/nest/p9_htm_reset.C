@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /// ----------------------------------------------------------------------------
-/// @file  p9_htm_reset.H
+/// @file  p9_htm_reset.C
 ///
 /// @brief Reset the HTM engines on a processor chip
 ///
@@ -31,7 +31,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 ///----------------------------------------------------------------------------
 
@@ -175,7 +175,7 @@ fapi2::ReturnCode resetHTM(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_targe
     FAPI_DBG("Entering");
     fapi2::ReturnCode l_rc;
 
-    // TODO: Need to find out what to do to reset IMA trace.
+    // Place holder to reset IMA trace.
 
     FAPI_DBG("Exiting");
     return fapi2::current_err;

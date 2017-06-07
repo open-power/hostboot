@@ -31,7 +31,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 ///----------------------------------------------------------------------------
 
@@ -70,21 +70,16 @@ fapi2::ReturnCode aduNHTMControl(
     l_adu_oper_flag.setTransactionSize(p9_ADU_oper_flag::TSIZE_2);
 
     // Acquire ADU lock
-    l_rc = p9_adu_coherent_manage_lock( i_target,
-                                        false,
-                                        true,           // Acquire lock
-                                        l_num_attempts);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from p9_adu_coherent_manage_lock (acquire all)");
-        goto fapi_try_exit;
-    }
+    FAPI_TRY(p9_adu_coherent_manage_lock( i_target,
+                                          false,
+                                          true,           // Acquire lock
+                                          l_num_attempts),
+             "Error from p9_adu_coherent_manage_lock (acquire all)");
 
     // NOTE: lock is now held, if an operation fails from this point
-    //       to the end of the procedure.
-    // Reset lock
+    //       to the end of the procedure, need to reset and unlock.
     l_adu_is_dirty = true;
+
     // Reset ADU
     l_rc = p9_adu_coherent_utils_reset_adu(i_target);
 
@@ -94,7 +89,7 @@ fapi2::ReturnCode aduNHTMControl(
         goto adu_reset_unlock;
     }
 
-    // issue operation
+    // Issue operation
     l_rc = p9_adu_coherent_setup_adu(i_target,
                                      i_addr,
                                      false,      // write
@@ -156,7 +151,7 @@ fapi2::ReturnCode aduNHTMControl(
     }
 
     FAPI_DBG("All ADU locks released");
-    // no error for entire operation
+    // No error for entire operation
     l_adu_is_dirty = false;
 
 adu_reset_unlock:
