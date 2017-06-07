@@ -210,23 +210,16 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
         {
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            // Query the per-symbol counters for the hard CE symbol.
-            MemUtils::MaintSymbols symData; MemSymbol junk;
-            o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
+            // Query the per-symbol counters for hard CE symbols and make
+            // callouts for each failing DIMM. Note that this function creates
+            // new error logs for each DIMM with a hard CE.
+            D db = static_cast<D>(i_chip->getDataBundle());
+            o_rc = db->getIplCeStats()->calloutHardCes(rank);
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
-                          "failed", i_chip->GetId(), rank.getMaster(),
-                          rank.getSlave() );
+                PRDF_ERR( PRDF_FUNC "calloutHardCes(0x%02x) failed",
+                          rank.getKey() );
                 break;
-            }
-
-            // The command will have finished at the end of the rank so there
-            // may be more than one symbol. Add all to the callout list.
-            for ( auto & s : symData )
-            {
-                MemoryMru memmru ( trgt, rank, s.symbol );
-                io_sc.service_data->SetCallout( memmru );
             }
 
             // Add a TPS procedure to the queue.
