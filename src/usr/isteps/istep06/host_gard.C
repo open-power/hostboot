@@ -39,7 +39,7 @@
 #include <targeting/namedtarget.H>
 
 #include <sbe/sbeif.H>
-#include <sbe_update.H>
+#include <sbe/sbe_update.H>
 
 //  targeting support.
 #include  <targeting/common/utilFilter.H>

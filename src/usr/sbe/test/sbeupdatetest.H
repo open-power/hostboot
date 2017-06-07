@@ -40,7 +40,7 @@
 #include <targeting/common/utilFilter.H>
 #include <config.h>
 #include <sbe/sbeif.H>
-#include "../sbe_update.H"
+#include <sbe/sbe_update.H>
 #include <secureboot/service.H>
 
 

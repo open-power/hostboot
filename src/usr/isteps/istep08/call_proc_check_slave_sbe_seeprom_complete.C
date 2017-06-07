@@ -46,6 +46,7 @@
 #include <i2c/i2cif.H>
 #include <sbe/sbeif.H>
 #include <util/misc.H>
+#include <ipmi/ipmiwatchdog.H>
 
 //  targeting support
 #include <targeting/common/commontargeting.H>
@@ -119,17 +120,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
 
-        // Each slave sbe gets 60s to respond with the fact that it's
-        // booted and at runtime (stable state)
-        uint64_t SBE_TIMEOUT_NSEC = 60*NS_PER_SEC; //60sec
-        // Bump this up really high for Simics, things are slow there
-        if( Util::isSimicsRunning() )
-        {
-            SBE_TIMEOUT_NSEC *= 10;
-        }
-        const uint64_t SBE_NUM_LOOPS = 100;
-        const uint64_t SBE_WAIT_SLEEP = (SBE_TIMEOUT_NSEC/SBE_NUM_LOOPS);
-
         sbeMsgReg_t l_sbeReg;
 
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -137,39 +127,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                    " on processor target %.8X",
                    TARGETING::get_huid(l_cpu_target));
 
-        for( uint64_t l_loops = 0; l_loops < SBE_NUM_LOOPS; l_loops++ )
-        {
-            l_sbeReg.reg = 0;
-            FAPI_INVOKE_HWP(l_errl, p9_get_sbe_msg_register,
-                            l_fapi2ProcTarget,l_sbeReg);
-            if (l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR : call p9_get_sbe_msg_register, "
-                        "PLID=0x%x", l_errl->plid()  );
+        SBE_REG_RETURN l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
-                break;
-            }
-            else if(l_sbeReg.currState == SBE_STATE_RUNTIME)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SBE 0x%.8X booted and at runtime, l_sbeReg=0x%.8X",
-                           TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
-                break;
-            }
-            else
-            {
-                if( !(l_loops % 10) )
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                               "%d> SBE 0x%.8X NOT booted yet, l_sbeReg=0x%.8X",
-                               l_loops, TARGETING::get_huid(l_cpu_target),l_sbeReg.reg);
+        l_errl = sbe_timeout_handler(&l_sbeReg,l_cpu_target,&l_ret);
 
-                }
-                l_loops++;
-                nanosleep(0,SBE_WAIT_SLEEP);
-            }
-        }
         if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -224,7 +185,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 errlCommit( l_errl, HWPF_COMP_ID );
 
             }
-            else if(!l_errl && l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
+            else if(l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
             {
 
                 if(INITSERVICE::spBaseServicesEnabled())
@@ -237,12 +198,23 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 }
 
                 // Pull out previous rc error for threshold
-                uint8_t l_prevError = (l_cpu_target)->getAttr<
-                        TARGETING::ATTR_PREVIOUS_SBE_ERROR>();
+                uint8_t l_prevError = 0;
+
                 // Save the current rc error
                 (l_cpu_target)->setAttr<
                         TARGETING::ATTR_PREVIOUS_SBE_ERROR>(l_rcAction);
-
+#ifdef CONFIG_BMC_IPMI
+                // This could potentially take awhile, reset watchdog
+                l_errl = IPMIWATCHDOG::resetWatchDogTimer();
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_proc_check_slave_sbe_seeprom_complete "
+                              "Resetting watchdog before sbe_handler");
+                    l_errl->collectTrace("ISTEPS_TRACE",256);
+                    errlCommit(l_errl,ISTEP_COMP_ID);
+                }
+#endif
                 proc_extract_sbe_handler( l_cpu_target,
                                 l_prevError, l_rcAction);
             }
@@ -285,7 +257,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 "Running p9_extract_sbe_rc HWP"
                 " on processor target %.8X",
                   TARGETING::get_huid(l_cpu_target) );
-                  
+
         //@TODO-RTC:100963-Do something with the RETURN_ACTION
         P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction
           = P9_EXTRACT_SBE_RC::RE_IPL;

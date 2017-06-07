@@ -52,7 +52,7 @@
 #include <sbe/sbeif.H>
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
-#include "sbe_update.H"
+#include <sbe/sbe_update.H>
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #endif

@@ -58,6 +58,7 @@ namespace ISTEP
         MOD_PROC_EXIT_CACHE_CONTAINED                     = 0x16,
         MOD_SBE_THRESHOLD_FSM                             = 0x17,
         MOD_SBE_EXTRACT_RC_HANDLER                        = 0x18,
+        MOD_HANDLE_SBE_REG_VALUE                          = 0x19,
     };
 
     /**
