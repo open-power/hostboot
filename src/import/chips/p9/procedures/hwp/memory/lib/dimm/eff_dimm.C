@@ -68,22 +68,33 @@ enum rc08_encode
 {
     CID_START = 6,
     CID_LENGTH = 2,
-    ALL_ENABLE = 0b00,
-    ONE_ZERO_ENABLE = 0b01,
-    TWO_ONE_ENABLE = 0b10,
-    ALL_DISABLE = 0b11,
     DA17_START = 4,
     DA17_LENGTH = 1,
     DA17_QA17_LOCATION = 4,
     DA17_QA17_ENABLE = 0b0,
     DA17_QA17_DISABLE = 0b1,
     QXPAR_LOCATION = 5,
-    PARITY_ENABLE = 0,
+    RC08_PARITY_ENABLE = 0,
     PARITY_DISABLE = 1,
     MAX_SLAVE_RANKS = 8,
+    NUM_SLAVE_RANKS_ENCODED_IN_ONE_BIT = 2,
     NUM_SLAVE_RANKS_ENCODED_IN_TWO_BITS = 4,
+    NUM_SLAVE_RANKS_ENCODED_IN_THREE_BITS = 8,
 };
 
+///
+/// @brief bit encodings for Frequencies RCBX
+/// @note valid frequency values for Nimbus systems
+/// From DDR4 Register v1.0
+///
+enum rcbx_encode
+{
+    DC0_POS = 7,
+    DC1_POS = 6,
+    DC2_POS = 5,
+    DC_ENABLE = 0b0,
+    DC_DISABLE = 0b1,
+};
 ///
 /// @brief bit encodings for Frequencies RC0A (RC0A)
 /// @note valid frequency values for Nimbus systems
@@ -1209,37 +1220,43 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for DIMM RC08
+/// @brief Determines how many chip ID bits are needed for the iv_dimm
+/// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
-/// @note DA[1:0] enable/ disable QxC
 ///
-fapi2::ReturnCode eff_dimm::dimm_rc08()
+fapi2::ReturnCode eff_dimm::calculate_chip_ids( qsid& o_qs)
 {
-    uint8_t l_stack_type = 0;
-    uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    fapi2::buffer<uint8_t> l_buffer = 0;
     uint8_t l_total_ranks = 0;
     uint8_t l_master_ranks = 0;
     uint8_t l_num_slave_ranks = 0;
+    uint8_t l_stack_type = 0;
 
-    FAPI_TRY( eff_dimm_ddr4_rc08(iv_mcs, &l_attrs_dimm_rc08[0][0]) );
-    FAPI_TRY(iv_pDecoder->num_package_ranks_per_dimm(l_master_ranks) );
+    FAPI_TRY( mss::eff_num_master_ranks_per_dimm(iv_dimm, l_master_ranks) );
+    FAPI_TRY( mss::eff_num_ranks_per_dimm(iv_dimm, l_total_ranks) );
 
-    // Pulling this one from the decoder
-    FAPI_TRY( iv_pDecoder->logical_ranks_per_dimm(l_total_ranks),
-              "Failed to get logical_ranks_per_dimm from SPD %s", mss::c_str(iv_dimm) );
-
-    // Calling the this eff_dimm's setter function and then the function to get the attribute
+    // Calling this eff_dimm's setter function and then the function to get the attribute
     // While this is less efficient than calling the decoder function, it makes testing 3DS DIMMs easier
     // This allows us to use attribute overrides to test the DIMMS as SDP's
-    FAPI_TRY( primary_stack_type());
     FAPI_TRY( eff_prim_stack_type(iv_dimm, l_stack_type));
 
-    // Little assert, but this shouldn't be possibly and should be caught in the decoder function
-    fapi2::Assert(l_master_ranks != 0);
+    // Little assert, but this shouldn't be possible and should be caught in the decoder function
+    if (l_master_ranks == 0)
+    {
+        FAPI_ERR("Error getting master_ranks attribute. Should have already been caught if bad SPD");
+        fapi2::Assert(false);
+    }
 
     // Slave ranks = total ranks (aka logical ranks)  / master ranks (aka package ranks)
     l_num_slave_ranks = l_total_ranks / l_master_ranks;
+
+    // Let's assert that our math is correct. total_ranks % l_master_ranks should equal 0. It should be cleanly divisible
+    FAPI_ASSERT( !(l_total_ranks % l_master_ranks),
+                 fapi2::MSS_INVALID_SPD_SLAVE_RANKS()
+                 .set_LOGICAL_RANKS(l_total_ranks)
+                 .set_MASTER_RANKS(l_master_ranks)
+                 .set_DIMM_TARGET(iv_dimm),
+                 "%s Logical ranks(%d) are not divisible by master ranks(%d). Bad SPD?",
+                 mss::c_str(iv_dimm), l_total_ranks, l_master_ranks);
 
     // If we are 3DS we need to enable chip ID signal with QxC
     switch( l_stack_type)
@@ -1247,7 +1264,8 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
         case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_DDP_QDP:
         case fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_SDP:
             // Don't need the chip ID signals enabled because no slave ranks
-            l_buffer.insertFromRight<CID_START, CID_LENGTH> (ALL_DISABLE);
+            FAPI_INF("Disabling chip IDs");
+            o_qs = ALL_DISABLE;
             break;
 
         // If 3DS, we have slave ranks and thus need some chip ID bits to be enabled
@@ -1277,7 +1295,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                      l_num_slave_ranks);
 
             // Double check we calculated this correctly
-            FAPI_ASSERT( ((l_num_slave_ranks != 0) ||  (l_num_slave_ranks < 8)),
+            FAPI_ASSERT( ((l_num_slave_ranks != 0) ||  (l_num_slave_ranks < NUM_SLAVE_RANKS_ENCODED_IN_THREE_BITS)),
                          fapi2::MSS_INVALID_CALCULATED_NUM_SLAVE_RANKS()
                          .set_NUM_SLAVE_RANKS(l_num_slave_ranks)
                          .set_NUM_TOTAL_RANKS(l_total_ranks)
@@ -1289,17 +1307,23 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          l_total_ranks,
                          l_master_ranks);
 
-            // Only need 2 bits to encode 4 slave ranks with chip IDs
-            if (l_num_slave_ranks < NUM_SLAVE_RANKS_ENCODED_IN_TWO_BITS)
+            // These are based off of log base 2.
+            if (l_num_slave_ranks <= NUM_SLAVE_RANKS_ENCODED_IN_ONE_BIT)
             {
-
-                l_buffer.insertFromRight<CID_START, CID_LENGTH>( ONE_ZERO_ENABLE);
+                o_qs = ZERO_ENABLE;
+            }
+            // Only need 2 bits to encode 4 slave ranks per master rank with chip IDs
+            else if (l_num_slave_ranks <= NUM_SLAVE_RANKS_ENCODED_IN_TWO_BITS)
+            {
+                o_qs = ZERO_ONE_ENABLE;
             }
             else
             {
-                // 4-8 slave ranks, Gonna need all three bits
-                l_buffer.insertFromRight<CID_START, CID_LENGTH>( ALL_ENABLE);
+                // 5-8 slave ranks, Gonna need all three bits
+                o_qs = ALL_ENABLE;
             }
+
+            FAPI_INF("%s Chip ID bits are %x", mss::c_str(iv_dimm), o_qs);
 
             break;
 
@@ -1315,16 +1339,32 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
                          l_stack_type);
     };
 
-    // Let's set the other bits
-    l_buffer.writeBit<QXPAR_LOCATION>(PARITY_ENABLE);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
+/// @brief Determines & sets effective config for DIMM RC08
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note DA[1:0] enable/ disable QxC
+///
+fapi2::ReturnCode eff_dimm::dimm_rc08()
+{
+    uint8_t l_attrs_dimm_rc08[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    fapi2::buffer<uint8_t> l_buffer = 0;
 
-    // We only need the 17th Address bit if we have 16G dense drams
-    // TK: come back and do disable if not needed
+    qsid l_qs_enabled = ALL_DISABLE;
+    FAPI_TRY( eff_dimm::calculate_chip_ids(l_qs_enabled) );
+    l_buffer.insertFromRight<CID_START, CID_LENGTH>(l_qs_enabled);
+
+    // Let's set the other bits
+    l_buffer.writeBit<QXPAR_LOCATION>(RC08_PARITY_ENABLE);
+
     l_buffer.writeBit<DA17_QA17_LOCATION>(DA17_QA17_ENABLE);
 
+    FAPI_TRY( eff_dimm_ddr4_rc08(iv_mcs, &l_attrs_dimm_rc08[0][0]) );
     l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] = l_buffer;
 
-    FAPI_INF( "%s: RC08 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC08 setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] );
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC08, iv_mcs, l_attrs_dimm_rc08) );
 
@@ -1810,12 +1850,47 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_rcbx()
 {
+    fapi2::buffer<uint8_t> l_buf;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_bx[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-    FAPI_TRY( eff_dimm_ddr4_rc_bx(iv_mcs, &l_attrs_dimm_rc_bx[0][0]) );
 
-    // Update MCS attribute
-    l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rcbx;
+    qsid l_qs_enabled = ALL_DISABLE;
+    FAPI_TRY( eff_dimm::calculate_chip_ids( l_qs_enabled) );
+
+    switch (l_qs_enabled)
+    {
+        case ALL_DISABLE:
+            l_buf.writeBit<DC0_POS>(DC_DISABLE)
+            .writeBit<DC1_POS>(DC_DISABLE)
+            .writeBit<DC2_POS>(DC_DISABLE);
+            break;
+
+        case ZERO_ENABLE:
+            l_buf.writeBit<DC0_POS>(DC_ENABLE)
+            .writeBit<DC1_POS>(DC_DISABLE)
+            .writeBit<DC2_POS>(DC_DISABLE);
+            break;
+
+        case ZERO_ONE_ENABLE:
+            l_buf.writeBit<DC0_POS>(DC_ENABLE)
+            .writeBit<DC1_POS>(DC_ENABLE)
+            .writeBit<DC2_POS>(DC_DISABLE);
+            break;
+
+        case ALL_ENABLE:
+            l_buf.writeBit<DC0_POS>(DC_ENABLE)
+            .writeBit<DC1_POS>(DC_ENABLE)
+            .writeBit<DC2_POS>(DC_ENABLE);
+            break;
+
+        default:
+            FAPI_ERR("%s Error with C++ enum in eff_dimm.C. %d recieved", mss::c_str(iv_dimm), l_qs_enabled);
+            fapi2::Assert(false);
+    }
+
+    FAPI_TRY( eff_dimm_ddr4_rc_bx(iv_mcs, &l_attrs_dimm_rc_bx[0][0]) );
+    l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] = l_buf;
 
     FAPI_INF( "%s: RCBX setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Bx, iv_mcs, l_attrs_dimm_rc_bx) );
@@ -3743,7 +3818,6 @@ fapi2::ReturnCode eff_lrdimm::dram_rtt_park()
 fapi_try_exit:
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Determines & sets effective config for DIMM BC00
