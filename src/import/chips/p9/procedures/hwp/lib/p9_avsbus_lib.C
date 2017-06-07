@@ -305,10 +305,6 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     FAPI_TRY(putScom(i_target,
                      p9avslib::OCB_O2SCMD[i_avsBusNum][i_o2sBridgeNum], l_data64));
 
-    //unmask pmc_o2s_ongoing in OISR1
-    FAPI_TRY(getScom(i_target, OCB_OIMR1, l_data64));
-    l_data64 &= p9avslib::OCB_OIMR1_MASK_VALUES[i_avsBusNum][i_o2sBridgeNum];
-    FAPI_TRY(putScom(i_target, OCB_OIMR1, l_data64));
 
     // MSB sent out first always, which should be start code 0b01
     // compose and send frame
@@ -467,10 +463,6 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      l_scomdata),
              "Error clearing sticky bits in o2s_status_reg");
 
-    //unmask pmc_o2s_ongoing in OISR1
-    FAPI_TRY(getScom(i_target, OCB_OIMR1, l_scomdata));
-    l_scomdata &= p9avslib::OCB_OIMR1_MASK_VALUES[i_avsBusNum][i_o2sBridgeNum];
-    FAPI_TRY(putScom(i_target, OCB_OIMR1, l_scomdata));
 
     FAPI_INF("Sending idle frame of all 1s");
     // Send the idle frame
