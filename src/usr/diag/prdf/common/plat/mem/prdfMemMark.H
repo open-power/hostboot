@@ -33,6 +33,7 @@
 // Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemSymbol.H>
+#include <prdfP9McaExtraSig.H>
 #include <prdfPlatServices.H>
 
 //##############################################################################
@@ -192,6 +193,8 @@ uint32_t balance( ExtensibleChip * i_chip, const MemRank & i_rank,
             // Both a chip and symbol mark exist, but they are on separate
             // DRAMs. So, make the error log predictive.
             io_sc.service_data->setServiceCall();
+            io_sc.service_data->setSignature( i_chip->getHuid(),
+                                              PRDFSIG_AllDramRepairs );
         }
 
     } while (0);
