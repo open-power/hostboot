@@ -67,6 +67,19 @@ class eff_dimm
         uint8_t iv_refresh_mode;
         uint8_t iv_refresh_rate_request;
 
+        ///
+        ///@brief Encoding for QSID for RC08,
+        ///@note  placing here so we can use the enum for calculate_chip_id and for RCBX
+        ///
+        enum qsid
+        {
+            ALL_ENABLE = 0b00,
+            ZERO_ENABLE = 0b10,
+            ZERO_ONE_ENABLE = 0b01,
+            ALL_DISABLE = 0b11,
+
+        };
+
         //Delete the default
         eff_dimm () = delete;
 
@@ -278,6 +291,13 @@ class eff_dimm
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode dimm_rc06_07();
+
+        ///
+        /// @brief Determines how many chip select ID bits are needed for the iv_dimm
+        /// @param[out] o_qs a qsid encoding denoting if 0, 1, 2, or all three QSID's are needed
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode calculate_chip_ids( qsid& o_qs);
 
         ///
         /// @brief Determines & sets effective config for DIMM RC08
