@@ -36,18 +36,16 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_82 = 82;
 constexpr uint64_t literal_0x15 = 0x15;
-constexpr uint64_t literal_5 = 5;
+constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_100 = 100;
 constexpr uint64_t literal_1075 = 1075;
 constexpr uint64_t literal_0x1A = 0x1A;
 constexpr uint64_t literal_0x19 = 0x19;
-constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0x10 = 0x10;
 constexpr uint64_t literal_0x1F = 0x1F;
 constexpr uint64_t literal_0x3F = 0x3F;
 constexpr uint64_t literal_0x40 = 0x40;
 constexpr uint64_t literal_0x3C = 0x3C;
-constexpr uint64_t literal_0b0101 = 0b0101;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0b0001 = 0b0001;
 
@@ -74,9 +72,11 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_DD2_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_82);
         uint64_t l_def_DD1_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_X_MHZ * literal_100);
+        uint64_t l_def_DD1_LO_LIMIT_H = (l_def_DD1_LO_LIMIT_D / literal_2);
         uint64_t l_def_DD1_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_1075);
         uint64_t l_def_DD1_LO_LIMIT_R = (l_def_DD1_LO_LIMIT_N % l_def_DD1_LO_LIMIT_D);
         uint64_t l_def_DD1_PARTS = (l_TGT0_ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS == literal_1);
+        uint64_t l_def_DD1_LO_LIMIT_P = (l_def_DD1_LO_LIMIT_D % literal_2);
         uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] != literal_0);
         uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] != literal_0);
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
@@ -103,15 +103,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -125,15 +131,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -157,15 +169,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -179,15 +197,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X1_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -211,15 +235,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -233,15 +263,21 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R < l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == literal_5)))
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && l_def_DD1_LO_LIMIT_P))
+            {
+                l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1A - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
+            }
+            else if ((((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R == l_def_DD1_LO_LIMIT_H))
+                      && ( ! l_def_DD1_LO_LIMIT_P)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
-            else if (((l_def_X2_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > literal_5)))
+            else if (((l_def_X0_ENABLED && l_def_DD1_PARTS) && (l_def_DD1_LO_LIMIT_R > l_def_DD1_LO_LIMIT_H)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x19 - (l_def_DD1_LO_LIMIT_N / l_def_DD1_LO_LIMIT_D)) );
             }
@@ -387,14 +423,14 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if (l_def_X0_ENABLED)
             {
-                l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0b0101 );
-                l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0b0101 );
+                l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0b0100 );
+                l_scom_buffer.insert<8, 4, 60, uint64_t>(literal_0b0100 );
             }
 
             if (l_def_X0_ENABLED)
             {
-                l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0b0101 );
-                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0101 );
+                l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0b0001 );
+                l_scom_buffer.insert<12, 4, 60, uint64_t>(literal_0b0001 );
             }
 
             if ((( ! l_def_X0_ENABLED) && l_def_X1_ENABLED))
@@ -411,8 +447,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
 
             if (((( ! l_def_X0_ENABLED) && ( ! l_def_X1_ENABLED)) && l_def_X2_ENABLED))
             {
-                l_scom_buffer.insert<32, 4, 60, uint64_t>(literal_0b0001 );
-                l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_0b0001 );
+                l_scom_buffer.insert<32, 4, 60, uint64_t>(literal_0b0100 );
+                l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_0b0100 );
             }
 
             if (((( ! l_def_X0_ENABLED) && ( ! l_def_X1_ENABLED)) && l_def_X2_ENABLED))
