@@ -65,8 +65,7 @@ rcw_settings lrdimm_rc_b0( 0x00, // RC00
                            0x00, // RC6C
                            0x00, // RC8X
                            0x00, // RC9X
-                           0x00, // RCAx
-                           0x07);// RCBX
+                           0x00); // RCAX
 
 namespace lrdimm
 {
