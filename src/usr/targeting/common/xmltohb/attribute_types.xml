@@ -34901,4 +34901,40 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+    <id>SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
+    <description>
+    To allow for selective enablement for lab testing
+    To allow skew function to be enabled/disabled.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_CORECACHE_DCADJ_DISABLE</id>
+    <description>
+    To allow for selective enablement for lab testing
+    To allow dcadj function to be enabled/disabled.
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>
