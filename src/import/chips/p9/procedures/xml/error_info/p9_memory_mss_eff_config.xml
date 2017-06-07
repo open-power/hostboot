@@ -137,6 +137,31 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_INVALID_SPD_SLAVE_RANKS</rc>
+    <description>
+        Seems logical ranks are not master ranks* slave ranks.
+        Error from SPD is most likely.
+    </description>
+    <ffdc>LOGICAL_RANKS</ffdc>
+    <ffdc>MASTER_RANKS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>DIMM_TARGET</target>
+    </gard>
+  </hwpError>
+
+
+  <hwpError>
     <rc>RC_MSS_BAD_SDRAM_DENSITY_DECODER</rc>
     <description>
       SPD decoder messed up and returned a 0. Should have been caught already
