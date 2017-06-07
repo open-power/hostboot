@@ -961,6 +961,8 @@
     <attribute><id>PGPE_HCODE_FUNCTION_ENABLE</id></attribute>
     <attribute><id>PERF_24x7_INVOCATION_TIME_MS</id></attribute>
     <attribute><id>AUX_FUNC_INVOCATION_TIME_MS</id></attribute>
+    <attribute><id>SYSTEM_CORECACHE_SKEWADJ_DISABLE</id></attribute>
+    <attribute><id>SYSTEM_CORECACHE_DCADJ_DISABLE</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->

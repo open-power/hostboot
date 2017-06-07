@@ -743,4 +743,28 @@
   <writeable/>
 </attribute>
 
+<attribute>
+  <id>ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>To allow for selective enablement for lab testing
+  To allow skew function to be enabled/disabled. </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>To allow for selective enablement for lab testing
+  To allow dcadj function to be enabled/disabled. </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <persistRuntime/>
+  <initToZero/>
+  <writeable/>
+</attribute>
+
 </attributes>
