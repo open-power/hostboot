@@ -185,6 +185,7 @@ fapi2::ReturnCode after_scominit( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         FAPI_TRY(l_mca_fir_reg.clear<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_4>());
 
         FAPI_TRY(l_cal_fir_reg.clear<MCA_MBACALFIRQ_RCD_PARITY_ERROR>());
+        FAPI_TRY(l_cal_fir_reg.clear<MCA_MBACALFIRQ_DDR_MBA_EVENT_N>());
 
         // No need to write after clearing - the clear does the read/modify/write.
     }
