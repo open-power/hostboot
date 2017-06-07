@@ -52,7 +52,6 @@ struct rcw_settings
 {
     uint64_t iv_rc00;
     uint64_t iv_rc01;
-    uint64_t iv_rc02;
     uint64_t iv_rc06_07;
     uint64_t iv_rc09;
     uint64_t iv_rc0b;
@@ -98,7 +97,6 @@ struct rcw_settings
     /// @brief ctor
     /// @param[in] i_rc00 setting for register control word (RC00)
     /// @param[in] i_rc01 setting for register control word (RC01)
-    /// @param[in] i_rc02 setting for register control word (RC02)
     /// @param[in] i_rc06_07 setting for register control word (RCO6 & RC07)
     /// @param[in] i_rc09 setting for register control word (RC09)
     /// @param[in] i_rc0b setting for register control word (RC0B)
@@ -115,7 +113,6 @@ struct rcw_settings
     ///
     constexpr rcw_settings( const uint64_t i_rc00,
                             const uint64_t i_rc01,
-                            const uint64_t i_rc02,
                             const uint64_t i_rc06_07,
                             const uint64_t i_rc09,
                             const uint64_t i_rc0b,
@@ -131,7 +128,6 @@ struct rcw_settings
                             const uint64_t i_rcax)
         : iv_rc00(i_rc00),
           iv_rc01(i_rc01),
-          iv_rc02(i_rc02),
           iv_rc06_07(i_rc06_07),
           iv_rc09(i_rc09),
           iv_rc0b(i_rc0b),
