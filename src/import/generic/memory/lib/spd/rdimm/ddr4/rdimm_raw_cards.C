@@ -51,7 +51,6 @@ namespace mss
 ///
 rcw_settings rdimm_rc_c1( 0x02, // RC00
                           0x0C, // RC01
-                          0x00, // RC02
                           0x0F, // RC06_07
                           0x0C, // RC09
                           0x0E, // RC0B
@@ -72,7 +71,6 @@ rcw_settings rdimm_rc_c1( 0x02, // RC00
 ///
 rcw_settings rdimm_rc_c2( 0x02, // RC00
                           0x0C, // RC01
-                          0x00, // RC02
                           0x0F, // RC06_07
                           0x0C, // RC09
                           0x0E, // RC0B
@@ -92,7 +90,6 @@ rcw_settings rdimm_rc_c2( 0x02, // RC00
 ///
 rcw_settings  rdimm_rc_a1( 0x02, // RC00
                            0x00, // RC01
-                           0x00, // RC02
                            0x0F, // RC06_07
                            0x0C, // RC09
                            0x0E, // RC0B
@@ -113,7 +110,6 @@ rcw_settings  rdimm_rc_a1( 0x02, // RC00
 ///
 rcw_settings rdimm_rc_b1( 0x02, // RC00
                           0x00, // RC01
-                          0x00, // RC02
                           0x0F, // RC06_07
                           0x0C, // RC09 Could be set in eff_config for CKE power DOWN mode
                           0x0E, // RC0B
@@ -134,7 +130,6 @@ rcw_settings rdimm_rc_b1( 0x02, // RC00
 ///
 rcw_settings rdimm_rc_b2( 0x02, // RC00
                           0x00, // RC01
-                          0x00, // RC02
                           0x0F, // RC06_07
                           0x0C, // RC09
                           0x0E, // RC0B
@@ -155,7 +150,6 @@ rcw_settings rdimm_rc_b2( 0x02, // RC00
 ///
 rcw_settings rdimm_rc_custom ( 0x02, // RC00
                                0x00, // RC01
-                               0x00, // RC02
                                0x0F, // RC06_07
                                0x0C, // RC09
                                0x0E, // RC0B
@@ -176,7 +170,6 @@ rcw_settings rdimm_rc_custom ( 0x02, // RC00
 ///
 rcw_settings rdimm_rc_vbu( 0x02, // RC00
                            0x00, // RC01
-                           0x00, // RC02
                            0x0F, // RC06_07
                            0x0C, // RC09
                            0x0E, // RC0B
