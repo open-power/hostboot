@@ -64,8 +64,7 @@ rcw_settings rdimm_rc_c1( 0x02, // RC00
                           0x00, // RC6X
                           0x00, // RC8X
                           0x00, // RC9X
-                          0x00, // RCAX
-                          0x07);// RCBX
+                          0x00); // RCAX
 
 ///
 /// @brief raw card C2 settings
@@ -86,8 +85,7 @@ rcw_settings rdimm_rc_c2( 0x02, // RC00
                           0x00, // RC6X
                           0x00, // RC8X
                           0x00, // RC9X
-                          0x00, // RCAX
-                          0x07);// RCBX
+                          0x00); // RCAX
 
 ///
 /// @brief raw card A1 settings
@@ -107,8 +105,7 @@ rcw_settings  rdimm_rc_a1( 0x02, // RC00
                            0x00, // RC6X
                            0x00, // RC8X
                            0x00, // RC9X
-                           0x00, // RCAX
-                           0x07);// RCBX
+                           0x00); // RCAX
 
 ///
 /// @brief raw card B1 settings
@@ -129,8 +126,8 @@ rcw_settings rdimm_rc_b1( 0x02, // RC00
                           0x00, // RC6X
                           0x00, // RC8X
                           0x00, // RC9X
-                          0x00, // RCAX
-                          0x07);// RCBX
+                          0x00);// RCAX
+
 
 ///
 /// @brief raw card B2 settings
@@ -150,8 +147,8 @@ rcw_settings rdimm_rc_b2( 0x02, // RC00
                           0x00, // RC6X
                           0x00, // RC8X
                           0x00, // RC9X
-                          0x00, // RCAX
-                          0x07);// RCBX
+                          0x00);// RCAX
+
 
 ////
 /// @brief raw card for custom dimms
@@ -171,8 +168,8 @@ rcw_settings rdimm_rc_custom ( 0x02, // RC00
                                0x00, // RC6X
                                0x00, // RC8X
                                0x00, // RC9X
-                               0x00, // RCAX
-                               0x07);// RCBX
+                               0x00);// RCAX
+
 
 ///
 /// @brief raw card VBU settings
@@ -192,8 +189,7 @@ rcw_settings rdimm_rc_vbu( 0x02, // RC00
                            0x00, // RC6X
                            0x00, // RC8X
                            0x00, // RC9X
-                           0x00, // RCAX
-                           0x07);// RCBX
+                           0x00); // RCAX
 
 namespace rdimm
 {
