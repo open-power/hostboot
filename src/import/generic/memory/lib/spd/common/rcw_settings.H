@@ -66,7 +66,6 @@ struct rcw_settings
     uint64_t iv_rc8x;
     uint64_t iv_rc9x;
     uint64_t iv_rcax;
-    uint64_t iv_rcbx;
 
     ///
     /// @brief default ctor
@@ -113,7 +112,6 @@ struct rcw_settings
     /// @param[in] i_rc8x setting for register control word (RC8X)
     /// @param[in] i_rc9x setting for register control word (RC9X)
     /// @param[in] i_rcax setting for register control word (RCAX)
-    /// @param[in] i_rcbx setting for register control word (RCBX)
     ///
     constexpr rcw_settings( const uint64_t i_rc00,
                             const uint64_t i_rc01,
@@ -130,8 +128,7 @@ struct rcw_settings
                             const uint64_t i_rc6x,
                             const uint64_t i_rc8x,
                             const uint64_t i_rc9x,
-                            const uint64_t i_rcax,
-                            const uint64_t i_rcbx )
+                            const uint64_t i_rcax)
         : iv_rc00(i_rc00),
           iv_rc01(i_rc01),
           iv_rc02(i_rc02),
@@ -147,8 +144,7 @@ struct rcw_settings
           iv_rc6x(i_rc6x),
           iv_rc8x(i_rc8x),
           iv_rc9x(i_rc9x),
-          iv_rcax(i_rcax),
-          iv_rcbx(i_rcbx)
+          iv_rcax(i_rcax)
     {}
 
     ///
