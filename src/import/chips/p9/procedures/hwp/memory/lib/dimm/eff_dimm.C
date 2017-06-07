@@ -41,6 +41,7 @@
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
 #include <lib/eff_config/timing.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>
@@ -56,6 +57,18 @@ using fapi2::TARGET_TYPE_DIMM;
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
+
+///
+/// @brief bit encodings for RC02
+/// From DDR4 Register v1.0
+///
+enum rc02_encode
+{
+    A17_POS = 7,
+    A17_ENABLE = 0,
+    A17_DISABLE = 1
+};
+
 ///
 /// @brief bit encodings for Frequencies RC08
 /// @note valid frequency values for Nimbus systems
@@ -1062,10 +1075,15 @@ fapi2::ReturnCode eff_dimm::dimm_rc02()
 {
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc02[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+    fapi2::buffer<uint8_t> l_temp;
+
+    bool is_a17 = false;
+    FAPI_TRY( is_a17_needed( iv_dimm, is_a17), "%s Failed to get a17 boolean", mss::c_str(iv_dimm) );
+
+    l_temp.writeBit<rc02_encode::A17_POS>(is_a17 ? rc02_encode::A17_ENABLE : rc02_encode::A17_DISABLE);
     FAPI_TRY( eff_dimm_ddr4_rc02(iv_mcs, &l_attrs_dimm_rc02[0][0]) );
 
-    // Update MCS attribute
-    l_attrs_dimm_rc02[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc02;
+    l_attrs_dimm_rc02[iv_port_index][iv_dimm_index] = l_temp;
 
     FAPI_INF("%s: RC02 settting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc02[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC02, iv_mcs, l_attrs_dimm_rc02) );
@@ -1359,7 +1377,15 @@ fapi2::ReturnCode eff_dimm::dimm_rc08()
     // Let's set the other bits
     l_buffer.writeBit<QXPAR_LOCATION>(RC08_PARITY_ENABLE);
 
-    l_buffer.writeBit<DA17_QA17_LOCATION>(DA17_QA17_ENABLE);
+    // Now for A17 bit
+    {
+        bool l_is_a17 = false;
+
+        FAPI_TRY( is_a17_needed( iv_dimm, l_is_a17), "%s Failed to get a17 boolean", mss::c_str(iv_dimm) );
+        l_buffer.writeBit<DA17_QA17_LOCATION>(l_is_a17 ? DA17_QA17_ENABLE : DA17_QA17_DISABLE);
+
+        FAPI_INF("%s Turning %s DA17", mss::c_str(iv_dimm), (l_is_a17 ? "on" : "off"));
+    }
 
     FAPI_TRY( eff_dimm_ddr4_rc08(iv_mcs, &l_attrs_dimm_rc08[0][0]) );
     l_attrs_dimm_rc08[iv_port_index][iv_dimm_index] = l_buffer;
@@ -4727,5 +4753,4 @@ fapi2::ReturnCode eff_dimm::phy_seq_refresh()
                          iv_mcs,
                          UINT8_VECTOR_TO_1D_ARRAY(l_phy_seq_ref_enable, PORTS_PER_MCS));
 }
-
 }//mss

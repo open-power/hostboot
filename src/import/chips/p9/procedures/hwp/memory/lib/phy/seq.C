@@ -83,7 +83,6 @@ uint64_t exp_helper( const uint64_t i_value )
     return l_first_bit + (uint64_t(1 << l_first_bit) < i_value ? 1 : 0);
 }
 
-
 ///
 /// @brief reset SEQ_TIMING0
 /// @param[in] i_target fapi2 target of the port

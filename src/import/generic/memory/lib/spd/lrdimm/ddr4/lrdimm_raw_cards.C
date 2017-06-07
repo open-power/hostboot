@@ -52,7 +52,6 @@ namespace mss
 // TODO RTC:160116 Fill in valid RCD data for LRDIMM
 rcw_settings lrdimm_rc_b0( 0x00, // RC00
                            0x00, // RC01 (C might be the right answer)
-                           0x00, // RC02
                            0x1F, // RC06_7
                            0x00, // RC09
                            0x0E, // RC0B

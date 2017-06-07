@@ -70,6 +70,65 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Helper function to determine whether the A17 is needed
+/// @param[in] i_target the DIMM target
+/// @param[out] o_is_needed boolean whether A17 should be turned on or off
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
+///
+template<>
+fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                bool& o_is_needed)
+{
+    uint8_t l_dram_density = 0;
+    uint8_t l_dram_width = 0;
+
+    FAPI_TRY( eff_dram_density( i_target, l_dram_density) );
+    FAPI_TRY( eff_dram_width( i_target, l_dram_width) );
+
+    o_is_needed = (l_dram_density == fapi2::ENUM_ATTR_EFF_DRAM_DENSITY_16G
+                   && l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X4) ?
+                  true : false;
+    FAPI_INF("%s Turning A17 %s", mss::c_str(i_target), o_is_needed ? "on" : "off" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to determine whether the A17 is needed
+/// @param[in] i_target the MCA target
+/// @param[out] o_is_needed boolean whether A17 should be turned on or off
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
+///
+template<>
+fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                bool& o_is_needed)
+{
+    // Set this to good in case no dimms and we're running unit tests
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Loop over the DIMMs and see if A17 is needed for one of them
+    // If so, we enable the parity bit in the PHY
+    for (const auto& l_dimm : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
+    {
+        // Default to not used
+        // Using temp because we want to OR the two results together. Don't want the false to overwrite
+        bool l_temp = false;
+        FAPI_TRY( is_a17_needed( l_dimm, l_temp), "%s Failed to get a17 boolean", mss::c_str(l_dimm) );
+
+        if (l_temp == true)
+        {
+            o_is_needed = true;
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace ddr4
 {
 
