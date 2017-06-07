@@ -70,8 +70,8 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             // False alarm threshold has been reached. Leave the mark in place
             // and treat the chip mark as verified.
 
-            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
-                                                  PRDFSIG_VcmFalseAlarm );
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_VcmFalseAlarmTH );
 
             PRDF_TRAC( PRDF_FUNC "False alarm threshold: 0x%08x,0x%02x",
                        iv_chip->getHuid(), getKey() );

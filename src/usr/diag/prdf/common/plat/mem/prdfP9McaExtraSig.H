@@ -44,8 +44,10 @@ PRDR_ERROR_SIGNATURE(MaintSOFT_CTE,  0xffff0014, "", "Maintenance SOFT CTE");
 PRDR_ERROR_SIGNATURE(MaintINTER_CTE, 0xffff0015, "", "Maintenance INTER CTE");
 PRDR_ERROR_SIGNATURE(MaintRETRY_CTE, 0xffff0016, "", "Maintenance RETRY CTE");
 
-PRDR_ERROR_SIGNATURE(VcmVerified,    0xffff0020, "", "VCM: verified");
-PRDR_ERROR_SIGNATURE(VcmFalseAlarm,  0xffff0021, "", "VCM: false alarm");
+PRDR_ERROR_SIGNATURE(VcmVerified,     0xffff0020, "", "VCM: verified");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
+PRDR_ERROR_SIGNATURE(VcmFalseAlarmTH, 0xffff0022, "", "VCM: false alarm threshold");
+PRDR_ERROR_SIGNATURE(AllDramRepairs,  0xffff002F, "", "all DRAM repairs used");
 
 PRDR_ERROR_SIGNATURE(MnfgIplHardCE,  0xffff0051, "", "MNFG IPL hard CE");
 PRDR_ERROR_SIGNATURE(MnfgIplDramCTE, 0xffff0052, "", "MNFG IPL DRAM CTE");
