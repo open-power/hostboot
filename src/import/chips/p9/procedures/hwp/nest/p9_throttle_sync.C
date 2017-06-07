@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /// ----------------------------------------------------------------------------
-/// @file  p9_throttle_sync.H
+/// @file  p9_throttle_sync.C
 ///
 /// @brief Perform p9_throttle_sync HWP
 ///
@@ -34,7 +34,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 /// ----------------------------------------------------------------------------
 
@@ -59,9 +59,7 @@ template <fapi2::TargetType T>
 struct mcSideInfo_t
 {
     bool masterMcFound = false;
-
-    // Master MC for this MC side
-    fapi2::Target<T> masterMc;
+    fapi2::Target<T> masterMc;   // Master MC for this MC side
 };
 
 ///
@@ -75,6 +73,7 @@ struct mcSideInfo_t
 template< fapi2::TargetType T>
 uint8_t findNumDimms(const fapi2::Target<T>& i_mcTarget);
 
+// TARGET_TYPE_MI
 template<>
 uint8_t findNumDimms(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_miTarget)
 {
@@ -97,6 +96,7 @@ uint8_t findNumDimms(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_miTarget)
     return l_num_dimms;
 }
 
+// TARGET_TYPE_MCS
 template<>
 uint8_t findNumDimms(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcsTarget)
 {
@@ -154,7 +154,6 @@ fapi2::ReturnCode progMCMODE0(
     // Determine side functionality
     for (auto l_mc : i_mcTargets)
     {
-
         uint8_t l_tmp_pos = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_mc,
                                l_tmp_pos),
@@ -167,7 +166,7 @@ fapi2::ReturnCode progMCMODE0(
             l_other_side_functional = true;
         }
 
-        // the same side
+        // The same side
         if (l_tmp_pos == l_same_side_pos)
         {
             l_same_side_functional = true;
@@ -194,7 +193,7 @@ fapi2::ReturnCode progMCMODE0(
 
     FAPI_TRY(fapi2::putScomUnderMask(i_mcTarget, MCS_MCMODE0,
                                      l_scomData, l_scomMask),
-             "putScomUnderMask() returns an error (Mode0), MCS_MCMODE0 reg 0x%.16llX",
+             "putScomUnderMask() returns an error, MCS_MCMODE0 reg 0x%.16llX",
              MCS_MCMODE0);
 
 fapi_try_exit:
@@ -212,8 +211,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 template< fapi2::TargetType T>
-fapi2::ReturnCode progMaster(
-    const fapi2::Target<T>& i_mcTarget)
+fapi2::ReturnCode progMaster(const fapi2::Target<T>& i_mcTarget)
 {
     FAPI_DBG("Entering progMaster");
     fapi2::ReturnCode l_rc;
@@ -242,7 +240,7 @@ fapi2::ReturnCode progMaster(
     l_scomData.flush<0>();
     FAPI_TRY(fapi2::putScomUnderMask(i_mcTarget, MCS_MCSYNC,
                                      l_scomData, l_scomMask),
-             "putScomUnderMask() returns an error (Sync reset), Addr 0x%.16llX",
+             "putScomUnderMask() returns an error (Reset), MCS_MCSYNC reg 0x%.16llX",
              MCS_MCSYNC);
 
     // --------------------------------------------------------------
