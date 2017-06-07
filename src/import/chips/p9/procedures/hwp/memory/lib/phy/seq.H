@@ -41,6 +41,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 
 namespace mss
 {
@@ -107,10 +108,13 @@ class seqTraits<fapi2::TARGET_TYPE_MCA>
             TODTLON_OFF_CYCLES = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TODTLON_OFF_CYCLES,
             TODTLON_OFF_CYCLES_LEN = MCA_DDRPHY_SEQ_MEM_TIMING_PARAM2_P0_TODTLON_OFF_CYCLES_LEN,
 
+            PAR_A17 = MCA_DDRPHY_SEQ_CONFIG0_P0_PAR_17_MASK,
             DELAYED_PARITY = MCA_DDRPHY_SEQ_CONFIG0_P0_DELAYED_PAR,
             TWO_N_MODE = MCA_DDRPHY_SEQ_CONFIG0_P0_TWO_CYCLE_ADDR_EN,
-        };
 
+            A17_IS_USED = 0b0,
+            A17_IS_NOT_USED = 0b1,
+        };
 };
 
 namespace seq
@@ -400,12 +404,20 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
-inline fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
+fapi2::ReturnCode reset_config0( const fapi2::Target<T>& i_target )
 {
     fapi2::buffer<uint64_t> l_data;
 
-    l_data.writeBit<TT::TWO_N_MODE>(mss::two_n_mode_helper(i_target));
+    // Let's figure out if the A17 bit is on/ needed for parity calculations
+    bool l_a17 = false;
+    FAPI_TRY( is_a17_needed( i_target, l_a17) );
 
+    {
+        const auto l_encoding = l_a17 ? TT::A17_IS_USED : TT::A17_IS_NOT_USED;
+        l_data.writeBit<TT::PAR_A17>( l_encoding );
+    }
+
+    l_data.writeBit<TT::TWO_N_MODE>(mss::two_n_mode_helper(i_target));
     // DDR4 needs delayed partiy TK for DDR5/DDR3 ...
     l_data.setBit<TT::DELAYED_PARITY>();
     FAPI_TRY( write_config0(i_target, l_data), "%s failed to reset seq_config0 register via write", mss::c_str(i_target) );
@@ -423,7 +435,6 @@ fapi_try_exit:
 ///
 template< fapi2::TargetType T, typename TT = seqTraits<T> >
 fapi2::ReturnCode reset_timing0( const fapi2::Target<T>& i_target );
-
 
 ///
 /// @brief reset SEQ_TIMING1
