@@ -147,11 +147,16 @@ fapi_try_exit:
 
 ///
 /// @brief Invert (side to side) the ADR bits of a CCS instruction
+/// @tparam T the target type of the ccs instruction
+/// @param[in] i_target the DIMM target of the ccs command
 /// @param[in] i_inst const reference to a CCS instruction.
-/// @return[out] ccs instruction with the ADR bits inverted (side-to-side)
+/// @param[in] l_is_a17 Boolean for whether A17 bit is enabled or not
+/// @return ccs instruction with the ADR bits inverted (side-to-side)
 ///
 template<fapi2::TargetType T>
-ccs::instruction_t<T> address_invert(const ccs::instruction_t<T>& i_inst)
+ccs::instruction_t<T> address_invert(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const ccs::instruction_t<T>& i_inst,
+                                     const bool i_is_a17 = false)
 {
     // Copy the input as the output doesn't all change.
     ccs::instruction_t<T> i_out(i_inst);
@@ -167,7 +172,12 @@ ccs::instruction_t<T> address_invert(const ccs::instruction_t<T>& i_inst)
 
     mss::template negate<A11>(i_out.arr0);
     mss::template negate<A13>(i_out.arr0);
-    mss::template negate<A17>(i_out.arr0);
+
+    if (i_is_a17)
+    {
+        FAPI_INF("%s A17 is turned on, negating CCS bit A17", mss::c_str(i_target) );
+        mss::template negate<A17>(i_out.arr0);
+    }
 
     mss::template negate<BA0>(i_out.arr0);
     mss::template negate<BA1>(i_out.arr0);
@@ -246,6 +256,18 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to determine whether the A17 is needed
+/// @tparam T fapi2::TargetType DIMM or MCA
+/// @param[in] i_target the target to check
+/// @param[out] o_is_needed boolean whether A17 should be turned on or off
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Based off of Table 2.8 Proposed DDR4 Full spec update(79-4B) page 28
+///
+template< fapi2::TargetType T>
+fapi2::ReturnCode is_a17_needed(const fapi2::Target<T>& i_target,
+                                bool& o_is_needed);
+
+///
 /// @brief Helper function to decode MRS and trace CCS instructions
 /// @param[in] i_data the completed MRS data to send
 /// @param[in] i_rank the rank to send to
@@ -287,6 +309,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 {
     ccs::instruction_t<T> l_inst_a_side = ccs::mrs_command<T>(i_target, i_rank, i_data.iv_mrs);
     ccs::instruction_t<T> l_inst_b_side;
+    bool l_is_a17 = false;
 
     // Thou shalt send 2 MRS, one for the a-side and the other inverted for the b-side.
     // If we're on an odd-rank then we need to mirror
@@ -299,7 +322,9 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
               "Failed mirroring MR%d rank %d on %s",
               i_data.iv_mrs, i_rank, mss::c_str(i_target) );
 
-    l_inst_b_side = mss::address_invert(l_inst_a_side);
+    // So we need to see if the A17 bit is enabled. If it is we need to invert it for the CCS parity
+    FAPI_TRY( is_a17_needed( i_target, l_is_a17) );
+    l_inst_b_side = mss::address_invert(i_target, l_inst_a_side, l_is_a17);
 
     // Not sure if we can get tricky here and only delay after the b-side MR. The question is whether the delay
     // is needed/assumed by the register or is purely a DRAM mandated delay. We know we can't go wrong having
