@@ -54,7 +54,7 @@
 #include <i2c/eepromif.H>
 #include <sbe/sbeif.H>
 #include "../../secureboot/common/errlud_secure.H"
-#include "../../sbe/sbe_update.H"
+#include <sbe/sbe_update.H>
 
 namespace ISTEP_10
 {

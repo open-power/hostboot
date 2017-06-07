@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbe/sbe_update.H $                                    */
+/* $Source: src/include/usr/sbe/sbe_update.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <targeting/common/targetservice.H>
 #include <i2c/eepromif.H>
 #include <p9_infrastruct_help.H>
+#include <sbe/sbeif.H>
 
 namespace SBE
 {
