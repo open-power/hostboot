@@ -943,21 +943,20 @@ sub processObus
 
         if ($obus eq "")
         {
-            #No connections mean, we need to remove all the children and the obus
+            #No connections mean, we need to set the OBUS_SLOT_INDEX to -1
+            #to mark that they are not connected
             $targetObj->log($target,"no bus connection found");
-            $targetObj->log($target,"removing target and it's children");
             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
             {
-                $targetObj->removeTarget($obrick);
+                $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
             }
-            $targetObj->removeTarget($target);
         }
         else
         {
             #Loop through all the bricks and figure out if it connected to an
             #obusslot. If it is connected, then store the slot information (position)
             #in the obus_brick target as OBUS_SLOT_INDEX. If it is not connected,
-            #remove obus brick target.
+            #set the value to -1 to mark that they are not connected
             my $match = 0;
             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
             {
@@ -976,11 +975,11 @@ sub processObus
                     }
                  }
 
-                 #This brick is not connected to anything, remove
+                 #This brick is not connected to anything, set the value of OBUS_SLOT_INDEX to -1
+                 #to mark that they are not connected
                  if ($match eq 0)
                  {
-                    $targetObj->log($target,"no bus conn, removing target");
-                    $targetObj->removeTarget($obrick);
+                    $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
                  }
             }
         }
