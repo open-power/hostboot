@@ -142,20 +142,6 @@ void applyTempOverrides()
             TRACFCOMP(g_trac_targeting, "Overrides found at %.16X", l_overAddr );
             l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
         }
-        else
-        {
-            //@fixme-RTC:169478-Remove this workaround once HDAT+PHYP is ready
-            // grab the data we stashed at the end of the targeting data
-            l_overAddr = g_hostInterfaces
-              ->get_reserved_mem("ibm,hbrt-target-image",0);
-            if( l_overAddr != 0 )
-            {
-                l_overAddr += (1*MEGABYTE - 64*KILOBYTE);
-                TRACFCOMP(g_trac_targeting, "NULL from get_reserved_mem, using stashed value at %.llX instead", l_overAddr );
-                l_overPtr = reinterpret_cast<uint8_t*>(l_overAddr);
-                l_usingStash = true;
-            }
-        }
     }
 
     // Having no overrides is a normal thing
