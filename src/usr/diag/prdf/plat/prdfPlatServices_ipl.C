@@ -221,6 +221,7 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
     mss::mcbist::stop_conditions stopCond;
     stopCond.set_pause_on_mpe(mss::ON)
             .set_pause_on_ue(mss::ON)
+            .set_pause_on_aue(mss::ON)
             .set_nce_inter_symbol_count_enable(mss::ON)
             .set_nce_soft_symbol_count_enable( mss::ON)
             .set_nce_hard_symbol_count_enable( mss::ON);
