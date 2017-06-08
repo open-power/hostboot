@@ -44,7 +44,9 @@ CLEAN_TARGETS += $(GENPATH)/collect_reg_ffdc_regs.C
 CLEAN_TARGETS += $(GENPATH)/set_sbe_error.H
 
 define parseErrorInfo_RUN
-		$(C1) $$< --output-dir=$$($(GENERATED)_PATH) $$(filter-out $$<,$$^)
+		$(C1) $$< --use-variable-buffers \
+				  --output-dir=$$($(GENERATED)_PATH) \
+				  $$(filter-out $$<,$$^)
 endef
 
 $(call BUILD_GENERATED)
