@@ -812,6 +812,15 @@ class variable_buffer
         }
 
         ///
+        /// @brief Get a pointer to the buffer bits
+        /// @return Pointer to the buffer itself
+        ///
+        inline const unit_type* pointer(void) const
+        {
+            return &(iv_data[0]);
+        }
+
+        ///
         /// @brief operator!=()
         ///
         inline bool operator!=(const variable_buffer& rhs) const
