@@ -22,32 +22,24 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------------
-//
+
+///
 /// @file p9_sbe_hb_structures.H
-/// @brief Structures that the SBE and HB will both use
-//
-// *HWP HWP Owner: Joshua Hannan jlhannan@us.ibm.com
+/// @brief Structures shared between SBE/HB code
+///
+
+// *HWP HWP Owner: Joe McGill jmcgill@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
 // *HWP Level: 3
 // *HWP Consumed by: SBE, HB
-//-----------------------------------------------------------------------------------
 
 #ifndef _SBE_HB_STRUCTURES_H_
 #define _SBE_HB_STRUCTURES_H_
 
-//-----------------------------------------------------------------------------------
-// Includes
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Structure definitions
-//-----------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 // Used for version checking as the BootloaderConfigData_t structure changes
 enum SbeBootloaderVersion
@@ -78,16 +70,19 @@ union BootloaderSecureSettings
 //          maintain compatibility with Hostboot
 struct BootloaderConfigData_t
 {
-    uint32_t version;         // bytes  4:7  Version field so we know if there is new data being added
-    uint8_t sbeBootSide;      // byte   8    0=SBE side 0, 1=SBE side 1   [ATTR_SBE_BOOT_SIDE]
-    uint8_t pnorBootSide;     // byte   9    0=PNOR side A, 1=PNOR side B  [ATTR_PNOR_BOOT_SIDE]
-    uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB  [ATTR_PNOR_SIZE]
-    uint64_t blLoadSize;      // bytes 12:19 Size of Load (Exception vectors and Bootloader)
+    uint32_t version;         // bytes  4:7  Version identifier
+    uint8_t sbeBootSide;      // byte   8    0=SBE side 0, 1=SBE side 1
+    //                                         [ATTR_SBE_BOOT_SIDE]
+    uint8_t pnorBootSide;     // byte   9    0=PNOR side A, 1=PNOR side B
+    //                                         [ATTR_PNOR_BOOT_SIDE]
+    uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB
+    //                                         [ATTR_PNOR_SIZE]
+    uint64_t blLoadSize;      // bytes 12:19 Size of Load
+    //                                         Exception vectors and Bootloader
     BootloaderSecureSettings  secureSettings  ; // byte  20
     uint8_t reserved[7];      // bytes 21:27 Reserved space to maintain 64-bit alignment
     uint64_t xscomBAR;        // bytes 28:35 XSCOM MMIO BAR
     uint64_t lpcBAR;          // bytes 36:43 LPC MMIO BAR
 }; // Note: Want to use '__attribute__((packed))' but compiler won't let us
 
-
-#endif
+#endif // _SBE_HB_STRUCTURES_H_
