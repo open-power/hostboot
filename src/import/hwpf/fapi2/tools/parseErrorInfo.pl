@@ -324,10 +324,14 @@ sub addFfdcMethod
     elsif ( $type eq $buffer_ffdc_type )
     {
         # Two methods - one for integral buffers and one for variable_buffers
-        $method = "\n    template< typename T >\n";
+        $method = "\n";
+        $method .= "    template< typename T >\n";
         $method .= "    inline $class_name& set_$ffdc_uc(const fapi2::buffer<T>& $param)\n";
-        $method_body =
-            "        {\n        $ffdc_uc.ptr() = &i_value(); $ffdc_uc.size() = i_value.template getLength<uint8_t>(); return *this;}\n\n";
+        $method_body = "    {\n";
+        $method_body .= "        $ffdc_uc.ptr() = $param.pointer();\n";
+        $method_body .= "        $ffdc_uc.size() = $param.template getLength<uint8_t>();\n";
+        $method_body .= "        return *this;\n";
+        $method_body .= "    }\n\n";
         $methods->{$key}{member}            = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} = "$buffer_ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
@@ -335,9 +339,13 @@ sub addFfdcMethod
 
     elsif ( $type eq $variable_buffer_ffdc_type )
     {
-        $method = "\n    inline $class_name& set_$ffdc_uc(const fapi2::variable_buffer& $param)\n";
-        $method_body =
-            "    {$ffdc_uc.ptr() = &$param(); $ffdc_uc.size() = $param.template getLength<uint8_t>(); return *this;}\n\n";
+        $method = "\n";
+        $method .= "    inline $class_name& set_$ffdc_uc(const fapi2::variable_buffer& $param)\n";
+        $method_body = "    {\n";
+        $method_body .= "        $ffdc_uc.ptr() = $param.pointer();\n";
+        $method_body .= "        $ffdc_uc.size() = $param.template getLength<uint8_t>();\n";
+        $method_body .= "        return *this;\n";
+        $method_body .= "    }\n\n";
 
         # No need to add the member here, it was added with fapi2::buffer. And we can't have variable
         # buffer support with out integral buffer support (can we?)
