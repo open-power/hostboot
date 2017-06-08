@@ -52,6 +52,10 @@
 
 extern char bootloader_end_address;
 
+// XSCOM/LPC BAR constants
+const uint64_t XSCOM_BAR_MASK = 0xFF000003FFFFFFFFULL;
+const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
+
 
 namespace Bootloader{
     /**
@@ -129,9 +133,10 @@ namespace Bootloader{
 
         // Copy values for MMIO BARs
         g_blData->blToHbData.xscomBAR
-            = /* (l_blConfigData->version >= MMIO_BARS_ADDED)
+            = ((l_blConfigData->version >= MMIO_BARS_ADDED) &&
+               ((l_blConfigData->xscomBAR & XSCOM_BAR_MASK) == 0))
             ? l_blConfigData->xscomBAR
-            : @fixme-RTC:149250-Remove */ MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
+            : MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
         /* lpcBAR already copied in main() */
 
         // Only set rest of BlToHbData if SecureROM is valid
@@ -296,13 +301,13 @@ namespace Bootloader{
         // @TODO RTC:138268 Support multiple sides of PNOR in bootloader
 
         // Copy SBE BL shared data into BL HB shared data
-/*        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
+        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
                                                               SBE_HB_COMM_ADDR);
-        @fixme-RTC:149250-Remove */ 
         g_blData->blToHbData.lpcBAR
-            = /* (l_blConfigData->version >= MMIO_BARS_ADDED)
+            = ((l_blConfigData->version >= MMIO_BARS_ADDED) &&
+               ((l_blConfigData->lpcBAR & LPC_BAR_MASK) == 0))
             ? l_blConfigData->lpcBAR
-            : @fixme-RTC:149250-Remove */ MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
+            : MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
 
         //pnorEnd is the end of flash, which is base of lpc, plus
         //the offset of the FW space, plus the TOP memory address in FW space

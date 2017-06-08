@@ -145,7 +145,9 @@ printk("Version=%lX\n",i_data.version);
     }
 
     // Ensure Bootloader to HB structure has the MMIO members
-    if( iv_data.version >= Bootloader::BLTOHB_MMIOBARS )
+    // NOTE: BLTOHB_MMIOBARS version may not be sufficient to ensure that BARs
+    //       were set correctly, instead use BLTOHB_SECURE_OVERRIDES version.
+    if( iv_data.version >= Bootloader::BLTOHB_SECURE_OVERRIDES )
     {
 printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
         kassert(i_data.lpcBAR>0);
@@ -161,10 +163,8 @@ printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
 
     }
 
-    //@fixme-RTC:149250-Remove this hack
-    iv_data.lpcBAR = MMIO_GROUP0_CHIP0_LPC_BASE_ADDR;
-    iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
-    printk( "Use default LPC/XSCOM\n" );
+printk("lpc=%lX, xscom=%lX, iv_data=%p\n", iv_data.lpcBAR, iv_data.xscomBAR,
+       static_cast<void *>(&iv_data) );
 
 
     // Size of data that needs to be preserved and pinned.
