@@ -471,7 +471,6 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
 
     // Now the fun begins....
     // Note: adding this call outside the loop to avoid hitting calibration an extra time in case we're fully passing
-    // TK can I compress this?
     FAPI_TRY(mss::workarounds::dp16::dqs_align::record_passing_values(i_target, i_rp, l_passing_values));
 
     // Loop until we pass or timeout
