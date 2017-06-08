@@ -401,6 +401,15 @@ class buffer
             return &iv_data;
         }
 
+        ///
+        /// @brief Get a pointer to the buffer bits
+        /// @return Pointer to the buffer itself
+        ///
+        inline const T* pointer(void) const
+        {
+            return &iv_data;
+        }
+
         // Note: Many (all?) of these are not needed and the compiler complains
         // as the cast to T yields a better operator. There are here mainly for
         // documenation purposes.

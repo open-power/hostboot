@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -331,6 +331,16 @@ inline uint16_t getErrorInfoFfdcSize(const fapi2::variable_buffer& i_thing)
                     i_thing.getLength<uint8_t>());
 }
 #endif
+
+///
+/// @brief Get FFDC Size specialization for ffdc_t
+///
+template<>
+inline uint16_t getErrorInfoFfdcSize(const fapi2::ffdc_t& i_ffdc)
+{
+    return static_cast<uint16_t>(i_ffdc.size());
+}
+
 };
 
 #endif // FAPI2_ERRORINFO_DEFS_H_

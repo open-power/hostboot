@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -807,6 +807,15 @@ class variable_buffer
         /// @return Pointer to the buffer itself
         ///
         inline unit_type* pointer(void)
+        {
+            return &(iv_data[0]);
+        }
+
+        ///
+        /// @brief Get a pointer to the buffer bits
+        /// @return Pointer to the buffer itself
+        ///
+        inline const unit_type* pointer(void) const
         {
             return &(iv_data[0]);
         }
