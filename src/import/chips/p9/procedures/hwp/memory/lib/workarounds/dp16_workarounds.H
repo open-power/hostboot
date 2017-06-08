@@ -376,7 +376,7 @@ fapi2::ReturnCode record_passing_values_per_dqs( const fapi2::Target<fapi2::TARG
     }
 
     // Skips DP4 non-existant quads
-    if(QUAD >= NUM_QUADS_PER_DP4 && i_dp == MAX_DP)
+    if((QUAD >= NUM_QUADS_PER_DP4) && (i_dp == MAX_DP))
     {
         FAPI_INF("%s i_rp %lu skipping non existant DP%lu QUAD%lu", mss::c_str(i_target), i_rp, i_dp, QUAD)
         return fapi2::FAPI2_RC_SUCCESS;
