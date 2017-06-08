@@ -757,7 +757,7 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             // position number for MCS->MEMBUF connections only.
             itr = std::find_if( list.begin(), list.end(),
                                 [&](const TargetHandle_t & t)
-                                { return trgtPos == getTargetPosition(t); } );
+                                { return trgtPos == getMemChnl(t); } );
         }
         else if ( TYPE_MCA == trgtType && TYPE_DIMM == i_connType )
         {
@@ -1047,11 +1047,8 @@ uint32_t getTargetPosition( TargetHandle_t i_trgt )
                 case TYPE_OSC:
                 case TYPE_OSCPCICLK:
                 case TYPE_OSCREFCLK:
-                    o_pos = i_trgt->getAttr<ATTR_POSITION>();
-                    break;
-
                 case TYPE_MEMBUF:
-                    o_pos = getMemChnl( i_trgt );
+                    o_pos = i_trgt->getAttr<ATTR_POSITION>();
                     break;
 
                 default:
