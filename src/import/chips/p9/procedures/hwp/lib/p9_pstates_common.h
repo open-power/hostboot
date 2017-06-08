@@ -290,7 +290,7 @@ typedef struct
 
 
 //VFRT Header fields
-typedef struct __attribute__((__packed__)) VFRTHeaderLayout
+typedef struct __attribute__((packed)) VFRTHeaderLayout
 {
     // VFRT Magic code "VT"
     uint16_t magic_number;
@@ -310,7 +310,7 @@ typedef struct __attribute__((__packed__)) VFRTHeaderLayout
     uint8_t VddId_QAId;
 } VFRTHeaderLayout_t;// WOF Tables Header
 
-typedef struct __attribute__((__packed__)) WofTablesHeader
+typedef struct __attribute__((packed, aligned(128))) WofTablesHeader
 {
 
     /// Magic Number
@@ -388,33 +388,30 @@ typedef struct __attribute__((__packed__)) WofTablesHeader
     /// Future usage
     uint16_t Vdn_percent[8];
 
-    ///Socket Power (in Watts) for the WOF Tables
+    /// Socket Power (in Watts) for the WOF Tables
     uint16_t socket_power_w;
 
-    ///Nest Frequency (in MHz) used in building the WOF Tables
+    /// Nest Frequency (in MHz) used in building the WOF Tables
     uint16_t nest_frequency_mhz;
 
-    //Core Sort Power Target Frequency (in MHz) – The #V frequency associated
-    //with the sort power target for this table set. This will be either the
-    //Nominal or
-    //Turbo #V frequency
+    /// Core Sort Power Target Frequency (in MHz) – The #V frequency associated
+    /// with the sort power target for this table set. This will be either the
+    /// Nominal or Turbo #V frequency
     uint16_t sort_power_freq_mhz;
 
-    ///Regulator Design Point Capacity (in Amps)
+    /// Regulator Design Point Capacity (in Amps)
     uint16_t rdp_capacity;
 
-    ///Up to 8 ASCII characters to be defined by the Table generation team to
-    //back reference table sources
-    uint64_t wof_table_source_tag;
+    /// Up to 8 ASCII characters to be defined by the Table generation team to
+    /// back reference table sources
+    char wof_table_source_tag[8];
 
-    ///Up to 16 ASCII characters as a Package designator
-    uint64_t package_name;
+    /// Up to 16 ASCII characters as a Package designator
+    char package_name[16];
 
-    uint8_t reserved[6];
+    // Padding to 128B is left to the compiler via the following attribute.
 
 } WofTablesHeader_t;
-
-
 
 #define CEF_VDN_INDEX 8
 #define CEF_VDD_INDEX 21
@@ -427,25 +424,23 @@ typedef struct __attribute__((__packed__)) WofTablesHeader
 // 5 steps down from 100% is Fratio_step sizes
 #define VFRT_FRATIO_SIZE 5
 
-//System VFRT layout
-typedef struct __attribute__((__packed__)) HomerSysVFRTLayout
+// System VFRT layout
+typedef struct __attribute__((packed, aligned(128))) HomerSysVFRTLayout
 {
     VFRTHeaderLayout_t vfrtHeader;
     uint8_t vfrt_data[VFRT_FRATIO_SIZE][VFRT_VRATIO_SIZE];
 } HomerSysVFRTLayout_t;
 
-
-
-//HOMER VFRT Layout
-typedef struct __attribute__((__packed__)) HomerVFRTLayout
+// HOMER VFRT Layout
+typedef struct __attribute__((packed, aligned(256))) HomerVFRTLayout
 {
     VFRTHeaderLayout_t vfrtHeader;
     uint8_t vfrt_data[VFRT_FRATIO_SIZE][VFRT_VRATIO_SIZE];
     uint8_t padding[128];
 } HomerVFRTLayout_t;
 
-//HOMER WOF layout
-typedef struct __attribute__((__packed__)) HomerWOFLayout
+// HOMER WOF layout
+typedef struct __attribute__((packed)) HomerWOFLayout
 {
     WofTablesHeader_t wof_header_data;
     HomerVFRTLayout_t homer_vfrt_data[CEF_VDN_INDEX][CEF_VDD_INDEX][ACTIVE_QUADS];
@@ -454,12 +449,8 @@ typedef struct __attribute__((__packed__)) HomerWOFLayout
 typedef uint8_t VFRT_Circuit_t;
 typedef Pstate  VFRT_Hcode_t;
 
-
-
 extern VFRT_Circuit_t VFRTCircuitTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
-
 extern VFRT_Hcode_t   VFRTInputTable[VFRT_FRATIO_SIZE][VFRT_FRATIO_SIZE];
-
 
 #ifdef __cplusplus
 } // end extern C

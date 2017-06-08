@@ -67,16 +67,35 @@ fapi2::vdmData_t g_vpdData = {1,
                              };
 
 
-uint8_t g_wofData[] = {0x57, 0x46, 0x54, 0x48,  /*MAGIC CODE WFTH*/0x00, 0x00, 0x00,
-                       0x01,/*version*/0x00, 0x80 /*VFRT block size*/, 0x00, 0x08 /*VFRT header size*/,
-                       0x00, 0x01, 0x6,/*Quad value*/ 0x18 /*core count*/, 0x00, 0xFA /*Vdn start*/, 0x00, 0x64 /*Vdn step*/,
-                       0x00, 0x08 /*Vdn size*/, 0x00, 0x00 /*Vdd start*/, 0x00, 0x32 /*Vdd step*/, 0x00, 0x15/*Vdd size*/, 0x03, 0xE8 /*Vratio start*/,
-                       0x00, 0x53 /*Vratio step*/, 0x00, 0x18 /*Vratio size*/, 0x03, 0xE8 /*Fratio start*/, 0x00, 0x64/*Fratio step*/, 0x00, 0x5 /*Fratio size*/,
-                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /*Vdn percent*/
-                       0x00, 0x64 /*Socket power Watts*/, 0x07, 0x4a /*nest freq*/, 0x09, 0x60 /*nominl freq*/, 0x00, 0x00/*RDP capacity*/,
-                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* WOF table source tag*/, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*package name*/,
-                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+uint8_t g_wofData[] = { 0x57, 0x46, 0x54, 0x48  /*MAGIC CODE WFTH*/,
+                        0x00, 0x00, 0x00, 0x01  /*version*/,
+                        0x00, 0x80              /*VFRT block size*/,
+                        0x00, 0x08              /*VFRT header size*/,
+                        0x00, 0x01              /*VFRT data size*/,
+                        0x6                     /*Quad value*/,
+                        0x18                    /*core count*/,
+                        0x00, 0xFA              /*Vdn start*/,
+                        0x00, 0x64              /*Vdn step*/,
+                        0x00, 0x08              /*Vdn size*/,
+                        0x00, 0x00              /*Vdd start*/,
+                        0x00, 0x32              /*Vdd step*/,
+                        0x00, 0x15              /*Vdd size*/,
+                        0x03, 0xE8              /*Vratio start*/,
+                        0x00, 0x53              /*Vratio step*/,
+                        0x00, 0x18              /*Vratio size*/,
+                        0x03, 0xE8              /*Fratio start*/,
+                        0x00, 0x64              /*Fratio step*/,
+                        0x00, 0x5               /*Fratio size*/,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*Vdn percent*/,
+                        0x00, 0x64              /*Socket power Watts*/,
+                        0x07, 0x4a              /*nest freq*/,
+                        0x09, 0x60              /*nominl freq*/,
+                        0x00, 0x00              /*RDP capacity*/,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* WOF table source tag*/,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*package name*/,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /*Pad to 128B*/
                       };
 
 
@@ -477,9 +496,20 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         Pstate pstate_min;
         rc = freq2pState(&l_globalppb, revle32(l_occppb.frequency_min_khz), &pstate_min);
 
-        if (!rc)
+        switch (rc)
         {
-            FAPI_ERR("A Bad thing happened!");
+            case -PSTATE_LT_PSTATE_MIN:
+                FAPI_INF("OCC Minimum Frequency was clipped to Pstate 0");
+                break;
+
+            case -PSTATE_GT_PSTATE_MAX:
+                FAPI_INF("OCC Minimum FrequenL1617cy %d KHz is outside the range that can be represented"
+                         " by a Pstate with a base frequency of %d KHz and step size %d KHz",
+                         revle32(l_occppb.frequency_min_khz),
+                         revle32(l_globalppb.reference_frequency_khz),
+                         revle32(l_globalppb.frequency_step_khz));
+                FAPI_INF("Pstate is set to %X (%d)", pstate_min);
+                break;
         }
 
         l_occppb.pstate_min = pstate_min;
@@ -534,12 +564,17 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         {
             FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is SET");
             // Copy WOF header data
-            memcpy (o_buf, g_wofData, sizeof (g_wofData));
-            uint32_t l_index = sizeof (g_wofData);
+            FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
+            memcpy (o_buf, g_wofData, sizeof(g_wofData));
+            uint32_t l_index = sizeof(g_wofData);
+
+            WofTablesHeader_t* p_wfth;
+            p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
+            FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
 
             for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
             {
-                p9_pstate_update_vfrt (g_sysvfrtData, &l_vfrt, l_base_state_frequency);
+                p9_pstate_update_vfrt (&l_globalppb, g_sysvfrtData, &l_vfrt, l_base_state_frequency);
 
                 memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
                 l_index += sizeof (l_vfrt);
@@ -550,21 +585,28 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         else
         {
             // Read System VFRT data
-            fapi2::ATTR_WOF_TABLE_DATA_Type l_wof_table_data;
+            // Use new to avoid over-running the stack
+            fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
+                (fapi2::ATTR_WOF_TABLE_DATA_Type*)new fapi2::ATTR_WOF_TABLE_DATA_Type;
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_DATA, FAPI_SYSTEM,
-                                   l_wof_table_data), "fapiGetAttribute of ATTR_WOF_TABLE_DATA failed");
+                                   (*l_wof_table_data)), "fapiGetAttribute of ATTR_WOF_TABLE_DATA failed");
 
             FAPI_DBG("ATTR_SYS_VFRT_STATIC_DATA_ENABLE is not SET");
             // Copy WOF header data
-            memcpy (o_buf, l_wof_table_data, sizeof (WofTablesHeader_t));
-            uint32_t l_wof_table_index = sizeof (WofTablesHeader_t);
-            uint32_t l_index = sizeof (WofTablesHeader_t);
+            FAPI_INF("WFTH struct size = %d", sizeof(g_wofData));
+            memcpy (o_buf, (*l_wof_table_data), sizeof(WofTablesHeader_t));
+            uint32_t l_wof_table_index = sizeof(WofTablesHeader_t);
+            uint32_t l_index = sizeof(WofTablesHeader_t);
+
+            WofTablesHeader_t* p_wfth;
+            p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
+            FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
 
             // Convert system vfrt to homer vfrt
             for (uint32_t vfrt_index = 0; vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS); ++vfrt_index)
             {
 
-                p9_pstate_update_vfrt ((l_wof_table_data + l_wof_table_index), &l_vfrt, l_base_state_frequency);
+                p9_pstate_update_vfrt (&l_globalppb, ((*l_wof_table_data) + l_wof_table_index), &l_vfrt, l_base_state_frequency);
                 l_wof_table_index += 128; //System vFRT size is 128B..hence need to jump after each VFRT entry
 
                 memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
@@ -572,6 +614,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             }
 
             io_size = l_index;
+
+            delete l_wof_table_data;
         }
     }
     while(0);
@@ -1043,6 +1087,13 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
         FAPI_INF("%s", l_line_str);
 
+        // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
+        // consume these at 1mA values.  thus, all values are multiplied by
+        // 5 upon installation into the paramater block.
+        static const uint32_t CONST_5MA_1MA = 5;
+        FAPI_INF("IDDQ data is converted 5mA units to 1mA units");
+
+
         // get IVDDQ measurements with all good cores ON
         strcpy(l_line_str, "  IDDQ all good cores ON:                        ");
         strcpy(l_buffer_str, "");
@@ -1050,7 +1101,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_on_caches_on[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
             l_buffer_iq_inc += sizeof(iddq_entry_t);
             sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_on_caches_on[i]);
             strcat(l_line_str, l_buffer_str);
@@ -1065,7 +1116,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_cores_off_caches_off[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
             l_buffer_iq_inc += sizeof(iddq_entry_t);
             sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_cores_off_caches_off[i]);
             strcat(l_line_str, l_buffer_str);
@@ -1080,7 +1131,8 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] = revle16(l_iddq_data);
+            io_iddqt->ivdd_all_good_cores_off_good_caches_on[i] =
+                revle16(l_iddq_data) * CONST_5MA_1MA;
             l_buffer_iq_inc += sizeof(iddq_entry_t);
             sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_all_good_cores_off_good_caches_on[i]);
             strcat(l_line_str, l_buffer_str);
@@ -1091,7 +1143,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         // get IVDDQ measurements with all good cores in each quad
         for (i = 0; i < MAXIMUM_QUADS; i++)
         {
-            strcpy(l_line_str, "  IVDDQ all good cores OFF and caches ON: ");
+            strcpy(l_line_str, "  IVDDQ all good cores ON and caches ON: ");
             strcpy(l_buffer_str, "");
             sprintf(l_buffer_str, "Quad %d:", i);
             strcat(l_line_str, l_buffer_str);
@@ -1099,7 +1151,8 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             for (j = 0; j < IDDQ_MEASUREMENTS; j++)
             {
                 l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-                io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] = revle16(l_iddq_data);
+                io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j] =
+                    revle16(l_iddq_data) * CONST_5MA_1MA;
                 l_buffer_iq_inc += sizeof(iddq_entry_t);
                 sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdd_quad_good_cores_on_good_caches_on[i][j]);
                 strcat(l_line_str, l_buffer_str);
@@ -1115,15 +1168,13 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_iddq_data = *(reinterpret_cast<iddq_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->ivdn[i] = revle16(l_iddq_data);
+            io_iddqt->ivdn[i] = revle16(l_iddq_data) * CONST_5MA_1MA;
             l_buffer_iq_inc += sizeof(iddq_entry_t);
             sprintf(l_buffer_str, "  %04u ", io_iddqt->ivdn[i]);
             strcat(l_line_str, l_buffer_str);
         }
 
         FAPI_INF("%s", l_line_str);
-
-
 
         // get average temperature measurements with all good cores ON
         strcpy(l_line_str, "  Measurment voltages:                           ");
@@ -1198,7 +1249,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         for (i = 0; i < IDDQ_MEASUREMENTS; i++)
         {
             l_avgtemp_data = *(reinterpret_cast<avgtemp_entry_t*>(l_buffer_iq_inc));
-            io_iddqt->avgtemp_vdn[i] = (l_avgtemp_data);
+            io_iddqt->avgtemp_vdn[i] = l_avgtemp_data;
             l_buffer_iq_inc += sizeof(l_avgtemp_data);
             sprintf(l_buffer_str, "   %02u  ", io_iddqt->avgtemp_vdn[i]);
             strcat(l_line_str, l_buffer_str);
@@ -1602,10 +1653,21 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
 
         int rc = freq2pState(i_gppb, freq_khz, &pstate);
 
-        if (!rc)
+        switch (rc)
         {
-            FAPI_ERR("freq2pState Pstate out-of-bounds!");
-            break;
+            case -PSTATE_LT_PSTATE_MIN:
+                FAPI_INF("Resonant clock frequency %d KHz was clipped to Pstate 0",
+                         freq_khz);
+                break;
+
+            case -PSTATE_GT_PSTATE_MAX:
+                FAPI_INF("Resonant clock Frequency %d KHz is outside the range that can be represented"
+                         " by a Pstate with a base frequency of %d KHz and step size %d KHz",
+                         freq_khz,
+                         l_ultra_turbo_freq_khz,
+                         revle32(i_gppb->frequency_step_khz));
+                FAPI_INF("Pstate is set to %X (%d)", pstate);
+                break;
         }
 
         o_resclk_setup->resclk_freq[i] = pstate;
@@ -2403,20 +2465,23 @@ int freq2pState (const GlobalPstateParmBlock* gppb,
     // ----------------------------------
     // compute pstate for given frequency
     // ----------------------------------
-    pstate32 = ((float)(revle32(gppb->reference_frequency_khz) - freq_khz)) / (float)revle32(gppb->frequency_step_khz);
-    *pstate    = (Pstate)pstate32;
+    pstate32 = ((float)(revle32(gppb->reference_frequency_khz) - (float)freq_khz)) /
+               (float)revle32(gppb->frequency_step_khz);
+    *pstate  = (Pstate)pstate32;
 
     // ------------------------------
     // perform pstate bounds checking
     // ------------------------------
-    if (pstate32 > PSTATE_MIN)
+    if (pstate32 < PSTATE_MIN)
     {
         rc = -PSTATE_LT_PSTATE_MIN;
+        *pstate = PSTATE_MIN;
     }
 
-    if (pstate32 < PSTATE_MAX)
+    if (pstate32 > PSTATE_MAX)
     {
         rc = -PSTATE_GT_PSTATE_MAX;
+        *pstate = PSTATE_MAX;
     }
 
     return rc;
@@ -2653,47 +2718,98 @@ fapi_try_exit:
 }
 
 //@brief Initialize HOMER VFRT data
-void p9_pstate_update_vfrt(uint8_t* i_pBuffer,
+void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
+                           uint8_t* i_pBuffer,
                            HomerVFRTLayout_t* o_vfrt_data,
                            uint32_t i_reference_freq)
 {
     uint32_t l_index_0 = 0;
     uint32_t l_index_1 = 0;
-    uint8_t l_type = 0;
-    uint32_t l_freq = 0;
+    uint8_t  l_type = 0;
+    uint32_t l_freq_khz = 0;
+    uint32_t l_step_freq_khz;
+    Pstate   l_ps;
 
-    do
+    l_step_freq_khz = revle32(i_gppb->frequency_step_khz);
+
+    //Initialize VFRT header
+    o_vfrt_data->vfrtHeader.magic_number = revle16(UINT16_GET(i_pBuffer));
+    i_pBuffer += 2;
+    o_vfrt_data->vfrtHeader.reserved_1 = revle16(UINT16_GET(i_pBuffer));
+    i_pBuffer += 2;
+    o_vfrt_data->vfrtHeader.type_version = *i_pBuffer;
+    i_pBuffer++;
+    o_vfrt_data->vfrtHeader.reserved_2   = *i_pBuffer;
+    i_pBuffer++;
+    o_vfrt_data->vfrtHeader.res_vdnId    = *i_pBuffer;
+    i_pBuffer++;
+    o_vfrt_data->vfrtHeader.VddId_QAId   = *i_pBuffer;
+    i_pBuffer++;
+
+    //find type
+    l_type = (o_vfrt_data->vfrtHeader.type_version) >> 4;
+
+    // @todo RTC 175631
+    // This doesn't have the correct error checking in place!!!!!
+    // This function should exit if the input type is not "SYSTEM"
+    // Correct in Level 3 update.
+
+    char            l_buffer_str[256];   // Temporary formatting string buffer
+    char            l_line_str[256];     // Formatted output line string
+
+    strcpy(l_line_str, "VFRT:");
+    sprintf(l_buffer_str, " %X Ver/Type %X B5 %X B6 %X  B7 %X",
+            revle16(o_vfrt_data->vfrtHeader.magic_number),
+            revle16(o_vfrt_data->vfrtHeader.type_version),
+            o_vfrt_data->vfrtHeader.reserved_2,   /// BUG:  this should be VDN!!!
+            o_vfrt_data->vfrtHeader.res_vdnId,    /// BUG:  this should be VDD!!!
+            o_vfrt_data->vfrtHeader.VddId_QAId);  /// BUG:  this should be resvQID!!!
+    strcat(l_line_str, l_buffer_str);
+    FAPI_INF("%s", l_line_str);
+
+    //Initialize VFRT data part
+    for (l_index_0 = 0; l_index_0 < VFRT_FRATIO_SIZE; ++l_index_0)
     {
-        //Initialize VFRT header
-        o_vfrt_data->vfrtHeader.magic_number = revle16(UINT16_GET(i_pBuffer));
-        i_pBuffer += 2;
-        o_vfrt_data->vfrtHeader.reserved_1 = revle16(UINT16_GET(i_pBuffer));
-        i_pBuffer += 2;
-        o_vfrt_data->vfrtHeader.type_version = *i_pBuffer;
-        i_pBuffer++;
-        o_vfrt_data->vfrtHeader.reserved_2     = *i_pBuffer;
-        i_pBuffer++;
-        o_vfrt_data->vfrtHeader.res_vdnId    = *i_pBuffer;
-        i_pBuffer++;
-        o_vfrt_data->vfrtHeader.VddId_QAId   = *i_pBuffer;
-        i_pBuffer++;
+        strcpy(l_buffer_str, "");
+        strcpy(l_line_str, "    ");
 
-        //find type
-        l_type = (o_vfrt_data->vfrtHeader.type_version) >> 4;
-
-        //Initialize VFRT data part
-        for (l_index_0 = 0; l_index_0 < VFRT_FRATIO_SIZE; ++l_index_0)
+        for (l_index_1 = 0; l_index_1 < VFRT_VRATIO_SIZE; ++l_index_1)
         {
-            for (l_index_1 = 0; l_index_1 < VFRT_VRATIO_SIZE; ++l_index_1)
+            // Offset MHz*1000 (khz) + step (khz) * sysvalue
+            l_freq_khz = 1000 * 1000 + (l_step_freq_khz * (*i_pBuffer));
+
+            // Translate to Pstate.  The called function will clip to the
+            // legal range.  The rc is only interesting if we care that
+            // the pstate was clipped;  in this case, we don't.
+            freq2pState(i_gppb, l_freq_khz, &l_ps);
+
+            o_vfrt_data->vfrt_data[l_index_0][l_index_1] = l_ps;
+
+            sprintf(l_buffer_str, "[%2d][%2d] %2d %4d; ",
+                    l_index_0, l_index_1,
+                    l_ps,  l_freq_khz / 1000);
+            strcat(l_line_str, l_buffer_str);
+
+            // Trace the first 8 values of the 24 for debug. As this is
+            // in a loop that is processing over 1000 tables, the first
+            // 8 gives a view that can correlate that the input data read
+            // is correct without overfilling the HB trace buffer.
+            if ((l_index_1 + 1) == 8)
             {
-                l_freq = (l_type) ? HOMER_VERSION_FREQUENCY(*i_pBuffer, i_reference_freq) : SYSTEM_VERSION_FRQUENCY(*i_pBuffer);
-                o_vfrt_data->vfrt_data[l_index_0][l_index_1] = HOMER_VFRT_VALUE(l_freq, i_reference_freq);
-                i_pBuffer++;
+                FAPI_INF("%s", l_line_str);
+                strcpy(l_buffer_str, "");
+                strcpy(l_line_str, "    ");
             }
+
+            i_pBuffer++;
         }
 
+//        FAPI_INF("%s", l_line_str);
     }
-    while(0);
+
+    // Flip the type from System (0) to HOMER (1)
+    l_type = 1;
+    o_vfrt_data->vfrtHeader.type_version |=  l_type << 4;
 
 }
 

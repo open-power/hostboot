@@ -519,11 +519,14 @@ oppb_print(OCCPstateParmBlock* i_oppb);
 int freq2pState (const GlobalPstateParmBlock* gppb,
                  const uint32_t freq_khz,
                  Pstate* pstate);
-// @brief Pstate VFRT initialization
-// @param[in] i_pBuffer VFRT data coming from HB
-// @param[out] o_vfrt_data Homer VFRT version
-// @param[in] i_reference_freq  Ultra frequency
-void p9_pstate_update_vfrt(uint8_t* i_pBuffer,
+
+/// @brief Pstate VFRT initialization
+/// @param[in] i_gppb       The Global Pstate Parameter Block
+/// @param[in] i_pBuffer    VFRT data coming from HB
+/// @param[out] o_vfrt_data Homer VFRT version
+/// @param[in] i_reference_freq  Ultra frequency  @todo get this from the gppb
+void p9_pstate_update_vfrt(const GlobalPstateParmBlock*  i_gppb,
+                           uint8_t* i_pBuffer,
                            HomerVFRTLayout_t* o_vfrt_data,
                            uint32_t i_reference_freq);
 
