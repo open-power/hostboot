@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ enum P9_SET_FSI_GP_SHADOW_Public_Constants
     PERV_CTRL1_FLUSHVALUE = 0x63C00000,
     ROOT_CTRL0_FLUSHVALUE = 0x80FE4003,
     ROOT_CTRL1_FLUSHVALUE = 0x00180000,
-    ROOT_CTRL2_FLUSHVALUE = 0x0000E000,
+    ROOT_CTRL2_FLUSHVALUE = 0x0400E000,
     ROOT_CTRL5_FLUSHVALUE = 0x00000000,
     ROOT_CTRL3_FLUSHVALUE = 0x0080C000,
     ROOT_CTRL4_FLUSHVALUE = 0x00000000,
