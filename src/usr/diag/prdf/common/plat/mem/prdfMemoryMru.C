@@ -296,7 +296,7 @@ void MemoryMru::getCommonVars()
         TargetHandle_t membuf = getConnectedParent( iv_target, TYPE_MEMBUF );
 
         iv_memMruMeld.s.isMca   = 0;
-        iv_memMruMeld.s.chnlPos = getTargetPosition( membuf );
+        iv_memMruMeld.s.chnlPos = getMemChnl( membuf );
         iv_memMruMeld.s.mbaPos  = getTargetPosition( iv_target );
     }
     // If our target is an MCA, then chnlPos will specify the MCA position

@@ -625,7 +625,7 @@ errlHndl_t getHwConfig( HOMER_Data_t & o_data, const HwInitialized_t i_curHw )
                 for ( TargetHandleList::iterator membIt = membList.begin();
                         membIt != membList.end(); ++membIt )
                 {
-                    uint32_t membPos = getTargetPosition(*membIt);
+                    uint32_t membPos = getMemChnl(*membIt); // relative to proc
                     PRDF_ASSERT( membPos < MAX_MEMB_PER_PROC );
 
                     o_data.membMasks[procPos] |= 0x80 >> membPos;
