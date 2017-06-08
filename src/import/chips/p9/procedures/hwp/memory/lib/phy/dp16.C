@@ -2218,7 +2218,7 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode process_bad_bits( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                    const fapi2::Target<TARGET_TYPE_DIMM>& i_dimm,
                                     const uint64_t i_rp )
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
