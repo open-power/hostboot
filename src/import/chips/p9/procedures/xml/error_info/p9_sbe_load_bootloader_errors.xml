@@ -22,8 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- Halt codes for p9_sbe_load_bootloader -->
-<!-- TODO Add in the callout, gard, and deconfig info wherever applicable  -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -38,6 +36,10 @@
     <ffdc>TARGET_BASE_ADDRESS</ffdc>
     <ffdc>HRMOR_OFFSET</ffdc>
     <ffdc>BOOTLOADER_OFFSET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -50,6 +52,10 @@
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>EX_TARGET</ffdc>
     <ffdc>PAYLOAD_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -57,11 +63,16 @@
     <rc>RC_P9_MASTER_CORE_NOT_FOUND</rc>
     <description>
       Procedure: p9_sbe_load_bootloader
-      The master core is not found from the ex master target 
+      The master core is not found from the EX master target
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>EX_TARGET</ffdc>
-    <ffdc>MASTER_CORE</ffdc>
+    <ffdc>MASTER_CORE_UNIT_POS</ffdc>
+    <ffdc>FUSED_MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <!-- ******************************************************************** --> 
+  <!-- ******************************************************************** -->
 </hwpErrors>
