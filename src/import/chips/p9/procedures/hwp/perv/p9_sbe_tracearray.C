@@ -87,6 +87,8 @@ const uint32_t EX_L31_SCOM_OFFSET        = EQ_L3TRA1_TR0_TRACE_HI_DATA_REG - EQ_
 const uint32_t TRACE_LO_DATA_RUNNING     = PERV_1_TPCHIP_TRA0_TR0_TRACE_LO_DATA_REG_RUNNING;
 const uint32_t TRCTRL_MUX0_SEL           = 14;
 const uint32_t TRCTRL_MUX0_SEL_LEN       = 2;
+const uint32_t TRCTRL_HOLD_OFF           = 18;
+const uint32_t TRCTRL_RUN_STATUS         = 19;
 
 const uint32_t TRACE_MUX_POSITIONS       = 1 << TRCTRL_MUX0_SEL_LEN;
 
@@ -205,6 +207,125 @@ class TraceArrayFinder
 //-----------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------
+
+/**
+ * @brief Perform the actual dumping of the trace array
+ *
+ * Make sure trace_run is held off during the dump, and check that the trace is no longer running after
+ * we enabled holding it off (holding it off only makes sure it doesn't turn back on during the trace,
+ * it will not force it off if it's currently running).
+ *
+ * On DD1 that capability is not available, so we have to skip the SCOM operations to the TRCTRL register
+ * and can check for running trace by looking at the trace_running bit in the returned trace data.
+ *
+ * The error handling makes sure that the hold_off bit is cleared even in case of an error.
+ *
+ * @param i_target      The target to run SCOMs against
+ * @param i_scom_base   The calculated base SCOM address for the targeted trace array
+ * @param i_num_rows    The number of rows requested to be dumped
+ * @param o_ta_data     The destination data array
+ *
+ * @return fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING if trace is still running, else fapi2::FAPI2_RC_SUCCESS
+ */
+fapi2::ReturnCode p9_sbe_tracearray_do_dump(
+    const fapi2::Target < P9_SBE_TRACEARRAY_TARGET_TYPES | fapi2::TARGET_TYPE_EQ > &i_target,
+    const uint32_t i_scom_base,
+    const uint32_t i_num_rows,
+    uint64_t* o_ta_data)
+{
+    bool l_reset_trace_ctrl = false;
+    fapi2::buffer<uint64_t> l_trace_ctrl;
+    fapi2::buffer<uint64_t> buf = 0;
+    uint8_t l_trctrl_has_no_run_bits = 0;
+
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> proc_target =
+        i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_TRCTRL_HAS_NO_RUN_BITS,
+                           proc_target, l_trctrl_has_no_run_bits),
+             "Failed to query chip EC feature "
+             "ATTR_CHIP_EC_FEATURE_TRCTRL_HAS_NO_RUN_BITS");
+
+    /* weird doubly inverted logic because the EC attr XML definition doesn't have inversion
+     * and I don't want to add new XML every time we decide to build another P9 variant */
+    if (!l_trctrl_has_no_run_bits)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_base + TRACE_TRCTRL_CONFIG_OFS, l_trace_ctrl),
+                 "Failed to read current trace control setting");
+
+        if (l_trace_ctrl.getBit<TRCTRL_RUN_STATUS>())
+        {
+            FAPI_TRY(fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING);
+        }
+
+        l_trace_ctrl.setBit<TRCTRL_HOLD_OFF>();
+        FAPI_TRY(fapi2::putScom(i_target, i_scom_base + TRACE_TRCTRL_CONFIG_OFS, l_trace_ctrl),
+                 "Failed to enable holding trace_run off; a possible reason is that "
+                 "tracing was started just before the SCOM access");
+        l_reset_trace_ctrl = true;
+    }
+
+    /* Start with the low data register because that's where the
+     * "trace running" bit is. */
+    for (uint32_t i = 0; i < i_num_rows; i++)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_base + TRACE_LO_DATA_OFS, buf),
+                 "Failed to read trace array low data register,"
+                 " iteration %d", i);
+
+        /* On DD1, the "trace running" bit is our best indicator of whether
+         * the array is currently running.
+         * If it is, the read won't have incremented the address,
+         * so it's okay to bail out. */
+        if (buf.getBit<TRACE_LO_DATA_RUNNING>())
+        {
+            FAPI_TRY(fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING);
+        }
+
+        *(o_ta_data + (2 * i + 1)) = buf;
+    }
+
+    /*
+     * Run empty scoms to move the address pointer of trace array control
+     * logic, till it reaches the same row again, as the trace array is
+     * a circular buffer
+     */
+    for (uint32_t i = 0; i < (P9_TRACEARRAY_NUM_ROWS - i_num_rows); i++)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_base + TRACE_LO_DATA_OFS, buf),
+                 "Failed to read trace array low data register, "
+                 "iteration %d", i);
+    }
+
+    /* Then dump the high data */
+    for (uint32_t i = 0; i < i_num_rows; i++)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, i_scom_base + TRACE_HI_DATA_OFS, buf),
+                 "Failed to read trace array high data register, "
+                 "iteration %d", i);
+        *(o_ta_data + (2 * i + 0)) = buf;
+    }
+
+fapi_try_exit:
+
+    if (l_reset_trace_ctrl)
+    {
+        l_trace_ctrl.clearBit<TRCTRL_HOLD_OFF>();
+        fapi2::ReturnCode l_rc = fapi2::putScom(i_target, i_scom_base + TRACE_TRCTRL_CONFIG_OFS, l_trace_ctrl);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            FAPI_ERR("Failed to stop holding trace_run off");
+
+            if (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::current_err = l_rc;
+            }
+        }
+    }
+
+    return fapi2::current_err;
+}
+
 fapi2::ReturnCode p9_sbe_tracearray(
     const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
     const proc_gettracearray_args& i_args,
@@ -213,8 +334,7 @@ fapi2::ReturnCode p9_sbe_tracearray(
     const uint32_t i_num_rows
 )
 {
-    fapi2::Target < P9_SBE_TRACEARRAY_TARGET_TYPES |
-    fapi2::TARGET_TYPE_EQ > target = i_target;
+    fapi2::Target < P9_SBE_TRACEARRAY_TARGET_TYPES | fapi2::TARGET_TYPE_EQ > target = i_target;
     FAPI_INF("Start");
     const TraceArrayFinder l_ta_finder(i_args.trace_bus);
 
@@ -328,63 +448,16 @@ fapi2::ReturnCode p9_sbe_tracearray(
 
     if (i_args.collect_dump)
     {
-        fapi2::buffer<uint64_t> buf = 0;
-
-        /* Start with the low data register because that's where the
-         * "trace running" bit is. */
-        for (uint32_t i = 0; i < i_num_rows; i++)
-        {
-            FAPI_TRY(fapi2::getScom(target,
-                                    (TRACE_SCOM_BASE +
-                                     tra_scom_offset +
-                                     TRACE_LO_DATA_OFS +
-                                     l_proc_offset),
-                                    buf),
-                     "Failed to read trace array low data register,"
-                     " iteration %d", i);
-
-            /* The "trace running" bit is our best indicator of whether
-             * the array is currently running.
-             * If it is, the read won't have incremented the address,
-             * so it's okay to bail out. */
-            FAPI_ASSERT(!buf.getBit<TRACE_LO_DATA_RUNNING>(), fapi2::PROC_GETTRACEARRAY_TRACE_RUNNING()
-                        .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
-                        "Trace array is still running -- If you think you stopped it, "
-                        "maybe the controlling debug macro is slaved to another debug macro?");
-
-            *(o_ta_data + (2 * i + 1)) = buf;
-        }
-
-        /*
-         * Run empty scoms to move the address pointer of trace array control
-         * logic, till it reaches the same row again, as the trace array is
-         * a circular buffer
-         */
-        for (uint32_t i = 0; i < (P9_TRACEARRAY_NUM_ROWS - i_num_rows); i++)
-        {
-            FAPI_TRY(fapi2::getScom(target,
-                                    (TRACE_SCOM_BASE +
-                                     tra_scom_offset +
-                                     TRACE_LO_DATA_OFS +
-                                     l_proc_offset),
-                                    buf),
-                     "Failed to read trace array low data register, "
-                     "iteration %d", i);
-        }
-
-        /* Then dump the high data */
-        for (uint32_t i = 0; i < i_num_rows; i++)
-        {
-            FAPI_TRY(fapi2::getScom(target,
-                                    (TRACE_SCOM_BASE +
-                                     tra_scom_offset +
-                                     TRACE_HI_DATA_OFS +
-                                     l_proc_offset),
-                                    buf),
-                     "Failed to read trace array high data register, "
-                     "iteration %d", i);
-            *(o_ta_data + (2 * i + 0)) = buf;
-        }
+        /* Run the do_dump subroutine, turn the TRACE_RUNNING return code into FFDC */
+        fapi2::ReturnCode l_rc = p9_sbe_tracearray_do_dump(target,
+                                 TRACE_SCOM_BASE + tra_scom_offset + l_proc_offset,
+                                 i_num_rows, o_ta_data);
+        FAPI_ASSERT(l_rc != fapi2::ReturnCode(fapi2::RC_PROC_GETTRACEARRAY_TRACE_RUNNING),
+                    fapi2::PROC_GETTRACEARRAY_TRACE_RUNNING()
+                    .set_TARGET(i_target).set_TRACE_BUS(i_args.trace_bus),
+                    "Trace array is still running -- If you think you stopped it, "
+                    "maybe the controlling debug macro is slaved to another debug macro?");
+        FAPI_TRY(l_rc);
     }
 
     /* If control is requested along with dump, post dump condition should run
