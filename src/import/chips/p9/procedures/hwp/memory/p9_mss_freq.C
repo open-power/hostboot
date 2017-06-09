@@ -40,7 +40,7 @@
 
 // std lib
 #include <map>
-
+#include <utility>
 // fapi2
 #include <fapi2.H>
 
@@ -95,7 +95,7 @@ extern "C"
         {
             const auto l_mcs_index = mss::index(l_mcs);
 
-            std::vector< uint64_t > l_desired_cas_latency(mss::PORTS_PER_MCS,  0 );
+            std::vector< std::pair< uint64_t, fapi2::Target<fapi2::TARGET_TYPE_MCA>> > l_desired_cas_latency;
 
             for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(l_mcs) )
             {
@@ -111,6 +111,7 @@ extern "C"
                     // instantiation of class that calculates CL algorithm
                     fapi2::ReturnCode l_rc;
                     mss::cas_latency l_cas_latency( l_mca, l_factory_caches, l_rc );
+
                     FAPI_TRY( l_rc, "%s. Failed to initialize cas_latency ctor", mss::c_str(l_mca) );
 
                     if(l_cas_latency.iv_dimm_list_empty)
@@ -125,16 +126,19 @@ extern "C"
                         // go from clocks to time (and vice versa.) We have other bugs if there was really
                         // no MT/s determined and there really is a DIMM installed, so this is ok.
                         // We pick the maximum frequency supported by the system as the default.
+                        uint64_t l_desired_cl = 0;
+
                         l_min_dimm_freq[l_mcs_index][l_index] = fapi2::ENUM_ATTR_MSS_FREQ_MT2666;
 
                         uint64_t l_tCKmin = 0;
 
                         // Find CAS latency using JEDEC algorithm
-                        FAPI_TRY( l_cas_latency.find_cl(l_desired_cas_latency[l_index],
-                                                        l_tCKmin) );
+                        FAPI_TRY( l_cas_latency.find_cl(l_desired_cl, l_tCKmin) );
 
                         FAPI_INF("%s. Result from CL algorithm, CL (nck): %d, tCK (ps): %d",
-                                 mss::c_str(l_mca), l_desired_cas_latency[l_index], l_tCKmin);
+                                 mss::c_str(l_mca), l_desired_cl, l_tCKmin);
+
+                        l_desired_cas_latency.push_back(std::make_pair(l_desired_cl, l_mca) );
 
                         // Find dimm transfer speed from selected tCK
                         FAPI_TRY( mss::ps_to_freq(l_tCKmin, l_min_dimm_freq[l_mcs_index][l_index]),
