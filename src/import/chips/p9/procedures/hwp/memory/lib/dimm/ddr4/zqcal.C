@@ -69,8 +69,12 @@ fapi2::ReturnCode setup_dram_zqcal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     // Note: this isn't general - assumes Nimbus via MCBIST instruction here BRS
     l_inst = ccs::zqcl_command<TARGET_TYPE_MCBIST>(i_target, i_rank);
 
-    l_inst.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
-                                MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(tDLLK + mss::tzqinit());
+    // Doubling tZQ to better margin per lab request
+    {
+        const size_t DELAY = 2 * (tDLLK + mss::tzqinit());
+        l_inst.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES,
+                                    MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(DELAY);
+    }
 
     // There's nothing to decode here.
     FAPI_INF("ZQCL 0x%016llx:0x%016llx %s:rank %d",
