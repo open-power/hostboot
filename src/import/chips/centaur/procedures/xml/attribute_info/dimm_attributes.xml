@@ -109,5 +109,16 @@
     <array>2 2 4</array>
     <platInit/>
 </attribute>
+<attribute>
+    <id>ATTR_CEN_MBVPD_VERSION</id>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <description>
+       Memory Buffer VPD version, written and consumed by the MB vpd
+       accessor functions (see getMBvpdAttr.C).
+    </description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <initToZero/>
+</attribute>
 
 </attributes>
