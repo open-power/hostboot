@@ -358,6 +358,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
             SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
             break;
         }
+
         //check status and seq ID in response messages
         else if ((SBE_PRI_OPERATION_SUCCESSFUL != o_pPsuResponse->primaryStatus) ||
             (SBE_SEC_OPERATION_SUCCESSFUL != o_pPsuResponse->secondaryStatus) ||
@@ -374,6 +375,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                       i_pPsuRequest->seqID,
                       o_pPsuResponse->seqID);
             SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
+
 
             /*@
              * @errortype
@@ -400,22 +402,35 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                                  o_pPsuResponse->mbxReg4);
 
             void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
+
             if(l_ffdcPkg != NULL)
             {
-                SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-                l_ffdc_parser->parseFFDCData(l_ffdcPkg);
-                uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-                uint8_t i;
-                for(i = 0; i < l_pkgs; i++)
+                //If this is a result of setFFDCAddress command, it fails.
+                //Deallocate FFDC buffer
+                if(i_pPsuRequest->command == SBE_PSU_SET_FFDC_ADDRESS)
                 {
-                    errl->addFFDC( SBEIO_COMP_ID,
-                               l_ffdc_parser->getFFDCPackage(i),
-                               l_ffdc_parser->getPackageLength(i),
-                               0,
-                               SBEIO_UDT_PARAMETERS,
-                               false );
+                    SBE_TRACF(ERR_MRK, "sbe_psudd.C: readResponse: "
+                        "Set FFDC Address failed.");
+                    PageManager::freePage(l_ffdcPkg);
+                    iv_ffdcPackageBuffer.erase(i_target);
                 }
-                delete l_ffdc_parser;
+                else
+                {
+                    SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
+                    l_ffdc_parser->parseFFDCData(l_ffdcPkg);
+                    uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+                    uint8_t i;
+                    for(i = 0; i < l_pkgs; i++)
+                    {
+                        errl->addFFDC( SBEIO_COMP_ID,
+                                   l_ffdc_parser->getFFDCPackage(i),
+                                   l_ffdc_parser->getPackageLength(i),
+                                   0,
+                                   SBEIO_UDT_PARAMETERS,
+                                   false );
+                    }
+                    delete l_ffdc_parser;
+                }
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
