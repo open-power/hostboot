@@ -35,7 +35,7 @@
 
 #ifndef MSS_FREQ_H_
 #define MSS_FREQ_H_
-
+#include <utility>
 #include <fapi2.H>
 #include <lib/freq/cas_latency.H>
 #include <lib/shared/mss_const.H>
@@ -46,30 +46,21 @@ namespace mss
 
 ///
 /// @brief      Sets DRAM CAS latency attributes
-/// @param[in]  i_target the controller target
-/// @param[in]  i_cas_latency vector of the two final selected CAS latencies
+/// @param[in]  i_target the controller target the cas_latency vector is for
+/// @param[in]  i_cas_latency vector of pairs. Contains the two final selected CAS latencies
 /// @return     FAPI2_RC_SUCCESS iff ok
 ///
 inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
-                                     const std::vector< uint64_t >& i_cas_latency)
+                                     const std::vector< std::pair< uint64_t, fapi2::Target<fapi2::TARGET_TYPE_MCA>> >& i_cas_latency)
 {
     // I wish I could do the reinterpret cast or set the pointer to the vector :(
     // But no can do, manual copy pasta
     uint8_t l_temp [mss::PORTS_PER_MCS] = {0};
-    const auto l_functional_ports = find_targets<fapi2::TARGET_TYPE_MCA>(i_target);
 
-    FAPI_ASSERT( l_functional_ports.size() == i_cas_latency.size(),
-                 fapi2::MSS_ERROR_CALCULATING_CAS_LATENCY_VECTOR()
-                 .set_NUM_PORTS_FUNCTIONAL(l_functional_ports.size())
-                 .set_NUM_CAS_LATENCIES_FOUND(i_cas_latency.size())
-                 .set_MCS_TARGET(i_target),
-                 "%s Error calculating cas latencies. Found %d CLs for %d functional ports. Numbers should equal",
-                 mss::c_str(i_target), i_cas_latency.size(), l_functional_ports.size() );
-
-    for( const auto& p : l_functional_ports )
+    for( const auto& cl : i_cas_latency )
     {
         // Local variable instead of calling it three times. Hopefully compiler can optimize this better
-        const auto l_index = mss::index(p);
+        const auto l_index = mss::index(cl.second);
 
         if ( l_index >= PORTS_PER_MCS)
         {
@@ -77,16 +68,19 @@ inline fapi2::ReturnCode set_CL_attr(const fapi2::Target<fapi2::TARGET_TYPE_MCS>
             fapi2::Assert(false);
         }
 
-        l_temp[l_index] = i_cas_latency[l_index];
-        FAPI_ASSERT( l_temp[l_index] == i_cas_latency[l_index],
+        l_temp[l_index] = cl.first;
+
+        //Check for rounding issues. Going from a uint64_t to a uint8_t
+        FAPI_ASSERT( l_temp[l_index] == cl.first,
                      fapi2::MSS_BAD_CL_CAST()
-                     .set_CL(i_cas_latency[l_index])
-                     .set_MCA_TARGET(p),
+                     .set_CL(cl.first)
+                     .set_MCA_TARGET(cl.second),
                      "%s bad cast for cas latency from %d to %d",
-                     mss::c_str(p),
-                     i_cas_latency[l_index],
+                     mss::c_str(cl.second),
+                     cl.first,
                      l_temp[l_index]);
-        FAPI_INF( "Final Chosen CL: %d for %s", l_temp[l_index], mss::c_str(p));
+
+        FAPI_INF( "Final Chosen CL: %d for %s", l_temp[l_index], mss::c_str(cl.second));
     }
 
     // set CAS latency attribute
