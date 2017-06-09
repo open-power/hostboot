@@ -43,19 +43,26 @@
 #include <fapi2.H>
 #include <error_info_defs.H>
 
+#ifndef __PPE__
 /// @typedef p9_eq_clear_atomic_lock_FP_t
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_eq_clear_atomic_lock_FP_t) (
     const fapi2::ffdc_t&,
     fapi2::ReturnCode&
 );
+#endif
+
+/// typedef p9_clear_atomic_lock_FP_t
+/// function pointer typdef definition for HWP call support
+typedef fapi2::ReturnCode (*p9_clear_atomic_lock_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& );
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 extern "C"
 {
-
+#ifndef __PPE__
 /// @brief HWP to pick up the atomic lock on a cache chiplet to allow the
 ///        collection of CME FFDC register content (SCOM or RAM)
 /// @param  [in]    i_eq_target    TARGET_TYPE_EQ
@@ -64,7 +71,16 @@ extern "C"
     fapi2::ReturnCode
     p9_eq_clear_atomic_lock ( const fapi2::ffdc_t& i_eq_target,
                               fapi2::ReturnCode& io_rc );
+#endif
 
+/// @brief HWP to pick up the atomic lock on a cache chiplet to allow the
+///        collection of CME FFDC register content (SCOM or RAM)
+/// @param [in] i_eq EQ target on which the atomic lock should be released
+/// @return FAPI2_RC_SUCCESS on success, else error code
+/// @note Unlike the collectFfdc triggered callback, this is a direct HWP call
+///       to support the SBE platform limitations
+    fapi2::ReturnCode
+    p9_clear_atomic_lock ( const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_eq );
 } // extern C
 
 #endif  // __P9_EQ_CLEAR_ATOMIC_LOCK_H__

@@ -32,54 +32,67 @@
 /// *HWP Level           : 2
 /// *HWP Consumed by     : SBE, HB
 
-#include <hwp_error_info.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
 #include <p9_eq_clear_atomic_lock.H>
 
 extern "C"
 {
+#ifndef __PPE__
     fapi2::ReturnCode
     p9_eq_clear_atomic_lock ( const fapi2::ffdc_t& i_eq_target,
                               fapi2::ReturnCode&   io_rc )
     {
         FAPI_INF (">> p9_eq_clear_atomic_lock");
-#if 0
         fapi2::ReturnCode l_rc;
-        fapi2::buffer<uint64_t> l_value;
 
-        // Note: Not using FAPI_TRY in FFDC callback context, as it can
-        // potentially reset the fapi2::current_err
-        // Note: No FFDC to be added to io_rc in this particular callback
+        // Note: No FFDC to be appended to io_rc in this callback
+        // leaving it here for the callback synxtax
 
         fapi2::Target<fapi2::TARGET_TYPE_EQ> l_eq =
             *(reinterpret_cast<const fapi2::Target<fapi2::TARGET_TYPE_EQ> *>
               (i_eq_target.ptr()));
 
-        l_rc = fapi2::getScom (l_eq, EQ_ATOMIC_LOCK_REG, l_value);
+        // Note: Not using FAPI_TRY in FFDC callback context, as it can
+        // potentially reset the fapi2::current_err
+        l_rc = p9_clear_atomic_lock (l_eq);
+        return l_rc;
+    }
+#endif
+
+    fapi2::ReturnCode
+    p9_clear_atomic_lock (const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_eq )
+    {
+        FAPI_INF (">> p9_clear_atomic_lock");
+        fapi2::ReturnCode l_rc;
+        fapi2::buffer<uint64_t> l_value;
+
+        // Note: Not using FAPI_TRY in FFDC callback context, as it can
+        // potentially reset the fapi2::current_err
+
+        l_rc = fapi2::getScom (i_eq, EQ_ATOMIC_LOCK_REG, l_value);
 
         if ( (l_rc == fapi2::FAPI2_RC_SUCCESS) &&
              (l_value.getBit<EQ_ATOMIC_LOCK_REG_ENABLE>() == 1))
         {
             // Pick the atomic lock if it was already taken
-            l_rc = fapi2::putScom (l_eq, EQ_ATOMIC_LOCK_REG, l_value);
+            l_rc = fapi2::putScom (i_eq, EQ_ATOMIC_LOCK_REG, l_value);
 
             if (l_rc == fapi2::FAPI2_RC_SUCCESS)
             {
                 l_value.flush<0>();
                 // Clear the atomic lock
-                l_rc = fapi2::putScom (l_eq, EQ_ATOMIC_LOCK_REG, l_value);
+                l_rc = fapi2::putScom (i_eq, EQ_ATOMIC_LOCK_REG, l_value);
             }
         }
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
-            FAPI_ERR ("Could not clear eq atomic lock for FFDC");
+            FAPI_ERR ("Could not clear atomic lock");
         }
 
-#endif
-        FAPI_INF ("<< p9_eq_clear_atomic_lock");
-        return fapi2::FAPI2_RC_SUCCESS; // always return success
+        FAPI_INF ("<< p9_clear_atomic_lock");
+        return l_rc;
     }
 }
 
