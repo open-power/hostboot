@@ -84,17 +84,21 @@ fapi2::ReturnCode mrs_load( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     FAPI_INF("ddr4::mrs_load %s", mss::c_str(i_target));
 
+    // Doubling tMRD delay to increase margin per lab request
+    const size_t DOUBLE_TMRD = 2 * mss::tmrd();
+    const size_t DOUBLE_TMOD = 2 * mss::tmod(i_target);
+
     static const std::vector< mrs_data<TARGET_TYPE_MCBIST> > MRS_DATA =
     {
         // JEDEC ordering of MRS per DDR4 power on sequence
-        {  3, mrs03, mrs03_decode, mss::tmrd()  },
-        {  6, mrs06, mrs06_decode, mss::tmrd()  },
-        {  5, mrs05, mrs05_decode, mss::tmrd()  },
-        {  4, mrs04, mrs04_decode, mss::tmrd()  },
-        {  2, mrs02, mrs02_decode, mss::tmrd()  },
-        {  1, mrs01, mrs01_decode, mss::tmrd()  },
+        {  3, mrs03, mrs03_decode, DOUBLE_TMRD  },
+        {  6, mrs06, mrs06_decode, DOUBLE_TMRD  },
+        {  5, mrs05, mrs05_decode, DOUBLE_TMRD  },
+        {  4, mrs04, mrs04_decode, DOUBLE_TMRD  },
+        {  2, mrs02, mrs02_decode, DOUBLE_TMRD  },
+        {  1, mrs01, mrs01_decode, DOUBLE_TMRD  },
         // We need to wait tmod before zqcl, a non-mrs command
-        {  0, mrs00, mrs00_decode, mss::tmod(i_target) },
+        {  0, mrs00, mrs00_decode, DOUBLE_TMOD },
     };
 
     std::vector< uint64_t > l_ranks;
