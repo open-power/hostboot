@@ -74,6 +74,8 @@ union BootloaderSecureSettings
 };
 
 // Structure starts at the bootloader zero address
+//   Note - this structure must remain 64-bit aligned to
+//          maintain compatibility with Hostboot
 struct BootloaderConfigData_t
 {
     uint32_t version;         // bytes  4:7  Version field so we know if there is new data being added
@@ -82,8 +84,10 @@ struct BootloaderConfigData_t
     uint16_t pnorSizeMB;      // bytes 10:11 Size of PNOR in MB  [ATTR_PNOR_SIZE]
     uint64_t blLoadSize;      // bytes 12:19 Size of Load (Exception vectors and Bootloader)
     BootloaderSecureSettings  secureSettings  ; // byte  20
-    uint64_t xscomBAR;        // bytes 21:28 XSCOM MMIO BAR
-    uint64_t lpcBAR;          // bytes 29:36 LPC MMIO BAR
-};
+    uint8_t reserved[7];      // bytes 21:27 Reserved space to maintain 64-bit alignment
+    uint64_t xscomBAR;        // bytes 28:35 XSCOM MMIO BAR
+    uint64_t lpcBAR;          // bytes 36:43 LPC MMIO BAR
+}; // Note: Want to use '__attribute__((packed))' but compiler won't let us
+
 
 #endif
