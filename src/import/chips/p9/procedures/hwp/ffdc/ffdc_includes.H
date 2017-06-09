@@ -33,4 +33,5 @@
 #include <p9_collect_some_ffdc.H>
 #include <p9_pib2pcb_mux_seq.H>
 #include <p9_collect_ppe_state.H>
+#include <p9_eq_clear_atomic_lock.H>
 #endif
