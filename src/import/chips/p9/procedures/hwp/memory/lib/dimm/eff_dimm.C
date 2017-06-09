@@ -2003,16 +2003,35 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dram_lpasr()
 {
+    // Retreive attribute
     std::vector<uint8_t> l_attrs_lpasr(PORTS_PER_MCS, 0);
-
     FAPI_TRY( eff_dram_lpasr(iv_mcs, l_attrs_lpasr.data()) );
 
-    l_attrs_lpasr[iv_port_index] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_EXTENDED;
+    switch(iv_refresh_rate_request)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE:
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE_10_PERCENT_FASTER:
+            l_attrs_lpasr[iv_port_index] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_EXTENDED;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE:
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE_10_PERCENT_FASTER:
+            l_attrs_lpasr[iv_port_index] =  fapi2::ENUM_ATTR_EFF_DRAM_LPASR_MANUAL_NORMAL;
+            break;
+
+        default:
+            // Will catch incorrect MRW value set
+            FAPI_ASSERT(false,
+                        fapi2::MSS_INVALID_REFRESH_RATE_REQUEST().set_REFRESH_RATE_REQUEST(iv_refresh_rate_request),
+                        "Incorrect refresh request rate received: %d for %s",
+                        iv_refresh_rate_request, mss::c_str(iv_mcs));
+            break;
+    }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_LPASR,
                             iv_mcs,
                             UINT8_VECTOR_TO_1D_ARRAY(l_attrs_lpasr, PORTS_PER_MCS)),
-              "Failed setting attribute for LPASR");
+              "Failed setting attribute for LPASR on %s", mss::c_str(iv_mcs));
 
 fapi_try_exit:
     return fapi2::current_err;
