@@ -1170,23 +1170,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW396388</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD1 only: HW396388 - Disable recovery by default
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW399524</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2713,6 +2696,23 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW409194
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW407136</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW407136
     </description>
     <chipEcFeature>
       <chip>
