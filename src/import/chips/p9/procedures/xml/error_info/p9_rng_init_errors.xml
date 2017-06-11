@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,14 +24,34 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
   <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>REG_FFDC_RNG_SELF_TEST_FAIL</id>
+    <scomRegister>PU_NX_RNG_ST0</scomRegister>
+    <scomRegister>PU_NX_RNG_ST1</scomRegister>
+    <scomRegister>PU_NX_RNG_ST2</scomRegister>
+    <scomRegister>PU_NX_RNG_ST3</scomRegister>
+    <scomRegister>PU_NX_RNG_RDELAY</scomRegister>
+    <scomRegister>PU_NX_RNG_CFG</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_RNG_INIT_CONDITIONER_STARTUP_TEST_FAILED_ERR</rc>
     <description>
       Procedure: p9_rng_init_phase1
-      NX RNG Read Conditioner startup test failed after POR
+      NX RNG Read Conditioner startup test failed after POR,
+      NX RNG is unusable
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>RNG_CFG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RNG_SELF_TEST_FAIL</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -39,10 +59,19 @@
     <description>
       Procedure: p9_rng_init_phase2
       NX RNG Self Test Hard Fail status is non-zero after programmed
-      initialization
+      initialization, NX RNG is unusable
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>SELF_TEST_HARD_FAIL_STATUS</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RNG_SELF_TEST_FAIL</id>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <target>TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
