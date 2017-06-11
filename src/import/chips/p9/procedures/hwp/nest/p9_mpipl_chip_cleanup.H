@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,22 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-//
-//  (C) Copyright International Business Machines Corp. 2012
-//  All Rights Reserved -- Property of IBM
-//  *** IBM Confidential ***
-//
-///  TITLE       : p9_mpipl_chip_cleanup.H
-///  DESCRIPTION : To enable MCD recovery
+
 ///
-///  HWP HWP OWNER: Joshua Hannan            Email: jlhannan@us.ibm.com
-///  HWP FW Owner: Thi N Tran                Email: thi@us.ibm.com
-///  HWP Team: NEST
-///  HWP Level: 2
-///  HWP Consumed by: FSP/HB
+/// @file p9_mpipl_chip_cleanup.H
+/// @brief Placeholder for chip cleanup actions required on MPIPL (FAPI2)
+///
+
 //
-//------------------------------------------------------------------------------
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
+// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
+// *HWP Team: Nest
+// *HWP Level: 3
+// *HWP Consumed by: FSB/HB
+//
 
 #ifndef _P9_MPIPL_CHIP_CLEANUP_H_
 #define _P9_MPIPL_CHIP_CLEANUP_H_
@@ -48,18 +45,25 @@
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Structure Definition(s)
+// Structure definitions
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_mpipl_chip_cleanup_FP_t) (fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& );
+typedef fapi2::ReturnCode (*p9_mpipl_chip_cleanup_FP_t) (
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
 
 extern "C"
 {
-    ///  @brief To enable MCD recovery
-    ///  @param[in] 'i_target' Reference to processor chip target
-    ///  @return FAPI_RC_SUCCESS if the mpipl_chip_cleanup completes successfully
-    fapi2::ReturnCode p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    /// @brief Perform chip cleanup for MPIPL
+    /// @param[in] 'i_target' Reference to processor chip target
+    /// @return FAPI2_RC_SUCCESS if succesful, else error
+    fapi2::ReturnCode p9_mpipl_chip_cleanup(
+        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+
 } //extern "C"
 
 #endif

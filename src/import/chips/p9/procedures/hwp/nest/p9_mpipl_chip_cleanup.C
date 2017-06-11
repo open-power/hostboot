@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,140 +22,32 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file   p9_mpipl_chip_cleanup.C
-/// @brief  To enable MCD recovery
+/// @file p9_mpipl_chip_cleanup.C
+/// @brief Placeholder for chip cleanup actions required on MPIPL (FAPI2)
 ///
-// *HWP HWP OWNER: Joshua Hannan            Email: jlhannan@us.ibm.com
-// *HWP FW  OWNER: Thi Tran                 Email: thi@us.ibm.com
+
+//
+// *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
+// *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: FSP/HB
+// *HWP Level: 3
+// *HWP Consumed by: FSB/HB
 //
-//  Additional Note(s):
-//
-//
-//
-//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_mpipl_chip_cleanup.H>
 
-extern "C"
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode
+p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    //------------------------------------------------------------------------------
-    // Function definitions
-    //------------------------------------------------------------------------------
-
-    //------------------------------------------------------------------------------
-    // name: p9_mpipl_chip_cleanup
-    //------------------------------------------------------------------------------
-    // purpose:
-    // Place holder
-    //
-    //------------------------------------------------------------------------------
-    fapi2::ReturnCode p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        //This is currently a no-op , leaving it in as a placeholder.
-        return fapi2::current_err;
-    }
-
-
-//Commenting out the old functionality of this code. Was going to delete it but will
-//leave it here incase we need logic like this in the future for some reason
-#if 0
-    //------------------------------------------------------------------------------
-    // name: p9_mpipl_chip_cleanup (DEPRECATED)
-    //------------------------------------------------------------------------------
-    // purpose:
-    // To enable MCD recovery
-    //
-    // Note: PHBs are left in ETU reset state after executing proc_mpipl_nest_cleanup, which runs before this procedure.  PHYP releases PHBs from ETU reset post HostBoot IPL.
-    //
-    // SCOM regs
-    //
-    // 1) MCD even recovery control register
-    // PU_BANK0_MCD_REC (SCOM)
-    // bit 0 (PU_BANK0_MCD_REC_ENABLE): 0 to 1 transition needed to start, reset to 0 at end of request.
-    //
-    // 2) MCD odd recovery control register
-    // PU_MCD1_BANK0_MCD_REC (SCOM)
-    // bit 0 (PU_BANK0_MCD_REC_ENABLE): 0 to 1 transition needed to start, reset to 0 at end of request.
-    //
-    //------------------------------------------------------------------------------
-    fapi2::ReturnCode p9_mpipl_chip_cleanup(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
-    {
-        const uint8_t MAX_MCD_DIRS = 2; //Max of 2 MCD Directories (even and odd)
-        fapi2::buffer<uint64_t> fsi_data[MAX_MCD_DIRS];
-        fapi2::buffer<uint64_t> w_data(0x00030001);
-        fapi2::buffer<uint64_t> r_data;
-        const uint64_t C_INT_VC_VSD_TABLE_DATA(0x5013202);
-        const uint64_t ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[MAX_MCD_DIRS] =
-        {
-            PU_BANK0_MCD_REC, //MCD even recovery control register address
-            PU_MCD1_BANK0_MCD_REC  //MCD odd recovery control register address
-        };
-        const char* ARY_MCD_DIR_STRS[MAX_MCD_DIRS] =
-        {
-            "Even", //Ptr to char string "Even" for even MCD
-            "Odd"   //Ptr to char string "Odd" for odd MCD
-        };
-
-
-    HW386071:
-
-        INT unit has a defect that might result in fake ecc errors.  Have to do these four writes and reads to scom registers
-            FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
-                     "putScom error selecting address 1");
-
-        FAPI_TRY(fapi2::getScom(i_target, C_INT_VC_VSD_TABLE_DATA, r_data),
-                 "getScom error reading from address 1");
-
-        w_data.clearBit<63>();
-        FAPI_TRY(fapi2::putScom(i_target, PU_INT_VC_VSD_TABLE_ADDR, w_data),
-                 "putScom error selecting address 0");
-
-        w_data.flush<0>();
-        FAPI_TRY(fapi2::putScom(i_target, C_INT_VC_VSD_TABLE_DATA, w_data),
-                 "putScom error writing to address 0");
-        HW386071
-
-        Verify MCD recovery was previously disabled for even and odd slices
-        If not, this is an error condition
-        for (uint8_t counter = 0; counter < MAX_MCD_DIRS; counter++)
-            {
-                FAPI_DBG("Verifying MCD %s Recovery is disabled", ARY_MCD_DIR_STRS[counter]);
-                FAPI_TRY(fapi2::getScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]),
-                         "getScom error veryfing that MCD recovery is disabled");
-
-
-                FAPI_ASSERT(!fsi_data[counter].getBit<PU_BANK0_MCD_REC_ENABLE>(),
-                            fapi2::P9_MPIPL_CHIP_CLEANUP_MCD_NOT_DISABLED().set_TARGET(i_target).set_ADDRESS(
-                                ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter]).set_DATA(fsi_data[counter]), "MCD recovery not disabled as expected");
-            }
-
-        Assert bit 0 of MCD Recovery Ctrl regs to enable MCD recovery
-
-        for (int counter = 0; counter < MAX_MCD_DIRS; counter++)
-        {
-            FAPI_DBG("Enabling MCD %s Recovery", ARY_MCD_DIR_STRS[counter]);
-
-            Assert bit 0 of MCD Even or Odd Recovery Control reg to enable recovery
-            fsi_data[counter].setBit<PU_BANK0_MCD_REC_ENABLE>();
-
-            Write data to MCD Even or Odd Recovery Control reg
-            FAPI_TRY(fapi2::putScom(i_target, ARY_MCD_RECOVERY_CTRL_REGS_ADDRS[counter], fsi_data[counter]),
-                     "putScom error assert bit 0 of MCD recovery control register");
-        }
-
-
-    fapi_try_exit:
-        FAPI_DBG("Exiting...");
-        return fapi2::current_err;
-    }
-#endif
-
-
-} // extern "C"
+    // This is currently a no-op , leaving it in as a placeholder.
+    return fapi2::current_err;
+}

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,18 +23,5 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-  <!-- ********************************************************************          -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_MPIPL_CHIP_CLEANUP_MCD_NOT_DISABLED</rc>
-    <description>
-      Procedure: p9_mpipl_chip_cleanup
-      MCU recovery was not disabled as expected
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>ADDRESS</ffdc>
-    <ffdc>DATA</ffdc>
-  </hwpError>
-  <!-- ********************************************************************          -->
 </hwpErrors>
 
