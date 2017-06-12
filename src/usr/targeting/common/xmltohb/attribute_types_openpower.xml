@@ -782,4 +782,43 @@ ID for the sensor number returned with the elog. -->
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>BMC_MANUFACTURER</id>
+    <description>The manufacturer of the BMC</description>
+    <simpleType>
+    <string>
+        <default>ibm</default>
+        <sizeInclNull>32</sizeInclNull>
+    </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>BMC_HW_CHIP_TYPE</id>
+    <description>The type of hardware of the BMC</description>
+    <simpleType>
+    <string>
+        <default>ast2500</default>
+        <sizeInclNull>32</sizeInclNull>
+    </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>BMC_SW_TYPE</id>
+    <description>The software type of the BMC</description>
+    <simpleType>
+    <string>
+        <default>openbmc</default>
+        <sizeInclNull>32</sizeInclNull>
+    </string>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 </attributes>
