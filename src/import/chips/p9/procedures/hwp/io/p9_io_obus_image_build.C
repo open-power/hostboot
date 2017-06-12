@@ -41,7 +41,7 @@
 #include "p9_xip_image.h"
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode extractPpeImg(void* const iImagePtr, uint8_t*& oObusImgPtr, uint32_t& oSize)
+fapi2::ReturnCode extractPpeImgObus(void* const iImagePtr, uint8_t*& oObusImgPtr, uint32_t& oSize)
 {
     FAPI_IMP("Entering getObusImageFromHwImage.");
     P9XipSection ppeSection;
@@ -103,7 +103,7 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     uint8_t* pObusImg = NULL;
     uint32_t imgSize   = 0;
 
-    FAPI_TRY(extractPpeImg(iHwImagePtr, pObusImg, imgSize), "Extract PPE Image Failed.");
+    FAPI_TRY(extractPpeImgObus(iHwImagePtr, pObusImg, imgSize), "Extract PPE Image Failed.");
 
     // PPE Reset
     FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
