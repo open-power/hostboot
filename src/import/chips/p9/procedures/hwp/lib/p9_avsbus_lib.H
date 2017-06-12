@@ -167,7 +167,7 @@ const uint32_t OCB_OIMR1_MASK_VALUES[2][2] =
 ///@param[i] i_data
 ///@return   3 bit CRC result (right aligned)
 
-uint32_t avsCRCcalc(uint32_t i_data);
+uint32_t avsCRCcalc(uint32_t i_avs_cmd);
 
 
 
