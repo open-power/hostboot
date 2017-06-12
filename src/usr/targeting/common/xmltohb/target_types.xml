@@ -909,6 +909,7 @@
     <attribute><id>DPLL_VDM_RESPONSE</id></attribute>
     <attribute><id>MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id></attribute>
     <attribute><id>SYSTEM_WOF_ENABLED</id></attribute>
+    <attribute><id>SYSTEM_WOF_DISABLE</id></attribute>
     <attribute><id>WOF_VRATIO_SELECT</id></attribute>
     <attribute><id>WOF_ENABLE_VRATIO</id></attribute>
     <attribute><id>WOF_ENABLE_FRATIO</id></attribute>
