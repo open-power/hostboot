@@ -69,6 +69,7 @@ OBJS += plat_mvpd_access.o
 OBJS += plat_mbvpd_access.o
 OBJS += plat_vpd_access.o
 OBJS += plat_wof_access.o
+OBJS += dimmBadDqBitmapFuncs.o
 
 
 #Required include before all the procedure.mk are included
