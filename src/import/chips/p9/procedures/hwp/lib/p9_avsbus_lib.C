@@ -40,45 +40,41 @@
 //##############################################################################
 // Function which generates a 3 bit CRC value for 29 bit data
 //##############################################################################
-uint32_t
-avsCRCcalc(const uint32_t i_data)
+#define AVS_CRC_MASK      0x00000007
+#define AVS_CRC_DATA_MASK 0xFFFFFFF8
+uint32_t avsCRCcalc(const uint32_t i_avs_cmd)
 {
-    //Polynomial= x^3 + x^2 + 1 = 1*x^3 + 0*x^2 + 1*x^1 + 1*x^0 = divisor(1011)
+    //Polynomial= x^3 + x^1 + x^0 = 1*x^3 + 0*x^2 + 1*x^1 + 1*x^0 = divisor(1011)
 
-    uint32_t l_crc_value = 0;
-    uint32_t l_data, l_msb_xor, l_crc_0, l_crc_1, l_crc_2, l_data_msb_shifted;
-    uint32_t l_crc = 0;
+    uint32_t o_crc_value = 0;
+    uint32_t l_polynomial = 0xB0000000;
+    uint32_t l_msb =        0x80000000;
 
-    // CRC computation code for polynomial 0b1011 for P9
-    l_data = i_data >> 3;
+    o_crc_value = i_avs_cmd & AVS_CRC_DATA_MASK;
 
-    for (uint8_t i = 0; i <= 31; i++)
+    while (o_crc_value & AVS_CRC_DATA_MASK)
     {
+        if (o_crc_value & l_msb)
+        {
+            //if l_msb is 1'b1, divide by l_polynomial and shift l_polynomial
+            // to the right
+            o_crc_value = o_crc_value ^ l_polynomial;
+            l_polynomial = l_polynomial >> 1;
+        }
+        else
+        {
+            // if l_msb is zero, shift l_polynomial
+            l_polynomial = l_polynomial >> 1;
+        }
 
-
-        // Get the Data MSB into LSB position
-        l_data_msb_shifted = (l_data) >> 31;
-
-        // Compute the XOR value
-        l_msb_xor = l_data_msb_shifted ^ ((l_crc & 0x00000004) >> 2);
-
-        l_crc_0 = (l_crc & 0x00000002) << 1;
-        l_crc_1 = (l_crc & 0x00000001) ^ l_msb_xor;
-        l_crc_2 = l_msb_xor;
-
-        l_crc = (l_crc_0) | (l_crc_1 << 1) | (l_crc_2);
-
-        // Shift out the used MSB
-        l_data = l_data << 1;
-
+        l_msb = l_msb >> 1;
     }
 
-    l_crc_value = l_crc;
+    FAPI_INF("The computed CRC Value is %d", o_crc_value)
 
-    FAPI_INF("The computed CRC Value is %d", l_crc_value)
-
-    return l_crc_value;
+    return o_crc_value;
 }
+
 //##############################################################################
 
 
@@ -536,54 +532,51 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
     else
     {
-        FAPI_INF("Incorrect response received - Computed CRC %X Received %X - Full Response %08X", l_rsp_computed_crc,
-                 l_rsp_rcvd_crc, l_rsp_data);
+        FAPI_INF("Incorrect response received - Computed CRC %X Received %X - Full Response %08X",
+                 l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
-        // @todo RTC 174723 - Hostboot CI isn't generating the correct response.   Report a good response
-        // The asserts will be added back after the .xml is mirrored to hostboot
-        o_goodResponse = true;
 
 
         if(l_rsp_data == 0x00000000)
         {
             FAPI_DBG("ERROR: AVS command failed failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
-//            FAPI_ASSERT((i_throw_assert != true),
-//                        fapi2::PM_AVSBUS_ZERO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
-//                        "ERROR: AVS command failed failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_ZERO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        "ERROR: AVS command failed failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
         }
         else if(l_rsp_data == 0xFFFFFFFF)
         {
             FAPI_DBG("ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
-//            FAPI_ASSERT((i_throw_assert != true),
-//                        fapi2::PM_AVSBUS_NO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
-//                        "ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_NO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        "ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
         }
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Bad CRC detected by P9 on AVSBus Slave Segement.");
-//            FAPI_ASSERT((i_throw_assert != true),
-//                        fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
-//                        "ERROR: AVS command failed failed. Bad CRC detected by P9 on AVSBus Slave Segement.");
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        "ERROR: AVS command failed failed. Bad CRC detected by P9 on AVSBus Slave Segement.");
         }
         else if(l_data_status_code == 0x02)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
-//            FAPI_ASSERT((i_throw_assert != true),
-//                        fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
-//                        "ERROR: AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        "ERROR: AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
         }
         else if(l_data_status_code == 0x01)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Valid data sent but no action is taken due to unavailable resource.");
-//            FAPI_ASSERT((i_throw_assert != true),
-//                        fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
-//                        "ERROR: AVS command failed failed. Valid data sent but no action is taken due to unavailable resource.");
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        "ERROR: AVS command failed failed. Valid data sent but no action is taken due to unavailable resource.");
         }
         else if(l_data_status_code == 0x03)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Unknown resource, invalid data, incorrect data or incorrect action.");
-//            FAPI_ASSERT((i_throw_assert != true), fapi2::PM_AVSBUS_INVALID_DATA_ERROR().set_TARGET(i_target),
-//                        "ERROR: AVS command failed failed. Unknown resource, invalid data, incorrect data or incorrect action.");
+            FAPI_ASSERT((i_throw_assert != true), fapi2::PM_AVSBUS_INVALID_DATA_ERROR().set_TARGET(i_target),
+                        "ERROR: AVS command failed failed. Unknown resource, invalid data, incorrect data or incorrect action.");
         }
 
 
