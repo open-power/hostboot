@@ -163,7 +163,7 @@ fapi2::ReturnCode throttle::power_regulator_throttles ()
 
     //Decide utilization for each dimm based off of dimm count and power slopes
     FAPI_TRY( calc_databus(iv_databus_port_max, l_databus_dimm_max),
-              "Failed to calculate each DIMMs' percentage of dram databus utilization for target %s, max port databus is %s",
+              "Failed to calculate each DIMMs' percentage of dram databus utilization for target %s, max port databus is %d",
               mss::c_str(iv_target),
               iv_databus_port_max);
 
@@ -187,18 +187,18 @@ fapi2::ReturnCode throttle::power_regulator_throttles ()
              l_port_power_calc_max,
              l_port_power_calc_idle);
 
-    FAPI_INF("POWER Port power limit is %d", iv_port_power_limit);
+    FAPI_INF("%s POWER Port power limit is %d", mss::c_str(iv_target), iv_port_power_limit);
     //Calculate the port's utilization to get under watt target using the port's calculated slopes
     calc_util_usage(l_port_power_slope,
                     l_port_power_int,
                     iv_port_power_limit,
                     l_calc_util_port);
 
-    FAPI_INF("POWER calc util port is %f", l_calc_util_port);
+    FAPI_INF("%s POWER calc util port is %f",  mss::c_str(iv_target), l_calc_util_port);
 
     //Calculate the new slot values and the max power value for the port
     FAPI_TRY( calc_slots_and_power( l_calc_util_port),
-              "Error calculating the final throttles and power values for target %s with passed in port utilization %d",
+              "%s Error calculating the final throttles and power values for target with passed in port utilization %d",
               mss::c_str(iv_target),
               l_calc_util_port);
 
@@ -418,12 +418,8 @@ fapi2::ReturnCode throttle::calc_power_curve(const double i_power_idle,
                  .set_UTIL_CONVERSION(UTIL_CONVERSION)
                  .set_IDLE_UTIL(IDLE_UTIL)
                  .set_RESULT(l_divisor),
-                 "Calculated zero for the divisor in calc_power_curve on target %s, the equation is %s",
-                 mss::c_str(iv_target),
-                 "(double(iv_databus_port_max %d) / UTIL_CONVERSION %d) - IDLE_UTIL %d",
-                 iv_databus_port_max,
-                 UTIL_CONVERSION,
-                 IDLE_UTIL);
+                 "Calculated zero for the divisor in calc_power_curve on target %s",
+                 mss::c_str(iv_target) );
 
     o_slope = (i_power_max - i_power_idle) / l_divisor;
     o_int = i_power_idle - (o_slope * IDLE_UTIL);

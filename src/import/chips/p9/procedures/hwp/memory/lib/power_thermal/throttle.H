@@ -287,7 +287,7 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
 
     o_calc_util = ( (o_calc_util == 0) ? MIN_UTIL : o_calc_util);
 
-    FAPI_INF("In calc_util_from_throttles, calculated %f for output utilization", o_calc_util);
+    FAPI_INF("In calc_util_from_throttles, calculated %d for output utilization", o_calc_util);
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
