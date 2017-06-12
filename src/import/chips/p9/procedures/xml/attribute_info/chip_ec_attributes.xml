@@ -5378,6 +5378,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_EXTRACT_SBE_RC_P9NDD1_CHIPS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Use to detect Nimbus DD1 chips in p9_extract_sbe_rc procedure
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NO_GPTR_SUPPORT_VIA_MVPD</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>

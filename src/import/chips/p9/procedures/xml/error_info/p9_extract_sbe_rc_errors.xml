@@ -42,6 +42,7 @@
     Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -60,6 +61,7 @@
     Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -75,8 +77,10 @@
     <rc>RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT</rc>
     <description>
     Program interrupt promoted
-    Action:Code update required [RESTART_SBE]
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -91,8 +95,10 @@
     <rc>RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED</rc>
     <description>
     Address scope out of range
-    Action:Code update required [RESTART_SBE]
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -106,11 +112,13 @@
   <!-- Halt codes for OTPROM -->
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_OTP_ECC_ERR_INSECURE_MODE</rc>
+    <rc>RC_EXTRACT_SBE_RC_OTP_ECC_ERR_NONSECURE_MODE</rc>
     <description>
     Uncorrectable error detected in OTPROM memory read
     Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -127,8 +135,56 @@
     <rc>RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH</rc>
     <description>
     SEEPROM magic number didn't match
-    Action:Reload/update of SEEPROM required [REIPL_UPD_SEEPROM]
+    Action:Update of SEEPROM required or switch seeprom [REIPL_UPD_SEEPROM]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL</rc>
+    <description>
+    Program Interrupt occured during base loader
+    Action:Switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL</rc>
+    <description>
+    Program Interrupt occured during pk loader
+    Action:Switch seeprom [REIPL_BKP_SEEPROM]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -150,6 +206,8 @@
     Branch to SEEPROM didn't happen
     Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -167,6 +225,8 @@
     Halted in OTPROM, but not at an expected halt location
     Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -182,11 +242,13 @@
   <!-- Halt codes for PIBMEM -->
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE</rc>
+    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR</rc>
     <description>
-    Uncorrectable error occurred while PIB memory read
-    Action:Reload/update of PIBMEM required [RESTART_SBE]
+    Uncorrectable error occurred while PIB memory access, Check if REPAIR solution is applied
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -206,11 +268,13 @@
   <!-- Halt codes for SEEPROM -->
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR</rc>
+    <rc>RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR_NONSECURE_MODE</rc>
     <description>
     I2C bit rate divisor is less than min speed value
-    Action:Attempt an SBE restart [RESTART_SBE]
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -222,11 +286,13 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_FI2C_ERROR</rc>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_ERR_NONSECURE_MODE</rc>
     <description>
     There are an FI2C I2C Error detected
     Action:Switch seeprom [REIPL_BKP_SEEPROM]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -240,11 +306,13 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_INSECURE_MODE</rc>
+    <rc>RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_NONSECURE_MODE</rc>
     <description>
     There are 2 bit flips in read data which cannot be corrected
     Action:Update of SEEPROM required or switch seeprom [REIPL_UPD_SEEPROM]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -265,6 +333,8 @@
     Uncorrectable error detected in OTPROM memory read
     Action:No recovery action possible to correct this error [NO_RECOVERY_ACTION]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -283,6 +353,8 @@
     PIB Timeout error detected
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -305,6 +377,8 @@
     Scom error detected
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -322,34 +396,13 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR</rc>
-    <description>
-    ECC error detected during pibmem access, Check if REPAIR solution is applied
-    Action:Retrigger IPL or HRESET [RESTART_SBE]
-    </description>
-    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <callout>
-      <target>TARGET_CHIP</target>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_EXTRACT_SBE_RC_PIBMEM_PIB_ERR</rc>
     <description>
     Error detected during pibmem access
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -368,6 +421,8 @@
     FI2C Timeout error detected
     Action:Reload/update of SEEPROM required or switch seeprom [REIPL_BKP_SEEPROM]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -386,6 +441,8 @@
     There are 2 bit flips in read data which cannot be corrected
     Action:Update of SEEPROM required or switch seeprom [REIPL_UPD_SEEPROM]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -404,6 +461,8 @@
     FI2C SEEPROM config error detected
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -425,6 +484,8 @@
     FI2C PIB error detected
     Action:Warm ipl where we don't switch off VSB just toggle start_cbs from FSP [RESTART_CBS]
     </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -444,6 +505,7 @@
     Action:Switch seeprom [REIPL_BKP_SEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
