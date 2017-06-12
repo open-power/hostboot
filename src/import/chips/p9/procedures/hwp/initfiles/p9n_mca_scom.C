@@ -292,11 +292,7 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
 
             l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0b0100 );
             l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_0b11100 );
-
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
-            {
-                l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b110 );
-            }
+            l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_0b110 );
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
             {
