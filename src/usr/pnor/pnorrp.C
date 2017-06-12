@@ -647,6 +647,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                    != 0) ? true : false;
             o_info.reprovision = ((iv_TOC[id].misc & FFS_MISC_REPROVISION)
                                    != 0) ? true : false;
+            o_info.Volatile = ((iv_TOC[id].misc & FFS_MISC_VOLATILE)
+                                   != 0) ? true : false;
         }
 
     } while(0);
