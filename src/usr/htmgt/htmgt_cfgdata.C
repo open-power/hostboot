@@ -929,19 +929,26 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
 
         //Ultra Turbo Frequency in MHz
-        ATTR_SYSTEM_WOF_ENABLED_type wofSupported;
-        if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_ENABLED>(wofSupported))
+        ATTR_SYSTEM_WOF_DISABLE_type wofSupported;
+        if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_DISABLE>(wofSupported))
         {
-            wofSupported = 0;
-        }
-        if (0 != wofSupported)
-        {
-            ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+            G_wofSupported = false;
         }
         else
         {
+            if( wofSupported != SYSTEM_WOF_DISABLE_ON )
+            {
+                ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+            }
+            else
+            {
+                G_wofSupported = false;
+            }
+        }
+
+        if( !G_wofSupported )
+        {
             TMGT_INF("getFrequencyPoint: WOF not enabled");
-            G_wofSupported = false;
         }
     }
     else

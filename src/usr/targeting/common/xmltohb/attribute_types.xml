@@ -17935,28 +17935,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>WOF_ENABLED</id>
-    <description>
-        Defines if the Workload Optimization Frequency (WOF) system feature
-        where OCC algorithms will change (typically boost) the operational
-        frequency based on measured power available and any currently idling
-        cores.
-    </description>
-    <simpleType>
-        <uint8_t>
-            <default>0</default>
-        </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_WOF_ENABLED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>TRUSTED_SLAVE_SCAN_PATH_ACTIVE</id>
     <description>
         Set to indicate state of master->slave scan path.
@@ -20265,6 +20243,7 @@ Measured in GB</description>
     <writeable/>
 </attribute>
 
+
 <enumerationType>
     <id>SYSTEM_WOF_ENABLED</id>
     <description>Enumeration for Work Load Optimized Frequency</description>
@@ -20275,6 +20254,55 @@ Measured in GB</description>
     <enumerator>
         <name>ON</name>
         <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>SYSTEM_WOF_DISABLE</id>
+    <description>
+        Disables Work Load Optimized Frequency (WOF) algoritms to
+        modify frequency based on active core count and other inputs.
+
+        OFF:            Will enable WOF given all validity checks pass. If
+                        validity checks fail, WOF will be disabled for
+                        the present IPL.
+        ON:             Will disable WOF.
+        OFF_SKIP_DD:    Same as OFF but skips any validity checking of the chip
+                        design level (lab use only).
+
+        Producer: Override
+
+        Consumers: p9_build_pstate_datablock ->
+                         Pstate Parameter Block (PSPB) for PGPE/OCC
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>OFF</default>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_WOF_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>SYSTEM_WOF_DISABLE</id>
+    <description> Enumeration for ATTR_SYSTEM_WOF_DISABLE</description>
+    <enumerator>
+        <name>OFF</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>ON</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>OFF_SKIP_DD</name>
+        <value>0x02</value>
     </enumerator>
 </enumerationType>
 
