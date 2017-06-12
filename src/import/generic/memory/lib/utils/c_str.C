@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/centaur/procedures/hwp/memory/lib/utils/position.C $ */
+/* $Source: src/import/generic/memory/lib/utils/c_str.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,3 +22,36 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file c_str.C
+/// @brief Storage for the C-string name of a thing
+///
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: HB:FSP
+
+#include <fapi2.H>
+#include <generic/memory/lib/utils/c_str.H>
+
+using fapi2::TARGET_TYPE_MCBIST;
+using fapi2::TARGET_TYPE_MCA;
+using fapi2::TARGET_TYPE_MCS;
+using fapi2::TARGET_TYPE_DIMM;
+
+using fapi2::FAPI2_RC_SUCCESS;
+
+namespace mss
+{
+
+// Thread local storage for the string we're going to create.
+//TODO RTC:153924 Remove the else case when issue is resolved
+#ifndef PLAT_NO_THREAD_LOCAL_STORAGE
+    thread_local char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+#else
+    char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
+#endif
+
+}

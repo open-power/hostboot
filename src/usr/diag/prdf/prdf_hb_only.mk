@@ -65,6 +65,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/utils/stopreg/
+prd_incpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
@@ -178,14 +179,15 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/utils/
+prd_vpath += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/workarounds/
-prd_obj_no_sim += pos.o
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/workarounds/
 
+prd_obj_no_sim += c_str.o
 prd_obj_no_sim += mcbist.o
 prd_obj_no_sim += mcbist_workarounds.o
 prd_obj_no_sim += sim.o
 prd_obj_no_sim += rank.o
-prd_obj_no_sim += c_str.o
 prd_obj_no_sim += memory_size.o
 prd_obj_no_sim += patterns.o
 

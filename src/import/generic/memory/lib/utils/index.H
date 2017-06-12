@@ -61,13 +61,18 @@ namespace mss
 
 ///
 /// @brief Return an attribute array index from a fapi2 target
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target a DIMM target representing the DIMM in question
+/// @tparam T the fapi2::TargetType - derived
+/// @param[in] i_target a fapi2 target
 /// @return size_t the attribute array index.
 ///
 template< fapi2::TargetType T >
 inline size_t index(const fapi2::Target<T>& i_target);
 
+///
+/// @brief Return an attribute array index from a DIMM target
+/// @param[in] i_target a DIMM target representing the DIMM in question
+/// @return size_t the attribute array index.
+///
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
 {
@@ -75,6 +80,11 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
     return mss::pos(i_target) % TT::DIMMS_PER_PORT;
 }
 
+///
+///@brief Return an attribute array index from a MCA target
+/// @param[in] i_target a MCA target representing the MCA in question
+/// @return size_t the attribute array index.
+///
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
@@ -82,6 +92,11 @@ inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
     return mss::pos(i_target) % TT::PORTS_PER_MCS;
 }
 
+///
+/// @brief Return an attribute array index from a MCS target
+/// @param[in] i_target a MCS target representing the MCS in question
+/// @return size_t the attribute array index.
+///
 template<>
 inline size_t index(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
