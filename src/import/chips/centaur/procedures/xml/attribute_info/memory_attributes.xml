@@ -2103,7 +2103,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2113,7 +2112,6 @@ firmware notes: none</description>
     <odmVisable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
@@ -3193,7 +3191,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3203,9 +3200,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3215,7 +3210,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -3608,7 +3602,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3617,7 +3610,6 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id>
