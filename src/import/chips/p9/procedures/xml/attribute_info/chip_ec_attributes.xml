@@ -3861,11 +3861,12 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_P9C_SPY_ONLY</id>
+    <id>ATTR_CHIP_EC_FEATURE_P9C_LOGIC_ONLY</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns true if spy name has usage only in P9C.
-      Spy Name of Cumulus
+      Spy Name of Cumulus; Also used for cumulus only 
+      oscswitch settings. 
     </description>
     <chipEcFeature>
       <chip>
