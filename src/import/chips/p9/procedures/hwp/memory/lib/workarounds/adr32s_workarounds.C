@@ -67,7 +67,6 @@ namespace adr32s
 /// @param[in] i_target MCBIST target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note Always needs to be run for DD1.* parts.  unsure for DD2
-/// TODO:RTC169173 update DCD calibration for DD2
 ///
 fapi2::ReturnCode clear_dcd_firs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
 {
@@ -138,6 +137,59 @@ fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::
     FAPI_TRY(mss::workarounds::adr32s::clear_dcd_firs(i_target));
 
     FAPI_INF("%s Cleared DCD firs", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retries to clear the cal update bit, as it has been seen that the bit can be "sticky" in hardware
+/// @param[in] i_target MCA target on which to operate
+/// @param[in] i_reg the register on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode setup_dll_control_regs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_reg )
+{
+    // Traits definition
+    typedef dutyCycleDistortionTraits<TARGET_TYPE_MCA> TT;
+
+    // Poll limit declaration - this is an engineering judgement value from the lab's experimentation
+    // The bit thus far has always unstuck after 3 loops, so 10 is more than safe
+    constexpr uint64_t POLL_LIMIT = 10;
+    bool l_done = false;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    for(uint64_t i = 0; i < POLL_LIMIT; ++i)
+    {
+        fapi2::buffer<uint64_t> l_data;
+
+        FAPI_TRY(mss::getScom(i_target, i_reg, l_data), "%s failed to getScom from register 0x%016lx", mss::c_str(i_target),
+                 i_reg);
+
+        // If our bit is a 0, then we're done
+        l_done = !l_data.getBit<TT::DLL_CAL_UPDATE>();
+
+        // Break out
+        if(l_done)
+        {
+            FAPI_INF("%s DLL control register 0x%016lx is setup correctly after %lu attempts", mss::c_str(i_target), i_reg, i);
+            break;
+        }
+
+        // Stops cal from updating and disables cal good to keep parity good (these regs have parity issues on bits 60-63)
+        l_data.clearBit<TT::DLL_CAL_UPDATE>();
+        l_data.clearBit<TT::DLL_CAL_GOOD>();
+
+        FAPI_TRY(mss::putScom(i_target, i_reg, l_data), "%s failed to putScom from register 0x%016lx", mss::c_str(i_target),
+                 i_reg);
+    }
+
+    // do the error check
+    FAPI_ASSERT( l_done,
+                 fapi2::MSS_DLL_UPDATE_BIT_STUCK()
+                 .set_TARGET(i_target)
+                 .set_REGISTER(i_reg),
+                 "Failed to setup DLL control reg for %s 0x%016lx", mss::c_str(i_target), i_reg );
 
 fapi_try_exit:
     return fapi2::current_err;
