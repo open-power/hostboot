@@ -38,7 +38,7 @@
 
 #ifndef _P9_EXTRACT_SBE_RC_H_
 #define _P9_EXTRACT_SBE_RC_H_
-
+#define btos(x) ((x)?"TRUE":"FALSE")
 
 #include <fapi2.H>
 

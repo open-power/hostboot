@@ -65,6 +65,13 @@
 ///     4) If in SEEPROM data range, report error if RSP_INFO is non-zero response (0x7-FI2C timeout Error, 0x4-FI2C Seeprom cfg Err, else-FI2C PIB Err)
 ///
 ///     DEFAULT) If non of the above errors are detected then report as UNKNOWN_ERROR
+//
+/////////////////////////////// USE CASES ////////////////////////////////////
+//     1) FSP calling on any proc                                           //
+//     2) HB calling on master proc (after a failed chipop or something)    //
+//     3) HB calling on slave proc before SMP is up (initial sbe start)     //
+//     4) HB calling on slave proc after SMP is up (chipop fail)            //
+//////////////////////////////////////////////////////////////////////////////
 //------------------------------------------------------------------------------
 // *HWP HW Owner        : Soma BhanuTej <soma.bhanu@in.ibm.com>
 // *HWP HW Backup Owner : Srinivas V Naga <srinivan@in.ibm.com>
@@ -87,9 +94,10 @@
 
 
 fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
-                                    P9_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action, bool i_set_sdb, bool i_unsecure_mode)
+                                    P9_EXTRACT_SBE_RC::RETURN_ACTION& o_return_action,
+                                    bool i_set_sdb,
+                                    bool i_unsecure_mode)
 {
-
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_data64_dbgpro;
     fapi2::buffer<uint64_t> l_data64_fi2c_status;
@@ -99,6 +107,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     fapi2::buffer<uint32_t> l_data32_ir;
     fapi2::buffer<uint32_t> l_data32_edr;
     fapi2::buffer<uint32_t> l_data32_iar;
+    fapi2::buffer<uint8_t>  l_is_ndd1;
     bool l_ppe_halt_state = true;
     bool l_data_mchk = false;
     bool otprom_addr_range = false;
@@ -107,7 +116,12 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     bool otprom_data_range = false;
     bool pibmem_data_range = false;
     bool seeprom_data_range = false;
+    bool l_is_HB_module = false;
     uint32_t HC, MCS, otprom_addr, mem_error, sib_rsp_info;
+    uint32_t SEEPROM_MIN_RANGE;
+    uint32_t SEEPROM_MAX_RANGE;
+    uint32_t MAGIC_NUMBER_MISMATCH_LOCATION;
+    uint32_t OTPROM_IMAGE_END_LOCATION;
 
     // FAPI_ASSERT condition constant
     const bool FAIL = false;
@@ -116,20 +130,55 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
     const uint32_t OTPROM_MAX_RANGE  = 0x000C0378;
     const uint32_t PIBMEM_MIN_RANGE  = 0xFFFE8000;
     const uint32_t PIBMEM_MAX_RANGE  = 0xFFFFFFFF;
-    const uint32_t SEEPROM_MIN_RANGE = 0x80000000;
-    const uint32_t SEEPROM_MAX_RANGE = 0x80038E18;
+    const uint32_t SEEPROM_NDD1_MIN_RANGE = 0x80000000;
+    const uint32_t SEEPROM_NDD1_MAX_RANGE = 0x80038E18;
+    const uint32_t SEEPROM_NOT_NDD1_MIN_RANGE = 0xFF800000;
+    const uint32_t SEEPROM_NOT_NDD1_MAX_RANGE = 0xFF838E18;
 
-    // OTPROM Address constants as per the image on 28/Sep/2016
+    // Interrupt Vector offsets locations
+    const uint32_t OTPROM_PROG_EXCEPTION_LOCATION = 0x000C00E0;
+    const uint32_t PIBMEM_PROG_EXCEPTION_LOCATION = 0xFFFE80E0;
+
+    // OTPROM Address constants as per the image on 12/Jun/2017
     // These values might change on every recomilation of OTPROM binary
-    // Refs : /afs/apd/func/project/tools/cronus/p9/exe/dev/prcd_d/images/sbe_otprom.dis
-    const uint32_t MAGIC_NUMBER_MISMATCH_LOCATION = 0xC0188;
-    const uint32_t OTPROM_IMAGE_END_LOCATION      = 0xC016C;
+    // Refs : /afs/apd/func/project/tools/cronus/p9/exe/dev/prcd_d/images/sim/sbe_otprom_DD2.dis
+    const uint32_t NOT_NDD1_MAGIC_NUMBER_MISMATCH_LOCATION = 0xC0170;
+    const uint32_t NOT_NDD1_OTPROM_IMAGE_END_LOCATION      = 0xC016C;
+    // NDD1 address locations are extracted from HW System by Joachim Fenkes
+    const uint32_t NDD1_MAGIC_NUMBER_MISMATCH_LOCATION     = 0xC015C;
+    const uint32_t NDD1_OTPROM_IMAGE_END_LOCATION          = 0xC0158;
 
     FAPI_INF("p9_extract_sbe_rc : Entering ...");
 
+#ifdef __HOSTBOOT_MODULE
+    l_is_HB_module = true;
+#endif
+
+    FAPI_INF("p9_extract_sbe_rc : Inputs \n\ti_set_sdb = %s \n\ti_unsecure_mode = %s \n\tl_is_HB_module = %s",
+             btos(i_set_sdb), btos(i_unsecure_mode), btos(l_is_HB_module));
+
+    FAPI_DBG("p9_extract_sbe_rc: Reading chip ec attribute");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTRACT_SBE_RC_P9NDD1_CHIPS, i_target_chip, l_is_ndd1));
+
+    if(l_is_ndd1)
+    {
+        FAPI_INF("p9_extract_sbe_rc: Detected as Nimbus DD1 chip");
+        MAGIC_NUMBER_MISMATCH_LOCATION = NDD1_MAGIC_NUMBER_MISMATCH_LOCATION;
+        OTPROM_IMAGE_END_LOCATION = NDD1_OTPROM_IMAGE_END_LOCATION;
+        SEEPROM_MIN_RANGE = SEEPROM_NDD1_MIN_RANGE;
+        SEEPROM_MAX_RANGE = SEEPROM_NDD1_MAX_RANGE;
+    }
+    else
+    {
+        MAGIC_NUMBER_MISMATCH_LOCATION = NOT_NDD1_MAGIC_NUMBER_MISMATCH_LOCATION;
+        OTPROM_IMAGE_END_LOCATION = NOT_NDD1_OTPROM_IMAGE_END_LOCATION;
+        SEEPROM_MIN_RANGE = SEEPROM_NOT_NDD1_MIN_RANGE;
+        SEEPROM_MAX_RANGE = SEEPROM_NOT_NDD1_MAX_RANGE;
+    }
+
     if(i_set_sdb)
     {
-        // Applying SDB setting
+        // Applying SDB setting required in usecase 1 & 3 only
         FAPI_DBG("p9_extract_sbe_rc: Setting chip in SDB mode");
         FAPI_TRY(getCfamRegister(i_target_chip, PERV_SB_CS_FSI, l_data32));
         l_data32.setBit<PERV_SB_CS_SECURE_DEBUG_MODE>();
@@ -146,7 +195,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
     if (l_data64_dbgpro.getBit<PU_PPE_XIDBGPRO_XSR_HS>())
     {
-        FAPI_INF("p9_extract_sbe_rc : PPE is in HALT state");
+        FAPI_INF("p9_extract_sbe_rc : PPE is in HALT state and SDB is set %s", btos(i_set_sdb));
         l_ppe_halt_state  = true;
     }
     else
@@ -262,19 +311,66 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         l_data64.extractToRight(l_data32_ir, PU_PPE_XIRAMEDR_XIRAMGA_IR, PU_PPE_XIRAMEDR_XIRAMGA_IR_LEN);
         l_data64.extractToRight(l_data32_edr, PU_PPE_XIRAMEDR_EDR, PU_PPE_XIRAMEDR_EDR_LEN);
 
-        if(MCS == 0x4)
+        if(MCS == 0x4 ||
+           l_data32_iar == PIBMEM_PROG_EXCEPTION_LOCATION ||
+           l_data32_iar == OTPROM_PROG_EXCEPTION_LOCATION )
         {
             if((OTPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= OTPROM_MAX_RANGE))
             {
-                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in OTPROM memory program");
+                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured during IVPR pointed to OTPROM memory range");
+
+                if(!l_is_ndd1)
+                {
+                    fapi2::buffer<uint8_t> l_sbe_code_state;
+                    FAPI_DBG("p9_extract_sbe_rc : Reading SB_MSG register to collect SBE Code state bits");
+
+                    if(l_is_HB_module && !i_set_sdb) //HB calling Master Proc or HB calling Slave after SMP
+                    {
+                        FAPI_TRY(getScom(i_target_chip, PERV_SB_MSG_SCOM, l_data64));
+                        l_data64.extractToRight(l_sbe_code_state, 30, 2);
+                    }
+                    else
+                    {
+                        FAPI_TRY(getCfamRegister(i_target_chip, PERV_SB_MSG_FSI, l_data32));
+                        l_data32.extractToRight(l_sbe_code_state, 30, 2);
+                    }
+
+                    if(l_sbe_code_state == 0x1)
+                    {
+                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH()
+                                    .set_TARGET_CHIP(i_target_chip),
+                                    "ERROR:Program Interrupt occured, probably MAGIC NUMBER MISMATCH");
+
+                    }
+                    else if(l_sbe_code_state == 0x2)
+                    {
+                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL()
+                                    .set_TARGET_CHIP(i_target_chip),
+                                    "ERROR:Program Interrupt occured during base loader (l1)");
+
+                    }
+                    else if(l_sbe_code_state == 0x3)
+                    {
+                        o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+                        FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL()
+                                    .set_TARGET_CHIP(i_target_chip),
+                                    "ERROR:Program Interrupt occured during pk loader")
+                    }
+                    else
+                    {
+                        FAPI_ERR("p9_extract_sbe_rc : SBE code state value = %02X is invalid", l_sbe_code_state);
+                    }
+                }
             }
             else if((PIBMEM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= PIBMEM_MAX_RANGE))
             {
-                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in PIBMEM memory program");
+                FAPI_ERR("p9_extract_sbe_rc : Program Interrupt occured in PIBMEM memory program");
             }
             else if((SEEPROM_MIN_RANGE <= l_data32_iar) && (l_data32_iar <= SEEPROM_MAX_RANGE))
             {
-                FAPI_DBG("p9_extract_sbe_rc : Program Interrupt occured in SEEPROM memory program");
+                FAPI_ERR("p9_extract_sbe_rc : Program Interrupt occured in SEEPROM memory program");
             }
             else
             {
@@ -408,7 +504,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 //--  FAPI Asserts section for OTPROM --//
                 o_return_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
                 FAPI_ASSERT(l_data64.getBit<PU_STATUS_REGISTER_UNCORR_ERROR>() != 1,
-                            fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR_INSECURE_MODE()
+                            fapi2::EXTRACT_SBE_RC_OTP_ECC_ERR_NONSECURE_MODE()
                             .set_TARGET_CHIP(i_target_chip),
                             "ERROR:Uncorrectable error detected in OTPROM memory read");
             }
@@ -440,7 +536,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
         }
 
-        if(pibmem_addr_range)
+        if(pibmem_addr_range) // PIBMEM status register read is allowed in both Secure & NonSecure mode
         {
             FAPI_DBG("p9_extract_sbe_rc : Reading PIBMEM status register");
             FAPI_TRY(getScom(i_target_chip, PU_PIBMEM_STATUS_REG, l_data64));
@@ -524,148 +620,138 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             //--  FAPI Asserts section for PIBMEM --//
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<PU_PIBMEM_STATUS_REG_ECC_UNCORRECTED_ERROR_PIB>() != 1,
-                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE()
+                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
                         .set_TARGET_CHIP(i_target_chip),
-                        "ERROR:Uncorrectable error occurred while PIB memory read");
+                        "ERROR:Uncorrectable error occurred while accessing memory via PIB side");
 
             o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
             FAPI_ASSERT(l_data64.getBit<PU_PIBMEM_STATUS_REG_ECC_UNCORRECTED_ERROR_FACES>() != 1,
-                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE()
+                        fapi2::EXTRACT_SBE_RC_PIBMEM_ECC_ERR()
                         .set_TARGET_CHIP(i_target_chip),
-                        "ERROR:Uncorrectable error occurred while fast access interface read");
+                        "ERROR:Uncorrectable error occurred while accessing memory via fast access side");
         }
 
-        if(seeprom_addr_range)
+        if(seeprom_addr_range && i_unsecure_mode)
         {
-            if(i_unsecure_mode)
+            FAPI_DBG("p9_extract_sbe_rc : Reading FI2CM mode register");
+            FAPI_TRY(getScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
+            FAPI_DBG("p9_extract_sbe_rc : FI2CM mode : %#018lX", l_data64);
+
+            l_data32.flush<0>();
+            l_data64.extractToRight(l_data32, 0, 16);
+            uint32_t i2c_speed = l_data32;
+
+            if(i2c_speed < 0x0003)
             {
-                FAPI_DBG("p9_extract_sbe_rc : Reading FI2CM mode register");
-                FAPI_TRY(getScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
-                FAPI_DBG("p9_extract_sbe_rc : FI2CM mode : %#018lX", l_data64);
-
-                l_data32.flush<0>();
-                l_data64.extractToRight(l_data32, 0, 16);
-                uint32_t i2c_speed = l_data32;
-
-                if(i2c_speed < 0x0003)
-                {
-                    o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
-                    FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR()
-                                .set_TARGET_CHIP(i_target_chip),
-                                "ERROR:Speed on the I2C bit rate divisor is less than min speed value (0x0003), I2C Speed read is %04lX", i2c_speed);
-                }
-            }
-
-            if(i_unsecure_mode)
-            {
-                FAPI_DBG("p9_extract_sbe_rc : Reading FI2CM status register");
-                FAPI_TRY(getScom(i_target_chip, PU_STATUS_REGISTER_B, l_data64_fi2c_status));
-                FAPI_DBG("p9_extract_sbe_rc : FI2CM status : %#018lX", l_data64_fi2c_status);
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ADDR_NVLD_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Address invalid bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_WRITE_NVLD_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Write invalid bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_READ_NVLD_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Read invalid bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ADDR_P_ERR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Address parity error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PAR_ERR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Data parity error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_LB_PARITY_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Local bus parity error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CORRECTED_ERROR_0>())
-                {
-                    FAPI_INF("p9_extract_sbe_rc : FI2CM::WARN:One bit flip was there in data and been corrected");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_UNCORRECTED_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::There are 2 bit flips in read data which cannot be corrected");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CONFIG_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Control register is ecc_enabled for data_length not equal to 8. OR ECC is enabled for the engine where ECC block is not instantiated");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_INVALID_COMMAND_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Invalid command bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PARITY_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Parity error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_OVERRUN_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Back end overrun error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_ACCESS_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Back end access error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ARBITRATION_LOST_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Arbitration lost error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_NACK_RECEIVED_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::NACK receieved error bit set");
-                }
-
-                if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>())
-                {
-                    FAPI_ERR("p9_extract_sbe_rc : FI2CM::Stop error bit set");
-                }
-
-                //--  FAPI Asserts section for SEEPROM --//
-                o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
-                FAPI_ASSERT((l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CONFIG_ERROR_0>() != 1           ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_INVALID_COMMAND_0>() != 1        ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PARITY_ERROR_0>() != 1           ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_OVERRUN_ERROR_0>() != 1 ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_ACCESS_ERROR_0>() != 1  ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ARBITRATION_LOST_ERROR_0>() != 1 ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_NACK_RECEIVED_ERROR_0>() != 1    ||
-                             l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>() != 1),
-                            fapi2::EXTRACT_SBE_RC_FI2C_ERROR()
+                o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
+                FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR_NONSECURE_MODE()
                             .set_TARGET_CHIP(i_target_chip),
-                            "FI2C I2C Error detected");
+                            "ERROR:Speed on the I2C bit rate divisor is less than min speed value (0x0003), I2C Speed read is %04lX", i2c_speed);
+            }
 
-                o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
-                FAPI_ASSERT(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_UNCORRECTED_ERROR_0>() != 1,
-                            fapi2::EXTRACT_SBE_RC_FI2C_ECC_ERR_INSECURE_MODE()
-                            .set_TARGET_CHIP(i_target_chip),
-                            "ERROR:There are 2 bit flips in read data which cannot be corrected");
-            }
-            else
+            FAPI_DBG("p9_extract_sbe_rc : Reading FI2CM status register");
+            FAPI_TRY(getScom(i_target_chip, PU_STATUS_REGISTER_B, l_data64_fi2c_status));
+            FAPI_DBG("p9_extract_sbe_rc : FI2CM status : %#018lX", l_data64_fi2c_status);
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ADDR_NVLD_0>())
             {
-                // TODO - Read FI2CM status register by performing ramming of local register
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Address invalid bit set");
             }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_WRITE_NVLD_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Write invalid bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_READ_NVLD_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Read invalid bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ADDR_P_ERR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Address parity error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PAR_ERR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Data parity error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_LB_PARITY_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Local bus parity error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CORRECTED_ERROR_0>())
+            {
+                FAPI_INF("p9_extract_sbe_rc : FI2CM::WARN:One bit flip was there in data and been corrected");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_UNCORRECTED_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::There are 2 bit flips in read data which cannot be corrected");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CONFIG_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Control register is ecc_enabled for data_length not equal to 8. OR ECC is enabled for the engine where ECC block is not instantiated");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_INVALID_COMMAND_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Invalid command bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PARITY_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Parity error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_OVERRUN_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Back end overrun error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_ACCESS_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Back end access error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ARBITRATION_LOST_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Arbitration lost error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_NACK_RECEIVED_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::NACK receieved error bit set");
+            }
+
+            if(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>())
+            {
+                FAPI_ERR("p9_extract_sbe_rc : FI2CM::Stop error bit set");
+            }
+
+            //--  FAPI Asserts section for SEEPROM --//
+            o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+            FAPI_ASSERT((l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_CONFIG_ERROR_0>() != 1           ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_INVALID_COMMAND_0>() != 1        ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_PARITY_ERROR_0>() != 1           ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_OVERRUN_ERROR_0>() != 1 ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_BACK_END_ACCESS_ERROR_0>() != 1  ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_ARBITRATION_LOST_ERROR_0>() != 1 ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_NACK_RECEIVED_ERROR_0>() != 1    ||
+                         l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_BUS_STOP_ERROR_0>() != 1),
+                        fapi2::EXTRACT_SBE_RC_FI2C_ERR_NONSECURE_MODE()
+                        .set_TARGET_CHIP(i_target_chip),
+                        "FI2C I2C Error detected");
+
+            o_return_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+            FAPI_ASSERT(l_data64_fi2c_status.getBit<PU_STATUS_REGISTER_B_ECC_UNCORRECTED_ERROR_0>() != 1,
+                        fapi2::EXTRACT_SBE_RC_FI2C_ECC_ERR_NONSECURE_MODE()
+                        .set_TARGET_CHIP(i_target_chip),
+                        "ERROR:There are 2 bit flips in read data which cannot be corrected");
         }
 
         // ------- LEVEL 4 ------ //
