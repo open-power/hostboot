@@ -121,6 +121,7 @@ fapi2::ReturnCode writeMboxRegs (
 {
     FAPI_DBG ("writeMboxRegs Entering...");
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    P9XipItem l_item;
 
     MBOX_ATTR_WRITE (ATTR_I2C_BUS_DIV_REF,          i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_EQ_GARD,                  i_procTarget,   i_image);
@@ -150,6 +151,39 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T2,  FAPI_SYSTEM,    i_image);
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_WRITE_CYCLES_T1, FAPI_SYSTEM,    i_image);
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM,    i_image);
+
+    // for backwards compatiblity with images that don't contain
+    // the OB/MC PLL bucket attributes, ensure that the item exists
+    // prior to attempting an update which would otherwise fail
+    if (p9_xip_find(i_image, "ATTR_OB0_PLL_BUCKET", &l_item) !=
+        P9_XIP_ITEM_NOT_FOUND)
+    {
+        MBOX_ATTR_WRITE(ATTR_OB0_PLL_BUCKET, i_procTarget, i_image);
+    }
+
+    if (p9_xip_find(i_image, "ATTR_OB1_PLL_BUCKET", &l_item) !=
+        P9_XIP_ITEM_NOT_FOUND)
+    {
+        MBOX_ATTR_WRITE(ATTR_OB1_PLL_BUCKET, i_procTarget, i_image);
+    }
+
+    if (p9_xip_find(i_image, "ATTR_OB2_PLL_BUCKET", &l_item) !=
+        P9_XIP_ITEM_NOT_FOUND)
+    {
+        MBOX_ATTR_WRITE(ATTR_OB2_PLL_BUCKET, i_procTarget, i_image);
+    }
+
+    if (p9_xip_find(i_image, "ATTR_OB3_PLL_BUCKET", &l_item) !=
+        P9_XIP_ITEM_NOT_FOUND)
+    {
+        MBOX_ATTR_WRITE(ATTR_OB3_PLL_BUCKET, i_procTarget, i_image);
+    }
+
+    if (p9_xip_find(i_image, "ATTR_MC_PLL_BUCKET", &l_item) !=
+        P9_XIP_ITEM_NOT_FOUND)
+    {
+        MBOX_ATTR_WRITE(ATTR_MC_PLL_BUCKET, FAPI_SYSTEM, i_image);
+    }
 
 fapi_try_exit:
     FAPI_DBG("writeMboxRegs Exiting...");
