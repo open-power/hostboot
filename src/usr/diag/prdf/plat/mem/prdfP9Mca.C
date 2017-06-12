@@ -114,10 +114,13 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
 
-    // Recovery is always enabled during runtime. Start TPS on all slave ranks
-    // behind the MCA if the recovery threshold is reached.
+    // Recovery is always enabled during runtime. If the threshold is reached,
+    // make the error log predictive and start TPS on all slave ranks behind
+    // the MCA.
     if ( getMcaDataBundle(i_mcaChip)->iv_rcdParityTh.inc(io_sc) )
     {
+        io_sc.service_data->setServiceCall();
+
         ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
 
         McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
