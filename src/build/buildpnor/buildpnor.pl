@@ -241,6 +241,10 @@ sub addUserData
     {
         $miscFlags |= 0x10;
     }
+    if( ($i_sectionHash{$i_key}{volatile} eq "yes") )
+    {
+        $miscFlags |= 0x08;
+    }
 
     #First User Data Word
     #[1:chip][1:compressType][2:dataInteg]
