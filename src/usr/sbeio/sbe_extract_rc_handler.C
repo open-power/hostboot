@@ -802,24 +802,24 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc(uint32_t i_rc)
         case fapi2::RC_EXTRACT_SBE_RC_NEVER_STARTED:
         case fapi2::RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT:
         case fapi2::RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED:
-        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR:
         case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR_NONSECURE_MODE:
 
             l_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
 
             break;
 
         case fapi2::RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH:
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_INSECURE_MODE:
         case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_NONSECURE_MODE:
 
             l_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
 
             break;
 
-        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ERROR:
         case fapi2::RC_EXTRACT_SBE_RC_FI2C_TIMEOUT:
+        case fapi2::RC_EXTRACT_SBE_RC_SBE_L1_LOADER_FAIL:
+        case fapi2::RC_EXTRACT_SBE_RC_SBE_L2_LOADER_FAIL:
         case fapi2::RC_EXTRACT_SBE_RC_UNKNOWN_ERROR:
 
             l_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
@@ -836,7 +836,6 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc(uint32_t i_rc)
 
             break;
 
-        case fapi2::RC_EXTRACT_SBE_RC_OTP_ECC_ERR_INSECURE_MODE:
         case fapi2::RC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL:
         case fapi2::RC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT:
         case fapi2::RC_EXTRACT_SBE_RC_OTP_ECC_ERR:
