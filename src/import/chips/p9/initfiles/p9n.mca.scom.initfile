@@ -992,7 +992,10 @@ ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_NUM_RMW_BUF [when=S] {
 
 # All rctrl ops through tag FIFO (bit 0)
 # Serialize CMDLIST pf drop through rctrl (bit 1)
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S && ATTR_CHIP_EC_FEATURE_HW375732] {
+# Reinstate tag fifo workaround for DD2 in response to early VBU issue
+# Leaving old code here because workaround likely temporary
+#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S && ATTR_CHIP_EC_FEATURE_HW375732] {
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S] {
   spyv;
   0b110;
 }
