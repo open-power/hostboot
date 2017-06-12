@@ -57,7 +57,6 @@ namespace adr32s
 /// @param[in] i_target MCBIST target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 /// @note Always needs to be run for DD1.* parts.  unsure for DD2
-/// TODO:RTC169173 update DCD calibration for DD2
 ///
 fapi2::ReturnCode clear_dcd_firs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
@@ -67,6 +66,14 @@ fapi2::ReturnCode clear_dcd_firs( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode duty_cycle_distortion_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
+
+///
+/// @brief Retries to clear the cal update bit, as it has been seen that the bit can be "sticky" in hardware
+/// @param[in] i_target MCA target on which to operate
+/// @param[in] i_reg the register on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode setup_dll_control_regs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_reg );
 
 } // close namespace adr32s
 } // close namespace workarounds
