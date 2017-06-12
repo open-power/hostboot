@@ -25,7 +25,7 @@
 #ifndef __IO_IOF_HCODE_IMG_BUILD_H_
 #define __IO_IOF_HCODE_IMG_BUILD_H_
 ///
-/// @file   p9_io_obus_image_build.H
+/// @file   p9_io_xbus_image_build.H
 /// @brief  Implements HWP that builds the Hcode image in IO Xbus PPE Sram.
 ///----------------------------------------------------------------------------
 /// *HWP HWP Owner        : Chris Steffen <cwsteffen@us.ibm.com>
@@ -45,7 +45,7 @@
 
 typedef  const fapi2::Target<fapi2::TARGET_TYPE_XBUS> CONST_XBUS;
 
-typedef fapi2::ReturnCode (*p9_io_obus_image_build_FP_t)(CONST_XBUS&, void* const);
+typedef fapi2::ReturnCode (*p9_io_xbus_image_build_FP_t)(CONST_XBUS&, void* const);
 
 extern "C"
 {
