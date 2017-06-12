@@ -39,6 +39,7 @@
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/utils/poll.H>
 #include <lib/utils/conversions.H>
+#include <lib/workarounds/adr32s_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCBIST;
@@ -104,6 +105,9 @@ fapi2::ReturnCode setup_dll_control_regs( const fapi2::Target<fapi2::TARGET_TYPE
         l_data.clearBit<TT::DLL_CAL_GOOD>();
 
         FAPI_TRY(mss::putScom(i_target, r, l_data));
+
+        FAPI_TRY(mss::workarounds::adr32s::setup_dll_control_regs( i_target, r ), "%s failed to setup DLL control reg 0x%016lx",
+                 mss::c_str(i_target), r);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -159,7 +163,11 @@ fapi2::ReturnCode sw_cal_side_helper( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
 {
     typedef dutyCycleDistortionTraits<TARGET_TYPE_MCA> TT;
 
-    constexpr uint64_t l_dcd_adjust_overflow =  0b1111111;
+    constexpr uint64_t DD1_OVERFLOW = 0b1111111;
+    constexpr uint64_t DD2_OVERFLOW = 0b11111111;
+
+    // Having an extra bit in DD2 means that the overflow value changes
+    const uint64_t l_dcd_adjust_overflow =  mss::chip_ec_nimbus_lt_2_0(i_target) ? DD1_OVERFLOW : DD2_OVERFLOW;
     constexpr uint64_t l_dcd_adjust_underflow = 0b0000000;
 
     constexpr uint64_t l_delay = mss::DELAY_100NS;
@@ -293,9 +301,17 @@ fapi2::ReturnCode sw_cal_per_register( const fapi2::Target<TARGET_TYPE_MCA>& i_t
     uint64_t l_b_side_value = 0;
     fapi2::buffer<uint64_t> l_buff;
 
+    // Fixes the default seed values
+    const uint64_t l_default_seed = mss::chip_ec_nimbus_lt_2_0(i_target) ? TT::DD1_DCD_ADJUST_DEFAULT :
+                                    TT::DD2_DCD_ADJUST_DEFAULT;
+
+    // Note: per the design and lab teams, we should always start out at our nominal value
+    // This is a bit of a workaround given some broken HW in the lab, not sure if it should go in the workaround file
+    io_seed = l_default_seed;
+
     auto l_a_rc = sw_cal_side_helper(i_target, i_reg, io_seed, A_SIDE, l_a_side_value);
 
-    // Updates the seed value to avoid underflow issues
+    // Updates the seed value to avoid bad hardware issues
     io_seed = (l_a_side_value == 0) ? (io_seed) : (l_a_side_value - 1);
 
     // We want to seed the other side (and each subsequent port) with the
@@ -407,6 +423,14 @@ void log_reg_results( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     if(l_failed)
     {
         io_failing_regs.push_back(i_reg);
+
+        // Set current error, and log it
+        FAPI_ASSERT(false,
+                    fapi2::MSS_HARDWARE_DUTY_CLOCK_DISTORTION_CAL_FAILED()
+                    .set_TARGET(i_target)
+                    .set_REGISTER(i_reg),
+                    "DCD hardware calibration failed on %s. register 0x%016lx. Attempting software recovery",
+                    mss::c_str(i_target), i_reg);
     }
     // Updates sum if we passed
     else
@@ -415,6 +439,15 @@ void log_reg_results( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         get_dcd_value(i_target, i_data, l_result);
         io_sum += l_result;
     }
+
+    // Exits out before error handling
+    return;
+
+    // Handles the error
+fapi_try_exit:
+    // Logs the error
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -530,8 +563,8 @@ fapi2::ReturnCode execute_hw_calibration( const fapi2::Target<TARGET_TYPE_MCA>& 
     {
         // Copies the seed so we can preserve the average
         uint64_t l_seed = l_good_average;
-        FAPI_INF("%s executing software calibration on failing register 0x%016lx with seed of %lu", mss::c_str(i_target), l_reg,
-                 l_seed);
+        FAPI_INF("%s executing software calibration on failing register 0x%016lx with seed of %lu",
+                 mss::c_str(i_target), l_reg, l_seed);
         FAPI_TRY(sw_cal_per_register(i_target, l_reg, l_seed),
                  "%s failed to execute the software DCD calibration on register 0x%016lx", mss::c_str(i_target), l_reg);
     }
