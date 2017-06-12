@@ -116,4 +116,12 @@
     <id>unit-core-power9</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
 </targetTypeExtension>
+
+<targetTypeExtension>
+    <id>bmc</id>
+    <attribute><id>BMC_MANUFACTURER</id></attribute>
+    <attribute><id>BMC_HW_CHIP_TYPE</id></attribute>
+    <attribute><id>BMC_SW_TYPE</id></attribute>
+</targetTypeExtension>
+
 </attributes>
