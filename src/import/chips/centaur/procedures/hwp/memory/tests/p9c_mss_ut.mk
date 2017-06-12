@@ -33,10 +33,7 @@ $(call ADD_EXE_INCDIR,$(WRAPPER),$(CEN_INCLUDES))
 $(call ADD_EXE_INCDIR,$(WRAPPER),$(CEN_CATCH_UNIT_TESTS_INCLUDES))
 
 $(WRAPPER)_DEPLIBS+=cen
-
-# USELIBS to get the header, DEPLIBS to get the so
-#$(WRAPPER)_USELIBS+=p9_getecid
-#$(WRAPPER)_DEPLIBS+=p9_getecid
+$(WRAPPER)_DEPLIBS+=mss_generic
 
 $(WRAPPER)_COMMONFLAGS+=-fno-var-tracking-assignments
 

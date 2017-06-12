@@ -26,4 +26,5 @@
 WRAPPER=p9c_mss_ddr_phy_reset_wrap
 $(WRAPPER)_USELIBS+=p9c_mss_ddr_phy_reset
 $(WRAPPER)_DEPLIBS+=cen
+$(WRAPPER)_DEPLIBS+=mss_generic
 $(call BUILD_WRAPPER)

@@ -26,4 +26,5 @@
 WRAPPER=p9c_mss_eff_mb_interleave_wrap
 $(WRAPPER)_USELIBS+=p9c_mss_eff_mb_interleave
 $(WRAPPER)_DEPLIBS+=cen
+$(WRAPPER)_DEPLIBS+=mss_generic
 $(call BUILD_WRAPPER)
