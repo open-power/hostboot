@@ -54,7 +54,8 @@ enum P9_START_CBS_Private_Constants
     //                       max : 64k x (1/50MHz) = 128k x 10(-8) = 1280 us]
     P9_CBS_IDLE_SIM_CYCLE_DELAY = 7500000, // unit is sim cycles,to match the poll count change( 250000 * 30 )
     P9_PIBRESET_HW_NS_DELAY = 4000,  // 256 pibclocks
-    P9_PIBRESET_SIM_CYCLE_DELAY = 256000
+    P9_PIBRESET_SIM_CYCLE_DELAY = 256000,
+    FIFO_RESET = 0x80000000
 };
 
 fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -161,6 +162,9 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         FAPI_DBG("waiting for pibreset to complete");
         fapi2::delay(P9_PIBRESET_HW_NS_DELAY, P9_PIBRESET_SIM_CYCLE_DELAY);
     }
+
+    FAPI_DBG("FIFO reset");
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSB_FSB_DOWNFIFO_RESET_FSI, FIFO_RESET));
 
     if ( i_sbe_start )
     {
