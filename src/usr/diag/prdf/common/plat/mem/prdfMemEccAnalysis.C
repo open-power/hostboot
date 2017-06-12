@@ -418,7 +418,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
     uint32_t o_rc = SUCCESS;
 
-    o_doTps = i_isHard; // Do TPS on every hard CE.
+    o_doTps = false;
 
     TargetHandle_t trgt = i_chip->getTrgt();
     MemRank        rank = i_addr.getRank();
