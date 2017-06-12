@@ -622,6 +622,8 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
 
+    l_totalSectionSize += sizeof(l_hbTOC);  // Add 4KB Table of Contents
+
     // Fill in PADDING size
     // Now calculate how much padding is needed for 64KB alignment
     // of the whole data section
