@@ -46,6 +46,7 @@ HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 ENGD_SRCPATH = ${SRCPATH:S/hbfw\/img/engd\/href/g}
 SBEI_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
+ENGD_WOFPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -62,6 +63,7 @@ HBB_IMG = hostboot.bin
 HBB_ECC_IMG = hostboot.bin.ecc
 HBI_IMG =  hostboot_extended.bin
 HBRT_IMG = hostboot_runtime.bin
+WOFDATA_IMG = ${ENGD_WOFPATH:Fzz_wof_data.bin}
 BASE_IMAGES = ${BOOTLDR_IMG} ${HB_SECROM_IMG} ${HBB_IMG} ${HBI_IMG} ${HBRT_IMG}
 
 # Input fake images
@@ -121,7 +123,7 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,WOFDATA=EMPTY,FIRDATA=EMPTY
+    GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,WOFDATA=${WOFDATA_IMG},FIRDATA=EMPTY
     DEFAULT_PARAMS = --build-all --emit-eccless ${TARGET_TEST:b--test} ${HB_STANDALONE:b--hb-standalone} \
                      ${CONFIG_SECUREBOOT:b--secureboot} --systemBinFiles ${GEN_DEFAULT_BIN_FILES} \
                      --pnorLayout ${PNOR_LAYOUT} ${KEY_TRANSITION_PARAMS} ${CORRUPT_PARAMS} \
