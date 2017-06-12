@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,19 +42,17 @@
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB,FSP
 //
 
 #ifndef _P9_SMP_LINK_LAYER_H_
 #define _P9_SMP_LINK_LAYER_H_
 
-
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -66,7 +64,6 @@ typedef fapi2::ReturnCode (*p9_smp_link_layer_FP_t) (
     const bool,
     const bool);
 
-
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
@@ -77,15 +74,16 @@ extern "C"
 ///
 /// @brief Train fabric DLL/TL layers
 ///
-/// @param[in] i_target            Reference to processor chip target
-/// @param[in] i_train_electrical  Train electrical links?
-/// @param[in] i_train_optical     Train optical links?
+/// @param[in] i_target Reference to processor chip target
+/// @param[in] i_train_electrical Train electrical links?
+/// @param[in] i_train_optical Train optical links?
 ///
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
-    fapi2::ReturnCode p9_smp_link_layer(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                        const bool i_train_electrical,
-                                        const bool i_train_optical);
+    fapi2::ReturnCode p9_smp_link_layer(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_train_electrical,
+        const bool i_train_optical);
 
 } // extern "C"
 
