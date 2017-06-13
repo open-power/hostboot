@@ -2304,7 +2304,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!-- GARD -->
     </attribute>
-    <attribute><id>OPTICS_CONFIG_MODE</id><default>SMP</default></attribute>
+    <attribute><id>OPTICS_CONFIG_MODE</id><default>NVLINK</default></attribute>
     <attribute><id>PARENT_PERVASIVE</id></attribute>
 </targetType>
 

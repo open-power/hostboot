@@ -3280,7 +3280,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3317,7 +3317,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3354,7 +3354,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8685,7 +8685,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8722,7 +8722,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8759,7 +8759,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
+        <default>NVLINK</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
