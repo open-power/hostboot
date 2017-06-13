@@ -62,7 +62,9 @@ enum hdatIPMIDataPtrs
 {
     HDAT_IPMI_FRU_SENSOR_MAPPING      = 0,
     HDAT_IPMI_LED_SENSOR_ID_MAPPING   = 1,
-    HDAT_IPMI_DA_LAST                 = 2,
+    HDAT_IPMI_RESERVED1               = 2,
+    HDAT_IPMI_RESERVED2               = 3,
+    HDAT_IPMI_DA_LAST                 = 4,
 };
 
 struct hdatIPMIFRUSensorMapEntry_t
