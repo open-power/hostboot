@@ -351,6 +351,8 @@ HCD_HDR_UINT32(g_pgpe_wof_state_address,        0 );        // SRAM address wher
 HCD_HDR_UINT32(g_pgpe_req_active_quad_address,  0 );        // SRAM address where requested quad status is located
 HCD_HDR_UINT32(g_wof_table_addr,                0 );        // SRAM address where WOF Table is Located
 HCD_HDR_UINT32(g_wof_table_length,              0 );        // WOF Table length in bytes
+HCD_HDR_UINT32(g_pgpe_core_throttle_assert_cnt, 0 );        // Core throttle assert count
+HCD_HDR_UINT32(g_pgpe_core_throttle_deassert_cnt, 0 );      // Core throttle de-aasert count
 #ifdef __ASSEMBLER__
 .endm
 #else
