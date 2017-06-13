@@ -23,27 +23,24 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_pfet_init and p9_pfet_lib procedures -->
+<!-- 
+     *HWP HWP Owner          :  David Du       <daviddu@us.ibm.com>
+     *HWP Backup HWP Owner   :  Greg Still     <stillgs@us.ibm.com>
+     *HWP FW Owner           :  Prem S Jha     <premjha2@in.ibm.com>
+     *HWP Team               :  PM
+     *HWP Consumed by        :  SBE:SGPE:CME
+     *HWP Level              :  3
+-->
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_BAD_DOMAIN</rc>
-    <description>Invalid domain value passed to p9_pfet_control.</description>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_BAD_SCOM</rc>
+    <rc>RC_PFET_FORCE_STATE_ERROR</rc>
     <description>SCOM request failed.</description>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>ADDRESS</ffdc>
+    <ffdc>CHIPLET</ffdc>
+    <ffdc>PFCS_REG_ADDRESS</ffdc>
+    <ffdc>PFCS_REG_VALUE</ffdc>
+    <ffdc>OP_TYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -52,88 +49,148 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_BAD_OP</rc>
-    <description>Invalid operation value passed to p9_pfet_control.</description>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>OPERATION</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_RAIL_ON</rc>
-    <description>Error returned turning PFETs on in p9_pfet_control.</description>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>OPERATION</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_RAIL_OFF</rc>
-    <description>Error returned turning PFETs off in p9_pfet_control.</description>
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>OPERATION</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_PFETLIB_TIMEOUT</rc>
+    <rc>RC_VDD_CORE_PFET_TIMEOUT</rc>
     <description>
         PFET sequencer timed out in p9_pfet_control.
-        Bad EX Chiplet
+        Bad Core Chiplet
     </description>
     <ffdc>ADDRESS</ffdc>
-    <ffdc>PFETCONTROLVALUE</ffdc>
-    <ffdc>DOMAIN</ffdc>
+    <ffdc>PPM_PFSNS_REG_ADDRESS</ffdc>
+    <ffdc>PPM_PFSNS_REG_VALUE</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CORE_NUMBER_IN_ERROR</ffdc>
     <callout>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
-        <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </deconfigure>
     <gard>
       <childTargets>
-        <parent>PROC_CHIP_IN_ERROR</parent>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_VDD_QUAD_PFET_TIMEOUT</rc>
+    <description>
+        PFET sequencer timed out in p9_pfet_control.
+        Bad EQ Chiplet
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>PPM_PFSNS_REG_ADDRESS</ffdc>
+    <ffdc>PPM_PFSNS_REG_VALUE</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>EQ_NUMBER_IN_ERROR</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_VCS_CORE_PFET_TIMEOUT</rc>
+    <description>
+        PFET sequencer timed out in p9_pfet_control.
+        Bad Core Chiplet
+    </description>
+    <ffdc>DOMAIN</ffdc>
+    <ffdc>PPM_PFSNS_REG_ADDRESS</ffdc>
+    <ffdc>PPM_PFSNS_REG_VALUE</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>CORE_NUMBER_IN_ERROR</ffdc>
+    <callout>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
         <childType>TARGET_TYPE_EX_CHIPLET</childType>
-        <childNumber>EX_NUMBER_IN_ERROR</childNumber>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_CORE</childType>
+        <childNumber>CORE_NUMBER_IN_ERROR</childNumber>
       </childTargets>
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_PMPROC_PFET_CODE_BAD_MODE</rc>
-    <description>Unknown mode passed to p9_pfet_init</description>
-    <ffdc>EX</ffdc>
+    <rc>RC_VCS_QUAD_PFET_TIMEOUT</rc>
+    <description>
+        PFET sequencer timed out in p9_pfet_control.
+        Bad EQ Chiplet
+    </description>
     <ffdc>DOMAIN</ffdc>
+    <ffdc>PPM_PFSNS_REG_ADDRESS</ffdc>
+    <ffdc>PPM_PFSNS_REG_VALUE</ffdc>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>EQ_NUMBER_IN_ERROR</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_PMPROC_PFET_GET_ATTR</rc>
-    <description>p9_pfet_init could not get an attribute.</description>   
-    <ffdc>EX</ffdc>
-    <ffdc>DOMAIN</ffdc>
-    <ffdc>OPERATION</ffdc>
+    <deconfigure>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </deconfigure>
+    <gard>
+      <childTargets>
+        <parent>PROC_CHIP</parent>
+        <childType>TARGET_TYPE_EQ</childType>
+        <childNumber>EQ_NUMBER_IN_ERROR</childNumber>
+      </childTargets>
+    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
