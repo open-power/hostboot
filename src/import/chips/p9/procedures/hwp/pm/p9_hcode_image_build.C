@@ -3810,7 +3810,7 @@ void customizeMagicWord( Homerlayout_t*     i_pHomer, uint8_t i_ecLevel )
         magicWordCustom[i] += ecMajor;
         *pMagicWord[i]     = SWIZZLE_8_BYTE( magicWordCustom[i]);
         memcpy( tempBuf, pMagicWord[i], sizeof(uint64_t) );
-        FAPI_INF("%s\t\t:\t\t %s ( 0x%016lx ) ", &magicWord[i], tempBuf, *pMagicWord[i] );
+        FAPI_INF("%s\t\t:\t\t %s ( 0x%016lx ) ", &magicWord[i], tempBuf, SWIZZLE_8_BYTE(*pMagicWord[i]) );
     }
 
     FAPI_INF("=========== Header Magic Words Info Ends ===========");
