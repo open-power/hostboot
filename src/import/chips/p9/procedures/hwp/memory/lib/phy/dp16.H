@@ -1284,6 +1284,16 @@ inline fapi2::ReturnCode write_drift_limits( const fapi2::Target<T>& i_target,
     }
 }
 
+///
+/// @brief Reset blue waterfall range in DRIFT_LIMITS register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode reset_drift_limits( const fapi2::Target<T>& i_target );
+
 ////////////////////////////////////////
 //   all the WR VREF scom accessors   //
 ////////////////////////////////////////

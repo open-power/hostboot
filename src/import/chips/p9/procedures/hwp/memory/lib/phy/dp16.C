@@ -1884,6 +1884,54 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Reset blue waterfall range in DRIFT_LIMITS register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template<>
+fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    // traits definition
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_freq = 0;
+    blue_waterfall_range l_value = blue_waterfall_range::ONE_TO_FOUR;
+
+    if (mss::chip_ec_nimbus_lt_2_0(i_target))
+    {
+        // This regfield doesn't exist on DD1, so nothing to do here
+        FAPI_INF("%s Skipping initialization of RDCLK extended range, since we're on DD1", c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get the frequency attribute
+    const auto l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+    FAPI_TRY(mss::freq(l_mcbist, l_freq));
+
+    // Set the blue waterfall range according to the frequency value as follows:
+    // for 2400, 2133, 1866 set ext range to 1-4
+    // for 2666 set ext range to 2-5
+    l_value = (l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2666) ?
+              blue_waterfall_range::TWO_TO_FIVE :
+              blue_waterfall_range::ONE_TO_FOUR;
+    FAPI_INF("%s Initializing RDCLK extended range to 0x%01x", c_str(i_target), l_value);
+
+    // Loops through all DP's and sets the register values
+    for(uint8_t dp = 0; dp < TT::DP_COUNT; ++dp)
+    {
+        FAPI_TRY(read_drift_limits(i_target, dp, l_data), "Failed to read PHY DRIFT_LIMITS register on DP%d", dp);
+        set_blue_waterfall_range(i_target, l_data, l_value);
+        FAPI_TRY(write_drift_limits(i_target, dp, l_data), "Failed to write PHY DRIFT_LIMITS register on DP%d", dp);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ////////////////////////////////////////////////////
 // reset procedures for all the WR VREF registers //
 ////////////////////////////////////////////////////
