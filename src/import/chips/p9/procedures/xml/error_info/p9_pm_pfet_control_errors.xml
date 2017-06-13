@@ -30,6 +30,13 @@
 <!-- *HWP Consumed by: OCC:CME:FSP                                              -->
 
 <!-- Error definitions for p9_pm_pfet_control procedure -->
+<!--
+    *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
+    *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+    *HWP Team            : PM
+    *HWP Level           : 3
+    *HWP Consumed by     : OCC:CME:FSP 
+-->
 <!-- ********************************************************************   -->
 <hwpErrors>
   <hwpError>
@@ -38,29 +45,9 @@
     Invalid chiplet selected.
     </description>
     <ffdc>TARGET</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PFET_FORCE_STATE_NOT_ZERO_ERROR</rc>
-    <description>
-    PFET force state not zero.
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>VALUE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PFET_CTRL_VDD_PG_STATE_TIMEOUT_ERROR</rc>
-    <description>
-    VDD FSM idle timeout. 
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>VALUE</ffdc>
-  </hwpError>
-  <hwpError>
-    <rc>RC_PFET_CTRL_VCS_PG_STATE_TIMEOUT_ERROR</rc>
-    <description>
-    VCS FSM idle timeout. 
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 </hwpErrors>

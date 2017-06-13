@@ -26,7 +26,6 @@
 PROCEDURE=p9_pm_pfet_control
 FAPI2_PLAT_INCLUDE += $(ROOTPATH)/chips/p9/procedures/hwp/lib
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib/)
-OBJS+=p9_common_poweronoff.o
-OBJS+=p9_pm_pfet_control.o
+lib$(PROCEDURE)_DEPLIBS += p9_common_poweronoff
 $(call BUILD_PROCEDURE)
 

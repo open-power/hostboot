@@ -30,12 +30,12 @@
 ///        portions of the targets.   FW/Platform is responsible for checking these
 ///        states before calling HWPs
 ///
-// *HWP HWP Owner: Brian Vanderpool <vanderp@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner:  Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
-// *HWP Consumed by: FSP:HS
+// *HWP HWP Owner:    Brian Vanderpool <vanderp@us.ibm.com>
+// *HWP Backup Owner: Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner:     Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team:         PM
+// *HWP Level:        3
+// *HWP Consumed by:  FSP:HS
 ///
 ///
 ///

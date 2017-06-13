@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,6 +23,14 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_pm_pfet_init procedure -->
+<!--
+    *HWP Owner              :   Greg Still     <stillgs@us.ibm.com>
+    *HWP Backup Owner       :   David Du       <daviddu@us.ibm.com>
+    *HWP FW Owner           :   Prem S Jha     <premjha2@in.ibm.com>
+    *HWP Team               :   PM
+    *HWP Consumed by        :   SBE:SGPE:CME
+    *HWP Level              :   3
+-->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -30,6 +38,10 @@
     <description>Unknown mode passed to p9_pm_pfet_init.
     </description>
     <ffdc>MODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>

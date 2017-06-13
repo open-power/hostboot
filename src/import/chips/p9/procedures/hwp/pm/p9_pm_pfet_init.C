@@ -26,12 +26,12 @@
 /// @file p9_pfet_init.C
 /// @brief  Initialization and reset the EC/EQ chiplet PFET controller
 ///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+// *HWP Owner              : Greg Still     <stillgs@us.ibm.com>
+// *HWP Backup Owner       : David Du       <daviddu@us.ibm.com>
+// *HWP FW Owner           : Prem S Jha     <premjha2@in.ibm.com>
+// *HWP Team               : PM
+// *HWP Consumed by        : SBE:SGPE:CME
+// *HWP Level              : 3
 ///
 /// High-level procedure flow:
 /// \verbatim

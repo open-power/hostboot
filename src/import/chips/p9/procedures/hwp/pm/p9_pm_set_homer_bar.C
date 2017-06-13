@@ -25,12 +25,12 @@
 /// @file p9_pm_set_homer_bar.C
 /// @brief Setup a PBABAR to locate the HOMER region for the OCC complex
 
-// *HWP HWP Owner       : Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Bilicon Patil <bilpatil@in.ibm.com>
-// *HWP Team            : PM
-// *HWP Level           : 2
-// *HWP Consumed by     : HS
+// *HWP Owner           :   Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    :   Prasad BGR <prasadbgr.in.ibm.com>
+// *HWP FW Owner        :   Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            :   PM
+// *HWP Level           :   3
+// *HWP Consumed by     :   HS
 ///
 ///
 /// High-level procedure flow:

@@ -31,7 +31,7 @@
 // *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : OCC:CME:FSP
 //----------------------------------------------------------------------------
 //
@@ -101,7 +101,6 @@
 // Includes
 // ----------------------------------------------------------------------
 #include <p9_common_poweronoff.H>
-#include <p9_common_poweronoff.C>
 #include <p9_pm_pfet_control.H>
 
 //------------------------------------------------------------------------------

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,13 +26,13 @@
 /// @file  p9_pm_set_homer_bar.H
 /// @brief Set/reset the BLOCK_REG_WKUP_SOURCES bit in the PPM
 ///         associated with an EX chiplet
-///
-// *HWP HWP Owner: Amit Kumar <akumar3@us.ibm.com>
-// *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 1
-// *HWP Consumed by: FSP:HS
+
+// *HWP Owner           : Greg Still <stillgs@us.ibm.com>
+// *HWP Backup Owner    : Prasad BGR <prasadbgr.in.ibm.com>
+// *HWP FW Owner        : Prem S Jha <premjha2@in.ibm.com>
+// *HWP Team            : PM
+// *HWP Level           : 3
+// *HWP Consumed by     : HS
 ///
 ///-----------------------------------------------------------------------------
 
