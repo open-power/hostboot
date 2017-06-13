@@ -1010,11 +1010,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         uint64_t l_prevDataSize = l_totalSizeAligned;
 
 
-        ///////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////
         // HBRT image entry
-        //   Only needed for OPAL on OP, data comes from a LID in other cases
-        if(TARGETING::is_sapphire_load() &&
-                (!INITSERVICE::spBaseServicesEnabled()))
+        //   OPAL w/ FSP could get the hbrt image from the LID
+        //   Include hbrt_code_image here to be consistent with P8
+        if(TARGETING::is_sapphire_load())
         {
             uint64_t l_hbrtImageAddr = 0x0;
 
