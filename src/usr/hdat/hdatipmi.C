@@ -42,10 +42,6 @@ extern trace_desc_t *g_trac_hdat;
 
 uint32_t HdatIpmi::cv_actualCnt = 0;
 
-
-
-
-
 /*******************************************************************************
 *  IPMI Constructor
 *  IPMI sensor data structure is pretty simple with only 2 internal data pointers.
@@ -91,30 +87,26 @@ HdatIpmi::HdatIpmi(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr):
         l_targetService.begin(),
         l_targetService.end(),
         &l_presentTargExpr);
-
+        
+        TARGETING::ATTR_IPMI_SENSORS_type sensors = {{0}};
         for(; l_targFilter; ++l_targFilter)
         {
-#if 0
             // Create a new array entry and push it to FRU/LED sensor vector
             hdatIPMIFRUSensorMapEntry_t l_fruEntry;
-            uint8_t l_sensorType = 0;
-            uint8_t l_eventReadingType = 0;
             l_fruEntry.SLCAIndex = (*l_targFilter)->getAttr<ATTR_SLCA_INDEX>();
-            l_fruEntry.IPMISensorID = getFaultSensorNumber(*l_targFilter);
-            l_errl = SensorBase::getSensorType(l_fruEntry.IPMISensorID,
-                                   l_sensorType, l_eventReadingType);
-            if(l_errl == NULL)
+            assert((*l_targFilter)->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(sensors));
+            for(auto & l_sensor : sensors)
             {
-                l_fruEntry.IPMISensorType = l_sensorType;
+                l_fruEntry.IPMISensorID = l_sensor[1];
+                l_fruEntry.IPMISensorType = (uint8_t)(l_sensor[0] >> 8);
+                // OPAL doesn't like sensor types of 0xFF, so filter them out.
+                if( l_fruEntry.IPMISensorType != 0xFF )
+                {
+                    iv_ipmiFruEntry.push_back(l_fruEntry);
+                }
             }
-            else
-            { 
-                HDAT_ERR(" Error in getsensor type");
-                break;
-            }
-            iv_ipmiFruEntry.push_back(l_fruEntry);
-#endif
         }
+
         iv_ipmiDataSize = sizeof(hdatHDIF_t)+
                           HDAT_IPMI_PADDING +
                           ( sizeof(hdatHDIFDataHdr_t) * HDAT_IPMI_NUM_DATA_PTRS)+
