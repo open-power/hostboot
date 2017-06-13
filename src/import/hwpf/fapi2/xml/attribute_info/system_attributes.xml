@@ -87,7 +87,8 @@
     <valueType>uint8</valueType>
     <enum>
         DECONFIGURE      = 0x1,
-        BAD_DQ_BIT_SET   = 0x2
+        BAD_DQ_BIT_SET   = 0x2,
+        RCD_PARITY_ERROR = 0x4
     </enum>
     <writeable/>
   </attribute>
