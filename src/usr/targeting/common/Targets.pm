@@ -42,7 +42,14 @@ use constant
     PERVASIVE_PARENT_PEC_OFFSET => 13,
     PERVASIVE_PARENT_PHB_OFFSET => 13,
     PERVASIVE_PARENT_NPU_OFFSET => 5,
+    PERVASIVE_PARENT_MC_OFFSET => 7,
+    PERVASIVE_PARENT_MI_OFFSET => 7,
+    PERVASIVE_PARENT_DMI_OFFSET => 7,
     NUM_PROCS_PER_GROUP => 4,
+    DIMMS_PER_PROC => 64, # 8 DMI x 8 DIMMS per Centaur
+    DIMMS_PER_DMI => 8, # 8 dimms per dmi
+    DIMMS_PER_MBA => 4, # 4 dimms per mba
+    DIMMS_PER_PORT => 2, # 2 dimms per port
 };
 
 my %maxInstance = (
@@ -65,7 +72,9 @@ my %maxInstance = (
     "SBE"           => 1,
     "OBUS_BRICK"    => 12,
     "NPU"           => 1,
+    "MC"            => 2,
     "MI"            => 4,
+    "DMI"           => 8,
     "OCC"           => 1,
 );
 sub new
@@ -91,6 +100,9 @@ sub new
         TOPOLOGY     => undef,
         report_log   => "",
         vpd_num      => 0,
+        MAX_MC       => 0,
+        MAX_MI       => 0,
+        MAX_DMI      => 0,
         DMI_FSI_MAP  => {
             '0' => '3',
             '1' => '2',
@@ -494,8 +506,9 @@ sub buildAffinity
     my $sys_phys        = "";
     my $node_phys       = "";
     my $node_aff        = "";
-    my $sys_pos         = -1;
+    my $sys_pos         = 0; # There is always a single system target
     my $mcbist          = -1;
+    my $num_mc = 0 ;
 
     $self->{membuf_inst_num}=0;
 
@@ -518,7 +531,6 @@ sub buildAffinity
         my $type       = $self->getType($target);
         my $type_id    = $self->getEnumValue("TYPE", $type);
         my $pos        = $self->{data}->{TARGETS}{$target}{TARGET}{position};
-        $sys_pos       = $pos if ($type eq "SYS");
 
         if ($type_id eq "") { $type_id = 0; }
 
@@ -531,8 +543,8 @@ sub buildAffinity
             #SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML
             #Also, there is no HUID for SYS
             $self->setAttribute($target,"FAPI_NAME",getFapiName($type));
-            $self->setAttribute($target,"FAPI_POS",      $pos);
-            $self->setAttribute($target,"ORDINAL_ID",    $pos);
+            $self->setAttribute($target,"FAPI_POS",      $sys_pos);
+            $self->setAttribute($target,"ORDINAL_ID",    $sys_pos);
             $sys_phys = $self->getAttribute($target, "PHYS_PATH");
             $sys_phys = substr($sys_phys, 9);
         }
@@ -553,6 +565,7 @@ sub buildAffinity
             $self->setAttribute($target, "PHYS_PATH",     $node_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $node_aff);
             $self->setAttribute($target, "ORDINAL_ID",    $pos);
+
         }
         elsif ($type eq "TPM")
         {
@@ -582,10 +595,13 @@ sub buildAffinity
             my $ddrs = $self->findConnections($target,"DDR4","");
             $self->processDimms($ddrs, $sys_pos, $node_phys, $node, $proc);
         }
+
         elsif ($type eq "PROC")
         {
             $proc++;
             my $num_mcs = 0;
+            my $num_mi = 0;
+            my $num_dmi  = 0;
             ### count number of MCSs
             foreach my $unit (@{ $self->{data}->{TARGETS}{$target}{CHILDREN} })
             {
@@ -594,10 +610,28 @@ sub buildAffinity
                 {
                     $num_mcs+=2;  # 2 MCS's per MCBIST
                 }
+                if ($unit_type eq "MC")
+                {
+                    $num_mc++;
+                    $num_mi += 2; # 2 MI's per MC
+                    $num_dmi+=4;  # 2DMI's per MI & 4 DMI per MC
+                }
             }
             if ($num_mcs > $self->{MAX_MCS})
             {
                 $self->{MAX_MCS} = $num_mcs;
+            }
+            if ($num_mc > $self->{MAX_MC})
+            {
+                $self->{MAX_MC} = $num_mc;
+            }
+            if ($num_mi > $self->{MAX_MI})
+            {
+                $self->{MAX_MI} = $num_mi;
+            }
+            if ($num_dmi > $self->{MAX_DMI})
+            {
+                $self->{MAX_DMI} = $num_dmi;
             }
 
             $self->{NUM_PROCS_PER_NODE} = $proc + 1;
@@ -629,6 +663,9 @@ sub buildAffinity
                  $self->getAttribute($socket,"FABRIC_CHIP_ID"));
 
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
+
+            $self->processMc($target, $sys_pos, $node, $proc, $parent_affinity,
+                             $parent_physical, $node_phys );
         }
     }
 }
@@ -818,7 +855,6 @@ sub setCommonAttrForChiplet
 
     my $fapi_name       = getFapiName($tgt_type, $node, $proc, $pos);
 
-
     #unique offset per system
     my $offset = ($proc * $maxInstance{$tgt_type}) + $pos;
     $self->{huid_idx}->{$tgt_type} = $offset;
@@ -945,6 +981,21 @@ sub getPervasiveForUnit
             $unitToPervasive{"MCA$mca"} =
                 PERVASIVE_PARENT_MCA_OFFSET + ($mca > 3);
         }
+        for my $mc (0..$maxInstance{"MC"}-1)
+        {
+            $unitToPervasive{"MC$mc"} =
+                PERVASIVE_PARENT_MC_OFFSET + $mc;
+        }
+        for my $mi (0..$maxInstance{"MI"}-1)
+        {
+            $unitToPervasive{"MI$mi"} =
+                PERVASIVE_PARENT_MI_OFFSET + ($mi > 1);
+        }
+        for my $dmi (0..$maxInstance{"DMI"}-1)
+        {
+            $unitToPervasive{"DMI$dmi"} =
+                PERVASIVE_PARENT_DMI_OFFSET + ($dmi > 3);
+        }
         for my $pec (0..$maxInstance{"PEC"}-1)
         {
             $unitToPervasive{"PEC$pec"} =
@@ -1066,156 +1117,186 @@ sub processDimms
 
 }
 
-sub processMcs
+sub processMc
 {
-#@TODO RTC:163874
-#Most of the nimmbus functionality is already in incorporated in other
-#functions. Leaving this in as we may need this code for centaur/cumulus.
-=begin
-    my $self            = shift;
-    my $unit            = shift;
-    my $node            = shift;
-    my $proc            = shift;
-    my $mcbist          = shift;
+
+    my $self     = shift;
+    my $target   = shift;
+    my $sys      = shift;
+    my $node     = shift;
+    my $proc     = shift;
     my $parent_affinity = shift;
     my $parent_physical = shift;
     my $node_phys       = shift;
 
-    my $mcs = $self->getAttribute($unit, "CHIP_UNIT");
-    my $membufnum = $proc * $self->{MAX_MCS} + $mcs;
-    $self->setAttribute($unit, "AFFINITY_PATH",$parent_affinity . "/mcs-$mcs");
-    $self->setAttribute($unit, "PHYS_PATH", $parent_physical . "/mcs-$mcs");
-    $self->setAttribute($unit, "MCS_NUM",   $mcs);
-    $self->setHuid($unit, 0, $node);
-    $self->{targeting}{SYS}[0]{NODES}[$node]{MCBISTS}{$mcbist}{MCSS}[$mcs]{KEY}
-             = $unit;
-
-#    $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT","0");
-#    $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP","0");
-#    $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE","0");
-
-    ## Find connected membufs
-    my $membuf_dmi = $self->{data}->{TARGETS}{$unit}{CONNECTION}{DEST}[0];
-    if (defined($membuf_dmi))
+    foreach my $proc_child (@{ $self->getTargetChildren($target) })
     {
-        ## found membuf connected
-        my $membuf =
-          $self->{data}->{TARGETS}{$membuf_dmi}
-          {PARENT};    ## get parent of dmi unit which is membuf
-        my $dmi_bus = $self->{data}->{TARGETS}{$unit}{CONNECTION}{BUS}[0];
-        $self->setAttribute($membuf, "POSITION",$membufnum);
-        $self->setAttribute($membuf, "AFFINITY_PATH",
-            $parent_affinity . "/mcs-$mcs/membuf-$membufnum");
-        $self->setAttribute($membuf, "PHYS_PATH",
-            $node_phys . "/membuf-$membufnum");
+       my $tgt_type       = $self->getType($proc_child);
 
-        ## copy DMI bus attributes to membuf
-        $self->setAttribute($unit, "EI_BUS_TX_LANE_INVERT",
-            $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
-        $self->setAttribute($unit, "EI_BUS_TX_MSBSWAP",
-            $dmi_bus->{bus_attribute}->{PROC_TX_MSBSWAP}->{default});
-        $self->setAttribute($membuf, "EI_BUS_TX_LANE_INVERT",
-            $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}->{default});
-        $self->setAttribute($membuf, "EI_BUS_TX_MSBSWAP",
-            $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}->{default});
+       if($tgt_type eq "MC")
+       {
+            my $mc =  $proc_child;
+            my $mc_num =  $self->getAttribute($mc, "CHIP_UNIT");
 
-        ## auto setup FSI assuming schematic symbol.  If FSI busses are
-        ## defined in serverwiz2, this will be overridden
-        ## in the schematic symbol, the fsi port num matches dmi ref clk num
-
-        my $fsi_port = $self->{DMI_FSI_MAP}->{$mcs};
-        my $proc_key =
-            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
-        my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
-        $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
-        $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",$fsi_port);
-        my $dmi_swizzle =
-             $self->getBusAttribute($unit,0,"DMI_REFCLOCK_SWIZZLE");
-        if ($dmi_swizzle ne "")
-        {
-            $self->setAttribute($unit, "DMI_REFCLOCK_SWIZZLE",$dmi_swizzle);
-        }
-
-        $self->setHuid($membuf, 0, $node);
-        $self->{targeting}
-          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs] {MEMBUFS}[0]{KEY} =
-          $membuf;
-
-        $self->setAttribute($membuf, "ENTITY_INSTANCE",
-               $self->{membuf_inst_num});
-        $self->{membuf_inst_num}++;
-        ## get the mbas
-        foreach my $child (@{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} })
-        {
-            ## need to not hardcard the subunits
-            if ($self->getType($child) eq "L4")
+            foreach my $mi (@{ $self->getTargetChildren($mc) })
             {
-                $self->{targeting}
-                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{MEMBUFS}[0]
-                  {L4S}[0] {KEY} = $child;
-                $self->setAttribute($child, "AFFINITY_PATH",
-                    $parent_affinity . "/mcs-$mcs/membuf-$membufnum/l4-0");
-                $self->setAttribute($child, "PHYS_PATH",
-                    $node_phys . "/membuf-$membufnum/l4-0");
-                $self->setHuid($child, 0, $node);
-            }
+                my $mi_num = $self->getAttribute($mi, "CHIP_UNIT");
 
-
-            if ($self->getType($child) eq "MCA")
-            {
-                my $mba = $self->getAttribute($child,"MBA_NUM");
-                $self->setAttribute($child, "AFFINITY_PATH",
-                    $parent_affinity . "/mcs-$mcs/membuf-$membufnum/mba-$mba");
-                $self->setAttribute($child, "PHYS_PATH",
-                    $node_phys . "/membuf-$membufnum/mba-$mba");
-                $self->setHuid($child, 0, $node);
-                $self->{targeting}
-                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MCSS}[$mcs]{MEMBUFS}[0]
-                  {MBAS}[$mba]{KEY} = $child;
-
-                ## Trace the DDR busses to find connected DIMM
-                my $ddrs = $self->findConnections($child,"DDR4","");
-                if ($ddrs ne "")
+                foreach my $dmi (@{ $self->getTargetChildren($mi) })
                 {
+                    my $dmi_num = $self->getAttribute($dmi, "CHIP_UNIT");
 
-                    my $affinitypos=0;
-                    foreach my $dimms (@{$ddrs->{CONN}})
+                    my $membufnum = $proc * $self->{MAX_DMI} + $dmi_num;
+
+                    my $aff_path = $self->getAttribute($dmi, "AFFINITY_PATH");
+                    my $phys_path = $self->getAttribute($dmi, "PHYS_PATH");
+
+                    ## Find connected membufs
+                    my $membuf_dmi = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{DEST}[0];
+
+                    if (defined($membuf_dmi))
                     {
-                        my $ddr = $dimms->{SOURCE};
-                        my $port_num = $self->getAttribute($ddr,"MBA_PORT");
-                        my $dimm_num = $self->getAttribute($ddr,"MBA_DIMM");
-                        my $dimm=$dimms->{DEST_PARENT};
-                        $self->setAttribute($dimm,"MBA_PORT",$port_num);
-                        $self->setAttribute($dimm,"MBA_DIMM",$dimm_num);
+                        ## found membuf connected
+                        my $membuf = $self->{data}->{TARGETS}{$membuf_dmi}{PARENT};
+                        ## get parent of dmi unit which is membuf
+                        my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
+                        $self->setAttribute($membuf, "POSITION",$membufnum);
+                        $self->setAttribute($membuf, "AFFINITY_PATH",
+                                            $aff_path . "/membuf-$membufnum");
 
-                        my $aff_pos=16*$proc+$mcs*$self->{MAX_MCS}+4*$mba+
-                                    2*$port_num+$dimm_num;
-                        $self->setAttribute($dimm, "AFFINITY_PATH",
-                            $parent_affinity
-                      . "/mcs-$mcs/membuf-$membufnum/mba-$mba/dimm-$affinitypos"
-                        );
-                        $self->setAttribute($dimm, "PHYS_PATH",
-                            $node_phys . "/dimm-" . $self->{dimm_tpos});
-                        $self->setAttribute($dimm, "POSITION",
-                            $aff_pos);
-                        $self->setAttribute($dimm, "VPD_REC_NUM",
-                            $aff_pos);
-                        $self->setHuid($dimm, 0, $node);
+                        # For Zeppelin, the membufs are on riser cards, not directly on the node.
+                        # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                        $self->setAttribute($membuf, "PHYS_PATH",
+                            $node_phys . "/membuf-$membufnum");
+
+                        # copy DMI bus attributes to membuf
+                        $self->setAttribute($dmi, "EI_BUS_TX_LANE_INVERT",
+                            $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
+                        $self->setAttribute($dmi, "EI_BUS_TX_MSBSWAP",
+                            $dmi_bus->{bus_attribute}->{PROC_TX_MSBSWAP}->{default});
+                        $self->setAttribute($membuf, "EI_BUS_TX_LANE_INVERT",
+                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}->{default});
+                        $self->setAttribute($membuf, "EI_BUS_TX_MSBSWAP",
+                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}->{default});
+
+                        ## auto setup FSI assuming schematic symbol.  If FSI busses are
+                        ## defined in serverwiz2, this will be overridden
+                        ## in the schematic symbol, the fsi port num matches dmi ref clk num
+
+                        my $fsi_port = $self->{DMI_FSI_MAP}->{$dmi};
+                        my $proc_key =
+                            $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
+                        my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
+                        $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
+                        $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$fsi_port);
+                        my $dmi_swizzle =
+                             $self->getBusAttribute($dmi,0,"DMI_REFCLOCK_SWIZZLE");
+                        if ($dmi_swizzle ne "")
+                        {
+                            $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$dmi_swizzle);
+                        }
+
+                        $self->setHuid($membuf, $sys, $node);
                         $self->{targeting}
-                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MCSS}[$mcs]
-                          {MEMBUFS}[0]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
-                          $dimm;
-                        $self->setAttribute($dimm, "ENTITY_INSTANCE",
-                             $self->{dimm_tpos});
-                        $self->{dimm_tpos}++;
-                        $affinitypos++;
+                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
+                          {DMI}[$dmi] {MEMBUFS}[0]{KEY} = $membuf;
+
+                        $self->setAttribute($membuf, "ENTITY_INSTANCE",
+                               $self->{membuf_inst_num});
+                               $self->{membuf_inst_num}++;
+                        ## get the mbas
+                        foreach my $membuf_child (@{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} })
+                        {
+                            my $childType = $self->getType($membuf_child);
+
+                            ## need to not hardcard the subunits
+                            if ($childType eq "L4")
+                            {
+                                $self->{targeting}
+                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
+                                    {DMI}[$dmi]{MEMBUFS}[0]{L4S}[0] {KEY} = $membuf_child;
+                                # For Zeppelin, the membufs are on riser cards, not directly on the node.
+                                # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
+                                                    $aff_path . "/membuf-$membufnum/l4-0");
+                                $self->setAttribute($membuf_child, "PHYS_PATH",
+                                    $node_phys . "/membuf-$membufnum/l4-0");
+                                $self->setHuid($membuf_child, $sys, $node);
+                            }
+
+
+                            if ($childType eq "MBA")
+                            {
+                                my $mba = $self->getAttribute($membuf_child,"MBA_NUM");
+                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
+                                              $aff_path . "/membuf-$membufnum/mba-$mba");
+
+                                # For Zeppelin, the membufs are on riser cards, not directly on the node.
+                                # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                                $self->setAttribute($membuf_child, "PHYS_PATH",
+                                    $node_phys . "/membuf-$membufnum/mba-$mba");
+                                $self->setHuid($membuf_child, $sys, $node);
+                                $self->{targeting}
+                                  ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
+                                    {DMI}[$dmi]{MEMBUFS}[0]{MBAS}[$mba]{KEY} = $membuf_child;
+
+                                ## Trace the DDR busses to find connected DIMM
+                                my $ddrs = $self->findConnections($membuf_child,"DDR4","");
+                                if ($ddrs ne "")
+                                {
+                                    my $affinitypos=0;
+                                    foreach my $dimms (@{$ddrs->{CONN}})
+                                    {
+                                        my $ddr = $dimms->{SOURCE};
+                                        my $port_num = $self->getAttribute($ddr,"MBA_PORT");
+                                        my $dimm_num = $self->getAttribute($ddr,"MBA_DIMM");
+                                        my $dimm=$dimms->{DEST_PARENT};
+                                        $self->setAttribute($dimm,"MBA_PORT",$port_num);
+                                        $self->setAttribute($dimm,"MBA_DIMM",$dimm_num);
+
+                                        my $aff_pos = DIMMS_PER_PROC*$proc+
+                                                      DIMMS_PER_DMI*$dmi_num+
+                                                      DIMMS_PER_MBA*$mba+
+                                                      DIMMS_PER_PORT*$port_num+
+                                                      $dimm_num;
+
+                                        $self->setAttribute($dimm, "AFFINITY_PATH",
+                                                  $aff_path . "/membuf-$membufnum/mba-$mba/dimm-$affinitypos"
+                                        );
+                                        # For Zeppelin, the membufs are on riser cards, not directly on the node.
+                                        # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                                        $self->setAttribute($dimm, "PHYS_PATH",
+                                            $node_phys . "/dimm-" . $self->{dimm_tpos});
+                                        $self->setAttribute($dimm, "POSITION",
+                                            $aff_pos);
+                                        $self->setAttribute($dimm, "VPD_REC_NUM",
+                                            $aff_pos);
+                                        $self->setHuid($dimm, $sys, $node);
+                                        $self->{targeting}
+                                          ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
+                                          {MEMBUFS}[0]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
+                                          $dimm;
+                                        $self->setAttribute($dimm, "ENTITY_INSTANCE",
+                                             $self->{dimm_tpos});
+                                        $self->{dimm_tpos}++;
+
+                                        $affinitypos++;
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-            }
-        }
-    }
-=cut
+
+
+                }#dmi
+            }#mi
+
+        }#mc
+    }#membuf_child
+
 }
+
+
 
 sub setFsiAttributes
 {

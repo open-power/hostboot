@@ -407,6 +407,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "MCA";
         case TYPE_MCBIST:
             return "MCBIST";
+        case TYPE_MC:
+            return "MC";
         case TYPE_MI:
             return "MI";
         case TYPE_DMI:
