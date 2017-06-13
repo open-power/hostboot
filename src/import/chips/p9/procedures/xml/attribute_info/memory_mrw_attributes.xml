@@ -67,7 +67,7 @@
     </description>
     <valueType>uint64</valueType>
     <mssUnits>cW</mssUnits>
-    <default>ffffe000000006A4</default>
+    <default>0xffffe000000006A4</default>
     <array>10</array>
     <platInit/>
     <initToZero/>
