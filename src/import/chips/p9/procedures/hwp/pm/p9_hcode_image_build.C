@@ -1805,19 +1805,36 @@ uint32_t layoutSgpeScanOverride( Homerlayout_t*   i_pHomer,
 
 /**
  * @brief   update fields of PGPE image header region with parameter block info.
- * @param   i_pHomer    points to start of chip's HOMER.
+ * @param[in]   i_pHomer    points to start of chip's HOMER.
+ * @param[in]   i_procTgt   P9 chip target.
+ * @return      FAPI2 return code.
  */
 
 
-void updatePgpeHeader( void* const i_pHomer )
+fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_procTgt )
 {
-    FAPI_DBG("> updatePgpeHeader");
+    FAPI_DBG(">> updatePgpeHeader");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
     PgpeHeader_t*  pPgpeHdr = (PgpeHeader_t*)&pHomerLayout->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE];
     PpmrHeader_t* pPpmrHdr = ( PpmrHeader_t* ) pHomerLayout->ppmrRegion.ppmrHeader;
+    uint32_t attrVal = 0;
 
     //Updating PGPE Image Header
-    pPgpeHdr->g_pgpe_ivpr_addr                    =     OCC_SRAM_PGPE_BASE_ADDR;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_THROTTLE_ASSERT_COUNT,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_ASSERT_COUNT");
+    pPgpeHdr->g_pgpe_core_throttle_assert_cnt     =     attrVal;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CORE_THROTTLE_DEASSERT_COUNT,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for ATTR_CORE_THROTTLE_DEASSERT_COUNT");
+    pPgpeHdr->g_pgpe_core_throttle_deassert_cnt   =     attrVal;
+
+    pPgpeHdr->g_pgpe_ivpr_addr                    =     SWIZZLE_4_BYTE(OCC_SRAM_PGPE_BASE_ADDR);
 
     //Global P-State Parameter Block SRAM address
     pPgpeHdr->g_pgpe_gppb_sram_addr               =     0;      // set by PGPE Hcode
@@ -1866,8 +1883,11 @@ void updatePgpeHeader( void* const i_pHomer )
     pPgpeHdr->g_quad_status_addr                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_quad_status_addr);
     pPgpeHdr->g_wof_table_addr                      =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_addr);
     pPgpeHdr->g_wof_table_length                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length);
+    pPgpeHdr->g_pgpe_core_throttle_assert_cnt       =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt);
+    pPgpeHdr->g_pgpe_core_throttle_deassert_cnt     =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt);
 
     FAPI_DBG("================================PGPE Image Header==========================================")
+    FAPI_DBG("IVPR Address              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_ivpr_addr));
     FAPI_DBG("Hcode Length              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_length));
     FAPI_DBG("GPPB SRAM                 :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr));
     FAPI_DBG("GPPB Mem Offset           :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_mem_offset));
@@ -1880,16 +1900,28 @@ void updatePgpeHeader( void* const i_pHomer )
     FAPI_DBG("Quad Status               :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_quad_status_addr));
     FAPI_DBG("WOF Addr                  :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_addr));
     FAPI_DBG("WOF Length                :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length));
+    FAPI_DBG("Core Assert Count         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt));
+    FAPI_DBG("Core De - Assert Count    :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt));
+
     FAPI_DBG("==============================PGPE Image Header End========================================")
 
-    FAPI_DBG("< updatePgpeHeader");
+fapi_try_exit:
+    FAPI_DBG("<< updatePgpeHeader");
+    return fapi2::current_err;
 }
 
 //---------------------------------------------------------------------------
 
-void updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr )
+/**
+ * @brief   Updates PPMR and PGPE Image header in P9 HOMER.
+ * @param[in]   i_pHomer    points to P9 HOMER base.
+ * @param[in]   i_procTgt   chip pertaining to P9 chip.
+ * @return      FAPI2 return code
+ */
+fapi2::ReturnCode updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr, CONST_FAPI2_PROC& i_procTgt  )
 {
-    FAPI_DBG("> updatePpmrHeader");
+    FAPI_DBG(">> updatePpmrHeader");
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     Homerlayout_t* pHomerLayout = (Homerlayout_t*)i_pHomer;
     PpmrHeader_t*  pPpmrHdr = (PpmrHeader_t*) &pHomerLayout->ppmrRegion.ppmrHeader;
     memcpy( pPpmrHdr, &io_ppmrHdr, sizeof(PpmrHeader_t) );
@@ -1913,9 +1945,11 @@ void updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrHdr )
     FAPI_DBG("WOF Table End         :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_length));
     FAPI_DBG("=========================== PPMR Header ends ==================================" );
 
-    updatePgpeHeader( i_pHomer );
-
-    FAPI_DBG("< updatePpmrHeader");
+    FAPI_TRY( updatePgpeHeader( i_pHomer, i_procTgt ),
+              "PGPE Image Header Update Failed" );
+fapi_try_exit:
+    FAPI_DBG("<< updatePpmrHeader");
+    return fapi2::current_err;
 }
 
 //---------------------------------------------------------------------------
@@ -2065,6 +2099,7 @@ fapi2::ReturnCode buildParameterBlock( void* const i_pHomer, CONST_FAPI2_PROC& i
         //  The PPMR offset is from the begining --- which is the ppmrHeader
         io_ppmrHdr.g_ppmr_pstables_offset    =   pPpmr->pstateTable - pPpmr->ppmrHeader;;
         io_ppmrHdr.g_ppmr_pstables_length    =   sizeof(GeneratedPstateInfo);
+        FAPI_INF( "PPMR GEN PSTABLE 0x%08x", sizeof(GeneratedPstateInfo) );
 
         //------------------------------ Copying WOF Table ----------------------------------------------
 
@@ -4023,7 +4058,8 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
         updateQpmrHeader( pChipHomer, l_qpmrHdr );
 
         //update PPMR Header area in HOMER
-        updatePpmrHeader( pChipHomer, l_ppmrHdr );
+        FAPI_TRY( updatePpmrHeader( pChipHomer, l_ppmrHdr, i_procTgt ),
+                  "Failed to update PPMR Header" );
 
         //Update L2 Epsilon SCOM Registers
         FAPI_TRY( populateEpsilonL2ScomReg( pChipHomer ),
