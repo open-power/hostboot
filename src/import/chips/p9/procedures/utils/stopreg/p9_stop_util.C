@@ -66,7 +66,10 @@ static StopReturnCode_t  isFusedMode( void* const i_pImage, bool* o_fusedMode )
         }
 
 
-        if( SWIZZLE_8_BYTE(CPMR_MAGIC_NUMBER) != pHomer->cpmrMagicWord )
+        uint64_t cpmrCheckWord = SWIZZLE_8_BYTE(pHomer->cpmrMagicWord);
+        cpmrCheckWord = cpmrCheckWord >> 32;
+
+        if( CPMR_REGION_CHECK_WORD != cpmrCheckWord )
         {
             MY_ERR("corrupt or invalid HOMER image location 0x%016llx",
                    SWIZZLE_8_BYTE(pHomer->cpmrMagicWord) );
