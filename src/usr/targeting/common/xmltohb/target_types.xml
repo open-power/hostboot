@@ -143,6 +143,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default> <!-- GARD -->
     </attribute>
+    
     <attribute><id>VPD_REC_NUM</id></attribute>
     <!-- New attributes for mss/proc_setup_bars -->
     <!--    proc_setup_bars_memory_attributes.xml   -->
@@ -403,12 +404,13 @@
             <field><id>reserved</id><value>0</value></field>
         </default>
     </attribute>
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
+    <attribute>
+        <id>ISDIMM_MBVPD_INDEX</id>
+    </attribute>
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>0,0,0,0,0,400,0,400,400,0,0,0,0,0,0,0</default>
     </attribute>
-
     <attribute><id>MSS_FREQ</id></attribute>
     <attribute><id>MSS_LAB_OVERRIDE_FOR_MEM_PLL</id></attribute>
     <attribute><id>ECID</id></attribute>
@@ -462,7 +464,7 @@
     </attribute>
     <attribute><id>CDM_DOMAIN</id><default>MEM</default></attribute>
     <attribute><id>FRU_ID</id></attribute>
-    <attribute><id>MSS_VREF_CAL_CNTL</id></attribute>
+    <attribute><id>MSS_VREF_CAL_CNTL</id></attribute>    
 </targetType>
 
 <!--Dummy card to use as a DIMM for initial I2C/EEPROM testing -->
@@ -500,10 +502,7 @@
     <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default> <!--GARD | MEMDIAG -->
     </attribute>
-
-    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
     <attribute><id>TEMP_SENSOR_I2C_CONFIG</id></attribute>
-
     <attribute><id>VPD_REC_NUM</id></attribute>
     <attribute><id>MSS_EFF_VPD_VERSION</id></attribute>
     <attribute><id>CDM_DOMAIN</id><default>DIMM</default></attribute>
@@ -615,6 +614,7 @@
          <default>43</default>
     </attribute>
     <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
+    <attribute><id>MAX_DMI_PER_PROC</id></attribute>
     <attribute><id>TEST_NEGATIVE_FCN</id></attribute>
     <!-- End max/min config attributes -->
     <attribute><id>RECONFIGURE_LOOP</id></attribute>
@@ -719,7 +719,6 @@
     <attribute><id>MAX_MBA_PORTS_PER_MBA</id></attribute>
     <attribute><id>MAX_DIMMS_PER_MBA_PORT</id></attribute>
     <attribute><id>MAX_CHIPLETS_PER_PROC</id></attribute>
-    <attribute><id>MAX_MCS_PER_SYSTEM</id></attribute>
     <attribute><id>FABRIC_TO_PHYSICAL_NODE_MAP</id></attribute>
     <attribute><id>RUN_MAX_MEM_PATTERNS</id></attribute>
     <attribute><id>HIDDEN_ERRLOGS_ENABLE</id></attribute>
@@ -2019,6 +2018,28 @@
         <default>NIMBUS</default>
     </attribute>
 </targetType>
+
+<!-- MC
+     Nimbus : None
+     Cumulus: 2 per chip  -->
+  <targetType>
+    <id>unit-mc-power9</id>
+    <parent>unit</parent>
+    <attribute>
+      <id>TYPE</id>
+      <default>MC</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>PARENT_PERVASIVE</id></attribute>
+  </targetType>
+  <targetType>
+    <id>unit-mc-cumulus</id>
+    <parent>unit-mc-power9</parent>
+    <attribute>
+      <id>MODEL</id>
+      <default>CUMULUS</default>
+    </attribute>
+  </targetType>
 
 <!-- MI
      Nimbus : None

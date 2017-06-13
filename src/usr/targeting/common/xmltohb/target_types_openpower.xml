@@ -100,11 +100,16 @@
 <targetTypeExtension>
     <id>chip-membuf-centaur</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute>
+        <id>GPIO_INFO</id>
+    </attribute>        
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
     <id>lcard-dimm</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+    <attribute><id>EEPROM_VPD_PRIMARY_INFO</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

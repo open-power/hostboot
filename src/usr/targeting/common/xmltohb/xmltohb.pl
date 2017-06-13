@@ -5451,6 +5451,14 @@ sub generateTargetingImage {
         # Use all attributes including virtual for association processing
         getTargetAttributes($targetInstance->{type}, $allAttributes,\%attrhash);
 
+        #Check for Targets with ZERO attributes before writing to PNOR.
+        my $tempNumAttributes = keys %attrhash;
+        if($tempNumAttributes == 0)
+        {
+            #skip the present target
+            next;
+        }
+
         # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
         foreach my $attr (@{$targetInstance->{attribute}})

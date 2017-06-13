@@ -358,14 +358,18 @@
         <name>NPU</name>
         <value>67</value>
     </enumerator>
+    <enumerator>
+        <name>MC</name>
+        <value>68</value>
+    </enumerator>
     <!-- add any new types here, and increment TEST_FAIL and LAST_IN_RANGE -->
     <enumerator>
         <name>TEST_FAIL</name>
-        <value>68</value>
+        <value>69</value>
     </enumerator>
     <enumerator>
         <name>LAST_IN_RANGE</name>
-        <value>69</value>
+        <value>70</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
@@ -1229,6 +1233,26 @@
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
+</attribute>
+
+<attribute>
+    <id>ISDIMM_MBVPD_INDEX</id>
+    <description>
+        Multiple centaurs can sometimes have their VPD located in one
+        physical SEEPROM. This is the index into the memory buffer VPD
+        for this centaur.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_ISDIMM_MBVPD_INDEX</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
 </attribute>
 
 <attribute>
@@ -12619,6 +12643,21 @@ Measured in GB</description>
     <simpleType>
         <uint8_t>
             <default>4</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MAX_DMI_PER_PROC</id>
+    <description>
+        System attribute.
+        The max DMI units per proc available in the system.
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>8</default>
         </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>

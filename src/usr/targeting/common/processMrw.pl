@@ -110,6 +110,10 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processApss($targetObj, $target);
     }
+    elsif ($type eq "MEMBUF")
+    {
+        processMembuf($targetObj, $target);
+    }
 
     processIpmiSensors($targetObj,$target);
 }
@@ -563,6 +567,7 @@ sub processProcessor
                 $targetObj->setAttribute($child, "VDDR_ID", $socket_pos);
             }
         }
+
         elsif ($child_type eq "OCC")
         {
             processOcc($targetObj, $child, $target);
@@ -652,10 +657,12 @@ sub processI2cSpeeds
     }
 
     my $i2cs=$targetObj->findConnections($target,"I2C","");
+
     if ($i2cs ne "") {
         foreach my $i2c (@{$i2cs->{CONN}}) {
             my $dest_type = $targetObj->getTargetType($i2c->{DEST_PARENT});
             my $parent_target =$targetObj->getTargetParent($i2c->{DEST_PARENT});
+
             if ($dest_type eq "chip-spd-device") {
                  setEepromAttributes($targetObj,
                        "EEPROM_VPD_PRIMARY_INFO",$parent_target,
@@ -889,6 +896,7 @@ sub processObus
             #No connections mean, we need to set the OBUS_SLOT_INDEX to -1
             #to mark that they are not connected
             $targetObj->log($target,"no bus connection found");
+
             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
             {
                 $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
@@ -923,6 +931,7 @@ sub processObus
                  if ($match eq 0)
                  {
                     $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
+
                  }
             }
         }
@@ -1363,6 +1372,7 @@ sub processMembufVpdAssociation
 {
     my $targetObj = shift;
     my $target    = shift;
+
     my $vpds=$targetObj->findConnections($target,"I2C","VPD");
     if ($vpds ne "" ) {
         my $vpd = $vpds->{CONN}->[0];
@@ -1423,7 +1433,8 @@ sub processMembuf
          if ($targetObj->getType($child) eq "MBA")
          {
              my $mba_num = $targetObj->getAttribute($child,"MBA_NUM");
-             my $dimms=$targetObj->findConnections($child,"DDR3","");
+             my $dimms=$targetObj->findConnections($child,"DDR4","");
+
              if ($dimms ne "")
              {
                  foreach my $dimm (@{$dimms->{CONN}})
@@ -1450,8 +1461,10 @@ sub processMembuf
             setEepromAttributes($targetObj,
                        "EEPROM_VPD_PRIMARY_INFO",$dimm_target,
                        $dimm);
+
             my $field=getI2cMapField($targetObj,$dimm_target,$dimm);
             my $map = $dimm_portmap{$dimm_target};
+
             if ($map eq "") {
                 print "ERROR: $dimm_target doesn't map to a dimm/port\n";
                 $targetObj->myExit(3);
@@ -1463,12 +1476,12 @@ sub processMembuf
             "MRW_MEM_SENSOR_CACHE_ADDR_MAP","0x".join("",@addr_map));
 
     ## Update bus speeds
-    #@TODO RTC:163874 -- centaur support
-    #processI2cSpeeds($targetObj,$target);
+    processI2cSpeeds($targetObj,$target);
 
     ## Do MBA port mapping
     my %mba_port_map;
-    my $ddrs=$targetObj->findConnections($target,"DDR3","DIMM");
+    #@TODO RTC:175881 -- Support DDR3 DIMMs on Fleetwood systems
+    my $ddrs=$targetObj->findConnections($target,"DDR4","DIMM");
     if ($ddrs ne "") {
         my %portmap;
         foreach my $ddr (@{$ddrs->{CONN}}) {
