@@ -86,6 +86,18 @@ namespace SBEIO
     errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target);
 
     /**
+    * @brief Sends a PSU chipOp to quiesce the SBE
+    *
+    * @param[in]  i_key   The key used to identify what the value is
+    * @param[in]  i_value Value that will be passed (likely an address)
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendPsuStashKeyAddrRequest(const uint8_t i_key,
+                                          const uint64_t i_value);
+
+    /**
      * @brief Get SCOM via SBE FIFO
      *
      * @param[in]  i_target  Target to access

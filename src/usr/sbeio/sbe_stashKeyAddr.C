@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_systemConfig.C $                            */
+/* $Source: src/usr/sbeio/sbe_stashKeyAddr.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,9 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
-* @file sbe_systemConfig.C
-* @brief System Configuartion Setup Messages to inform the SBE of other
-         procs in the system.
+* @file sbe_stashKeyAddr.C
+* @brief Send command to stash key-value pair in the SBE
 */
 
 #include <config.h>
@@ -33,61 +32,54 @@
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_psudd.H>
-#include <targeting/common/targetservice.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
-TRACDCOMP(g_trac_sbeio,"sendSystemConfig: " printf_string,##args)
+TRACDCOMP(g_trac_sbeio,"psuStashKeyAddr: " printf_string,##args)
 
 #define SBE_TRACF(printf_string,args...) \
-TRACFCOMP(g_trac_sbeio,"sendSystemConfig: " printf_string,##args)
+TRACFCOMP(g_trac_sbeio,"psuStashKeyAddr: " printf_string,##args)
 
 namespace SBEIO
 {
 
     /**
-    * @brief Set the system configuration on the SBE so it is aware of
-    *        the other procs in the system
-    *
-    * @param[in] i_systemConfig uint64 where each bit represents a proc in that position
-    *        Bit position ATTR_PROC_FABRIC_CHIP_ID + (8 * ATTR_PROC_FABRIC_GROUP_ID) = 1
-    *        if that proc is present and functional.
-    * @param[in] i_procChip The proc you would like to send the system config to
+    * @brief Sends a PSU chipOp to stash a key-address pair in the SBE
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-
-    errlHndl_t sendSystemConfig(const uint64_t i_systemConfig,
-                                TARGETING::Target * i_procChip)
+    errlHndl_t sendPsuStashKeyAddrRequest(const uint8_t i_key,
+                                          const uint64_t i_value,
+                                          TARGETING::Target * i_procChip)
     {
         errlHndl_t errl = NULL;
 
-        SBE_TRACD(ENTER_MRK "sending system configuration from HB -> SBE  i_systemConfig=0x%x on Proc 0x%x",
-                  i_systemConfig,
-                  i_procChip->getAttr<TARGETING::ATTR_POSITION>());
-
-        SbePsu::psuCommand   l_psuCommand(
-                                  SbePsu::SBE_REQUIRE_RESPONSE,  //control flags
-                                  SbePsu::SBE_PSU_GENERIC_MESSAGE, //command class
-                                  SbePsu::SBE_CMD_CONTROL_SYSTEM_CONFIG); //command
-        SbePsu::psuResponse  l_psuResponse;
+        SBE_TRACD(ENTER_MRK "sending psu stashKeyAddr request from HB to SBE on proc %d",
+                    i_procChip->getAttr<TARGETING::ATTR_POSITION>());
 
         // set up PSU command message
-        l_psuCommand.cd7_SetSystemConfig_SystemFabricIdMap = i_systemConfig;
+        SbePsu::psuCommand   l_psuCommand(
+                                  SbePsu::SBE_REQUIRE_RESPONSE |
+                                  SbePsu::SBE_REQUIRE_ACK, //control flags
+                                  SbePsu::SBE_PSU_GENERIC_MESSAGE, //command class
+                                  SbePsu::SBE_PSU_MSG_STASH_KEY_ADDR); //command
+        SbePsu::psuResponse  l_psuResponse;
+
+        l_psuCommand.cd7_stashKeyAddr_Key = i_key;
+        l_psuCommand.cd7_stashKeyAddr_Value = i_value;
 
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(i_procChip,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                                SbePsu::SBE_SYSTEM_CONFIG_REQ_USED_REGS,
-                                SbePsu::SBE_SYSTEM_CONFIG_RSP_USED_REGS);
+                                SbePsu::SBE_STASH_KEY_ADDR_REQ_USED_REGS,
+                                SbePsu::SBE_STASH_KEY_ADDR_RSP_USED_REGS);
 
-        SBE_TRACD(EXIT_MRK "sendSystemConfig");
+        SBE_TRACD(EXIT_MRK "stashKeyAddr");
 
         return errl;
     };
 
 } //end namespace SBEIO
-

@@ -102,7 +102,8 @@ class SbePsu
         {
             SBE_PSU_SET_FFDC_ADDRESS         = 0x04,
             SBE_PSU_GENERIC_MSG_QUIESCE      = 0x05,
-            SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06
+            SBE_CMD_CONTROL_SYSTEM_CONFIG    = 0x06,
+            SBE_PSU_MSG_STASH_KEY_ADDR       = 0x07,
         };
 
         /**
@@ -121,7 +122,7 @@ class SbePsu
         * @brief enums for SBE system config control flags
         */
         //BYTE 2  & 3, Control Flags
-        enum psuSystemConfigControlFlags
+        enum psuCommonControlFlags
         {
             SBE_REQUIRE_RESPONSE             = 0x0100,
             SBE_REQUIRE_ACK                  = 0x0200,
@@ -185,6 +186,26 @@ class SbePsu
             SBE_QUIESCE_REQ_USED_REGS     = 0x01,
             SBE_QUIESCE_RSP_USED_REGS     = 0x01,
         };
+
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuStashKeyAddrNonReservedMsgs
+        {
+            SBE_STASH_KEY_ADDR_REQ_USED_REGS     = 0x07,
+            SBE_STASH_KEY_ADDR_RSP_USED_REGS     = 0x01,
+        };
+
 
         /**
         * @brief non reserved word enums
@@ -267,14 +288,14 @@ class SbePsu
 
             struct //setSystemConfig
             {
-                uint16_t cd2_SetSystemConfig_Reserved;
-                uint16_t cd2_SetSystemConfig_ControlFlags;
-                uint16_t cd2_SetSystemConfig_SeqID;
-                uint8_t  cd2_SetSystemConfig_CommandClass;
-                uint8_t  cd2_SetSystemConfig_Command;
-                uint64_t cd2_SetSystemConfig_SystemFabricIdMap ;
-                uint64_t cd2_SetSystemConfig_MbxReg2reserved;
-                uint64_t cd2_SetSystemConfig_MbxReg3reserved;
+                uint16_t cd7_SetSystemConfig_Reserved;
+                uint16_t cd7_SetSystemConfig_ControlFlags;
+                uint16_t cd7_SetSystemConfig_SeqID;
+                uint8_t  cd7_SetSystemConfig_CommandClass;
+                uint8_t  cd7_SetSystemConfig_Command;
+                uint64_t cd7_SetSystemConfig_SystemFabricIdMap ;
+                uint64_t cd7_SetSystemConfig_MbxReg2reserved;
+                uint64_t cd7_SetSystemConfig_MbxReg3reserved;
             } PACKED;
 
             struct //for 'Put Ring from Image' message
@@ -295,14 +316,29 @@ class SbePsu
 
             struct //psuQuiesce
             {
-                uint16_t cd4_PsuQuiesce_Reserved;
-                uint16_t cd4_PsuQuiesce_ControlFlags;
-                uint16_t cd4_PsuQuiesce_SeqID;
-                uint8_t  cd4_PsuQuiesce_CommandClass;
-                uint8_t  cd4_PsuQuiesce_Command;
-                uint64_t cd4_PsuQuiesce_MbxReg1reserved;
-                uint64_t cd4_PsuQuiesce_MbxReg2reserved;
-                uint64_t cd4_PsuQuiesce_MbxReg3reserved;
+                uint16_t cd7_PsuQuiesce_Reserved;
+                uint16_t cd7_PsuQuiesce_ControlFlags;
+                uint16_t cd7_PsuQuiesce_SeqID;
+                uint8_t  cd7_PsuQuiesce_CommandClass;
+                uint8_t  cd7_PsuQuiesce_Command;
+                uint64_t cd7_PsuQuiesce_MbxReg1reserved;
+                uint64_t cd7_PsuQuiesce_MbxReg2reserved;
+                uint64_t cd7_PsuQuiesce_MbxReg3reserved;
+            } PACKED;
+
+            struct //stashKeyAddr
+            {
+                uint16_t cd7_stashKeyAddr_MbxReg0Reserved;  //Mbx Reg 0
+                uint16_t cd7_stashKeyAddr_ControlFlags;     //Mbx Reg 0
+                uint16_t cd7_stashKeyAddr_SeqID;            //Mbx Reg 0
+                uint8_t  cd7_stashKeyAddr_CommandClass;     //Mbx Reg 0
+                uint8_t  cd7_stashKeyAddr_Command;          //Mbx Reg 0
+                uint32_t cd7_stashKeyAddr_MbxReg1ReservedA; //Mbx Reg 1
+                uint16_t cd7_stashKeyAddr_MbxReg1ReservedB; //Mbx Reg 1
+                uint8_t  cd7_stashKeyAddr_MbxReg1ReservedC; //Mbx Reg 1
+                uint8_t  cd7_stashKeyAddr_Key;              //Mbx Reg 1
+                uint64_t cd7_stashKeyAddr_Value;            //Mbx Reg 2
+                uint64_t cd7_stashKeyAddr_MbxReg3Reserved;  //Mbx Reg 3
             } PACKED;
 
             struct //setFFDCAddress
@@ -317,7 +353,6 @@ class SbePsu
                 uint64_t cd7_setFFDCAddr_FFDCAddr; // mbxReg2
                 uint64_t cd7_setFFDCAddr_CommAddr; // mbxReg3
             } PACKED;
-
 
             psuCommand(uint16_t i_controlFlags, //Mbx Reg 0 input
                        uint8_t  i_commandClass, //Mbx Reg 0 input
