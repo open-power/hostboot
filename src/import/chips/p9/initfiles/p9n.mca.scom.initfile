@@ -748,15 +748,19 @@ ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCEPSQ_VECTOR_GROUP_EPSILON [when=S] {
 #         dn = MBSECCQ_delay_nonbypass
 #         h  = MBSECCQ_delay_valid_1x
 #    SETTINGS TABLE
-#         Optimized For   | L T      D dn    h       | mfreq, assume nfreq 2GHz | m/n min   m/n max
-#         -----------------------------------------------------------------------------------------
-#         sync            | 5 2(off) 0 1(on) 0(off)  |                          |
-#         1866 m : 2000 n | 5 2(off) 2 1(on) 0(off)  | 1.818 < mfreq < 2.000    |  909       963
-#         1:1 async ratio | 5 3(on)  2 1(on) 0(off)  | 1.818 < mfreq < 2.286    |  963      1038
-#         2133 m : 2000 n | 5 2(off) 0 1(on) 0.5(on) | 2.000 < mfreq < 2.167    | 1038      1084
-#         (Gap filler)    | 5 3(on)  2 1(on) 0(off)  | 1.818 < mfreq < 2.286    | 1084      1143
-#         2400 m : 2000 n | 5 3(on)  0 1(on) 0(off)  | 2.286 < mfreq < 2.667    | 1143      1250
-#         2667 m : 2000 n | 6 3(on)  1 1(on) 0(off)  | 2.500 < mfreq < 2.769    | 1250      1385
+#         New values 6/13/2017 in light of HW413361
+#         L T      D dn     h       | m/n min   m/n max
+#         ---------------------------------------------
+#         5 2(off) 1 0(off) 0(off)  |      SYNC   
+#         3 3(on)  1 0(off) 0(off)  |  727       915
+#         4 3(on)  1 0(off) 0(off)  |  915      1040
+#         4 3(on)  0 0(off) 0(off)  | 1040      1150
+#         5 3(on)  1 0(off) 0(off)  | 1150      1215
+#         5 3(on)  0 1(on)  0(off)  | 1215      1300
+#         6 3(on)  1 1(on)  0(off)  | 1300      1400*
+#         6 3(on)  0 1(on)  0(off)  | 1400*     1500**
+#            * 1385-1429 is actually no man's land, but none of our ratios exist here
+#           ** max 1500 means only ratio we don't support is 2666/1600
 
 
 # helpful expressions
@@ -802,51 +806,44 @@ espy MCP.PORT0.ECC64.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && ATTR_CHIP_EC_FEATURE
 # "L" field
 ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_VAL_TO_DATA_DELAY [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
-  5,      (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
-  5,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio < 1250); # async 2400m/2000n and below
-  6,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1250);                               # async 2666m/2000n
+  5,      (PROC.ATTR_MC_SYNC_MODE==1); 
+  3,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio <  915);
+  4,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >=  915) && (def_mn_freq_ratio < 1150);
+  5,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1150) && (def_mn_freq_ratio < 1300);
+  6,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1300);                              
 }
 
 # "T" field (new for DD2)
 espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_BYPASS_TENURE_3 [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0)                                && (def_mn_freq_ratio <  963); # async 1866m/2000n
-  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >=  963) && (def_mn_freq_ratio < 1038); # async 1:1 optimized
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1038) && (def_mn_freq_ratio < 1084); # async 2133m/2000n
-  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1084) && (def_mn_freq_ratio < 1143); # async gap filler
-  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1143) && (def_mn_freq_ratio < 1250); # async 2400m/2000n
-  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1250) && (def_mn_freq_ratio < 1385); # async 2666m/2000n
+  OFF,    (PROC.ATTR_MC_SYNC_MODE==1);
+  ON,     (PROC.ATTR_MC_SYNC_MODE==0);
 }
 
 # "D" field
 ispy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_NEST_VAL_TO_DATA_DELAY [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
   spyv, expr;
-  0,      (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
-  2,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio <  963); # async 1866m/2000n
-  2,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >=  963) && (def_mn_freq_ratio < 1038); # async 1:1 optimized
-  0,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1038) && (def_mn_freq_ratio < 1084); # async 2133m/2000n
-  2,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1084) && (def_mn_freq_ratio < 1143); # async gap filler
-  0,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1143) && (def_mn_freq_ratio < 1250); # async 2400m/2000n
-  1,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1250);                               # async 2666m/2000n
+  1,      (PROC.ATTR_MC_SYNC_MODE==1);                                                             
+  1,      (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio < 1040);
+  0,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1040) && (def_mn_freq_ratio < 1150);
+  1,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1150) && (def_mn_freq_ratio < 1215);
+  0,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1215) && (def_mn_freq_ratio < 1300);
+  1,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1300) && (def_mn_freq_ratio < 1400);
+  0,      (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1400);                              
 }
 
 # "dn" field
 espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_NONBYPASS [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
-  spyv;
-  ON; # same across all frequency settings
+  spyv, expr;
+  OFF,    (PROC.ATTR_MC_SYNC_MODE==1);                                                             
+  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio < 1215);
+  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1215);                              
 }
 
 # "h" field
 espy MCP.PORT0.ECC64.ECC.SCOM.MBSECCQ_DELAY_VALID_1X [when=S && !ATTR_CHIP_EC_FEATURE_MCA_P9NDD1_ASYNC] {
-  spyv, expr;
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==1);                                                              # sync
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) &&                                (def_mn_freq_ratio <  963); # async 1866m/2000n
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >=  963) && (def_mn_freq_ratio < 1038); # async 1:1 optimized
-  ON,     (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1038) && (def_mn_freq_ratio < 1084); # async 2133m/2000n
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1084) && (def_mn_freq_ratio < 1143); # async gap filler
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1143) && (def_mn_freq_ratio < 1250); # async 2400m/2000n
-  OFF,    (PROC.ATTR_MC_SYNC_MODE==0) && (def_mn_freq_ratio >= 1250);                               # async 2666m/2000n
+  spyv;
+  OFF;
 }
 
 ############################
@@ -992,10 +989,7 @@ ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_NUM_RMW_BUF [when=S] {
 
 # All rctrl ops through tag FIFO (bit 0)
 # Serialize CMDLIST pf drop through rctrl (bit 1)
-# Reinstate tag fifo workaround for DD2 in response to early VBU issue
-# Leaving old code here because workaround likely temporary
-#ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S && ATTR_CHIP_EC_FEATURE_HW375732] {
-ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S] {
+ispy  MC01.PORT0.ATCL.CL.CLSCOM.MCPERF2_RCTRL_CONFIG [when=S && ATTR_CHIP_EC_FEATURE_HW375732] {
   spyv;
   0b110;
 }
