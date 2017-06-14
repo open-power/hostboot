@@ -271,20 +271,20 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
         if( l_pvr.isNimbusDD1() )
         {
-            sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
-                    (TARGETING::FUSED_CORE_MODE_SMT4_DEFAULT);
+            sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
+                    (TARGETING::FUSED_CORE_MODE_HB_SMT4_DEFAULT);
         }
         else
         {
             if( l_pvr.smt == PVR_t::SMT4_MODE )
             {
-                sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
-                        (TARGETING::FUSED_CORE_MODE_SMT4_ONLY);
+                sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
+                        (TARGETING::FUSED_CORE_MODE_HB_SMT4_ONLY);
             }
             else // SMT8_MODE
             {
-                sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE>
-                        (TARGETING::FUSED_CORE_MODE_SMT8_ONLY);
+                sys->setAttr<TARGETING::ATTR_FUSED_CORE_MODE_HB>
+                        (TARGETING::FUSED_CORE_MODE_HB_SMT8_ONLY);
                 l_smt8 = true;
             }
         }

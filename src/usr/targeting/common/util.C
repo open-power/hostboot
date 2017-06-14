@@ -326,13 +326,13 @@ uint8_t  is_fused_mode( )
         smt8_only / fused_cores   / *   --> fused
     */
 
-    uint8_t l_mode = sys->getAttr<ATTR_FUSED_CORE_MODE>();;
+    uint8_t l_mode = sys->getAttr<ATTR_FUSED_CORE_MODE_HB>();;
     uint8_t l_option = sys->getAttr<ATTR_FUSED_CORE_OPTION>();;
     PAYLOAD_KIND l_payload = sys->getAttr<ATTR_PAYLOAD_KIND>();
 
     if (FUSED_CORE_OPTION_USING_DEFAULT_CORES == l_option)
     {
-        if (FUSED_CORE_MODE_SMT4_DEFAULT == l_mode)
+        if (FUSED_CORE_MODE_HB_SMT4_DEFAULT == l_mode)
         {
             if (PAYLOAD_KIND_PHYP == l_payload)
             {
@@ -343,7 +343,7 @@ uint8_t  is_fused_mode( )
                 l_fused = false;
             }
         }
-        else if (FUSED_CORE_MODE_SMT4_ONLY == l_mode)
+        else if (FUSED_CORE_MODE_HB_SMT4_ONLY == l_mode)
         {
             l_fused = false;
         }

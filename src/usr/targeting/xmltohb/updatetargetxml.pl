@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2014
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -83,13 +83,18 @@ foreach my $Extension ( @{$generic->{targetTypeExtension}} )
         {
             $default = $attr->{default}->[0];
         }
-        #print "$id, $attribute_id $default\n";
+
         if (! exists $generic1->{targetType}->{$id}->{attribute}->{$attribute_id})
         {
             push @NewAttr, [ $id, $attribute_id, $default ];
         }
     }
 }
+
+#for my $i ( 0 .. $#NewAttr )
+#{
+         #  print STDERR "$NewAttr[$i][0], $NewAttr[$i][1], $NewAttr[$i][2]\n";
+#}
 
 open (FH, "<$common");
 

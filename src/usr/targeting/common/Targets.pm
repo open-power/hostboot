@@ -1723,6 +1723,21 @@ sub getAttributeGroup
     return \%attr;
 }
 
+## delete a target attribute
+sub deleteAttribute
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $Name       = shift;
+    my $target_ptr = $self->{data}->{TARGETS}->{$target};
+    if (!defined($target_ptr->{ATTRIBUTES}->{$Name}))
+    {
+        return 1;
+    }
+    delete($target_ptr->{ATTRIBUTES}->{$Name});
+    $self->log($target, "Deleting attribute: $Name");
+    return 0;
+}
 
 ## renames a target attribute
 sub renameAttribute

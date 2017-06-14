@@ -390,24 +390,6 @@
 </attribute>
 
 <attribute>
-    <id>HOMER_PHYS_ADDR</id>
-    <description>
-        Physical address where HOMER image is placed in mainstore.
-    </description>
-    <simpleType>
-        <uint64_t></uint64_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_HOMER_PHYS_ADDR</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <hbOnly/>
-</attribute>
-
-<attribute>
     <id>HOMER_VIRT_ADDR</id>
     <description>
         Virtual address where HOMER memory is mapped into.  If value is zero,
@@ -1054,7 +1036,7 @@
     <persistency>volatile-zeroed</persistency>
     <writeable/>
     <readable/>
-    <hwpfToHbAttrMap>
+   <hwpfToHbAttrMap>
         <id>ATTR_SECURITY_MODE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>

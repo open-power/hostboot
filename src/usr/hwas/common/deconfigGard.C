@@ -1573,11 +1573,14 @@ void DeconfigGard::_deconfigureByAssoc(
                 targetService().getTopLevelTarget(pSys);
                 HWAS_ASSERT(pSys, "HWAS _deconfigureByAssoc: no TopLevelTarget");
 
+#if 0 //@TODO RTC 178216 Re-Add this after proc_setup_bars_memory_attributes.xml
+      //                 is imported from ekb
                 // done if not in interleaved mode
                 if (!pSys->getAttr<ATTR_ALL_MCS_IN_INTERLEAVING_GROUP>())
                 {
                     break;
                 }
+#endif
                 // if paired mode (interleaved)
                 //      deconfigure paired MCS and MEMBUF (Centaur)
                 // find paired MCS / MEMBUF (Centaur)
@@ -1699,12 +1702,14 @@ void DeconfigGard::_deconfigureByAssoc(
                 targetService().getTopLevelTarget(pSys);
                 HWAS_ASSERT(pSys, "HWAS _deconfigureByAssoc: no TopLevelTarget");
 
+#if 0 //@TODO RTC 178216 Re-Add this after proc_setup_bars_memory_attributes.xml
+      //                 is imported from ekb
                 // done if not in interleaved mode
                 if (!pSys->getAttr<ATTR_ALL_MCS_IN_INTERLEAVING_GROUP>())
                 {
                     break;
                 }
-
+#endif
                 // we need to make sure that MBA memory is balanced.
 
                 // find parent MCS

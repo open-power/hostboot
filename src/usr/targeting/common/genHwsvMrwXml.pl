@@ -5093,6 +5093,10 @@ sub generate_obus
         <id>REL_POS</id>
         <default>$obus</default>
     </attribute>
+    <attribute>
+        <id>OPTICS_CONFIG_MODE</id>
+        <default>NV</default>
+    </attribute>
     ";
 
     addPervasiveParentLink($sys,$node,$proc,$obus,"obus");

@@ -59,6 +59,7 @@ XMLTOHB_TARGETS += ${XMLTOHB_SOURCE_TARGETS}
 # Temp defaults XML sources used by updatetempsxml.pl script
 TEMP_DEFAULTS_XML       += tempdefaults.xml
 HB_TEMP_DEFAULTS_XML    += hb_temp_defaults.xml
+HB_CUSTOMIZED_ATTRS_XML    += hb_customized_attrs.xml
 
 ATTRIBUTE_SERVICE_H     += plat_attribute_service.H
 HB_PLAT_ATTR_SRVC_H     += hb_plat_attr_srvc.H
@@ -66,9 +67,15 @@ HB_PLAT_ATTR_SRVC_H     += hb_plat_attr_srvc.H
 TEMP_GENERIC_XML        += temp_generic.xml
 XMLTOHB_GENERIC_XML     += generic.xml
 XMLTOHB_FAPI_XML        += fapiattrs.xml
+
+#scripts for attribute/target xml manipulation
 XMLTOHB_MERGE_SCRIPT    += mergexml.sh
-XMLTOHB_TEMPS_MERGE_SCRIPT += updatetempsxml.pl
-XMLTOHB_COMPILER_SCRIPT += xmltohb.pl
-VMM_CONSTS_FILE         += vmmconst.h
+XMLTOHB_TEMPS_MERGE_SCRIPT       += updatetempsxml.pl
+XMLTOHB_COMPILER_SCRIPT          += xmltohb.pl
+XMLTOHB_EKB_TARGATTR_SCRIPT      += create_ekb_targattr.pl
+XMLTOHB_DUPLICATE_SCRIPT         += handle_duplicate.pl
+XMLTOHB_SWAP_MAPPED_ATTR_SCRIPT  += handle_fapi_attr_mapping.pl
+XMLTOHB_REMOVE_HB_MAPPED_ATTR_SCRIPT  += remove_hb_fapi_maps.pl
+VMM_CONSTS_FILE             += vmmconst.h
 
 GENERATED_CODE = ${XMLTOHB_TARGETS}
