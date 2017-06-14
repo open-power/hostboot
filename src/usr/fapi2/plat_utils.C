@@ -965,7 +965,7 @@ void logError(
     fapi2::errlSeverity_t i_sev,
     bool i_unitTestError )
 {
-    FAPI_DBG("Entering logError" );
+    FAPI_INF("logError(rc=%x, sev=%d)", (uint32_t)io_rc, i_sev );
 
     createPlatLog( io_rc, i_sev );
 
