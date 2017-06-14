@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,3 +26,4 @@
 OBJS += ipmisel.o
 OBJS += ipmisensor.o
 OBJS += ipmidcmi.o
+OBJS += ipmiconfiglookup.o
