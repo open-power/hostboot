@@ -181,16 +181,8 @@ void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
     io_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
                                HWAS::SRCI_PRIORITY_HIGH);
 
-    // Add security register values
-    addSecurityRegistersToErrlog(io_err);
-
-    // Add HW Keys' Hash to trace and the error log
-    SHA512_t hash = {0};
-    getHwKeyHash(hash);
-
-    SB_INF_BIN("HwKeyHash", &hash, sizeof(hash));
-
-    UdSystemHwKeyHash( hash ).addToLog(io_err);
+    // Add Security related user details
+    addSecureUserDetailsToErrolog(io_err);
 
     io_err->collectTrace(SECURE_COMP_NAME,MAX_ERROR_TRACE_SIZE);
 
@@ -554,6 +546,23 @@ void addSecurityRegistersToErrlog(errlHndl_t & io_err)
             ERRL_GETRC_SAFE(io_err), ERRL_GETPLID_SAFE(io_err));
 
     return;
+}
+
+void addSecureUserDetailsToErrolog(errlHndl_t & io_err)
+{
+    // Add Security Settings
+    UdSecuritySettings().addToLog(io_err);
+
+    // Add security register values
+    addSecurityRegistersToErrlog(io_err);
+
+    // Add System HW Keys' Hash
+    SHA512_t hash = {0};
+    getHwKeyHash(hash);
+    SB_INF_BIN("Sys HwKeyHash", &hash, sizeof(hash));
+    UdSystemHwKeyHash( hash ).addToLog(io_err);
+
+    //Note: adding UdTargetHwKeyHash left to Extended image
 }
 
 } //namespace SECUREBOOT

@@ -205,11 +205,8 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
 
     ERRORLOG::ErrlUserDetailsTarget(i_pProc).addToLog(err);
 
-    SECUREBOOT::addSecurityRegistersToErrlog(err);
-
-    sha2_hash_t sysHash = {0};
-    SECUREBOOT::getHwKeyHash(sysHash);
-    SECUREBOOT::UdSystemHwKeyHash(sysHash).addToLog(err);
+    // Add Security related user details
+    SECUREBOOT::addSecureUserDetailsToErrolog(err);
 
     // add hashes to log and traces
     for(auto& hsh : i_hashes)
