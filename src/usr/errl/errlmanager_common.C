@@ -29,6 +29,7 @@
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisel.H>
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmiconfiglookup.H>
 #endif
 #include <errl/errlentry.H>
 #include <sys/mm.h>
@@ -711,21 +712,18 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
 
                     // grab the sensor type so the bmc knows how to use the
                     // offset
-                    uint8_t unused = 0;
-                    errlHndl_t e =
-                        SENSOR::SensorBase::getSensorType(
-                            l_sensorNumber[j],
-                            l_sensorType[j],unused);
-
-                    if( e )
+                    errlHndl_t l_errl =
+                       IPMI::IpmiConfigLookup::getSensorType(l_sensorNumber[j],
+                                                             l_sensorType[j]
+                                                            );
+                    if(l_errl)
                     {
                         TRACFCOMP(g_trac_errl,
                             ERR_MRK"Failed to get sensor type for sensor %d",
                             l_sensorNumber[j]);
                         l_sensorType[j] = 0;
-                        // since we are in the commit path, lets just delete
-                        // this error and move on.
-                        delete e;
+
+                        delete l_errl;
                     }
 
                     // this call will modify the sensor if any procedure
