@@ -151,6 +151,7 @@ fapi2::ReturnCode empty_slot_zero(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
 
+    // If there's one dimm, make sure it's in slot 0
     if ( l_dimms.size() == 1 )
     {
         FAPI_ASSERT(  mss::index(l_dimms[0]) == 0,
@@ -176,18 +177,10 @@ fapi2::ReturnCode empty_slot_zero( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
 
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
-        // Doing this so we can check both ports instead of just one mca
-        fapi2::current_err = empty_slot_zero( p );
-
-        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
-        {
-            fapi2::logError( (l_rc = fapi2::current_err));
-        }
+        FAPI_TRY( empty_slot_zero( p ) );
     }
 
-    // Need to return an error or else the logs will be ignored
-    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
-
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -252,16 +245,10 @@ fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
 
     for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
     {
-        fapi2::current_err = check_dead_load( p );
-
-        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
-        {
-            fapi2::logError( (l_rc = fapi2::current_err));
-        }
+        FAPI_TRY( check_dead_load( p ) );
     }
 
-    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
-
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -279,14 +266,15 @@ fapi2::ReturnCode check_gen( const std::vector<dimm::kind>& i_kinds )
         // This should never fail ... but Just In Case a little belt-and-suspenders never hurt.
         // TODO RTC:160395 This needs to change for controllers which support different generations
         // Nimbus only supports DDR4 for now
-        FAPI_ASSERT_NOEXIT( k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4 ||
-                            k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY,
-                            fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
-                            .set_DRAM_GEN(k.iv_dimm_type)
-                            .set_DIMM_TARGET(k.iv_target),
-                            "%s is not DDR4 it is %d", mss::c_str(k.iv_target), k.iv_dram_generation );
+        FAPI_ASSERT( k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4 ||
+                     k.iv_dram_generation == fapi2::ENUM_ATTR_EFF_DRAM_GEN_EMPTY,
+                     fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
+                     .set_DRAM_GEN(k.iv_dimm_type)
+                     .set_DIMM_TARGET(k.iv_target),
+                     "%s is not DDR4 it is %d", mss::c_str(k.iv_target), k.iv_dram_generation );
     }
 
+fapi_try_exit:
     return fapi2::current_err;
 }
 
@@ -429,7 +417,6 @@ fapi_try_exit:
 fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
 {
     // Check per-MCS plug rules. If those all pass, check each of our MCA
-
     const auto l_dimms = mss::find_targets<TARGET_TYPE_DIMM>(i_target);
     fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
 
@@ -452,28 +439,13 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
         return FAPI2_RC_SUCCESS;
     }
 
-    // We want to be careful here. The idea is to execute all the plug rules and commit erros before
-    // failing out. That way, a giant configuration doesn't take 45m to boot, to find a DIMM out of place
-    // the another 45m to find the next DIMM, etc.
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        // Cronus only exits if the procedure returns an error, so we need to keep track
-        // To do this, we are using l_rc and current_err
-        // current_err is not confined by scope,
-        // So current_err can be set to SUCCESS within the called function and could overwrite bad values
-        // l_rc will keep track if there are any errors and won't be overwritten by a success accidentally
-        fapi2::current_err = enforce_plug_rules(p);
-
-        if ( fapi2::current_err != fapi2::FAPI2_RC_SUCCESS )
-        {
-            // Sets current_err to bad and doesn't override with a "good" status
-            fapi2::logError( l_rc = fapi2::current_err );
-        }
+        // Difference between cronus and hostboot make it really annoying to loop over the targets,
+        // So we'll just error out if we find a bad port, this could make 2 deconfig loops instead of one,
+        // but it's worth for proper behavior and really shouldn't happen often
+        FAPI_TRY( enforce_plug_rules(p) );
     }
-
-    // if current_err is marked as good, set to l_rc
-    // l_rc error has already been logged, so if current_err has an error report that
-    fapi2::current_err = (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS) ? l_rc : fapi2::current_err;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -529,6 +501,4 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-
 }// mss
