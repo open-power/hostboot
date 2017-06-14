@@ -30,6 +30,7 @@
 #include <errl/errlmanager.H>
 #include <util/utilbyte.H>
 #include <sbeio/sbe_ffdc_parser.H>
+#include <fapi2.H>
 
 /**
  * @file sbe_ffdc_pader.C
@@ -257,4 +258,49 @@ void SbeFFDCParser::addFFDCPackage(void * i_ffdcPackage,
     iv_ffdcPackages.push_back(l_ffdcPkg);
 }
 
+PIB::PibError  SbeFFDCParser::getPibRc(uint8_t i_index)
+{
+    //get the rc for this ffdc package
+    auto l_fapiRc           = getPackageRC(i_index);
+    PIB::PibError l_pibRc   = PIB::PIB_NO_ERROR;
+
+    //check if it is a fapi2::PIBRC
+    //if yes, convert to PIBERROR value
+    switch(l_fapiRc)
+    {
+        case fapi2::RC_SBE_PIB_XSCOM_ERROR:
+            l_pibRc = PIB::PIB_RESOURCE_OCCUPIED;
+            break;
+
+        case fapi2::RC_SBE_PIB_OFFLINE_ERROR:
+            l_pibRc = PIB::PIB_CHIPLET_OFFLINE;
+            break;
+
+        case fapi2::RC_SBE_PIB_PARTIAL_ERROR:
+            l_pibRc = PIB::PIB_PARTIAL_GOOD;
+            break;
+
+        case fapi2::RC_SBE_PIB_ADDRESS_ERROR:
+            l_pibRc = PIB::PIB_INVALID_ADDRESS;
+            break;
+
+        case fapi2::RC_SBE_PIB_CLOCK_ERROR:
+            l_pibRc = PIB::PIB_CLOCK_ERROR;
+            break;
+
+        case fapi2::RC_SBE_PIB_PARITY_ERROR:
+            l_pibRc = PIB::PIB_PARITY_ERROR;
+            break;
+
+        case fapi2::RC_SBE_PIB_TIMEOUT_ERROR:
+            l_pibRc = PIB::PIB_TIMEOUT;
+            break;
+
+        case fapi2::FAPI2_RC_SUCCESS:
+            l_pibRc = PIB::PIB_NO_ERROR;
+            break;
+    }
+    SBE_TRACF("getPibRc for index=%d, fapiRc=0x%x pibRc:%0x", i_index, l_fapiRc, l_pibRc);
+    return l_pibRc;
+}
 }

@@ -43,6 +43,7 @@
 #include <kernel/pagemgr.H>
 #include <fapi2.H>
 #include <sbeio/sbe_sp_intf.H>
+#include <xscom/piberror.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -346,6 +347,11 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
             // has been sent. If not EOT, then data ready to receive.
             uint32_t l_status = 0;
             errl = waitDnFifoReady(i_target,l_status);
+            if (errl)
+            {
+                SBE_TRACF("readResponse: waitDnFifoReady returned an error");
+                break;
+            }
 
             if (l_status & DNFIFO_STATUS_DEQUEUED_EOT_FLAG)
             {
@@ -582,6 +588,15 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                          ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
                      }
                  }
+                 PIB::PibError l_pibRc = l_ffdc_parser->getPibRc(i);
+                 if (l_pibRc != PIB::PIB_NO_ERROR)
+                 {
+                    //this is pibrc, call addFruCallouts to log the error
+                    auto l_fifoReq =
+                        (SbeFifo::fifoGetScomRequest*)i_pFifoRequest;
+                    PIB::addFruCallouts
+                        (i_target, l_pibRc, l_fifoReq->address, errl);
+                 }
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -650,6 +665,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_DOWNSTREAM_TIMEOUT
              * @userdata1    Timeout in NS
+             * @userdata2    FIFO Status
              * @devdesc      Timeout waiting for downstream FIFO to have
              *               data to receive
              */
@@ -658,7 +674,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
                                 SBEIO_FIFO,
                                 SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
                                 MAX_UP_FIFO_TIMEOUT_NS,
-                                0);
+                                o_status);
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);

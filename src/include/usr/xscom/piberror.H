@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -31,7 +33,7 @@ namespace PIB
     /**
      * @brief Enumerations for the each PIB error possbility
      */
-    enum
+    enum PibError
     {
         PIB_NO_ERROR          = 0,//0b000,
         PIB_RESOURCE_OCCUPIED = 1,//0b001,
