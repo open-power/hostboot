@@ -3465,6 +3465,23 @@
   <!-- ******************************************************************** -->
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW368644</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Register init for nimbus DD1 that is not necessary for DD2
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW384794</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
