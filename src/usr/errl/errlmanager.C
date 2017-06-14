@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -693,7 +693,8 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X",
                     i_committerComp, io_err->eid(), io_err->reasonCode() );
 
-        if (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
+             (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )
         {
             iv_nonInfoCommitted = true;
             lwsync();
