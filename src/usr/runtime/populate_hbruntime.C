@@ -683,7 +683,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         }
         else
         {
-            io_start_address = io_end_address - l_totalSizeAligned + 1;
+            io_start_address = io_end_address - l_totalSizeAligned;
         }
 
 
