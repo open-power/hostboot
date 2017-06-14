@@ -160,10 +160,10 @@ Layout Description - Used when building an FSP driver
     </section>
     -->
     <section>
-        <description>SBE-IPL (Staging Area) (288K)</description>
+        <description>SBE-IPL (Staging Area) (520K)</description>
         <eyeCatch>SBE</eyeCatch>
         <physicalOffset>0xF61000</physicalOffset>
-        <physicalRegionSize>0x48000</physicalRegionSize>
+        <physicalRegionSize>0x82000</physicalRegionSize>
         <sha512perEC/>
         <sha512Version/>
         <side>sideless</side>
@@ -172,7 +172,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>HCODE Ref Image (1.125MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0xFA9000</physicalOffset>
+        <physicalOffset>0xFE3000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -181,7 +181,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0x10C9000</physicalOffset>
+        <physicalOffset>0x1103000</physicalOffset>
         <physicalRegionSize>0x480000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -190,7 +190,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Payload (21.375MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0x1549000</physicalOffset>
+        <physicalOffset>0x1583000</physicalOffset>
         <physicalRegionSize>0x1560000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -198,7 +198,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x2AA9000</physicalOffset>
+        <physicalOffset>0x2AE3000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <side>sideless</side>
@@ -207,7 +207,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalOffset>0x2AB2000</physicalOffset>
+        <physicalOffset>0x2AEC000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
@@ -218,7 +218,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x2ABB000</physicalOffset>
+        <physicalOffset>0x2AF5000</physicalOffset>
         <!-- Physical Size includes Header rounded to ECC valid size -->
         <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
         <physicalRegionSize>0x7000</physicalRegionSize>
@@ -228,7 +228,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x2AC2000</physicalOffset>
+        <physicalOffset>0x2AFC000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -236,7 +236,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x2ACB000</physicalOffset>
+        <physicalOffset>0x2B05000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -244,7 +244,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x2AD0000</physicalOffset>
+        <physicalOffset>0x2B0A000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -254,7 +254,7 @@ Layout Description - Used when building an FSP driver
         <!-- We need 266KB per module sort, going to support
              10 sorts by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x2BF4000</physicalOffset>
+        <physicalOffset>0x2B0E000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -262,7 +262,7 @@ Layout Description - Used when building an FSP driver
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x2EF4000</physicalOffset>
+        <physicalOffset>0x2E0E000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
