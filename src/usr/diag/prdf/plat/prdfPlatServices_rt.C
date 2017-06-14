@@ -41,6 +41,11 @@
 
 // Other includes
 #include <runtime/interface.h>
+#include <p9_l3err_extract.H>
+#include <p9_l2err_extract.H>
+#include <p9_l3err_linedelete.H>
+#include <p9_l2err_linedelete.H>
+#include <p9_proc_gettracearray.H>
 
 //------------------------------------------------------------------------------
 
@@ -328,6 +333,153 @@ uint32_t startVcmPhase2<TYPE_MBA>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
+
+//##############################################################################
+//##                       Line Delete Functions
+//##############################################################################
+int32_t extractL3Err( TargetHandle_t i_exTgt,
+                      p9_l3err_extract_err_data &o_errorAddr)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = nullptr;
+    bool errFound = false;
+
+    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    FAPI_INVOKE_HWP( err,
+                     p9_l3err_extract,
+                     i_exTgt,
+                     o_errorAddr,
+                     errFound );
+
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::extractL3Err] huid: 0x%08x failed",
+                  getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    if ( !errFound )
+    {
+        PRDF_ERR( "[PlatServices::extractL3Err] huid: 0x%08x No Error Found",
+                  getHuid(i_exTgt));
+        o_rc = FAIL;
+    }
+
+    return o_rc;
+}
+
+int32_t l3LineDelete(TargetHandle_t i_exTgt,
+                     const p9_l3err_extract_err_data& i_l3_err_data)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+    const uint64_t retryCount = 100;
+
+    // Apply Line Delete
+    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    FAPI_INVOKE_HWP( err,
+                     p9_l3err_linedelete,
+                     fapiTrgt,
+                     i_l3_err_data,
+                     retryCount);
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x failed",
+                  getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    // Do HCODE update to preserve line delete
+
+    return o_rc;
+}
+
+int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
+                      p9_l2err_extract_err_data &o_errorAddr)
+{
+    errlHndl_t err = nullptr;
+    bool errFound = false;
+    fapi2::variable_buffer ta_data( P9_TRACEARRAY_NUM_ROWS *
+                                    P9_TRACEARRAY_BITS_PER_ROW);
+    proc_gettracearray_args args;
+
+    args.trace_bus = PROC_TB_L20;
+    args.stop_pre_dump = true;
+    args.ignore_mux_setting = false;
+    args.collect_dump = true;
+    args.reset_post_dump = false;
+    args.restart_post_dump = false;
+
+    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+
+    FAPI_INVOKE_HWP( err,
+                     p9_proc_gettracearray,
+                     i_exTgt,
+                     args,
+                     ta_data);
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x gettracearray "
+                  "failed", getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    FAPI_INVOKE_HWP( err,
+                     p9_l2err_extract,
+                     i_exTgt,
+                     ta_data,
+                     i_ce ? L2ERR_CE : L2ERR_CE_UE,
+                     o_errorAddr,
+                     errFound );
+
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x failed",
+                  getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    if ( !errFound )
+    {
+        PRDF_ERR( "[PlatServices::extractL2Err] huid: 0x%08x No Error Found",
+                  getHuid(i_exTgt));
+        return FAIL;
+    }
+
+    return SUCCESS;
+}
+
+int32_t l2LineDelete(TargetHandle_t i_exTgt,
+                     const p9_l2err_extract_err_data& i_l2_err_data)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = NULL;
+    const uint64_t retryCount = 100;
+
+    // Apply Line Delete
+    fapi2::Target<fapi2::TARGET_TYPE_EX> fapiTrgt (i_exTgt);
+    FAPI_INVOKE_HWP( err,
+                     p9_l2err_linedelete,
+                     fapiTrgt,
+                     i_l2_err_data,
+                     retryCount);
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x failed",
+                  getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    // Do HCODE update to preserve line delete
+
+    return o_rc;
+}
+
 
 //------------------------------------------------------------------------------
 

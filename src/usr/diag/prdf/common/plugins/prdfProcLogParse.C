@@ -191,8 +191,6 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L2LdCrFfdc));
 
         i_parser.PrintNumber( "   L2 LD Counts", "%d", ldcrffdc.L2LDcnt );
-        i_parser.PrintBool(   "   L2 LD Allowed",
-                                              0 != ldcrffdc.L2LDallowed );
         i_parser.PrintNumber( "   L2 LD Max Allowed", "%d",
                                               ldcrffdc.L2LDMaxAllowed );
         i_parser.PrintNumber( "   L2 CR Max Allowed", "%d",
@@ -213,6 +211,8 @@ bool parseL2LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
                                                ldcrffdc.L2errBitLine );
         i_parser.PrintBool(   "   L2 Error Is Top SA",
                                                0 != ldcrffdc.L2errIsTopSA );
+        i_parser.PrintBool(   "   L2 Error Is Left SA",
+                                               0 != ldcrffdc.L2errIsLeftSA );
         i_parser.PrintNumber( "   L2 Error Address", "%d",
                                                ldcrffdc.L2errAddress );
 
@@ -247,8 +247,6 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         memcpy( &ldcrffdc, i_buffer, sizeof(LD_CR_FFDC::L3LdCrFfdc));
 
         i_parser.PrintNumber( "   L3 LD Counts", "%d", ldcrffdc.L3LDcnt );
-        i_parser.PrintBool(   "   L3 LD Allowed",
-                                               0 != ldcrffdc.L3LDallowed );
         i_parser.PrintNumber( "   L3 LD Max Allowed", "%d",
                                                 ldcrffdc.L3LDMaxAllowed );
         i_parser.PrintNumber( "   L3 CR Max Allowed", "%d",
@@ -262,10 +260,10 @@ bool parseL3LdCrFfdc( uint8_t * i_buffer, uint32_t i_buflen,
         i_parser.PrintNumber( "   L3 Error Bank", "%d", ldcrffdc.L3errBank );
         i_parser.PrintNumber( "   L3 Error Data Out", "%d",
                                                 ldcrffdc.L3errDataOut );
-        i_parser.PrintNumber( "   L3 Error Address", "%d",
-                                                ldcrffdc.L3errAddress );
-        i_parser.PrintNumber( "   L3 Error IO", "%d", ldcrffdc.L3errIO );
-        i_parser.PrintNumber( "   L3 Error Row", "%d", ldcrffdc.L3errRow );
+        i_parser.PrintNumber( "   L3 Error Hashed Address", "%d",
+                                                ldcrffdc.L3errHshAddress );
+        i_parser.PrintNumber( "   L3 Error Cache Address", "%d",
+                                                ldcrffdc.L3errCacheAddress );
 
     } while (0);
 

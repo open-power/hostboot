@@ -49,7 +49,7 @@
 #include <attributeenums.H>     // For TARGETING::TYPE enum
 
 #include <prdfMemLogParse.H>
-//#include <prdfProcLogParse.H> TODO: RTC 136050
+#include <prdfProcLogParse.H>
 #include <prdfParserEnums.H>
 #include <prdfMemoryMruData.H>
 #include <prdfBitString.H>
@@ -461,6 +461,11 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                 parseTodFfdcData( sigData, sigDataSize, i_parser );
             }
+            else if ( Util::hashString("OCC_CS_FFDC") == sigId)
+            {
+                parsePnorFirData( sigData, sigDataSize, i_parser );
+            }
+*/
             else if ( Util::hashString(LD_CR_FFDC::L2TITLE) == sigId )
             {
                  parseL2LdCrFfdc( sigData, sigDataSize, i_parser );
@@ -469,11 +474,6 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
             {
                  parseL3LdCrFfdc( sigData, sigDataSize, i_parser );
             }
-            else if ( Util::hashString("OCC_CS_FFDC") == sigId)
-            {
-                parsePnorFirData( sigData, sigDataSize, i_parser );
-            }
-*/
             else if ( (0 != sigDataSize) && (sizeof(uint64_t) >= sigDataSize) )
             {
                 // Print one reg/line if the data size <= 8 bytes
