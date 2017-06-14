@@ -26,6 +26,8 @@
 #ifndef __SBEFFDC_H
 #define __SBEFFDC_H
 
+#include <xscom/piberror.H>
+
 /**
  * @file sbe_ffdc_parser.H
  * @brief SBE FFDC package parser
@@ -94,6 +96,11 @@ class SbeFFDCParser
          */
         uint32_t getPackageLength(uint8_t i_index);
 
+        /**
+         * @brief: converts fapi2 rc to pib rc
+         * @param[in]: i_index index in the ffdc package
+         */
+        PIB::PibError getPibRc (uint8_t i_index);
     private:
 
         /**
