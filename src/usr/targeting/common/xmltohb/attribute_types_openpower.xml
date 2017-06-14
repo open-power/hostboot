@@ -1083,4 +1083,26 @@ ID for the sensor number returned with the elog. -->
 
 <!-- end HTMGT attributes -->
 
+<attribute>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>Machine Readable Workbook safe mode throttle value for numerator cfg_nm_n_per_chip</description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+  <id>MSS_UTIL_N_PER_MBA</id>
+  <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
+  <simpleType>
+      <uint32_t></uint32_t>
+  </simpleType>
+  <persistency>volatile-zeroed</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+
 </attributes>

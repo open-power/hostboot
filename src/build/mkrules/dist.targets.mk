@@ -69,9 +69,10 @@ COPY_FILES = \
     obj/genfiles/attrInfo.csv:vpo \
     obj/genfiles/attrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
-    obj/genfiles/target_types_merged.xml:openpower \
     obj/genfiles/fapiattrs.xml:openpower \
     obj/genfiles/config.h:openpower \
+    obj/genfiles/attribute_types_full.xml:openpower \
+    obj/genfiles/target_types_full.xml:openpower \
     src/usr/targeting/attroverride/README.attr_override:tools,openpower \
     src/build/hwpf/prcd_compile.tcl:tools \
     src/build/buildpnor/buildSbePart.pl:openpower \
@@ -115,7 +116,15 @@ COPY_FILES += $(if $(CONFIG_INCLUDE_XML_OPPOWERVM),src/usr/targeting/common/xmlt
 # Format is <dest file>:<source file>:<comma separated targets>
 #
 COPY_RENAME_FILES = \
-    makefile:src/build/mkrules/hbfw/makefile:fsp\
+    attribute_types.xml:obj/genfiles/attribute_types_full.xml:openpower \
+    target_types_merged.xml:obj/genfiles/target_types_full.xml:openpower \
+    attribute_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    target_types_hb.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    attribute_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    target_types_oppowervm.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    attribute_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    target_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
+    makefile:src/build/mkrules/hbfw/makefile:fsp \
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
     img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,vpo \
@@ -257,6 +266,8 @@ fsp.tar_CONTENTS = \
     $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.protected) \
     $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.unprotected) \
     obj/genfiles/fapiattrs.xml \
+    obj/genfiles/attribute_types_sp.xml \
+    obj/genfiles/target_types_sp.xml \
     obj/genfiles/hb_plat_attr_srvc.H \
     src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml \
     $(addsuffix :targeting/,\

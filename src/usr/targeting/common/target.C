@@ -702,7 +702,6 @@ void setFrequencyAttributes( Target * i_sys,
     uint32_t l_newPll = (i_newNestFreq * l_oldPll)/l_oldNestFreq;
 
     // Needed for NEST_PLL_BUCKET
-    uint32_t l_i2cBusDiv = 0;
     size_t l_bucket;
     uint8_t nest_pll_freq_buckets =
         i_sys->getAttr<TARGETING::ATTR_NEST_PLL_FREQ_BUCKETS>();
@@ -748,7 +747,6 @@ void setFrequencyAttributes( Target * i_sys,
                       "ATTR_NEST_PLL_BUCKET getting set to %x",
                       l_bucket);
             i_sys->setAttr<TARGETING::ATTR_NEST_PLL_BUCKET>(l_bucket);
-            l_i2cBusDiv = i2cdiv_list[l_bucket-1];
             break;
         }
     }
@@ -764,13 +762,6 @@ void setFrequencyAttributes( Target * i_sys,
                             true ); // true: return functional procs
 
     TargetHandleList::iterator l_procTarget;
-
-    for( l_procTarget = l_procList.begin();
-        l_procTarget != l_procList.end();
-        ++l_procTarget )
-    {
-        (*l_procTarget)->setAttr<TARGETING::ATTR_I2C_BUS_DIV_NEST>(l_i2cBusDiv);
-    }
 
     TARG_EXIT();
     #undef TARG_FN

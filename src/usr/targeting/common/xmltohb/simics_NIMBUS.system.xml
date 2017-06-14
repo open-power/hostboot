@@ -180,6 +180,14 @@
         <id>MAX_PROC_CHIPS_PER_NODE</id>
         <default>2</default>
     </attribute>
+    <attribute>
+        <id>MAX_ALLOWED_DIMM_FREQ</id>
+        <default>2400,2400,2400,2400,2400</default>
+    </attribute>
+    <attribute>
+        <id>MSS_INTERLEAVE_ENABLE</id>
+        <default>0xAF</default>
+    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->
@@ -3272,7 +3280,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3309,7 +3317,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3346,7 +3354,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3383,7 +3391,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3420,7 +3428,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3457,7 +3465,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8677,7 +8685,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8714,7 +8722,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8751,7 +8759,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8788,7 +8796,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8825,7 +8833,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8862,7 +8870,7 @@
     </attribute>
     <attribute>
         <id>OPTICS_CONFIG_MODE</id>
-        <default>NVLINK</default>
+        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>

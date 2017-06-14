@@ -189,6 +189,7 @@ my $allAttributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','enumerator','attribute','hwpfToHbAttrMap',
                    'compileAttribute','range']);
 
+
 my $fapiAttributes = {};
 if ($cfgFapiAttributesXmlFile ne "")
 {
@@ -1003,6 +1004,7 @@ sub validateAttributes {
     $elements{"serverwizShow"} = { required => 0, isscalar => 1};
     $elements{"global"} = { required => 0, isscalar => 0};
     $elements{"range"} = { required => 0, isscalar => 0};
+    $elements{"ignoreEkb"} = { required => 0, isscalar => 0};
 
     # do NOT export attribute & its associated enum to serverwiz
     $elements{"no_export"}   = { required => 0, isscalar => 0};
@@ -2092,7 +2094,7 @@ sub writeEnumFileAttrEnums {
     # Format below intentionally > 80 chars for clarity
 
     format ENUMFORMAT =
-    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<
+    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<<<<<<<<<
     $enumName,                                                       $enumHex .","
 .
     select($outFile);
@@ -5214,8 +5216,9 @@ sub packSingleSimpleTypeAttribute {
     {
         my $enumeration = getEnumerationType($$attributesRef,$simpleType->
             {enumeration}->{id});
-        #print STDOUT "id=$simpleType->{enumeration}->{id}\n";
-        #print STDOUT "value=$value\n";
+
+#         print STDOUT "id=$simpleType->{enumeration}->{id}\n";
+#         print STDOUT "value=$value\n";
         #my %dummy1 = %{$enumeration};
         #foreach (sort keys %dummy1) {
         #    print STDOUT "---$_ : $dummy1{$_}\n";
@@ -5270,6 +5273,7 @@ sub packSingleSimpleTypeAttribute {
         if( ($simpleTypeProperties->{$typeName}{complexTypeSupport}) &&
             ($value =~ m/[^0-9]/) && ($valueIsNegative eq 'false'))
         {
+
             # This is a type that supports complex types - i.e. an integer and
             # the value is a string. Look for an enumeration named after the
             # attribute id, if one is not found then one of the function calls
@@ -5922,6 +5926,7 @@ sub generateTargetingImage {
         # Use all attributes including virtual for association processing
         getTargetAttributes($targetInstance->{type}, $allAttributes,\%attrhash);
 
+
         #Check for Targets with ZERO attributes before writing to PNOR.
         my $tempNumAttributes = keys %attrhash;
         if($tempNumAttributes == 0)
@@ -5929,6 +5934,7 @@ sub generateTargetingImage {
             #skip the present target
             next;
         }
+#         print Dumper($allAttributes);
 
         # Update hash with any per-instance overrides, but only if that
         # attribute has already been defined
@@ -5940,7 +5946,7 @@ sub generateTargetingImage {
             }
             else
             {
-                croak("Target instance \"$targetInstance->{id}\" cannot "
+                croak("Target instance \"$targetInstance->{id}\" of type \" $targetInstance->{type} \" cannot "
                     . "override attribute \"$attr->{id}\" unless "
                     . "the attribute has already been defined in the target "
                     . "type inheritance chain.");

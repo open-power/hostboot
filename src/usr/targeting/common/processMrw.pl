@@ -112,6 +112,37 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     if ($type eq "SYS")
     {
         processSystem($targetObj, $target);
+        #TODO RTC: 178351 Remove depricated Attribute from HB XML
+        #these are obsolete
+        $targetObj->deleteAttribute($target,"FUSED_CORE_MODE");
+        $targetObj->deleteAttribute($target,"MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE");
+        $targetObj->deleteAttribute($target,"MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE");
+        $targetObj->deleteAttribute($target,"MRW_DRAMINIT_RESET_DISABLE");
+        $targetObj->deleteAttribute($target,"MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP");
+        $targetObj->deleteAttribute($target,"MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA");
+        $targetObj->deleteAttribute($target,"MRW_STRICT_MBA_PLUG_RULE_CHECKING");
+        $targetObj->deleteAttribute($target,"MSS_DRAMINIT_RESET_DISABLE");
+        $targetObj->deleteAttribute($target,"MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+        $targetObj->deleteAttribute($target,"OPT_MEMMAP_GROUP_POLICY");
+        $targetObj->deleteAttribute($target,"PFET_POWERDOWN_DELAY_NS");
+        $targetObj->deleteAttribute($target,"PFET_POWERUP_DELAY_NS");
+        $targetObj->deleteAttribute($target,"PFET_VCS_VOFF_SEL");
+        $targetObj->deleteAttribute($target,"PFET_VDD_VOFF_SEL");
+        $targetObj->deleteAttribute($target,"SYSTEM_IVRMS_ENABLED");
+        $targetObj->deleteAttribute($target,"SYSTEM_RESCLK_ENABLE");
+        $targetObj->deleteAttribute($target,"SYSTEM_WOF_ENABLED");
+        $targetObj->deleteAttribute($target,"VDM_ENABLE");
+        $targetObj->deleteAttribute($target,"CHIP_HAS_SBE");
+        #handle enumeration changes
+        my $enum_val = $targetObj->getAttribute($target,"PROC_FABRIC_PUMP_MODE");
+        if ( $enum_val =~ /MODE1/i)
+        {
+            $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_NODE");
+        }
+        elsif ( $enum_val =~ /MODE2/i)
+        {
+            $targetObj->setAttribute($target,"PROC_FABRIC_PUMP_MODE","CHIP_IS_GROUP");
+        }
     }
     elsif ($type eq "PROC")
     {
@@ -120,6 +151,29 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
         {
             do_plugin("fsp_proc", $targetObj, $target);
         }
+        #TODO RTC: 178351 Remove depricated Attribute from HB XML
+        #these are obsolete
+        $targetObj->deleteAttribute($target,"CHIP_HAS_SBE");
+        $targetObj->deleteAttribute($target,"FSI_GP_REG_SCOM_ACCESS");
+        $targetObj->deleteAttribute($target,"I2C_SLAVE_ADDRESS");
+        $targetObj->deleteAttribute($target,"LPC_BASE_ADDR");
+        $targetObj->deleteAttribute($target,"NPU_MMIO_BAR_BASE_ADDR");
+        $targetObj->deleteAttribute($target,"NPU_MMIO_BAR_SIZE");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_CORE_DELAY0");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_CORE_DELAY1");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_ECO_DELAY0");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERDOWN_ECO_DELAY1");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_CORE_DELAY0");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_CORE_DELAY1");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_ECO_DELAY0");
+        $targetObj->deleteAttribute($target,"PM_PFET_POWERUP_ECO_DELAY1");
+        $targetObj->deleteAttribute($target,"PNOR_I2C_ADDRESS_BYTES");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_IOP");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_LANES");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_PEC");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_PHB");
+        $targetObj->deleteAttribute($target,"PROC_SECURITY_SETUP_VECTOR");
+        $targetObj->deleteAttribute($target,"SBE_SEEPROM_I2C_ADDRESS_BYTES");
     }
     elsif ($type eq "APSS")
     {
@@ -128,6 +182,30 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     elsif ($type eq "MEMBUF")
     {
         processMembuf($targetObj, $target);
+    }
+    elsif ($type eq "DIMM")
+    {
+        #TODO RTC: 178351 Remove depricated Attribute from HB XML
+        $targetObj->deleteAttribute($target,"MBA_DIMM");
+        $targetObj->deleteAttribute($target,"MBA_PORT");
+    }
+    elsif ($type eq "PHB")
+    {
+        #TODO RTC: 178351 Remove depricated Attribute from HB XML
+        $targetObj->deleteAttribute($target,"DEVICE_ID");
+        $targetObj->deleteAttribute($target,"HDDW_ORDER");
+        $targetObj->deleteAttribute($target,"MAX_POWER");
+        $targetObj->deleteAttribute($target,"MGC_LOAD_SOURCE");
+        $targetObj->deleteAttribute($target,"PCIE_32BIT_DMA_SIZE");
+        $targetObj->deleteAttribute($target,"PCIE_32BIT_MMIO_SIZE");
+        $targetObj->deleteAttribute($target,"PCIE_64BIT_DMA_SIZE");
+        $targetObj->deleteAttribute($target,"PCIE_64BIT_MMIO_SIZE");
+        $targetObj->deleteAttribute($target,"PCIE_CAPABILITES");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_BAR_BASE_ADDR");
+        $targetObj->deleteAttribute($target,"PROC_PCIE_NUM_LANES");
+        $targetObj->deleteAttribute($target,"SLOT_INDEX");
+        $targetObj->deleteAttribute($target,"SLOT_NAME");
+        $targetObj->deleteAttribute($target,"VENDOR_ID");
     }
 
     processIpmiSensors($targetObj,$target);
@@ -574,6 +652,12 @@ sub processProcessor
         elsif ($child_type eq "OBUS")
         {
             processObus($targetObj, $child);
+            #handle enumeration changes
+            my $enum_val = $targetObj->getAttribute($child,"OPTICS_CONFIG_MODE");
+            if ( $enum_val =~ /NVLINK/i)
+            {
+                $targetObj->setAttribute($child,"OPTICS_CONFIG_MODE","NV");
+            }
         }
         elsif ($child_type eq "FSIM" || $child_type eq "FSICM")
         {
@@ -985,6 +1069,11 @@ sub processObus
             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
             {
                 $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
+                my $enum_val = $targetObj->getAttribute($obrick,"OPTICS_CONFIG_MODE");
+                if ( $enum_val =~ /NVLINK/i)
+                {
+                    $targetObj->setAttribute($obrick,"OPTICS_CONFIG_MODE","NV");
+                }
             }
         }
         else
@@ -1017,6 +1106,12 @@ sub processObus
                  {
                     $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
 
+                 }
+                 
+                 my $enum_val = $targetObj->getAttribute($obrick,"OPTICS_CONFIG_MODE");
+                 if ( $enum_val =~ /NVLINK/i)
+                 {
+                    $targetObj->setAttribute($obrick,"OPTICS_CONFIG_MODE","NV");
                  }
             }
         }
