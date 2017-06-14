@@ -41,6 +41,9 @@ namespace SECUREBOOT
 
                 registerParser<SECUREBOOT::UdParserTargetHwKeyHash>
                   (SECURE_UDT_TARGET_HW_KEY_HASH);
+
+                registerParser<SECUREBOOT::UdParserSecuritySettings>
+                  (SECURE_UDT_SECURITY_SETTINGS);
             }
 
         private:

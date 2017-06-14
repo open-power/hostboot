@@ -165,6 +165,70 @@ private:
     UdParserTargetHwKeyHash & operator=(const UdParserTargetHwKeyHash&);
 };
 
+/**
+ * @class UdParserSecuritySettings
+ *
+ * Parses UdSecuritySettings
+ */
+class UdParserSecuritySettings : public ERRORLOG::ErrlUserDetailsParser
+{
+  public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserSecuritySettings() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserSecuritySettings() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        //***** Version 1 Memory Layout *****
+        // 1 byte   : Secure Access Bit
+        // 1 byte   : Security Override
+        // 1 byte   : Allow Attribute Overrides
+
+        detailsLayout* l_databuf = static_cast<detailsLayout*>(i_pBuffer);
+
+        i_parser.PrintHeading("Security Settings");
+        if (i_version >= 1)
+        {
+            i_parser.PrintNumber("Secure Access Bit","0x%.2X",
+                                 l_databuf->secAccessBit);
+            i_parser.PrintNumber("Security Override","0x%.2X",
+                                 l_databuf->secOverride);
+            i_parser.PrintNumber("Allow Attribute Overrides","0x%.2X",
+                                 l_databuf->allowAttrOverride);
+        }
+    }
+
+  private:
+    // Disabled
+    UdParserSecuritySettings(const UdParserSecuritySettings&);
+    UdParserSecuritySettings & operator=(const UdParserSecuritySettings&);
+
+    // Errl User Details layout
+    struct detailsLayout
+    {
+        uint8_t secAccessBit;
+        uint8_t secOverride;
+        uint8_t allowAttrOverride;
+    };
+};
+
 
 
 } // end SECUREBOOT namespace

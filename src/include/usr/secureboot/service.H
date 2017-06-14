@@ -284,6 +284,14 @@ namespace SECUREBOOT
      */
     void addSecurityRegistersToErrlog(errlHndl_t & io_err);
 
+    /**
+     * @brief Common handler for adding all relevant secureboot information to
+     *        the user details section of an error log
+     * @param[in/out] io_err  Error Log to add secure info to.
+     *                        Must not be nullptr.
+     */
+    void addSecureUserDetailsToErrolog(errlHndl_t & io_err);
+
 }
 
 #endif

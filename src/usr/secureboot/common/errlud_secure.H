@@ -125,6 +125,54 @@ class UdTargetHwKeyHash : public ERRORLOG::ErrlUserDetails
     UdTargetHwKeyHash& operator = (UdTargetHwKeyHash&&) = delete;
 };
 
+/**
+ * @class UdSecuritySettings
+ *
+ * Adds Security Settings to an error log as user detail data
+ */
+class UdSecuritySettings : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     */
+    UdSecuritySettings();
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdSecuritySettings();
+
+    /**
+     * Delete Copy Constructor
+     */
+    UdSecuritySettings(const UdSecuritySettings&) = delete;
+
+    /**
+     * Delete Copy Assignment
+     */
+    UdSecuritySettings& operator= (const UdSecuritySettings&) = delete;
+
+    /**
+     * Delete Move Constructor
+     */
+    UdSecuritySettings (UdSecuritySettings&&) = delete;
+
+    /**
+     * Delete Move Assignment
+     */
+    UdSecuritySettings& operator = (UdSecuritySettings&&) = delete;
+
+    private:
+        // Errl User Details layout
+        struct detailsLayout
+        {
+            uint8_t secAccessBit;
+            uint8_t secOverride;
+            uint8_t allowAttrOverride;
+        };
+
+};
 
 } // end SECUREBOOT namespace
 

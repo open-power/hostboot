@@ -30,6 +30,7 @@
 #include <secureboot/service.H>
 #include <secureboot/secure_reasoncodes.H>
 #include "errlud_secure.H"
+#include <kernel/bltohbdatamgr.H>
 
 namespace SECUREBOOT
 {
@@ -117,6 +118,48 @@ UdTargetHwKeyHash::UdTargetHwKeyHash(const TARGETING::Target * i_target,
 
 //------------------------------------------------------------------------------
 UdTargetHwKeyHash::~UdTargetHwKeyHash()
+{
+
+}
+
+//------------------------------------------------------------------------------
+//  SECURE Security Settings User Details
+//------------------------------------------------------------------------------
+UdSecuritySettings::UdSecuritySettings()
+{
+    // Set up Ud instance variables
+    iv_CompId = SECURE_COMP_ID;
+    iv_Version = SECURE_UDT_VERSION_1;
+    iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
+
+    char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
+                                                        sizeof(detailsLayout)));
+
+    detailsLayout * l_pDetailsLayout = reinterpret_cast<detailsLayout *>(l_pBuf);
+
+    //***** Version SECURE_UDT_VERSION_1 Memory Layout *****
+    // 1 byte   : Secure Access Bit
+    // 1 byte   : Security Override
+    // 1 byte   : Allow Attribute Overrides
+
+    l_pDetailsLayout->secAccessBit = 0xFF;
+    l_pDetailsLayout->secOverride = 0xFF;
+    l_pDetailsLayout->allowAttrOverride = 0xFF;
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
+    if (g_BlToHbDataManager.isValid())
+    {
+        l_pDetailsLayout->secAccessBit = g_BlToHbDataManager.getSecureAccessBit();
+        l_pDetailsLayout->secOverride = g_BlToHbDataManager.getSecurityOverride();
+        l_pDetailsLayout->allowAttrOverride = g_BlToHbDataManager.getAllowAttrOverrides();
+    }
+#endif
+
+}
+
+//------------------------------------------------------------------------------
+UdSecuritySettings::~UdSecuritySettings()
 {
 
 }

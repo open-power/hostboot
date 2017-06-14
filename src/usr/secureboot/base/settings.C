@@ -160,7 +160,7 @@ namespace SECUREBOOT
         auto l_errl = readSecurityRegister(i_pProc,
                     static_cast<uint64_t>(ProcSecurity::SwitchRegister),
                     o_regValue);
-        SB_INF("getSecuritySwitch() err_rc:%.4X huid:%.8X reg:%.16llX",
+        SB_INF("getSecuritySwitch() err_rc:0x%.4X huid:0x%.8X reg:0x%.16llX",
             ERRL_GETRC_SAFE(l_errl), get_huid(i_pProc), o_regValue);
 
         return l_errl;
@@ -265,6 +265,7 @@ namespace SECUREBOOT
                 TO_UINT64(get_huid(i_pTarget)),
                 true);
             pError->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
+            addSecureUserDetailsToErrolog(pError);
             break;
         }
 
@@ -335,6 +336,7 @@ namespace SECUREBOOT
                                          TO_UINT64(get_huid(i_pProc)),
                                          true /* Add HB Software Callout */ );
             l_errl->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
+            addSecureUserDetailsToErrolog(l_errl);
             break;
         }
 
