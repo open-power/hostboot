@@ -4796,9 +4796,14 @@ sub generate_pec
     }
     elsif ($pec == 1)
     {
-        $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
-        if (($proc == 0) || ($proc == 1))
+        if ($proc == 0)
         {
+            $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x00FF, 0x0000";
+            $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x2;
+        }
+        elsif ($proc == 1)
+        {
+            $pciOtherAttr{"PROC_PCIE_LANE_MASK"} = "0xFF00, 0x0000, 0x0000, 0x0000";
             $pciOtherAttr{"PROC_PCIE_IOP_SWAP"} = 0x2;
         }
     }
