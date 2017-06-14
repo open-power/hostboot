@@ -45,6 +45,7 @@ install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 HBFW_OBJPATH = ${.PATH:M*obj*}
 ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
 ENGD_SRCPATH = ${SRCPATH:S/hbfw\/img/engd\/href/g}
+SBEI_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -168,10 +169,11 @@ clobber_cp_hbfiles:
 #################################################
 SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
-P9N_EC10_BIN = ${ENGD_OBJPATH:Fp9n_10.sbe_seeprom.hdr.bin}
+P9N_EC10_BIN = ${SBEI_OBJPATH:Fp9n_10.sbe_seeprom.hdr.bin}
+P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  p9nSbePartition.bin:10=${P9N_EC10_BIN}
+  p9nSbePartition.bin:10=${P9N_EC10_BIN},20=${P9N_EC20_BIN}
 
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
