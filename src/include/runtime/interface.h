@@ -45,6 +45,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <limits.h>
 
 /** Memory error types defined for memory_error() interface. */
 enum MemoryError_t
@@ -128,7 +129,8 @@ enum MemoryError_t
 #define HBRT_RSVD_MEM__SECUREBOOT         "ibm,secure-crypt-algo-code"
 #define HBRT_RSVD_MEM__DATA               "ibm,hbrt-data"
 
-
+// Aligned reserved memory size for Opal
+#define HBRT_RSVD_MEM_OPAL_ALIGN  64*KILOBYTE
 
 /**
  * Specifiers for get_interface_capabilities

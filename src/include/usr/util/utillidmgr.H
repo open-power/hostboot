@@ -419,6 +419,15 @@ class UtilLidMgr
      */
     void* iv_lidBuffer;
 
+    /**
+     *  @brief Indicates that a lid is pre-verified in HbResvMem
+     *
+     *  @param[in] i_section - Lid Id
+     *
+     *  @return bool - True if lid is in HB reserved memory, false otherwise
+    */
+    bool lidInHbResvMem(uint32_t i_lidId) const;
+
 #endif // __HOSTBOOT_RUNTIME
 
     /**
@@ -463,6 +472,11 @@ class UtilLidMgr
      * @brief value indicating if lid is in extended image
      */
     bool iv_isLidInVFS;
+
+    /**
+     * @brief value indicating if lid is in hostboot reserved memory
+     */
+    bool iv_isLidInHbResvMem;
 
 };
 

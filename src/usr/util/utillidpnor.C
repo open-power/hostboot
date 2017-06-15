@@ -33,9 +33,13 @@
 
 #include <utility>
 #include <map>
+#include <trace/interface.H>
+#include "utilbase.H"
 
 namespace Util
 {
+
+const size_t lidIdStrLength = 9;
 
 //  Map of PNOR section Ids to pairs of LidIds
 //  Key - PNOR section
@@ -101,9 +105,11 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
 
     // Search if a lid id maps to pnor section
     auto l_secId = Util::getLidPnorSection(static_cast<Util::LidId>(i_lidId));
+
     // LidToPnor will return INVALID_SECITON if no mapping found
     if (l_secId == PNOR::INVALID_SECTION)
     {
+        UTIL_FT("UtilLidMgr::getLidPnorSection lid 0x%X not in PNOR", i_lidId);
         o_lidPnorInfo.id = PNOR::INVALID_SECTION;
     }
     // A mapping was found
@@ -120,11 +126,14 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
         else
         {
             l_lidInPnor = true;
+            UTIL_FT("UtilLidMgr::getLidPnorSection Lid 0x%X in PNOR", i_lidId);
 #ifdef CONFIG_SECUREBOOT
 #ifndef __HOSTBOOT_RUNTIME
             // The lid could be securely signed in PNOR
             if(o_lidPnorInfo.secure)
             {
+                UTIL_FT("UtilLidMgr::getLidPnorSection verify Lid in PNOR");
+
                 // Load the secure section
                 l_err = loadSecureSection(l_secId);
 

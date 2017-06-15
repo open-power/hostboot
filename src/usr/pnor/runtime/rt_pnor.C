@@ -259,9 +259,10 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
 #ifdef CONFIG_SECUREBOOT
+        o_info.secure = iv_TOC[i_section].secure;
         // We don't verify PNOR sections at runtime, but we
         // still have to bypass the secure header
-        if(iv_TOC[i_section].secure)
+        if(o_info.secure)
         {
             o_info.vaddr += PAGESIZE;
             o_info.size -= PAGESIZE;

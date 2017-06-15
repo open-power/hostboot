@@ -68,6 +68,8 @@
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <kernel/bltohbdatamgr.H>
 #include <util/utilrsvdmem.H>
+#include <util/utillidpnor.H>
+#include <stdio.h>
 
 
 namespace RUNTIME
@@ -332,7 +334,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     // Begin with ATTROVER
 
     // default to the minimum space we have to allocate anyway
-    size_t l_attrOverMaxSize = 64*KILOBYTE;
+    size_t l_attrOverMaxSize = HBRT_RSVD_MEM_OPAL_ALIGN;
 
     // copy overrides into local buffer
     uint8_t* l_overrideData =
@@ -395,11 +397,12 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     l_totalSectionSize += sizeof(l_hbTOC);  // Add 4KB Table of Contents
 
     // Fill in PADDING size
-    // Now calculate how much padding is needed for 64KB alignment
+    // Now calculate how much padding is needed for OPAL alignment
     // of the whole data section
-    size_t l_totalSizeAligned = ALIGN_X( l_totalSectionSize, 64*KILOBYTE );
+    size_t l_totalSizeAligned = ALIGN_X( l_totalSectionSize,
+                                         HBRT_RSVD_MEM_OPAL_ALIGN );
 
-    // l_actualSizeAligned will bring section to 64k alignment
+    // l_actualSizeAligned will bring section to OPAL alignment
     uint64_t l_actualSizeAligned = l_totalSizeAligned - l_totalSectionSize;
 
     // Do we need a Padding section?
@@ -571,6 +574,147 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     return l_elog;
 }
 
+errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
+                                    const uint64_t i_rangeId,
+                                    uint64_t& io_prevAddr,
+                                    uint64_t& io_prevSize)
+{
+    TRACFCOMP( g_trac_runtime,ENTER_MRK"hbResvloadSecureSection() sec %s",
+              PNOR::SectionIdToString(i_sec));
+
+    errlHndl_t l_elog = nullptr;
+    PNOR::SectionInfo_t l_info;
+    uint64_t l_tmpVaddr = 0;
+
+    do {
+
+#ifdef CONFIG_SECUREBOOT
+    // Securely Load PNOR section
+    l_elog = loadSecureSection(i_sec);
+    if (l_elog)
+    {
+        TRACFCOMP( g_trac_runtime,
+                   ERR_MRK"hbResvloadSecureSection() - Error from "
+                   "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+        break;
+    }
+#endif
+
+    l_elog = PNOR::getSectionInfo( i_sec, l_info );
+    if(l_elog)
+    {
+        //No need to commit error here, it gets handled later
+        //just break out to escape this function
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() getSectionInfo failed");
+        break;
+    }
+
+    auto l_pnorVaddr = l_info.vaddr;
+    auto l_imgSize = l_info.size;
+    // If section is signed, only the protected size was loaded into memory
+#ifdef CONFIG_SECUREBOOT
+    if (l_info.secure)
+    {
+        l_imgSize = l_info.secureProtectedPayloadSize;
+        // Include secure header
+        l_pnorVaddr -= PAGESIZE;
+        l_imgSize += PAGESIZE;
+    }
+#endif
+
+    // Align size for OPAL
+    size_t l_imgSizeAligned = ALIGN_X(l_imgSize, HBRT_RSVD_MEM_OPAL_ALIGN);
+
+    //  For PHYP we build up starting at the end of the  previously allocated
+    //  areas, for OPAL we build downwards from the top of memory
+    uint64_t l_imgAdd = 0x0;
+    if(TARGETING::is_phyp_load())
+    {
+        l_imgAdd = io_prevAddr + io_prevSize;
+    }
+    else if(TARGETING::is_sapphire_load())
+    {
+        l_imgAdd = io_prevAddr - l_imgSizeAligned;
+    }
+
+    auto l_lids = Util::getPnorSecLidIds(i_sec);
+    TRACFCOMP(g_trac_runtime, "hbResvloadSecureSection() getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
+              l_lids.lid, l_lids.containerLid);
+    assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
+
+// @TODO RTC:178163 enabled when HDAT support is complete for extra HB resv mem entries
+// PHYP will use these 2 entries in the future
+/*
+    // Verified Lid - Header Only
+    char l_containerLidStr [Util::lidIdStrLength];
+    snprintf (l_containerLidStr, Util::lidIdStrLength, "%X",
+              l_lids.containerLid);
+    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+                                  i_rangeId,
+                                  l_imgAdd,
+                                  l_imgSizeAligned,
+                                  l_containerLidStr);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid header failed");
+        break;
+    }
+
+    // Verified Lid - Content Only
+    char l_lidStr[Util::lidIdStrLength];
+    snprintf (l_lidStr, Util::lidIdStrLength, "%X",l_lids.lid);
+    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+                                  i_rangeId,
+                                  l_imgAdd+PAGE_SIZE,
+                                  l_imgSizeAligned,
+                                  l_lidStr);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid content failed");
+        break;
+    }
+*/
+    // Verified PNOR - Header + Content
+    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_PNOR,
+                                  i_rangeId,
+                                  l_imgAdd,
+                                  l_imgSizeAligned,
+                                  PNOR::SectionIdToString(i_sec));
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry PNOR content failed");
+        break;
+    }
+
+    io_prevAddr = l_imgAdd;
+    // Use aligned size for OPAL alignment even if that means there is some
+    // wasted space.
+    io_prevSize = l_imgSizeAligned;
+
+    // Load the Verified image into HB resv memory
+    l_elog = mapPhysAddr(l_imgAdd, l_imgSize, l_tmpVaddr);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() mapPhysAddr failed");
+        break;
+    }
+
+    // Include Header page from pnor image.
+    memcpy(reinterpret_cast<void*>(l_tmpVaddr),
+           reinterpret_cast<void*>(l_pnorVaddr),
+           l_imgSize);
+
+    l_elog = unmapVirtAddr(l_tmpVaddr);
+    if(l_elog)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() unmapVirtAddr failed");
+        break;
+    }
+    } while(0);
+
+    return l_elog;
+}
+
 /**
  *  @brief Load the HDAT HB Reserved Memory
  *         address range structures on given node
@@ -640,6 +784,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             // -----SBE Comm---------
             // -----SBE FFDC---------
             // -----Secureboot cryptographic algorithms code---------
+            // -----Verified Images---------
+            //   -- OCC
+            //   -- WOFDATA
+            //   -- HCODE
 
             // First opal entries are for the HOMERs
             uint64_t l_homerAddr = l_topMemAddr;
@@ -788,11 +936,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             uint64_t l_imageSize = l_vfsLastAddress +
                                 (l_relocateCount+1)*sizeof(uint64_t);
 
-            // Set the image address, align down 64K for Opal
+            // Set the image address, align down for OPAL
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_prevDataAddr);
             l_hbrtImageAddr = ALIGN_PAGE_DOWN(l_hbrtImageAddr - l_imageSize);
-            l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,64*KILOBYTE);
-            size_t l_hbrtImageSizeAligned = ALIGN_X( l_imageSize, 64*KILOBYTE );
+            l_hbrtImageAddr = ALIGN_DOWN_X(l_hbrtImageAddr,
+                                           HBRT_RSVD_MEM_OPAL_ALIGN);
+            size_t l_hbrtImageSizeAligned = ALIGN_X( l_imageSize,
+                                                   HBRT_RSVD_MEM_OPAL_ALIGN);
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                           i_nodeId,
@@ -836,9 +986,11 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         uint64_t l_sbeffdcSize =
             SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize();
 
-        // Minimum 64K size for Opal
-        size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize, 64*KILOBYTE );
-        size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize, 64*KILOBYTE );
+        // Algin size for OPAL
+        size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize,
+                                              HBRT_RSVD_MEM_OPAL_ALIGN );
+        size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize,
+                                              HBRT_RSVD_MEM_OPAL_ALIGN );
 
         // Loop through all functional Procs
         for (const auto & l_procChip: l_procChips)
@@ -928,13 +1080,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
         }
 
+        ///////////////////////////////////////////////////
         // -- Secureboot cryptographic algorithms code
         //    Only add if SecureROM is available and valid.
         if (g_BlToHbDataManager.isValid())
         {
             size_t l_secureRomSize = g_BlToHbDataManager.getSecureRomSize();
-            // Minimum 64K size for Opal
-            size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize, 64*KILOBYTE);
+            // Align size for OPAL
+            size_t l_secRomSizeAligned = ALIGN_X(l_secureRomSize,
+                                                 HBRT_RSVD_MEM_OPAL_ALIGN);
 
             uint64_t l_secureRomAddr = 0x0;
             if(TARGETING::is_phyp_load())
@@ -945,7 +1099,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             {
                 l_secureRomAddr = l_prevDataAddr - l_secRomSizeAligned;
             }
-            assert(l_secureRomAddr>0, "populate_HbRsvMem: SecureROM address cannot be 0");
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_SECUREBOOT,
                                           i_nodeId,
@@ -978,12 +1131,38 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
         }
 
+        ///////////////////////////////////////////////////
+        // -- Verified Images
+        //   -- OCC
+        //   -- WOFDATA
+        //   -- HCODE
+        // @TODO RTC:178164 add OCC PNOR support for fsp back
+        if (!INITSERVICE::spBaseServicesEnabled())
+        {
+            l_elog = hbResvLoadSecureSection(PNOR::OCC, i_nodeId,
+                                             l_prevDataAddr, l_prevDataSize);
+            if (l_elog)
+            {
+                break;
+            }
+        }
+        l_elog = hbResvLoadSecureSection(PNOR::WOFDATA, i_nodeId,
+                                         l_prevDataAddr, l_prevDataSize);
+        if (l_elog)
+        {
+            break;
+        }
+        l_elog = hbResvLoadSecureSection(PNOR::HCODE, i_nodeId, l_prevDataAddr,
+                                         l_prevDataSize);
+        if (l_elog)
+        {
+            break;
+        }
     } while(0);
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
-   return(l_elog);
+    return(l_elog);
 } // end populate_HbRsvMem
-
 
 errlHndl_t populate_hbSecurebootData ( void )
 {
