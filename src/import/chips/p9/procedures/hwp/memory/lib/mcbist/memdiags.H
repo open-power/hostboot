@@ -387,16 +387,15 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
 /// @param[in] i_target the target
 /// @param[in] i_end whether to end, and where (default - don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
-/// @param[in] i_speed the speed to scrub (default - NO_CHANGE meaning leave speed untouched)
+/// @param[in] i_speed the speed to scrub (default - SAME_SPEED meaning leave speed untouched)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
-                                const end_boundary i_end = end_boundary::NONE,
-                                const stop_conditions& i_stop = stop_conditions(),
+                                const end_boundary i_end = end_boundary::DONT_CHANGE,
+                                const stop_conditions& i_stop = stop_conditions(stop_conditions::DONT_CHANGE),
                                 const speed i_speed = speed::SAME_SPEED );
 
 } // namespace
 
 #endif
-
