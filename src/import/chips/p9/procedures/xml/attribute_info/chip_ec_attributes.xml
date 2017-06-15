@@ -3092,6 +3092,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_OBUS_P9NDD1_SPY_NAMES</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Use Nimbus DD1 Obus spy register definition names
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DDRPHY_P9NDD1_SPY_NAMES</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
