@@ -102,6 +102,10 @@ typedef struct __attribute__((packed))
     /** Contains number of registers per type for each target type. */
     uint8_t regCounts[TRGT_MAX][REG_MAX];
 
+    /** Number of regs that are dependent on EC level      **/
+    /** (these registers follow the normal register list)  **/
+    uint8_t ecDepCounts;
+
     /** Information regarding the PNOR location and size. */
     HOMER_PnorInfo_t pnorInfo;
 
@@ -137,7 +141,25 @@ typedef struct __attribute__((packed))
     uint16_t chipPos  :  6; /** Chip position relative to the node. */
     uint16_t reserved :  6;
 
+    uint8_t  chipEcLevel;   /** EC level for this chip */
+
 } HOMER_Chip_t;
+
+
+/** Used for Registers that have EC level dependencies */
+typedef struct __attribute__((packed))
+{
+    uint32_t chipType :  4; /** See HOMER_ChipType_t. */
+    uint32_t trgtType :  6; /** See TrgtType_t. */
+    uint32_t regType  :  4; /** See RegType_t. */
+    uint32_t ddLevel  :  8; /** A zero value applies to all levels on a chip. */
+    uint32_t reserved : 10; /** unused at this time */
+
+    /** The 32 or 64 bit address (right justified). */
+    uint64_t address;
+
+} HOMER_ChipSpecAddr_t;
+
 
 /** @return An initialized HOMER_Chip_t struct. */
 static inline HOMER_Chip_t HOMER_getChip( HOMER_ChipType_t i_type )
@@ -237,7 +259,7 @@ static inline HOMER_ChipCentaur_t HOMER_initChipCentaur()
  */
 typedef struct __attribute__((packed))
 {
-    HOMER_Chip_t  hChipType;
+    HOMER_Chip_t  hChipType;  /* Nimbus, Centaur, EC Level, etc...*/
 
     union
     {

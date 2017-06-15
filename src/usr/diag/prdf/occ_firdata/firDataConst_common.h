@@ -69,10 +69,6 @@ typedef enum
     TRGT_MEMBUF,
     TRGT_MBA,
 
-    /* EC level handling -- special case for NIMBUS */
-    TRGT_PROC_NIMBUS_10,
-    TRGT_PROC_NIMBUS_20,
-
     TRGT_MAX,
 
 } TrgtType_t;
