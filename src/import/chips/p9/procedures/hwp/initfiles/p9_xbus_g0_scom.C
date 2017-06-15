@@ -60,13 +60,19 @@ constexpr uint64_t literal_0b1100 = 0b1100;
 constexpr uint64_t literal_0b00 = 0b00;
 
 fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& TGT0,
-                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
+                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2)
 {
     {
+        fapi2::ATTR_EC_Type   l_chip_ec;
+        fapi2::ATTR_NAME_Type l_chip_id;
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
+        FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
         fapi2::ATTR_IS_SIMULATION_Type l_TGT1_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT1, l_TGT1_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         uint64_t l_def_IS_SIM = (l_TGT1_ATTR_IS_SIMULATION == literal_1);
+        fapi2::ATTR_CHIP_EC_FEATURE_HW393297_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW393297, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297));
         fapi2::ATTR_IO_XBUS_MASTER_MODE_Type l_TGT0_ATTR_IO_XBUS_MASTER_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_XBUS_MASTER_MODE, TGT0, l_TGT0_ATTR_IO_XBUS_MASTER_MODE));
         uint64_t l_def_is_master = (l_TGT0_ATTR_IO_XBUS_MASTER_MODE == literal_1);
@@ -2952,6 +2958,22 @@ fapi2::ReturnCode p9_xbus_g0_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             l_scom_buffer.insert<48, 7, 57, uint64_t>
             (l_IOF1_TX_WRAP_TX0_TXPACKS_3_TXPACK_DD_SLICE_4_DD_TX_BIT_REGS_TX_PRBS_SEED_VALUE_16_22_PATTERN_TX_A_16_22 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8004441006010c3full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8008000006010c3full, l_scom_buffer ));
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297 == literal_0))
+            {
+                constexpr auto l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_ON = 0x1;
+                l_scom_buffer.insert<48, 1, 63, uint64_t>(l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_ON );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_OFF = 0x0;
+                l_scom_buffer.insert<48, 1, 63, uint64_t>(l_IOF1_RX_RX0_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_OFF );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8008000006010c3full, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8008080006010c3full, l_scom_buffer ));
