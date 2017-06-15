@@ -30,8 +30,19 @@
     <description>Mapping keyword smaller than minimum expected</description>
     <ffdc>SIZE</ffdc>
     <ffdc>EXPECTED</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -39,15 +50,30 @@
     <description>Version in vpd mapping keyword not supported</description>
     <ffdc>VERSION</ffdc>
     <ffdc>EXPECTED</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_TYPE</rc>
     <description>Type not supported. Supported types are MR, MT, DQ, and CK</description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -58,16 +84,24 @@
     <ffdc>MEMVPDFREQ1</ffdc>
     <ffdc>MEMVPDFREQ2</ffdc>
     <ffdc>MEMVPDFREQ3</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_GET_MEM_VPD_UNSUPPORTED_RANK</rc>
     <description>Invalid Rank. Valid values are 0,1,2 and 4</description>
     <ffdc>RANK</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -80,7 +114,7 @@
     <ffdc>DIMM0RANK</ffdc>
     <ffdc>DIMM1RANK</ffdc>
     <ffdc>HEADER</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
     <!-- Contents of mapping keyword, i.e. MR, MT, DQ -->
     <ffdc>MAPROW0</ffdc>
@@ -94,6 +128,17 @@
     <ffdc>MAPROW8</ffdc>
     <ffdc>MAPROW9</ffdc>
     <!-- Should use a variable ffdc for the rows but that isn't supported -->
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -102,8 +147,19 @@
     <ffdc>ENTRY</ffdc>
     <ffdc>MAX_ENTRIES</ffdc>
     <ffdc>VERSION</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -111,8 +167,12 @@
     <description>ATTR_MEMVPD_POS is out of range</description>
     <ffdc>MCS_POS</ffdc>
     <ffdc>MAX_MEMVPD_POS</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCS_TARGET</ffdc>
     <ffdc>VPDTYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
