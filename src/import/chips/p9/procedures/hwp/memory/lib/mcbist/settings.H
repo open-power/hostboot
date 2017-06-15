@@ -90,6 +90,7 @@ class stop_conditions
         // Many of the config fields share a disable bit pattern, so we define it here
         static constexpr uint64_t DISABLE       = 0b1111;
         static constexpr uint64_t MAX_THRESHOLD = 0b1110;
+        static constexpr uint64_t DONT_CHANGE = 0;
 
     private:
 
