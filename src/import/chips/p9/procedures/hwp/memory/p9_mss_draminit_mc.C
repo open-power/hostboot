@@ -73,13 +73,7 @@ extern "C"
             // Setup the read_pointer_delay
             // TK: Do we need to do this in general or is this a place holder until the
             // init file gets here?
-            {
-                fapi2::buffer<uint64_t> l_data;
-                FAPI_TRY( mss::getScom(p, MCA_RECR, l_data) );
-                l_data.insertFromRight<MCA_RECR_MBSECCQ_READ_POINTER_DELAY, MCA_RECR_MBSECCQ_READ_POINTER_DELAY_LEN>(0x1);
-                FAPI_DBG("writing read pointer delay 0x%016lx %s", l_data, mss::c_str(p));
-                FAPI_TRY( mss::putScom(p, MCA_RECR, l_data) );
-            }
+            FAPI_TRY( mss::setup_read_pointer_delay(p), "Failed to setup read pointer delay for %s", mss::c_str(p));
 
             //Enable Power management based off of mrw_power_control_requested
             //Needs to be set near end of IPL
