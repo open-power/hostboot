@@ -170,7 +170,7 @@ fapi2::ReturnCode p9_io_xbus_scominit(
     {
         case ENUM_ATTR_XBUS_GROUP_0:
             FAPI_INF("Group 0:Invoke FAPI procedure core: input_target");
-            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_target, l_system_target);
+            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_target, l_system_target, l_proc);
 
             if( rc )
             {
@@ -180,7 +180,7 @@ fapi2::ReturnCode p9_io_xbus_scominit(
             }
 
             FAPI_INF("Group 0:Invoke FAPI procedure core: connected_target");
-            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_connected_target, l_system_target);
+            FAPI_EXEC_HWP(rc, p9_xbus_g0_scom, i_connected_target, l_system_target, l_proc);
 
             if( rc )
             {
