@@ -35,13 +35,6 @@ OBJS += daemonif.o
 OBJS += debug.o
 OBJS += assert.o
 
-# We need the client interfaces for console available in the base image,
-# similar to the client interfaces for trace.  Putting 'console.o' from the
-# console component into libtrace.so instead of creating a whole new library
-# for that purpose.
-VPATH += ../console
-OBJS += $(if $(CONFIG_CONSOLE),console.o)
-
 SUBDIRS += daemon.d
 SUBDIRS += test.d
 SUBDIRS += runtime.d

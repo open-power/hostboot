@@ -54,6 +54,20 @@ const TaskInfo    g_taskinfolist[]   =   {
         },
 
         /**
+         * @brief console library
+         */
+#ifdef CONFIG_CONSOLE
+        {
+            "libconsole.so",                       // library name
+            NULL,                                  // no function to run
+            {
+                START_TASK,                        // task type
+                BASE_IMAGE,                        // base image module
+            }
+        },
+#endif
+
+        /**
          * @brief   PNOR    Driver  Task
          */
         {
