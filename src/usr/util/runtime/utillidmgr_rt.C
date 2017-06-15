@@ -31,17 +31,21 @@
 #include <vfs/vfs.H>
 #include <runtime/interface.h>
 #include <initservice/initserviceif.H>
+#include <secureboot/containerheader.H>
+#include <trace/interface.H>
+#include "../utilbase.H"
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
-    iv_isLidInPnor(false), iv_lidBuffer(NULL), iv_lidSize(0),
-    iv_isLidInVFS(false)
+    iv_isLidInPnor(false), iv_lidBuffer(nullptr), iv_lidSize(0),
+    iv_isLidInVFS(false), iv_isLidInHbResvMem(false)
 {
+    iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
     updateLid(i_lidId);
 }
 
 UtilLidMgr::~UtilLidMgr()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     l_err = cleanup();
     if(l_err)
@@ -53,7 +57,7 @@ UtilLidMgr::~UtilLidMgr()
 
 errlHndl_t UtilLidMgr::setLidId(uint32_t i_lidId)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     //must call cleanup before updateLid
     l_err = cleanup();
@@ -75,7 +79,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 {
     errlHndl_t l_err = loadLid();
 
-    if (iv_lidBuffer != NULL)
+    if (iv_lidBuffer != nullptr)
     {
         memcpy(i_dest, iv_lidBuffer, std::min(i_destSize, iv_lidSize));
     }
@@ -86,9 +90,9 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
                                          size_t& o_lidImageSize)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
-    if((NULL == iv_lidBuffer) || (0 == iv_lidSize))
+    if((nullptr == iv_lidBuffer) || (0 == iv_lidSize))
     {
         l_err = loadLid();
     }
@@ -96,7 +100,7 @@ errlHndl_t UtilLidMgr::getStoredLidImage(void*& o_pLidImage,
     if(l_err)
     {
         o_lidImageSize = 0;
-        o_pLidImage = NULL;
+        o_pLidImage = nullptr;
     }
     else
     {
@@ -112,27 +116,73 @@ errlHndl_t UtilLidMgr::releaseLidImage(void)
     // we already figured out where the data is, remember that
     bool l_inPnor = iv_isLidInPnor;
     bool l_inVFS = iv_isLidInVFS;
+    bool l_inHbResvMem = iv_isLidInHbResvMem;
 
     errlHndl_t l_err = cleanup();
 
     // restore the presence info
     iv_isLidInPnor = l_inPnor;
     iv_isLidInVFS = l_inVFS;
+    iv_isLidInHbResvMem = l_inHbResvMem;
 
     return l_err;
 }
 
 errlHndl_t UtilLidMgr::loadLid()
 {
-    if (NULL != iv_lidBuffer) return NULL;
+    if (nullptr != iv_lidBuffer) return nullptr;
 
-    const char* l_addr = NULL;
+    const char* l_addr = nullptr;
     size_t l_size = 0;
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     do
     {
-        if(iv_isLidInVFS)
+        if(iv_isLidInHbResvMem)
+        {
+            iv_lidBuffer = reinterpret_cast<void*>(g_hostInterfaces->
+                get_reserved_mem(PNOR::SectionIdToString(iv_lidPnorInfo.id),0));
+
+            // If nullptr returned, set size to 0 to indicate we could not find
+            // the lid in HB resv memory
+            if (iv_lidBuffer == nullptr)
+            {
+                UTIL_FT("UtilLidMgr::loadLid - resv mem section not found");
+                iv_lidSize = 0;
+            }
+            else
+            {
+                UTIL_FT("UtilLidMgr::loadLid - resv mem section found");
+                // If section is secure, adjust size and buffer pointer
+                if(iv_lidPnorInfo.secure)
+                {
+                    UTIL_FT("UtilLidMgr::loadLid - resv mem section is secure");
+                    // Build a container header object to parse protected size
+                    SECUREBOOT::ContainerHeader l_conHdr(iv_lidBuffer);
+                    iv_lidSize = l_conHdr.payloadTextSize();
+
+                    // Increment by page size to not expose secure header
+                    iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
+                                   PAGESIZE;
+                }
+                else
+                {
+                    // If no secure header, just use PNOR size
+                    iv_lidSize = iv_lidPnorInfo.size;
+
+                    // Need to increment past header if one exists
+                    if (iv_lidPnorInfo.sha512Version)
+                    {
+                        UTIL_FT("UtilLidMgr::loadLid - resv mem section is not secure, but has header");
+                        // Increment by page size to not expose sha512 version header
+                        iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
+                                       PAGESIZE;
+                        iv_lidSize -= PAGESIZE;
+                    }
+                }
+            }
+        }
+        else if(iv_isLidInVFS)
         {
             l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
             if (l_errl)
@@ -149,7 +199,7 @@ errlHndl_t UtilLidMgr::loadLid()
             iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
         }
         else if( g_hostInterfaces->lid_load
-                 && INITSERVICE::spBaseServicesEnabled() )
+                 && iv_spBaseServicesEnabled  )
         {
             int rc = g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer,
                     &iv_lidSize);
@@ -199,8 +249,9 @@ errlHndl_t UtilLidMgr::loadLid()
 
 errlHndl_t UtilLidMgr::cleanup()
 {
-    errlHndl_t l_err = NULL;
-    if ((!iv_isLidInVFS) && (!iv_isLidInPnor) && (NULL != iv_lidBuffer))
+    errlHndl_t l_err = nullptr;
+    if ((!iv_isLidInVFS) && (!iv_isLidInPnor) && (nullptr != iv_lidBuffer) &&
+         !iv_isLidInHbResvMem)
     {
         int l_rc = g_hostInterfaces->lid_unload(iv_lidBuffer);
         if (l_rc)
@@ -220,10 +271,11 @@ errlHndl_t UtilLidMgr::cleanup()
         }
     }
 
-    iv_lidBuffer   = NULL;
+    iv_lidBuffer   = nullptr;
     iv_lidSize     = 0;
     iv_isLidInPnor = false;
     iv_isLidInVFS  = false;
+    iv_isLidInHbResvMem = false;
     return l_err;
 }
 
@@ -231,14 +283,23 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
 {
     iv_lidId = i_lidId;
 
+    // First check if lid is already in hostboot reserved memory
+    // In securemode the lid is pre-verified
+    if (TARGETING::is_sapphire_load() && lidInHbResvMem(iv_lidId))
+    {
+        UTIL_FT("UtilLidMgr::updateLid - lid in Hb Resv Mem");
+        getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
+        iv_isLidInHbResvMem = true;
+    }
     // Check if PNOR is access is supported
-    if (!g_hostInterfaces->pnor_read ||
-        INITSERVICE::spBaseServicesEnabled())
+    else if (!g_hostInterfaces->pnor_read ||
+             iv_spBaseServicesEnabled )
     {
         iv_isLidInPnor = false;
     }
     else
     {
+        UTIL_FT("UtilLidMgr::updateLid - lid in PNOR");
         // If it's in PNOR it's not technically a lid
         // so use a slightly different extension
         iv_isLidInPnor = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
@@ -252,13 +313,36 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
         static uint32_t lidlist[] =
         {
             Util::OCC_LIDID,
+            Util::OCC_CONTAINER_LIDID,
             Util::WOF_LIDID,
-            Util::NIMBUS_HCODE_LIDID
+            Util::WOF_CONTAINER_LIDID,
+            Util::NIMBUS_HCODE_LIDID,
+            Util::HWREFIMG_RINGOVD_LIDID,
+            Util::HCODE_CONTAINER_LIDID,
+            Util::HWREFIMG_RINGOVD_LIDID
         };
         *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
         return lidlist;
 }
 
+bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
+{
+    // @TODO RTC:178164 Remove this and add OCC PNOR support for fsp back
+    // hostboot could not verify it from pnor, so it is not in hb resv meomory
+    if (iv_spBaseServicesEnabled &&
+        (i_lidId == Util::OCC_LIDID || i_lidId == Util::OCC_CONTAINER_LIDID))
+    {
+        return false;
+    }
+
+    return i_lidId == Util::OCC_LIDID ||
+           i_lidId == Util::OCC_CONTAINER_LIDID ||
+           i_lidId == Util::WOF_LIDID ||
+           i_lidId == Util::WOF_CONTAINER_LIDID ||
+           i_lidId == Util::NIMBUS_HCODE_LIDID ||
+           i_lidId == Util::CUMULUS_HCODE_LIDID ||
+           i_lidId == Util::HCODE_CONTAINER_LIDID;
+}
 
 //------------------------------------------------------------------------
 

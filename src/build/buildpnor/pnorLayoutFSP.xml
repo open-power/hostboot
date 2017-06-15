@@ -238,6 +238,18 @@ Layout Description - Used when building an FSP driver
         <side>sideless</side>
         <ecc/>
     </section>
+<!--
+    @TODO RTC:178164 add OCC support back in
+    <section>
+        <description>OCC Lid (1.125M)</description>
+        <eyeCatch>OCC</eyeCatch>
+        <physicalOffset>0x2B7E000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+-->
     <section>
         <description>VFRT data for WOF (3MB)</description>
         <!-- We need 266KB per module sort, going to support

@@ -54,8 +54,8 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ,iv_lidImageSize(0)
 ,iv_lidSize(0)
 {
-    updateLid(i_lidId);
     iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
+    updateLid(i_lidId);
 
 #ifdef CONFIG_SECUREBOOT
     // In SECUREBOOT mode ensure that OpenPower systems only get LIDs from

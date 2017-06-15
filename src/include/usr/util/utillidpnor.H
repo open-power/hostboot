@@ -32,6 +32,9 @@
 namespace Util
 {
 
+// 4 byte LidId string plus NULL
+extern const size_t lidIdStrLength;
+
 /** @struct LidAndContainerLid
  *  @brief  Stores the Lid ID and corresponding Container Lid ID for a lid
  *
