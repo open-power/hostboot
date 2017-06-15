@@ -1097,6 +1097,12 @@ ispy MC01.PORT0.ATCL.CL.CLSCOM.MCBUSYQ_BUSY_COUNTER_THRESHOLD2 [when=S && ATTR_C
   64;
 }
 
+# Performance request: disable clearing of MDI on remte cp_m
+espy MC01.PORT0.ATCL.CL.CLSCOM.MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] {
+  spyv;
+  ON;
+}
+
 #################
 # DD2 WORKAROUNDS
 #################
