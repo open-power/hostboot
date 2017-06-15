@@ -205,7 +205,8 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     SPGE_DEBUG_TRAP_ENABLE                      = 8,
     CME_DEBUG_TRAP_ENABLE                       = 9,
     PGPE_DEBUG_TRAP_ENABLE                      = 10,
-    L3_CONTAINED_MODE                           = 11
+    L3_CONTAINED_MODE                           = 11,
+    PGPE_SAFE_MODE_ERROR                        = 12
 };
 
 //
