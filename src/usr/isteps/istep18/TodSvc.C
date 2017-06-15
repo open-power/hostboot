@@ -177,6 +177,7 @@ errlHndl_t TodSvc::todSetup()
                      "for secondary topology.");
             //Report the error as informational - loss of redundancy,
             //but no loss of TOD function.
+            errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
 
@@ -188,7 +189,7 @@ errlHndl_t TodSvc::todSetup()
             TOD_ERR("TOD setup failure: failed to create secondary topology.");
             //Report the error as informational - loss of redundancy,
             //but no loss of TOD function.
-
+            errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
         l_secondary.dumpTopology();
@@ -202,7 +203,7 @@ errlHndl_t TodSvc::todSetup()
             TOD_ERR("TOD setup failure: secondary topology setup HWP.");
             //Report the error as informational - loss of redundancy,
             //but no loss of TOD function.
-
+            errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
 
@@ -377,6 +378,8 @@ errlHndl_t TodSvc::todInit()
         if( l_errHdl )
         {
             TOD_ERR("TOD initialization failed for primary topology : HWP");
+            l_errHdl->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            errlCommit(l_errHdl, TOD_COMP_ID);
             break;
         }
 

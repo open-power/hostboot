@@ -199,11 +199,13 @@ errlHndl_t TodDrawer::findMasterProc(TodProc*& o_drawerMaster) const
              *               host
              */
 
+            const bool hbSwError = true;
             l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_FIND_MASTER_PROC,
                            TOD_NO_MASTER_PROC,
-                           iv_todDrawerId);
+                           iv_todDrawerId,
+                           hbSwError);
         }
     }while(0);
 
@@ -237,7 +239,7 @@ void TodDrawer::getPotentialMdmts(
 {
     TOD_ENTER("TodDrawer::getPotentialMdmts");
     bool l_isGARDed = false;
-    errlHndl_t l_errHndl = NULL;
+    errlHndl_t l_errHdl = NULL;
 
     const TARGETING::Target* l_procTarget = NULL;
 
@@ -250,14 +252,16 @@ void TodDrawer::getPotentialMdmts(
         if ( !(TOD::isProcBlackListed(l_procTarget)) )
         {
             //Check if the target is not garded
-            l_errHndl = TOD::checkGardStatusOfTarget(l_procTarget,
+            l_errHdl = TOD::checkGardStatusOfTarget(l_procTarget,
                         l_isGARDed);
 
-            if(l_errHndl)
+            if(l_errHdl)
             {
                 TOD_ERR("Failed in checkGardStatusOfTarget() to get the "
                         " GARD state for the target 0x%.8x",
                         GETHUID(l_procTarget));
+
+                errlCommit(l_errHdl, TOD_COMP_ID);
 
                 //Ignore this target as the gard status for this target
                 //could not be obtained.
