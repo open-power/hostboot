@@ -3608,15 +3608,17 @@ fapi_try_exit:
 /**
  * @brief   populate L3 Refresh Timer Control register
  * @param   i_pChipHomer    points to start of P9 HOMER.
+ * @param   i_procTgt       fapi2 target for p9 chip.
  * @return  fapi2 return code.
  */
-fapi2::ReturnCode populateL3RefreshScomReg( void*    i_pChipHomer )
+fapi2::ReturnCode populateL3RefreshScomReg( void*    i_pChipHomer, CONST_FAPI2_PROC& i_procTgt)
 {
     FAPI_DBG("> populateL3RefreshScomReg");
 
     do
     {
         uint32_t l_nest_freq_mhz = 0;
+        uint8_t  l_chip_ec_feature_hw408892 = 0;
         uint32_t scomAddr = 0;
         uint32_t rc = IMG_BUILD_SUCCESS;
         uint64_t l_refreshScomVal ;
@@ -3634,8 +3636,14 @@ fapi2::ReturnCode populateL3RefreshScomReg( void*    i_pChipHomer )
                                l_nest_freq_mhz),
                  "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_PB_MHZ");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW408892,
+                               i_procTgt,
+                               l_chip_ec_feature_hw408892),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_CHIP_EC_FEATURE_HW408892");
+
+
         // above 2GHz, set DIVIDE_MINOR = DIV_BY_12 = 0x2
-        if (l_nest_freq_mhz >= 2000)
+        if ((l_nest_freq_mhz >= 2000) && (l_chip_ec_feature_hw408892 == 0))
         {
             refreshValBuf.insertFromRight<EX_DRAM_REF_REG_L3_TIMER_DIVIDE_MINOR,
                 EX_DRAM_REF_REG_L3_TIMER_DIVIDE_MINOR_LEN>(0x2);
@@ -4025,7 +4033,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                   "populateEpsilonL3ScomReg failed" );
 
         //Update L3 Refresh Timer Control SCOM Registers
-        FAPI_TRY( populateL3RefreshScomReg( pChipHomer ),
+        FAPI_TRY( populateL3RefreshScomReg( pChipHomer, i_procTgt),
                   "populateL3RefreshScomReg failed" );
 
         //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
