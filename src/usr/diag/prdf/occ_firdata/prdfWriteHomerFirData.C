@@ -270,7 +270,6 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_PROC][REG_FIR] =
     {
-        0x05011440, // NPU FIR1
         0x01010800, // OCCFIR
         0x050129C0, // PBAMFIR
         0x0104000a, // TP_LFIR
@@ -649,17 +648,8 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x8001D0070301143Fll, // DDRPHY_APB_FIR_ERR1_P1
     };
 
-    // EC level handling will be done with
-    // different target types.
-    io_targMap[TRGT_PROC_NIMBUS_10][REG_FIR] =
-    {
-        0x05011400, // NPU FIR0  (differs on DD level)
-    };
-
-    io_targMap[TRGT_PROC_NIMBUS_20][REG_FIR] =
-    {
-        0x05013C00, // NPU FIR0  (differs on DD level)
-    };
+    // EC level handling will be done with a
+    // structure and separate register count field.
 
 } // end getAddresses
 
@@ -754,6 +744,9 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
             l_chipItem.hChipType = HOMER_getChip(l_procModelType);
             l_chipItem.hChipType.chipPos  = procPos;
             l_chipItem.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
+
+            // save EC level for the chip
+            l_chipItem.hChipType.chipEcLevel = (*procIt)->getAttr<ATTR_EC>();
 
             // is this the MASTER processor ?
             l_chipItem.hChipN.isMaster = (*procIt == masterProc) ? 1 : 0;
@@ -864,6 +857,9 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
                 // Get the MEMBUF FSI address.
                 getFsiLinkInfo( *membIt, fsiInfo );
 
+                // save EC level for the chip
+                l_chipItem.hChipType.chipEcLevel=(*membIt)->getAttr<ATTR_EC>();
+
                 // Fill in our HOMER chip info
                 l_chipItem.hChipType = HOMER_getChip(HOMER_CHIP_CENTAUR);
                 l_chipItem.hChipType.chipPos  = membPos;
@@ -906,6 +902,63 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
 
 //------------------------------------------------------------------------------
 
+/***************************************************/
+/* Define EC level dependent registers here        */
+/*   chipType         Target     RegType  EC level */
+/*     Unused  - scomAddress                       */
+/***************************************************/
+static HOMER_ChipSpecAddr_t  s_ecDepProcRegisters[]
+{
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x10,
+      0, 0x0000000005011400ll }, // NPU0FIR DD1
+
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x10,
+      0, 0x0000000005011440ll }, // NPU1FIR DD1
+
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
+      0, 0x0000000005013C00ll }, // NPU0FIR DD2
+
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
+      0, 0x0000000005013C40ll }, // NPU1FIR DD2
+
+    { HOMER_CHIP_NIMBUS, TRGT_PROC, REG_FIR, 0x20,
+      0, 0x000000005013C80ll }   // NPU2FIR DD2
+};
+
+//------------------------------------------------------------------------------
+errlHndl_t  homerVerifySizeFits( const size_t i_maxSize,
+                                 const size_t i_currentSize )
+{
+    errlHndl_t  l_errl = NULL;
+
+
+    // Verify we haven't exceeded max size
+    if ( i_currentSize > i_maxSize )
+    {
+        PRDF_ERR( "HOMER SIZE issue: curDataSize %d is greater than max "
+                 "HOMER data %d", i_currentSize, i_maxSize );
+        /*@
+         * @errortype
+         * @reasoncode PRDF_INVALID_CONFIG
+         * @severity   ERRL_SEV_UNRECOVERABLE
+         * @moduleid   PRDF_CS_FIRDATA_WRITE
+         * @userdata1  Size needed
+         * @userdata2  Size available
+         * @devdesc    Invalid configuration in CS FIR Data handling.
+         */
+        l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          PRDF_CS_FIRDATA_WRITE,
+                                          PRDF_INVALID_CONFIG,
+                                          i_currentSize,
+                                          i_maxSize );
+    } // end if too big of size
+
+    return(l_errl);
+
+} // end routine  homerVerifySizeFits
+
+//------------------------------------------------------------------------------
+
 errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                       const HwInitialized_t i_curHw,
                       std::vector<HOMER_ChipInfo_t> &i_chipVector,
@@ -931,8 +984,7 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         // initialize SCOM addresses for all targets & regs
         getAddresses(l_targMap);
 
-
-        // loop thru targets
+        // loop thru targets to get register counts
         for ( auto & t : l_targMap )
         {
             // loop thru register types
@@ -963,30 +1015,10 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         } // end for on Targets
 
 
-        // Verify data will fit in HOMER.
-        if ( i_hBufSize < sz_hBuf )
-        {
-
-            PRDF_ERR( FUNC "Required data size %d is greater that available "
-                      "HOMER data %d", sz_hBuf, i_hBufSize );
-
-            /*@
-             * @errortype
-             * @reasoncode PRDF_INVALID_CONFIG
-             * @severity   ERRL_SEV_UNRECOVERABLE
-             * @moduleid   PRDF_CS_FIRDATA_WRITE
-             * @userdata1  Size needed
-             * @userdata2  Size available
-             * @devdesc    Invalid configuration in CS FIR Data handling.
-             */
-            errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                            PRDF_CS_FIRDATA_WRITE,
-                                            PRDF_INVALID_CONFIG,
-                                            sz_hBuf,
-                                            i_hBufSize );
-            break;
-        }
-
+        // Setup EC level dependent register counts
+        // (currently just proc has some)
+        io_homerData.ecDepCounts =
+                    sizeof(s_ecDepProcRegisters) / sizeof(HOMER_ChipSpecAddr_t);
 
         // Add everything to the buffer.
         uint32_t idx = 0;
@@ -1008,6 +1040,11 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                   (l_chipItr < i_chipVector.end());
                   l_chipItr++ )
             {
+                // Ensure we won't copy beyond space allowed
+                sz_hBuf += l_chipTypeSize;
+                errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
+                if (NULL != errl) { break; }
+
                 // place the CHIP information
                 memcpy( &i_hBuf[idx], &(l_chipItr->hChipType),
                         l_chipTypeSize ); idx += l_chipTypeSize;
@@ -1015,6 +1052,11 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                 // place the configured chiplet information
                 if (HOMER_CHIP_CENTAUR != l_chipItr->hChipType.chipType)
                 {
+                    // Ensure we won't copy beyond space allowed
+                    sz_hBuf += sizeof(HOMER_ChipNimbus_t);
+                    errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
+                    if (NULL != errl) { break; }
+
                     // Cumulus and Nimbus are the same size area
                     memcpy( &i_hBuf[idx], &(l_chipItr->hChipN),
                             sizeof(HOMER_ChipNimbus_t) );
@@ -1023,6 +1065,11 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
                 } // end if PROC (not-centaur)
                 else
                 {
+                    // Ensure we won't copy beyond space allowed
+                    sz_hBuf += sizeof(HOMER_ChipCentaur_t);
+                    errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
+                    if (NULL != errl) { break; }
+
                     // Centaur is smaller area than PROC chips
                     memcpy( &i_hBuf[idx], &(l_chipItr->hChipM),
                             sizeof(HOMER_ChipCentaur_t) );
@@ -1032,57 +1079,102 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
 
             } // end for loop on chip vector
 
+            // ensure size is ok before any other copy
+            if (NULL != errl) { break; }
+
+            // Verify registers will fit before copying them
+            uint32_t  l_reg32Count = 0;
+            uint32_t  l_reg64Count = 0;
+
+            // Count number of 32 bit addresses first
+            for ( uint32_t  l_regIdx = REG_FIRST;
+                   (l_regIdx < REG_IDFIR); l_regIdx++ )
+            {
+                for ( uint32_t l_tgtIndex = TRGT_FIRST;
+                       (l_tgtIndex < TRGT_MAX); l_tgtIndex++ )
+                {
+                    l_reg32Count +=io_homerData.regCounts[l_tgtIndex][l_regIdx];
+                } // end for on target index
+            } // end for on register index
+
+
+            // Count number of 64 bit addresses now
+            for ( uint32_t  l_regIdx = REG_IDFIR;
+                   (l_regIdx < REG_MAX); l_regIdx++ )
+            {
+                for ( uint32_t l_tgtIndex = TRGT_FIRST;
+                       (l_tgtIndex < TRGT_MAX); l_tgtIndex++ )
+                {
+                    l_reg64Count +=io_homerData.regCounts[l_tgtIndex][l_regIdx];
+                } // end for on target index
+            } // end for on register index
+
+            // Calculate additional size we need from the counts.
+            // We have 32 bit addrs, 64 bit addrs, then EC level structures.
+            sz_hBuf +=(l_reg32Count             * sizeof(uint32_t)) +
+                      (l_reg64Count             * sizeof(uint64_t)) +
+                      (io_homerData.ecDepCounts * sizeof(HOMER_ChipSpecAddr_t));
+
+            // ensure we fit in HOMER before doing register copies
+            errl = homerVerifySizeFits(i_hBufSize, sz_hBuf);
+            if (NULL != errl) { break; }
+
+            // loop thru targets
+            for ( auto & t : l_targMap )
+            {
+                // TODO RTC 173614: story for CUMULUS when we know the regs
+                // for sure TRGT_MC TRGT_MI TRGT_DMI -- probably NOOP now
+                if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
+                     (ALL_HARDWARE == i_curHw)             ||
+                     ( (TRGT_MCBIST != t.first) &&
+                       (TRGT_MCS != t.first)    &&
+                       (TRGT_MCA != t.first)    &&
+                       (TRGT_MEMBUF != t.first) &&
+                       (TRGT_MBA != t.first)
+                      )
+                   )
+                {
+                    // loop thru register types
+                    for ( auto & r : t.second )
+                    {
+                        // loop thru SCOM addresses for reg type
+                        for ( auto &  rAddr : r.second )
+                        {
+                            if ( (REG_IDFIR == r.first) ||
+                                 (REG_IDREG == r.first)
+                               )
+                            {
+                                memcpy( &i_hBuf[idx],
+                                        &rAddr,
+                                        u64 );
+
+                                idx += u64;
+                            }
+                            else
+                            {
+                                uint32_t  tempAddr = (uint32_t)rAddr;
+                                memcpy( &i_hBuf[idx],
+                                        &tempAddr,
+                                        u32 );
+
+                                idx += u32;
+                            }
+
+                        } // end for on register addresses
+
+                    } // end for on regs
+
+                } // end if we need this target
+
+            } // end for on targets
+
+            // Add EC Level dependencies at the end
+            uint8_t  *l_ecDepSourceRegs = (uint8_t *)(&s_ecDepProcRegisters[0]);
+            memcpy( &i_hBuf[idx], l_ecDepSourceRegs,
+                                  sizeof(s_ecDepProcRegisters) );
+
         } // end if chipCount non-zero
 
-
-        // loop thru targets
-        for ( auto & t : l_targMap )
-        {
-            // TODO RTC 173614: story for CUMULUS when we know the regs for sure
-            //  TRGT_MC   TRGT_MI   TRGT_DMI  -- probably NOOP now
-            if ( (ALL_PROC_MEM_MASTER_CORE == i_curHw) ||
-                 (ALL_HARDWARE == i_curHw)             ||
-                 ( (TRGT_MCBIST != t.first) &&
-                   (TRGT_MCS != t.first)    &&
-                   (TRGT_MCA != t.first)    &&
-                   (TRGT_MEMBUF != t.first) &&
-                   (TRGT_MBA != t.first)
-                  )
-               )
-            {
-                // loop thru register types
-                for ( auto & r : t.second )
-                {
-                    // loop thru SCOM addresses for reg type
-                    for ( auto &  rAddr : r.second )
-                    {
-                        if ( (REG_IDFIR == r.first) ||
-                             (REG_IDREG == r.first)
-                           )
-                        {
-                            memcpy( &i_hBuf[idx],
-                                    &rAddr,
-                                    u64 );
-
-                            idx += u64;
-                        }
-                        else
-                        {
-                            uint32_t  tempAddr = (uint32_t)rAddr;
-                            memcpy( &i_hBuf[idx],
-                                    &tempAddr,
-                                    u32 );
-
-                            idx += u32;
-                        }
-
-                    } // end for on register addresses
-
-                } // end for on regs
-
-            } // end if we need this target
-
-        } // end for on targets
 
     } while(0);
 
@@ -1104,6 +1196,7 @@ void dumpInfoVector( std::vector<HOMER_ChipInfo_t> &i_chipVector )
           l_chipItr++ )
     {
         PRDF_ERR("HOMER: ChipPosition:%d", l_chipItr->hChipType.chipPos);
+        PRDF_ERR("HOMER: EC Level:%X", l_chipItr->hChipType.chipEcLevel);
         PRDF_ERR("HOMER: FSI Addr:%X", l_chipItr->hChipType.fsiBaseAddr);
 
         switch (l_chipItr->hChipType.chipType)
