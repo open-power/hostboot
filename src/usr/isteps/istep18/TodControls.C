@@ -49,6 +49,7 @@
 #include <p9_perv_scom_addresses.H>
 #include <p9_tod_setup.H>
 #include <errl/errlentry.H>
+#include <errl/errludtarget.H>
 #include <p9_tod_utils.H>
 #include <isteps/tod_init_reasoncodes.H>
 
@@ -152,6 +153,7 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
                                         GETHUID(l_procItr->getTarget()),
                                         l_drwItr->getId(),
                                         i_config);
+                                errlCommit(l_errHdl, TOD_COMP_ID);
                             }
                             break;
                         }
@@ -214,6 +216,7 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
                             getAttr<TARGETING::ATTR_HUID>(),
                             l_pTodDrw->getId(),
                             i_config);
+                    errlCommit(l_errHdl, TOD_COMP_ID);
                 }
             }
         }
@@ -234,11 +237,37 @@ errlHndl_t TodControls ::pickMdmt(const p9_tod_setup_tod_sel i_config)
          * @custdesc     Host Processor Firmware couldn't detect any
          *               functional master processor required to boot the host
          */
+        const bool hbSwError = true;
         l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_PICK_MDMT,
                            TOD_MASTER_TARGET_NOT_FOUND,
-                           i_config);
+                           i_config,
+                           hbSwError);
+
+        //Check the list of garded targets on the system and pick the garded
+        //targets for adding it into FFDC data.
+        //
+        std::vector<TARGETING::ATTR_HUID_type>::iterator l_iter;
+
+        for ( l_iter = iv_gardedTargets.begin();
+                l_iter != iv_gardedTargets.end();
+                ++l_iter )
+        {
+            //Get the target corresponding to the HUID stored in
+            //iv_gardedTargets
+            TARGETING::Target* l_pTarget =
+                 TARGETING::Target::getTargetFromHuid(*l_iter);
+            if ( l_pTarget )
+            {
+                if ( TARGETING::TYPE_PROC == GETTYPE(l_pTarget))
+                {
+                    // Add garded PROC targets into the errorlog
+                    ERRORLOG::ErrlUserDetailsTarget(l_pTarget,
+                        "GARDed Part").addToLog(l_errHdl);
+                }
+            }
+        }
     }
     else
     {
@@ -300,11 +329,13 @@ errlHndl_t  TodControls::buildTodDrawers(
               * @userdata1    system target's HUID
               * @devdesc      MDMT could not find a functional node
               */
+            const bool hbSwError = true;
             l_errHdl = new ERRORLOG::ErrlEntry(
-                               ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                TOD_BUILD_TOD_DRAWERS,
                                TOD_NO_FUNC_NODE_AVAILABLE,
-                               l_pSysTarget->getAttr<ATTR_HUID>());
+                               l_pSysTarget->getAttr<ATTR_HUID>(),
+                               hbSwError);
             break;
         }
 
@@ -426,6 +457,11 @@ errlHndl_t  TodControls::buildTodDrawers(
                                TOD_BUILD_TOD_DRAWERS,
                                TOD_NO_DRAWERS,
                                i_config);
+
+             l_errHdl->addProcedureCallout(
+             HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+             HWAS::SRCI_PRIORITY_LOW);
+
         }
 
     }while(0);
@@ -568,7 +604,7 @@ errlHndl_t TodControls ::queryActiveConfig(
              *               configuring Time Of Day on the Host processors
              */
             l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_QUERY_ACTIVE_CONFIG,
                            TOD_NO_VALID_MDMT_FOUND);
             break;
@@ -683,11 +719,13 @@ errlHndl_t TodControls ::queryActiveConfig(
                  * @custdesc     Service Processor Firmware encountered an
                  *               internal error
                  */
+                const bool hbSwError = true;
                 l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_QUERY_ACTIVE_CONFIG,
                            TOD_NO_MDMT_ON_ACTIVE_CONFIG,
-                           o_activeConfig);
+                           o_activeConfig,
+                           hbSwError);
                 break;
             }
         }//isTodRunning check
@@ -1460,13 +1498,9 @@ errlHndl_t TodControls::gardGetGardedUnits(
         {
             TARGETING::Target * l_pTarget = NULL;
 
-            l_err = getTargetFromPhysicalPath(l_iter.iv_targetId,
-                               l_pTarget);
-            if(l_err != NULL)
-            {
-                TOD_ERR("Error finding target");
-                break;
-            }
+            // getTargetFromPhysicalPath will either succeed or assert
+            getTargetFromPhysicalPath(l_iter.iv_targetId, l_pTarget);
+
             GardedUnit_t l_gardedUnit;
             memset(&l_gardedUnit,0,sizeof(GardedUnit_t));
             l_gardedUnit.iv_huid =
@@ -1526,39 +1560,22 @@ errlHndl_t TodControls::gardGetGardedUnits(
 // getTargetFromPhysicalPath
 //******************************************************************************
 
-errlHndl_t TodControls::getTargetFromPhysicalPath(
+void TodControls::getTargetFromPhysicalPath(
     const TARGETING::ATTR_PHYS_PATH_type &i_path,
           TARGETING::Target*&  o_pTarget)
 
 {
     TOD_ENTER("getTargetFromPhysicalPath");
-    errlHndl_t l_err = NULL;
     do
     {
         o_pTarget =
                 TARGETING::targetService().toTarget(i_path);
-        if(o_pTarget == NULL)
-        {
-            TOD_ERR("Error in getting target from entity path[%s]",
-                        getPhysicalPathString(i_path));
-            /*@
-            * @errortype
-            * @moduleid     TOD_CONTROLS_GET_TARGET
-            * @reasoncode   TOD_NULL_INPUT_TARGET
-            * @devdesc      Target ID is invalid
-            * @custdesc     Service Processor Firmware encountered an internal
-            *               error
-            */
-            l_err = new ERRORLOG::ErrlEntry(
-                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                         TOD_CONTROLS_GET_TARGET,
-                         TOD_NULL_INPUT_TARGET);
-            break;
-        }
+        TOD_ERR_ASSERT(o_pTarget != NULL,
+                "Error in getting target from entity path[%s]",
+                getPhysicalPathString(i_path));
     }
     while(0);
     TOD_EXIT();
-    return l_err;
 }
 
 //******************************************************************************
@@ -1589,26 +1606,7 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
 
     do
     {
-        // If i_pTarget is NULL then create an error log
-        if(!i_pTarget)
-        {
-            TOD_ERR("Input Target handle is null");
-
-            //Create error
-            /*@
-             * @errortype
-             * @moduleid     TOD_UTIL_MOD_GET_PARENT
-             * @reasoncode   TOD_NULL_INPUT_TARGET
-             * @devdesc      NULL Target is supplied as input
-             * @custdesc     Service Processor Firmware encountered an internal
-             *               error
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                         TOD_UTIL_MOD_GET_PARENT,
-                         TOD_NULL_INPUT_TARGET);
-            break;
-        }
+        TOD_ERR_ASSERT(i_pTarget != NULL, "Input Target handle is null");
 
         // If we have a valid target, check if it is system
         l_type = i_pTarget->getAttr<TARGETING::ATTR_TYPE>();
@@ -1635,11 +1633,13 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
              *               error
              */
 
+            const bool hbSwError = true;
             l_errl = new ERRORLOG::ErrlEntry(
-                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                          TOD_UTIL_MOD_GET_PARENT,
                          TOD_INVALID_TARGET,
-                         GETHUID(i_pTarget));
+                         GETHUID(i_pTarget),
+                         hbSwError);
 
             break;
         }
@@ -1700,14 +1700,6 @@ errlHndl_t TodControls::getParent(const TARGETING::Target *i_pTarget,
                           TOD_PARENT_NOT_FOUND,
                           GETHUID(i_pTarget),
                           TWO_UINT32_TO_UINT64(l_list.size(), i_class));
-
-         // Assert will R/R the FSP, set the R/R bit in this error
-         // to indicate that this error is responsible for the R/R
-         //l_errl->setRsrlBit(true);
-
-         TOD_ERR_ASSERT(0, "ERROR - Parent not found for the supplied target."
-                        "Supplied target's HUID: 0x%08X",
-                        GETHUID(i_pTarget));
 
     }
 

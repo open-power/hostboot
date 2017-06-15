@@ -85,23 +85,6 @@ errlHndl_t todSetupHwp(const p9_tod_setup_tod_sel i_topologyType)
                     l_pMDMT->getMasterType(),
                     l_pMDMT->getBusIn(), l_pMDMT->getBusOut());
 
-            /*@
-             * @errortype
-             * @moduleid     TOD_SETUP_HWP
-             * @reasoncode   TOD_HWP_EXECUTION_FAILED
-             * @userdata1    MDMT HUID
-             * @userdata2    Topology Type
-             * @devdesc      Failed to configure TOD toplogy, due to
-             *               error returned by p9_tod_setup.
-             * @custdesc     Service Processor Firmware encountered an
-             *               internal error
-             */
-            l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                           TOD_SETUP_HWP,
-                           TOD_HWP_EXECUTION_FAILED,
-                           GETHUID(l_pMDMT->getTarget()),
-                           i_topologyType);
             break;
         }
     }while(0);
@@ -135,11 +118,13 @@ errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType)
              * @custdesc     Host failed to boot because there was a problem
              *               configuring Time Of Day on the Host processors
              */
+            const bool hbSwError = true;
             l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_SAVEREGS_HWP,
                            TOD_NO_VALID_MDMT_FOUND,
-                           i_topologyType);
+                           i_topologyType,
+                           hbSwError);
             break;
         }
 
@@ -159,21 +144,6 @@ errlHndl_t todSaveRegsHwp(const p9_tod_setup_tod_sel i_topologyType)
                     l_pMDMT->getMasterType(),
                     l_pMDMT->getBusIn(), l_pMDMT->getBusOut());
 
-            /*@
-             * @errortype
-             * @moduleid     TOD_SAVEREGS_HWP
-             * @reasoncode   TOD_HWP_EXECUTION_FAILED
-             * @userdata1    Topology Type
-             * @devdesc      Failed to save TOD configuration registers,
-             *               due to error returned by p9_tod_save_config.
-             * @custdesc     Service Processor Firmware encountered an
-             *               internal error
-             */
-            l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                           TOD_SAVEREGS_HWP,
-                           TOD_HWP_EXECUTION_FAILED,
-                           i_topologyType);
             break;
         }
     }while(0);
@@ -209,12 +179,14 @@ errlHndl_t todInitHwp()
              * @custdesc     Host failed to boot because there was a problem
              *               configuring Time Of Day on the Host processors
              */
+            const bool hbSwError = true;
             l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                            TOD_INIT_HWP,
                            TOD_NO_VALID_MDMT_FOUND,
                            EMOD_TOD_INIT_HWP,
-                           TOD_PRIMARY);
+                           TOD_PRIMARY,
+                           hbSwError);
             break;
         }
 
@@ -235,22 +207,6 @@ errlHndl_t todInitHwp()
                     "MDMT Master type : 0x%.8X. ",
                     GETHUID(l_pMDMT->getTarget()),
                     l_pMDMT->getMasterType());
-
-            /*@
-             * @errortype
-             * @moduleid     TOD_INIT_HWP
-             * @reasoncode   TOD_HWP_EXECUTION_FAILED
-             * @userdata1    MDMT HUID
-             * @devdesc      Failed to initialize TOD, due to
-             *               error returned by p9_tod_init.
-             * @custdesc     Service Processor Firmware encountered an
-             *               internal error
-             */
-            l_errHdl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                           TOD_INIT_HWP,
-                           TOD_HWP_EXECUTION_FAILED,
-                           GETHUID(l_pMDMT->getTarget()));
 
             l_failingTodProc = reinterpret_cast<TARGETING::Target*>(
                     l_fapiFailingProcTarget.get());

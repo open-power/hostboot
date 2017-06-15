@@ -828,13 +828,10 @@ private:
        * @param[out] o_Target
        * Pointer to Target
        *
-       * @return errlHndl_t
-       * Returns error handle if supplied physical path
-       * is not valid
-       * else NULL
+       * assert if supplied physical path is not valid
        */
 
-      errlHndl_t getTargetFromPhysicalPath(
+      void getTargetFromPhysicalPath(
           const TARGETING::ATTR_PHYS_PATH_type &i_path,
                 TARGETING::Target*&  o_pTarget);
 

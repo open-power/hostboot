@@ -35,6 +35,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <attributeenums.H>
+#include <errl/errlmanager.H>
 
 #include "TodSvcUtil.H"
 #include "TodUtils.H"
@@ -71,11 +72,22 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
      */
 
     io_errHdl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         TOD_ENDPOINT_CALLOUT,
                         TOD_MASTER_PATH_ERROR,
                         EMOD_CALLOUT_TOD_ENDPOINT,
                         GETHUID(i_pTodEndPoint));
+
+    io_errHdl->addHwCallout(
+            i_pTodEndPoint,
+            HWAS::SRCI_PRIORITY_HIGH,
+            HWAS::DECONFIG,
+            HWAS::GARD_Fatal);
+
+    //Get the PEER TOD end point on the OSC and callout as low
+    io_errHdl->addProcedureCallout(
+            HWAS::EPUB_PRC_TOD_CLOCK_ERR,
+            HWAS::SRCI_PRIORITY_LOW);
 
     //Get the PEER TOD end point on the OSC and callout as low
     TARGETING::PredicateCTM  l_todEndPointPred(
@@ -105,10 +117,10 @@ void calloutTodEndPoint( const TARGETING::Target* const i_pTodEndPoint,
 
     if ( !l_todEndPointList.empty())
     {
-         io_errHdl->addHwCallout((*l_todEndPointList.begin()),
-                 HWAS::SRCI_PRIORITY_LOW,
-                 HWAS::DECONFIG,
-                 HWAS::GARD_Fatal);
+        io_errHdl->addHwCallout((*l_todEndPointList.begin()),
+                HWAS::SRCI_PRIORITY_LOW,
+                HWAS::DECONFIG,
+                HWAS::GARD_Fatal);
 
     }
 
@@ -190,6 +202,7 @@ uint32_t getMaxProcsOnSystem()
     else
     {
         TOD_ERR("getMaxConfigParams() Failed");
+        errlCommit(l_errHdl, TOD_COMP_ID);
     }
 
     return (l_maxProcCount);
