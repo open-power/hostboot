@@ -228,6 +228,9 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             CAL3Q_ALL_PERIODIC_LENGTH_LEN = MCA_MBA_CAL3Q_CFG_ALL_PERIODIC_LENGTH_LEN,
             CAL3Q_FREEZE_ON_PARITY_ERROR_DIS = MCA_MBA_CAL3Q_CFG_FREEZE_ON_PARITY_ERROR_DIS,
 
+            RECR_TCE_CORRECTION = MCA_RECR_MBSECCQ_ENABLE_TCE_CORRECTION,
+            RECR_READ_POINTER_DLY = MCA_RECR_MBSECCQ_READ_POINTER_DELAY,
+            RECR_READ_POINTER_DLY_LEN = MCA_RECR_MBSECCQ_READ_POINTER_DELAY_LEN,
             DSM0Q_RDTAG_DLY = MCA_MBA_DSM0Q_CFG_RDTAG_DLY,
             DSM0Q_RDTAG_DLY_LEN = MCA_MBA_DSM0Q_CFG_RDTAG_DLY_LEN,
             DSM0Q_WRDONE_DLY = MCA_MBA_DSM0Q_CFG_WRDONE_DLY,
@@ -266,6 +269,133 @@ class portTraits<fapi2::TARGET_TYPE_MCA>
             WRQ_FIFO_MODE = MCA_MBA_WRQ0Q_CFG_WRQ_FIFO_MODE,
         };
 };
+
+///
+/// @brief Read the read ECC Control register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[out] o_buffer the buffer to write the register data into
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode read_recr_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_buffer )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::ECC_REG, o_buffer) );
+
+    FAPI_INF( "Read ECC Control register is 0x%016lx for %s", uint64_t(o_buffer), mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write to RECR register
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @param[in] i_buffer the buffer that holds the register data to write
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T, typename TT = portTraits<T> >
+fapi2::ReturnCode write_recr_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer )
+{
+    FAPI_INF( "Change Read ECC Control register to 0x%016lx for %s",  i_buffer, mss::c_str(i_target) );
+
+    FAPI_TRY( mss::putScom(i_target, TT::ECC_REG, i_buffer) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Get the read pointer delay value from RECR
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the RECR register
+/// @param[out] o_delay READ_POINTER_DLY value (in cycles)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_read_pointer_delay( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_delay )
+{
+    i_data.template extractToRight<TT::RECR_READ_POINTER_DLY, TT::RECR_READ_POINTER_DLY_LEN>(o_delay);
+
+    FAPI_INF( "READ_POINTER_DLY: 0x%016lx", uint64_t(o_delay) );
+}
+
+///
+/// @brief Sets read pointer delay in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in,out] io_data the target data buffer
+/// @param[in] i_delay READ_POINTER_DLY value (in cycles) to set
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_read_pointer_delay( fapi2::buffer<uint64_t>& io_data, const uint64_t i_delay )
+{
+    FAPI_INF( "Set READ_POINTER_DLY to %d", i_delay);
+
+    io_data.template insertFromRight<TT::RECR_READ_POINTER_DLY, TT::RECR_READ_POINTER_DLY_LEN>(i_delay);
+}
+
+///
+/// @brief Get the tce correction enable value from RECR
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_data the data buffer containing the RECR register
+/// @param[out] o_value TCE_CORRECTION_ENABLE value (on or off)
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_value )
+{
+    o_value = i_data.template getBit<TT::RECR_TCE_CORRECTION>() ? mss::states::ON : mss::states::OFF;
+
+    FAPI_INF( "TCE_CORRECTION_ENABLE: %lu", o_value );
+}
+
+///
+/// @brief Sets tce correction enable in buffer
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in,out] io_data the target data buffer
+/// @param[in] i_value TCE_CORRECTION_ENABLE value (on or off) to set
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
+{
+    FAPI_INF( "Set TCE_CORRECTION_ENABLE to %lu", i_value);
+
+    io_data.template writeBit<TT::RECR_TCE_CORRECTION>(i_value);
+}
+
+///
+/// @brief Setup read pointer delay and TCE correction
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT the class traits for the port
+/// @param[in] i_target the target
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = portTraits<T> >
+fapi2::ReturnCode setup_read_pointer_delay (const fapi2::Target<T>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t mnfg_flag = 0;
+    mss::states l_state = mss::OFF;
+
+    FAPI_TRY( mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
+    mss::set_read_pointer_delay(l_data, mss::ON);
+
+    // Check for manufacturing threshold and disable TCE correction
+    FAPI_TRY( mss::mnfg_flags(mnfg_flag), "%s: Failed mnfg_flags check", mss::c_str(i_target) );
+    l_state = (mnfg_flag == fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) ? mss::OFF : mss::ON;
+    mss::set_tce_correction(l_data, l_state);
+
+    FAPI_TRY( mss::write_recr_register(i_target, l_data), "%s: Failed write_recr_register", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Read the data state machine register
