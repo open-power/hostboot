@@ -208,7 +208,7 @@ extern "C"
             default:
                 FAPI_ASSERT(false,
                             fapi2::GET_MEM_VPD_UNSUPPORTED_TYPE().
-                            set_TARGET(i_target).
+                            set_MCS_TARGET(i_target).
                             set_VPDTYPE(i_vpd_info.iv_vpd_type),
                             "Invalid vpd type = %d",
                             i_vpd_info.iv_vpd_type);
@@ -221,8 +221,8 @@ extern "C"
                     fapi2::GET_MEM_VPD_MAPPING_TOO_SMALL().
                     set_SIZE(size_t(i_mappingSize)).
                     set_EXPECTED(l_mapping_layout_maxsize).
-                    set_TARGET(i_target).
-                    set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                    set_VPDTYPE(i_vpd_info.iv_vpd_type).
+                    set_MCS_TARGET(i_target),
                     "Mapping keyword size %d less than min %d expected",
                     i_mappingSize,
                     l_mapping_layout_maxsize);
@@ -232,8 +232,8 @@ extern "C"
                     fapi2::GET_MEM_VPD_UNSUPPORTED_VERSION().
                     set_VERSION(uint8_t(l_mappingHeader->layoutVersion)).
                     set_EXPECTED(uint8_t(l_mapping_layout_version)).
-                    set_TARGET(i_target).
-                    set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                    set_VPDTYPE(i_vpd_info.iv_vpd_type).
+                    set_MCS_TARGET(i_target),
                     "Header version %d not supported % expected",
                     l_mappingHeader->layoutVersion,
                     l_mapping_layout_version);
@@ -248,7 +248,7 @@ extern "C"
                     fapi2::GET_MEM_VPD_POS_OUT_OF_RANGE().
                     set_MCS_POS(l_mcsPos).
                     set_MAX_MEMVPD_POS(MAX_MEMVPD_POS).
-                    set_TARGET(i_target).
+                    set_MCS_TARGET(i_target).
                     set_VPDTYPE(i_vpd_info.iv_vpd_type),
                     "ATTR_MEMVPD_POS out of range (=%d)",
                     l_mcsPos);
@@ -264,8 +264,8 @@ extern "C"
                         set_ENTRY(l_mcsPos).
                         set_MAX_ENTRIES(uint8_t(l_mappingHeader2->numEntries)).
                         set_VERSION(uint8_t(l_mappingHeader2->layoutVersion)).
-                        set_TARGET(i_target).
-                        set_VPDTYPE(i_vpd_info.iv_vpd_type),
+                        set_VPDTYPE(i_vpd_info.iv_vpd_type).
+                        set_MCS_TARGET(i_target),
                         "Unsupported entry (%d), max entries (%d)",
                         l_mcsPos,
                         uint8_t(l_mappingHeader2->numEntries));
@@ -321,7 +321,7 @@ extern "C"
                         set_MEMVPDFREQ1(uint32_t(l_freqTable[1])).
                         set_MEMVPDFREQ2(uint32_t(l_freqTable[2])).
                         set_MEMVPDFREQ3(uint32_t(l_freqTable[3])).
-                        set_TARGET(i_target).
+                        set_MCS_TARGET(i_target).
                         set_VPDTYPE(i_vpd_info.iv_vpd_type),
                         "Frequency %d not supported by Nimbus",
                         i_vpd_info.iv_freq_mhz);
@@ -350,7 +350,7 @@ extern "C"
                     FAPI_ASSERT(false,
                                 fapi2::GET_MEM_VPD_UNSUPPORTED_RANK().
                                 set_RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
-                                set_TARGET(i_target).
+                                set_MCS_TARGET(i_target).
                                 set_VPDTYPE(i_vpd_info.iv_vpd_type),
                                 "Unsupported rank = %d should be 0,1,2, or 4",
                                 i_vpd_info.iv_rank_count_dimm_0);
@@ -372,7 +372,7 @@ extern "C"
                     FAPI_ASSERT(false,
                                 fapi2::GET_MEM_VPD_UNSUPPORTED_RANK().
                                 set_RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
-                                set_TARGET(i_target).
+                                set_MCS_TARGET(i_target).
                                 set_VPDTYPE(i_vpd_info.iv_vpd_type),
                                 "Unsupported rank = %d should be 0,1,2, or 4",
                                 i_vpd_info.iv_rank_count_dimm_1);
@@ -432,7 +432,7 @@ extern "C"
                      set_DIMM0RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_0)).
                      set_DIMM1RANK(uint64_t(i_vpd_info.iv_rank_count_dimm_1)).
                      set_HEADER(mappingHeader_t(*l_mappingHeader)).
-                     set_TARGET(i_target).
+                     set_MCS_TARGET(i_target).
                      set_VPDTYPE(i_vpd_info.iv_vpd_type).
                      set_MAPROW0(l_ffdc_MAPROW[0]).
                      set_MAPROW1(l_ffdc_MAPROW[1]).
