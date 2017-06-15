@@ -177,11 +177,11 @@ enum cal_steps : uint64_t
     RUN_ALL_CAL_STEPS          = 0xFFFFF000,
     RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7000,
 
-    DRAM_ZQCAL_TO_WR_LEVEL_LEN = inclusive_range(DRAM_ZQCAL, WR_LEVEL),
     INITIAL_PAT_WR_TO_RD_CTR_LEN = inclusive_range(INITIAL_PAT_WR, READ_CTR),
     WR_VREF_TO_COARSE_RD_LEN = inclusive_range(WRITE_CTR_2D_VREF, COARSE_RD),
     RDCLK_ALIGN_TO_RD_CTR_LEN = inclusive_range(RDCLK_ALIGN, READ_CTR),
-    DRAM_ZQCAL_TO_WRITE_CTR_2D_VREF = inclusive_range(DRAM_ZQCAL, WRITE_CTR_2D_VREF),
+    // In this case, we just want to clear everything prior to WR 2D VREF, inclusive range also kills the WR VREF bit
+    DRAM_ZQCAL_UP_TO_WRITE_CTR_2D_VREF = WRITE_CTR_2D_VREF,
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
