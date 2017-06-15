@@ -1125,7 +1125,8 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         // Sets up the cal steps in the buffer
         fapi2::buffer<uint32_t> l_steps_to_execute;
         l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
-        l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>(i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>());
+        l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>
+        (i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>());
 
         FAPI_INF("%s Running DQS align on RP%d 0x%08lx",
                  mss::c_str(i_target), i_rp, l_steps_to_execute);
@@ -1174,7 +1175,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
     if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::WR_VREF_TO_COARSE_RD_LEN>())
     {
         fapi2::buffer<uint32_t> l_steps_to_execute( i_cal_steps_enabled );
-        l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL, mss::cal_steps::DRAM_ZQCAL_TO_WRITE_CTR_2D_VREF>();
+        l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL, mss::cal_steps::DRAM_ZQCAL_UP_TO_WRITE_CTR_2D_VREF>();
 
         // Setting the WR_VREF_LATCH bit to run the WR_VREF workaround after wr_vref runs
         // Gets set iff the bit is set in i_steps_to_execute
