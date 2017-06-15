@@ -640,7 +640,7 @@ fapi_try_exit:
 /// @param[in] i_target the target
 /// @param[in] i_end whether to end, and where (default = don't stop at end of rank)
 /// @param[in] i_stop stop conditions (default - 0 meaning 'don't change conditions')
-/// @param[in] i_speed the speed to scrub (default - NO_CHANGE meaning leave speed untouched)
+/// @param[in] i_speed the speed to scrub (default - SAME_SPEED meaning leave speed untouched)
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note overloaded as there's no 'invalid' state for thresholds.
 ///
@@ -723,14 +723,20 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     }
 
     // Thresholds
-    FAPI_TRY( mss::mcbist::load_thresholds(i_target, i_stop) );
+    // According to API definition, 0 means don't change conditions
+    if( i_stop != stop_conditions::DONT_CHANGE)
+    {
+        FAPI_TRY( mss::mcbist::load_thresholds(i_target, i_stop) );
+    }
 
     // Setup speed
     FAPI_TRY( l_program.change_speed(i_target, i_speed) );
 
-    // Clear the program complete FIR
-    FAPI_TRY( mss::putScom(i_target, MCBIST_MCBISTFIRQ_AND,
-                           fapi2::buffer<uint64_t>().setBit<MCBIST_MCBISTFIRQ_MCBIST_PROGRAM_COMPLETE>().invert()) );
+    // Load new speed unless we aren't changing it
+    if( i_speed != speed::SAME_SPEED )
+    {
+        FAPI_TRY( load_mcbparm(i_target, l_program) );
+    }
 
     // Tickle the resume from pause
     FAPI_TRY( mss::mcbist::resume(i_target) );
