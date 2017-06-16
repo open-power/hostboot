@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -43,8 +43,11 @@ HOSTBOOT_RUNTIME_SPECIFIC_OBJS += errludattribute.o
 OBJS += ${COMMON_TARGETING_OBJS}
 OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 OBJS += ${HOSTBOOT_RUNTIME_SPECIFIC_OBJS}
+OBJS += persistrwattrcheck.o
+
 
 include $(ROOTPATH)/config.mk
+
 
 # To find errludattribute.[CH], etc.  They are generated
 # by src/usr/targeting/common/xmltohb/xmltohb.pl
