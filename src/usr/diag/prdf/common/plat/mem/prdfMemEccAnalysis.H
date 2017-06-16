@@ -117,24 +117,14 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                           STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
- * @brief  Analyzes a fetch NCE attention.
+ * @brief  Analyzes a fetch NCE/TCE attention.
  * @param  i_chip   MCA or MBA.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T, typename D>
-uint32_t analyzeFetchNce( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc );
-
-/**
- * @brief  Analyzes a fetch TCE attention.
- * @param  i_chip   MCA or MBA.
- * @param  io_sc    The step code data struct.
- * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
- */
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeFetchTce( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Analyzes a fetch UE attention.
