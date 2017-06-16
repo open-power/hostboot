@@ -114,9 +114,10 @@ extern "C"
             FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
             fapi2::ReturnCode l_rc = mss::dll_calibration(i_target);
 
-            // Only run DLL workaround if we fail DLL cal and we are a < DD2.0 part
-            if( l_rc != fapi2::FAPI2_RC_SUCCESS &&
-                mss::chip_ec_feature_mss_dll_workaround(i_target) )
+            // Only run DLL workaround if we fail DLL cal
+            // Note: there is no EC workaround for this workaround
+            // The designer team informed me that there is no hardware fix in plan for this type of fail as of DD2 - SPG
+            if( l_rc != fapi2::FAPI2_RC_SUCCESS )
             {
                 FAPI_INF( "%s Applying DLL workaround", mss::c_str(i_target) );
                 l_rc = mss::workarounds::dll::fix_bad_voltage_settings(i_target);
