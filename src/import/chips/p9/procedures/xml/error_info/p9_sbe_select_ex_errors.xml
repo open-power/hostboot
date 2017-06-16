@@ -54,4 +54,9 @@
     <description>No cores are configurable with current partial good and gard settings</description>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SBE_SELECT_EX_FORCE_FUSED_CORES_DISABLED</rc>
+    <description>Forcing fused core mode has been disabled via eFuses</description>
+  </hwpError>
 </hwpErrors>
