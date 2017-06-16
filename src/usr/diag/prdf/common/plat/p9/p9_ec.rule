@@ -559,7 +559,7 @@ group gCOREFIR filter singlebit, cs_root_cause
     /** COREFIR[14]
      *  Machine check and ME = 0 Err
      */
-    (rCOREFIR, bit(14)) ? self_th_1;
+    (rCOREFIR, bit(14)) ? self_th_1_SUE;
 
     /** COREFIR[15]
      *  LSU or IFU detected UE from L2
@@ -754,12 +754,12 @@ group gCOREFIR filter singlebit, cs_root_cause
     /** COREFIR[57]
      *  Other Core Core Checkstop
      */
-    (rCOREFIR, bit(57)) ? self_th_1;
+    (rCOREFIR, bit(57)) ? defaultMaskedError;
 
     /** COREFIR[58]
      *  Other Core System Checkstop
      */
-    (rCOREFIR, bit(58)) ? self_th_1;
+    (rCOREFIR, bit(58)) ? defaultMaskedError;
 
     /** COREFIR[59]
      *  SCOM error handling

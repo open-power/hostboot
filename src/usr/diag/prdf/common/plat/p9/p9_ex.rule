@@ -555,7 +555,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[8]
      *  NCU Store Queue Data Parity Err
      */
-    (rNCUFIR, bit(8)) ? self_th_1;
+    (rNCUFIR, bit(8)) ? self_th_1_UERE;
 
     /** NCUFIR[9]
      *  store timed out on pb

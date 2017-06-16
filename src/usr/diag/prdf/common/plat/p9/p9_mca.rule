@@ -302,7 +302,7 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
     /** MCACALFIR[13]
      *  Persistent RCD error, port failed
      */
-    (rMCACALFIR, bit(13)) ? mem_port_failure;
+    (rMCACALFIR, bit(13)) ? mem_port_failure_UERE;
 
     /** MCACALFIR[14]
      *  RCD during periodic cal
@@ -413,7 +413,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[14]
      *  Mainline read UE
      */
-    (rMCAECCFIR, bit(14)) ? mainline_ue_handling;
+    (rMCAECCFIR, bit(14)) ? mainline_ue_handling_UERE;
 
     /** MCAECCFIR[15]
      *  Mainline read RCD
@@ -428,7 +428,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[17]
      *  Mainline read IUE
      */
-    (rMCAECCFIR, bit(17)) ? mainline_iue_handling;
+    (rMCAECCFIR, bit(17)) ? mainline_iue_handling_UERE;
 
     /** MCAECCFIR[18]
      *  Mainline read IRCD
@@ -493,7 +493,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[37]
      *  Maintenance IUE
      */
-    (rMCAECCFIR, bit(37)) ? maintenance_iue_handling;
+    (rMCAECCFIR, bit(37)) ? maintenance_iue_handling_UERE;
 
     /** MCAECCFIR[38]
      *  Maintenance IRCD

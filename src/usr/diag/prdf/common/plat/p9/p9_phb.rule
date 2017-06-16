@@ -387,7 +387,7 @@ group gPCIFIR filter singlebit, cs_root_cause
     /** PCIFIR[0]
      *  PBAIB register parity error
      */
-    (rPCIFIR, bit(0)) ? self_th_1;
+    (rPCIFIR, bit(0)) ? externalAttention;
 
     /** PCIFIR[1]
      *  Hardware error
@@ -397,12 +397,12 @@ group gPCIFIR filter singlebit, cs_root_cause
     /** PCIFIR[2]
      *  AIB interface error
      */
-    (rPCIFIR, bit(2)) ? self_th_1;
+    (rPCIFIR, bit(2)) ? externalAttention;
 
     /** PCIFIR[3]
      *  ETU reset error
      */
-    (rPCIFIR, bit(3)) ? self_th_1;
+    (rPCIFIR, bit(3)) ? externalAttention;
 
     /** PCIFIR[4]
      *  PEC scom error
