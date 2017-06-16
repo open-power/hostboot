@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include "p9_const_common.H"
 
 #include <p9_perv_scom_addresses.H>
+#include <p9n2_perv_scom_addresses_fld.H>
 
 
 fapi2::ReturnCode p9_set_fsi_gp_shadow(const
@@ -124,6 +125,21 @@ fapi2::ReturnCode p9_set_fsi_gp_shadow(const
         FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_PERV_CTRL1_COPY_FSI,
                                         p9SetFsiGpShadow::PERV_CTRL1_FLUSHVALUE));
     }
+
+    /* Write the value of FUSED_CORE_MODE into PERV_CTRL0(23) regardless of chip EC; the bit is nonfunctional on Nimbus DD1 */
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FUSED_CORE_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_read_attr));
+    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_PERV_CTRL0_COPY_FSI, l_cfam_data));
+
+    if (l_read_attr)
+    {
+        l_cfam_data.setBit<P9N2_PERV_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>();
+    }
+    else
+    {
+        l_cfam_data.clearBit<P9N2_PERV_PERV_CTRL0_TP_OTP_SCOM_FUSED_CORE_MODE>();
+    }
+
+    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_PERV_CTRL0_COPY_FSI, l_cfam_data));
 
     FAPI_INF("p9_set_fsi_gp_shadow: Exiting ...");
 
