@@ -62,3 +62,10 @@ actionclass pb_cent_hang_recovery_gte
     funccall("ClearServiceCallFlag_mnfgInfo");
 };
 
+/** Callout connected NX, threshold 32/day */
+actionclass nx_th_32perDay
+{
+    callout(connected(TYPE_NX,0), MRU_MED);
+    threshold32pday;
+};
+

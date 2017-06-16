@@ -3283,12 +3283,12 @@ group gNXDMAENGFIR filter singlebit, cs_root_cause
     /** NXDMAENGFIR[9]
      *  DMA array ECC CE error
      */
-    (rNXDMAENGFIR, bit(9)) ? self_th_1;
+    (rNXDMAENGFIR, bit(9)) ? nx_th_32perDay;
 
     /** NXDMAENGFIR[10]
      *  DMA outWR/inRD ECC CE error
      */
-    (rNXDMAENGFIR, bit(10)) ? self_th_1;
+    (rNXDMAENGFIR, bit(10)) ? nx_th_32perDay;
 
     /** NXDMAENGFIR[11]
      *  Channel 4 GZIP ECC CE
