@@ -560,7 +560,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[9]
      *  store timed out on pb
      */
-    (rNCUFIR, bit(9)) ? level2_M_self_L_th_1;
+    (rNCUFIR, bit(9)) ? threshold_and_mask;
 
     /** NCUFIR[10]
      *  tlbie master timeout
