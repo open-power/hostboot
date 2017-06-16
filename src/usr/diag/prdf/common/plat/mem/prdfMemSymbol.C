@@ -64,10 +64,10 @@ MemSymbol::MemSymbol( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
     iv_trgt(i_trgt), iv_rank(i_rank), iv_symbol(i_symbol),
     iv_pins(i_pins), iv_isDramSpared(false), iv_isEccSpared(false)
 {
-    PRDF_ASSERT( NULL != i_trgt );
+    PRDF_ASSERT( nullptr != i_trgt );
     PRDF_ASSERT( TYPE_MBA == getTargetType(i_trgt) ||
                  TYPE_MCA == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_symbol < SYMBOLS_PER_RANK );
+    // Allowing an invalid symbol. Use isValid() to check validity.
     PRDF_ASSERT( i_pins <= CEN_SYMBOL::BOTH_SYMBOL_DQS );
 }
 
@@ -86,8 +86,6 @@ MemSymbol MemSymbol::fromGalois( TargetHandle_t i_trgt, const MemRank & i_rank,
             break;
         }
     }
-
-    PRDF_ASSERT( symbol < SYMBOLS_PER_RANK );
 
     // Get pins from mask.
     uint8_t pins = NO_SYMBOL_DQS;
@@ -160,7 +158,7 @@ uint8_t MemSymbol::getDramPins() const
 template<>
 uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
                                      const MemRank & i_rank,
-                                     MemSymbol & o_symbol, bool i_isTce )
+                                     MemSymbol & o_sym1, MemSymbol & o_sym2 )
 {
     #define PRDF_FUNC "[getMemReadSymbol<TYPE_MBA>] "
 
@@ -169,6 +167,8 @@ uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
+
+    o_sym1 = o_sym2 = MemSymbol(); // both initially invalid
 
     do
     {
@@ -190,22 +190,15 @@ uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
             break;
         }
 
-        uint32_t bitPos = (mcaRelMcs * 32) + (i_isTce ? 16 : 0);
-
-        uint8_t galois = reg->GetBitFieldJustified( bitPos,     8 );
-        uint8_t mask   = reg->GetBitFieldJustified( bitPos + 8, 8 );
+        uint32_t bitPos = mcaRelMcs * 32;
+        uint8_t g1 = reg->GetBitFieldJustified( bitPos,      8 );
+        uint8_t m1 = reg->GetBitFieldJustified( bitPos +  8, 8 );
+        uint8_t g2 = reg->GetBitFieldJustified( bitPos + 16, 8 );
+        uint8_t m2 = reg->GetBitFieldJustified( bitPos + 24, 8 );
 
         // Get the NCE/TCE symbol.
-        o_symbol = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, galois,
-                                          mask );
-        if ( !o_symbol.isValid() )
-        {
-            PRDF_ERR( PRDF_FUNC "fromGalois(0x%08x,m%ds%d,0x%02x,0x%02x) "
-                      "failed", i_chip->getHuid(), i_rank.getMaster(),
-                      i_rank.getSlave(), galois, mask );
-            o_rc = FAIL;
-            break;
-        }
+        o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g1, m1 );
+        o_sym2 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g2, m2 );
 
         // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
 
@@ -221,16 +214,17 @@ uint32_t getMemReadSymbol<TYPE_MCA>( ExtensibleChip * i_chip,
 template<>
 uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
                                      const MemRank & i_rank,
-                                     MemSymbol & o_symbol, bool i_isTce )
+                                     MemSymbol & o_sym1, MemSymbol & o_sym2 )
 {
     #define PRDF_FUNC "[getMemReadSymbol<TYPE_MBA>] "
 
     // Check parameters
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MBA == i_chip->getType() );
-    PRDF_ASSERT( !i_isTce ); // TCEs do not exist on Centaur
 
     uint32_t o_rc = SUCCESS;
+
+    o_sym1 = o_sym2 = MemSymbol(); // both initially invalid
 
     do
     {
@@ -249,20 +243,11 @@ uint32_t getMemReadSymbol<TYPE_MBA>( ExtensibleChip * i_chip,
             break;
         }
 
-        uint8_t galois = reg->GetBitFieldJustified( 40, 8 );
-        uint8_t mask   = reg->GetBitFieldJustified( 32, 8 );
+        uint8_t g1 = reg->GetBitFieldJustified( 40, 8 );
+        uint8_t m1 = reg->GetBitFieldJustified( 32, 8 );
 
         // Get the NCE symbol.
-        o_symbol = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, galois,
-                                          mask );
-        if ( !o_symbol.isValid() )
-        {
-            PRDF_ERR( PRDF_FUNC "fromGalois(0x%08x,m%ds%d,0x%02x,0x%02x) "
-                      "failed", i_chip->getHuid(), i_rank.getMaster(),
-                      i_rank.getSlave(), galois, mask );
-            o_rc = FAIL;
-            break;
-        }
+        o_sym1 = MemSymbol::fromGalois( i_chip->getTrgt(), i_rank, g1, m1 );
 
         // TODO: RTC 157888 Check if the symbol is on a spare DRAM.
 

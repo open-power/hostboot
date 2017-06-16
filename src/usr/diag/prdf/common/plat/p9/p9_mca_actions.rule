@@ -33,11 +33,8 @@ actionclass verify_chip_mark_5 { funccall("AnalyzeFetchMpe_5"); };
 actionclass verify_chip_mark_6 { funccall("AnalyzeFetchMpe_6"); };
 actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 
-/** Mainline NCE handling */
-actionclass mainline_nce_handling { funccall("AnalyzeFetchNce"); };
-
-/** Mainline TCE handling */
-actionclass mainline_tce_handling { funccall("AnalyzeFetchTce"); };
+/** Mainline NCE/TCE handling */
+actionclass mainline_nce_tce_handling { funccall("AnalyzeFetchNceTce"); };
 
 /** Mainline UE handling */
 actionclass mainline_ue_handling_UERE

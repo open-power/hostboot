@@ -513,19 +513,32 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T, typename D>
-uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                               STEP_CODE_DATA_STRUCT & io_sc,
-                               bool i_isTce = false )
+uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
+                             STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[MemEcc::__analyzeFetchNceTce] "
+    #define PRDF_FUNC "[MemEcc::analyzeFetchNceTce] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( T == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
 
     do
     {
-        // Get the symbol of the failure.
-        MemSymbol symbol;
-        o_rc = getMemReadSymbol<T>( i_chip, i_addr.getRank(), symbol, i_isTce );
+        // Get the address of the failure.
+        MemAddr addr;
+        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
+        MemRank rank = addr.getRank();
+
+        // Get the symbols for the NCE/TCE attention.
+        MemSymbol sym1, sym2;
+        o_rc = getMemReadSymbol<T>( i_chip, rank, sym1, sym2 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
@@ -533,14 +546,39 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             break;
         }
 
-        // Add the symbol to the callout list and CE table.
-        bool doTps;
-        o_rc = handleMemCe<T,D>( i_chip, i_addr, symbol, doTps, io_sc );
-        if ( SUCCESS != o_rc )
+        // Add the first symbol to the callout list and CE table.
+        bool doTps = false;
+        if ( sym1.isValid() )
         {
-            PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x) failed",
-                      i_chip->getHuid() );
+            o_rc = handleMemCe<T,D>( i_chip, addr, sym1, doTps, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
+                          i_chip->getHuid(), rank.getKey(), sym1.getSymbol() );
+                break;
+            }
+        }
+        else
+        {
+            // The first symbol should always be valid.
+            PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) returned an invalid "
+                      "symbol", i_chip->getHuid() );
+            o_rc = FAIL;
             break;
+        }
+
+        // Add the second symbol to the callout list and CE table, if it exists.
+        if ( sym2.isValid() )
+        {
+            bool tmp;
+            o_rc = handleMemCe<T,D>( i_chip, addr, sym2, tmp, io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
+                          i_chip->getHuid(), rank.getKey(), sym2.getSymbol() );
+                break;
+            }
+            if ( tmp ) doTps = true;
         }
 
         // Initiate a TPS procedure, if needed.
@@ -552,11 +590,11 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
             // will still try to start TPS just in case MNFG disables the
             // termination policy.
 
-            o_rc = addTpsEvent<T,D>( i_chip, i_addr.getRank(), io_sc );
+            o_rc = addTpsEvent<T,D>( i_chip, rank, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x) failed",
-                          i_chip->getHuid() );
+                PRDF_ERR( PRDF_FUNC "addTpsEvent(0x%08x,0x%02x) failed",
+                          i_chip->getHuid(), rank.getKey() );
             }
 
             #endif
@@ -564,47 +602,6 @@ uint32_t __analyzeFetchNceTce( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
     } while (0);
 
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeFetchNce( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::analyzeFetchNce] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get the address of the failure.
-        MemAddr addr;
-        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Complete analysis.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "__analyzeFetchNceTce(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-    } while (0);
-
     // Add ECC capture data for FFDC.
     MemCaptureData::addEccData<T>( i_chip, io_sc );
 
@@ -615,65 +612,7 @@ uint32_t analyzeFetchNce( ExtensibleChip * i_chip,
 
 // To resolve template linker errors.
 template
-uint32_t analyzeFetchNce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-                                                STEP_CODE_DATA_STRUCT & io_sc );
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T, typename D>
-uint32_t analyzeFetchTce( ExtensibleChip * i_chip,
-                          STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[MemEcc::analyzeFetchTce] "
-
-    PRDF_ASSERT( nullptr != i_chip );
-    PRDF_ASSERT( T == i_chip->getType() );
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        // Get the address of the failure.
-        MemAddr addr;
-        o_rc = getMemReadAddr<T>( i_chip, MemAddr::READ_NCE_ADDR, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Complete analysis for first symbol.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "first __analyzeFetchNceTce(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-        // Complete analysis for second symbol.
-        o_rc = __analyzeFetchNceTce<T,D>( i_chip, addr, io_sc, true );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "second __analyzeFetchNceTce(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
-    } while (0);
-
-    // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc );
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
-// To resolve template linker errors.
-template
-uint32_t analyzeFetchTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+uint32_t analyzeFetchNceTce<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
                                                 STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
@@ -929,7 +868,7 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on MSR: i_chip=0x%08x",
-                    i_chip->getHuid() );
+                      i_chip->getHuid() );
             break;
         }
 
@@ -944,6 +883,13 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
         // get symbol and DRAM
         MemSymbol symbol = MemSymbol::fromGalois( trgt, rank, galois );
+        if ( !symbol.isValid() )
+        {
+            PRDF_ERR( PRDF_FUNC "Galois 0x%02x from MSR is invalid: 0x%08x,"
+                      "0x%02x", galois, i_chip->getHuid(), rank.getKey() );
+            o_rc = FAIL;
+            break;
+        }
         uint8_t dram = symbol.getDram();
 
         // Add the DIMM to the callout list
