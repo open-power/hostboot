@@ -131,8 +131,17 @@ printk("Version=%lX\n",i_data.version);
     if(iv_data.version >= Bootloader::BLTOHB_SAB)
     {
         iv_data.secureAccessBit = i_data.secureAccessBit;
-        iv_data.securityOverride = i_data.securityOverride;
+    }
+
+    if(iv_data.version >= Bootloader::BLTOHB_SECURE_OVERRIDES)
+    {
+        iv_data.securityOverride   = i_data.securityOverride;
         iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
+    }
+    else
+    {
+        iv_data.securityOverride   = 0;
+        iv_data.allowAttrOverrides = 0;
     }
 
     // Ensure Bootloader to HB structure has the MMIO members

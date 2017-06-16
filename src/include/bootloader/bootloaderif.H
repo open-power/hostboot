@@ -54,9 +54,10 @@ const uint64_t BLTOHB_EYECATCHER = 0x23626C746F686200; // #BLTOHB\0
 enum BlToHbDataVersion
 {
     // [release:4][version:4]
-    BLTOHB_INIT      = 0x0000000900000001,
-    BLTOHB_SAB       = 0x0000000900000002,
-    BLTOHB_MMIOBARS  = 0x0000000900000003
+    BLTOHB_INIT             = 0x0000000900000001,
+    BLTOHB_SAB              = 0x0000000900000002,
+    BLTOHB_MMIOBARS         = 0x0000000900000003,
+    BLTOHB_SECURE_OVERRIDES = 0x0000000900000004,
 };
 
 
@@ -76,9 +77,9 @@ struct BlToHbData
                    secureRomSize(0), hwKeysHash(nullptr),
                    hwKeysHashSize(0), hbbHeader(nullptr),
                    hbbHeaderSize(0), secureAccessBit(0),
-                   securityOverride(0), allowAttrOverrides(0),
                    xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
-                   lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR) {}
+                   lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
+                   securityOverride(0), allowAttrOverrides(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -100,14 +101,14 @@ struct BlToHbData
     size_t hbbHeaderSize;
     // Secure Setting - Secure Access Bit
     bool secureAccessBit;
-    // Secure Setting - Security Override
-    bool securityOverride;
-    // Secure Setting - Allow Attribute Overrides in Securemode
-    bool allowAttrOverrides;
     // XSCOM MMIO BAR
     uint64_t xscomBAR;
     // LPC MMIO BAR
     uint64_t lpcBAR;
+    // Secure Setting - Security Override
+    bool securityOverride;
+    // Secure Setting - Allow Attribute Overrides in Securemode
+    bool allowAttrOverrides;
 } __attribute__((packed));
 
 /**
