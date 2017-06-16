@@ -78,6 +78,12 @@ class LpcDD
                         const void* i_buffer,
                         size_t& io_buflen);
 
+    /**
+     * @brief Check For Errors in OPB and LPCHC Status Registers
+     *
+     * @return Error log if error found
+     */
+    errlHndl_t checkForLpcErrors();
 
     /**
      * @brief Enums for different levels of resetting PNOR communication levels
@@ -85,10 +91,9 @@ class LpcDD
     enum ResetLevels
     {
         RESET_CLEAR          = 0x00000000, /**< Clear Reset Level */
-        RESET_ECCB           = 0x00000001, /**< ECCB FW Logic */
-        RESET_OPB_LPCHC_SOFT = 0x00000002, /**< OPB LPCHC Clear Errors */
-        RESET_OPB_LPCHC_HARD = 0x00000004, /**< OPB LPCHC Reset Logic */
-        RESET_INIT           = 0x00000008, /**< Initial HW setup */
+        RESET_OPB_LPCHC_SOFT = 0x00000001, /**< OPB LPCHC Clear Errors */
+        RESET_OPB_LPCHC_HARD = 0x00000002, /**< OPB LPCHC Reset Logic */
+        RESET_INIT           = 0x00000004, /**< Initial HW setup */
     };
 
 
@@ -156,11 +161,10 @@ class LpcDD
 
     /**
      * @brief Constructor
-     * @param[in]  Processor target associated with the ECCB logic
+     * @param[in]  Processor target associated with the LPC Master
      */
     LpcDD( TARGETING::Target* i_proc
            = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL );
-
 
     /**
      * @brief Destructor
@@ -181,55 +185,110 @@ class LpcDD
         /** Size that LPC takes up (0xC0000000 to 0xFFFFFFFF)*/
         LPC_SPACE_SIZE = 0x40000000,
 
-        /**< OPB LPCM Sync FIR Reg - used to read the FIR*/
-        OPB_LPCM_FIR_REG = 0x01010C00,
-
         /**< OPB LPCM Sync FIR Reg WOX_AND - used to clear the FIR */
         OPB_LPCM_FIR_WOX_AND_REG = 0x01010C01,
 
         /**< OPB LPCM Sync FIR Mask Reg WO_OR - used to set the mask */
         OPB_LPCM_FIR_MASK_WO_OR_REG = 0x01010C05,
 
-        OPB_LPCM_FIR_ERROR_MASK = 0xFF00000000000000, /**< Error Bits MASK */
-
         // LPCHC reset-related registers
         OPB_MASTER_LS_CONTROL_REG = 0x008, /**<OPBM LS Control Reg */
-        LPCHC_RESET_REG           = 0x0FC, /**<LPC HC Reset Register */
 
+        LPCHC_SYNC_CYCLE_COUNTER_INFINITE = 0xFF000000,
 
-        LPCHC_SYNC_CYCLE_COUNTER_INFINITE = 0xFF000000
+        /** OPB Master Accumulated Status Register - used to check error bits*/
+        OPBM_ACCUM_STATUS_REG = 0x0,
+
+        /** OPB Master Actual Status Register */
+        OPBM_STATUS_REG = 0x004C,
+
+        /** LPC Host Controller Status Register - used to check error bits*/
+        LPCHC_REG = 0x2038,
+
+        /** LPC Host Controller Error Addr Register - used to check error bits*/
+        LPCHC_ERROR_ADDR_REG = 0x2040,
+
+        /** LPC Host Controller Reset Register */
+        LPCHC_LPC_BUS_ABORT_REG = 0x20F8,
+
+        /** LPC Host Controller Reset Register */
+        LPCHC_RESET_REG = 0x20FC,
+
+        OPB_ERROR_MASK = 0x20000FC3, /**< OPBM Error Bits MASK */
+
+        LPCHC_ERROR_MASK = 0x000004FC /**< LPCHC Error Bits MASK */
+
     };
 
-
     /**
-     * @brief  OPB-LPCM FIR Register Layout
+     * @brief  OPB Master Status Register Layout
      */
-    union OpbLpcmFirReg_t
+    union OpbmErrReg_t
     {
-        uint64_t data64;
+        uint32_t data32;
         struct
         {
-            uint64_t rxits : 1;    // Invalid Transfer Size
-            uint64_t rxicmd : 1;   // Invalid Command
-            uint64_t rxiaa : 1;    // Invalid Address Alignment
-            uint64_t rxhopbe : 1;  // OPB Bus Error
-            uint64_t rxhopbt : 1;  // OPB Bus Timeout
-            uint64_t rxctgtel : 1; // CI Load/CI Store/OPB Master Hang Timeout
-            uint64_t rxcbpe : 1;   // Command Buffer Parity Error
-            uint64_t rxdbpe : 1;   // Data Buffer Parity Error
-            uint64_t reserved  : 56;
+            uint32_t reserved : 2;    // 0:1 reserved
+            uint32_t rxctgtel : 1;    // 2 - OPB master timeout
+            uint32_t rxfwrdcv : 1;    // 3 - FW read cache valid(status only)
+            uint32_t reserved1 : 16;  // 4:19 reserved
+            uint32_t rxits : 1;      // 20 - Invalid Transfer Size
+            uint32_t rxicmd : 1;     // 21 - Invalid Command
+            uint32_t rxiaa : 1;      // 22 - Invalid address alignment
+            uint32_t rxiaddr : 1;    // 23 - Invalid address
+            uint32_t rxopbe : 1;     // 24 - OPB error acknowledge
+            uint32_t rxopbt : 1;     // 25 - OPB timeout
+            uint32_t reserved2 : 4;  // 26:29 reserved
+            uint32_t rxicmdb : 1;    // 30 - Command buffer parity error
+            uint32_t rxidatab : 1;   // 31 - Data buffer parity error
+
         };
-        OpbLpcmFirReg_t() : data64(0) {};
+        OpbmErrReg_t() : data32(0) {};
+    };
+
+    /**
+     * @brief  LPCHC Status Register Layout
+     */
+    union LpchcErrReg_t
+    {
+        uint32_t data32;
+        struct
+        {
+            uint32_t reserved : 17;    // 0:16 IRQSER status - not used
+            uint32_t reserved1 : 4;    // 17:20 reserved
+            uint32_t lreset : 1;       // 21 - Lreset Event
+            uint32_t reserved2 : 2;    // 22:23 reserved
+            uint32_t syncab : 1;       // 24 - Sync Abnormal
+            uint32_t syncnr : 1;       // 25 - Sync no response
+            uint32_t syncne : 1;       // 26 - Sync normal error
+            uint32_t syncto : 1;       // 27 - Sync timeout
+            uint32_t tctar : 1;        // 28 - Target cycle TAR error
+            uint32_t mctar : 1;        // 29 - LPC bus master cycle TAR error
+            uint32_t mzeror : 1;       // 30 - LPC bus master 0 request
+            uint32_t moner : 1;        // 31 - LPC bus master 1 request
+        };
+        LpchcErrReg_t() : data32(0) {};
     };
 
 
     /**
-     * @brief Check For Errors in OPB and LPCHC Status Registers
      *
-     * @parm o_resetLevel    if error, reset level to clear error
-     * @return Error log if error found
+     * @brief Compute the Severity of the errors from the OPBM Status Register
+     *
+     * @parm i_opbmErrData    Masked bits of the OPBM error register
+     * @parm o_resetLevel     Level of severity of the error reported
      */
-    errlHndl_t checkForOpbErrors( ResetLevels &o_resetLevel );
+    void computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
+                           ResetLevels &o_resetLevel);
+
+    /**
+     * @brief Compute the Severity of the errors from the LPCHC Status Register
+     *
+     * @parm i_lpchcErrData    Masked bits of the LPCHC error register
+     * @parm o_resetLevel     Level of severity of the error reported
+     */
+    void computeLpchcErrSev(LpchcErrReg_t i_lpchcErrData,
+                            ResetLevels &o_resetLevel);
 
     /**
      * @brief Sanity check the input address for a LPC op and return
@@ -302,7 +361,7 @@ class LpcDD
     mutex_t* ivp_mutex;
 
     /**
-     * @brief Processor target associated with the ECCB logic
+     * @brief Processor target associated with the LPC Master
      */
     TARGETING::Target* iv_proc;
 

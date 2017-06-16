@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,6 +222,72 @@ class LpcDdTest : public CxxTest::TestSuite
             TS_FAIL("LpcDD::test_hwfail> No error from bad address");
         }
     }
+
+
+    /**
+     * @brief LPC HW Failure
+     *       Test handling of invalid address
+     *       This address has to be within the range to pass checkAddr, but
+     *       not actaully a valid LPC address.
+     */
+    void _test_invalidAddress(void)
+    {
+        TRACFCOMP( g_trac_lpc, "LpcDdTest::test_invalidAddress>" );
+        errlHndl_t l_err = NULL;
+
+        TARGETING::Target* sentinel =
+          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        size_t opsize = 4;
+        uint8_t data[12];
+
+        // pass a bad address
+        l_err = deviceRead( sentinel,
+                            data,
+                            opsize,
+                            DEVICE_LPC_ADDRESS(LPC::TRANS_ABS,0xDEADBEEF) );
+        if( l_err )
+        {
+            delete l_err;
+        }
+        else
+        {
+            TS_FAIL("LpcDD::test_invalidAddress> No error from invalid address test");
+        }
+    }
+
+    /**
+     * @brief LPC HW Failure
+     *       Test handling of invalid address
+     *       This address has to be within the range to pass checkAddr, but
+     *       not actaully a valid LPC address.
+     */
+    void _test_invalidTransferSize(void)
+    {
+        TRACFCOMP( g_trac_lpc, "LpcDdTest::test_invalidTransferSize>" );
+        errlHndl_t l_err = NULL;
+
+        TARGETING::Target* sentinel =
+          TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+        size_t opsize = 4;
+        uint8_t data[12];
+
+        // pass a bad address
+        l_err = deviceRead( sentinel,
+                            data,
+                            opsize,
+                            DEVICE_LPC_ADDRESS(LPC::TRANS_ABS,0x12345678) );
+        if( l_err )
+        {
+            delete l_err;
+        }
+        else
+        {
+            TS_FAIL("LpcDD::test_invalidTransferSize> No error from invalid transfer size test");
+        }
+    }
+
+
+
 };
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -36,7 +36,7 @@ namespace LPC
         MOD_LPCDD_CHECKADDR             = 0x01,
         MOD_LPCDD_READLPC               = 0x02,
         MOD_LPCDD_WRITELPC              = 0x03,
-        MOD_LPCDD_CHECKFOROPBERRORS     = 0x04,
+        MOD_LPCDD_CHECKFORLPCERRORS     = 0x04,
         MOD_LPCDD_HWRESET               = 0x05,
         MOD_CREATE_ALTMASTER            = 0x06,
         MOD_READLPC                     = 0x07,
@@ -54,6 +54,7 @@ namespace LPC
         RC_CANT_USE_MASTER           = LPC_COMP_ID | 0x07,
         RC_CANT_USE_SENTINEL         = LPC_COMP_ID | 0x08,
         RC_BAD_TARGET                = LPC_COMP_ID | 0x09,
+        RC_LPCHC_ERROR               = LPC_COMP_ID | 0x0A,
     };
 };
 

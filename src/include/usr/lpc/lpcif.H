@@ -41,7 +41,8 @@ enum TransType {
     TRANS_FW,  // LPC Firmware Space
     TRANS_REG, // LPCHC Register space
     TRANS_ABS, // Address parm is absolute
-    TRANS_LAST //Invalid, used for looping and tests
+    TRANS_ERR, // LPC Register Error Space
+    TRANS_LAST // Invalid, used for looping and tests
 };
 
 /**
