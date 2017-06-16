@@ -1637,25 +1637,12 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
 
         if( mss::pc::get_dll_cal_status(l_read) != mss::YES )
         {
-            // For < DD2.0 parts we want to run DLL workaround so
+            // For all Nimbus parts parts we want to run DLL workaround so
             // Instead of using FAPI_ASSERT and logging FFDC we will
             // return a "bad" ReturnCode to trigger a workaround that
             // will be run after DLL Calibration for all failing DLLs.
             // FFDC will be collected there if it doesn't pass.
-            if( mss::chip_ec_feature_mss_dll_workaround(p) )
-            {
-                FAPI_INF("%s DLL failed to calibrate", mss::c_str(p));
-                return fapi2::FAPI2_RC_FALSE;
-            }
-
-            // If we are here than we are not running DLL workaround
-            // because this part is not < DD2.0, so we want to fail out here
-            // and log FFDC
-            FAPI_ASSERT( false,
-                         fapi2::MSS_DLL_FAILED_TO_CALIBRATE()
-                         .set_MCA_IN_ERROR(p),
-                         "%s DLL failed to calibrate",
-                         mss::c_str(i_target) );
+            return fapi2::FAPI2_RC_FALSE;
 
         }// endif
 
