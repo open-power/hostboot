@@ -33,6 +33,7 @@
 #include <secureboot/settings.H>
 #include <config.h>
 #include <console/consoleif.H>
+#include <kernel/console.H>
 
 // SECUREBOOT : General driver traces
 #include "../common/securetrace.H"
@@ -67,6 +68,7 @@ namespace SECUREBOOT
                             static_cast<uint64_t>(ProcSecurity::SabBit)));
 
         SB_INF("getEnabled() state:%i",iv_enabled);
+        printk("SECUREBOOT::enabled() state:%i\n", iv_enabled);
 
         // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
@@ -158,8 +160,8 @@ namespace SECUREBOOT
         auto l_errl = readSecurityRegister(i_pProc,
                     static_cast<uint64_t>(ProcSecurity::SwitchRegister),
                     o_regValue);
-        SB_INF("getSecuritySwitch() err:%i reg:%.16llX huid:%.8X",
-            !!l_errl, o_regValue, get_huid(i_pProc));
+        SB_INF("getSecuritySwitch() err_rc:%.4X huid:%.8X reg:%.16llX",
+            ERRL_GETRC_SAFE(l_errl), get_huid(i_pProc), o_regValue);
 
         return l_errl;
     }
