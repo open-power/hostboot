@@ -51,6 +51,9 @@ HOSTBOOT_SPECIFIC_OBJS += ${DEBUG_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += ${HOSTBOOT_RT_IPL_COMMON_OBJS}
 HOSTBOOT_SPECIFIC_OBJS += namedtarget.o
 HOSTBOOT_SPECIFIC_OBJS += errludattribute.o
+HOSTBOOT_SPECIFIC_OBJS += attrcheck_errl.o
+OBJS += persistrwattrcheck.o
+
 
 # Indicates that targutilbase.o will be excluded from targeting and put in
 # the base image for hostboot builds only. See common/common.mk and grep

@@ -73,10 +73,9 @@ Target::~Target()
 }
 
 //******************************************************************************
-// Target::_tryGetAttr
+// Target::_tryGetAttrUnsafe
 //******************************************************************************
-
-bool Target::_tryGetAttr(
+bool Target::_tryGetAttrUnsafe(
     const ATTRIBUTE_ID i_attr,
     const uint32_t     i_size,
           void* const  io_pAttrData) const
@@ -776,8 +775,6 @@ void setFrequencyAttributes( Target * i_sys,
     TARG_EXIT();
     #undef TARG_FN
 }
-
-
 
 //******************************************************************************
 // Attribute Tanks

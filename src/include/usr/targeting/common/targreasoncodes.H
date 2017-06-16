@@ -38,16 +38,17 @@ namespace TARGETING
 
 enum TargetingModuleId
 {
-    TARG_MOD_TEST               = 0x01,
-    TARG_MOD_ATTR_SYNC          = 0x02,
-    TARG_RT_GET_RT_TARGET       = 0x03,
-    TARG_RT_GET_HB_TARGET       = 0x04,
-    TARG_GET_ATTR_OVER          = 0x05,
-    TARG_WRITE_PERM_ATTR        = 0x06,
-    TARG_PARSE_ATTR_SECT_HEADER = 0x07,
-    TARG_MSG_SERVICE_TASK       = 0x08,
-    TARG_CREATE_VMM_SECTIONS    = 0x09,
-    TARG_APPLY_ATTR_OVER        = 0x0A,
+    TARG_MOD_TEST                   = 0x01,
+    TARG_MOD_ATTR_SYNC              = 0x02,
+    TARG_RT_GET_RT_TARGET           = 0x03,
+    TARG_RT_GET_HB_TARGET           = 0x04,
+    TARG_GET_ATTR_OVER              = 0x05,
+    TARG_WRITE_PERM_ATTR            = 0x06,
+    TARG_PARSE_ATTR_SECT_HEADER     = 0x07,
+    TARG_MSG_SERVICE_TASK           = 0x08,
+    TARG_CREATE_VMM_SECTIONS        = 0x09,
+    TARG_APPLY_ATTR_OVER            = 0x0A,
+    TARG_HANDLE_ENUM_CHECK_FAILURE  = 0x0B,
 };
 
 enum TargetingReasonCode
@@ -73,6 +74,7 @@ enum TargetingReasonCode
     TARG_RC_MM_BLOCK_MAP_FAIL               = TARG_COMP_ID | 0x13,
     TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED     = TARG_COMP_ID | 0x14,
     TARG_RC_MM_BLOCK_UNMAP_FAIL             = TARG_COMP_ID | 0x15,
+    TARG_RC_ATTRIBUTE_ENUM_CHECK_FAIL       = TARG_COMP_ID | 0x16,
 };
 
 }; // End TARGETING namespace
