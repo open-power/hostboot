@@ -69,3 +69,13 @@ actionclass nx_th_32perDay
     threshold32pday;
 };
 
+/** Callout connected NX, threshold 1 */
+actionclass nx_th_1
+{
+    callout(connected(TYPE_NX,0), MRU_MED);
+    threshold1;
+};
+
+/** Callout connected NX, threshold 1, SUE originated from somewhere else */
+actionclass nx_th_1_SUE { nx_th_1; SueSeen; };
+

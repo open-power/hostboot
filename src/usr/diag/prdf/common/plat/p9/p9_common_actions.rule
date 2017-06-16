@@ -108,11 +108,11 @@ actionclass threshold_and_mask
 #                               Special Flags                                  #
 ################################################################################
 
-/** Set SUE generation point */
-actionclass SUEGenerationPoint
-{
-    flag(UERE);
-};
+/** SUE source */
+actionclass SueSource { flag(UERE); };
+
+/** SUE originated from somewhere else */
+actionclass SueSeen { flag(SUE); };
 
 ################################################################################
 #                               Simple Callouts                                #
@@ -142,7 +142,6 @@ actionclass calloutSelfLowNoGard
 ################################################################################
 #                           Callouts with thresholds                           #
 ################################################################################
-
 
 actionclass self_th_1
 {
@@ -207,6 +206,14 @@ actionclass level2_M_proc_L_th_1
     callout(connected(TYPE_PROC), MRU_LOW);
     threshold1;
 };
+
+################################################################################
+#                           Callouts with flags                                #
+################################################################################
+
+actionclass level2_th_1_SUE { level2_th_1; SueSeen;   };
+actionclass self_th_1_SUE   { self_th_1;   SueSeen;   };
+actionclass self_th_1_UERE  { self_th_1;   SueSource; };
 
 ################################################################################
 #                               Dump Types                                     #

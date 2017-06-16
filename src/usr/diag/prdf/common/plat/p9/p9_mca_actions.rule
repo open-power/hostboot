@@ -40,9 +40,9 @@ actionclass mainline_nce_handling { funccall("AnalyzeFetchNce"); };
 actionclass mainline_tce_handling { funccall("AnalyzeFetchTce"); };
 
 /** Mainline UE handling */
-actionclass mainline_ue_handling
+actionclass mainline_ue_handling_UERE
 {
-    SUEGenerationPoint;
+    SueSource;
     threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
                                       # when background scrubbing resumes after
                                       # targeted diagnostics is complete.
@@ -50,8 +50,9 @@ actionclass mainline_ue_handling
 };
 
 /** Memory Port Failure */
-actionclass mem_port_failure
+actionclass mem_port_failure_UERE
 {
+    SueSource;
     callout(connected(TYPE_DIMM,0), MRU_HIGH); # DIMM 0 HIGH
     callout(connected(TYPE_DIMM,1), MRU_HIGH); # DIMM 1 HIGH
     calloutSelfLow;                            # Self LOW
@@ -70,17 +71,17 @@ actionclass rcd_parity_error
 };
 
 /** Handle Mainline IUEs */
-actionclass mainline_iue_handling
+actionclass mainline_iue_handling_UERE
 {
-    SUEGenerationPoint;
+    SueSource;
     # Thresholding done in the plugin
     funccall("AnalyzeMainlineIue");
 };
 
 /**  Handle Maintenance IUEs */
-actionclass maintenance_iue_handling
+actionclass maintenance_iue_handling_UERE
 {
-    SUEGenerationPoint;
+    SueSource;
     # Thresholding done in the plugin
     funccall("AnalyzeMaintIue");
 };
