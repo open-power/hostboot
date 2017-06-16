@@ -840,6 +840,37 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Write the READ_VREF register to enable and or to skip the read centering cal
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
+{
+    fapi2::buffer<uint64_t> l_data;
+    typedef rcTraits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // The two bits we care about are the calibration enable and skip read centering
+    // bits in rc_vref_config1.
+    FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data), "%s Failed read_vref_config1", mss::c_str(i_target) );
+
+    // Enable is based off of the RDVREF attribute
+    l_data.writeBit<TT::RDVREF_CALIBRATION_ENABLE>( i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() );
+
+    // Check to see if READ_CENTERING is disabled, if so, set the bit
+    l_data.writeBit<TT::SKIP_RDCENTERING>( !i_cal_steps_enabled.getBit<READ_CTR>() );
+
+    FAPI_INF("%s %s read VREF cal, read centering is %s",
+             mss::c_str(i_target),
+             i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() ? "Enabling" : "Disabling",
+             i_cal_steps_enabled.getBit<READ_CTR>() ? "yup" : "nope");
+
+    FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data), "%s Failed write_vref_config1", mss::c_str(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+///
 /// @brief Setup all the cal config register
 /// @param[in] i_target the MCA target associated with this cal setup
 /// @param[in] i_rank_pairs the vector of currently configured rank pairs
@@ -892,36 +923,18 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     }
 
     // Blast the VREF config with the proper setting for these cal bits if there were any enable bits set
-    // TK let's remove the EC check sometime in the future. Added here to double check lab team on attribute overrides
-    if (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() && (!mss::chip_ec_feature_skip_hw_vref_cal(i_target)))
+    if (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>())
     {
         uint16_t l_vref_cal_enable = 0;
-
-        fapi2::buffer<uint64_t> l_data;
-        typedef rcTraits<fapi2::TARGET_TYPE_MCA> TT;
 
         // Blast the VREF_CAL_ENABLE to the registers that control which dp16's to use for rdvref
         FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
         FAPI_TRY( mss::scom_blastah(i_target, dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ENABLE_REG, l_vref_cal_enable) );
-
-        // The two bits we care about are the calibration enable and skip read centering
-        // bits in rc_vref_config1. We always run RDVREF config, but sometimes skip
-        // read centering after (if we're not doing those steps.
-        FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data) );
-
-        FAPI_INF("enabling read VREF cal, read centering is %s", i_cal_steps_enabled.getBit<READ_CTR>() ? "yup" : "nope");
-
-        l_data.setBit<TT::RDVREF_CALIBRATION_ENABLE>();
-
-        // Check to see if READ_CENTERING is disabled, if so, set the bit
-        if (!i_cal_steps_enabled.getBit<READ_CTR>())
-        {
-            FAPI_INF("skipping read centering");
-            l_data.setBit<TT::SKIP_RDCENTERING>();
-        }
-
-        FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data) );
     }
+
+    // Now lets set the actual read_vref_config. We want to write/ clear this every time we run so seperate function
+    FAPI_TRY( setup_read_vref_config1(i_target, i_cal_steps_enabled),
+              "%s Failed setting the read_vref_config1", mss::c_str(i_target) );
 
     {
         typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
@@ -1119,14 +1132,27 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         }
     }
 
+    // run Initial Pattern Write
+    if(i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>())
+    {
+        // Sets up the cal steps in the buffer
+        fapi2::buffer<uint32_t> l_steps_to_execute;
+        l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>
+        (i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>());
+
+        FAPI_INF("%s Running Initial Pattern Write on RP%d 0x%08lx",
+                 mss::c_str(i_target), i_rp, l_steps_to_execute);
+
+        // Undertake the calibration steps
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+    }
+
     // Lets run DQS
     if(i_cal_steps_enabled.getBit<mss::cal_steps::DQS_ALIGN>())
     {
         // Sets up the cal steps in the buffer
         fapi2::buffer<uint32_t> l_steps_to_execute;
         l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
-        l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>
-        (i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>());
 
         FAPI_INF("%s Running DQS align on RP%d 0x%08lx",
                  mss::c_str(i_target), i_rp, l_steps_to_execute);
@@ -1137,8 +1163,6 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         // Now run the DQS align workaround
         FAPI_TRY(mss::workarounds::dp16::dqs_align::dqs_align_workaround(i_target, i_rp, i_abort_on_error),
                  "%s Failed to run dqs align workaround on rp %d", mss::c_str(i_target), i_rp);
-
-
     }
 
     // Run cal steps between RDCLK_ALIGN and RD_CTR if any are selected - note RDCLK_ALIGN takes place after WR_LEVEL
