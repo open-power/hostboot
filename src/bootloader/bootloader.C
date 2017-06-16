@@ -123,7 +123,7 @@ namespace Bootloader{
         {
             // Add cases as additional versions are created
             default:
-                g_blData->blToHbData.version = BLTOHB_MMIOBARS;
+                g_blData->blToHbData.version = BLTOHB_SECURE_OVERRIDES;
                 break;
         }
 
