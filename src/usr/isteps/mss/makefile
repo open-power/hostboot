@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/power_thermal/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/spd/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/workarounds/
+MSS_LIB += ${PROCEDURES_PATH}/hwp/memory/lib/rosetta_map/
 MSS_LIB += ${ROOTPATH}/src/import/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/lrdimm/ddr4/
 MSS_LIB += ${ROOTPATH}/src/import/generic/memory/lib/spd/rdimm/ddr4/
