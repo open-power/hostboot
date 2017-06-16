@@ -6384,12 +6384,12 @@ group gPBAMFIR filter singlebit, cs_root_cause
     /** PBAMFIR[3]
      *  action0_for_OPB_error
      */
-    (rPBAMFIR, bit(3)) ? self_th_1;
+    (rPBAMFIR, bit(3)) ? defaultMaskedError;
 
     /** PBAMFIR[4]
      *  action0_for_OPB_timeout
      */
-    (rPBAMFIR, bit(4)) ? self_th_32perDay;
+    (rPBAMFIR, bit(4)) ? defaultMaskedError;
 
     /** PBAMFIR[5]
      *  action0_for_OPB_master_hang_timeout

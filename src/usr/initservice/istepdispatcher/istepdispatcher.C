@@ -65,6 +65,7 @@
 #include <console/consoleif.H>
 #include <isteps/hwpisteperror.H>
 #include <pnor/pnorif.H>
+#include <lpc/lpcif.H>
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmiwatchdog.H>      //IPMI watchdog timer
 #include <ipmi/ipmipowerstate.H>    //IPMI System ACPI Power State
@@ -1953,6 +1954,18 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     Util::writeScratchReg( SPLESS::MBOX_SCRATCH_REG5,
                            l_scratch5.data32 );
 
+#ifdef CONFIG_ISTEP_LPC_PORT80_DEBUG
+    // Starting port 80h value for hostboot isteps.  Each step started will
+    // increase the value by one.
+    static uint8_t port80_val = 0x30;
+    static size_t port80_len = sizeof(port80_val);
+    errlHndl_t port80_err = NULL;
+    port80_err = deviceWrite(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
+                             &port80_val, port80_len,
+                             DEVICE_LPC_ADDRESS(LPC::TRANS_IO, 0x80));
+    delete port80_err;  // ignore any error
+    port80_val++;
+#endif
 
     //--- Display step on serial console
 #ifdef CONFIG_CONSOLE_OUTPUT_PROGRESS
