@@ -111,6 +111,15 @@ fapi2::ReturnCode reset_delay_values( const fapi2::Target<fapi2::TARGET_TYPE_MCB
 fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target );
 
 ///
+/// @brief Write the READ_VREF register to enable and or to skip the read centering cal
+/// @param[in] i_target the MCA target associated with this cal setup
+/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
+
+///
 /// @brief Configure the DP16 sysclk
 /// @param[in] i_target a MCBIST target
 /// @return FAPI2_RC_SUCCESs iff ok
