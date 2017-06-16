@@ -50,6 +50,9 @@
 #include <initservice/taskargs.H>
 #include <config.h>
 #include <arch/memorymap.H>
+#include <util/misc.H>
+#include <errl/errlreasoncodes.H>
+
 
 trace_desc_t* g_trac_lpc;
 TRAC_INIT( & g_trac_lpc, LPC_COMP_NAME, 2*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -106,6 +109,13 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
     //  then we have to use our special side copy of the driver
     if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
+        //First check/clear the LPC bus of errors and commit any errors found
+        l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
+        if (l_err)
+        {
+            errlCommit(l_err, LPC_COMP_ID);
+        }
+
         l_err = Singleton<LpcDD>::instance().readLPC( l_type,
                                                       l_addr,
                                                       io_buffer,
@@ -116,6 +126,14 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
         if( g_altLpcDD
             && (i_target == g_altLpcDD->getProc()) )
         {
+            //First check/clear the LPC bus of errors and commit
+            //   any errors found
+            l_err = g_altLpcDD->checkForLpcErrors();
+            if (l_err)
+            {
+                errlCommit(l_err, LPC_COMP_ID);
+            }
+
             l_err = g_altLpcDD->readLPC( l_type,
                                          l_addr,
                                          io_buffer,
@@ -130,7 +148,7 @@ errlHndl_t lpcRead(DeviceFW::OperationType i_opType,
                 alt_huid = TARGETING::get_huid(g_altLpcDD->getProc());
             }
             /*@
-             * @errortype
+             * @errortype    ERRL_SEV_UNRECOVERABLE
              * @moduleid     LPC::MOD_READLPC
              * @reasoncode   LPC::RC_BAD_TARGET
              * @userdata1[00:31]    Requested target
@@ -197,6 +215,13 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
     //  then we have to use our special side copy of the driver
     if( i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL )
     {
+        //First check/clear the LPC bus of errors and commit any errors found
+        l_err = Singleton<LpcDD>::instance().checkForLpcErrors();
+        if (l_err)
+        {
+            errlCommit(l_err, LPC_COMP_ID);
+        }
+
         l_err = Singleton<LpcDD>::instance().writeLPC( l_type,
                                                        l_addr,
                                                        io_buffer,
@@ -207,6 +232,14 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
         if( g_altLpcDD
             && (i_target == g_altLpcDD->getProc()) )
         {
+            //First check/clear the LPC bus of errors and commit
+            //   any errors found
+            l_err = g_altLpcDD->checkForLpcErrors();
+            if (l_err)
+            {
+                errlCommit(l_err, LPC_COMP_ID);
+            }
+
             l_err = g_altLpcDD->writeLPC( l_type,
                                           l_addr,
                                           io_buffer,
@@ -221,7 +254,7 @@ errlHndl_t lpcWrite(DeviceFW::OperationType i_opType,
                 alt_huid = TARGETING::get_huid(g_altLpcDD->getProc());
             }
             /*@
-             * @errortype
+             * @errortype    ERRL_SEV_UNRECOVERABLE
              * @moduleid     LPC::MOD_WRITELPC
              * @reasoncode   LPC::RC_BAD_TARGET
              * @userdata1[00:31]    Requested target
@@ -272,7 +305,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
         {
             TRACFCOMP(g_trac_lpc, "LPC::create_altmaster_objects> Alt-master object already exists");
             /*@
-             * @errortype
+             * @errortype    ERRL_SEV_UNRECOVERABLE
              * @moduleid     LPC::MOD_CREATE_ALTMASTER
              * @reasoncode   LPC::RC_ALTMASTER_EXISTS
              * @userdata1    Requested proc
@@ -300,7 +333,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
             {
                 TRACFCOMP(g_trac_lpc, "LPC::create_altmaster_objects> Cannot create another object using master sentinel");
                 /*@
-                 * @errortype
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
                  * @moduleid     LPC::MOD_CREATE_ALTMASTER
                  * @reasoncode   LPC::RC_CANT_USE_SENTINEL
                  * @userdata1    <unused>
@@ -329,7 +362,7 @@ errlHndl_t create_altmaster_objects( bool i_create,
             {
                 TRACFCOMP(g_trac_lpc, "LPC::create_altmaster_objects> Cannot create another object using master proc");
                 /*@
-                 * @errortype
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
                  * @moduleid     LPC::MOD_CREATE_ALTMASTER
                  * @reasoncode   LPC::RC_CANT_USE_MASTER
                  * @userdata1    <unused>
@@ -438,14 +471,15 @@ LpcDD::LpcDD( TARGETING::Target* i_proc )
                   mmio_dev_map(reinterpret_cast<void *>(baseAddr),
                                LPC_SPACE_SIZE )));
 
-    //@todo RTC:126644
-    // Initialize the hardware
-//     errlHndl_t l_errl = hwReset(LpcDD::RESET_INIT);
-//     if( l_errl )
-//     {
-//         TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
-//         errlCommit(l_errl, LPC_COMP_ID);
-//     }
+    /*  @todo RTC:126644
+    Initialize the hardware
+    errlHndl_t l_errl = hwReset(LpcDD::RESET_INIT);
+    if( l_errl )
+    {
+        TRACFCOMP( g_trac_lpc, "Errors initializing LPC logic... Beware! PLID=%.8X", l_errl->plid() );
+        errlCommit(l_errl, LPC_COMP_ID);
+    }
+    **/
 }
 
 LpcDD::~LpcDD()
@@ -459,11 +493,11 @@ LpcDD::~LpcDD()
  */
 errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
 {
-  errlHndl_t l_err = NULL;
-// @todo RTC:133649 Support P9 LPC controller - error detection
-#if 0
-    TRACFCOMP( g_trac_lpc, ENTER_MRK"LpcDD::hwReset(i_resetLevel=%d)>", i_resetLevel );
+    errlHndl_t l_err = NULL;
+    uint32_t i_addr = 0;
+    uint64_t l_addr = 0;
 
+    TRACFCOMP( g_trac_lpc, ENTER_MRK"LpcDD::hwReset(i_resetLevel=%d)>", i_resetLevel );
 
     // check iv_resetActive to avoid infinite loops
     // and don't reset if in the middle of FFDC collection
@@ -475,10 +509,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
         iv_resetActive = true;
 
         do {
-            // always read/write 64 bits to SCOM
-            uint64_t scom_data_64 = 0x0;
-            size_t scom_size = sizeof(uint64_t);
-
             /***************************************/
             /* Handle the different reset levels   */
             /***************************************/
@@ -488,7 +518,8 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                     {// Nothing to do here, so just break
                         break;
                     }
-                case RESET_INIT:
+/*   @todo - RTC:179179
+                  case RESET_INIT:
                     {
                         // Set OPB LPCM FIR Mask
                         //  hostboot will monitor these FIR bits
@@ -503,27 +534,60 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                                          OPB_LPCM_FIR_MASK_WO_OR_REG));
                         if( l_err ) { break; }
                     }
+**/
 
-                case RESET_ECCB:
-                    {
-                        // Write Reset Register to reset FW Logic registers
-                        TRACFCOMP(g_trac_lpc, "LpcDD::hwReset> Writing ECCB_RESET_REG to reset ECCB FW Logic");
-                        scom_data_64 = 0x0;
-                        l_err = deviceOp( DeviceFW::WRITE,
-                                      iv_proc,
-                                      &(scom_data_64),
-                                      scom_size,
-                                      DEVICE_SCOM_ADDRESS(ECCB_RESET_REG) );
-
-                        break;
-                    }
-
-                case RESET_OPB_LPCHC_SOFT:
+                case RESET_OPB_LPCHC_HARD:
                     {
                         TRACFCOMP(g_trac_lpc, "LpcDD::hwReset> Writing OPB_MASTER_LS_CONTROL_REG to disable then enable First Error Data Capture");
 
-                        size_t opsize = sizeof(uint32_t);
+                        //Clear all error indicators in LPCM OPB Master Actual
+                        //      Status Reg
+                        i_addr = OPBM_STATUS_REG;
+                        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+                        if (l_err) { break; }
+                        uint32_t * l_status_ptr
+                               = reinterpret_cast<uint32_t*>(l_addr);
+                        //Clear under mask - aka write 1 clears
+                        *l_status_ptr = OPB_ERROR_MASK;
+                        eieio();
 
+                        //Clear related bits in the LPCM OPB Master Accumulated
+                        //   Status Reg
+                        i_addr = OPBM_ACCUM_STATUS_REG;
+                        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+                        if (l_err) { break; }
+                        uint32_t * l_accum_status_ptr
+                                = reinterpret_cast<uint32_t*>(l_addr);
+                        //Clear under mask - aka write 1 clears
+                        *l_accum_status_ptr = OPB_ERROR_MASK;
+                        eieio();
+
+                        //Reset LPCHC Logic
+                        TRACFCOMP(g_trac_lpc, "LpcDD::hwReset> Writing LPCHC_RESET_REG to reset LPCHC Logic");
+                        i_addr = LPCHC_RESET_REG;
+                        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+                        if (l_err) { break; }
+                        uint32_t * l_reset_ptr
+                                = reinterpret_cast<uint32_t*>(l_addr);
+                        //The spec states the act of a write is all that matters
+                        //The data itself doesn't matter, so using an arbitrary
+                        //value
+                        *l_reset_ptr = 0x12345678;
+                        eieio();
+
+                        //Issue LPC Abort
+                        i_addr = LPCHC_LPC_BUS_ABORT_REG;
+                        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+                        if (l_err) { break; }
+                        uint32_t * l_abort_ptr
+                                = reinterpret_cast<uint32_t*>(l_addr);
+                        //The spec states the act of a write is all that matters
+                        //The data itself doesn't matter, so using an arbitrary
+                        //value
+                        *l_abort_ptr = 0x12345678;
+                        eieio();
+
+/*   @todo - RTC:179179 - Re-enable FEDC
                         // First read OPB_MASTER_LS_CONTROL_REG
                         uint32_t lpc_data = 0x0;
                         l_err = _readLPC( LPC::TRANS_REG,
@@ -563,47 +627,25 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
                              scom_size,
                              DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
                         if (l_err) { break; }
-
+**/
                         break;
                     }
 
-                case RESET_OPB_LPCHC_HARD:
+/*   @todo - RTC:179179 - Properly categorize errors into SOFT/HARD errors and
+                        update this implementation based on results
+                case RESET_OPB_LPCHC_SOFT:
                     {
-                        TRACFCOMP(g_trac_lpc, "LpcDD::hwReset> Writing LPCHC_RESET_REG to reset LPCHC Logic");
-
-                        size_t opsize = sizeof(uint32_t);
-                        uint32_t lpc_data = 0x0;
-                        l_err = _writeLPC( LPC::TRANS_REG,
-                                           LPCHC_RESET_REG,
-                                           &lpc_data,
-                                           opsize );
-                        if (l_err) { break; }
-
-                        // sleep 1ms for LPCHC to execute internal
-                        // reset+init sequence
-                        nanosleep( 0, NS_PER_MSEC );
-
-                        // Clear FIR register
-                        scom_data_64 = ~(OPB_LPCM_FIR_ERROR_MASK);
-                        l_err = deviceOp(
-                             DeviceFW::WRITE,
-                             iv_proc,
-                             &(scom_data_64),
-                             scom_size,
-                             DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_WOX_AND_REG) );
-                        if (l_err) { break; }
-
                         break;
                     }
+**/
 
                     // else - unsupported reset level
                 default:
                     {
-
                         TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::hwReset> Unsupported Reset Level Passed In: 0x%X", i_resetLevel);
 
                         /*@
-                         * @errortype
+                         * @errortype    ERRL_SEV_UNRECOVERABLE
                          * @moduleid     LPC::MOD_LPCDD_HWRESET
                          * @reasoncode   LPC::RC_UNSUPPORTED_OPERATION
                          * @userdata1    Unsupported Reset Level Parameter
@@ -651,7 +693,6 @@ errlHndl_t LpcDD::hwReset( ResetLevels i_resetLevel )
     }
 
     TRACFCOMP( g_trac_lpc, EXIT_MRK"LpcDD::hwReset()=%.8X:%.4X", ERRL_GETEID_SAFE(l_err), ERRL_GETRC_SAFE(l_err) );
-#endif
     return l_err;
 }
 
@@ -702,6 +743,15 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
             *o_addr =
             getLPCBaseAddr()+ i_addr + LPC::LPCHC_REG_SPACE- LPC_ADDR_START;
             break;
+        case LPC::TRANS_ERR:
+          if( i_addr >= 0x10000 )
+            {
+                invalid_address = true;
+                break;
+            }
+            *o_addr =
+            getLPCBaseAddr()+ i_addr + LPC::LPCHC_ERR_SPACE- LPC_ADDR_START;
+            break;
         case LPC::TRANS_ABS:
             //Just use the address as given
             *o_addr = getLPCBaseAddr() + i_addr;
@@ -714,7 +764,7 @@ errlHndl_t LpcDD::checkAddr(LPC::TransType i_type,
     {
         TRACFCOMP( g_trac_lpc, "LpcDD::checkAddr() Invalid address : i_type=%d, i_addr=%X", i_type, i_addr );
         /*@
-         * @errortype
+         * @errortype    ERRL_SEV_UNRECOVERABLE
          * @moduleid     LPC::MOD_LPCDD_CHECKADDR
          * @reasoncode   LPC::RC_INVALID_ADDR
          * @userdata1[0:31]   LPC Address
@@ -786,7 +836,7 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
         {
             TRACFCOMP( g_trac_lpc, "readLPC> Unsupported buffer size : %d", io_buflen );
             /*@
-             * @errortype
+             * @errortype    ERRL_SEV_UNRECOVERABLE
              * @moduleid     LPC::MOD_LPCDD_READLPC
              * @reasoncode   LPC::RC_BAD_ARG
              * @userdata1[0:31]   LPC Address
@@ -808,6 +858,9 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
 
         //Sync the IO op
         eieio();
+
+        // Check Error bits
+        l_err = checkForLpcErrors();
 
     } while(0);
 
@@ -861,202 +914,315 @@ errlHndl_t LpcDD::_writeLPC(LPC::TransType i_type,
         }
         eieio();
 #endif
+
+        // Check Error bits
+        l_err = checkForLpcErrors();
+
     } while(0);
 
     return l_err;
 }
-
-
 
 /**
  * @brief Add Error Registers to an existing Error Log
  */
 void LpcDD::addFFDC(errlHndl_t & io_errl)
 {
+    errlHndl_t l_err = nullptr;
+    uint32_t i_addr = 0;
+    uint64_t l_addr = 0;
+    uint32_t lpcAddr_buffer;
+    size_t l_buflen = sizeof(uint32_t);
+
     // check iv_ffdcActive to avoid infinite loops
-    if ( iv_ffdcActive == false )
-    {
-        iv_ffdcActive = true;
+    do{
 
-        TRACFCOMP( g_trac_lpc, "LpcDD::addFFDC> adding FFDC to Error Log EID=0x%X, PLID=0x%X",
-                   io_errl->eid(), io_errl->plid() );
+        if ( iv_ffdcActive == false )
+        {
+            iv_ffdcActive = true;
 
-        ERRORLOG::ErrlUserDetailsLogRegister l_eud(iv_proc);
+            TRACFCOMP( g_trac_lpc, "LpcDD::addFFDC> adding FFDC to Error Log EID=0x%X, PLID=0x%X",
+                       io_errl->eid(), io_errl->plid() );
 
-        // @todo RTC:133649 Support P9 LPC controller - error detection
-        // Add ECCB Status Register
-        //l_eud.addData(DEVICE_SCOM_ADDRESS(ECCB_STAT_REG));
+            i_addr = LPCHC_ERROR_ADDR_REG;
+            l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+            if (l_err)
+            {
+                // Additional FFDC is not necessary, just delete error and break
+                delete l_err;
+                l_err = nullptr;
+                break;
+            }
 
-        // Add OPB LPC Master FIR
-        //l_eud.addData(DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
+            memcpy(&lpcAddr_buffer, reinterpret_cast<void*>(l_addr), l_buflen);
+            eieio();
 
-        //@todo - add more LPC regs RTC:37744
-        //LPCIRQ_STATUS = 0x38
-        //SYS_ERR_ADDR = 0x40
+            io_errl->addFFDC(LPC_COMP_ID,
+                           &lpcAddr_buffer,
+                           l_buflen,
+                           0,                             // version
+                           ERRORLOG::ERRL_UDT_NOFORMAT,   // parser ignores data
+                           false);
 
-        l_eud.addToLog(io_errl);
+            // reset FFDC active flag
+            iv_ffdcActive = false;
+        }
 
-        // reset FFDC active flag
-        iv_ffdcActive = false;
-    }
+    }while(0);
 
     return;
 }
 
 /**
- * @brief Check For Errors in OPB and LPCHC Status Registers
+ * @brief Compute error severity from OPBM Status Register
  */
-errlHndl_t LpcDD::checkForOpbErrors( ResetLevels &o_resetLevel )
+void LpcDD::computeOpbmErrSev(OpbmErrReg_t i_opbmErrData,
+                              ResetLevels &o_resetLevel)
 {
-    errlHndl_t l_err = NULL;
-    bool errorFound = false;
-
-    // Used to set Reset Levels, if necessary
     o_resetLevel = RESET_CLEAR;
 
-    // Default status values in case we fail in reading the registers
-    OpbLpcmFirReg_t fir_reg;
-    fir_reg.data64 = 0xDEADBEEFDEADBEEF;
-    uint64_t fir_data = 0x0;
-
-    // always read/write 64 bits to SCOM
-    size_t scom_size = sizeof(uint64_t);
-
-    do {
-        // Read FIR Register
-        l_err = deviceOp( DeviceFW::READ,
-                          iv_proc,
-                          &(fir_data),
-                          scom_size,
-                          DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG) );
-        if( l_err ) { break; }
-
-
-        // Mask data to just the FIR bits we care about
-        fir_reg.data64 = fir_data & OPB_LPCM_FIR_ERROR_MASK;
-
-        // First look for SOFT errors
-        if( 1 == fir_reg.rxits )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Invalid Transfer Size: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxicmd )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Invalid Command: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxiaa )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Invalid Address Alignment: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxcbpe )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Command Buffer Parity Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxdbpe )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_SOFT;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Data Buffer Parity Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-
-        // Now look for HARD errors that will override SOFT errors reset Level
-        if( 1 == fir_reg.rxhopbe )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> OPB Bus Error: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxhopbt )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> OPB Bus Timeout: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-        if( 1 == fir_reg.rxctgtel )
-        {
-            errorFound = true;
-            o_resetLevel = RESET_OPB_LPCHC_HARD;
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> CI Load/CI Store/OPB Master Hang Timeout: OPB_LPCM_FIR_REG=0x%.16X, ResetLevel=%d",
-                       fir_reg.data64, o_resetLevel);
-        }
-
-
-    }while(0);
-
-
-    // If there is any error create an error log
-    if ( errorFound )
+    // First check the soft errors
+    /*   @todo - RTC:179179 Revisit below Reset Levels **/
+    if( i_opbmErrData.rxits )
     {
-        // If we failed on a register read above, but still found an error,
-        // delete register read error log and create an original error log
-        // for the found error
-        if ( l_err )
-        {
-            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForOpbErrors> Deleting register read error. Returning error created for the found error");
-            delete l_err;
-        }
-
-        /*@
-         * @errortype
-         * @moduleid     LPC::MOD_LPCDD_CHECKFOROPBERRORS
-         * @reasoncode   LPC::RC_OPB_ERROR
-         * @userdata1    OPB FIR Register Data
-         * @userdata2    Reset Level
-         * @devdesc      LpcDD::checkForOpbErrors> Error(s) found in OPB
-         *               and/or LPCHC Status Register
-         * @custdesc     Error(s) found in OPB and/or LPCHC Status Register
-         */
-        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        LPC::MOD_LPCDD_CHECKFOROPBERRORS,
-                                        LPC::RC_OPB_ERROR,
-                                        fir_reg.data64,
-                                        o_resetLevel );
-
-        l_err->addHwCallout( iv_proc,
-                             HWAS::SRCI_PRIORITY_HIGH,
-                             HWAS::NO_DECONFIG,
-                             HWAS::GARD_NULL );
-
-
-        // Log FIR Register Data
-        ERRORLOG::ErrlUserDetailsLogRegister l_eud(iv_proc);
-
-        l_eud.addDataBuffer(&fir_data, scom_size,
-                            DEVICE_SCOM_ADDRESS(OPB_LPCM_FIR_REG));
-
-        l_eud.addToLog(l_err);
-
-        addFFDC(l_err);
-        l_err->collectTrace(LPC_COMP_NAME);
-
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Transfer Size Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxicmd )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Command Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxiaa )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Address Alignment Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxopbe )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Error Acknowledged: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxicmdb )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Master Command Buffer Parity Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxidatab )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPM Master Data Buffer Parity Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
     }
 
-    return l_err;
+    // Now look for HARD errors that will override SOFT errors reset Level
+    if( i_opbmErrData.rxopbt )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_HARD;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPM Timeout Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxiaddr )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_HARD;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> Invalid Address Error: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+    if( i_opbmErrData.rxctgtel )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_HARD;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeOpbmErrSev> OPB Master Timeout: OPBM Status Reg =0x%8X, ResetLevel=%d",
+                   i_opbmErrData, o_resetLevel);
+    }
+}
+
+/**
+ * @brief Compute error severity from LPCHC Status Register
+ */
+void LpcDD::computeLpchcErrSev(LpchcErrReg_t i_lpchcErrData,
+                               ResetLevels &o_resetLevel)
+{
+    o_resetLevel = RESET_CLEAR;
+
+    // First check the soft errors
+    // All of these errors are set from bad LPC end points. Setting all to soft
+    /*   @todo - RTC:179179 Revisit below Reset Levels **/
+    if( i_lpchcErrData.lreset )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Lreset Event: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.syncab )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Sync Abnormal Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.syncnr )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Sync No Response Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                  i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.syncne )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Sync Normal Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.syncto )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Sync Timeout Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.tctar )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> Target Cycle TAR Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
+    if( i_lpchcErrData.mctar )
+    {
+        o_resetLevel = RESET_OPB_LPCHC_SOFT;
+        TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::computeLpchcErrSev> LPC Bus Master Cycle TAR Error: LPCHC Status Reg =0x%8X, ResetLevel=%d",
+                   i_lpchcErrData, o_resetLevel);
+    }
 
 }
 
+/**
+ * @brief Check For Errors in OPB and LPCHC Status Registers
+ */
+errlHndl_t LpcDD::checkForLpcErrors()
+{
+    errlHndl_t l_err = NULL;
+
+    uint32_t i_addr = 0;
+    uint64_t l_addr = 0;
+    uint32_t opbm_buffer;
+    uint32_t lpchc_buffer;
+    size_t l_buflen = sizeof(uint32_t);
+    ResetLevels l_opbmResetLevel = RESET_CLEAR;
+    ResetLevels l_lpchcResetLevel = RESET_CLEAR;
+
+    OpbmErrReg_t opbm_err_union;
+    opbm_err_union.data32 = 0x0;
+
+    LpchcErrReg_t lpchc_err_union;
+    lpchc_err_union.data32 = 0x0;
+
+    do {
+        // LPC error registers are not modeled in FSP simics.
+        // Skip if we are running simics.
+        if (Util::isSimicsRunning())
+        { break; }
+
+        // Read OPBM Status Register via MMIO
+        i_addr = OPBM_ACCUM_STATUS_REG;
+        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+        if (l_err) { break; }
+
+        memcpy( &opbm_buffer, reinterpret_cast<void*>(l_addr), l_buflen );
+        eieio();
+
+        // Read LPC Host Controller Status register via MMIO
+        i_addr = LPCHC_REG;
+        l_err = checkAddr( LPC::TRANS_ERR, i_addr, &l_addr );
+        if (l_err) { break; }
+
+        memcpy( &lpchc_buffer, reinterpret_cast<void*>(l_addr), l_buflen );
+        eieio();
+
+        // Mask error bits
+        opbm_err_union.data32 = (opbm_buffer & OPB_ERROR_MASK);
+        lpchc_err_union.data32 = (lpchc_buffer & LPCHC_ERROR_MASK);
+
+        // First look for errors in the OPBM bit mask
+        if (opbm_err_union.data32 != 0)
+        {
+            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForLpcErrors> Error found in OPB Master Status Register: 0x%8X",opbm_err_union.data32);
+            computeOpbmErrSev(opbm_err_union, l_opbmResetLevel);
+
+            if(l_opbmResetLevel != RESET_CLEAR)
+            {
+                /*@
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     LPC::MOD_LPCDD_CHECKFORLPCERRORS
+                 * @reasoncode   LPC::RC_OPB_ERROR
+                 * @userdata1    OPBM Error Status Register
+                 * @userdata2    Reset Level
+                 * @devdesc      LpcDD::checkLpcErrors> Error(s) found in OPB
+                 *               Status Register
+                 * @custdesc     Error(s) found in OPB Status Register
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              LPC::MOD_LPCDD_CHECKFORLPCERRORS,
+                                              LPC::RC_OPB_ERROR,
+                                              opbm_buffer,
+                                              l_opbmResetLevel);
+
+                // Gather additional ffdc data
+                addFFDC(l_err);
+                l_err->addHwCallout( iv_proc,
+                                     HWAS::SRCI_PRIORITY_NONE,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL );
+
+                /*   @todo - RTC:179179 Use l_opbmResetLevel **/
+                hwReset(RESET_OPB_LPCHC_HARD);
+            }
+        }
+        // Check the LPC host controller bit mask, only if there are no errors
+        //    from the OPBM bit mask
+        if (lpchc_err_union.data32 != 0 && l_err == NULL)
+        {
+            TRACFCOMP( g_trac_lpc, ERR_MRK"LpcDD::checkForLpcErrors> Error found in LPC Host Controller Status Register: 0x%8X",lpchc_err_union.data32);
+            computeLpchcErrSev(lpchc_err_union, l_lpchcResetLevel);
+
+            if(l_lpchcResetLevel != RESET_CLEAR)
+            {
+                /*@
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     LPC::MOD_LPCDD_CHECKFORLPCERRORS
+                 * @reasoncode   LPC::RC_LPCHC_ERROR
+                 * @userdata1    LPCHC Error Status Register
+                 * @userdata2    Reset Level
+                 * @devdesc      LpcDD::checkForLpcErrors> Error(s) found in LPCHC
+                 *  Status Register
+                 * @custdesc     Error(s) found in LPCHC Status Register
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               LPC::MOD_LPCDD_CHECKFORLPCERRORS,
+                                               LPC::RC_LPCHC_ERROR,
+                                               lpchc_buffer,
+                                               l_lpchcResetLevel);
+
+                l_err->addHwCallout( iv_proc,
+                                     HWAS::SRCI_PRIORITY_NONE,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL );
+
+                // Gather addtional ffdc data
+                addFFDC(l_err);
+                l_err->collectTrace(LPC_COMP_NAME);
+                /*   @todo - RTC:179179 Use l_opbmResetLevel **/
+                hwReset(RESET_OPB_LPCHC_HARD);
+            }
+        }
+
+    }while(0);
+
+    return l_err;
+}
 
 /**
  * @brief Read an address from LPC space
@@ -1070,6 +1236,7 @@ errlHndl_t LpcDD::readLPC(LPC::TransType i_type,
     mutex_lock(ivp_mutex);
     errlHndl_t l_err = _readLPC( i_type, i_addr, o_buffer, io_buflen );
     mutex_unlock(ivp_mutex);
+
     return l_err;
 }
 
@@ -1085,5 +1252,6 @@ errlHndl_t LpcDD::writeLPC(LPC::TransType i_type,
     mutex_lock(ivp_mutex);
     errlHndl_t l_err = _writeLPC( i_type, i_addr, i_buffer, io_buflen );
     mutex_unlock(ivp_mutex);
+
     return l_err;
 }

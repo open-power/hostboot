@@ -39,6 +39,7 @@ namespace LPC
         LPCHC_MEM_SPACE = 0xE0000000, /**< LPC Host Controller Mem Space */
         LPCHC_IO_SPACE  = 0xD0010000, /**< LPC Host Controller I/O Space */
         LPCHC_REG_SPACE = 0xC0012000, /**< LPC Host Ctlr Register Space */
+        LPCHC_ERR_SPACE = 0xC0010000, /**< LPC Host Ctlr Err Register Space */
 
         /** Physical addr of the start of LPC address space*/
         LPC_PHYS_BASE = 0x6030000000000,

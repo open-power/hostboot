@@ -2097,6 +2097,7 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
                       &port80_val, port80_len,
                       DEVICE_LPC_ADDRESS(LPC::TRANS_IO, 0x80));
     delete err; // this is debug only, ignore any errors
+    err = NULL;
     port80_val++;
 #endif
 
