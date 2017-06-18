@@ -223,7 +223,7 @@ fapi_try_exit:
 /// @tparam OT the output type, derrived from the parameters
 /// @param[in] timing_in_ps timing parameter in ps
 /// @param[out] o_value_nck the end calculation in nck
-/// @return the clock cycles of timing parameter (provided in ps)
+/// @return the clock cycles of timing parameter (provided in ps)F
 /// @note Uses DDR4 SPD Contents Rounding Algorithm
 /// @note Item 2220.46
 ///
@@ -320,6 +320,27 @@ constexpr uint64_t tmrd_l()
 {
     // Per DDR4RCD02 Spec Rev 0.85
     return 16;
+}
+
+///
+/// @brief Control word to control word delay for L2 (using F0RC0D or F0RC0F)
+/// @return constexpr value of 32 clocks
+///
+constexpr uint64_t tmrd_l2()
+{
+    // Per DDR4RCD02 Spec Rev 0.85
+    return 32;
+}
+
+///
+/// @brief Control word F0RC06 with or without geardown mode
+/// @note using the geardown mode which is longer for saftey
+/// @return constexpr value of 32 clocks
+///
+constexpr uint64_t tmrc1()
+{
+    // Per DDR4RCD02 Spec Rev 0.85
+    return 32;
 }
 
 ///
