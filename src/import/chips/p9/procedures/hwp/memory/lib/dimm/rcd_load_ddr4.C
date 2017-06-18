@@ -73,15 +73,17 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         {  FS0, 3, eff_dimm_ddr4_rc03, mss::tmrd_l()   },
         {  FS0, 4, eff_dimm_ddr4_rc04, mss::tmrd_l()   },
         {  FS0, 5, eff_dimm_ddr4_rc05, mss::tmrd_l()   },
-        {  FS0, 6, eff_dimm_ddr4_rc06_07, mss::tmrd()  },
+        // Note: the tMRC1 timing as it is larger for saftey's sake
+        // The concern is that if geardown mode is ever required in the future, we would need the longer timing
+        {  FS0, 6, eff_dimm_ddr4_rc06_07, mss::tmrc1()  },
         {  FS0, 8, eff_dimm_ddr4_rc08, mss::tmrd()     },
         {  FS0, 9, eff_dimm_ddr4_rc09, mss::tmrd()     },
         {  FS0, 10, eff_dimm_ddr4_rc0a, tSTAB          },
-        {  FS0, 11, eff_dimm_ddr4_rc0b, mss::tmrd()    },
+        {  FS0, 11, eff_dimm_ddr4_rc0b, mss::tmrd_l()    },
         {  FS0, 12, eff_dimm_ddr4_rc0c, mss::tmrd()    },
-        {  FS0, 13, eff_dimm_ddr4_rc0d, mss::tmrd()    },
+        {  FS0, 13, eff_dimm_ddr4_rc0d, mss::tmrd_l2()    },
         {  FS0, 14, eff_dimm_ddr4_rc0e, mss::tmrd()    },
-        {  FS0, 15, eff_dimm_ddr4_rc0f, mss::tmrd()    },
+        {  FS0, 15, eff_dimm_ddr4_rc0f, mss::tmrd_l2()    },
     };
 
     // RCD 8-bit data - integral represents rc#
@@ -93,7 +95,7 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         {  FS0, 4, eff_dimm_ddr4_rc_4x, mss::tmrd()     },
         {  FS0, 5, eff_dimm_ddr4_rc_5x, mss::tmrd()     },
         {  FS0, 6, eff_dimm_ddr4_rc_6x, mss::tmrd()     },
-        {  FS0, 7, eff_dimm_ddr4_rc_7x, mss::tmrd()     },
+        {  FS0, 7, eff_dimm_ddr4_rc_7x, mss::tmrd_l()     },
         {  FS0, 8, eff_dimm_ddr4_rc_8x, mss::tmrd()     },
         {  FS0, 9, eff_dimm_ddr4_rc_9x, mss::tmrd()     },
         {  FS0, 10, eff_dimm_ddr4_rc_ax, mss::tmrd()    },
