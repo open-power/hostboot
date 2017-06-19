@@ -98,7 +98,7 @@ errlHndl_t getPnorAddr( pnorInformation & i_pnorInfo,
     if( g_reserved_mem_addr == 0 )
     {
         uint64_t l_vpdSize;
-        g_reserved_mem_addr = hb_get_rt_rsvd_mem(HBRT_MEM_LABEL_VPD,
+        g_reserved_mem_addr = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_VPD,
                                                  0,
                                                  l_vpdSize);
 

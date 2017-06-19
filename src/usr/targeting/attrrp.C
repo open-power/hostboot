@@ -47,6 +47,7 @@
 #include <targeting/common/attributeTank.H>
 #include <initservice/initserviceif.H>
 #include <util/align.H>
+#include <util/utilrsvdmem.H>
 #include <sys/misc.h>
 #include <fapi2/plat_attr_override_sync.H>
 #include <targeting/attrPlatOverride.H>
@@ -320,17 +321,92 @@ namespace TARGETING
                 //Create a block map of the address space we used to store
                 //attribute information on the initial IPL
                 //Account HRMOR (non 0 base addr)
-                uint64_t    l_attr_data_addr =   cpu_spr_value(CPU_SPR_HRMOR)
-                                                 + VMM_ATTR_DATA_START_OFFSET;
-                l_header = reinterpret_cast<TargetingHeader*>(
-                mm_block_map(reinterpret_cast<void*>(l_attr_data_addr),
-                             VMM_ATTR_DATA_SIZE));
+
+                ///////////////////////////////////////////////////////////////
+                // This should change to get address from SBE.  Currently hack
+                // to the start of ATTR data section on FSP systems
+                uint64_t l_phys_attr_data_addr = 0;
+                uint64_t l_attr_data_size = 0;
+
+                // Setup physical TOC address
+                uint64_t l_toc_addr = cpu_spr_value(CPU_SPR_HRMOR) +
+                                     VMM_HB_DATA_TOC_START_OFFSET;
+
+                // Now map the TOC to find the ATTR label address & size
+                Util::hbrtTableOfContents_t * l_toc_ptr =
+                        reinterpret_cast<Util::hbrtTableOfContents_t *>(
+                            mm_block_map(reinterpret_cast<void*>(l_toc_addr),
+                            sizeof(Util::hbrtTableOfContents_t)));
+
+                if (l_toc_ptr != 0)
+                {
+                    // read the TOC and look for ATTR data section
+                    uint64_t l_attr_data_addr = Util::hb_find_rsvd_mem_label(
+                                                    Util::HBRT_MEM_LABEL_ATTR,
+                                                    l_toc_ptr,
+                                                    l_attr_data_size);
+
+                    // calculate the offset from the start of the TOC
+                    uint64_t l_attr_offset = l_attr_data_addr -
+                                        reinterpret_cast<uint64_t>(l_toc_ptr);
+
+                    // Setup where the ATTR data can be found
+                    l_phys_attr_data_addr = l_toc_addr + l_attr_offset;
+
+                    // Clear the mapped memory for the TOC
+                    int l_rc = mm_block_unmap(
+                                    reinterpret_cast<void*>(l_toc_ptr));
+                    if(l_rc)
+                    {
+                        TRACFCOMP( g_trac_targeting,
+                           "parseAttrSectHeader. fail to unmap virt addr %p, "
+                           " rc = %d",
+                           reinterpret_cast<void*>(l_toc_ptr), l_rc);
+                        //Error mm_block_unmap returned non-zero
+                        /*@
+                        *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                        *   @moduleid          TARG_PARSE_ATTR_SECT_HEADER
+                        *   @reasoncode        TARG_RC_MM_BLOCK_UNMAP_FAIL
+                        *   @userdata1         return code
+                        *   @userdata2         Unmap virtual address
+                        *
+                        *   @devdesc   While attempting to unmap a virtual
+                        *              addr for our targeting information the
+                        *              kernel returned an error
+                        *   @custdesc  Kernel failed to unblock mapped memory
+                        */
+                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                               TARG_PARSE_ATTR_SECT_HEADER,
+                                               TARG_RC_MM_BLOCK_FAIL,
+                                               l_rc,
+                                               reinterpret_cast<uint64_t>
+                                                (l_toc_ptr),
+                                               true);
+                        break;
+                    }
+
+                    // Now just map the ATTR data section
+                    l_header = reinterpret_cast<TargetingHeader*>(
+                        mm_block_map(
+                            reinterpret_cast<void*>(l_phys_attr_data_addr),
+                            l_attr_data_size));
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_targeting,
+                              "Failed mapping Table of Contents section");
+                    l_header = 0;
+                    l_phys_attr_data_addr = l_toc_addr;
+                    l_attr_data_size = sizeof(Util::hbrtTableOfContents_t);
+                }
+                ///////////////////////////////////////////////////////////////
+
                 if(l_header == 0)
                 {
                     TRACFCOMP(g_trac_targeting,
                               "Failed mapping phys addr: %p for %lx bytes",
-                              l_attr_data_addr,
-                              VMM_ATTR_DATA_SIZE);
+                              l_phys_attr_data_addr,
+                              l_attr_data_size);
                     //Error mm_block_map returned invalid ptr
                     /*@
                     *   @errortype         ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -347,14 +423,14 @@ namespace TARGETING
                     l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                            TARG_PARSE_ATTR_SECT_HEADER,
                                            TARG_RC_MM_BLOCK_FAIL,
-                                           l_attr_data_addr,
-                                           VMM_ATTR_DATA_SIZE,
+                                           l_phys_attr_data_addr,
+                                           l_attr_data_size,
                                            true);
                     break;
                 }
                 TRACFCOMP(g_trac_targeting,
                           "Mapped phys addr: %p to virt addr: %p",
-                          reinterpret_cast<void*>(l_attr_data_addr),
+                          reinterpret_cast<void*>(l_phys_attr_data_addr),
                           l_header);
             }
 

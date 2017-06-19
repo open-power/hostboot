@@ -102,31 +102,14 @@ errlHndl_t bld_vpd_image(PNOR::SectionId vpd_type,
 }
 
 // External function see vpd_if.H
-errlHndl_t VPD::vpd_load_rt_image(uint64_t & io_vpd_addr, bool i_virtualAddr)
+errlHndl_t VPD::vpd_load_rt_image(uint64_t & i_vpd_addr)
 {
     errlHndl_t err = NULL;
 
     do
     {
-        void* vptr = reinterpret_cast<void*>(io_vpd_addr);
+        void* vptr = reinterpret_cast<void*>(i_vpd_addr);
         uint8_t* vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
-
-        bool l_is_no_load = TARGETING::is_no_load();
-        if( l_is_no_load && !i_virtualAddr)
-        {
-            io_vpd_addr = TARGETING::get_top_mem_addr();
-            assert (io_vpd_addr != 0,
-                    "vpd_load_rt_image: Top of memory was 0!");
-
-            io_vpd_addr -= VMM_RT_VPD_OFFSET;
-
-            vptr = mm_block_map(reinterpret_cast<void*>(io_vpd_addr),
-                                VMM_RT_VPD_SIZE);
-
-            vpd_ptr = reinterpret_cast<uint8_t*>(vptr);
-
-            assert(vptr != NULL,"vpd_load_rt_image: Could not map VPD memory");
-        }
 
         err = bld_vpd_image(PNOR::DIMM_JEDEC_VPD,
                                  vpd_ptr,
@@ -152,11 +135,6 @@ errlHndl_t VPD::vpd_load_rt_image(uint64_t & io_vpd_addr, bool i_virtualAddr)
         if(err)
         {
             break;
-        }
-
-        if ( l_is_no_load && !i_virtualAddr)
-        {
-            mm_block_unmap(vptr);
         }
 
     } while( 0 );

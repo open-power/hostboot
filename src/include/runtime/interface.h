@@ -120,9 +120,6 @@ enum MemoryError_t
  *  Reserved memory labels - used by get_reserved_mem
  */
 #define HBRT_RSVD_MEM__CODE               "ibm,hbrt-code-image"
-#define HBRT_RSVD_MEM__ATTRIBUTES         "ibm,hbrt-target-image"
-#define HBRT_RSVD_MEM__VPD_CACHE          "ibm,hbrt-vpd-image"
-#define HBRT_RSVD_MEM__OVERRIDES          "ibm,hbrt-targetoverride-image"
 #define HBRT_RSVD_MEM__PRIMARY            "ibm,hb-rsv-mem"
 #define HBRT_RSVD_MEM__HOMER              "ibm,homer-image"
 #define HBRT_RSVD_MEM__OCC_COMMON         "ibm,occ-common-area"

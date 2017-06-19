@@ -99,14 +99,6 @@ errlHndl_t populate_hbTpmInfo( void );
  */
 errlHndl_t populate_TpmInfoByNode();
 
-/**
- * @brief Fills in HBRT for given NODE
- *
- * @param[in] iNodeId : Node number from 0 to 7 ..etc...
- *
- * @return errlHndl_t NULL on Success
- */
-errlHndl_t populate_RtDataByNode(uint64_t iNodeId);
 
 // How many pointers/sections there are in HB runtime data
 #define HBRT_NUM_PTRS        2

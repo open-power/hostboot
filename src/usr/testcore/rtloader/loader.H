@@ -44,7 +44,7 @@
 #include <ipmi/ipmiif.H>
 #include <targeting/common/attributeTank.H>
 #include <config.h>
-#include <util/runtime/util_rt.H>
+#include <util/utilrsvdmem.H>
 #include <sys/misc.h>
 
 
@@ -405,12 +405,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                                         VMM_HB_DATA_TOC_START_OFFSET;
 
             TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: "
-                "mapping physical address:0x%.1611X", l_physical_addr);
+                "mapping physical address:0x%.16llX", l_physical_addr);
 
             // Map to the virtual address to access data
             l_vAddr = reinterpret_cast<uint64_t>(mm_block_map(
                     reinterpret_cast<void*>(l_physical_addr),
-                    sizeof(hbrtTableOfContents_t)));
+                    sizeof(Util::hbrtTableOfContents_t)));
 
             TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: mapped "
                 "physical address 0x%.16llX -> virtual address 0x%.16llX",
@@ -420,8 +420,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert(l_vAddr != 0,"rt_get_hb_data. Could not map HB DATA memory");
 
             // find the total size
-            hbrtTableOfContents_t * toc_ptr =
-                    reinterpret_cast<hbrtTableOfContents_t *>(l_vAddr);
+            Util::hbrtTableOfContents_t * toc_ptr =
+                    reinterpret_cast<Util::hbrtTableOfContents_t *>(l_vAddr);
             l_totalSize = toc_ptr->total_size;
             TRACFCOMP(g_trac_hbrt, "rt_get_hb_data: "
                           "total_size for HB Data = %lld", l_totalSize);
@@ -642,7 +642,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             assert (cv_comm_phys_addr != 0,
                     "rt_get_comm: Top of memory was 0!");
 
-            cv_comm_phys_addr -= (VMM_RT_VPD_OFFSET + 64*KILOBYTE);
+            // Just picking 64K inside VMM_ATTR_DATA as it is available for HDAT
+            cv_comm_phys_addr -= (VMM_ALL_HOMER_OCC_MEMORY_SIZE + 64*KILOBYTE);
 
             uint8_t *comm_ptr = reinterpret_cast<uint8_t *>(cv_comm_phys_addr);
 

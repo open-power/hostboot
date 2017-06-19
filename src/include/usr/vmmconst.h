@@ -168,40 +168,30 @@ enum BlockPriority
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
  (VMM_OCC_COMMON_SIZE + VMM_HOMER_REGION_SIZE)
 
-/** Memory offset for runtime VPD image */
-// Given value is number of bytes BELOW the top of memory to store
-//  the runtime image(s)  Currently below the OCC HOMER IMAGE
-#define VMM_RT_VPD_OFFSET (VMM_RT_VPD_SIZE + \
-                           VMM_ALL_HOMER_OCC_MEMORY_SIZE)
-
-/** Memory for VPD */
-#define VMM_VPD_START_OFFSET VMM_OCC_COMMON_END_OFFSET
-#define VMM_MODULE_VPD_SIZE (512*KILOBYTE)          /* must be 64KB aligned */
-#define VMM_CENTAUR_VPD_SIZE (256*KILOBYTE)         /* must be 64KB aligned */
-#define VMM_DIMM_JEDEC_VPD_SIZE (256*KILOBYTE)      /* must be 64KB aligned */
-#define VMM_RT_VPD_SIZE (VMM_MODULE_VPD_SIZE + \
-                         VMM_CENTAUR_VPD_SIZE + \
-                         VMM_DIMM_JEDEC_VPD_SIZE)
-/** End of VPD Area = 201MB */
-
 /** Memory for attribute data */
-#define VMM_ATTR_DATA_START_OFFSET \
- (VMM_VPD_START_OFFSET + VMM_RT_VPD_SIZE)
+#define VMM_ATTR_DATA_START_OFFSET  VMM_OCC_COMMON_END_OFFSET
 #define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
-/** End of Attr Area = 202MB */
+/** End of Attr Area = 201MB */
 
 /** Chunk of physical memory used for Dump Source Table */
 #define DUMP_TEST_MEMORY_ADDR \
- (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)   /* currently 202MB */
+ (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)  /* currently 201MB */
 #define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
-/** End of Dump Source Table = 206MB */
+/** End of Dump Source Table = 205MB */
 
 /** Memory for hostboot data Table of Contents */
 #define VMM_HB_DATA_TOC_START_OFFSET \
-    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 206MB */
-#define VMM_HB_DATA_TOC_END_OFFSET (VMM_HB_DATA_TOC_START_OFFSET + (4*KILOBYTE))
-/** End of HB DATA TOC Area = 206MB + 4KB */
+    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 205MB */
 
+/** Variable Attribute overrides and Attributes memory here **/
+
+/** Memory for VPD (1 MB total) */
+#define VMM_MODULE_VPD_SIZE (512*KILOBYTE)          /* must be 64KB aligned */
+#define VMM_CENTAUR_VPD_SIZE (256*KILOBYTE)         /* must be 64KB aligned */
+#define VMM_DIMM_JEDEC_VPD_SIZE (256*KILOBYTE)      /* must be 64KB aligned */
+#define VMM_RT_VPD_SIZE ( VMM_MODULE_VPD_SIZE + \
+                          VMM_CENTAUR_VPD_SIZE + \
+                          VMM_DIMM_JEDEC_VPD_SIZE )
 
 
 /** Internode communication area outside of the HB image.

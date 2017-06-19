@@ -49,12 +49,10 @@ namespace VPD
 
     /**
      * @brief Load the runtime VPD image into memory
-     * @param[in/out] The physical or virtual address of the VPD image
-     * @param[in] Is the address virtual?
+     * @param[in] The virtual address of the VPD image
      * @return error handle if there was an error
      */
-    errlHndl_t vpd_load_rt_image(uint64_t & io_vpd_addr,
-                                 bool i_virtualAddr = false);
+    errlHndl_t vpd_load_rt_image(uint64_t & i_vpd_addr);
 
     /**
      * @brief This function checks to see if the given mvpd target

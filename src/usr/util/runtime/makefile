@@ -34,6 +34,7 @@ OBJS += utilfile.o
 OBJS += utillidpnor.o
 OBJS += rt_cmds.o
 OBJS += util_rt.o
+OBJS += utilrsvdmem.o
 
 SUBDIRS += test.d
 

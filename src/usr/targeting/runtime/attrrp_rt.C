@@ -47,7 +47,7 @@ namespace TARGETING
             uint64_t attr_size = 0;
             TargetingHeader* l_header =
               reinterpret_cast<TargetingHeader*>(
-                  hb_get_rt_rsvd_mem(HBRT_MEM_LABEL_ATTR,0,attr_size));
+                  hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,0,attr_size));
 
             if ((NULL == l_header) ||
                 (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))
