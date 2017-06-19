@@ -133,7 +133,7 @@ void applyTempOverrides()
     // Get a pointer to the reserved memory where HB
     // saved the overrides during boot
     uint64_t l_overAttrSize = 0;
-    uint64_t l_overAddr = hb_get_rt_rsvd_mem(HBRT_MEM_LABEL_ATTROVER,
+    uint64_t l_overAddr = hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTROVER,
                                              0, l_overAttrSize);
 
 

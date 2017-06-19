@@ -72,6 +72,7 @@ enum TargetingReasonCode
     TARG_RC_WRITE_ATTR_OVER_NO_TANK_LAYER   = TARG_COMP_ID | 0x12,
     TARG_RC_MM_BLOCK_MAP_FAIL               = TARG_COMP_ID | 0x13,
     TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED     = TARG_COMP_ID | 0x14,
+    TARG_RC_MM_BLOCK_UNMAP_FAIL             = TARG_COMP_ID | 0x15,
 };
 
 }; // End TARGETING namespace

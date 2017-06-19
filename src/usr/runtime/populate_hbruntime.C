@@ -67,7 +67,7 @@
 #include <sbeio/sbe_psudd.H>
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <kernel/bltohbdatamgr.H>
-#include <util/runtime/util_rt.H>
+#include <util/utilrsvdmem.H>
 
 
 namespace RUNTIME
@@ -82,236 +82,6 @@ const uint8_t BITS_PER_BYTE = 8;
 
 trace_desc_t *g_trac_runtime = nullptr;
 TRAC_INIT(&g_trac_runtime, RUNTIME_COMP_NAME, KILOBYTE);
-
-/** This is the original function used to load the HDAT data
- *  It contains support for PHYP payload
- *  It does not support OPAL payload
- *  OPAL must use the new function below - populate_HbRsvMem()
- *  RTC 169478 - remove when new rsv_mem structure is supported in FSP
- */
-errlHndl_t populate_RtDataByNode(uint64_t iNodeId)
-{
-    TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_RtDataByNode" );
-    errlHndl_t  l_elog = nullptr;
-    const char* l_stringLabels[] =
-                     { HBRT_RSVD_MEM__VPD_CACHE ,
-                       HBRT_RSVD_MEM__ATTRIBUTES };
-
-    // OPAL not supported
-    if(TARGETING::is_sapphire_load())
-    {
-        return l_elog;
-    }
-
-    do {
-        // Wipe out our cache of the NACA/SPIRA pointers
-        RUNTIME::rediscover_hdat();
-
-        // Find pointer for HBRT data structure on given Node
-        // Each node will have HBRT_NUM_PTRS sections
-
-        // We will update VPD part first
-        uint64_t l_section = (iNodeId * HBRT_NUM_PTRS) + HBRT_VPD_SECTION;
-        uint64_t l_hbrtDataAddr = 0;
-        uint64_t l_hbrtDataSizeMax = 0;
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::HBRT,
-                                                l_section,
-                                                l_hbrtDataAddr,
-                                                l_hbrtDataSizeMax );
-        if(l_elog != nullptr)
-        {
-            TRACFCOMP( g_trac_runtime,
-                       "populate_RtDataByNode fail getHostDataSection VPD" );
-            break;
-        }
-
-        // Currently have access to HBRT data pointer
-        // So start filling in the structure
-        hdatHBRT_t*  l_hbrtPtr = reinterpret_cast<hdatHBRT_t *>(l_hbrtDataAddr);
-
-        memcpy( l_hbrtPtr->hdatStringName,
-                l_stringLabels[HBRT_VPD_SECTION],
-                strlen(l_stringLabels[HBRT_VPD_SECTION]) );
-
-        l_hbrtPtr->hdatInstance = static_cast<uint32_t>(iNodeId);
-
-        // Need to get the blob pointer one level deeper
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::HBRT_DATA,
-                                                l_section,
-                                                l_hbrtDataAddr,
-                                                l_hbrtDataSizeMax );
-        if(l_elog != nullptr)
-        {
-            TRACFCOMP( g_trac_runtime,
-                "populate_RtDataByNode fail getHostDataSection VPD data" );
-            break;
-        }
-
-        // Put VPD data into the structure now
-        l_elog = VPD::vpd_load_rt_image( l_hbrtDataAddr );
-        if(l_elog != nullptr)
-        {
-            TRACFCOMP( g_trac_runtime,
-                       "populate_RtDataByNode fail VPD call" );
-            break;
-        }
-
-        // Time to update ATTRIB section now
-        l_section = (iNodeId * HBRT_NUM_PTRS) + HBRT_ATTRIB_SECTION;
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::HBRT,
-                                                l_section,
-                                                l_hbrtDataAddr,
-                                                l_hbrtDataSizeMax );
-        if(l_elog != nullptr)
-        {
-            TRACFCOMP( g_trac_runtime,
-                "populate_RtDataByNode fail getHostDataSection ATTRIB" );
-            break;
-        }
-
-        // Put in string/instance into HBRT area
-        l_hbrtPtr = reinterpret_cast<hdatHBRT_t *>(l_hbrtDataAddr);
-        memcpy( l_hbrtPtr->hdatStringName,
-                l_stringLabels[HBRT_ATTRIB_SECTION],
-                strlen(l_stringLabels[HBRT_ATTRIB_SECTION]) );
-
-        l_hbrtPtr->hdatInstance = static_cast<uint32_t>(iNodeId);
-
-        // Need to get the blob pointer one level deeper
-        l_elog = RUNTIME::get_host_data_section(RUNTIME::HBRT_DATA,
-                                                l_section,
-                                                l_hbrtDataAddr,
-                                                l_hbrtDataSizeMax );
-        if(l_elog != nullptr)
-        {
-            TRACFCOMP( g_trac_runtime,
-                "populate_RtDataByNode fail getHostDataSection ATTRIB data" );
-            break;
-        }
-
-        //@fixme-RTC:169478-Remove this workaround once HDAT+PHYP is ready
-        //  Add the override data into the back-end of the allocated
-        //  attribute data to handle the case where the RHB pointers
-        //  are not yet being used
-        {
-            size_t l_attrOverMaxSize = 64*KILOBYTE;
-
-            // Stick the overrides at Attributes+1MB-64KB
-            uint8_t* l_overridePtr =
-              reinterpret_cast<uint8_t*>( l_hbrtDataAddr
-                                          + 1*MEGABYTE
-                                          - l_attrOverMaxSize );
-
-            // copy overrides into local buffer
-            uint8_t* l_overrideData =
-              reinterpret_cast<uint8_t*>(malloc(l_attrOverMaxSize));
-            size_t l_actualSize = l_attrOverMaxSize;
-            l_elog = TARGETING::AttrRP::saveOverrides( l_overrideData,
-                                                       l_actualSize );
-            if( l_elog )
-            {
-                TRACFCOMP( g_trac_runtime, "workaround is busted!!!" );
-                break;
-            }
-            else if( l_actualSize > 0 )
-            {
-                memcpy( reinterpret_cast<uint8_t*>(l_hbrtDataAddr
-                                                   +1*MEGABYTE
-                                                   -l_attrOverMaxSize),
-                        l_overrideData,
-                        l_actualSize );
-                TRACFCOMP( g_trac_runtime, "Copied %d bytes of overrides into HDAT", l_actualSize );
-            }
-            else
-            {
-                TRACFCOMP( g_trac_runtime, "No overrides" );
-                // add a terminator at the end so that the processing
-                //  code in HBRT is happy
-                TARGETING::AttrOverrideSection* l_term =
-                  reinterpret_cast<TARGETING::AttrOverrideSection*>
-                  (l_overridePtr);
-                l_term->iv_layer = TARGETING::AttributeTank::TANK_LAYER_TERM;
-            }
-        }
-
-        // Load ATTRIBUTE data into HDAT
-        TARGETING::AttrRP::save(l_hbrtDataAddr);
-
-        //Create a block map of memory so we can save a copy of the attribute
-        //data incase we need to MPIPL
-        //Account HRMOR (non 0 base addr)
-        uint64_t    l_attrDataAddr =   cpu_spr_value(CPU_SPR_HRMOR)
-                                       + VMM_ATTR_DATA_START_OFFSET;
-        uint64_t l_attrCopyVmemAddr =
-        reinterpret_cast<uint64_t>(mm_block_map(
-            reinterpret_cast<void*>(l_attrDataAddr),
-            VMM_ATTR_DATA_SIZE ));
-
-        //Make sure the address returned from the block map call is not NULL
-        if(l_attrCopyVmemAddr != 0)
-        {
-            //The function save() for AttrRP saves then entire HBD data
-            // section of PNOR to the provided vmm address
-            TARGETING::AttrRP::save(l_attrCopyVmemAddr);
-
-            //Make sure to unmap the virtual address
-            // because we won't need it anymore
-            int l_rc =
-                mm_block_unmap(reinterpret_cast<void*>(l_attrCopyVmemAddr));
-
-            if(l_rc)
-            {
-                TRACFCOMP( g_trac_runtime,
-                           "populate_RtDataByNode fail to unmap physical addr %p, virt addr %p",
-                           reinterpret_cast<void*>(l_attrDataAddr),
-                           reinterpret_cast<void*>(l_attrCopyVmemAddr));
-                /*@ errorlog tag
-                * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                * @moduleid        RUNTIME::MOD_POPULATE_RTDATABYNODE
-                * @reasoncode      RUNTIME::RC_UNMAP_FAIL
-                * @userdata1       Phys address we are trying to unmap
-                * @userdata2       Virtual address we are trying to unmap
-                *
-                * @devdesc         Error unmapping a virtual memory map
-                * @custdesc        Kernel failed to unmap memory
-                */
-                l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                       RUNTIME::MOD_POPULATE_RTDATABYNODE,
-                                       RUNTIME::RC_UNMAP_FAIL,
-                                       l_attrDataAddr,
-                                       l_attrCopyVmemAddr,
-                                       true);
-            }
-        }
-        else
-        {
-            TRACFCOMP( g_trac_runtime,
-                       "populate_RtDataByNode fail to map  physical addr %p, size %lx",
-                       reinterpret_cast<void*>(l_attrDataAddr),
-                       VMM_ATTR_DATA_SIZE );
-            /*@ errorlog tag
-            * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
-            * @moduleid        RUNTIME::MOD_POPULATE_RTDATABYNODE
-            * @reasoncode      RUNTIME::RC_CANNOT_MAP_MEMORY
-            * @userdata1       Phys address we are trying to unmap
-            * @userdata2       Size of memory we are trying to map
-            *
-            * @devdesc         Error unmapping a virtual memory map
-            * @custdesc        Kernel failed to map memory
-            */
-            l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   RUNTIME::MOD_POPULATE_RTDATABYNODE,
-                                   RUNTIME::RC_CANNOT_MAP_MEMORY,
-                                   l_attrDataAddr,
-                                   VMM_ATTR_DATA_SIZE,
-                                   true);
-        }
-
-    } while(0);
-
-    TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_RtDataByNode" );
-    return(l_elog);
-} // end populate_RtDataByNode
 
 
 /**
@@ -548,9 +318,9 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     uint64_t l_prevDataSize = 0;
 
     // TOC to be filled in and added to beginning of HB Data section
-    hbrtTableOfContents_t l_hbTOC;
+    Util::hbrtTableOfContents_t l_hbTOC;
     strcpy(l_hbTOC.toc_header, "Hostboot Table of Contents");
-    l_hbTOC.toc_version = HBRT_TOC_VERSION_1;
+    l_hbTOC.toc_version = Util::HBRT_TOC_VERSION_1;
     l_hbTOC.total_entries = 0;
 
     /////////////////////////////////////////////////////////////
@@ -598,7 +368,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     if (l_actualSize > 0)
     {
         l_hbTOC.entry[l_hbTOC.total_entries].label =
-                                                HBRT_MEM_LABEL_ATTROVER;
+                                                Util::HBRT_MEM_LABEL_ATTROVER;
         l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
         l_hbTOC.entry[l_hbTOC.total_entries].size = l_actualSize;
         l_totalSectionSize += ALIGN_PAGE(l_actualSize);
@@ -606,7 +376,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     }
 
     // Now calculate ATTR size
-    l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_ATTR;
+    l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_ATTR;
     l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
     l_hbTOC.entry[l_hbTOC.total_entries].size =
         TARGETING::AttrRP::maxSize();
@@ -615,7 +385,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     l_hbTOC.total_entries++;
 
     // Fill in VPD size
-    l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_VPD;
+    l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_VPD;
     l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
     l_hbTOC.entry[l_hbTOC.total_entries].size = VMM_RT_VPD_SIZE;
     l_totalSectionSize +=
@@ -636,7 +406,8 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     if (l_actualSizeAligned > 0)
     {
         // Add padding section
-        l_hbTOC.entry[l_hbTOC.total_entries].label = HBRT_MEM_LABEL_PADDING;
+        l_hbTOC.entry[l_hbTOC.total_entries].label =
+                                                Util::HBRT_MEM_LABEL_PADDING;
         l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
         l_hbTOC.entry[l_hbTOC.total_entries].size = l_actualSizeAligned;
         l_hbTOC.total_entries++;
@@ -679,7 +450,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         // Figure out the start and end addresses
         if (i_startAddressValid)
         {
-            io_end_address = io_start_address + l_totalSizeAligned - 1;
+            io_end_address = io_start_address + l_totalSizeAligned;
         }
         else
         {
@@ -720,14 +491,14 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
 
             switch ( l_hbTOC.entry[i].label )
             {
-                case HBRT_MEM_LABEL_ATTROVER:
+                case Util::HBRT_MEM_LABEL_ATTROVER:
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTROVER address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> memcpy %d size", actual_size);
                     memcpy( reinterpret_cast<void*>(l_prevDataAddr),
                             l_overrideData,
                             actual_size);
                     break;
-                case HBRT_MEM_LABEL_ATTR:
+                case Util::HBRT_MEM_LABEL_ATTR:
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTR address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
                     l_elog = TARGETING::AttrRP::save(
                                 reinterpret_cast<uint8_t*>(l_prevDataAddr),
@@ -740,9 +511,9 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     }
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TARGETING::AttrRP::save(0x%.16llX) done", l_prevDataAddr);
                     break;
-                case HBRT_MEM_LABEL_VPD:
+                case Util::HBRT_MEM_LABEL_VPD:
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
-                    l_elog = VPD::vpd_load_rt_image(l_prevDataAddr, true);
+                    l_elog = VPD::vpd_load_rt_image(l_prevDataAddr);
                     if(l_elog)
                     {
                         TRACFCOMP( g_trac_runtime,
@@ -846,45 +617,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
 
-            //@fixme-RTC:169478-Remove this workaround once HDAT is ready
-            // Check to see if HDAT has the space we need allocated
-            //   by looking for a 3rd instance
-            uint64_t l_rsvMemDataAddr = 0;
-            uint64_t l_rsvMemDataSizeMax = 0;
-            l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
-                                                     3,
-                                                     l_rsvMemDataAddr,
-                                                     l_rsvMemDataSizeMax );
-            if(l_elog != nullptr)
-            {
-                TRACFCOMP( g_trac_runtime, "populate_HbRsvMem> HDAT doesn't have RHB allocated, fall back to using old HBRT data" );
-                delete l_elog;
-                l_elog = nullptr;
-                break;
-            }
-            //end workaround
         }
-
         else if(TARGETING::is_sapphire_load())
         {
-            //@fixme-RTC:169478-Remove this workaround once HDAT is ready
-            // Check to see if HDAT has the space we need allocated
-            //   by looking for a 3rd instance
-            uint64_t l_rsvMemDataAddr = 0;
-            uint64_t l_rsvMemDataSizeMax = 0;
-            l_elog = RUNTIME::get_host_data_section( RUNTIME::RESERVED_MEM,
-                                                     3,
-                                                     l_rsvMemDataAddr,
-                                                     l_rsvMemDataSizeMax );
-            if(l_elog != nullptr)
-            {
-                TRACFCOMP( g_trac_runtime, "populate_HbRsvMem> HDAT doesn't have RHB allocated - HBRT is NOT supported here" );
-                delete l_elog;
-                l_elog = nullptr;
-                break;
-            }
-            //end workaround
-
             // Opal data goes at top_of_mem
             l_topMemAddr = TARGETING::get_top_mem_addr();
             assert (l_topMemAddr != 0,
@@ -1967,7 +1702,7 @@ errlHndl_t populate_hbTpmInfo()
             if(l_elog != nullptr)
             {
                 TRACFCOMP( g_trac_runtime, "populate_hbTpmInfo: "
-                    "populate_RtDataByNode failed" );
+                    "populate_TpmInfoByNode failed" );
             }
             break;
         }
@@ -2034,18 +1769,6 @@ errlHndl_t populate_hbRuntimeData( void )
         // needs to be setup by a hb routine that snoops for multiple nodes.
         if (0 == hb_images)  //Single-node
         {
-            //@fixme-RTC:169478-Remove once all code has switched
-            if( TARGETING::is_phyp_load() )
-            {
-                // Single node system, call inline and pass in our node number
-                l_elog = populate_RtDataByNode(0);
-                if(l_elog != nullptr)
-                {
-                    TRACFCOMP( g_trac_runtime, "populate_RtDataByNode failed" );
-                    break;
-                }
-            }
-
             if( !TARGETING::is_no_load() )
             {
                 l_elog = populate_HbRsvMem(nodeid);
@@ -2087,7 +1810,6 @@ errlHndl_t populate_hbRuntimeData( void )
 
                 // Need to send message to the node (l_node)
                 // When NODE receives the msg it should
-                // call populate_RtDataByNode(itsNodeId)
                 // call populate_HbRsvMem(itsNodeId)
                 TRACFCOMP( g_trac_runtime, "MsgToNode %d for HBRT Data",
                            l_node );
