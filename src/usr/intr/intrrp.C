@@ -333,6 +333,8 @@ errlHndl_t IntrRp::_init()
                 break;
             }
 
+            enableLsiInterrupts();
+
             TRACFCOMP(g_trac_intr, "IntrRp::_init() Enabling PSIHB Interrupts");
             //Enable PSIHB Interrupts
             l_err = enableInterrupts(l_procIntrHdlr);
