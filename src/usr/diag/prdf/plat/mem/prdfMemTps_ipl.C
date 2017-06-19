@@ -82,13 +82,16 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
         //phase 1/2
         else
         {
-            //collect the CE statistics for later analysis use
+            // PHASE_1: Collect soft/intermittent CE for later analysis use.
+            // PHASE_2: Callout all hard CEs.
             McaDataBundle * db = getMcaDataBundle( iv_chip );
-            o_rc = db->getIplCeStats()->collectStats( iv_rank );
+            o_rc = ( TD_PHASE_1 == iv_phase )
+                                ? db->getIplCeStats()->collectStats(  iv_rank)
+                                : db->getIplCeStats()->calloutHardCes(iv_rank);
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "collectStats(m%ds%d) failed on 0x%08x",
-                          iv_rank.getMaster(), iv_rank.getSlave(),
+                PRDF_ERR( PRDF_FUNC "collectStats/calloutHardCes(0x%02x) "
+                          "failed on 0x%08x", iv_rank.getKey(),
                           iv_chip->getHuid() );
                 break;
             }
