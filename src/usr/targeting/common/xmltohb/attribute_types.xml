@@ -30723,8 +30723,7 @@ Measured in GB</description>
         </uint8_t>
     </simpleType>
     <readable/>
-<!-- TODO RTC:170773 VPD -->
-    <persistency>volatile-zeroed</persistency>
+    <persistency>non-volatile</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_DPLL_VDM_RESPONSE</id>
       <macro>DIRECT</macro>
