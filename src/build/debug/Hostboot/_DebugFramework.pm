@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -55,6 +55,7 @@ our @EXPORT = ( 'setBootloader', 'clearBootloader', 'callToolModule',
                 'translateHRMOR',
                 'getIstepList',
                 'findSymbolWithinAddrRange',
+                'alignUp',
               );
 
 our ($parsedSymbolFile, %symbolAddress, %symbolTOC,
@@ -746,6 +747,24 @@ sub getIstepList
 
 
     return  @isteplist;
+}
+
+# @sub alignUp
+#
+# Align an input to boundary greater than or equal to input.
+#
+# @param Input to align.
+# @param Boundary on which to align.
+#
+sub alignUp
+{
+    my $input = shift;
+    my $boundary = shift;
+
+    my $output = $input;
+    $output += ($boundary - ($input % $boundary)) % $boundary;
+
+    return $output;
 }
 
 __END__

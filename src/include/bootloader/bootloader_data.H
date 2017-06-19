@@ -73,16 +73,27 @@ namespace Bootloader{
 
         // Instance of the TI Data Area
         HB_TI_DataArea bl_TIDataArea;
+        static_assert( sizeof(HB_TI_DataArea) == 48, "HB_TI_DataArea "
+                       "size changed.  Check bootloader_data.H alignment.  "
+                       "Fix BlData.pm processing.");
 
         // Buffer to save HBB PNOR section data
         PNOR::SectionData_t bl_hbbSection;
+        uint8_t bl_reserved3[(64 - sizeof(PNOR::SectionData_t)) % 16];
+        static_assert( sizeof(PNOR::SectionData_t) == 26, "SectionData_t "
+                       "size changed.  Check bootloader_data.H alignment.  "
+                       "Fix BlData.pm processing.");
 
         // Bool indicating if the secureROM is valid. Toggles verification.
         bool secureRomValid;
-        uint8_t bl_reserved3[15];
+        uint8_t bl_reserved4[15];
 
         // Object that will be stored where the SBE HB structure indicates
         BlToHbData blToHbData;
+        uint8_t bl_reserved5[(512 - sizeof(BlToHbData)) % 16];
+        static_assert( sizeof(BlToHbData) == 91, "BlToHbData "
+                       "size changed.  Check bootloader_data.H alignment.  "
+                       "Fix BlData.pm processing.");
     } blData_t;
 
     /**

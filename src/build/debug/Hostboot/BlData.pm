@@ -57,13 +57,28 @@ sub main
 {
     ::setBootloader();
 
+    my ($packName,$args) = @_;
+
     my $btLdrHrmorOffset  = 0x0000000000200000;
+
+    my $dataAddr = 0x08208000;
+    my $dataOffset = 0;
+
+    # Parse data address from options.
+    if (defined $args->{"address"})
+    {
+        $dataAddr = $args->{"address"};
+    }
+    elsif (defined $args->{"addr"})
+    {
+        $dataAddr = $args->{"addr"};
+    }
 
     my ($dataSym, $dataSize) = ::findSymbolAddress("Bootloader::g_blData");
     if (not defined $dataSym) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $dataSymStr = sprintf("0x%08X", $dataSym);
-    my $dataAddr = ::read64($dataSym|$btLdrHrmorOffset);
-    my $dataAddrStr = sprintf("0x%016llX", $dataAddr);
+    my $dataAddress = ::read64($dataSym|$btLdrHrmorOffset);
+    my $dataAddrStr = sprintf("0x%016llX", $dataAddress);
 
     ::userDisplay "------------Bootloader Data------------";
     ::userDisplay "\nData Symbol Address: ";
@@ -84,11 +99,12 @@ sub main
     ::userDisplay $scratchAddrStr;
     ::userDisplay "\n--------------------------------------------\n";
 
-    my $traceAddr = $dataAddr;
+    my $traceAddr = $dataAddr + $dataOffset;
     my $traceAddrStr = sprintf("0x%08X", $traceAddr);
     my $traceSize = 64;
     my $trace = ::readData($traceAddr,$traceSize);
     my $traceData = formatData($trace);
+    $dataOffset += ::alignUp($traceSize, 16);
 
     ::userDisplay "\nTrace Buffer Address: ";
     ::userDisplay $traceAddrStr;
@@ -97,10 +113,11 @@ sub main
     ::userDisplay "\n--------------------------------------------\n";
 
 
-    my $indexAddr = $dataAddr + 64;
+    my $indexAddr = $dataAddr + $dataOffset;
     my $indexAddrStr = sprintf("0x%08X", $indexAddr);
     my $index = ::read8($indexAddr);
     my $indexStr = sprintf("0x%02X", $index);
+    $dataOffset += 2; # index and reserved
 
     ::userDisplay "\nTrace Index Address: ";
     ::userDisplay $indexAddrStr;
@@ -109,10 +126,11 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
-    my $savedAddr = $dataAddr + 66;
+    my $savedAddr = $dataAddr + $dataOffset;
     my $savedAddrStr = sprintf("0x%08X", $savedAddr);
     my $saved = ::read8($savedAddr);
     my $savedStr = sprintf("0x%02X", $saved);
+    $dataOffset += 2; # saved index and reserved
 
     ::userDisplay "\nSaved Trace Index Address: ";
     ::userDisplay $savedAddrStr;
@@ -121,10 +139,11 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
-    my $loopCntAddr = $dataAddr + 68;
+    my $loopCntAddr = $dataAddr + $dataOffset;
     my $loopCntAddrStr = sprintf("0x%08X", $loopCntAddr);
     my $loopCnt = ::read32($loopCntAddr);
     my $loopCntStr = sprintf("0x%08X", $loopCnt);
+    $dataOffset += 4; # loop counter
 
     ::userDisplay "\nPNOR Loop Counter Address: ";
     ::userDisplay $loopCntAddrStr;
@@ -133,10 +152,11 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
-    my $pnorMmioAddr = $dataAddr + 72;
+    my $pnorMmioAddr = $dataAddr + $dataOffset;
     my $pnorMmioAddrStr = sprintf("0x%08X", $pnorMmioAddr);
     my $pnorMmio = ::read64($pnorMmioAddr);
     my $pnorMmioStr = sprintf("0x%016llX", $pnorMmio);
+    $dataOffset += 8; # MMIO address
 
     ::userDisplay "\nFirst PNOR MMIO Address: ";
     ::userDisplay $pnorMmioAddrStr;
@@ -145,11 +165,12 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
-    my $tiDataAreaAddr = $dataAddr + 80;
+    my $tiDataAreaAddr = $dataAddr + $dataOffset;
     my $tiDataAreaAddrStr = sprintf("0x%08X", $tiDataAreaAddr);
     my $tiDataAreaSize = 48;
     my $tiDataArea = ::readData($tiDataAreaAddr,$tiDataAreaSize);
     my $tiDataAreaData = formatData($tiDataArea);
+    $dataOffset += ::alignUp($tiDataAreaSize, 16);
 
     ::userDisplay "\nTI Data Area Address: ";
     ::userDisplay $tiDataAreaAddrStr;
@@ -158,11 +179,12 @@ sub main
     ::userDisplay "\n--------------------------------------------\n";
 
 
-    my $hbbPnorSecAddr = $dataAddr + 128;
+    my $hbbPnorSecAddr = $dataAddr + $dataOffset;
     my $hbbPnorSecAddrStr = sprintf("0x%08X", $hbbPnorSecAddr);
-    my $hbbPnorSecSize = 32;
+    my $hbbPnorSecSize = 26;
     my $hbbPnorSec = ::readData($hbbPnorSecAddr,$hbbPnorSecSize);
     my $hbbPnorSecData = formatData($hbbPnorSec);
+    $dataOffset += ::alignUp($hbbPnorSecSize, 16);
 
     ::userDisplay "\nHBB PNOR Section Data Address: ";
     ::userDisplay $hbbPnorSecAddrStr;
@@ -171,10 +193,11 @@ sub main
     ::userDisplay "\n--------------------------------------------\n";
 
 
-    my $secRomValAddr = $dataAddr + 160;
+    my $secRomValAddr = $dataAddr + $dataOffset;
     my $secRomValAddrStr = sprintf("0x%08X", $secRomValAddr);
     my $secRomVal = ::read8($secRomValAddr);
     my $secRomValStr = sprintf("0x%02X", $secRomVal);
+    $dataOffset += 16; # secure ROM value and reserved
 
     ::userDisplay "\nSecure ROM Valid Address: ";
     ::userDisplay $secRomValAddrStr;
@@ -183,11 +206,12 @@ sub main
     ::userDisplay "\n\n--------------------------------------------\n";
 
 
-    my $blToHbAddr = $dataAddr + 176;
+    my $blToHbAddr = $dataAddr + $dataOffset;
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
-    my $blToHbSize = 89;
+    my $blToHbSize = 91;
     my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
+    $dataOffset += ::alignUp($blToHbSize, 16);
 
     ::userDisplay "\nBL to HB Data Address: ";
     ::userDisplay $blToHbAddrStr;
@@ -203,5 +227,9 @@ sub helpInfo
     my %info = (
         name => "BlData",
         intro => ["Displays Bootloader data."],
+        options => {
+                    "address='data address'" => ["Address of Bootloader data."],
+                   },
+        notes => ["addr can be used as a short-name for 'address'."]
     );
 }
