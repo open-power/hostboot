@@ -871,6 +871,28 @@ class decoder
         }
 
         ///
+        /// @brief Decodes RCD Manufacturer ID code
+        /// @param[out] o_value rcd manufacturing id code
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode reg_manufacturer_id_code( uint16_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Register Revision Number
+        /// @param[out] o_value register revision number
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode register_rev_num( uint8_t& o_value ) const
+        {
+            o_value = 0;
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes DRAM Stepping
         /// @param[out] o_value uint8_t DRAM Stepping val
         /// @return FAPI2_RC_SUCCESS if okay
