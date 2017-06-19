@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -277,7 +277,7 @@ int VmmManager::_devUnmap(void* ea)
 
 uint64_t VmmManager::HTABORG()
 {
-    return ((uint32_t)HTABORG_OFFSET + getHRMOR());
+    return static_cast<uint32_t>(pageTableOffset()) + getHRMOR();
 }
 
 uint64_t VmmManager::findKernelAddress(uint64_t i_vaddr)
@@ -303,4 +303,14 @@ int VmmManager::_mmLinearMap(void *i_paddr, uint64_t i_size)
     int rc = BaseSegment::mmLinearMap(i_paddr, i_size);
     lock.unlock();
     return rc;
+}
+
+uint64_t VmmManager::pageTableOffset()
+{
+    return Singleton<VmmManager>::instance()._pageTableOffset();
+}
+
+uint64_t VmmManager::_pageTableOffset() const
+{
+    return INITIAL_PT_OFFSET;
 }

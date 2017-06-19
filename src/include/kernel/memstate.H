@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,6 @@ namespace KernelMemState
           REDUCED_CACHE   =  0x00000008,
           FULL_CACHE      =  0x0000000A,
           MS_32MEG        =  0x00000020,
-          PRE_SECURE_BOOT =  0x000000FF,
     };
 
     struct mem_location

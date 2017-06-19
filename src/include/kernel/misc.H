@@ -152,15 +152,6 @@ namespace KernelMisc
 
     };
 
-    /** @fn expand_half_cache
-     *
-     *  @brief Expands the image footprint from a quarter-cache (top 512k of
-     *         each cache column) to a half-cache (full 1mb of each column).
-     *
-     *  @return 0 or -errno
-     */
-    int expand_half_cache();
-
     /** @fn expand_full_cache
      *
      *  @brief Expands the image footprint from a half-cache to full-cache

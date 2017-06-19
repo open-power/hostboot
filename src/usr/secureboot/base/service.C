@@ -98,14 +98,9 @@ void* initializeBase(void* unused)
             Singleton<Header>::instance().loadSecurely();
         }
 
-        // Extend memory footprint into lower portion of cache.
-        assert(0 == mm_extend(MM_EXTEND_PARTIAL_CACHE));
-
         // Don't extend more than 1/2 cache in VPO as fake PNOR is there
         // Don't enable SecureRomManager in VPO
 #ifndef CONFIG_P9_VPO_COMPILE
-        // Run dcbz on the entire 10MB cache
-        assert(0 == mm_extend(MM_EXTEND_FULL_CACHE));
 
         // Initialize the Secure ROM
         l_errl = initializeSecureRomManager();

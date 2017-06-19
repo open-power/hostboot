@@ -37,7 +37,6 @@ use constant    MEMSTATE_HALF_CACHE => 0x4;
 use constant    MEMSTATE_REDUCED_CACHE => 0x8;
 use constant    MEMSTATE_FULL_CACHE => 0xa;
 use constant    MEMSTATE_MS_32MEG => 0x20;
-use constant    MEMSTATE_PRE_SECURE_BOOT => 0xff;
 
 use constant    _KB => 1024;
 use constant    _MB => 1024 * 1024;
@@ -49,16 +48,6 @@ our %memory_maps = (
         # code load up to 512 - 4k.  The 4k is a reserved space for the
         # Secureboot Header.
         [ 0,                            (512 - 4) * _KB
-        ],
-    MEMSTATE_PRE_SECURE_BOOT() =>
-        # Until the early secureboot operations have been done, we can
-        # only access the top 512k of each 1MB column.  Need to avoid
-        # the hole for the MBOX DMA buffers (64K @ 3MB + 256K).
-        [ (512 - 4) * _KB,              4 * _KB,
-          1 * _MB,                      512 * _KB,
-          2 * _MB,                      512 * _KB,
-          3 * _MB,                      256 * _KB,
-          3 * _MB + (256 + 64) * _KB,   (256 - 64) * _KB
         ],
     MEMSTATE_HALF_CACHE() =>
         # All of the first 4MB can now be read (except reserved MBOX).
@@ -88,16 +77,15 @@ our %memory_maps = (
 # Map the current state to the combined states available.
 our %memory_states = (
     MEMSTATE_NO_MEM() => [ MEMSTATE_NO_MEM ],
-    MEMSTATE_PRE_SECURE_BOOT() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT ],
-    MEMSTATE_HALF_CACHE() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
+    MEMSTATE_HALF_CACHE() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE ],
     MEMSTATE_REDUCED_CACHE() =>
-                             [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
+                             [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE ],
-    MEMSTATE_FULL_CACHE() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
+    MEMSTATE_FULL_CACHE() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE ],
-    MEMSTATE_MS_32MEG() => [ MEMSTATE_NO_MEM, MEMSTATE_PRE_SECURE_BOOT,
+    MEMSTATE_MS_32MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE, MEMSTATE_MS_32MEG ]
 );
