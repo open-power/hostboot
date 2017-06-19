@@ -368,10 +368,93 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Determines & sets effective config for eff_rcd_mfg_id from SPD
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::rcd_mfg_id()
+{
+    uint16_t l_decoder_val = 0;
+    uint16_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-/////////////////////////
-// Member Method implementation
-/////////////////////////
+    // Get & update MCS attribute
+    FAPI_TRY( eff_rcd_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_RCD_MFG_ID" );
+    FAPI_TRY( iv_pDecoder->reg_manufacturer_id_code(l_decoder_val), "Failed getting rcd id code from SPD %s",
+              mss::c_str(iv_dimm) );
+
+    switch (l_decoder_val)
+    {
+        case fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_IDT:
+            FAPI_INF("%s Register Manufacturer is %s", mss::c_str(iv_dimm), "IDT");
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_INPHI:
+            FAPI_INF("%s Register Manufacturer is %s", mss::c_str(iv_dimm), "INPHI");
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_RCD_MFG_ID_MONTAGE:
+            FAPI_INF("%s Register Manufacturer is %s", mss::c_str(iv_dimm), "MONTAGE");
+            break;
+
+        default:
+            FAPI_INF("%s Register Manufacturer is 0x%04x", mss::c_str(iv_dimm), l_decoder_val);
+            break;
+    }
+
+    l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_RCD_MFG_ID, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_RCD_MFG_ID" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief Determines & sets effective config for eff_register_type from SPD
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::register_type()
+{
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_register_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_REGISTER_TYPE" );
+    FAPI_TRY( iv_pDecoder->iv_module_decoder->register_and_buffer_type(l_decoder_val),
+              "Failed getting register_type code from SPD %s",
+              mss::c_str(iv_dimm) );
+
+    FAPI_INF("%s Register type is %s", mss::c_str(iv_dimm), l_decoder_val ? "RCD01" : "RCD02");
+
+    l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_REGISTER_TYPE, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_REGISTER_TYPE" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for eff_register_rev type from SPD
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::register_rev()
+{
+    uint8_t l_decoder_val = 0;
+    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_register_rev(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_REGISTER_REV" );
+    FAPI_TRY( iv_pDecoder->register_rev_num(l_decoder_val), "Failed getting register_rev code from SPD %s",
+              mss::c_str(iv_dimm) );
+
+    FAPI_INF("%s Register rev is 0x%02x", mss::c_str(iv_dimm), l_decoder_val);
+    l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_REGISTER_REV, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_REGISTER_REV" );
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
 
 ///
 /// @brief Determines & sets effective config for eff_dram_mfg_id type from SPD
@@ -386,6 +469,25 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
     FAPI_TRY( eff_dram_mfg_id(iv_mcs, &l_mcs_attrs[0][0]), "Failed accessing ATTR_MSS_EFF_DRAM_MFG_ID" );
     FAPI_TRY( iv_pDecoder->dram_manufacturer_id_code(l_decoder_val), "Failed getting dram id code from SPD %s",
               mss::c_str(iv_dimm) );
+
+    switch (l_decoder_val)
+    {
+        case fapi2::ENUM_ATTR_EFF_DRAM_MFG_ID_MICRON:
+            FAPI_INF("%s Dram Manufacturer is %s", mss::c_str(iv_dimm), "MICRON");
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_MFG_ID_HYNIX:
+            FAPI_INF("%s Dram Manufacturer is %s", mss::c_str(iv_dimm), "HYNIX");
+            break;
+
+        case fapi2::ENUM_ATTR_EFF_DRAM_MFG_ID_SAMSUNG:
+            FAPI_INF("%s Dram Manufacturer is %s", mss::c_str(iv_dimm), "SAMSUNG");
+            break;
+
+        default:
+            FAPI_INF("%s Dram Manufacturer is 0x%04x", mss::c_str(iv_dimm), l_decoder_val);
+            break;
+    }
 
     l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DRAM_MFG_ID, iv_mcs, l_mcs_attrs), "Failed to set ATTR_EFF_DRAM_MFG_ID" );
@@ -423,7 +525,6 @@ fapi2::ReturnCode eff_dimm::dram_width()
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 ///
