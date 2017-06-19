@@ -129,13 +129,22 @@ sub main
 {
     ::setBootloader();
 
-    my $btLdrHrmorOffset  = 0x0000000000200000;
+    my ($packName,$args) = @_;
 
-    my ($dataSym, $dataSize) = ::findSymbolAddress("Bootloader::g_blData");
-    if (not defined $dataSym) { ::userDisplay "Cannot find symbol.\n"; die; }
-    my $dataAddr = ::read64($dataSym|$btLdrHrmorOffset);
+    my $traceAddr = 0x08208000;
+    my $traceSize = 64;
 
-    my $indexAddr = $dataAddr + 64;
+    # Parse trace address from options.
+    if (defined $args->{"address"})
+    {
+        $traceAddr = $args->{"address"};
+    }
+    elsif (defined $args->{"addr"})
+    {
+        $traceAddr = $args->{"addr"};
+    }
+
+    my $indexAddr = $traceAddr + $traceSize;
     my $index = ::read8($indexAddr);
     my $indexStr = sprintf("0x%02X", $index);
 
@@ -143,9 +152,7 @@ sub main
     ::userDisplay "\nNext Entry Index: ";
     ::userDisplay $indexStr;
 
-    my $traceAddr = $dataAddr;
     my $traceAddrStr = sprintf("0x%08X", $traceAddr);
-    my $traceSize = 64;
     my $trace = ::readData($traceAddr,$traceSize);
     $trace =~ s/\0+//g; #strip off nulls
     my $traceData = formatTrace($trace);
@@ -164,5 +171,9 @@ sub helpInfo
     my %info = (
         name => "BlTrace",
         intro => ["Displays the Bootloader trace buffer."],
+        options => {
+                    "address='trace address'" => ["Address of trace buffer."],
+                   },
+        notes => ["addr can be used as a short-name for 'address'."]
     );
 }
