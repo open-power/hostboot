@@ -40,11 +40,13 @@ namespace Bootloader{
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
+#define MAX_HBB_SIZE (512 * KILOBYTE)
+
 // The Bootloader to Hostboot communication area exists after the working HBB
 #ifdef BOOTLOADER
-#define BLTOHB_COMM_DATA_ADDR (getHRMOR() - ( 2*MEGABYTE) + 512*KILOBYTE)
+#define BLTOHB_COMM_DATA_ADDR (getHRMOR() - ( 2*MEGABYTE) + MAX_HBB_SIZE)
 #else
-#define BLTOHB_COMM_DATA_ADDR (getHRMOR() + 512*KILOBYTE)
+#define BLTOHB_COMM_DATA_ADDR (getHRMOR() + MAX_HBB_SIZE)
 #endif
 
 // Expected BlToHbData eye catch

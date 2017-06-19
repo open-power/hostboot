@@ -490,54 +490,6 @@ namespace KernelMisc
         kassert(false);
     }
 
-    int expand_half_cache()
-    {
-        static bool executed = false;
-
-        if (executed) // Why are we being called a second time?
-        {
-            return -EFAULT;
-        }
-
-        uint64_t startAddr = 512*KILOBYTE;
-        uint64_t endAddr = 1*MEGABYTE;
-
-        size_t cache_columns = 0;
-
-        switch(CpuID::getCpuType())
-        {
-            case CORE_POWER8_MURANO:
-            case CORE_POWER8_VENICE:
-            case CORE_POWER8_NAPLES:
-            case CORE_POWER9_NIMBUS:
-            case CORE_POWER9_CUMULUS:
-                cache_columns = 4;
-                break;
-
-            default:
-                kassert(false);
-                break;
-        }
-
-        for (size_t i = 0; i < cache_columns; i++)
-        {
-            size_t offset = i * MEGABYTE;
-            populate_cache_lines(
-                reinterpret_cast<uint64_t*>(startAddr + offset),
-                reinterpret_cast<uint64_t*>(endAddr + offset));
-
-            PageManager::addMemory(startAddr + offset,
-                                   (512*KILOBYTE)/PAGESIZE);
-        }
-
-        executed = true;
-
-        KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                         KernelMemState::HALF_CACHE);
-
-        return 0;
-    }
-
     int expand_full_cache(uint64_t i_expandSize)
     {
         static bool executed = false;
@@ -596,6 +548,9 @@ namespace KernelMisc
     {
         size_t cache_line_size = getCacheLineWords();
 
+        // Assert start/end address is divisible by Cache Line Words
+        kassert(reinterpret_cast<uint64_t>(i_start)%cache_line_size == 0);
+        kassert(reinterpret_cast<uint64_t>(i_end)%cache_line_size == 0);
         while(i_start != i_end)
         {
             dcbz(i_start);

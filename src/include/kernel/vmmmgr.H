@@ -47,18 +47,16 @@ class VmmManager
             // Place the page table at the top side of the cache, 256k in size.
             INITIAL_PT_OFFSET = INITIAL_MEM_SIZE - 1*MEGABYTE,
             PTSIZE = 256*KILOBYTE,
-            HTABORG_OFFSET = INITIAL_PT_OFFSET,
 
             // Put the DMA Pages just after the Page Table
             MBOX_DMA_PAGES = 64,    // must be <= 64
             MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
-            MBOX_DMA_ADDR = INITIAL_PT_OFFSET + PTSIZE,
             MBOX_DMA_SIZE = MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE,
 
             /** We need to reserve a hole in heap memory for the page table,
              *  etc.  Use these constants to define the hole. */
             FIRST_RESERVED_PAGE = INITIAL_PT_OFFSET,
-            END_RESERVED_PAGE = INITIAL_PT_OFFSET + PTSIZE + MBOX_DMA_SIZE,
+            END_RESERVED_PAGE = INITIAL_PT_OFFSET + PTSIZE,
 
             BLTOHB_DATA_START = END_RESERVED_PAGE,
 
@@ -215,6 +213,13 @@ class VmmManager
          */
          static int mmLinearMap(void *i_paddr, uint64_t i_size);
 
+        /** @fn pageTableOffset()
+         *  @brief   Gets starting address of Page Table
+         *
+         *  @return uint64_t - starting address of Page Table
+         */
+        static uint64_t pageTableOffset();
+
     protected:
         VmmManager();
         ~VmmManager() {};
@@ -273,6 +278,9 @@ class VmmManager
 
         /** See mmLinearMap */
         int _mmLinearMap(void*, uint64_t);
+
+        /** See pageTableOffset */
+        uint64_t _pageTableOffset() const;
 
     public:
         friend class Block;

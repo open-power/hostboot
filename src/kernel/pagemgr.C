@@ -206,95 +206,44 @@ void PageManager::_initialize()
     uint64_t totalPages = 0;
 
     page_t* startAddr = reinterpret_cast<page_t*>(firstPageAddr());
-    page_t* endAddr = reinterpret_cast<page_t*>(VmmManager::INITIAL_MEM_SIZE);
-    printk("PageManager starts at %p...", startAddr);
+    printk("PageManager starts at %p\n", startAddr);
 
+    // Populate cache lines from end of HBB to PT offset and add to heap
+    uint64_t startBlock = reinterpret_cast<uint64_t>(startAddr);
+    uint64_t endBlock = VmmManager::INITIAL_PT_OFFSET;
+    KernelMisc::populate_cache_lines(
+                reinterpret_cast<uint64_t*>(startBlock),
+                reinterpret_cast<uint64_t*>(endBlock));
+
+    uint64_t pages = (endBlock - startBlock) / PAGESIZE;
+    iv_heap.addMemory(startBlock, pages);
+    totalPages += pages;
+
+    // Populate cache lines of PT
+    startBlock = VmmManager::INITIAL_PT_OFFSET;
+    endBlock = VmmManager::INITIAL_PT_OFFSET + VmmManager::PTSIZE;
+    KernelMisc::populate_cache_lines(reinterpret_cast<uint64_t*>(startBlock),
+                                     reinterpret_cast<uint64_t*>(endBlock));
+
+    // Populate cachelines from end of Preserved read (PT + securebood data) to
+    // 4MB and add to heap
     // Add on secureboot data size to end of reserved space
     size_t securebootDataSize = 0;
     if (g_BlToHbDataManager.isValid())
     {
         securebootDataSize = g_BlToHbDataManager.getPreservedSize();
     }
-    size_t l_endReservedPage = VmmManager::END_RESERVED_PAGE
+    size_t l_endReservedPage = VmmManager::BLTOHB_DATA_START
                                + securebootDataSize;
-
-    // Calculate chunks along the top half of the L3 and erase them.
-    uint64_t currentBlock = reinterpret_cast<uint64_t>(startAddr);
-    do
-    {
-        if (currentBlock % (1*MEGABYTE) >= (512*KILOBYTE))
-        {
-            currentBlock = ALIGN_MEGABYTE(currentBlock);
-            continue;
-        }
-
-        uint64_t endBlock = ALIGN_MEGABYTE_DOWN(currentBlock) + 512*KILOBYTE;
-
-        // Adjust address to compensate for reserved hole and add to
-        // heap...
-
-        // Check if this block starts in the hole.
-        if ((currentBlock >= VmmManager::FIRST_RESERVED_PAGE) &&
-            (currentBlock < l_endReservedPage))
-        {
-            // End of the block is in the hole, skip.
-            if (endBlock < l_endReservedPage)
-            {
-                currentBlock = ALIGN_MEGABYTE(endBlock);
-                continue;
-            }
-
-            // Advance the current block past the hole.
-            currentBlock = l_endReservedPage;
-        }
-
-        // Check if the block is has the hole in it.
-        if ((endBlock >= VmmManager::FIRST_RESERVED_PAGE) &&
-            (currentBlock < VmmManager::FIRST_RESERVED_PAGE))
-        {
-            // Hole is at the end of the block, shrink it down.
-            if (endBlock < l_endReservedPage)
-            {
-                endBlock = VmmManager::FIRST_RESERVED_PAGE;
-            }
-            // Hole is in the middle... yuck.
-            else
-            {
-                uint64_t hole_end =
-                    (VmmManager::FIRST_RESERVED_PAGE - currentBlock);
-
-                // Populate L3 for the first part of the chunk.
-                KernelMisc::populate_cache_lines(
-                    reinterpret_cast<uint64_t*>(currentBlock),
-                    reinterpret_cast<uint64_t*>(hole_end));
-
-                // Add it to the heap.
-                iv_heap.addMemory(currentBlock, hole_end / PAGESIZE);
-                totalPages += (hole_end / PAGESIZE);
-
-                currentBlock = l_endReservedPage;
-            }
-        }
-
-        // Populate L3 cache lines for this chunk.
-        KernelMisc::populate_cache_lines(
-            reinterpret_cast<uint64_t*>(currentBlock),
-            reinterpret_cast<uint64_t*>(endBlock));
-
-        uint64_t pages = (endBlock - currentBlock) / PAGESIZE;
-
-        iv_heap.addMemory(currentBlock, pages);
-        totalPages += pages;
-
-        currentBlock = ALIGN_MEGABYTE(endBlock);
-
-    } while (reinterpret_cast<page_t*>(currentBlock) != endAddr);
-
-    // Ensure HW page table area is erased / populated.
+    startBlock = l_endReservedPage;
+    endBlock = VmmManager::INITIAL_MEM_SIZE;
     KernelMisc::populate_cache_lines(
-        reinterpret_cast<uint64_t*>(VmmManager::INITIAL_PT_OFFSET),
-        reinterpret_cast<uint64_t*>(VmmManager::INITIAL_PT_OFFSET +
-                                    VmmManager::PTSIZE));
+        reinterpret_cast<uint64_t*>(startBlock),
+        reinterpret_cast<uint64_t*>(endBlock));
+
+    pages = (endBlock - startBlock) / PAGESIZE;
+    iv_heap.addMemory(startBlock, pages);
+    totalPages += pages;
 
     printk("%ld pages.\n", totalPages);
 
@@ -309,7 +258,7 @@ void PageManager::_initialize()
     cv_low_page_count = totalPages;
 
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
-                                     KernelMemState::PRE_SECURE_BOOT);
+                                     KernelMemState::HALF_CACHE);
 }
 
 void* PageManager::_allocatePage(size_t n, bool userspace)
