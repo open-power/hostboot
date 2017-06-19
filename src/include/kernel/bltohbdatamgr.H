@@ -93,6 +93,15 @@ class BlToHbDataManager
          */
         void initInvalid();
 
+        /**
+         * @brief Relocates preserved data to a location in cache that will not
+         *        be flushed
+         *        NOTE: Asserts that it's only called during initialization
+         *
+         * @return N/A
+         */
+        void relocatePreservedArea();
+
         /*
          * @brief Returns internal branchtable offset
          *
@@ -191,6 +200,13 @@ class BlToHbDataManager
          * @return size_t     XSCP< BAR
          */
         const uint64_t getXscomBAR() const;
+
+        /*
+         * @brief Returns internal BlToHbData size
+         *
+         * @return size_t     BlToHbData size
+         */
+        const size_t getBlToHbDataSize() const;
 };
 
 // Extern global instance of the class

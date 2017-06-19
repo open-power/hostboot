@@ -82,38 +82,8 @@ int main()
     if ( Bootloader::BlToHbDataValid(l_pBltoHbData) )
     {
         printk("BL to HB comm valid\n");
-
-        // Make copy of structure so to not modify original pointers
-        auto l_blToHbDataCopy = *l_pBltoHbData;
-
-        // Get destination location that will be preserved by the pagemgr
-        auto l_pBltoHbDataStart = reinterpret_cast<uint8_t *>(
-                                                 VmmManager::BLTOHB_DATA_START);
-        // Copy in SecureRom
-        memcpy(l_pBltoHbDataStart,
-               l_blToHbDataCopy.secureRom,
-               l_blToHbDataCopy.secureRomSize);
-        // Change pointer to new location and increment
-        l_blToHbDataCopy.secureRom = l_pBltoHbDataStart;
-        l_pBltoHbDataStart += l_blToHbDataCopy.secureRomSize;
-
-        // Copy in HW keys' Hash
-        memcpy(l_pBltoHbDataStart,
-               l_blToHbDataCopy.hwKeysHash,
-               l_blToHbDataCopy.hwKeysHashSize);
-        // Change pointer to new location and increment
-        l_blToHbDataCopy.hwKeysHash = l_pBltoHbDataStart;
-        l_pBltoHbDataStart += l_blToHbDataCopy.hwKeysHashSize;
-
-        // Copy in HBB header
-        memcpy(l_pBltoHbDataStart,
-               l_blToHbDataCopy.hbbHeader,
-               l_blToHbDataCopy.hbbHeaderSize);
-        // Change pointer to new location
-        l_blToHbDataCopy.hbbHeader = l_pBltoHbDataStart;
-
         // Initialize Secureboot Data class
-        g_BlToHbDataManager.initValid(l_blToHbDataCopy);
+        g_BlToHbDataManager.initValid(*l_pBltoHbData);
     }
     else
     {

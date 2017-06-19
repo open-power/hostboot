@@ -208,7 +208,7 @@ sub main
 
     my $blToHbAddr = $dataAddr + $dataOffset;
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
-    my $blToHbSize = 91;
+    my $blToHbSize = 99;
     my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
     $dataOffset += ::alignUp($blToHbSize, 16);
