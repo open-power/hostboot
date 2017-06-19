@@ -373,20 +373,8 @@ fapi_try_exit:
 
         int l_result = -1;
 
-//The generated classes in hwp_ffdc_classes.H are not produced to support
-//fapi2::variable_buffer.In order to enable the following test the
-//parseErrorInfo.pl script must be configured to use variable buffers.
-//To enable variable buffer support ensure that the parseErrorInfo_RUN
-//macro in import/hwpf/fapi2/tools/parseErrorInfo.mk is defined to
-//include the --use-variable-buffers option as shown below.
-//$(C1) $$< --use-variable-buffers --output-dir=$$($(GENERATED)_PATH) ...
-
-//Disable unless parseErrorInfo.pl --use-variable-buffers invoked to
-//generate hwp_ffdc_classes.H.
-
         do
         {
-#if 0
             //get a PROC target for this test.
             TARGETING::Target *l_procTarget = getProcTarget();
 
@@ -494,6 +482,8 @@ fapi_try_exit:
                                     l_ct = snprintf(
                                               l_ptr,
                                               l_remain,
+                                              (i != 0 && i%4 == 0)?
+                                              "\n\t\t Data[%d]: %X ":
                                               ", Data[%d]: %X ",
                                               i,
                                             FAPI2_TEST_VARIABLE_BUFFER_VALUE[i]
@@ -536,7 +526,6 @@ fapi_try_exit:
                 break;
             }
 
-#endif
             l_result = 0;
 
         }

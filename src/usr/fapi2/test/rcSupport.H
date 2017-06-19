@@ -92,21 +92,11 @@ fapi2::ReturnCode p9_hwCallout(
 fapi2::ReturnCode p9ErrorWithBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
-#if 0
-//The generated classes in hwp_ffdc_classes.H are not produced to support
-//fapi2::variable_buffer.In order to enable the following function the
-//parseErrorInfo.pl script must be configured to use variable buffers.
-//To enable variable buffer support ensure that the parseErrorInfo_RUN
-//macro in import/hwpf/fapi2/tools/parseErrorInfo.mk is defined to
-//include the --use-variable-buffers option as shown below.
-//$(C1) $$< --use-variable-buffers --output-dir=$$($(GENERATED)_PATH) ...
-
 //*****************************************************************************
 // p9ErrorWithVariableBuffer
 // Force an error that will use a caller populated fapi2::variable_buffer
 //*****************************************************************************
 fapi2::ReturnCode p9ErrorWithVariableBuffer(
                     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-#endif
 
 #endif

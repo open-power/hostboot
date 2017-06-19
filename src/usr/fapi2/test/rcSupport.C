@@ -41,7 +41,18 @@ const uint64_t FAPI2_TEST_BUFFER_VALUE = 0x123456789ABCDEF;
 const uint32_t FAPI2_TEST_VARIABLE_BUFFER_VALUE[] =
                                                    {
                                                         0x12345678,
-                                                        0x9ABCDEF
+                                                        0x23456781,
+                                                        0x34567812,
+                                                        0x45678123,
+                                                        0x56781234,
+                                                        0x67812345,
+                                                        0x78123456,
+                                                        0x81234567,
+                                                        0x9ABCDEF,
+                                                        0xABCDEF9,
+                                                        0xBCDEF9A,
+                                                        0xCDEF9AB,
+                                                        0xDEF9ABC
                                                    };
 const uint32_t VARIABLE_BUFFER_ELEMENTS =
             sizeof(FAPI2_TEST_VARIABLE_BUFFER_VALUE)/
@@ -210,15 +221,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#if 0
-//The generated classes in hwp_ffdc_classes.H are not produced to support
-//fapi2::variable_buffer.In order to enable the following function the
-//parseErrorInfo.pl script must be configured to use variable buffers.
-//To enable variable buffer support ensure that the parseErrorInfo_RUN
-//macro in import/hwpf/fapi2/tools/parseErrorInfo.mk is defined to
-//include the --use-variable-buffers option as shown below.
-//$(C1) $$< --use-variable-buffers --output-dir=$$($(GENERATED)_PATH) ...
-//
 //****************************************************************************
 // p9ErrorWithVariableBuffer
 // Force an error that will use a caller populated fapi2::variable_buffer
@@ -251,6 +253,5 @@ fapi_try_exit:
     FAPI_INF("Exiting p9ErrorWithVariableBuffer");
     return fapi2::current_err;
 }
-#endif
 
 
