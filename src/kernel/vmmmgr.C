@@ -33,6 +33,8 @@
 #include <kernel/stacksegment.H>
 #include <kernel/devicesegment.H>
 #include <config.h>
+#include <kernel/bltohbdatamgr.H>
+#include <util/align.H>
 
 
 extern void* data_load_address;
@@ -312,5 +314,26 @@ uint64_t VmmManager::pageTableOffset()
 
 uint64_t VmmManager::_pageTableOffset() const
 {
-    return INITIAL_PT_OFFSET;
+    return ALIGN_X(_endPreservedOffset(), PT_ALIGNMENT);
+}
+
+uint64_t VmmManager::BlToHbPreserveDataOffset()
+{
+    return Singleton<VmmManager>::instance()._BlToHbPreserveDataOffset();
+}
+
+uint64_t VmmManager::_BlToHbPreserveDataOffset() const
+{
+    return  ALIGN_8(MAX_HBB_SIZE + g_BlToHbDataManager.getBlToHbDataSize());
+}
+
+uint64_t VmmManager::endPreservedOffset()
+{
+    return Singleton<VmmManager>::instance()._endPreservedOffset();
+}
+
+uint64_t VmmManager::_endPreservedOffset() const
+{
+    return ALIGN_PAGE(_BlToHbPreserveDataOffset() +
+                      g_BlToHbDataManager.getPreservedSize());
 }

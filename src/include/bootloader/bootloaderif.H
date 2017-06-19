@@ -60,8 +60,15 @@ enum BlToHbDataVersion
     BLTOHB_SAB              = 0x0000000900000002,
     BLTOHB_MMIOBARS         = 0x0000000900000003,
     BLTOHB_SECURE_OVERRIDES = 0x0000000900000004,
+    BLTOHB_SIZE             = 0x0000000900000005,
 };
 
+enum
+{
+    // Arbitrary size larger than the current structure size 8 byte aligned.
+    // This will only be used when there is a BL/HB mismatch
+    INITIAL_BLTOHB_PADDED_SIZE = 256
+};
 
 /** @struct BlToHbData
  *  @brief  Shared data between bootloader and Hostboot.
@@ -81,7 +88,8 @@ struct BlToHbData
                    hbbHeaderSize(0), secureAccessBit(0),
                    xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
-                   securityOverride(0), allowAttrOverrides(0) {}
+                   securityOverride(0), allowAttrOverrides(0),
+                   sizeOfStructure(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -111,6 +119,8 @@ struct BlToHbData
     bool securityOverride;
     // Secure Setting - Allow Attribute Overrides in Securemode
     bool allowAttrOverrides;
+    // Size of this structure (Use for backwards compatibility)
+    size_t sizeOfStructure;
 } __attribute__((packed));
 
 /**

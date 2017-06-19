@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <arch/memorymap.H>
 #include <bootloader/bootloaderif.H>
+#include <kernel/vmmmgr.H>
 
 // Global and only BlToHbDataManager instance
 BlToHbDataManager g_BlToHbDataManager;
@@ -76,6 +77,10 @@ void BlToHbDataManager::print() const
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
                iv_data.hbbHeaderSize);
         printkd("-- Reserved Size = 0x%lX\n", iv_preservedSize);
+        if(iv_data.version >= Bootloader::BLTOHB_SIZE)
+        {
+            printkd("-- Size of structure = 0x%lX\n", iv_data.sizeOfStructure);
+        }
         printkd("\n");
     }
 }
@@ -166,13 +171,28 @@ printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
 printk("lpc=%lX, xscom=%lX, iv_data=%p\n", iv_data.lpcBAR, iv_data.xscomBAR,
        static_cast<void *>(&iv_data) );
 
+    // Check if bootloader advertised the size of the structure it saw;
+    // otherwise use the default padded size
+    if(iv_data.version >= Bootloader::BLTOHB_SIZE)
+    {
+        iv_data.sizeOfStructure = i_data.sizeOfStructure;
+    }
+    else
+    {
+        iv_data.sizeOfStructure = Bootloader::INITIAL_BLTOHB_PADDED_SIZE;
+    }
 
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
                                  iv_data.hwKeysHashSize +
                                  iv_data.hbbHeaderSize );
+
+    // Move preserved content to a location free from cache clearing
+    relocatePreservedArea();
+
     iv_initialized = true;
     iv_dataValid = true;
+
     print();
 }
 
@@ -193,6 +213,46 @@ void BlToHbDataManager::initInvalid ()
     iv_initialized = true;
     iv_dataValid = false;
     print();
+}
+
+void BlToHbDataManager::relocatePreservedArea()
+{
+    // Allow call this within the initializer
+    if (iv_initialized)
+    {
+        printk("E> BlToHbDataManager relocatePreservedArea called outside initializer\n");
+        kassert(!iv_initialized);
+    }
+    // Ensure the pointers were initialized
+    kassert(iv_data.secureRom!=nullptr);
+    kassert(iv_data.hwKeysHash!=nullptr);
+    kassert(iv_data.hbbHeader!=nullptr);
+
+    // Get destination location that will be preserved by the pagemgr
+    auto l_pBltoHbDataStart = reinterpret_cast<uint8_t *>(
+                                    VmmManager::BlToHbPreserveDataOffset());
+    // Copy in SecureRom
+    memcpy(l_pBltoHbDataStart,
+           iv_data.secureRom,
+           iv_data.secureRomSize);
+    // Change pointer to new location and increment
+    iv_data.secureRom = l_pBltoHbDataStart;
+    l_pBltoHbDataStart += iv_data.secureRomSize;
+
+    // Copy in HW keys' Hash
+    memcpy(l_pBltoHbDataStart,
+           iv_data.hwKeysHash,
+           iv_data.hwKeysHashSize);
+    // Change pointer to new location and increment
+    iv_data.hwKeysHash = l_pBltoHbDataStart;
+    l_pBltoHbDataStart += iv_data.hwKeysHashSize;
+
+    // Copy in HBB header
+    memcpy(l_pBltoHbDataStart,
+           iv_data.hbbHeader,
+           iv_data.hbbHeaderSize);
+    // Change pointer to new location
+    iv_data.hbbHeader = l_pBltoHbDataStart;
 }
 
 const uint64_t BlToHbDataManager::getBranchtableOffset() const
@@ -284,5 +344,10 @@ const uint64_t BlToHbDataManager::getLpcBAR() const
 const uint64_t BlToHbDataManager::getXscomBAR() const
 {
     return reinterpret_cast<uint64_t>(iv_data.xscomBAR);
+}
+
+const size_t BlToHbDataManager::getBlToHbDataSize() const
+{
+    return iv_data.sizeOfStructure;
 }
 

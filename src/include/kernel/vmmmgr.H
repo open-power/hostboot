@@ -45,20 +45,13 @@ class VmmManager
             INITIAL_MEM_SIZE = 4*MEGABYTE,
 
             // Place the page table at the top side of the cache, 256k in size.
-            INITIAL_PT_OFFSET = INITIAL_MEM_SIZE - 1*MEGABYTE,
             PTSIZE = 256*KILOBYTE,
+            PT_ALIGNMENT = 256*KILOBYTE,
 
             // Put the DMA Pages just after the Page Table
             MBOX_DMA_PAGES = 64,    // must be <= 64
             MBOX_DMA_PAGESIZE = (1 * KILOBYTE),
             MBOX_DMA_SIZE = MBOX_DMA_PAGES * MBOX_DMA_PAGESIZE,
-
-            /** We need to reserve a hole in heap memory for the page table,
-             *  etc.  Use these constants to define the hole. */
-            FIRST_RESERVED_PAGE = INITIAL_PT_OFFSET,
-            END_RESERVED_PAGE = INITIAL_PT_OFFSET + PTSIZE,
-
-            BLTOHB_DATA_START = END_RESERVED_PAGE,
 
             // Tells processor to ignore HRMOR
             FORCE_PHYS_ADDR = 0x8000000000000000,
@@ -220,6 +213,20 @@ class VmmManager
          */
         static uint64_t pageTableOffset();
 
+        /** @fn BlToHbPreserveDataOffset()
+         *  @brief   Gets starting address of BltoHB preserved data area
+         *
+         *  @return uint64_t - starting address of VMM area
+         */
+        static uint64_t BlToHbPreserveDataOffset();
+
+        /** @fn endPreservedOffset()
+         *  @brief   Gets ending address of preserved data area
+         *
+         *  @return uint64_t - ending address of VMM preserved area
+         */
+        static uint64_t endPreservedOffset();
+
     protected:
         VmmManager();
         ~VmmManager() {};
@@ -281,6 +288,12 @@ class VmmManager
 
         /** See pageTableOffset */
         uint64_t _pageTableOffset() const;
+
+        /** See BlToHbPreserveDataOffset */
+        uint64_t _BlToHbPreserveDataOffset() const;
+
+        /** See endPreservedOffset */
+        uint64_t _endPreservedOffset() const;
 
     public:
         friend class Block;

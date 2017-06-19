@@ -202,60 +202,54 @@ PageManager::PageManager()
 
 void PageManager::_initialize()
 {
-    typedef PageManagerCore::page_t page_t;
+    printk("Hostboot base image ends at 0x%lX...\n", firstPageAddr());
+
     uint64_t totalPages = 0;
+    // Extend memory footprint to half the cache
+    // There is a preserved area after the base image and boot loader to HB
+    // communication area. The page table must be 256KB aligned, so it is
+    // likely to not be flush against the preserved area end.
+    // Example:
+    //      [HBB max size][BlToHBData][8 byte aligned]
+    //      [128 byte aligned Preserved-area][256K aligned Page Table]
+    uint64_t l_endPreservedArea = VmmManager::endPreservedOffset();
+    uint64_t l_endInitCache = VmmManager::INITIAL_MEM_SIZE;
+    uint64_t l_pageTableOffset = VmmManager::pageTableOffset();
+    uint64_t l_endPageTable = l_pageTableOffset + VmmManager::PTSIZE;
 
-    page_t* startAddr = reinterpret_cast<page_t*>(firstPageAddr());
-    printk("PageManager starts at %p\n", startAddr);
+    printk("PageManager end of preserved area at 0X%lX\n", l_endPreservedArea);
+    printk("PageManager page table offset at 0X%lX\n", l_pageTableOffset);
 
-    // Populate cache lines from end of HBB to PT offset and add to heap
-    uint64_t startBlock = reinterpret_cast<uint64_t>(startAddr);
-    uint64_t endBlock = VmmManager::INITIAL_PT_OFFSET;
+    // Populate half the cache after the preserved area
     KernelMisc::populate_cache_lines(
-                reinterpret_cast<uint64_t*>(startBlock),
-                reinterpret_cast<uint64_t*>(endBlock));
+                                reinterpret_cast<uint64_t*>(l_endPreservedArea),
+                                reinterpret_cast<uint64_t*>(l_endInitCache));
 
-    uint64_t pages = (endBlock - startBlock) / PAGESIZE;
-    iv_heap.addMemory(startBlock, pages);
-    totalPages += pages;
-
-    // Populate cache lines of PT
-    startBlock = VmmManager::INITIAL_PT_OFFSET;
-    endBlock = VmmManager::INITIAL_PT_OFFSET + VmmManager::PTSIZE;
-    KernelMisc::populate_cache_lines(reinterpret_cast<uint64_t*>(startBlock),
-                                     reinterpret_cast<uint64_t*>(endBlock));
-
-    // Populate cachelines from end of Preserved read (PT + securebood data) to
-    // 4MB and add to heap
-    // Add on secureboot data size to end of reserved space
-    size_t securebootDataSize = 0;
-    if (g_BlToHbDataManager.isValid())
+    // Allocate heap memory between end of preserved area and start of page
+    // table, if necessary
+    uint64_t pages = 0;
+    if ( (l_pageTableOffset - l_endPreservedArea) > 0 )
     {
-        securebootDataSize = g_BlToHbDataManager.getPreservedSize();
+        pages = (l_pageTableOffset - l_endPreservedArea) / PAGESIZE;
+        iv_heap.addMemory(l_endPreservedArea, pages);
+        totalPages += pages;
     }
-    size_t l_endReservedPage = VmmManager::BLTOHB_DATA_START
-                               + securebootDataSize;
-    startBlock = l_endReservedPage;
-    endBlock = VmmManager::INITIAL_MEM_SIZE;
-    KernelMisc::populate_cache_lines(
-        reinterpret_cast<uint64_t*>(startBlock),
-        reinterpret_cast<uint64_t*>(endBlock));
-
-    pages = (endBlock - startBlock) / PAGESIZE;
-    iv_heap.addMemory(startBlock, pages);
+    // After the Page table
+    pages = (l_endInitCache - l_endPageTable) / PAGESIZE;
+    iv_heap.addMemory(l_endPageTable, pages);
     totalPages += pages;
 
     printk("%ld pages.\n", totalPages);
-
-    // Reserve pages for the kernel.
-    iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
-                              iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
-                            KERNEL_HEAP_RESERVED_PAGES);
 
     // Statistics
     iv_pagesTotal = totalPages;
     iv_pagesAvail = totalPages;
     cv_low_page_count = totalPages;
+
+    // Reserve pages for the kernel.
+    iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
+                              iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
+                            KERNEL_HEAP_RESERVED_PAGES);
 
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
                                      KernelMemState::HALF_CACHE);

@@ -127,7 +127,7 @@ namespace Bootloader{
         {
             // Add cases as additional versions are created
             default:
-                g_blData->blToHbData.version = BLTOHB_SECURE_OVERRIDES;
+                g_blData->blToHbData.version = BLTOHB_SIZE;
                 break;
         }
 
@@ -159,6 +159,9 @@ namespace Bootloader{
             // Set HBB header and size
             g_blData->blToHbData.hbbHeader = i_pHbbSrc;
             g_blData->blToHbData.hbbHeaderSize = PAGE_SIZE;
+
+            // Set Bootloader preceived size of structure
+            g_blData->blToHbData.sizeOfStructure = sizeof(BlToHbData);
         }
 
         // Place structure into proper location for HB to find
