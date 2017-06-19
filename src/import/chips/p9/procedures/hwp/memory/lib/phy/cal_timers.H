@@ -256,7 +256,8 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     // Fudge some for sim irregularities. This will increase time to a complete timeout but won't
     // really effect valid training unless these cycles are needed. So this isn't a bad thing ...
     // AKA watchdog timer
-    i_poll.iv_poll_count *= 2;
+    // HB is failing, bump it out 4x for the polling
+    i_poll.iv_poll_count *= 4;
 
     FAPI_INF("cal abort on error? %s. tc: %luc, id: %luns(%lusc), d: %lu(%lusc), pc: %lu",
              (cal_abort_on_error ? "yup" : "nope"), l_total_cycles, i_poll.iv_initial_delay,
