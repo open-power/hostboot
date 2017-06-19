@@ -264,6 +264,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_EFF_REGISTER_TYPE</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_RCD_MFG_ID</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_REGISTER_REV</id>
+        <default>0x00</default>
+    </attribute>
+
+    <attribute>
         <id>ATTR_SYSTEM_PSTATES_MODE</id>
         <default>0x00</default>
     </attribute>
