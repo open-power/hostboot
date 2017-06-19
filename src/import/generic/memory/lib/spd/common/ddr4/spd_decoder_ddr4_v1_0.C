@@ -2866,6 +2866,69 @@ fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value ) c
 }
 
 ///
+/// @brief Decodes REGISTER Manufacturer ID code
+/// @param[out] o_value rcd manufacturing id code
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 133-134
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @note Page 4.1.2.12 - 54
+///
+fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code( uint16_t& o_value ) const
+{
+    constexpr size_t BYTE_INDEX_LSB = 133;
+    uint8_t mfgid_LSB = iv_spd_data[BYTE_INDEX_LSB];
+
+    constexpr size_t BYTE_INDEX_MSB = 134;
+    uint8_t mfgid_MSB = iv_spd_data[BYTE_INDEX_MSB];
+
+    constexpr size_t MSB_START = 0;
+    constexpr size_t MSB_LEN = 8;
+    constexpr size_t LSB_START = 8;
+    constexpr size_t LSB_LEN = 8;
+
+    fapi2::buffer<uint16_t> l_buffer;
+    l_buffer.insertFromRight<MSB_START, MSB_LEN>( mfgid_MSB )
+    .insertFromRight<LSB_START, LSB_LEN>( mfgid_LSB );
+
+    o_value = l_buffer;
+
+    FAPI_INF("%s.RCD Manufacturer ID Code (rcd_mfg_id): %x",
+             mss::c_str(iv_target),
+             o_value);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Decodes Register Revision Number
+/// @param[out] o_value register revision number
+/// @return FAPI2_RC_SUCCESS if okay
+/// @note SPD Byte 135
+/// @note Item JEDEC Standard No. 21-C
+/// @note DDR4 SPD Document Release 2
+/// @note Page 4.1.2.12 - 54
+///
+fapi2::ReturnCode decoder_v1_0::register_rev_num( uint8_t& o_value ) const
+{
+    // Trace in the front assists w/ debug
+    constexpr size_t BYTE_INDEX = 135;
+
+    FAPI_INF("%s SPD data at Byte %d: 0x%01X.",
+             mss::c_str(iv_target),
+             BYTE_INDEX,
+             iv_spd_data[BYTE_INDEX]);
+
+    o_value = iv_spd_data[BYTE_INDEX];
+
+    FAPI_INF("%s. Register Revision Number: %x",
+             mss::c_str(iv_target),
+             o_value);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Decodes DRAM Stepping
 /// @param[out] o_value uint8_t  DRAM Stepping val
 /// @return FAPI2_RC_SUCCESS if okay

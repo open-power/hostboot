@@ -1154,6 +1154,29 @@ class decoder_v1_0 : public decoder
         /// @note Page 4.1.2.12 - 54
         ///
         virtual fapi2::ReturnCode dram_manufacturer_id_code( uint16_t& o_output ) const override;
+
+        ///
+        /// @brief Decodes RCD Manufacturer ID code
+        /// @param[out] o_value rcd manufacturing id code
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 133 134
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 54
+        ///
+        virtual fapi2::ReturnCode reg_manufacturer_id_code( uint16_t& o_value ) const override;
+
+        ///
+        /// @brief Decodes Register Revision Number
+        /// @param[out] o_value register revision number
+        /// @return FAPI2_RC_SUCCESS if okay
+        /// @note SPD Byte 135
+        /// @note Item JEDEC Standard No. 21-C
+        /// @note DDR4 SPD Document Release 2
+        /// @note Page 4.1.2.12 - 54
+        ///
+        virtual fapi2::ReturnCode register_rev_num( uint8_t& o_value ) const override;
+
         ///
         /// @brief Decodes DRAM Stepping
         /// @param[out] o_value uint8_t DRAM Stepping val

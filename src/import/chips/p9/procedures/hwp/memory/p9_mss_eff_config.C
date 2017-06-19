@@ -84,10 +84,16 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     for( const auto& l_cache : l_factory_caches )
     {
+
+
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
 
         FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm));
+        FAPI_INF("%s Running eff_config", mss::c_str(l_cache->iv_target) );
 
+        FAPI_TRY( l_eff_dimm->rcd_mfg_id() );
+        FAPI_TRY( l_eff_dimm->register_type() );
+        FAPI_TRY( l_eff_dimm->register_rev() );
         FAPI_TRY( l_eff_dimm->dram_mfg_id() );
         FAPI_TRY( l_eff_dimm->dram_width() );
         FAPI_TRY( l_eff_dimm->dram_density() );

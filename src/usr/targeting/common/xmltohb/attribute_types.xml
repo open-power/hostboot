@@ -34840,4 +34840,65 @@ Measured in GB</description>
     <readable/>
 </attribute>
 
+<attribute>
+    <id>EFF_REGISTER_TYPE</id>
+    <description>
+        Register Type
+        Decodes SPD Byte 131
+        creator: mss_eff_cnfg
+        consumer: eff_dimm
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2, 2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+        <hwpfToHbAttrMap>
+        <id>ATTR_EFF_REGISTER_TYPE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_RCD_MFG_ID</id>
+    <description>
+        Register Manufacturer ID Code
+        Decodes SPD Byte 133 and 134
+        creator: mss_eff_cnfg
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>2, 2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+        <hwpfToHbAttrMap>
+        <id>ATTR_EFF_RCD_MFG_ID</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>EFF_REGISTER_REV</id>
+    <description>
+        Register Revision Number
+        Decodes SPD Byte 135
+        creator: mss_eff_cnfg
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+        <array>2, 2</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+        <hwpfToHbAttrMap>
+        <id>ATTR_EFF_REGISTER_REV</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
 </attributes>

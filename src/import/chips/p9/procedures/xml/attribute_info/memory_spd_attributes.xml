@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -595,6 +595,23 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_EFF_REGISTER_TYPE</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Type
+            Decodes SPD Byte 131
+            creator: mss_eff_cnfg
+            consumer: eff_dimm
+        </description>
+        <enum>RCD01 = 0x0, RCD02 = 0x1</enum>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_register_type</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_EFF_DRAM_MFG_ID</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -607,9 +624,38 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <array> 2 2</array>
+        <array>2 2</array>
         <mssAccessorName>eff_dram_mfg_id</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_EFF_RCD_MFG_ID</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Manufacturer ID Code
+            Decodes SPD Byte 133 and 134
+            creator: mss_eff_cnfg
+        </description>
+        <enum>INPHI = 0xB304, MONTAGE = 0x3286, IDT = 0xB380 </enum>
+        <initToZero></initToZero>
+        <valueType>uint16</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_rcd_mfg_id</mssAccessorName>
+    </attribute>
 
+    <attribute>
+        <id>ATTR_EFF_REGISTER_REV</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Register Revision Number
+            Decodes SPD Byte 135
+            creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2</array>
+        <mssAccessorName>eff_register_rev</mssAccessorName>
+    </attribute>
 </attributes>

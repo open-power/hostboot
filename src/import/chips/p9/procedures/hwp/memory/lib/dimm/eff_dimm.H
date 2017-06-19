@@ -154,6 +154,24 @@ class eff_dimm
         fapi2::ReturnCode dram_mfg_id();
 
         ///
+        /// @brief Determines & sets effective config for eff_rcd_mfg_id type from SPD
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode rcd_mfg_id();
+
+        ///
+        /// @brief Determines & sets effective config for eff_register_type from SPD
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode register_type();
+
+        ///
+        /// @brief Determines & sets effective config for eff_register_rev type from SPD
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode register_rev();
+
+        ///
         /// @brief Determines & sets effective config for primary stack type
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
@@ -190,7 +208,6 @@ class eff_dimm
         fapi2::ReturnCode dram_density();
 
         ///
-
         /// @brief Determines & sets effective config for dram width
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
