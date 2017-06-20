@@ -117,20 +117,16 @@ errlHndl_t runStep(const TargetHandleList & i_targetList)
 
     doStepCleanup(globals);
 
-    if ( nullptr != top &&
-         0 != top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() )
+    // If this step completes without the need for a reconfig due to an RCD
+    // parity error, clear all RCD parity error counters.
+    ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
+    if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
     {
-        // Reset the RCD parity error reconfig loop counter if this step
-        // completes without an RCD parity error. Note that PRD will only set
-        // the RCD parity error flag if there is an RCD parity error and the
-        // total count of reconfig loops is under threshold. At threshold, a
-        // part will be deconfigured, forcing a reconfig, but the RCD parity
-        // error flag will not be set to ensure this code is activated and the
-        // count it reset.
-        ATTR_RECONFIGURE_LOOP_type attr = top->getAttr<ATTR_RECONFIGURE_LOOP>();
-        if ( 0 == (attr & RECONFIGURE_LOOP_RCD_PARITY_ERROR) )
+        TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MCA );
+        for ( auto & trgt : trgtList )
         {
-            top->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(0);
+            if ( 0 != trgt->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() )
+                trgt->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(0);
         }
     }
 

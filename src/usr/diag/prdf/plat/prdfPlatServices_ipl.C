@@ -39,6 +39,7 @@
 
 //#include <prdfCenDqBitmap.H> TODO RTC 164707
 #include <prdfMemScrubUtils.H>
+#include <prdfMfgThresholdMgr.H>
 
 #include <diag/mdia/mdia.H>
 #include <config.h>
@@ -107,15 +108,25 @@ int32_t mdiaSendEventMsg( TargetHandle_t i_trgt,
 
 //------------------------------------------------------------------------------
 
-bool rcdParityErrorReconfigLoop()
+bool rcdParityErrorReconfigLoop( TargetHandle_t i_trgt )
 {
     TargetHandle_t top = getSystemTarget();
 
-    // Check the current reconfig count.
-    uint8_t allowed = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>();
-    uint8_t count   = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>();
+    // Get the current reconfig count and increment.
+    uint8_t count = i_trgt->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>() + 1;
 
-    if ( count <= allowed )
+    // Get the reconfig threshold and check MNFG threshold, if needed.
+    uint8_t th = top->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>() + 1;
+    if ( mfgMode() )
+    {
+        uint8_t mnfgTh = MfgThresholdMgr::getInstance()->
+                                   getThreshold(ATTR_MNFG_TH_RCD_PARITY_ERRORS);
+        if ( mnfgTh < th )
+            th = mnfgTh;
+    }
+
+    // If the count is under threshold, trigger a reconfig loop.
+    if ( count < th )
     {
         // Set the RCD parity error flag in the reconfig loop attribute. This
         // will trigger a reconfig loop at the end of the current istep.
@@ -126,8 +137,8 @@ bool rcdParityErrorReconfigLoop()
             top->setAttr<ATTR_RECONFIGURE_LOOP>(attr);
         }
 
-        // Increment the count.
-        top->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(++count);
+        // Write the new count to the attribute.
+        i_trgt->setAttr<ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>(count);
 
         return false;
     }

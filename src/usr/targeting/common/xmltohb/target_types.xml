@@ -705,7 +705,6 @@
     <attribute><id>MNFG_TH_MEMORY_IUES</id></attribute>
     <attribute><id>MNFG_TH_MEMORY_IMPES</id></attribute>
     <attribute><id>RCD_PARITY_RECONFIG_LOOPS_ALLOWED</id></attribute>
-    <attribute><id>RCD_PARITY_RECONFIG_LOOP_COUNT</id></attribute>
     <attribute><id>OPT_MEMMAP_GROUP_POLICY</id></attribute>
     <attribute><id>BRAZOS_RX_FIFO_OVERRIDE</id></attribute>
     <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
@@ -1939,6 +1938,7 @@
     <attribute><id>VPD_OVERRIDE_MW_ENABLE</id></attribute>
     <attribute><id>VPD_OVERRIDE_MW</id></attribute>
     <attribute><id>PRD_HWP_PLID</id></attribute>
+    <attribute><id>RCD_PARITY_RECONFIG_LOOP_COUNT</id></attribute>
 </targetType>
 
 <targetType>

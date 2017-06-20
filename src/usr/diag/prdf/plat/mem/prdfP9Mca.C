@@ -109,7 +109,7 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     // documented below.
 
     // Nothing more to do if this is a checkstop attention.
-    if ( CHECK_STOP != io_sc.service_data->getPrimaryAttnType() )
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
         return SUCCESS;
 
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
@@ -160,7 +160,7 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     {
         // Recovery is disabled. Issue a reconfig loop. Make the error log
         // predictive if threshold is reached.
-        if ( rcdParityErrorReconfigLoop() )
+        if ( rcdParityErrorReconfigLoop(i_mcaChip->getTrgt()) )
             io_sc.service_data->setServiceCall();
     }
     else

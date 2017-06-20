@@ -65,10 +65,11 @@ int32_t mdiaSendEventMsg( TARGETING::TargetHandle_t i_trgt,
 
 /**
  * @brief  Initiates a reconfig loop due to an RCD parity error.
+ * @param  i_trgt An MCA target.
  * @return True if the number of allowed reconfig loops has been exceeded.
  *         False otherwise.
  */
-bool rcdParityErrorReconfigLoop();
+bool rcdParityErrorReconfigLoop( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Invokes the restore DRAM repairs hardware procedure.
