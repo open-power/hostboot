@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,13 +23,13 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file p9_sbe_instruct_start.C
-/// @brief  Placeholder for overrides needed to step the core from cache-contained execution to expand to memory
+/// @file p9_sbe_instruct_start.H
+/// @brief  Starts instructions on master core, thread 0.
 ///
 // *HWP HWP Owner: Nick Klazynski <jklazyns@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _PROC_SBE_INSTRUCT_START_H_
@@ -55,7 +55,7 @@ extern "C"
 // Hardware Procedure
 //------------------------------------------------------------------------------
 ///
-/// @brief Calls thread_control to start instruction on thread 0.
+/// @brief Calls thread_control to start instruction on master core, thread 0.
 ///        This is to be called during IPL (istep 5.2)
 ///
 /// @param[in] i_target   Reference to core target
