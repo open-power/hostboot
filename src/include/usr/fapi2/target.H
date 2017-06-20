@@ -762,16 +762,12 @@ inline std::vector<Target<K_CHILD, V> >
                   "fapi2::TARGET_TYPE_CORE has no children");
     static_assert((T_SELF != fapi2::TARGET_TYPE_CAPP),
                   "fapi2::TARGET_TYPE_CAPP has no children");
-    static_assert((T_SELF != fapi2::TARGET_TYPE_OBUS),
-                  "fapi2::TARGET_TYPE_OBUS has no children");
     static_assert((T_SELF != fapi2::TARGET_TYPE_OBUS_BRICK),
                   "fapi2::TARGET_TYPE_OBUS_BRICK has no children");
     static_assert((T_SELF != fapi2::TARGET_TYPE_SBE),
                   "fapi2::TARGET_TYPE_SBE has no children");
     static_assert((T_SELF != fapi2::TARGET_TYPE_PPE),
                   "fapi2::TARGET_TYPE_PPE has no children");
-    static_assert((T_SELF != fapi2::TARGET_TYPE_PEC),
-                  "fapi2::TARGET_TYPE_PEC has no children");
     static_assert((T_SELF != fapi2::TARGET_TYPE_PHB),
                   "fapi2::TARGET_TYPE_PHB has no children");
 
