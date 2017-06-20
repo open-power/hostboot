@@ -19,9 +19,17 @@ if ($hb_skip_vpd_preload == 0) {
         echo "Preload VPD into PNOR"
 
         run-python-file (lookup-file hbfw/hb-pnor-vpd-preload.py)
-            ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x229000
-            ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x1E1000
-            ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x2B9000
+            # Must match pnor layout used (see eyecatch in layout)
+            echo "PNOR layout offset for VPD:"
+            # PNOR eyecatch MVPD
+            echo "    - MVPD at 0x79000"
+            ($hb_pnor).sfc_master_mem.load-file ./sysmvpd.dat.ecc 0x79000
+            # PNOR eyecatch DJVPD
+            echo "    - DJVPD at 0x31000"
+            ($hb_pnor).sfc_master_mem.load-file ./sysspd.dat.ecc 0x31000
+            # PNOR eyecatch CVPD
+            echo "    - CVPD at 0x109000"
+            ($hb_pnor).sfc_master_mem.load-file ./sysmemvpd.dat.ecc 0x109000
     } except { echo "ERROR: Failed to preload VPD into PNOR." }
 }
 

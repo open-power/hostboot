@@ -41,20 +41,23 @@ use constant    MEMSTATE_MS_32MEG => 0x20;
 use constant    _KB => 1024;
 use constant    _MB => 1024 * 1024;
 
+# Size of HBB PNOR partition without ECC, page algined down, minus 4K header
+use constant    MAX_HBB_SIZE => (904 * _KB);
+
 # Map the available memory at each state.
+# *** NOTE: Keep in sync with fsp-memdump.sh and bootloaderif.H (MAX_HBB_SIZE)
 our %memory_maps = (
     MEMSTATE_NO_MEM() =>
         # No memory has been initialized so we can only dump our static
-        # code load up to 512 - 4k.  The 4k is a reserved space for the
-        # Secureboot Header.
-        [ 0,                            (512 - 4) * _KB
+        # code load up to HBB size
+        [ 0,                            MAX_HBB_SIZE
         ],
     MEMSTATE_HALF_CACHE() =>
-        # All of the first 4MB can now be read (except reserved MBOX).
-        [ 512 * _KB,                    512 * _KB,
-          1 * _MB + 512 * _KB,          512 * _KB,
-          2 * _MB + 512 * _KB,          512 * _KB,
-          3 * _MB + 512 * _KB,          512 * _KB
+        # All of the first 4MB can now be read.
+        [ MAX_HBB_SIZE,                 ((1 * _MB) - MAX_HBB_SIZE),
+          1 * _MB,                      1 * _MB,
+          2 * _MB,                      1 * _MB,
+          3 * _MB,                      1 * _MB
         ],
     MEMSTATE_REDUCED_CACHE() =>
         # Initial chips may have 2MB bad cache

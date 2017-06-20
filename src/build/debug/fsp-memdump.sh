@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -121,24 +121,18 @@ echo "NODE: ${NODE} - HRMOR is: ${HRMOR}"
 # appropriate memory sections.
 while [[ ${STATE} != BREAK ]]
 do
+    # *** NOTE: Keep in sync with Dump.pm and bootloaderif.H (MAX_HBB_SIZE)
     case ${STATE} in
         00|0)
-            dump 0 520192
+            # Size of HBB PNOR partition without ECC, page algined down, minus 4K header
+            dump 0 925696
             STATE=BREAK
             ;;
-        ff|FF)
-            dump 520192 4096
-            dump 1048576 524288
-            dump 2097152 524288
-            dump 3145728 262144
-            dump 3473408 196608
-            STATE=00
-            ;;
         04|4)
-            dump 524288 524288
-            dump 1572864 524288
-            dump 2621440 524288
-            dump 3670016 524288
+            dump 925696 122880
+            dump 1048576 1048576
+            dump 2097152 1048576
+            dump 3145728 1048576
             STATE=ff
             ;;
         08|8)

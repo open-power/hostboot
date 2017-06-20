@@ -79,18 +79,9 @@ Layout Description
         </side>
     </metadata>
     <section>
-        <description>Hostboot Base (576K)</description>
-        <eyeCatch>HBB</eyeCatch>
-        <physicalOffset>0x8000</physicalOffset>
-        <physicalRegionSize>0x90000</physicalRegionSize>
-        <sha512Version/>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
         <description>Hostboot Error Logs (144K)</description>
         <eyeCatch>HBEL</eyeCatch>
-        <physicalOffset>0x98000</physicalOffset>
+        <physicalOffset>0x8000</physicalOffset>
         <physicalRegionSize>0x24000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -98,17 +89,8 @@ Layout Description
     <section>
         <description>Guard Data (20K)</description>
         <eyeCatch>GUARD</eyeCatch>
-        <physicalOffset>0xBC000</physicalOffset>
+        <physicalOffset>0x2C000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    <section>
-        <description>Hostboot Data (1.125M)</description>
-        <eyeCatch>HBD</eyeCatch>
-        <physicalOffset>0xC1000</physicalOffset>
-        <physicalRegionSize>0x120000</physicalRegionSize>
-        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
@@ -116,7 +98,7 @@ Layout Description
         <description>DIMM JEDEC (288K)</description>
         <eyeCatch>DJVPD</eyeCatch>
         <!--NOTE: MUST update standalone.simics if offset changes -->
-         <physicalOffset>0x1E1000</physicalOffset>
+         <physicalOffset>0x31000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -125,7 +107,7 @@ Layout Description
         <description>Module VPD (576K)</description>
         <eyeCatch>MVPD</eyeCatch>
         <!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalOffset>0x229000</physicalOffset>
+        <physicalOffset>0x79000</physicalOffset>
         <physicalRegionSize>0x90000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -134,15 +116,33 @@ Layout Description
         <description>Centaur VPD (288K)</description>
         <eyeCatch>CVPD</eyeCatch>
         <!--NOTE: MUST update standalone.simics if offset changes -->
-        <physicalOffset>0x2B9000</physicalOffset>
+        <physicalOffset>0x109000</physicalOffset>
         <physicalRegionSize>0x48000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
+    <section>
+        <description>Hostboot Base (1MB)</description>
+        <eyeCatch>HBB</eyeCatch>
+        <physicalOffset>0x151000</physicalOffset>
+        <physicalRegionSize>0x100000</physicalRegionSize>
+        <side>sideless</side>
+        <sha512Version/>
+        <ecc/>
+    </section>
+    <section>
+        <description>Hostboot Data (1.125M)</description>
+        <eyeCatch>HBD</eyeCatch>
+        <physicalOffset>0x251000</physicalOffset>
+        <physicalRegionSize>0x120000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
     <section>
         <description>Hostboot Extended image (11MB w/o ECC)</description>
         <eyeCatch>HBI</eyeCatch>
-        <physicalOffset>0x301000</physicalOffset>
+        <physicalOffset>0x371000</physicalOffset>
         <physicalRegionSize>0xC60000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -162,7 +162,7 @@ Layout Description
     <section>
         <description>SBE-IPL (Staging Area) (520K)</description>
         <eyeCatch>SBE</eyeCatch>
-        <physicalOffset>0xF61000</physicalOffset>
+        <physicalOffset>0xFD1000</physicalOffset>
         <physicalRegionSize>0x82000</physicalRegionSize>
         <sha512perEC/>
         <sha512Version/>
@@ -172,7 +172,7 @@ Layout Description
     <section>
         <description>HCODE Ref Image (1.125MB)</description>
         <eyeCatch>HCODE</eyeCatch>
-        <physicalOffset>0xFE3000</physicalOffset>
+        <physicalOffset>0x1053000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -181,7 +181,7 @@ Layout Description
     <section>
         <description>Hostboot Runtime Services for Sapphire (4.5MB)</description>
         <eyeCatch>HBRT</eyeCatch>
-        <physicalOffset>0x1103000</physicalOffset>
+        <physicalOffset>0x1173000</physicalOffset>
         <physicalRegionSize>0x480000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -190,7 +190,7 @@ Layout Description
     <section>
         <description>Payload (21.375MB)</description>
         <eyeCatch>PAYLOAD</eyeCatch>
-        <physicalOffset>0x1583000</physicalOffset>
+        <physicalOffset>0x15F3000</physicalOffset>
         <physicalRegionSize>0x1560000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -199,7 +199,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TEST</eyeCatch>
-        <physicalOffset>0x2AE3000</physicalOffset>
+        <physicalOffset>0x2B53000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <testonly/>
         <side>sideless</side>
@@ -208,7 +208,7 @@ Layout Description
     <section>
         <description>Special PNOR Test Space (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
-        <physicalOffset>0x2AEC000</physicalOffset>
+        <physicalOffset>0x2B5C000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <testonly/>
@@ -219,7 +219,7 @@ Layout Description
     <section>
         <description>Hostboot Bootloader (28K)</description>
         <eyeCatch>HBBL</eyeCatch>
-        <physicalOffset>0x2AF5000</physicalOffset>
+        <physicalOffset>0x2B65000</physicalOffset>
         <!-- Physical Size includes Header rounded to ECC valid size -->
         <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
         <physicalRegionSize>0x7000</physicalRegionSize>
@@ -230,7 +230,7 @@ Layout Description
     <section>
         <description>Global Data (36K)</description>
         <eyeCatch>GLOBAL</eyeCatch>
-        <physicalOffset>0x2AFC000</physicalOffset>
+        <physicalOffset>0x2B6C000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -238,7 +238,7 @@ Layout Description
     <section>
         <description>Ref Image Ring Overrides (20K)</description>
         <eyeCatch>RINGOVD</eyeCatch>
-        <physicalOffset>0x2B05000</physicalOffset>
+        <physicalOffset>0x2B75000</physicalOffset>
         <physicalRegionSize>0x5000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -246,7 +246,7 @@ Layout Description
     <section>
         <description>SecureBoot Key Transition Partition (16K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalOffset>0x2B0A000</physicalOffset>
+        <physicalOffset>0x2B7A000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -254,7 +254,7 @@ Layout Description
     <section>
         <description>OCC Lid (1.125M)</description>
         <eyeCatch>OCC</eyeCatch>
-        <physicalOffset>0x2B0E000</physicalOffset>
+        <physicalOffset>0x2B7E000</physicalOffset>
         <physicalRegionSize>0x120000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
@@ -265,7 +265,7 @@ Layout Description
         <!-- We need 266KB per module sort, going to support
              10 sorts by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
-        <physicalOffset>0x2C2E000</physicalOffset>
+        <physicalOffset>0x2C9E000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
@@ -274,7 +274,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x2F2E000</physicalOffset>
+        <physicalOffset>0x2F9E000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -282,7 +282,7 @@ Layout Description
     <section>
         <description>Memory Data (24K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x2F31000</physicalOffset>
+        <physicalOffset>0x2FA1000</physicalOffset>
         <physicalRegionSize>0x6000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
