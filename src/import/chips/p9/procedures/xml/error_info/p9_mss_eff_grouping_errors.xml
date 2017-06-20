@@ -62,7 +62,6 @@
     <description>
         p9_mss_eff_grouping is unable to group this MCA/DMI port.
         This is a memory plugging error. Refer to memory plugging rules.
-        The target MCA/DMI is deconfigured as a result.
     </description>
     <ffdc>MC_PORT</ffdc>
     <callout>
@@ -73,9 +72,6 @@
         <procedure>CODE</procedure>
         <priority>MEDIUM</priority>
     </callout>
-    <deconfigure>
-        <target>MC_TARGET</target>
-    </deconfigure>
 </hwpError>
 
 <hwpError>

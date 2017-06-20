@@ -36,7 +36,7 @@
 /// *HWP HWP Owner   : Joe McGill <jmcgill@us.ibm.com>
 /// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Nest
-/// *HWP Level       : 2
+/// *HWP Level       : 3
 /// *HWP Consumed by : HB
 ///----------------------------------------------------------------------------
 
@@ -2352,11 +2352,9 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
     {
         // Assert with first failed port as FFDC
         uint8_t l_mcPortNum = l_unGroupedPair.begin()->first;
-        fapi2::Target<T> l_portTarget = l_unGroupedPair.begin()->second;
         FAPI_ASSERT(false,
                     fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC()
-                    .set_MC_PORT(l_mcPortNum)
-                    .set_MC_TARGET(l_portTarget),
+                    .set_MC_PORT(l_mcPortNum),
                     "grouping_findUngroupedPorts: Unable to group port %u", l_mcPortNum);
     }
 
