@@ -360,6 +360,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         // Calculate pnor vaddr and read original page so we can run test case
         // in both secure and unsecure mode.
         uint64_t l_pnorVaddr = VFS::VfsRp::getInstance().iv_pnor_vaddr
+                               - VFS::VfsRp::getInstance().iv_unprotectedOffset
                                + l_vaddr;
         memcpy(l_originPage, reinterpret_cast<uint8_t*>(l_pnorVaddr), PAGESIZE);
 

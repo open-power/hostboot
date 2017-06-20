@@ -95,7 +95,8 @@ namespace VFS
              */
             VfsRp() : iv_msgQ(NULL), iv_msg(NULL), iv_pnor_vaddr(0),
                       iv_hashPageTableOffset(0),iv_hashPageTableSize(0),
-                      iv_protectedPayloadSize(0),iv_hbExtSecure(0)
+                      iv_protectedPayloadSize(0),iv_hbExtSecure(0),
+                      iv_unprotectedOffset(0)
             {
                 mutex_init(&iv_mutex);
             }
@@ -258,6 +259,8 @@ namespace VFS
             uint64_t iv_protectedPayloadSize; //!< size of entire protected payload of ext img
                                               //!< Includes Hash page table and VFS module table
             bool     iv_hbExtSecure; //!< cache result if hostboot extended image is secure
+            uint64_t iv_unprotectedOffset; //!< Offset to unprotected payload
+                                           //!< (subtract from secure offset)
 
             typedef std::vector<VfsSystemModule *> ModuleList_t;
 

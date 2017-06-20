@@ -442,6 +442,17 @@ namespace TARGETING
                 iv_sections[i].pnorAddress =
                     l_pnorSectionInfo.vaddr + l_section->sectionOffset;
 
+                #ifdef CONFIG_SECUREBOOT
+                // RW targeting section is part of the unprotected payload
+                // so use the normal PNOR virtual address space
+                if(   l_pnorSectionInfo.secure
+                   && iv_sections[i].type == SECTION_TYPE_PNOR_RW)
+                {
+                    iv_sections[i].pnorAddress -=
+                        (VMM_VADDR_SPNOR_DELTA + VMM_VADDR_SPNOR_DELTA);
+                }
+                #endif
+
                 if(iv_isMpipl)
                 {
                     //For MPIPL we are reading from real memory,
