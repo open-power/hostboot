@@ -182,6 +182,10 @@ errlHndl_t VfsRp::_init()
                   iv_hashPageTableSize);
         // skip the hash page table
         iv_pnor_vaddr += iv_hashPageTableSize;
+
+        // Compute offset to the unprotected payload virtual address range.
+        // This offset should be subtracted from the secure address
+        iv_unprotectedOffset = VMM_VADDR_SPNOR_DELTA+VMM_VADDR_SPNOR_DELTA;
     }
 #endif
 
@@ -365,7 +369,8 @@ void VfsRp::msgHandler()
                             }
                         }
 #endif
-                        memcpy((void *)paddr, (void *)(iv_pnor_vaddr+vaddr),
+                        memcpy((void *)paddr, (void *)(iv_pnor_vaddr
+                               -iv_unprotectedOffset+vaddr),
                                PAGE_SIZE);
                         mm_icache_invalidate((void*)paddr,PAGE_SIZE/8);
                         msg->data[1] = 0;
@@ -762,7 +767,7 @@ errlHndl_t VfsRp::verify_page(uint64_t i_vaddr, uint64_t i_baseOffset,
                               uint64_t i_hashPageTableOffset) const
 {
     errlHndl_t l_errl = nullptr;
-    uint64_t l_pnorVaddr = iv_pnor_vaddr + i_vaddr;
+    uint64_t l_pnorVaddr = iv_pnor_vaddr-iv_unprotectedOffset+i_vaddr;
 
     // Get current hash page table entry
     TRACDCOMP(g_trac_vfs, "VfsRp::verify_page Current Page vaddr = 0x%llX, index = %d, bin file offset = 0x%llX",
