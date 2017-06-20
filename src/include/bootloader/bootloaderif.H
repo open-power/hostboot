@@ -40,7 +40,8 @@ namespace Bootloader{
 // Size of exception vector reserved space at start of the HBBL section
 #define HBBL_EXCEPTION_VECTOR_SIZE (12 * KILOBYTE)
 
-#define MAX_HBB_SIZE (512 * KILOBYTE)
+// Size of PNOR partition without ECC, page algined down, minus 4K header
+#define MAX_HBB_SIZE (904 * KILOBYTE)
 
 // Location of running copy of HBB
 #ifdef BOOTLOADER

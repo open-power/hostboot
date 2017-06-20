@@ -385,14 +385,16 @@ $(IMGDIR)/hbotStringFile : $(IMAGES)
 	$(ROOTPATH)/src/build/trace/tracehash_hb.pl -c -d $(ROOTPATH)/obj -s $@
 
 .PHONY: imgsizecheck
-#make sure base image isn't over 508k  (512K - 4K for secure header)
-#PROCESS: get size of hbicore.bin, sort with respect to 508k (520192), then see if
-#last word is 508k.  If not, the base image is too big.
+#make sure base image isn't over 904K (908K - 4K for secure header)
+#PROCESS: get size of hbicore.bin, sort with respect to 904k (925696), then see
+# if last word is 904k.  If not, the base image is too big.
+#NOTE: HBB size is 1MB in pnor layout. 908K is the size without ECC rounded down
+#      to the nearest 4K page.
 #make sure bootloader image isn't over 32k (32K = 12K for exception vectors +
 #20K for bootloader code and data)
 #PROCESS: get size of hbibl.bin, sort with respect to 32k (32768),
 #then see if last word is 32k.  If not, the bootloader image is too big.
-MAX_BASE_SIZE = 520192
+MAX_BASE_SIZE = 925696
 MAX_BTLDR_SIZE = 32768
 imgsizecheck: ${IMGDIR}/hbicore.bin ${IMGDIR}/hbibl.bin
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
