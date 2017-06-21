@@ -83,6 +83,7 @@ namespace PVPD
         VZ         = 0x17,
         LX         = 0x18,
         MB         = 0x19,
+        NV         = 0x1A,
 
         // Last Keyword
         PVPD_LAST_KEYWORD,
