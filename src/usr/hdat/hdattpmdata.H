@@ -58,7 +58,7 @@ enum {
     TpmDataVersion = 0x11,
     TpmDataHdrSize = 0x20,
     TpmDataPtrOffset = 0x20,
-    TpmDataPtrCnt = 1,
+    TpmDataPtrCnt = 3,
     TpmDataChildStrCnt = 0,
     TpmDataChildStrOffset = 0,
     TpmDataMinRqrdPcrdVersion = 0x1
