@@ -1727,18 +1727,6 @@ sub getBusAttribute
       ->{default};
 }
 
-## returns a boolean for if a given bus attribute is defined
-sub isBusAttributeDefined
-{
-    my $self       = shift;
-    my $target     = shift;
-    my $busnum     = shift;
-    my $attr       = shift;
-    my $target_ptr = $self->getTarget($target);
-
-    return defined($target_ptr->{CONNECTION}->{BUS}->[$busnum]->{bus_attribute}
-            ->{$attr}->{default});
-}
 
 ## returns a pointer to an array of children target names
 sub getTargetChildren
@@ -2081,10 +2069,6 @@ to value C<VALUE>.  This is for complex attributes.
 
 Gets the attribute C<ATTRIBUTE_NAME> from bus C<TARGET_STRING> bus number
 C<INDEX>.
-
-=item isBusAttributeDefined(C<TARGET_STRING>,C<INDEX>.C<ATTRIBUTE_NAME>)
-
-Looks for a specific attribute and returns if it exists or not
 
 =item getTargetChildren(C<TARGET_STRING>)
 

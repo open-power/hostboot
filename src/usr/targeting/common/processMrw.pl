@@ -512,15 +512,6 @@ sub processProcessor
        $targetObj->setMasterProc($target);
     }
 
-    # I2C arrays
-    my @engine = ();
-    my @port = ();
-    my @slavePort = ();
-    my @addr = ();
-    my @speed = ();
-    my @type = ();
-    my @purpose = ();
-
     $targetObj->log($target, "Processing PROC");
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
     {
@@ -576,57 +567,7 @@ sub processProcessor
         {
             processOcc($targetObj, $child, $target);
         }
-        # Ideally this should be $child_type eq "I2C", but we need a change
-        # in serverwiz and the witherspoon.xml first
-        elsif (index($child,"i2c-master") != -1)
-        {
-            my ($i2cEngine, $i2cPort, $i2cSlavePort, $i2cAddr,
-                $i2cSpeed, $i2cType, $i2cPurpose) =
-                    processI2C($targetObj, $child, $target);
-
-            # Add this I2C device's information to the proc array
-            push(@engine,@$i2cEngine);
-            push(@port,@$i2cPort);
-            push(@slavePort,@$i2cSlavePort);
-            push(@addr,@$i2cAddr);
-            push(@speed,@$i2cSpeed);
-            push(@type,@$i2cType);
-            push(@purpose,@$i2cPurpose);
-
-        }
     }
-
-    # Add final I2C arrays to processor
-    my $size         = scalar @engine;
-    my $engine_attr  = $engine[0];
-    my $port_attr    = $port[0];
-    my $slave_attr   = $slavePort[0];
-    my $addr_attr    = $addr[0];
-    my $speed_attr   = $speed[0];
-    my $type_attr    = "0x".$type[0];
-    my $purpose_attr = "0x".$purpose[0];
-
-    # Parse out array to print as a string
-    foreach my $n (1..($size-1))
-    {
-        $engine_attr    .= ",".$engine[$n];
-        $port_attr      .= ",".$port[$n];
-        $slave_attr     .= ",".$slavePort[$n];
-        $addr_attr      .= ",".$addr[$n];
-        $speed_attr     .= ",".$speed[$n];
-        $type_attr      .= ",0x".$type[$n];
-        $purpose_attr   .= ",0x".$purpose[$n];
-    }
-
-    # Set the arrays to the corresponding attribute on the proc
-    $targetObj->setAttribute($target,"HDAT_I2C_ENGINE",$engine_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_MASTER_PORT",$port_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_SLAVE_PORT",$slave_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_ADDR",$addr_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_BUS_FREQ",$speed_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_DEVICE_TYPE",$type_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_DEVICE_PURPOSE",$purpose_attr);
-    $targetObj->setAttribute($target,"HDAT_I2C_ELEMENTS",$size);
 
     ## update path for mvpd's and sbe's
     my $path  = $targetObj->getAttribute($target, "PHYS_PATH");
@@ -1560,137 +1501,6 @@ sub getI2cMapField
     my $field=sprintf("%d%3s",oct($port),substr($bits,4,3));
     my $hexfield = sprintf("%X",oct("0b$field"));
     return $hexfield;
-}
-
-#------------------------------------------------------------------------------
-# I2C
-#
-sub processI2C
-{
-    my $targetObj    = shift; # Top Hierarchy of targeting structure
-    my $target       = shift; # I2C targetInstance
-    my $parentTarget = shift; # Processor target
-
-    # Initialize output arrays
-    my @i2cEngine = ();
-    my @i2cPort = ();
-    my @i2cSlave = ();
-    my @i2cAddr = ();
-    my @i2cSpeed = ();
-    my @i2cType = ();
-    my @i2cPurpose = ();
-
-    # Step 1: get I2C_ENGINE and PORT from <targetInstance>
-
-    my $engine = $targetObj->getAttribute($target, "I2C_ENGINE");
-    if($engine eq "") {$engine = "0xFF";}
-
-    my $port = $targetObj->getAttribute($target, "I2C_PORT");
-    if($port eq "") {$port = "0xFF";}
-
-    # Step 2: get I2C_ADDRESS and I2C_SPEED from <bus>
-    #         This is different for each connection.
-
-    my $i2cs = $targetObj->findConnections($parentTarget, "I2C","");
-    if ($i2cs ne "")
-    {
-        # This gives all i2c connections
-        foreach my $i2c (@{$i2cs->{CONN}})
-        {
-            # Here we are checking that the i2c source matches our target
-            my $source = $i2c->{SOURCE};
-            if ($source ne $target)
-            {
-                next;
-            }
-
-            # Most I2C devices will default the slave port, it is only valid
-            # for gpio expanders.
-            my $slavePort = "0xFF";
-
-            my @source_array = split(/-/,$source);
-            my $source_idx = scalar @source_array;
-
-            # If the last part of the source only includes numbers
-            if($source_array[$source_idx-1] =~ /^[0-9,.E]+$/)
-            {
-                $slavePort = $source_array[$source_idx-1];
-            }
-
-            my $addr;
-            my $speed;
-            my $type;
-            my $purpose;
-
-            # For all these attributes, we need to check if they're defined,
-            # and if not we set them to a default value.
-            if ($targetObj->isBusAttributeDefined(
-                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_ADDRESS"))
-            {
-                $addr = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_ADDRESS");
-            }
-
-            if ($addr eq "") {$addr = "0xFF";}
-
-            if ($targetObj->isBusAttributeDefined(
-                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED"))
-            {
-                $speed = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
-            }
-
-            if ($speed eq "") {$speed = "0";}
-
-            if ($targetObj->isBusAttributeDefined(
-                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_TYPE"))
-            {
-                $type = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_TYPE");
-            }
-
-            if ($type eq "")
-            {
-                $type = "FF";
-            }
-            else
-            {
-                $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type);
-            }
-
-            if ($targetObj->isBusAttributeDefined(
-                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE"))
-            {
-                $purpose = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE");
-            }
-
-            if ($purpose eq "")
-            {
-                $purpose = "FF";
-            }
-            else
-            {
-                $purpose = $targetObj->getEnumValue("HDAT_I2C_DEVICE_PURPOSE",
-                                                    $purpose);
-            }
-
-            # Step 3: For each connection, create an instance in the array
-            #         for the DeviceInfo_t struct.
-            push @i2cEngine, $engine;
-            push @i2cPort, $port;
-            push @i2cSlave, $slavePort;
-            push @i2cAddr, $addr;
-            push @i2cSpeed, $speed;
-            push @i2cType, $type;
-            push @i2cPurpose, $purpose;
-
-        }
-    }
-
-    # Return this i2c device's information back to the processor
-    return (\@i2cEngine, \@i2cPort, \@i2cSlave, \@i2cAddr,
-            \@i2cSpeed, \@i2cType, \@i2cPurpose);
 }
 
 
