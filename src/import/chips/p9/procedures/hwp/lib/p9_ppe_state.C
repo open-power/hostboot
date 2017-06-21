@@ -372,7 +372,7 @@ ppe_state_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         FAPI_TRY(putScom(i_target, i_base_address + PPE_XIRAMDBG , l_sprg0_save), "Error in GETSCOM");
 
         //If SNAPSHOT mode and only if initially PPE was not halted then do XCR(resume)
-        if ((i_mode == SNAPSHOT) && ~(l_ppe_halt_state))
+        if ((i_mode == SNAPSHOT) && !(l_ppe_halt_state))
         {
             FAPI_TRY(ppe_resume(i_target, i_base_address));
 
