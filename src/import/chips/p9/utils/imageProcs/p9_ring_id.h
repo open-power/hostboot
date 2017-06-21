@@ -171,61 +171,60 @@ enum RingID
     mc_repr = 113,
     mc_iom01_repr = 114,
     mc_iom23_repr = 115,
-    // values 116-117 unused
 
-    // OB Chiplet Rings
-    // Common - apply to all instances of O-Bus
-    ob0_fure = 118,
+    // OB0 Chiplet Rings
+    ob0_pll_bndy = 116,
+    ob0_pll_bndy_bucket_1 = 117,
+    ob0_pll_bndy_bucket_2 = 118,
     ob0_gptr = 119,
     ob0_time = 120,
     ob0_pll_gptr = 121,
-    ob0_pll_bndy = 122,
-    ob0_pll_bndy_bucket_1 = 123,
-    ob0_pll_bndy_bucket_2 = 124,
-    ob0_pll_bndy_bucket_3 = 125,
+    ob0_fure = 122,
+    ob0_pll_bndy_bucket_3 = 123,
 
-    // OB Chiplet Rings
-    // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob0_repr = 126,
+    // OB0 Chiplet instance specific Ring
+    ob0_repr = 124,
 
-    ob1_fure = 127,
+    // OB1 Chiplet Rings
+    ob1_pll_bndy = 125,
+    ob1_pll_bndy_bucket_1 = 126,
+    ob1_pll_bndy_bucket_2 = 127,
     ob1_gptr = 128,
     ob1_time = 129,
     ob1_pll_gptr = 130,
-    ob1_pll_bndy  = 131,
-    ob1_pll_bndy_bucket_1 = 132,
-    ob1_pll_bndy_bucket_2 = 133,
-    ob1_pll_bndy_bucket_3 = 134,
+    ob1_fure = 131,
+    ob1_pll_bndy_bucket_3 = 132,
 
-    // OB Chiplet Rings
-    // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob1_repr = 135,
+    // OB1 Chiplet instance specific Ring
+    ob1_repr = 133,
 
-    ob2_fure = 136,
+    // OB2 Chiplet Rings
+    ob2_pll_bndy = 134,
+    ob2_pll_bndy_bucket_1 = 135,
+    ob2_pll_bndy_bucket_2 = 136,
     ob2_gptr = 137,
     ob2_time = 138,
     ob2_pll_gptr = 139,
-    ob2_pll_bndy  = 140,
-    ob2_pll_bndy_bucket_1 = 141,
-    ob2_pll_bndy_bucket_2 = 142,
-    ob2_pll_bndy_bucket_3 = 143,
+    ob2_fure = 140,
+    ob2_pll_bndy_bucket_3 = 141,
 
-    // OB Chiplet Rings
-    // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob2_repr = 144,
+    // OB2 Chiplet instance specific Ring
+    ob2_repr = 142,
 
-    ob3_fure = 145,
+    // OB3 Chiplet Rings
+    ob3_pll_bndy = 143,
+    ob3_pll_bndy_bucket_1 = 144,
+    ob3_pll_bndy_bucket_2 = 145,
     ob3_gptr = 146,
     ob3_time = 147,
     ob3_pll_gptr = 148,
-    ob3_pll_bndy  = 149,
-    ob3_pll_bndy_bucket_1 = 150,
-    ob3_pll_bndy_bucket_2 = 151,
-    ob3_pll_bndy_bucket_3 = 152,
+    ob3_fure = 149,
+    ob3_pll_bndy_bucket_3 = 150,
 
-    // OB Chiplet Rings
-    // OB0, OB1, OB2 and OB3 instance specific Ring
-    ob3_repr = 153,
+    // OB3 Chiplet instance specific Rings
+    ob3_repr = 151,
+
+    // values 152-153 unused
 
     // PCI Chiplet Rings
     // PCI0 Common Rings
