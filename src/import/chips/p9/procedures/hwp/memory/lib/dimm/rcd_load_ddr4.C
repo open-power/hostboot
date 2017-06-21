@@ -38,6 +38,7 @@
 #include <mss.H>
 #include <lib/dimm/rcd_load_ddr4.H>
 #include <lib/dimm/ddr4/control_word_ddr4.H>
+#include <lib/workarounds/draminit_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -67,46 +68,53 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
     // RCD 4-bit data - integral represents rc#
     static const std::vector< cw_data > l_rcd_4bit_data =
     {
-        {  FS0, 0, eff_dimm_ddr4_rc00, mss::tmrd()     },
-        {  FS0, 1, eff_dimm_ddr4_rc01, mss::tmrd()     },
-        {  FS0, 2, eff_dimm_ddr4_rc02, tSTAB           },
-        {  FS0, 3, eff_dimm_ddr4_rc03, mss::tmrd_l()   },
-        {  FS0, 4, eff_dimm_ddr4_rc04, mss::tmrd_l()   },
-        {  FS0, 5, eff_dimm_ddr4_rc05, mss::tmrd_l()   },
+        { FS0, 0,  eff_dimm_ddr4_rc00,    mss::tmrd()    },
+        { FS0, 1,  eff_dimm_ddr4_rc01,    mss::tmrd()    },
+        { FS0, 2,  eff_dimm_ddr4_rc02,    tSTAB          },
+        { FS0, 3,  eff_dimm_ddr4_rc03,    mss::tmrd_l()  },
+        { FS0, 4,  eff_dimm_ddr4_rc04,    mss::tmrd_l()  },
+        { FS0, 5,  eff_dimm_ddr4_rc05,    mss::tmrd_l()  },
         // Note: the tMRC1 timing as it is larger for saftey's sake
         // The concern is that if geardown mode is ever required in the future, we would need the longer timing
-        {  FS0, 6, eff_dimm_ddr4_rc06_07, mss::tmrc1()  },
-        {  FS0, 8, eff_dimm_ddr4_rc08, mss::tmrd()     },
-        {  FS0, 9, eff_dimm_ddr4_rc09, mss::tmrd()     },
-        {  FS0, 10, eff_dimm_ddr4_rc0a, tSTAB          },
-        {  FS0, 11, eff_dimm_ddr4_rc0b, mss::tmrd_l()    },
-        {  FS0, 12, eff_dimm_ddr4_rc0c, mss::tmrd()    },
-        {  FS0, 13, eff_dimm_ddr4_rc0d, mss::tmrd_l2()    },
-        {  FS0, 14, eff_dimm_ddr4_rc0e, mss::tmrd()    },
-        {  FS0, 15, eff_dimm_ddr4_rc0f, mss::tmrd_l2()    },
+        { FS0, 6,  eff_dimm_ddr4_rc06_07, mss::tmrc1()   },
+        { FS0, 8,  eff_dimm_ddr4_rc08,    mss::tmrd()    },
+        { FS0, 9,  eff_dimm_ddr4_rc09,    mss::tmrd()    },
+        { FS0, 10, eff_dimm_ddr4_rc0a,    tSTAB          },
+        { FS0, 11, eff_dimm_ddr4_rc0b,    mss::tmrd_l()  },
+        { FS0, 12, eff_dimm_ddr4_rc0c,    mss::tmrd()    },
+        { FS0, 13, eff_dimm_ddr4_rc0d,    mss::tmrd_l2() },
+        { FS0, 14, eff_dimm_ddr4_rc0e,    mss::tmrd()    },
+        { FS0, 15, eff_dimm_ddr4_rc0f,    mss::tmrd_l2() },
     };
 
     // RCD 8-bit data - integral represents rc#
     static const std::vector< cw_data > l_rcd_8bit_data =
     {
-        {  FS0, 1, eff_dimm_ddr4_rc_1x, mss::tmrd()     },
-        {  FS0, 2, eff_dimm_ddr4_rc_2x, mss::tmrd()     },
-        {  FS0, 3, eff_dimm_ddr4_rc_3x, tSTAB           },
-        {  FS0, 4, eff_dimm_ddr4_rc_4x, mss::tmrd()     },
-        {  FS0, 5, eff_dimm_ddr4_rc_5x, mss::tmrd()     },
-        {  FS0, 6, eff_dimm_ddr4_rc_6x, mss::tmrd()     },
-        {  FS0, 7, eff_dimm_ddr4_rc_7x, mss::tmrd_l()     },
-        {  FS0, 8, eff_dimm_ddr4_rc_8x, mss::tmrd()     },
-        {  FS0, 9, eff_dimm_ddr4_rc_9x, mss::tmrd()     },
-        {  FS0, 10, eff_dimm_ddr4_rc_ax, mss::tmrd()    },
-        {  FS0, 11, eff_dimm_ddr4_rc_bx, mss::tmrd_l()  }
+        { FS0, 1,  eff_dimm_ddr4_rc_1x, mss::tmrd()   },
+        { FS0, 2,  eff_dimm_ddr4_rc_2x, mss::tmrd()   },
+        { FS0, 3,  eff_dimm_ddr4_rc_3x, tSTAB         },
+        { FS0, 4,  eff_dimm_ddr4_rc_4x, mss::tmrd()   },
+        { FS0, 5,  eff_dimm_ddr4_rc_5x, mss::tmrd()   },
+        { FS0, 6,  eff_dimm_ddr4_rc_6x, mss::tmrd()   },
+        { FS0, 7,  eff_dimm_ddr4_rc_7x, mss::tmrd_l() },
+        { FS0, 8,  eff_dimm_ddr4_rc_8x, mss::tmrd()   },
+        { FS0, 9,  eff_dimm_ddr4_rc_9x, mss::tmrd()   },
+        { FS0, 10, eff_dimm_ddr4_rc_ax, mss::tmrd()   },
+        { FS0, 11, eff_dimm_ddr4_rc_bx, mss::tmrd_l() },
     };
 
     // Load 4-bit data
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, io_inst) );
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, io_inst), "%s failed to load 4-bit control words",
+              mss::c_str(i_target));
 
     // Load 8-bit data
-    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, io_inst) );
+    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, io_inst), "%s failed to load 8-bit control words",
+              mss::c_str(i_target));
+
+    // DD2 hardware has an issue with properly resetting the DRAM
+    // The below workaround toggles RC06 again to ensure the DRAM is reset properly
+    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, io_inst), "%s failed to add reset workaround functionality",
+              mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
