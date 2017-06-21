@@ -26,4 +26,5 @@
 WRAPPER=p9c_mss_draminit_training_advanced_wrap
 $(WRAPPER)_USELIBS+=p9c_mss_draminit_training_advanced
 $(WRAPPER)_DEPLIBS+=cen
+$(WRAPPER)_DEPLIBS+=mss_generic
 $(call BUILD_WRAPPER)
