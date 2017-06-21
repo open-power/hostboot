@@ -242,7 +242,13 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         //the data.
         if (attr.attr_pstate_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
         {
-            FAPI_INF("Requested for not to boot the PGPE, So PPB won't be initialized");
+            FAPI_INF("Pstate mode is to not boot the PGPE.  Thus, none of the parameter blocks will be constructed");
+
+            // Set the io_size to 0 so that memory allocation issues won't be
+            // detected by the caller.
+
+            io_size = 0;
+
             break;
         }
 
@@ -569,7 +575,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         uint8_t l_nest_leakage_for_occ = 75;
 
         if (attr.attr_system_wof_disable == fapi2::ENUM_ATTR_SYSTEM_WOF_DISABLE_OFF)
-        {
+        {        io_size = 0;
+
             uint16_t l_iac_tdp_vdn = get_iac_vdn_value (l_vpd_vdn_mv, l_iddqt, l_nest_leakage_for_occ,
                                      l_vpd_idn_100ma);
 
@@ -1237,7 +1244,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         strcpy(l_line_str, string); \
         sprintf(l_buffer_str, "%-*s", size, l_line_str);\
         strcpy(l_line_str, l_buffer_str); \
-        strcpy(l_buffer_str, "");        
+        strcpy(l_buffer_str, "");
 
     // get IVDDQ measurements with all good cores ON
     IDDQ_TRACE ("  IDDQ all good cores ON:", IDDQ_DESC_SIZE);
