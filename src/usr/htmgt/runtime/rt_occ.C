@@ -150,7 +150,6 @@ namespace HTMGT
         registerOcc()
         {
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->get_lid_list = &UtilLidMgr::getLidList;
             rt_intf->process_occ_error  = &process_occ_error;
             rt_intf->process_occ_reset  = &process_occ_reset;
             rt_intf->enable_occ_actuation  = &enable_occ_actuation;

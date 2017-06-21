@@ -251,9 +251,24 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 {
         static uint32_t lidlist[] =
         {
-            Util::OCC_LIDID
-                // add SLW lids if ever needed
+            Util::OCC_LIDID,
+            Util::WOF_LIDID,
+            Util::NIMBUS_HCODE_LIDID
         };
         *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
         return lidlist;
 }
+
+
+//------------------------------------------------------------------------
+
+struct registerLidMgr
+{
+    registerLidMgr()
+    {
+        runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
+        rt_intf->get_lid_list = &UtilLidMgr::getLidList;
+    }
+};
+
+registerLidMgr g_registerLidMgr;
