@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2016
+# Contributors Listed Below - COPYRIGHT 2010,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,7 @@
 ROOTDIR=.
 
 if [ -e ./customrc ]; then
-    source ./customrc
+    . ./customrc
 fi
 
 if [ -n "${OPENPOWER_BUILD}" ]; then
