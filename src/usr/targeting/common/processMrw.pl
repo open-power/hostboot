@@ -1644,14 +1644,36 @@ sub processI2C
             # Most I2C devices will default the slave port, it is only valid
             # for gpio expanders.
             my $slavePort = "0xFF";
-
-            my @source_array = split(/-/,$source);
-            my $source_idx = scalar @source_array;
-
-            # If the last part of the source only includes numbers
-            if($source_array[$source_idx-1] =~ /^[0-9,.E]+$/)
+            my $purpose = undef;
+            if ($targetObj->isBusAttributeDefined(
+                    $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE"))
             {
-                $slavePort = $source_array[$source_idx-1];
+                $purpose = $targetObj->getBusAttribute(
+                               $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE");
+            }
+
+            if(   defined $purpose
+               && $purpose ne "")
+            {
+                my $parent = $targetObj->getTargetParent($i2c->{DEST});
+                foreach my $aTarget ( sort keys %{ $targetObj->getAllTargets()})
+                {
+                    if($aTarget =~ m/$parent/)
+                    {
+                        if ($targetObj->isBadAttribute($aTarget,"PIN_NAME"))
+                        {
+                            next;
+                        }
+
+                        my $pin = $targetObj->getAttribute($aTarget,
+                                                           "PIN_NAME");
+                        if($pin eq $purpose)
+                        {
+                            ($slavePort) = $aTarget =~ m/\-([0-9]+)$/g;
+                            last;
+                        }
+                    }
+                }
             }
 
             my $addr;
