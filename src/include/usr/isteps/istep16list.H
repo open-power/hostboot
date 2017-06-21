@@ -99,6 +99,17 @@ void*    call_mss_scrub( void    *io_pArgs );
  *
  */
 void*    call_host_ipl_complete( void    *io_pArgs );
+
+/**
+ *  @brief    host_load_io_ppe
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    call_host_load_io_ppe( void    *io_pArgs );
+
 };
 
 
@@ -137,6 +148,11 @@ namespace   INITSERVICE
                 ISTEP_16::call_host_ipl_complete,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
         },
+        {
+                ISTEPNAME(16,06,"host_load_io_ppe"),
+                ISTEP_16::call_host_load_io_ppe,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
 };
 
 const DepModInfo g_istep16Dependancies = {
@@ -144,6 +160,7 @@ const DepModInfo g_istep16Dependancies = {
         DEP_LIB(libistep16.so),
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libisteps_mss.so),
+        DEP_LIB(libpm.so),
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
         DEP_LIB(libocc.so),
 #endif
