@@ -1621,6 +1621,13 @@ errlHndl_t populate_TpmInfoByNode()
         auto i2cAryOff =
             l_pcrd->hdatPcrdIntData[HDAT::HDAT_PCRD_DA_HOST_I2C].hdatOffset;
 
+        // If pointer pair's offset value is 0, advance to next PCRD instance
+        // as this one has no I2C links
+        if(!i2cAryOff)
+        {
+            continue;
+        }
+
         // Convert i2c array header offset to a pointer to the i2c array header
         const auto l_hostI2cPcrdHdrPtr =
            reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(l_pcrdAddr + i2cAryOff);
@@ -1941,14 +1948,6 @@ errlHndl_t populate_hbTpmInfo()
     errlHndl_t l_elog = nullptr;
 
     do {
-        // TODO RTC 171851 Remove FSP restriction when FSP code provides
-        // Node TPM Related Data
-
-        // Skip populating HDAT TPM Node Related Data on FSP systems
-        if (INITSERVICE::spBaseServicesEnabled())
-        {
-            break;
-        }
 
         TRACFCOMP(g_trac_runtime, "Running populate_hbTpmInfo");
 
