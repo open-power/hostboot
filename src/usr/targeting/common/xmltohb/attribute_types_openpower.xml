@@ -191,7 +191,7 @@
 </attribute>
 
 <attribute>
-    <id>HDAT_I2C_DEVICE_TYPE</id>
+    <id>HDAT_I2C_DEVTYPE</id>
     <description>
         This attribute holds the values of the I2C device type from the i2c
         device connections as defined in the MRW.  It is parsed into a
@@ -255,7 +255,7 @@
 </attribute>
 
 <attribute>
-    <id>HDAT_I2C_DEVICE_PURPOSE</id>
+    <id>HDAT_I2C_DEV_PURPOSE</id>
     <description>
         This attribute holds the values of the I2C device purpose from the i2c
         device connections as defined in the MRW.  It is parsed into a
