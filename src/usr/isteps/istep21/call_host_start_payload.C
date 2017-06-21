@@ -317,21 +317,6 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         }
 
-// @todo RTC:123019 I2CM changes for P9bringup
-#if (0)
-        // Phyp needs us to program all of the I2C masters with the bus
-        // divisor
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Setup I2C Masters" );
-        err = I2C::i2cSetupActiveMasters(I2C::I2C_PROC_ALL);
-        if( err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Error setting up I2C Bus Divisors" );
-            // just commit the error and keep going
-            errlCommit(err, ISTEP_COMP_ID);
-        }
-#endif
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
         TARGETING::Target* sys = NULL;
