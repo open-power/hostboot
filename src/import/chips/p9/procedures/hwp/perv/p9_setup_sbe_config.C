@@ -58,6 +58,8 @@ enum P9_SETUP_SBE_CONFIG_Private_Constants
     ATTR_OPTICS_CONFIG_MODE_OBUS1_BIT  = 17,
     ATTR_OPTICS_CONFIG_MODE_OBUS2_BIT  = 18,
     ATTR_OPTICS_CONFIG_MODE_OBUS3_BIT  = 19,
+    ATTR_MC_PLL_BUCKET_STARTBIT      = 21,
+    ATTR_MC_PLL_BUCKET_LENGTH        = 3,
     ATTR_OB0_PLL_BUCKET_STARTBIT       = 24,
     ATTR_OB0_PLL_BUCKET_LENGTH         = 2,
     ATTR_OB1_PLL_BUCKET_STARTBIT       = 26,
@@ -206,6 +208,11 @@ fapi2::ReturnCode p9_setup_sbe_config(const
                         || (l_optics_cfg_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_CAPI)) ? (1) : (0));
             }
         }
+
+        FAPI_DBG("Reading MC PLL buckets");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_PLL_BUCKET, FAPI_SYSTEM, l_read_1));
+        l_read_scratch_reg.insertFromRight< ATTR_MC_PLL_BUCKET_STARTBIT, ATTR_MC_PLL_BUCKET_LENGTH >(l_read_1);
+
 
         FAPI_DBG("Reading OB PLL buckets");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OB0_PLL_BUCKET, i_target_chip, l_ob0_pll_bucket));

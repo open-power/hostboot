@@ -333,6 +333,10 @@
         <id>ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE</id>
         <default>0x0</default>
     </attribute>
+    <attribute>
+        <id>ATTR_MC_PLL_BUCKET</id>
+        <default>0x05</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions

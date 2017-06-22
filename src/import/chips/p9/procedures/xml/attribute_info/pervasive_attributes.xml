@@ -767,4 +767,14 @@
   <writeable/>
 </attribute>
 
+<attribute>
+  <id>ATTR_MC_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>MC pll bucket selection in async mode for Cumulus</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <writeable/>
+</attribute>
+
 </attributes>
