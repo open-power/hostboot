@@ -5,7 +5,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
+# [+] International Business Machines Corp.
+# [+] Joel Stanley
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +50,7 @@ _init:
 
     ld r8, 0(r10)             # Get count of relocations.
 
-    cmpi cr0, r8, 0           # Perform relocations (if any).
+    cmpwi cr0, r8, 0          # Perform relocations (if any).
     beq 2f
     mtctr r8
 1:
