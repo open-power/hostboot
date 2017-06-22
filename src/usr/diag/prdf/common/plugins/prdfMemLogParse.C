@@ -2931,30 +2931,39 @@ void addDramSiteString( const MemoryMruData::ExtendedData & i_extMemMru,
     }
     else // IS DIMMs
     {
-        char tmp[DATA_SIZE] = { '\0' };
-
         // Add DQ info.
+        char tmp[DATA_SIZE] = { '\0' };
         strcat( io_data, "DQ:" );
-        switch ( mm.s.pins )
+
+        if ( mm.s.isMca ) // MCA
         {
-            case EVEN_SYMBOL_DQ:
-                snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx] );
-                strcat( io_data, tmp );
-                break;
-
-            case ODD_SYMBOL_DQ:
-                snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx+1]);
-                strcat( io_data, tmp );
-                break;
-
-            case BOTH_SYMBOL_DQS:
-            case NO_SYMBOL_DQS:
-                snprintf( tmp, DATA_SIZE, "%d,%d",
-                          i_extMemMru.dqMapping[dqIdx],
-                          i_extMemMru.dqMapping[dqIdx+1] );
-                strcat( io_data, tmp );
-                break;
+            // There is only one DQ per symbol.
+            snprintf( tmp, DATA_SIZE, "%d", i_extMemMru.dqMapping[dqIdx] );
         }
+        else // MBA
+        {
+            switch ( mm.s.pins )
+            {
+                case EVEN_SYMBOL_DQ:
+                    snprintf( tmp, DATA_SIZE, "%d",
+                              i_extMemMru.dqMapping[dqIdx] );
+                    break;
+
+                case ODD_SYMBOL_DQ:
+                    snprintf( tmp, DATA_SIZE, "%d",
+                              i_extMemMru.dqMapping[dqIdx+1]);
+                    break;
+
+                case BOTH_SYMBOL_DQS:
+                case NO_SYMBOL_DQS:
+                    snprintf( tmp, DATA_SIZE, "%d,%d",
+                            i_extMemMru.dqMapping[dqIdx],
+                            i_extMemMru.dqMapping[dqIdx+1] );
+                    break;
+            }
+        }
+
+        strcat( io_data, tmp );
     }
 }
 
