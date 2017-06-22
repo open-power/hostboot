@@ -144,7 +144,7 @@ int32_t collectCeStats<TYPE_MCA>( ExtensibleChip * i_chip,
 
                     SymbolData symData;
                     symData.symbol = MemSymbol::fromSymbol( mcaTrgt, i_rank,
-                                            sym, CEN_SYMBOL::BOTH_SYMBOL_DQS );
+                                               sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
                     if ( !symData.symbol.isValid() )
                     {
                         PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
