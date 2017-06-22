@@ -96,6 +96,7 @@ namespace HBPM
 
     std::shared_ptr<UtilLidMgr> g_pOccLidMgr (nullptr);
     std::shared_ptr<UtilLidMgr> g_pHcodeLidMgr (nullptr);
+    std::shared_ptr<UtilLidMgr> g_pRingOvdLidMgr (nullptr);
 
     /**
      *  @brief Convert HOMER physical address space to a vitual address
@@ -1049,50 +1050,55 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
-#ifdef __HOSTBOOT_RUNTIME
-            break;
-#endif
-
-            PNOR::SectionInfo_t l_pnorRingOvd;
-            l_err = PNOR::getSectionInfo(PNOR::RINGOVD, l_pnorRingOvd);
-            if(l_err)
+            uint32_t l_lidId = Util::HWREFIMG_RINGOVD_LIDID;
+            if(g_pRingOvdLidMgr.get() == nullptr)
             {
-                delete l_err;
-                l_err = NULL;
+                g_pRingOvdLidMgr = std::shared_ptr<UtilLidMgr>
+                                                    (new UtilLidMgr(l_lidId));
+            }
+            void* l_pImageIn = nullptr;
+            size_t l_lidImageSize = 0;
+
+            l_err = g_pRingOvdLidMgr->getStoredLidImage(l_pImageIn,
+                                                        l_lidImageSize);
+            if (l_err)
+            {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd(): RINGOVD section not found or "
-                           "is blocked in secure mode. it is optional");
+                           ERR_MRK"getRingOvd: get stored LID image failed!");
+                l_err->collectTrace("ISTEPS_TRACE",256);
+                l_err->collectTrace(FAPI_TRACE_NAME,256);
+                l_err->collectTrace(FAPI_IMP_TRACE_NAME,256);
                 break;
             }
-            if(l_pnorRingOvd.size == 0)
+
+            if((l_lidImageSize == 0) || (l_pImageIn == nullptr))
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd(): RINGOVD section is empty in PNOR");
+                           INFO_MRK"getRingOvd(): RINGOVD section is empty");
                 break;
             }
 
             TRACDBIN( ISTEPS_TRACE::g_trac_isteps_trace,
                       "getRingOvd():100 bytes of RINGOVD section",
-                      (void *)l_pnorRingOvd.vaddr,100);
+                      l_pImageIn, 100);
 
             // If first 8 bytes are just FF's then we know there's no override
-            if((*(static_cast<uint64_t *>((void *)l_pnorRingOvd.vaddr))) ==
-                    0xFFFFFFFFFFFFFFFF)
+            if((*(static_cast<uint64_t *>(l_pImageIn))) == 0xFFFFFFFFFFFFFFFF )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           INFO_MRK"getRingOvd():No overrides in RINGOVD section "
-                           "found");
+                    INFO_MRK"getRingOvd():No overrides in RINGOVD section "
+                            "found");
                 break;
             }
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        INFO_MRK"getRingOvd():Found valid ring overrides");
-            io_overrideImg = reinterpret_cast<void*>(l_pnorRingOvd.vaddr);
+            io_overrideImg = l_pImageIn;
 
         }while(0);
 
         return l_err;
-    }
+    } // end getRingOvd
 
 }  // end HBPM namespace
 
