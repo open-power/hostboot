@@ -175,10 +175,7 @@
         <id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id>
         <scomRegister>PU_PPE_XIDBGPRO</scomRegister>
         <scomRegister>PU_PPE_XIRAMEDR</scomRegister>
-        <scomRegister>PU_PPE_XIRAMDBG</scomRegister>
-        <scomRegister>PU_PPE_XIRAMGA</scomRegister>
-        <scomRegister>PU_PPE_XIRAMRA</scomRegister>
-        <scomRegister>PU_PPE_XIXCR</scomRegister>
+        <scomRegister>PU_PPE_XIRAMDBG</scomRegister> 
      </registerFfdc>
      <registerFfdc>
         <id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id>
