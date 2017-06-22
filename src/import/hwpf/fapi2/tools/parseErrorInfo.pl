@@ -64,6 +64,7 @@ my $buffer_ffdc_type          = "fapi2::buffer";
 my $variable_buffer_ffdc_type = "fapi2::variable_buffer";
 my $ffdc_type                 = "fapi2::ffdc_t";
 my $mcast_type                = "fapi2::mcast_t";
+my $scom_addr_type            = "uint64_t";
 my $ffdc_count                = 0;
 
 # There are some names used in the XML files which exist in either
@@ -371,6 +372,14 @@ sub addFfdcMethod
         $methods->{$key}{member}                     = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar}          = "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
+    }
+    elsif ( $type eq $scom_addr_type )
+    {
+        if ( $arg_local_ffdc eq undef )
+        {
+            $method = "\n    static $type $ffdc_uc(const sbeFfdc_t *ffdc)\n";
+            $method_body = "    {\n        return ffdc[$objectNumber].data;\n    }\n\n";
+        }
     }
     else
     {
@@ -910,6 +919,9 @@ foreach my $argnum ( 0 .. $#ARGV )
             $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
             $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$ffdcName; \\\n";
             $eiEntryStr .= "\tl_entries[$eiEntryCount].ffdc.iv_ffdcSize = 8; \\\n";
+
+            # Add a static method to get address from ffdc blob
+            addFfdcMethod( \%methods, "get_address", $err->{rc}, $scom_addr_type, $eiEntryCount );
             $eiEntryCount++;
 
             # Set the FFDC ID value in a global hash. The name is <rc>_pib_error
