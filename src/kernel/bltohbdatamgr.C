@@ -148,8 +148,8 @@ printk("Version=%lX\n",i_data.version);
     if( iv_data.version >= Bootloader::BLTOHB_MMIOBARS )
     {
 printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
-        kassert(i_data.lpcBar>0);
-        kassert(i_data.xscomBar>0);
+        kassert(i_data.lpcBAR>0);
+        kassert(i_data.xscomBAR>0);
         iv_data.lpcBAR = i_data.lpcBAR;
         iv_data.xscomBAR = i_data.xscomBAR;
     }

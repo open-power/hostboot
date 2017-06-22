@@ -42,6 +42,8 @@
 #include <stdint.h>                /* uint_fast8_t, uintN_t        */
 #include "inttypes.H"          /* PRIx64 used to format bn_t's */
 
+#define NDEBUG
+
 /**
  *  Define __LITTLE_ENDIAN or __BIG_ENDIAN for target.
  */
