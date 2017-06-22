@@ -46,6 +46,8 @@
 #include <p9_l3err_linedelete.H>
 #include <p9_l2err_linedelete.H>
 #include <p9_proc_gettracearray.H>
+#include <pm_common_ext.H>
+#include <p9_stop_api.H>
 
 //------------------------------------------------------------------------------
 
@@ -372,7 +374,7 @@ int32_t extractL3Err( TargetHandle_t i_exTgt,
 int32_t l3LineDelete(TargetHandle_t i_exTgt,
                      const p9_l3err_extract_err_data& i_l3_err_data)
 {
-    int32_t o_rc = SUCCESS;
+    using namespace stopImageSection;
     errlHndl_t err = NULL;
     const uint64_t retryCount = 100;
 
@@ -388,12 +390,28 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x failed",
                   getHuid(i_exTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        return FAIL;
     }
 
     // Do HCODE update to preserve line delete
+    BitStringBuffer ldData(64);
+    ldData.setBit(0); //Trigger
+    ldData.setFieldJustify(1, 4, 0x2); // Purge Type (LD=0x2)
+    ldData.setFieldJustify(12, 5, i_l3_err_data.member);
+    ldData.setFieldJustify(17, 12, i_l3_err_data.hashed_real_address_45_56);
 
-    return o_rc;
+    err = RTPM::hcode_update(P9_STOP_SECTION_L3, P9_STOP_SCOM_APPEND,
+                             i_exTgt, 0x1001180E,
+                             ldData.getFieldJustify(0, 64));
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x hcode_update "
+                  "failed", getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    return SUCCESS;
 }
 
 int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
@@ -456,8 +474,8 @@ int32_t extractL2Err( TargetHandle_t i_exTgt, bool i_ce,
 int32_t l2LineDelete(TargetHandle_t i_exTgt,
                      const p9_l2err_extract_err_data& i_l2_err_data)
 {
-    int32_t o_rc = SUCCESS;
-    errlHndl_t err = NULL;
+    using namespace stopImageSection;
+    errlHndl_t err = nullptr;
     const uint64_t retryCount = 100;
 
     // Apply Line Delete
@@ -467,17 +485,35 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
                      fapiTrgt,
                      i_l2_err_data,
                      retryCount);
-    if(NULL != err)
+    if(nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x failed",
                   getHuid(i_exTgt));
         PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
-        o_rc = FAIL;
+        return FAIL;
     }
 
     // Do HCODE update to preserve line delete
+    BitStringBuffer ldData(64);
+    ldData.setBit(0); //Trigger
+    ldData.setFieldJustify(1, 4, 0x2); // Purge Type (LD=0x2)
+    ldData.setFieldJustify(17, 3, i_l2_err_data.member);
+    ldData.setFieldJustify(20, 8, i_l2_err_data.address);
+    if (i_l2_err_data.bank)
+        ldData.setBit(28);
 
-    return o_rc;
+    err = RTPM::hcode_update(P9_STOP_SECTION_L2, P9_STOP_SCOM_APPEND,
+                             i_exTgt, 0x1001080E,
+                             ldData.getFieldJustify(0, 64));
+    if (nullptr != err)
+    {
+        PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x hcode_update "
+                  "failed", getHuid(i_exTgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        return FAIL;
+    }
+
+    return SUCCESS;
 }
 
 
