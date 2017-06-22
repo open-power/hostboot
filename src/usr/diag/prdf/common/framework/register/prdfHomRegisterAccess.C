@@ -41,6 +41,11 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
+#ifdef __HOSTBOOT_RUNTIME
+#include <pm_common_ext.H>
+#include <p9_stop_api.H>
+#endif
+
 #undef prdfHomRegisterAccess_C
 
 
@@ -145,57 +150,47 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
             {
                 rc = PRDF::PlatServices::putScom(i_target, bs, registerId);
 
-                #ifndef __HOSTBOOT_MODULE
+                #ifdef __HOSTBOOT_RUNTIME
+                using namespace stopImageSection;
 
-/* TODO RTC 136050
-                if( NULL != errH ) break;
-
-                // If register is in a EX chiplet, need to update PORE image.
-                // The PORE update is necessary to avoid losing the FIR MASK
-                // after the Core exits the sleep-winkle state.
-                if( TYPE_EX == PlatServices::getTargetType(i_target) )
+                // Update CORE/EQ/EX Fir masks in HCODE image
+                TARGETING::TYPE type = PlatServices::getTargetType(i_target);
+                if( TYPE_EX == type || TYPE_EQ == type || TYPE_CORE == type )
                 {
-                    // In SLW image we only have space for 32 registers and
-                    // that space is not exclusive to PRD.
-                    // Though we can write to Mask directly or using AND
-                    // register but when we mask a FIR bit for Predictive
-                    // callout, we always use OR register.
-                    // So we will only consider OR register here as it will
-                    // simplify our logic and  will also help to meet SLW
-                    // image size requirement.
-                    // Using OR register only also enables us to use SCOM_OR
-                    // operation in underlying platform API which further
-                    // helps to reduce size of SLW Image.
-                    uint32_t l_exMaskReg[5] = {
-                                        0x1004000f,   // EX_LOCAL_FIR_MASK_OR
-                                        0x10013105,   // EX_CORE_FIR_MASK_OR
-                                        0x10012805,   // EX_L2CERRS_FIR_MASK_OR
-                                        0x10010805,   // EX_L3CERRS_FIR_MASK_OR
-                                        0x10010c05 }; // EX_NCSCOMS_FIR_MASK_OR
+                    uint32_t l_MaskReg[7] = {
+                                        0x2004000f,   // EC_LFIR_MASK_OR
+                                        0x20010a45,   // EC_COREFIR_MASK_OR
+                                        0x1004000f,   // EQ_LOCAL_FIR_MASK_OR
+                                        0x10010805,   // EX_L2FIR_MASK_OR
+                                        0x10011005,   // EX_NCUFIR_MASK_OR
+                                        0x10011805,   // EX_L3FIR_MASK_OR
+                                        0x10012005 }; // EX_CMEFIR_MASK_OR
 
-                    for(uint32_t l_count = 0; l_count < 5; l_count++)
+                    for(uint32_t l_count = 0; l_count < 7; l_count++)
                     {
-                        if( l_exMaskReg[l_count]  == registerId )
+                        if( l_MaskReg[l_count]  == registerId )
                         {
-                            int32_t l_rc = SUCCESS;
-                            l_rc = PlatServices::updateExScomToSlwImage(
-                                                        i_target,
-                                                        registerId,
-                                                        buffer,
-                                                        P8_PORE_SCOM_OR_APPEND);
-                            if( SUCCESS != l_rc )
+                            errlHndl_t err = nullptr;
+                            uint32_t sec = (TYPE_CORE == type) ?
+                                P9_STOP_SECTION_CORE_SCOM :
+                                P9_STOP_SECTION_EQ_SCOM;
+
+                            err = RTPM::hcode_update(sec,
+                                                     P9_STOP_SCOM_OR_APPEND,
+                                                     i_target,
+                                                     registerId,
+                                                     bs.getFieldJustify(0,64));
+                            if( nullptr != err)
                             {
                                 PRDF_ERR("[ScomAccessor::Access()] Error in"
-                                         " updateExScomToSlwImage.");
+                                         " hcode_update");
+                                PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
                             }
                             break;
                         }
                     }
                 }
-*/
-
-                #endif // End of, not __HOSTBOOT_MODULE
-
+                #endif
                 break;
             }
 
