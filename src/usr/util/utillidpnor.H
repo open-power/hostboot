@@ -57,11 +57,12 @@ bool cmpLidToPnor (const std::pair<uint32_t, PNOR::SectionId> p1,
 const std::pair<uint32_t, PNOR::SectionId>
     lidToPnor[] =
     {
-        std::make_pair(Util::TEST_LIDID, PNOR::TESTRO),         // 0x00000111
-        std::make_pair(Util::OCC_LIDID, PNOR::OCC),             // 0x81e00430
-        std::make_pair(Util::WOF_LIDID, PNOR::WOFDATA),         // 0x81e00440
-        std::make_pair(Util::NIMBUS_HCODE_LIDID, PNOR::HCODE),  // 0x81e00602
-        std::make_pair(Util::CUMULUS_HCODE_LIDID, PNOR::HCODE)  // 0x81e00603
+        std::make_pair(Util::TEST_LIDID, PNOR::TESTRO),            // 0x00000111
+        std::make_pair(Util::OCC_LIDID, PNOR::OCC),                // 0x81e00430
+        std::make_pair(Util::WOF_LIDID, PNOR::WOFDATA),            // 0x81e00440
+        std::make_pair(Util::NIMBUS_HCODE_LIDID, PNOR::HCODE),     // 0x81e00602
+        std::make_pair(Util::CUMULUS_HCODE_LIDID, PNOR::HCODE),    // 0x81e00603
+        std::make_pair(Util::HWREFIMG_RINGOVD_LIDID, PNOR::RINGOVD)// 0x81e00620
     };
 
 // Size of lidToPnor[]

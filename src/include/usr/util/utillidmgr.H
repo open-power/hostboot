@@ -51,6 +51,7 @@ enum LidId
     // Hcode Reference Image LIDs
     NIMBUS_HCODE_LIDID = 0x81e00602,
     CUMULUS_HCODE_LIDID = 0x81e00603,
+    HWREFIMG_RINGOVD_LIDID = 0x81e00620,
 };
 
 }
