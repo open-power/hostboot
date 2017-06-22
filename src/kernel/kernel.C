@@ -61,6 +61,43 @@ class Kernel
 	Kernel() {};
 };
 
+
+/**
+ * @brief Searches multiple locations for the BlToHbData structure.
+ *
+ * @description Due to the possibility of a mismatch between the bootloader and
+ *              hostboot, we must check every location of this structure in
+ *              history. Searches latest to oldest.
+ *
+ * @return if found, pointer to structure
+ *         otherwise nullptr
+ */
+const Bootloader::BlToHbData* getBlToHbData()
+{
+    const Bootloader::BlToHbData* l_resultBltoHbData = nullptr;
+
+    // Order bootloader addr versions from most recent to oldest
+    // Note: Defined here to limit code space in bootloader code
+    static const std::array<uint64_t,2> BlToHbDataAddrs =
+    {
+        BLTOHB_COMM_DATA_ADDR_LATEST,
+        BLTOHB_COMM_DATA_ADDR_V1
+    };
+
+    for (auto addr : BlToHbDataAddrs)
+    {
+        const auto l_bltoHbData =
+                          reinterpret_cast<const Bootloader::BlToHbData*>(addr);
+        if(Bootloader::BlToHbDataValid(l_bltoHbData))
+        {
+            l_resultBltoHbData = l_bltoHbData;
+            break;
+        }
+    }
+
+    return l_resultBltoHbData;
+}
+
 extern "C"
 int main()
 {
@@ -75,13 +112,12 @@ int main()
     Kernel& kernel = Singleton<Kernel>::instance();
     kernel.cppBootstrap();
 
-    // Get pointer to BL and HB comm data
-    const auto l_pBltoHbData = reinterpret_cast<const Bootloader::BlToHbData*>(
-                                                        BLTOHB_COMM_DATA_ADDR);
 
-    if ( Bootloader::BlToHbDataValid(l_pBltoHbData) )
+    // Get pointer to BL and HB comm data
+    const auto l_pBltoHbData = getBlToHbData();
+    if ( l_pBltoHbData != nullptr )
     {
-        printk("BL to HB comm valid\n");
+        printk("Valid BlToHbData found at 0x%lX\n", reinterpret_cast<uint64_t>(l_pBltoHbData));
         // Initialize Secureboot Data class
         g_BlToHbDataManager.initValid(*l_pBltoHbData);
     }

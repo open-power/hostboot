@@ -42,12 +42,20 @@ namespace Bootloader{
 
 #define MAX_HBB_SIZE (512 * KILOBYTE)
 
-// The Bootloader to Hostboot communication area exists after the working HBB
+// Location of running copy of HBB
 #ifdef BOOTLOADER
-#define BLTOHB_COMM_DATA_ADDR (getHRMOR() - ( 2*MEGABYTE) + MAX_HBB_SIZE)
+#define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
+#define HBB_RUNNING_ADDR        (getHRMOR() - ( 2*MEGABYTE))
 #else
-#define BLTOHB_COMM_DATA_ADDR (getHRMOR() + MAX_HBB_SIZE)
+#define HBB_HRMOR               (getHRMOR())
+#define HBB_RUNNING_ADDR        (getHRMOR())
 #endif
+
+// Different Locations of BlToHBData struct over time.
+// New values make "_LATEST" and switch current "_LATEST" to "V<N>"
+// NOTE: Done this way to limit code space.
+#define BLTOHB_COMM_DATA_ADDR_V1 (HBB_HRMOR + 512*KILOBYTE)
+#define BLTOHB_COMM_DATA_ADDR_LATEST (HBB_HRMOR + MAX_HBB_SIZE)
 
 // Expected BlToHbData eye catch
 const uint64_t BLTOHB_EYECATCHER = 0x23626C746F686200; // #BLTOHB\0

@@ -164,8 +164,8 @@ namespace Bootloader{
             g_blData->blToHbData.sizeOfStructure = sizeof(BlToHbData);
         }
 
-        // Place structure into proper location for HB to find
-        memcpy(reinterpret_cast<void *>(BLTOHB_COMM_DATA_ADDR |
+        // Place BlToHb into proper location for HB to find
+        memcpy(reinterpret_cast<void *>(BLTOHB_COMM_DATA_ADDR_LATEST |
                                         IGNORE_HRMOR_MASK),
                &g_blData->blToHbData,
                sizeof(BlToHbData));
