@@ -963,6 +963,7 @@
     <attribute><id>AUX_FUNC_INVOCATION_TIME_MS</id></attribute>
     <attribute><id>SYSTEM_CORECACHE_SKEWADJ_DISABLE</id></attribute>
     <attribute><id>SYSTEM_CORECACHE_DCADJ_DISABLE</id></attribute>
+    <attribute><id>MC_PLL_BUCKET</id></attribute>
 </targetType>
 
 <!-- enc-node-power9 -->
