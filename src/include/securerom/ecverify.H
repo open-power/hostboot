@@ -43,6 +43,4 @@ int ec_verify (const uint8_t *publicpt,     /* 2*EC_COORDBYTES */
                const uint8_t *hash,         /*   EC_HASHBYTES  */
                const uint8_t *signature) ;  /* 2*EC_COORDBYTES */
 
-#define NDEBUG
-
 #endif    /* defined(__ECVERIFY_H__) */
