@@ -142,8 +142,7 @@ namespace HTMGT
             // NOTE: SRC tags are NOT required here as these logs will get
             //       parsed with the OCC src tags
             const occErrlUsrDtls_t *l_usrDtls_ptr = (occErrlUsrDtls_t *)
-                ((uint8_t*)l_occElog+sizeof(occErrlEntry_t)+
-                 (l_occElog->maxCallouts * sizeof(occErrlCallout_t)) );
+                ((uint8_t*)l_occElog + sizeof(occErrlEntry_t));
             bldErrLog(l_errlHndl,
                       (htmgtModuleId)(l_usrDtls_ptr->modId & 0x00FF),
                       (htmgtReasonCode)l_occSrc, // occ reason code
