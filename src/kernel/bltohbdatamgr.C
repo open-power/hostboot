@@ -54,16 +54,16 @@ void BlToHbDataManager::validAssert() const
 
 void BlToHbDataManager::print() const
 {
-    printkd("\nBlToHbData (all addr HRMOR relative):\n");
-
-    if(iv_data.version >= Bootloader::BLTOHB_SAB)
-    {
-        printkd("-- secureSettings: SAB=%d, SecOvrd=%d, AllowAttrOvrd=%d\n",
-                iv_data.secureAccessBit, iv_data.securityOverride,
-                iv_data.allowAttrOverrides);
-    }
     if(iv_dataValid)
     {
+        printkd("\nBlToHbData (all addr HRMOR relative):\n");
+        if(iv_data.version >= Bootloader::BLTOHB_SAB)
+        {
+            printkd("-- secureSettings: SAB=%d, SecOvrd=%d, AllowAttrOvrd=%d\n",
+                    iv_data.secureAccessBit, iv_data.securityOverride,
+                    iv_data.allowAttrOverrides);
+        }
+
         printkd("-- eyeCatch = 0x%lX (%s)\n", iv_data.eyeCatch,
                                     reinterpret_cast<char*>(&iv_data.eyeCatch));
         printkd("-- version = 0x%lX\n", iv_data.version);
@@ -197,7 +197,6 @@ void BlToHbDataManager::initInvalid ()
 
 const uint64_t BlToHbDataManager::getBranchtableOffset() const
 {
-    validAssert();
     return iv_data.branchtableOffset;
 }
 
@@ -215,7 +214,6 @@ const uint64_t BlToHbDataManager::getSecureRomAddr() const
 
 const size_t BlToHbDataManager::getSecureRomSize() const
 {
-    validAssert();
     return iv_data.secureRomSize;
 }
 
@@ -233,7 +231,6 @@ const uint64_t BlToHbDataManager::getHwKeysHashAddr() const
 
 const size_t BlToHbDataManager::getHwKeysHashSize() const
 {
-    validAssert();
     return iv_data.hwKeysHashSize;
 }
 
@@ -251,31 +248,26 @@ const uint64_t BlToHbDataManager::getHbbHeaderAddr() const
 
 const size_t BlToHbDataManager::getHbbHeaderSize() const
 {
-    validAssert();
     return iv_data.hbbHeaderSize;
 }
 
 const bool BlToHbDataManager::getSecureAccessBit() const
 {
-    validAssert();
     return iv_data.secureAccessBit;
 }
 
 const bool BlToHbDataManager::getSecurityOverride() const
 {
-    validAssert();
     return iv_data.securityOverride;
 }
 
 const bool BlToHbDataManager::getAllowAttrOverrides() const
 {
-    validAssert();
     return iv_data.allowAttrOverrides;
 }
 
 const size_t BlToHbDataManager::getPreservedSize() const
 {
-    validAssert();
     return iv_preservedSize;
 }
 
