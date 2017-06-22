@@ -226,10 +226,10 @@ namespace Bootloader{
 #define HW_KEYS_HASH_ADDR (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
                            + MAX_HBBL_SIZE - 64)
     /** Location of working copy of HBB with ECC */
-#define HBB_ECC_WORKING_ADDR    (getHRMOR() + ( 1*MEGABYTE))
+#define HBB_ECC_WORKING_ADDR    (getHRMOR() - ( 1*MEGABYTE))
 
     /** Location of working copy of HBB without ECC */
-#define HBB_WORKING_ADDR        (getHRMOR() - ( 1*MEGABYTE))
+#define HBB_WORKING_ADDR        (getHRMOR() + ( 1*MEGABYTE))
 
     /** Location of HBBL data */
 #define HBBL_DATA_ADDR          (getHRMOR() + HBBL_EXCEPTION_VECTOR_SIZE \
@@ -237,10 +237,6 @@ namespace Bootloader{
 
     /** Location of HBBL scratch space */
 #define HBBL_SCRATCH_SPACE_ADDR (getHRMOR() + (64*KILOBYTE))
-
-    /** Location of running copy of HBB */
-#define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
-#define HBB_RUNNING_ADDR        (getHRMOR() - ( 2*MEGABYTE))
 
     /** Location of SBE HB communication area
         Defined in SBE code and bootloader.ld */
