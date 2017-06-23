@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC mark shadow registers (MSR)
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_MARK_SHADOW_REG_H_
@@ -62,7 +62,7 @@ template< fapi2::TargetType T, typename TT = eccTraits<T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::MARK_SHADOW_REG, o_data) );
-    FAPI_INF("read: 0x%016lx", o_data);
+    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -79,7 +79,7 @@ template< fapi2::TargetType T, typename TT = eccTraits<T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::MARK_SHADOW_REG, i_data) );
-    FAPI_INF("write: 0x%016lx", i_data);
+    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
