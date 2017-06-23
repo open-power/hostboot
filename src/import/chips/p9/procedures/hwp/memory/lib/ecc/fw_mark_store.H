@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC firmware mark store registers
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_FW_MARK_STORE_H_
@@ -51,12 +51,18 @@ namespace ecc
 namespace fwms
 {
 
+///
+/// @brief chip mark type enums
+///
 enum mark_type
 {
     SYMBOL = 1,
     CHIP = 0
 };
 
+///
+/// @brief Chip Mark Region. Used for region field values in the FWMS regs
+///
 enum mark_region
 {
     DISABLED = 0b000,
@@ -232,8 +238,19 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
             return ( read_rank7(i_target, o_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK_PASSED()
+                         .set_RANK(i_rank)
+                         .set_TARGET(i_target)
+                         .set_FUNCTION(FWMS_READ),
+                         "%s Invalid rank passed to fwms::ecc::read (%d)",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -399,8 +416,19 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
             return ( write_rank7(i_target, i_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK_PASSED()
+                         .set_RANK(i_rank)
+                         .set_TARGET(i_target)
+                         .set_FUNCTION(FWMS_WRITE),
+                         "%s Invalid rank passed to fwms::ecc::write (%d)",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
