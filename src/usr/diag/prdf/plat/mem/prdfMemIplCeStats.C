@@ -57,52 +57,50 @@ using namespace PARSERUTILS;
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MBA>::banAnalysis( const MemRank & i_rank )
+void MemIplCeStats<TYPE_MBA>::banAnalysis( uint8_t i_dimmSlct,
+                                           uint8_t i_portSlct )
 {
-    for ( uint8_t i = 0; i < MAX_PORT_PER_MBA; i++ )
+    PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
+    PRDF_ASSERT( i_portSlct < MAX_PORT_PER_MBA );
+
+    DimmKey banKey = { i_dimmSlct, i_portSlct };
+    iv_bannedAnalysis[banKey] = true;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct,
+                                           uint8_t i_portSlct )
+{
+    PRDF_ASSERT( i_dimmSlct < MAX_DIMM_PER_PORT );
+    PRDF_ASSERT( 0 == i_portSlct );
+
+    DimmKey banKey = { i_dimmSlct, i_portSlct };
+    iv_bannedAnalysis[banKey] = true;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+void MemIplCeStats<TYPE_MBA>::banAnalysis( uint8_t i_dimmSlct )
+{
+    // Two DIMMs per DIMM select on MBA.
+    for ( uint8_t ps = 0; ps < MAX_PORT_PER_MBA; ps++ )
     {
-        HalfRankKey banKey = { i_rank, i };
-        iv_bannedAnalysis[banKey] = true;
+        banAnalysis( i_dimmSlct, ps );
     }
 }
 
 //------------------------------------------------------------------------------
 
 template<>
-void MemIplCeStats<TYPE_MCA>::banAnalysis( const MemRank & i_rank )
+void MemIplCeStats<TYPE_MCA>::banAnalysis( uint8_t i_dimmSlct )
 {
-    for ( uint8_t i = 0; i < MAX_PORT_PER_MCBIST; i++ )
-    {
-        HalfRankKey banKey = { i_rank, i };
-        iv_bannedAnalysis[banKey] = true;
-    }
+    // Only one DIMM per DIMM select on MCA.
+    banAnalysis( i_dimmSlct, 0 );
 }
 
-
-//------------------------------------------------------------------------------
-template<TYPE T>
-int32_t MemIplCeStats<T>::banAnalysis( const MemRank & i_rank,
-                                       uint8_t i_portSlct )
-{
-    int32_t o_rc = SUCCESS;
-
-    do
-    {
-        if ( i_portSlct >= MAX_PORT_PER_MBA  )
-        {
-            PRDF_ERR("[banAnalysis] i_portSlct (0x%02x) is invalid",
-                      i_portSlct );
-            o_rc = FAIL;
-            break;
-        }
-
-        HalfRankKey banKey = { i_rank, i_portSlct };
-        iv_bannedAnalysis[banKey] = true;
-
-    } while (0);
-
-    return o_rc;
-}
 
 //------------------------------------------------------------------------------
 
@@ -134,13 +132,8 @@ int32_t MemIplCeStats<T>::collectStats( const MemRank & i_stopRank )
             uint8_t portSlct = symData[i].symbol.getPortSlct();
 
             // Check if analysis is banned
-            HalfRankKey banKey = { i_stopRank, portSlct };
-
-            // Check if the rank has already been banned. Note that [] will
-            // create an entry if one does not exist, so used find() instead to
-            // check for existence in the map.
-            if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
-                continue;
+            DimmKey banKey = { dimmSlct, portSlct };
+            if ( iv_bannedAnalysis[banKey] ) continue;
 
             // Update iv_ceSymbols with the new symbol data.
             SymbolKey symkey = { symData[i].symbol };
@@ -209,12 +202,8 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
             uint8_t portSlct = symData[i].symbol.getPortSlct();
 
             // Check if analysis is banned.
-            HalfRankKey banKey = { i_stopRank, portSlct };
-
-            bool& isBanned = iv_bannedAnalysis[banKey];
-
-            if ( isBanned )
-                continue;
+            DimmKey banKey = { i_stopRank.getDimmSlct(), portSlct };
+            if ( iv_bannedAnalysis[banKey] ) continue;
 
             // At this point a hard CE was found, callout the symbol.
             MemoryMru memMru ( trgt, symData[i].symbol.getRank(),
@@ -238,11 +227,13 @@ int32_t MemIplCeStats<T>::calloutHardCes( const MemRank & i_stopRank )
                               0, PRDFSIG_MnfgIplHardCE, 0);
             addMruAndCommitErrl( memMru, l_errl);
 
-            // Ban the half rank.
-            isBanned = true;
+            iv_bannedAnalysis[banKey] = true; // ban this DIMM
         }
-    }while(0);
+
+    } while (0);
+
     return o_rc;
+
     #undef PRDF_FUNC
 }
 
@@ -259,13 +250,9 @@ bool MemIplCeStats<T>::calloutCePerDram()
           dramIter != iv_dramMap.end(); dramIter++ )
     {
         // First, check if this half rank is banned from analysis
-        HalfRankKey banKey = { dramIter->first.rank, dramIter->first.portSlct };
-
-        // Check if the rank has already been banned. Note that [] will create
-        // the entry if one does not exist, so used find() instead to check
-        // for existence in the map.
-        if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
-            continue;
+        DimmKey banKey = { dramIter->first.rank.getDimmSlct(),
+                           dramIter->first.portSlct };
+        if ( iv_bannedAnalysis[banKey] ) continue;
 
         // Get the CEs per DRAM threshold.
         uint32_t dramTh = 1, junk0, junk1;
@@ -302,8 +289,8 @@ bool MemIplCeStats<T>::calloutCePerDram()
 
                 addMruAndCommitErrl( memMru, l_errl);
 
-                // Ban the half rank.
-                iv_bannedAnalysis[banKey] = true;
+                iv_bannedAnalysis[banKey] = true; // ban this DIMM
+
                 o_callOutsMade = true;
 
                 // Only one symbol needs to be called out, so exit on first
@@ -329,13 +316,9 @@ bool MemIplCeStats<T>::calloutCePerRank()
           rankIter != iv_rankMap.end(); rankIter++ )
     {
         // First, check if this half rank is banned from analysis
-        HalfRankKey banKey = { rankIter->first.rank, rankIter->first.portSlct };
-
-        // Check if the rank has already been banned. Note that [] will create
-        // the an entry if one does not exist, so used find() instead to check
-        // for existence in the map.
-        if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
-            continue;
+        DimmKey banKey = { rankIter->first.rank.getDimmSlct(),
+                           rankIter->first.portSlct };
+        if ( iv_bannedAnalysis[banKey] ) continue;
 
         // Get the CEs per rank threshold.
         uint32_t junk0, rankTh, junk1;
@@ -371,8 +354,9 @@ bool MemIplCeStats<T>::calloutCePerRank()
                               0, PRDFSIG_MnfgIplRankCTE, 0);
 
                 addMruAndCommitErrl( memMru, l_errl);
-                // Ban the half rank.
-                iv_bannedAnalysis[banKey] = true;
+
+                iv_bannedAnalysis[banKey] = true; // ban this DIMM
+
                 o_callOutsMade = true;
 
                 // Only one symbol needs to be called out, so exit on first
@@ -398,13 +382,9 @@ bool MemIplCeStats<T>::calloutCePerDs()
           dsIter != iv_dsMap.end(); dsIter++ )
     {
         // First, check if this half fimm select is banned from analysis
-        HalfRankKey banKey = { dsIter->first.rank, dsIter->first.portSlct };
-
-        // Check if the rank has already been banned. Note that [] will create
-        // the an entry if one does not exist, so used find() instead to check
-        // for existence in the map.
-        if ( iv_bannedAnalysis.end() != iv_bannedAnalysis.find(banKey) )
-            continue;
+        DimmKey banKey = { dsIter->first.rank.getDimmSlct(),
+                           dsIter->first.portSlct };
+        if ( iv_bannedAnalysis[banKey] ) continue;
 
         // Get the CEs per dimm select threshold.
         uint32_t junk0, junk1, dsTh;
@@ -440,8 +420,9 @@ bool MemIplCeStats<T>::calloutCePerDs()
                               0, PRDFSIG_MnfgIplDsCTE, 0);
 
                 addMruAndCommitErrl( memMru, l_errl);
-                // Ban the half dimm select.
-                iv_bannedAnalysis[banKey] = true;
+
+                iv_bannedAnalysis[banKey] = true; // ban this DIMM
+
                 o_callOutsMade = true;
 
                 // Only one symbol needs to be called out, so exit on first

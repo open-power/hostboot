@@ -65,18 +65,17 @@ class MemIplCeStats
     ~MemIplCeStats() {}
 
     /**
-     * @brief Bans analysis of the given rank.
-     * @param i_rank The rank to ban.
+     * @brief Bans analysis of the given DIMM select.
+     * @param i_dimmSlct The DIMM select.
      */
-    void banAnalysis( const MemRank & i_rank );
+    void banAnalysis( uint8_t i_dimmSlct );
 
     /**
-     * @brief  Bans analysis of the given half rank (Only needed for centaur).
-     * @param  i_rank        The rank.
-     * @param  i_portSlct The port select.
-     * @return Non-SUCCESS if the parameters are invalid, SUCCESS otherwise.
+     * @brief Bans analysis of the given DIMM select and port select.
+     * @param i_dimmSlct The DIMM select.
+     * @param i_portSlct The port select.
      */
-    int32_t banAnalysis( const MemRank & i_rank, uint8_t i_portSlct );
+    void banAnalysis( uint8_t i_dimmSlct, uint8_t i_portSlct );
 
     /**
      * @brief  Will collect all the maintenance statistics and store them for
@@ -136,6 +135,25 @@ class MemIplCeStats
         }
     };
 
+    /** @brief The key to identify a DIMM. This key will be used to ban analysis
+     *         on a DIMM after a DIMM has been called out. */
+    struct DimmKey
+    {
+        uint8_t dimmSlct; ///< The DIMM select
+        uint8_t portSlct; ///< The port select
+
+        /** @brief Overrides the '==' operator. */
+        bool operator==( const DimmKey & i ) const
+        { return ( (dimmSlct == i.dimmSlct) && (portSlct == i.portSlct) ); }
+
+        /** @brief Overrides the '<' operator. */
+        bool operator<( const DimmKey & i ) const
+        {
+            return (  (dimmSlct <  i.dimmSlct) ||
+                     ((dimmSlct == i.dimmSlct) && (portSlct < i.portSlct)) );
+        }
+    };
+
     /** @brief The key type for each entry in iv_dramMap. */
     struct DramKey
     {
@@ -166,8 +184,8 @@ class MemIplCeStats
     typedef std::map<HalfRankKey, uint32_t>  CePerHalfDsMap;
     // data type to collect all symbol statistics for a rank.
     typedef std::map<HalfRankKey, uint32_t>  CePerHalfRankMap;
-    // data type to store banned half ranks on which analysis is not required.
-    typedef std::map<HalfRankKey, bool>      BannedAnalysisMap;
+    // data type to store banned DIMMs on which analysis is not required.
+    typedef std::map<DimmKey,     bool>      BannedAnalysisMap;
     // data type to collect all symbol statistics for a dram.
     typedef std::map<DramKey,     uint32_t>  CePerDramMap;
 
