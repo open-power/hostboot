@@ -179,7 +179,7 @@ ReturnCode platPutScom(const Target<TARGET_TYPE_ALL>& i_target,
         }
         else
         {
-            FAPI_ERR("platPutScom: deviceRead returns error!");
+            FAPI_ERR("platPutScom: deviceWrite returns error!");
             FAPI_ERR("platPutScom failed - Target %s, Addr %.16llX",
                      l_targName, i_address);
                      l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
