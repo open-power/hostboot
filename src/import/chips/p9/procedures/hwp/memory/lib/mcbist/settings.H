@@ -27,7 +27,7 @@
 /// @file settings.H
 /// @brief MCBIST settings, like stop conditions, thresholds, etc
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 2
