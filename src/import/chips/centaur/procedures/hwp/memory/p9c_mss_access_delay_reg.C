@@ -4423,7 +4423,6 @@ extern "C" {
             FAPI_TRY(fapi2::putScom(i_target_mba, l_scom_add, l_data_buffer_64));
         }
 
-        FAPI_INF("access_delay_reg_shmoo is done");
     fapi_try_exit:
         return fapi2::current_err;
     }

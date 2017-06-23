@@ -83,6 +83,9 @@ enum consts : size_t
     BITS_PER_REG = 16,
     BITS_PER_PORT = (LANES_PER_BLOCK * DP18_INSTANCES),
 
+    DATA_BYTES_PER_PORT = 8,
+    SP_BYTES_PER_PORT = 2,
+
 };
 
 enum ohm : size_t

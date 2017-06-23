@@ -196,10 +196,7 @@ extern "C"
         FAPI_TRY(cfg_mcb_dgen(i_target_mba, i_mcbpatt1, i_mcbrotate, i_mcbrotdata));
 
 
-        FAPI_DBG("%s:DEBUG-----Print----Address Gen ", mss::c_str(i_target_mba));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_ADDR_MODES, i_target_mba,  l_new_addr));
-
-        FAPI_DBG("DEBUG----- l_new_addr = %d ", l_new_addr);
 
         if (l_new_addr != 0)
         {
@@ -317,13 +314,8 @@ extern "C"
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target_mba,  l_num_ranks_per_dimm));
 
-        if ((l_num_ranks_per_dimm[0][0] > 0) && (l_num_ranks_per_dimm[0][1] > 0))
-        {
-            FAPI_DBG("%s: Socket 0, 1 Configured", mss::c_str(i_target_mba));
-            l_data_buffer_64.setBit<24>();
-            l_data_buffer_64.setBit<25>();
-        }
-        else if (l_num_ranks_per_dimm[0][0] > 0)
+        // Enables the address engines.  Only one LFSR is required to hit both dimms, 0b11 shown to cause fails (second lfsr is not configured)
+        if (l_num_ranks_per_dimm[0][0] > 0)
         {
             FAPI_DBG("%s: Socket 0 Configured", mss::c_str(i_target_mba));
             l_data_buffer_64.setBit<24>();
@@ -796,16 +788,14 @@ extern "C"
                 for (l_nibble = 0; l_nibble < MAX_NIBBLES_PER_BYTE; l_nibble++)
                 {
                     l_value = l_marray0[l_num];
-                    FAPI_DBG("%s:l_value %d l_num %d", mss::c_str(i_target_mba), l_value, l_num);
                     l_index0 = (l_rank * 20) + (l_byte * 2) + l_nibble;
                     l_index2 = (l_byte * 2) + l_nibble;
                     l_index1 = l_index0;
-                    FAPI_DBG("l_rank %x  l_index0 %x  l_index2 %x", l_rank, l_index0, l_index2);
+                    //FAPI_DBG("l_rank %x  l_index0 %x  l_index2 %x", l_rank, l_index0, l_index2);
 
                     if ((l_value == l_index2) && (l_num < io_num))
                     {
                         strcat(l_str1, "M");
-                        FAPI_DBG("%s:l_value %d l_num %d", mss::c_str(i_target_mba), l_value, l_num);
                         l_num++;
                     }
                     else
@@ -1488,12 +1478,12 @@ extern "C"
 
                         for (i_byte = 0; i_byte < l_max_bytes; i_byte++)
                         {
-                            for (i_nibble = 0; i_nibble < 2; i_nibble++)
+                            for (i_nibble = 0; i_nibble < MAX_NIBBLES_PER_BYTE; i_nibble++)
                             {
                                 l_flag = 0;
                                 l_inter = l_marray[l_num];
 
-                                i_input_index_u8 = (8 * i_byte) + (4 * i_nibble);
+                                i_input_index_u8 = (BITS_PER_BYTE * i_byte) + (BITS_PER_NIBBLE * i_nibble);
 
                                 if ((l_inter == i_input_index_u8) && (l_num < io_num))
                                 {
@@ -1505,8 +1495,8 @@ extern "C"
                                                      l_input_type_e, i_input_index_u8,
                                                      0, o_val));
 
-                                i_byte1 = o_val / 8;
-                                i_nibble1 = o_val % 8;
+                                i_byte1 = o_val / BITS_PER_BYTE;
+                                i_nibble1 = o_val % BITS_PER_BYTE;
 
                                 if (i_nibble1 > 3)
                                 {
@@ -1632,7 +1622,6 @@ extern "C"
 
         FAPI_DBG("%s:SUBTEST %d of %d in Progress.................... ",
                  mss::c_str(i_target_mba), i_testnumber1, i_total_subtest_no);
-        //FAPI_DBG("%s:SUBTEST %d  in Progress.................... ",i_testnumber);
         FAPI_DBG("%s:SUBTEST DETAILS", mss::c_str(i_target_mba));
 
         switch (l_operation_type)
@@ -1740,29 +1729,24 @@ extern "C"
         {
             FAPI_DBG("%s:DONE BIT IS SET FOR CURRENT SUBTEST %d",
                      mss::c_str(i_target_mba), i_testnumber1);
-            //FAPI_DBG("%s:DONE BIT IS SET FOR CURRENT SUBTEST %d",i_testnumber);
         }
 
         if ((l_data_mode == 0) || (l_data_mode == 6) || (l_data_mode == 7) || (l_data_mode == 5))
         {
-            //FAPI_DBG("%s:fixed set and value of datamode is %d",l_data_mode);
             i_sub_info[i_testnumber1].l_fixed_data_enable = 1;
         }
         else if ((l_data_mode == 1) || (l_data_mode == 2) || (l_data_mode == 3) || (l_data_mode == 4))
         {
             i_sub_info[i_testnumber1].l_random_data_enable = 1;
-            //FAPI_DBG("%s:random set and value of datamode is %d",l_data_mode);
         }
 
         if ((l_addr_mode == 0) || (l_addr_mode == 1))
         {
-            //FAPI_DBG("fixed addr and value of addrmode is %d",l_addr_mode);
             i_sub_info[i_testnumber1].l_fixed_addr_enable = 1;
         }
         else if ((l_addr_mode == 2) || (l_addr_mode == 3))
         {
             i_sub_info[i_testnumber1].l_random_addr_enable = 1;
-            //FAPI_DBG("random addr and value of addrmode is %d",l_addr_mode);
         }
 
     fapi_try_exit:
@@ -1796,8 +1780,8 @@ extern "C"
         uint8_t l_mba_position = 0;
         uint8_t l_attr_eff_dimm_type_u8 = 0;
         uint8_t l_dqBitmap[DIMM_DQ_RANK_BITMAP_SIZE] = {0};
-        uint8_t l_dq[8] = { 0 };
-        uint8_t l_sp[2] = { 0 };
+        uint8_t l_dq[DATA_BYTES_PER_PORT] = { 0 };
+        uint8_t l_sp[SP_BYTES_PER_PORT] = { 0 };
         uint16_t l_index0 = 0;
         uint8_t l_index_sp = 0;
         uint16_t l_sp_isdimm = 0xff;
@@ -1842,7 +1826,7 @@ extern "C"
 
                 for (l_index0 = 0; l_index0 < DIMM_DQ_RANK_BITMAP_SIZE; l_index0++)
                 {
-                    if (l_index0 < 8)
+                    if (l_index0 < DATA_BYTES_PER_PORT)
                     {
                         l_dq[l_index0] = l_dqBitmap[l_index0];
 
@@ -1867,9 +1851,9 @@ extern "C"
                     }
                 }
 
-                for(l_index0 = 0; l_index0 < 8; l_index0++)
+                for(l_index0 = 0; l_index0 < DATA_BYTES_PER_PORT; l_index0++)
                 {
-                    FAPI_TRY(l_data_buffer1_64.insertFromRight(l_dq[l_index0], l_index0 * 8, 8));
+                    FAPI_TRY(l_data_buffer1_64.insertFromRight(l_dq[l_index0], l_index0 * BITS_PER_BYTE, BITS_PER_BYTE));
                 }
 
                 if (l_mba_position == 0)
@@ -1988,12 +1972,12 @@ extern "C"
             {
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS01_MCBCMA1Q, l_data_buffer1_64));
 
-                FAPI_TRY(l_data_buffer1_64.insert(l_var, 0, 64));
+                l_data_buffer1_64.insert<0, 64>(l_var);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS01_MCBCMA1Q, l_data_buffer1_64));
 
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer1_64));
 
-                FAPI_TRY(l_data_buffer1_64.insertFromRight(l_spare, 0, 16));
+                l_data_buffer1_64.insertFromRight<0, 16>(l_spare);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer1_64));
 
             }
@@ -2001,12 +1985,12 @@ extern "C"
             {
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS23_MCBCMA1Q, l_data_buffer1_64));
 
-                FAPI_TRY(l_data_buffer1_64.insert(l_var, 0, 64));
+                l_data_buffer1_64.insert<0, 64>(l_var);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMA1Q, l_data_buffer1_64));
 
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer1_64));
 
-                FAPI_TRY(l_data_buffer1_64.insertFromRight(l_spare, 0, 16));
+                l_data_buffer1_64.insertFromRight<0, 16>(l_spare);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer1_64));
 
             }
@@ -2017,22 +2001,22 @@ extern "C"
             if (l_mba_position == 0)
             {
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS01_MCBCMB1Q, l_data_buffer1_64));
-                FAPI_TRY(l_data_buffer1_64.insert(l_var, 0, 64));
+                l_data_buffer1_64.insert<0, 64>(l_var);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS01_MCBCMB1Q, l_data_buffer1_64));
 
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer1_64));
-                FAPI_TRY(l_data_buffer1_64.insertFromRight(l_spare, 16, 16));
+                l_data_buffer1_64.insertFromRight<16, 16>(l_spare);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer1_64));
 
             }
             else
             {
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS23_MCBCMB1Q, l_data_buffer1_64));
-                FAPI_TRY(l_data_buffer1_64.insert(l_var, 0, 64));
+                l_data_buffer1_64.insert<0, 64>(l_var);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMB1Q, l_data_buffer1_64));
 
                 FAPI_TRY(fapi2::getScom(i_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer1_64));
-                FAPI_TRY(l_data_buffer1_64.insertFromRight(l_spare, 16, 16));
+                l_data_buffer1_64.insertFromRight<16, 16>(l_spare);
                 FAPI_TRY(fapi2::putScom(i_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer1_64));
 
             }
