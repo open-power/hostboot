@@ -60,6 +60,7 @@ namespace ISTEP
         MOD_SBE_EXTRACT_RC_HANDLER                        = 0x18,
         MOD_HANDLE_SBE_REG_VALUE                          = 0x19,
         MOD_SBE_PERFORM_UPDATE_CHECK                      = 0x1A,
+        MOD_MSS_ATTR_UPDATE = 0x1B, /* @TODO-RTC:149250-Remove */
     };
 
     /**
