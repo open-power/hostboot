@@ -65,6 +65,15 @@ typedef fapi2::ReturnCode (*p9_perst_phb_FP_t) (const fapi2::Target<fapi2::TARGE
 // Constant definitions
 //-----------------------------------------------------------------------------------
 
+// PCI Nest FIR Register bit26 for SW Freeze enablement
+const uint8_t PHB_NFIR_REG_SW_DEFINED_FREEZE = 26;
+//Maximum number of iterations (So, 20ms * 100 = 2s before timeout)
+const uint32_t MAX_NUM_POLLS = 100;
+//(40000000 ns = 20 ms) to wait for PBCQ inbound/outbound to become inactive
+const uint64_t NANO_SEC_DELAY = 256;
+//400,000 simulation cycles to wait for PBCQ inbound/outbound to become inactive
+const uint64_t SIM_CYC_DELAY = 512;
+
 
 extern "C" {
 
