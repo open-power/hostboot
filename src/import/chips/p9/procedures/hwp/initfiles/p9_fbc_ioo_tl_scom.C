@@ -81,25 +81,18 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1] != literal_0));
         uint64_t l_def_OBUS0_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3] != literal_0)
                                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] != literal_0));
-        fapi2::ATTR_FREQ_O_MHZ_Type l_TGT0_ATTR_FREQ_O_MHZ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_O_MHZ, TGT0, l_TGT0_ATTR_FREQ_O_MHZ));
+        fapi2::ATTR_FREQ_A_MHZ_Type l_TGT1_ATTR_FREQ_A_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_A_MHZ, TGT1, l_TGT1_ATTR_FREQ_A_MHZ));
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_OBUS0_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT0_ATTR_FREQ_O_MHZ[literal_0] *
-                                           literal_12));
-        uint64_t l_def_OBUS0_LO_LIMIT_D = (l_TGT0_ATTR_FREQ_O_MHZ[literal_0] * literal_10);
+        uint64_t l_def_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT1_ATTR_FREQ_A_MHZ * literal_12));
+        uint64_t l_def_OBUS0_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS0_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_154);
-        uint64_t l_def_OBUS1_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT0_ATTR_FREQ_O_MHZ[literal_1] *
-                                           literal_12));
-        uint64_t l_def_OBUS1_LO_LIMIT_D = l_TGT0_ATTR_FREQ_O_MHZ[literal_1];
+        uint64_t l_def_OBUS1_LO_LIMIT_D = l_TGT1_ATTR_FREQ_A_MHZ;
         uint64_t l_def_OBUS1_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_12);
-        uint64_t l_def_OBUS2_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT0_ATTR_FREQ_O_MHZ[literal_2] *
-                                           literal_12));
-        uint64_t l_def_OBUS2_LO_LIMIT_D = (l_TGT0_ATTR_FREQ_O_MHZ[literal_2] * literal_10);
+        uint64_t l_def_OBUS2_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS2_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_74);
-        uint64_t l_def_OBUS3_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT0_ATTR_FREQ_O_MHZ[literal_3] *
-                                           literal_12));
-        uint64_t l_def_OBUS3_LO_LIMIT_D = (l_TGT0_ATTR_FREQ_O_MHZ[literal_3] * literal_10);
+        uint64_t l_def_OBUS3_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS3_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_95);
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE));
@@ -136,7 +129,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS0_FBC_ENABLED && (l_def_OBUS0_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS0_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x36 - (l_def_OBUS0_LO_LIMIT_N / l_def_OBUS0_LO_LIMIT_D)) );
             }
@@ -150,7 +143,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS0_FBC_ENABLED && (l_def_OBUS0_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS0_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x36 - (l_def_OBUS0_LO_LIMIT_N / l_def_OBUS0_LO_LIMIT_D)) );
             }
@@ -174,7 +167,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS1_FBC_ENABLED && (l_def_OBUS1_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS1_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x2A - (l_def_OBUS1_LO_LIMIT_N / l_def_OBUS1_LO_LIMIT_D)) );
             }
@@ -188,7 +181,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS1_FBC_ENABLED && (l_def_OBUS1_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS1_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x2A - (l_def_OBUS1_LO_LIMIT_N / l_def_OBUS1_LO_LIMIT_D)) );
             }
@@ -212,7 +205,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS2_FBC_ENABLED && (l_def_OBUS2_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS2_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x1B - (l_def_OBUS2_LO_LIMIT_N / l_def_OBUS2_LO_LIMIT_D)) );
             }
@@ -226,7 +219,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS2_FBC_ENABLED && (l_def_OBUS2_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS2_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x1B - (l_def_OBUS2_LO_LIMIT_N / l_def_OBUS2_LO_LIMIT_D)) );
             }
@@ -250,7 +243,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS3_FBC_ENABLED && (l_def_OBUS3_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS3_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x22 - (l_def_OBUS3_LO_LIMIT_N / l_def_OBUS3_LO_LIMIT_D)) );
             }
@@ -264,7 +257,7 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x40 );
             }
 
-            if ((l_def_OBUS3_FBC_ENABLED && (l_def_OBUS3_LO_LIMIT_R == literal_1)))
+            if ((l_def_OBUS3_FBC_ENABLED && (l_def_LO_LIMIT_R == literal_1)))
             {
                 l_scom_buffer.insert<36, 8, 56, uint64_t>((literal_0x22 - (l_def_OBUS3_LO_LIMIT_N / l_def_OBUS3_LO_LIMIT_D)) );
             }
