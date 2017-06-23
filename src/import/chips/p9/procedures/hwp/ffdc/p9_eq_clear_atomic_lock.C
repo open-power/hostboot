@@ -32,6 +32,7 @@
 /// *HWP Level           : 2
 /// *HWP Consumed by     : SBE, HB
 
+#include <fapi2.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
 #include <p9_eq_clear_atomic_lock.H>
