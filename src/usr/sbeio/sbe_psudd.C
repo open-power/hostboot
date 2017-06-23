@@ -322,7 +322,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
     do
     {
         //wait for request to be completed
-        errl = pollForPsuComplete(i_target,i_timeout);
+        errl = pollForPsuComplete(i_target,i_timeout,i_pPsuRequest);
         if (errl) break;  // return with error
 
         //read the response registers
@@ -455,7 +455,8 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
  * @brief poll for PSU to complete command
  */
 errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
-                                      const uint64_t i_timeout)
+                                      const uint64_t i_timeout,
+                                      psuCommand* i_pPsuRequest)
 {
     errlHndl_t errl = NULL;
 
@@ -488,15 +489,18 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
              * @errortype
              * @moduleid     SBEIO_PSU
              * @reasoncode   SBEIO_PSU_RESPONSE_TIMEOUT
-             * @userdata1    Timeout in NS
+             * @userdata1[00:31]    Timeout in NS
+             * @userdata1[32:63]    Processor Target
+             * @userdata2    Failing Request
              * @devdesc      Timeout waiting for PSU command to complete
              * @custdesc     Firmware error communicating with boot device
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_PSU,
                                  SBEIO_PSU_RESPONSE_TIMEOUT,
-                                 i_timeout,
-                                 0);
+                                 TWO_UINT32_TO_UINT64(i_timeout,
+                                    TARGETING::get_huid(i_target)),
+                                 i_pPsuRequest->mbxReg0);
 
             void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
             if(l_ffdcPkg != NULL)

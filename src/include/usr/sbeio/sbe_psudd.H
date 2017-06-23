@@ -575,11 +575,13 @@ class SbePsu
          *
          * @param[in]  i_target       Master proc to use for scoms
          * @param[in]  i_timeout      Time out for response
+         * @param[in]  i_pPsuRequest  PSU request (for FFDC)
          *
          * @return errlHndl_t Error log handle on failure.
          */
         errlHndl_t pollForPsuComplete(TARGETING::Target * i_target,
-                                      const uint64_t i_timeout);
+                                      const uint64_t i_timeout,
+                                      psuCommand* i_pPsuRequest);
         /**
          * @brief Read Scom wrapper
          *
