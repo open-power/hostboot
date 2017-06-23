@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_MCBIST_H_
@@ -1023,7 +1023,6 @@ inline subtest_t<T> init_subtest()
 /// - ENABLE_SPEC_ATTN - disabled
 /// - ENABLE_HOST_ATTN - enabled
 ///
-
 template< fapi2::TargetType T, typename TT = mcbistTraits<T> >
 class program
 {
@@ -1067,6 +1066,7 @@ class program
 
         }
 
+        ///
         /// @brief Change the DIMM select in the address mapping
         /// @param[in] i_bitmap DIMM select bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1077,6 +1077,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the MRANK0 address mapping when not in 5D mode
         /// @param[in] i_bitmap MRANK0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1087,6 +1088,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the MRANK0 address mapping when in 5D mode
         /// @param[in] i_bitmap MRANK0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1097,6 +1099,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the MRANK1 address mapping when not in 5D mode
         /// @param[in] i_bitmap MRANK1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1107,6 +1110,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the MRANK1 address mapping when in 5D mode
         /// @param[in] i_bitmap MRANK1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1117,6 +1121,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the MRANK2 address mapping when in 5D mode
         /// @param[in] i_bitmap MRANK2 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1127,6 +1132,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the SRANK0 address mapping when in 5D mode
         /// @param[in] i_bitmap SRANK0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1137,6 +1143,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the SRANK1 address mapping
         /// @param[in] i_bitmap SRANK1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1147,6 +1154,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the SRANK2 address mapping
         /// @param[in] i_bitmap SRANK2 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1157,6 +1165,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the BANK2 address mapping
         /// @param[in] i_bitmap BANK2 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1167,6 +1176,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the BANK1 address mapping
         /// @param[in] i_bitmap BANK1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1177,6 +1187,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the BANK0 address mapping
         /// @param[in] i_bitmap BANK0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1187,6 +1198,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the BANK_GROUP1 address mapping
         /// @param[in] i_bitmap BANK_GROUP1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1197,6 +1209,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the BANK_GROUP0 address mapping
         /// @param[in] i_bitmap BANK_GROUP0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1207,6 +1220,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW17 address mapping
         /// @param[in] i_bitmap ROW17 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1217,6 +1231,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW16 address mapping
         /// @param[in] i_bitmap ROW16 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1227,6 +1242,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW15 address mapping
         /// @param[in] i_bitmap ROW15 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1237,6 +1253,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW14 address mapping
         /// @param[in] i_bitmap ROW14 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1247,6 +1264,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW13 address mapping
         /// @param[in] i_bitmap ROW13 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1258,17 +1276,19 @@ class program
             return;
         }
 
-        ///CFG_AMAP_ROW12     = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12     ,
+        ///
         /// @brief Change the ROW12 address mapping
         /// @param[in] i_bitmap ROW12 bit map in the address counter
         /// @note Assumes data is right-aligned
         ///
         inline void change_row12_bit( const uint64_t i_bitmap )
         {
+            // CFG_AMAP_ROW12     = MCBIST_MCBAMR1A0Q_CFG_AMAP_ROW12     ,
             iv_addr_map1.insertFromRight<TT::CFG_AMAP_ROW12, TT::CFG_AMAP_ROW12_LEN>(i_bitmap);
             return;
         }
 
+        ///
         /// @brief Change the ROW11 address mapping
         /// @param[in] i_bitmap ROW11 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1279,6 +1299,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW10 address mapping
         /// @param[in] i_bitmap ROW10 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1289,6 +1310,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW9 address mapping
         /// @param[in] i_bitmap ROW9 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1299,6 +1321,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW8 address mapping
         /// @param[in] i_bitmap ROW8 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1309,6 +1332,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW7 address mapping
         /// @param[in] i_bitmap ROW7 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1319,6 +1343,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW6 address mapping
         /// @param[in] i_bitmap ROW6 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1329,6 +1354,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW5 address mapping
         /// @param[in] i_bitmap ROW5 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1339,6 +1365,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW4 address mapping
         /// @param[in] i_bitmap ROW4 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1349,6 +1376,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW3 address mapping
         /// @param[in] i_bitmap ROW3 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1359,6 +1387,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW2 address mapping
         /// @param[in] i_bitmap ROW2 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1369,6 +1398,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW1 address mapping
         /// @param[in] i_bitmap ROW1 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1379,6 +1409,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the ROW0 address mapping
         /// @param[in] i_bitmap ROW0 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1389,6 +1420,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the COL9 address mapping
         /// @param[in] i_bitmap COL9 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1399,6 +1431,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the COL8 address mapping
         /// @param[in] i_bitmap COL8 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1409,6 +1442,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the COL7 address mapping
         /// @param[in] i_bitmap COL7 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -1419,6 +1453,7 @@ class program
             return;
         }
 
+        ///
         /// @brief Change the COL6 address mapping
         /// @param[in] i_bitmap COL6 bit map in the address counter
         /// @note Assumes data is right-aligned
@@ -2067,14 +2102,16 @@ class program
         {
             iv_control.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(i_ports);
             FAPI_INF("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
-
             return;
         }
 
         ///
         /// @brief Process mcbist errors
-        /// @param[in] i_target fapi2::Target<T> of the MCBIST
+        /// @tparam MCBIST target type
+        /// @tparam T fapi2::TargetType representing the fapi2 target which
+        /// contains the MCBIST engine (e.g., fapi2::TARGET_TYPE_MCBIST)
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+        /// This shouldn't be called in firmware? Check with PRD
         ///
         inline fapi2::ReturnCode process_errors( const fapi2::Target<T> i_target ) const
         {
@@ -2084,7 +2121,7 @@ class program
                 fapi2::buffer<uint64_t> l_data;
                 uint64_t l_port = 0;
                 uint64_t l_subtest = 0;
-                FAPI_TRY( mss::getScom(i_target, TT::MCBSTATQ_REG, l_data) );
+                FAPI_TRY( mss::getScom(i_target, TT::MCBSTATQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
                 l_data.extractToRight<TT::LOGGED_ERROR_ON_PORT_INDICATOR, TT::LOGGED_ERROR_ON_PORT_INDICATOR_LEN>(l_port);
                 l_data.extractToRight<TT::SUBTEST_NUM_INDICATOR, TT::SUBTEST_NUM_INDICATOR_LEN>(l_subtest);
 
@@ -2093,7 +2130,7 @@ class program
                              .set_TARGET(i_target)
                              .set_PORT(mss::first_bit_set(l_port))
                              .set_SUBTEST(l_subtest),
-                             "MCBIST error on port %d subtest %d", mss::first_bit_set(l_port), l_subtest );
+                             "%s MCBIST error on port %d subtest %d", mss::c_str(i_target), mss::first_bit_set(l_port), l_subtest );
             }
 
             // Check for UE errors
@@ -2101,18 +2138,18 @@ class program
                 fapi2::buffer<uint64_t> l_read0;
                 fapi2::buffer<uint64_t> l_read1;
 
-                FAPI_TRY( mss::getScom(i_target, TT::SRERR0_REG, l_read0) );
-                FAPI_TRY( mss::getScom(i_target, TT::SRERR1_REG, l_read1) );
+                FAPI_TRY( mss::getScom(i_target, TT::SRERR0_REG, l_read0), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( mss::getScom(i_target, TT::SRERR1_REG, l_read1), "%s Failed getScom", mss::c_str(i_target) );
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
                              fapi2::MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN()
                              .set_TARGET(i_target)
                              .set_STATUS0(l_read0)
                              .set_STATUS1(l_read1),
-                             "MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", l_read0, l_read1 );
+                             "%s MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", mss::c_str(i_target), l_read0, l_read1 );
             }
 
-            FAPI_INF("Execution success - no errors seen from MCBIST program");
+            FAPI_INF("%s Execution success - no errors seen from MCBIST program", mss::c_str(i_target));
 
         fapi_try_exit:
             return fapi2::current_err;
