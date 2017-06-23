@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC modal symbol count (MBSSYMEC*Q) registers
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_MODAL_SYMBOL_COUNT_H_
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
@@ -228,8 +229,18 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
             return ( read_index8(i_target, o_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_INDEX_PASSED()
+                         .set_INDEX(i_index)
+                         .set_FUNCTION(SYMBOL_COUNT_READ),
+                         "%s Invalid index passed to fwms::ecc::modal_symbol_count::read (%d)",
+                         mss::c_str(i_target),
+                         i_index);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -411,8 +422,18 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
             return ( write_index8(i_target, i_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_INDEX_PASSED()
+                         .set_INDEX(i_index)
+                         .set_FUNCTION(SYMBOL_COUNT_WRITE),
+                         "%s Invalid index passed to fwms::ecc::modal_symbol_count::write (%d)",
+                         mss::c_str(i_target),
+                         i_index);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -431,6 +452,8 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = eccTraits<T> >
 inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index, const uint64_t i_value )
 {
+    static_assert ( TT::MODAL_SYMBOL_COUNTERS_PER_REG  <= 8,
+                    "mss::ecc_count::modal_symbol_count: Modal symbol count field index failed range check" );
     const uint64_t l_field = i_index % TT::MODAL_SYMBOL_COUNTERS_PER_REG;
 
     switch (l_field)
@@ -468,7 +491,7 @@ inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index,
             break;
 
         default:
-            // shouldn't happen due to modulo above, but here just in case
+            // Shouldn't happen due to modulo above, but here just in case - JLH
             FAPI_ERR("Modal symbol count field index failed range check");
             fapi2::Assert(false);
             break;
@@ -494,6 +517,8 @@ template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCBIST, typename TT = eccTrai
 inline void get_count( const fapi2::buffer<uint64_t>& i_data, const uint64_t i_index, uint64_t& o_value )
 {
     const uint64_t l_field = i_index % TT::MODAL_SYMBOL_COUNTERS_PER_REG;
+    static_assert ( TT::MODAL_SYMBOL_COUNTERS_PER_REG  <= 8,
+                    "mss::ecc_count::get_count: Modal symbol count field index failed range check" );
 
     switch (l_field)
     {
