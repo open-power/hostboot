@@ -45,6 +45,11 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initserviceif.H>
 
+#include    <hwas/common/hwasCallout.H> //@fixme-RTC:149250-Remove
+
+// SBE
+#include    <sbeif.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -99,12 +104,12 @@ const uint8_t INVALID_PROC = 0xFF;
  *
  *  If SBE Update is needed, sync all attributes to the FSP and perform update.
  *
- * @param  none
+ * @param[in/out] io_istepErr  Error for this istep
  *
  * @return errlHndl_t       valid errlHndl_t handle if there was an error
  *                          NULL if no errors;
  */
-errlHndl_t check_proc0_memory_config()
+errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 {
     errlHndl_t l_err = nullptr;
     bool l_updateNeeded = false;
@@ -184,6 +189,54 @@ errlHndl_t check_proc0_memory_config()
                   "dimms behind it",
                   get_huid(l_procIds[l_proc0].proc) );
 
+        //@fixme-RTC:149250-Remove when we have XOR Mask Support
+        do
+        {
+        // determine some numbers to help figure out what's up..
+        PredicateHwas l_present;
+        l_present.present(true);
+        TargetHandleList l_plist;
+        PredicatePostfixExpr l_checkExprPresent;
+        l_checkExprPresent.push(&l_dimm).push(&l_present).And();
+        targetService().getAssociated(l_plist, l_procIds[l_proc0].proc,
+                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
+                &l_checkExprPresent);
+        uint32_t dimms_present = l_plist.size();
+
+        /*@
+         * @errortype
+         * @severity          ERRL_SEV_UNRECOVERABLE
+         * @moduleid          MOD_MSS_ATTR_UPDATE
+         * @reasoncode        RC_MIN_HW_CHECK_FAILED
+         * @devdesc           check_proc0_memory_config found no
+         *                    functional dimms behind proc0
+         * @custdesc          A problem occurred during the IPL of the
+         *                    system: Found no functional dimm cards.
+         * @userdata1[00:31]  HUID of proc0
+         * @userdata2[00:31]  number of present, non-functional dimms
+         */
+        const uint64_t userdata1 =
+            (static_cast<uint64_t>(get_huid(l_procIds[l_proc0].proc)) << 32);
+        const uint64_t userdata2 =
+            (static_cast<uint64_t>(dimms_present) << 32);
+        l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                              MOD_MSS_ATTR_UPDATE,
+                              RC_MIN_HW_CHECK_FAILED,
+                              userdata1,
+                              userdata2);
+
+        //  call out the procedure to find the deconfigured part.
+        l_err->addProcedureCallout( HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
+                                    HWAS::SRCI_PRIORITY_HIGH );
+
+        //  link this one to the istep and commit
+        io_istepErr.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+        // errl is now NULL
+
+        break;
+        //@fixme-RTC:149250-Remove when we have XOR Mask Support
+
         // Loop through all procs to find ones for memory remap
         for (i = 0; i < l_procsList.size(); i++)
         {
@@ -240,6 +293,8 @@ errlHndl_t check_proc0_memory_config()
 
         // Check that a victim was found
         assert( l_victim < l_procsList.size(), "No swap match found" );
+
+        } while(0); //@fixme-RTC:149250-Remove when we have XOR Mask Support
     }
 
     // Loop through all procs detecting that IDs are set correctly
@@ -248,7 +303,11 @@ errlHndl_t check_proc0_memory_config()
         if((l_procIds[i].groupId != l_procIds[i].groupIdEff) ||
            (l_procIds[i].chipId != l_procIds[i].chipIdEff) )
         {
-            // Update attributes @TODO RTC: 176068
+            // Update attributes
+            (l_procIds[i].proc)->
+                setAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(l_procIds[i].groupId);
+            (l_procIds[i].proc)->
+                setAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(l_procIds[i].chipId);
 
             l_updateNeeded = true;
         }
@@ -256,8 +315,44 @@ errlHndl_t check_proc0_memory_config()
 
     if(l_updateNeeded)
     {
-        // Sync all attributes to the FSP @TODO RTC: 176068
-        // Rebuild SBE image and trigger reconfig loop @TODO RTC: 176068
+        do
+        {
+            // Sync all attributes to the FSP
+            l_err = syncAllAttributesToFsp();
+            if( l_err )
+            {
+                // Something failed on the sync.  Commit the error here
+                // and continue with the Re-IPL Request
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"check_proc0_memory_config() - Error "
+                          "syncing attributes to FSP, RC=0x%X, PLID=0x%lX",
+                          ERRL_GETRC_SAFE(l_err),
+                          ERRL_GETPLID_SAFE(l_err));
+
+                io_istepErr.addErrorDetails(l_err);
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          INFO_MRK"check_proc0_memory_config() - Sync "
+                          "Attributes to FSP" );
+            }
+
+            // Rebuild SBE image and trigger reconfig loop
+            l_err = SBE::updateProcessorSbeSeeproms();
+
+            if( l_err )
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"check_proc0_memory_config() - Error calling "
+                          "updateProcessorSbeSeeproms, RC=0x%X, PLID=0x%lX",
+                          ERRL_GETRC_SAFE(l_err),
+                          ERRL_GETPLID_SAFE(l_err));
+
+                break;
+            }
+        } while(0);
     }
 
     return l_err;
@@ -275,7 +370,7 @@ void*    call_mss_attr_update( void *io_pArgs )
     errlHndl_t l_err = NULL;
 
     // Check the memory on proc0 chip
-    l_err = check_proc0_memory_config();
+    l_err = check_proc0_memory_config(l_StepError);
 
     if (l_err)
     {
