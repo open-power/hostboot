@@ -28,9 +28,9 @@
 /// @brief Top level API for MSS ECC
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_ECC_H_
@@ -521,6 +521,7 @@ inline fapi2::ReturnCode get_per_symbol_error_counts( const fapi2::Target<T>& i_
 {
     fapi2::buffer<uint64_t> l_buffer;
     uint64_t l_count = 0;
+    o_error_counts.clear();
 
     for (uint64_t l_index = 0; l_index < TT::NUM_MBSSYM_REGS; ++l_index)
     {

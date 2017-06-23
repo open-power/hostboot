@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC hardware mark store registers
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_HW_MARK_STORE_H_
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 #include <lib/ecc/ecc_traits.H>
 #include <generic/memory/lib/utils/scom.H>
+#include <lib/shared/mss_const.H>
 
 namespace mss
 {
@@ -212,8 +213,19 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target,
             return ( read_rank7(i_target, o_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK_PASSED()
+                         .set_RANK(i_rank)
+                         .set_TARGET(i_target)
+                         .set_FUNCTION(HWMS_READ),
+                         "%s Invalid rank passed to fwms::ecc::hwms::read (%d)",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -379,8 +391,19 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
             return ( write_rank7(i_target, i_data) );
 
         default:
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
+            FAPI_ASSERT( false,
+                         fapi2::MSS_INVALID_RANK_PASSED()
+                         .set_RANK(i_rank)
+                         .set_TARGET(i_target)
+                         .set_FUNCTION(HWMS_WRITE),
+                         "%s Invalid rank passed to fwms::ecc::hwms::write(%d)",
+                         mss::c_str(i_target),
+                         i_rank);
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

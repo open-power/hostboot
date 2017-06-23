@@ -128,6 +128,24 @@ enum times
     FULL_DLL_CAL_DELAY      = 37382,    ///< Full DLL calibration (in ddphy_nck cycles)
 };
 
+///
+/// @brief ID codes so we can lookup which function triggered the ffdc fail
+///
+enum ffdc_function_codes
+{
+    // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
+    FWMS_READ = 30,
+    FWMS_WRITE = 31,
+
+    // Used in hw_mark_store.H for MSS_INVALID_RANK_PASSED
+    HWMS_READ = 40,
+    HWMS_WRITE = 41,
+
+    // MSS_INVALID_INDEX_PASSED
+    SYMBOL_COUNT_READ = 50,
+    SYMBOL_COUNT_WRITE = 51,
+};
+
 enum states
 {
     LOW = 0,

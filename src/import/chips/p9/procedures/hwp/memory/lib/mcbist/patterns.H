@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,10 @@
 /// @file patterns.H
 /// @brief Static definition of MCBIST patterns
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_MCBIST_PATTERNS_
@@ -84,7 +84,7 @@ constexpr uint64_t NO_RANDOM24_SEED_MAP = LAST_RANDOM24_SEED_MAP + 1;
 constexpr uint64_t RANDOM24_SEED_MAP_FIELD_LEN = 4;
 
 
-/// Vector of cache lines, seaprated in to two 64B chunks
+/// Vector of cache lines, separated in to two 64B chunks
 typedef std::pair<uint64_t, uint64_t> cache_line;
 typedef std::vector< cache_line > pattern;
 extern const std::vector< pattern > patterns;
@@ -97,9 +97,8 @@ extern const std::vector< random24_data_seed > random24_data_seeds;
 typedef std::vector< uint64_t > random24_seed_map;
 extern const std::vector< random24_seed_map > random24_seed_maps;
 
+}// mcbist
 
-}
-
-}
+}// mss
 #endif
 

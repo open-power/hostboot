@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC MBS error vector trap registers (MBSEVR*Q)
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_MBS_ERROR_VECTOR_TRAP_H_
@@ -65,7 +65,7 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<u
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     FAPI_TRY( mss::getScom(l_mcbist_target, (TT::ERROR_VECTOR_REGS[l_port]), o_data) );
-    FAPI_INF("read: 0x%016lx", o_data);
+    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -85,7 +85,7 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::b
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     FAPI_TRY( mss::putScom(l_mcbist_target, (TT::ERROR_VECTOR_REGS[l_port]), i_data) );
-    FAPI_INF("write: 0x%016lx", i_data);
+    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -115,7 +115,7 @@ inline void set_nce_galois( const fapi2::Target<T>& i_target,
         io_data.insertFromRight<TT::P1_NCE_GALOIS, TT::P1_NCE_GALOIS_LEN>(i_value);
     }
 
-    FAPI_INF("set_nce_galois: 0x%016lx", i_value);
+    FAPI_INF("%s set_nce_galois: 0x%016lx", mss::c_str(i_target), i_value);
 }
 
 ///
@@ -143,7 +143,7 @@ inline void get_nce_galois( const fapi2::Target<T>& i_target,
         i_data.extractToRight<TT::P1_NCE_GALOIS, TT::P1_NCE_GALOIS_LEN>(o_value);
     }
 
-    FAPI_INF("get_nce_galois: 0x%016lx", o_value);
+    FAPI_INF("%s get_nce_galois: 0x%016lx", mss::c_str(i_target), o_value);
 }
 
 ///
@@ -171,7 +171,7 @@ inline void set_nce_magnitude( const fapi2::Target<T>& i_target,
         io_data.insertFromRight<TT::P1_NCE_MAGNITUDE, TT::P1_NCE_MAGNITUDE_LEN>(i_value);
     }
 
-    FAPI_INF("set_nce_magnitude: 0x%016lx", i_value);
+    FAPI_INF("%s set_nce_magnitude: 0x%016lx", mss::c_str(i_target), i_value);
 }
 
 ///
@@ -199,7 +199,7 @@ inline void get_nce_magnitude( const fapi2::Target<T>& i_target,
         i_data.extractToRight<TT::P1_NCE_MAGNITUDE, TT::P1_NCE_MAGNITUDE_LEN>(o_value);
     }
 
-    FAPI_INF("get_nce_magnitude: 0x%016lx", o_value);
+    FAPI_INF("%s get_nce_magnitude: 0x%016lx", mss::c_str(i_target), o_value);
 }
 
 ///
@@ -227,7 +227,7 @@ inline void set_tce_galois( const fapi2::Target<T>& i_target,
         io_data.insertFromRight<TT::P1_TCE_GALOIS, TT::P1_TCE_GALOIS_LEN>(i_value);
     }
 
-    FAPI_INF("set_tce_galois: 0x%016lx", i_value);
+    FAPI_INF("%s set_tce_galois: 0x%016lx", mss::c_str(i_target), i_value);
 }
 
 ///
@@ -255,7 +255,7 @@ inline void get_tce_galois( const fapi2::Target<T>& i_target,
         i_data.extractToRight<TT::P1_TCE_GALOIS, TT::P1_TCE_GALOIS_LEN>(o_value);
     }
 
-    FAPI_INF("get_tce_galois: 0x%016lx", o_value);
+    FAPI_INF("%s get_tce_galois: 0x%016lx", mss::c_str(i_target), o_value);
 }
 
 ///
@@ -283,7 +283,7 @@ inline void set_tce_magnitude( const fapi2::Target<T>& i_target,
         io_data.insertFromRight<TT::P1_TCE_MAGNITUDE, TT::P1_TCE_MAGNITUDE_LEN>(i_value);
     }
 
-    FAPI_INF("set_tce_magnitude: 0x%016lx", i_value);
+    FAPI_INF("%s set_tce_magnitude: 0x%016lx", mss::c_str(i_target), i_value);
 }
 
 ///
@@ -311,7 +311,7 @@ inline void get_tce_magnitude( const fapi2::Target<T>& i_target,
         i_data.extractToRight<TT::P1_TCE_MAGNITUDE, TT::P1_TCE_MAGNITUDE_LEN>(o_value);
     }
 
-    FAPI_INF("get_tce_magnitude: 0x%016lx", o_value);
+    FAPI_INF("%s get_tce_magnitude: 0x%016lx", mss::c_str(i_target), o_value);
 }
 
 } // close namespace mbs_error_vector_trap

@@ -28,9 +28,9 @@
 /// @brief Translate ECC mark Galois codes to symbol and DQ
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_ECC_GALOIS_H_
@@ -57,14 +57,17 @@ fapi2::ReturnCode galois_to_symbol( const uint8_t i_galois, uint8_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2galois, (TT::symbol2galois + MAX_DQ_BITS), i_galois);
 
-    if (l_p == (TT::symbol2galois + MAX_DQ_BITS))
-    {
-        FAPI_ERR("galois_to_symbol: invalid Galois code: 0x%02x", i_galois);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( l_p != (TT::symbol2galois + MAX_DQ_BITS),
+                 fapi2::MSS_INVALID_GALOIS_TO_SYMBOL()
+                 .set_GALOIS(i_galois),
+                 "Invalid Galois code: 0x%02x",
+                 i_galois);
 
     o_symbol = (l_p - TT::symbol2galois);
+
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -78,14 +81,17 @@ fapi2::ReturnCode galois_to_symbol( const uint8_t i_galois, uint8_t& o_symbol )
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
 fapi2::ReturnCode symbol_to_galois( const uint8_t i_symbol, uint8_t& o_galois )
 {
-    if (i_symbol >= MAX_DQ_BITS)
-    {
-        FAPI_ERR("symbol_to_galois: invalid symbol: %d", i_symbol);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( i_symbol < MAX_DQ_BITS,
+                 fapi2::MSS_INVALID_SYMBOL_FOR_GALOIS()
+                 .set_SYMBOL(i_symbol),
+                 "Invalid symbol: %d",
+                 i_symbol);
 
     o_galois = TT::symbol2galois[i_symbol];
+
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -101,14 +107,17 @@ fapi2::ReturnCode dq_to_symbol( const uint8_t i_dq, uint8_t& o_symbol )
 {
     const auto& l_p = std::find(TT::symbol2dq, (TT::symbol2dq + MAX_DQ_BITS), i_dq);
 
-    if (l_p == (TT::symbol2dq + MAX_DQ_BITS))
-    {
-        FAPI_ERR("dq_to_symbol: invalid DQ index: %d", i_dq);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( l_p != (TT::symbol2dq + MAX_DQ_BITS),
+                 fapi2::MSS_INVALID_DQ_TO_SYMBOL()
+                 .set_DQ(i_dq),
+                 "Invalid DQ index: %d",
+                 i_dq);
 
     o_symbol = (l_p - TT::symbol2dq);
+
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -122,14 +131,17 @@ fapi2::ReturnCode dq_to_symbol( const uint8_t i_dq, uint8_t& o_symbol )
 template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = eccTraits<T> >
 fapi2::ReturnCode symbol_to_dq( const uint8_t i_symbol, uint8_t& o_dq )
 {
-    if (i_symbol >= MAX_DQ_BITS)
-    {
-        FAPI_ERR("symbol_to_dq: invalid symbol: %d", i_symbol);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( i_symbol < MAX_DQ_BITS,
+                 fapi2::MSS_INVALID_SYMBOL_TO_DQ()
+                 .set_SYMBOL(i_symbol),
+                 "symbol_to_dq: invalid symbol: %d",
+                 i_symbol);
 
     o_dq = TT::symbol2dq[i_symbol];
+
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -145,8 +157,8 @@ fapi2::ReturnCode galois_to_dq( const uint8_t i_galois, uint8_t& o_dq  )
 {
     uint8_t l_symbol = 0;
 
-    FAPI_TRY( galois_to_symbol<T>(i_galois, l_symbol) );
-    FAPI_TRY( symbol_to_dq<T>(l_symbol, o_dq) );
+    FAPI_TRY( galois_to_symbol<T>(i_galois, l_symbol), "Failed galois_to_symbol");
+    FAPI_TRY( symbol_to_dq<T>(l_symbol, o_dq), "Failed symbol_to_dq" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -165,8 +177,8 @@ fapi2::ReturnCode dq_to_galois( const uint8_t i_dq, uint8_t& o_galois )
 {
     uint8_t l_symbol = 0;
 
-    FAPI_TRY( mss::ecc::dq_to_symbol<T>(i_dq, l_symbol) );
-    FAPI_TRY( mss::ecc::symbol_to_galois<T>(l_symbol, o_galois) );
+    FAPI_TRY( mss::ecc::dq_to_symbol<T>(i_dq, l_symbol), "Failed dq_to_symbol");
+    FAPI_TRY( mss::ecc::symbol_to_galois<T>(l_symbol, o_galois) , "Failed symbol_to_galois" );
 
 fapi_try_exit:
     return fapi2::current_err;

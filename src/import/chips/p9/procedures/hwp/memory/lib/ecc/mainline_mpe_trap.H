@@ -28,9 +28,9 @@
 /// @brief Subroutines for the MC mainline mpe address trap registers (MBNCER*Q)
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_MAINLINE_MPE_TRAP_H_
@@ -66,7 +66,7 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<u
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     FAPI_TRY( mss::getScom(l_mcbist_target, (TT::MAINLINE_MPE_REGS[l_port]), o_data) );
-    FAPI_INF("read: 0x%016lx", o_data);
+    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -86,7 +86,7 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::b
     const auto& l_port = mss::relative_pos<fapi2::TARGET_TYPE_MCBIST>(i_target);
 
     FAPI_TRY( mss::putScom(l_mcbist_target, (TT::MAINLINE_MPE_REGS[l_port]), i_data) );
-    FAPI_INF("write: 0x%016lx", i_data);
+    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
