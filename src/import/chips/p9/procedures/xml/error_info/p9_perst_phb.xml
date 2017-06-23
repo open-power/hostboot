@@ -39,4 +39,50 @@
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_PHB_PERST_PBCQ_CQ_NOT_IDLE</rc>
+    <description>
+      PBCQ CQ did not go to idle after getting reset.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NFIR_ADDR</ffdc>
+    <ffdc>NFIR_DATA</ffdc>
+    <ffdc>PHB_RESET_ADDR</ffdc>
+    <ffdc>PHB_RESET_DATA</ffdc>
+    <ffdc>CQ_STAT_ADDR</ffdc>
+    <ffdc>CQ_STAT_DATA</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_PHB_PERST_NFIR_NOT_CLEARED</rc>
+    <description>
+      Attempt to clear PCI Nest FIR Register is unsuccessful.
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>NFIR_ADDR</ffdc>
+    <ffdc>NFIR_DATA</ffdc>
+    <ffdc>PFIR_ADDR</ffdc>
+    <ffdc>PFIR_DATA</ffdc>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <!-- Add hw callout -->
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

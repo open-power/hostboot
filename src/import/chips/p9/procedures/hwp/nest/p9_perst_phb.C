@@ -65,7 +65,10 @@ extern "C"
     fapi2::ReturnCode p9_perst_phb(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const PERST_ACTION i_perst_action)
     {
         fapi2::buffer<uint64_t> l_buf = 0;
+        fapi2::buffer<uint64_t> l_buf2 = 0;
+        fapi2::buffer<uint64_t> l_buf3 = 0;
         uint8_t l_phb_id = 0;
+        uint32_t l_poll_counter; // # of iterations while polling for inbound_active and outbound_active
 
 
         //Get the PHB id
@@ -92,6 +95,8 @@ extern "C"
             l_buf.clearBit<PHB_PHBRESET_REG_PE_ETU_RESET>();
             FAPI_DBG("  ETU Reset Register %016lX", l_buf());
             FAPI_TRY(fapi2::putScom(i_target, PHB_PHBRESET_REG, l_buf));
+
+            FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
         }
 
 
@@ -120,12 +125,90 @@ extern "C"
             FAPI_DBG("  Value to be written to %016lX - %016lX", PHB_CORE_RESET_REGISTER, l_buf());
             FAPI_TRY(p9_phb_hv_access(i_target, PHB_CORE_RESET_REGISTER, false, false, l_buf));
 
+            //Force PEC freeze by setting SW Freeze bit in PCI Nest FIR Register
+            l_buf = 0;
+            l_buf.setBit<PHB_NFIR_REG_SW_DEFINED_FREEZE>();
+            FAPI_DBG("PHB%i: PCI Nest FIR Register %#lx", l_phb_id, l_buf());
+            FAPI_TRY(fapi2::putScom(i_target, PHB_NFIR_REG_OR, l_buf), "Error from putScom (0x%.16llX)", PHB_NFIR_REG_OR);
+
             //Put ETU into reset
             FAPI_DBG("  Put ETU into reset.");
             l_buf = 0;
             l_buf.setBit<PHB_PHBRESET_REG_PE_ETU_RESET>();
             FAPI_DBG("  ETU Reset Register %016lX", l_buf());
             FAPI_TRY(fapi2::putScom(i_target, PHB_PHBRESET_REG, l_buf));
+
+            //Check CQ Status
+            l_poll_counter = 0; //Reset poll counter
+
+            while (l_poll_counter < MAX_NUM_POLLS)
+            {
+                l_poll_counter++;
+                FAPI_TRY(fapi2::delay(NANO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+                //Read PBCQ General Status Register and put contents into l_buf
+                FAPI_TRY(fapi2::getScom(i_target, PHB_CQSTAT_REG, l_buf), "Error from getScom (0x%.16llX)", PHB_CQSTAT_REG);
+                FAPI_DBG("PHB%i: PBCQ General Status Register %#lx", l_phb_id, l_buf());
+
+                //Check for bits 0 (inbound_active) and 1 (outbound_active) to become deasserted
+                if (!(l_buf.getBit(PEC_STACK0_CQSTAT_REG_PE_INBOUND_ACTIVE) || l_buf.getBit(PEC_STACK0_CQSTAT_REG_PE_OUTBOUND_ACTIVE)))
+                {
+
+                    FAPI_DBG("PHB%i: PBCQ CQ status is idle.", l_phb_id);
+                    FAPI_DBG("PHB%i: End polling for inbound_active and outbound_active state machines to become idle.", l_phb_id);
+                    break;
+                }
+            }
+
+            FAPI_DBG("PHB%i: inbound_active and outbound_active status (poll counter = %d).", l_phb_id, l_poll_counter);
+
+            FAPI_TRY(fapi2::getScom(i_target, PHB_NFIR_REG, l_buf2), "Error from getScom (0x%.16llX)", PHB_NFIR_REG);
+
+            FAPI_DBG("PHB%i: PCI Nest FIR Register %#lx", l_phb_id, l_buf2());
+
+            FAPI_TRY(fapi2::getScom(i_target, PHB_PHBRESET_REG, l_buf3), "Error from getScom (0x%.16llX)", PHB_PHBRESET_REG);
+
+            FAPI_DBG("PHB%i: PHB Reset Register %#lx", l_phb_id, l_buf3());
+
+            FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
+                        fapi2::P9_PHB_PERST_PBCQ_CQ_NOT_IDLE()
+                        .set_TARGET(i_target)
+                        .set_NFIR_ADDR(PHB_NFIR_REG)
+                        .set_NFIR_DATA(l_buf2)
+                        .set_PHB_RESET_ADDR(PHB_PHBRESET_REG)
+                        .set_PHB_RESET_DATA(l_buf3)
+                        .set_CQ_STAT_ADDR(PHB_CQSTAT_REG)
+                        .set_CQ_STAT_DATA(l_buf),
+                        "PHB%i: PBCQ CQ Status did not clear.", l_phb_id);
+
+            //Clear FIR bits of PCI Nest FIR register
+            FAPI_TRY(fapi2::getScom(i_target, PHB_NFIR_REG, l_buf), "Error from getScom (0x%.16llX)", PHB_NFIR_REG);
+            FAPI_DBG("PHB%i: PCI Nest FIR Register %#lx", l_phb_id, l_buf());
+            l_buf.invert();
+            FAPI_DBG("PHB%i: PCI Nest FIR Register Clear %#lx", l_phb_id, l_buf());
+
+            FAPI_TRY(fapi2::putScom(i_target, PHB_NFIR_REG_AND, l_buf), "Error from putScom (0x%.16llX)", PHB_NFIR_REG_AND);
+
+            //Confirm FIR bits have been cleared
+            FAPI_TRY(fapi2::getScom(i_target, PHB_NFIR_REG, l_buf), "Error from getScom (0x%.16llX)", PHB_NFIR_REG);
+            FAPI_DBG("PHB%i: PCI Nest FIR Register %#lx", l_phb_id, l_buf());
+
+            FAPI_TRY(fapi2::getScom(i_target, PHB_PFIR_REG, l_buf2), "Error from getScom (0x%.16llX)", PHB_PFIR_REG);
+            FAPI_DBG("PHB%i: PCI FIR Register %#lx", l_phb_id, l_buf2());
+
+            if (l_buf.getBit<PHB_NFIR_REG_NFIRNFIR, PHB_NFIR_REG_NFIRNFIR_LEN>())
+            {
+                FAPI_ASSERT(false,
+                            fapi2::P9_PHB_PERST_NFIR_NOT_CLEARED()
+                            .set_TARGET(i_target)
+                            .set_NFIR_ADDR(PHB_NFIR_REG)
+                            .set_NFIR_DATA(l_buf)
+                            .set_PFIR_ADDR(PHB_PFIR_REG)
+                            .set_PFIR_DATA(l_buf2),
+                            "PHB%i: PCI Nest FIR Register did not clear.", l_phb_id);
+            }
+
+            FAPI_DBG("PHB%i: Succesfully cleared PCI Nest FIR.", l_phb_id);
         }
 
     fapi_try_exit:
