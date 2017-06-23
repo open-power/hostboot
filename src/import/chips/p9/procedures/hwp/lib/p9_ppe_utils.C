@@ -182,12 +182,6 @@ uint32_t ppe_getMfcrInstruction( const uint16_t i_Rt )
 
 //-----------------------------------------------------------------------------
 
-/**
- * @brief poll for Halt state
- * @param[in]   i_Rt     target register number
- * @return  fapi2::ReturnCode
- * @note    moves contents of register MSR to i_Rt register.
- */
 fapi2::ReturnCode ppe_pollHaltState(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -218,12 +212,6 @@ fapi_try_exit:
 
 //-----------------------------------------------------------------------------
 
-/**
- * @brief halt the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with halt bit to halt the engine.
- */
 fapi2::ReturnCode ppe_halt(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -242,12 +230,6 @@ fapi_try_exit:
 }
 //-----------------------------------------------------------------------------
 
-/**
- * @brief force halt the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with force halt  to force halt the engine.
- */
 fapi2::ReturnCode ppe_force_halt(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -268,12 +250,6 @@ fapi_try_exit:
 
 //-----------------------------------------------------------------------------
 
-/**
- * @brief resume the halted engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with resume bit to resume the engine.
- */
 fapi2::ReturnCode ppe_resume(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -302,19 +278,14 @@ fapi2::ReturnCode ppe_resume(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief update dbcr
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs mtdbcr
- */
 fapi2::ReturnCode ppe_update_dbcr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
-    const uint64_t l_inst_op,
-    const uint16_t l_immed_16,
+    const uint64_t i_inst_op,
+    const uint16_t i_immed_16,
     const uint16_t i_Rs)
 {
     fapi2::buffer<uint64_t> l_data64;
@@ -324,8 +295,8 @@ fapi2::ReturnCode ppe_update_dbcr(
     FAPI_DBG("getMfsprInstruction(%d, DBCR): 0x%16llX", i_Rs, l_data64 );
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
     //Modify Rs
-    l_data64.flush<0>().insertFromRight(ppe_getInstruction(l_inst_op, i_Rs, i_Rs, l_immed_16), 0, 32);
-    FAPI_DBG("getInstruction(Immed %X: 0x%16llX", l_immed_16, l_data64 );
+    l_data64.flush<0>().insertFromRight(ppe_getInstruction(i_inst_op, i_Rs, i_Rs, i_immed_16), 0, 32);
+    FAPI_DBG("getInstruction(Immed %X: 0x%16llX", i_immed_16, l_data64 );
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMEDR, l_data64));
     //MOVE new Rs into DBCR
     l_data64.flush<0>().insertFromRight(ppe_getMtsprInstruction(i_Rs, DBCR), 0, 32);
@@ -336,16 +307,12 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-/**
- * @brief update dacr
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs mtdacr
- */
+//-----------------------------------------------------------------------------
+
 fapi2::ReturnCode ppe_update_dacr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
-    const uint64_t l_address,
+    const uint64_t i_address,
     const uint16_t i_Rs)
 {
     fapi2::buffer<uint32_t> temp_inst32;
@@ -353,7 +320,7 @@ fapi2::ReturnCode ppe_update_dacr(
 
     temp_data64.flush<0>().insertFromRight(ppe_getMfsprInstruction(i_Rs, SPRG0), 0, 32);
     FAPI_DBG("getMfsprInstruction(%d, SPRG0): 0x%16llX", i_Rs, temp_data64 );
-    temp_data64.insertFromRight(l_address, 32, 32);
+    temp_data64.insertFromRight(i_address, 32, 32);
     FAPI_DBG("Final Instr + SPRG0: 0x%16llX", temp_data64 );
     //write sprg0 with address and ram mfsprg0 to i_Rs
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIRAMGA, temp_data64 ));
@@ -365,16 +332,9 @@ fapi2::ReturnCode ppe_update_dacr(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief Perform RAM "read" operation
- * @param[in]   i_target        Chip Target
- * @param[in]   i_base_address  Base SCOM address of the PPE
- * @param[in]   i_instruction   RAM instruction to move a register
- * @param[out]  o_data          Returned data
- * @return  fapi2::ReturnCode
- */
 fapi2::ReturnCode ppe_RAMRead(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
@@ -393,16 +353,9 @@ fapi2::ReturnCode ppe_RAMRead(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief Perform RAM "read" operation
- * @param[in]   i_target        Chip Target
- * @param[in]   i_base_address  Base SCOM address of the PPE
- * @param[in]   i_instruction   RAM instruction to move a register
- * @param[out]  o_data          Returned data
- * @return  fapi2::ReturnCode
- */
 fapi2::ReturnCode ppe_RAM(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
@@ -421,14 +374,9 @@ fapi2::ReturnCode ppe_RAM(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief single step the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with single step  tosingle step the engine.
- */
 fapi2::ReturnCode ppe_single_step(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
@@ -535,47 +483,37 @@ fapi2::ReturnCode ppe_single_step(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief single step the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note   output is l_ppe_regs.] which has reg name added along with value and number
- *         this will be used for printing in the wrapper
- */
+#ifndef  __HOSTBOOT_MODULE
 fapi2::ReturnCode ppe_regs_populate_name(
-    std::vector<PPERegValue_t> l_ppe_regs_value,
-    const std::map<uint16_t, std::string> l_ppe_regs_num_name,
-    std::vector<PPEReg_t>& l_ppe_regs)
+    std::vector<PPERegValue_t> i_ppe_regs_value,
+    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
+    std::vector<PPEReg_t>& i_ppe_regs)
 
 {
     PPEReg_t l_reg;
     FAPI_INF("   populating reg names");
 
-    if (!l_ppe_regs_value.empty())
+    if (!i_ppe_regs_value.empty())
     {
-        for (auto it : l_ppe_regs_value)
+        for (auto it : i_ppe_regs_value)
         {
-            auto search = l_ppe_regs_num_name.find(it.number);
+            auto search = i_ppe_regs_num_name.find(it.number);
             l_reg.name  = search->second;
             l_reg.reg = it;
-            l_ppe_regs.push_back(l_reg);
+            i_ppe_regs.push_back(l_reg);
         }
     }
 
     return fapi2::current_err;
 }
 
+#endif
 
 //-----------------------------------------------------------------------------
 
-/**
- * @brief clear the dbg status engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR to clear dbg status.
- */
 fapi2::ReturnCode ppe_clear_dbg(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -591,14 +529,9 @@ fapi2::ReturnCode ppe_clear_dbg(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief toggle TRH
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR to toggle trh.
- */
 fapi2::ReturnCode ppe_toggle_trh(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -613,14 +546,9 @@ fapi2::ReturnCode ppe_toggle_trh(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 //-----------------------------------------------------------------------------
 
-/**
- * @brief xcr soft reset
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR to give soft reset
- */
 fapi2::ReturnCode ppe_soft_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -637,12 +565,6 @@ fapi_try_exit:
 }
 //-----------------------------------------------------------------------------
 
-/**
- * @brief xcr hard reset
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR to give hard reset
- */
 fapi2::ReturnCode ppe_hard_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -659,12 +581,6 @@ fapi_try_exit:
 }
 //-----------------------------------------------------------------------------
 
-/**
- * @brief xcr resume only
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR to only resume
- */
 fapi2::ReturnCode ppe_resume_only(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address)
@@ -681,12 +597,6 @@ fapi_try_exit:
 }
 //-----------------------------------------------------------------------------
 
-/**
- * @brief only single step the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note    programs XCR with single step no clearing DBCR
- */
 fapi2::ReturnCode ppe_ss_only(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
@@ -711,16 +621,18 @@ fapi2::ReturnCode ppe_ss_only(
 fapi_try_exit:
     return fapi2::current_err;
 }
-//PPE write  IAR
+
+//-----------------------------------------------------------------------------
+
 fapi2::ReturnCode ppe_write_iar(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint64_t i_base_address,
-    const uint64_t l_address
+    const uint64_t i_address
 )
 {
 
     fapi2::buffer<uint64_t> temp_data64;
-    temp_data64.flush<0>().insertFromRight(l_address, 32, 32);
+    temp_data64.flush<0>().insertFromRight(i_address, 32, 32);
     FAPI_DBG("IAR: 0x%16llX",  temp_data64  );
     FAPI_TRY(fapi2::putScom(i_target, i_base_address + PPE_XIDBGPRO, temp_data64));
 fapi_try_exit:
@@ -729,33 +641,31 @@ fapi_try_exit:
 
 //-----------------------------------------------------------------------------
 
-/**
- * @brief single step the engine
- * @param[in]   i_target  target register number
- * @return  fapi2::ReturnCode
- * @note   output is l_scom_regs.] which has reg name added along with value and number
- *         this will be used for printing in the wrapper
- */
+#ifndef  __HOSTBOOT_MODULE
+
 fapi2::ReturnCode scom_regs_populate_name(
-    std::vector<SCOMRegValue_t> l_ppe_regs_value,
-    const std::map<uint16_t, std::string> l_ppe_regs_num_name,
-    std::vector<SCOMReg_t>& l_scom_regs)
+    std::vector<SCOMRegValue_t> i_ppe_regs_value,
+    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
+    std::vector<SCOMReg_t>& i_scom_regs)
 
 {
     SCOMReg_t l_reg;
     FAPI_INF("   populating reg names");
 
-    if (!l_ppe_regs_value.empty())
+    if (!i_ppe_regs_value.empty())
     {
-        for (auto it : l_ppe_regs_value)
+        for (auto it : i_ppe_regs_value)
         {
-            auto search = l_ppe_regs_num_name.find(it.number);
+            auto search = i_ppe_regs_num_name.find(it.number);
             l_reg.name  = search->second;
             l_reg.reg = it;
-            l_scom_regs.push_back(l_reg);
+            i_scom_regs.push_back(l_reg);
         }
     }
 
 
     return fapi2::current_err;
 }
+
+#endif
+

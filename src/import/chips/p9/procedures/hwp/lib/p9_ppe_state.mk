@@ -23,7 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_ppe_state
-$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
-OBJS+=p9_ppe_state.o
+$(PROCEDURE)_DEPLIBS += p9_ppe_utils
 $(call BUILD_PROCEDURE)
 
