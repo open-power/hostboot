@@ -46,7 +46,6 @@
 #include <fapi2.H>
 #include <p9_ppe_state.H>
 #include <p9_ppe_utils.H>
-#include <p9_ppe_utils.C>
 
 
 #include <p9_hcd_common.H>
