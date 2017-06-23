@@ -31,11 +31,12 @@
 /// *HWP HW Backup Owner : Brian Vanderpool <vanderp@us.ibm.com>
 /// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
 /// *HWP Team            : PM
-/// *HWP Level           : 2
-/// *HWP Consumed by     : CMEs, GPEs, SBE, Cronus
-#include <map>
+/// *HWP Level           : 3
+/// *HWP Consumed by     : Cronus, HB, FSP
 #ifndef __P9_PPE_UTILS_H__
 #define __P9_PPE_UTILS_H__
+#include <map>
+#include <fapi2.H>
 typedef struct
 {
     uint16_t    number;
@@ -44,22 +45,10 @@ typedef struct
 
 typedef struct
 {
-    PPERegValue_t     reg;
-    std::string  name;
-} PPEReg_t;
-
-typedef struct
-{
     uint16_t    number;
     uint64_t    value;
 } SCOMRegValue_t;
 
-
-typedef struct
-{
-    SCOMRegValue_t    reg;
-    std::string  name;
-} SCOMReg_t;
 /**
  * @brief enumerates opcodes for few instructions.
  */
@@ -179,6 +168,20 @@ enum PPE_GPRS
     R30 = 30,
     R31 = 31,
 };
+
+#ifndef  __HOSTBOOT_MODULE
+typedef struct
+{
+    SCOMRegValue_t    reg;
+    std::string  name;
+} SCOMReg_t;
+
+typedef struct
+{
+    PPERegValue_t     reg;
+    std::string  name;
+} PPEReg_t;
+
 // Vector defining all spr acceess egisters
 const std::map<uint16_t, std::string> v_ppe_sprs_num_name =
 {
@@ -230,5 +233,291 @@ const std::map<uint16_t, std::string> v_ppe_xsr_num_name =
     { SPRG0, "SPRG0"  }
 };
 
+#endif //__HOSTBOOT_MODULE
 
+///--------------------------------------------------------------------------------------
+/// @brief generates a PPE instruction for some formats
+/// @param[in] i_Op      Opcode
+/// @param[in] i_Rts     Source or Target Register
+/// @param[in] i_RA      Address Register
+/// @param[in] i_d       Instruction Data Field
+/// @return returns 32 bit instruction representing the PPE instruction.
+///--------------------------------------------------------------------------------------
+uint32_t ppe_getInstruction( const uint16_t i_Op, const uint16_t i_Rts, const uint16_t i_Ra, const uint16_t i_d );
+
+///--------------------------------------------------------------------------------------
+/// @brief generates instruction for mtspr
+/// @param[in] i_Rs      source register number
+/// @param[in] i_Spr represents spr where data is to be moved.
+/// @return returns 32 bit instruction representing mtspr instruction.
+///--------------------------------------------------------------------------------------
+uint32_t ppe_getMtsprInstruction( const uint16_t i_Rs, const uint16_t i_Spr );
+
+
+///--------------------------------------------------------------------------------------
+/// @brief generates instruction for mfspr
+/// @param[in] i_Rt      target register number
+/// @param[in] i_Spr represents spr where data is to sourced
+/// @return returns 32 bit instruction representing mfspr instruction.
+///--------------------------------------------------------------------------------------
+
+uint32_t ppe_getMfsprInstruction( const uint16_t i_Rt, const uint16_t i_Spr );
+
+///--------------------------------------------------------------------------------------
+/// @brief generates instruction for mfmsr instruction.
+/// @param[in]   i_Rt     target register number
+/// @return  returns 32 bit instruction representing mfmsr instruction.
+/// @note    moves contents of register MSR to i_Rt register.
+///--------------------------------------------------------------------------------------
+uint32_t ppe_getMfmsrInstruction( const uint16_t i_Rt );
+
+///--------------------------------------------------------------------------------------
+/// @brief generates instruction for mfcr instruction.
+/// @param[in]   i_Rt     target register number
+/// @return  returns 32 bit instruction representing mfcr instruction.
+/// @note    moves contents of register CR to i_Rt register.
+///--------------------------------------------------------------------------------------
+uint32_t ppe_getMfcrInstruction( const uint16_t i_Rt );
+
+///--------------------------------------------------------------------------------------
+/// @brief poll for Halt state
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    moves contents of register MSR to i_Rt register.
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_pollHaltState(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address) ;
+
+///--------------------------------------------------------------------------------------
+/// @brief halt the engine
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with halt bit to halt the engine.
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_halt(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief force halt the engine
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with force halt  to force halt the engine.
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_force_halt(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief resume the halted engine
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with resume bit to resume the engine.
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_resume(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief update dbcr
+/// @param[in]  i_target fapi2 target for proc chip
+/// @param[in]  i_base_address  base SCOM address of the PPE
+/// @param[in]  i_inst_op       instruction opcode
+/// @param[in]  i_immed_16      16 bit constant
+/// @param[in]  i_Rs            source GPR number
+/// @return  fapi2::ReturnCode
+/// @note    programs mtdbcr
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_update_dbcr(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint64_t i_inst_op,
+    const uint16_t i_immed_16,
+    const uint16_t i_Rs );
+
+///--------------------------------------------------------------------------------------
+/// @brief update dacr
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_address       address to be updated
+/// @return      fapi2::ReturnCode
+/// @note        programs mtdacr
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_update_dacr(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint64_t i_address,
+    const uint16_t i_Rs );
+
+///--------------------------------------------------------------------------------------
+/// @brief Perform RAM "read" operation
+/// @param[in]   i_target        Chip Target
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_instruction   RAM instruction to move a register
+/// @param[out]  o_data          Returned data
+/// @return  fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_RAMRead(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const fapi2::buffer<uint64_t> i_instruction,
+    fapi2::buffer<uint32_t>& o_data );
+
+///--------------------------------------------------------------------------------------
+/// @brief Perform RAM "read" operation
+/// @param[in]   i_target        Chip Target
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_instruction   RAM instruction to move a register
+/// @return  fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_RAM(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint64_t i_instruction
+);
+
+///--------------------------------------------------------------------------------------
+/// @brief single step the engine
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_Rs
+/// @param[in]   i_step_count
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with single step  tosingle step the engine.
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_single_step(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint16_t i_Rs,
+    uint64_t i_step_count );
+
+
+///--------------------------------------------------------------------------------------
+/// @brief clear the dbg status engine
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to clear dbg status.
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_clear_dbg(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief toggle TRH
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to toggle trh.
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_toggle_trh(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief xcr soft reset
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to give soft reset
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_soft_reset(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief xcr hard reset
+/// @param[in]   i_target        target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to give hard reset
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_hard_reset(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief xcr resume only
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR to only resume
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_resume_only(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address );
+
+///--------------------------------------------------------------------------------------
+/// @brief only single step the engine
+/// @param[in]   i_target  target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_step_count
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with single step no clearing DBCR
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_ss_only(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    uint64_t i_step_count );
+
+///--------------------------------------------------------------------------------------
+/// @brief populate IAR register with a given address
+/// @param[in]   i_target        target register number
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[in]   i_address       address to be populated
+/// @return  fapi2::ReturnCode
+/// @note    programs XCR with single step no clearing DBCR
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_write_iar(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    const uint64_t i_address );
+
+#ifndef  __HOSTBOOT_MODULE
+
+///--------------------------------------------------------------------------------------
+/// @brief   finds name of SCOM registers and populates a vector
+/// @param[in]   i_ppe_regs_value    a vector of SCOMRegValue_t
+/// @param[in]   i_ppe_regs_num_name a map of reg num and respective name
+/// @param[in]   i_scom_regs         a vector of SCOMReg_t
+/// @return  fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode scom_regs_populate_name(
+    std::vector<SCOMRegValue_t> i_ppe_regs_value,
+    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
+    std::vector<SCOMReg_t>& i_scom_regs );
+
+///--------------------------------------------------------------------------------------
+/// @brief       populates register names
+/// @param[in]   i_ppe_regs_value
+/// @param[in]   i_ppe_regs_num_name
+/// @param[in]   i_ppe_regs
+/// @return      fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+
+fapi2::ReturnCode ppe_regs_populate_name(
+    std::vector<PPERegValue_t> i_ppe_regs_value,
+    const std::map<uint16_t, std::string> i_ppe_regs_num_name,
+    std::vector<PPEReg_t>& i_ppe_regs );
+
+#endif  //__HOSTBOOT_MODULE
 #endif  // __P9_PPE_UTILS_H__
