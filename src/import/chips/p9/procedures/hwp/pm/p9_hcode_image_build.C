@@ -134,6 +134,7 @@ enum
     L3_EPS_DIVIDER              =   1,
     L2_EPS_DIVIDER              =   1,
     MAX_HOMER_HEADER            =   6,
+    MAX_PM_REGION_HEADER        =   3,
 };
 
 /**
@@ -3825,34 +3826,29 @@ void customizeMagicWord( Homerlayout_t*     i_pHomer, uint8_t i_ecLevel )
     uint64_t magicWordCustom[MAX_HOMER_HEADER];
     uint64_t * pMagicWord[MAX_HOMER_HEADER];
     pMagicWord[0]   =   &pQpmrHdr->magic_number;
-    pMagicWord[1]   =   &pSgpeImgHdr->g_sgpe_magic_number;
-    pMagicWord[2]   =   &pCpmrHdr->magic_number;
-    pMagicWord[3]   =   &pCmeHdr->g_cme_magic_number;
-    pMagicWord[4]   =   &pPpmrHdr->g_ppmr_magic_number;
+    pMagicWord[1]   =   &pCpmrHdr->magic_number;
+    pMagicWord[2]   =   &pPpmrHdr->g_ppmr_magic_number;
+    pMagicWord[3]   =   &pSgpeImgHdr->g_sgpe_magic_number;
+    pMagicWord[4]   =   &pCmeHdr->g_cme_magic_number;
     pMagicWord[5]   =   &pPgpeHdr->g_pgpe_magic_number;
 
-    magicWordCustom[0]  =  QPMR_MAGIC_NUMBER_BASE;
-    magicWordCustom[1]  =  SGPE_MAGIC_NUMBER_BASE;
-    magicWordCustom[2]  =  CPMR_MAGIC_NUMBER_BASE;
-    magicWordCustom[3]  =  CME_MAGIC_NUMBER_BASE;
-    magicWordCustom[4]  =  PPMR_MAGIC_NUMBER_BASE;
-    magicWordCustom[5]  =  PGPE_MAGIC_NUMBER_BASE;
+    magicWordCustom[0]  =  QPMR_MAGIC_NUMBER;
+    magicWordCustom[1]  =  CPMR_MAGIC_NUMBER;
+    magicWordCustom[2]  =  PPMR_MAGIC_NUMBER;
+    magicWordCustom[3]  =  SGPE_MAGIC_NUMBER;
+    magicWordCustom[4]  =  CME_MAGIC_NUMBER;
+    magicWordCustom[5]  =  PGPE_MAGIC_NUMBER;
 
-    uint32_t ecMajor = (i_ecLevel & 0xf0 );
-    ecMajor = ecMajor << 12;
-    uint8_t ecMinor = (i_ecLevel & 0x0f);
 
     FAPI_INF("=========== Header Magic Words Info ===========");
 
     for( uint32_t i = 0; i < MAX_HOMER_HEADER; i++ )
     {
-        char magicWord[MAX_HOMER_HEADER][20] = { "QPMR Magic Word ", "SGPE Magic Word ", "CPMR Magic Word ",
-                                        "CME Magic Word ", "PPMR Magic Word ", "PGPE Magic Word " };
+        char magicWord[MAX_HOMER_HEADER][20] = { "QPMR Magic Word ", "CPMR Magic Word ", "PPMR Magic Word ",
+                                                 "SGPE Magic Word ", "CME Magic Word ", "PGPE Magic Word " };
         char tempBuf[10] ;
         memset( tempBuf, 0x00, 10 );
-        magicWordCustom[i] += ecMinor;
-        magicWordCustom[i] += ecMajor;
-        *pMagicWord[i]     = SWIZZLE_8_BYTE( magicWordCustom[i]);
+        *pMagicWord[i]     =    SWIZZLE_8_BYTE( magicWordCustom[i] );
         memcpy( tempBuf, pMagicWord[i], sizeof(uint64_t) );
         FAPI_INF("%s\t\t:\t\t %s ( 0x%016lx ) ", &magicWord[i], tempBuf, SWIZZLE_8_BYTE(*pMagicWord[i]) );
     }
