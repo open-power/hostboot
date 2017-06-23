@@ -118,6 +118,83 @@
     <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_INDEX</rc>
     <description>An invalid pattern index was passed to the pattern loader</description>
     <ffdc>INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_MEMDIAGS_ERROR_CHANGING_RANDOM_SEED</rc>
+    <description>Attempting to change to a 24b random data seed which does not exist</description>
+    <ffdc>RANDOM_SEED</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_GALOIS_TO_SYMBOL</rc>
+    <description> An invalid galois code was found</description>
+    <ffdc>GALOIS</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_SYMBOL_FOR_GALOIS</rc>
+    <description> An invalid symbol was passed to symbol_to_galois</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_DQ_TO_SYMBOL</rc>
+    <description> An invalid DQ bit index received to map to Galois symbol</description>
+    <ffdc>DQ</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+      <rc>RC_MSS_INVALID_SYMBOL_TO_DQ</rc>
+    <description> An invalid symbol received to map to DQ bit index</description>
+    <ffdc>SYMBOL</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_RANK_PASSED</rc>
+    <description> An invalid rank was passed to ecc::read function</description>
+    <ffdc>RANK</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>TARGET</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_INDEX_PASSED</rc>
+    <description> An invalid index was passed to MODAL_SYMBOL_COUNT function</description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -130,7 +207,7 @@
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -170,13 +247,14 @@
     <description>The port used in an MCBIST program is not functional</description>
     <ffdc>RELATIVE_PORT_POSITION</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -184,7 +262,6 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
     <description>A superfast read operation failed initialization</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
@@ -199,7 +276,6 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
     <description>A superfast init operation failed initialization</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
@@ -214,7 +290,6 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
@@ -229,7 +304,6 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
       <target>TARGET</target>
@@ -252,7 +326,7 @@
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+        <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -262,7 +336,7 @@
     <description>Attempt to run an MCBIST program with no subtests</description>
     <ffdc>TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -293,7 +367,7 @@
       <targetType>TARGET_TYPE_MCA</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
