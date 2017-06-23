@@ -53,8 +53,6 @@ constexpr uint64_t literal_110 = 110;
 constexpr uint64_t literal_105 = 105;
 constexpr uint64_t literal_0b01011 = 0b01011;
 constexpr uint64_t literal_125 = 125;
-constexpr uint64_t literal_130 = 130;
-constexpr uint64_t literal_135 = 135;
 constexpr uint64_t literal_0b01111 = 0b01111;
 constexpr uint64_t literal_0b10001 = 0b10001;
 constexpr uint64_t literal_0b10011 = 0b10011;
@@ -89,8 +87,8 @@ constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0x400 = 0x400;
 constexpr uint64_t literal_0b010 = 0b010;
-constexpr uint64_t literal_0b00010000 = 0b00010000;
-constexpr uint64_t literal_0x10 = 0x10;
+constexpr uint64_t literal_0b00001100 = 0b00001100;
+constexpr uint64_t literal_0x0C = 0x0C;
 constexpr uint64_t literal_0x141 = 0x141;
 constexpr uint64_t literal_0x21B = 0x21B;
 constexpr uint64_t literal_0x30D = 0x30D;
@@ -132,8 +130,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         uint64_t l_def_X_RATIO_100_115 = ((literal_115 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_100_120 = ((literal_120 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_100_125 = ((literal_125 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_100_130 = ((literal_130 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_X_RATIO_100_135 = ((literal_135 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE));
         uint64_t l_def_SMP_OPTICS_MODE = (l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE ==
@@ -240,14 +236,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_130))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_135))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
-                }
                 else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
@@ -287,14 +275,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_125))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_130))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_135))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
                 }
                 else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
                 {
@@ -336,14 +316,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_130))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_135))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11100 );
-                }
                 else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11000 );
@@ -384,14 +356,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_130))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_135))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
-                }
                 else if (((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG == literal_4)))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
@@ -427,6 +391,19 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_012 = 0xe;
+                    l_scom_buffer.insert<45, 4, 60, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_012 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_01 = 0xc;
+                    l_scom_buffer.insert<45, 4, 60, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_01 );
+                }
 
                 if (l_def_SMP_OPTICS_MODE)
                 {
@@ -483,6 +460,19 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
                 if (l_def_SMP_OPTICS_MODE)
                 {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_012 = 0xe;
+                    l_scom_buffer.insert<45, 4, 60, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_012 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_01 = 0xc;
+                    l_scom_buffer.insert<45, 4, 60, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_ARBMODE_NEXT_ENABLE_01 );
+                }
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
                     constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_32_32 = 0x4;
                     l_scom_buffer.insert<49, 3, 61, uint64_t>
                     (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_32_32 );
@@ -533,17 +523,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
-
-                if ((l_def_TRUE == literal_1))
-                {
-                    l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b01 );
-                }
-
-                if ((l_def_TRUE == literal_1))
-                {
-                    l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b11 );
-                }
-
+                l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b01 );
+                l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b11 );
                 FAPI_TRY(fapi2::putScom(TGT0, 0x90000d6805011c11ull, l_scom_buffer));
             }
         }
@@ -551,17 +532,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
             {
                 l_scom_buffer.flush<0> ();
-
-                if ((l_def_TRUE == literal_1))
-                {
-                    l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b01 );
-                }
-
-                if ((l_def_TRUE == literal_1))
-                {
-                    l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b11 );
-                }
-
+                l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b01 );
+                l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b11 );
                 FAPI_TRY(fapi2::putScom(TGT0, 0x90000d7805011c11ull, l_scom_buffer));
             }
         }
@@ -791,15 +763,12 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
-                if ((l_def_TRUE == literal_1))
-                {
-                    l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0b00010000 );
-                }
+                l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0b00001100 );
             }
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0x10 );
+                l_scom_buffer.insert<20, 8, 56, uint64_t>(literal_0x0C );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000ec705011c11ull, l_scom_buffer));

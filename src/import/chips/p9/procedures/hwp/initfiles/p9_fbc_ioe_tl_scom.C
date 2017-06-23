@@ -324,7 +324,7 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013411ull, l_scom_buffer ));
 
-            if ((l_def_X0_ENABLED && l_def_OPTICS_IS_A_BUS))
+            if ((l_def_X1_ENABLED && l_def_OPTICS_IS_A_BUS))
             {
                 l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0x10 );
             }
@@ -361,7 +361,7 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013412ull, l_scom_buffer ));
 
-            if ((l_def_X0_ENABLED && l_def_OPTICS_IS_A_BUS))
+            if ((l_def_X2_ENABLED && l_def_OPTICS_IS_A_BUS))
             {
                 l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0x10 );
             }
