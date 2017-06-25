@@ -246,7 +246,11 @@
     <attribute><id>PM_SPIVID_MAX_RETRIES</id></attribute>
     <attribute><id>PROC_DPLL_DIVIDER</id></attribute>
     <attribute><id>PSTATES_ENABLED</id></attribute>
+    <attribute><id>RESCLK_ENABLED</id></attribute>
+    <attribute><id>VDM_ENABLED</id></attribute>
     <attribute><id>IVRMS_ENABLED</id></attribute>
+    <attribute><id>IVRM_ENABLED</id></attribute>
+    <attribute><id>WOF_ENABLED</id></attribute>
     <!-- End pm_hwp_attributes.xml -->
     <attribute><id>SKIP_HW_VREF_CAL</id></attribute>
     <attribute><id>SKIP_RD_VREF_VREFSENSE_OVERRIDE</id></attribute>
@@ -675,6 +679,7 @@
     <attribute><id>MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id></attribute>
     <attribute><id>MSS_MRW_PERIODIC_MEMCAL_MODE_OPTIONS</id></attribute>
     <attribute><id>SYSTEM_IVRMS_ENABLED</id></attribute>
+    <attribute><id>SYSTEM_IVRM_DISABLE</id></attribute>
     <attribute><id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id></attribute>
     <attribute><id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id></attribute>
     <attribute><id>MNFG_DMI_MIN_EYE_WIDTH</id></attribute>
@@ -915,9 +920,11 @@
     <attribute><id>WOF_POWER_LIMIT</id></attribute>
     <attribute><id>SYS_VFRT_STATIC_DATA_ENABLE</id></attribute>
     <attribute><id>WOF_TABLE_LID_NUMBER</id></attribute>
+    <attribute><id>SYSTEM_PSTATES_MODE</id></attribute>
     <attribute><id>AVSBUS_FREQUENCY</id></attribute>
     <attribute><id>PROC_FABRIC_ASYNC_SAFE_MODE</id></attribute>
     <attribute><id>VDM_ENABLE</id></attribute>
+    <attribute><id>SYSTEM_VDM_DISABLE</id></attribute>
     <attribute><id>STOP8_DISABLE</id></attribute>
     <attribute><id>STOP4_DISABLE</id></attribute>
     <attribute><id>STOP5_DISABLE</id></attribute>
@@ -941,6 +948,7 @@
     <attribute><id>IVRM_STEP_DELAY_NS</id></attribute>
     <attribute><id>IVRM_STABILIZATION_DELAY_NS</id></attribute>
     <attribute><id>SYSTEM_RESCLK_ENABLE</id></attribute>
+    <attribute><id>SYSTEM_RESCLK_DISABLE</id></attribute>
     <attribute><id>MSS_MRW_REFRESH_RATE_REQUEST</id></attribute>
     <attribute><id>MSS_MRW_TEMP_REFRESH_MODE</id></attribute>
     <attribute><id>MSS_VCCD_OVERRIDE</id></attribute>

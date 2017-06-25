@@ -5445,6 +5445,51 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
 </attribute>
 
 <attribute>
+    <id>RESCLK_ENABLED</id>
+    <description>
+    Indicator that all relevant attributes and required data for
+    Resonant Clocking to be enabled is present and valid
+    FALSE=0, TRUE=1
+    Producer: p9_build_pstate_datablock
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_RESCLK_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>VDM_ENABLED</id>
+    <description>
+    Voltage Droop Monitors (VDM) to be enabled is present and valid
+    FALSE=0, TRUE=1
+    Producer: p9_build_pstate_datablock
+    Consumers: p9_hcode_image_build ->
+                      SGPE Header
+                      CME Header
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_VDM_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
     <id>IVRMS_ENABLED</id>
     <description>
      <!-- @todo RTC 173736 -->
@@ -5460,6 +5505,52 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
     <writeable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IVRMS_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>IVRM_ENABLED</id>
+    <description>
+    Indicator that all relevant attributes and required data for
+    Internal Voltage Regulator Macros (IVRMs) to be enabled is present and valid
+    FALSE=0, TRUE=1
+    Producer: p9_build_pstate_datablock
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_IVRM_ENABLED</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>WOF_ENABLED</id>
+    <description>
+    Indicator that all relevent attributes and required data for
+    WOF to be enabled is present and valid
+    FALSE=0, TRUE=1
+    Producer: p9_build_pstate_datablock
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+                      CME Header
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_WOF_ENABLED</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
@@ -20307,6 +20398,32 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
+    <id>SYSTEM_IVRM_DISABLE</id>
+    <description>
+        Disables IVRM enablement in the system
+
+        Producer: Override
+
+        Consumers: p9_build_pstate_datablock ->
+                   Pstate Parameter Block (PSPB) for PGPE/OCC
+                   CME Quad Pstate Region (CQPR) for CM Quad Manager
+
+        Platform default:  OFF
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_IVRM_DISABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
     <id>SYSTEM_WOF_ENABLED</id>
     <description>
       System control to allow Work Load Optimized Frequency (WOF)
@@ -20594,6 +20711,52 @@ Measured in GB</description>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
+
+<attribute>
+    <id>SYSTEM_PSTATES_MODE</id>
+    <description>
+      Controls the mode of Pstate Protocol for testing.
+        ON: Boots the PGPE in "OCC Pstate Mode" but does NOT start the Pstate
+        protocol
+
+        OFF:  Does NOT boot the PGPE
+        AUTO: Boots the PGPE and automatically starts the Pstate protocol.
+        PMCR operations to move Pstates are honored
+
+      Producer:  Override
+
+      Consumers:
+        p9_pstate_parameter_block and p9_pm_pstate_gpe_init
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_PSTATES_MODE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<enumerationType>
+    <id>SYSTEM_PSTATES_MODE</id>
+    <description>Enumeration for Work Load Optimized Frequency</description>
+    <enumerator>
+        <name>ON</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>OFF</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>AUTO</name>
+        <value>0x02</value>
+    </enumerator>
+</enumerationType>
 
 <attribute>
     <id>SYSTEM_RESCLK_STEP_DELAY</id>
@@ -30735,6 +30898,40 @@ Measured in GB</description>
 </enumerationType>
 
 <attribute>
+    <id>SYSTEM_VDM_DISABLE</id>
+    <description>
+      Disables the enablement of Voltage Droop Monitors (VDM) in the system.
+
+      Producer:  Override
+
+      Consumers:
+        p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
+            reaction
+    </description>
+    <simpleType><uint8_t></uint8_t></simpleType>
+    <readable/>
+    <writeable/>
+    <persistency>volatile-zeroed</persistency>
+    <hwpfToHbAttrMap>
+      <id>ATTR_SYSTEM_VDM_DISABLE</id>
+      <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<enumerationType>
+    <id>SYSTEM_VDM_DISABLE</id>
+    <description>Enumeration for Voltage Drop Monitor disable</description>
+    <enumerator>
+        <name>OFF</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>ON</name>
+        <value>0x01</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
     <id>DPLL_DYNAMIC_FMAX_ENABLE</id>
     <description>
     Allow increased dynamic frequency in response to excess voltage margin
@@ -33504,6 +33701,30 @@ Measured in GB</description>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
+        <macro>DIRECT</macro>
+    </hwpfToHbAttrMap>
+</attribute>
+
+<attribute>
+    <id>SYSTEM_RESCLK_DISABLE</id>
+    <description>
+      Disables the enablement of resonant clocking in the system.
+
+      Producer:  Override
+
+      Consumers:
+        p9_pstate_parameter_block to clear the flag for CME QuadManager Hcode
+            reaction
+    </description>
+    <simpleType>
+        <uint8_t>
+        </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hwpfToHbAttrMap>
+        <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>
