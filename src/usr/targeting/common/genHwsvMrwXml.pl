@@ -450,6 +450,16 @@ elsif ($reqPol->{'required_synch_mode'} eq 'undetermined')
 }
 
 
+if ( exists $reqPol->{'dpll_vdm_response'} )
+{
+    push @systemAttr, ['DPLL_VDM_RESPONSE',
+        $reqPol->{'dpll_vdm_response'}];
+}
+else
+{
+    push @systemAttr, ['DPLL_VDM_RESPONSE', 0 ];
+}
+
 my $xBusWidth = $reqPol->{'proc_x_bus_width'};
 if( $xBusWidth == 1 )
 {
