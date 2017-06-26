@@ -1772,7 +1772,7 @@ class program
         /// @return vector of port targets
         ///
         template< fapi2::TargetType P >
-        std::vector<fapi2::Target<P>> get_port_list( const fapi2::Target<T>& i_target );
+        std::vector<fapi2::Target<P>> get_port_list( const fapi2::Target<T>& i_target ) const;
 
         ///
         /// @brief Change MCBIST Stop-on-error conditions (end boundaries)
