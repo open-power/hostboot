@@ -455,6 +455,24 @@ sub filetype
     {
         return "Initfile"
     }
+    if ($filename =~ m/\.s$/i)
+    {
+        return "Assembly";
+    }
+    if (($filename =~ m/Makefile$/i) or
+        ($filename =~ m/\.mk$/i))
+    {
+        return "Makefile";
+    }
+    if ( $filename =~ m/\.am$/i )
+    {
+        return "Automake";
+    }
+    if ( ($filename =~ m/configure\.ac$/i)
+       ||($filename =~ m/Makefile\.in$/i) )
+    {
+        return "Autoconf";
+    }
     if ( ( $filename =~ m/\.[cht]$/i )
        ||( $filename =~ m/\.[cht]\+\+$/i )
        ||( $filename =~ m/\.[cht]pp$/i )
@@ -475,24 +493,6 @@ sub filetype
        ||( $fileinfo =~ m/perl.*script.*text executable/i) )
     {
         return "Perl";
-    }
-    if ($filename =~ m/\.s$/i)
-    {
-        return "Assembly";
-    }
-    if (($filename =~ m/Makefile$/i) or
-        ($filename =~ m/\.mk$/i))
-    {
-        return "Makefile";
-    }
-    if ( $filename =~ m/\.am$/i )
-    {
-        return "Automake";
-    }
-    if ( ($filename =~ m/configure\.ac$/i)
-       ||($filename =~ m/Makefile\.in$/i) )
-    {
-        return "Autoconf";
     }
     if ( ( $filename =~ m/\.[kc]{0,1}sh$/i )
        ||( $filename =~ m/\.bash$/i )
