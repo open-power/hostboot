@@ -518,7 +518,7 @@ template<>
 template<>
 std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>
         program<fapi2::TARGET_TYPE_MCBIST>::get_port_list<fapi2::TARGET_TYPE_MCA>( const
-                fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target )
+                fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target ) const
 {
     typedef mss::mcbistTraits<TARGET_TYPE_MCBIST> TT;
 
