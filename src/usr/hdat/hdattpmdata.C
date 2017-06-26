@@ -55,8 +55,8 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
 
     const uint64_t l_baseAddr = static_cast<uint64_t>(i_msAddr.hi) << 32
                                                                  | i_msAddr.lo;
-
-    const uint64_t l_size = ALIGN_PAGE(sizeof(hdatTpmData_t)) + PAGESIZE;
+    const auto maxLogicalSize = hdatTpmDataCalcMaxSize();
+    const uint64_t l_size = ALIGN_PAGE(maxLogicalSize) + PAGESIZE;
 
     const uint64_t l_alignedAddr = ALIGN_PAGE_DOWN(l_baseAddr);
 
@@ -72,7 +72,7 @@ HdatTpmData::HdatTpmData(errlHndl_t &o_errlHndl,
         // TODO RTC 167290 - This memset needs to be revisited for multinode
         // support. We may need to do this memset once per node or use some
         // other approach to initialization.
-        memset(iv_hdatTpmData, 0x0, sizeof(hdatTpmData_t));
+        memset(iv_hdatTpmData, 0x0, maxLogicalSize);
 
         HDAT_DBG("Ctr iv_hdatTpmData addr 0x%.16llX virtual addr 0x%.16llX",
                                     reinterpret_cast<uint64_t>(iv_hdatTpmData),
@@ -149,8 +149,8 @@ errlHndl_t HdatTpmData::hdatLoadTpmData(uint32_t &o_size, uint32_t &o_count)
 
     o_size = hdatTpmDataCalcMaxSize();
 
-    // zero all of it
-    memset(iv_hdatTpmData,0,o_size);
+    // Note: HdatTpmData constructor already cleared the memory to the tune of
+    // o_size (hdatTpmDataCalcMaxSize()) bytes
 
     // We add the first two fields for a reference to aid in debugging,
     // but the rest will be populated in FSP/OpenPower common code. Any
