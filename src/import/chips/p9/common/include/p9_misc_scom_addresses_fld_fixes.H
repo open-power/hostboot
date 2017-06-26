@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,10 @@ REG64_FLD(PU_TX_CH_INTADDR_IAR_ADDR_LEN,          8, SH_UNT, SH_ACS_SCOM, SH_FLD
 REG64_FLD(PU_TX_CH_MISC_WEN0,                    12, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
 REG64_FLD(PU_TX_CH_MISC_WEN1,                    13, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
 REG64_FLD(PU_TX_CH_MISC_WEN2,                    14, SH_UNT, SH_ACS_SCOM, SH_FLD_UNUSED);
+
+// RX VGA Control Register1
+REG64_FLD(PEC_SCOM0X0B_EDMOD,                    52, SH_UNT_PEC, SH_ACS_SCOM, SH_FLD_UNUSED);
+REG64_FLD(PEC_SCOM0X0B_EDMOD_LEN,                 2, SH_UNT_PEC, SH_ACS_SCOM, SH_FLD_UNUSED);
 
 //Example
 //Copy the whole line from the *scom_addresses_fld.H file.  Then add FIX in front of REG

@@ -125,9 +125,13 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     uint8_t l_attr_8 = 0;
     uint16_t l_attr_16 = 0;
     uint32_t l_poll_counter; //Number of iterations while polling for PLLA and PLLB Port Ready Status
+    uint8_t l_hw414759 = 0;
 
     FAPI_DBG("target vec size: %#x", l_pec_chiplets_vec.size());
     FAPI_DBG("l_buf: %#x", l_buf());
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414759, i_target, l_hw414759),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW414759)");
 
     for (auto l_pec_chiplets : l_pec_chiplets_vec)
     {
@@ -348,9 +352,18 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                        56, 7);
 
         // Phase1 init step 20 (RX VGA Control Register 1)
-        SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1,
-                                       PEC_PCS_RX_VGA_CONTROL1_REG,
-                                       48, 16);
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1,
+                               l_pec_chiplets,
+                               l_attr_16));
+        FAPI_TRY(l_buf.insertFromRight(l_attr_16, 48, 16));
+
+        if (l_hw414759)
+        {
+            l_buf.setBit<PEC_SCOM0X0B_EDMOD, PEC_SCOM0X0B_EDMOD_LEN>();
+        }
+
+        FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_VGA_CONTROL1_REG, l_buf));
 
         // Phase1 init step 21 (RX VGA Control Register 2)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2,
