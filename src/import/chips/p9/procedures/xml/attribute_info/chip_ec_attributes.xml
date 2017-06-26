@@ -512,17 +512,17 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW393547</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW393547_HW413718</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1 only: HW393547
+      Nimbus DD1/DD2.0 only: HW393547, HW413718
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>LESS_THAN</test>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
