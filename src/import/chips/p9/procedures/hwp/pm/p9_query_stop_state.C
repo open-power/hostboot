@@ -120,7 +120,7 @@ const uint32_t eq_clk_l3_pos[] = {6, 7};
 
 void compare_ss_hw(const char* msg, const uint8_t hw_state, uint8_t& stop_state);
 
-
+#define SSHSRC_STOP_GATED 0
 
 // ----------------------------------------------------------------------
 // Procedure Function
@@ -145,8 +145,8 @@ query_stop_state(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_ex_target,
     stop_attrs_t& o_stop_attrs)
 {
-    fapi2::buffer<uint64_t>  l_qsshsrc, l_csshsrc[2], l_qpfetsense, l_cpfetsense[2];
-    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t>  l_qsshsrc, l_csshsrc[2], l_qpfetsense, l_cpfetsense[2], l_qStopGated, l_cStopGated;
+    fapi2::buffer<uint64_t> l_data64, l_sisr;
     uint8_t  l_chpltNumber = 0;
     uint32_t l_quadStopLevel = 0;
     uint32_t l_exPos = 0;
@@ -192,9 +192,41 @@ query_stop_state(
     // A unit is scannable if the unit is powered up.
 
     // Extract the quad and core stop states
-    l_qsshsrc.extractToRight<uint32_t>(l_quadStopLevel, 8, 4);
-    l_csshsrc[0].extractToRight<uint32_t>(l_coreStopLevel[0], 8, 4);
-    l_csshsrc[1].extractToRight<uint32_t>(l_coreStopLevel[1], 8, 4);
+    if (l_qsshsrc.getBit<SSHSRC_STOP_GATED>() == 1)
+    {
+        l_qsshsrc.extractToRight<uint32_t>(l_quadStopLevel, 8, 4);
+    }
+
+    if (l_csshsrc[0].getBit<SSHSRC_STOP_GATED>() == 1)
+    {
+        l_csshsrc[0].extractToRight<uint32_t>(l_coreStopLevel[0], 8, 4);
+    }
+
+    if (l_csshsrc[1].getBit<SSHSRC_STOP_GATED>() == 1)
+    {
+        l_csshsrc[1].extractToRight<uint32_t>(l_coreStopLevel[1], 8, 4);
+    }
+
+
+    // if the quad is not stop gated, double check the CME SISR register to make sure we aren't in stop 1
+    if (l_qsshsrc.getBit<SSHSRC_STOP_GATED>() == 0)
+    {
+
+        // if cores aren't stop gated, double check the SISR register to make sure it isn't in stop 1
+        FAPI_TRY(fapi2::getScom(i_ex_target, EX_CME_LCL_SISR_SCOM, l_sisr), "Error reading data from CME SISR register");
+
+        if (l_coreStopLevel[0] == 0 && l_sisr.getBit<EX_CME_LCL_SISR_PM_STATE_ACTIVE_C0>() )
+        {
+            l_sisr.extractToRight<uint32_t>(l_coreStopLevel[0], EX_CME_LCL_SISR_PM_STATE_C0, EX_CME_LCL_SISR_PM_STATE_C0_LEN);
+        }
+
+        if (l_coreStopLevel[1] == 0 && l_sisr.getBit<EX_CME_LCL_SISR_PM_STATE_ACTIVE_C1>() )
+        {
+            l_sisr.extractToRight<uint32_t>(l_coreStopLevel[1], EX_CME_LCL_SISR_PM_STATE_C1, EX_CME_LCL_SISR_PM_STATE_C1_LEN);
+        }
+    }
+
+
 
     FAPI_INF("EX Stop States: Q(%d) C0(%d) C1(%d)", l_quadStopLevel, l_coreStopLevel[0], l_coreStopLevel[1]);
 
@@ -317,24 +349,28 @@ query_stop_state(
     l_cpfetsense[0].extractToRight<uint8_t>(l_clk_pfet.vdd_pfet_disable_core[0], 1, 1);
     l_cpfetsense[1].extractToRight<uint8_t>(l_clk_pfet.vdd_pfet_disable_core[1], 1, 1);
 
+    // Read clocks running registers if the quad is powered up
 
-    // Read clocks running registers
+    if (l_clk_pfet.vdd_pfet_disable_quad == 0 )
+    {
 
-    // Determine if this is an odd or even EX for checking EX clock state
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_ex_target, l_chpltNumber),
-             "ERROR: Failed to get the position of the EX:0x%08X",
-             i_ex_target);
+        // Determine if this is an odd or even EX for checking EX clock state
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_ex_target, l_chpltNumber),
+                 "ERROR: Failed to get the position of the EX:0x%08X",
+                 i_ex_target);
 
-    l_exPos = l_chpltNumber % 2;
+        l_exPos = l_chpltNumber % 2;
 
-    FAPI_TRY(fapi2::getScom(l_eq_target, EQ_CLOCK_STAT_SL,  l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
+        FAPI_TRY(fapi2::getScom(l_eq_target, EQ_CLOCK_STAT_SL,  l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
 
 
-    l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l2_pos[l_exPos], 1);
-    l_clk_pfet.l2_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+        l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l2_pos[l_exPos], 1);
+        l_clk_pfet.l2_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
 
-    l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l3_pos[l_exPos], 1);
-    l_clk_pfet.l3_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+        l_data64.extractToRight<uint8_t>(l_data8, eq_clk_l3_pos[l_exPos], 1);
+        l_clk_pfet.l3_hasclocks = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+
+    }
 
 
     for (auto l_core_chplt : l_coreChiplets)
@@ -344,17 +380,23 @@ query_stop_state(
                  "ERROR: Failed to get the position of the Core:0x%08X",
                  l_core_chplt);
 
-        FAPI_DBG("   Read Core EPS clock status for core %d", l_chpltNumber);
+
         //In case a core is deconfigured, figure out if this is the odd or even core and write the appropriate array
         uint32_t l_pos = l_chpltNumber % 2;
 
-        FAPI_TRY(fapi2::getScom(l_core_chplt, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
+        if (l_clk_pfet.vdd_pfet_disable_core[l_pos] == 0)
+        {
+            FAPI_DBG("   Read Core EPS clock status for core %d", l_chpltNumber);
 
-        l_data64.extractToRight<uint8_t>(l_data8, 6, 1);
-        l_clk_pfet.c_exec_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
 
-        l_data64.extractToRight<uint8_t>(l_data8, 5, 1);
-        l_clk_pfet.c_pc_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+            FAPI_TRY(fapi2::getScom(l_core_chplt, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
+
+            l_data64.extractToRight<uint8_t>(l_data8, 6, 1);
+            l_clk_pfet.c_exec_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+
+            l_data64.extractToRight<uint8_t>(l_data8, 5, 1);
+            l_clk_pfet.c_pc_hasclocks[l_pos] = (l_data8 == 1) ? 0 : 1; // If the bit is 0, clocks are running
+        }
     }
 
     FAPI_DBG("Comparing Stop State vs Actual HW settings");
