@@ -506,6 +506,7 @@ print CRFILE "#include <p9_perv_scom_addresses.H>\n";
 print CRFILE "#include <p9_quad_scom_addresses.H>\n";
 print CRFILE "#include <p9_xbus_scom_addresses.H>\n";
 print CRFILE "#include <cen_gen_scom_addresses.H>\n";
+print CRFILE "#include <centaur_misc_constants.H>\n";
 print CRFILE "namespace fapi2\n";
 print CRFILE "{\n";
 print CRFILE "void getAddressData(const fapi2::HwpFfdcId i_ffdcId,\n";
