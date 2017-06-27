@@ -45,6 +45,7 @@
 #include <fapi2.H>
 #include <p9_pm.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
