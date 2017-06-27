@@ -786,7 +786,10 @@ namespace HTMGT
             auto sramRspPtr = reinterpret_cast<uint8_t*>(l_buffer.pointer());
             uint32_t l_sramDataLen = l_buffer.getLength<uint8_t>();
             // Check buffer status for exception
-            if ((l_sramDataLen >= 3) && (0xE0 == (sramRspPtr[2] & 0xE0)))
+            // (don't log 0xE1 exception if communication has been established)
+            if (((l_sramDataLen >= 3) && (0xE0 == (sramRspPtr[2] & 0xE0)))  &&
+                 ((sramRspPtr[2] != OCC_RC_OCC_INIT_CHECKPOINT) ||
+                  (false == iv_Occ->iv_commEstablished)))
             {
                 const uint8_t exceptionType = sramRspPtr[2];
                 uint16_t exceptionDataLength = 0;
