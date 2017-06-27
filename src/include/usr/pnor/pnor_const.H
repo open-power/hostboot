@@ -72,6 +72,7 @@ enum SectionId
     WOFDATA,        /**< VFRT data tables for WOF */
     SBKT,           /**< SecureBoot Key Transition */
     HB_VOLATILE,    /**< Semi volatile partition for reconfig */
+    MEMD,           /**< Memory configuration data */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

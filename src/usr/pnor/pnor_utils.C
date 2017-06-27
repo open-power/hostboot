@@ -462,6 +462,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "WOFDATA",     /**< PNOR::WOFDATA        : VFRT data tables for WOF */
         "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
         "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
+        "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
 #endif
     };
 
