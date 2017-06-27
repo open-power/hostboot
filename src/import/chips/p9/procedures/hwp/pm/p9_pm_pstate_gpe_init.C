@@ -134,6 +134,15 @@ fapi2::ReturnCode pstate_gpe_init(
             FAPI_TRY(putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM2, BIT(p9hcd::PGPE_PSTATE_PROTOCOL_AUTO_ACTIVATE)));
         }
 
+        // Setup the PGPE Timer Selects
+        // These hardcoded values are assumed by the PGPE Hcode for setting up
+        // the FIT and Watchdog values a based on the nest frequency that is
+        // passed to it via the PGPE header.
+        l_data64.flush<0>()
+        .insertFromRight<0, 4>(0x1)    // Watchdog
+        .insertFromRight<4, 4>(0xA);   // FIT
+        FAPI_TRY(fapi2::putScom(i_target, PU_GPE2_GPETSEL_SCOM, l_data64));
+
         // Program XCR to ACTIVATE PGPE
         // @todo RTC 146665 Operations to PPEs should use a p9ppe namespace
         FAPI_INF("   Starting the PGPE...");
