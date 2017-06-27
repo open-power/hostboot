@@ -674,7 +674,7 @@ rs4_compress(CompressedScanData** o_rs4,
     uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
     uint32_t bytes   = rs4_max_compressed_bytes(nibbles);
 
-    *o_rs4  = (CompressedScanData*)malloc(bytes);
+    *o_rs4  = (CompressedScanData*)(operator new(bytes));
 
     if (*o_rs4 == 0)
     {
@@ -693,15 +693,15 @@ rs4_compress(CompressedScanData** o_rs4,
 // Returns a scan compression return code.
 
 static int
-__rs4_decompress(uint8_t* io_data_str,
-                 uint8_t* io_care_str,
+__rs4_decompress(uint8_t* o_data_str,
+                 uint8_t* o_care_str,
                  uint32_t i_size,
                  uint32_t* o_length,
                  const uint8_t* i_rs4_str)
 {
     int state;                  /* 0 : Rotate, 1 : Scan */
     uint32_t i;                 /* Nibble index in i_rs4_str */
-    uint32_t j;                 /* Nibble index in io_data_str/io_care_str */
+    uint32_t j;                 /* Nibble index in o_data_str/o_care_str */
     uint32_t k;                 /* Loop index */
     uint32_t bits;              /* Number of output bits decoded so far */
     uint32_t count;             /* Count of rotate nibbles */
@@ -715,7 +715,6 @@ __rs4_decompress(uint8_t* io_data_str,
     state = 0;
 
     // Decompress the bulk of the string
-
     do
     {
         if (state == 0)
@@ -757,9 +756,9 @@ __rs4_decompress(uint8_t* io_data_str,
 
             for (k = 0; k < nibbles; k++)
             {
-                rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
+                rs4_set_nibble(o_care_str, j, rs4_get_nibble(i_rs4_str, i));
                 i = (masked ? i + 1 : i);
-                rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
+                rs4_set_nibble(o_data_str, j, rs4_get_nibble(i_rs4_str, i));
                 i++;
                 j++;
             }
@@ -785,9 +784,9 @@ __rs4_decompress(uint8_t* io_data_str,
 
     if (r != 0)
     {
-        rs4_set_nibble(io_care_str, j, rs4_get_nibble(i_rs4_str, i));
+        rs4_set_nibble(o_care_str, j, rs4_get_nibble(i_rs4_str, i));
         i = (masked ? i + 1 : i);
-        rs4_set_nibble(io_data_str, j, rs4_get_nibble(i_rs4_str, i));
+        rs4_set_nibble(o_data_str, j, rs4_get_nibble(i_rs4_str, i));
     }
 
     *o_length = bits;
@@ -796,8 +795,8 @@ __rs4_decompress(uint8_t* io_data_str,
 
 
 int
-_rs4_decompress(uint8_t* io_data_str,
-                uint8_t* io_care_str,
+_rs4_decompress(uint8_t* o_data_str,
+                uint8_t* o_care_str,
                 uint32_t i_size,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4)
@@ -814,10 +813,10 @@ _rs4_decompress(uint8_t* io_data_str,
         return BUG(SCAN_COMPRESSION_VERSION_ERROR);
     }
 
-    memset(io_data_str, 0, i_size);
-    memset(io_care_str, 0, i_size);
+    memset(o_data_str, 0, i_size);
+    memset(o_care_str, 0, i_size);
 
-    return __rs4_decompress(io_data_str, io_care_str, i_size,
+    return __rs4_decompress(o_data_str, o_care_str, i_size,
                             o_length, rs4_str);
 }
 
@@ -828,21 +827,21 @@ rs4_decompress(uint8_t** o_data_str,
                uint32_t* o_length,
                const CompressedScanData* i_rs4)
 {
-    uint32_t size = 400000;
+    uint32_t size = MAX_RING_BUF_SIZE_TOOL;
     int rc;
 
-    *o_data_str = (uint8_t*)malloc(size);
+    *o_data_str = (uint8_t*)(operator new(size));
 
     if (*o_data_str == NULL)
     {
         return BUG(SCAN_COMPRESSION_NO_MEMORY);
     }
 
-    *o_care_str = (uint8_t*)malloc(size);
+    *o_care_str = (uint8_t*)(operator new(size));
 
     if (*o_care_str == NULL)
     {
-        free(*o_data_str);
+        operator delete(*o_data_str);
         *o_data_str = NULL;
         return BUG(SCAN_COMPRESSION_NO_MEMORY);
     }
@@ -851,8 +850,8 @@ rs4_decompress(uint8_t** o_data_str,
 
     if (rc != SCAN_COMPRESSION_OK)
     {
-        free(*o_data_str);
-        free(*o_care_str);
+        operator delete(*o_data_str);
+        operator delete(*o_care_str);
         *o_data_str = NULL;
         *o_care_str = NULL;
     }
@@ -905,7 +904,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant)
 
 // Check for RS4 contains CMSK ring
 int
-rs4_is_cmsk(CompressedScanData* i_rs4)
+rs4_is_cmsk(const CompressedScanData* i_rs4)
 {
     return(i_rs4->iv_type == RS4_SCAN_DATA_TYPE_CMSK);
 }
@@ -915,16 +914,17 @@ rs4_is_cmsk(CompressedScanData* i_rs4)
 // |------RS4 Header------|
 // |-----CMSK Header------|
 // |-----CMSK RS4 Data----|
-// |-------RS4 Data-------|
+// |----Stump RS4 Data----|
 int
-rs4_embed_cmsk(CompressedScanData** io_rs4, CompressedScanData* i_rs4_cmsk)
+rs4_embed_cmsk( CompressedScanData** io_rs4,
+                CompressedScanData*  i_rs4Cmsk )
 {
-    char* embedded_addr = (char*)(*io_rs4 + 1);
-    size_t embedded_size = be16toh(i_rs4_cmsk->iv_size);
-    size_t total_size   = be16toh((*io_rs4)->iv_size) + embedded_size;
+    char* embeddedAddr = (char*)(*io_rs4 + 1);
+    size_t embeddedSize = be16toh(i_rs4Cmsk->iv_size);
+    size_t totalSize   = be16toh((*io_rs4)->iv_size) + embeddedSize;
 
     // Enlarge RS4 container to accomodate cmsk ring
-    *io_rs4 = (CompressedScanData*)realloc(*io_rs4, total_size);
+    *io_rs4 = (CompressedScanData*)realloc(*io_rs4, totalSize);
 
     if (!*io_rs4)
     {
@@ -932,65 +932,112 @@ rs4_embed_cmsk(CompressedScanData** io_rs4, CompressedScanData* i_rs4_cmsk)
     }
 
     // Make space for cmsk ring
-    memmove(embedded_addr + embedded_size,
-            embedded_addr,
+    memmove(embeddedAddr + embeddedSize,
+            embeddedAddr,
             be16toh((*io_rs4)->iv_size) - sizeof(CompressedScanData));
 
     // Copy cmsk ring into rs4
-    memcpy(embedded_addr,
-           i_rs4_cmsk,
-           embedded_size);
+    memcpy(embeddedAddr,
+           i_rs4Cmsk,
+           embeddedSize);
 
     // Update header fields
-    (*io_rs4)->iv_size = htobe16(total_size);
+    (*io_rs4)->iv_size = htobe16(totalSize);
     (*io_rs4)->iv_type = RS4_SCAN_DATA_TYPE_CMSK;
 
     return SCAN_COMPRESSION_OK;
 }
 
 
-// Extract Stump & Cmsk ring containers
+// Extract Stump & Cmsk ring containers (assumes pre-allocation of ring buffers)
 int
-rs4_extract_cmsk(CompressedScanData* i_rs4,
-                 CompressedScanData** io_rs4_stump,
-                 CompressedScanData** io_rs4_cmsk)
+_rs4_extract_cmsk( const CompressedScanData* i_rs4,
+                   size_t                    i_size,
+                   CompressedScanData*       o_rs4Stump,
+                   CompressedScanData*       o_rs4Cmsk )
 {
-    CompressedScanData* embedded_addr = (CompressedScanData*)(i_rs4 + 1);
+    if (be16toh(i_rs4->iv_magic) != RS4_MAGIC)
+    {
+        return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
+    }
+
+    if (i_rs4->iv_version != RS4_VERSION)
+    {
+        return BUG(SCAN_COMPRESSION_VERSION_ERROR);
+    }
+
+    memset((uint8_t*)o_rs4Stump, 0, i_size);
+    memset((uint8_t*)o_rs4Cmsk, 0, i_size);
+
+    const CompressedScanData* embeddedAddr = i_rs4 + 1;
 
     // Get size of Stump and Cmsk rings
-    size_t embedded_size = be16toh(embedded_addr->iv_size);
-    size_t stump_size    = be16toh(i_rs4->iv_size) - embedded_size;
+    size_t embeddedSize = be16toh(embeddedAddr->iv_size);
+    size_t stumpSize    = be16toh(i_rs4->iv_size) - embeddedSize;
 
-    // Allocate memory for Stump and Cmsk rings
-    *io_rs4_stump = (CompressedScanData*)malloc(stump_size);
-    *io_rs4_cmsk  = (CompressedScanData*)malloc(embedded_size);
-
-    if (!*io_rs4_stump || !*io_rs4_cmsk)
+    if (stumpSize > i_size || embeddedSize > i_size)
     {
-        return BUG(SCAN_COMPRESSION_NO_MEMORY);
+        return BUG(SCAN_COMPRESSION_BUFFER_OVERFLOW);
     }
 
     // Copy Cmsk ring - (header+data)
-    memcpy(*io_rs4_cmsk,
-           embedded_addr,
-           embedded_size);
+    memcpy(o_rs4Cmsk,
+           embeddedAddr,
+           embeddedSize);
 
     // Copy Stump ring - header
-    memcpy(*io_rs4_stump,
+    memcpy(o_rs4Stump,
            i_rs4,
            sizeof(CompressedScanData));
 
     // Copy Stump ring - data
-    memcpy(((CompressedScanData*)(*io_rs4_stump) + 1),
-           (uint8_t*)embedded_addr + embedded_size,
-           stump_size - sizeof(CompressedScanData));
+    memcpy(o_rs4Stump + 1,
+           (uint8_t*)embeddedAddr + embeddedSize,
+           stumpSize - sizeof(CompressedScanData));
 
     // Update header fields - stump
-    (*io_rs4_stump)->iv_size = htobe16(stump_size);
-    (*io_rs4_stump)->iv_type = RS4_SCAN_DATA_TYPE_NON_CMSK;
+    o_rs4Stump->iv_size = htobe16(stumpSize);
+    o_rs4Stump->iv_type = RS4_SCAN_DATA_TYPE_NON_CMSK;
 
     return SCAN_COMPRESSION_OK;
 }
+
+
+// Extract Stump & Cmsk ring containers (local allocation of ring buffers)
+int
+rs4_extract_cmsk( const CompressedScanData*   i_rs4,
+                  CompressedScanData**        o_rs4Stump,
+                  CompressedScanData**        o_rs4Cmsk )
+{
+    int rc;
+    uint32_t size = MAX_RING_BUF_SIZE_TOOL;
+
+    // Allocate memory for Stump and Cmsk rings
+    *o_rs4Stump = (CompressedScanData*)(operator new(size));
+    *o_rs4Cmsk  = (CompressedScanData*)(operator new(size));
+
+    if (!*o_rs4Stump || !*o_rs4Cmsk)
+    {
+        operator delete(*o_rs4Stump);
+        operator delete(*o_rs4Cmsk);
+        *o_rs4Stump = NULL;
+        *o_rs4Cmsk = NULL;
+        return BUG(SCAN_COMPRESSION_NO_MEMORY);
+    }
+
+    rc = _rs4_extract_cmsk(i_rs4, size, *o_rs4Stump, *o_rs4Cmsk);
+
+    if (rc != SCAN_COMPRESSION_OK)
+    {
+        operator delete(*o_rs4Stump);
+        operator delete(*o_rs4Cmsk);
+        *o_rs4Stump = NULL;
+        *o_rs4Cmsk = NULL;
+    }
+
+    return rc;
+}
+
 
 // Prints out the raw decompressed RS4 ring content
 void print_raw_ring( uint8_t*  data,
