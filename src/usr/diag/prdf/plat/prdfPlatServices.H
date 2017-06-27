@@ -153,6 +153,13 @@ uint32_t startTpsPhase1( ExtensibleChip * i_chip, const MemRank & i_rank );
 template<TARGETING::TYPE T>
 uint32_t startTpsPhase2( ExtensibleChip * i_chip, const MemRank & i_rank );
 
+/**
+ * @brief Restarts Trace arrays after having stopped on error
+ * @param i_tgt EC/EQ target
+ * @return non-SUCCESS for failure, SUCCESS otherwise
+ */
+int32_t restartTraceArray(TARGETING::TargetHandle_t i_tgt);
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

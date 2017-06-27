@@ -61,6 +61,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/utils/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 prd_incpath += ${ROOTPATH}/src/import/hwpf/fapi2/include
 prd_incpath += ${ROOTPATH}/src/import/
@@ -148,6 +149,9 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 ################################################################################
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
 prd_obj_no_sim += p9_io_xbus_read_erepair.o
+prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
+prd_obj_no_sim += p9_proc_gettracearray.o
+prd_obj_no_sim += p9_sbe_tracearray.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
