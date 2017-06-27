@@ -52,6 +52,7 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_query_cache_access_state.H>
 
+
 // ----------------------------------------------------------------------
 // Constants
 // ----------------------------------------------------------------------
@@ -105,12 +106,15 @@ p9_query_cache_access_state(
     //A unit is scommable if clocks are running
     //A unit is scannable if the unit is powered up
 
-    //Extract the core stop state
-    l_qsshsrc.extractToRight<uint32_t>(l_quadStopLevel, SSH_REG_STOP_LEVEL, SSH_REG_STOP_LEVEL_LEN);
+    //Extract the quad stop state
+    if (l_qsshsrc.getBit(SSH_REG_STOP_GATED))
+    {
+        l_qsshsrc.extractToRight<uint32_t>(l_quadStopLevel, SSH_REG_STOP_LEVEL, SSH_REG_STOP_LEVEL_LEN);
+    }
 
     FAPI_DBG("EQ Stop State: EQ(%d)", l_quadStopLevel);
 
-    //Set all attribtes to 1, then clear them based on the stop state
+    //Set all attributes to 1, then clear them based on the stop state
     o_l2_is_scomable = 1;
     o_l2_is_scannable = 1;
     o_l3_is_scomable = 1;
