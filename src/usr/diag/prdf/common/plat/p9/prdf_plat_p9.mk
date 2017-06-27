@@ -51,4 +51,5 @@ prd_rule_plugin += prdfP9Pll.o
 prd_rule_plugin += prdfCommonPlugins.o
 prd_rule_plugin += prdfP9Ex.o
 prd_rule_plugin += prdfP9Xbus.o
-
+prd_rule_plugin += prdfP9Ec.o
+prd_rule_plugin += prdfP9Eq.o

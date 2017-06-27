@@ -50,6 +50,7 @@
 #include <devicefw/userif.H>
 #include <iipMopRegisterAccess.h>
 #include <ibscomreasoncodes.H>
+#include <p9_proc_gettracearray.H>
 
 using namespace TARGETING;
 
@@ -588,6 +589,66 @@ uint32_t startTpsPhase2<TYPE_MBA>( ExtensibleChip * i_mbaChip,
 {
     PRDF_ERR( "function not implemented yet" ); // TODO RTC 157888
     return SUCCESS;
+}
+
+int32_t restartTraceArray(TargetHandle_t i_tgt)
+{
+    int32_t o_rc = SUCCESS;
+    errlHndl_t err = nullptr;
+    TYPE tgtType = getTargetType(i_tgt);
+    proc_gettracearray_args taArgs;
+    TargetHandle_t l_tgt = nullptr;
+
+    if (TYPE_CORE == tgtType)
+    {
+        taArgs.trace_bus = PROC_TB_CORE0;
+        l_tgt = i_tgt;
+    }
+    else if (TYPE_EQ == tgtType)
+    {
+        taArgs.trace_bus = PROC_TB_L20;
+        // HWP requires an EX tgt here, all the traces within EQ/EX start/stop
+        // so it doesn't matter which one, just use the first
+        TargetHandleList lst = getConnected(i_tgt, TYPE_EX);
+        if (lst.size() > 0)
+        {
+            l_tgt = lst[0];
+        }
+        else
+        {
+            PRDF_ERR( "restartTraceArray: no functional EX for EQ 0x%08x",
+                      getHuid(i_tgt) );
+            return FAIL;
+        }
+    }
+    else
+    {
+        PRDF_ASSERT(false); // should only call this on EC/EQ/EX
+    }
+
+    taArgs.stop_pre_dump = false;
+    taArgs.ignore_mux_setting = true;
+    taArgs.collect_dump = false;
+    taArgs.reset_post_dump = true;
+    taArgs.restart_post_dump = true; //Restart all chiplet trace arrays
+
+    fapi2::variable_buffer taData;
+
+    fapi2::Target<PROC_GETTRACEARRAY_TARGET_TYPES> fapiTrgt (l_tgt);
+    FAPI_INVOKE_HWP( err,
+                     p9_proc_gettracearray,
+                     fapiTrgt,
+                     taArgs,
+                     taData);
+
+    if(NULL != err)
+    {
+        PRDF_ERR( "[PlatServices::RestartTraceArray] HUID: 0x%08x"
+                  "RestartTraceArray failed", getHuid(i_tgt));
+        PRDF_COMMIT_ERRL( err, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+    return o_rc;
 }
 
 //------------------------------------------------------------------------------
