@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -94,7 +94,7 @@ kernel_shutdown_ea0_1_mode:
         ;// as it was the one that updated the cpu_count & lowest_pir
         ;// barrier - 1 wait for all nodes to report
     mfspr  r10, PIR
-    cmp    cr0, r10, r7
+    cmpw    cr0, r10, r7
     bne+ 2f       ;// inside KERNEL_BARRIER below
 
         ;// Perform barrier - 1
@@ -132,7 +132,7 @@ kernel_shutdown_ea0_1_mode:
     addi r8, r8, 8
             ;// Check for PIR == r7.
     mfspr r10, PIR
-    cmp cr0, r10, r7
+    cmpw cr0, r10, r7
     beq 3f
         ;// Increment thread count.
 1:
@@ -165,7 +165,7 @@ kernel_shutdown_ea0_1_mode:
 1:
     or 1,1,1
     ld r11, 0(r8)
-    cmp cr0, r3, r11
+    cmpw cr0, r3, r11
     bne+ 1b
     isync
         ;// All other threads have left, so wait a little bit...
