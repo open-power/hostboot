@@ -44,9 +44,10 @@ namespace HTMGT
 {
 
     errlHndl_t OccManager::_sendOccPoll(const bool i_flushAllErrors,
-                                        TARGETING::Target * i_occTarget)
+                                        TARGETING::Target * i_occTarget,
+                                        const bool onlyIfEstablished)
     {
-        errlHndl_t l_err = NULL;
+        errlHndl_t l_err = nullptr;
 
         TMGT_INF("sendOccPoll(flush=%c)", i_flushAllErrors?'y':'n');
 
@@ -54,7 +55,24 @@ namespace HTMGT
         {
             if(NULL == i_occTarget || l_occ->iv_target == i_occTarget)
             {
-                l_err = l_occ->pollForErrors(i_flushAllErrors);
+                if ((l_occ->iv_commEstablished) ||
+                    (onlyIfEstablished == false))
+                {
+                    errlHndl_t poll_err=l_occ->pollForErrors(i_flushAllErrors);
+                    if (poll_err != nullptr)
+                    {
+                        if (l_err == nullptr)
+                        {
+                            // Only return 1st error (continue to poll others)
+                            l_err = poll_err;
+                            poll_err = nullptr;
+                        }
+                        else
+                        {
+                            ERRORLOG::errlCommit(poll_err, HTMGT_COMP_ID);
+                        }
+                    }
+                }
             }
         }
 

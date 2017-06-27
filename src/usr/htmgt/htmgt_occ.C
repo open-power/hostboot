@@ -206,24 +206,28 @@ namespace HTMGT
             cmdData[1] = OCC_RESET_FAIL_OTHER_OCC;
         }
 
-        OccCmd cmd(this, OCC_CMD_RESET_PREP, sizeof(cmdData), cmdData);
-        err = cmd.sendOccCmd();
-        if(err)
+        if (iv_commEstablished)
         {
-            // log error and keep going
-            TMGT_ERR("OCC::resetPrep: OCC%d resetPrep failed with rc = 0x%04x",
-                     iv_instance,
-                     err->reasonCode());
+            OccCmd cmd(this, OCC_CMD_RESET_PREP, sizeof(cmdData), cmdData);
+            err = cmd.sendOccCmd();
+            if(err)
+            {
+                // log error and keep going
+                TMGT_ERR("OCC::resetPrep: OCC%d resetPrep failed, rc=0x%04x",
+                         iv_instance,
+                         err->reasonCode());
 
-            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
-        }
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
 
-        // poll and flush error logs from OCC - Check Ex return code
-        err = pollForErrors(true);
-        if(err)
-        {
-            ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            // poll and flush error logs from OCC - Check Ex return code
+            err = pollForErrors(true);
+            if(err)
+            {
+                ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+            }
         }
+        // else comm to OCC has not been established yet
 
         return atThreshold;
     }
@@ -841,8 +845,11 @@ namespace HTMGT
 
                 if (false == i_skipComm)
                 {
-                    // Send poll cmd to all OCCs to establish comm
-                    err = _sendOccPoll(false,nullptr);
+                    // Send poll cmd to all OCCs
+                    err = _sendOccPoll(false, // don't flush errors
+                                       nullptr, // send to all OCCs
+                                       true); // only poll if communications
+                    // has been established
                     if (err)
                     {
                         TMGT_ERR("_resetOccs: Poll OCCs failed.");
