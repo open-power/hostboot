@@ -56,6 +56,7 @@ namespace HTMGT
                  i_startCompleted, i_failedOccTarget);
         errlHndl_t l_err = nullptr;
         uint32_t l_huid = 0;
+        bool skip_comm = true;
         if (i_failedOccTarget)
         {
             l_huid = TARGETING::get_huid(i_failedOccTarget);
@@ -116,6 +117,7 @@ namespace HTMGT
                                     ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
                                 }
                             }
+                            skip_comm = false;
 
                             // Send ALL config data
                             sendOccConfigData();
@@ -193,7 +195,11 @@ namespace HTMGT
                              "Attempting OCC Reset",
                              l_err->reasonCode());
                 TMGT_INF("processOccStartStatus: Calling resetOccs");
-                errlHndl_t err2 = OccManager::resetOccs(nullptr);
+                // Reset ALL OCCs, don't skip incrementing reset count, and
+                // if comm has not been established, don't try to talk to OCCs
+                errlHndl_t err2 = OccManager::resetOccs(nullptr,
+                                                        false,
+                                                        skip_comm);
                 if(err2)
                 {
                     TMGT_ERR("OccManager::resetOccs failed with 0x%04X",

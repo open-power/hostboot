@@ -710,9 +710,13 @@ namespace HTMGT
                                   bool i_skipComm = false);
 
             /** See sendOccPoll() above */
+            /* @param[in] i_onlyIfEstablished: If true, only send poll if
+             *                 communications has already been established
+             *                 with that OCC */
             errlHndl_t
                 _sendOccPoll(const bool i_flushAllErrors,
-                            TARGETING::Target * i_occTarget);
+                             TARGETING::Target * i_occTarget,
+                             const bool i_onlyIfEstablished = false);
 
             /** See updateSafeModeReason() above */
             void _updateSafeModeReason(uint32_t i_src,
