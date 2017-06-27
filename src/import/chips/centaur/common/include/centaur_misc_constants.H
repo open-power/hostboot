@@ -44,6 +44,23 @@
 #define CFAM_FSI_GP6_RESET_DATA 0x00000000
 #define CFAM_FSI_GP7_RESET_DATA 0x00000000
 
+#define CFAM_FSI_SHIFT_CTRL        0x00000C10
+#define CFAM_FSI_DATA_0            0x00001000
+#define CFAM_FSI_DATA_1            0x00001001
+#define CFAM_FSI_CMD_REG           0x00001002
+#define CFAM_FSI_RESET             0x00001006
+#define CFAM_FSI_STATUS            0x00001007
+#define CFAM_FSI_GP1               0x00001010
+#define CFAM_FSI_GP2               0x00001011
+#define CFAM_FSI_GP3               0x00001012
+#define CFAM_FSI_GP4               0x00001013
+#define CFAM_FSI_GP5               0x00001014
+#define CFAM_FSI_GP6               0x00001015
+#define CFAM_FSI_GP7               0x00001016
+#define CFAM_FSI_GP8               0x00001017
+#define CFAM_FSI_GP3_MIRROR        0x0000101B
+
+
 #define PERV_GP3_RESET_DATA 0x44166000
 
 #define MAX_FLUSH_LOOPS  400
