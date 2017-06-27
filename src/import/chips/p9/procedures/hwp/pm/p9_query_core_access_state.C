@@ -51,6 +51,8 @@
 
 #include "p9_query_core_access_state.H"
 
+#define SSHSRC_STOP_GATED 0
+
 // ----------------------------------------------------------------------
 // Procedure Function
 // ----------------------------------------------------------------------
@@ -62,12 +64,14 @@ p9_query_core_access_state(
     bool& o_is_scanable)
 {
 
-    fapi2::buffer<uint64_t> l_csshsrc, l_cpfetsense;
+    fapi2::buffer<uint64_t> l_csshsrc, l_cpfetsense, l_sisr;
     fapi2::buffer<uint64_t> l_data64;
     uint32_t l_coreStopLevel = 0;
     uint8_t  vdd_pfet_disable_core = 0;
     uint8_t  c_exec_hasclocks = 0;
     uint8_t  c_pc_hasclocks = 0;
+    uint8_t  l_chpltNumber = 0;
+
 
     FAPI_INF("> p9_query_core_access_state...");
 
@@ -79,7 +83,36 @@ p9_query_core_access_state(
     // A unit is scannable if the unit is powered up.
 
     // Extract the core stop state
-    l_csshsrc.extractToRight<uint32_t>(l_coreStopLevel, 8, 4);
+    if (l_csshsrc.getBit<SSHSRC_STOP_GATED>() == 1)
+    {
+        l_csshsrc.extractToRight<uint32_t>(l_coreStopLevel, 8, 4);
+    }
+
+    if (l_coreStopLevel == 0)
+    {
+        // Double check the core isn't in stop 1
+        auto l_ex_target = i_target.getParent<fapi2::TARGET_TYPE_EX>();
+
+        FAPI_TRY(fapi2::getScom(l_ex_target, EX_CME_LCL_SISR_SCOM, l_sisr), "Error reading data from CME SISR register");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
+                 "ERROR: Failed to get the position of the Core:0x%08X",
+                 i_target);
+
+        uint32_t l_pos = l_chpltNumber % 2;
+
+        if (l_pos == 0 && l_sisr.getBit<EX_CME_LCL_SISR_PM_STATE_ACTIVE_C0>())
+        {
+            l_sisr.extractToRight<uint32_t>(l_coreStopLevel, EX_CME_LCL_SISR_PM_STATE_C0, EX_CME_LCL_SISR_PM_STATE_C0_LEN);
+        }
+
+        if (l_pos == 1 && l_sisr.getBit<EX_CME_LCL_SISR_PM_STATE_ACTIVE_C1>())
+        {
+            l_sisr.extractToRight<uint32_t>(l_coreStopLevel, EX_CME_LCL_SISR_PM_STATE_C1, EX_CME_LCL_SISR_PM_STATE_C1_LEN);
+        }
+
+
+    }
 
     FAPI_INF("Core Stop State: C(%d)", l_coreStopLevel);
 
@@ -130,12 +163,15 @@ p9_query_core_access_state(
 
 
     // Read clocks running registers
+    if (vdd_pfet_disable_core == 0)
+    {
 
-    FAPI_DBG("   Read Core EPS clock status for core");
-    FAPI_TRY(fapi2::getScom(i_target, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
+        FAPI_DBG("   Read Core EPS clock status for core");
+        FAPI_TRY(fapi2::getScom(i_target, C_CLOCK_STAT_SL,  l_data64), "Error reading data from C_CLOCK_STAT_SL");
 
-    l_data64.extractToRight<uint8_t>(c_exec_hasclocks, 6, 1);
-    l_data64.extractToRight<uint8_t>(c_pc_hasclocks,   5, 1);
+        l_data64.extractToRight<uint8_t>(c_exec_hasclocks, 6, 1);
+        l_data64.extractToRight<uint8_t>(c_pc_hasclocks,   5, 1);
+    }
 
     FAPI_INF("Core Clock Status : PC_HASCLOCKS(%d) EXEC_HASCLOCKS(%d)", c_pc_hasclocks, c_exec_hasclocks);
 
