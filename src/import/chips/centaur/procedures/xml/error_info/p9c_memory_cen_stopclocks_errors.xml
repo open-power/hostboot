@@ -1,0 +1,111 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/centaur/procedures/xml/error_info/p9c_memory_cen_stopclocks_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2013,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- @file p9c_memory_cen_stopclocks_errors.xml -->
+<!-- @brief Error xml for cen_stopclocks errors-->
+<!-- -->
+<!-- *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 1 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
+
+<hwpErrors>
+<registerFfdc>
+  <id>REG_FFDC_CLOCK_STOP_BAD_STATUS_REGS</id>
+  <cfamRegister>CFAM_FSI_GP3</cfamRegister>
+  <cfamRegister>CFAM_FSI_GP4</cfamRegister>
+  <cfamRegister>CEN_PERV_GP3</cfamRegister>
+  <scomRegister>CEN_PCBSLMEM_GP3_REG_PCB</scomRegister>
+  <scomRegister>CEN_PCBSLNEST_GP3_REG_PCB</scomRegister>
+</registerFfdc>
+
+<hwpError>
+  <rc>RC_CEN_MSS_UNEXPECTED_MEM_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in MEM_CLK_STATUS
+    This error could happen for a number of reasons and probably not on the
+    IPL path, so callout the memory buffer chip, but do not deconfigure/GARD.
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CLOCK_STOP_BAD_STATUS_REGS</id>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <priority>HIGH</priority>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_UNEXPECTED_NEST_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in NEST_CLK_STATUS
+    This error could happen for a number of reasons and probably not on the
+    IPL path, so callout the memory buffer chip, but do not deconfigure/GARD.
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CLOCK_STOP_BAD_STATUS_REGS</id>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
+  <rc>RC_CEN_MSS_UNEXPECTED_TP_CLOCK_STATUS</rc>
+  <description>
+    cen_stopclocks got unexpected clock status in TP_CLK_STATUS
+    This error could happen for a number of reasons and probably not on the
+    IPL path, so callout the memory buffer chip, but do not deconfigure/GARD.
+  </description>
+  <ffdc>EXPECTED_STATUS</ffdc>
+  <ffdc>ACTUAL_STATUS</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_CLOCK_STOP_BAD_STATUS_REGS</id>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>MEMBUF_CHIP_IN_ERROR</target>
+    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<!-- Add some header comments for BACKUP and SCREEN. -->
+
+</hwpErrors>
