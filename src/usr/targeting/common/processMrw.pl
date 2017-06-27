@@ -1507,8 +1507,32 @@ sub getI2cMapField
 
     my $port = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_PORT");
     my $engine = $targetObj->getAttribute($conn_target->{SOURCE}, "I2C_ENGINE");
-    my $addr = $targetObj->getBusAttribute($conn_target->{SOURCE},
+    my $addr = "";
+
+    # For Open Power systems continue to get the I2C_ADDRESS from
+    # bus target, if defined.
+    if ($targetObj->isBusAttributeDefined(
+           $conn_target->{SOURCE},$conn_target->{BUS_NUM},"I2C_ADDRESS"))
+    {
+        $addr = $targetObj->getBusAttribute($conn_target->{SOURCE},
             $conn_target->{BUS_NUM}, "I2C_ADDRESS");
+    }
+    # If bus doesn't have I2C_ADDRESS or default value is not set,
+    # then get it from i2c-slave, if defined.
+    if ($addr eq "")
+    {
+        if (! $targetObj->isBadAttribute($conn_target->{DEST},"I2C_ADDRESS") )
+        {
+           $addr = $targetObj->getAttribute($conn_target->{DEST},"I2C_ADDRESS");
+        }
+    }
+
+    #if the addr is still not defined, then throw an error
+    if ($addr eq "")
+    {
+        print ("ERROR: I2C_ADDRESS is not defined for $conn_target\n");
+        $targetObj->myExit(4);
+    }
 
     my $bits=sprintf("%08b",hex($addr));
     my $field=sprintf("%d%3s",oct($port),substr($bits,4,3));
