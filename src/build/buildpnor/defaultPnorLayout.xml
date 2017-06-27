@@ -279,4 +279,12 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
+    <section>
+        <description>Memory Data (24K)</description>
+        <eyeCatch>MEMD</eyeCatch>
+        <physicalOffset>0x2F31000</physicalOffset>
+        <physicalRegionSize>0x6000</physicalRegionSize>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 </pnor>
