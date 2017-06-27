@@ -123,8 +123,9 @@ compressed_scan_data_translate(CompressedScanData* o_data,
 /// <ChipType> ring ID header files for more info.)
 ///
 /// This API is required for integration with PHYP which does not support
-/// malloc().  Applications in environments supporting malloc() can use
-/// rs4_compress() instead.
+/// local memory allocation, like malloc() and new().  Applications in
+/// environments supporting local memory allocation can use rs4_compress()
+/// instead.
 ///
 /// We always require the worst-case amount of memory including the header and
 /// any rounding required to guarantee that the data size is a multiple of 8
@@ -145,7 +146,7 @@ _rs4_compress(CompressedScanData* io_rs4,
 
 /// Compress a scan string using the RS4 compression algorithm
 ///
-/// \param[out] o_rs4 This algorithm uses malloc() to allocate memory for the
+/// \param[out] o_rs4 This algorithm uses new() to allocate memory for the
 /// compressed data, and returns a pointer to this memory in \a o_rs4. After
 /// the call this memory is owned by the caller who is responsible for
 /// free()-ing the data area once it is no longer required. Note that the
@@ -189,7 +190,9 @@ rs4_compress(CompressedScanData** o_rs4,
 /// the decompressed care mask, which is the size of the original string in
 /// bits rounded up to the nearest byte.
 ///
-/// \param[in] i_size The size in \e bytes of \a io_data_str and \a io_care_str.
+/// \param[in] i_size The size in \e bytes of \a o_data_str and \a o_care_str
+/// buffers and which represents the max number of raw ring bits x 8 that may
+/// fit into the two raw ring buffers.
 ///
 /// \param[out] o_length The length of the decompressed string in \e bits.
 ///
@@ -197,13 +200,14 @@ rs4_compress(CompressedScanData** o_rs4,
 /// decompressed.
 ///
 /// This API is required for integration with PHYP which does not support
-/// malloc().  Applications in environments supporting malloc() can use
-/// rs4_decompress() instead.
+/// local memory allocation, such as malloc() and new().  Applications in
+/// environments supporting local memory allocation can use rs4_decompress()
+/// instead.
 ///
 /// \returns See \ref scan_compression_codes
 int
-_rs4_decompress(uint8_t* io_data_str,
-                uint8_t* io_care_str,
+_rs4_decompress(uint8_t* o_data_str,
+                uint8_t* o_care_str,
                 uint32_t i_size,
                 uint32_t* o_length,
                 const CompressedScanData* i_rs4);
@@ -211,11 +215,11 @@ _rs4_decompress(uint8_t* io_data_str,
 
 /// Decompress a scan string compressed using the RS4 compression algorithm
 ///
-/// \param[out] o_data_str The API malloc()-s this data area to contain the
+/// \param[out] o_data_str The API new() allocs this data area to contain the
 /// decompressed string. After this call the caller owns \a o_data_str and is
 /// responsible for free()-ing this data area once it is no longer required.
 ///
-/// \param[out] o_care_str The API malloc()-s this data area to contain the
+/// \param[out] o_care_str The API new() allocs this data area to contain the
 /// decompressed care mask. After this call the caller owns \a o_care_str and
 /// is responsible for free()-ing this data area once it is no longer required.
 ///
@@ -251,7 +255,7 @@ rs4_redundant(const CompressedScanData* i_data, int* o_redundant);
 /// \param[in] i_rs4 A pointer to the RS4 CompressedScanData [header + data]
 ///
 /// \returns 1 if CMSK ring found, 0 otherwise
-int rs4_is_cmsk(CompressedScanData* i_rs4);
+int rs4_is_cmsk(const CompressedScanData* i_rs4);
 
 
 /// Embed CMSK ring into an RS4 ring
@@ -265,18 +269,41 @@ int rs4_embed_cmsk(CompressedScanData** io_rs4,
                    CompressedScanData* i_rs4_cmsk);
 
 
-/// Extract Stump & CMSK rings from an RS4 ring
+/// Extract Stump & CMSK rings from an RS4 ring (assumes pre-allocated ring buffers)
 ///
-/// \param[in] i_rs4 A pointer to the CompressedScanData [header + data]
+/// \param[in] i_rs4  A pointer to the input hybrid CMSK RS4 ring and which must contain
+/// boto CompressedScanData header + RS4 encoded data string.
 ///
-/// \param[inout] i_rs4_stump A pointer to the Stump CompressedScanData [header + data]
+/// \param[in] i_size  Size of buffers to hold the output Stump and CMSK RS4 rings.
 ///
-/// \param[inout] i_rs4_cmsk A pointer to the Cmsk CompressedScanData [header + data]
+/// \param[out] o_rs4_stump  A pointer to a pre-allocated buffer that must be big
+/// enough to hold the Stump CompressedScanData [header + data].
+///
+/// \param[out] o_rs4_cmsk  A pointer to a pre-allocated buffer that must be big
+/// enough to hold the Cmsk CompressedScanData [header + data].
 ///
 /// \returns See \ref scan_compression_codes
-int rs4_extract_cmsk(CompressedScanData* i_rs4,
-                     CompressedScanData** io_rs4_stump,
-                     CompressedScanData** io_rs4_cmsk);
+int _rs4_extract_cmsk( const CompressedScanData* i_rs4,
+                       size_t                    i_size,
+                       CompressedScanData*       o_rs4_stump,
+                       CompressedScanData*       o_rs4_cmsk );
+
+
+/// Extract Stump & CMSK rings from an RS4 ring (local allocation of ring buffers)
+///
+/// \param[in] i_rs4  A pointer to the input hybrid CMSK RS4 ring and which must contain
+/// boto CompressedScanData header + RS4 encoded data string.
+///
+/// \param[out] o_rs4_stump  A pointer to a locally allocated buffer that holds the
+/// Stump CompressedScanData [header + data].  The calling code must free the buffer.
+///
+/// \param[out] o_rs4_cmsk  A pointer to a locally allocated buffer that holds the
+/// Cmsk CompressedScanData [header + data].  The calling code must free the buffer.
+///
+/// \returns See \ref scan_compression_codes
+int rs4_extract_cmsk( const CompressedScanData* i_rs4,
+                      CompressedScanData**      o_rs4_stump,
+                      CompressedScanData**      o_rs4_cmsk );
 
 #endif  // __ASSEMBLER__
 
