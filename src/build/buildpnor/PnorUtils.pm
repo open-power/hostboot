@@ -523,7 +523,9 @@ sub displayPnorLayout
     }
 
     my $curOffset = 0;
-    my $totalFree = 0;
+    my $gapTotal = 0;
+    my $prevOffset = 0;
+    my $prevSize = 0;
     # Iterate through all sections of PNOR, including TOC's
     foreach my $section (sort {$a <=> $b} keys %{$$i_pnorLayoutRef{sections}})
     {
@@ -531,6 +533,14 @@ sub displayPnorLayout
         my $offset = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalOffset});
         my $size = sprintf("0x%X",$$i_pnorLayoutRef{sections}{$section}{physicalRegionSize});
         my $end = sprintf("0x%X",hex($offset)+hex($size));
+
+        if ($prevOffset+$prevSize > hex($offset))
+        {
+            my $hexEndPrevSection = sprintf("0x%X",$prevOffset+$prevSize);
+            print "---- Error: Prevoius Section ends at offset $hexEndPrevSection which is after Current Offset $offset\n";
+            print "---- Current Offset Section: ".$$i_pnorLayoutRef{sections}{$section}{eyeCatch}."-$offset-$size-$end\n";
+            die ">>Error overlapping section\n";
+        }
 
         # Check if there is a gap between sections
         if ($i_gaps && ($curOffset < hex($offset)))
@@ -540,13 +550,16 @@ sub displayPnorLayout
             # Display address and size of gap
             my $gapSize = hex($offset)-$curOffset;
             print " size = ".sprintf("0x%X",$gapSize)."\n";
-            $totalFree += $gapSize;
+            $gapTotal += $gapSize;
             $curOffset = hex($offset) + hex($size);
         }
         else
         {
             $curOffset += hex($size);
         }
+
+        $prevOffset = hex($offset);
+        $prevSize = hex($size);
 
         # Print sections
         if ($i_verbose)
@@ -564,10 +577,19 @@ sub displayPnorLayout
     # Display total free space
     if($i_gaps)
     {
-        my $hexVal = sprintf("0x%X",$totalFree);
-        my $kiloBytes = $totalFree/1024;
-        print "\n---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
+        my $hexVal = sprintf("0x%X",$gapTotal);
+        my $kiloBytes = $gapTotal/1024;
+        print "\n---Total Gap(s) Free Space = ".$gapTotal." Bytes or ".$kiloBytes." KB";
         print " (".$hexVal.")\n";
     }
+
+    my $endImageFree = $$i_pnorLayoutRef{metadata}{imageSize} - $curOffset;
+    $endImageFree = 0 if ($endImageFree < 0 );
+    my $totalFree = $endImageFree + $gapTotal;
+
+    my $hexVal = sprintf("0x%X",$totalFree);
+    my $kiloBytes = $totalFree/1024;
+    print "---Total Free Space = ".$totalFree." Bytes or ".$kiloBytes." KB";
+    print " (".$hexVal.")\n";
 }
 1;
