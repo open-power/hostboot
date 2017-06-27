@@ -282,6 +282,14 @@ fapi2::ReturnCode p9_pm_stop_gpe_init(
             }
         }
 
+        // Setup the SGPE Timer Selects
+        // These hardcoded values are assumed by the SGPE Hcode for setting up
+        // the FIT and Watchdog values.
+        l_data64.flush<0>()
+        .insertFromRight<0, 4>(0x1)     // Watchdog
+        .insertFromRight<4, 4>(0xA);    // FIT
+        FAPI_TRY(fapi2::putScom(i_target, PU_GPE3_GPETSEL_SCOM, l_data64));
+
         // Boot the STOP GPE
         FAPI_TRY(stop_gpe_init(i_target), "ERROR: failed to initialize Stop GPE");
 
