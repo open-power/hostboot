@@ -71,11 +71,10 @@ use constant VFS_MODULE_TABLE_ENTRY_SIZE => 112;
 # VFS Module table max size
 use constant VFS_MODULE_TABLE_MAX_SIZE => VFS_EXTENDED_MODULE_MAX
                                           * VFS_MODULE_TABLE_ENTRY_SIZE;
-
 # Flag parameter string passed into signing tools
 # Note spaces before/after are critical.
 use constant LOCAL_SIGNING_FLAG => " -flag ";
-use constant OP_SIGNING_FLAG => " -flags ";
+use constant OP_SIGNING_FLAG => " --flags ";
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
 use constant FIPS_BUILD_FLAG => 0x40000000;
@@ -278,7 +277,7 @@ if ($keyTransition{enabled})
 }
 
 ### Open POWER signing
-my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.pl ";
+my $OPEN_SIGN_REQUEST="$SIGNING_DIR/crtSignedContainer.sh ";
 # By default key transition container is unused
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
@@ -286,10 +285,10 @@ my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 my $OPEN_PRD_SIGN_PARAMS = "--mode production "
     . " --sign-project-config $sb_signing_config_file";
 # Imprint key signing parameters
-my $OPEN_DEV_SIGN_PARAMS = " -hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
-    . "-hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
-    . "-hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
-    . "-swPrivKeyP $DEV_KEY_DIR/sw_key_a.key";
+my $OPEN_DEV_SIGN_PARAMS = " --hwPrivKeyA $DEV_KEY_DIR/hw_key_a.key "
+    . "--hwPrivKeyB $DEV_KEY_DIR/hw_key_b.key "
+    . "--hwPrivKeyC $DEV_KEY_DIR/hw_key_c.key "
+    . "--swPrivKeyP $DEV_KEY_DIR/sw_key_a.key";
 
 # Handle key transition and production signing logic
 # If in production mode, key transition is not supported yet
@@ -505,7 +504,7 @@ sub manipulateImages
         HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
     );
 
-    foreach my $key (sort partitionDepSort  keys %{$i_binFilesRef})
+    foreach my $key (sort partitionDepSort keys %{$i_binFilesRef})
     {
         my %callerHwHdrFields = (
             configure => 0,
@@ -668,8 +667,8 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "-protectedPayload $tempImages{PAYLOAD_TEXT} "
-                                . "-out $tempImages{PROTECTED_PAYLOAD}");
+                                . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
+                                . "--out $tempImages{PROTECTED_PAYLOAD}");
                         }
                         else
                         {
@@ -686,8 +685,8 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "-protectedPayload $bin_file.protected "
-                                . "-out $tempImages{PROTECTED_PAYLOAD}");
+                                . "--protectedPayload $bin_file.protected "
+                                . "--out $tempImages{PROTECTED_PAYLOAD}");
                         }
                         else
                         {
@@ -703,11 +702,11 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             my $codeStartOffset = ($eyeCatch eq "HBB") ?
-                                "-code-start-offset 0x00000180" : "";
+                                "--code-start-offset 0x00000180" : "";
                             run_command("$CUR_OPEN_SIGN_REQUEST "
                                 . "$codeStartOffset "
-                                . "-protectedPayload $bin_file "
-                                . "-out $tempImages{HDR_PHASE}");
+                                . "--protectedPayload $bin_file "
+                                . "--out $tempImages{HDR_PHASE}");
                         }
                         else
                         {
@@ -745,8 +744,8 @@ sub manipulateImages
                     if($openSigningTool)
                     {
                         run_command("$CUR_OPEN_SIGN_REQUEST "
-                            . "-protectedPayload $bin_file "
-                            . "-out $tempImages{HDR_PHASE}");
+                            . "--protectedPayload $bin_file "
+                            . "--out $tempImages{HDR_PHASE}");
                     }
                     else
                     {
@@ -1135,12 +1134,12 @@ sub create_sb_key_transition_container
 
         # Create a signed container with new production keys
         run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
-            . "$sb_hdrs{SBKT}{inner}{flags} -protectedPayload $tempImages{RAND_BLOB} "
-            . "-out $tempImages{PRD_KEY_FILE}");
+            . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
+            . "--out $tempImages{PRD_KEY_FILE}");
         # Sign new production key container with imprint keys
         run_command("$OPEN_SIGN_REQUEST ".OP_SIGNING_FLAG
-            . "$sb_hdrs{SBKT}{outer}{flags} -protectedPayload $tempImages{PRD_KEY_FILE} "
-            . "-out $o_file");
+            . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
+            . "--out $o_file");
     }
     else
     {
