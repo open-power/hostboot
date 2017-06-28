@@ -424,7 +424,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000cf405011c11ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
@@ -477,7 +477,60 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.flush<0> ();
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_32_32 = 0x4;
+                    l_scom_buffer.insert<49, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_32_32 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_64_0 = 0x0;
+                    l_scom_buffer.insert<49, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DOFF_VCINIT_NEXT_DOFF_64_0 );
+                }
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_VA_DOFF_VCINIT_NEXT_DOFF_24_24_16 = 0x4;
+                    l_scom_buffer.insert<61, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_VA_DOFF_VCINIT_NEXT_DOFF_24_24_16 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_VA_DOFF_VCINIT_NEXT_DOFF_32_0_32 = 0x0;
+                    l_scom_buffer.insert<61, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_VA_DOFF_VCINIT_NEXT_DOFF_32_0_32 );
+                }
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_2CH_MODE2 = 0x5;
+                    l_scom_buffer.insert<54, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_2CH_MODE2 );
+                }
+                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_1CH_MODE2 = 0x1;
+                    l_scom_buffer.insert<54, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_1CH_MODE2 );
+                }
+                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG <= literal_3)))
+                {
+                    constexpr auto l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_1CH_MODE1 = 0x0;
+                    l_scom_buffer.insert<54, 3, 61, uint64_t>
+                    (l_PB_DAT_PBIEN_PBIEN_EAST_EN_SER_DCTL_PB_PBIEN_CFG_LINK_DON_VCINIT_NEXT_DON_1CH_MODE1 );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x90000d3f05011c11ull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
@@ -492,6 +545,24 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 }
 
                 FAPI_TRY(fapi2::putScom(TGT0, 0x90000d6805011c11ull, l_scom_buffer));
+            }
+        }
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.flush<0> ();
+
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b01 );
+                }
+
+                if ((l_def_TRUE == literal_1))
+                {
+                    l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b11 );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x90000d7805011c11ull, l_scom_buffer));
             }
         }
         {
@@ -771,7 +842,7 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f2005011c11ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
@@ -995,6 +1066,47 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005011811ull, l_scom_buffer));
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer));
+        }
+        {
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            {
+                l_scom_buffer.flush<0> ();
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A_ON_TOK_SEL_NEXT_SEL_16 = 0x3;
+                    l_scom_buffer.insert<25, 3, 61, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A_ON_TOK_SEL_NEXT_SEL_16 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A_ON_TOK_SEL_NEXT_SEL_32 = 0x1;
+                    l_scom_buffer.insert<25, 3, 61, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A_ON_TOK_SEL_NEXT_SEL_32 );
+                }
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A3_ON_TOK_SEL_NEXT_SEL_12 = 0x2;
+                    l_scom_buffer.insert<31, 3, 61, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A3_ON_TOK_SEL_NEXT_SEL_12 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A3_ON_TOK_SEL_NEXT_SEL_16 = 0x1;
+                    l_scom_buffer.insert<31, 3, 61, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_A3_ON_TOK_SEL_NEXT_SEL_16 );
+                }
+
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_X_ON_TOK_SEL_NEXT_SEL_32 = 0x1;
+                    l_scom_buffer.insert<52, 2, 62, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_X_ON_TOK_SEL_NEXT_SEL_32 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    constexpr auto l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_X_ON_TOK_SEL_NEXT_SEL_64 = 0x0;
+                    l_scom_buffer.insert<52, 2, 62, uint64_t>(l_PB_DAT_TRUNK_PBEM0ARB_DAT_ARBEM_PB_CFG_X_ON_TOK_SEL_NEXT_SEL_64 );
+                }
+
+                FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4d05011c11ull, l_scom_buffer));
+            }
         }
         {
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
