@@ -1260,8 +1260,11 @@ fapi2::ReturnCode buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
                      .set_ACTUAL_SIZE( ppeSection.iv_size ),
                      "Failed to update SGPE Hcode in HOMER" );
 
-        memset( i_pChipHomer->qpmrRegion.cacheScomRegion, 0x00,
-                QUAD_SCOM_RESTORE_SIZE_TOTAL );
+        if( i_imgType.cacheScomBuild )
+        {
+            memset( i_pChipHomer->qpmrRegion.cacheScomRegion, 0x00,
+                    QUAD_SCOM_RESTORE_SIZE_TOTAL );
+        }
 
         o_qpmrHdr.sgpeImgOffset = o_qpmrHdr.bootLoaderOffset + SGPE_BOOT_LOADER_SIZE;
 
@@ -1380,40 +1383,46 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
                  .set_ACTUAL_SIZE( ppeSection.iv_size ),
                  "Failed to update CPMR Header in HOMER" );
 
-    //Pad undefined or runtime section with  ATTN Opcode
-    //Padding SPR restore area with ATTN Opcode
-    FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
 
-    while( wordCnt < SELF_RESTORE_CORE_REGS_SIZE )
+    if( i_imgType.coreSprBuild )
     {
+        //Pad undefined or runtime section with  ATTN Opcode
+        //Padding SPR restore area with ATTN Opcode
+        FAPI_INF("Padding CPMR Core Restore portion with Attn opcodes");
 
-        uint32_t l_fillPattern = 0;
-
-        if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % CORE_RESTORE_SIZE_PER_THREAD ) ))
+        while( wordCnt < SELF_RESTORE_CORE_REGS_SIZE )
         {
-            l_fillPattern = l_fillBlr;
-        }
-        else
-        {
-            l_fillPattern = l_fillAttn;
-        }
+            uint32_t l_fillPattern = 0;
 
-        //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
-        //This helps in a specific lab scenario. If Self Restore region is populated only for
-        //select number of threads, other threads will not hit attention during the self restore
-        //sequence. Instead, execution will hit a blr and control should return to thread launcher
-        //region.
+            if( ( 0 == wordCnt ) || ( 0 == ( wordCnt % CORE_RESTORE_SIZE_PER_THREAD ) ))
+            {
+                l_fillPattern = l_fillBlr;
+            }
+            else
+            {
+                l_fillPattern = l_fillAttn;
+            }
 
-        memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
-                &l_fillPattern,
-                sizeof( uint32_t ));
-        wordCnt += 4;
+            //Lab Need: First instruction in thread SPR restore region should be a blr instruction.
+            //This helps in a specific lab scenario. If Self Restore region is populated only for
+            //select number of threads, other threads will not hit attention during the self restore
+            //sequence. Instead, execution will hit a blr and control should return to thread launcher
+            //region.
+
+            memcpy( (uint32_t*)&i_pChipHomer->cpmrRegion.selfRestoreRegion.coreSelfRestore[wordCnt],
+                    &l_fillPattern,
+                    sizeof( uint32_t ));
+            wordCnt += 4;
+        }
     }
-
     updateCpmrHeaderSR( i_pChipHomer, i_fusedState );
 
-    memset( i_pChipHomer->cpmrRegion.selfRestoreRegion.coreScom,
-            0x00, CORE_SCOM_RESTORE_SIZE_TOTAL );
+    if( i_imgType.coreScomBuild )
+    {
+        memset( i_pChipHomer->cpmrRegion.selfRestoreRegion.coreScom,
+                0x00, CORE_SCOM_RESTORE_SIZE_TOTAL );
+    }
+
 fapi_try_exit:
     FAPI_INF("<< buildCoreRestoreImage")
 
@@ -4013,6 +4022,20 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
                                       i_sizeBuf4 ),
               "Invalid arguments, escaping hcode image build" );
 
+    if( PHASE_REBUILD == i_phase )
+    {
+        //During Rebuild Phase keep following untouched
+        //1. SPR Restore entries in Self Restore Region
+        //2. Core SCOM restore entries in CPMR region
+        //3. Cache SCOM entries in QPMR region
+        FAPI_INF("HOMER Rebuild Phase");
+        i_imgType.configRebuildPhase();
+    }
+    else
+    {
+        i_imgType.configBuildPhase();
+    }
+
     // HW Image is a nested XIP Image. Let us read global TOC of hardware image
     // and find out if XIP header of PPE image is contained therein.
     // Let us start with SGPE
@@ -4128,21 +4151,24 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( updatePpmrHeader( pChipHomer, l_ppmrHdr, i_procTgt ),
               "Failed to update PPMR Header" );
 
-    //Update L2 Epsilon SCOM Registers
-    FAPI_TRY( populateEpsilonL2ScomReg( pChipHomer ),
-              "populateEpsilonL2ScomReg failed" );
+    if( PHASE_REBUILD != i_phase )
+    {
+        //Update L2 Epsilon SCOM Registers
+        FAPI_TRY( populateEpsilonL2ScomReg( pChipHomer ),
+                  "populateEpsilonL2ScomReg failed" );
 
-    //Update L3 Epsilon SCOM Registers
-    FAPI_TRY( populateEpsilonL3ScomReg( pChipHomer ),
-              "populateEpsilonL3ScomReg failed" );
+        //Update L3 Epsilon SCOM Registers
+        FAPI_TRY( populateEpsilonL3ScomReg( pChipHomer ),
+                  "populateEpsilonL3ScomReg failed" );
 
-    //Update L3 Refresh Timer Control SCOM Registers
-    FAPI_TRY( populateL3RefreshScomReg( pChipHomer, i_procTgt),
-              "populateL3RefreshScomReg failed" );
+        //Update L3 Refresh Timer Control SCOM Registers
+        FAPI_TRY( populateL3RefreshScomReg( pChipHomer, i_procTgt),
+                  "populateL3RefreshScomReg failed" );
 
-    //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
-    FAPI_TRY( populateNcuRngBarScomReg( pChipHomer, i_procTgt ),
-              "populateNcuRngBarScomReg failed" );
+        //populate HOMER with SCOM restore value of NCU RNG BAR SCOM Register
+        FAPI_TRY( populateNcuRngBarScomReg( pChipHomer, i_procTgt ),
+                  "populateNcuRngBarScomReg failed" );
+    }
 
     //validate SRAM Image Sizes of PPE's
     FAPI_TRY( validateSramImageSize( pChipHomer, sramImgSize ),
