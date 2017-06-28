@@ -36,6 +36,7 @@
 #include <errl/errlreasoncodes.H>
 #include <util/utillidmgr.H>
 #include <p9_pstates_common.h>
+#include <initservice/initserviceif.H>
 
 namespace fapi2
 {
@@ -151,9 +152,13 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
 
     do {
         // @todo RTC 172776 Make WOF table parser PNOR accesses more efficient
-        // Lid number is system dependent
-        uint32_t l_lidNumber =
-            l_sys->getAttr<TARGETING::ATTR_WOF_TABLE_LID_NUMBER>();
+        uint32_t l_lidNumber = Util::WOF_LIDID;
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            // Lid number is system dependent on FSP systems
+            l_lidNumber =
+              l_sys->getAttr<TARGETING::ATTR_WOF_TABLE_LID_NUMBER>();
+        }
         UtilLidMgr l_wofLidMgr(l_lidNumber);
 
         // Get the size of the full wof tables image
