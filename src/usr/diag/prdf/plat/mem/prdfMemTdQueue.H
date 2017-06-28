@@ -102,7 +102,8 @@ class TdEntry
     bool operator==( const TdEntry & i_e ) const
     {
         return ( this->iv_tdType == i_e.iv_tdType &&
-                 this->getKey()  == i_e.getKey()     );
+                 this->getKey()  == i_e.getKey()  &&
+                 this->iv_chip   == i_e.iv_chip );
     }
 
     /**
@@ -137,12 +138,12 @@ class TdEntry
 
   protected: // instance variables
 
-    const TdType iv_tdType;      ///< The event type (see enum TdType).
-    Phase iv_phase = TD_PHASE_0; ///< The event phase (see enum Phase).
+    const TdType iv_tdType;         ///< The event type (see enum TdType).
+    Phase iv_phase = TD_PHASE_0;    ///< The event phase (see enum Phase).
+    ExtensibleChip * const iv_chip; ///< The chip in which this event occurred.
 
     // These are not used for comparisons, but used by all procedures and also
     // used for displaying FFDC in the TD controller.
-    ExtensibleChip * const iv_chip; ///< The chip in which this event occurred.
     const MemRank          iv_rank; ///< The rank in which this event occurred.
 
 };
