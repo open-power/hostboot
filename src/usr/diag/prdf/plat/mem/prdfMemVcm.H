@@ -69,10 +69,6 @@ class VcmEvent : public TdEntry
 
         o_done = false;
 
-        // Add the chip mark to the callout list.
-        MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_mark.getSymbol() };
-        io_sc.service_data->SetCallout( mm );
-
         // Take action based on the current phase.
         switch ( iv_phase )
         {
@@ -96,6 +92,13 @@ class VcmEvent : public TdEntry
         {
             PRDF_ERR( "[VcmEvent::nextStep] failed: 0x%08x,0x%02x",
                       iv_chip->getHuid(), getKey() );
+        }
+
+        // Add the chip mark to the callout list if no callouts in the list.
+        if ( 0 == io_sc.service_data->getMruListSize() )
+        {
+            MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_mark.getSymbol() };
+            io_sc.service_data->SetCallout( mm );
         }
 
         return o_rc;
