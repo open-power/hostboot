@@ -89,7 +89,10 @@ extern "C"
         uint32_t sgpeCacheSpecificRingBuild: 1; // for cache specific ring inclusion
         uint32_t pgpeImageBuild: 1;      // pgpe platform inclusion in image build
         uint32_t pgpePstateParmBlockBuild: 1; //pgpe P-State Parameter Block Build
-        uint32_t reserve: 23;
+        uint32_t coreSprBuild: 1;   //SPR restore region inclusion in HOMER Build
+        uint32_t coreScomBuild: 1; //Core SCOM restore region inclusion in HOMER Build
+        uint32_t cacheScomBuild: 1; //Cache SCOM restore region inclusion in HOMER Build
+        uint32_t reserve: 20;
 
         ImageType_t( )
         {
@@ -103,6 +106,9 @@ extern "C"
             this->sgpeCacheSpecificRingBuild |= 0x01;
             this->pgpeImageBuild |= 0x01;
             this->pgpePstateParmBlockBuild |= 0x01;
+            this->coreSprBuild |= 0x01;
+            this->coreScomBuild |= 0x01;
+            this->cacheScomBuild |= 0x01;
         }
 
         bool isBuildValid()
@@ -117,13 +123,31 @@ extern "C"
                  ( this->sgpeCommonRingBuild ) ||
                  ( this->sgpeCacheSpecificRingBuild ) ||
                  ( this->pgpeImageBuild ) ||
-                 ( this->pgpePstateParmBlockBuild ) )
+                 ( this->pgpePstateParmBlockBuild ) ||
+                 ( this->coreSprBuild ) ||
+                 ( this->coreScomBuild ) ||
+                 ( this->cacheScomBuild ) )
             {
                 buildValid = true;
             }
 
             return buildValid;
         }
+
+        void configRebuildPhase()
+        {
+            this->coreSprBuild &= 0x0;
+            this->coreScomBuild &= 0x0;
+            this->cacheScomBuild &= 0x0;
+        }
+
+        void configBuildPhase()
+        {
+            this->coreSprBuild |= 0x1;
+            this->coreScomBuild |= 0x1;
+            this->cacheScomBuild |= 0x1;
+        }
+
     };
 
     typedef fapi2::ReturnCode( *p9_hcode_image_build_FP_t )
