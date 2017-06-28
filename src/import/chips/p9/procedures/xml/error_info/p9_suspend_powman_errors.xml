@@ -31,9 +31,24 @@
       Procedure: p9_suspend_powman
       The PGPE Timed out trying to get to safe mode 
     </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>OCCFLGREG</ffdc>
+    <ffdc>PROC_CHIP_TARGET</ffdc>
+    <ffdc>PPE_BASE_ADDRESSES</ffdc>
+    <!-- <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_BASE_ADDRESSES</collectFfdc> -->
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_PGPE_SUSPEND_TIMEOUT</rc>
+    <description>
+      Procedure: p9_suspend_powman
+      The PGPE Timed out trying to suspend 
+    </description>
+    <ffdc>PROC_CHIP_TARGET</ffdc>            
+    <ffdc>PPE_BASE_ADDRESSES</ffdc>
+    <!-- <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_BASE_ADDRESSES</collectFfdc> -->
+  </hwpError>
+  <!-- ******************************************************************** -->
+
+
 </hwpErrors>
 
