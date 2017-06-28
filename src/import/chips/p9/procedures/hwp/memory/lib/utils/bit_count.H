@@ -75,13 +75,13 @@ inline uint64_t first_bit_set(const T& i_value, const uint64_t i_pos = 0)
         return 0;
     }
 
-    if (fapi2::buffer<T>(i_value).template getBit<0>())
+    if (fapi2::buffer<T>(i_value).template getBit(i_pos))
     {
         return i_pos;
     }
     else
     {
-        return first_bit_set(i_value << 1, i_pos + 1);
+        return first_bit_set(i_value, i_pos + 1);
     }
 }
 
