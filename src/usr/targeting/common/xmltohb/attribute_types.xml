@@ -2693,6 +2693,10 @@
             <default>0</default>
         </int32_t>
     </simpleType>
+    <range>
+        <min>-100</min>
+        <max>0</max>
+    </range>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>

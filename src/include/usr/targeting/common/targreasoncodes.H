@@ -49,6 +49,7 @@ enum TargetingModuleId
     TARG_CREATE_VMM_SECTIONS        = 0x09,
     TARG_APPLY_ATTR_OVER            = 0x0A,
     TARG_HANDLE_ENUM_CHECK_FAILURE  = 0x0B,
+    TARG_HANDLE_RANGE_CHECK_FAILURE = 0x0C,
 };
 
 enum TargetingReasonCode
@@ -75,6 +76,7 @@ enum TargetingReasonCode
     TARG_RC_APPLY_ATTR_OVER_NOT_ALLOWED     = TARG_COMP_ID | 0x14,
     TARG_RC_MM_BLOCK_UNMAP_FAIL             = TARG_COMP_ID | 0x15,
     TARG_RC_ATTRIBUTE_ENUM_CHECK_FAIL       = TARG_COMP_ID | 0x16,
+    TARG_RC_ATTRIBUTE_RANGE_CHECK_FAIL      = TARG_COMP_ID | 0x17,
 };
 
 }; // End TARGETING namespace

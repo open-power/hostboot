@@ -87,6 +87,40 @@ void handleEnumCheckFailure(const Target* i_pTarget,
     // is advisable in most cases, including this one.
     SECUREBOOT::handleSecurebootFailure(err, true);
 }
+
+void handleRangeCheckFailure(const Target* i_pTarget,
+                             const ATTRIBUTE_ID i_attr,
+                             const uint64_t i_outOfRangeValue)
+{
+    TRACFCOMP(g_trac_targeting,
+        "ATTRIBUTE_ID range check failed! Attribute ID = 0x%x "
+        "with out of range value 0x%llX", i_attr, i_outOfRangeValue);
+
+    /*@
+     * @errortype
+     * @moduleid         TARGETING::TARG_HANDLE_RANGE_CHECK_FAILURE
+     * @reasoncode       TARGETING::TARG_RC_ATTRIBUTE_RANGE_CHECK_FAIL
+     * @userdata1[00:31] Target's HUID
+     * @userdata1[32:64] Attribute ID
+     * @userdata2        Value that was out of range
+     * @devdesc          Invalid range for attribute value.
+     * @custdesc         Unexpected internal firmware error.
+     */
+    auto err = new ERRORLOG::ErrlEntry(
+        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+        TARGETING::TARG_HANDLE_RANGE_CHECK_FAILURE,
+        TARGETING::TARG_RC_ATTRIBUTE_RANGE_CHECK_FAIL,
+        TWO_UINT32_TO_UINT64(
+            get_huid(i_pTarget),
+            i_attr),
+        i_outOfRangeValue,
+        true);
+
+    // handle the secureboot failure in the normal secureboot way
+    // The 'true' below indicates that we want to wait for shutdown, which
+    // is advisable in most cases, including this one.
+    SECUREBOOT::handleSecurebootFailure(err, true);
+}
 #endif
 
 } // End namespace TARGETING
