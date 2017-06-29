@@ -187,7 +187,7 @@ use Digest::MD5 qw(md5_hex);
 # NOTE: the attribute list initially contains both real and virtual attributes
 my $allAttributes = $xml->XMLin($cfgHbXmlFile,
     forcearray => ['enumerationType','enumerator','attribute','hwpfToHbAttrMap',
-                   'compileAttribute']);
+                   'compileAttribute','range']);
 
 my $fapiAttributes = {};
 if ($cfgFapiAttributesXmlFile ne "")
@@ -496,6 +496,19 @@ foreach my $attrs (@{$attributes->{attribute}})
     {
         print $rwAttrFile "$attrs->{id}\n";
         push @rwPersistAttrs, $attrs;
+
+        # do a little bit of validation for the range tag
+        if (exists $attrs->{range})
+        {
+            if (!exists $attrs->{simpleType})
+            {
+                die "Attribute $attrs->{id} must be simpleType to use range tag.";
+            }
+            elsif (exists $attrs->{simpleType}->{enumeration})
+            {
+                die "Enumeration and range tags cannot coexist. See $attrs->{id}";
+            }
+        }
     }
 }
 
@@ -545,7 +558,6 @@ foreach my $attr (@rwPersistAttrs)
 {
     if (exists $attr->{simpleType} &&
         exists $attr->{simpleType}->{enumeration})
-
     {
         my $typeId = $attr->{simpleType}->{enumeration}->{id};
         if (!exists $attrEnumTypes{$typeId})
@@ -618,9 +630,7 @@ foreach my $attr (@rwPersistAttrs)
         . "}\n\n";
     }
 }
-print $rwAttrHFile "#endif\n";
 print $rwAttrCFile "#endif // !__HOSTBOOT_RUNTIME\n";
-close $rwAttrHFile;
 
 print $rwAttrCFile <<VERBATIM;
 
@@ -646,6 +656,21 @@ foreach my $attr (@rwPersistAttrs)
 VERBATIM
     }
 }
+# throw in any range checked attributes
+foreach my $attr (@rwPersistAttrs)
+{
+    if (exists $attr->{range})
+    {
+        print $rwAttrCFile <<VERBATIM;
+        case (ATTR_$attr->{id}):
+            return tryGetAttr<ATTR_$attr->{id}>(
+                * reinterpret_cast<
+                    typename AttributeTraits<ATTR_$attr->{id}>::Type*
+                >(io_attrData)
+            );
+VERBATIM
+    }
+}
 print $rwAttrCFile <<VERBATIM;
         default:
             return _tryGetAttrUnsafe(i_attr, i_size, io_attrData);
@@ -655,12 +680,103 @@ print $rwAttrCFile <<VERBATIM;
     #endif
 }
 
+#if !defined(__HOSTBOOT_RUNTIME) && defined(__HOSTBOOT_MODULE)
+VERBATIM
+foreach my $attr (@rwPersistAttrs)
+{
+    if (exists $attr->{range})
+    {
+        print $rwAttrHFile "template<>\n"
+        . "bool Target::tryGetAttr<ATTR_$attr->{id}>("
+        . "typename AttributeTraits<ATTR_$attr->{id}>::Type& o_attrValue)"
+        . " const;\n\n";
+        print $rwAttrCFile "template<>\n"
+        . "bool Target::tryGetAttr<ATTR_$attr->{id}>("
+        . "typename AttributeTraits<ATTR_$attr->{id}>::Type& o_attrValue)"
+        . " const\n"
+        . "{\n"
+        . "    bool l_read = _tryGetAttrUnsafe(ATTR_$attr->{id},"
+        .          "sizeof(o_attrValue),&o_attrValue);\n"
+        . "    if (l_read)\n"
+        . "    {\n";
+        my $valueString = "";
+        my $extraIndent = "";
+        # persence of simpleType tag confirmed previously
+        my $isArrayType = exists $attr->{simpleType}->{array};
+        if ($isArrayType)
+        {
+            my $arrayTag = "$attr->{simpleType}->{array}";
+            my $arraySize = getArrayTagTotalSize($arrayTag);
+            my $numDimensions = getArrayNumDimensions($arrayTag);
+            my $arrayPrefix = "";
+            $extraIndent = "    ";
+            for (my $i=0; $i < $numDimensions - 1; $i++)
+            {
+                $arrayPrefix =  "$arrayPrefix*";
+            }
+            print $rwAttrCFile ""
+            . "        for(int i=0; i<$arraySize; i++)\n"
+            . "        {\n";
+            $valueString = "(${arrayPrefix}o_attrValue)[i]";
+        }
+        else
+        {
+            $valueString = "o_attrValue";
+        }
+        if (exists $attr->{range})
+        {
+            my @ranges = validateRangeMinsAndMaxes($attr->{range}, $attr->{id});
+            print $rwAttrCFile "$extraIndent"
+            . "        do {\n$extraIndent";
+            for my $range (@ranges)
+            {
+                if (exists $range->{min} || exists $range->{max})
+                {
+                    print $rwAttrCFile "            if (";
+                }
+                if (exists $range->{min})
+                {
+                    print $rwAttrCFile "$valueString >= $range->{min}";
+                }
+                if (exists $range->{min} && exists $range->{max})
+                {
+                    print $rwAttrCFile " && ";
+                }
+                if (exists $range->{max})
+                {
+                    print $rwAttrCFile "$valueString <= $range->{max}";
+                }
+                if (exists $range->{min} || exists $range->{max})
+                {
+                    print $rwAttrCFile ")\n$extraIndent"
+                        . "            {\n$extraIndent"
+                        . "                break;\n$extraIndent"
+                        . "            }\n";
+                }
+            }
+            print $rwAttrCFile "$extraIndent"
+                . "            handleRangeCheckFailure(this,ATTR_$attr->{id},"
+                . "$valueString);\n$extraIndent"
+                . "       } while(0);\n";
+        }
+        if ($isArrayType)
+        {
+            print $rwAttrCFile "        }\n";
+        }
+        print $rwAttrCFile ""
+        . "   }\n"
+        . "   return l_read;\n"
+        . "}\n";
+    }
+}
+print $rwAttrCFile <<VERBATIM;
+#endif // !__HOSTBOOT_RUNTIME &&__HOSTBOOT_MODULE
 } // namespace TARGETING
 
 VERBATIM
-
+print $rwAttrHFile "#endif\n";
+close $rwAttrHFile;
 close $rwAttrCFile;
-
 }
 
 # sub getArrayTagTotalSize
@@ -693,6 +809,98 @@ sub getArrayNumDimensions {
     return $dims;
 }
 
+# sub validateRangeMinsAndMaxes
+# Looks at the supplied range tag to determine if it was authored correctly.
+# @param[in] range - The range tag and all of its sub elements
+# @param[in] attr_id - The attribute id string used for better error messages.
+sub validateRangeMinsAndMaxes {
+    my ($range, $attr_id) = @_;
+
+    # first check: make sure there is only one unbounded max and only one
+    # unbounded min
+    my $unboundedMins = 0;
+    my $unboundedMaxes = 0;
+    foreach my $i (@{$range})
+    {
+        if (!exists $i->{min} && exists $i->{max})
+        {
+            $unboundedMaxes++;
+        }
+        if (!exists $i->{max} && exists $i->{min})
+        {
+            $unboundedMins++;
+        }
+        if (!exists $i->{max} && !exists $i->{min})
+        {
+            die "empty range tag!";
+        }
+    }
+    if ($unboundedMins > 1)
+    {
+        die "$attr_id has > 1 unbounded min in range tag: $unboundedMins";
+    }
+    if ($unboundedMaxes > 1)
+    {
+        die "$attr_id has > 1 unbounded max in range tag: $unboundedMaxes";
+    }
+
+    # sort by mins
+    # if an item has no min tag assume lowest number possible
+    # if an item has no max tag assume highest number possible
+    # this puts the unbounded max at beginning and unbounded min at the end
+    my @rangeArray = sort { (!exists $a->{min}? "-inf":
+                             !exists $a->{max}? "inf": $a->{min} ) <=>
+                            (!exists $b->{min}? "-inf":
+                             !exists $b->{max}? "inf": $b->{min} )
+                          } @$range;
+
+    my $i=0;
+    # if the first range is an unbounded max then it stands alone
+    my $prevMax = "-inf"; # default prevMax is negative infinity
+    if (!exists @rangeArray->[$i]->{min})
+    {
+        if (!exists @rangeArray->[$i]->{max})
+        {
+            die "$attr_id has range tag with no min or max!";
+        }
+        $prevMax = @rangeArray->[$i]->{max};
+        $i++;
+    }
+
+    # go through the list and check for undesired overlap of ranges
+    while (exists @rangeArray->[$i]->{min} && exists @rangeArray->[$i]->{max})
+    {
+        if (@rangeArray->[$i]->{max} < @rangeArray->[$i]->{min})
+        {
+            print Dumper(@rangeArray[$i]);
+            die "Min/max pair in <range> tag inverted!";
+        }
+        if ($prevMax > @rangeArray->[$i]->{min})
+        {
+            print "Previous max: $prevMax\n";
+            print Dumper(@rangeArray[$i]);
+            die "Range overlap! Previous <max> tag $prevMax "
+            . "exceeds <min> tag value! @rangeArray->[$i]->{min}";
+        }
+        $prevMax = @rangeArray->[$i]->{max};
+        $i++;
+    }
+
+    # check for stray min tag at the end
+    if (exists @rangeArray->[$i]->{min})
+    {
+        # make sure trailing min is greater than previous max
+        if ($prevMax > @rangeArray->[$i]->{min})
+        {
+            print "Previous max: $prevMax\n";
+            print Dumper(@rangeArray[$i]);
+            die "Range overlap! Previous <max> tag $prevMax "
+            . "exceeds <min> tag value! @rangeArray->[$i]->{min}";
+        }
+    }
+
+    return @rangeArray;
+}
 
 sub VALIDATION_FUNCTIONS { }
 
@@ -768,6 +976,7 @@ sub validateAttributes {
     $elements{"serverwizReadonly"} = { required => 0, isscalar => 0};
     $elements{"serverwizShow"} = { required => 0, isscalar => 1};
     $elements{"global"} = { required => 0, isscalar => 0};
+    $elements{"range"} = { required => 0, isscalar => 0};
 
     foreach my $attribute (@{$attributes->{attribute}})
     {

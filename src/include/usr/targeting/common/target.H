@@ -762,7 +762,7 @@ void setFrequencyAttributes(Target * i_sys,
  *         and halts the IPL.
  *
  * @param[in] i_pTarget The target associated with the attribute that failed
- *                      enum value checking.
+ *                      enum value checking. Cannot be nullptr.
  * @param[in] i_attr    The attribute id of the attribute that failed enum
  *                      value checking.
  * @param[in] i_invalidValue The invalid value that failed the enum check.
@@ -770,6 +770,23 @@ void setFrequencyAttributes(Target * i_sys,
 void handleEnumCheckFailure(const Target* i_pTarget,
                             const ATTRIBUTE_ID i_attr,
                             const uint64_t i_invalidValue);
+
+// Function to handle secureboot attribute range check failures
+/**
+ * @brief  Creates an error log with target and attribute information
+ *         and halts the IPL.
+ *
+ * @param[in] i_pTarget The target associated with the attribute that failed.
+ *                      Cannot be nullptr.
+ *
+ * @param[in] i_attr The attribute id of the attribute that failed
+ *
+ * @param[in] i_outOfRangeValue The value that was out of range
+ */
+void handleRangeCheckFailure(const Target* i_pTarget,
+                             const ATTRIBUTE_ID i_attr,
+                             const uint64_t i_outOfRangeValue);
+
 
 // The following #include ensures that persistent read/write attributes are
 // value-checked for validity upon calling getAttr. This is done via
