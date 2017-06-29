@@ -45,8 +45,6 @@
 #include    <initservice/isteps_trace.H>
 #include    <initservice/initserviceif.H>
 
-#include    <hwas/common/hwasCallout.H> //@fixme-RTC:149250-Remove
-
 // SBE
 #include    <sbeif.H>
 
@@ -202,54 +200,6 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
                   "dimms behind it",
                   get_huid(l_procIds[l_proc0].proc) );
 
-        //@fixme-RTC:149250-Remove when we have XOR Mask Support
-        do
-        {
-        // determine some numbers to help figure out what's up..
-        PredicateHwas l_present;
-        l_present.present(true);
-        TargetHandleList l_plist;
-        PredicatePostfixExpr l_checkExprPresent;
-        l_checkExprPresent.push(&l_dimm).push(&l_present).And();
-        targetService().getAssociated(l_plist, l_procIds[l_proc0].proc,
-                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                &l_checkExprPresent);
-        uint32_t dimms_present = l_plist.size();
-
-        /*@
-         * @errortype
-         * @severity          ERRL_SEV_UNRECOVERABLE
-         * @moduleid          MOD_MSS_ATTR_UPDATE
-         * @reasoncode        RC_MIN_HW_CHECK_FAILED
-         * @devdesc           check_proc0_memory_config found no
-         *                    functional dimms behind proc0
-         * @custdesc          A problem occurred during the IPL of the
-         *                    system: Found no functional dimm cards.
-         * @userdata1[00:31]  HUID of proc0
-         * @userdata2[00:31]  number of present, non-functional dimms
-         */
-        const uint64_t userdata1 =
-            (static_cast<uint64_t>(get_huid(l_procIds[l_proc0].proc)) << 32);
-        const uint64_t userdata2 =
-            (static_cast<uint64_t>(dimms_present) << 32);
-        l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                              MOD_MSS_ATTR_UPDATE,
-                              RC_MIN_HW_CHECK_FAILED,
-                              userdata1,
-                              userdata2);
-
-        //  call out the procedure to find the deconfigured part.
-        l_err->addProcedureCallout( HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
-                                    HWAS::SRCI_PRIORITY_HIGH );
-
-        //  link this one to the istep and commit
-        io_istepErr.addErrorDetails(l_err);
-        errlCommit(l_err, HWPF_COMP_ID);
-        // errl is now NULL
-
-        break;
-        //@fixme-RTC:149250-Remove when we have XOR Mask Support
-
         // Loop through all procs to find ones for memory remap
         for (i = 0; i < l_procsList.size(); i++)
         {
@@ -306,8 +256,6 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 
         // Check that a victim was found
         assert( l_victim < l_procsList.size(), "No swap match found" );
-
-        } while(0); //@fixme-RTC:149250-Remove when we have XOR Mask Support
     }
 
     // Loop through all procs detecting that IDs are set correctly
