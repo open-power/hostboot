@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -34,20 +34,20 @@ my $arg_output_dir = undef;
 
 # Get the options from the command line - the rest of @ARGV will
 # be filenames
-GetOptions("output-dir=s" => \$arg_output_dir);
+GetOptions( "output-dir=s" => \$arg_output_dir );
 
 my $numArgs = $#ARGV + 1;
-if (($numArgs < 1) || ($arg_output_dir eq undef))
+if ( ( $numArgs < 1 ) || ( $arg_output_dir eq undef ) )
 {
-    print ("Usage: parseAttributeInfo.pl --output-dir=<output dir> <attr-xml-file1> [<attr-xml-file2> ...]\n");
-    print ("  This perl script will parse attribute XML files and create the following files:\n");
-    print ("  - attribute_ids.H.          Contains IDs, type, value enums and other information\n");
-    print ("  - fapi2_chip_ec_feature.H   Contains a function to query chip EC features\n");
-    print ("  - attribute_plat_check.H    Contains compile time checks that all attributes are\n");
-    print ("                              handled by the platform\n");
-    print ("  - attributesSupported.html  Contains the HWPF attributes supported\n");
-    print ("  - attrInfo.csv              Used to process Attribute Override Text files\n");
-    print ("  - attrEnumInfo.csv          Used to process Attribute Override Text files\n");
+    print("Usage: parseAttributeInfo.pl --output-dir=<output dir> <attr-xml-file1> [<attr-xml-file2> ...]\n");
+    print("  This perl script will parse attribute XML files and create the following files:\n");
+    print("  - attribute_ids.H.          Contains IDs, type, value enums and other information\n");
+    print("  - fapi2_chip_ec_feature.H   Contains a function to query chip EC features\n");
+    print("  - attribute_plat_check.H    Contains compile time checks that all attributes are\n");
+    print("                              handled by the platform\n");
+    print("  - attributesSupported.html  Contains the HWPF attributes supported\n");
+    print("  - attrInfo.csv              Used to process Attribute Override Text files\n");
+    print("  - attrEnumInfo.csv          Used to process Attribute Override Text files\n");
     exit(1);
 }
 
@@ -56,7 +56,7 @@ if (($numArgs < 1) || ($arg_output_dir eq undef))
 #------------------------------------------------------------------------------
 use Digest::MD5 qw(md5_hex);
 use XML::Simple;
-my $xml = new XML::Simple (KeyAttr=>[]);
+my $xml = new XML::Simple( KeyAttr => [] );
 
 # Uncomment to enable debug output
 #use Data::Dumper;
@@ -74,51 +74,49 @@ $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
 my $aiFile = $arg_output_dir;
 $aiFile .= "/";
 $aiFile .= "attribute_ids.H";
-open(AIFILE, ">", $aiFile);
+open( AIFILE, ">", $aiFile );
 
 my $ecHFile = $arg_output_dir;
 $ecHFile .= "/";
 $ecHFile .= "fapi2_chip_ec_feature.H";
-open(ECHFILE, ">", $ecHFile);
-
+open( ECHFILE, ">", $ecHFile );
 
 my $acFile = $arg_output_dir;
 $acFile .= "/";
 $acFile .= "attribute_plat_check.H";
-open(ACFILE, ">", $acFile);
+open( ACFILE, ">", $acFile );
 
 my $asFile = $arg_output_dir;
 $asFile .= "/";
 $asFile .= "attributesSupported.html";
-open(ASFILE, ">", $asFile);
+open( ASFILE, ">", $asFile );
 
 my $itFile = $arg_output_dir;
 $itFile .= "/";
 $itFile .= "attrInfo.csv";
-open(ITFILE, ">", $itFile);
+open( ITFILE, ">", $itFile );
 
 my $etFile = $arg_output_dir;
 $etFile .= "/";
 $etFile .= "attrEnumInfo.csv";
-open(ETFILE, ">", $etFile);
+open( ETFILE, ">", $etFile );
 
 # TODO: This for platform use only, will support later via RTC 128106 for HB
 my $fmFile = $arg_output_dir;
 $fmFile .= "/";
 $fmFile .= "fapi2AttrOverrideData.H";
-open(FMFILE, ">", $fmFile);
+open( FMFILE, ">", $fmFile );
 
 # TODO: This for platform use only, will support later via RTC 128106 for HB
 my $fsFile = $arg_output_dir;
 $fsFile .= "/";
 $fsFile .= "fapi2AttrSyncData.H";
-open(FSFILE, ">", $fsFile);
+open( FSFILE, ">", $fsFile );
 
 my $feFile = $arg_output_dir;
 $feFile .= "/";
 $feFile .= "fapi2AttrOverrideEnums.H";
-open(FEFILE, ">", $feFile);
-
+open( FEFILE, ">", $feFile );
 
 #------------------------------------------------------------------------------
 # Print Start of file information to attribute_ids.H
@@ -148,8 +146,8 @@ print ECHFILE "namespace fapi2\n";
 print ECHFILE "{\n\n";
 print ECHFILE "// create a unique type from an int ( or attribute id) \n";
 print ECHFILE "template<int I>\n";
-print ECHFILE  "struct int2Type {\n";
-print ECHFILE  "enum { value = I };\n";
+print ECHFILE "struct int2Type {\n";
+print ECHFILE "enum { value = I };\n";
 print ECHFILE "};\n";
 print ECHFILE "ReturnCode queryChipEcAndName(\n";
 print ECHFILE "                    const Target<fapi2::TARGET_TYPE_ALL>& i_target,\n";
@@ -248,19 +246,19 @@ my %attrSyncData = ();
 print FEFILE "const AttributeEnum g_FapiEnums[] = {\n";
 my @attrOverrideEnums = ();
 
-my %attrIdHash;  # Records which Attribute IDs have been used
-my %attrValHash; # Records which Attribute values have been used
+my %attrIdHash;     # Records which Attribute IDs have been used
+my %attrValHash;    # Records which Attribute values have been used
 
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-foreach my $argnum (0 .. $#ARGV)
+foreach my $argnum ( 0 .. $#ARGV )
 {
     my $infile = $ARGV[$argnum];
 
     # read XML file. The ForceArray option ensures that there is an array of
     # elements even if there is only one such element in the file
-    my $attributes = $xml->XMLin($infile, ForceArray => ['attribute']);
+    my $attributes = $xml->XMLin( $infile, ForceArray => ['attribute'] );
 
     # Uncomment to get debug output of all attributes
     #print "\nFile: ", $infile, "\n", Dumper($attributes), "\n";
@@ -268,7 +266,7 @@ foreach my $argnum (0 .. $#ARGV)
     #--------------------------------------------------------------------------
     # For each Attribute
     #--------------------------------------------------------------------------
-    foreach my $attr (@{$attributes->{attribute}})
+    foreach my $attr ( @{ $attributes->{attribute} } )
     {
         #----------------------------------------------------------------------
         # Print the Attribute ID and calculated value to attribute_ids.H and
@@ -282,38 +280,36 @@ foreach my $argnum (0 .. $#ARGV)
         # ID be zero to store flags.  In P9, this may change because the
         # Initfile compiler is re-designed.
         #----------------------------------------------------------------------
-        if (! exists $attr->{id})
+        if ( !exists $attr->{id} )
         {
-            print ("parseAttributeInfo.pl ERROR. Att 'id' missing\n");
+            print("parseAttributeInfo.pl ERROR. Att 'id' missing\n");
             exit(1);
         }
 
-        if (exists($attrIdHash{$attr->{id}}))
+        if ( exists( $attrIdHash{ $attr->{id} } ) )
         {
             # Two different attributes with the same id!
-            print ("parseAttributeInfo.pl ERROR. Duplicate attr id ",
-                $attr->{id}, "\n");
+            print( "parseAttributeInfo.pl ERROR. Duplicate attr id ", $attr->{id}, "\n" );
             exit(1);
         }
 
         # Calculate a 28 bit hash value.
-        my $attrHash128Bit = md5_hex($attr->{id});
-        my $attrHash28Bit = substr($attrHash128Bit, 0, 7);
+        my $attrHash128Bit = md5_hex( $attr->{id} );
+        my $attrHash28Bit = substr( $attrHash128Bit, 0, 7 );
 
         # Print the attribute ID/value to attribute_ids.H
         print AIFILE "    $attr->{id} = 0x$attrHash28Bit,\n";
 
-        if (exists($attrValHash{$attrHash28Bit}))
+        if ( exists( $attrValHash{$attrHash28Bit} ) )
         {
             # Two different attributes generate the same hash-value!
-            print ("parseAttributeInfo.pl ERROR. Duplicate attr id hash value for ",
-                   $attr->{id}, "\n");
+            print( "parseAttributeInfo.pl ERROR. Duplicate attr id hash value for ", $attr->{id}, "\n" );
             exit(1);
         }
 
-        $attrIdHash{$attr->{id}} = $attrHash28Bit;
+        $attrIdHash{ $attr->{id} } = $attrHash28Bit;
         $attrValHash{$attrHash28Bit} = 1;
-    };
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -331,23 +327,23 @@ print AIFILE " *\/\n";
 #------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
-foreach my $argnum (0 .. $#ARGV)
+foreach my $argnum ( 0 .. $#ARGV )
 {
     my $infile = $ARGV[$argnum];
 
     # read XML file. The ForceArray option ensures that there is an array of
     # elements even if there is only one such element in the file
-    my $attributes = $xml->XMLin($infile, ForceArray => ['attribute', 'chip']);
+    my $attributes = $xml->XMLin( $infile, ForceArray => [ 'attribute', 'chip' ] );
 
     #--------------------------------------------------------------------------
     # For each Attribute
     #--------------------------------------------------------------------------
 
-    foreach my $attr
-        (@{$attributes->{attribute}})
+    foreach my $attr ( @{ $attributes->{attribute} } )
     {
         my $attrOverride = "";
-        my $attrSync = "";
+        my $attrSync     = "";
+
         #----------------------------------------------------------------------
         # Print a comment with the attribute ID attribute_ids.H
         #----------------------------------------------------------------------
@@ -356,9 +352,9 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the AttributeId and description to attributesSupported.html
         #----------------------------------------------------------------------
-        if (! exists $attr->{description})
+        if ( !exists $attr->{description} )
         {
-            print ("parseAttributeInfo.pl ERROR. Att 'description' missing\n");
+            print("parseAttributeInfo.pl ERROR. Att 'description' missing\n");
             exit(1);
         }
 
@@ -370,41 +366,40 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the assignment of each attribute to the local l_name
         #----------------------------------------------------------------------
-         $attrOverride .= "\t{\n";
-         $attrOverride .= "\t\t\"$attr->{id}\",\n";
-         $attrSync .= "\t{\n";
+        $attrOverride .= "\t{\n";
+        $attrOverride .= "\t\t\"$attr->{id}\",\n";
+        $attrSync     .= "\t{\n";
 
         #----------------------------------------------------------------------
         # Figure out the attribute array dimensions (if array)
         #----------------------------------------------------------------------
         my $arrayDimensions = "";
-        my @arrayDims = ();
-        if ($attr->{array})
+        my @arrayDims       = ();
+        if ( $attr->{array} )
         {
             # Remove leading whitespace
             my $dimText = $attr->{array};
             $dimText =~ s/^\s+//;
 
             # Split on commas or whitespace
-            @arrayDims = split(/\s*,\s*|\s+/, $dimText);
-
+            @arrayDims = split( /\s*,\s*|\s+/, $dimText );
 
             foreach my $val (@arrayDims)
             {
                 $arrayDimensions .= "[${val}]";
             }
         }
-        until ($#arrayDims == 3)
+        until ( $#arrayDims == 3 )
         {
             push @arrayDims, 1;
         }
-        my $arrayDimString = join(", ", @arrayDims);
+        my $arrayDimString = join( ", ", @arrayDims );
 
         #----------------------------------------------------------------------
         # Print the typedef for each attribute's val type to attribute_ids.H
         # Print the attribute information to attrInfo.csv
         #----------------------------------------------------------------------
-        if (exists $attr->{chipEcFeature})
+        if ( exists $attr->{chipEcFeature} )
         {
             # The value type of chip EC feature attributes is uint8_t
             print AIFILE "typedef uint8_t $attr->{id}_Type;\n";
@@ -414,28 +409,29 @@ foreach my $argnum (0 .. $#ARGV)
             $attrOverride .= "\t\tsizeof(uint8_t),\n";
             $attrOverride .= "\t\t{ $arrayDimString }\n";
             $attrOverride .= "\t},\n";
-            $attrSync .= "\t\t0x$attrIdHash{$attr->{id}},\n";
-            $attrSync .= "\t\tsizeof(uint8_t),\n";
-            $attrSync .= "\t\t{ $arrayDimString }\n";
-            $attrSync .= "\t},\n";
+            $attrSync     .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+            $attrSync     .= "\t\tsizeof(uint8_t),\n";
+            $attrSync     .= "\t\t{ $arrayDimString }\n";
+            $attrSync     .= "\t},\n";
         }
         else
         {
-            if (! exists $attr->{valueType})
+            if ( !exists $attr->{valueType} )
             {
-                print ("parseAttributeInfo.pl ERROR. Att 'valueType' missing\n");
+                print("parseAttributeInfo.pl ERROR. Att 'valueType' missing\n");
                 exit(1);
             }
 
             #These array/fapi sizes need to stay in sync
-            my @sizes = ( 'uint8', 'uint16', 'uint32', 'uint64', 'int8', 'int16', 'int32', 'int64' );
-            my @fapiSizes = ( 'u8', 'u16', 'u32', 'u64', 's8', 's16', 's32', 's64' );
+            my @sizes     = ( 'uint8', 'uint16', 'uint32', 'uint64', 'int8', 'int16', 'int32', 'int64' );
+            my @fapiSizes = ( 'u8',    'u16',    'u32',    'u64',    's8',   's16',   's32',   's64' );
             my $actualSize = '';
             my $actualFapi = '';
-            my $index = 0;
+            my $index      = 0;
             foreach my $size (@sizes)
             {
-                if ($attr->{valueType} eq $size)
+
+                if ( $attr->{valueType} eq $size )
                 {
                     $actualSize = $size;
                     $actualFapi = @fapiSizes[$index];
@@ -443,33 +439,32 @@ foreach my $argnum (0 .. $#ARGV)
                 }
                 $index++;
             }
-            if ($actualSize ne '')
+            if ( $actualSize ne '' )
             {
 
                 print AIFILE "typedef ${actualSize}_t $attr->{id}_Type$arrayDimensions;\n";
-                print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},$actualFapi" .
-                             "$arrayDimensions\n";
+                print ITFILE "$attr->{id},$attr->{id},0x$attrIdHash{$attr->{id}},$actualFapi" . "$arrayDimensions\n";
                 $attrOverride .= "\t\t0x$attrIdHash{$attr->{id}},\n";
                 $attrOverride .= "\t\tsizeof(${actualSize}_t),\n";
-                $attrSync .= "\t\t0x$attrIdHash{$attr->{id}},\n";
-                $attrSync .= "\t\tsizeof(${actualSize}_t),\n";
+                $attrSync     .= "\t\t0x$attrIdHash{$attr->{id}},\n";
+                $attrSync     .= "\t\tsizeof(${actualSize}_t),\n";
             }
             else
             {
-                print ("parseAttributeInfo.pl ERROR. valueType not recognized: ");
+                print("parseAttributeInfo.pl ERROR. valueType not recognized: ");
                 print $attr->{valueType}, "\n";
                 exit(1);
             }
             $attrOverride .= "\t\t{ $arrayDimString }\n";
             $attrOverride .= "\t},\n";
-            $attrSync .= "\t\t{ $arrayDimString }\n";
-            $attrSync .= "\t},\n";
+            $attrSync     .= "\t\t{ $arrayDimString }\n";
+            $attrSync     .= "\t},\n";
         }
 
         #----------------------------------------------------------------------
         # Print if the attribute is privileged
         #----------------------------------------------------------------------
-        if (exists $attr->{privileged})
+        if ( exists $attr->{privileged} )
         {
             print AIFILE "const bool $attr->{id}_Privileged = true;\n";
         }
@@ -481,7 +476,7 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print if the attribute is a initToZero attribute
         #----------------------------------------------------------------------
-        if (exists $attr->{initToZero})
+        if ( exists $attr->{initToZero} )
         {
             print AIFILE "const bool $attr->{id}_InitToZero = true;\n";
         }
@@ -493,16 +488,16 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the target type(s) that the attribute is associated with
         #----------------------------------------------------------------------
-        if (! exists $attr->{targetType})
+        if ( !exists $attr->{targetType} )
         {
-            print ("parseAttributeInfo.pl ERROR. Att 'targetType' missing\n");
+            print("parseAttributeInfo.pl ERROR. Att 'targetType' missing\n");
             exit(1);
         }
 
         print AIFILE "const fapi2::TargetType $attr->{id}_TargetType = ";
 
         # Split on commas
-        my @targTypes = split(',', $attr->{targetType});
+        my @targTypes = split( ',', $attr->{targetType} );
 
         my $targTypeCount = 0;
         foreach my $targType (@targTypes)
@@ -512,21 +507,21 @@ foreach my $argnum (0 .. $#ARGV)
             $targType =~ s/^\s+//;
             $targType =~ s/\s+$//;
 
-            if ($targTypeCount != 0)
+            if ( $targTypeCount != 0 )
             {
                 print AIFILE " | ";
             }
             print AIFILE "fapi2::$targType";
             $targTypeCount++;
 
-            $attrSyncData{$targType}{$attr->{id}} = $attrSync;
+            $attrSyncData{$targType}{ $attr->{id} } = $attrSync;
         }
         print AIFILE ";\n";
 
         #----------------------------------------------------------------------
         # Print if the attribute is a platInit attribute
         #----------------------------------------------------------------------
-        if (exists $attr->{platInit})
+        if ( exists $attr->{platInit} )
         {
             print AIFILE "const bool $attr->{id}_PlatInit = true;\n";
         }
@@ -539,13 +534,13 @@ foreach my $argnum (0 .. $#ARGV)
         # Print the value enumeration (if specified) to attribute_ids.H and
         # attributeEnums.txt
         #----------------------------------------------------------------------
-        if (exists $attr->{enum})
+        if ( exists $attr->{enum} )
         {
             print AIFILE "enum $attr->{id}_Enum\n{\n";
 
             # Values must be separated by commas to allow for values to be
             # specified: <enum>VAL_A = 3, VAL_B = 5, VAL_C = 0x23</enum>
-            my @vals = split(',', $attr->{enum});
+            my @vals = split( ',', $attr->{enum} );
 
             foreach my $val (@vals)
             {
@@ -554,7 +549,8 @@ foreach my $argnum (0 .. $#ARGV)
                 $val =~ s/^\s+//;
                 $val =~ s/\s+$//;
 
-                my @values = split('=', ${val});
+                my @values = split( '=', ${val} );
+
                 # Remove newlines and leading/trailing whitespace
 
                 foreach my $value (@values)
@@ -564,8 +560,7 @@ foreach my $argnum (0 .. $#ARGV)
                     $value =~ s/\s+$//;
                 }
 
-                push @attrOverrideEnums,
-                    "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
+                push @attrOverrideEnums, "\t{ \"$attr->{id}_$values[0]\", $values[1] },\n";
 
                 # Print the attribute enum to attribute_ids.H
                 print AIFILE "    ENUM_$attr->{id}_${val}";
@@ -573,16 +568,14 @@ foreach my $argnum (0 .. $#ARGV)
                 # Print the attribute enum to attrEnumInfo.csv
                 my $attrEnumTxt = "$attr->{id}_${val}\n";
 
-
                 $attrEnumTxt =~ s/ = /,/;
                 print ETFILE $attrEnumTxt;
 
-
-                if ($attr->{valueType} eq 'uint64')
+                if ( $attr->{valueType} eq 'uint64' )
                 {
                     print AIFILE "ULL";
                 }
-                elsif ($attr->{valueType} eq 'int64')
+                elsif ( $attr->{valueType} eq 'int64' )
                 {
                     print AIFILE "LL";
                 }
@@ -596,7 +589,7 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print _GETMACRO and _SETMACRO where appropriate to attribute_ids.H
         #----------------------------------------------------------------------
-        if (exists $attr->{chipEcFeature})
+        if ( exists $attr->{chipEcFeature} )
         {
             #------------------------------------------------------------------
             # The attribute is a Chip EC Feature, define _GETMACRO to call a
@@ -609,13 +602,13 @@ foreach my $argnum (0 .. $#ARGV)
             print AIFILE "#define $attr->{id}_SETMACRO(ID, PTARGET, VAL) ";
             print AIFILE "CHIP_EC_FEATURE_ATTRIBUTE_NOT_WRITABLE\n";
         }
-        elsif (! exists $attr->{writeable})
+        elsif ( !exists $attr->{writeable} )
         {
             #------------------------------------------------------------------
             # The attribute is read-only, define the _SETMACRO to something
             # that will cause a compile failure if a set is attempted
             #------------------------------------------------------------------
-            if (! exists $attr->{writeable})
+            if ( !exists $attr->{writeable} )
             {
                 print AIFILE "#define $attr->{id}_SETMACRO ATTRIBUTE_NOT_WRITABLE\n";
             }
@@ -627,7 +620,7 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Each EC attribute will generate a new inline overloaded version of
         # hasFeature with the attribute specific logic
-        if (exists $attr->{chipEcFeature})
+        if ( exists $attr->{chipEcFeature} )
         {
             my $chipCount = 0;
             print ECHFILE " inline uint8_t hasFeature(int2Type<$attr->{id}>,\n";
@@ -637,62 +630,62 @@ foreach my $argnum (0 .. $#ARGV)
             print ECHFILE "    uint8_t hasFeature = 0;\n\n";
             print ECHFILE "    if(";
 
-            foreach my $chip (@{$attr->{chipEcFeature}->{chip}})
+            foreach my $chip ( @{ $attr->{chipEcFeature}->{chip} } )
             {
                 $chipCount++;
 
-                if (! exists $chip->{name})
+                if ( !exists $chip->{name} )
                 {
-                    print ("parseAttributeInfo.pl ERROR. Att 'name' missing\n");
+                    print("parseAttributeInfo.pl ERROR. Att 'name' missing\n");
                     exit(1);
                 }
 
-                if (! exists $chip->{ec})
+                if ( !exists $chip->{ec} )
                 {
-                    print ("parseAttributeInfo.pl ERROR. Att 'ec' missing\n");
+                    print("parseAttributeInfo.pl ERROR. Att 'ec' missing\n");
                     exit(1);
                 }
 
-                if (! exists $chip->{ec}->{value})
+                if ( !exists $chip->{ec}->{value} )
                 {
-                    print ("parseAttributeInfo.pl ERROR. Att 'value' missing\n");
+                    print("parseAttributeInfo.pl ERROR. Att 'value' missing\n");
                     exit(1);
                 }
 
-                if (! exists $chip->{ec}->{test})
+                if ( !exists $chip->{ec}->{test} )
                 {
-                    print ("parseAttributeInfo.pl ERROR. Att 'test' missing\n");
+                    print("parseAttributeInfo.pl ERROR. Att 'test' missing\n");
                     exit(1);
                 }
 
                 my $test;
-                if ($chip->{ec}->{test} eq 'EQUAL')
+                if ( $chip->{ec}->{test} eq 'EQUAL' )
                 {
                     $test = '==';
                 }
-                elsif ($chip->{ec}->{test} eq 'GREATER_THAN')
+                elsif ( $chip->{ec}->{test} eq 'GREATER_THAN' )
                 {
                     $test = '>';
                 }
-                elsif ($chip->{ec}->{test} eq 'GREATER_THAN_OR_EQUAL')
+                elsif ( $chip->{ec}->{test} eq 'GREATER_THAN_OR_EQUAL' )
                 {
                     $test = '>=';
                 }
-                elsif ($chip->{ec}->{test} eq 'LESS_THAN')
+                elsif ( $chip->{ec}->{test} eq 'LESS_THAN' )
                 {
                     $test = '<';
                 }
-                elsif ($chip->{ec}->{test} eq 'LESS_THAN_OR_EQUAL')
+                elsif ( $chip->{ec}->{test} eq 'LESS_THAN_OR_EQUAL' )
                 {
                     $test = '<=';
                 }
                 else
                 {
-                    print ("parseAttributeInfo.pl ERROR. test '$chip->{ec}->{test}' unrecognized\n");
+                    print("parseAttributeInfo.pl ERROR. test '$chip->{ec}->{test}' unrecognized\n");
                     exit(1);
                 }
 
-                if ($chipCount > 1)
+                if ( $chipCount > 1 )
                 {
                     print ECHFILE " ||\n\t";
                 }
@@ -710,7 +703,7 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Print the platform attribute checks to attribute_plat_check.H
         #----------------------------------------------------------------------
-        if (exists $attr->{writeable})
+        if ( exists $attr->{writeable} )
         {
             print ACFILE "#ifndef $attr->{id}_SETMACRO\n";
             print ACFILE "#error Platform does not support set of HWPF attr $attr->{id}\n";
@@ -729,8 +722,8 @@ foreach my $argnum (0 .. $#ARGV)
         #----------------------------------------------------------------------
         # Add attribute override string to map.
         #----------------------------------------------------------------------
-        $attrOverrideData{$attr->{id}} = $attrOverride;
-    };
+        $attrOverrideData{ $attr->{id} } = $attrOverride;
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -741,7 +734,6 @@ print AIFILE "#endif\n";
 
 print ECHFILE "}\n";
 print ECHFILE "#endif\n";
-
 
 #------------------------------------------------------------------------------
 # Print End of file information to attribute_plat_check.H
@@ -758,7 +750,7 @@ print ASFILE "</html>\n";
 #------------------------------------------------------------------------------
 # Print content for getFapiAttrData.C
 #------------------------------------------------------------------------------
-foreach my $override (sort keys %attrOverrideData)
+foreach my $override ( sort keys %attrOverrideData )
 {
     print FMFILE $attrOverrideData{$override};
 }
@@ -767,13 +759,14 @@ print FMFILE "};\n";
 #------------------------------------------------------------------------------
 # Print content for fapi2AttrSyncData.H
 #------------------------------------------------------------------------------
-while ((my $syncTarget, my $syncList) = each(%attrSyncData))
+while ( ( my $syncTarget, my $syncList ) = each(%attrSyncData) )
 {
     $syncTarget =~ s/TARGET_TYPE_//g;
+
     #print "TYPE: $syncTarget\n";
 
     print FSFILE "const AttributeSyncInfo g_${syncTarget}_syncInfo[] = {\n";
-    while ((my $attrName, my $attrData) = each(%{$syncList}))
+    while ( ( my $attrName, my $attrData ) = each( %{$syncList} ) )
     {
         print FSFILE "\n\t//$attrName\n";
         print FSFILE "$attrData";
@@ -790,7 +783,7 @@ print FSFILE "\to_size = 0;\n";
 print FSFILE "\tswitch(i_type)\n";
 print FSFILE "\t{\n";
 
-while ((my $syncTarget, my $syncList) = each(%attrSyncData))
+while ( ( my $syncTarget, my $syncList ) = each(%attrSyncData) )
 {
     my $name = $syncTarget;
     $syncTarget =~ s/TARGET_TYPE_//g;
@@ -810,12 +803,10 @@ print FSFILE "}\n";
 print FSFILE "}\n\n";
 print FSFILE "#endif\n";
 
-
-
 #------------------------------------------------------------------------------
 # Print footer for getFapiAttrEnumData.C
 #------------------------------------------------------------------------------
-foreach my $override (sort @attrOverrideEnums)
+foreach my $override ( sort @attrOverrideEnums )
 {
     print FEFILE $override;
 }
@@ -833,4 +824,3 @@ close(ETFILE);
 close(FMFILE);
 close(FSFILE);
 close(FEFILE);
-
