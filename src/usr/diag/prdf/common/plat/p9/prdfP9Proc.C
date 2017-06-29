@@ -33,6 +33,10 @@
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
 
+#ifdef __HOSTBOOT_MODULE
+#include <prdfPlatServices_ipl.H>
+#endif
+
 // Platform includes
 
 using namespace TARGETING;
@@ -268,7 +272,7 @@ int32_t checkNimbusDD10( ExtensibleChip * i_chip,
     // It does look a little weird to return FAIL when the chip is Nimbus DD1.0,
     // but the purpose of this plugin is to give a non-SUCCESS return code to
     // the 'try' statement in rule code so that it will execute actions
-    // specifically for Nimbus DD1.0 in the default branch of the 'try'
+    // specifically for Nimbus DD1.0 in the default branch of the 'try'.
     // statement.
 
     if ( MODEL_NIMBUS == getChipModel(trgt) && 0x10 == getChipLevel(trgt) )
@@ -285,6 +289,43 @@ int32_t checkNotNimbusDD10( ExtensibleChip * i_chip,
     return (FAIL == checkNimbusDD10(i_chip, io_sc)) ? SUCCESS : FAIL;
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, checkNotNimbusDD10 );
+
+//------------------------------------------------------------------------------
+
+int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
+{
+    o_isOkToAccess = false;
+
+    // Host Processor side can always access the 'host' attn reg
+    // The FSP can not access it during IPL steps 15 thru 16.2
+    // Host attn is only needed for MS diag and runtime case.
+
+    if ( (true == atRuntime())
+#ifdef __HOSTBOOT_MODULE
+          || (true == isInMdiaMode())
+#endif
+       )
+    {
+        o_isOkToAccess = true;
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, isHostAttnFirAccessible );
+
+//------------------------------------------------------------------------------
+
+int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
+{
+    o_isOkToAccess = (true == atRuntime()) ? true : false;
+
+    // Host Processor side can always access the 'unitCS' reg
+    // The FSP can not access it during IPL steps 15 thru 16.2
+    // We  don't really use unitCs at this time.
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
 
