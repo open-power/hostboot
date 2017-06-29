@@ -377,6 +377,10 @@ void* host_build_stop_image (void *io_pArgs)
         TARGETING::targetService().getTopLevelTarget(l_sys);
         assert( l_sys != NULL );
 
+        // @todo RTC:176627 Remove workaround setting SYSTEM_RESCLK_DISABLE
+        l_sys->setAttr<TARGETING::ATTR_SYSTEM_RESCLK_DISABLE>(0x1);
+        // end workaround
+
         if (l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
         {
             l_errl = HBPM::resetPMAll();
