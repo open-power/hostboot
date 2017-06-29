@@ -330,14 +330,14 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
 
         #ifdef __HOSTBOOT_RUNTIME
 
-        // If the queue is still empty then it is possible that background
-        // scrubbing only stopped for FFDC. In that case, simply resume the
-        // command instead of starting a new one.
         if ( iv_queue.empty() )
         {
-            // It is possible to get here if we were running a TD procedure
-            // and the PRD service is reset. Therefore, we must check if
-            // background scrubbing was actually configured.
+            // The queue is empty so it is possible that background scrubbing
+            // only stopped for FFDC. Simply resume the command instead of
+            // starting a new one. Note that it is possible to get here if we
+            // were running a TD procedure and the PRD service is reset.
+            // Therefore, we must check if background scrubbing was actually
+            // configured.
             bool isBgScrub;
             o_rc = isBgScrubConfig<T>( iv_chip, isBgScrub );
             if ( SUCCESS != o_rc )
@@ -349,10 +349,204 @@ uint32_t MemTdCtlr<T>::analyzeCmdComplete( bool & o_errorsFound,
 
             if ( isBgScrub ) iv_resumeBgScrub = true;
         }
+        else
+        {
+            // The analyzeCmdComplete() function is only called if there was a
+            // command complete attention and there were no TD procedures
+            // currently in progress. At this point, there are new TD procedures
+            // in the queue so we want to mask certain fetch attentions to avoid
+            // the complication of handling the attentions during the TD
+            // procedures.
+            o_rc = maskEccAttns();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                break;
+            }
+        }
 
         #endif
 
     } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_MCBIST>::maskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::maskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Loop through all MCAs.
+    for ( uint32_t ps = 0; ps < MAX_PORT_PER_MCBIST; ps++ )
+    {
+        ExtensibleChip * mcaChip = getConnectedChild( iv_chip, TYPE_MCA, ps );
+        SCAN_COMM_REGISTER_CLASS * mask =
+            mcaChip->getRegister( "MCAECCFIR_MASK_OR" );
+
+        mask->clearAllBits();
+        mask->SetBit(8); // Mainline read NCE
+        mask->SetBit(9); // Mainline read TCE
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_OR" );
+            break;
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_MCBIST>::unmaskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::unmaskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Memory CEs were masked at the beginning of the TD procedure, so
+    // clear and unmask them. Also, it is possible that memory UEs have
+    // thresholded so clear and unmask them as well.
+
+    // Loop through all MCAs.
+    for ( uint32_t ps = 0; ps < MAX_PORT_PER_MCBIST; ps++ )
+    {
+        ExtensibleChip * mcaChip = getConnectedChild( iv_chip, TYPE_MCA, ps );
+        SCAN_COMM_REGISTER_CLASS * fir =
+            mcaChip->getRegister( "MCAECCFIR_AND" );
+        SCAN_COMM_REGISTER_CLASS * mask =
+            mcaChip->getRegister( "MCAECCFIR_MASK_AND" );
+
+        fir->setAllBits(); mask->setAllBits();
+
+        // Don't clear the NCE and TCE attentions if specified to save the mask
+        // in the iv_saveEccMask array.
+        if ( !iv_saveEccMask[ps] )
+        {
+            fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
+            fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE
+        }
+        fir->ClearBit(14); mask->ClearBit(14); // Mainline read UE
+
+        o_rc = fir->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_AND" );
+            break;
+        }
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_AND" );
+            break;
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_MBA>::maskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::maskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // TODO RTC 176901
+    //do
+    //{
+    //    // Don't want to handle memory CEs during any TD procedures, so
+    //    // mask them.
+
+    //    const char * reg_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_OR"
+    //                                            : "MBA1_MBSECCFIR_MASK_OR";
+    //    SCAN_COMM_REGISTER_CLASS * reg = iv_membChip->getRegister(reg_str);
+
+    //    reg->clearAllBits();
+    //    reg->SetBit(16); // fetch NCE
+    //    reg->SetBit(17); // fetch RCE
+    //    reg->SetBit(43); // prefetch UE
+
+    //    o_rc = reg->Write();
+    //    if ( SUCCESS != o_rc )
+    //    {
+    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", reg_str );
+    //        break;
+    //    }
+
+    //    iv_fetchAttnsMasked = true;
+
+    //} while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::unmaskEccAttns] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // TODO RTC 176901
+    //do
+    //{
+    //    // Memory CEs where masked at the beginning of the TD procedure, so
+    //    // clear and unmask them. Also, it is possible that memory UEs have
+    //    // thresholded so clear and unmask them as well.
+
+    //    const char * fir_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_AND"
+    //                                            : "MBA1_MBSECCFIR_AND";
+    //    const char * msk_str = (0 == iv_mbaPos) ? "MBA0_MBSECCFIR_MASK_AND"
+    //                                            : "MBA1_MBSECCFIR_MASK_AND";
+
+    //    SCAN_COMM_REGISTER_CLASS * fir = iv_membChip->getRegister( fir_str );
+    //    SCAN_COMM_REGISTER_CLASS * msk = iv_membChip->getRegister( msk_str );
+
+    //    fir->setAllBits(); msk->setAllBits();
+    //    fir->ClearBit(16); msk->ClearBit(16); // fetch NCE
+    //    fir->ClearBit(17); msk->ClearBit(17); // fetch RCE
+    //    fir->ClearBit(19); msk->ClearBit(19); // fetch UE
+    //    fir->ClearBit(43); msk->ClearBit(43); // prefetch UE
+
+    //    o_rc = fir->Write();
+    //    if ( SUCCESS != o_rc )
+    //    {
+    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", fir_str );
+    //        break;
+    //    }
+
+    //    o_rc = msk->Write();
+    //    if ( SUCCESS != o_rc )
+    //    {
+    //        PRDF_ERR( PRDF_FUNC "Write() failed on %s", msk_str );
+    //        break;
+    //    }
+
+    //    iv_fetchAttnsMasked = false;
+
+    //} while (0);
 
     return o_rc;
 

@@ -285,6 +285,15 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
     }
     else
     {
+
+        // Unmask the ECC attentions that were explicitly masked during the
+        // TD procedure.
+        o_rc = unmaskEccAttns();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+        }
+
         // A TD procedure has completed. Restart background scrubbing on the
         // next rank.
 
