@@ -1765,66 +1765,6 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
             // errl is now NULL
         } // if no dimms
 
-        //@fixme-RTC:149250-Remove when we have XOR Mask Support
-        //  check here for functional dimms behind the master proc
-        targetService().getAssociated(l_dimms, l_pMasterProc,
-                TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                &l_checkExprFunctional);
-        HWAS_DBG( "checkMinimumHardware: %d functional dimms behind master proc %.8X",
-                  l_dimms.size(), get_huid(l_pMasterProc) );
-
-        if (l_dimms.empty())
-        {
-            HWAS_ERR( "Insufficient hardware to continue IPL (func DIMM behind master proc)");
-
-            if(o_bootable)
-            {
-                *o_bootable = false;
-                break;
-            }
-            // determine some numbers to help figure out what's up..
-            TargetHandleList l_plist;
-            PredicatePostfixExpr l_checkExprPresent;
-            l_checkExprPresent.push(&l_dimm).push(&l_present).And();
-            targetService().getAssociated(l_plist, l_pMasterProc,
-                    TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
-                    &l_checkExprPresent);
-            uint32_t dimms_present = l_plist.size();
-
-            /*@
-             * @errortype
-             * @severity          ERRL_SEV_UNRECOVERABLE
-             * @moduleid          MOD_CHECK_MIN_HW
-             * @reasoncode        RC_SYSAVAIL_NO_MEMORY_FUNC_MASTER
-             * @devdesc           checkMinimumHardware found no
-             *                    functional dimms behind proc0
-             * @custdesc          A problem occurred during the IPL of the
-             *                    system: Found no functional dimm cards.
-             * @userdata1[00:31]  HUID of master proc
-             * @userdata2[00:31]  number of present, non-functional dimms
-             */
-            const uint64_t userdata1 =
-                (static_cast<uint64_t>(get_huid(l_pMasterProc)) << 32);
-            const uint64_t userdata2 =
-                (static_cast<uint64_t>(dimms_present) << 32);
-            l_errl = hwasError(ERRL_SEV_UNRECOVERABLE,
-                                MOD_CHECK_MIN_HW,
-                                RC_SYSAVAIL_NO_MEMORY_FUNC,
-                                userdata1, userdata2);
-
-            //  call out the procedure to find the deconfigured part.
-            hwasErrorAddProcedureCallout( l_errl,
-                                          EPUB_PRC_FIND_DECONFIGURED_PART,
-                                          SRCI_PRIORITY_HIGH );
-
-            //  if we already have an error, link this one to the earlier;
-            //  if not, set the common plid
-            hwasErrorUpdatePlid( l_errl, l_commonPlid );
-            errlCommit(l_errl, HWAS_COMP_ID);
-            // errl is now NULL
-        } // if no dimms
-        //END section to remove
-
         // There needs to be either functional MCS/MCAs (NIMBUS) or MCS/MBAs
         // (CUMULUS). Check for MCAs first.
         PredicateCTM l_mca(CLASS_UNIT, TYPE_MCA);
