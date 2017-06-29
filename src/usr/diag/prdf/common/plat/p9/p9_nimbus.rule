@@ -72,6 +72,7 @@ chip p9_nimbus
     {
         name        "Global Unit Checkstop FIR";
         scomaddr    0x50040018;
+        capture     req funccall("isUcsFirAccessible");
         capture     group default;
     };
 
@@ -83,6 +84,7 @@ chip p9_nimbus
     {
         name        "Global Host Attention FIR";
         scomaddr    0x50040009;
+        capture     req funccall("isHostAttnFirAccessible");
         capture     group default;
     };
 
