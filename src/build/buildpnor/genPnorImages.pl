@@ -845,9 +845,18 @@ sub manipulateImages
                     if ($secureboot && $secureSupported)
                     {
                         $callerHwHdrFields{configure} = 1;
-                        # @TODO RTC:155374 Remove when official signing
-                        # supported
-                        run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                        if($openSigningTool)
+                        {
+                            run_command("$CUR_OPEN_SIGN_REQUEST "
+                                . "--protectedPayload $tempImages{TEMP_BIN} "
+                                . "--out $tempImages{PAD_PHASE}");
+                        }
+                        else
+                        {
+                            # @TODO RTC:155374 Remove when official signing
+                            # supported
+                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                        }
                         setCallerHwHdrFields(\%callerHwHdrFields,
                                              $tempImages{PAD_PHASE});
                     }
