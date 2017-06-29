@@ -189,6 +189,23 @@ class MemTdCtlr
     void collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
                                   const char * i_startEnd );
 
+    /**
+     * @brief  Masks NCE and TCE ECC attentions.
+     * @note   Only intended to be used just before starting a new TD procedure.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t maskEccAttns();
+
+    /**
+     * @brief  Clears and unmasks NCE and TCE ECC attentions.
+     * @note   maskEccAttns() will not mask fetch UEs, however, this function
+     *         will unmask them because it is possible that UEs exceeded
+     *         threshold and were masked by the rule code.
+     * @note   Only intended to be used just after completing a TD procedure.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t unmaskEccAttns();
+
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
@@ -229,6 +246,11 @@ class MemTdCtlr
      *  restarted on the next rank in defaultStep() after all targeted
      *  diagnostics are complete. */
     TdRankListEntry iv_stoppedRank;
+
+    /** An array to track whether we want to keep the NCE and TCE ECC attentions
+     *  for each port masked at the end of the TD procedures or not. True if we
+     *  keep them masked, false if we unmask and clear them. */
+    bool iv_saveEccMask[MAX_PORT_PER_MCBIST] = { false };
 
     #ifdef __HOSTBOOT_RUNTIME
 

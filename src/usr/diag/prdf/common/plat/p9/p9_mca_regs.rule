@@ -51,6 +51,14 @@
         access      write_only;
     };
 
+    register MCAECCFIR_MASK_AND
+    {
+        name        "P9 MCA target MCAECCFIR MASK AND";
+        scomaddr    0x07010a04;
+        capture     group never;
+        access      write_only;
+    };
+
     register MCAECCFIR_MASK_OR
     {
         name        "P9 MCA target MCAECCFIR MASK OR";
