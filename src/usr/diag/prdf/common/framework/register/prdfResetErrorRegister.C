@@ -109,9 +109,7 @@ ResetAndMaskErrorRegister::Reset(const BitKey & bit_list,
 {
     int32_t rc = SUCCESS;
     // Don't do reset on CS.
-    if ((CHECK_STOP != error.service_data->getPrimaryAttnType()) && //@pw01
-        (UNIT_CS != error.service_data->getPrimaryAttnType()) &&
-        (UNIT_CS != error.service_data->getSecondaryAttnType()))
+    if (CHECK_STOP != error.service_data->getPrimaryAttnType())
     {
       #ifndef __HOSTBOOT_MODULE
       ServiceDataCollector & sdc = *(error.service_data);
