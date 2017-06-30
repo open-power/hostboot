@@ -33,6 +33,7 @@ use Getopt::Long;
 use File::Basename;
 
 use constant HZ_PER_KHZ=>1000;
+use constant MAX_MCS_PER_PROC => 4; # 4 MCS per Nimbus
 
 my $VERSION = "1.0.0";
 
@@ -990,6 +991,17 @@ sub processMcs
                                 ($targetObj->getTargetParent($parentTarget)))));
     my $name = "EEPROM_VPD_PRIMARY_INFO";
     $targetObj->copyAttributeFields($node, $target, "EEPROM_VPD_PRIMARY_INFO");
+
+    # MEMVPD_POS is relative to the EEPROM containing the MEMD record
+    #  associated with this MCS, since all MCS are sharing the same
+    #  VPD record (see VPD_REC_NUM hardcode in Targets.pm) that means all
+    #  MCS need a unique position
+    my $chip_unit = $targetObj->getAttribute($target, "CHIP_UNIT");
+    my $proctarg = $targetObj->getTargetParent( $parentTarget );
+    my $proc_num = $targetObj->getAttribute($proctarg, "POSITION");
+    $targetObj->setAttribute( $target, "MEMVPD_POS",
+                             $chip_unit + ($proc_num * MAX_MCS_PER_PROC) );
+
 
 #@TODO RTC:163874 -- maybe needed for centaur support
 
