@@ -109,14 +109,6 @@ ErrlManager::ErrlManager() :
         TRACFCOMP( g_trac_errl, ERR_MRK"HOSTSVC_PLID not available" );
     }
 
-#if 1
-// TODO: RTC 131067
-// for now do this. but the real code should be the #else below.
-#ifdef CONFIG_BMC_IPMI
-        // setup so that we can write the error log to PNOR
-        setupPnorInfo();
-#endif
-#else
     // check if there's an FSP. if not, then we write to PNOR
     TARGETING::SpFunctions spfn;
     if (!(sys &&
@@ -131,7 +123,7 @@ ErrlManager::ErrlManager() :
     {
         iv_isSpBaseServices = true;
     }
-#endif
+
 
     TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::ErrlManager constructor." );
 }
@@ -141,22 +133,12 @@ ErrlManager::ErrlManager() :
 ErrlManager::~ErrlManager()
 {
     TRACFCOMP( g_trac_errl, INFO_MRK"ErrlManager::ErrlManager destructor" );
-#if 1
-// TODO: RTC 131067
-// for now do this. but the real code should be the #else below.
-#ifdef CONFIG_BMC_IPMI
-        // if we saved to PNOR, we need to flush
-        TRACFCOMP( g_trac_errl, INFO_MRK"flushing pnor" );
-        PNOR::flush(PNOR::HB_ERRLOGS);
-#endif
-#else
     if (!iv_isSpBaseServices)
     {
         // if we saved to PNOR, we need to flush
         TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, flushing pnor" );
         PNOR::flush(PNOR::HB_ERRLOGS);
     }
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -166,18 +148,6 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 {
     do
     {
-#if 1
-// TODO: RTC 131067
-// for now do this. but the real code should be the #else below.
-#ifdef CONFIG_BMC_IPMI
-        bool l_savedToPnor = saveErrLogToPnor(io_err);
-        if (!l_savedToPnor)
-        {
-            TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor didn't save 0x%X",
-                io_err->eid());
-        }
-#endif
-#else
         if (!iv_isSpBaseServices)
         {
             // save to PNOR
@@ -189,7 +159,7 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                     io_err->eid());
             }
         }
-#endif
+
 
 #ifdef CONFIG_BMC_IPMI
         TRACFCOMP(g_trac_errl,INFO_MRK"Send msg to BMC for errlogId [0x%08x]",
