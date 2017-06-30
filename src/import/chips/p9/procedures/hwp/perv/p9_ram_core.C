@@ -180,6 +180,14 @@ fapi2::ReturnCode RamCore::ram_setup()
     FAPI_DBG("THREAD_INFO:%#lx", l_data());
     FAPI_TRY(l_data.extractToRight(l_thread_active, C_THREAD_INFO_VTID0_ACTIVE + iv_thread, 1));
 
+    if (!l_thread_active)
+    {
+        FAPI_TRY(l_data.setBit(C_THREAD_INFO_RAM_THREAD_ACTIVE + iv_thread));
+        FAPI_TRY(fapi2::putScom(iv_target, C_THREAD_INFO, l_data));
+        FAPI_TRY(fapi2::getScom(iv_target, C_THREAD_INFO, l_data));
+        FAPI_TRY(l_data.extractToRight(l_thread_active, C_THREAD_INFO_VTID0_ACTIVE + iv_thread, 1));
+    }
+
     FAPI_ASSERT(l_thread_active,
                 fapi2::P9_RAM_THREAD_INACTIVE_ERR()
                 .set_THREAD(iv_thread),
