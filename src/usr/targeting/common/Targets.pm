@@ -50,6 +50,7 @@ use constant
     DIMMS_PER_DMI => 8, # 8 dimms per dmi
     DIMMS_PER_MBA => 4, # 4 dimms per mba
     DIMMS_PER_PORT => 2, # 2 dimms per port
+    MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
 };
 
 my %maxInstance = (
@@ -649,8 +650,6 @@ sub buildAffinity
         elsif ($type eq "MCS")
         {
             $self->setAttribute($target, "VPD_REC_NUM", 0);
-            $self->setAttribute($target, "MEMVPD_POS",
-                $self->getAttribute($target, "CHIP_UNIT"));
         }
         elsif ($type eq "MCA")
         {
