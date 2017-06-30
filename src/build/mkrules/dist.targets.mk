@@ -88,6 +88,7 @@ COPY_FILES = \
     src/usr/targeting/common/xmltohb/attribute_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/target_types_hb.xml:openpower \
     src/usr/targeting/common/xmltohb/simics_NIMBUS.system.xml:openpower \
+    src/usr/targeting/common/xmltohb/simics_CUMULUS.system.xml:openpower \
     src/usr/targeting/common/xmltohb/xmltohb.pl:openpower \
     src/usr/targeting/xmltohb/updatetempsxml.pl:openpower \
     src/include/usr/vmmconst.h:openpower \
@@ -249,8 +250,11 @@ fsp.tar_CONTENTS = \
     $(if $(FAKEPNOR), img/vpo_djvpd.dat, ) \
     $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
+    img/simics_CUMULUS_targeting.bin \
     $(if $(CONFIG_SECUREBOOT),img/simics_NIMBUS_targeting.bin.protected) \
     $(if $(CONFIG_SECUREBOOT),img/simics_NIMBUS_targeting.bin.unprotected) \
+    $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.protected) \
+    $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.unprotected) \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/hb_plat_attr_srvc.H \
     src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml \

@@ -123,6 +123,11 @@ XMLTOHB_SYSTEM_BINARIES += \
 	$(if $(CONFIG_SECUREBOOT),simics_NIMBUS_targeting.bin.protected)
 XMLTOHB_SYSTEM_BINARIES += \
 	$(if $(CONFIG_SECUREBOOT),simics_NIMBUS_targeting.bin.unprotected)
+    
+XMLTOHB_SYSTEM_BINARIES += \
+	$(if $(CONFIG_SECUREBOOT),simics_CUMULUS_targeting.bin.protected)
+XMLTOHB_SYSTEM_BINARIES += \
+	$(if $(CONFIG_SECUREBOOT),simics_CUMULUS_targeting.bin.unprotected)
 
 #debug :
 #	@echo COMMON_TARGETING_PATH_PREFIX = ${COMMON_TARGETING_PATH_PREFIX}
