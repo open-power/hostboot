@@ -66,6 +66,9 @@ class BlToHbDataManager
         // Converts HBB header pointer to a 64-bit address
         const uint64_t getHbbHeaderAddr() const;
 
+        // Needed for testcases
+        friend class AttrTankTest;
+
     public:
 
         /**

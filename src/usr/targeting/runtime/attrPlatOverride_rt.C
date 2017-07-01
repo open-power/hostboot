@@ -54,7 +54,7 @@ int apply_attr_override(uint8_t* i_data,
     bool l_allowOverrides = true;
 
     #ifdef CONFIG_SECUREBOOT
-    l_allowOverrides = !SECUREBOOT::enabled();
+    l_allowOverrides = SECUREBOOT::allowAttrOverrides();
     #endif
 
     if (l_allowOverrides)

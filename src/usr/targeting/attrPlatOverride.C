@@ -27,6 +27,7 @@
 #include <targeting/common/trace.H>
 #include <targeting/common/targreasoncodes.H>
 #include <errl/errlmanager.H>
+#include <secureboot/service.H>
 
 namespace TARGETING
 {
@@ -71,6 +72,13 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
 
     do
     {
+        if (!SECUREBOOT::allowAttrOverrides())
+        {
+            TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides: "
+                      "skipping since Attribute Overrides are not allowed");
+            break;
+        }
+
         TRACFCOMP( g_trac_targeting, "Section id=%d, size=%d", i_sectionInfo.id, i_sectionInfo.size );
 
         uint32_t l_index = 0;

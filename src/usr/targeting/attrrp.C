@@ -52,6 +52,7 @@
 #include <fapi2/plat_attr_override_sync.H>
 #include <targeting/attrPlatOverride.H>
 #include <config.h>
+#include <secureboot/service.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -928,6 +929,12 @@ namespace TARGETING
         {
             size_t l_maxSize = io_size;
             io_size = 0;
+
+            if (!SECUREBOOT::allowAttrOverrides())
+            {
+                TRACFCOMP( g_trac_targeting, "AttrRP::_saveOverrides: skipping "
+                           "since Attribute Overrides are not allowed.");
+            }
 
             // Save the fapi and temp overrides
             //   Note: no need to look at PERM because those were added to

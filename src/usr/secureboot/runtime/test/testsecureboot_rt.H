@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <config.h>
 
 #include "common/securetrace.H"
+#include <secureboot/service.H>
 
 class SecurebootRtTestSuite: public CxxTest::TestSuite
 {
@@ -94,6 +95,23 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
 
         SB_EXIT("SecurebootRtTestSuite::testVerifyContainer");
     }
+
+    void testBaseInterfaces()
+    {
+        SB_ENTER("SecurebootRtTestSuite::testBaseInterfaces");
+
+        do {
+
+        SB_INF("SECUREBOOT::enabled() = %d", SECUREBOOT::enabled());
+
+        SB_INF("SECUREBOOT::allowAttrOverrides() = %d",
+               SECUREBOOT::allowAttrOverrides());
+
+        } while(0);
+
+        SB_EXIT("SecurebootRtTestSuite::testBaseInterfaces");
+    }
+
 
     private:
 

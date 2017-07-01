@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,7 +27,7 @@
 #include <targeting/common/trace.H>
 #include <initservice/initserviceif.H>
 #include <errl/hberrltypes.H>
-
+#include <secureboot/service.H>
 
 using namespace ERRORLOG;
 
@@ -66,6 +66,14 @@ namespace TARGETING
         TARG_INF( ENTER_MRK "AttributeSync::updateSectionData - "
                   "section type %u total pages %d",
                   iv_section_to_sync, iv_total_pages );
+
+        if (!SECUREBOOT::allowAttrOverrides())
+        {
+            TARG_INF("AttributeSync::updateSectionData(): skipping since "
+                     "attribute overrides are not allowed and we don't "
+                     "trust the FSP, but still returning ATTR_SYNC_SUCCESS");
+            return ATTR_SYNC_SUCCESS;
+        }
 
         ATTR_SYNC_RC l_rc = ATTR_SYNC_SUCCESS;
 
@@ -167,6 +175,13 @@ namespace TARGETING
         memset( &l_page, 0, sizeof(TARGETING::sectionRefData) );
 
         do{
+            if (!SECUREBOOT::allowAttrOverrides())
+            {
+                TARG_INF("AttributeSync::syncSectionFromFsp(): skipping since "
+                         "attribute overrides are not allowed and we don't "
+                         "trust the FSP");
+                break;
+            }
 
             // send a request to FSP to sync to Hostboot
             l_errl = sendSyncToHBRequestMessage();
@@ -551,6 +566,14 @@ namespace TARGETING
             if( !INITSERVICE::spBaseServicesEnabled() )
             {
                 TARG_INF( "SP Base Services not enabled, skipping attribute sync" );
+                break;
+            }
+
+            if (!SECUREBOOT::allowAttrOverrides())
+            {
+                TARG_INF("syncAllAttributesFromFsp(): skipping since "
+                         "attribute overrides are not allowed and we don't "
+                         "trust the FSP");
                 break;
             }
 

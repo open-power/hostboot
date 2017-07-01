@@ -290,6 +290,15 @@ namespace SECUREBOOT
      */
     void addSecureUserDetailsToErrolog(errlHndl_t & io_err);
 
+    /*
+     *  @brief Determines if Attribute Overrides are Allowed
+     *         If Secureboot is enabled, check allowAttrOverrides setting;
+     *         If Secureboot is not enabled, always allow Attribute Overrides
+     *
+     *  @return bool   TRUE if Attribute Overrides Are Allowed; FALSE otherwise
+     */
+    bool allowAttrOverrides();
+
 }
 
 #endif
