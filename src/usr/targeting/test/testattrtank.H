@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <targeting/common/attributeTank.H>
 #include <targeting/attrPlatOverride.H>
 #include <pnor/pnorif.H>
+#include <kernel/bltohbdatamgr.H>
 
 using namespace TARGETING;
 
@@ -1171,6 +1172,13 @@ public:
         l_attrPermSec.name = "Test Attr Perm";
         l_attrPermSec.vaddr = reinterpret_cast<uint64_t>(malloc(3*l_chunkSize));
 
+
+        // This test needs Attribute Overrides to work, so save global variable
+        // before setting it to 'true' for the duration of this test
+        bool save_allowAttrOverrides = g_BlToHbDataManager.iv_data.allowAttrOverrides;
+        g_BlToHbDataManager.iv_data.allowAttrOverrides = true;
+        TS_TRACE("testBMCAttrOverride: saved Allow Attr Override (%d) and set to true", save_allowAttrOverrides);
+
         do
         {
             // Create local AttributeTanks
@@ -1447,6 +1455,10 @@ public:
             }
 
         } while(0);
+
+        // Restore Allow Attr Override Setting
+        g_BlToHbDataManager.iv_data.allowAttrOverrides = save_allowAttrOverrides;
+        TS_TRACE("testBMCAttrOverride: restored Allow Attr Override (%d)", save_allowAttrOverrides);
 
         // Free memory
         free (reinterpret_cast<char *>(l_attrTmpSec.vaddr));

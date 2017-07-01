@@ -51,6 +51,7 @@
 #include <fapi2_attribute_service.H>
 #include <util/utilmbox_scratch.H>
 #include <plat_utils.H>
+#include <secureboot/service.H>
 
 namespace fapi2
 {
@@ -72,6 +73,13 @@ uint8_t g_attrOverrideFapiTank = 0;
 //******************************************************************************
 void directOverride()
 {
+    if (!SECUREBOOT::allowAttrOverrides())
+    {
+        FAPI_INF("directOverride: skipping since "
+                 "attribute overrides are not allowed");
+        return;
+    }
+
 #ifndef __HOSTBOOT_RUNTIME
     uint32_t l_targetType = TARGETING::TYPE_NA;
     // Apply the attribute override
@@ -239,7 +247,14 @@ void AttrOverrideSync::monitorForFspMessages()
             l_chunk.iv_size = l_pMsg->data[1];
             l_chunk.iv_pAttributes = static_cast<uint8_t *>(l_pMsg->extra_data);
 
-            if (l_chunk.iv_pAttributes == NULL)
+            if (SECUREBOOT::allowAttrOverrides() == false)
+            {
+                FAPI_ERR("monitorForFspMessages: Ignoring Set Overrides "
+                         "Message (0x%X) from FSP since attribute overrides "
+                         "are not allowed",
+                         l_pMsg->type);
+            }
+            else if (l_chunk.iv_pAttributes == NULL)
             {
                 FAPI_ERR("monitorForFspMessages: tank %d, size %d, NULL data pointer",
                          l_tank, l_chunk.iv_size);
@@ -364,6 +379,7 @@ errlHndl_t AttrOverrideSync::sendAttrsToFsp(
 //******************************************************************************
 void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
 {
+
 #ifndef __HOSTBOOT_RUNTIME
     const uint32_t MAILBOX_CHUNK_SIZE = 4096;
 
@@ -495,6 +511,7 @@ void AttrOverrideSync::sendAttrOverridesAndSyncsToFsp()
 //******************************************************************************
 void AttrOverrideSync::sendFapiAttrSyncs()
 {
+
 #ifndef __HOSTBOOT_RUNTIME
     const uint32_t MAILBOX_CHUNK_SIZE = 4096;
 
@@ -540,8 +557,14 @@ void AttrOverrideSync::getAttrOverridesFromFsp()
 {
 #ifndef __HOSTBOOT_RUNTIME
     FAPI_IMP("Requesting Attribute Overrides from the FSP");
-
     errlHndl_t l_pErr = NULL;
+
+    if (!SECUREBOOT::allowAttrOverrides())
+    {
+        FAPI_INF("AttrOverrideSync::getAttrOverridesFromFsp: skipping "
+                 "since attribute overrides are not allowed");
+        return;
+    }
 
     msg_t * l_pMsg = msg_allocate();
     l_pMsg->type = MSG_GET_OVERRIDES;
@@ -579,6 +602,14 @@ bool AttrOverrideSync::getAttrOverride(const AttributeId i_attrId,
     // Check to see if there are any overrides for this attr ID
     if (!(iv_overrideTank.attributeExists(i_attrId)))
     {
+        return false;
+    }
+
+    // This check after previous two for performance reasons
+    if (!SECUREBOOT::allowAttrOverrides())
+    {
+        FAPI_INF("AttrOverrideSync::getAttrOverride: skipping "
+                 "since attribute overrides are not allowed");
         return false;
     }
 
@@ -778,6 +809,12 @@ void AttrOverrideSync::triggerAttrSync()
 //******************************************************************************
 void AttrOverrideSync::clearAttrOverrides()
 {
+    if (!SECUREBOOT::allowAttrOverrides())
+    {
+        FAPI_INF("AttrOverrideSync::clearAttrOverrides: skipping clear calls"
+                 "since attribute overrides are not allowed");
+        return;
+    }
 #ifndef __HOSTBOOT_RUNTIME
     // Debug Channel is clearing all attribute overrides.
     FAPI_INF("Debug Channel CLEAR_ALL_OVERRIDES");
@@ -789,6 +826,13 @@ void AttrOverrideSync::clearAttrOverrides()
 //******************************************************************************
 void AttrOverrideSync::dynSetAttrOverrides()
 {
+    if (!SECUREBOOT::allowAttrOverrides())
+    {
+        FAPI_INF("AttrOverrideSync::dynSetAttrOverrides: skipping since "
+                 "attribute overrides are not allowed");
+        return;
+    }
+
 #ifndef __HOSTBOOT_RUNTIME
     errlHndl_t err = NULL;
     int64_t rc = 0;

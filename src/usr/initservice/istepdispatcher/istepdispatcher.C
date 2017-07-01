@@ -331,7 +331,7 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 l_attrOverridesExist = l_pTopLevelTarget->
                     getAttr<TARGETING::ATTR_PLCK_IPL_ATTR_OVERRIDES_EXIST>();
 
-                if (l_attrOverridesExist)
+                if (l_attrOverridesExist && SECUREBOOT::allowAttrOverrides())
                 {
                     fapi2::theAttrOverrideSync().getAttrOverridesFromFsp();
                 }
@@ -343,7 +343,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
             }
 
             err = executeAllISteps();
-
             if(err)
             {
                 TRACFCOMP(g_trac_initsvc, "ERROR: Failed executing all isteps,"
@@ -1744,7 +1743,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     uint8_t istep = ((io_pMsg->data[0] & 0x000000FF00000000) >> 32);
     uint8_t substep = (io_pMsg->data[0] & 0x00000000000000FF);
 
-    TRACFCOMP(g_trac_initsvc, ENTER_MRK"handleIstepRequestMsg: 0x%016x, istep: %d, substep: %d",
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"handleIStepRequestMsg: 0x%016x, istep: %d, substep: %d",
               io_pMsg->data[0], istep, substep);
 
     // Transfer ownership of the message pointer to iv_pIstepMsg because if the
@@ -1813,7 +1812,7 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
 
         // In istep mode we cannot do a reconfigure of any sort, so create
         // an error.
-        TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: IStep success and deconfigs, creating error");
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIStepRequestMsg: IStep success and deconfigs, creating error");
         err = failedDueToDeconfig(istep, substep, newIstep, newSubstep);
 
     }
@@ -1840,14 +1839,14 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     if (io_pMsg == NULL)
     {
         // An IStep already responded to the message!!
-        TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: message response already sent!");
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIStepRequestMsg: message response already sent!");
     }
     else
     {
         if (msg_is_async(io_pMsg))
         {
             // Unexpected
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIstepRequestMsg: async istep message!");
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"handleIStepRequestMsg: async istep message!");
         }
         else
         {

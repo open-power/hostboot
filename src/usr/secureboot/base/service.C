@@ -41,6 +41,7 @@
 #include "purge.H"
 #include <kernel/misc.H>
 #include <kernel/console.H>
+#include <kernel/bltohbdatamgr.H>
 #include <console/consoleif.H>
 #include <util/misc.H>
 
@@ -558,5 +559,36 @@ void addSecureUserDetailsToErrolog(errlHndl_t & io_err)
 
     //Note: adding UdTargetHwKeyHash left to Extended image
 }
+
+#ifndef __HOSTBOOT_RUNTIME
+bool allowAttrOverrides()
+{
+    bool retVal = false;
+
+    if (enabled())
+    {
+        if (g_BlToHbDataManager.getAllowAttrOverrides())
+        {
+            retVal = true;
+            SB_INF("allowAttrOverrides: Allowing Attr Overrides in "
+                   "Secure Mode: retVal=%d", retVal);
+        }
+        else
+        {
+            retVal = false;
+            SB_INF("allowAttrOverrides: DO NOT Allow Attr Overrides in "
+                   "Secure Mode: retVal=%d", retVal);
+        }
+    }
+    else
+    {
+        retVal = true;
+        SB_DBG("allowAttrOverrides: Allow Attr Overrides in "
+                "Unsecure Mode: retVal=%d", retVal);
+    }
+
+    return retVal;
+};
+#endif
 
 } //namespace SECUREBOOT
