@@ -144,6 +144,18 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54, 0x00, 0x00, 0x02, 0x01, 0x01, 0x06, /// V
 // Struct Variable for all attributes
 AttributeList attr;
 
+bool
+is_wof_enabled()
+{
+    return (!(attr.attr_system_wof_disable) && !(attr.attr_dd_wof_not_supported)) ? true : false;
+}
+
+bool
+is_vdm_enabled()
+{
+    return (!(attr.attr_system_vdm_disable) && !(attr.attr_dd_vdm_not_supported)) ? true : false;
+}
+
 // START OF PSTATE PARAMETER BLOCK function
 
 /// -------------------------------------------------------------------
@@ -208,6 +220,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         SysPowerDistParms l_vdd_sysparm;
         SysPowerDistParms l_vcs_sysparm;
         SysPowerDistParms l_vdn_sysparm;
+        memset(&l_vdd_sysparm,0x00,sizeof(SysPowerDistParms));
+        memset(&l_vcs_sysparm,0x00,sizeof(SysPowerDistParms));
+        memset(&l_vdn_sysparm,0x00,sizeof(SysPowerDistParms));
 
         // Local IDDQ table variable
         IddqTable l_iddqt;
@@ -218,14 +233,18 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         //VDM Parm block
         GP_VDMParmBlock l_gp_vdmpb;
+        memset (&l_gp_vdmpb,0x00,sizeof(GP_VDMParmBlock));
 
         LP_VDMParmBlock   l_lp_vdmpb;
+        memset (&l_lp_vdmpb, 0x00, sizeof(LP_VDMParmBlock));
 
         //Resonant Clocking setup
         ResonantClockingSetup l_resclk_setup;
+        memset (&l_resclk_setup,0x00, sizeof(ResonantClockingSetup));
 
         //IVRM Parm block
         IvrmParmBlock l_ivrmpb;
+        memset (&l_ivrmpb, 0x00,sizeof(IvrmParmBlock));
 
         // VPD voltage and frequency biases
         VpdBias l_vpdbias[NUM_OP_POINTS];
@@ -252,7 +271,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             break;
         }
 
-
         // ----------------
         // get #V data
         // ----------------
@@ -264,17 +282,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         fapi2::voltageBucketData_t l_poundv_data;
 
 
-        l_rc = proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
-                                   l_poundv_bucketId, &l_poundv_data, &l_state);
-
-        if(l_rc)
-        {
-            FAPI_ASSERT(false,
-                        fapi2::PSTATE_PB_GET_MVPD_FOR_POUND_V_FAILED()
-                        .set_CHIP_TARGET(i_target)
-                        .set_PRESENT_CHIPLETS(present_chiplets),
-                        "proc_get_mvpd_data function failed to retrieve porund V data");
-        }
+        FAPI_TRY(proc_get_mvpd_data( i_target, attr_mvpd_voltage_control, &valid_pdv_points, &present_chiplets,
+                                   l_poundv_bucketId, &l_poundv_data, &l_state),
+                          "proc_get_mvpd_data function failed to retrieve porund V data");
 
         if (!present_chiplets)
         {
@@ -314,7 +324,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_vdn_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vdn_uv);
 
         //if wof is disabled.. don't call IQ function
-        if (attr.attr_system_wof_disable == fapi2::ENUM_ATTR_SYSTEM_WOF_DISABLE_OFF)
+        if (is_wof_enabled())
         {
             // ----------------
             // get IQ (IDDQ) data
@@ -334,6 +344,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
         else
         {
+            FAPI_INF("Skipping IQ (IDDQ) Data as WOF is disabled");
             l_state.iv_wof_enabled = false;
         }
 
@@ -343,27 +354,21 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         FAPI_INF("Getting VDM Parameters Data");
         FAPI_TRY(proc_get_vdm_parms(i_target, &attr, &l_gp_vdmpb));
 
-        // if vdm is disabled.. don't call pound w funcion
-        if (attr.attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
-        {
-            FAPI_INF("Getting WOF data and VDM points (#W) Data");
-            l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state);
+        // Note:  the proc_get_mvpd_poundw has the conditional checking for VDM and WOF enablement
+        // as #W has both VDM and WOF content
 
-            if (l_rc)
-            {
-                FAPI_ASSERT_NOEXIT(false,
-                                   fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                   .set_CHIP_TARGET(i_target)
-                                   .set_FAPI_RC(l_rc),
-                                   "Pstate Parameter Block proc_get_mvpd_poundw function failed");
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            }
-        }
-        else
+        l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state);
+
+        if (l_rc)
         {
-            l_state.iv_wof_enabled = false;
-            l_state.iv_vdm_enabled = false;
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_target)
+                               .set_FAPI_RC(l_rc),
+                               "Pstate Parameter Block proc_get_mvpd_poundw function failed");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
+
 
         // ----------------
         // get IVRM Parameters data
@@ -440,11 +445,13 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         {
             if (attr.attr_resclk_disable == fapi2::ENUM_ATTR_SYSTEM_RESCLK_DISABLE_OFF)
             {
-                FAPI_TRY(proc_set_resclk_table_attrs(i_target), "proc_set_resclk_table_attrs failed");
-                FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup, &l_globalppb));
-                l_localppb.resclk = l_resclk_setup;
-                l_globalppb.resclk = l_resclk_setup;
-                l_state.iv_resclk_enabled = true;
+                FAPI_TRY(proc_set_resclk_table_attrs(i_target, &l_state), "proc_set_resclk_table_attrs failed");
+                if (l_state.iv_resclk_enabled)
+                {
+                    FAPI_TRY(proc_res_clock_setup(i_target, &l_resclk_setup, &l_globalppb));
+                    l_localppb.resclk = l_resclk_setup;
+                    l_globalppb.resclk = l_resclk_setup;
+                }
 
                 FAPI_INF("Resonant Clocks are enabled");
             }
@@ -513,12 +520,14 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             FAPI_INF ("l_biased_pstate %d ", l_biased_pstate[i]);
         }
 
-        p9_pstate_compute_vdm_threshold_pts(l_poundw_data, &l_localppb);
+        if (attr.attr_system_vdm_disable == fapi2::ENUM_ATTR_SYSTEM_VDM_DISABLE_OFF)
+        {
+           p9_pstate_compute_vdm_threshold_pts(l_poundw_data, &l_localppb);
 
+           p9_pstate_compute_PsVIDCompSlopes_slopes(l_poundw_data, &l_localppb, l_biased_pstate);
 
-        p9_pstate_compute_PsVIDCompSlopes_slopes(l_poundw_data, &l_localppb, l_biased_pstate);
-
-        p9_pstate_compute_PsVDMThreshSlopes(&l_localppb, l_biased_pstate);
+           p9_pstate_compute_PsVDMThreshSlopes(&l_localppb, l_biased_pstate);
+        }
         // -----------------------------------------------
         // OCC parameter block
         // -----------------------------------------------
@@ -663,6 +672,12 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
 fapi_try_exit:
     FAPI_INF("< p9_pstate_parameter_block");
+
+    if (fapi2::current_err)
+    {
+        fapi2::logError(fapi2::current_err,fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     return fapi2::current_err;
 }
@@ -891,6 +906,7 @@ FAPI_INF("%-60s = 0x%08x %u", #attr_name, io_attr->attr_assign, io_attr->attr_as
     DATABLOCK_GET_ATTR(ATTR_DPLL_DROOP_PROTECT_ENABLE, FAPI_SYSTEM, attr_dpll_droop_protect_enable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
     DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, i_target, attr_dd_wof_not_supported);
+    DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_VDM_NOT_SUPPORTED, i_target, attr_dd_vdm_not_supported);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE, FAPI_SYSTEM, attr_pstate_mode);
 
     DATABLOCK_GET_ATTR(ATTR_TDP_RDP_CURRENT_FACTOR, i_target, attr_tdp_rdp_current_factor);
@@ -1496,11 +1512,6 @@ proc_get_extint_bias( uint32_t io_attr_mvpd_data[PV_D][PV_W],
 /// ssrivath END OF BIAS APPLICATION FUNCTION
 
 
-bool
-is_wof_enabled()
-{
-    return (!(attr.attr_system_wof_disable) && !(attr.attr_dd_wof_not_supported)) ? true : false;
-}
 
 
 fapi2::ReturnCode
@@ -1643,6 +1654,7 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                          pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
                          pv_op_order[i]);
 
+                o_state->iv_pstates_enabled = false;
 
                 // Error out has Pstate and all dependent functions are suspious.
                 FAPI_ASSERT(false,
@@ -2685,8 +2697,22 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     const uint16_t VDM_VOLTAGE_IN_MV = 512;
     const uint16_t VDM_GRANULARITY = 4;
 
+    FAPI_INF(">> proc_get_mvpd_poundw");
+
     do
     {
+         FAPI_DBG("proc_get_mvpd_poundw: VDM enable = %d, WOF enable %d",
+                    is_vdm_enabled(), is_wof_enabled());
+
+        // Exit if both VDM and WOF is disabled
+        if (!is_vdm_enabled() && !is_wof_enabled())
+        {
+            FAPI_INF("   proc_get_mvpd_poundw: BOTH VDM and WOF are disabled.  Skipping remaining checks");
+            o_state->iv_vdm_enabled = false;
+            o_state->iv_wof_enabled = false;
+            break;
+        }
+
         // Below fields for Nominal, Powersave, Turbo, Ultra Turbo
         // I-VDD Nominal TDP AC current  2B
         // I-VDD Nominal TDP DC current 2B
@@ -2723,6 +2749,15 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             }
         }
 
+        // The rest of the processing here is all checking of the VDM content
+        // within #W.  If VDMs are not enabled (or supported), skip all of it
+        if (!is_vdm_enabled())
+        {
+            FAPI_INF("   proc_get_mvpd_poundw: VDM is disabled.  Skipping remaining checks");
+            o_state->iv_vdm_enabled = false;
+            break;
+        }
+
         uint8_t l_poundw_static_data = 0;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_W_STATIC_DATA_ENABLE,
@@ -2751,7 +2786,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         memcpy (&l_tmp_data, &(o_data->poundw[VPD_PV_NOMINAL]), sizeof (poundw_entry_t));
         memcpy(&(o_data->poundw[VPD_PV_NOMINAL]), &(o_data->poundw[VPD_PV_POWERSAVE]), sizeof(poundw_entry_t));
         memcpy (&(o_data->poundw[VPD_PV_POWERSAVE]), &l_tmp_data, sizeof(poundw_entry_t));
-
 
         FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
         FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
@@ -2783,7 +2817,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                   !(o_data->poundw[ULTRA].vdm_vid_compare_ivid))
         {
             o_state->iv_vdm_enabled = false;
-            FAPI_ERR("Pound W data contains invalid values");
             FAPI_ASSERT_NOEXIT(false,
                                fapi2::PSTATE_PB_POUND_W_INVALID_VID_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
@@ -2793,6 +2826,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
                                "Pstate Parameter Block #W : one of the VID compare value is zero");
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
         }
 
         FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
@@ -2812,7 +2846,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         {
             o_state->iv_vdm_enabled = false;
             FAPI_ASSERT_NOEXIT(false,
-                               fapi2::PSTATE_PB_POUND_W_INVALID_VID_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               fapi2::PSTATE_PB_POUND_W_INVALID_VID_ORDER(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                .set_CHIP_TARGET(i_target)
                                .set_NOMINAL_VID_COMPARE_IVID_VALUE(o_data->poundw[NOMINAL].vdm_vid_compare_ivid)
                                .set_POWERSAVE_VID_COMPARE_IVID_VALUE(o_data->poundw[POWERSAVE].vdm_vid_compare_ivid)
@@ -2820,6 +2854,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                .set_ULTRA_VID_COMPARE_IVID_VALUE(o_data->poundw[ULTRA].vdm_vid_compare_ivid),
                                "Pstate Parameter Block #W VID compare data are not in increasing order");
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
         }
 
         // validate threshold values
@@ -2850,6 +2885,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                    .set_VDM_LARGE((o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F),
                                    "Pstate Parameter Block #W VDM threshold data are invalid");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                break;
             }
         }
 
@@ -2876,6 +2912,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                    .set_VDM_SMALL_NORMAL((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F),
                                    "Pstate Parameter Block #W VDM frequency drop data are invalid");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                break;
             }
         }
 
@@ -2907,100 +2944,116 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
 fapi_try_exit:
 
+    // Given #W has both VDM and WOF content, a failure needs to disable both
     if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
         o_state->iv_vdm_enabled = false;
+        o_state->iv_wof_enabled = false;
     }
-
+    FAPI_INF("<< proc_get_mvpd_poundw");
     return fapi2::current_err;
 
 }
 
 
 fapi2::ReturnCode
-proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                      PSTATE_attribute_state* o_state)
 {
     uint8_t l_resclk_freq_index[RESCLK_FREQ_REGIONS];
     uint8_t l_l3_steparray[RESCLK_L3_STEPS];
     uint16_t l_resclk_freq_regions[RESCLK_FREQ_REGIONS];
     uint16_t l_resclk_value[RESCLK_STEPS];
     uint16_t l_l3_threshold_mv;
+    o_state->iv_resclk_enabled = true;
 
-    // Perform some basic sanity checks on the header data structures (since
-    // the header values are provided by another team)
-    FAPI_ASSERT((p9_resclk_defines::RESCLK_INDEX_VEC.size() == RESCLK_FREQ_REGIONS),
-                fapi2::PSTATE_PB_RESCLK_INDEX_ERROR()
+    do
+    {
+        // Perform some basic sanity checks on the header data structures (since
+        // the header values are provided by another team)
+        FAPI_ASSERT_NOEXIT((p9_resclk_defines::RESCLK_INDEX_VEC.size() == RESCLK_FREQ_REGIONS),
+                fapi2::PSTATE_PB_RESCLK_INDEX_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                 .set_FREQ_REGIONS(RESCLK_FREQ_REGIONS)
                 .set_INDEX_VEC_SIZE(p9_resclk_defines::RESCLK_INDEX_VEC.size()),
                 "p9_resclk_defines.h RESCLK_INDEX_VEC.size() mismatch");
 
-    FAPI_ASSERT((p9_resclk_defines::RESCLK_TABLE_VEC.size() == RESCLK_STEPS),
-                fapi2::PSTATE_PB_RESCLK_TABLE_ERROR()
-                .set_STEPS(RESCLK_STEPS)
-                .set_TABLE_VEC_SIZE(p9_resclk_defines::RESCLK_TABLE_VEC.size()),
-                "p9_resclk_defines.h RESCLK_TABLE_VEC.size() mismatch");
+        FAPI_ASSERT_NOEXIT((p9_resclk_defines::RESCLK_TABLE_VEC.size() == RESCLK_STEPS),
+                fapi2::PSTATE_PB_RESCLK_TABLE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                    .set_STEPS(RESCLK_STEPS)
+                    .set_TABLE_VEC_SIZE(p9_resclk_defines::RESCLK_TABLE_VEC.size()),
+                    "p9_resclk_defines.h RESCLK_TABLE_VEC.size() mismatch");
 
-    FAPI_ASSERT((p9_resclk_defines::L3CLK_TABLE_VEC.size() == RESCLK_L3_STEPS),
-                fapi2::PSTATE_PB_RESCLK_L3_TABLE_ERROR()
-                .set_L3_STEPS(RESCLK_L3_STEPS)
-                .set_L3_VEC_SIZE(p9_resclk_defines::L3CLK_TABLE_VEC.size()),
-                "p9_resclk_defines.h L3CLK_TABLE_VEC.size() mismatch");
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
-                           l_l3_steparray));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
-                           l_resclk_freq_regions));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
-                           l_resclk_freq_index));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
-                           l_resclk_value));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
-                           l_l3_threshold_mv));
-
-    for (uint8_t i = 0; i < RESCLK_FREQ_REGIONS; ++i)
-    {
-        if (l_resclk_freq_regions[i] == 0)
+        FAPI_ASSERT_NOEXIT((p9_resclk_defines::L3CLK_TABLE_VEC.size() == RESCLK_L3_STEPS),
+                    fapi2::PSTATE_PB_RESCLK_L3_TABLE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                    .set_L3_STEPS(RESCLK_L3_STEPS)
+                    .set_L3_VEC_SIZE(p9_resclk_defines::L3CLK_TABLE_VEC.size()),
+                    "p9_resclk_defines.h L3CLK_TABLE_VEC.size() mismatch");
+        //FAPI_ASSERT_NOEXIT will log an error with recoverable.. but rc won't be
+        //cleared.. So we are initializing again to continue further
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
         {
-            l_resclk_freq_regions[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).freq;
+            o_state->iv_resclk_enabled = false;
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
         }
 
-        if (l_resclk_freq_index[i] == 0)
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
+                               l_l3_steparray));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
+                               l_resclk_freq_regions));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
+                               l_resclk_freq_index));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
+                               l_resclk_value));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
+                               l_l3_threshold_mv));
+
+        for (uint8_t i = 0; i < RESCLK_FREQ_REGIONS; ++i)
         {
-            l_resclk_freq_index[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).idx;
-        }
-    }
+            if (l_resclk_freq_regions[i] == 0)
+            {
+                l_resclk_freq_regions[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).freq;
+            }
 
-    for (uint8_t i = 0; i < RESCLK_STEPS; ++i)
-    {
-        if (l_resclk_value[i] == 0)
+            if (l_resclk_freq_index[i] == 0)
+            {
+                l_resclk_freq_index[i] = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).idx;
+            }
+        }
+
+        for (uint8_t i = 0; i < RESCLK_STEPS; ++i)
         {
-            l_resclk_value[i] = p9_resclk_defines::RESCLK_TABLE_VEC.at(i);
+            if (l_resclk_value[i] == 0)
+            {
+                l_resclk_value[i] = p9_resclk_defines::RESCLK_TABLE_VEC.at(i);
+            }
         }
-    }
 
-    for (uint8_t i = 0; i < RESCLK_L3_STEPS; ++i)
-    {
-        if (l_l3_steparray[i] == 0)
+        for (uint8_t i = 0; i < RESCLK_L3_STEPS; ++i)
         {
-            l_l3_steparray[i] = p9_resclk_defines::L3CLK_TABLE_VEC.at(i);
+            if (l_l3_steparray[i] == 0)
+            {
+                l_l3_steparray[i] = p9_resclk_defines::L3CLK_TABLE_VEC.at(i);
+            }
         }
-    }
 
-    if(l_l3_threshold_mv == 0)
-    {
-        l_l3_threshold_mv = p9_resclk_defines::L3_VOLTAGE_THRESHOLD_MV;
-    }
+        if(l_l3_threshold_mv == 0)
+        {
+            l_l3_threshold_mv = p9_resclk_defines::L3_VOLTAGE_THRESHOLD_MV;
+        }
 
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
-                           l_l3_steparray));
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
-                           l_resclk_freq_regions));
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
-                           l_resclk_freq_index));
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
-                           l_resclk_value));
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
-                           l_l3_threshold_mv));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
+                               l_l3_steparray));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGIONS, i_target,
+                               l_resclk_freq_regions));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_FREQ_REGION_INDEX, i_target,
+                               l_resclk_freq_index));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_VALUE, i_target,
+                               l_resclk_value));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_RESCLK_L3_VOLTAGE_THRESHOLD_MV, i_target,
+                               l_l3_threshold_mv));
+    }while(0);
 
 fapi_try_exit:
     return fapi2::current_err;

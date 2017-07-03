@@ -3891,6 +3891,23 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_VDM_NOT_SUPPORTED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Voltage Droop Monitor non-support in manufacturing.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
    <!-- ******************************************************************** -->
     <attribute>
     <id>ATTR_CHIP_EC_FEATURE_DD1_ANALOG</id>

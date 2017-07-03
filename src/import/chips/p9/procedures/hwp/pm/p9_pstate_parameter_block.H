@@ -251,6 +251,7 @@ typedef struct
     uint8_t attr_system_vdm_disable;
 
     uint8_t attr_dd_wof_not_supported;
+    uint8_t attr_dd_vdm_not_supported;
     uint8_t attr_pstate_mode;
 
 } AttributeList;
@@ -483,10 +484,12 @@ proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 /// -------------------------------------------------------------------
 /// @brief Set Resonant Clocking "array"/"table" attributes using p9_resclk_defines.h
 /// @param[in]    i_target          => Chip Target
+/// @param[in]    o_state           => resclck attribute state
 /// @return   FAPI2::SUCCESS
 /// -------------------------------------------------------------------
 fapi2::ReturnCode
-proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                            PSTATE_attribute_state* o_state);
 
 //
 // p9_pstate_compute_vpd_pts

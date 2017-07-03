@@ -129,6 +129,16 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_PB_POUND_W_INVALID_VID_ORDER</rc>
+    <description>#W vid compare ivid value is not in increasing order</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>NOMINAL_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
+    <ffdc>ULTRA_VID_COMPARE_IVID_VALUE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE</rc>
     <description>#W threshold values are invalid</description>
     <ffdc>CHIP_TARGET</ffdc>
