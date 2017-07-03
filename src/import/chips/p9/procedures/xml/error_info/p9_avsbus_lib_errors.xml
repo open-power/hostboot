@@ -32,27 +32,33 @@
 <!-- Error definitions for p9_avsbus_lib procedure -->
 <hwpErrors>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_AVSBUS_READVOLTAGE_TIMEOUT</rc>
+    <hwpError>
+    <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
     <description>
-    A timeout occured reading voltage from an AVSBus interface
-    </description>    
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PROCPM_AVSBUS_WRITEVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured writing a voltage to an AVSBus interface
-    </description>    
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
+    A timeout occured reading/writing voltage from an AVSBus
+    interface
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>AVSBUS_NUM</ffdc>
+    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+    <ffdc>AVSBUS_CMD_TYPE</ffdc>
+    <ffdc>AVSBUS_CMD_GROUP</ffdc>
+    <ffdc>AVSBUS_CMD_DATATYPE</ffdc>
+    <ffdc>AVSBUS_RAILSELECT</ffdc>
+    <ffdc>AVSBUS_CMD_DATA</ffdc>
+    <ffdc>CRC</ffdc>
+    <ffdc>AVSBUS_OP_TYPE</ffdc>
+    </hwpError>
+    <!-- ********************************************************************-->
+    <hwpError>
     <rc>RC_PROCPM_AVSBUS_IDLEFRAME_TIMEOUT</rc>
     <description>
     A timeout occured writing an idle from to an AVSBus interface
-    </description>    
-  </hwpError>
-
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>AVSBUS_NUM</ffdc>
+    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+    </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PM_AVSBUS_ZERO_RESP_ERROR</rc>

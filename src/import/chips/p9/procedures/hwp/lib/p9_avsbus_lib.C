@@ -237,6 +237,7 @@ avsPollVoltageTransDone(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                         const uint8_t i_avsBusNum,
                         const uint8_t i_o2sBridgeNum)
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::buffer<uint64_t> l_data64;
 
     uint8_t l_count = 0;
@@ -260,11 +261,10 @@ avsPollVoltageTransDone(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     // Check for timeout condition
     if (l_count >= p9avslib::MAX_POLL_COUNT_AVS)
     {
-
-        // @todo L3:  Added Timeout FAPI2_SET_RC error point
         // This will set current_err to a non success value that can be
         // checked by the caller.
-
+        l_rc = fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT;
+        fapi2::current_err = l_rc;
     }
 
 fapi_try_exit:
@@ -283,7 +283,8 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const uint32_t i_CmdType,
                 const uint32_t i_CmdGroup,
                 const uint32_t i_CmdDataType,
-                const uint32_t i_CmdData)
+                const uint32_t i_CmdData,
+                enum avsBusOpType i_opType)
 {
 
     fapi2::buffer<uint64_t> l_data64;
@@ -343,6 +344,24 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // Note:  caller will check for the specific timeout return code.
 
 fapi_try_exit:
+
+    if (fapi2::current_err == fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT)
+    {
+        FAPI_ASSERT(false,
+                    fapi2::PROCPM_AVSBUS_VOLTAGE_TIMEOUT()
+                    .set_CHIP_TARGET(i_target)
+                    .set_AVSBUS_NUM(i_avsBusNum)
+                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
+                    .set_AVSBUS_CMD_TYPE(i_CmdType)
+                    .set_AVSBUS_CMD_GROUP(i_CmdGroup)
+                    .set_AVSBUS_CMD_DATATYPE(i_CmdDataType)
+                    .set_AVSBUS_RAILSELECT(i_RailSelect)
+                    .set_AVSBUS_CMD_DATA(i_CmdData)
+                    .set_CRC(l_crc)
+                    .set_AVSBUS_OP_TYPE(i_opType),
+                    "AVS bus driver command funciton fail");
+    }
+
     return fapi2::current_err;
 }
 
@@ -384,16 +403,6 @@ avsVoltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
     FAPI_INF("Voltage value read is %d mV", o_Voltage);
 
-    // @todo L3 insert SET_HWP_RC macro with FFDC
-    // FFDC:
-    //  i_avsBusNum
-    //  i_o2sBridgeNum,
-    //  i_RailSelect,
-    //  l_CmdType,
-    //  l_CmdGroup
-    //  l_CmdDataType
-    // O2S Registers (need to create in XML
-
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -423,16 +432,6 @@ avsVoltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                              l_CmdGroup,
                              l_CmdDataType,
                              i_Voltage));   // @todo command data flow
-
-    // @todo L3 insert SET_HWP_RC macro with FFDC
-    // FFDC:
-    //  i_avsBusNum
-    //  i_o2sBridgeNum,
-    //  i_RailSelect,
-    //  l_CmdType,
-    //  l_CmdGroup
-    //  l_CmdDataType
-    // O2S Registers (need to create in XML)
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -469,17 +468,18 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // Wait on o2s_ongoing = 0
     FAPI_TRY(avsPollVoltageTransDone(i_target, i_avsBusNum, i_o2sBridgeNum));
 
-    // @todo L3 insert SET_HWP_RC macro with FFDC
-    // FFDC:
-    //  i_avsBusNum
-    //  i_o2sBridgeNum,
-    //  i_RailSelect,
-    //  l_CmdType,
-    //  l_CmdGroup
-    //  l_CmdDataType
-    // O2S Registers (need to create in XML
-
 fapi_try_exit:
+
+    if (fapi2::current_err == fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT)
+    {
+        FAPI_ASSERT(false,
+                    fapi2::PROCPM_AVSBUS_IDLEFRAME_TIMEOUT()
+                    .set_CHIP_TARGET(i_target)
+                    .set_AVSBUS_NUM(i_avsBusNum)
+                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum),
+                    "AVS Idle frame funciton fail");
+    }
+
     return fapi2::current_err;
 }
 //##############################################################################
@@ -583,6 +583,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
 
 fapi_try_exit:
+
     return fapi2::current_err;
 
 }
