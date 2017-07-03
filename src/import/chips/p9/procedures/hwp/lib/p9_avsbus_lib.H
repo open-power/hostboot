@@ -159,9 +159,17 @@ const uint32_t OCB_OIMR1_MASK_VALUES[2][2] =
     0xFFFFFEFF  //bit 24
 };
 
+enum avsBusOpType
+{
+    NO_OP,
+    VLTG_READ_TYPE,
+    VLTG_WTITE_TYPE,
+};
+
 //const uint64_t OCB_O2SST_MASK = 0x8000000000000000;
 
 } //end of p9avslib namespace
+using namespace p9avslib;
 
 ///@brief Generates a 3 bit CRC value for 29 bit data
 ///@param[i] i_data
@@ -216,7 +224,8 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 const uint32_t i_CmdType,
                 const uint32_t i_CmdGroup,
                 const uint32_t i_CmdDataType,
-                const uint32_t i_CmdData);
+                const uint32_t i_CmdData,
+                enum avsBusOpType i_opType = avsBusOpType::NO_OP);
 
 
 
