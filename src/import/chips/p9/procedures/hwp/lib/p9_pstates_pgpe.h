@@ -283,7 +283,7 @@ typedef struct
 
     // @todo DPLL Droop Settings.  These need communication to SGPE for STOP
 
-} GlobalPstateParmBlock;
+} __attribute__((packed, aligned(1024))) GlobalPstateParmBlock;
 
 
 #ifdef __cplusplus
