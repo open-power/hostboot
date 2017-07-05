@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2015
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -651,11 +651,11 @@ sub assimilate_file($) {
 	    chop $line;         # remove EOL
 
 	    # 64 bit support
-	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)d\b/\%$1$2$3lld/g;
-	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)i\b/\%$1$2$3lld/g;
-	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)u\b/\%$1$2$3llu/g;
-	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)x\b/\%$1$2$3llx/g;
-	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)X\b/\%$1$2$3llX/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)d/\%$1$2$3lld/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)i/\%$1$2$3lld/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)u/\%$1$2$3llu/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)x/\%$1$2$3llx/g;
+	    $line =~ s/\%(\d*)(\.?)(\d*)(?:h?|l{0,2}|L?)X/\%$1$2$3llX/g;
 	    $line =~ s/\%p/0x\%llX/g;   # Replace pointer format with hex value
 	    #print "line: $line\n";
 
