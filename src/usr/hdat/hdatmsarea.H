@@ -597,27 +597,27 @@ private:
      * @li iv_ramPtrs         - ptr to storage which contains one of more ptrs
      *                          to RAM objects
      */
-    uint32_t                iv_kwdSize;
-    uint32_t                iv_maxAddrRngCnt;
-    uint32_t                iv_maxEcCnt;
-    uint32_t                iv_msaHostI2cCnt;
-    uint32_t                iv_msaHostI2cSize;
-    uint32_t                iv_maxRamCnt;
-    uint32_t                iv_actRamCnt;
-    uint32_t                iv_maxRamObjSize;
-    char                   *iv_kwd;
-    bool                    iv_ramPadReq;
-    hdatFruId_t             iv_fru;
-    hdatMsAreaId_t          iv_msId;
-    hdatMsAreaSize_t        iv_msSize;
-    hdatHDIFDataArray_t     iv_addrRngArrayHdr;
-    hdatMsAreaAddrRange_t   *iv_addrRange;
-    hdatMsAreaAffinity_t    iv_aff;
-    hdatHDIFDataArray_t     iv_ecArrayHdr;
-    hdatMsAreaEcLvl_t      *iv_ecLvl;
-    hdatHDIFDataArray_t     iv_msaI2cHdr;
-    uint8_t                *iv_msaI2cDataPtr;
-    HdatRam               **iv_ramPtrs;
+    uint32_t                     iv_kwdSize;
+    uint32_t                     iv_maxAddrRngCnt;
+    uint32_t                     iv_maxEcCnt;
+    uint32_t                     iv_msaHostI2cCnt;
+    uint32_t                     iv_msaHostI2cSize;
+    uint32_t                     iv_maxRamCnt;
+    uint32_t                     iv_actRamCnt;
+    uint32_t                     iv_maxRamObjSize;
+    char                        *iv_kwd;
+    bool                         iv_ramPadReq;
+    hdatFruId_t                  iv_fru;
+    hdatMsAreaId_t               iv_msId;
+    hdatMsAreaSize_t             iv_msSize;
+    hdatHDIFDataArray_t          iv_addrRngArrayHdr;
+    hdatMsAreaAddrRange_t        *iv_addrRange;
+    hdatMsAreaAffinity_t         iv_aff;
+    hdatHDIFDataArray_t          iv_ecArrayHdr;
+    hdatMsAreaEcLvl_t           *iv_ecLvl;
+    hdatHDIFVersionedDataArray_t iv_msaI2cHdr;
+    uint8_t                     *iv_msaI2cDataPtr;
+    HdatRam                    **iv_ramPtrs;
 
 
     /** Class (static) Data

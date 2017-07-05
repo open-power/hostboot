@@ -1664,6 +1664,26 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
     return(err);
 }
 
+//******************************************************************************
+// byNodeProcAffinty (std::sort comparison function)
+//******************************************************************************
+
+bool byNodeProcAffinity(
+    const DeviceInfo_t& i_lhs,
+    const DeviceInfo_t& i_rhs)
+{
+    bool lhsLogicallyBeforeRhs = (i_lhs.assocNode < i_rhs.assocNode);
+    if(i_lhs.assocNode == i_rhs.assocNode)
+    {
+        lhsLogicallyBeforeRhs = (i_lhs.assocProc < i_rhs.assocProc);
+        if(i_lhs.assocProc == i_rhs.assocProc)
+        {
+            lhsLogicallyBeforeRhs = (i_lhs.masterChip < i_rhs.masterChip);
+        }
+    }
+    return lhsLogicallyBeforeRhs;
+}
+
 /*******************************************************************************
  * hdatGetI2cDeviceInfo
  *
@@ -1674,44 +1694,121 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
  * @post None
  *
  * @param[in] i_pTarget
- *       The i2c master target handle
+ *       The i2c master target handle, or nullptr for all i2c masters
  * @param[out] o_i2cDevEntries
  *       The host i2c dev entries
  *
  * @return void
  *
 *******************************************************************************/
-void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
-    std::vector<hdatI2cData_t>&o_i2cDevEntries)
+void hdatGetI2cDeviceInfo(
+    TARGETING::Target*          i_pTarget,
+    std::vector<hdatI2cData_t>& o_i2cDevEntries)
 {
     HDAT_ENTER();
-    std::vector<DeviceInfo_t> o_deviceInfo;
-    getDeviceInfo( i_pTarget, o_deviceInfo);
-    uint32_t l_I2cLinkId = 0;
 
-    if(!o_deviceInfo.size())
+    std::vector<DeviceInfo_t> deviceInfo;
+    getDeviceInfo(nullptr,deviceInfo);
+
+    if(deviceInfo.empty())
     {
-        HDAT_INF(" No i2c connections found for i2c master : 0x08X",
-                i_pTarget->getAttr<ATTR_HUID>());
+        HDAT_INF("No I2C connections found for I2C master with HUID of 0x%08X",
+                 TARGETING::get_huid(i_pTarget));
     }
-    else
+    else // At least one device, and index [0] is valid
     {
-        for ( auto &l_i2cDevEle : o_deviceInfo )
+        // Order by node ordinal ID, processor position, I2C master target
+        // pointer
+        std::sort(deviceInfo.begin(), deviceInfo.end(),
+            byNodeProcAffinity);
+
+        union LinkId
         {
+            struct
+            {
+                uint8_t  node;     ///< Ordinal ID of node
+                uint8_t  proc;     ///< Processor position
+                uint16_t instance; ///< Link instance (unique across a given
+                                   ///<     processor and its downstream
+                                   ///<     membufs)
+            };
+            uint32_t val;          ///< Allow access to the raw value
+        } linkId = { {
+            .node=static_cast<uint8_t>(deviceInfo[0].assocNode),
+            .proc=static_cast<uint8_t>(deviceInfo[0].assocProc),
+            .instance=0 }
+        };
+
+        for (const auto& i2cDevice : deviceInfo)
+        {
+            if(   (i2cDevice.assocNode != linkId.node)
+               || (i2cDevice.assocProc != linkId.proc))
+            {
+                linkId.node=i2cDevice.assocNode;
+                linkId.proc=i2cDevice.assocProc;
+                linkId.instance=0;
+            }
+
             hdatI2cData_t l_hostI2cObj;
             memset(&l_hostI2cObj, 0x00, sizeof(hdatI2cData_t));
 
-            l_hostI2cObj.hdatI2cEngine       = l_i2cDevEle.engine;
-            l_hostI2cObj.hdatI2cMasterPort   = l_i2cDevEle.masterPort;
-            l_hostI2cObj.hdatI2cBusSpeed     = l_i2cDevEle.busFreqKhz;
-            l_hostI2cObj.hdatI2cSlaveDevType = l_i2cDevEle.deviceType;
-            l_hostI2cObj.hdatI2cSlaveDevAddr = l_i2cDevEle.addr;
-            l_hostI2cObj.hdatI2cSlavePort    = l_i2cDevEle.slavePort;
-            l_hostI2cObj.hdatI2cSlaveDevPurp = l_i2cDevEle.devicePurpose;
-            l_hostI2cObj.hdatI2cLinkId       = l_I2cLinkId++;
+            l_hostI2cObj.hdatI2cEngine       = i2cDevice.engine;
+            l_hostI2cObj.hdatI2cMasterPort   = i2cDevice.masterPort;
+            l_hostI2cObj.hdatI2cBusSpeed     = i2cDevice.busFreqKhz;
+            l_hostI2cObj.hdatI2cSlaveDevType = i2cDevice.deviceType;
+            l_hostI2cObj.hdatI2cSlaveDevAddr = i2cDevice.addr;
+            l_hostI2cObj.hdatI2cSlavePort    = i2cDevice.slavePort;
+            l_hostI2cObj.hdatI2cSlaveDevPurp = i2cDevice.devicePurpose;
+            l_hostI2cObj.hdatI2cLinkId       = linkId.val;
 
-            o_i2cDevEntries.push_back(l_hostI2cObj);
+            // @TODO RTC 176759 Populate SLCA and I2C label
+            l_hostI2cObj.hdatI2cSlcaIndex    = 0;
+            memset(&l_hostI2cObj.hdatI2cLabel,0x00,
+                   sizeof(l_hostI2cObj.hdatI2cLabel));
+
+            // Don't include the device if the slave address is
+            // invalid
+            if(l_hostI2cObj.hdatI2cSlaveDevAddr == UINT8_MAX)
+            {
+                continue;
+            }
+
+            assert(linkId.instance <= UINT16_MAX,"Illegal link ID instance "
+                "detected");
+            ++linkId.instance;
+
+            if(   (i_pTarget == nullptr)
+               || (i_pTarget == i2cDevice.masterChip))
+            {
+                o_i2cDevEntries.push_back(l_hostI2cObj);
+            }
         }
+    }
+
+    for(auto const& i2cDevice : o_i2cDevEntries)
+    {
+        HDAT_DBG("Unique I2C device attached to HUID=0x%08X: "
+            "engine=0x%02X, "
+            "port=0x%02X, "
+            "speed=0x%04X, "
+            "slave type=0x%02X, "
+            "slave address=0x%02X, "
+            "slave port=0x%02X, "
+            "slave purpose=0x%08X, "
+            "link ID=0x%08X, "
+            "SLCA index=0x%04X, "
+            "slave label=\"%s\"",
+            TARGETING::get_huid(i_pTarget),
+            i2cDevice.hdatI2cEngine,
+            i2cDevice.hdatI2cMasterPort,
+            i2cDevice.hdatI2cBusSpeed,
+            i2cDevice.hdatI2cSlaveDevType,
+            i2cDevice.hdatI2cSlaveDevAddr,
+            i2cDevice.hdatI2cSlavePort,
+            i2cDevice.hdatI2cSlaveDevPurp,
+            i2cDevice.hdatI2cLinkId,
+            i2cDevice.hdatI2cSlcaIndex,
+            i2cDevice.hdatI2cLabel);
     }
 
     HDAT_EXIT();

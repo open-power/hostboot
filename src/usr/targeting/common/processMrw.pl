@@ -32,6 +32,8 @@ use Math::BigInt;
 use Getopt::Long;
 use File::Basename;
 
+use constant HZ_PER_KHZ=>1000;
+
 my $VERSION = "1.0.0";
 
 my $force          = 0;
@@ -1695,7 +1697,7 @@ sub processI2C
             if ($targetObj->isBusAttributeDefined(
                      $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED"))
             {
-                $speed = $targetObj->getBusAttribute(
+                $speed = HZ_PER_KHZ * $targetObj->getBusAttribute(
                            $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_SPEED");
             }
 

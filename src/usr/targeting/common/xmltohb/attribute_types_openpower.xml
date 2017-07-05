@@ -246,7 +246,7 @@
         into a struct in i2c.C
     </description>
     <simpleType>
-        <uint8_t></uint8_t>
+        <uint32_t></uint32_t>
         <array>32</array>
     </simpleType>
     <persistency>non-volatile</persistency>

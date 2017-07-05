@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,15 @@ ALWAYS_INLINE inline uint64_t i2cGetPollingInterval(uint64_t i_bus_speed_khz )
 #define I2C_BUS_SPEED_400KHZ     400
 #define I2C_BUS_SPEED_1MHZ       1000
 
+/**
+ *  @brief Frequency conversions, assuming base unit of Hz
+ */
+enum FREQ_CONVERSION : size_t
+{
+    HZ_PER_KHZ  = 1000,
+    KHZ_PER_MHZ = 1000,
+    HZ_PER_MHZ  = KHZ_PER_MHZ * HZ_PER_KHZ,
+};
 
 // -----------------------------------------------------------------------
 // NOTE: Host I2C is using the PIB I2C Master 'legacy' registers, which

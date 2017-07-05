@@ -101,6 +101,10 @@ namespace HDAT
 
 extern trace_desc_t* g_trac_hdat;
 
+enum HOST_I2C_DEV_INFO_VERSION : uint32_t
+{
+    V2 = 0x00000002,
+};
 
 /** @brief Defines the Host I2C device info
  */
@@ -115,6 +119,8 @@ struct hdatI2cData_t
     uint8_t  hdatReserved1;
     uint32_t hdatI2cSlaveDevPurp;
     uint32_t hdatI2cLinkId;
+    uint16_t hdatI2cSlcaIndex;
+    char     hdatI2cLabel[64];
 
 }__attribute__ ((packed));
 
