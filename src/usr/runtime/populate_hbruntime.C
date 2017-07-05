@@ -1407,10 +1407,6 @@ errlHndl_t populate_TpmInfoByNode()
                     "populate_TpmInfoByNode: A duplicate link Id was found. %d",
                     l_linkId);
 
-#if 0
-                // TODO RTC 173541 - Renable when HB + FIPS have the uniqueness
-                // change.
-
                 // terminate the boot due to an integrity violation
                 /*@
                  * @errortype
@@ -1433,8 +1429,6 @@ errlHndl_t populate_TpmInfoByNode()
                 SECUREBOOT::handleSecurebootFailure(err);
 
                 assert(true,"Bug! handleSecurebootFailure shouldn't return!");
-#endif
-
             }
             else
             {

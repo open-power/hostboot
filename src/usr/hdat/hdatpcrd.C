@@ -143,7 +143,8 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
     // Allocate the CHIP INFO section also
     iv_numPcrdEntries = HDAT_NUM_P7_PCRD_ENTRIES;
     iv_spPcrdEntrySize = sizeof(hdatSpPcrd_t) + HDAT_FULL_MVPD_SIZE +
-           sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
+           sizeof(hdatHDIFVersionedDataArray_t) + ((sizeof(hdatI2cData_t)
+               * HDAT_PCRD_MAX_I2C_DEV));
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -446,9 +447,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 // Setting Host I2C device entry data
                 uint32_t l_pcrdHI2cTotalSize = 0;
 
-                hdatHDIFDataArray_t *l_hostI2cFullPcrdHdrPtr = NULL;
-                l_hostI2cFullPcrdHdrPtr =
-                    reinterpret_cast<hdatHDIFDataArray_t *>
+                hdatHDIFVersionedDataArray_t *l_hostI2cFullPcrdHdrPtr =
+                    reinterpret_cast<hdatHDIFVersionedDataArray_t *>
                     (l_FullMvpdAddr+l_FullMvpdSize);
 
                 // Need to get i2c Master data correctly
@@ -456,25 +456,29 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
 
                 hdatGetI2cDeviceInfo(l_pProcTarget, l_i2cDevEntries);
 
-                l_pcrdHI2cTotalSize = sizeof(hdatHDIFDataArray_t) +
+                l_pcrdHI2cTotalSize = sizeof(*l_hostI2cFullPcrdHdrPtr) +
                     (sizeof(hdatI2cData_t) * l_i2cDevEntries.size());
 
                 HDAT_INF("pcrdHI2cNumEntries=0x%x, l_pcrdHI2cTotalSize=0x%x",
                     l_i2cDevEntries.size(), l_pcrdHI2cTotalSize);
 
-                l_hostI2cFullPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
+                // All array entries start right after header which is of 5 word
+                // size
+                l_hostI2cFullPcrdHdrPtr->hdatOffset =
+                    sizeof(*l_hostI2cFullPcrdHdrPtr);
                 l_hostI2cFullPcrdHdrPtr->hdatArrayCnt =
                     l_i2cDevEntries.size();
                 l_hostI2cFullPcrdHdrPtr->hdatAllocSize =
                     sizeof(hdatI2cData_t);
                 l_hostI2cFullPcrdHdrPtr->hdatActSize =
                     sizeof(hdatI2cData_t);
+                l_hostI2cFullPcrdHdrPtr->hdatVersion =
+                    HOST_I2C_DEV_INFO_VERSION::V2;
 
-                hdatI2cData_t *l_hostI2cFullPcrdDataPtr = NULL;
-                l_hostI2cFullPcrdDataPtr = 
+                hdatI2cData_t *l_hostI2cFullPcrdDataPtr =
                     reinterpret_cast<hdatI2cData_t *>
-                    (reinterpret_cast<uint8_t *>(l_hostI2cFullPcrdHdrPtr)
-                                +sizeof(hdatHDIFDataArray_t));
+                        (reinterpret_cast<uint8_t *>(l_hostI2cFullPcrdHdrPtr)
+                            +sizeof(*l_hostI2cFullPcrdHdrPtr));
 
                 if ( l_i2cDevEntries.size() != 0 )
                 {
@@ -489,15 +493,15 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 }
                 this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].
                     hdatOffset = this->iv_spPcrd->hdatPcrdIntData
-                    [HDAT_PCRD_DA_CHIP_VPD].hdatOffset + 
+                    [HDAT_PCRD_DA_CHIP_VPD].hdatOffset +
                     this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_CHIP_VPD].
                     hdatSize;
                 this->iv_spPcrd->hdatPcrdIntData
                     [HDAT_PCRD_DA_HOST_I2C].hdatSize = l_pcrdHI2cTotalSize;
                 this->iv_spPcrd->hdatHdr.hdatSize +=
-                sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
+                    sizeof(*l_hostI2cFullPcrdHdrPtr) + (sizeof(hdatI2cData_t)
+                    * HDAT_PCRD_MAX_I2C_DEV);
 
-                
                 uint8_t* l_temp = reinterpret_cast<uint8_t *>
                                                  (l_hostI2cFullPcrdHdrPtr);
 
@@ -509,7 +513,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset =
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_HOST_I2C].hdatOffset
                    +
-            sizeof(hdatHDIFDataArray_t) + (sizeof(hdatI2cData_t) * HDAT_PCRD_MAX_I2C_DEV);
+            sizeof(hdatHDIFVersionedDataArray_t) + (sizeof(hdatI2cData_t)
+                * HDAT_PCRD_MAX_I2C_DEV);
 
             if(l_pProcTarget == l_pMasterProc)
             {

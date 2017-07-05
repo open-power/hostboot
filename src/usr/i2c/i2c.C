@@ -3781,7 +3781,7 @@ void getMasterInfo( const TARGETING::Target* i_chip,
         //can be computed by adding an offset of 0x1000 each time
         info.scomAddr = 0x000A0000 + engine*P9_ENGINE_SCOM_OFFSET;
         info.engine = engine;
-        info.freq = i2cGetNestFreq()*1000*1000; //convert MHz->Hz
+        info.freq = i2cGetNestFreq()*FREQ_CONVERSION::HZ_PER_MHZ;
         // PIB_CLK = NEST_FREQ /4
         // Local Bus = PIB_CLK / 4
         info.freq = info.freq/16; //convert nest to local bus
@@ -3792,8 +3792,51 @@ void getMasterInfo( const TARGETING::Target* i_chip,
     }
 }
 
+//******************************************************************************
+// areI2cDevicesLogicallyEqual (std::unique equality comparison)
+//******************************************************************************
+
+bool areI2cDevicesLogicallyEqual(
+     const DeviceInfo_t& i_lhs,
+     const DeviceInfo_t& i_rhs)
+{
+    return    (i_lhs.masterChip == i_rhs.masterChip)
+           && (i_lhs.engine == i_rhs.engine)
+           && (i_lhs.masterPort == i_rhs.masterPort)
+           && (i_lhs.addr == i_rhs.addr)
+           && (i_lhs.slavePort == i_rhs.slavePort);
+}
+
+//******************************************************************************
+// byI2cDeviceOrder (std::sort comparison function)
+//******************************************************************************
+
+bool byI2cDeviceOrder(
+     const DeviceInfo_t& i_lhs,
+     const DeviceInfo_t& i_rhs)
+{
+    bool lhsLogicallyBeforeRhs = (i_lhs.masterChip < i_rhs.masterChip);
+    if(i_lhs.masterChip == i_rhs.masterChip)
+    {
+        lhsLogicallyBeforeRhs = (i_lhs.engine < i_rhs.engine);
+        if(i_lhs.engine == i_rhs.engine)
+        {
+            lhsLogicallyBeforeRhs = (i_lhs.masterPort < i_rhs.masterPort);
+            if(i_lhs.masterPort == i_rhs.masterPort)
+            {
+                lhsLogicallyBeforeRhs = (i_lhs.addr < i_rhs.addr);
+                if(i_lhs.addr == i_rhs.addr)
+                {
+                    lhsLogicallyBeforeRhs = (i_lhs.slavePort < i_rhs.slavePort);
+                }
+            }
+        }
+    }
+    return lhsLogicallyBeforeRhs;
+}
+
 /**
- * Retrieve some information about all I2C devices that the Host
+ * Retrieve some information about I2C devices that the Host
  * needs to know about
  */
 void getDeviceInfo( TARGETING::Target* i_i2cMaster,
@@ -3801,196 +3844,318 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 {
     TRACFCOMP(g_trac_i2c,"getDeviceInfo>>");
 
-    //Get list of all I2C Masters
-    std::list<I2C::MasterInfo_t> l_i2cInfo;
-    I2C::getMasterInfo( i_i2cMaster, l_i2cInfo );
-
-    //Find all the EEPROMs connected via i2c
-    std::list<EEPROM::EepromInfo_t> l_eepromInfo;
-    EEPROM::getEEPROMs( l_eepromInfo );
-
-    //Find all TPMs
-#ifdef CONFIG_TPMDD
-    TPMDD::tpm_info_t tpmInfo;
-    errlHndl_t l_err = NULL;
-    TARGETING::TargetHandleList tpmList;
-    TRUSTEDBOOT::getTPMs(tpmList);
-#endif
-
-    for( std::list<I2C::MasterInfo_t>::iterator i2cm = l_i2cInfo.begin();
-         i2cm != l_i2cInfo.end();
-         ++i2cm )
+    TARGETING::TargetHandleList chipTargets;
+    if(i_i2cMaster == nullptr)
     {
-        TRACDCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(i_i2cMaster));
-        /* I2C Busses */
-        std::list<EEPROM::EepromInfo_t>::iterator l_eep = l_eepromInfo.begin();
-        while( l_eep != l_eepromInfo.end() )
-        {
-            TRACDCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
-            DeviceInfo_t l_currentDI;
+        // If no target specified, use every proc / membuf chip
+        TARGETING::Target* pSys = nullptr;
+        TARGETING::targetService().getTopLevelTarget(pSys);
+        assert(pSys != nullptr,"System target was nullptr");
 
-            //ignore the devices that aren't on the current target
-            if( l_eep->i2cMaster != i_i2cMaster )
+        TARGETING::PredicateCTM procChip(
+            TARGETING::CLASS_CHIP,TARGETING::TYPE_PROC);
+        TARGETING::PredicateCTM membufChip(
+            TARGETING::CLASS_CHIP,TARGETING::TYPE_MEMBUF);
+
+        TARGETING::PredicatePostfixExpr procOrMembuf;
+        procOrMembuf.push(&procChip).push(&membufChip).Or();
+
+        TARGETING::targetService().getAssociated(
+            chipTargets,
+            pSys,
+            TARGETING::TargetService::CHILD,
+            TARGETING::TargetService::ALL,
+            &procOrMembuf);
+    }
+    else
+    {
+        // Otherwise, use the input target
+        chipTargets.push_back(i_i2cMaster);
+    }
+
+    for(auto pChipTarget : chipTargets)
+    {
+        // If target is a processor, find its upstream node; if a membuf, find
+        // both the upstream processor and node
+        TARGETING::Target* pProc = nullptr;
+        if(pChipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+        {
+            pProc = pChipTarget;
+        }
+        else
+        {
+            TARGETING::TargetHandleList affinityParentTargets;
+            TARGETING::getParentAffinityTargets (
+                affinityParentTargets,
+                pChipTarget,
+                TARGETING::CLASS_CHIP,
+                TARGETING::TYPE_PROC,
+                false);
+            // Chip like TPM might not have upstream processor
+            if(affinityParentTargets.empty())
             {
-                TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                continue;
+            }
+            assert(affinityParentTargets.size() == 1,
+                "Exactly one affinity parent expected, not %d",
+                affinityParentTargets.size());
+            pProc = affinityParentTargets[0];
+        }
+        auto assocProc = pProc->getAttr<TARGETING::ATTR_POSITION>();
+        assert(assocProc <= UINT8_MAX,"Proc position exceeded max for uint8_t");
+
+        TARGETING::TargetHandleList affinityParentTargets;
+        TARGETING::getParentAffinityTargets (
+            affinityParentTargets,
+            pProc,
+            TARGETING::CLASS_ENC,
+            TARGETING::TYPE_NODE,
+            false);
+        assert(affinityParentTargets.size() == 1,
+            "Exactly one affinity parent expected, not %d",
+            affinityParentTargets.size());
+        TARGETING::Target* pNode = affinityParentTargets[0];
+        auto assocNode = pNode->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+        assert(assocNode <= UINT8_MAX,"Node position exceeded max for uint8_t");
+
+        //Get list of all I2C Masters
+        std::list<I2C::MasterInfo_t> l_i2cInfo;
+        I2C::getMasterInfo( pChipTarget, l_i2cInfo );
+
+        //Find all the EEPROMs connected via i2c
+        std::list<EEPROM::EepromInfo_t> l_eepromInfo;
+        EEPROM::getEEPROMs( l_eepromInfo );
+
+        //Find all TPMs
+    #ifdef CONFIG_TPMDD
+        TPMDD::tpm_info_t tpmInfo;
+        errlHndl_t l_err = NULL;
+        TARGETING::TargetHandleList tpmList;
+        TRUSTEDBOOT::getTPMs(tpmList);
+    #endif
+
+        for(auto const& i2cm : l_i2cInfo)
+        {
+            TRACDCOMP(g_trac_i2c,"i2c loop - eng=%.8X", TARGETING::get_huid(pChipTarget));
+            /* I2C Busses */
+            std::list<EEPROM::EepromInfo_t>::iterator l_eep =
+                l_eepromInfo.begin();
+            while( l_eep != l_eepromInfo.end() )
+            {
+                TRACDCOMP(g_trac_i2c,"eeprom loop - eng=%.8X, port=%.8X", TARGETING::get_huid(l_eep->i2cMaster), l_eep->engine );
+                DeviceInfo_t l_currentDI;
+
+                //ignore the devices that aren't on the current target
+                if( l_eep->i2cMaster != pChipTarget )
+                {
+                    TRACDCOMP(g_trac_i2c,"skipping unmatched i2cmaster");
+                    l_eep = l_eepromInfo.erase(l_eep);
+                    continue;
+                }
+
+                //skip the devices that are on a different engine
+                else if( l_eep->engine != i2cm.engine)
+                {
+                    TRACDCOMP(g_trac_i2c,"skipping umatched engine");
+                    ++l_eep;
+                    continue;
+                }
+
+                l_currentDI.assocNode = assocNode;
+                l_currentDI.assocProc = assocProc;
+                l_currentDI.masterChip = l_eep->i2cMaster;
+                l_currentDI.engine = l_eep->engine;
+                l_currentDI.masterPort = l_eep->port;
+                l_currentDI.addr = l_eep->devAddr;
+                l_currentDI.slavePort = 0xFF;
+                l_currentDI.busFreqKhz = (l_eep->busFreq)
+                    / FREQ_CONVERSION::HZ_PER_KHZ;
+                l_currentDI.deviceType =
+                    TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
+                switch(l_eep->device)
+                {
+                    case EEPROM::VPD_PRIMARY:
+                    case EEPROM::VPD_BACKUP:
+                        l_currentDI.devicePurpose =
+                                TARGETING::HDAT_I2C_DEVICE_PURPOSE_MODULE_VPD;
+                        //TODO RTC:165485 this isn't currently right. we'll need
+                        //to add the changes in the enum and possibly the other
+                        //struct/attribute.
+                        break;
+                    case EEPROM::SBE_PRIMARY:
+                    case EEPROM::SBE_BACKUP:
+                        l_currentDI.devicePurpose =
+                                TARGETING::HDAT_I2C_DEVICE_PURPOSE_SBE_SEEPROM;
+                        break;
+                    case EEPROM::LAST_CHIP_TYPE:
+                        break;
+                }
+
+                TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_eep->devAddr);
+                o_deviceInfo.push_back(l_currentDI);
                 l_eep = l_eepromInfo.erase(l_eep);
-                continue;
-            }
+            } //end of eeprom iter
 
-            //skip the devices that are on a different engine
-            else if( l_eep->engine != i2cm->engine)
+    #ifdef CONFIG_TPMDD
+            for(auto pTpm : tpmList)
             {
-                TRACDCOMP(g_trac_i2c,"skipping umatched engine");
-                ++l_eep;
-                continue;
-            }
+                DeviceInfo_t l_currentDI;
+                TPMDD::tpm_locality_t locality = TPMDD::TPM_LOCALITY_0;
 
-            l_currentDI.masterChip = l_eep->i2cMaster;
-            l_currentDI.engine = l_eep->engine;
-            l_currentDI.masterPort = l_eep->port;
-            l_currentDI.addr = l_eep->devAddr;
-            l_currentDI.slavePort = 0xFF;
-            l_currentDI.busFreqKhz = (l_eep->busFreq) / 1000;
-            l_currentDI.deviceType = TARGETING::HDAT_I2C_DEVICE_TYPE_SEEPROM;
-            switch(l_eep->device)
-            {
-                case EEPROM::VPD_PRIMARY:
-                case EEPROM::VPD_BACKUP:
-                    l_currentDI.devicePurpose =
-                            TARGETING::HDAT_I2C_DEVICE_PURPOSE_MODULE_VPD;
-                    break;
-                case EEPROM::SBE_PRIMARY:
-                case EEPROM::SBE_BACKUP:
-                    l_currentDI.devicePurpose =
-                            TARGETING::HDAT_I2C_DEVICE_PURPOSE_SBE_SEEPROM;
-                    break;
-                case EEPROM::LAST_CHIP_TYPE:
-                    break;
-            }
+                // Lookup i2c info for the TPM
+                l_err = TPMDD::tpmReadAttributes(pTpm,
+                                                 tpmInfo, locality);
+                if( NULL != l_err )
+                {
+                    // Unable to get info, so we skip
+                    delete l_err;
+                    continue;
+                }
+                // ignore the devices that aren't on the current target
+                if( tpmInfo.i2cTarget != pChipTarget )
+                {
+                    continue;
+                }
+                // skip the devices that are on a different engine
+                else if( tpmInfo.engine != i2cm.engine )
+                {
+                    continue;
+                }
 
-            TRACDCOMP(g_trac_i2c,"Adding addr=%X", l_eep->devAddr);
-            o_deviceInfo.push_back(l_currentDI);
-            l_eep = l_eepromInfo.erase(l_eep);
-        } //end of eeprom iter
+                l_currentDI.assocNode = assocNode;
+                l_currentDI.assocProc = assocProc;
+                l_currentDI.masterChip = tpmInfo.i2cTarget;
+                l_currentDI.engine = tpmInfo.engine;
+                l_currentDI.masterPort = tpmInfo.port;
+                l_currentDI.addr = tpmInfo.devAddr;
+                l_currentDI.slavePort = 0xFF;
+                l_currentDI.busFreqKhz = (tpmInfo.busFreq)
+                    / FREQ_CONVERSION::HZ_PER_KHZ;
+                l_currentDI.deviceType =
+                        TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
+                l_currentDI.devicePurpose =
+                    TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
 
-#ifdef CONFIG_TPMDD
-        for(auto pTpm : tpmList)
+                o_deviceInfo.push_back(l_currentDI);
+
+            } //end of tpm iter
+    #endif
+
+        } //end of i2cm
+
+#if CONFIG_INCLUDE_XML_OPENPOWER
+
+        TARGETING::ATTR_HDAT_I2C_ELEMENTS_type l_arrayLength = 0;
+        auto present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_ELEMENTS>(l_arrayLength);
+        if(!present || l_arrayLength == 0)
         {
-            DeviceInfo_t l_currentDI;
-            TPMDD::tpm_locality_t locality = TPMDD::TPM_LOCALITY_0;
-
-            // Lookup i2c info for the TPM
-            l_err = TPMDD::tpmReadAttributes(pTpm,
-                                             tpmInfo, locality);
-            if( NULL != l_err )
-            {
-                // Unable to get info, so we skip
-                delete l_err;
-                continue;
-            }
-            // ignore the devices that aren't on the current target
-            if( tpmInfo.i2cTarget != i_i2cMaster )
-            {
-                continue;
-            }
-            // skip the devices that are on a different engine
-            else if( tpmInfo.engine != i2cm->engine )
-            {
-                continue;
-            }
-
-            l_currentDI.masterChip = tpmInfo.i2cTarget;
-            l_currentDI.engine = tpmInfo.engine;
-            l_currentDI.masterPort = tpmInfo.port;
-            l_currentDI.addr = tpmInfo.devAddr;
-            l_currentDI.slavePort = 0xFF;
-            l_currentDI.busFreqKhz = (tpmInfo.busFreq) / 1000;
-            l_currentDI.deviceType =
-                    TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
-            l_currentDI.devicePurpose = TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
-
-            o_deviceInfo.push_back(l_currentDI);
-
-        } //end of tpm iter
-#endif
-
-    } //end of i2cm
-
-// @TODO RTC 173541: Re-enable
-// #if CONFIG_INCLUDE_XML_OPENPOWER
-#if 0
-    TARGETING::Target * sys = NULL;
-    TARGETING::targetService().getTopLevelTarget(sys);
-
-    //need to get all targets here, and pull it out.
-    TARGETING::TargetHandleList pChildList;
-
-    TARGETING::targetService().getAssociated(pChildList, sys,
-                    TARGETING::TargetService::CHILD,
-                    TARGETING::TargetService::ALL);
-    pChildList.push_back(sys);
-
-    for(TARGETING::TargetHandleList::const_iterator childItr =
-        pChildList.begin();
-        childItr != pChildList.end(); ++childItr)
-    {
-        TARGETING::ATTR_HDAT_I2C_ENGINE_type l_i2cEngine;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_ENGINE>(l_i2cEngine);
-
-        if(l_i2cEngine[0] == 0)
-        {
+            // The arrays are non-existent or empty
             continue;
         }
 
-        TARGETING::ATTR_HDAT_I2C_MASTER_PORT_type l_i2cMasterPort;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_MASTER_PORT>(
-                                                    l_i2cMasterPort);
+        // Assume all required attributes are present from this point
+        TARGETING::ATTR_HDAT_I2C_ENGINE_type l_i2cEngine = {0};
+        present = pChipTarget->tryGetAttr<TARGETING::ATTR_HDAT_I2C_ENGINE>(
+            l_i2cEngine);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_ENGINE "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
+        TARGETING::ATTR_HDAT_I2C_MASTER_PORT_type l_i2cMasterPort = {0};
+        present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_MASTER_PORT>(l_i2cMasterPort);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_MASTER_PORT "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
         TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE_type l_i2cDevType;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE>(
-                                                    l_i2cDevType);
-        TARGETING::ATTR_HDAT_I2C_ADDR_type l_i2cAddr;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_ADDR>(l_i2cAddr);
-        TARGETING::ATTR_HDAT_I2C_SLAVE_PORT_type l_i2cSlavePort;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_SLAVE_PORT>(
-                                                    l_i2cSlavePort);
-        TARGETING::ATTR_HDAT_I2C_BUS_FREQ_type l_i2cBusFreq;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_BUS_FREQ>(
-                                                    l_i2cBusFreq);
+        memset(&l_i2cDevType,TARGETING::HDAT_I2C_DEVICE_TYPE_UNKNOWN,
+               sizeof(l_i2cDevType));
+        present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_DEVICE_TYPE>(l_i2cDevType);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_DEVICE_TYPE "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
+        TARGETING::ATTR_HDAT_I2C_ADDR_type l_i2cAddr = {0};
+        present = pChipTarget->tryGetAttr<TARGETING::ATTR_HDAT_I2C_ADDR>(
+            l_i2cAddr);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_ADDR "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
+        TARGETING::ATTR_HDAT_I2C_SLAVE_PORT_type l_i2cSlavePort = {0};
+        present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_SLAVE_PORT>(l_i2cSlavePort);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_SLAVE_PORT "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
+        TARGETING::ATTR_HDAT_I2C_BUS_FREQ_type l_i2cBusFreq = {0};
+        present = pChipTarget->tryGetAttr<TARGETING::ATTR_HDAT_I2C_BUS_FREQ>(
+            l_i2cBusFreq);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_BUS_FREQ "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
         TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE_type l_i2cDevPurpose;
-        (*childItr)->tryGetAttr<TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE>(
-                                                    l_i2cDevPurpose);
+        memset(&l_i2cDevPurpose,TARGETING::HDAT_I2C_DEVICE_PURPOSE_UNKNOWN,
+               sizeof(l_i2cDevPurpose));
+        present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_DEVICE_PURPOSE>(l_i2cDevPurpose);
+        assert(present,"Target 0x%08X does not have "
+            "ATTR_HDAT_I2C_DEVICE_PURPOSE attribute",
+            TARGETING::get_huid(pChipTarget));
 
-        uint8_t l_arrayLength =
-                (*childItr)->getAttr<TARGETING::ATTR_HDAT_I2C_ELEMENTS>();
+        for(TARGETING::ATTR_HDAT_I2C_ELEMENTS_type l_idx=0;
+            l_idx < l_arrayLength;
+            ++l_idx)
+        {
+            if(   (   pChipTarget->getAttr<TARGETING::ATTR_TYPE>()
+                   == TARGETING::TYPE_PROC)
+               && (l_i2cEngine[l_idx] == 0))
+            {
+                // We never expose proc engine 0 devices to host, since they are
+                // owned by SBE
+                continue;
+            }
 
-        if(l_arrayLength == 0)
-        {
-            //The arrays are empty
-            continue;
-        }
-        for(uint8_t l_idx=0;
-                    l_idx < l_arrayLength;
-                    l_idx++)
-        {
-            DeviceInfo_t l_currentDevice;
-            l_currentDevice.masterChip = (*childItr);
+            if(l_i2cAddr[l_idx] == UINT8_MAX)
+            {
+                continue;
+            }
+
+            DeviceInfo_t l_currentDevice = {nullptr};
+            l_currentDevice.assocNode = assocNode;
+            l_currentDevice.assocProc = assocProc;
+            l_currentDevice.masterChip = pChipTarget;
             l_currentDevice.engine = l_i2cEngine[l_idx];
             l_currentDevice.masterPort = l_i2cMasterPort[l_idx];
             l_currentDevice.addr = l_i2cAddr[l_idx];
             l_currentDevice.slavePort = l_i2cSlavePort[l_idx];
-            l_currentDevice.busFreqKhz = l_i2cBusFreq[l_idx] / 1000;
+            l_currentDevice.busFreqKhz = l_i2cBusFreq[l_idx]
+                / FREQ_CONVERSION::HZ_PER_KHZ;
             l_currentDevice.deviceType = l_i2cDevType[l_idx];
             l_currentDevice.devicePurpose = l_i2cDevPurpose[l_idx];
 
             o_deviceInfo.push_back(l_currentDevice);
         }
-    }
 #endif
+
+    } //end of per chip loop
+
+    // Order I2C devices by chip, engine, port, address, slave port
+    std::sort(o_deviceInfo.begin(), o_deviceInfo.end(),
+        byI2cDeviceOrder);
+
+    // Move logical duplicates to end
+    std::vector<DeviceInfo_t>::iterator
+        pInvalidEntries = std::unique(
+            o_deviceInfo.begin(),
+            o_deviceInfo.end(),
+            areI2cDevicesLogicallyEqual);
+
+    // Erase the duplicates
+    o_deviceInfo.erase(pInvalidEntries,o_deviceInfo.end());
 
     TRACFCOMP(g_trac_i2c,"<<getDeviceInfo");
     return;
 };
-
 
 /**
  * @brief Utility Function to capture error log user data consisting of

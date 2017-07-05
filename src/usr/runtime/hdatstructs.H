@@ -221,6 +221,17 @@ struct hdatHDIFDataArray_t
   uint32_t hdatActSize;    // 0x000C Actual size of an array entry
 } __attribute__ ((packed));
 
+/** @brief Type definition for a versioned data array header. Used when internal
+ *         data is an array and the array data must be versioned
+ */
+struct hdatHDIFVersionedDataArray_t
+{
+  uint32_t hdatOffset;     // 0x0000 Offset to array from this structure
+  uint32_t hdatArrayCnt;   // 0x0004 Number of array entries
+  uint32_t hdatAllocSize;  // 0x0008 Size of allocated space for array entry
+  uint32_t hdatActSize;    // 0x000C Actual size of an array entry
+  uint32_t hdatVersion;    // 0x0010 Version of the array instance format
+} __attribute__ ((packed));
 
 // Originally copied from FipS:src/hdat/fsp/hdatspira.H
 /** @brief The SPIRA is composed of an HDIF header and an array.  Each array

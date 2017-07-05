@@ -230,13 +230,15 @@ struct DeviceInfo_t
     uint8_t slavePort; //< I2C Slave Port. 0xFF if N/A
     uint16_t busFreqKhz; //< Bus speed in KHz
     uint8_t devicePurpose; //< Slave device purpose (from enum)
+    TARGETING::ATTR_ORDINAL_ID_type assocNode; //< Upstream node's ordinal ID
+    TARGETING::ATTR_POSITION_type assocProc; //< Upstream proc's position
 };
 
 /**
  * Retrieve some information about I2C devices that the Host
  * needs to know about.
  *
- * @param[in]   i_i2cMaster  I2C master to query, pass in NULL
+ * @param[in]   i_i2cMaster  I2C master to query, pass in nullptr
  *                           to get a system-wide list
  * @param[out]  o_deviceInfo  list of I2C device structures
  *
