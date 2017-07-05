@@ -297,6 +297,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     int rc = 0;
     uint32_t       torMagic;
     TorHeader_t*   torHeader;
+#ifdef TORV3_SUPPORT
     TorDdBlock_t*  torDdBlock;
     uint32_t ddLevelCount = 0;
     uint32_t ddLevelOffset = 0;
@@ -304,7 +305,8 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     void*    ddBlockStart = NULL;
     uint8_t  bDdCheck = 0;
     uint32_t ddLevel = 0;
-
+#endif
+    uint8_t* postHeaderStart = (uint8_t*)i_ringSection + sizeof(TorHeader_t);
 
     if (i_dbgl > 1)
     {
@@ -314,7 +316,9 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     torHeader = (TorHeader_t*)i_ringSection;
     torMagic = be32toh(torHeader->magic);
 
-    if (torMagic == TOR_MAGIC_HW)
+#ifdef TORV3_SUPPORT
+
+    if (torMagic == TOR_MAGIC_HW && torHeader->version < 5)
     {
 
         ddLevelCount = torHeader->numDdLevels;
@@ -374,14 +378,20 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     }
     else
     {
+#endif
+
         if ( i_ddLevel != torHeader->ddLevel &&
              i_ddLevel != UNDEFINED_DD_LEVEL )
         {
-            MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL\n",
-                   i_ddLevel, torHeader->ddLevel);
+            MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL (=0x%x) \n",
+                   i_ddLevel, torHeader->ddLevel, UNDEFINED_DD_LEVEL);
             return TOR_DD_LEVEL_NOT_FOUND;
         }
+
+#ifdef TORV3_SUPPORT
     }
+
+#endif
 
     if ( ( i_ringBlockType == GET_SINGLE_RING ) ||   // All Magics supported for GET
          ( i_ringBlockType == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
@@ -389,16 +399,32 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
              torMagic == TOR_MAGIC_CME ||
              torMagic == TOR_MAGIC_SGPE ) ) )
     {
+        void* l_ringSection = i_ringSection;
+
         if ( torMagic == TOR_MAGIC_HW )
         {
-            // Update i_ringSection:
-            // Extract the offset to the specified ppeType's ring section TOR header and update i_ringSection
+            // Update l_ringSection:
+            // Extract the offset to the specified ppeType's ring section TOR header and update l_ringSection
             TorPpeBlock_t*  torPpeBlock;
-            torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
-            i_ringSection = (void*)((uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset));
+#ifdef TORV3_SUPPORT
+
+            if (torHeader->version < 5)
+            {
+                torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
+                l_ringSection = (void*)((uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset));
+            }
+            else
+            {
+#endif
+                torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
+                l_ringSection = (void*)(postHeaderStart + be32toh(torPpeBlock->offset));
+#ifdef TORV3_SUPPORT
+            }
+
+#endif
         }
 
-        rc =  get_ring_from_ring_section( i_ringSection,
+        rc =  get_ring_from_ring_section( l_ringSection,
                                           i_ringId,
                                           i_ringVariant,
                                           io_instanceId,
@@ -410,8 +436,11 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 
         return rc;
     }
+
+#ifdef TORV3_SUPPORT
     else if ( i_ringBlockType == GET_DD_LEVEL_RINGS &&
-              torMagic == TOR_MAGIC_HW )
+              torMagic == TOR_MAGIC_HW &&
+              torHeader->version < 5 )
     {
         if (io_ringBlockSize >= ddBlockSize)
         {
@@ -438,6 +467,8 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             return TOR_BUFFER_TOO_SMALL;
         }
     }
+
+#endif
     else if ( i_ringBlockType == GET_PPE_LEVEL_RINGS &&
               torMagic == TOR_MAGIC_HW &&
               (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE) )
@@ -445,14 +476,42 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         TorPpeBlock_t*  torPpeBlock;
         uint32_t ppeSize;
 
-        torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
+#ifdef TORV3_SUPPORT
+
+        if (torHeader->version < 5)
+        {
+            torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
+        }
+        else
+        {
+#endif
+            torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
+#ifdef TORV3_SUPPORT
+        }
+
+#endif
         ppeSize = be32toh(torPpeBlock->size);
 
         if (io_ringBlockSize >= ppeSize)
         {
-            memcpy( (uint8_t*)(*io_ringBlockPtr),
-                    (uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset),
-                    ppeSize );
+#ifdef TORV3_SUPPORT
+
+            if (torHeader->version < 5)
+            {
+                memcpy( (uint8_t*)(*io_ringBlockPtr),
+                        (uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset),
+                        ppeSize );
+            }
+            else
+            {
+#endif
+                memcpy( (uint8_t*)(*io_ringBlockPtr),
+                        postHeaderStart + be32toh(torPpeBlock->offset),
+                        ppeSize );
+#ifdef TORV3_SUPPORT
+            }
+
+#endif
             io_ringBlockSize = ppeSize;
 
             return TOR_SUCCESS;
@@ -572,7 +631,10 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
 
     if ( torMagic == TOR_MAGIC_HW && chipType != CT_CEN )
     {
-        if (i_ppeType == NUM_PPE_TYPES)
+#ifdef TORV3_SUPPORT
+
+        if ( i_ppeType == NUM_PPE_TYPES &&
+             torHeader->version < 5 )
         {
             // Get DD level block of rings
             rc = tor_access_ring( i_ringSection,
@@ -587,27 +649,28 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
                                   i_ringName,
                                   i_dbgl );
         }
-        else if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
-        {
-            // Get block of rings specific to a PPE type
-            rc = tor_access_ring( i_ringSection,
-                                  UNDEFINED_RING_ID,
-                                  i_ddLevel,
-                                  i_ppeType,
-                                  i_ringVariant,
-                                  l_instanceId,
-                                  GET_PPE_LEVEL_RINGS,
-                                  io_ringBlockPtr,
-                                  io_ringBlockSize,
-                                  i_ringName,
-                                  i_dbgl );
-
-        }
         else
-        {
-            MY_ERR("tor_get_block_of_rings(): Ambiguous API parameters\n");
-            return TOR_AMBIGUOUS_API_PARMS;
-        }
+#endif
+            if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
+            {
+                // Get specific PPE block of rings
+                rc = tor_access_ring( i_ringSection,
+                                      UNDEFINED_RING_ID,
+                                      i_ddLevel,
+                                      i_ppeType,
+                                      i_ringVariant,
+                                      l_instanceId,
+                                      GET_PPE_LEVEL_RINGS,
+                                      io_ringBlockPtr,
+                                      io_ringBlockSize,
+                                      i_ringName,
+                                      i_dbgl );
+            }
+            else
+            {
+                MY_ERR("tor_get_block_of_rings(): Ambiguous API parameters\n");
+                return TOR_AMBIGUOUS_API_PARMS;
+            }
     }
     else
     {

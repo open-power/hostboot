@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,9 +29,11 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define   TORV3_SUPPORT
 
-////////////////////////////////////////////////////////////////////////////////
-// Declare assumptions - Begin
+///////////////////////////////////////////////////////////////////////////////
+//                     Declare assumptions - Begin                           //
+//                                                                           //
 //
 
 // Various data type defs for enums. Serves following purposes:
@@ -48,40 +50,49 @@ typedef uint8_t   ChipType_t;       // Type for ChipType enum
 typedef uint8_t   RingType_t;       // Type for RingType enum
 typedef uint8_t   RingVariant_t;    // Type for RingVariant enum
 typedef uint32_t  TorCpltOffset_t;  // Type for offset value to chiplet's CMN or INST section
+typedef uint8_t   myBoolean_t;      // false:0, true:1, undefined:UNDEFINED_BOOLEAN
 
 #define  UNDEFINED_RING_ID      (RingId_t)0xffff
 #define  INVALID_RING_TYPE      (RingType_t)0xff
 #define  INVALID_CHIPLET_TYPE   (ChipletType_t)0xff
+#define  UNDEFINED_PPE_TYPE     (PpeType_t)0xff
 #define  UNDEFINED_CHIP_TYPE    (ChipType_t)0xff
 #define  MAX_TOR_RING_OFFSET    (uint16_t)(256*256-1) // Max val of uint16
 #define  MAX_RING_NAME_LENGTH   (uint8_t)50
 #define  UNDEFINED_DD_LEVEL     (uint8_t)0xff
+#define  UNDEFINED_BOOLEAN      (myBoolean_t)0xff
 
-//
-// Declare assumptions - End
+//                                                                           //
+//                     Declare assumptions - End                             //
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// TOR layout definitions - Begin
-//
+//                     TOR layout definitions - Begin                        //
+//                                                                           //
 
 //
 // TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
 //
 typedef struct
 {
-    uint32_t   magic;
-    uint8_t    version;
+    uint32_t   magic;       // =TOR_MAGIC_xyz
+    uint8_t    version;     // =TOR_VERSION
     ChipType_t chipType;    // Value from ChipType enum
+#ifdef TORV3_SUPPORT
     uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
     uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
-    uint32_t   size;        // Size of the TOR ringSection.
+#else
+    uint8_t    ddLevel;     // Actual DD level of ringSection
+    uint8_t    undefined;
+#endif
+    uint32_t   size;        // Size of ringSection.
 } TorHeader_t;
 
 //
 // Subsequent TOR fields (listed in order they appear in TOR ringSections)
 //
+#ifdef TORV3_SUPPORT
 typedef struct
 {
     uint32_t offset;
@@ -89,6 +100,7 @@ typedef struct
     uint8_t  ddLevel;
     uint8_t  reserved[3];
 } TorDdBlock_t;
+#endif
 
 typedef struct
 {
@@ -104,16 +116,19 @@ typedef struct
 
 typedef uint16_t TorRingOffset_t;  // Offset value to actual ring
 
-//
-// TOR layout definitions - End
+//                                                                           //
+//                     TOR layout definitions - End                          //
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// Key TOR constants - Begin
-//
+//                     Key TOR constants - Begin                             //
+//                                                                           //
 
-#define  TOR_VERSION  4
+//#define TOR_VERSION  1  // Initial version. Large RS4 header.
+//#define TOR_VERSION  2  // Reduced RS4 header.
+//#define TOR_VERSION  3  // Added TOR magic header.
+#define TOR_VERSION  4  // TOR API code restructuring.
 
 // TOR Magic values for top-level TOR ringSection and sub-ringSections
 enum TorMagicNum
@@ -128,8 +143,8 @@ enum TorMagicNum
     TOR_MAGIC_CEN   = (uint32_t)0x544F524E,   // "TORN"
 };
 
-//
-// Key TOR constants - End
+//                                                                           //
+//                     Key TOR constants - End                               //
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -192,9 +207,9 @@ typedef struct
 //   order with which they appear in the HW image's .rings section.
 enum PpeType
 {
-    PT_SBE           = 0x00,
-    PT_CME           = 0x01,
-    PT_SGPE          = 0x02,
+    PT_SBE        = 0x00,
+    PT_CME        = 0x01,
+    PT_SGPE       = 0x02,
     NUM_PPE_TYPES = 0x03
 };
 

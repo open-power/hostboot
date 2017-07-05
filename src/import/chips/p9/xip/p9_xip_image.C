@@ -45,12 +45,10 @@
     #include <stdint.h>
     #include <endian.h>
 #endif
-#ifndef __PPE__
-    #include "p9_dd_container.h"
-#endif
 #include <stdlib.h>
 #include <string.h>
 #include "p9_xip_image.h"
+#include "p9_dd_container.h"
 
 ////////////////////////////////////////////////////////////////////////////
 // Local Functions
@@ -164,7 +162,7 @@ dumpSectionTable(const void* i_image)
 
     for (i = 0; i < P9_XIP_SECTIONS; i++)
     {
-        rc = p9_xip_get_section(i_image, i, &section);
+        rc = p9_xip_get_section(i_image, i, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -615,7 +613,7 @@ xipImage2Section(const void* i_image,
 
         for (sectionId = 0; sectionId < P9_XIP_SECTIONS; sectionId++)
         {
-            rc = p9_xip_get_section(i_image, sectionId, &section);
+            rc = p9_xip_get_section(i_image, sectionId, &section, UNDEFINED_DD_LEVEL);
 
             if (rc)
             {
@@ -687,7 +685,7 @@ xipDeleteLastSection(void* io_image,
             break;
         }
 
-        rc = p9_xip_get_section(io_image, final, &section);
+        rc = p9_xip_get_section(io_image, final, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -720,7 +718,7 @@ p9_xip_get_toc(void* i_image,
 
     do
     {
-        rc = p9_xip_get_section(i_image, P9_XIP_SECTION_TOC, &tocSection);
+        rc = p9_xip_get_section(i_image, P9_XIP_SECTION_TOC, &tocSection, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -728,7 +726,7 @@ p9_xip_get_toc(void* i_image,
         }
 
         rc = p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS,
-                                &stringsSection);
+                                &stringsSection, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -1174,7 +1172,7 @@ xipDecodeToc(void* i_image,
         o_item->iv_type = hostToc.iv_type;
         o_item->iv_elements = hostToc.iv_elements;
 
-        p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS, &stringsSection);
+        p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS, &stringsSection, UNDEFINED_DD_LEVEL);
         o_item->iv_id =
             (char*)i_image + stringsSection.iv_offset + hostToc.iv_id;
 
@@ -1184,7 +1182,7 @@ xipDecodeToc(void* i_image,
         // even though the section has been removed from the image, so this
         // case needs to be covered.
 
-        rc = p9_xip_get_section(i_image, hostToc.iv_section, &dataSection);
+        rc = p9_xip_get_section(i_image, hostToc.iv_section, &dataSection, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -1237,7 +1235,7 @@ p9_xip_decode_toc_dump(void* i_image, void* i_dump,
     o_item->iv_type = hostToc.iv_type;
     o_item->iv_elements = hostToc.iv_elements;
 
-    p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS, &stringsSection);
+    p9_xip_get_section(i_image, P9_XIP_SECTION_STRINGS, &stringsSection, UNDEFINED_DD_LEVEL);
     o_item->iv_id =
         (char*)i_image + stringsSection.iv_offset + hostToc.iv_id;
 
@@ -1355,7 +1353,7 @@ xipGetFixedToc(void* io_image,
     int rc;
     P9XipSection section;
 
-    rc = p9_xip_get_section(io_image, P9_XIP_SECTION_FIXED_TOC, &section);
+    rc = p9_xip_get_section(io_image, P9_XIP_SECTION_FIXED_TOC, &section, UNDEFINED_DD_LEVEL);
 
     if (!rc)
     {
@@ -1429,7 +1427,7 @@ xipFixedFind(void* i_image, const char* i_id, P9XipItem* o_item)
         o_item->iv_type = toc->iv_type;
         o_item->iv_elements = toc->iv_elements;
 
-        rc = p9_xip_get_section(i_image, P9_XIP_SECTION_FIXED, &fixedSection);
+        rc = p9_xip_get_section(i_image, P9_XIP_SECTION_FIXED, &fixedSection, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -1541,7 +1539,7 @@ xipHeaderFind(void* i_image, const char* i_id, P9XipItem* o_item)
         o_item->iv_elements = 1; /* True for now... */
 
         rc = p9_xip_get_section(i_image, P9_XIP_SECTION_HEADER,
-                                &headerSection);
+                                &headerSection, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -1982,7 +1980,7 @@ p9_xip_normalize(void* io_image)
 
         for (i = 0; i < P9_XIP_SECTIONS; i++)
         {
-            rc = p9_xip_get_section(io_image, i, &section);
+            rc = p9_xip_get_section(io_image, i, &section, UNDEFINED_DD_LEVEL);
 
             if (rc)
             {
@@ -2024,27 +2022,6 @@ p9_xip_image_size(void* io_image, uint32_t* o_size)
     return rc;
 }
 
-
-#if defined(__PPE__)
-int
-p9_xip_get_section(const void* i_image,
-                   const int i_sectionId,
-                   P9XipSection* o_hostSection)
-{
-    int rc;
-    P9XipSection* imageSection;
-
-    rc = xipGetSectionPointer(i_image, i_sectionId, &imageSection);
-
-    if (!rc)
-    {
-        xipTranslateSection(o_hostSection, imageSection);
-    }
-
-    return rc;
-}
-
-#else
 
 int
 p9_xip_get_section(const void* i_image,
@@ -2117,7 +2094,6 @@ p9_xip_get_section(const void* i_image,
 
     return rc;
 }
-#endif
 
 
 // If the 'big' TOC is not present, search the mini-TOCs that only index the
@@ -2623,7 +2599,7 @@ p9_xip_delete_section(void* io_image,
         // the final section of the image. Update the sizes and re-establish
         // the final image alignment.
 
-        rc = p9_xip_get_section(io_image, i_sectionId, &section);
+        rc = p9_xip_get_section(io_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -2722,7 +2698,7 @@ p9_xip_delete_section(void* io_image,
             {
 
                 orderIdx--;
-                rc = p9_xip_get_section(o_imageBuf, sectionOrder[orderIdx], &section);
+                rc = p9_xip_get_section(o_imageBuf, sectionOrder[orderIdx], &section, UNDEFINED_DD_LEVEL);
 
                 if (rc)
                 {
@@ -2788,7 +2764,7 @@ p9_xip_duplicate_section(const void* i_image,
             break;
         }
 
-        rc = p9_xip_get_section(i_image, i_sectionId, &section);
+        rc = p9_xip_get_section(i_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -2865,7 +2841,7 @@ p9_xip_append(void* io_image,
             break;
         }
 
-        rc = p9_xip_get_section(io_image, i_sectionId, &section);
+        rc = p9_xip_get_section(io_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -3016,7 +2992,7 @@ p9_xip_section2image(const void* i_image,
             break;
         }
 
-        rc = p9_xip_get_section(i_image, i_sectionId, &section);
+        rc = p9_xip_get_section(i_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
 
         if (rc)
         {
@@ -3257,33 +3233,28 @@ p9_xip_map_toc(void* io_image,
 }
 
 
-#if !defined(__PPE__)
 //
 // Inform caller if specified sectionId has DD support
 //
 int p9_xip_dd_section_support(const void* i_image,
                               const int i_sectionId,
-                              bool& o_bDdSupport)
+                              myBoolean_t* o_bDdSupport)
 {
     int rc;
     P9XipSection section;
 
-    rc = p9_xip_get_section(i_image, i_sectionId, &section);
+    rc = p9_xip_get_section(i_image, i_sectionId, &section, UNDEFINED_DD_LEVEL);
 
     if (!rc)
     {
-        if (section.iv_ddSupport == 0 || section.iv_ddSupport == 1)
-        {
-            o_bDdSupport = (bool)section.iv_ddSupport;
-        }
-        else
+        *o_bDdSupport = (myBoolean_t)section.iv_ddSupport;
+
+        if (section.iv_ddSupport != true && section.iv_ddSupport != false)
         {
             // iv_ddSupport is uninitialized or corrupted
-            o_bDdSupport = false;
             rc = P9_XIP_IMAGE_ERROR;
         }
     }
 
     return rc;
 }
-#endif

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -219,6 +219,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_XIP_GET_SECTION_ERROR</rc>
+    <description>p9_xip_get_section() failed getting an XIP section or a sub-section within an XIP section</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_RC</ffdc>
+    <ffdc>DDLEVEL</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_XIP_API_MISC_ERROR</rc>
     <description>An XIP API call failed with a non-categorized error</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -234,6 +247,7 @@
     <rc>RC_XIPC_EMPTY_RING_SECTION</rc>
     <description>The ring section size is zero. No TOR. Can't append rings</description>
     <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>DDLEVEL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

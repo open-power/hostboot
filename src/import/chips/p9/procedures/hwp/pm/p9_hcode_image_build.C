@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -681,9 +681,9 @@ uint32_t getXipImageSectn( uint8_t * i_srcPtr, uint8_t i_secId, uint8_t i_ecLeve
     uint32_t rc = IMG_BUILD_SUCCESS;
     do
     {
-        bool ecLvlSupported = false;
+        myBoolean_t ecLvlSupported = UNDEFINED_BOOLEAN;
 
-        rc = p9_xip_dd_section_support( i_srcPtr, i_secId, ecLvlSupported );
+        rc = p9_xip_dd_section_support( i_srcPtr, i_secId, &ecLvlSupported );
 
         if( rc )
         {
