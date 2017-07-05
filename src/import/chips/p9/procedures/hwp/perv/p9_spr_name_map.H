@@ -151,7 +151,7 @@ typedef std::map<std::string, SPRMapEntry>::iterator SPR_MAP_IT;
     _op_(HSRR1    ,315 , ECP.SD.T<??T>_HSRR1                              ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
     _op_(TFMR     ,317 , EXP.EC.CC.PCC<??C>.COMMON.TFC.T<??T>_TFMR        ,FLAG_READ_WRITE ,SPR_PARTIAL_SHARED ,64)\
     _op_(LPCR     ,318 , ECP.LS.T<??T>_LPCR_MASTER                        ,FLAG_READ_WRITE ,SPR_PER_PT         ,64)\
-    _op_(LPIDR    ,319 , ECP.LS.T<??T>_LPIDR_MASTER                       ,FLAG_READ_WRITE ,SPR_PER_LPAR_PT    ,64)\
+    _op_(LPIDR    ,319 , ECP.LS.T<??T>_LPIDR                              ,FLAG_READ_WRITE ,SPR_PER_LPAR_PT    ,64)\
     _op_(HMER     ,336 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.V<??T>_HMER ,FLAG_READ_WRITE ,SPR_PER_VT         ,64)\
     _op_(HMEER    ,337 , EXP.EC.CC.PCC<??C>.COMMON.SPR_COMMON.HMEER       ,FLAG_READ_WRITE ,SPR_SHARED         ,64)\
     _op_(PCR      ,338 , ECP.IFU.T<??T>_PCR                               ,FLAG_READ_WRITE ,SPR_PER_LPAR_PT    ,64)\
