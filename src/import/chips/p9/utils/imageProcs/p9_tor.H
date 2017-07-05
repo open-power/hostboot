@@ -30,10 +30,12 @@
 // Different options to extract data using tor_access_ring API
 typedef enum RingBlockType
 {
-    GET_SINGLE_RING      = 0x00,
-    GET_DD_LEVEL_RINGS   = 0x01,
-    GET_PPE_LEVEL_RINGS  = 0x02,
-    PUT_SINGLE_RING      = 0x03
+    GET_SINGLE_RING     = 0x00,
+#ifdef TORV3_SUPPORT
+    GET_DD_LEVEL_RINGS  = 0x01,
+#endif
+    GET_PPE_LEVEL_RINGS = 0x02,
+    PUT_SINGLE_RING     = 0x03
 } RingBlockType_t;
 
 ///
@@ -67,7 +69,6 @@ typedef enum RingBlockType
 /// \param[in] i_RingVariant  A enum to indicate type of operation performed
 /// by TOR API Option:
 /// GET_SINGLE_RING indicates to extract single ring container.
-/// GET_DD_LEVEL_RINGS indicates to extract specific DD level TOR and rings
 /// GET_PPE_LEVEL_RINGS indcates to extract specific PPE level TOR and rings
 /// PUT_SINGLE_RING indicates to extract ring absolute memory addres for
 /// ringTorSlot location
@@ -96,13 +97,6 @@ typedef enum RingBlockType
 /// returns chiplet number while accessing common ring. On return,
 /// \a io_ringBlockPtr contains RS4 container \a io_ringBlockSize contains size
 /// of data copied into io_ringBlockPtr. \a o_ringName returns ring string name.
-///
-/// GET_DD_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
-/// buffer based on \a i_ddLevel which gives dd spec (used only for HW image
-/// /optional  for other image) On return, \a io_ringBlockPtr contains DD level
-/// specific ring section and \a io_ringBlockSize contains size of the data
-/// copied into io_ringBlockPtr. \a Other params are optional.
-/// This ringVariant works on HW image.
 ///
 /// GET_PPE_LEVEL_RINGS (\a i_ringVariant) - traverse on \a i_ringSection
 /// buffer based on \a i_ppeType which gives ppe type info  and \a i_ddLevel which
