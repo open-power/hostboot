@@ -707,10 +707,10 @@ p9_xip_image_size(void* i_image, uint32_t* o_size);
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
-#if defined(__PPE__)
-                   P9XipSection* o_hostSection);
-#else
                    P9XipSection* o_hostSection,
+#if defined(__PPE__)
+                   uint8_t i_ddLevel);
+#else
                    uint8_t i_ddLevel=UNDEFINED_DD_LEVEL);
 #endif
 
@@ -1388,12 +1388,10 @@ p9_xip_get_toc(void* i_image,
 /// \retval 0 Success
 ///
 /// \retval non-0 See \ref p9_xip_image_errors
-#if !defined(__PPE__)
 int
 p9_xip_dd_section_support(const void* i_image,
                           const int i_sectionId,
-                          bool& o_bDdSupport);
-#endif
+                          myBoolean_t* o_bDdSupport);
 
 
 /// \brief Decode a TOC entry from dump file
