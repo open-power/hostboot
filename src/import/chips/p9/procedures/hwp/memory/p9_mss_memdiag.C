@@ -83,9 +83,10 @@ extern "C"
             // assert if we have exceeded the allowed repairs
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_mca))
             {
+                // Note: using MCA here as the scoms used to collect FFDC data fail on the DIMM level target
                 FAPI_ASSERT( !(l_repairs_exceeded.getBit(mss::index(l_dimm))),
-                             fapi2::MSS_MEMDIAGS_REPAIRS_EXCEEDED().set_TARGET(l_dimm),
-                             "p9_mss_memdiag bad bit repairs exceeded %s", mss::c_str(l_dimm) );
+                             fapi2::MSS_MEMDIAGS_REPAIRS_EXCEEDED().set_TARGET(l_mca),
+                             "p9_mss_memdiag bad bit repairs exceeded %s", mss::c_str(l_mca) );
             }
 
 #ifdef __HOSTBOOT_MODULE
