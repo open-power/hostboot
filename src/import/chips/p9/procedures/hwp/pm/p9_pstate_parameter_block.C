@@ -296,13 +296,22 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         if (!present_chiplets)
         {
-            FAPI_ERR("**** ERROR : There are eq chiplets present");
+            FAPI_IMP("**** WARNING : There are no EQ chiplets present which means there is no valid #V VPD");
+            FAPI_IMP("**** WARNING : Pstates and all related functions will NOT be enabled.");
+            l_state.iv_pstates_enabled = false;
 
-            FAPI_ASSERT(false,
-                        fapi2::PSTATE_PB_NO_PRESENT_CHIPLETS_ERROR()
-                        .set_CHIP_TARGET(i_target)
-                        .set_PRESENT_CHIPLETS(present_chiplets),
-                        "No eq chiplets are present for a give proc target");
+//             FAPI_ASSERT(false,
+//                         fapi2::PSTATE_PB_NO_PRESENT_CHIPLETS_ERROR()
+//                         .set_CHIP_TARGET(i_target)
+//                         .set_PRESENT_CHIPLETS(present_chiplets),
+//                         "No eq chiplets are present for a give proc target");
+
+            // Set the io_size to 0 so that memory allocation issues won't be
+            // detected by the caller.
+
+            io_size = 0;
+
+            break;
         }
 
         // ---------------------------------------------
@@ -346,7 +355,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                                    fapi2::PSTATE_PB_FUNCTION_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                    .set_CHIP_TARGET(i_target)
                                    .set_FAPI_RC(l_rc),
-                                   "Pstate Parameter Block proc_get_mvpd_iddq funciton failed");
+                                   "Pstate Parameter Block proc_get_mvpd_iddq function failed");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
         }
