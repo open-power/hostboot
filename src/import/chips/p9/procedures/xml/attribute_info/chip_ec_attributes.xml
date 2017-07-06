@@ -1377,24 +1377,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW371141_HW371628</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      DD1 only: HW371141 lvext causes unforseen cgc lockouts, bad for performance
-                HW371628 coherency hole in LVEXT also found must turn off LVEXT.
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW370687</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
