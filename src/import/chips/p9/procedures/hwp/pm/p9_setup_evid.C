@@ -214,112 +214,123 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS_UOHM, i_target, attrs->r_distloss_vcs_uohm);
     DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS_UV,  i_target, attrs->vrm_voffset_vcs_uv);
 
-    //We only wish to compute voltage setting defaults if the action
-    //inputed to the HWP tells us to
-    if(i_action == COMPUTE_VOLTAGE_SETTINGS)
+    do
     {
-        // query VPD if any of the voltage attributes are zero
-        if (!attrs->vdd_voltage_mv ||
-            !attrs->vcs_voltage_mv ||
-            !attrs->vdn_voltage_mv)
+
+        //We only wish to compute voltage setting defaults if the action
+        //inputed to the HWP tells us to
+        if(i_action == COMPUTE_VOLTAGE_SETTINGS)
         {
-            uint8_t l_poundv_bucketId = 0;
-            fapi2::voltageBucketData_t l_poundv_data;
-            // Get #V data from MVPD for VDD/VDN and VCS voltage values
-            FAPI_TRY(proc_get_mvpd_data(i_target,
-                                        attr_mvpd_data,
-                                        &valid_pdv_points,
-                                        &present_chiplets,
-                                        l_poundv_bucketId,
-                                        &l_poundv_data,
-                                        &l_state          ));
-
-            // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
-            if (attrs->vdd_voltage_mv)
+            // query VPD if any of the voltage attributes are zero
+            if (!attrs->vdd_voltage_mv ||
+                !attrs->vcs_voltage_mv ||
+                !attrs->vdn_voltage_mv)
             {
-                FAPI_INF("VDD boot voltage override set.");
+                uint8_t l_poundv_bucketId = 0;
+                fapi2::voltageBucketData_t l_poundv_data;
+                // Get #V data from MVPD for VDD/VDN and VCS voltage values
+                FAPI_TRY(proc_get_mvpd_data(i_target,
+                                            attr_mvpd_data,
+                                            &valid_pdv_points,
+                                            &present_chiplets,
+                                            l_poundv_bucketId,
+                                            &l_poundv_data,
+                                            &l_state          ));
+
+                if (!present_chiplets)
+                {
+                    FAPI_IMP("**** WARNING : There are no EQ chiplets present which means there is no valid #V VPD");
+                    break;
+                }
+
+                // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
+                if (attrs->vdd_voltage_mv)
+                {
+                    FAPI_INF("VDD boot voltage override set.");
+                }
+                else
+                {
+                    FAPI_INF("VDD boot voltage override not set, using VPD value and correcting for applicable load line setting");
+                    uint32_t vpd_vdd_voltage_mv = attr_mvpd_data[POWERSAVE][VPD_PV_VDD_MV];
+                    attrs->vdd_voltage_mv =
+                        ( (vpd_vdd_voltage_mv * 1000) +                                                 // uV
+                          ( ( (attr_mvpd_data[POWERSAVE][VPD_PV_IDD_100MA] / 10) *                      // A
+                              (attrs->r_loadline_vdd_uohm + attrs->r_distloss_vdd_uohm)) +            // uohm -> A*uohm = uV
+                            attrs->vrm_voffset_vdd_uv                                    )) / 1000;  // mV
+
+                    FAPI_INF("VDD VPD voltage %d mV; Corrected voltage: %d mV; IDD: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                             vpd_vdd_voltage_mv,
+                             attrs->vdd_voltage_mv,
+                             attr_mvpd_data[POWERSAVE][VPD_PV_IDD_100MA] * 100,
+                             attrs->r_loadline_vdd_uohm,
+                             attrs->r_distloss_vdd_uohm,
+                             attrs->vrm_voffset_vdd_uv);
+
+                    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, attrs->vdd_voltage_mv),
+                             "Error from FAPI_ATTR_SET (ATTR_VDD_BOOT_VOLTAGE)");
+                }
+
+                // set VCS voltage to UltraTurbo Voltage from MVPD data (if no override)
+                if (attrs->vcs_voltage_mv)
+                {
+                    FAPI_INF("VCS boot voltage override set.");
+                }
+                else
+                {
+                    FAPI_INF("VCS boot voltage override not set, using VPD value and correcting for applicable load line setting");
+                    uint32_t vpd_vcs_voltage_mv = attr_mvpd_data[POWERSAVE][VPD_PV_VCS_MV];
+                    attrs->vcs_voltage_mv =
+                        ( (vpd_vcs_voltage_mv * 1000) +                                                 // uV
+                          ( ( (attr_mvpd_data[POWERSAVE][VPD_PV_ICS_100MA] / 10) *                      // A
+                              (attrs->r_loadline_vcs_uohm + attrs->r_distloss_vcs_uohm)) +            // uohm -> A*uohm = uV
+                            attrs->vrm_voffset_vcs_uv                                    )) / 1000;  // mV
+
+                    FAPI_INF("VCS VPD voltage %d mV; Corrected voltage: %d mV; IDD: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                             vpd_vcs_voltage_mv,
+                             attrs->vcs_voltage_mv,
+                             attr_mvpd_data[POWERSAVE][VPD_PV_ICS_100MA] * 100,
+                             attrs->r_loadline_vcs_uohm,
+                             attrs->r_distloss_vcs_uohm,
+                             attrs->vrm_voffset_vcs_uv);
+
+                    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target, attrs->vcs_voltage_mv),
+                             "Error from FAPI_ATTR_SET (ATTR_VCS_BOOT_VOLTAGE)");
+                }
+
+                // set VDN voltage to PowerSave Voltage from MVPD data (if no override)
+                if (attrs->vdn_voltage_mv)
+                {
+                    FAPI_INF("VDN boot voltage override set");
+                }
+                else
+                {
+                    FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
+                    uint32_t vpd_vdn_voltage_mv = attr_mvpd_data[POWERBUS][VPD_PV_VDN_MV];
+                    attrs->vdn_voltage_mv =
+                        ( (vpd_vdn_voltage_mv * 1000) +                                                 // uV
+                          ( ( (attr_mvpd_data[POWERBUS][VPD_PV_IDN_100MA] / 10) *                       // A
+                              (attrs->r_loadline_vdn_uohm + attrs->r_distloss_vdn_uohm)) +            // uohm -> A*uohm = uV
+                            attrs->vrm_voffset_vdn_uv                                    )) / 1000;  // mV
+
+                    FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+                             vpd_vdn_voltage_mv,
+                             attrs->vdn_voltage_mv,
+                             attr_mvpd_data[POWERBUS][VPD_PV_IDN_100MA] * 100,
+                             attrs->r_loadline_vdn_uohm,
+                             attrs->r_distloss_vdn_uohm,
+                             attrs->vrm_voffset_vdn_uv);
+
+                    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target, attrs->vdn_voltage_mv),
+                             "Error from FAPI_ATTR_SET (ATTR_VDN_BOOT_VOLTAGE)");
+                }
             }
             else
             {
-                FAPI_INF("VDD boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                uint32_t vpd_vdd_voltage_mv = attr_mvpd_data[POWERSAVE][VPD_PV_VDD_MV];
-                attrs->vdd_voltage_mv =
-                    ( (vpd_vdd_voltage_mv * 1000) +                                                 // uV
-                      ( ( (attr_mvpd_data[POWERSAVE][VPD_PV_IDD_100MA] / 10) *                      // A
-                          (attrs->r_loadline_vdd_uohm + attrs->r_distloss_vdd_uohm)) +            // uohm -> A*uohm = uV
-                        attrs->vrm_voffset_vdd_uv                                    )) / 1000;  // mV
-
-                FAPI_INF("VDD VPD voltage %d mV; Corrected voltage: %d mV; IDD: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                         vpd_vdd_voltage_mv,
-                         attrs->vdd_voltage_mv,
-                         attr_mvpd_data[POWERSAVE][VPD_PV_IDD_100MA] * 100,
-                         attrs->r_loadline_vdd_uohm,
-                         attrs->r_distloss_vdd_uohm,
-                         attrs->vrm_voffset_vdd_uv);
-
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, attrs->vdd_voltage_mv),
-                         "Error from FAPI_ATTR_SET (ATTR_VDD_BOOT_VOLTAGE)");
+                FAPI_INF("Using override for all boot voltages (VDD/VCS/VDN)");
             }
-
-            // set VCS voltage to UltraTurbo Voltage from MVPD data (if no override)
-            if (attrs->vcs_voltage_mv)
-            {
-                FAPI_INF("VCS boot voltage override set.");
-            }
-            else
-            {
-                FAPI_INF("VCS boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                uint32_t vpd_vcs_voltage_mv = attr_mvpd_data[POWERSAVE][VPD_PV_VCS_MV];
-                attrs->vcs_voltage_mv =
-                    ( (vpd_vcs_voltage_mv * 1000) +                                                 // uV
-                      ( ( (attr_mvpd_data[POWERSAVE][VPD_PV_ICS_100MA] / 10) *                      // A
-                          (attrs->r_loadline_vcs_uohm + attrs->r_distloss_vcs_uohm)) +            // uohm -> A*uohm = uV
-                        attrs->vrm_voffset_vcs_uv                                    )) / 1000;  // mV
-
-                FAPI_INF("VCS VPD voltage %d mV; Corrected voltage: %d mV; IDD: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                         vpd_vcs_voltage_mv,
-                         attrs->vcs_voltage_mv,
-                         attr_mvpd_data[POWERSAVE][VPD_PV_ICS_100MA] * 100,
-                         attrs->r_loadline_vcs_uohm,
-                         attrs->r_distloss_vcs_uohm,
-                         attrs->vrm_voffset_vcs_uv);
-
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VCS_BOOT_VOLTAGE, i_target, attrs->vcs_voltage_mv),
-                         "Error from FAPI_ATTR_SET (ATTR_VCS_BOOT_VOLTAGE)");
-            }
-
-            // set VDN voltage to PowerSave Voltage from MVPD data (if no override)
-            if (attrs->vdn_voltage_mv)
-            {
-                FAPI_INF("VDN boot voltage override set");
-            }
-            else
-            {
-                FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                uint32_t vpd_vdn_voltage_mv = attr_mvpd_data[POWERBUS][VPD_PV_VDN_MV];
-                attrs->vdn_voltage_mv =
-                    ( (vpd_vdn_voltage_mv * 1000) +                                                 // uV
-                      ( ( (attr_mvpd_data[POWERBUS][VPD_PV_IDN_100MA] / 10) *                       // A
-                          (attrs->r_loadline_vdn_uohm + attrs->r_distloss_vdn_uohm)) +            // uohm -> A*uohm = uV
-                        attrs->vrm_voffset_vdn_uv                                    )) / 1000;  // mV
-
-                FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                         vpd_vdn_voltage_mv,
-                         attrs->vdn_voltage_mv,
-                         attr_mvpd_data[POWERBUS][VPD_PV_IDN_100MA] * 100,
-                         attrs->r_loadline_vdn_uohm,
-                         attrs->r_distloss_vdn_uohm,
-                         attrs->vrm_voffset_vdn_uv);
-
-                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDN_BOOT_VOLTAGE, i_target, attrs->vdn_voltage_mv),
-                         "Error from FAPI_ATTR_SET (ATTR_VDN_BOOT_VOLTAGE)");
-            }
-        }
-        else
-        {
-            FAPI_INF("Using override for all boot voltages (VDD/VCS/VDN)");
         }
     }
+    while(0);
 
     // trace values to be used
     FAPI_INF("VDD boot voltage = %d mV (0x%x)",
@@ -371,6 +382,12 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
             // initialize the AVS slave on VDD bus
             FAPI_TRY(avsIdleFrame(i_target, attrs.vdd_bus_num, BRIDGE_NUMBER));
 
+            if (!attrs.vdd_voltage_mv)
+            {
+                FAPI_IMP("VDD voltage value is zero,so we can't set boot voltage");
+                break;
+            }
+
             // Set Boot VDD Voltage
             FAPI_TRY(avsVoltageWrite(i_target,
                                      attrs.vdd_bus_num,
@@ -399,6 +416,12 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 
             // VDN bus
             FAPI_TRY(avsIdleFrame(i_target, attrs.vdn_bus_num, BRIDGE_NUMBER));
+
+            if (!attrs.vdn_voltage_mv)
+            {
+                FAPI_IMP("VDN voltage value is zero,so we can't set boot voltage");
+                break;
+            }
 
             // Set Boot VDN Voltage
             FAPI_TRY(avsVoltageWrite(i_target,
@@ -435,6 +458,12 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
             {
                 // VCS bus
                 FAPI_TRY(avsIdleFrame(i_target, attrs.vcs_bus_num, BRIDGE_NUMBER));
+
+                if (!attrs.vcs_voltage_mv)
+                {
+                    FAPI_IMP("VCS voltage value is zero,so we can't set boot voltage");
+                    break;
+                }
 
                 // Set Boot VCS voltage
                 FAPI_TRY(avsVoltageWrite(i_target,
