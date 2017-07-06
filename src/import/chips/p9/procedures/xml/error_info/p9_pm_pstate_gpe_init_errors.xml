@@ -39,7 +39,7 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_GPE_INIT_TIMEOUT</rc>
-    <description> Pstate GPE init timed out while waiting for PGPE ACtive in OCC
+    <description> Pstate GPE init timed out while waiting for PGPE Active in OCC
     SCRATCH2.
     </description>
     <collectRegisterFfdc>
