@@ -132,6 +132,12 @@ fapi2::ReturnCode p9_mem_pll_setup(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             l_data64 = 0xFFFFFFFFFFFFFFFF;
             FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_ERROR_REG, l_data64));
 
+            // unmask PLL unlock error in PCB slave configuration register
+            FAPI_DBG("Unmask PLL unlock error in PCB slave");
+            FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_SLAVE_CONFIG_REG, l_data64));
+            l_data64.clearBit<12>();
+            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_SLAVE_CONFIG_REG, l_data64));
+
         }
     }
 
