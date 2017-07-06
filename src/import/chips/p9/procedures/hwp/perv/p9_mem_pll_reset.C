@@ -160,6 +160,12 @@ fapi2::ReturnCode p9_mem_pll_reset(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             l_data64.setBit<PERV_1_NET_CTRL0_PCB_EP_RESET>();
             FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_NET_CTRL0_WOR, l_data64));
 
+            // mask PLL unlock error in PCB slave configuration register
+            FAPI_DBG("Mask PLL unlock error in PCB slave");
+            FAPI_TRY(fapi2::getScom(l_chplt_trgt, PERV_SLAVE_CONFIG_REG, l_data64));
+            l_data64.setBit<12>();
+            FAPI_TRY(fapi2::putScom(l_chplt_trgt, PERV_SLAVE_CONFIG_REG, l_data64));
+
             //Move MC PLL into reset state
             FAPI_DBG("Move MC PLL into reset state");
             l_data64.flush<0>();
