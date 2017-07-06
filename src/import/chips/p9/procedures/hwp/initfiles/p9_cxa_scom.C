@@ -34,7 +34,7 @@ constexpr uint64_t literal_0x801B1F98C8717000 = 0x801B1F98C8717000;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x801B1F98D8717000 = 0x801B1F98D8717000;
 constexpr uint64_t literal_0x0000000000000 = 0x0000000000000;
-constexpr uint64_t literal_0x2080000020080 = 0x2080000020080;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0b0000 = 0b0000;
 constexpr uint64_t literal_0b111 = 0b111;
 constexpr uint64_t literal_0b0010 = 0b0010;
@@ -87,12 +87,18 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<0, 52, 12, uint64_t>(literal_0x2080000020080 );
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<44, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(literal_0b1 );
             }
             else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21))
                      || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<0, 53, 11, uint64_t>(literal_0x2080000020080 );
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<44, 1, 63, uint64_t>(literal_0b1 );
+                l_scom_buffer.insert<8, 1, 63, uint64_t>(literal_0b1 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010807ull, l_scom_buffer));

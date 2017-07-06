@@ -53,12 +53,14 @@
 #include <p9_io_regs.H>
 #include <p9_obus_scom.H>
 #include <p9_io_obus_scominit.H>
-
+#include <p9_obus_scom_addresses.H>
 
 //------------------------------------------------------------------------------
 //  Constant definitions
 //------------------------------------------------------------------------------
-
+const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FIR_ACTION1 = 0x2000000000000000ULL;
+const uint64_t FIR_MASK    = 0xDFFFFFFFFFFFC000ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -91,6 +93,32 @@ fapi2::ReturnCode p9_io_obus_scominit( const fapi2::Target<fapi2::TARGET_TYPE_OB
 
     FAPI_INF("Invoke FAPI procedure core: input_target");
     FAPI_EXEC_HWP(rc, p9_obus_scom, i_target, l_system_target, l_proc_target);
+
+    // configure FIR, use OBUS unit number to form fully qualified SCOM address
+    {
+        uint8_t l_unit_pos;
+        uint64_t l_addr_offset;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               i_target,
+                               l_unit_pos),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+        l_addr_offset = l_unit_pos;
+        l_addr_offset = l_addr_offset << 24;
+
+        FAPI_TRY(fapi2::putScom(l_proc_target,
+                                OBUS_FIR_ACTION0_REG,
+                                FIR_ACTION0),
+                 "Error from putScom (OBUS_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(l_proc_target,
+                                OBUS_FIR_ACTION1_REG,
+                                FIR_ACTION1),
+                 "Error from putScom (OBUS_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(l_proc_target,
+                                OBUS_FIR_MASK_REG,
+                                FIR_MASK),
+                 "Error from putScom (OBUS_FIR_MASK_REG)");
+    }
 
     // mark HWP exit
     FAPI_INF("p9_io_obus_scominit: ...Exiting");
