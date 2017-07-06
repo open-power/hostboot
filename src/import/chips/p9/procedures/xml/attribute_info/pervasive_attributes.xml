@@ -744,6 +744,16 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_START_CBS_FIFO_RESET_SKIP</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Allow skipping fifo reset during p9_start_cbs,
+  to enable systems without cfam access to fifo registers (WAFER/RBI). </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <initToZero/>
+</attribute>
+
+<attribute>
   <id>ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>To allow for selective enablement for lab testing

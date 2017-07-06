@@ -69,10 +69,15 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
     int l_timeout = 0;
     fapi2::buffer<uint8_t> l_read_attr;
+    fapi2::buffer<uint8_t> l_fifo_reset_skip;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     FAPI_INF("p9_start_cbs: Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW402019_PIBRESET_DELAY,
                            i_target_chip, l_read_attr));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_START_CBS_FIFO_RESET_SKIP,
+                           FAPI_SYSTEM, l_fifo_reset_skip));
 
     FAPI_DBG("Clearing  Selfboot message register before every boot ");
     // buffer is init value is 0
@@ -163,8 +168,11 @@ fapi2::ReturnCode p9_start_cbs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
         fapi2::delay(P9_PIBRESET_HW_NS_DELAY, P9_PIBRESET_SIM_CYCLE_DELAY);
     }
 
-    FAPI_DBG("FIFO reset");
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSB_FSB_DOWNFIFO_RESET_FSI, FIFO_RESET));
+    if ( !l_fifo_reset_skip )
+    {
+        FAPI_DBG("FIFO reset");
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_FSB_FSB_DOWNFIFO_RESET_FSI, FIFO_RESET));
+    }
 
     if ( i_sbe_start )
     {
