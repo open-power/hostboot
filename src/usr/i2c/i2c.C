@@ -3916,7 +3916,9 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
     } //end of i2cm
 
-#if CONFIG_INCLUDE_XML_OPENPOWER
+// @TODO RTC 173541: Re-enable
+// #if CONFIG_INCLUDE_XML_OPENPOWER
+#if 0
     TARGETING::Target * sys = NULL;
     TARGETING::targetService().getTopLevelTarget(sys);
 
