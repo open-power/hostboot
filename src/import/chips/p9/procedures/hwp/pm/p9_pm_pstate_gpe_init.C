@@ -70,7 +70,7 @@ fapi2::ReturnCode pstate_gpe_init(
     fapi2::buffer<uint64_t> l_data64;
     fapi2::buffer<uint64_t> l_occ_scratch2;
     fapi2::buffer<uint64_t> l_xcr;
-    fapi2::buffer<uint64_t> l_xsr;
+    fapi2::buffer<uint64_t> l_xsr_iar;
     fapi2::buffer<uint64_t> l_ivpr;
     uint32_t                l_xsr_halt_condition = 0;
     uint32_t                l_timeout_counter = TIMEOUT_COUNT;
@@ -124,8 +124,16 @@ fapi2::ReturnCode pstate_gpe_init(
                             l_pstates_mode),
               "Error getting ATTR_SYSTEM_PSTATES_MODE");
 
+    fapi2::ATTR_PSTATES_ENABLED_Type l_ps_enabled;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_PSTATES_ENABLED,
+                            i_target,
+                            l_ps_enabled),
+              "Error getting ATTR_PSTATES_ENABLED");
+
+
     // Boot if not OFF
-    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
+    if (l_pstates_mode != fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF &&
+        (l_ps_enabled == fapi2::ENUM_ATTR_PSTATES_ENABLED_TRUE) )
     {
         // Set auto mode if needed
         if (l_pstates_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_AUTO)
@@ -156,30 +164,31 @@ fapi2::ReturnCode pstate_gpe_init(
         // Now wait for PGPE to boot
         FAPI_DBG("   Poll for PGPE Active for %d ms", PGPE_TIMEOUT_MS);
         l_occ_scratch2.flush<0>();
-        l_xsr.flush<0>();
+        l_xsr_iar.flush<0>();
 
         do
         {
             FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
-            FAPI_TRY(getScom(i_target, PU_GPE2_GPEXIXSR_SCOM, l_xsr));
+            FAPI_TRY(getScom(i_target, PU_GPE3_PPE_XIDBGPRO, l_xsr_iar));
             FAPI_DBG("OCC Scratch2: 0x%016lx; XSR: 0x%016lx Timeout: %d",
-                     l_occ_scratch2, l_xsr, l_timeout_counter);
+                     l_occ_scratch2, l_xsr_iar, l_timeout_counter);
             // fapi2::delay takes ns as the arg
             fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
         }
         while((l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() != 1) &&
-              (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
+              (l_xsr_iar.getBit<p9hcd::HALTED_STATE>() != 1) &&
               (--l_timeout_counter != 0));
 
         // Extract the halt condition
-        l_xsr.extractToRight<uint32_t>(l_xsr_halt_condition,
-                                       p9hcd::HALT_CONDITION_START,
-                                       p9hcd::HALT_CONDITION_LEN);
-        FAPI_DBG("halt state: XSR: 0x%016lx condition: %d",
-                 l_xsr, l_xsr_halt_condition);
+        l_xsr_iar.extractToRight<uint32_t>(l_xsr_halt_condition,
+                                           p9hcd::HALT_CONDITION_START,
+                                           p9hcd::HALT_CONDITION_LEN);
+        FAPI_DBG("halt state: XSR/IAR: 0x%016lx condition: %d",
+                 l_xsr_iar, l_xsr_halt_condition);
+
 
         // Check for a debug halt condition
-        FAPI_ASSERT(!((l_xsr.getBit<p9hcd::HALTED_STATE>() == 1) &&
+        FAPI_ASSERT(!((l_xsr_iar.getBit<p9hcd::HALTED_STATE>() == 1) &&
                       ((l_xsr_halt_condition == p9hcd::DEBUG_HALT ||
                         l_xsr_halt_condition == p9hcd::DBCR_HALT)   )),
                     fapi2::PSTATE_GPE_INIT_DEBUG_HALT()
@@ -192,7 +201,7 @@ fapi2::ReturnCode pstate_gpe_init(
         // When PGPE fails to boot, assert out
         FAPI_ASSERT((l_timeout_counter != 0 &&
                      l_occ_scratch2.getBit<p9hcd::PGPE_ACTIVE>() == 1 &&
-                     l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
+                     l_xsr_iar.getBit<p9hcd::HALTED_STATE>() != 1),
                     fapi2::PSTATE_GPE_INIT_TIMEOUT()
                     .set_CHIP(i_target),
                     "Pstate GPE Init timeout");
@@ -207,22 +216,28 @@ fapi2::ReturnCode pstate_gpe_init(
             do
             {
                 FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
+                FAPI_TRY(getScom(i_target, PU_GPE3_PPE_XIDBGPRO, l_xsr_iar));
                 // fapi2::delay takes ns as the arg
                 fapi2::delay(PGPE_POLLTIME_MS * 1000 * 1000, PGPE_POLLTIME_MCYCLES * 1000 * 1000);
             }
             while((l_occ_scratch2.getBit<p9hcd::PGPE_PSTATE_PROTOCOL_ACTIVE>() != 1) &&
-                  (l_xsr.getBit<p9hcd::HALTED_STATE>() != 1) &&
+                  (l_xsr_iar.getBit<p9hcd::HALTED_STATE>() != 1) &&
                   (--l_timeout_counter != 0));
 
-            // When Pstate protocol fails to start, assert out
-            FAPI_ASSERT((l_timeout_counter != 0 &&
-                         l_occ_scratch2.getBit<p9hcd::PGPE_PSTATE_PROTOCOL_ACTIVE>() == 1 &&
-                         l_xsr.getBit<p9hcd::HALTED_STATE>() != 1),
-                        fapi2::PSTATE_GPE_INIT_PSTATE_AUTOSTART_TIMEOUT()
-                        .set_CHIP(i_target),
-                        "Pstate GPE Protocol Auto Start timeout");
-
-            FAPI_INF("  Pstate Auto Start Mode Complete!!!!");
+            // When Pstate protocol fails to start, post a log
+            if (l_timeout_counter != 0 &&
+                l_occ_scratch2.getBit<p9hcd::PGPE_PSTATE_PROTOCOL_ACTIVE>() == 1 &&
+                l_xsr_iar.getBit<p9hcd::HALTED_STATE>() != 1)
+            {
+                FAPI_INF("  Pstate Auto Start Mode Complete!!!!");
+            }
+            else
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_GPE_INIT_PSTATE_AUTOSTART_TIMEOUT()
+                                   .set_CHIP(i_target),
+                                   "Pstate GPE Protocol Auto Start timeout");
+            }
         }
     }
     else
