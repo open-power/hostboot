@@ -45,7 +45,7 @@ using namespace std;
 class PDA_MRS_Storage
 {
     private:
-        static char pda_string[fapi2::MAX_ECMD_STRING_LEN];
+        char pda_string[fapi2::MAX_ECMD_STRING_LEN];
     public:
         uint8_t attribute_data;
         uint32_t attribute_name;
