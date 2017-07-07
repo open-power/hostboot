@@ -54,7 +54,7 @@ namespace HDAT
 /* Typedefs                                                                   */
 /*----------------------------------------------------------------------------*/
 
-const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x5F;
+const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x70; // First P9 version
 const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
 
 
