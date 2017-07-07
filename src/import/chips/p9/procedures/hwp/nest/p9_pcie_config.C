@@ -56,9 +56,12 @@ const uint64_t PCI_NFIR_MASK_REG    = 0x0030001C00000000ULL;
 
 // PCI PBCQ Hardware Configuration Register field definitions
 const uint8_t PEC_PBCQ_HWCFG_HANG_POLL_SCALE = 0x1;
-const uint8_t PEC_PBCQ_HWCFG_DATA_POLL_SCALE = 0x2;
+const uint8_t PEC_PBCQ_HWCFG_DATA_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_HANG_PE_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE = 0x3;
+
+// PCI AIB Hardware Configuration Register field definitions
+const uint8_t PEC_AIB_HWCFG_OSBM_HOL_BLK_CNT = 0x7;
 
 // PCI Nest Trace Control Register field definitions
 const uint8_t PEC_PBCQ_NESTTRC_SEL_A = 0x9;
@@ -84,6 +87,7 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     fapi2::buffer<uint64_t> l_buf = 0;
+    uint8_t l_attr_proc_pcie_iovalid_enable = 0;
     uint64_t l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m, l_base_addr_mmio;
 
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>(
@@ -135,14 +139,19 @@ fapi2::ReturnCode p9_pcie_config(
                                l_pec_id),
                  "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
+        // Grab the IOVALID attribute to determine if PEC is bifurcated or not.
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOVALID_ENABLE, l_pec_chiplet,
+                               l_attr_proc_pcie_iovalid_enable));
+        FAPI_DBG("l_attr_proc_pcie_iovalid_enable: %#x", l_attr_proc_pcie_iovalid_enable);
+
         // Phase2 init step 1
         // NestBase+0x00
         // Set bits 00:03 = 0b0001 Set hang poll scale
         // Set bits 04:07 = 0b0010 Set data scale
         // Set bits 08:11 = 0b0001 Set hang pe scale
-        // Set bit 22 = 0b1 Disable out-of-order store behavior
         // Set bit 33 = 0b1 Enable Channel Tag streaming behavior
         // Set bits 34:35 = 0b11 Set P9 Style cache-inject behavior
+        // Set bit 60 = 0b1 only if PEC is not used at a x16 unit.
         FAPI_TRY(fapi2::getScom(l_pec_chiplet, PEC_PBCQHWCFG_REG, l_buf),
                  "Error from getScom (PEC_PBCQHWCFG_REG)");
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_POLL_SCALE,
@@ -151,11 +160,16 @@ fapi2::ReturnCode p9_pcie_config(
                               PEC_PBCQHWCFG_REG_HANG_DATA_SCALE_LEN>(PEC_PBCQ_HWCFG_DATA_POLL_SCALE);
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_PE_SCALE,
                               PEC_PBCQHWCFG_REG_HANG_PE_SCALE_LEN>(PEC_PBCQ_HWCFG_HANG_PE_SCALE);
-        l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_OOO_MODE>();
         l_buf.setBit<PEC_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN>();
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
                               PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
                                   PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
+
+        if (l_attr_proc_pcie_iovalid_enable > 0x1)
+        {
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_TCE_ARBITRATION>();
+        }
+
         FAPI_DBG("PEC%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplet, PEC_PBCQHWCFG_REG, l_buf),
                  "Error from putScom (PEC_PBCQHWCFG_REG)");
@@ -189,6 +203,8 @@ fapi2::ReturnCode p9_pcie_config(
         // Set bits 30 = 0b1 Enable Trace
         l_buf.flush<0>();
         l_buf.setBit<PEC_PBAIBHWCFG_REG_PE_PCIE_CLK_TRACE_EN>();
+        l_buf.insertFromRight<PEC_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT,
+                              PEC_PBAIBHWCFG_REG_PE_OSMB_HOL_BLK_CNT_LEN>(PEC_AIB_HWCFG_OSBM_HOL_BLK_CNT);
         FAPI_DBG("PECc%i: %#lx", l_pec_id, l_buf());
         FAPI_TRY(fapi2::putScom(l_pec_chiplet, PEC_PBAIBHWCFG_REG, l_buf));
     }
