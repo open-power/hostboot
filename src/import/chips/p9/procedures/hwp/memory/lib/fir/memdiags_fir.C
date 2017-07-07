@@ -65,6 +65,7 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     uint64_t rd_tag_delay = 0;
     uint64_t wr_done_delay = 0;
     uint64_t mnfg_flag = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW414700_Type l_checkstop_flag;
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
     {
@@ -86,6 +87,16 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         .recoverable_error<MCA_FIR_MAINLINE_UE>()
         .checkstop<MCA_FIR_MAINLINE_IAUE>()
         .recoverable_error<MCA_FIR_MAINLINE_IUE>();
+
+        // If ATTR_CHIP_EC_FEATURE_HW414700 is enabled set checkstops
+        auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_chip_target, l_checkstop_flag) );
+
+        if (l_checkstop_flag)
+        {
+            l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_UE>()
+            .checkstop<MCA_FIR_MAINLINE_RCD>();
+        }
 
         // If MNFG FLAG Threshhold is enabled skip IUE unflagging
         FAPI_TRY (mss::mnfg_flags(mnfg_flag) );
