@@ -48,6 +48,7 @@ enum sbeioModuleId
     SBEIO_FFDC_PARSER                   = 0x03,
     SBEIO_FIFO_CONTINUE_MPIPL           = 0x04,
     SBEIO_RUNTIME                       = 0x05,
+    SBEIO_MEM_REGION                    = 0x06,
 };
 
 /**
@@ -98,6 +99,9 @@ enum sbeioReasonCode
     SBEIO_RT_FUNCTION_NOT_FOUND        = SBEIO_COMP_ID | 0x39,
     SBEIO_RT_NO_INTERFACE_POINTER      = SBEIO_COMP_ID | 0x3A,
     SBEIO_RT_NO_INTERFACE_FUNCTION     = SBEIO_COMP_ID | 0x3B,
+
+    // SBE Unsecure Memory Region error codes
+    SBEIO_MEM_REGION_DOES_NOT_EXIST    = SBEIO_COMP_ID | 0x50,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

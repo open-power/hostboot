@@ -176,6 +176,50 @@ namespace SBEIO
                                const uint64_t i_sbeCommAddr,
                                TARGETING::Target * i_procChip);
 
+    /**
+     * @brief Open Unsecure Memory Region via the SBE
+     *
+     * @param[in] i_start_addr  Starting Physical Memory Address of the
+     *                          Unsecure Memory Region to Open
+     *
+     * @param[in] i_size        Size in bytes of the Unsecure Memory Region
+     *
+     * @param[in] i_isWritable  Specifies if the Unsecure Memory is Read-Only
+     *                          or Read-Write: If false then Read-only Region
+     *                                         If true then Read-Write Region
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * @note  Function is not thread-safe.
+     * @note  Read-Only/Read-Write settings are not considered when closing any
+     *        existing regions that overlap with the requested region to open.
+     */
+    errlHndl_t openUnsecureMemRegion(const uint64_t i_start_addr,
+                                     const uint32_t i_size,
+                                     const bool     i_isWritable);
+
+    /**
+     * @brief Close Unsecure Memory Region
+     *
+     * @param[in] i_start_addr  Starting Physical Memory Address of the
+     *                          Unsecure Memory Region to Close
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * @note  Function is not thread-safe.
+     */
+    errlHndl_t closeUnsecureMemRegion(const uint64_t i_start_addr);
+
+
+    /**
+     * @brief Close All Unsecure Memory Regions
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * @note  Function is not thread-safe.
+     */
+    errlHndl_t closeAllUnsecureMemRegions();
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */
