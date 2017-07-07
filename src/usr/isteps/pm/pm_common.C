@@ -29,10 +29,14 @@
 
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+#include    <errl/errlreasoncodes.H>
 
 #include    <sys/misc.h>
 #include    <sys/mm.h>
-#include <sys/time.h>
+#include    <sys/time.h>
+
+#include    <util/utilxipimage.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -61,6 +65,8 @@
 #include <p9_hcode_image_build.H>
 
 #include <p9_hcode_image_defines.H>
+#include <p9_xip_image.h>
+
 
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
@@ -297,6 +303,12 @@ namespace HBPM
                        l_pImageIn,
                        l_lidId);
 
+            // Pull build information from XIP header and trace it
+            Util::imageBuild_t l_imageBuild;
+            Util::pullTraceBuildInfo(l_pImageIn,
+                                     l_imageBuild,
+                                     ISTEPS_TRACE::g_trac_isteps_trace);
+
             ImageType_t l_imgType;
 
             // Check if we have a valid ring override section and
@@ -332,6 +344,12 @@ namespace HBPM
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadHcode: p9_hcode_image_build failed!" );
+                l_errl->addFFDC( ISTEP_COMP_ID,
+                                 reinterpret_cast<void *>(&l_imageBuild),
+                                 sizeof(Util::imageBuild_t),
+                                 0,                           // Version
+                                 ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores
+                                 false );                     // merge
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
                 break;

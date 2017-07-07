@@ -31,6 +31,7 @@
 #include <errl/errlentry.H>
 #include <pnor/pnorif.H>
 #include <pnor/ecc.H>
+#include <util/utilxipimage.H>
 #include <vmmconst.h>
 #include <targeting/common/targetservice.H>
 #include <i2c/eepromif.H>
@@ -266,12 +267,21 @@ namespace SBE
 
         uint32_t seeprom_1_data_crc;
         uint8_t seeprom_1_short_version[SBE_MVPD_SHORT_IMAGE_VERSION_SIZE];
+
+        Util::imageBuild_t seeprom_0_build;
+
+        Util::imageBuild_t seeprom_1_build;
+
         uint8_t mvpdSbPad[MVPD_SB_RECORD_SIZE - sizeof(flags)
                           - sizeof(seeprom_0_data_crc)
                           - sizeof(seeprom_1_data_crc)
-                          - (SBE_MVPD_SHORT_IMAGE_VERSION_SIZE * 2)];
+                          - (SBE_MVPD_SHORT_IMAGE_VERSION_SIZE * 2)
+                          - (sizeof(Util::imageBuild_t) * 2)];
     } PACKED;
 
+    // This line forces a compile fail if struct is too large
+    static_assert(sizeof(mvpdSbKeyword_t) <= MVPD_SB_RECORD_SIZE,
+                  "mvpdSbKeyword_t is too large");
 
     /**
      * @brief Contains the SBE state for a given target
@@ -308,6 +318,7 @@ namespace SBE
 
         sbeSeepromVersionInfo_t       new_seeprom_ver;
         bool                          new_readBack_check;
+        Util::imageBuild_t            new_imageBuild;
 
         uint32_t                      err_plid;
         uint32_t                      err_eid;
@@ -442,7 +453,7 @@ namespace SBE
     /**
      * @brief Determines which Seeprom was used to boot the SBE
      *
-     * @param[in] i_target      Target processor to customize
+     * @param[in] i_target      Target processor to customize.
      *
      * @param[out] o_bootSide   The Seeprom the SBE booted from
      *

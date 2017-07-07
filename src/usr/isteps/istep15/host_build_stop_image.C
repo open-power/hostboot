@@ -33,11 +33,15 @@
 #include    <isteps/pm/pm_common_ext.H>
 #include    <config.h>
 
+//Utilities
+#include    <util/utilxipimage.H>
+
 //Error handling and tracing
 #include    <errl/errlentry.H>
 #include    <errl/errluserdetails.H>
 #include    <errl/errludtarget.H>
 #include    <errl/errlmanager.H>
+#include    <errl/errlreasoncodes.H>
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
 
@@ -447,6 +451,12 @@ void* host_build_stop_image (void *io_pArgs)
         unload_hcode_pnor_section = true;
 #endif
 
+        // Pull build information from XIP header and trace it
+        Util::imageBuild_t l_imageBuild;
+        Util::pullTraceBuildInfo(l_pHcodeImage,
+                                 l_imageBuild,
+                                 ISTEPS_TRACE::g_trac_isteps_trace);
+
         //  Loop through all functional Procs and generate images for them.
         //get a list of all the functional Procs
         TARGETING::TargetHandleList l_procChips;
@@ -569,6 +579,13 @@ void* host_build_stop_image (void *io_pArgs)
             {
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
+
+                l_errl->addFFDC( HWPF_COMP_ID,
+                                 reinterpret_cast<void *>(&l_imageBuild),
+                                 sizeof(Util::imageBuild_t),
+                                 0,                   // Version
+                                 ERRL_UDT_NOFORMAT,   // parser ignores data
+                                 false );             // merge
 
                 // Create IStep error log and cross ref error that occurred
                 l_StepError.addErrorDetails( l_errl );

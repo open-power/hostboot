@@ -26,6 +26,9 @@ HOSTBOOT_RUNTIME = 1
 ROOTPATH = ../../../..
 MODULE = util_rt
 
+## pointer to common HWP files
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+
 OBJS += utilbase.o
 OBJS += utilstream.o
 OBJS += utilmem.o
@@ -35,6 +38,7 @@ OBJS += utillidpnor.o
 OBJS += rt_cmds.o
 OBJS += util_rt.o
 OBJS += utilrsvdmem.o
+OBJS += utilxipimage.o
 
 SUBDIRS += test.d
 

@@ -38,6 +38,7 @@
 #include <util/align.H>
 #include <util/crc32.H>
 #include <util/misc.H>
+#include <util/utilxipimage.H>
 #include <errno.h>
 #include <pnor/pnorif.H>
 #include <pnor/ecc.H>
@@ -1750,6 +1751,13 @@ namespace SBE
         errlHndl_t err = NULL;
         void *sbeHbblImgPtr = NULL;
 
+        // Clear build information
+        io_sbeState.new_imageBuild.buildDate = 0;
+        io_sbeState.new_imageBuild.buildTime = 0;
+        memset(io_sbeState.new_imageBuild.buildTag,
+               '\0',
+               sizeof(io_sbeState.new_imageBuild.buildTag) );
+
         do{
 
             /************************************************************/
@@ -1832,6 +1840,11 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
                            "sbePnorPtr=%p, sbePnorImageSize=0x%08X (%d)",
                            sbePnorPtr, sbePnorImageSize, sbePnorImageSize);
+
+                // Pull build information from XIP header and trace it
+                Util::pullTraceBuildInfo(sbePnorPtr,
+                                         io_sbeState.new_imageBuild,
+                                         g_trac_sbe);
             }
 
             // copy tmp_pnorVersion to the main structure
@@ -2189,6 +2202,17 @@ namespace SBE
                        io_sbeState.alt_seeprom_side);
 
         }while(0);
+
+        if(err && (io_sbeState.new_imageBuild.buildDate != 0) &&
+           (io_sbeState.new_imageBuild.buildTime != 0))
+        {
+            err->addFFDC(SBE_COMP_ID,
+                         &(io_sbeState.new_imageBuild),
+                         sizeof(io_sbeState.new_imageBuild),
+                         0,                   // Version
+                         ERRL_UDT_NOFORMAT,   // parser ignores data
+                         false );             // merge
+        }
 
         return err;
 
@@ -2700,6 +2724,12 @@ namespace SBE
                     &io_sbeState.new_seeprom_ver,
                     sbeInfoSize );
 
+            // Also update with new Build date, time, and tag for MVPD
+            memcpy( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY
+                    ? &io_sbeState.mvpdSbKeyword.seeprom_0_build
+                    : &io_sbeState.mvpdSbKeyword.seeprom_1_build,
+                    &io_sbeState.new_imageBuild,
+                    sizeof(Util::imageBuild_t) );
         }while(0);
 
         // Free allocated memory
