@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <prdfParserUtils.H>
+#include <prdfParserEnums.H>
 
 namespace PRDF
 {
@@ -107,6 +108,52 @@ uint8_t symbol2PortSlct<TARGETING::TYPE_MCA>( uint8_t i_symbol )
     // Port select does not exist on MCA. Always return 0 so that code will
     // continue to work.
     return 0;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t dq2Symbol<TARGETING::TYPE_MBA>( uint8_t i_dq, uint8_t i_ps )
+{
+    uint8_t sym = SYMBOLS_PER_RANK;
+
+    if ( DQS_PER_DIMM > i_dq && MAX_PORT_PER_MBA > i_ps )
+    {
+        if ( i_dq >= 64 )
+            sym = ( (3 - ((i_dq - 64) / 2)) + ((0 == i_ps) ? 4 : 0) );
+        else
+            sym = ( ((63 - i_dq) / 2) + ((0 == i_ps) ? 32 : 0) + 8 );
+    }
+
+    return sym;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint8_t dq2Symbol<TARGETING::TYPE_MCA>( uint8_t i_dq, uint8_t i_ps )
+{
+    uint8_t symbol = SYMBOLS_PER_RANK;
+
+    static const uint8_t dq2symbol[] =
+    {
+        71, 70, 69, 68, 39, 38, 37, 36, // dqs 0- 7
+        67, 66, 65, 64, 35, 34, 33, 32, // dqs 8-15
+        63, 62, 61, 60, 31, 30, 29, 28, // dqs 16-23
+        59, 58, 57, 56, 27, 26, 25, 24, // dqs 24-31
+        55, 54, 53, 52, 23, 22, 21, 20, // dqs 32-39
+        51, 50, 49, 48, 19, 18, 17, 16, // dqs 40-47
+        47, 46, 45, 44, 15, 14, 13, 12, // dqs 48-55
+        43, 42, 41, 40, 11, 10,  9,  8, // dqs 56-63
+         7,  6,  5,  4,  3,  2,  1,  0, // dqs 64-71
+    };
+
+    if ( DQS_PER_DIMM > i_dq )
+    {
+        symbol = dq2symbol[i_dq];
+    }
+
+    return symbol;
 }
 
 //------------------------------------------------------------------------------
