@@ -43,6 +43,7 @@ OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_ffdc_parser.o
 OBJS += sbe_setFFDCAddr.o
+OBJS += sbe_memRegionMgr.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

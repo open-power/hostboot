@@ -68,9 +68,10 @@ class SbePsu
         // BYTE 6 options
         enum psuCommandClass
         {
-            SBE_PSU_CLASS_UNKNOWN      = 0,
-            SBE_PSU_CLASS_CORE_STATE   = 0xD1,
+            SBE_PSU_CLASS_UNKNOWN           = 0,
+            SBE_PSU_CLASS_CORE_STATE        = 0xD1,
             SBE_PSU_PUT_RING_FROM_IMAGE_CMD = 0xD3,
+            SBE_PSU_CLASS_SECURITY_CONTROL  = 0xD6,
             SBE_PSU_GENERIC_MESSAGE         = 0xD7
         };
 
@@ -107,6 +108,15 @@ class SbePsu
         };
 
         /**
+        * @brief enums for SBE Security Control commands
+        */
+        //BYTE 7 options
+        enum psuSecurityContolCommands
+        {
+            SBE_PSU_SET_UNSECURE_MEMORY_REGION_CMD  = 0x01,
+        };
+
+        /**
          * @brief enums for SBE core state control flags
          */
         //BYTE 2  & 3, Control Flags
@@ -126,6 +136,21 @@ class SbePsu
         {
             SBE_REQUIRE_RESPONSE             = 0x0100,
             SBE_REQUIRE_ACK                  = 0x0200,
+        };
+
+        /**
+        * @brief enums for SBE Set Unsecure Memory Region control flags
+        */
+        //BYTE 2  & 3, Control Flags
+        enum psuSetUnsecureMemoryRegionControlFlags
+        {
+            SBE_MEM_REGION_OPEN_READ_ONLY   = 0x0011,
+            SBE_MEM_REGION_OPEN_READ_WRITE  = 0x0012,
+            SBE_MEM_REGION_CLOSE            = 0x0020,
+
+            // Re-use SBE_REQUIRE_RESPONSE and SBE_REQUIRE_ACK from above
+            SBE_MEM_REGION_RESPONSE_REQUIRED = SBE_REQUIRE_RESPONSE,
+            SBE_MEM_REGION_ACK_REQUIRED      = SBE_REQUIRE_ACK,
         };
 
         /**
@@ -225,6 +250,26 @@ class SbePsu
             SBE_SET_FFDC_ADDR_REQ_USED_REGS     = 0x0F,
             SBE_SET_FFDC_ADDR_RSP_USED_REGS     = 0x01,
         };
+
+        /**
+        * @brief non reserved word enums
+        *
+        * Shows which of the request and response msg registers are
+        * not reserved. Reserved registers do not need to be written
+        * or read.
+        *
+        * This is a 4 bit field:
+        * 0x1 - Reg 0 is non-reserved (read or write this reg)
+        * 0x2 - Reg 1 is non-reserved (read or write this reg)
+        * 0x4 - Reg 2 is non-reserved (read or write this reg)
+        * 0x8 - Reg 3 is non-reserved (read or write this reg)
+        */
+        enum psuSetUnsecureMemoryRegionNonReservedMsgs
+        {
+            SBE_MEM_REGION_REQ_USED_REGS  = 0x07,
+            SBE_MEM_REGION_RSP_USED_REGS  = 0x01,
+        };
+
 
         /**
          * @brief Struct for PSU command message format
@@ -339,6 +384,19 @@ class SbePsu
                 uint8_t  cd7_stashKeyAddr_Key;              //Mbx Reg 1
                 uint64_t cd7_stashKeyAddr_Value;            //Mbx Reg 2
                 uint64_t cd7_stashKeyAddr_MbxReg3Reserved;  //Mbx Reg 3
+            } PACKED;
+
+            struct //setUnsecureMemoryRegion
+            {
+                uint16_t cd6_memRegion_Reserved;        //Mbx Reg 0
+                uint16_t cd6_memRegion_ControlFlags;    //Mbx Reg 0
+                uint16_t cd6_memRegion_SeqID;           //Mbx Reg 0
+                uint8_t  cd6_memRegion_CommandClass;    //Mbx Reg 0
+                uint8_t  cd6_memRegion_Command;         //Mbx Reg 0
+                uint32_t cd6_memRegion_MbxReg1reserved; //Mbx Reg 1
+                uint32_t cd6_memRegion_Size;            //Mbx Reg 1
+                uint64_t cd6_memRegion_Start_Addr;      //Mbx Reg 2
+                uint64_t cd6_memRegion_MbxReg3reserved; //Mbx Reg 3
             } PACKED;
 
             struct //setFFDCAddress
@@ -496,6 +554,8 @@ class SbePsu
             SBE_SEC_INSUFFICIENT_DATA_PASSED          = 0x0E,
             SBE_SEC_EXCESS_DATA_PASSED                = 0x0F,
             SBE_SEC_SBE_BUSY_TO_HANDLE_COMMAND        = 0x10,
+            SBE_SEC_MEM_REGION_NOT_FOUND              = 0x11,
+            SBE_SEC_EXCEEDED_MAX_NUM_MEM_REGIONS      = 0x12,
         };
 
         enum SBE_TARGET_TYPES {
