@@ -75,6 +75,10 @@ namespace TRUSTEDBOOT
         HASH_COUNT            = 2,       ///< Maximum # of digests
 
         PCR_SELECT_MAX = (IMPLEMENTATION_PCR+7)/8, ///< PCR selection octet max
+
+        NVIDX_RSAEKCERT = 0x01C00002,    ///< RSA EK certificate NV index
+        NVIDX_ECCEKCERT = 0x01C0000A,    ///< ECC EK certificate NV index
+        NVIDX_IBMPLATCERT = 0x01C10180,  ///< IBM Platform certificate index
     };
 
     /**
@@ -110,9 +114,13 @@ namespace TRUSTEDBOOT
         TPM_SU_STATE              = 0x0001,///< TPM perform restore saved state
 
         // Capability
+        MAX_TPML_HANDLES          = 20,
+        TPM_CAP_HANDLES           = 1,
         MAX_TPM_PROPERTIES        = 2,
         TPM_CAP_TPM_PROPERTIES    = 0x00000006, ///< Pull TPM Properties
 
+        // TPM Handles
+        TPM_HT_NV_INDEX           = 0x01000000,
         // TPM Properties
         TPM_PT_MANUFACTURER       = 0x00000105,
         TPM_PT_FIRMWARE_VERSION_1 = 0x0000010B,
@@ -152,10 +160,19 @@ namespace TRUSTEDBOOT
                                       TPML_TAGGED_TPM_PROPERTY* val,
                                       const uint8_t* i_tpmBuf,
                                       size_t* io_tpmBufSize);
+    struct _TPML_HANDLE
+    {
+        uint32_t count;  ///< Number of handles
+        uint32_t handles[MAX_TPML_HANDLES];
+    } PACKED;
+    typedef struct _TPML_HANDLE TPML_HANDLE;
+    const uint8_t* TPML_HANDLE_unmarshal(TPML_HANDLE* val,
+                                         const uint8_t* i_tpmBuf,
+                                         size_t* io_tpmBufSize);
 
     union _TPMU_CAPABILITIES
     {
-        // Currently only TPM properties supported
+        TPML_HANDLE              tpmHandles;
         TPML_TAGGED_TPM_PROPERTY tpmProperties;
     } PACKED;
     typedef union _TPMU_CAPABILITIES TPMU_CAPABILITIES;

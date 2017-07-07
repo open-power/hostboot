@@ -67,6 +67,7 @@
 #include <p9_update_security_ctrl.H>
 #include <targeting/common/commontargeting.H>
 #include <algorithm>
+#include <util/misc.H>
 
 namespace TRUSTEDBOOT
 {
@@ -492,6 +493,27 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
         {
             break;
         }
+
+#ifdef CONFIG_TPM_NVIDX_VALIDATE
+        // Find out if in manufacturing mode
+        TARGETING::Target* pTopLevel = nullptr;
+        TARGETING::targetService().getTopLevelTarget(pTopLevel);
+        assert(pTopLevel != nullptr,"Top level target was nullptr");
+
+        auto mnfgFlags =
+            pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+
+        // Only validate during MFG IPL
+        if (mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM &&
+            !Util::isSimicsRunning()) {
+            // TPM_GETCAPABILITY to validate NV Indexes
+            err = tpmCmdGetCapNvIndexValidate(i_pTpm);
+            if (nullptr != err)
+            {
+                break;
+            }
+        }
+#endif
 
 #ifdef CONFIG_DRTM
         // For a DRTM we need to reset PCRs 17-22
