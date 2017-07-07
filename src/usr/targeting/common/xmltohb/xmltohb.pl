@@ -770,6 +770,32 @@ foreach my $attr (@rwPersistAttrs)
     }
 }
 print $rwAttrCFile <<VERBATIM;
+void validateAllRwNvAttr(const Target* i_pTarget)
+{
+VERBATIM
+foreach my $attr (@rwPersistAttrs)
+{
+    if (exists $attr->{simpleType} &&
+        exists $attr->{simpleType}->{enumeration})
+    {
+        my $lowerCaseValue = lc "o_$attr->{id}_value";
+        print $rwAttrCFile ""
+        . "    AttributeTraits<ATTR_$attr->{id}>::Type $lowerCaseValue;\n"
+        . "    i_pTarget->tryGetAttr<ATTR_$attr->{id}>($lowerCaseValue);\n\n";
+    }
+}
+foreach my $attr (@rwPersistAttrs)
+{
+    if (exists $attr->{range})
+    {
+        my $lowerCaseValue = lc "o_$attr->{id}_value";
+        print $rwAttrCFile ""
+        . "    AttributeTraits<ATTR_$attr->{id}>::Type $lowerCaseValue;\n"
+        . "    i_pTarget->tryGetAttr<ATTR_$attr->{id}>($lowerCaseValue);\n\n";
+    }
+}
+print $rwAttrCFile <<VERBATIM;
+}
 #endif // !__HOSTBOOT_RUNTIME &&__HOSTBOOT_MODULE
 } // namespace TARGETING
 

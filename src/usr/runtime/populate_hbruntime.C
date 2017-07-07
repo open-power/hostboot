@@ -1838,5 +1838,96 @@ errlHndl_t populate_hbRuntimeData( void )
 
 } // end populate_hbRuntimeData
 
+errlHndl_t persistent_rwAttrRuntimeCheck( void )
+{
+    errlHndl_t l_err = nullptr;
+    // For security purposes make R/W attribute memory pages non-ejectable
+    // and of these, verify the persistent attributes. If all goes well,
+    // we can hand these over to runtime with added confidence of their
+    // validity, otherwise we stop the IPL.
+    msg_q_t l_msgQ = msg_q_resolve(TARGETING::ATTRRP_MSG_Q);
+
+    assert(l_msgQ != nullptr, "Bug! Message queue did not resolve properly!");
+
+    msg_t* l_msg = msg_allocate();
+
+    assert(l_msg != nullptr, "Bug! Message allocation failed!");
+
+    l_msg->type = TARGETING::MSG_MM_RP_RUNTIME_PREP;
+
+    l_msg->data[0] = TARGETING::MSG_MM_RP_RUNTIME_PREP_BEGIN;
+
+    int rc = msg_sendrecv(l_msgQ, l_msg);
+
+    if (rc != 0 || l_msg->data[1])
+    {
+        uint64_t l_rc = l_msg->data[1];
+
+        TRACFCOMP( g_trac_runtime,
+            "persistent_rwAttrRuntimeCheck: failed to pin attribute memory. "
+            "Message rc: %llX msg_sendrecv rc:%i", l_rc, rc);
+
+        /*@
+         * @errortype
+         * @reasoncode RUNTIME::RC_UNABLE_TO_PIN_ATTR_MEM
+         * @moduleid   RUNTIME::MOD_ATTR_RUNTIME_CHECK_PREP_FAIL
+         * @userdata1  Message return code from message handler
+         * @userdata2  Return code from msg_sendrecv function
+         * @devdesc    Unable to pin read/write attribute memory
+         * @custdesc   Internal system error occured
+         */
+        l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                        RUNTIME::MOD_ATTR_RUNTIME_CHECK_PREP_FAIL,
+                        RUNTIME::RC_UNABLE_TO_PIN_ATTR_MEM,
+                        l_rc,
+                        rc,
+                        true /* Add HB Software Callout */);
+    }
+    else
+    {
+         TARGETING::TargetRangeFilter targets(
+            TARGETING::targetService().begin(),
+            TARGETING::targetService().end());
+        for ( ; targets; ++targets)
+        {
+            validateAllRwNvAttr( *targets );
+        }
+
+        l_msg->type = TARGETING::MSG_MM_RP_RUNTIME_PREP;
+        l_msg->data[0] = TARGETING::MSG_MM_RP_RUNTIME_PREP_END;
+
+        int rc = msg_sendrecv(l_msgQ, l_msg);
+
+        if (rc != 0 || l_msg->data[1])
+        {
+            uint64_t l_rc = l_msg->data[1];
+
+            TRACFCOMP( g_trac_runtime, "persistent_rwAttrRuntimeCheck:"
+                " failed to unpin attribute memory. "
+                "Message rc: %llX msg_sendrecv rc:%i", l_rc, rc);
+
+            /*@
+             * @errortype
+             * @reasoncode RUNTIME::RC_UNABLE_TO_UNPIN_ATTR_MEM
+             * @moduleid   RUNTIME::MOD_ATTR_RUNTIME_CHECK_PREP_FAIL
+             * @userdata1  Message return code from message handler
+             * @userdata2  Return code from msg_sendrecv function
+             * @devdesc    Unable to unpin read/write attribute memory
+             * @custdesc   Internal system error occured
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                        RUNTIME::MOD_ATTR_RUNTIME_CHECK_PREP_FAIL,
+                        RUNTIME::RC_UNABLE_TO_UNPIN_ATTR_MEM,
+                        l_rc,
+                        rc,
+                        true /* Add HB Software Callout */);
+        }
+    }
+
+    return l_err;
+} // end persistent_rwAttrRuntimeCheck
+
 } //namespace RUNTIME
 

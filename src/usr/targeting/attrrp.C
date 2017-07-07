@@ -60,6 +60,9 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
+
+    const char* ATTRRP_MSG_Q = "attrrpq";
+
     void* AttrRP::getBaseAddress(const NODE_ID i_nodeIdUnused)
     {
         return reinterpret_cast<void*>(VMM_VADDR_ATTR_RP);
@@ -130,39 +133,52 @@ namespace TARGETING
             if (!msg) continue;
 
             // Parse message data members.
-            uint64_t vAddr = msg->data[0];
-            void*    pAddr = reinterpret_cast<void*>(msg->data[1]);
+            uint64_t vAddr = 0;
+            void*    pAddr = nullptr;
+            ssize_t  section = -1;
+            uint64_t offset = 0;
+            uint64_t size = 0;
 
             TRACFCOMP(g_trac_targeting, INFO_MRK "AttrRP: Message recv'd: "
-                      "0x%x, 0x%lx 0x%p", msg->type, vAddr, pAddr);
+                        "0x%x");
 
-            // Locate corresponding attribute section for message.
-            ssize_t section = -1;
-            for (size_t i = 0; i < iv_sectionCount; ++i)
-            {
-                if ((vAddr >= iv_sections[i].vmmAddress) &&
-                    (vAddr < iv_sections[i].vmmAddress + iv_sections[i].size))
+            do {
+
+                if (msg->type != MSG_MM_RP_RUNTIME_PREP)
                 {
-                    section = i;
-                    break;
-                }
-            }
+                    vAddr = msg->data[0];
+                    pAddr = reinterpret_cast<void*>(msg->data[1]);
 
-            // Return EINVAL if no section was found.  Kernel bug?
-            if (section == -1)
-            {
-                rc = -EINVAL;
-                TRACFCOMP(g_trac_targeting,
-                          ERR_MRK "AttrRP: Address given outside section "
-                                  "ranges: %p",
-                          vAddr);
-            }
-            else // Process request.
-            {
+                    TRACFCOMP(g_trac_targeting,
+                        INFO_MRK "AttrRP: vAddr=0x%lx pAddr=0x%p",
+                        msg->type, vAddr, pAddr);
 
-                // Determine PNOR offset and page size.
-                uint64_t offset = vAddr - iv_sections[section].vmmAddress;
-                uint64_t size = std::min(PAGE_SIZE,
+                    // Locate corresponding attribute section for message.
+                    for (size_t i = 0; i < iv_sectionCount; ++i)
+                    {
+                        if ((vAddr >= iv_sections[i].vmmAddress) &&
+                            (vAddr < iv_sections[i].vmmAddress +
+                                                         iv_sections[i].size))
+                        {
+                            section = i;
+                            break;
+                        }
+                    }
+
+                    // Return EINVAL if no section was found.  Kernel bug?
+                    if (section == -1)
+                    {
+                        rc = -EINVAL;
+                        TRACFCOMP(g_trac_targeting,
+                              ERR_MRK "AttrRP: Address given outside section "
+                                      "ranges: %p",
+                              vAddr);
+                        break; // go to error handler
+                    }
+
+                    // Determine PNOR offset and page size.
+                    offset = vAddr - iv_sections[section].vmmAddress;
+                    size = std::min(PAGE_SIZE,
                                          iv_sections[section].vmmAddress +
                                          iv_sections[section].size -
                                          vAddr);
@@ -173,6 +189,10 @@ namespace TARGETING
                     // Example: Section size is 6k and vAddr = vmmAddr + 4k,
                     //          we should only operate on 2k of content.
 
+
+                }
+
+                // Process request.
 
                 // Read / Write message behavior.
                 switch(msg->type)
@@ -229,7 +249,33 @@ namespace TARGETING
                                pAddr,
                                size);
                         break;
+                    case MSG_MM_RP_RUNTIME_PREP:
+                    {
+                        // used for security purposes to pin all the attribute
+                        // memory just prior to copying to reserve memory
+                        uint64_t l_access =
+                            msg->data[0] == MSG_MM_RP_RUNTIME_PREP_BEGIN?
+                                WRITABLE:
+                            msg->data[0] == MSG_MM_RP_RUNTIME_PREP_END?
+                                WRITE_TRACKED: 0;
+                        if (!l_access)
+                        {
+                            rc = -EINVAL;
+                            break;
+                        }
 
+                        for (size_t i = 0; i < iv_sectionCount; ++i)
+                        {
+                            if ( iv_sections[i].type == SECTION_TYPE_PNOR_RW)
+                            {
+                                rc = mm_set_permission(reinterpret_cast<void*>(
+                                       iv_sections[i].vmmAddress),
+                                       iv_sections[i].size,
+                                       l_access);
+                            }
+                        }
+                        break;
+                    }
                     default:
                         TRACFCOMP(g_trac_targeting,
                                   ERR_MRK "AttrRP: Unhandled command type %d.",
@@ -237,7 +283,8 @@ namespace TARGETING
                         rc = -EINVAL;
                         break;
                 }
-            }
+
+            } while (0);
 
             // Log an error log if the AttrRP was unable to handle a message
             // for any reason.
@@ -272,7 +319,7 @@ namespace TARGETING
                 errlCommit(l_errl,TARG_COMP_ID);
             }
 
-            // Respond to kernel request.
+            // Respond to request.
             msg->data[1] = rc;
             rc = msg_respond(iv_msgQ, msg);
             if (rc)
@@ -565,6 +612,12 @@ namespace TARGETING
         {
             // Allocate message queue for VMM requests.
             iv_msgQ = msg_q_create();
+
+            // register it so it can be discovered by istep 21 and thus allow
+            // secure runtime preparation of persistent r/w attributes
+            int rc = msg_q_register(iv_msgQ, ATTRRP_MSG_Q);
+
+            assert(rc == 0, "Bug! Unable to register message queue");
 
             // Create VMM block for each section, assign permissions.
             for (size_t i = 0; i < iv_sectionCount; ++i)

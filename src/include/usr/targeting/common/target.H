@@ -787,6 +787,17 @@ void handleRangeCheckFailure(const Target* i_pTarget,
                              const ATTRIBUTE_ID i_attr,
                              const uint64_t i_outOfRangeValue);
 
+// Function to handle validation of all persistent r/w attributes for runtime
+/**
+ * @brief  Attempts to get all persistent r/w attributes for a given target.
+ *         Those that are non-present for that target are skipped. All others
+ *         are checked for valid enum values and ranges.
+ *
+ * @param[in] i_pTarget The target for which all attributes will be checked.
+ *                      Cannot be nullptr.
+ */
+void validateAllRwNvAttr(const Target* i_pTarget);
+
 
 // The following #include ensures that persistent read/write attributes are
 // value-checked for validity upon calling getAttr. This is done via

@@ -394,6 +394,22 @@ class AttrRP
  */
 TARG_DECLARE_SINGLETON(TARGETING::AttrRP,theAttrRP);
 
+extern const char* ATTRRP_MSG_Q;
+
+// user-defined message subtype for MSG_MM_RP_RUNTIME_PREP
+/** @enum msg_mm_rp_runtime_prep_t
+  * @brief Message type and subtypes for the MSG_MM_RP_RUNTIME_PREP message
+  */
+enum msg_mm_rp_runtime_prep_t
+{
+    MSG_MM_RP_RUNTIME_PREP = 0x2, // prepare runtime for secure transition
+                                  // of attrs
+                                  // data[0] = MSG_MM_RP_RUNTIME_PREP_BEGIN or
+                                  // data[0] = MSG_MM_RP_RUNTIME_PREP_END
+    MSG_MM_RP_RUNTIME_PREP_BEGIN,
+    MSG_MM_RP_RUNTIME_PREP_END,
+};
+
 } // End namespace TARGETING
 
 #endif // __TARGETING_ATTRRP_H
