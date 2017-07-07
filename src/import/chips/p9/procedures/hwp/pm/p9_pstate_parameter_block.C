@@ -958,6 +958,7 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     do
     {
         // initialize
+        FAPI_TRY(proc_get_attributes(i_target, &attr), "proc_get_mvpd_data: Get attributes function failed");
         *o_present_chiplets    = 0;
 
         // -----------------------------------------------------------------
