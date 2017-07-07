@@ -52,23 +52,28 @@ namespace SBEIO
 
 // External Function to Open an Unsecure Memory Region
 // - see sbeioif.H for details
-errlHndl_t openUnsecureMemRegion(const uint64_t i_start_addr,
-                                 const uint32_t i_size,
-                                 const bool     i_isWritable)
+errlHndl_t openUnsecureMemRegion(
+    const uint64_t i_start_addr,
+    const uint32_t i_size,
+    const bool     i_isWritable,
+    TARGETING::Target* i_target)
 {
     return Singleton<MemRegionMgr>::instance()
                .openUnsecureMemRegion(i_start_addr,
                                       i_size,
-                                      i_isWritable);
+                                      i_isWritable,
+                                      i_target);
 };
 
 
 // External Function to Close an Unsecure Memory Region
 // - see sbeioif.H for details
-errlHndl_t closeUnsecureMemRegion(const uint64_t i_start_addr)
+errlHndl_t closeUnsecureMemRegion(
+    const uint64_t i_start_addr,
+    TARGETING::Target* i_target)
 {
     return Singleton<MemRegionMgr>::instance()
-               .closeUnsecureMemRegion(i_start_addr);
+               .closeUnsecureMemRegion(i_start_addr, i_target);
 };
 
 
@@ -117,9 +122,10 @@ MemRegionMgr::~MemRegionMgr()
  * - see sbe_unsecureMemRegionMgr.H for details
  */
 errlHndl_t MemRegionMgr::openUnsecureMemRegion(
-    const uint64_t i_start_addr,
-    const uint32_t i_size,
-    const bool     i_isWritable)
+    const uint64_t    i_start_addr,
+    const uint32_t    i_size,
+    const bool        i_isWritable,
+    TARGETING::Target* i_target)
 {
 
     errlHndl_t errl = nullptr;
@@ -129,9 +135,12 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                                   SbePsu::SBE_MEM_REGION_OPEN_READ_WRITE :
                                   SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY;
 
-    SBE_TRACF(ENTER_MRK"openUnsecureMemRegion: i_start_addr=0x%.16llX, "
-              "i_size=0x%.8X, i_isWritable=%d (flags=0x%.2X)",
-              i_start_addr, i_size, i_isWritable, input_flags);
+    SBE_TRACF(ENTER_MRK"openUnsecureMemRegion: i_tgt=0x%X: "
+              "i_start_addr=0x%.16llX, i_size=0x%.8X, i_isWritable=%d "
+              "(flags=0x%.2X)",
+              TARGETING::get_huid(i_target), i_start_addr, i_size,
+              i_isWritable, input_flags);
+    assert(i_size!=0, "openUnsecureMemRegion: i_size=0");
 
     do
     {
@@ -167,6 +176,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 l_region.start_addr = itr->start_addr;
                 l_region.size = itr->size;
                 l_region.flags = SbePsu::SBE_MEM_REGION_CLOSE;
+                l_region.tgt = itr->tgt;
 
                 errl = doUnsecureMemRegionOp(l_region);
 
@@ -189,6 +199,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 l_region.start_addr = itr->start_addr;
                 l_region.size = i_start_addr - itr->start_addr;
                 l_region.flags = itr->flags;
+                l_region.tgt = itr->tgt;
 
                 errl = doUnsecureMemRegionOp(l_region);
 
@@ -225,6 +236,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                     l_region.start_addr = itr->start_addr;
                     l_region.size = itr->size;
                     l_region.flags = SbePsu::SBE_MEM_REGION_CLOSE;
+                    l_region.tgt = itr->tgt;
 
                     errl = doUnsecureMemRegionOp(l_region);
 
@@ -251,6 +263,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 l_region.size = (itr->start_addr + itr->size) -
                                   (i_start_addr + i_size);
                 l_region.flags = itr->flags;
+                l_region.tgt = itr->tgt;
 
                 errl = doUnsecureMemRegionOp(l_region);
 
@@ -289,6 +302,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                     l_region.start_addr = itr->start_addr;
                     l_region.size = itr->size;
                     l_region.flags = SbePsu::SBE_MEM_REGION_CLOSE;
+                    l_region.tgt = itr->tgt;
 
                     errl = doUnsecureMemRegionOp(l_region);
 
@@ -331,6 +345,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
         l_region.start_addr = i_start_addr;
         l_region.size = i_size;
         l_region.flags = input_flags;
+        l_region.tgt = i_target;
 
         errl = doUnsecureMemRegionOp(l_region);
         if (errl)
@@ -354,9 +369,9 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
     // TODO RTC 174970 remove when base support is working
     printIvMemRegions();
 
-    SBE_TRACF(EXIT_MRK "openUnsecureMemRegion: i_start_addr=0x%.16llX: "
-              "err_rc=0x%.4X",
-              i_start_addr,
+    SBE_TRACF(EXIT_MRK "openUnsecureMemRegion: i_tgt=0x%X: "
+              "i_start_addr=0x%.16llX: err_rc=0x%.4X",
+              TARGETING::get_huid(i_target), i_start_addr,
               ERRL_GETRC_SAFE(errl));
 
     return errl;
@@ -366,15 +381,18 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
  * MemRegionMgr::closeUnsecureMemRegion
  * - see sbe_unsecureMemRegionMgr.H for details
  */
-errlHndl_t MemRegionMgr::closeUnsecureMemRegion(const uint64_t i_start_addr)
+errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
+    const uint64_t    i_start_addr,
+    TARGETING::Target* i_target)
 {
     errlHndl_t errl = nullptr;
 
     bool region_found = false;
     regionData l_region;
 
-    SBE_TRACF(ENTER_MRK"closeUnsecureMemRegion: i_start_addr=0x%.16llX",
-              i_start_addr);
+    SBE_TRACF(ENTER_MRK"closeUnsecureMemRegion: i_tgt=0x%X: "
+              "i_start_addr=0x%.16llX",
+              TARGETING::get_huid(i_target), i_start_addr);
 
     do
     {
@@ -389,6 +407,8 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(const uint64_t i_start_addr)
                 l_region.start_addr = itr->start_addr;
                 l_region.size = itr->size;
                 l_region.flags = SbePsu::SBE_MEM_REGION_CLOSE;
+                l_region.tgt = itr->tgt;
+
                 errl = doUnsecureMemRegionOp(l_region);
                 if (errl)
                 {
@@ -443,9 +463,9 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(const uint64_t i_start_addr)
     }
     while (0);
 
-    SBE_TRACF(EXIT_MRK "closeUnsecureMemRegion: i_start_addr0x%.16llX: "
-              "err_rc=0x%4X",
-              i_start_addr,
+    SBE_TRACF(EXIT_MRK "closeUnsecureMemRegion: i_tgt: 0x%X: "
+              "i_start_addr0x%.16llX: err_rc=0x%4X",
+              TARGETING::get_huid(i_target), i_start_addr,
               ERRL_GETRC_SAFE(errl));
 
     return errl;
@@ -535,30 +555,38 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
  * MemRegionMgr::doUnsecureMemRegionOp
  * - see sbe_unsecureMemRegionMgr.H for details
  */
-errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(const regionData & i_region)
+errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
 {
     errlHndl_t errl = nullptr;
+    TARGETING::Target * l_tgt = i_region.tgt;
 
     // @TODO RTC 174970 - make TRACD when SBE support is tested
-    SBE_TRACF(ENTER_MRK"doUnsecureMemRegionOp: start_addr=0x%.16llX, "
-              "size=0x%.8X, controlFlags=0x%.2X",
-              i_region.start_addr, i_region.size, i_region.flags);
+    SBE_TRACF(ENTER_MRK"doUnsecureMemRegionOp: tgt=0x%.8X: "
+              "start_addr=0x%.16llX, size=0x%.8X, controlFlags=0x%.2X",
+              TARGETING::get_huid(l_tgt), i_region.start_addr,
+              i_region.size, i_region.flags);
 
     do
     {
-        // Find master proc for target of PSU command
-        TARGETING::TargetService& tS = TARGETING::targetService();
-        TARGETING::Target * l_master = nullptr;
-
-        errl = tS.queryMasterProcChipTargetHandle(l_master);
-        if (errl)
+        // Find master proc for target of PSU command, if necessary
+        if (l_tgt == nullptr)
         {
-            SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Failed to get Master "
-                      "Proc: err rc=0x%.4X plid=0x%.8X",
-                      ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+            TARGETING::TargetService& tS = TARGETING::targetService();
 
-            break;
+            errl = tS.queryMasterProcChipTargetHandle(l_tgt);
+            if (errl)
+            {
+                SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Failed to get Master "
+                          "Proc: err rc=0x%.4X plid=0x%.8X",
+                          ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+
+                break;
+            }
+
+            // Set target for future operations
+            i_region.tgt = l_tgt;
         }
+
         SbePsu::psuCommand l_psuCommand(
             i_region.flags |
               SbePsu::SBE_MEM_REGION_RESPONSE_REQUIRED, //control flags
@@ -573,7 +601,7 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(const regionData & i_region)
 
 // @TODO RTC 174970 - Activate code block when SBE support is tested
 #if 0
-        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_master,
+        errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_tgt,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
@@ -583,7 +611,7 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(const regionData & i_region)
         if (errl)
         {
             SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: PSU Cmd Failed: "
-                      "err rc=0x%.4X plid=0x%.4X (mbxReg0=0x%.16llX)",
+                      "err rc=0x%.4X plid=0x%.8X (mbxReg0=0x%.16llX)",
                       ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl),
                       l_psuCommand.mbxReg0);
             break;
@@ -593,10 +621,12 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(const regionData & i_region)
     while (0);
 
     // @TODO RTC 174970 - make TRACD when SBE support is tested
-    SBE_TRACF(EXIT_MRK "doUnsecureMemRegionOp: start_addr=0x%.16llX, "
-              "size=0x%.8X, controlFlags=0x%.2X: err_rc=0x%.4X",
-              i_region.start_addr, i_region.size, i_region.flags,
-              ERRL_GETRC_SAFE(errl));
+    SBE_TRACF(EXIT_MRK "doUnsecureMemRegionOp: tgt=0x%.8X: "
+              "start_addr=0x%.16llX, size=0x%.8X, controlFlags=0x%.2X: "
+              "err_rc=0x%.4X",
+              TARGETING::get_huid(l_tgt), i_region.start_addr, i_region.size,
+              i_region.flags, ERRL_GETRC_SAFE(errl));
+
     return errl;
 }
 
@@ -611,9 +641,10 @@ void MemRegionMgr::printIvMemRegions(void) const
 
     for ( const auto& itr : iv_memRegions )
     {
-        SBE_TRACF("printIvMemRegions: start_addr=0x%.16llX, "
+        SBE_TRACF("printIvMemRegions: tgt=0x%.8X: start_addr=0x%.16llX, "
                   "size=0x%.8X, flags=0x%.2X (%s)",
-                  itr.start_addr, itr.size, itr.flags,
+                  TARGETING::get_huid(itr.tgt), itr.start_addr,
+                  itr.size, itr.flags,
                   itr.flags == SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY ?
                     "Read-Only" : "Read-Write");
     }

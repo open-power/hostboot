@@ -897,6 +897,20 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             l_prevDataAddr = l_sbeffdcAddr;
             l_prevDataSize = l_sbeffdcSizeAligned;
 
+            // Open Unsecure Memory Region for SBE FFDC Section
+            l_elog = SBEIO::openUnsecureMemRegion(l_sbeffdcAddr,
+                                                  l_sbeffdcSize,
+                                                  false, //Read-Only
+                                                  l_procChip);
+
+            if(l_elog)
+            {
+                TRACFCOMP( g_trac_runtime,
+                           "populate_HbRsvMem: openUnsecureMemRegion failed");
+
+                break;
+            }
+
 
             // Send Set FFDC Address, tell SBE where to write FFDC and messages
             l_elog = SBEIO::sendSetFFDCAddr(l_sbeffdcSize,
