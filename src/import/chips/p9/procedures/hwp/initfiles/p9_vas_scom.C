@@ -31,6 +31,8 @@ using namespace fapi2;
 
 constexpr uint64_t literal_0x00200102000D7FFF = 0x00200102000D7FFF;
 constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_0x00DD0201C0000000 = 0x00DD0201C0000000;
 constexpr uint64_t literal_0x00DF0201C0000000 = 0x00DF0201C0000000;
 constexpr uint64_t literal_0x0080000000000000 = 0x0080000000000000;
 constexpr uint64_t literal_0x1 = 0x1;
@@ -44,6 +46,8 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW414700_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700));
         fapi2::ATTR_PROC_FABRIC_PUMP_MODE_Type l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_PUMP_MODE));
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -62,7 +66,15 @@ fapi2::ReturnCode p9_vas_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x3011807ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 54, 0, uint64_t>(literal_0x00DF0201C0000000 );
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 != literal_0))
+            {
+                l_scom_buffer.insert<0, 54, 0, uint64_t>(literal_0x00DD0201C0000000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<0, 54, 0, uint64_t>(literal_0x00DF0201C0000000 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x3011807ull, l_scom_buffer));
         }
         {
