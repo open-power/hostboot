@@ -25,6 +25,9 @@
 ROOTPATH = ../../..
 MODULE = util
 
+## pointer to common HWP files
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+
 OBJS += threadpool.o
 OBJS += utilbase.o
 OBJS += utilstream.o
@@ -36,6 +39,7 @@ OBJS += utilmbox_scratch.o
 OBJS += utiltcemgr.o
 OBJS += utilsemipersist.o
 OBJS += utilrsvdmem.o
+OBJS += utilxipimage.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d
