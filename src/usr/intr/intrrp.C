@@ -415,6 +415,15 @@ void IntrRp::acknowledgeInterrupt()
     TRACFCOMP(g_trac_intr, "IntrRp::acknowledgeInterrupt(), read result: %16x", l_ackRead);
 }
 
+void IntrRp::disablePsiInterrupts(intr_hdlr_t* i_proc)
+{
+    //Disable Incoming PSI Interrupts
+    PSIHB_SW_INTERFACES_t * l_psihb_ptr = i_proc->psiHbBaseAddr;
+
+    //Clear bit to disable PSI CEC interrupts
+    l_psihb_ptr->psihbcr = (l_psihb_ptr->psihbcr & ~PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI);
+}
+
 errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
 {
     errlHndl_t l_err = NULL;
@@ -436,6 +445,9 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
 
         if (l_doHwReset)
         {
+            //Disable the PSI CEC interrupts
+            disablePsiInterrupts(i_proc);
+
             //Use HW-based XIVE Reset
             //First quiesce the power bus
             TRACDCOMP(g_trac_intr, "IntrRp::resetIntUnit() - "
@@ -563,12 +575,8 @@ errlHndl_t IntrRp::disableInterrupts(intr_hdlr_t *i_proc)
 
     do
     {
-        //Disable Incoming PSI Interrupts
-        PSIHB_SW_INTERFACES_t * l_psihb_ptr = i_proc->psiHbBaseAddr;
-
-        //Clear bit to disable PSI CEC interrupts
-        l_psihb_ptr->psihbcr =
-             (l_psihb_ptr->psihbcr & ~PSI_BRIDGE_INTP_STATUS_CTL_DISABLE_PSI);
+        //Disable PSI CEC interrupts
+        disablePsiInterrupts(i_proc);
 
         //The XIVE HW is expecting these MMIO accesses to come from the
         // core/thread they were setup (master core, thread 0)

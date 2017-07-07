@@ -399,6 +399,12 @@ namespace INTR
             void enableLsiInterrupts();
 
             /**
+             * Clear bit 3 of the PSIHB Control/Status register to disable
+               PSI interrupts from interrupting the CEC.
+             */
+            void disablePsiInterrupts(intr_hdlr_t* i_proc);
+
+            /**
              * Message handler
              */
             void msgHandler();
