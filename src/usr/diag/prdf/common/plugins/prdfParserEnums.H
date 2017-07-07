@@ -153,17 +153,16 @@ namespace RCE_TABLE
 
 } // namespace RCE_TABLE
 
-/* TODO: RTC 164707
 namespace DQ_BITMAP
 {
     enum
     {
         BITMAP_SIZE = 10, // 80-bit bitmap
-        ENTRY_SIZE  = sizeof(uint8_t) + MBA_DIMMS_PER_RANK * BITMAP_SIZE,
+        MCA_ENTRY_SIZE  = sizeof(uint8_t) + MCA_DIMMS_PER_RANK * BITMAP_SIZE,
+        MBA_ENTRY_SIZE  = sizeof(uint8_t) + MBA_DIMMS_PER_RANK * BITMAP_SIZE,
     };
 
 } // namespace DQ_BITMAP
-*/
 
 namespace CEN_SYMBOL
 {

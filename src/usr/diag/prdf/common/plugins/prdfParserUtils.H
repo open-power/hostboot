@@ -70,6 +70,15 @@ template<TARGETING::TYPE T>
 uint8_t symbol2PortSlct( uint8_t i_symbol );
 
 /**
+ * @brief Find the symbol for the given DQ
+ * @param i_dq The chip DQ
+ * @param i_ps The port select. Default is 0. Only needed for MBA.
+ * @return The Symbol
+ */
+template<TARGETING::TYPE T>
+uint8_t dq2Symbol( uint8_t i_dq, uint8_t i_ps = 0 );
+
+/**
  * @brief Find the first symbol of the given x4 DRAM index
  * @param i_x4Dram     The x4 Dram index
  * @return The Symbol
