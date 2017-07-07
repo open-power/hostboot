@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <kernel/console.H>
 #include <arch/pirformat.H>
+#include <sbeio/sbeioif.H>
 
 // Local functions
 namespace MBOX
@@ -151,6 +152,16 @@ errlHndl_t MailboxSp::_init()
     // handled as soon as the msgQ is registered with the interrupt service
     // provider
     task_create(MailboxSp::msg_handler, NULL);
+
+    // Tell SBE to create Read-Write Memory Region for the DMA Buffer
+    err = SBEIO::openUnsecureMemRegion(
+        iv_dmaBuffer.toPhysAddr(iv_dmaBuffer.getDmaBufferHead()),
+        VmmManager::MBOX_DMA_SIZE,
+        true); //true=Read-Write
+    if (err)
+    {
+        return err;
+    }
 
     if(mbxComm)
     {

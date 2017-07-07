@@ -126,6 +126,15 @@ void* call_host_runtime_setup (void *io_pArgs)
                        "Successfully sent all system configs to procs via SBE chip op !!");
         }
 
+        // Tell SBE to Close All Unsecure Memory Regions
+        l_err = SBEIO::closeAllUnsecureMemRegions();
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SBEIO::closeAllUnsecureMemRegions Failed" );
+            // break from do loop if error occured
+            break;
+        }
 
 
         // Need to load up the runtime module if it isn't already loaded

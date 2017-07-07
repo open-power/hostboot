@@ -183,20 +183,26 @@ namespace SBEIO
      *                          Unsecure Memory Region to Open
      *
      * @param[in] i_size        Size in bytes of the Unsecure Memory Region
+     *                          Assert if size = 0
      *
      * @param[in] i_isWritable  Specifies if the Unsecure Memory is Read-Only
-     *                          or Read-Write: If false then Read-only Region
+     *                          or Read-Write: If false then Read-Only Region
      *                                         If true then Read-Write Region
+     *
+     * @param[in] i_target      Target associated with SBE command
+     *                          If nullptr, default to Master Processor
      *
      * @return errlHndl_t Error log handle on failure.
      *
      * @note  Function is not thread-safe.
-     * @note  Read-Only/Read-Write settings are not considered when closing any
-     *        existing regions that overlap with the requested region to open.
+     * @note  Read-Only/Read-Write settings and Target associated with the
+     *        region are not considered when closing any existing regions
+     *        that overlap with the requested region to open.
      */
     errlHndl_t openUnsecureMemRegion(const uint64_t i_start_addr,
                                      const uint32_t i_size,
-                                     const bool     i_isWritable);
+                                     const bool     i_isWritable,
+                                     TARGETING::Target*  i_target=nullptr);
 
     /**
      * @brief Close Unsecure Memory Region
@@ -204,12 +210,15 @@ namespace SBEIO
      * @param[in] i_start_addr  Starting Physical Memory Address of the
      *                          Unsecure Memory Region to Close
      *
+     * @param[in] i_target      Target associated with SBE command
+     *                          If nullptr, default to Master Processor
+     *
      * @return errlHndl_t Error log handle on failure.
      *
      * @note  Function is not thread-safe.
      */
-    errlHndl_t closeUnsecureMemRegion(const uint64_t i_start_addr);
-
+    errlHndl_t closeUnsecureMemRegion(const uint64_t i_start_addr,
+                                      TARGETING::Target*  i_target=nullptr);
 
     /**
      * @brief Close All Unsecure Memory Regions

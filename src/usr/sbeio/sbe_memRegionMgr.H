@@ -42,10 +42,14 @@ struct regionData
     uint32_t size;       // Size of region in bytes
 
     // Control Flags for PSU command -
-    //   see SbePsu::psuSetUnsecureMemoryRegionControlFlags
+    // - see SbePsu::psuSetUnsecureMemoryRegionControlFlags
     uint8_t  flags;
 
-    regionData() : start_addr(0), size(0), flags(0) {}
+    // Target associated with the SBE
+    // - If tgt == nullptr it will eventually be updated to the Master Proc
+    TARGETING::Target* tgt;
+
+    regionData() : start_addr(0), size(0), flags(0), tgt(nullptr) {}
 };
 
 /** @class MemRegionMgr
@@ -71,7 +75,7 @@ class MemRegionMgr
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t doUnsecureMemRegionOp(const regionData & i_region);
+    errlHndl_t doUnsecureMemRegionOp(regionData & i_region);
 
   public:
     /**
@@ -113,7 +117,8 @@ class MemRegionMgr
     errlHndl_t openUnsecureMemRegion(
         const uint64_t i_start_addr,
         const uint32_t i_size,
-        const bool     i_isWritable);
+        const bool     i_isWritable,
+        TARGETING::Target* i_target);
 
    /**
      * @brief Close Unsecure Memory Region
@@ -121,7 +126,9 @@ class MemRegionMgr
      * @note: See closeUnsecureMemRegion() function in sbeioif.H for details
      *
      */
-    errlHndl_t closeUnsecureMemRegion(const uint64_t i_start_addr);
+    errlHndl_t closeUnsecureMemRegion(
+        const uint64_t i_start_addr,
+        TARGETING::Target* i_target);
 
 
     /**
