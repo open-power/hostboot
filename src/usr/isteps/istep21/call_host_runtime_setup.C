@@ -189,6 +189,14 @@ void* call_host_runtime_setup (void *io_pArgs)
             }
         }
 
+        l_err = RUNTIME::persistent_rwAttrRuntimeCheck();
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Failed persistent_rwAttrRuntimeCheck()" );
+            break;
+        }
+
         // Fill in Hostboot runtime data for all nodes
         // (adjunct partition)
         // Write the HB runtime data into mainstore

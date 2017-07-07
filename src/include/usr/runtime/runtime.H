@@ -71,6 +71,19 @@ errlHndl_t load_host_data( void );
 errlHndl_t populate_hbRuntimeData( void );
 
 /**
+ * @brief persistent read/write Attribute validity runtime check
+ *
+ * @description In order to ensure validity of persistent read/write
+ *    attributes, perform a check of enum values and integer ranges
+ *    to ensure validity, while pinning attribute memory to ensure
+ *    that PNOR cannot change the attributes prior to the copy to
+ *    reserve memory.
+ *
+ * @return errlHndl_t nullptr on Success else pointer to error log
+ */
+errlHndl_t persistent_rwAttrRuntimeCheck( void );
+
+/**
  * @brief Populate HB secureboot data in mainstore
  *
  * @description  Populates the System Parameters section of HDAT with
