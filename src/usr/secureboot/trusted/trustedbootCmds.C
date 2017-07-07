@@ -447,6 +447,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
     return err;
 }
 
+#ifdef __HOSTBOOT_MODULE
 errlHndl_t tpmCmdStartup(TpmTarget* io_target)
 {
     errlHndl_t err = TB_SUCCESS;
@@ -738,6 +739,164 @@ errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target)
     return err;
 }
 
+errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target)
+{
+    errlHndl_t err = TB_SUCCESS;
+    uint8_t dataBuf[BUFSIZE];
+    size_t dataSize = BUFSIZE;
+    TPM2_GetCapabilityOut* resp =
+        (TPM2_GetCapabilityOut*)dataBuf;
+    TPM2_GetCapabilityIn* cmd =
+        (TPM2_GetCapabilityIn*)dataBuf;
+    bool foundRSAEKCert = false;
+    bool foundECCEKCert = false;
+    bool foundPlatCert = false;
+    bool moreData = false;
+
+    TRACUCOMP( g_trac_trustedboot,
+               ">>tpmCmdGetCapNvIndexValidate()" );
+
+    do
+    {
+
+        // Build our command block for a get capability of the FW version
+        memset(dataBuf, 0, dataSize);
+
+        cmd->base.tag = TPM_ST_NO_SESSIONS;
+        cmd->base.commandCode = TPM_CC_GetCapability;
+        cmd->capability = TPM_CAP_HANDLES;
+        cmd->property = TPM_HT_NV_INDEX;
+        cmd->propertyCount = MAX_TPML_HANDLES;
+
+        err = tpmTransmitCommand(io_target,
+                                 dataBuf,
+                                 sizeof(dataBuf),
+                                 TPM_LOCALITY_0);
+
+        if (TB_SUCCESS != err)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM GETCAP Transmit Fail");
+            break;
+
+        }
+
+        if (TPM_SUCCESS != resp->base.responseCode)
+        {
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM GETCAP OP Fail Ret(0x%X) Size(%d) ",
+                       resp->base.responseCode,
+                       (int)dataSize);
+
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_GETCAP_FAIL
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_GETCAPNVINDEX
+             * @userdata1      responseCode
+             * @userdata2      0
+             * @devdesc        Command failure reading TPM capability.
+             * @custdesc       Failure detected in security subsystem
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPNVINDEX,
+                                    RC_TPM_GETCAP_FAIL,
+                                    resp->base.responseCode,
+                                    0);
+
+            break;
+        }
+
+        // Walk the reponse data to pull the high order bytes out
+
+        if (resp->capData.capability != TPM_CAP_HANDLES) {
+
+            TRACFCOMP( g_trac_trustedboot,
+                       "TPM GETCAP NVINDEX INVALID DATA "
+                       "Cap(0x%X) Cnt(0x%X) ",
+                       resp->capData.capability,
+                       resp->capData.data.tpmHandles.count);
+
+            /*@
+             * @errortype
+             * @reasoncode     RC_TPM_GETCAP_FW_INVALID_RESP
+             * @severity       ERRL_SEV_UNRECOVERABLE
+             * @moduleid       MOD_TPM_CMD_GETCAPNVINDEX
+             * @userdata1      capability
+             * @userdata2      0
+             * @devdesc        Command failure reading TPM NV indexes.
+             * @custdesc       Failure detected in security subsystem
+             */
+            err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPNVINDEX,
+                                    RC_TPM_GETCAP_FW_INVALID_RESP,
+                                    resp->capData.capability, 0);
+
+            break;
+        }
+
+        for (size_t idx = 0; idx < resp->capData.data.tpmHandles.count;
+             ++idx)
+        {
+            // Check for specific handles we expect to be setup
+            // by manufacturing provisioning
+            switch (resp->capData.data.tpmHandles.handles[idx])
+            {
+              case NVIDX_RSAEKCERT:
+                foundRSAEKCert = true;
+                break;
+              case NVIDX_ECCEKCERT:
+                foundECCEKCert = true;
+                break;
+              case NVIDX_IBMPLATCERT:
+                foundPlatCert = true;
+                break;
+                // Ignore any other handles
+            }
+        }
+        // More Data implies the TPM could have returned more then
+        //  we asked for
+        moreData = resp->moreData;
+
+    } while ( 0 );
+
+    // Validate we found all we needed
+    if (NULL == err &&
+        (foundRSAEKCert == false || foundECCEKCert == false ||
+         foundPlatCert == false || moreData == true))
+    {
+        TRACFCOMP( g_trac_trustedboot,
+                   "TPM GETCAP NVINDEX MISSING INDEX "
+                   "RSAEK(%d) ECCEK(%d) PLAT(%d) MD(%d)",
+                   foundRSAEKCert, foundECCEKCert, foundPlatCert,
+                   moreData);
+
+        /*@
+         * @errortype
+         * @reasoncode     RC_TPM_NVINDEX_VALIDATE_FAIL
+         * @severity       ERRL_SEV_UNRECOVERABLE
+         * @moduleid       MOD_TPM_CMD_GETCAPNVINDEX
+         * @userdata1[0:3] foundRSAEKCert
+         * @userdata1[4:7] foundECCEKCert
+         * @userdata1[8:11] foundPlatCert
+         * @userdata1[12:31] 0
+         * @userdata2[0:3] moreData
+         * @userdata2[4:31] 0
+         * @devdesc        Command failure reading TPM NV indexes.
+         * @custdesc       Failure detected in security subsystem
+         */
+        err = tpmCreateErrorLog(MOD_TPM_CMD_GETCAPNVINDEX,
+                                RC_TPM_NVINDEX_VALIDATE_FAIL,
+                                (uint32_t)foundRSAEKCert << 28 |
+                                (uint32_t)foundECCEKCert << 14 |
+                                (uint32_t)foundPlatCert << 20,
+                                (uint32_t)moreData << 28);
+    }
+
+    TRACDCOMP( g_trac_trustedboot,
+               "<<tpmCmdGetCapNvIndexValidate() - %s",
+               ((TB_SUCCESS == err) ? "No Error" : "With Error") );
+    return err;
+}
+#endif // HOSTBOOT
 
 errlHndl_t tpmCmdPcrExtend(TpmTarget * io_target,
                            TPM_Pcr i_pcr,

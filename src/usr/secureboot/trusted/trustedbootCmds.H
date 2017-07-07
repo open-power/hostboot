@@ -99,6 +99,7 @@ errlHndl_t tpmUnmarshalResponseData(uint32_t i_commandCode,
                                     size_t i_respBufSize,
                                     TPM2_BaseOut* o_outBuf,
                                     size_t i_outBufSize);
+#ifdef __HOSTBOOT_MODULE
 /**
  * @brief Send the TPM_STARTUP command to the targetted TPM
  * @param[in/out] io_target Current TPM target structure
@@ -116,6 +117,15 @@ errlHndl_t tpmCmdStartup(TpmTarget* io_target);
 
 errlHndl_t tpmCmdGetCapFwVersion(TpmTarget* io_target);
 
+/**
+ * @brief Send the TPM_GETCAPABILITY command to validate NV indexes
+ * @param[in/out] io_target Current TPM target structure
+ * @return errlHndl_t NULL if successful, otherwise a pointer to the
+ *       error log.
+*/
+
+errlHndl_t tpmCmdGetCapNvIndexValidate(TpmTarget* io_target);
+#endif
 /**
  * @brief Send the TPM_Extend command to the targeted TPM and log
  * @param[in/out] io_target Current TPM target structure

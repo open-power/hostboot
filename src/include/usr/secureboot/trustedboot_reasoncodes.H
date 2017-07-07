@@ -57,6 +57,7 @@ namespace TRUSTEDBOOT
         MOD_TPM_TPMDAEMON                = 0x0B,
         MOD_TPM_SYNCRESPONSE             = 0x0C,
         MOD_TPM_SEPARATOR                = 0x0D,
+        MOD_TPM_CMD_GETCAPNVINDEX        = 0x0E,
 
         MOD_TPMLOGMGR_INITIALIZE         = 0x10,
         MOD_TPMLOGMGR_ADDEVENT           = 0x11,
@@ -90,6 +91,7 @@ namespace TRUSTEDBOOT
         RC_SEND_FAIL                     = SECURE_COMP_ID | 0xB2,
         RC_MSGRESPOND_FAIL               = SECURE_COMP_ID | 0xB3,
         RC_UPDATE_SECURITY_CTRL_HWP_FAIL = SECURE_COMP_ID | 0xB4,
+        RC_TPM_NVINDEX_VALIDATE_FAIL     = SECURE_COMP_ID | 0xB5,
     };
 #ifdef __cplusplus
 }

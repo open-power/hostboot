@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,6 +127,26 @@ namespace TRUSTEDBOOT
 
         return i_tpmBuf;
     }
+    const uint8_t* TPML_HANDLE_unmarshal(TPML_HANDLE* val,
+                                         const uint8_t* i_tpmBuf,
+                                         size_t* io_tpmBufSize)
+    {
+        i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                  &(val->count), sizeof(val->count));
+
+        // Now we know the count as well
+        if (val->count <= MAX_TPML_HANDLES) {
+            i_tpmBuf = unmarshalChunk(i_tpmBuf, io_tpmBufSize,
+                                      &(val->handles[0]),
+                                      sizeof(uint32_t) * val->count);
+        }
+        else
+        {
+            return NULL;
+        }
+
+        return i_tpmBuf;
+    }
 
     const uint8_t* TPMS_CAPABILITY_DATA_unmarshal(TPMS_CAPABILITY_DATA* val,
                                                   const uint8_t* i_tpmBuf,
@@ -138,6 +158,13 @@ namespace TRUSTEDBOOT
 
         switch (val->capability)
         {
+          case TPM_CAP_HANDLES:
+              {
+                  return TPML_HANDLE_unmarshal(
+                                      &(val->data.tpmHandles), i_tpmBuf,
+                                      io_tpmBufSize);
+              }
+              break;
           case TPM_CAP_TPM_PROPERTIES:
               {
                   return TPML_TAGGED_TPM_PROPERTY_unmarshal(

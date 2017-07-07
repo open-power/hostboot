@@ -25,3 +25,8 @@ config DRTM_TRIGGERING #TODO RTC: 170487 Disable for relevant platforms
         Enable triggering DRTM from Hostboot when the
         ATTR_FORCE_PRE_PAYLOAD_DRTM attribute is overridden
 
+config TPM_NVIDX_VALIDATE
+    default y if TPMDD
+    depends on TPMDD
+    help
+        Validate TPM MFG NV Index Provisioning during IPL
