@@ -56,6 +56,7 @@
 //------------------------------------------------------------------------------
 const uint64_t FBC_IOE_TL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOE_TL_FIR_ACTION1 = 0x004B000000000000ULL;
+const uint64_t FBC_IOE_TL_FIR_ACTION1_HW414700 = 0x0049000000000000ULL;
 const uint64_t FBC_IOE_TL_FIR_MASK    = 0xFF24F0303FFFFFFFULL;
 
 const uint64_t FBC_IOE_DL_FIR_ACTION0 = 0x0000000000000000ULL;
@@ -107,9 +108,15 @@ fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_T
 
     if (l_xbus_chiplets.size())
     {
+        uint8_t l_hw414700;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, i_target, l_hw414700),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW414700)");
         FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION0_REG, FBC_IOE_TL_FIR_ACTION0),
                  "Error from putScom (PU_PB_IOE_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION1_REG, FBC_IOE_TL_FIR_ACTION1),
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION1_REG,
+                                (l_hw414700) ?
+                                (FBC_IOE_TL_FIR_ACTION1_HW414700) :
+                                (FBC_IOE_TL_FIR_ACTION1)),
                  "Error from putScom (PU_PB_IOE_FIR_ACTION1_REG)");
         FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_MASK_REG, FBC_IOE_TL_FIR_MASK),
                  "Error from putScom (PU_PB_IOE_FIR_MASK_REG)");
