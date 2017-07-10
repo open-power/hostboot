@@ -33,17 +33,17 @@ constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x04047C0000000000 = 0x04047C0000000000;
 constexpr uint64_t literal_0x04247C0000000000 = 0x04247C0000000000;
 constexpr uint64_t literal_0x0000000000000000 = 0x0000000000000000;
-constexpr uint64_t literal_0x40B2000000000000 = 0x40B2000000000000;
 constexpr uint64_t literal_0x409B000000000000 = 0x409B000000000000;
-constexpr uint64_t literal_0x40FB000000000000 = 0x40FB000000000000;
+constexpr uint64_t literal_0x4092000000000000 = 0x4092000000000000;
+constexpr uint64_t literal_0x40DB000000000000 = 0x40DB000000000000;
 constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x0000FAF800FF = 0x0000FAF800FF;
-constexpr uint64_t literal_0x0000FAFC00FB = 0x0000FAFC00FB;
+constexpr uint64_t literal_0x0400FAFC00FF = 0x0400FAFC00FF;
 constexpr uint64_t literal_0x000000000000 = 0x000000000000;
-constexpr uint64_t literal_0x951100000F04 = 0x951100000F04;
 constexpr uint64_t literal_0x910000040F00 = 0x910000040F00;
-constexpr uint64_t literal_0x9D1100000F04 = 0x9D1100000F04;
+constexpr uint64_t literal_0x911100000F00 = 0x911100000F00;
+constexpr uint64_t literal_0x991100000F00 = 0x991100000F00;
 constexpr uint64_t literal_0b11111 = 0b11111;
 constexpr uint64_t literal_0x00E = 0x00E;
 constexpr uint64_t literal_0x000 = 0x000;
@@ -91,17 +91,17 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c07ull, l_scom_buffer ));
 
-            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 != literal_0))
-            {
-                l_scom_buffer.insert<0, 22, 0, uint64_t>(literal_0x40B2000000000000 );
-            }
-            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 != literal_0))
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 != literal_0))
             {
                 l_scom_buffer.insert<0, 22, 0, uint64_t>(literal_0x409B000000000000 );
             }
-            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0))
+            else if (((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0) && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 != literal_0)))
             {
-                l_scom_buffer.insert<0, 22, 0, uint64_t>(literal_0x40FB000000000000 );
+                l_scom_buffer.insert<0, 22, 0, uint64_t>(literal_0x4092000000000000 );
+            }
+            else if (((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0) && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 == literal_0)))
+            {
+                l_scom_buffer.insert<0, 22, 0, uint64_t>(literal_0x40DB000000000000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c07ull, l_scom_buffer));
@@ -150,7 +150,7 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             }
             else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0))
             {
-                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x0000FAFC00FB );
+                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x0400FAFC00FF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c43ull, l_scom_buffer));
@@ -164,17 +164,17 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5012c47ull, l_scom_buffer ));
 
-            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 != literal_0))
-            {
-                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x951100000F04 );
-            }
-            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 != literal_0))
+            if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 != literal_0))
             {
                 l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x910000040F00 );
             }
-            else if ((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0))
+            else if (((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0) && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 != literal_0)))
             {
-                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x9D1100000F04 );
+                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x911100000F00 );
+            }
+            else if (((l_TGT0_ATTR_CHIP_EC_FEATURE_NMMU_NDD1 == literal_0) && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW414700 == literal_0)))
+            {
+                l_scom_buffer.insert<0, 48, 16, uint64_t>(literal_0x991100000F00 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c47ull, l_scom_buffer));
