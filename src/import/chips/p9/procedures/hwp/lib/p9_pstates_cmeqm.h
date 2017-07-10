@@ -92,17 +92,19 @@ typedef union
 #ifdef _BIG_ENDIAN
         uint16_t    resclk_enable               : 1;
         uint16_t    ivrm_enable                 : 1;
+        uint16_t    vdm_enable                  : 1;
         uint16_t    wof_enable                  : 1;
         uint16_t    dpll_dynamic_fmax_enable    : 1;
         uint16_t    dpll_dynamic_fmin_enable    : 1;
         uint16_t    dpll_droop_protect_enable   : 1;
-        uint16_t    reserved                    : 10;
+        uint16_t    reserved                    : 9;
 #else
-        uint16_t    reserved                    : 10;
+        uint16_t    reserved                    : 9;
         uint16_t    dpll_droop_protect_enable   : 1;
         uint16_t    dpll_dynamic_fmin_enable    : 1;
         uint16_t    dpll_dynamic_fmax_enable    : 1;
         uint16_t    wof_enable                  : 1;
+        uint16_t    vdm_enable                  : 1;
         uint16_t    ivrm_enable                 : 1;
         uint16_t    resclk_enable               : 1;
 #endif // _BIG_ENDIAN

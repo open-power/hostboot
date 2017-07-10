@@ -238,10 +238,7 @@ typedef struct
     uint32_t attr_tdp_rdp_current_factor;
 
     uint8_t attr_resclk_disable;
-    uint8_t attr_dpll_dynamic_fmax_enable;
-    uint8_t attr_dpll_dynamic_fmin_enable;
-    uint8_t attr_dpll_droop_protect_enable;
-
+    uint8_t attr_dpll_vdm_response;
     uint8_t attr_nest_leakage_percent;
 
 // Control attributes

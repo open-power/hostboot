@@ -210,13 +210,6 @@
         <default>0x00</default>
     </attribute>
 
-    <!-- Deprecated in deference to ATTR_VDM_ENABLED.  Will be deleted in the future -->
-    <attribute>
-        <id>ATTR_VDM_ENABLE</id>
-        <default>0x00</default>
-    </attribute>
-    <!-- End Deprecated -->
-
     <!-- HWP attribute -->
     <attribute>
         <id>ATTR_VDM_ENABLED</id>
@@ -241,13 +234,6 @@
     <attribute>
         <id>ATTR_IVRM_ENABLED</id>
     </attribute>
-
-    <!-- Deprecated in deference to ATTR_SYSTEM_WOF_ENABLE.  Will be deleted in the future -->
-    <attribute>
-        <id>ATTR_SYSTEM_WOF_ENABLED</id>
-        <default>0x00</default>
-    </attribute>
-    <!-- End Deprecated -->
 
     <!--  set to 0 to allow automatic enablement when underlying support is available
           WOF will simply not be enabled if any of the validation fails
