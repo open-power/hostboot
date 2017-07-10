@@ -38,9 +38,17 @@
 
   <hwpError>
     <rc>RC_MSS_BAD_SPD</rc>
-    <description>Bad SPD data recieved.</description>
+    <description>
+        Bad SPD data received.
+        Settings are incorrect within SPD.
+        This could be code problem (decoding) or bad SPD
+    </description>
     <ffdc>VALUE</ffdc>
     <ffdc>BYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
@@ -53,7 +61,7 @@
   <hwpError>
     <rc>RC_MSS_INVALID_DIMM_REV_COMBO</rc>
     <description>
-      Recieved a dimm type (e.g. RDIMM, LRDIMM) and SPD revision
+      Received a dimm type (e.g. RDIMM, LRDIMM) and SPD revision
       (e.g. 1.0, 1.1) combination unsupported by the spd_decoder
       object "factory"
     </description>
@@ -61,44 +69,43 @@
     <ffdc>ENCODING_REV</ffdc>
     <ffdc>ADDITIONS_REV</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
-  <hwpError>
-    <rc>RC_MSS_INVALID_CACHE</rc>
-    <description>
-      Bad SPD cache. Unable to find decoder factory instance from dimm position.
-    </description>
-    <ffdc>DIMM_POS</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
       <rc>RC_MSS_INVALID_RAW_CARD</rc>
     <description>
-        Recieved a raw card that currently isn't supported in code
+        Received a raw card that isn't currently supported in code
     </description>
     <ffdc>DIMM_TYPE</ffdc>
     <ffdc>RAW_CARD_REV</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
-
-
 </hwpErrors>
