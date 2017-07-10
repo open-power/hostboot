@@ -45,12 +45,20 @@
     </description>
     <ffdc>NUM_PKG_RANKS</ffdc>
     <callout>
-      <target>DIMM_TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
@@ -65,6 +73,10 @@
     <ffdc>AADR</ffdc>
     <ffdc>AAER</ffdc>
     <callout>
+        <procedure>CODE</procedure>
+        <priority>LOW</priority>
+    </callout>
+    <callout>
       <target>DIMM_TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -72,5 +84,4 @@
       <target>DIMM_TARGET</target>
     </deconfigure>
   </hwpError>
-
 </hwpErrors>
