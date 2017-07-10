@@ -261,7 +261,7 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
     // From the DDR PHY workbook
     constexpr uint64_t CONTINUOUS_UPDATE = 0x8024;
 
-    FAPI_INF("continuous update: 0x%x", CONTINUOUS_UPDATE);
+    FAPI_INF("%s continuous update: 0x%x", mss::c_str(i_target), CONTINUOUS_UPDATE);
 
     constexpr uint64_t SIM_OVERRIDE = 0x8080;
     constexpr uint64_t PHASE_CNTL_EN = 0x8020;
@@ -302,7 +302,7 @@ fapi2::ReturnCode setup_phase_rotator_control_registers( const fapi2::Target<TAR
     // All the MCA (and both registers) will be in the same state, so we can get the first and use it to create the
     // values for the others.
 
-    FAPI_INF("Write 0x%lx into the ADR SysClk Phase Rotator Control Regs", l_update);
+    FAPI_INF("%s Write 0x%lx into the ADR SysClk Phase Rotator Control Regs", mss::c_str(i_target), l_update);
 
     // WRCLK Phase rotators are taken care of in the phy initfile. BRS 6/16.
 
@@ -1482,7 +1482,7 @@ fapi2::ReturnCode setup_wr_level_terminations( const fapi2::Target<fapi2::TARGET
     FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks) );
     FAPI_ASSERT( !l_ranks.empty(),
                  fapi2::MSS_NO_RANKS_IN_RANK_PAIR()
-                 .set_TARGET(i_target)
+                 .set_MCA_TARGET(i_target)
                  .set_RANK_PAIR(i_rp),
                  "No ranks configured in MCA %s, rank pair %d",
                  mss::c_str(i_target),
@@ -1541,7 +1541,7 @@ fapi2::ReturnCode restore_mainline_terminations( const fapi2::Target<fapi2::TARG
     FAPI_TRY( mss::rank::get_ranks_in_pair(i_target, i_rp, l_ranks) );
     FAPI_ASSERT( !l_ranks.empty(),
                  fapi2::MSS_NO_RANKS_IN_RANK_PAIR()
-                 .set_TARGET(i_target)
+                 .set_MCA_TARGET(i_target)
                  .set_RANK_PAIR(i_rp),
                  "No ranks configured in MCA %s, rank pair %d", mss::c_str(i_target), i_rp );
 

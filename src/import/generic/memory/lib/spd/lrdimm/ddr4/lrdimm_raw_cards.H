@@ -28,9 +28,9 @@
 /// @brief Raw card data structure
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_LRDIMM_RAW_CARDS_H_
@@ -46,10 +46,14 @@ namespace mss
 namespace lrdimm
 {
 
-// In the order of the vector below which needs to be sorted by enum value
+///
+/// @brief raw card revs for LRDIMMs
+/// @note In the order of the vector below which needs to be sorted by enum value
+///
 enum raw_card_rev : uint8_t
 {
     // TODO RTC:160116 Fill in valid RCD data for LRDIMM
+    /// LRDIMM Raw Card encoding for B0
     B0 = 0x01,
 };
 

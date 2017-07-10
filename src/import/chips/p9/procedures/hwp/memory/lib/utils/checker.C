@@ -28,9 +28,9 @@
 /// @brief Contains common functions that perform checks
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP FW Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -72,5 +72,5 @@ fapi_try_exit:
     return fapi2::current_err;
 };
 
-}
-}
+} // ns check
+} // ns mss

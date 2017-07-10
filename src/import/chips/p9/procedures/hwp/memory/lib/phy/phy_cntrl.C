@@ -154,18 +154,17 @@ fapi2::ReturnCode reset_config1(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
     l_type_index = l_dimm_type[0] | l_dimm_type[1];
     l_gen_index = l_dram_gen[0] | l_dram_gen[1];
 
-    // These two checks should never be called, but better safe than seg fault
-    FAPI_ASSERT( l_type_index < NUM_DIMM_TYPES,
-                 fapi2::MSS_INVALID_DIMM_TYPE()
-                 .set_DIMM_TYPE(l_type_index)
-                 .set_TARGET(i_target),
-                 "Invalid DIMM configuration or DIMM type on %s",
-                 mss::c_str(i_target));
-    FAPI_ASSERT( l_gen_index < NUM_DIMM_GEN,
-                 fapi2::MSS_PLUG_RULES_INVALID_DRAM_GEN()
-                 .set_DRAM_GEN(l_gen_index)
-                 .set_DIMM_TARGET(i_target),
-                 "Invalid DIMM configuration or DRAM gen on %s",
+    // This check should never be called, but better safe than seg fault
+    FAPI_ASSERT( (l_type_index < NUM_DIMM_TYPES) && (l_gen_index < NUM_DIMM_GEN),
+                 fapi2::MSS_PLUG_RULES_ERROR_IN_PHY()
+                 .set_DIMM_TYPE_DIMM_0(l_dimm_type[0])
+                 .set_DIMM_TYPE_DIMM_1(l_dimm_type[1])
+                 .set_DRAM_GEN_DIMM_0(l_dram_gen[0])
+                 .set_DRAM_GEN_DIMM_1(l_dram_gen[1])
+                 .set_MCA_TARGET(i_target),
+                 "Invalid DIMM configuration or DIMM type (%d) or DRAM_GEN (%d) on %s",
+                 l_type_index,
+                 l_gen_index,
                  mss::c_str(i_target));
 
     // FOR NIMBUS PHY (as the protocol choice above is) BRS

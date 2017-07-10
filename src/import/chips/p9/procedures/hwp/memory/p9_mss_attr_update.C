@@ -28,9 +28,9 @@
 /// @brief Programatic over-rides related to effective config
 ///
 // *HWP HWP Owner: Joe McGill <jmcgill@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 
@@ -94,7 +94,7 @@ p9_mss_attr_update_get_lx_offsets(const fapi2::Target<TARGET_TYPE_MCA>& i_target
                                   fapi2::MvpdKeyword& o_keyword,
                                   uint8_t& o_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("%s Start p9_mss_attr_update_get_lx_offsets", mss::c_str(i_target));
 
     switch( mss::pos(i_target) )
     {
@@ -168,10 +168,9 @@ p9_mss_attr_update_get_lx_offsets(const fapi2::Target<TARGET_TYPE_MCA>& i_target
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_get_lx_offsets");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Set ATTR_MSS_MVPD_FWMS from MVPD Lx keyword
@@ -185,7 +184,7 @@ p9_mss_attr_update_fwms(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                         const uint8_t* i_record_data,
                         const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_fwms");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -221,10 +220,9 @@ p9_mss_attr_update_fwms(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_fwms");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Set ATTR_MSS_VREF_DAC_NIBBLE from MVPD Lx keyword
@@ -238,7 +236,7 @@ p9_mss_attr_update_dac_nibble(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                               const uint8_t* i_record_data,
                               const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_dac_nibble");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -264,10 +262,9 @@ p9_mss_attr_update_dac_nibble(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_dac_nibble");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Set ATTR_MSS_VOLT_VDDR from MVPD Lx keyword
@@ -281,7 +278,7 @@ p9_mss_attr_update_vddr(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                         const uint8_t* i_record_data,
                         const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_vddr");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -310,11 +307,9 @@ p9_mss_attr_update_vddr(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_vddr");
     return fapi2::current_err;
 }
-
-
 
 ///
 /// @brief Set ATTR_MSS_VPD_MR_DPHY_RLO from MVPD Lx keyword
@@ -328,7 +323,7 @@ p9_mss_attr_update_dphy_rlo(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                             const uint8_t* i_record_data,
                             const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_dphy_rlo");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -354,7 +349,7 @@ p9_mss_attr_update_dphy_rlo(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_dphy_rlo");
     return fapi2::current_err;
 }
 
@@ -371,7 +366,7 @@ p9_mss_attr_update_tsys_adr(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                             const uint8_t* i_record_data,
                             const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_tsys_adr");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -394,10 +389,9 @@ p9_mss_attr_update_tsys_adr(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_tsys_adr");
     return fapi2::current_err;
 }
-
 
 ///
 /// @brief Set ATTR_MSS_VPD_MR_TSYS_DATA from MVPD Lx keyword
@@ -411,7 +405,7 @@ p9_mss_attr_update_tsys_data(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
                              const uint8_t* i_record_data,
                              const uint8_t i_f_s_offset)
 {
-    FAPI_DBG("Start");
+    FAPI_DBG("Start p9_mss_attr_update_tsys_data");
 
     // if group is valid, update attribute value associated with this port
     if (i_record_data[i_f_s_offset +
@@ -434,7 +428,7 @@ p9_mss_attr_update_tsys_data(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
     }
 
 fapi_try_exit:
-    FAPI_DBG("End");
+    FAPI_DBG("End p9_mss_attr_update_tsys_data");
     return fapi2::current_err;
 }
 
@@ -447,7 +441,7 @@ fapi_try_exit:
 fapi2::ReturnCode
 p9_mss_attr_update_lx_mvpd(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 {
-    FAPI_INF("Start");
+    FAPI_INF("Start p9_mss_attr_update_lx_mvpd");
 
     uint32_t l_keyword_size;
     uint8_t l_keyword_data[CRP0_Lx_RECORD_SIZE_EXP];
@@ -470,7 +464,7 @@ p9_mss_attr_update_lx_mvpd(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
 
     FAPI_ASSERT(l_keyword_size == CRP0_Lx_RECORD_SIZE_EXP,
                 fapi2::P9_MSS_ATTR_UPDATE_MVPD_READ_ERR()
-                .set_TARGET(l_chip_target)
+                .set_CHIP_TARGET(l_chip_target)
                 .set_KEYWORD_SIZE(l_keyword_size),
                 "Invalid CRP0 keyword:%d record size (%s)",
                 l_keyword, mss::c_str(l_chip_target));
@@ -490,7 +484,7 @@ p9_mss_attr_update_lx_mvpd(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
                  (l_keyword_data[Lx_VERSION_OFFSET] == Lx_V1_VALUE) ||
                  (l_keyword_data[Lx_VERSION_OFFSET] == Lx_V2_VALUE)),
                 fapi2::P9_MSS_ATTR_UPDATE_MVPD_VERSION_ERR().
-                set_TARGET(l_chip_target).
+                set_CHIP_TARGET(l_chip_target).
                 set_VERSION(l_keyword_data[Lx_VERSION_OFFSET]),
                 "Invalid CRP0 keyword:%d record version: %02X (%s)",
                 l_keyword, l_keyword_data[Lx_VERSION_OFFSET], mss::c_str(l_chip_target));
@@ -510,7 +504,7 @@ p9_mss_attr_update_lx_mvpd(const fapi2::Target<TARGET_TYPE_MCA>& i_target)
              "Error from p9_mss_attr_update_tsys_data");
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_INF("End p9_mss_attr_update_lx_mvpd");
     return fapi2::current_err;
 }
 
@@ -524,7 +518,7 @@ fapi_try_exit:
 fapi2::ReturnCode
 p9_mss_attr_update(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
 {
-    FAPI_INF("Start");
+    FAPI_INF("%s Start p9_mss_attr_update", mss::c_str(i_target) );
 
     // if there are no DIMM, exit
     if (mss::count_dimm(i_target) == 0)
@@ -541,6 +535,6 @@ p9_mss_attr_update(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
     }
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_INF("%s End p9_mss_attr_update", mss::c_str(i_target) );
     return fapi2::current_err;
 }

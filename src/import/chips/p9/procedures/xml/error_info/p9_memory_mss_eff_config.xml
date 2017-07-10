@@ -49,22 +49,6 @@
   </hwpError>
 
   <hwpError>
-    <rc>RC_MSS_UNSUPPORTED_DEV_TYPE</rc>
-    <description>Device type is not DDR4 or DDR3</description>
-    <ffdc>DEV_TYPE</ffdc>
-    <callout>
-      <target>DIMM_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>DIMM_TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>DIMM_TARGET</target>
-    </gard>
-  </hwpError>
-
-  <hwpError>
     <rc>RC_MSS_INVALID_FINE_REFRESH_MODE_WITH_TEMP_REFRESH_MODE_ENABLED</rc>
     <description>
         Invalid fine refresh mode received due to temperature refresh mode being enabled

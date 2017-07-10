@@ -561,6 +561,23 @@
 </hwpError>
 
 <hwpError>
+  <rc>RC_MSS_PLUG_RULES_ERROR_IN_PHY</rc>
+  <description>
+     Error in mss_ddr_phy_reset due error on DIMM attributes
+     Should have been caught in plug rules
+  </description>
+  <ffdc>DRAM_GEN_DIMM_0</ffdc>
+  <ffdc>DRAM_GEN_DIMM_1</ffdc>
+  <ffdc>DIMM_TYPE_DIMM_0</ffdc>
+  <ffdc>DIMM_TYPE_DIMM_1</ffdc>
+  <ffdc>MCA_TARGET</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
   <rc>RC_MSS_DDR_PHY_RESET_PORT_FIRS_REPORTED</rc>
   <description>
     One or more ports noted a set error bit during PHY reset

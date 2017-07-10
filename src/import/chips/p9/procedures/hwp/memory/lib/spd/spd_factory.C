@@ -27,9 +27,9 @@
 /// @brief SPD factory and functions
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 // std lib
@@ -122,7 +122,7 @@ fapi_try_exit:
 ///
 /// @brief       Decodes SPD Revision additions level
 /// @param[in]   i_target dimm target
-/// @param[in]  i_spd_data SPD data
+/// @param[in]   i_spd_data SPD data
 /// @param[out]  o_value additions revision num
 /// @return      FAPI2_RC_SUCCESS if okay
 /// @note        Decodes SPD Byte 1 (bits 7~4).
@@ -637,7 +637,7 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
                          .set_DIMM_TYPE(l_dimm_type)
                          .set_RAW_CARD_REV(l_ref_raw_card_rev)
                          .set_DIMM_TARGET(i_target),
-                         "Invalid reference raw card recieved for RDIMM: %d for %s",
+                         "Invalid reference raw card received for RDIMM: %d for %s",
                          l_ref_raw_card_rev,
                          mss::c_str(i_target) );
             break;
@@ -649,17 +649,16 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
                          .set_DIMM_TYPE(l_dimm_type)
                          .set_RAW_CARD_REV(l_ref_raw_card_rev)
                          .set_DIMM_TARGET(i_target),
-                         "Invalid reference raw card recieved for LRDIMM: %d for %s",
+                         "Invalid reference raw card received for LRDIMM: %d for %s",
                          l_ref_raw_card_rev,
                          mss::c_str(i_target));
             break;
 
         default:
-
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_DIMM_TYPE()
                          .set_DIMM_TYPE(l_dimm_type)
-                         .set_TARGET(i_target),
+                         .set_DIMM_TARGET(i_target),
                          "Recieved invalid dimm type: %d for %s",
                          l_dimm_type, mss::c_str(i_target) );
             break;

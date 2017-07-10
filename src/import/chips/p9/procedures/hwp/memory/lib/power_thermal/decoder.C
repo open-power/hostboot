@@ -27,9 +27,9 @@
 /// @brief Decode MSS_MRW_PWR_CURVE_SLOPE, PWR_CURVE_INTERCEPT, and THERMAL_POWER_LIMIT
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 // fapi2
@@ -290,44 +290,45 @@ fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& 
 
         mss::dimm::kind l_kind (l_dimm);
         mss::power_thermal::decoder l_decoder(l_kind);
-        FAPI_TRY( l_decoder.generate_encoding() );
+        FAPI_TRY( l_decoder.generate_encoding(), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
 
         // The first entry into these arrays must be valid
         // If we don't find any values, the attributes aren't found so go with some defaults
         if (i_slope.empty() || i_slope[0] == 0)
         {
-            FAPI_INF("ATTR_MSS_MRW_PWR_SLOPE not found!!");
+            FAPI_INF("%s ATTR_MSS_MRW_PWR_SLOPE not found!!", mss::c_str(i_mcs));
             o_vddr_slope [l_mca_pos][l_dimm_pos] = default_power::VDDR_SLOPE;
             o_total_slope [l_mca_pos][l_dimm_pos] = default_power::TOTAL_SLOPE;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_slope(i_slope) );
+            FAPI_TRY( l_decoder.find_slope(i_slope), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_vddr_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_slope;
             o_total_slope [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_slope;
         }
 
         if (i_intercept.empty() || i_intercept[0] == 0)
         {
-            FAPI_INF("ATTR_MSS_MRW_PWR_INTERCEPT not found!!");
+            FAPI_INF("%s ATTR_MSS_MRW_PWR_INTERCEPT not found!!", mss::c_str(i_mcs));
             o_total_int [l_mca_pos][l_dimm_pos] = default_power::TOTAL_INT;
             o_vddr_int [l_mca_pos][l_dimm_pos] = default_power::VDDR_INT;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_intercept(i_intercept) );
+            FAPI_TRY( l_decoder.find_intercept(i_intercept), "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_vddr_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_vddr_intercept;
             o_total_int [l_mca_pos][l_dimm_pos] = l_decoder.iv_total_intercept;
         }
 
         if (i_thermal_power_limit.empty() || i_thermal_power_limit[0] == 0)
         {
-            FAPI_INF("ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT not found!!");
+            FAPI_INF("%s ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT not found!!", mss::c_str(i_mcs));
             o_thermal_power [l_mca_pos][l_dimm_pos] = default_power::THERMAL_LIMIT;
         }
         else
         {
-            FAPI_TRY( l_decoder.find_thermal_power_limit(i_thermal_power_limit) );
+            FAPI_TRY( l_decoder.find_thermal_power_limit(i_thermal_power_limit),
+                      "%s Error in get_power_attrs", mss::c_str(i_mcs) );
             o_thermal_power [l_mca_pos][l_dimm_pos] = l_decoder.iv_thermal_power_limit;
         }
     }

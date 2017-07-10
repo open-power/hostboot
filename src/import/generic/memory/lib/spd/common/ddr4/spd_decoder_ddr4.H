@@ -28,9 +28,9 @@
 /// @brief SPD decoder declarations
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_SPD_DECODER_H_
@@ -58,6 +58,9 @@ namespace mss
 namespace spd
 {
 
+///
+/// @brief sdram package types. Follows encodings in SPD
+///
 enum sdram_package_type : uint8_t
 {
     // Package Type
@@ -70,6 +73,9 @@ enum sdram_package_type : uint8_t
     SINGLE_LOAD_STACK = 2,    ///< Single load stack (3DS)
 };
 
+///
+/// @brief enum for voltage information. Encoding comes from SPD
+///
 enum nominal_voltage : uint8_t
 {
     NOT_OPERABLE = 0, ///< Not operable at 1.2V

@@ -2774,7 +2774,7 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
         // the errors and the disables there.
         FAPI_ASSERT_NOEXIT(v == 0,
                            fapi2::MSS_FAILED_RDVREF_CAL()
-                           .set_DIMM_TARGET(i_target)
+                           .set_MCA_TARGET(i_target)
                            .set_REGISTER(TT::RD_VREF_CAL_ERROR_REG[l_index])
                            .set_VALUE(v),
                            "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
@@ -2836,7 +2836,7 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
             // Now does bitwise anding to determine what's an actual error w/ the masking
             FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->first),
                                fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_DIMM_TARGET(i_target)
+                               .set_MCA_TARGET(i_target)
                                .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].first)
                                .set_VALUE(l_data_it->first)
                                .set_MASK(l_mask_it->first),
@@ -2849,7 +2849,7 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
 
             FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->second),
                                fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_DIMM_TARGET(i_target)
+                               .set_MCA_TARGET(i_target)
                                .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].second)
                                .set_VALUE(l_data_it->second)
                                .set_MASK(l_mask_it->second),

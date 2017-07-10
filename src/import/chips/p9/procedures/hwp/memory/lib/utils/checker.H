@@ -28,9 +28,9 @@
 /// @brief Contains common functions that perform checks
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP FW Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _CHECKER_H_
@@ -88,78 +88,6 @@ inline fapi2::ReturnCode invalid_dq_data( const fapi2::Target<fapi2::TARGET_TYPE
                 mss::c_str(i_target), i_phase_timing,
                 i_nibble, l_aadr, l_aaer );
 
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief      Checks homogenous DDR4 dimm configuration (e.g. DDR4)
-/// @param[in]  i_target the controller target
-/// @return     fapi2::FAPI2_RC_SUCCESS iff ok
-///
-inline fapi2::ReturnCode dram_type(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target)
-{
-    uint8_t l_dram_gen[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {0};
-
-    // Retrieve DDR4 dimm attributes
-    FAPI_TRY(eff_dram_gen(i_target, &(l_dram_gen[0][0])));
-
-    // Make sure all DRAMs are DDR4 or throw an error
-    for (const auto& l_mca : i_target.getChildren<fapi2::TARGET_TYPE_MCA>())
-    {
-        const auto l_port_num = mss::index(l_mca);
-
-        for (const auto& l_dimm : l_mca.getChildren<fapi2::TARGET_TYPE_DIMM>())
-        {
-            const auto l_dimm_num = mss::index(l_dimm);
-
-            FAPI_INF("%s DRAM device type is %llX",
-                     mss::c_str(l_dimm),
-                     l_dram_gen[l_port_num][l_dimm_num]);
-
-            // Nimbus supports only DDR4
-            FAPI_ASSERT(l_dram_gen[l_port_num][l_dimm_num] == fapi2::ENUM_ATTR_EFF_DRAM_GEN_DDR4,
-                        fapi2::MSS_UNSUPPORTED_DEV_TYPE().
-                        set_DEV_TYPE(l_dram_gen[l_port_num][l_dimm_num]),
-                        "%s Incorrect DRAM device generation, DRAM generation is %llx",
-                        mss::c_str(l_dimm),
-                        l_dram_gen[l_port_num][l_dimm_num]);
-        }// dimm
-    }// mca
-
-fapi_try_exit:
-    return fapi2::current_err;
-
-}// dram_type
-
-///
-/// @brief      Checks conditional and implements traces & exits if it fails
-/// @param[in]  i_target the dimm target
-/// @param[in]  i_conditional conditional that we are testing against
-/// @param[in]  i_key map key
-/// @param[in]  i_data additional returned data
-/// @param[in]  i_err_str error string to print out when conditional fails
-/// @return     ReturnCode
-///
-inline fapi2::ReturnCode fail_for_invalid_map(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const bool i_conditional,
-        const uint64_t i_key,
-        const uint64_t i_data = 0,
-        const char* i_err_str = "")
-{
-    // Invalid keys won't return useful or valid data so we allow optional data
-    FAPI_ASSERT(i_conditional,
-                fapi2::MSS_INVALID_KEY().
-                set_KEY(i_key).
-                set_DATA(i_data).
-                set_DIMM_TARGET(i_target),
-                "%s. %s Could not find value from key %d. Returned data: %d.",
-                c_str(i_target),
-                i_err_str,
-                i_key,
-                i_data);
-
-    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }

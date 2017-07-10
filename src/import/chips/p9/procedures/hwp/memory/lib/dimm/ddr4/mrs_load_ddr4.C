@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -211,7 +211,7 @@ fapi2::ReturnCode rtt_wr_to_rtt_nom_helper(const fapi2::Target<TARGET_TYPE_DIMM>
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RTT_WR_ENCODING().
                          set_RTT_WR(i_rtt_wr).
-                         set_TARGET(i_target),
+                         set_DIMM_TARGET(i_target),
                          "Received invalid RTT_WR value: 0x%02x for %s.",
                          i_rtt_wr, mss::c_str(i_target) );
             break;

@@ -223,7 +223,6 @@ fapi2::ReturnCode check_dead_load( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
         l_live_dimm = ( l_found == l_functional_dimms.end() ) ? l_live_dimm : l_plugged_dimms[0];
         FAPI_ASSERT( false,
                      fapi2::MSS_DEAD_LOAD_ON_PORT()
-                     .set_DEAD_DIMM(l_dead_dimm)
                      .set_FUNCTIONAL_DIMM(l_live_dimm),
                      "%s has two DIMMs installed, but one is deconfigured (%d), so deconfiguring the other (%d) because of dead load",
                      mss::c_str(i_target), mss::index(l_dead_dimm), mss::index(l_live_dimm));

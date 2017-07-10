@@ -28,9 +28,9 @@
 /// @brief Raw card data structure
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_RDIMM_RAW_CARDS_H_
@@ -46,7 +46,10 @@ namespace mss
 namespace rdimm
 {
 
-// In the order of the vector below which needs to be sorted by enum value
+///
+/// @brief raw card encoding as per SPD
+/// @note In the order of the vector below which needs to be sorted by enum value
+///
 enum raw_card_rev : uint8_t
 {
     A1 = 0x20,

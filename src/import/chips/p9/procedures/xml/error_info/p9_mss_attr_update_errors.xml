@@ -31,8 +31,15 @@
       Procedure: p9_mss_attr_update
       Unsupported MVPD CRP0 Lx Keyword version
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>CHIP_TARGET</ffdc>
     <ffdc>VERSION</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -41,8 +48,15 @@
       Procedure: p9_mss_attr_update
       Unexpected MVPD CRP0 Lx Keyword size
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>CHIP_TARGET</ffdc>
     <ffdc>KEYWORD_SIZE</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>CHIP_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

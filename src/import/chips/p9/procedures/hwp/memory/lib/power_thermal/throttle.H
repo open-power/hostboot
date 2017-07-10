@@ -28,7 +28,7 @@
 ///
 
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -42,19 +42,30 @@ namespace mss
 {
 namespace power_thermal
 {
+///
+/// @brief throttle constants used in the power_thermal functions
+///
 enum throttle_const : size_t
 {
-    // Dram data bus utilization is bus utilization / 4
+    /// Dram data bus utilization is bus utilization / 4
     DRAM_BUS_UTILS = 4,
-    //10000 to convert to and from c%
+
+    /// 10000 to convert to and from c%
     UTIL_CONVERSION = 10000,
+
+    /// Conversion to percentage
     PERCENT_CONVERSION = 100,
 
-    //MIN_UTIL and IDLE_UTIL are in c%
+    /// MIN_UTIL is  in c%
     MIN_UTIL = 100,
+
+    /// IDLE_UTIL is  in c%
     IDLE_UTIL = 0,
+
+    /// Minimum throttle allowed for the port and or slot. If we set to 0, we brick the port
     MIN_THROTTLE = 1,
 };
+
 ///
 /// @class throttle
 /// @brief Determine power_thermal throttles for memory

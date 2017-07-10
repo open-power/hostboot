@@ -28,9 +28,9 @@
 /// @brief Perform thermal calculations as part of the effective configuration
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -74,10 +74,10 @@ extern "C"
         std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit = {};
 
         //Get the vectors of power curves and thermal power limits to convert to buffers
-        FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data() ));
-        FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()) );
-        FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
-        FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets));
+        FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data()), "Error in p9_mss_eff_config_thermal");
+        FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()), "Error in p9_mss_eff_config_thermal" );
+        FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()), "Error in p9_mss_eff_config_thermal" );
+        FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets), "Error in p9_mss_eff_config_thermal");
 
         for (size_t i = 0; i < mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS; ++i)
         {
@@ -133,7 +133,7 @@ extern "C"
                       l_thermal_power));
             //Sets throttles to max_databus_util value
             FAPI_INF("Restoring throttles");
-            FAPI_TRY( mss::power_thermal::restore_runtime_throttles(l_mcs));
+            FAPI_TRY( mss::power_thermal::restore_runtime_throttles(l_mcs), "Error in p9_mss_eff_config_thermal");
 
             //Set the power attribute (TOTAL_PWR) to just VDDR for the POWER bulk_pwr_throttles, restore to vddr+vpp  later for OCC
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_TOTAL_PWR_SLOPE,
@@ -158,7 +158,7 @@ extern "C"
         //Set runtime throttles to worst case between ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT
         //and ATTR_MSS_MEM_RUNTIME_THROTTLED_N_COMMANDS_PER_SLOT and the _PORT equivalents also
         FAPI_INF("Starting update");
-        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets) );
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets), "Error in p9_mss_eff_config_thermal" );
         FAPI_INF("finished update");
 
         //Set VDDR+VPP power curve values
@@ -196,7 +196,7 @@ extern "C"
         FAPI_EXEC_HWP(l_rc, p9_mss_bulk_pwr_throttles, i_targets, mss::throttle_type::THERMAL);
         FAPI_TRY(l_rc, "Failed running p9_mss_bulk_pwr_throttles with THERMAL throttling in p9_mss_eff_config_thermal");
         //Update everything to worst case
-        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets) );
+        FAPI_TRY( mss::power_thermal::update_runtime_throttles (i_targets), "Error in p9_mss_eff_config_thermal" );
 
         //Done
         FAPI_INF( "End effective config thermal");
