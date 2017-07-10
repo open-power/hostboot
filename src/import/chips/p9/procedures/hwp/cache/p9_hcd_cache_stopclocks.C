@@ -78,7 +78,7 @@ p9_hcd_cache_stopclocks(
     uint32_t                                       l_loops1ms                  = 0;
     uint32_t                                       l_scom_addr                 = 0;
     uint8_t                                        l_attr_chip_unit_pos        = 0;
-    uint8_t                                        l_attr_vdm_enable           = 0;
+    uint8_t                                        l_attr_vdm_enabled           = 0;
     uint8_t                                        l_is_mpipl                  = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
@@ -135,8 +135,8 @@ p9_hcd_cache_stopclocks(
         FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QCCR_SCOM1, l_data64));
     }
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,    l_sys,
-                           l_attr_vdm_enable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED, l_chip,
+                           l_attr_vdm_enabled));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
                            l_attr_chip_unit_pos));
 //  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
@@ -263,7 +263,7 @@ p9_hcd_cache_stopclocks(
     // Disable VDM
     // -------------------------------
 
-    if (l_attr_vdm_enable == fapi2::ENUM_ATTR_VDM_ENABLE_ON)
+    if (l_attr_vdm_enabled == fapi2::ENUM_ATTR_VDM_ENABLED_TRUE)
     {
         FAPI_DBG("Clear Jump Protect Enable via DPLL_CTRL[1] (no need to poll DPLL_STAT)");
         FAPI_TRY(putScom(i_target, EQ_QPPM_DPLL_CTRL_CLEAR, MASK_SET(1)));
