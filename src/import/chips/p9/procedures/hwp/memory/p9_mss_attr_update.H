@@ -28,9 +28,9 @@
 /// @brief Programatic over-rides related to effective config
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP FW Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_ATTR_UPDATE__
