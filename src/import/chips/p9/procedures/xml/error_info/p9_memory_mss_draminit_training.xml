@@ -577,23 +577,23 @@
   <ffdc>VALUE</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <callout>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
   </deconfigure>
   <gard>
-    <target>DIMM_TARGET</target>
+      <target>MCA_TARGET</target>
   </gard>
 </hwpError>
 
@@ -675,19 +675,19 @@
   <ffdc>MASK</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
     <targetType>TARGET_TYPE_MCA</targetType>
   </collectRegisterFfdc>
   <deconfigure>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
   </deconfigure>
   <gard>
-    <target>DIMM_TARGET</target>
+    <target>MCA_TARGET</target>
   </gard>
 </hwpError>
 
