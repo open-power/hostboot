@@ -93,7 +93,7 @@ const HdatKeywordInfo l_mvpdKeywords[] =
 extern trace_desc_t *g_trac_hdat;
 
 /**
- * @brief This routine fill up the SP I/O path information.          
+ * @brief This routine fill up the SP I/O path information.
  *
  * @pre The o_pathArray must be set to zero.
  *
@@ -177,8 +177,8 @@ static errlHndl_t hdatGetPathInfo(
                                                          LPC::LPCHC_REG_SPACE;
 #ifdef CONFIG_CONSOLE
         CONSOLE::UartInfo_t l_uartInfo = CONSOLE::getUartInfo();
-    
-        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfUARTDev = 
+
+        o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBarOfUARTDev =
                                                     l_uartInfo.lpcBaseAddr;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofUARTAdrSpc =
                                                     l_uartInfo.lpcSize;
@@ -194,7 +194,7 @@ static errlHndl_t hdatGetPathInfo(
 
 #if 0 //Temp remove until ready CONFIG_BMC_IPMI
         IPMI::BmcInfo_t l_bmcInfo = IPMI::getBmcInfo();
-        
+
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatBARofBTDevAdrSpc =
                                                 l_bmcInfo.bulkTransferLpcBaseAddr;
         o_pathArray[o_arrayHdr.hdatArrayCnt].hdatSizeofBTDevAdrSpc =
@@ -209,7 +209,7 @@ static errlHndl_t hdatGetPathInfo(
         // except the end points Service Processor and master proc
         // The Fru's slca index should be populated for this entry by
         // starting from SP
-        
+
         /* TARGETING::Target* l_lpcPathTargetsArray[] =
                            { i_pSpTarget , l_pMasterProcChipTargetHandle };
         uint32_t l_fruIdx = 0;
@@ -307,10 +307,10 @@ HdatSpSubsys::HdatSpSubsys(errlHndl_t &o_errlHndl,
 {
 
     HDAT_ENTER();
-    
+
     // Copy the input phy address to this object member variable
     iv_msAddr  = ((uint64_t) io_msAddr.hi << 32) | io_msAddr.lo;
-    
+
     do{
         // Fill the internal data pointers
         o_errlHndl = this->hdatFillDataPtrs();
@@ -319,7 +319,7 @@ HdatSpSubsys::HdatSpSubsys(errlHndl_t &o_errlHndl,
             HDAT_ERR("Error while filling internal data ptrs for SP subsys");
             break;
         }
-    
+
         // Size of the SP sub sys structure
         iv_size  = sizeof(hdatHDIF_t) +
                          ( sizeof(hdatHDIFDataHdr_t) *
@@ -384,7 +384,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         memset(&iv_impl , 0x0 , sizeof(hdatSpImpl_t));
         memset(&iv_fru, 0x0 , sizeof(hdatFruId_t));
         memset(&iv_mem, 0x0 , sizeof(hdatSpMem_t));
-    
+
         // Fill the SP impl data
         iv_impl.hdatHdwVer = 0x0003;
         iv_impl.hdatSftVer = 0x0002;
@@ -392,8 +392,8 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         iv_impl.hdatStatus = HDAT_SP_INSTALLED;
             iv_impl.hdatStatus |= HDAT_SP_PRIMARY;
             iv_impl.hdatStatus |=  HDAT_SP_FUNCTIONAL;
-#if 0  // TODO : RTC 166755
-        TARGETING::PredicateCTM l_bmcFilter(CLASS_CHIP, TYPE_SP, MODEL_BMC);
+
+        TARGETING::PredicateCTM l_bmcFilter(CLASS_SP, TYPE_BMC, MODEL_AST2500);
         TARGETING::PredicateHwas l_pred;
         l_pred.present(true);
         TARGETING::PredicatePostfixExpr l_presentSp;
@@ -404,35 +404,33 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
                             TARGETING::targetService().end(),
                             &l_presentSp);
 
-        // As of now we are not supporting any other bmc stacks.But there is a scope for 
-        // improvement here by using data driven approach. TODO : RTC@166476
+        // As of now we are not supporting any other bmc stacks.
+        // But there is a scope for improvement here by using
+        // data driven approach. TODO : RTC@166476
         if(l_filter)
         {
-            strcpy( iv_impl.hdatBmcFamily , "ibm,bmc,openbmc");
+           TARGETING::ATTR_BMC_MANUFACTURER_type l_bmcManufacturer;
+           l_filter->
+              tryGetAttr<TARGETING::ATTR_BMC_MANUFACTURER>(l_bmcManufacturer);
+
+           TARGETING::ATTR_BMC_HW_CHIP_TYPE_type l_bmcHwChip;
+           l_filter->tryGetAttr<TARGETING::ATTR_BMC_HW_CHIP_TYPE>(l_bmcHwChip);
+
+           TARGETING::ATTR_BMC_SW_TYPE_type l_bmcSw;
+           l_filter->tryGetAttr<TARGETING::ATTR_BMC_SW_TYPE>(l_bmcSw);
+
+           strcpy( iv_impl.hdatBmcFamily , l_bmcManufacturer);
+           strcat( iv_impl.hdatBmcFamily , ",");
+           strcpy( iv_impl.hdatBmcFamily , l_bmcHwChip);
+           strcat( iv_impl.hdatBmcFamily , ",");
+           strcpy( iv_impl.hdatBmcFamily , l_bmcSw);
         }
         else
         {
-            /*@
-            * @errortype
-            * @moduleid         HDAT::MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS
-            * @reasoncode       HDAT::RC_NO_BMC_TARGET_FOUND
-            * @devdesc          No BMC target found
-            * @custdesc         Firmware encountered an internal
-            *                   error while retrieving target data
-            */
-            hdatBldErrLog(l_errlHndl,
-                          MOD_HDAT_SPSUBSYS_FILL_DATA_PTRS,
-                          RC_NO_BMC_TARGET_FOUND,
-                          0,0,0,0);
-
-            HDAT_ERR("No BMC found on this machine");
-            break;
-
+           strcpy( iv_impl.hdatBmcFamily , "ibm,ast2500,openbmc");
         }
-#endif
-        strcpy( iv_impl.hdatBmcFamily , "ibm,ast2500,openbmc");
 
-        // Fill the FRU data 
+        // Fill the FRU data
         iv_fru.hdatSlcaIdx = 0;
         iv_fru.hdatResourceId = 0;
 
@@ -448,7 +446,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         {
             iv_mem.hdatHostRamSize = l_info.size;
         }
-        
+
         // Fill the SP I/O path information
 
         iv_ioPathArray = reinterpret_cast<hdatSpIoPath_t *>(calloc(
@@ -456,7 +454,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         // No need to check iv_ioPathArray because calloc won't return if out of memory.
 
         l_errlHndl = hdatGetPathInfo(
-                                     iv_numOfIoPaths,                      
+                                     iv_numOfIoPaths,
                                      iv_ioPathArrayHdr,
                                      iv_ioPathArray);
         HDAT_DBG(" Num of Io Paths returned : %d", iv_numOfIoPaths);
@@ -469,7 +467,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         // Fill the kwd
 
         // As of now there is no VPD present on BMC.
-        // Hence we are filling PROC data to get things moving. 
+        // Hence we are filling PROC data to get things moving.
         // TODO : RTC : 151618 Will relook at this once we get mail from Tom.
 
 
@@ -526,7 +524,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
                 delete[] o_fmtKwd;
             }
         }
-        
+
         // Done with getting all the data. Now its time to Add.
         if( l_errlHndl == NULL )
         {
@@ -581,7 +579,7 @@ HdatSpSubsys::~HdatSpSubsys()
         hdatBldErrLog(o_errlHndl,
                 HDAT::MOD_HDAT_SP_SUBSYS_DTOR,
                 RC_DEV_MAP_FAIL,
-                0,0,0,0,
+                rc,0,0,0,
                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                 HDAT_VERSION1,
                 true);

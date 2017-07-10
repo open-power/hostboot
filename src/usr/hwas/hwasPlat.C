@@ -494,7 +494,8 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // Hostboot is told everything it needs to know about the
         //  SP at compile time so just mark the target as present
         //  by default
-        if (pTarget->getAttr<ATTR_TYPE>() == TYPE_SP)
+        if ((pTarget->getAttr<ATTR_TYPE>() == TYPE_SP) ||
+            (pTarget->getAttr<ATTR_TYPE>() ==  TYPE_BMC))
         {
             HWAS_DBG("pTarget %.8X - detected present",
                 pTarget->getAttr<ATTR_HUID>());

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -505,9 +505,9 @@ static void hdatAddSPToSLCATable(TARGETING::Target *i_Target,
                               char *i_LocCodePrefix,
                       vector<HDAT_slcaEntry_t> &o_hdatslca)
 {
-    TARGETING::PredicateCTM l_spPredicate(TARGETING::CLASS_CHIP,
-                                             TARGETING::TYPE_SP,
-                                             TARGETING::MODEL_BMC);
+    TARGETING::PredicateCTM l_spPredicate(TARGETING::CLASS_SP,
+                                             TARGETING::TYPE_BMC,
+                                             TARGETING::MODEL_AST2500);
     TARGETING::PredicateHwas l_predHwas;
     l_predHwas.present(true);
 
@@ -515,14 +515,32 @@ static void hdatAddSPToSLCATable(TARGETING::Target *i_Target,
     l_presentSP.push(&l_spPredicate).push(&l_predHwas).And();
 
     //Get all Service processors in the system
-    TARGETING::TargetRangeFilter l_spFilter(
+    TARGETING::TargetRangeFilter* l_spFilter= new TARGETING::TargetRangeFilter(
                                         TARGETING::targetService().begin(),
                                         TARGETING::targetService().end(),
                                         &l_presentSP);
 
-    for (;l_spFilter;++l_spFilter)
+    // if the predicate is empty, then use old predicate
+    if (!(*l_spFilter))
     {
-        TARGETING::Target *l_spTarget = (*l_spFilter);
+       delete l_spFilter;
+
+       TARGETING::PredicateCTM l_spPredicate(TARGETING::CLASS_CHIP,
+                                             TARGETING::TYPE_SP,
+                                             TARGETING::MODEL_BMC);
+
+       TARGETING::PredicatePostfixExpr l_presentSP;
+       l_presentSP.push(&l_spPredicate).push(&l_predHwas).And();
+
+       l_spFilter = new TARGETING::TargetRangeFilter(
+                                     TARGETING::targetService().begin(),
+                                     TARGETING::targetService().end(),
+                                     &l_presentSP);
+    }
+
+    for (;(*l_spFilter);++(*l_spFilter))
+    {
+        TARGETING::Target *l_spTarget = (*(*l_spFilter));
 
         hdatAddSLCAEntry(l_spTarget, HDAT_SLCA_FRU_TYPE_SP, i_slcaParentIndex,
                                                   i_LocCodePrefix,o_hdatslca);
@@ -532,6 +550,8 @@ static void hdatAddSPToSLCATable(TARGETING::Target *i_Target,
 
         HDAT_DBG("Added Service Processor to SLCA");
     }
+
+    delete l_spFilter;
 }
 
 /**
