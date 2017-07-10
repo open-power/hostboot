@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -345,7 +345,6 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
   </attribute>
 -->
 
-<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_MCBIST_RANDOM_ADDRESS</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -362,7 +361,6 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
--->
 
 <!--
     <attribute>

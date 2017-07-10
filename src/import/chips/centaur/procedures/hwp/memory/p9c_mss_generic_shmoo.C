@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -484,15 +484,15 @@ extern "C"
         uint8_t l_max_byte = 10;
 
         struct subtest_info l_sub_info[30];
-
-        FAPI_TRY(schmoo_setup_mcb(i_target));
+        FAPI_DBG("%s:  enter sanity check", mss::c_str(i_target));
+        FAPI_TRY(schmoo_setup_mcb(i_target), "Sanity Check failed schmoo_setup_mcb");
         FAPI_DBG("%s:  starting  mcbist now", mss::c_str(i_target));
-        FAPI_TRY(start_mcb(i_target));
+        FAPI_TRY(start_mcb(i_target), "Sanity Check failed start_mcb");
         FAPI_DBG("%s:  polling   mcbist now", mss::c_str(i_target));
         FAPI_TRY(poll_mcb(i_target, &l_mcb_status, l_sub_info, 1), "generic_shmoo::do_mcbist_test: POLL MCBIST failed !!");
         FAPI_DBG("%s:  checking error map ", mss::c_str(i_target));
         FAPI_TRY(mcb_error_map(i_target, mcbist_error_map, l_CDarray0, l_CDarray1,
-                               count_bad_dq));
+                               count_bad_dq), "Failed mcb_error_map");
 
         for (l_p = 0; l_p < MAX_PORT; l_p++)
         {
@@ -4583,7 +4583,7 @@ extern "C"
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_TEST_TYPE, i_target, l_testtype));
         }
 
-        FAPI_TRY(setup_mcbist(i_target, i_mcbbytemask1, 0, 0x0ull , l_sub_info, l_str_cust_addr));
+        FAPI_TRY(setup_mcbist(i_target, i_mcbbytemask1, 0, 0x0ull , l_sub_info, l_str_cust_addr), "Failed setup_mcbist");
     fapi_try_exit:
         return fapi2::current_err;
     }

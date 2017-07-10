@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -87,6 +87,7 @@
     The cross_coupled utility function received a bad input type parameter
   </description>
   <ffdc>TYPE_PARAM</ffdc>
+  <ffdc>MBA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
@@ -100,6 +101,7 @@
     The cross_coupled utility function received a invalid DQS
   </description>
   <ffdc>INVALID_DQS</ffdc>
+  <ffdc>MBA_TARGET</ffdc>
   <callout>
     <procedure>CODE</procedure>
     <priority>HIGH</priority>

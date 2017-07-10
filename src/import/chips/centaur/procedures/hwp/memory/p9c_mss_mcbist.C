@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,10 +84,10 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 0, 0, 1, l_sub_info));
+                                        W, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 0, 0, 1, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 1, l_sub_info));
+                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 1, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == MEMWRITE)
@@ -98,7 +98,7 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 0, 0, 0, l_sub_info));
+                                        W, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 0, 0, 0, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == MEMREAD)
@@ -109,7 +109,7 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 0, 0, 0, l_sub_info));
+                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 0, 0, 0, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
         }
         else if (i_test_type == SIMPLE_FIX)
         {
@@ -119,24 +119,24 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        W, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             l_done_bit = 1;
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_ADDR_BANK, i_target_mba,  l_done_bit));
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info));
+                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info));
+                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR1Q,
-                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info));
+                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
         }
         else if (i_test_type == SIMPLE_RAND)
         {
@@ -146,7 +146,7 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        WR, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        WR, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             l_done_bit = 1;
@@ -154,17 +154,17 @@ extern "C"
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 1, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        R, 1, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info));
+                                        W, 0, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, RF, DATA_RF, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info));
+                                        R, 0, RF, DATA_RF, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR1Q,
-                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info));
+                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == WR_ONLY)
@@ -175,10 +175,10 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        W, 0, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             l_done_bit = 1;
@@ -186,14 +186,14 @@ extern "C"
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, RF, FIX, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info));
+                                        W, 0, RF, FIX, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info));
+                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR1Q,
-                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info));
+                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == W_ONLY)
@@ -204,7 +204,7 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        W, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             l_done_bit = 1;
@@ -212,18 +212,18 @@ extern "C"
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        R, 0, SF, FIX, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
                                         W, 0, RF, FIX, 0, DEFAULT, FIX_ADDR, 2, 2, 4,
-                                        l_sub_info));
+                                        l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info));
+                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR1Q,
-                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info));
+                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == R_ONLY)
@@ -234,7 +234,7 @@ extern "C"
             }
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             l_done_bit = 1;
@@ -242,17 +242,17 @@ extern "C"
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        GOTO, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        GOTO, 0, SF, FIX, 0, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, RF, FIX, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info));
+                                        W, 0, RF, FIX, 0, DEFAULT, FIX_ADDR, 2, 2, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info));
+                                        OPER_RAND, 0, RF, FIX, 1, DEFAULT, FIX_ADDR, 3, 3, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR1Q,
-                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info));
+                                        RW, 4, RF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 4, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
         }
         else if (i_test_type == SIMPLE_FIX_RF)
@@ -260,10 +260,10 @@ extern "C"
             FAPI_DBG("%s:Current MCBIST TESTTYPE : SIMPLE_FIX_RF ",
                      mss::c_str(i_target_mba));
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        W, 0, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info));
+                                        W, 0, SF, DATA_RF, 0, DEFAULT, FIX_ADDR, 0, 0, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             FAPI_TRY(mcb_write_test_mem(i_target_mba, CEN_MBA_MCBMR0Q,
-                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info));
+                                        R, 0, SF, DATA_RF, 1, DEFAULT, FIX_ADDR, 1, 1, 4, l_sub_info), "cfg_mcb_test_mem failed mcb_write_test_mem");
 
             l_done_bit = 1;
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MCBIST_ADDR_BANK, i_target_mba,  l_done_bit));
@@ -413,16 +413,6 @@ extern "C"
         }
 
         const auto i_target_centaur = i_target_mba.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
-
-        if (l_print == 0)
-        {
-            FAPI_DBG("Error in getting parent chip!");
-        }
-
-        if (l_print == 0)
-        {
-            FAPI_DBG("Function cfg_mcb_dgen");
-        }
 
         //Read MBA position attribute 0 - MBA01 1 - MBA23
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_mba,  l_mbaPosition));

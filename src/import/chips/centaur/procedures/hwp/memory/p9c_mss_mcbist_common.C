@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,7 +110,7 @@ extern "C"
         mss_conversion_testtype(i_target_mba, i_mcbtest, i_mcbtest1);
         mss_conversion_data(i_target_mba, i_mcbpatt, i_mcbpatt1);
 
-        FAPI_TRY(mcb_reset_trap(i_target_mba));
+        FAPI_TRY(mcb_reset_trap(i_target_mba), "Failed mcb_reset_trap");
 
         //should set attr for this 1st 8 or last 8
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_ERROR_CAPTURE, i_target_mba,  l_bit32));
@@ -187,16 +187,16 @@ extern "C"
             FAPI_DBG("%s:steer mode is not enabled", mss::c_str(i_target_mba));
         }
 
-        FAPI_TRY(cfg_mcb_test_mem(i_target_mba, i_mcbtest1, i_sub_info));
+        FAPI_TRY(cfg_mcb_test_mem(i_target_mba, i_mcbtest1, i_sub_info), "Failed cfg_mcb_test_mem");
 
-        FAPI_TRY(cfg_mcb_dgen(i_target_mba, i_mcbpatt1, i_mcbrotate, i_mcbrotdata));
+        FAPI_TRY(cfg_mcb_dgen(i_target_mba, i_mcbpatt1, i_mcbrotate, i_mcbrotdata), "Failed cfg_mcb_dgen");
 
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_ADDR_MODES, i_target_mba,  l_new_addr));
 
         if (l_new_addr != 0)
         {
-            FAPI_TRY(address_generation(i_target_mba, i_str_cust_addr));
+            FAPI_TRY(address_generation(i_target_mba, i_str_cust_addr), "Failed address_generation");
         }
 
         FAPI_INF( "+++ Enabling Refresh +++");
@@ -210,7 +210,7 @@ extern "C"
 
         if (i_mcbbytemask != NONE)
         {
-            FAPI_TRY(cfg_byte_mask(i_target_mba));
+            FAPI_TRY(cfg_byte_mask(i_target_mba), "Failed cfg_byte_mask");
 
         }
 
@@ -812,8 +812,6 @@ extern "C"
         uint8_t o_val = 0;
         uint8_t i_byte1 = 0;
         uint8_t i_nibble1 = 0;
-        uint8_t l_zmode_port = 0;
-        uint8_t l_zmode = 0;
         uint8_t l_index = 0;
         uint8_t l_i = 0;
         uint8_t l_number = 0;
@@ -935,15 +933,7 @@ extern "C"
                 {
                     for (l_nibble = 0; l_nibble < MAX_NIBBLES_PER_BYTE; l_nibble++)
                     {
-                        if (l_port == 0 && l_zmode == 1 && l_zmode_port == 1)
-                        {
-                            continue;
-                        }
-                        else if (l_port == 1 && l_zmode == 1 && l_zmode_port == 0)
-                        {
-                            continue;
-                        }
-                        else if (l_port == 0)
+                        if (l_port == 0)
                         {
                             l_index0 = (l_rank * 20) + (l_byte * 2) + l_nibble;
                             l_index1 = l_index0;
@@ -1476,6 +1466,8 @@ extern "C"
                                 }
                             } // for nibble
                         } // for byte
+
+                        FAPI_DBG("%s", l_str);
                     } // for rank
                 } // ranks found
             } // for each port
@@ -1547,7 +1539,7 @@ extern "C"
 
         if (l_done_bit == 1)
         {
-            return fapi2::FAPI2_RC_FALSE;
+            return fapi2::current_err;
         }
 
         i_sub_info[i_testnumber1].l_operation_type = l_operation_type;

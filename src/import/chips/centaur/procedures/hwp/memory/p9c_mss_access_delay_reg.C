@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,7 @@
 //  My Includes
 //----------------------------------------------------------------------
 #include <p9c_mss_access_delay_reg.H>
-
+#include <generic/memory/lib/utils/c_str.H>
 //----------------------------------------------------------------------
 //  Includes
 //----------------------------------------------------------------------
@@ -156,18 +156,26 @@ extern "C" {
         }
 
         FAPI_ASSERT(i_port_u8 < MAX_PORTS_PER_MBA,
-                    fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                    fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                    set_MBA_TARGET(i_target_mba).
+                    set_ACCESS_TYPE_PARAM(i_access_type_e).
+                    set_PORT_PARAM(i_port_u8).
+                    set_RANK_PARAM(i_rank_u8).
+                    set_TYPE_PARAM(i_input_type_e).
+                    set_INDEX_PARAM(i_input_index_u8),
                     "Wrong port specified (%d)", i_port_u8);
 
         FAPI_ASSERT(l_mbapos < MAX_MBA_PER_CEN,
                     fapi2::CEN_MSS_ACCESS_DELAY_REG_BAD_MBA_POS().
-                    set_MBA_POS(l_mbapos),
+                    set_MBA_POS(l_mbapos).
+                    set_MBA_TARGET(i_target_mba),
                     "Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
 
         FAPI_ASSERT((l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X4)
                     || (l_dram_width == fapi2::ENUM_ATTR_CEN_EFF_DRAM_WIDTH_X8),
                     fapi2::CEN_MSS_ACCESS_DELAY_REG_BAD_DRAM_WIDTH().
-                    set_DRAM_WIDTH(l_dram_width),
+                    set_DRAM_WIDTH(l_dram_width).
+                    set_MBA_TARGET(i_target_mba),
                     "Bad dram width from ATTR_EFF_DRAM_WIDTH (%d)", l_dram_width);
 
         if(i_verbose)
@@ -180,7 +188,13 @@ extern "C" {
             if(l_dimmtype == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
             {
                 FAPI_ASSERT(i_input_index_u8 < CDIMM_MAX_DQ_80,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
                             i_input_index_u8, CDIMM_MAX_DQ_80);
                 l_type = CDIMM_DQ;
@@ -188,7 +202,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(i_input_index_u8 < ISDIMM_MAX_DQ_72,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "ISDIMM_DQ: Wrong input index specified (%d, max %d)",
                             i_input_index_u8, ISDIMM_MAX_DQ_72);
                 l_type = ISDIMM_DQ;
@@ -219,7 +239,13 @@ extern "C" {
         else if(i_input_type_e == RAW_CDIMM_WR_DQ || i_input_type_e == RAW_CDIMM_RD_DQ)
         {
             FAPI_ASSERT(i_input_index_u8 <= CDIMM_MAX_DQ_80,
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "CDIMM_DQ: Wrong input index specified (%d, max %d)" ,
                         i_input_index_u8, CDIMM_MAX_DQ_80);
             l_type = CDIMM_DQ;
@@ -250,7 +276,13 @@ extern "C" {
         else if(i_input_type_e == ADDRESS)
         {
             FAPI_ASSERT(i_input_index_u8 < MAX_ADDR && (get_port(l_mbapos, i_port_u8)) < 4,
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "Wrong input index specified (%d)", i_input_index_u8);
 
             l_lane = l_addr_lane[(get_port(l_mbapos, i_port_u8))][i_input_index_u8];
@@ -281,7 +313,13 @@ extern "C" {
         else if(i_input_type_e == DATA_DISABLE)
         {
             FAPI_ASSERT(i_input_index_u8 < MAX_DATA_DISABLE, //5 delay values for data bits disable register
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "Wrong input index specified (%d)", i_input_index_u8);
 
             l_block = i_input_index_u8;
@@ -317,7 +355,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -345,7 +389,13 @@ extern "C" {
         else if(i_input_type_e == CONTROL)
         {
             FAPI_ASSERT(i_input_index_u8 < MAX_CNT && (get_port(l_mbapos, i_port_u8)) < 4, // 20 delay values for Control
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "Wrong input index specified (%d)", i_input_index_u8);
 
             l_lane = l_cnt_lane[(get_port(l_mbapos, i_port_u8))][i_input_index_u8];
@@ -374,8 +424,14 @@ extern "C" {
 
         else if(i_input_type_e == CLOCK)
         {
-            FAPI_ASSERT(i_input_index_u8 <= MAX_CLK && (get_port(l_mbapos, i_port_u8)) < 4,
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+            FAPI_ASSERT(i_input_index_u8 < MAX_CLK && (get_port(l_mbapos, i_port_u8)) < 4,
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "Wrong input index specified (%d)", i_input_index_u8);
             l_lane = l_clk_lane[(get_port(l_mbapos, i_port_u8))][i_input_index_u8];
             l_adr = l_clk_adr[(get_port(l_mbapos, i_port_u8))][i_input_index_u8];
@@ -502,7 +558,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -562,7 +624,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -619,7 +687,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -675,7 +749,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -731,7 +811,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -787,7 +873,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -843,7 +935,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
 
             }
@@ -898,7 +996,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -931,7 +1035,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -986,7 +1096,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -1037,7 +1153,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -1092,7 +1214,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input index specified (%d)", i_input_index_u8);
             }
 
@@ -1119,7 +1247,13 @@ extern "C" {
         else
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                        fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_ACCESS_TYPE_PARAM(i_access_type_e).
+                        set_PORT_PARAM(i_port_u8).
+                        set_RANK_PARAM(i_rank_u8).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index_u8),
                         "Wrong input type specified (%d)", i_input_type_e);
         }
 
@@ -1184,7 +1318,13 @@ extern "C" {
             else
             {
                 FAPI_ASSERT(false,
-                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                            fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                            set_MBA_TARGET(i_target_mba).
+                            set_ACCESS_TYPE_PARAM(i_access_type_e).
+                            set_PORT_PARAM(i_port_u8).
+                            set_RANK_PARAM(i_rank_u8).
+                            set_TYPE_PARAM(i_input_type_e).
+                            set_INDEX_PARAM(i_input_index_u8),
                             "Wrong input type specified (%d)", i_input_type_e);
 
             }
@@ -1257,7 +1397,7 @@ extern "C" {
         uint8_t l_dram_width = 0;
         uint8_t l_lane = 0;
         uint8_t l_block = 0;
-        uint8_t l_lane_dqs[4];
+        uint8_t l_lane_dqs[4] = {0};
         uint8_t l_index = 0;
         uint8_t l_dq = 0;
         uint64_t l_scom_address_64 = 0x0ull;
@@ -1274,7 +1414,12 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_WIDTH, i_target_mba, l_dram_width));
 
         FAPI_ASSERT(get_port(l_mbapos, i_port) < 4,
-                    fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                    fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                    set_MBA_TARGET(i_target_mba).
+                    set_PORT_PARAM(i_port).
+                    set_RANK_PARAM(i_rank_pair).
+                    set_TYPE_PARAM(i_input_type_e).
+                    set_INDEX_PARAM(i_input_index),
                     "Port not valid (%d)", get_port(l_mbapos, i_port));
 
         if(i_input_type_e == RD_DQ || i_input_type_e == WR_DQ || i_input_type_e == RAW_CDIMM_WR_DQ
@@ -1312,20 +1457,9 @@ extern "C" {
             l_dq = l_dqs_dq_lane[get_port(l_mbapos, i_port)][i_input_index];
             l_block = l_block_dqs[get_port(l_mbapos, i_port)][i_input_index];
 
-            if(i_verbose)
-            {
-                FAPI_INF("l_block=%d", l_block);
-                FAPI_INF("l_dqs_dq_lane=%d", l_dq);
-            }
-
             l_input_type = RD_CLK_t;
             FAPI_TRY(get_address(i_target_mba, i_port, i_rank_pair, l_input_type, l_block, l_lane, l_scom_address_64, l_start_bit,
                                  l_len));
-
-            if(i_verbose)
-            {
-                FAPI_INF("read clock address=%llx", l_scom_address_64);
-            }
 
             FAPI_TRY(fapi2::getScom(i_target_mba, l_scom_address_64, l_data_buffer_64));
 
@@ -1377,11 +1511,6 @@ extern "C" {
                     l_index++;
                 }
 
-                if(i_verbose)
-                {
-                    FAPI_INF("array is=%d and %d and %d and %d", l_lane_dqs[0], l_lane_dqs[1], l_lane_dqs[2], l_lane_dqs[3]);
-                }
-
                 if(l_dq == 0)
                 {
                     l_lane = l_lane_dqs[0];
@@ -1399,10 +1528,6 @@ extern "C" {
                     l_lane = l_lane_dqs[3];
                 }
 
-                if(i_verbose)
-                {
-                    FAPI_INF("lane is=%d", l_lane);
-                }
             } //end if DRAM_WIDTH_X4
 
 
@@ -1617,10 +1742,6 @@ extern "C" {
                     }
                 } // end if dimm is not custom dimm
 
-                if(i_verbose)
-                {
-                    FAPI_INF("lane is=%d", l_lane);
-                }
             } // end if dram width is not X4
 
             if(i_input_type_e == WR_DQS)
@@ -1644,9 +1765,11 @@ extern "C" {
 
             if(l_flag == 0)
             {
-                FAPI_ASSERT(false,
-                            fapi2::CEN_CROSS_COUPLED_INVALID_DQS(),
-                            "Invalid DQS and DQS lane=%d", l_lane);
+                FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::CEN_CROSS_COUPLED_INVALID_DQS().
+                                   set_INVALID_DQS(l_lane).
+                                   set_MBA_TARGET(i_target_mba),
+                                   "Invalid DQS and DQS lane=%d on %s lwm", l_lane, mss::c_str(i_target_mba));
             }
 
             FAPI_TRY(get_address(i_target_mba, i_port, i_rank_pair, l_input_type, l_block, l_lane, l_scom_address_64, l_start_bit,
@@ -1725,6 +1848,7 @@ extern "C" {
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_CROSS_COUPLED_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
                         set_TYPE_PARAM(i_input_type_e),
                         "Wrong input type specified (%d)", i_input_type_e);
         }
@@ -1805,7 +1929,11 @@ extern "C" {
         if(i_port > 1)
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_ROSETTA_MAP_INVALID_INPUT(),
+                        fapi2::CEN_ROSETTA_MAP_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_PORT_PARAM(i_port).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index),
                         "Wrong port specified (%d)", i_port);
 
         }
@@ -1814,6 +1942,7 @@ extern "C" {
         {
             FAPI_ASSERT(false,
                         fapi2::CEN_ROSETTA_MAP_BAD_MBA_POS().
+                        set_MBA_TARGET(i_target_mba).
                         set_MBA_POS(l_mbapos),
                         "Bad position from ATTR_CHIP_UNIT_POS (%d)", l_mbapos);
 
@@ -1962,7 +2091,11 @@ extern "C" {
         else
         {
             FAPI_ASSERT(false,
-                        fapi2::CEN_ROSETTA_MAP_INVALID_INPUT(),
+                        fapi2::CEN_ROSETTA_MAP_INVALID_INPUT().
+                        set_MBA_TARGET(i_target_mba).
+                        set_PORT_PARAM(i_port).
+                        set_TYPE_PARAM(i_input_type_e).
+                        set_INDEX_PARAM(i_input_index),
                         "Wrong input type specified (%d)", i_input_type_e);
 
         }
@@ -2713,7 +2846,10 @@ extern "C" {
         }
 
         FAPI_ASSERT( i_port < 2,
-                     fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT(),
+                     fapi2::CEN_MSS_ACCESS_DELAY_REG_INVALID_INPUT().
+                     set_MBA_TARGET(i_target_mba).
+                     set_PORT_PARAM(i_port).
+                     set_RANK_PARAM(i_rank),
                      "Port shall not be greater than 1.\n");
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_PRIMARY_RANK_GROUP0, i_target_mba, l_temp_rank));

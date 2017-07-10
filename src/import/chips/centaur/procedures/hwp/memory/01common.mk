@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -30,8 +30,14 @@ CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lib/shared
 CEN_INCLUDES += $(ROOTPATH)/chips/centaur/procedures/hwp/initfiles/
 
+CEN_MSS_LAB_PATH := $(ROOTPATH)/chips/centaur/procedures/hwp/memory/lab
+
 CEN_CATCH_UNIT_TESTS_INCLUDES := $(ROOTPATH)/hwpf/fapi2/test
 
 # ADD_MEMORY_INCDIRS
 #     This macro will add additional include paths for all memory modules
 ADD_MEMORY_INCDIRS = $(call __ADD_MODULE_INCDIR,$(1),$(CEN_INCLUDES))
+ADD_MEMORY_SRCDIRS = $(call __ADD_MODULE_SRCDIR,$(1),$(ROOTPATH)/chips/centaur/procedures/hwp/memory)
+
+# Include main MSS Lab makefile
+-include $(CEN_MSS_LAB_PATH)/01mss_lab.mk

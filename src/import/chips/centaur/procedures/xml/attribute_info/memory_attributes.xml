@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -102,7 +102,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_MSS_FREQ_BIAS_PERCENTAGE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -118,7 +117,6 @@ Set by: PLL settings written by Dave Cadigan</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
--->
 
 <attribute>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
