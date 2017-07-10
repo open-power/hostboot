@@ -67,16 +67,19 @@ throttle::throttle( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_mca, fapi2::R
     //holder for watt_target to add up for port
     uint32_t l_dimm_power_limits [MAX_DIMM_PER_PORT] = {};
 
-    FAPI_TRY( mrw_max_dram_databus_util(iv_databus_port_max) );
-    FAPI_TRY( mrw_dimm_power_curve_percent_uplift(iv_power_uplift) );
-    FAPI_TRY( mrw_dimm_power_curve_percent_uplift_idle(iv_power_uplift_idle) );
-    FAPI_TRY( dimm_thermal_limit( iv_target, iv_dimm_thermal_limit) );
-    FAPI_TRY( total_pwr_intercept( iv_target, iv_pwr_int));
-    FAPI_TRY( total_pwr_slope( iv_target, iv_pwr_slope));
-    FAPI_TRY( runtime_mem_throttled_n_commands_per_slot(iv_target, iv_runtime_n_slot ) );
-    FAPI_TRY( runtime_mem_throttled_n_commands_per_port(iv_target, iv_runtime_n_port ) );
-    FAPI_TRY( mem_watt_target( iv_target, l_dimm_power_limits) );
-    FAPI_TRY( mrw_mem_m_dram_clocks(iv_m_clocks) );
+    FAPI_TRY( mrw_max_dram_databus_util(iv_databus_port_max), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( mrw_dimm_power_curve_percent_uplift(iv_power_uplift), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( mrw_dimm_power_curve_percent_uplift_idle(iv_power_uplift_idle), "%s Error in throttle ctor",
+              mss::c_str(i_mca) );
+    FAPI_TRY( dimm_thermal_limit( iv_target, iv_dimm_thermal_limit), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( total_pwr_intercept( iv_target, iv_pwr_int), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( total_pwr_slope( iv_target, iv_pwr_slope), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( runtime_mem_throttled_n_commands_per_slot(iv_target, iv_runtime_n_slot ), "%s Error in throttle ctor",
+              mss::c_str(i_mca) );
+    FAPI_TRY( runtime_mem_throttled_n_commands_per_port(iv_target, iv_runtime_n_port ), "%s Error in throttle ctor",
+              mss::c_str(i_mca) );
+    FAPI_TRY( mem_watt_target( iv_target, l_dimm_power_limits), "%s Error in throttle ctor", mss::c_str(i_mca) );
+    FAPI_TRY( mrw_mem_m_dram_clocks(iv_m_clocks), "%s Error in throttle ctor", mss::c_str(i_mca) );
 
     //Port power limit = sum of dimm power limits
     for ( const auto& l_dimm : mss::find_targets<TARGET_TYPE_DIMM>(iv_target) )
