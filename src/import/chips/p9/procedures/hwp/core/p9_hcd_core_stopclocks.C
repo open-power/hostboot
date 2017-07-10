@@ -74,7 +74,7 @@ p9_hcd_core_stopclocks(
     fapi2::buffer<uint64_t>                        l_temp64;
     uint32_t                                       l_loops1ms;
     uint8_t                                        l_attr_chip_unit_pos;
-    uint8_t                                        l_attr_vdm_enable;
+    uint8_t                                        l_attr_vdm_enabled;
     uint8_t                                        l_attr_sdisn_setup;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     auto  l_quad = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
@@ -84,8 +84,8 @@ p9_hcd_core_stopclocks(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SDISN_SETUP, l_chip,
                            l_attr_sdisn_setup));
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLE,       l_sys,
-                           l_attr_vdm_enable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED,      l_chip,
+                           l_attr_vdm_enabled));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,    l_perv,
                            l_attr_chip_unit_pos));
     l_attr_chip_unit_pos = (l_attr_chip_unit_pos -
@@ -240,7 +240,7 @@ p9_hcd_core_stopclocks(
     // Disable VDM
     // -------------------------------
 
-    if (l_attr_vdm_enable == fapi2::ENUM_ATTR_VDM_ENABLE_ON)
+    if (l_attr_vdm_enabled == fapi2::ENUM_ATTR_VDM_ENABLED_TRUE)
     {
         FAPI_DBG("Set VDM Disable via CPPM_VDMCR[1]");
         FAPI_TRY(putScom(i_target, C_PPM_VDMCR_OR, MASK_SET(1)));
