@@ -900,20 +900,6 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_SYSTEM_WOF_ENABLED</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>
-    <!-- @todo RTC 173736 -->
-    !!!!! Deprecated for ATTR_SYSTEM_WOF_DISABLE
-    !!!!! Will be removed in the future
-    </description>
-    <valueType>uint8</valueType>
-    <enum>FALSE=0, TRUE=1</enum>
-    <platInit/>
-    <initToZero/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_SYSTEM_WOF_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Disables Work Load Optimized Frequency (WOF) algorithms to
@@ -934,20 +920,6 @@
     </description>
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1, OFF_SKIP_DD=2</enum>
-    <platInit/>
-    <initToZero/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-    <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <!-- @todo RTC 173736 -->
-    <description>
-    !!!!! Deprecated for ATTR_SYSTEM_IVRM_DISABLE
-    !!!!! Will be removed in the future
-    </description>
-    <valueType>uint8</valueType>
-    <enum>FALSE=0, TRUE=1</enum>
     <platInit/>
     <initToZero/>
   </attribute>
@@ -1163,20 +1135,6 @@
           if set to 1, p9_dump_stop_info output will be written to error logs
       </description>
       <valueType>uint8</valueType>
-      <initToZero/>
-      <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-      <id>ATTR_VDM_ENABLE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <!-- @todo RTC 173736 -->
-      <description>
-      !!!!! Deprecated for ATTR_SYSTEM_VDM_ENABLE
-      !!!!! Will be removed in the future
-      </description>
-      <valueType>uint8</valueType>
-      <enum>OFF = 0x00, ON = 0x01</enum>
       <initToZero/>
       <platInit/>
   </attribute>
@@ -1513,51 +1471,6 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-      <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
-      <description>
-        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
-        !!!!! Will be removed in the future
-      </description>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <valueType>uint8</valueType>
-      <enum>
-          OFF = 0x00,ON = 0x01
-      </enum>
-      <initToZero/>
-      <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-      <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
-      <description>
-        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
-        !!!!! Will be removed in the future
-      </description>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <valueType>uint8</valueType>
-      <enum>
-          OFF = 0x00,ON = 0x01
-      </enum>
-      <initToZero/>
-      <platInit/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-      <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
-      <description>
-        !!!!! Deprecated for ATTR_DPLL_VDM_RESPONSE
-        !!!!! Will be removed in the future
-      </description>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <valueType>uint8</valueType>
-      <enum>
-          OFF = 0x00,ON = 0x01
-      </enum>
-      <platInit/>
-      <initToZero/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
       <id>ATTR_DPLL_VDM_RESPONSE</id>
       <targetType>TARGET_TYPE_SYSTEM</targetType>
       <description>
@@ -1716,20 +1629,6 @@
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
-      <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
-      <targetType>TARGET_TYPE_SYSTEM</targetType>
-      <description>
-      <!-- @todo RTC 173736 -->
-      !!!!! Deprecated for ATTR_SYSTEM_RESCLK_DISABLE
-      !!!!! Will be removed in the future
-      </description>
-      <valueType>uint8</valueType>
-      <enum>OFF = 0x00, ON = 0x01</enum>
-      <initToZero/>
-      <platInit/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
