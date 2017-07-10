@@ -66,7 +66,7 @@ fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& T
                 }
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
             {
                 if (( true ))
                 {
@@ -381,7 +381,7 @@ fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& T
                 }
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
             {
                 if (( true ))
                 {
@@ -696,7 +696,7 @@ fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& T
                 }
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
             {
                 if (( true ))
                 {
@@ -1011,7 +1011,7 @@ fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& T
                 }
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
             {
                 if (( true ))
                 {
@@ -1326,7 +1326,7 @@ fapi2::ReturnCode p9n_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& T
                 }
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
             {
                 if (( true ))
                 {
