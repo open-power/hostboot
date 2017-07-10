@@ -503,6 +503,7 @@ sub buildAffinity
     my $node            = -1;
     my $proc            = -1;
     my $tpm             = -1;
+    my $bmc             = -1;
     my $sys_phys        = "";
     my $node_phys       = "";
     my $node_aff        = "";
@@ -583,6 +584,22 @@ sub buildAffinity
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $tpm_aff);
             $self->setAttribute($target, "ORDINAL_ID",    $pos);
+        }
+        elsif ($type eq "BMC")
+        {
+            $bmc++;
+
+            $self->{targeting}{SYS}[0]{NODES}[$node]{BMC}[$bmc]{KEY} = $target;
+            my $bmc_phys = $node_phys . "/bmc-$bmc";
+            my $bmc_aff  = $node_aff  . "/bmc-$bmc";
+
+            $self->setHuid($target, $sys_pos, $bmc);
+            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target, "FAPI_POS",      $pos);
+            $self->setAttribute($target, "PHYS_PATH",     $bmc_phys);
+            $self->setAttribute($target, "AFFINITY_PATH", $bmc_aff);
+            $self->setAttribute($target, "ORDINAL_ID",    $pos);
+
         }
         elsif ($type eq "MCS")
         {
@@ -896,6 +913,7 @@ sub getFapiName
         $nonFapiTargets{"NVBUS"} = "NA";
         $nonFapiTargets{"OCC"}   = "NA";
         $nonFapiTargets{"NPU"}   = "NA";
+        $nonFapiTargets{"BMC"}   = "NA";
     }
 
     if ($nonFapiTargets{$target} eq "NA")

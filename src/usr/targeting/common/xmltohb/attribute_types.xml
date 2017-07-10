@@ -75,8 +75,12 @@
         <value>9</value>
     </enumerator>
     <enumerator>
-        <name>MAX</name>
+        <name>SP</name>
         <value>10</value>
+    </enumerator>
+    <enumerator>
+        <name>MAX</name>
+        <value>11</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
