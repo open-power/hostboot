@@ -2013,7 +2013,7 @@ fapi2::ReturnCode eff_dimm::dimm_rcbx()
             break;
 
         default:
-            FAPI_ERR("%s Error with C++ enum in eff_dimm.C. %d recieved", mss::c_str(iv_dimm), l_qs_enabled);
+            FAPI_ERR("%s Error with C++ enum in eff_dimm.C. %d received", mss::c_str(iv_dimm), l_qs_enabled);
             fapi2::Assert(false);
     }
 
