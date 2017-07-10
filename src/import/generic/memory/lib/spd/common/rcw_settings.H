@@ -28,9 +28,9 @@
 /// @brief Raw card data structure
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_RAW_CARDS_H_
