@@ -25,7 +25,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Aandre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 
@@ -100,15 +100,16 @@ class eff_dimm
             iv_port_index = mss::index(iv_mca);
             iv_dimm_index = mss::index(iv_dimm);
 
-            FAPI_TRY( iv_pDecoder->medium_timebase(iv_mtb) );
-            FAPI_TRY( iv_pDecoder->fine_timebase(iv_ftb) );
+            FAPI_TRY( iv_pDecoder->medium_timebase(iv_mtb), "Failed medium timebase in eff_dimm()" );
+            FAPI_TRY( iv_pDecoder->fine_timebase(iv_ftb), "Failed medium timebase in eff_dimm()" );
 
             FAPI_TRY( clock_period(iv_dimm, iv_tCK_in_ps), "Failed to calculate clock period (tCK)" );
 
             FAPI_TRY( mss::mrw_refresh_rate_request(iv_refresh_rate_request), "Failed mrw_temp_refresh_rate_request()" );
             FAPI_TRY( mss::mrw_fine_refresh_mode(iv_refresh_mode), "Failed mrw_fine_refresh_mode()" );
 
-            FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(iv_dimm), iv_freq));
+            FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(iv_dimm), iv_freq),
+                      "Failed accessing mss::freq in eff_dimm");
 
             FAPI_INF("Calculated clock period - tCK (ps): %d for %s", iv_tCK_in_ps, mss::c_str(iv_dimm));
             FAPI_INF("Calculated frequency (ps): %d for %s", iv_freq, mss::c_str(iv_dimm));
