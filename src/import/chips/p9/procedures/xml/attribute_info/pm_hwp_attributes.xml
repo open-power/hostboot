@@ -382,20 +382,6 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_IVRMS_ENABLED</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-    <!-- @todo RTC 173736 -->
-    !!!!! Deprecated for ATTR_IVRM_ENABLED
-    !!!!! Will be removed in the future
-    </description>
-    <valueType>uint8</valueType>
-    <enum>FALSE=0, TRUE=1</enum>
-    <writeable/>
-    <initToZero/>
-  </attribute>
-  <!-- ********************************************************************* -->
-  <attribute>
     <id>ATTR_IVRM_ENABLED</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>Indicator that all relevant attributes and required data for
