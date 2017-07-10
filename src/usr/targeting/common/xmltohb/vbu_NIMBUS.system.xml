@@ -147,14 +147,6 @@
     <id>MSS_MRW_MAX_DRAM_DATABUS_UTIL</id>
     <default>10000</default>
     </attribute>
-    <attribute>
-        <id>SYSTEM_WOF_ENABLED</id>
-        <default>OFF</default>
-    </attribute>
-    <attribute>
-        <id>VDM_ENABLE</id>
-        <default>OFF</default>
-    </attribute>
 </targetInstance>
 
 <!-- System node 0 -->

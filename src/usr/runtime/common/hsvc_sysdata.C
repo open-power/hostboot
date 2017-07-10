@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,6 @@ HSVC_LOAD_ATTR( ATTR_PM_SAFE_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_SLEEP_ENABLE );
 HSVC_LOAD_ATTR( ATTR_PM_SPIPSS_FREQUENCY );
 HSVC_LOAD_ATTR( ATTR_PM_SPIVID_FREQUENCY );
-HSVC_LOAD_ATTR( ATTR_PM_SYSTEM_IVRMS_ENABLED );
 HSVC_LOAD_ATTR( ATTR_PM_SYSTEM_IVRM_VPD_MIN_LEVEL );
 // -- Input: ../../xml/attribute_info/poreve_memory_attributes.xml --
 // No attributes found

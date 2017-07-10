@@ -5518,26 +5518,6 @@ Supported values: 0x000 to spi_frame_size.  The actual number of bits captured i
 </attribute>
 
 <attribute>
-    <id>IVRMS_ENABLED</id>
-    <description>
-     <!-- @todo RTC 173736 -->
-     !!!!! Deprecated for ATTR_IVRM_ENABLED
-     !!!!! Will be removed in the future
-     FALSE=0, TRUE=1
-    </description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_IVRMS_ENABLED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
     <id>IVRM_ENABLED</id>
     <description>
     Indicator that all relevant attributes and required data for
@@ -20416,31 +20396,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>SYSTEM_IVRMS_ENABLED</id>
-    <description>
-      System control to allow (if all other attribute tests yield
-      true values) or categorically disallow IVRM enablement
-
-      Producer: MRWB
-
-      Consumers: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-                        CME Quad Pstate Region (CQPR) for CM Quad Manager
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SYSTEM_IVRMS_ENABLED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
     <id>SYSTEM_IVRM_DISABLE</id>
     <description>
         Disables IVRM enablement in the system
@@ -20465,47 +20420,6 @@ Measured in GB</description>
     <readable/>
     <writeable/>
 </attribute>
-
-<attribute>
-    <id>SYSTEM_WOF_ENABLED</id>
-    <description>
-      System control to allow Work Load Optimized Frequency (WOF)
-      algorithms to modify frequency based on active core count and other inputs.
-
-      Producer: MRWB
-
-      Consumers: p9_build_pstate_datablock ->
-                        Pstate Parameter Block (PSPB) for PGPE/OCC
-
-      Platform default:   FALSE
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>OFF</default>
-      </uint8_t>
-    </simpleType>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SYSTEM_WOF_ENABLED</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-
-<enumerationType>
-    <id>SYSTEM_WOF_ENABLED</id>
-    <description>Enumeration for Work Load Optimized Frequency</description>
-    <enumerator>
-        <name>OFF</name>
-        <value>0x00</value>
-    </enumerator>
-    <enumerator>
-        <name>ON</name>
-        <value>0x01</value>
-    </enumerator>
-</enumerationType>
 
 <attribute>
     <id>SYSTEM_WOF_DISABLE</id>
@@ -30938,41 +30852,6 @@ Measured in GB</description>
 </attribute>
 
 <attribute>
-    <id>VDM_ENABLE</id>
-    <description>
-    Controls the enablement of Voltage Droop Monitors (VDM) in the system.
-    OFF = 0x00, ON = 0x01
-
-    Producer:  Machine Readable Workbook
-
-    Consumers:
-    p9_pstate_parameter_block to set flag for CME QuadManager Hcode
-        reaction
-    p9_hcd_cache procedures to power on VDMs before CME booting
-    </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
-    <readable/>
-    <persistency>non-volatile</persistency>
-    <hwpfToHbAttrMap>
-      <id>ATTR_VDM_ENABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<enumerationType>
-    <id>VDM_ENABLE</id>
-    <description>Enumeration for Voltage Drop Monitor enable</description>
-    <enumerator>
-        <name>OFF</name>
-        <value>0x00</value>
-    </enumerator>
-    <enumerator>
-        <name>ON</name>
-        <value>0x01</value>
-    </enumerator>
-</enumerationType>
-
-<attribute>
     <id>SYSTEM_VDM_DISABLE</id>
     <description>
       Disables the enablement of Voltage Droop Monitors (VDM) in the system.
@@ -31006,70 +30885,6 @@ Measured in GB</description>
     </enumerator>
 </enumerationType>
 
-<attribute>
-    <id>DPLL_DYNAMIC_FMAX_ENABLE</id>
-    <description>
-    Allow increased dynamic frequency in response to excess voltage margin
-    Controlled by VDM_OVERVOLT threshold value in VDM Configuration Register.
-
-    Producer: MRWB.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <readable/>
-<!-- TODO RTC:170773 VPD -->
-    <persistency>volatile-zeroed</persistency>
-    <hwpfToHbAttrMap>
-      <id>ATTR_DPLL_DYNAMIC_FMAX_ENABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>DPLL_DYNAMIC_FMIN_ENABLE</id>
-    <description>
-    Allow increased dynamic frequency in response to excess voltage margin
-    Controlled by VDM_OVERVOLT threshold value in VDM Configuration Register.
-
-    Producer: MRWB.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <readable/>
-<!-- TODO RTC:170773 VPD -->
-    <persistency>volatile-zeroed</persistency>
-    <hwpfToHbAttrMap>
-      <id>ATTR_DPLL_DYNAMIC_FMIN_ENABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>DPLL_DROOP_PROTECT_ENABLE</id>
-    <description>
-    Enable instantaneous frequency reduction in response to droop events
-    Controlled by VDM_DROOP_SMALL, _LARGE and _XTREME threshold values in VDM
-    Configuration Register. The amount of reduction is controlled by chip
-    initialization values
-
-    Producer: MRWB.
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <readable/>
-<!-- TODO RTC:170773 VPD -->
-    <persistency>volatile-zeroed</persistency>
-    <hwpfToHbAttrMap>
-      <id>ATTR_DPLL_DROOP_PROTECT_ENABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
 
 <attribute>
     <id>DPLL_VDM_RESPONSE</id>
@@ -33753,29 +33568,6 @@ Measured in GB</description>
     <readable/>
     <hwpfToHbAttrMap>
         <id>ATTR_IVRM_STABILIZATION_DELAY_NS</id>
-        <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-<attribute>
-    <id>SYSTEM_RESCLK_ENABLE</id>
-    <description>
-      Controls the enablement of resonant clocking in the system.
-
-      Producer:  Machine Readable Workbook
-
-      Consumers:
-        p9_pstate_parameter_block to set flag for CME QuadManager Hcode
-            reaction
-    </description>
-    <simpleType>
-        <uint8_t>
-        </uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <hwpfToHbAttrMap>
-        <id>ATTR_SYSTEM_RESCLK_ENABLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
 </attribute>

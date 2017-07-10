@@ -301,7 +301,6 @@ push @systemAttr,
         $reqPol->{'mss_mrw_max_number_dimms_possible_per_vmem_regulator'},
     "MSS_MRW_THERMAL_MEMORY_POWER_LIMIT",
         $reqPol->{'mss_mrw_thermal_memory_power_limit'},
-    "SYSTEM_IVRMS_ENABLED", $reqPol->{'pm_system_ivrms_enabled'},
     "PM_SYSTEM_IVRM_VPD_MIN_LEVEL", $reqPol->{'pm_system_ivrm_vpd_min_level'},
     "MNFG_DMI_MIN_EYE_WIDTH", $reqPol->{'mnfg-dmi-min-eye-width'},
     "MNFG_DMI_MIN_EYE_HEIGHT", $reqPol->{'mnfg-dmi-min-eye-height'},
@@ -354,7 +353,6 @@ push @systemAttr,
     "PROC_NPU_MMIO_BAR_BASE_ADDR_OFFSET", 0x0000030200000000,
     "CP_REFCLOCK_RCVR_TERM", $reqPol->{'processor-refclock-receiver-termination'},
     "IO_REFCLOCK_RCVR_TERM", $reqPol->{'pci-refclock-receiver-termination'},
-    "VDM_ENABLE", $reqPol->{'vdm_enable'},
     "IVRM_DEADZONE_MV", $reqPol->{'ivrm_deadzone_mv'},
     "SYSTEM_RESCLK_STEP_DELAY", $reqPol->{'system_resclk_step_delay'},
     "NEST_LEAKAGE_PERCENT", $reqPol->{'nest_leakage_percent'},
@@ -366,15 +364,6 @@ push @systemAttr,
     "IVRM_STABILIZATION_DELAY_NS", $reqPol->{'ivrm_stabilization_delay_ns'},
     "SBE_UPDATE_DISABLE", 0,
 ];
-
-if ($reqPol->{'system_resclk_enable'} eq 'ON')
-{
-    push @systemAttr, ['SYSTEM_RESCLK_ENABLE', 1];
-}
-elsif ($reqPol->{'system_resclk_enable'} eq 'OFF')
-{
-    push @systemAttr, ['SYSTEM_RESCLK_ENABLE', 0];
-}
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
 {

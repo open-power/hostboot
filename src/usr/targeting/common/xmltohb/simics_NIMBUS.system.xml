@@ -149,14 +149,6 @@
     <default>10000</default>
     </attribute>
     <attribute>
-        <id>SYSTEM_WOF_ENABLED</id>
-        <default>OFF</default>
-    </attribute>
-    <attribute>
-        <id>VDM_ENABLE</id>
-        <default>OFF</default>
-    </attribute>
-    <attribute>
         <id>IVRM_DEADZONE_MV</id>
         <default>0x32</default>
     </attribute>
