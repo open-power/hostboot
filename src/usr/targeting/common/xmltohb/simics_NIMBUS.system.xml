@@ -12313,17 +12313,17 @@
 </targetInstance>
 
 <targetInstance>
-    <id>sys0bmc</id>
-    <type>bmc</type>
+    <id>sys0node0bmc0</id>
+    <type>chip-bmc-ast2500</type>
     <attribute>
     <id>PHYS_PATH</id>
-    <default>physical:sys-0/sp-0</default>
+    <default>physical:sys-0/node-0/bmc-0</default>
     </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/sp-0</default>
+        <default>affinity:sys-0/node-0/bmc-0</default>
     </attribute>
-    <attribute><id>HUID</id><default>0x00320000</default></attribute>
+    <attribute><id>HUID</id><default>0x003A0000</default></attribute>
 </targetInstance>
 
 <targetInstance>

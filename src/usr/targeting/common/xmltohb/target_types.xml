@@ -2690,10 +2690,10 @@
 
 <targetType>
     <id>sp</id>
-    <parent>chip</parent>
+    <parent>base</parent>
     <attribute>
         <id>CLASS</id>
-        <default>CHIP</default>
+        <default>SP</default>
     </attribute>
     <attribute>
         <id>TYPE</id>
@@ -2702,11 +2702,11 @@
 </targetType>
 
 <targetType>
-    <id>bmc</id>
+    <id>chip-bmc-ast2500</id>
     <parent>sp</parent>
     <attribute>
         <id>TYPE</id>
-        <default>SP</default>
+        <default>BMC</default>
     </attribute>
     <attribute>
         <id>MODEL</id>
