@@ -856,10 +856,10 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("Resonant Clock Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRMS_ENABLED,
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_ENABLED,
                            i_procTgt,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_IVRMS_ENABLED" );
+             "Error from FAPI_ATTR_GET for attribute ATTR_IVRM_ENABLED" );
 
     if( attrVal )
     {
