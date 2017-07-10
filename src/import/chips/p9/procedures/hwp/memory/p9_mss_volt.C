@@ -29,7 +29,6 @@
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre A. Marin  <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
@@ -90,18 +89,21 @@ extern "C"
                 //Check to make sure 1.2 V is both operable and endurant, fail if it is not
                 FAPI_ASSERT ( (l_dimm_nominal == mss::spd::OPERABLE) && (l_dimm_endurant == mss::spd::ENDURANT),
                               fapi2::MSS_VOLT_DDR_TYPE_REQUIRED_VOLTAGE().
-                              set_OPERABLE(l_dimm_nominal).
-                              set_ENDURANT(l_dimm_endurant).
+                              set_ACTUAL_OPERABLE(l_dimm_nominal).
+                              set_ACTUAL_ENDURANT(l_dimm_endurant).
+                              set_EXPECTED_OPERABLE(mss::spd::OPERABLE).
+                              set_EXPECTED_ENDURANT(mss::spd::ENDURANT).
                               set_DIMM_TARGET(l_cache->iv_target),
-                              "%s: DIMM is not operable (%d)"
-                              " and/or endurant (%d) at 1.2V",
+                              "%s: DIMM is not operable (%d) expected (%d)"
+                              " and/or endurant (%d) expected (%d) at 1.2V",
                               mss::c_str(l_cache->iv_target),
                               l_dimm_nominal,
-                              l_dimm_endurant);
+                              mss::spd::OPERABLE,
+                              l_dimm_endurant,
+                              mss::spd::ENDURANT);
             } // l_dimm
 
             // Set the attributes for this MCS, values are in mss_const.H
-            // TK : will need to change attribute target according to voltage rails in the future
             FAPI_TRY (mss::set_voltage_attributes (l_mcs,
                                                    mss::DDR4_NOMINAL_VOLTAGE,
                                                    mss::DDR4_VPP_VOLTAGE),
