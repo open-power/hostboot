@@ -28,29 +28,13 @@
 <!-- @brief Error xml for timing.H -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
-<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
 <!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
 <hwpErrors>
-
-   <hwpError>
-    <rc>RC_MSS_LOOKUP_FAILED</rc>
-    <description>
-      Conditional that tests whether a certain key value is located in a map (hence, lookup).
-    </description>
-    <ffdc>KEY</ffdc>
-    <ffdc>DATA</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
-    </hwpError>
 
    <hwpError>
     <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
@@ -60,44 +44,46 @@
     </description>
     <ffdc>DIMM_TYPE</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
     <deconfigure>
-      <target>TARGET</target>
+        <target>DIMM_TARGET</target>
     </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
     </hwpError>
 
    <hwpError>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
-      An invalid/unsupported RTT_WR encoding was received, possibly due to VPD error or bad
-      setting of ATTR_EFF_DRAM_RTT_WR attribute.
+      An invalid/unsupported RTT_WR encoding was received
     </description>
     <ffdc>RTT_WR</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
    </hwpError>
 
    <hwpError>
     <rc>RC_MSS_NO_RANKS_IN_RANK_PAIR</rc>
     <description>
-      A rank pair was received with no configured ranks when setting up terminations
-      for write leveling calibration.
+      A rank pair was received with no configured ranks
     </description>
     <ffdc>RANK_PAIR</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>TARGET</target>
-    </deconfigure>
    </hwpError>
 
 </hwpErrors>
