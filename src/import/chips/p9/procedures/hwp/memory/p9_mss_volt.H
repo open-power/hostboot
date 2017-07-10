@@ -29,7 +29,6 @@
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre A. Marin <aamarin@us.ibm.com>
-// *HWP FW  Owner: Brian Silver <bsilver@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
