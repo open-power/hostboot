@@ -69,12 +69,8 @@
         <priority>HIGH</priority>
     </callout>
     <callout>
-        <target>DEAD_DIMM</target>
-        <priority>LOW</priority>
-    </callout>
-    <callout>
         <target>FUNCTIONAL_DIMM</target>
-        <priority>LOW</priority>
+        <priority>NONE</priority>
     </callout>
     <deconfigure>
         <target>FUNCTIONAL_DIMM</target>
