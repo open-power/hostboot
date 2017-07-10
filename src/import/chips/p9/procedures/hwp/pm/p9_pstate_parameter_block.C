@@ -46,6 +46,7 @@
 // ----------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pstate_parameter_block.H>
+#include <p9_hcd_memmap_base.H>
 #include "p9_pm_get_poundw_bucket.H"
 #include "p9_resclk_defines.H"
 #include <attribute_ids.H>
@@ -915,9 +916,7 @@ FAPI_INF("%-60s = 0x%08x %u", #attr_name, io_attr->attr_assign, io_attr->attr_as
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_IVRM_DISABLE, FAPI_SYSTEM, attr_system_ivrm_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE, FAPI_SYSTEM, attr_system_wof_disable);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_VDM_DISABLE, FAPI_SYSTEM, attr_system_vdm_disable);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMAX_ENABLE, FAPI_SYSTEM, attr_dpll_dynamic_fmax_enable);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DYNAMIC_FMIN_ENABLE, FAPI_SYSTEM, attr_dpll_dynamic_fmin_enable);
-    DATABLOCK_GET_ATTR(ATTR_DPLL_DROOP_PROTECT_ENABLE, FAPI_SYSTEM, attr_dpll_droop_protect_enable);
+    DATABLOCK_GET_ATTR(ATTR_DPLL_VDM_RESPONSE, FAPI_SYSTEM, attr_dpll_vdm_response);
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_RESCLK_DISABLE, FAPI_SYSTEM, attr_resclk_disable);
     DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, i_target, attr_dd_wof_not_supported);
     DATABLOCK_GET_ATTR(ATTR_CHIP_EC_FEATURE_VDM_NOT_SUPPORTED, i_target, attr_dd_vdm_not_supported);
@@ -1914,9 +1913,9 @@ proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
         // Indicate that IVRM is good to be enabled (or not)
         FAPI_INF("   NOTE: This level of code is forcing the iVRM to OFF");
         {
-            fapi2::ATTR_IVRMS_ENABLED_Type l_ivrm_enabled =
-                (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_FALSE;
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRMS_ENABLED, i_target, l_ivrm_enabled));
+            fapi2::ATTR_IVRM_ENABLED_Type l_ivrm_enabled =
+                (fapi2::ATTR_IVRM_ENABLED_Type)fapi2::ENUM_ATTR_IVRM_ENABLED_FALSE;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRM_ENABLED, i_target, l_ivrm_enabled));
         }
     }
     else
@@ -3591,7 +3590,7 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
         (fapi2::ATTR_VDM_ENABLED_Type)fapi2::ENUM_ATTR_VDM_ENABLED_FALSE;
 
     fapi2::ATTR_IVRM_ENABLED_Type l_ivrm_enabled =
-        (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_FALSE;
+        (fapi2::ATTR_IVRM_ENABLED_Type)fapi2::ENUM_ATTR_IVRM_ENABLED_FALSE;
 
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
         (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FALSE;
@@ -3613,7 +3612,7 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
 
     if (i_state.iv_ivrm_enabled)
     {
-        l_ivrm_enabled = (fapi2::ATTR_IVRMS_ENABLED_Type)fapi2::ENUM_ATTR_IVRMS_ENABLED_TRUE;
+        l_ivrm_enabled = (fapi2::ATTR_IVRM_ENABLED_Type)fapi2::ENUM_ATTR_IVRM_ENABLED_TRUE;
     }
 
     if (i_state.iv_wof_enabled)
@@ -3624,7 +3623,7 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PSTATES_ENABLED, i_target, l_ps_enabled));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_RESCLK_ENABLED, i_target, l_resclk_enabled));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_VDM_ENABLED, i_target, l_vdm_enabled));
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRMS_ENABLED, i_target, l_ivrm_enabled));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IVRM_ENABLED, i_target, l_ivrm_enabled));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED, i_target, l_wof_enabled));
 
 
@@ -3635,11 +3634,41 @@ p9_pstate_set_global_feature_attributes(const fapi2::Target<fapi2::TARGET_TYPE_P
 
     l_data16.insertFromRight<0, 1>(l_resclk_enabled);
     l_data16.insertFromRight<1, 1>(l_ivrm_enabled);
-    l_data16.insertFromRight<2, 1>(l_wof_enabled);
+    l_data16.insertFromRight<2, 1>(l_vdm_enabled);
+    l_data16.insertFromRight<3, 1>(l_wof_enabled);
 
-    l_data16.insertFromRight<3, 1>(attr.attr_dpll_dynamic_fmax_enable);
-    l_data16.insertFromRight<4, 1>(attr.attr_dpll_dynamic_fmin_enable);
-    l_data16.insertFromRight<5, 1>(attr.attr_dpll_droop_protect_enable);
+
+    // DROOP_PROTECT          -> DPLL Mode 3
+    // DROOP_PROTECT_OVERVOLT -> DPLL Mode 3.5
+    // DYNAMIC                -> DPLL Mode 4
+    // DYNAMIC_PROTECT        -> DPLL Mode 5
+
+    //                     enable_fmin    enable_fmax   enable_jump
+    // DPLL Mode  2             0              0             0
+    // DPLL Mode  3             0              0             1
+    // DPLL Mode  4             X              1             0
+    // DPLL Mode  4             1              X             0
+    // DPLL Mode  3.5           0              1             1
+    // DPLL Mode  5             1              X             1
+
+    switch (attr.attr_dpll_vdm_response)
+    {
+        case fapi2::ENUM_ATTR_DPLL_VDM_RESPONSE_DROOP_PROTECT:
+            l_data16 |= CME_QM_FLAG_SYS_JUMP_PROTECT;
+            break;
+        case fapi2::ENUM_ATTR_DPLL_VDM_RESPONSE_DROOP_PROTECT_OVERVOLT:
+            l_data16 |= CME_QM_FLAG_SYS_DYN_FMAX_ENABLE;
+            l_data16 |= CME_QM_FLAG_SYS_JUMP_PROTECT;
+            break;
+        case fapi2::ENUM_ATTR_DPLL_VDM_RESPONSE_DYNAMIC:
+            l_data16 |= CME_QM_FLAG_SYS_DYN_FMIN_ENABLE;
+            l_data16 |= CME_QM_FLAG_SYS_DYN_FMAX_ENABLE;
+            break;
+        case fapi2::ENUM_ATTR_DPLL_VDM_RESPONSE_DYNAMIC_PROTECT:
+            l_data16 |= CME_QM_FLAG_SYS_DYN_FMIN_ENABLE;
+            l_data16 |= CME_QM_FLAG_SYS_JUMP_PROTECT;
+            break;
+    }
 
     o_qm_flags->value = revle16(l_data16);
 
