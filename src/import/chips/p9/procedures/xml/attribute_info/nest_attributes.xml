@@ -77,10 +77,10 @@
   <description>
     The frequency of a processor's Xbus mesh clocks, in MHz.
     This is the same for all chips in the system.
-    Provided by the MRW.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
+  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
