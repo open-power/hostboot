@@ -170,7 +170,7 @@
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -194,18 +194,18 @@
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
@@ -217,7 +217,7 @@
     <ffdc>REG_CONTENTS</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -239,18 +239,18 @@
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
@@ -262,18 +262,18 @@
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
@@ -285,18 +285,18 @@
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
@@ -308,18 +308,18 @@
     <ffdc>STATUS_REGISTER</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
@@ -329,18 +329,18 @@
     <ffdc>STATUS_REGISTER</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
     <deconfigure>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCBIST_TARGET</target>
     </deconfigure>
     <gard>
-        <target>TARGET_IN_ERROR</target>
+        <target>MCBIST_TARGET</target>
     </gard>
   </hwpError>
 
