@@ -10,7 +10,7 @@ config ENABLE_CHECKSTOP_ANALYSIS
         post-checkstop analysis by PRD on system reboot
 
 config IPLTIME_CHECKSTOP_ANALYSIS
-    default n
+    default y
     help
         Enable collection of FIR data by the OCC for checkstops
         during the IPL.

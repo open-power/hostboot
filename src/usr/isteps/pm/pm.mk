@@ -52,10 +52,14 @@ EXTRAINCDIR += ${NEST_UTIL_PATH}
 
 ##  NOTE: add the base istep dir here.
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/pnor/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/pnor/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/util/
 
 #common PM Complex functions between ipl and runtime
 OBJS += pm_common.o
 OBJS += occAccess.o
+OBJS += occCheckstop.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH} ${HWP_CUST_PATH} ${HWP_ACC_PATH}

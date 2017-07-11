@@ -198,6 +198,7 @@ const DepModInfo g_istep14Dependancies = {
         DEP_LIB(libistep14.so),
         DEP_LIB(libdump.so),
         DEP_LIB(libisteps_mss.so),
+        DEP_LIB(libpm.so),
         NULL
     }
 };

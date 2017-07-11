@@ -96,8 +96,6 @@ void* call_mss_memdiag (void* io_pArgs)
     TARGETING::targetService().masterProcChipTargetHandle(masterproc);
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-    // @TODO-RTC: 155065
-    // update firdata inputs for OCC
     errl = HBOCC::loadHostDataToSRAM(masterproc,
                                         PRDF::ALL_PROC_MEM_MASTER_CORE);
     assert(nullptr == errl,

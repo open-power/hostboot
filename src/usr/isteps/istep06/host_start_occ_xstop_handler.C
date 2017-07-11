@@ -29,83 +29,65 @@
 #include <errl/errlmanager.H>
 #include <isteps/hwpisteperror.H>
 #include <initservice/isteps_trace.H>
+#include <kernel/vmmmgr.H>
+#include <sys/mm.h>
+#include <pm/pm_common.H>
+#include <targeting/common/commontargeting.H>
 
 namespace ISTEP_06
 {
 void* host_start_occ_xstop_handler( void *io_pArgs )
 {
-//    errlHndl_t l_err = NULL;
-      ISTEP_ERROR::IStepError l_stepError;
+    ISTEP_ERROR::IStepError l_stepError;
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "host_start_occ_xstop_handler entry" );
-
-//TODO RTC 125486 add host_start_occ_xstop_handler
-#if 0
-/// This is a bunch of stuff that was put into P8 and git didn't handle
-/// merging correctly.  Some of this may be a useful starting point for
-/// enabling OCC checkstop handling.  -- Patrick
-
-                "host_cancontinue_clear entry" );
-    errlHndl_t errl = NULL;
-
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "host_cancontinue_clear: calling activateOCCs" );
-    errl = HBOCC::activateOCCs(true);
-    if (errl)
+               "host_start_occ_xstop_handler entry" );
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    errlHndl_t l_errl = NULL;
+    TARGETING::Target * l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget( l_sys );
+    assert(l_sys != nullptr);
+
+    TARGETING::Target* masterproc = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+
+    void* l_homerVirtAddrBase = reinterpret_cast<void*>
+                                                 (VmmManager::INITIAL_MEM_SIZE);
+    uint64_t l_homerPhysAddrBase = mm_virt_to_phys(l_homerVirtAddrBase);
+    uint64_t l_commonPhysAddr = l_homerPhysAddrBase + VMM_HOMER_REGION_SIZE;
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "host_start_occ_xstop_handler:"
+                             " l_homerPhysAddrBase=0x%x, l_commonPhysAddr=0x%x",
+                             l_homerPhysAddrBase, l_commonPhysAddr);
+    do
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "activateOCCs failed");
-    }
-#endif
-
-                //Create IStep error log and cross reference error that occurred
-                l_stepError.addErrorDetails(errl);
-
-                // Commit Error
-                errlCommit(errl, HWPF_COMP_ID);
-
-                // Don't keep calling proc_enable_reconfig. Treat as a fatal
-                // unexpected unrecoverable error and terminate the IPL.
-                break ; // break with error
-            }
-            // Success
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Successfully ran proc_enable_reconfig HWP on "
-                    "MCS target HUID %.8X", l_currMcsHuid);
-        } // for
-
-#if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
-        // update firdata inputs for OCC
-        TARGETING::Target* masterproc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
-        errl = HBOCC::loadHostDataToSRAM(masterproc,
-                                            PRDF::MASTER_PROC_CORE);
-        if (errl)
+        l_errl = HBPM::loadPMComplex(masterproc,
+                                    l_homerPhysAddrBase,
+                                    l_commonPhysAddr,
+                                    HBPM::PM_LOAD,
+                                    true);
+        if(l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Error returned from call to HBOCC::loadHostDataToSRAM");
-
-            //Create IStep error log and cross reference error that occurred
-            l_stepError.addErrorDetails(errl);
-
-            // Commit Error
-            errlCommit(errl, HWPF_COMP_ID);
+                                                        "loadPMComplex failed");
+            l_stepError.addErrorDetails(l_errl);
+            ERRORLOG::errlCommit(l_errl, HWPF_COMP_ID);
             break;
         }
+
+        //l_errl = HBPM::startPMComplex(masterproc);
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                                       "startPMComplex failed");
+            l_stepError.addErrorDetails(l_errl);
+            ERRORLOG::errlCommit(l_errl, HWPF_COMP_ID);
+            break;
+        }
+
+    }while(0);
 #endif
-
-    }
-    while(0);
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "host_prd_hwreconfig exit" );
-    // end task, returning any errorlogs to IStepDisp
-    return l_stepError.getErrorHandle();
-#endif
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_start_occ_xstop_handler exit" );
 
     return l_stepError.getErrorHandle();

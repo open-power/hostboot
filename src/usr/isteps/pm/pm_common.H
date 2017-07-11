@@ -126,13 +126,15 @@ namespace HBPM
      *      RELOAD == i_mode
      *       - Reload OCC lid, rewrite OCC config data, build Pstate
      *         Parameter Blocks, and rebuild Hcode
+     * @param[in] i_useSRAM:        Use SRAM to write data (default: false)
      *
      * @return errlHndl_t  Error log if loadPMComplex failed
      */
     errlHndl_t loadPMComplex(TARGETING::Target * i_target,
                              uint64_t i_homerPhysAddr,
                              uint64_t i_commonPhysAddr,
-                             loadPmMode i_mode);
+                             loadPmMode i_mode,
+                             bool i_useSRAM = false);
 
     /**
      * @brief Start PM Complex.

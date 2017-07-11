@@ -248,7 +248,7 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
             {
                 TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                        " Error [0x%X] in call to "
-                       " FAPI_INVOKE_HWP(p8_ocb_indir_setup_linear)",
+                       " FAPI_INVOKE_HWP(p9_pm_ocb_indir_setup_linear)",
                        l_errl->reasonCode());
                 break; // return with error
             }
@@ -270,11 +270,10 @@ errlHndl_t accessOCBIndirectChannel(accessOCBIndirectCmd i_cmd,
         {
             TRACFCOMP( g_fapiImpTd, ERR_MRK"accessOCBIndirectChannel:"
                    " Error [0x%X] in call to"
-                   " FAPI_INVOKE_HWP(p8_ocb_indir_access)",
+                   " FAPI_INVOKE_HWP(p9_pm_ocb_indir_access)",
                    l_errl->reasonCode());
             break; // return with error
         }
-
     }
     while (0);
 
