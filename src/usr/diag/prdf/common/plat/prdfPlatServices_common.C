@@ -119,7 +119,7 @@ int32_t readErepairXbus(TargetHandle_t i_rxBusTgt,
 
 int32_t clearIOFirsXbus(TargetHandle_t i_rxBusTgt)
 {
-    int32_t o_rc = SUCCESS; 
+    int32_t o_rc = SUCCESS;
 
     #ifdef __HOSTBOOT_MODULE
     PRDF_ASSERT( nullptr != i_rxBusTgt);
@@ -332,78 +332,92 @@ int32_t getMemAddrRange( TargetHandle_t i_mba, uint8_t i_mrank,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
-int32_t getBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
-                        CenDqBitmap & o_bitmap, bool i_allowNoDimm )
+template <DIMMS_PER_RANK T>
+int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+                        MemDqBitmap<T> & o_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::getBadDqBitmap] "
 
     int32_t o_rc = SUCCESS;
 
-    uint8_t data[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE];
+    // Don't proceed unless the DIMM exists
+    PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
+                                              i_rank.getDimmSlct()) );
 
-    for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
+    uint8_t data[T][DQ_BITMAP::BITMAP_SIZE] = {0};
+
+    for ( int32_t ps = 0; ps < T; ps++ )
     {
-        fapi::ReturnCode l_rc = dimmGetBadDqBitmap( getFapiTarget(i_mba),
-                                                    ps, i_rank.getDimmSlct(),
-                                                    i_rank.getRankSlct(),
-                                                    data[ps] );
+        errlHndl_t errl = nullptr;
 
-        if ( i_allowNoDimm && (fapi::RC_BAD_DQ_DIMM_NOT_FOUND == l_rc) )
+        constexpr fapi2::TargetType l_trgtType = ( T == DIMMS_PER_RANK::MBA ) ?
+            fapi2::TARGET_TYPE_MBA : fapi2::TARGET_TYPE_MCA;
+
+        fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
+
+        // TODO RTC 164707
+        //FAPI_INVOKE_HWP( errl, dimmGetBadDqBitmap, l_fapiTrgt,
+        //                 i_rank.getDimmSlct(), i_rank.getRankSlct(),
+        //                 data[ps], ps );
+
+        if ( nullptr != errl )
         {
-            memset( &data[ps], 0x00, DIMM_DQ_RANK_BITMAP_SIZE );
-        }
-        else
-        {
-            errlHndl_t errl = fapi::fapiRcToErrl(l_rc);
-            if ( NULL != errl )
-            {
-                PRDF_ERR( PRDF_FUNC "dimmGetBadDqBitmap() failed: MBA=0x%08x "
-                          "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
-                          i_rank.getDimmSlct(), i_rank.getRankSlct() );
-                PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-                o_rc = FAIL; break;
-            }
+            PRDF_ERR( PRDF_FUNC "dimmGetBadDqBitmap() failed: i_trgt=0x%08x "
+                    "ps=%d ds=%d rs=%d", getHuid(i_trgt), ps,
+                    i_rank.getDimmSlct(), i_rank.getRankSlct() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
         }
     }
 
     if ( SUCCESS == o_rc )
     {
-        o_bitmap = CenDqBitmap ( i_mba, i_rank, data );
+        o_bitmap = MemDqBitmap<T>( i_trgt, i_rank, data );
     }
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
-int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
-                        const CenDqBitmap & i_bitmap )
+template <DIMMS_PER_RANK T>
+int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
+                        const MemDqBitmap<T> & i_bitmap )
 {
     #define PRDF_FUNC "[PlatServices::setBadDqBitmap] "
 
     int32_t o_rc = SUCCESS;
 
+    // Don't proceed unless the DIMM exists
+    PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
+                                              i_rank.getDimmSlct()) );
+
     if ( !areDramRepairsDisabled() )
     {
-        const uint8_t (&data)[MBA_DIMMS_PER_RANK][DIMM_DQ_RANK_BITMAP_SIZE]
-                                                        = i_bitmap.getData();
+        const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
 
-        for ( int32_t ps = 0; ps < MBA_DIMMS_PER_RANK; ps++ )
+        for ( int32_t ps = 0; ps < T; ps++ )
         {
-            errlHndl_t errl = NULL;
-            FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, getFapiTarget(i_mba),
-                             ps, i_rank.getDimmSlct(), i_rank.getRankSlct(),
-                             data[ps] );
-            if ( NULL != errl )
+            errlHndl_t errl = nullptr;
+
+            constexpr fapi2::TargetType l_trgtType =
+                ( T == DIMMS_PER_RANK::MBA ) ? fapi2::TARGET_TYPE_MBA
+                                             : fapi2::TARGET_TYPE_MCA;
+
+            fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
+
+            // TODO RTC 164707
+            //FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, l_fapiTrgt,
+            //                 i_rank.getDimmSlct(), i_rank.getRankSlct(),
+            //                 data[ps], ps );
+
+            if ( nullptr != errl )
             {
-                PRDF_ERR( PRDF_FUNC "dimmSetBadDqBitmap() failed: MBA=0x%08x "
-                          "ps=%d ds=%d rs=%d", getHuid(i_mba), ps,
-                          i_rank.getDimmSlct(), i_rank.getRankSlct() );
+                PRDF_ERR( PRDF_FUNC "dimmSetBadDqBitmap() failed: "
+                          "i_trgt=0x%08x ps=%d ds=%d rs=%d", getHuid(i_trgt),
+                          ps, i_rank.getDimmSlct(), i_rank.getRankSlct() );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
                 o_rc = FAIL;
             }
@@ -414,7 +428,6 @@ int32_t setBadDqBitmap( TargetHandle_t i_mba, const CenRank & i_rank,
 
     #undef PRDF_FUNC
 }
-*/
 
 //------------------------------------------------------------------------------
 

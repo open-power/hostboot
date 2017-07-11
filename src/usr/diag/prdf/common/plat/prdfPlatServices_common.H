@@ -42,8 +42,8 @@
 #include <prdfMemConst.H>
 #include <prdfTimer.H>
 #include <prdfParserEnums.H>
-
-//#include <dimmConsts.H>         // for DIMM_DQ_RANK_BITMAP_SIZE TODO RTC 164707
+#include <prdfMemSymbol.H>
+#include <prdfMemDqBitmap.H>
 
 #include <plat_hwp_invoker.H>
 
@@ -55,7 +55,9 @@ namespace PRDF
 {
 
 class CenAddr;
-class CenDqBitmap;
+enum DIMMS_PER_RANK : uint8_t;
+template <DIMMS_PER_RANK T>
+class MemDqBitmap;
 class CenMark;
 class CenRank;
 class CenSymbol;
@@ -195,31 +197,27 @@ int32_t setVpdFailedLanesXbus(TARGETING::TargetHandle_t i_rxBusTgt,
 
 /**
  * @brief  Reads the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_mbaTarget A MBA target.
+ * @param  i_trgt        A MCA/MBA target.
  * @param  i_rank        Target rank.
  * @param  o_bitmap      DQ bitmap container.
- * @param  i_allowNoDimm TRUE ignores rc from hardware procedure indicating no
- *                       DIMM is attached. This is useful when iterating all
- *                       possible ranks. Default is FALSE.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 164707
-int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-                        CenDqBitmap & o_bitmap, bool i_allowNoDimm = false );
-*/
+template <DIMMS_PER_RANK T>
+int32_t getBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
+                        const MemRank & i_rank, MemDqBitmap<T> & o_bitmap );
 
 /**
  * @brief  Writes the bad DQ bitmap attribute for both ports of the target rank.
- * @param  i_mbaTarget A MBA target.
+ * @param  i_trgt   A MCA/MBA target.
  * @param  i_rank   Target rank.
  * @param  i_bitmap DQ bitmap container.
  * @note   This is a no-op if DRAM Repairs are disabled in manufacturing.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 164707
-int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_mba, const CenRank & i_rank,
-                        const CenDqBitmap & i_bitmap );
-*/
+template <DIMMS_PER_RANK T>
+int32_t setBadDqBitmap( TARGETING::TargetHandle_t i_trgt,
+                        const MemRank & i_rank,
+                        const MemDqBitmap<T> & i_bitmap );
 
 /**
  * @brief  Invokes the get mark store hardware procedure.
