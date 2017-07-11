@@ -2127,7 +2127,7 @@ class program
 
                 FAPI_ASSERT( l_port == 0,
                              fapi2::MSS_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN()
-                             .set_TARGET(i_target)
+                             .set_MCBIST_TARGET(i_target)
                              .set_PORT(mss::first_bit_set(l_port))
                              .set_SUBTEST(l_subtest),
                              "%s MCBIST error on port %d subtest %d", mss::c_str(i_target), mss::first_bit_set(l_port), l_subtest );
@@ -2143,7 +2143,7 @@ class program
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
                              fapi2::MSS_MEMDIAGS_ERROR_IN_LAST_PATTERN()
-                             .set_TARGET(i_target)
+                             .set_MCBIST_TARGET(i_target)
                              .set_STATUS0(l_read0)
                              .set_STATUS1(l_read1),
                              "%s MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", mss::c_str(i_target), l_read0, l_read1 );

@@ -123,7 +123,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     l_probes);
 
     FAPI_ASSERT( l_poll_results == true,
-                 fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                  "p9_mss_scrub (init) timedout %s", mss::c_str(i_target) );
 
     // Unmask firs after memdiags and turn off FIFO mode

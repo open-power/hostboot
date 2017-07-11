@@ -386,7 +386,7 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<T>& i_pr
 
     // Check to see if we're still in progress - meaning we timed out.
     FAPI_ASSERT((l_status & l_in_progress) != l_in_progress,
-                fapi2::MSS_MCBIST_TIMEOUT().set_TARGET_IN_ERROR(i_target),
+                fapi2::MSS_MCBIST_TIMEOUT().set_MCBIST_TARGET(i_target),
                 "MCBIST timed out %s", mss::c_str(i_target));
 
     // The control register has a bit for done-and-happy and a bit for done-and-unhappy
@@ -400,7 +400,7 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<T>& i_pr
         // If we're here there were no errors, but lets report if the fail bit was set anyway.
         FAPI_ASSERT( (l_status & l_fail) != l_fail,
                      fapi2::MSS_MCBIST_UNKNOWN_FAILURE()
-                     .set_TARGET_IN_ERROR(i_target)
+                     .set_MCBIST_TARGET(i_target)
                      .set_STATUS_REGISTER(l_status),
                      "%s MCBIST reported a fail, but process_errors didn't find it 0x%016llx",
                      mss::c_str(i_target), l_status );
@@ -411,7 +411,7 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<T>& i_pr
 
     FAPI_ASSERT(false,
                 fapi2::MSS_MCBIST_DATA_FAIL()
-                .set_TARGET_IN_ERROR(i_target)
+                .set_MCBIST_TARGET(i_target)
                 .set_STATUS_REGISTER(l_status),
                 "%s MCBIST executed but we got corrupted data in the control register 0x%016llx",
                 mss::c_str(i_target), l_status );
@@ -439,7 +439,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     // Before we go off into the bushes, lets see if there are any instructions in the
     // program. If not, we can save everyone the hassle
     FAPI_ASSERT(0 != i_program.iv_subtests.size(),
-                fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_TARGET(i_target),
+                fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_MCBIST_TARGET(i_target),
                 "Attempt to run an MCBIST program with no subtests on %s", mss::c_str(i_target));
 
     // Implement any mcbist work-arounds.
@@ -495,7 +495,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     // So we've either run/are running or we timed out waiting for the start.
     FAPI_ASSERT( l_poll_result == true,
-                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_START().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_START().set_MCBIST_TARGET(i_target),
                  "The MCBIST engine failed to start its program" );
 
     // If the user asked for async mode, we can leave. Otherwise, poll and check for errors
