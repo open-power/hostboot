@@ -398,7 +398,7 @@ uint8_t getDramSize<TYPE_MCA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 
     PRDF_ASSERT( nullptr != mcsTrgt );
 
-    uint8_t mcaPos = i_chip->getPos();
+    uint8_t mcaRelPos = i_chip->getPos() % MAX_MCA_PER_MCS;
 
     uint8_t tmp[MAX_MCA_PER_MCS][DIMM_SLCT_PER_PORT];
 
@@ -408,7 +408,7 @@ uint8_t getDramSize<TYPE_MCA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
         PRDF_ASSERT( false );
     }
 
-    return tmp[mcaPos][i_dimmSlct];
+    return tmp[mcaRelPos][i_dimmSlct];
 
     #undef PRDF_FUNC
 }
