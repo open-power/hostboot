@@ -89,11 +89,11 @@
     <ffdc>STATUS1</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -105,11 +105,11 @@
     <ffdc>SUBTEST</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -203,7 +203,7 @@
     <ffdc>SIZE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -215,14 +215,13 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
     <description>The MCBIST engine failed to start its program</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -230,14 +229,13 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
     <description>The MCBIST engine failed to stop its program</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -247,10 +245,10 @@
     <description>The port used in an MCBIST program is not functional</description>
     <ffdc>RELATIVE_PORT_POSITION</ffdc>
     <ffdc>ADDRESS</ffdc>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCBIST_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -264,11 +262,11 @@
     <description>A superfast read operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -278,11 +276,11 @@
     <description>A superfast init operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -292,11 +290,11 @@
     <description>A continuous scrub operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -306,11 +304,11 @@
     <description>A continuous scrub operation failed initialization</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -318,11 +316,11 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
     <description>A continue request asked to stop at a boundary, but we are there already</description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCBIST_TARGET</ffdc>
     <ffdc>BOUNDARY</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MEMDIAGS_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
     <callout>
@@ -334,7 +332,7 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program with no subtests</description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCBIST_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -344,14 +342,13 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_REPAIRS_EXCEEDED</rc>
     <description>A mark repair operation failed to repair enough bad bits</description>
-    <ffdc>TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MARK_REPAIR_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCA_TARGET</target>
       <targetType>TARGET_TYPE_MCA</targetType>
     </collectRegisterFfdc>
     <callout>
-      <target>TARGET</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -359,11 +356,11 @@
   <hwpError>
     <rc>RC_MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK</rc>
     <description>A mark repair operation set both a chipmark and symbol mark on one rank</description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>MCA_TARGET</ffdc>
     <ffdc>RANK</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_MARK_REPAIR_FAILURE</id>
-      <target>TARGET</target>
+      <target>MCA_TARGET</target>
       <targetType>TARGET_TYPE_MCA</targetType>
     </collectRegisterFfdc>
     <callout>
