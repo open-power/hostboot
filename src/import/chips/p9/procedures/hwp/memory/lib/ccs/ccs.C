@@ -89,24 +89,24 @@ fapi2::ReturnCode fail_type( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     // If the problem lies with the MCBIST, it'll just have to loop
     FAPI_ASSERT(STAT_READ_MISCOMPARE != i_type,
                 fapi2::MSS_CCS_READ_MISCOMPARE()
-                .set_TARGET_IN_ERROR(i_target)
+                .set_MCBIST_TARGET(i_target)
                 .set_MCA_TARGET(i_mca),
                 "%s CCS FAIL Read Miscompare", mss::c_str(i_mca));
 
     // This error is likely due to a bad CCS engine/ MCBIST
     FAPI_ASSERT(STAT_UE_SUE != i_type,
-                fapi2::MSS_CCS_UE_SUE().set_TARGET_IN_ERROR(i_target),
+                fapi2::MSS_CCS_UE_SUE().set_MCBIST_TARGET(i_target),
                 "%s CCS FAIL UE or SUE Error", mss::c_str(i_target));
 
     FAPI_ASSERT(STAT_CAL_TIMEOUT != i_type,
                 fapi2::MSS_CCS_CAL_TIMEOUT()
-                .set_TARGET_IN_ERROR(i_target)
+                .set_MCBIST_TARGET(i_target)
                 .set_MCA_TARGET(i_mca),
                 "%s CCS FAIL Calibration Operation Time Out", mss::c_str(i_mca));
 
     // Problem with the CCS engine
     FAPI_ASSERT(STAT_HUNG != i_type,
-                fapi2::MSS_CCS_HUNG().set_TARGET_IN_ERROR(i_target),
+                fapi2::MSS_CCS_HUNG().set_MCBIST_TARGET(i_target),
                 "%s CCS appears hung", mss::c_str(i_target));
 fapi_try_exit:
     return fapi2::current_err;
@@ -188,7 +188,7 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     }),
-    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_TARGET_IN_ERROR(i_target),
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target),
     "CCS appears hung (trying to stop)");
 
     while (l_inst_iter != i_program.iv_instructions.end())
