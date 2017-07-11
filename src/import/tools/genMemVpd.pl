@@ -272,11 +272,13 @@ my $cfgInputVpdTextDir = ".";
 my $cfgOutputVpdBinDir = ".";
 my $cfgHelp            = 0;
 my $cfgVerbose         = 0;
+my $cfgVersion         = undef;
 my %ckeKeywordData;    # CKE hash table (mcsMask -> hash ref with blob data for those masked mcs's)
 
 # Process command line parameters, issue help text if needed
 GetOptions(
-    "prefix:s"             => \$cfgPrefix,
+    "prefix=s"             => \$cfgPrefix,
+    "version:s"            => \$cfgVersion,
     "input-vpd-text-dir:s" => \$cfgInputVpdTextDir,
     "output-vpd-bin-dir:s" => \$cfgOutputVpdBinDir,
     "help"                 => \$cfgHelp,
@@ -381,6 +383,15 @@ elsif ( "CKE_MAP" eq $g_tarType )
 }
 elsif ( "VM" eq $g_tarType )
 {
+    unless (defined ($cfgVersion))
+    {
+        fatal( "Need to supply a version (0-F) for VM keyword" );
+    }
+    unless ($cfgVersion =~ m/^(0x)?[[:xdigit:]]$/)
+    {
+        fatal( "Invalid VM version ($cfgVersion), must be a single character (0-F)" );
+    }
+
     createVMFile();
     # createVMFile already reported created file
     verbose("Support file created:");
@@ -1348,10 +1359,13 @@ sub createVMFile
     trace( "Create output binary file: " . $fileInfo{FILE_NAME} );
 
     my $time = time;
+    $time = $time & 0xfffffff0;
+    $time = $time | hex($cfgVersion);
     my %num = newNum( $time, "u32" );
     filePushNum( \%fileInfo, \%num );
     fileWrite( \%fileInfo );
-    verbose( "\nTranslated VM timestamp in file: ". scalar localtime($num{NUM_VALUE}) );
+    verbose( "\nTranslated VM timestamp in file: ".
+             scalar localtime($num{NUM_VALUE}) );
     verbose( "Created " . $cfgOutputVpdBinDir . $fileInfo{FILE_NAME} );
 }
 
@@ -1602,11 +1616,14 @@ sub display_help
 usage:
     $scriptname --help
     $scriptname --prefix <system_kw>
+                [--version <single hex character>]
                 [--input-vpd-text-dir=./] [--output-vpd-bin-dir=./]
                 [--verbose]
         --prefix
              Prefix of vpd input files to process (template_MR or template_MT)
              Available kw = MR, MT, CKE_MAP, DQ_MAP and VM
+        --version
+             Hex character used in the last nibble of the VM keyword
         --input-vpd-text-dir
              Optional path to directory with input vpd files.
              Defaults to current directory (./)
