@@ -122,7 +122,7 @@ DeconfigGard & theDeconfigGard()
 //******************************************************************************
 DeconfigGard::DeconfigGard()
 : iv_platDeconfigGard(NULL),
-  iv_XABusEndpointDeconfigured(false)
+  iv_XAOBusEndpointDeconfigured(false)
 {
     HWAS_DBG("DeconfigGard Constructor");
     HWAS_MUTEX_INIT(iv_mutex);
@@ -698,7 +698,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-            //The system can be booted even after gardingthis resource
+            //The system can be booted even after garding this resource
             //Apply the gard record.
             l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
             if (l_pErr)
@@ -730,10 +730,11 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             break;
         }
 
-        if (iv_XABusEndpointDeconfigured)
+        if (iv_XAOBusEndpointDeconfigured)
         {
-            // Check if Abus decofigures should be considered in algorithm
+            // Check if Abus deconfigures should be considered in algorithm
             bool l_doAbusDeconfig = pSys->getAttr<ATTR_DO_ABUS_DECONFIG>();
+
             // Get all functional nodes
             TargetHandleList l_funcNodes;
             getEncResources(l_funcNodes, TYPE_NODE, UTIL_FILTER_FUNCTIONAL);
@@ -752,9 +753,9 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
                 // Set for deconfigure algorithm to run on every node even if
                 // no buses deconfigured (needed for multi-node systems)
-                setXABusEndpointDeconfigured(true);
+                setXAOBusEndpointDeconfigured(true);
             }
-            setXABusEndpointDeconfigured(false);
+            setXAOBusEndpointDeconfigured(false);
         }
     }
     while (0);
@@ -1155,16 +1156,16 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
         // then there's no work for _invokeDeconfigureAssocProc to do
         // as this implies there are no deconfigured endpoints or
         // processors.
-        if (!(iv_XABusEndpointDeconfigured))
+        if (!(iv_XAOBusEndpointDeconfigured))
         {
-            HWAS_INF("_invokeDeconfigureAssocProc: No deconfigured x/a"
+            HWAS_INF("_invokeDeconfigureAssocProc: No deconfigured x/a/o"
                      " bus endpoints. Deconfiguration of "
                      "associated procs unnecessary.");
             break;
         }
 
         // Clear flag as this function is called multiple times
-        iv_XABusEndpointDeconfigured = false;
+        iv_XAOBusEndpointDeconfigured = false;
 
         // Get top 'starting' level target - use top level target if no
         // i_node given (hostboot)
@@ -1834,7 +1835,30 @@ void DeconfigGard::_deconfigureByAssoc(
                                        i_deconfigRule);
                 }
                 break;
-            } // TYPE_XBUS, TYPE_ABUS
+            } // TYPE_XBUS, TYPE_ABUS, TYPE_PSI
+            case TYPE_OBUS:
+            {
+                // Only deconfigure peer endpoint if OBUS set to SMP mode
+                if (i_target.getAttr<ATTR_OPTICS_CONFIG_MODE>() ==
+                        OPTICS_CONFIG_MODE_SMP)
+                {
+                    // Get peer endpoint target
+                    const Target * l_pDstTarget =
+                        i_target.getAttr<ATTR_PEER_TARGET>();
+
+                    // If target is valid
+                    if (l_pDstTarget)
+                    {
+                        // Deconfigure peer endpoint
+                        HWAS_INF("_deconfigureByAssoc OBUS Peer: 0x%.8X",
+                            get_huid(l_pDstTarget));
+                        _deconfigureTarget(
+                                    const_cast<Target &>(*l_pDstTarget),
+                                    i_errlEid, NULL, i_deconfigRule);
+                    }
+                }
+                break;
+            }
             case TYPE_PORE:
             {
                 // Get parent proc target of PORE
@@ -1907,6 +1931,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 if ((isFunctional(l_parentObus)) &&
                    (!anyChildFunctional(*l_parentObus)))
                 {
+
                     _deconfigureTarget(*l_parentObus,
                                        i_errlEid, NULL, i_deconfigRule);
                     _deconfigureByAssoc(*l_parentObus,
@@ -2034,12 +2059,13 @@ void DeconfigGard::_deconfigureTarget(
 
             // Do any necessary Deconfigure Actions
             _doDeconfigureActions(i_target); /*no effect*/ // to quiet BEAM
-            // If target being deconfigured is an x/a bus endpoint
+            // If target being deconfigured is an x/a/o bus endpoint
             if ((TYPE_XBUS == i_target.getAttr<ATTR_TYPE>()) ||
-                (TYPE_ABUS == i_target.getAttr<ATTR_TYPE>()))
+                (TYPE_ABUS == i_target.getAttr<ATTR_TYPE>()) ||
+                (TYPE_OBUS == i_target.getAttr<ATTR_TYPE>()))
             {
-                // Set flag indicating x/a bus endpoint deconfiguration
-                iv_XABusEndpointDeconfigured = true;
+                // Set flag indicating x/a/o bus endpoint deconfiguration
+                iv_XAOBusEndpointDeconfigured = true;
             }
         }
     }
@@ -2720,10 +2746,10 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
 
 //******************************************************************************
 
-void DeconfigGard::setXABusEndpointDeconfigured(bool deconfig)
+void DeconfigGard::setXAOBusEndpointDeconfigured(bool deconfig)
 {
-    HWAS_INF("Set iv_XABusEndpointDeconfigured");
-    iv_XABusEndpointDeconfigured = deconfig;
+    HWAS_INF("Set iv_XAOBusEndpointDeconfigured = %d", deconfig?1:0);
+    iv_XAOBusEndpointDeconfigured = deconfig;
 }
 
 //*****************************************************************************

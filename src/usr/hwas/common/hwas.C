@@ -419,7 +419,7 @@ errlHndl_t discoverTargets()
 
         // Check for non-present Procs and if found, trigger
         // DeconfigGard::_invokeDeconfigureAssocProc() to run by setting
-        // setXABusEndpointDeconfigured to true
+        // setXAOBusEndpointDeconfigured to true
         PredicateCTM predProc(CLASS_CHIP, TYPE_PROC);
         TargetHandleList l_procs;
         targetService().getAssociated(l_procs,
@@ -437,7 +437,7 @@ errlHndl_t discoverTargets()
             {
                 HWAS_INF("discoverTargets: Proc %.8X not present",
                     (*l_procsIter)->getAttr<ATTR_HUID>());
-                HWAS::theDeconfigGard().setXABusEndpointDeconfigured(true);
+                HWAS::theDeconfigGard().setXAOBusEndpointDeconfigured(true);
             }
         }
 
