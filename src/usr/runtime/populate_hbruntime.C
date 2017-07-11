@@ -650,6 +650,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
                 l_homerAddr = l_procChip->getAttr
                                 <TARGETING::ATTR_HOMER_PHYS_ADDR>();
+                // Note: the instance we use to retrieve the data must
+                //   match the value we used to populate HDAT originally
                 l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HOMER_OCC,
                             l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>(),
                             l_homerAddr,
@@ -841,6 +843,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // Loop through all functional Procs
         for (const auto & l_procChip: l_procChips)
         {
+            // Note: the instance we use to retrieve the data must
+            //   match the value we used to populate HDAT originally
+            uint32_t l_id = l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
+
             // -- SBE Communications buffer entry
             if(TARGETING::is_phyp_load())
             {
@@ -852,7 +858,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          i_nodeId,
+                                          l_id,
                                           l_sbeCommAddr,
                                           l_sbeCommSizeAligned,
                                           HBRT_RSVD_MEM__SBE_COMM);
@@ -879,7 +885,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
 
             l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
-                                          i_nodeId,
+                                          l_id,
                                           l_sbeffdcAddr,
                                           l_sbeffdcSizeAligned,
                                           HBRT_RSVD_MEM__SBE_FFDC);

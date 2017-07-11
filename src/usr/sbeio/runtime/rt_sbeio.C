@@ -600,6 +600,8 @@ namespace RT_SBEIO
         int rc = 0;
         errlHndl_t errl = nullptr;
 
+        TRACFCOMP(g_trac_sbeio, ENTER_MRK" process_sbe_msg: on proc %d", i_procChipId );
+
         // Used to store a local copy of the Pass-through command and preserve
         // it during processing (response overlays SBE Communication buffer)
         sbeMessage_t l_request;
@@ -718,6 +720,7 @@ namespace RT_SBEIO
             errlCommit (errl, SBE_COMP_ID);
         }
 
+        TRACFCOMP(g_trac_sbeio, EXIT_MRK" process_sbe_msg: rc=%d", rc );
         return rc;
     }
 
@@ -829,11 +832,16 @@ namespace RT_SBEIO
             getAllChips(procChips, TYPE_PROC, true);
             for (const auto & l_procChip: procChips)
             {
-                uint64_t l_instance = l_procChip->getAttr<ATTR_POSITION>();
+                // Note: the instance we use to retrieve the data must
+                //   match the value we used to populate HDAT originally
+                uint64_t l_instance = l_procChip->getAttr<ATTR_HBRT_HYP_ID>();
                 uint64_t l_sbeCommAddr = g_hostInterfaces->get_reserved_mem(
                                          HBRT_RSVD_MEM__SBE_COMM,
                                          l_instance);
                 l_procChip->setAttr<ATTR_SBE_COMM_ADDR>(l_sbeCommAddr);
+                TRACFCOMP( g_trac_sbeio, INFO_MRK" COMM_ADDR=0x%.llX for %.8X",
+                           l_sbeCommAddr,
+                           TARGETING::get_huid(l_procChip) );
             }
 
 #ifdef CONFIG_HTMGT

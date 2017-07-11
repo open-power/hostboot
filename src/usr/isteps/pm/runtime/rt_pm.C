@@ -435,7 +435,9 @@ namespace RTPM
                  itr != procChips.end();
                  ++itr)
             {
-                uint32_t l_instance = (*itr)->getAttr<ATTR_POSITION>();
+                // Note: the instance we use to retrieve the data must
+                //   match the value we used to populate HDAT originally
+                uint32_t l_instance = (*itr)->getAttr<ATTR_HBRT_HYP_ID>();
                 uint64_t l_homerAddr = g_hostInterfaces->
                             get_reserved_mem(HBRT_RSVD_MEM__HOMER,
                                              l_instance);

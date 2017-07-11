@@ -622,7 +622,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             for (const auto & l_procChip: procChips)
             {
                 uint64_t l_instance =
-                    l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+                    l_procChip->getAttr<TARGETING::ATTR_HBRT_HYP_ID>();
                 if(l_instance == i_instance)
                 {
                     cv_comm_addr =
