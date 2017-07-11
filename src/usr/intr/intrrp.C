@@ -544,6 +544,39 @@ errlHndl_t IntrRp::resetIntUnit(intr_hdlr_t* i_proc)
                 TRACFCOMP(g_trac_intr, "Error resetting XIVE INT unit");
                 break;
             }
+
+            //Additional settings for fused mode
+            //Needed because the HW XIVE reset clears too much HW state
+            if (is_fused_mode())
+            {
+                //Do a Read-Modify-Write on INT Thread Context Register
+                //setting the FUSED_CORE_EN bit as the 'modify' part
+                uint64_t l_int_tctxt_reg = 0x0;
+                l_err = deviceRead(procTarget,
+                                    &l_int_tctxt_reg,
+                                    size,
+                                    DEVICE_SCOM_ADDRESS(PU_INT_TCTXT_CFG));
+
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_intr, "Error reading the INT_TCTXT_CFG(%lx) scom register",
+                              PU_INT_TCTXT_CFG);
+                    break;
+                }
+
+                l_int_tctxt_reg |= INT_TCTXT_CFG_FUSE_CORE_EN;
+
+                l_err = deviceWrite(procTarget,
+                                    &l_int_tctxt_reg,
+                                    size,
+                                    DEVICE_SCOM_ADDRESS(PU_INT_TCTXT_CFG));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_intr, "Error writing %lx  the INT_TCTXT_CFG(%lx) scom register",
+                              l_int_tctxt_reg, PU_INT_TCTXT_CFG );
+                    break;
+                }
+            }
         }
         else
         {
