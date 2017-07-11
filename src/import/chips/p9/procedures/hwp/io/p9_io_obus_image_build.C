@@ -93,7 +93,7 @@ fapi2::ReturnCode p9_io_obus_image_build(CONST_OBUS& iTgt, void* const iHwImageP
     const uint64_t HARD_RESET       = 0x6000000000000000ull; // xcr cmd=110
     const uint64_t RESUME_FROM_HALT = 0x2000000000000000ull; // xcr cmd=010
     // PPE Address
-    const uint64_t BASE_ADDR    = 0x0000000006010C00ull;
+    const uint64_t BASE_ADDR    = 0x0000000009011040ull;
     const uint64_t MEM_ARB_CSAR = 0x000000000000000Dull | BASE_ADDR; // Sram Address Reg
     const uint64_t MEM_ARB_SCR  = 0x000000000000000Aull | BASE_ADDR; // Sram Source Control Reg
     const uint64_t MEM_ARB_CSDR = 0x000000000000000Eull | BASE_ADDR; // Sram Data Reg
