@@ -56,6 +56,7 @@
 #include <sbe/sbe_update.H>
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
+#include <ipmi/ipmiwatchdog.H>
 #endif
 #include <initservice/istepdispatcherif.H>
 #ifdef CONFIG_SECUREBOOT
@@ -455,6 +456,22 @@ namespace SBE
                                TARGETING::get_huid(sbeState.target));
                     errlCommit( err, SBE_COMP_ID );
                 }
+
+                /**********************************************/
+                /*   Reset the watchdog after each Action     */
+                /**********************************************/
+#ifdef CONFIG_BMC_IPMI
+                err = IPMIWATCHDOG::resetWatchDogTimer();
+
+                if( err )
+                {
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms(): "
+                               "resetWatchDogTimer() Failed rc=0x%.4X",
+                               err->reasonCode());
+                    errlCommit( err, SBE_COMP_ID );
+                }
+#endif
 
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);
