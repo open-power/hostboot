@@ -85,7 +85,7 @@ extern "C"
             {
                 // Note: using MCA here as the scoms used to collect FFDC data fail on the DIMM level target
                 FAPI_ASSERT( !(l_repairs_exceeded.getBit(mss::index(l_dimm))),
-                             fapi2::MSS_MEMDIAGS_REPAIRS_EXCEEDED().set_TARGET(l_mca),
+                             fapi2::MSS_MEMDIAGS_REPAIRS_EXCEEDED().set_MCA_TARGET(l_mca),
                              "p9_mss_memdiag bad bit repairs exceeded %s", mss::c_str(l_mca) );
             }
 
@@ -111,7 +111,7 @@ extern "C"
                         FAPI_TRY( mss::ecc::get_fwms(l_mca, l_rank, l_galois, l_type, l_region, l_addr) );
 
                         FAPI_ASSERT( l_region == mss::ecc::fwms::mark_region::DISABLED,
-                                     fapi2::MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK().set_TARGET(l_mca).set_RANK(l_rank),
+                                     fapi2::MSS_MEMDIAGS_CHIPMARK_AND_SYMBOLMARK().set_MCA_TARGET(l_mca).set_RANK(l_rank),
                                      "p9_mss_memdiag both chip mark and symbol mark on rank %d: %s", l_rank, mss::c_str(l_mca) );
                     }
                 }
@@ -149,7 +149,7 @@ extern "C"
             l_probes);
 
             FAPI_ASSERT( l_poll_results == true,
-                         fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_TARGET(i_target),
+                         fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                          "p9_mss_memdiags timedout %s", mss::c_str(i_target) );
         }
 
