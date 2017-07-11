@@ -47,17 +47,21 @@ namespace HBOCC
         NOT_FIR_MASTER = 0x00000000,
         IS_FIR_MASTER  = 0x00000001,
 
-        // SRAM Address for OCC Main App
-        OCC_SRAM_ADDRESS = 0xFFF80000,
+        // SRAM Addresses for OCC Main App and GPE0 app
+        OCC_405_SRAM_ADDRESS  = 0xFFF40000,
+        OCC_GPE0_SRAM_ADDRESS = 0xFFF01000,
+        OCC_GPE1_SRAM_ADDRESS = 0xFFF10000,
 
         // SRAM Address and length for FIR HOMER data
-        OCC_SRAM_FIR_DATA   = 0xFFFF5000,
-        OCC_SRAM_FIR_LENGTH = 0x1000,
+        OCC_SRAM_FIR_DATA   = 0xFFFBA000,
+        OCC_SRAM_FIR_LENGTH = 0x3000,
 
         // offsets for OCC loading during IPL
-        OCC_OFFSET_LENGTH   = 0x48,
-        OCC_OFFSET_IPL_FLAG = 0x82,
-        OCC_OFFSET_FREQ     = 0x84,
+        OCC_OFFSET_LENGTH      = 0x48,
+        OCC_OFFSET_GPE0_LENGTH = 0x64,
+        OCC_OFFSET_GPE1_LENGTH = 0x68,
+        OCC_OFFSET_IPL_FLAG    = 0x92,
+        OCC_OFFSET_FREQ        = 0x94,
 
     };
 
@@ -90,6 +94,20 @@ namespace HBOCC
      */
     errlHndl_t loadHostDataToSRAM(TARGETING::Target* i_proc,
                     const PRDF::HwInitialized_t i_curHw = PRDF::ALL_HARDWARE);
+#endif
+
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    /**
+     * @brief Loads the OCC image from PNOR to SRAM
+     *
+     * @param[in] i_target: the proc we're operating on (should be masterproc)
+     * @param[in] i_occVirtAddr: the address of the page allocated for OCC
+     *                           bootloader.
+     *
+     * @return errlHndl_t Error log if load fails
+     */
+    errlHndl_t loadOCCImageDuringIpl(TARGETING::Target* i_target,
+                                      void* i_occVirtAddr);
 #endif
 
     /**

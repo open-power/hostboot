@@ -191,7 +191,6 @@ class UtilLidMgr
      */
     errlHndl_t releaseLidImage(void);
 
-// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
     /**
      *  @brief Get lid managers' pointer to the lid vaddr.

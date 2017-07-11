@@ -161,9 +161,6 @@ const DepModInfo g_istep16Dependancies = {
         DEP_LIB(libp9_cpuWkup.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libpm.so),
-#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        DEP_LIB(libocc.so),
-#endif
         NULL
     }
 };

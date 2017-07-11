@@ -62,7 +62,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/include/registe
 EXTRAINCDIR += ${LIB_HWP_PATH}
 EXTRAINCDIR += ${CORE_HWP_PATH}
 EXTRAINCDIR += ${CACHE_HWP_PATH}
-
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

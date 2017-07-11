@@ -71,6 +71,8 @@
 #include <arch/ppc.H>
 #include <isteps/pm/occAccess.H>
 
+#include <isteps/pm/occCheckstop.H>
+
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
   #include <diag/prdf/prdfWriteHomerFirData.H>
 #endif
@@ -98,6 +100,7 @@ namespace HBPM
 {
     constexpr uint32_t OCC_SRAM_RSP_ADDR   = 0xFFFBF000;
     constexpr uint16_t OCC_CHKPT_COMPLETE  = 0x0EFF;
+    const uint32_t IPL_FLAG_AND_FREQ_SIZE = sizeof(uint32_t) + sizeof(uint16_t);
 
 
     std::shared_ptr<UtilLidMgr> g_pOccLidMgr (nullptr);
@@ -192,7 +195,6 @@ namespace HBPM
         }
 
 #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
-// @todo RTC 155065 IPL Time Checkstop Analysis Enablement
         // Figure out the FIR master
         TARGETING::Target* masterproc = nullptr;
         tS.masterProcChipTargetHandle( masterproc );
@@ -615,7 +617,8 @@ namespace HBPM
     errlHndl_t loadPMComplex(TARGETING::Target * i_target,
                              uint64_t i_homerPhysAddr,
                              uint64_t i_commonPhysAddr,
-                             loadPmMode i_mode)
+                             loadPmMode i_mode,
+                             bool i_useSRAM)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    ENTER_MRK"loadPMComplex: %s",
@@ -626,7 +629,7 @@ namespace HBPM
         do
         {
             // Reset the PM complex for LOAD only
-            if( PM_LOAD == i_mode)
+            if(PM_LOAD == i_mode)
             {
                 l_errl = resetPMComplex(i_target);
                 if( l_errl )
@@ -650,7 +653,7 @@ namespace HBPM
             }
 
             // Zero out the HOMER memory for LOAD only
-            if(PM_LOAD == i_mode)
+            if(PM_LOAD == i_mode && !i_useSRAM)
             {
                 memset(l_homerVAddr, 0, VMM_HOMER_INSTANCE_SIZE);
             }
@@ -659,7 +662,6 @@ namespace HBPM
                                             + HOMER_OFFSET_TO_OCC_IMG;
             uint64_t l_occImgVaddr = reinterpret_cast <uint64_t>(l_homerVAddr)
                                             + HOMER_OFFSET_TO_OCC_IMG;
-
             l_errl = loadOCCSetup(i_target,
                                   l_occImgPaddr,
                                   l_occImgVaddr,
@@ -675,96 +677,110 @@ namespace HBPM
                            l_occImgVaddr, i_commonPhysAddr );
                 break;
             }
-
-#if 0 // @todo RTC 155065 IPL Time Checkstop Analysis Enablement
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-            if (i_useSRAM)
+            if(i_useSRAM)
             {
-                void* occVirt = reinterpret_cast<void *>(i_occImgVaddr);
-                l_errl = loadOCCImageDuringIpl( i_target, occVirt );
-                if( l_errl )
+                void* l_occVirt = reinterpret_cast<void *>(l_occImgVaddr);
+                l_errl = HBOCC::loadOCCImageDuringIpl(i_target, l_occVirt);
+                if(l_errl)
                 {
                     TRACFCOMP(g_fapiImpTd,
-                            ERR_MRK"loadOCC: loadOCCImageDuringIpl failed!");
+                            ERR_MRK"loadPMComplex:"
+                            " loadOCCImageDuringIpl failed!");
                     break;
                 }
             }
             else
+#endif
             {
-                // clear (up to and including) the IPL Flag
-                const uint32_t l_SramAddrApp = OCC_SRAM_ADDRESS;
-                ecmdDataBufferBase
-                    l_occAppData((OCC_OFFSET_IPL_FLAG + 6) * 8 /* bits */);
-                l_errl = HBOCC::writeSRAM(i_target,l_SramAddrApp,l_occAppData);
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+                //If we're in Checkstop analysis and get here, we need
+                //to clear the IPL flag that got set during istep 6
+                const uint32_t l_sramAddrApp = HBOCC::OCC_405_SRAM_ADDRESS;
+                uint8_t l_occAppData[HBOCC::OCC_OFFSET_IPL_FLAG
+                                                      + IPL_FLAG_AND_FREQ_SIZE];
+                memset(l_occAppData, 0, HBOCC::OCC_OFFSET_IPL_FLAG
+                                                      + IPL_FLAG_AND_FREQ_SIZE);
+                l_errl = HBOCC::writeSRAM(i_target, l_sramAddrApp,
+                      (uint64_t*) l_occAppData, HBOCC::OCC_OFFSET_IPL_FLAG
+                                                      + IPL_FLAG_AND_FREQ_SIZE);
                 if(l_errl)
                 {
-                    TRACFCOMP( g_fapiImpTd,
-                            ERR_MRK"loadOCC: Error in writeSRAM of 0");
+                    TRACFCOMP(g_fapiImpTd,
+                              "loadPMComplex: Error erasing IPL flag");
+                    break;
+                }
+#endif
+                l_errl = loadOCCImageToHomer(i_target,
+                                            l_occImgPaddr,
+                                            l_occImgVaddr,
+                                            i_mode);
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"loadPMComplex: "
+                              "loading OCC failed! "
+                              "HUID=0x%08X OCC_Phys=0x%0lX "
+                              "OCC_Virt=0x%0lX Mode=%s",
+                              get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
+                              (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
                     break;
                 }
             }
-#endif
-#endif
-            l_errl = loadOCCImageToHomer(i_target,
-                                         l_occImgPaddr,
-                                         l_occImgVaddr,
-                                         i_mode);
-            if(l_errl)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMComplex: "
-                           "loading OCC failed! "
-                           "HUID=0x%08X OCC_Phys=0x%0lX "
-                           "OCC_Virt=0x%0lX Mode=%s",
-                           get_huid(i_target), l_occImgPaddr, l_occImgVaddr,
-                           (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
-                break;
-            }
-
-            void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
-                                            HOMER_OFFSET_TO_OCC_HOST_DATA);
-
-#if 0 // @todo RTC 155065 IPL Time Checkstop Analysis Enablement
 #if defined(CONFIG_IPLTIME_CHECKSTOP_ANALYSIS) && !defined(__HOSTBOOT_RUNTIME)
-            if (i_useSRAM)
+            if(i_useSRAM)
             {
                 //==============================
                 //Setup host data area in SRAM
                 //==============================
                 l_errl = HBOCC::loadHostDataToSRAM(i_target,
-                                        PRDF::MASTER_PROC_CORE);
+                                                        PRDF::MASTER_PROC_CORE);
                 if( l_errl != NULL )
                 {
-                    TRACFCOMP( g_fapiImpTd, ERR_MRK"loading Host Data Area failed!" );
+                    TRACFCOMP(g_fapiImpTd,
+                                       ERR_MRK"loading Host Data Area failed!");
                     break;
                 }
             }
+            else
 #endif
-#endif
-            l_errl = loadHostDataToHomer(i_target,
-                                         l_occDataVaddr);
-            if(l_errl)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMComplex: "
-                           "loading Host Data Area failed! "
-                           "HUID=0x%08X OCC_Host_Data_Virt=0x%0lX",
-                           get_huid(i_target), l_occDataVaddr );
-                break;
+                void* l_occDataVaddr = reinterpret_cast <void *>(l_occImgVaddr +
+                                                 HOMER_OFFSET_TO_OCC_HOST_DATA);
+
+                l_errl = loadHostDataToHomer(i_target,
+                                             l_occDataVaddr);
+                if(l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"loadPMComplex: "
+                              "loading Host Data Area failed! "
+                              "HUID=0x%08X OCC_Host_Data_Virt=0x%0lX",
+                              get_huid(i_target), l_occDataVaddr );
+                    break;
+                }
+
+                l_errl = loadHcode(i_target,
+                                   l_homerVAddr,
+                                   i_mode);
+                if(l_errl)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                               ERR_MRK"loadPMComplex: "
+                               "loadHcode failed! "
+                               "HUID=0x%08X HOMER_Virt=0x%0lX Mode=%s",
+                               get_huid(i_target), l_occImgVaddr,
+                               (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
+                    break;
+                }
             }
 
-            l_errl = loadHcode(i_target,
-                               l_homerVAddr,
-                               i_mode);
-            if(l_errl)
+            //If i_useSRAM is true, then we're in istep 6.11. This address needs
+            //to be reset here, so that it's recalculated again in istep 21.1
+            //where this function is called.
+            if(i_useSRAM)
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           ERR_MRK"loadPMComplex: "
-                           "loadHcode failed! "
-                           "HUID=0x%08X HOMER_Virt=0x%0lX Mode=%s",
-                           get_huid(i_target), l_occImgVaddr,
-                           (PM_LOAD == i_mode) ? "LOAD" : "RELOAD" );
-                break;
+                i_target->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
             }
 
         } while(0);

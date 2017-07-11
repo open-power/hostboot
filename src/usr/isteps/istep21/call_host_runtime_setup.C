@@ -270,7 +270,7 @@ void* call_host_runtime_setup (void *io_pArgs)
             uint64_t l_occAppData[(sz_data+(sz_dw-1))/sz_dw];
             memset( l_occAppData, 0x00, sizeof(l_occAppData) );
 
-            const uint32_t l_SramAddrApp = HBOCC::OCC_SRAM_ADDRESS;
+            const uint32_t l_SramAddrApp = HBOCC::OCC_405_SRAM_ADDRESS;
             l_err = HBOCC::writeSRAM( masterproc, l_SramAddrApp, l_occAppData,
                                       sz_data );
             if(l_err)
