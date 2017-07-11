@@ -710,13 +710,13 @@ public:
     errlHndl_t deconfigureAssocProc();
 
     /**
-     *  @brief Sets iv_XABusEndpointDeconfigured
+     *  @brief Sets iv_XAOBusEndpointDeconfigured
      *
-     *  @param[in] deconfig Allows iv_XABusEndpointDeconfigured to be set
+     *  @param[in] deconfig Allows iv_XAOBusEndpointDeconfigured to be set
      *                      to true/false
      *
      */
-    void setXABusEndpointDeconfigured(bool deconfig);
+    void setXAOBusEndpointDeconfigured(bool deconfig);
 
 private:
 
@@ -733,14 +733,14 @@ private:
 
     /**
      * @brief  Flag indicating if _deconfigureTarget has deconfigured an
-     * x/a bus endpoint.
+     * x/a/o bus endpoint.
      *
      * Used by _invokeDeconfigureAssocProc.  If true,
      * _invokeDeconfigureAssocProc will execute and then call
      * _deconfigureAssocProc.  If false, there is no work to be done
      * and _invokeDeconfigureAssocProc will break and return.
      */
-    bool iv_XABusEndpointDeconfigured;
+    bool iv_XAOBusEndpointDeconfigured;
 
 
 }; // DeconfigGard
