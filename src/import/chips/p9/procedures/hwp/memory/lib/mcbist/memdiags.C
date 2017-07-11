@@ -96,7 +96,7 @@ fapi2::ReturnCode stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 
     // So we've either stopped or we timed out
     FAPI_ASSERT( l_poll_result == true,
-                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP().set_MCBIST_TARGET(i_target),
                  "The MCBIST engine failed to stop its program" );
 
 fapi_try_exit:
@@ -164,7 +164,7 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::single_port_init()
                  fapi2::MSS_MEMDIAGS_PORT_NOT_FUNCTIONAL()
                  .set_RELATIVE_PORT_POSITION(l_relative_port_number)
                  .set_ADDRESS( uint64_t(iv_const.iv_start_address) )
-                 .set_TARGET(iv_target),
+                 .set_MCBIST_TARGET(iv_target),
                  "Port with relative postion %d is not functional", l_relative_port_number );
 
     // No broadcast mode for this one
@@ -522,7 +522,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         sf_init_operation<TARGET_TYPE_MCBIST> l_init_op(i_target, l_const, l_rc);
 
         FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
-                     fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_TARGET(i_target),
+                     fapi2::MSS_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                      "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
 
         return l_init_op.execute();
@@ -558,7 +558,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     sf_read_operation<TARGET_TYPE_MCBIST> l_read_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a sf read %s", mss::c_str(i_target) );
 
     return l_read_op.execute();
@@ -590,7 +590,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_t
     continuous_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a continuous scrub %s", mss::c_str(i_target) );
 
     return l_op.execute();
@@ -624,7 +624,7 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     targeted_scrub_operation<TARGET_TYPE_MCBIST> l_op(i_target, l_const, l_rc);
 
     FAPI_ASSERT( l_rc == FAPI2_RC_SUCCESS,
-                 fapi2::MSS_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT().set_TARGET(i_target),
+                 fapi2::MSS_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT().set_MCBIST_TARGET(i_target),
                  "Unable to initialize the MCBIST engine for a targeted scrub %s", mss::c_str(i_target) );
 
     return l_op.execute();
@@ -708,7 +708,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
         };
 
         FAPI_ASSERT( l_stopped_at_boundary == false,
-                     fapi2::MSS_MEMDIAGS_ALREADY_AT_BOUNDARY().set_TARGET(i_target).set_BOUNDARY(i_stop),
+                     fapi2::MSS_MEMDIAGS_ALREADY_AT_BOUNDARY().set_MCBIST_TARGET(i_target).set_BOUNDARY(i_stop),
                      "Asked to stop at a boundary, but we're already there" );
 
         // Ok, if we're here either we need to change the stop and boundary conditions.
