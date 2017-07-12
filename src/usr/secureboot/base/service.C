@@ -98,7 +98,6 @@ void* initializeBase(void* unused)
             Singleton<Header>::instance().loadSecurely();
         }
 
-        // Don't extend more than 1/2 cache in VPO as fake PNOR is there
         // Don't enable SecureRomManager in VPO
 #ifndef CONFIG_P9_VPO_COMPILE
 
