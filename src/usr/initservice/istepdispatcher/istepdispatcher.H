@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,7 +86,7 @@ const uint64_t MAX_RCL_TESTS = 5;
  * @brief   detached task (daemon) to handle communication from
  *          VPO / Simics user console.
  *
- * param[in,out]    -   pointer to any args
+ * @param[in,out]    -   pointer to any args
  *
  * @return  NULL
  */
@@ -221,6 +221,24 @@ public:
     void requestReboot();
 #endif
 
+    /**
+     * @brief  For a given istep/substep combo, calculate (destructively)
+     *         the next istep/substep.
+     *
+     * @param[in,out] io_istep   The istep to be used as input to destructively
+     *                           calculate the istep for the next istep/substep
+     *                           combo and returned as the istep output
+     *                           parameter.
+     *
+     * @param[in,out] io_substep The substep to be used as input to
+     *                           destructively calculate the substep for the
+     *                           next istep/substep combo and returned as the
+     *                           substep output paremeter.
+     *
+     * @return 0 indicates there were no more isteps
+     *         1 indicates istep successfully incremented
+     */
+    int getNextIStep(uint8_t& io_istep, uint8_t& io_substep);
 
 protected:
 
@@ -424,6 +442,8 @@ private:
     // Used in only one thread,  mutex protection not needed
     uint32_t iv_istepModulesLoaded;
     bool iv_progressThreadStarted;
+    uint8_t iv_highestIStepDone;
+    uint8_t iv_highestSubstepDone;
 
     // Used in multiple threads, mutex protection needed
     uint8_t iv_curIStep;                // Current Step
