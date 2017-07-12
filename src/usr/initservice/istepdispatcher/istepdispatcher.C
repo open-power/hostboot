@@ -78,7 +78,7 @@
 #include <initservice/bootconfigif.H>
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>
-
+#include <secureboot/service.H>
 
 namespace ISTEPS_TRACE
 {
@@ -114,6 +114,8 @@ IStepDispatcher::IStepDispatcher() :
     iv_syncPointReached(false),
     iv_istepModulesLoaded(0),
     iv_progressThreadStarted(false),
+    iv_highestIStepDone(0),
+    iv_highestSubstepDone(0),
     iv_curIStep(0),
     iv_curSubStep(0),
     iv_pIstepMsg(NULL),
@@ -720,6 +722,8 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     // Get the Task Info for this step
     const TaskInfo * theStep = findTaskInfo(i_istep, i_substep);
 
+    do {
+
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
@@ -730,15 +734,58 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         TRACFCOMP(g_trac_initsvc,ENTER_MRK"doIstep: step %d, substep %d, "
                   "task %s", i_istep, i_substep, theStep->taskname);
 
+        #ifdef CONFIG_SECUREBOOT
+        if (SECUREBOOT::enabled())
+        {
+            auto nextIStepAllowed = iv_highestIStepDone;
+            auto nextSubstepAllowed = iv_highestSubstepDone;
+            auto rc = getNextIStep(nextIStepAllowed, nextSubstepAllowed);
+            if (rc && (i_istep > nextIStepAllowed ||
+                      (i_istep == nextIStepAllowed &&
+                        i_substep > nextSubstepAllowed))
+            )
+            {
+                TRACFCOMP(g_trac_initsvc,
+                    ERR_MRK"doIstep: failed on requested step %d,"
+                        " and substep %d, next allowed by secure boot is "
+                        "step %d and substep %d", i_istep, i_substep,
+                         nextIStepAllowed, nextSubstepAllowed);
+
+                /*@
+                 * @errortype
+                 * @reasoncode       ISTEP_SKIP_ATTEMPTED
+                 * @moduleid         ISTEP_INITSVC_MOD_ID
+                 * @userdata1[00:31] istep requested
+                 * @userdata1[32:64] substep requested
+                 * @userdata2[00:31] highest istep allowed
+                 * @userdata2[32:64] highest substep allowed
+                 * @devdesc          Istep skip prevented in secure mode
+                 * @custdesc         An internal firmware error occured
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                         ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                         ISTEP_INITSVC_MOD_ID,
+                                         ISTEP_SKIP_ATTEMPTED,
+                                         TWO_UINT32_TO_UINT64(
+                                            i_istep,
+                                            i_substep),
+                                         TWO_UINT32_TO_UINT64(
+                                            nextIStepAllowed,
+                                            nextSubstepAllowed));
+                break;
+            }
+        }
+        #endif // CONFIG_SECUREBOOT
+
+        // Record current IStep, SubStep
+        mutex_lock(&iv_mutex);
+        iv_curIStep = i_istep;
+        iv_curSubStep = i_substep;
+        mutex_unlock(&iv_mutex);
+
         // Send progress codes if in run-all mode
         if (!iv_istepMode)
         {
-            mutex_lock(&iv_mutex);
-            // Record current IStep, SubStep
-            iv_curIStep = i_istep;
-            iv_curSubStep = i_substep;
-            mutex_unlock(&iv_mutex);
-
             // If a shutdown request has been received
             if (isShutdownRequested())
             {
@@ -926,6 +973,27 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     {
         TRACDCOMP( g_trac_initsvc,
                   INFO_MRK"doIstep: Empty Istep, nothing to do!" );
+    }
+
+    } while (0); // if there was an error break here
+
+    if (!err && theStep)
+    {
+        // update high watermark for istep and substep but don't ever
+        // decrease it. Note: this code assumes you were allowed to execute
+        // the istep (we just got done with it after all).
+        if (i_substep > iv_highestSubstepDone &&
+            i_istep == iv_highestIStepDone)
+        {
+            iv_highestSubstepDone = i_substep;
+        }
+        else if (i_istep > iv_highestIStepDone)
+        {
+            iv_highestIStepDone = i_istep;
+            iv_highestSubstepDone = i_substep;
+        }
+        // else we do nothing, because we just did an istep that is lower
+        // than the watermark
     }
 
     return err;
@@ -1671,8 +1739,6 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     // IStep doesn't return (start_payload), it will call sendIstepCompleteMsg
     // which will respond to iv_pIstepMsg
     mutex_lock(&iv_mutex);
-    iv_curIStep = istep;
-    iv_curSubStep = substep;
     iv_pIstepMsg = io_pMsg;
     io_pMsg = NULL;
     l_acceptMessages = iv_acceptIstepMessages;
@@ -1697,8 +1763,8 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       ISTEP_INITSVC_MOD_ID,
                                       ISTEP_NON_MASTER_NODE_MSG,
-                                      iv_curIStep,
-                                      iv_curSubStep);
+                                      istep,
+                                      substep);
     }
 
     // If there was no IStep error, but something happened that requires a
@@ -2494,6 +2560,38 @@ void IStepDispatcher::istepPauseSet(uint8_t i_step, uint8_t i_substep)
 
         }
     }
+}
+
+int IStepDispatcher::getNextIStep(uint8_t& io_istep, uint8_t& io_substep)
+{
+    int rc = 0; // defaults to failure
+
+    do
+    {
+        rc = 0; // defaults to failure again unless a valid istep/substep
+                // is found
+        uint8_t l_numSubsteps = g_isteps[io_istep].numitems;
+
+        if (l_numSubsteps != 0 &&
+            (io_substep + 1u) < l_numSubsteps)
+        {
+            io_substep++;
+            rc = 1;
+        }
+        else if ((io_istep + 1u) < MaxISteps)
+        {
+            io_substep = 0;
+            io_istep++;
+            rc = 1;
+        }
+        else
+        {
+            // avoid infinite loop scenario
+            break;
+        }
+    } while (nullptr == findTaskInfo(io_istep, io_substep));
+
+    return rc;
 }
 
 }; // namespace
