@@ -148,17 +148,6 @@ Layout Description
         <side>sideless</side>
         <ecc/>
     </section>
-    <!-- #@TODO RTC:163810 - Put this back later if needed
-    <section>
-        <description>Centaur SBE (576K)</description>
-        <eyeCatch>SBEC</eyeCatch>
-        <physicalOffset>0x83D000</physicalOffset>
-        <physicalRegionSize>0x90000</physicalRegionSize>
-        <sha512perEC/>
-        <side>sideless</side>
-        <ecc/>
-    </section>
-    -->
     <section>
         <description>SBE-IPL (Staging Area) (520K)</description>
         <eyeCatch>SBE</eyeCatch>

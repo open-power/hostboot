@@ -91,7 +91,7 @@ namespace SBE
     const uint32_t RING_OVD_SIZE = 0x800;
 
 
-    // PNOR SBE and SBEC Partition constants
+    // PNOR SBE Partition constants
     const uint32_t MAX_SBE_ENTRIES = 9;
     const uint32_t SBETOC_EYECATCH = 0x53424500;  //'SBE\0'
     const uint64_t NONSECURE_VER_EYECATCH = 0x56455253494F4E00; //'VERSION\0'
@@ -225,7 +225,7 @@ namespace SBE
 
 
     /**
-     * @brief Struct of individual SBE entry in SBE and SBEC
+     * @brief Struct of individual SBE entry in SBE
      *        Table of Contents in PNOR partitions
      */
     struct sbeTocEntry_t
@@ -236,8 +236,7 @@ namespace SBE
     } PACKED;
 
     /**
-     * @brief Layout of Table of Contents at beginning of SBE and
-     *        SBEC Partitions in PNOR
+     * @brief Layout of Table of Contents at beginning of SBE Partitions in PNOR
      */
     struct sbeToc_t
     {

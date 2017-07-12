@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -38,8 +40,6 @@
 #include <fapiPlatHwpInvoker.H>
 #include <vfs/vfs.H>
 #include <errl/errlmanager.H>
-
-#define CENTAUR_SBE_PNOR_MRR    0     // Memory Relocation Register for Centaur
 
 
 using namespace TARGETING;
