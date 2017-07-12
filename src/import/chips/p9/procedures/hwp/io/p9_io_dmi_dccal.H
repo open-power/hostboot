@@ -43,7 +43,7 @@
 #include <fapi2.H>
 
 typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_TGT;
-typedef fapi2::ReturnCode (*p9_io_dmi_dccal_FP_t)(const DMI_TGT&);
+typedef fapi2::ReturnCode (*p9_io_dmi_dccal_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
@@ -52,11 +52,11 @@ extern "C"
      * @brief A I/O EDI+ Procedure that runs Rx Dccal and Tx Z Impedance calibration
      * on every EDI+ DMI chiplet.
      *
-     * @param[in] i_tgt   Reference to DMI chiplet target
+     * @param[in] i_target_chip   Chip target
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
-    fapi2::ReturnCode p9_io_dmi_dccal(const DMI_TGT& i_tgt);
+    fapi2::ReturnCode p9_io_dmi_dccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 } // extern "C"
 
