@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,8 +28,25 @@
 /**
  * @file    istep14list.H
  *
- *  IStep 14
- *  IPL FLow Doc        v0.95
+ *  IStep 14    Step 14 DRAM Initialization
+ *  IPL FLow Doc        v1.07
+ *
+ * 14.1  mss_memdiag
+ *       :  Mainstore Pattern Testing
+ * 14.2  mss_thermal_init
+ *       : Initialize the thermal sensor
+ * 14.3  proc_pcie_config
+ *       :  Configure the PHBs
+ * 14.4  mss_power_cleanup
+ *       :  Clean up any MCS/Centaurs
+ * 14.5  proc_setup_bars
+ *          : Setup Memory BARs
+ * 14.6  proc_htm_setup
+ *       : Setup HTM allocations
+ * 14.7  proc_exit_cache_contained
+ *       : Execution from memory
+ * 14.8  host_mpipl_service
+ *       : Perform MPIPL tasks 
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.

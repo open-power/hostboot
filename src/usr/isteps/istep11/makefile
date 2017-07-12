@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,18 @@ ROOTPATH = ../../../..
 MODULE = istep11
 
 OBJS += call_host_prd_hwreconfig.o
+OBJS += call_cen_tp_chiplet_init1.o
+OBJS += call_cen_pll_initf.o
+OBJS += call_cen_pll_setup.o
+OBJS += call_cen_tp_chiplet_init2.o
+OBJS += call_cen_tp_arrayinit.o
+OBJS += call_cen_tp_chiplet_init3.o
+OBJS += call_cen_chiplet_init.o
+OBJS += call_cen_arrayinit.o
+OBJS += call_cen_initf.o
+OBJS += call_cen_do_manual_inits.o
+OBJS += call_cen_startclocks.o
+OBJS += call_cen_scominits.o
 
 
 include ${ROOTPATH}/config.mk
