@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,7 +68,7 @@ enum PBA_FIR_BITS
     PBAFIR_PB_CE_FW,         // 5
     PBAFIR_OCI_SLAVE_INIT,   // 6
     PBAFIR_OCI_WRPAR_ERR,    // 7
-    PBAFIR_OCI_REREQTO,      // 8
+    PBAFIR_SPARE,            // 8
     PBAFIR_PB_UNEXPCRESP,    // 9
     PBAFIR_PB_UNEXPDATA,     // 10
     PBAFIR_PB_PARITY_ERR,    // 11
@@ -201,98 +201,98 @@ fapi2::ReturnCode pm_pba_fir_init(
              "ERROR: Failed to clear PBA FIR");
 
     /*  Set the action and mask for the PBA LFIR bits */
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_APAR_ERR),
-             "ERROR: Failed to mask bit");
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_APAR_ERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDADRERR_FW),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_RDDATATO_FW),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_SUE_FW),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UE_FW),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_CE_FW),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_SLAVE_INIT),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_WRPAR_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_REREQTO),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UNEXPCRESP),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_UNEXPDATA),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_PARITY_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_WRADRERR_FW),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_BADCRESP),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_UE_FW),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CE_FW),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_SLAVE_INIT),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_WRPAR_ERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_SPARE),
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_UNEXPCRESP),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_UNEXPDATA),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_PARITY_ERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_WRADRERR_FW),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_PB_BADCRESP),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_RD),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_CRESPTO),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_SETUP_ERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_PB_CRESPTO),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_SETUP_ERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_PB_ACK_DEAD),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_PB_ADRERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCUE_OCI_DATERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_SETUP_ERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_PB_ADRERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCUE_OCI_DATERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_SETUP_ERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_PB_ACK_DEAD),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_PB_ADRERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_RDDATATO_ERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_PB_ADRERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_RDDATATO_ERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_SUE_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_UE_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_CE),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_BCDE_OCI_DATERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_INTERNAL_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_ILLEGAL_CACHE_OP),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_OCI_BAD_REG_ADDR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXPUSH_WRERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_ERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_BCDE_UE_ERR),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_BCDE_CE),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_BCDE_OCI_DATERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_INTERNAL_ERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_ILLEGAL_CACHE_OP),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_OCI_BAD_REG_ADDR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXPUSH_WRERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXRCV_DLO_ERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_TO),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_RSVDATA_TO),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXFLOW_ERR),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_DHI_RTYTO),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_DLO_RTYTO),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXFLOW_ERR),
+             FIR_CHECKSTOP_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_AXSND_DHI_RTYTO),
+             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_AXSND_DLO_RTYTO),
+             FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_RSVTO),
-             "ERROR: Failed to mask bit");
-    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXSND_RSVERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
+    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXSND_RSVERR),
+             FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_PB_ACKDEAD_FW_WR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_41),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_42),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_RESERVED_43),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_FIR_PARITY_ERR2),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_FIR_PARITY_ERR),
-             "ERROR: Failed to mask bit");
+             FIR_MASK_ERROR);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
                            i_target, firinit_done_flag),

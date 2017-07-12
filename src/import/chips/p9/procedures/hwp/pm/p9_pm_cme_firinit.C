@@ -171,38 +171,38 @@ fapi2::ReturnCode pm_cme_fir_init(
                  "ERROR: Failed to clear CME FIR");
 
         /*  Set the action and mask for the CME LFIR bits */
-        FAPI_TRY(l_cmeFir.mask(PPE_INT_ERR), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_EXT_ERR), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_PROG_ERR), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_BRKPT_ERR), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_WATCHDOG), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_HALT), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(PPE_DBGTRG), "ERROR: Failed to mask");
+        FAPI_TRY(l_cmeFir.mask(PPE_INT_ERR), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_EXT_ERR), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_PROG_ERR), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_BRKPT_ERR), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_WATCHDOG), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_HALT), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(PPE_DBGTRG), FIR_MASK_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(CME_SRAM_UE),
-                 "ERROR: Failed to set recovery on interrupt");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(CME_SRAM_CE),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(SRAM_SCRUB_ERR),
-                 "ERROR: Failed to set recoverable error");
-        FAPI_TRY(l_cmeFir.mask(BCE_ERR), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(CME_SPARE_11), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(CME_SPARE_12), "ERROR: Failed to mask");
+                 FIR_REC_ATTN_ERROR);
+        FAPI_TRY(l_cmeFir.mask(BCE_ERR), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(CME_SPARE_11), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(CME_SPARE_12), FIR_MASK_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(C0_iVRM_DPOUT),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(C1_iVRM_DPOUT),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(CACHE_iVRM_DPOUT),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(EXTRM_DROOP_ERR),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(LARGE_DROOP_ERR),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(SMALL_DROOP_ERR),
-                 "ERROR: Failed to set recoverable error");
+                 FIR_REC_ATTN_ERROR);
         FAPI_TRY(l_cmeFir.setRecvAttn(UNEXP_DROOP_ENCODE),
-                 "ERROR: Failed to set recoverable error");
-        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR_DUP), "ERROR: Failed to mask");
-        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR), "ERROR: Failed to mask");
+                 FIR_REC_ATTN_ERROR);
+        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR_DUP), FIR_MASK_ERROR);
+        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR), FIR_MASK_ERROR);
 
         //todo: Yet to confirm on the action for the following bits
 

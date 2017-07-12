@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,13 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_misc_scom_addresses.H>
 
+
+#define FIR_CHECKSTOP_ERROR "ERROR: Failed to set CheckStop action"
+#define FIR_MASK_ERROR      "ERROR: Failed to set mask action"
+#define FIR_UNMASK_ERROR    "ERROR: Failed to set unmask action"
+#define FIR_REC_ATTN_ERROR  "ERROR: Failed to set recoverable attn action"
+#define FIR_REC_INTR_ERROR  "ERROR: Failed to set recoverable interrupt action"
+#define FIR_MALF_ALRT_ERROR "ERROR: Failed to set malfunction alert action"
 namespace p9pmFIR
 {
 
@@ -123,6 +130,8 @@ class PMFir
         fapi2::buffer<uint64_t> iv_action0;
         fapi2::buffer<uint64_t> iv_action1;
         fapi2::buffer<uint64_t> iv_mask;
+        fapi2::buffer<uint64_t> iv_and_mask;
+        fapi2::buffer<uint64_t> iv_or_mask;
 
         // Addresses of the FIRs, Masks, and action registers
         uint64_t iv_fir_address;
@@ -135,6 +144,8 @@ class PMFir
         bool iv_action0_write;
         bool iv_action1_write;
         bool iv_mask_write;
+        bool iv_mask_and_write;
+        bool iv_mask_or_write;
 
         uint8_t iv_targetType;
 
@@ -202,6 +213,8 @@ PMFir<FIRTYPE_OCC_LFIR>::PMFir(
     iv_action0_write = false;
     iv_action1_write = false;
     iv_mask_write = false;
+    iv_mask_and_write = false;
+    iv_mask_or_write = false;
 }
 
 /// @brief The constructor for FIR class for PBA FIR
@@ -223,6 +236,8 @@ PMFir<FIRTYPE_PBA_LFIR>::PMFir(
     iv_action0_write = false;
     iv_action1_write = false;
     iv_mask_write = false;
+    iv_mask_and_write = false;
+    iv_mask_or_write = false;
 }
 
 /// @brief Base constructor for FIR class to build object based on FIR type
@@ -262,6 +277,8 @@ PMFir<FIRTYPE_CME_LFIR>::PMFir(
     iv_action0_write = false;
     iv_action1_write = false;
     iv_mask_write = false;
+    iv_mask_and_write = false;
+    iv_mask_or_write = false;
 }
 
 /// @brief Base constructor for FIR class to build object based on FIR type
@@ -298,6 +315,8 @@ PMFir<FIRTYPE_PPM_LFIR>::PMFir(
     iv_action0_write = false;
     iv_action1_write = false;
     iv_mask_write = false;
+    iv_mask_and_write = false;
+    iv_mask_or_write = false;
 }
 
 /// @brief Base constructor for FIR class to build object based on FIR type
@@ -334,6 +353,8 @@ PMFir<FIRTYPE_PPM_LFIR>::PMFir(
     iv_action0_write = false;
     iv_action1_write = false;
     iv_mask_write = false;
+    iv_mask_and_write = false;
+    iv_mask_or_write = false;
 }
 
 /// @brief Get the values of FIRs, FIR masks & FIR actions
@@ -366,7 +387,11 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
         {
             FAPI_TRY(fapi2::getScom(iv_proc, iv_mask_address, iv_mask));
+            iv_and_mask = iv_mask;
+            iv_or_mask = iv_mask;
             iv_mask_write = false;
+            iv_mask_and_write = false;
+            iv_mask_or_write = false;
         }
     }
 
@@ -393,7 +418,11 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
         {
             FAPI_TRY(fapi2::getScom(iv_ex, iv_mask_address, iv_mask));
+            iv_and_mask = iv_mask;
+            iv_or_mask = iv_mask;
             iv_mask_write = false;
+            iv_mask_and_write = false;
+            iv_mask_or_write = false;
         }
     }
 
@@ -402,7 +431,11 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if (i_reg == REG_ERRMASK)
         {
             FAPI_TRY(fapi2::getScom(iv_eq, iv_mask_address, iv_mask));
+            iv_and_mask = iv_mask;
+            iv_or_mask = iv_mask;
             iv_mask_write = false;
+            iv_mask_and_write = false;
+            iv_mask_or_write = false;
         }
     }
 
@@ -411,7 +444,11 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if (i_reg == REG_ERRMASK)
         {
             FAPI_TRY(fapi2::getScom(iv_core, iv_mask_address, iv_mask));
+            iv_and_mask = iv_mask;
+            iv_or_mask = iv_mask;
             iv_mask_write = false;
+            iv_mask_and_write = false;
+            iv_mask_or_write = false;
         }
     }
 
@@ -447,10 +484,16 @@ fapi2::ReturnCode PMFir<Ftype>::put()
             FAPI_TRY(putScom(iv_proc, iv_action1_address, iv_action1));
         }
 
-        if (iv_mask_write == true)
+        if (iv_mask_or_write == true)
         {
             l_address = iv_fir_address + MASK_WOR_INCR;
-            FAPI_TRY(putScom(iv_proc, l_address, iv_mask));
+            FAPI_TRY(putScom(iv_proc, l_address, iv_or_mask));
+        }
+
+        if (iv_mask_and_write == true)
+        {
+            l_address = iv_fir_address + MASK_WAND_INCR;
+            FAPI_TRY(putScom(iv_proc, l_address, iv_and_mask));
         }
     }
 
@@ -472,10 +515,16 @@ fapi2::ReturnCode PMFir<Ftype>::put()
             FAPI_TRY(putScom(iv_ex, iv_action1_address, iv_action1));
         }
 
-        if (iv_mask_write == true)
+        if (iv_mask_or_write == true)
         {
             l_address = iv_fir_address + MASK_WOR_INCR;
-            FAPI_TRY(putScom(iv_ex, l_address, iv_mask));
+            FAPI_TRY(putScom(iv_ex, l_address, iv_or_mask));
+        }
+
+        if (iv_mask_and_write == true)
+        {
+            l_address = iv_fir_address + MASK_WAND_INCR;
+            FAPI_TRY(putScom(iv_ex, l_address, iv_and_mask));
         }
     }
 
@@ -510,10 +559,12 @@ fapi2::ReturnCode PMFir<Ftype>::setCheckStop(const uint32_t i_bit)
 {
     FAPI_TRY(iv_action0.clearBit(i_bit));
     FAPI_TRY(iv_action1.clearBit(i_bit));
+    FAPI_TRY(iv_and_mask.clearBit(i_bit));
     FAPI_TRY(iv_mask.clearBit(i_bit));
     iv_action0_write = true;
     iv_action1_write = true;
     iv_mask_write = true;
+    iv_mask_and_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -530,10 +581,12 @@ fapi2::ReturnCode PMFir<Ftype>::setRecvAttn(const uint32_t i_bit)
 {
     FAPI_TRY(iv_action0.clearBit(i_bit));
     FAPI_TRY(iv_action1.setBit(i_bit));
+    FAPI_TRY(iv_and_mask.clearBit(i_bit));
     FAPI_TRY(iv_mask.clearBit(i_bit));
     iv_action0_write = true;
     iv_action1_write = true;
     iv_mask_write = true;
+    iv_mask_and_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -550,10 +603,12 @@ fapi2::ReturnCode PMFir<Ftype>::setRecvIntr(const uint32_t i_bit)
 {
     FAPI_TRY(iv_action0.setBit(i_bit));
     FAPI_TRY(iv_action1.clearBit(i_bit));
+    FAPI_TRY(iv_and_mask.clearBit(i_bit));
     FAPI_TRY(iv_mask.clearBit(i_bit));
     iv_action0_write = true;
     iv_action1_write = true;
     iv_mask_write = true;
+    iv_mask_and_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -570,10 +625,12 @@ fapi2::ReturnCode PMFir<Ftype>::setMalfAlert(const uint32_t i_bit)
 {
     FAPI_TRY(iv_action0.setBit(i_bit));
     FAPI_TRY(iv_action1.setBit(i_bit));
+    FAPI_TRY(iv_and_mask.clearBit(i_bit));
     FAPI_TRY(iv_mask.clearBit(i_bit));
     iv_action0_write = true;
     iv_action1_write = true;
     iv_mask_write = true;
+    iv_mask_and_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -588,8 +645,10 @@ fapi_try_exit:
 template <FIRType Ftype>
 fapi2::ReturnCode PMFir<Ftype>::mask(const uint32_t i_bit)
 {
+    FAPI_TRY(iv_or_mask.setBit(i_bit));
     FAPI_TRY(iv_mask.setBit(i_bit));
     iv_mask_write = true;
+    iv_mask_or_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -604,8 +663,10 @@ fapi_try_exit:
 template <FIRType Ftype>
 fapi2::ReturnCode PMFir<Ftype>::unmask(const uint32_t i_bit)
 {
+    FAPI_TRY(iv_and_mask.clearBit(i_bit));
     FAPI_TRY(iv_mask.clearBit(i_bit));
     iv_mask_write = true;
+    iv_mask_and_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -639,7 +700,11 @@ fapi2::ReturnCode PMFir<Ftype>::setAllRegBits(const regType i_reg)
     if(i_reg == REG_FIRMASK || i_reg == REG_ERRMASK || i_reg == REG_ALL)
     {
         iv_mask.flush<1>();
+        iv_or_mask.flush<1>();
+        iv_and_mask.flush<1>();
         iv_mask_write = true;
+        iv_mask_and_write = true;
+        iv_mask_or_write = true;
     }
 
     return fapi2::current_err;
@@ -673,7 +738,11 @@ fapi2::ReturnCode PMFir<Ftype>::clearAllRegBits(const regType i_reg)
     if(i_reg == REG_FIRMASK || i_reg == REG_ERRMASK || i_reg == REG_ALL)
     {
         iv_mask.flush<0>();
+        iv_or_mask.flush<0>();
+        iv_and_mask.flush<0>();
         iv_mask_write = true;
+        iv_mask_or_write = true;
+        iv_mask_and_write = true;
     }
 
     return fapi2::current_err;
@@ -799,7 +868,11 @@ fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
     iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_or_mask = iv_mask;
+    iv_and_mask = iv_mask;
     iv_mask_write = true;
+    iv_mask_and_write = true;
+    iv_mask_or_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -822,7 +895,11 @@ fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
     iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_or_mask = iv_mask;
+    iv_and_mask = iv_mask;
     iv_mask_write = true;
+    iv_mask_and_write = true;
+    iv_mask_or_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -845,7 +922,11 @@ fapi2::ReturnCode PMFir<FIRTYPE_CME_LFIR>::restoreSavedMask()
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
     iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_or_mask = iv_mask;
+    iv_and_mask = iv_mask;
     iv_mask_write = true;
+    iv_mask_and_write = true;
+    iv_mask_or_write = true;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -877,7 +958,13 @@ fapi2::ReturnCode PMFir<FIRTYPE_PPM_LFIR>::restoreSavedMask()
     iv_mask.extract<0, 32>(l_tempMask);
     l_mask |= l_tempMask;
     iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_or_mask = iv_mask;
+    iv_and_mask = iv_mask;
     iv_mask_write = true;
+    iv_mask_and_write = true;
+    iv_mask_or_write = true;
+
+
 
 fapi_try_exit:
     return fapi2::current_err;
