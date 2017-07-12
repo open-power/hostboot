@@ -7,6 +7,7 @@ $model = (shell "printenv CEC_MODEL")
 $hb_machine = "unknown"
 if ($model == "p9_nimbus") {$hb_machine = "nimbus"}
 if ($model == "p9zz_1s2u") {$hb_machine = "zztop"}
+if ($model == "p9_cumulus") {$hb_machine = "cumulus"}
 python "os.environ['HB_MACHINE'] = \""+$hb_machine+"\""
 echo "HB_MACHINE is: "+$hb_machine
 
