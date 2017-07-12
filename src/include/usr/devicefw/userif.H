@@ -67,6 +67,7 @@ namespace DeviceFW
         SIO,
         AHB_SIO,
         DVPD,      // Direct access memory VPD
+        MEMD_VPD,
 
         LAST_ACCESS_TYPE,
     };
@@ -252,6 +253,31 @@ namespace DeviceFW
         DeviceFW::DVPD, static_cast<uint64_t>(( i_record )),\
             static_cast<uint64_t>(( i_keyword )),\
             static_cast<uint64_t>(( i_location ))
+
+    /**
+     * Construct the device addressing parameters for the DVPD (Direct access
+     * memory VPD) device ops.
+     * @param[in] i_record - The enumeration of the DVPD record to access.
+     * @param[in] i_keyword - The enumeration of the DVPD keyword, located
+     *      within the i_record Record to access.
+     */
+    #define DEVICE_MEMD_VPD_ADDRESS( i_record, i_keyword )\
+        DEVICE_MEMD_VPD_FORCE_ADDRESS( i_record, i_keyword, VPD::PNOR )
+
+    /**
+     * Construct the device addressing parameters for the DVPD device ops.
+     * @param[in] i_record - The enumeration of the DVPD record to access.
+     * @param[in] i_keyword - The enumeration of the DVPD keyword, located
+     *      within the i_record Record to access.
+     * @param[in] i_location - The location of the data (PNOR/SEEPROM)
+            see vpd_if.H
+     */
+    #define DEVICE_MEMD_VPD_FORCE_ADDRESS( i_record, i_keyword, i_location )\
+        DeviceFW::MEMD_VPD, static_cast<uint64_t>(( i_record )),\
+            static_cast<uint64_t>(( i_keyword )),\
+            static_cast<uint64_t>(( i_location ))
+
+
     /**
      * Construct the device addressing parameters for the SCAN device ops.
      * @param[in] i_ring - The ring address to scan
