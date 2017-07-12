@@ -28,15 +28,15 @@
 /**
  * @file    istep15list.H
  *
- *  IStep 15    Build Hcode Images
- *  IPL FLow Doc        v0.84 (11/11/15)
+ *  IStep 15    Build STOP Images
+ *  IPL FLow Doc        v1.07
  *
  *    15.1    host_build_stop_image
- *          : Build runtime stop images
- *    15.2    proc_set_pba_homer_bar
+ *          : Build runtime STOP images
+ *    15.1    proc_set_pba_homer_bar
  *          : Set HOMER location in OCC
  *    15.3    host_establish_ex_chiplet
- *          : Select Hostboot Core
+ *          : Select Hostboot core
  *    15.4    host_start_stop_engine
  *          : Initialize STOPGPE engine
  *
@@ -52,6 +52,18 @@
 namespace   ISTEP_15
 {
 
+
+/**
+ *  @brief   proc_set_pba_homer_bar
+ *
+ *  param[in,out]   -   pointer to any arguments, usually NULL
+ *
+ *  return  any errlogs to istep
+ *
+ */
+void*    proc_set_pba_homer_bar( void    *io_pArgs );
+
+
 /**
  *  @brief   host_build_stop_image
  *
@@ -65,14 +77,14 @@ void*  host_build_stop_image( void    *io_pArgs );
 
 
 /**
- *  @brief   proc_set_pba_homer_bar
+ *  @brief   host_start_stop_engine
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
  *
  *  return  any errlogs to istep
  *
  */
-void*    proc_set_pba_homer_bar( void    *io_pArgs );
+void*    host_start_stop_engine( void    *io_pArgs );
 
 
 
@@ -86,15 +98,6 @@ void*    proc_set_pba_homer_bar( void    *io_pArgs );
  */
 void*    host_establish_ex_chiplet( void    *io_pArgs );
 
-/**
- *  @brief   host_start_stop_engine
- *
- *  param[in,out]   -   pointer to any arguments, usually NULL
- *
- *  return  any errlogs to istep
- *
- */
-void*    host_start_stop_engine( void    *io_pArgs );
 };
 
 
@@ -115,7 +118,7 @@ namespace   INITSERVICE
                 ISTEPNAME(15,02,"proc_set_pba_homer_bar"),
                 ISTEP_15::proc_set_pba_homer_bar,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
-        },
+        },        
         {
                 ISTEPNAME(15,03,"host_establish_ex_chiplet"),
                 ISTEP_15::host_establish_ex_chiplet,
