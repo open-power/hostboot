@@ -70,6 +70,13 @@
 fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt);
 
 /**
+ * @brief Tx Z Impedance Calibration State Machine
+ * @param[in] i_tgt FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode tx_zcal_run_bus_poll(const DMI_TGT i_tgt);
+
+/**
  * @brief Tx Z Impedance Calibration
  * @param[in] i_tgt  FAPI2 Target
  * @retval ReturnCode
@@ -97,28 +104,69 @@ fapi2::ReturnCode rx_dccal_start_grp(const DMI_TGT i_tgt);
 /**
  * @brief A I/O EDI+ Procedure that runs Rx Dccal and Tx Z Impedance calibration
  * on every EDI+ DMI Chiplet.
- * @param[in] i_tgt  Reference to DMI Target
+ * @param[in] i_target_chip  Chip target
  * @return FAPI2_RC_SUCCESSS on success, error otherwise
  */
-fapi2::ReturnCode p9_io_dmi_dccal(const DMI_TGT& i_tgt)
+fapi2::ReturnCode p9_io_dmi_dccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
+    const uint64_t DLY_20MS         = 20000000;
+    const uint64_t DLY_10MIL_CYCLES = 10000000;
+    const uint64_t DLY_100MS         = 100000000;
+    const uint64_t DLY_1MIL_CYCLES  = 1000000;
+
     FAPI_IMP("p9_io_dmi_dccal: I/O EDI+ Dmi Entering");
 
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
-    fapi2::toString(i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
-    FAPI_DBG("I/O EDI+ Dmi Dccal %s", l_tgtStr);
 
-    // Runs Tx Zcal on a per bus basis
-    FAPI_TRY(tx_zcal_run_bus(i_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
+        {
+            fapi2::toString(l_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
+            FAPI_DBG("I/O EDI+ Dmi Dccal %s", l_tgtStr);
 
-    // Sets Tx Zcal Group Settings based on the bus results
-    FAPI_TRY(tx_zcal_set_grp(i_tgt), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
+            // Runs Tx Zcal on a per bus basis
+            FAPI_TRY(tx_zcal_run_bus(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
+        }
+    }
 
-    // Starts Rx Dccal on a per group basis
-    FAPI_TRY(rx_dccal_start_grp(i_tgt), "I/O Edi+ Dmi Rx DC Cal Start Failed");
+
+    // Delay before we start polling.  20ms was use from past p8 learning
+    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
+
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
+        {
+            // Runs Tx Zcal on a per bus basis
+            FAPI_TRY(tx_zcal_run_bus_poll(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
+        }
+    }
+
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
+        {
+            // Sets Tx Zcal Group Settings based on the bus results
+            FAPI_TRY(tx_zcal_set_grp(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
+
+            // Starts Rx Dccal on a per group basis
+            FAPI_TRY(rx_dccal_start_grp(l_tgt), "I/O Edi+ Dmi Rx DC Cal Start Failed");
+        }
+    }
+
+    // Delay before we start polling.  100ms was use from past p8 learning
+    FAPI_TRY(fapi2::delay(DLY_100MS, DLY_1MIL_CYCLES),
+             "rx_dc_cal_poll: Fapi Delay Failed.");
 
     // Checks/polls Rx Dccal on a per group basis
-    FAPI_TRY(rx_dccal_poll_grp(i_tgt), "I/O Edi+ Dmi Rx DC Cal Poll Failed");
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
+        {
+            FAPI_TRY(rx_dccal_poll_grp(l_tgt), "I/O Edi+ Dmi Rx DC Cal Poll Failed");
+        }
+    }
 
 fapi_try_exit:
 
@@ -214,14 +262,8 @@ fapi2::ReturnCode tx_zcal_verify_results(
  */
 fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
 {
-    const uint64_t DLY_20MS         = 20000000;
-    const uint64_t DLY_10US         = 10000;
-    const uint64_t DLY_10MIL_CYCLES = 10000000;
-    const uint64_t DLY_1MIL_CYCLES  = 1000000;
-    const uint32_t TIMEOUT          = 200;
     const uint8_t GRP3              = 3;
     const uint8_t LN0               = 0;
-    uint32_t l_count                = 0;
     uint64_t l_data                 = 0;
     uint8_t       l_is_sim = 0;
 
@@ -246,8 +288,26 @@ fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
     // The Done bit is read only pulse, must use pie driver or system model in sim
     FAPI_TRY(io::rmw(EDIP_TX_ZCAL_REQ, i_tgt, GRP3, LN0, 1));
 
-    // Delay before we start polling.  20ms was use from past p8 learning
-    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
+
+fapi_try_exit:
+    FAPI_IMP("tx_zcal_run_sm: I/O EDI+ Dmi Exiting");
+    return fapi2::current_err;
+}
+
+/**
+ * @brief Tx Z Impedance Calibration State Machine
+ * @param[in] i_tgt FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode tx_zcal_run_bus_poll(const DMI_TGT i_tgt)
+{
+    const uint64_t DLY_10US         = 10000;
+    const uint64_t DLY_1MIL_CYCLES  = 1000000;
+    const uint32_t TIMEOUT          = 200;
+    const uint8_t GRP3              = 3;
+    const uint8_t LN0               = 0;
+    uint32_t l_count                = 0;
+    uint64_t l_data                 = 0;
 
     // Poll Until Tx Impedance Calibration is done or errors out
     FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP3, LN0, l_data));
@@ -725,7 +785,6 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
 {
     FAPI_IMP("rx_dccal_poll_grp: I/O EDI+ Dmi Entering");
     const uint8_t  TIMEOUT           = 200;
-    const uint64_t DLY_100MS         = 100000000;
     const uint64_t DLY_10MS          = 10000000;
     const uint64_t DLY_1MIL_CYCLES   = 1000000;
     const uint8_t  GRP3              = 3;
@@ -739,17 +798,17 @@ fapi2::ReturnCode rx_dccal_poll_grp(const DMI_TGT i_tgt)
     // In the pervasive unit model, this takes 750,000,000 sim cycles to finish
     //   on a group.  This equates to 30 loops with 25,000,000 delay each.
 
-    // Delay before we start polling.  100ms was use from past p8 learning
-    FAPI_TRY(fapi2::delay(DLY_100MS, DLY_1MIL_CYCLES),
-             "rx_dc_cal_poll: Fapi Delay Failed.");
-
     do
     {
         FAPI_DBG("I/O EDI+ Dmi Rx Dccal Polling Count(%d/%d).", l_poll_count, TIMEOUT);
 
-        FAPI_TRY(fapi2::delay(DLY_10MS, DLY_1MIL_CYCLES), "Fapi Delay Failed.");
-
         FAPI_TRY(io::read(EDIP_RX_DC_CALIBRATE_DONE, i_tgt, GRP3, LN0, l_data));
+
+        if (!io::get(EDIP_RX_DC_CALIBRATE_DONE, l_data))
+        {
+            FAPI_TRY(fapi2::delay(DLY_10MS, DLY_1MIL_CYCLES), "Fapi Delay Failed.");
+        }
+
     }
     while((++l_poll_count < TIMEOUT) && !io::get(EDIP_RX_DC_CALIBRATE_DONE, l_data));
 
