@@ -1533,38 +1533,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Reset all of the DLL registers - Nimbus only
-/// @param[in] i_target an MCA
-/// @return FAPI2_RC_SUCCESs iff ok
-///
-fapi2::ReturnCode reset_dll( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
-{
-    typedef dp16Traits<TARGET_TYPE_MCA> TT;
-
-    // For DD1.0 we have some workarounds. We send the magic
-    // number in to the work around and it fixes it up as needed.
-    uint64_t l_vreg_cnrtl = mss::workarounds::dp16::vreg_control0(i_target, 0x6740);
-
-    // Magic numbers are from the PHY team (see the ddry phy initfile, too.) They are, in fact,
-    // magic numbers ...
-
-    // TK How about a little broadcast action here? BRS
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNFG_REG,        0x0060) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_CNTRL_REG,       0x8100) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_LOWER_REG,   0x8000) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_DAC_UPPER_REG,   0xffe0) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_LOWER_REG, 0x8000) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SLAVE_UPPER_REG, 0xffe0) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_EXTRA_REG,       0x2020) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_CNTRL_REG,  l_vreg_cnrtl) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_SW_CNTRL_REG,    0x0800) );
-    FAPI_TRY( mss::scom_blastah(i_target, TT::DLL_VREG_COARSE_REG, 0x0402) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
 /// @brief Configure Read VREF Registers
 /// @param[in] i_target a MCA target
 /// @return FAPI2_RC_SUCCESs iff ok
