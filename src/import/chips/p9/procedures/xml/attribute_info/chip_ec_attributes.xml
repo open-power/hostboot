@@ -2008,7 +2008,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW408892</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1.X, DD2.0: Leave at deafult value of DIV_BY_10 
+      Nimbus DD1.X, DD2.0: Leave at deafult value of DIV_BY_10
     </description>
     <chipEcFeature>
       <chip>
@@ -3928,6 +3928,23 @@
     </chipEcFeature>
   </attribute>
 
+<attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW407064</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Enable DP16 delay line tap point for DD2 and beyond
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW368644</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -4304,8 +4321,8 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Returns true if spy name has usage only in P9C.
-      Spy Name of Cumulus; Also used for cumulus only 
-      oscswitch settings. 
+      Spy Name of Cumulus; Also used for cumulus only
+      oscswitch settings.
     </description>
     <chipEcFeature>
       <chip>

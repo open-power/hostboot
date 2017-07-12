@@ -84,56 +84,6 @@ fapi2::ReturnCode rd_dia_config5( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
 fapi2::ReturnCode dqsclk_offset( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 ///
-/// @brief DP16 DLL_VREG_CONTROL0
-/// In DD1.0 Nimbus VREG control work arounds are needed
-/// @param[in] port in question - needed to figure out whether to apply the work-around or not
-/// @param[in] i_original_value a value to which we add the workaround bits
-/// @return uint64_t the original value with the bits added
-///
-inline uint64_t vreg_control0( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                               const uint64_t i_original_value )
-{
-
-// Anuwat has asked that we don't enforce this right now.
-#ifdef ANUWAT_SAYS_DONT_DO_THIS_NOW
-
-    fapi2::buffer<uint64_t> l_value(i_original_value);
-    uint8_t l_vccd_override = 0;
-
-    // Check for whether we apply this workaround or not
-    if (! mss::chip_ec_feature_mss_vccd_override(i_target) )
-    {
-        return i_original_value;
-    }
-
-    FAPI_TRY( mss::vccd_override(l_vccd_override) );
-
-    // No VCCD override, don't mess with the DLL's
-    if (fapi2::ENUM_ATTR_MSS_VCCD_OVERRIDE_YES == l_vccd_override)
-    {
-        l_value.insertFromRight<MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0_01_RXREG_REF_SEL_DC,
-                                MCA_DDRPHY_DP16_DLL_VREG_CONTROL0_P0_0_01_RXREG_REF_SEL_DC_LEN>(0b111);
-    }
-
-    FAPI_INF("vreg_control0 0x%016lx, 0x%016lx", i_original_value, uint64_t(l_value));
-    return l_value;
-
-fapi_try_exit:
-    // Probably bigger problems ...
-    FAPI_ERR("Unable to get vccd_override attribute");
-    fapi2::Assert(false);
-
-    // Not reached
-    return 0;
-
-#else
-
-    return i_original_value;
-
-#endif
-}
-
-///
 /// @brief DP16 VREF DAC override
 /// In DD1.0 Nimbus VREF DAC work arounds are needed
 /// @param[in] i_target the port target for this override
