@@ -778,9 +778,6 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         FAPI_TRY( mss::dp16::reset_bad_bits(p) );
 #endif
 
-        // New for Nimbus reset the DLL
-        FAPI_TRY( mss::dp16::reset_dll(p) );
-
         FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
         // Section 5.2.4.8 DP16 Write Clock Enable & Clock Selection on page 301
