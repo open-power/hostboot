@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -378,7 +378,7 @@ class IpVpdFacade
      *
      * @return bool - True if the record is found, False otherwise.
      */
-    bool recordPresent( const char * i_record,
+    virtual bool recordPresent( const char * i_record,
                         uint16_t & offset,
                         TARGETING::Target * i_target,
                         VPD::vpdCmdTarget i_location );
@@ -717,6 +717,24 @@ class IpVpdFacade
      *
      */
     const recordInfo* iv_vpdRecords;
+
+    /**
+     * @brief Returns the cached pnor address
+     *
+     */
+    inline static uint64_t getPnorAddr(const IpVpdFacade& x)
+    {
+        return x.iv_cachePnorAddr;
+    }
+
+    /**
+     * @brief Set the cached pnor address to the given value
+     *
+     */
+    inline void setPnorAddr(uint64_t i_pnorAddr)
+    {
+        this->iv_cachePnorAddr = i_pnorAddr;
+    }
 
     /**
      * @brief Number of VPD Records for current chip

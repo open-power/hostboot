@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ struct pnorInformation
  */
 enum VPD_MSG_TYPE
 {
+    VPD_INVALID       = 0x0000,
     VPD_WRITE_DIMM    = 0x00C1, //< DIMM SPD
     VPD_WRITE_PROC    = 0x00C2, //< Processor MVPD
     VPD_WRITE_MEMBUF  = 0x00C3, //< Centaur FRU VPD

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,8 @@
 #include <p9_get_mem_vpd_keyword.H>
 #include <attribute_service.H>
 #include <vpd/dvpdenums.H>
-
+#include <vpd/memd_vpdenums.H>
+#include <pnor/pnorif.H>
 
 //The following can be uncommented for unit testing
 //#undef FAPI_DBG
