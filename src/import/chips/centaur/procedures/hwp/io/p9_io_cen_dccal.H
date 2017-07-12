@@ -43,7 +43,7 @@
 #include <fapi2.H>
 
 typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> CEN_TGT;
-typedef fapi2::ReturnCode (*p9_io_cen_dccal_FP_t)(const CEN_TGT&);
+typedef fapi2::ReturnCode (*p9_io_cen_dccal_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 extern "C"
 {
@@ -51,10 +51,10 @@ extern "C"
     /**
      * @brief A I/O EDI Procedure that runs Rx Dccal and Tx Z Impedance calibration
      * on every group of the EDI Centaur.
-     * @param[in] i_tgt   FAPI2 Target
+     * @param[in] i_target_chip p9 chip target
      * @retval ReturnCode
      */
-    fapi2::ReturnCode p9_io_cen_dccal(const CEN_TGT& i_tgt);
+    fapi2::ReturnCode p9_io_cen_dccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 } // extern "C"
 

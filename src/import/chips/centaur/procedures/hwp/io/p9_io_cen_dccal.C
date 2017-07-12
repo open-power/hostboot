@@ -68,17 +68,15 @@ const uint8_t LN0  = 0;
 
 /**
  * @brief Tx Impedance Calibration
- * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode txZcal(const CEN_TGT& i_tgt);
+fapi2::ReturnCode txZcal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 /**
  * @brief Rx Dc Calibration
- * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode rxDccal(const CEN_TGT& i_tgt);
+fapi2::ReturnCode rxDccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 //-----------------------------------------------------------------------------
 //  Function Definitions
@@ -87,22 +85,20 @@ fapi2::ReturnCode rxDccal(const CEN_TGT& i_tgt);
 /**
  * @brief A I/O EDI Procedure that runs Rx Dccal and Tx Z Impedance calibration
  * on every instance of the Centaur on a per group level.
- * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_target_chip p9 chip target
  * @retval ReturnCode
  */
-fapi2::ReturnCode p9_io_cen_dccal(const CEN_TGT& i_tgt)
+fapi2::ReturnCode p9_io_cen_dccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     FAPI_IMP("p9_io_cen_dccal: I/O EDI Cen Entering");
 
-    char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
-    fapi2::toString(i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
-    FAPI_DBG("I/O EDI Cen Dccal %s", l_tgtStr);
+    FAPI_DBG("I/O EDI Cen Dccal");
 
     // Runs Tx Zcal on a per bus basis
-    FAPI_TRY(txZcal(i_tgt), "I/O Edi Cen Tx Z-Cal Failed");
+    FAPI_TRY(txZcal(i_target_chip), "I/O Edi Cen Tx Z-Cal Failed");
 
     // Starts Rx Dccal on a per group basis
-    FAPI_TRY(rxDccal(i_tgt), "I/O Edi Cen Rx DC Cal Failed");
+    FAPI_TRY(rxDccal(i_target_chip), "I/O Edi Cen Rx DC Cal Failed");
 
 fapi_try_exit:
     FAPI_IMP("p9_io_cen_dccal: I/O EDI Cen Exiting");
@@ -175,14 +171,6 @@ fapi2::ReturnCode txZcalVerifyResults(uint32_t& io_pvalx4, uint32_t& io_nvalx4)
  */
 fapi2::ReturnCode txZcalRunStateMachine(const CEN_TGT& i_tgt)
 {
-    const uint64_t DLY_20MS         = 20000000;
-    const uint64_t DLY_10US         = 10000;
-    const uint64_t DLY_10MIL_CYCLES = 10000000;
-    const uint64_t DLY_1MIL_CYCLES  = 1000000;
-    const uint32_t TIMEOUT          = 200;
-    uint32_t count                  = 0;
-    uint64_t regData                = 0;
-
     FAPI_IMP("tx_zcal_run_sm: I/O EDI cen Entering");
 
     // Request to start Tx Impedance Calibration
@@ -190,8 +178,27 @@ fapi2::ReturnCode txZcalRunStateMachine(const CEN_TGT& i_tgt)
     FAPI_TRY(io::rmw(EDI_TX_ZCAL_REQ, i_tgt, GRP0, LN0, 0));
     FAPI_TRY(io::rmw(EDI_TX_ZCAL_REQ, i_tgt, GRP0, LN0, 1));
 
-    // Delay before we start polling.  20ms was use from past p8 learning
-    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
+fapi_try_exit:
+
+    FAPI_IMP("tx_zcal_run_sm: I/O EDI cen Exiting");
+    return fapi2::current_err;
+}
+
+/**
+ * @brief Tx Z Impedance Calibration State Machine
+ * @param[in] i_tgt FAPI2 Target
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode txZcalRunStateMachinePoll(const CEN_TGT& i_tgt)
+{
+    const uint64_t DLY_10US         = 10000;
+    const uint64_t DLY_1MIL_CYCLES  = 1000000;
+    const uint32_t TIMEOUT          = 200;
+    uint32_t count                  = 0;
+    uint64_t regData                = 0;
+
+    FAPI_IMP("tx_zcal_run_sm: I/O EDI cen Entering");
+
 
     // Poll Until Tx Impedance Calibration is done or errors out
     FAPI_TRY(io::read(EDI_TX_IMPCAL_PB, i_tgt, GRP0, LN0, regData));
@@ -338,18 +345,48 @@ fapi_try_exit:
 
 /**
  * @brief A I/O EDI Procedure that runs Tx Z Impedance calibration
- * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_target_chip p9 chip target
  * @retval ReturnCode
  */
-fapi2::ReturnCode txZcal(const CEN_TGT& i_tgt)
+fapi2::ReturnCode txZcal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     FAPI_IMP("txZcal: I/O EDI Cen Entering");
+    const uint64_t DLY_10MIL_CYCLES = 10000000;
+    const uint64_t DLY_20MS         = 20000000;
 
-    // Runs Tx Zcal on a per bus basis
-    FAPI_TRY(txZcalRunStateMachine(i_tgt), "I/O Edi Cen Tx Z-Cal Run State Machine Failed");
+    for (auto l_dmi : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_tgt : l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            FAPI_DBG("Running on centaur..");
 
-    // Sets Tx Zcal Group Settings based on the bus results
-    FAPI_TRY(txZcalSetResults(i_tgt), "I/O Edi Cen Tx Z-Cal Set Results Failed");
+            // Runs Tx Zcal on a per bus basis
+            FAPI_TRY(txZcalRunStateMachine(l_tgt), "I/O Edi Cen Tx Z-Cal Run State Machine Failed");
+        }
+    }
+
+    // Delay before we start polling.  20ms was use from past p8 learning
+    FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
+
+    for (auto l_dmi : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_tgt : l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            FAPI_TRY(txZcalRunStateMachinePoll(l_tgt), "I/O Edi Cen Tx Z-Cal Run State Machine Failed");
+        }
+    }
+
+    for (auto l_dmi : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_tgt : l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            // Sets Tx Zcal Group Settings based on the bus results
+            FAPI_TRY(txZcalSetResults(l_tgt), "I/O Edi Cen Tx Z-Cal Set Results Failed");
+        }
+    }
 
 fapi_try_exit:
     FAPI_IMP("txZcal: I/O EDI Cen Exiting");
@@ -416,10 +453,10 @@ fapi_try_exit:
 
 /**
  * @brief A I/O EDI Procedure that runs Rx Dc Calibration
- * @param[in] i_tgt  FAPI2 Target
+ * @param[in] i_target_chip p9 chip target
  * @retval ReturnCode
  */
-fapi2::ReturnCode rxDccal(const CEN_TGT& i_tgt)
+fapi2::ReturnCode rxDccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     FAPI_IMP("rx_dccal: I/O EDI Cen Entering");
 
@@ -433,77 +470,95 @@ fapi2::ReturnCode rxDccal(const CEN_TGT& i_tgt)
     uint8_t rxWtTimeoutSel = 0;
     uint8_t count = 0;
 
-    FAPI_TRY(setCleanupPllWtRefclk(i_tgt));
-
-    // 1.0 Set rx_pdwn_lite_disable = '1'
-    //  - Save original setting
-    FAPI_TRY(io::read(EDI_RX_PDWN_LITE_DISABLE, i_tgt, GRP0, LN0, regData));
-    rxPdwnLite = io::get(EDI_RX_PDWN_LITE_DISABLE, regData);
-    FAPI_TRY(io::rmw(EDI_RX_PDWN_LITE_DISABLE, i_tgt, GRP0, LN0, 0x1));
-
-    // 1.1 Set rx_wt_cu_pll_pgooddly = '111'
-    //  - Save original wiretest pll control settings
-    FAPI_TRY(io::read(EDI_RX_WIRETEST_PLL_CNTL_PG, i_tgt, GRP0, LN0, rxWiretestPllCntlPg));
-    FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_PGOODDLY, i_tgt, GRP0, LN0, 0x7));
-
-    // 1.2 Set rx_wt_timeout_sel = '111'
-    FAPI_TRY(io::read(EDI_RX_WT_TIMEOUT_SEL, i_tgt, GRP0, LN0, regData));
-    rxWtTimeoutSel = io::get(EDI_RX_WT_TIMEOUT_SEL, regData);
-    FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, i_tgt, GRP0, LN0, 0x7));
-
-    // 1.3 Set rx_wt_cu_pll_reset = '1'
-    FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_RESET, i_tgt, GRP0, LN0, 0x1));
-
-    // 1.4 Set rx_wt_cu_pll_pgood = '1'
-    FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_PGOOD, i_tgt, GRP0, LN0, 0x1));
-
-    // 1.5 Wait 100ms -- From past p8 learning
-    FAPI_TRY(fapi2::delay(DLY_100MS, DLY_10MIL_CYCLES));
-
-    // 1.6 Set rx_wt_timeout_sel = '000'
-    FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, i_tgt, GRP0, LN0, 0x0));
-
-    // 2.0 Set rx_start_offset_cal = '1'
-    FAPI_TRY(io::rmw(EDI_RX_START_OFFSET_CAL, i_tgt, GRP0, LN0, 0x1));
-
-    // 2.1 Poll for rx_offset_cal done & check for fail
-    do
+    for (auto l_dmi : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
     {
-        FAPI_DBG("rx_dccal: I/O EDI Centaur Rx Dccal Poll, Count(%d/%d).", count, TIMEOUT);
+        //There should only be one centaur child
+        for (auto l_tgt : l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            FAPI_TRY(setCleanupPllWtRefclk(l_tgt));
 
-        FAPI_TRY(fapi2::delay(DLY_100MS, DLY_10MIL_CYCLES));
+            // 1.0 Set rx_pdwn_lite_disable = '1'
+            //  - Save original setting
+            FAPI_TRY(io::read(EDI_RX_PDWN_LITE_DISABLE, l_tgt, GRP0, LN0, regData));
+            rxPdwnLite = io::get(EDI_RX_PDWN_LITE_DISABLE, regData);
+            FAPI_TRY(io::rmw(EDI_RX_PDWN_LITE_DISABLE, l_tgt, GRP0, LN0, 0x1));
 
-        FAPI_TRY(io::read(EDI_RX_TRAINING_STATUS_PG, i_tgt, GRP0, LN0, regData));
+            // 1.1 Set rx_wt_cu_pll_pgooddly = '111'
+            //  - Save original wiretest pll control settings
+            FAPI_TRY(io::read(EDI_RX_WIRETEST_PLL_CNTL_PG, l_tgt, GRP0, LN0, rxWiretestPllCntlPg));
+            FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_PGOODDLY, l_tgt, GRP0, LN0, 0x7));
+
+            // 1.2 Set rx_wt_timeout_sel = '111'
+            FAPI_TRY(io::read(EDI_RX_WT_TIMEOUT_SEL, l_tgt, GRP0, LN0, regData));
+            rxWtTimeoutSel = io::get(EDI_RX_WT_TIMEOUT_SEL, regData);
+            FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, l_tgt, GRP0, LN0, 0x7));
+
+            // 1.3 Set rx_wt_cu_pll_reset = '1'
+            FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_RESET, l_tgt, GRP0, LN0, 0x1));
+
+            // 1.4 Set rx_wt_cu_pll_pgood = '1'
+            FAPI_TRY(io::rmw(EDI_RX_WT_CU_PLL_PGOOD, l_tgt, GRP0, LN0, 0x1));
+
+            // 1.5 Wait 100ms -- From past p8 learning
+            FAPI_TRY(fapi2::delay(DLY_100MS, DLY_10MIL_CYCLES));
+
+            // 1.6 Set rx_wt_timeout_sel = '000'
+            FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, l_tgt, GRP0, LN0, 0x0));
+
+            // 2.0 Set rx_start_offset_cal = '1'
+            FAPI_TRY(io::rmw(EDI_RX_START_OFFSET_CAL, l_tgt, GRP0, LN0, 0x1));
+        }
     }
-    while((++count < TIMEOUT) &&
-          !(io::get(EDI_RX_OFFSET_CAL_DONE, regData) || io::get(EDI_RX_OFFSET_CAL_FAILED, regData)));
 
-    FAPI_ASSERT(io::get(EDI_RX_OFFSET_CAL_DONE, regData) == 1,
-                fapi2::IO_DMI_CEN_RX_DCCAL_TIMEOUT().set_TARGET(i_tgt),
-                "Rx Dccal Timeout: Loops(%d) Delay(%d ns, %d cycles)",
-                count, DLY_100MS, DLY_10MIL_CYCLES);
+    for (auto l_dmi : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_tgt : l_dmi.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            // 2.1 Poll for rx_offset_cal done & check for fail
+            do
+            {
+                FAPI_DBG("rx_dccal: I/O EDI Centaur Rx Dccal Poll, Count(%d/%d).", count, TIMEOUT);
+                FAPI_TRY(io::read(EDI_RX_TRAINING_STATUS_PG, l_tgt, GRP0, LN0, regData));
 
-    FAPI_ASSERT(io::get(EDI_RX_OFFSET_CAL_FAILED, regData) == 0,
-                fapi2::IO_DMI_CEN_RX_DCCAL_FAILED().set_TARGET(i_tgt),
-                "Rx Dccal Failed: Loops(%d) Delay(%d ns, %d cycles)",
-                count, DLY_100MS, DLY_10MIL_CYCLES);
+                if (io::get(EDI_RX_OFFSET_CAL_DONE, regData) || io::get(EDI_RX_OFFSET_CAL_FAILED, regData))
+                {
+                    break;
+                }
 
-    FAPI_DBG("rx_dccal: Successful: Loops(%d)", count);
+                FAPI_TRY(fapi2::delay(DLY_100MS, DLY_10MIL_CYCLES));
+
+            }
+            while((++count < TIMEOUT));
+
+            FAPI_ASSERT(io::get(EDI_RX_OFFSET_CAL_DONE, regData) == 1,
+                        fapi2::IO_DMI_CEN_RX_DCCAL_TIMEOUT().set_TARGET(l_tgt),
+                        "Rx Dccal Timeout: Loops(%d) Delay(%d ns, %d cycles)",
+                        count, DLY_100MS, DLY_10MIL_CYCLES);
+
+            FAPI_ASSERT(io::get(EDI_RX_OFFSET_CAL_FAILED, regData) == 0,
+                        fapi2::IO_DMI_CEN_RX_DCCAL_FAILED().set_TARGET(l_tgt),
+                        "Rx Dccal Failed: Loops(%d) Delay(%d ns, %d cycles)",
+                        count, DLY_100MS, DLY_10MIL_CYCLES);
+
+            FAPI_DBG("rx_dccal: Successful: Loops(%d)", count);
 
 
-    // 3.0 Clear rx_eo_latch_offset_done = '0'
-    FAPI_TRY(io::rmw(EDI_RX_EO_LATCH_OFFSET_DONE, i_tgt, GRP0, LN0, 0x0));
+            // 3.0 Clear rx_eo_latch_offset_done = '0'
+            FAPI_TRY(io::rmw(EDI_RX_EO_LATCH_OFFSET_DONE, l_tgt, GRP0, LN0, 0x0));
 
-    // 3.1 Clear rx_pdwn_lite_disable = '0'
-    FAPI_TRY(io::rmw(EDI_RX_PDWN_LITE_DISABLE, i_tgt, GRP0, LN0, rxPdwnLite));
+            // 3.1 Clear rx_pdwn_lite_disable = '0'
+            FAPI_TRY(io::rmw(EDI_RX_PDWN_LITE_DISABLE, l_tgt, GRP0, LN0, rxPdwnLite));
 
-    // 3.2 Restore rx_wt_timeout_sel to saved values
-    FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, i_tgt, GRP0, LN0, rxWtTimeoutSel));
+            // 3.2 Restore rx_wt_timeout_sel to saved values
+            FAPI_TRY(io::rmw(EDI_RX_WT_TIMEOUT_SEL, l_tgt, GRP0, LN0, rxWtTimeoutSel));
 
-    // 3.3 Restore rx_wiretest_pll_cntl_pg
-    FAPI_TRY(io::write(EDI_RX_WIRETEST_PLL_CNTL_PG, i_tgt, GRP0, LN0, rxWiretestPllCntlPg));
+            // 3.3 Restore rx_wiretest_pll_cntl_pg
+            FAPI_TRY(io::write(EDI_RX_WIRETEST_PLL_CNTL_PG, l_tgt, GRP0, LN0, rxWiretestPllCntlPg));
 
-    FAPI_TRY(setCleanupPllFunctional(i_tgt));
+            FAPI_TRY(setCleanupPllFunctional(l_tgt));
+        }
+    }
 
 fapi_try_exit:
     FAPI_IMP("rx_dccal: I/O EDI Cen Exiting");
