@@ -167,24 +167,37 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_ID, i_target, l_fabric_system_id),
              "Error from FAPI_ATTR_GET (ATTR_FABRIC_SYSTEM_ID)");
 
-    if (i_addr_mode == ABS_FBC_GRP_CHIP_IDS)
+    // set group ID
+    if ((i_addr_mode == ABS_FBC_GRP_CHIP_IDS) ||
+        (i_addr_mode == ABS_FBC_GRP_ID_ONLY))
     {
+        // absolute
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
                  "Error from FAPI_ATTR_GET (ATTR_FABRIC_GROUP_ID)");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
-                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
     }
     else
     {
+        // effective
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_GROUP_ID, i_target, l_fabric_group_id),
                  "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_GROUP_ID)");
-
-        if (i_addr_mode == EFF_FBC_GRP_CHIP_IDS)
-        {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
-                     "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_CHIP_ID)");
-        }
     }
+
+    // set chip ID
+    if (i_addr_mode == ABS_FBC_GRP_CHIP_IDS)
+    {
+        // absolute
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_CHIP_ID)");
+    }
+    else if (i_addr_mode == EFF_FBC_GRP_CHIP_IDS)
+    {
+        // effective
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EFF_FABRIC_CHIP_ID, i_target, l_fabric_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_EFF_FABRIC_CHIP_ID)");
+
+    }
+
+    // else, leave chip ID=0 for the purposes of establishing drawer base address
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_mirror_policy),
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
