@@ -38,7 +38,6 @@
 #include <prdfDramRepairUsrData.H>
 #include <prdfParserEnums.H>
 #include <prdfParserUtils.H>
-#include <attributeenums.H>     // For TARGETING::TYPE enum
 
 namespace PRDF
 {
@@ -2774,7 +2773,6 @@ uint8_t dqSiteIdx2DramSiteIdx( uint8_t i_dqSiteIdx, bool i_isX4Dram )
 // Helper functions
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
 // Displays symbol value. If symbol is not valid, will display '--' in output.
 void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 {
@@ -2789,14 +2787,23 @@ void getDramRepairSymbolStr( uint8_t i_value, char * o_str, uint32_t i_strSize )
 }
 
 // Gets the string representation for a single bad DQ bitmap entry.
-void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
+void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str, TYPE i_type )
 {
-    UtilMem membuf( i_buffer, DQ_BITMAP::ENTRY_SIZE );
+    uint8_t dimmsPerRank = MCA_DIMMS_PER_RANK;
+    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
+
+    if ( TYPE_MBA == i_type )
+    {
+        dimmsPerRank = MBA_DIMMS_PER_RANK;
+        entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
+    }
+
+    UtilMem membuf( i_buffer, entrySize );
 
     uint8_t rank; membuf >> rank;
     snprintf( o_str, DATA_SIZE, "R:%1d", rank );
 
-    for ( int32_t p = 0; p < MBA_DIMMS_PER_RANK; p++ )
+    for ( int32_t p = 0; p < dimmsPerRank; p++ )
     {
         char temp[DATA_SIZE];
 
@@ -2810,7 +2817,6 @@ void getBadDqBitmapEntry( uint8_t * i_buffer, char * o_str )
         }
     }
 }
-*/
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -3234,7 +3240,6 @@ bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
 bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser )
 {
@@ -3244,10 +3249,10 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
     {
         UtilMem l_membuf( i_buffer, i_buflen );
 
-        DramRepairMbaData mbaData;
-        l_membuf >> mbaData;
+        DramRepairUsrData usrData;
+        l_membuf >> usrData;
 
-        uint8_t rankCount = mbaData.header.rankCount;
+        uint8_t rankCount = usrData.header.rankCount;
 
         i_parser.PrintNumber( " DRAM_REPAIRS_DATA", "%d", rankCount );
 
@@ -3258,7 +3263,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             char temp[64];
             char symbolStr[10];
 
-            DramRepairRankData rankEntry = mbaData.rankDataList[rankIdx];
+            DramRepairRankData rankEntry = usrData.rankDataList[rankIdx];
             snprintf(temp, 64, "Rank: %d", rankEntry.rank);
             snprintf(data, 64, temp);
 
@@ -3271,7 +3276,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             snprintf(data, 64, temp);
 
             // Display DRAM spare information if spare DRAM is supported.
-            if ( mbaData.header.isSpareDram )
+            if ( usrData.header.isSpareDram )
             {
                 getDramRepairSymbolStr(rankEntry.port0Spare, symbolStr, 10);
                 snprintf(temp, 64, "%s Sp0: %s", data, symbolStr);
@@ -3283,7 +3288,7 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
             }
 
             // Display ECC spare information for X4 DRAMs
-            if ( mbaData.header.isX4Dram )
+            if ( usrData.header.isX4Dram )
             {
                 getDramRepairSymbolStr( rankEntry.eccSpare, symbolStr, 10 );
                 snprintf(temp, 64, "%s EccSp: %s", data, symbolStr);
@@ -3300,45 +3305,47 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
 
     return rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
 bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
-                          ErrlUsrParser & i_parser )
+                          ErrlUsrParser & i_parser, TARGETING::TYPE i_type )
 {
     bool rc = true;
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    const uint32_t entries = i_buflen / DQ_BITMAP::ENTRY_SIZE;
+    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
+    if ( TYPE_MBA == i_type ) entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
+
+    const uint32_t entries = i_buflen / entrySize;
 
     i_parser.PrintNumber( " DRAM_REPAIRS_VPD", "%d", entries );
 
     for ( uint32_t i = 0; i < entries; i++ )
     {
         char data[DATA_SIZE];
-        getBadDqBitmapEntry( &i_buffer[i*DQ_BITMAP::ENTRY_SIZE], data );
+        getBadDqBitmapEntry( &i_buffer[i*entrySize], data, i_type );
 
         i_parser.PrintString( "", data );
     }
 
     return rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
 bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser )
+                       ErrlUsrParser & i_parser, TARGETING::TYPE i_type )
 {
     bool rc = true;
 
     if ( NULL == i_buffer ) return false; // Something failed in parser.
 
-    if ( DQ_BITMAP::ENTRY_SIZE > i_buflen ) // Data is expected to be one entry.
+    uint32_t entrySize = DQ_BITMAP::MCA_ENTRY_SIZE;
+    if ( TYPE_MBA == i_type ) entrySize = DQ_BITMAP::MBA_ENTRY_SIZE;
+
+    if ( entrySize > i_buflen ) // Data is expected to be one entry.
     {
         i_parser.PrintString( " BAD_DQ_BITMAP", "" );
         i_parser.PrintHexDump(i_buffer, i_buflen);
@@ -3346,14 +3353,13 @@ bool parseBadDqBitmap( uint8_t  * i_buffer, uint32_t i_buflen,
     else
     {
         char data[DATA_SIZE];
-        getBadDqBitmapEntry( i_buffer, data );
+        getBadDqBitmapEntry( i_buffer, data, i_type );
 
         i_parser.PrintString( " BAD_DQ_BITMAP", data );
     }
 
     return rc;
 }
-*/
 
 //------------------------------------------------------------------------------
 

@@ -433,20 +433,20 @@ bool parseCaptureData( void * i_buffer, uint32_t i_buflen,
                  parseMemRceTable( sigData, sigDataSize, i_parser );
             }
 */
-/*  TODO: RTC 164707
             else if ( Util::hashString("DRAM_REPAIRS_DATA") == sigId )
             {
                  parseDramRepairsData( sigData, sigDataSize, i_parser );
             }
             else if ( Util::hashString("DRAM_REPAIRS_VPD") == sigId )
             {
-                 parseDramRepairsVpd( sigData, sigDataSize, i_parser );
+                 parseDramRepairsVpd( sigData, sigDataSize, i_parser,
+                                      l_targetType );
             }
             else if ( Util::hashString("BAD_DQ_BITMAP") == sigId )
             {
-                 parseBadDqBitmap( sigData, sigDataSize, i_parser );
+                 parseBadDqBitmap( sigData, sigDataSize, i_parser,
+                                   l_targetType );
             }
-*/
             else if ( (Util::hashString(TD_CTLR_DATA::START) == sigId) ||
                       (Util::hashString(TD_CTLR_DATA::END)   == sigId) )
             {

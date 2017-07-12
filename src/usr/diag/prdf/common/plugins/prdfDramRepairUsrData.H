@@ -45,7 +45,7 @@ namespace FSP
 {
 #endif
 
-/* @brief Represent the header information for DRAM Repair data of a MBA
+/* @brief Represent the header information for DRAM Repair data
  */
 struct DramRepairDataHdr
 {
@@ -151,19 +151,19 @@ struct DramRepairRankData
 
 /** @brief Represent DRAM Repair data of a MBA
  */
-struct DramRepairMbaData
+struct DramRepairUsrData
 {
     DramRepairDataHdr header;
     std::vector<DramRepairRankData> rankDataList;
 
     /**
-     * @brief append DramRepairMbaData to UtilStream buffer
+     * @brief append DramRepairUsrData to UtilStream buffer
      * @param i_left UtilStream object
      * @param i_right DRAM Repair Mba data object
      * @return Upddated Utilstream object
      */
     friend UtilStream& operator<<( UtilStream& i_left,
-                                   DramRepairMbaData& i_right )
+                                   DramRepairUsrData& i_right )
     {
         i_left << i_right.header;
 
@@ -175,13 +175,13 @@ struct DramRepairMbaData
     }
 
     /**
-     * @brief Retrieve DramRepairMbaData from UtilStream buffer
+     * @brief Retrieve DramRepairUsrData from UtilStream buffer
      * @param i_left UtilStream object
      * @param i_right DRAM Repair rank data object
      * @return Upddated Utilstream object
      */
     friend UtilStream& operator>>( UtilStream& i_left,
-                                   DramRepairMbaData& i_right)
+                                   DramRepairUsrData& i_right)
     {
         //Retrieve Header
         i_left >> i_right.header;
