@@ -82,12 +82,7 @@
     <description>VFRT Header data is invalid</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAGIC_NUMBER</ffdc>
-    <ffdc>TYPE_VERSION</ffdc>
-    <ffdc>VDN_ID</ffdc>
-    <ffdc>VDD_ID</ffdc>
-    <ffdc>QUAD_ID</ffdc>
-    <ffdc>WOF_TABLE_INDEX</ffdc>
-    <ffdc>VFRT_TABLE_INDEX</ffdc>
+    <ffdc>VFRT_INDEX</ffdc>
   </hwpError>
 
   <!-- ******************************************************************** -->

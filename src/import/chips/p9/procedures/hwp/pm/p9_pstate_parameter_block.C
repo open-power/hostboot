@@ -813,6 +813,19 @@ void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
                                        ((*l_wof_table_data) + l_wof_table_index),
                                        &l_vfrt,
                                        i_base_state_frequency);
+
+                // Check for "VT" at the start of the magic number
+                if (l_vfrt.vfrtHeader.magic_number != 0x5654)
+                {
+                    o_state->iv_wof_enabled = false;
+                    FAPI_ASSERT_NOEXIT(false,
+                                   fapi2::PSTATE_PB_VFRT_HEADER_DATA_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                   .set_CHIP_TARGET(FAPI_SYSTEM)
+                                   .set_MAGIC_NUMBER(l_vfrt.vfrtHeader.magic_number)
+                                   .set_VFRT_INDEX(vfrt_index),
+                                   "Pstate Parameter Block: Invalid VFRT Magic word");
+                    break;
+                }
                 l_wof_table_index += 128; //System vFRT size is 128B..hence need to jump after each VFRT entry
 
                 memcpy(o_buf + l_index, &l_vfrt, sizeof (l_vfrt));
@@ -1644,14 +1657,6 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 
         FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                  pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]]);
-        FAPI_INF("   f=%u <= f=%u",               i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
-                 i_chiplet_mvpd_data[pv_op_order[i]][0]);
-        FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
-                 i_chiplet_mvpd_data[pv_op_order[i]][1], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
-                 i_chiplet_mvpd_data[pv_op_order[i]][2]);
-        FAPI_INF("   v=%u <= v=%u  i=%u <= i=%u", i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
-                 i_chiplet_mvpd_data[pv_op_order[i]][3], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
-                 i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
         // Only skip checkinug for WOF not enabled and UltraTurbo.
         if (is_wof_enabled() || (!( !is_wof_enabled() && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))))
@@ -1663,9 +1668,34 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                 i_chiplet_mvpd_data[pv_op_order[i - 1]][4] > i_chiplet_mvpd_data[pv_op_order[i]][4]    )
             {
 
-                FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s <= %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
+                FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s > %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
                          pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
                          pv_op_order[i]);
+#define POUNDV_SLOPE_CHECK(x,y)   x > y ? " is GREATER (ERROR!) than " : " is less than "
+                FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][0], 
+                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][0], i_chiplet_mvpd_data[pv_op_order[i]][0]),
+                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][0]);
+
+                FAPI_INF("%s VDD voltage value %u is %s %s Frequency value %u",
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][1], 
+                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][1], i_chiplet_mvpd_data[pv_op_order[i]][1]),
+                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][1]);
+
+                FAPI_INF("%s VDD current value %u is %s %s Frequency value %u",
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][2], 
+                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][2], i_chiplet_mvpd_data[pv_op_order[i]][2]),
+                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][2]);
+
+                FAPI_INF("%s VCS voltage value %u is %s %s Frequency value %u",
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][3], 
+                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][3], i_chiplet_mvpd_data[pv_op_order[i]][3]),
+                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][3]);
+
+                FAPI_INF("%s VCS current value %u is %s %s Frequency value %u",
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][4], 
+                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][4], i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
                 o_state->iv_pstates_enabled = false;
 
@@ -1676,11 +1706,11 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                             .set_CHIPLET_NUMBER(i_chiplet_num)
                             .set_BUCKET(i_bucket_id)
                             .set_POINT(i)
-                            .set_FREQUENCY_A(i_chiplet_mvpd_data[pv_op_order[i]][0])
-                            .set_VDD_A(i_chiplet_mvpd_data[pv_op_order[i]][1])
-                            .set_IDD_A(i_chiplet_mvpd_data[pv_op_order[i]][2])
-                            .set_VCS_A(i_chiplet_mvpd_data[pv_op_order[i]][3])
-                            .set_ICS_A(i_chiplet_mvpd_data[pv_op_order[i]][4])
+                            .set_FREQUENCY_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][0])
+                            .set_VDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][1])
+                            .set_IDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][2])
+                            .set_VCS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][3])
+                            .set_ICS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][4])
                             .set_FREQUENCY_B(i_chiplet_mvpd_data[pv_op_order[i]][0])
                             .set_VDD_B(i_chiplet_mvpd_data[pv_op_order[i]][1])
                             .set_IDD_B(i_chiplet_mvpd_data[pv_op_order[i]][2])
@@ -3173,8 +3203,8 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
     // This function should exit if the input type is not "SYSTEM"
     // Correct in Level 3 update.
 
-    char            l_buffer_str[512];   // Temporary formatting string buffer
-    char            l_line_str[512];     // Formatted output line string
+    char            l_buffer_str[256];   // Temporary formatting string buffer
+    char            l_line_str[256];     // Formatted output line string
 
     strcpy(l_line_str, "VFRT:");
     sprintf(l_buffer_str, " %X Ver/Type %X B5 %X B6 %X  B7 %X",
@@ -3213,7 +3243,7 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
             // in a loop that is processing over 1000 tables, the first
             // 8 gives a view that can correlate that the input data read
             // is correct without overfilling the HB trace buffer.
-            if ((l_index_1 + 1) == 8)
+            if (!((l_index_1 + 1) % 8))
             {
                 FAPI_INF("%s", l_line_str);
                 strcpy(l_buffer_str, "");
