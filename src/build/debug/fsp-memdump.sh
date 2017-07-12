@@ -117,14 +117,14 @@ HB_BASE_HRMOR=`expr 32 \* 1024 \* 1024 \* 1024 \* 1024`
 HRMOR=`expr ${HB_BASE_HRMOR} \* ${NODE} + ${HB_OFFSET}`
 echo "NODE: ${NODE} - HRMOR is: ${HRMOR}"
 
-# Using initial STATE, iterate through all the included states dumping each's
+# Using initial STATE, iterate through all the included states dumping each
 # appropriate memory sections.
 while [[ ${STATE} != BREAK ]]
 do
     # *** NOTE: Keep in sync with Dump.pm and bootloaderif.H (MAX_HBB_SIZE)
     case ${STATE} in
         00|0)
-            # Size of HBB PNOR partition without ECC, page algined down, minus 4K header
+            # Size of HBB PNOR partition without ECC, page aligned down, minus 4K header
             dump 0 925696
             STATE=BREAK
             ;;

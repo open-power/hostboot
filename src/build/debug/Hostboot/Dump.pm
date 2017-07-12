@@ -41,7 +41,7 @@ use constant    MEMSTATE_MS_32MEG => 0x20;
 use constant    _KB => 1024;
 use constant    _MB => 1024 * 1024;
 
-# Size of HBB PNOR partition without ECC, page algined down, minus 4K header
+# Size of HBB PNOR partition without ECC, page aligned down, minus 4K header
 use constant    MAX_HBB_SIZE => (904 * _KB);
 
 # Map the available memory at each state.
