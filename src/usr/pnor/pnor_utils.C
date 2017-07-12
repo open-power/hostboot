@@ -388,7 +388,6 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HB_EXT_CODE ||
                i_section == HB_DATA ||
                i_section == SBE_IPL ||
-               i_section == CENTAUR_SBE ||
                i_section == PAYLOAD ||
                i_section == SBKT ||
                i_section == OCC ||
@@ -435,7 +434,6 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
 #endif
         "HBB",         /**< PNOR::HB_BASE_CODE   : Hostboot Base Image */
 #ifndef BOOTLOADER
-        "SBEC",        /**< PNOR::CENTAUR_SBE    : Centaur Self-Boot Engine image */
         "SBE",         /**< PNOR::SBE_IPL        : Self-Boot Enginer IPL image */
         "HCODE",       /**< PNOR::HCODE          : HCODE Reference image */
         "PAYLOAD",     /**< PNOR::PAYLOAD        : HAL/OPAL */

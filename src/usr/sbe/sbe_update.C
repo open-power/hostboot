@@ -592,10 +592,6 @@ namespace SBE
             {
                 pnorSectionId = PNOR::SBE_IPL;
             }
-            else if ( i_target->getAttr<ATTR_TYPE>() == TYPE_MEMBUF )
-            {
-                pnorSectionId = PNOR::CENTAUR_SBE;
-            }
             else
             {
                 // Unsupported target type was passed in

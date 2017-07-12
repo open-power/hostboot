@@ -45,7 +45,6 @@ enum SectionId
 #endif
     HB_BASE_CODE,   /**< Hostboot Base Image */
 #ifndef BOOTLOADER
-    CENTAUR_SBE,    /**< Centaur Self-Boot Engine image */
     SBE_IPL,        /**< Self-Boot Engine IPL image */
     HCODE,          /**< HCODE Reference image */
     PAYLOAD,        /**< HAL/OPAL */

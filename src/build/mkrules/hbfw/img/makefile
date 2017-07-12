@@ -237,7 +237,6 @@ NIMBUS_HBD_IMG = simics_${NIMBUS}_targeting.bin
 NIMBUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9n.hw_ref_image.bin}
 NIMBUS_SBE_IMG = p9nSbePartition.bin
 NIMBUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
-SBEC_IMG = centSbePartition.bin
 
 # Input fake images
 NIMBUS_VPO_HBD_IMG = vbu_${NIMBUS}_targeting.bin
@@ -247,7 +246,6 @@ NIMBUS_HBD_FINAL_IMG = ${NIMBUS}.HBD.bin
 NIMBUS_HCODE_FINAL_IMG = ${NIMBUS}.HCODE.bin
 NIMBUS_SBE_FINAL_IMG = ${NIMBUS}.SBE.bin
 NIMBUS_OCC_FINAL_IMG = ${NIMBUS}.OCC.bin
-SBEC_FINAL_IMG = SBEC.bin
 
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
@@ -257,14 +255,12 @@ SBEC_FINAL_IMG = SBEC.bin
     .else
         GEN_NIMBUS_BIN_FILES = ${NIMBUS}:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P}
     .endif
-    #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES} --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
     GEN_NIMBUS_BIN_FILES = ${NIMBUS}:HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_VPO_HBD_IMG}:P}
-    #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = --pnorLayout ${PNOR_LAYOUT} \
                              --systemBinFiles ${GEN_NIMBUS_BIN_FILES}
 .endif
@@ -286,7 +282,6 @@ gen_system_specific_images: build_sbe_partitions .PMAKE
 	@${MAKE:T:R} gen_system_specific_images_bypass_cache
 
 HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},WOFDATA=${WOFDATA_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG}
-#@TODO RTC:163810 - Put SBEC back "SBEC=${SBEC_FINAL_IMG},"
 .if(${DEFAULT_PNOR} == 1)
     NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},SBE=${NIMBUS_SBE_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG},OCC=${NIMBUS_OCC_FINAL_IMG}
 .else
