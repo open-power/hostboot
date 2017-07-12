@@ -751,12 +751,11 @@ fapi_try_exit:
 /**
  * @brief A HWP that runs on every link of the DMI(EDI+)
  *
- * @param[in] i_mtgt   Reference to the Master Target
- * @param[in] i_stgt  Reference to the Slave Target
+ * @param[in] i_target_chip  Chip target
  *
  * @return FAPI2_RC_SUCCESS on success, error otherwise
  */
-fapi2::ReturnCode p9_io_dmi_linktrain(const DMI_TGT& i_mtgt, const CN_TGT& i_stgt)
+fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip)
 {
     FAPI_IMP("p9_io_dmi_linktrain: P9 I/O EDI+/EDI DMI Entering");
 
@@ -768,51 +767,95 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const DMI_TGT& i_mtgt, const CN_TGT& i_stg
 
     char l_mtgt_str[fapi2::MAX_ECMD_STRING_LEN];
     char l_stgt_str[fapi2::MAX_ECMD_STRING_LEN];
-    fapi2::toString(i_mtgt, l_mtgt_str, fapi2::MAX_ECMD_STRING_LEN);
-    fapi2::toString(i_stgt, l_stgt_str, fapi2::MAX_ECMD_STRING_LEN);
 
-    FAPI_DBG("I/O DMI Targets: Target(%s) Connected(%s)", l_mtgt_str, l_stgt_str);
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
 
-    // Shorten timers if we are running in simulation
-    FAPI_TRY(p9_io_dmi_proc_shorten_timers(i_mtgt));
-    FAPI_TRY(p9_io_dmi_cn_shorten_timers(i_stgt));
+            fapi2::toString(l_mtgt, l_mtgt_str, fapi2::MAX_ECMD_STRING_LEN);
+            fapi2::toString(l_stgt, l_stgt_str, fapi2::MAX_ECMD_STRING_LEN);
+
+            FAPI_DBG("I/O DMI Targets: Target(%s) Connected(%s)", l_mtgt_str, l_stgt_str);
+
+            // Shorten timers if we are running in simulation
+            FAPI_TRY(p9_io_dmi_proc_shorten_timers(l_mtgt));
+            FAPI_TRY(p9_io_dmi_cn_shorten_timers(l_stgt));
 
 
-    // Record the Bad Lane Vectors Prior to link training.
-    FAPI_TRY(get_dmi_proc_bad_lane_data(i_mtgt, l_m_pre_bad_data),
-             "Pre Training: Get Bad Lane Vector Failed on Master");
-    FAPI_TRY(get_dmi_cn_bad_lane_data(i_stgt, l_s_pre_bad_data),
-             "Pre Training: Get Bad Lane Vector Failed on Slave");
+            // Record the Bad Lane Vectors Prior to link training.
+            FAPI_TRY(get_dmi_proc_bad_lane_data(l_mtgt, l_m_pre_bad_data),
+                     "Pre Training: Get Bad Lane Vector Failed on Master");
+            FAPI_TRY(get_dmi_cn_bad_lane_data(l_stgt, l_s_pre_bad_data),
+                     "Pre Training: Get Bad Lane Vector Failed on Slave");
 
 
-    // Clock Serializer Init -- isn't strictly necessary but does line up the
-    //   clock serializer counter wit the data slices.
-    FAPI_TRY(tx_serializer_sync_power_on(i_mtgt), "tx_serializer_sync_power_on Failed.");
+            // Clock Serializer Init -- isn't strictly necessary but does line up the
+            //   clock serializer counter wit the data slices.
+            FAPI_TRY(tx_serializer_sync_power_on(l_mtgt), "tx_serializer_sync_power_on Failed.");
 
-    // TODO : For Centaur Only, Scan in pll settings with PFD360->1
+            // TODO : For Centaur Only, Scan in pll settings with PFD360->1
 
-    // Start Slave/Master Target Link Training
-    FAPI_TRY(linktrain_dmi_cn_start(i_stgt, State::WIRETEST), "P9 I/O DMI CN Start W Failed.");
-    FAPI_TRY(linktrain_dmi_proc_start(i_mtgt, State::WIRETEST), "P9 I/O DMI Proc Start W Failed.");
+            // Start Slave/Master Target Link Training
+            FAPI_TRY(linktrain_dmi_cn_start(l_stgt, State::WIRETEST), "P9 I/O DMI CN Start W Failed.");
+            FAPI_TRY(linktrain_dmi_proc_start(l_mtgt, State::WIRETEST), "P9 I/O DMI Proc Start W Failed.");
+        }
+    }
 
-    // Poll for Training to Complete on Master Target
-    FAPI_TRY(linktrain_poll(i_mtgt, i_stgt, State::WIRETEST), "P9 I/O DMI Proc Poll W Failed.");
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            // Poll for Training to Complete on Master Target
+            FAPI_TRY(linktrain_poll(l_mtgt, l_stgt, State::WIRETEST), "P9 I/O DMI Proc Poll W Failed.");
+        }
+    }
 
     // TODO : For Centaur Only, Scan in pll settings with PFD360->0
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
 
-    FAPI_TRY(linktrain_dmi_cn_start(i_stgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI CN Start DERF Failed.");
-    FAPI_TRY(linktrain_dmi_proc_start(i_mtgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI Proc Start DERF Failed.");
+            FAPI_TRY(linktrain_dmi_cn_start(l_stgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI CN Start DERF Failed.");
+            FAPI_TRY(linktrain_dmi_proc_start(l_mtgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI Proc Start DERF Failed.");
+        }
+    }
 
-    // Poll for Training to Complete on Master Target
-    FAPI_TRY(linktrain_poll(i_mtgt, i_stgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI Proc Poll DERF Failed.");
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            // Poll for Training to Complete on Master Target
+            FAPI_TRY(linktrain_poll(l_mtgt, l_stgt, State::DESKEW | State::EYEOPT), "P9 I/O DMI Proc Poll DERF Failed.");
+        }
+    }
 
     // DE / RF needs to split up due to HW220654
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
 
-    FAPI_TRY(linktrain_dmi_cn_start(i_stgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI CN Start DERF Failed.");
-    FAPI_TRY(linktrain_dmi_proc_start(i_mtgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI Proc Start DERF Failed.");
+            FAPI_TRY(linktrain_dmi_cn_start(l_stgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI CN Start DERF Failed.");
+            FAPI_TRY(linktrain_dmi_proc_start(l_mtgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI Proc Start DERF Failed.");
+        }
+    }
 
-    // Poll for Training to Complete on Master Target
-    FAPI_TRY(linktrain_poll(i_mtgt, i_stgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI Proc Poll DERF Failed.");
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
+            // Poll for Training to Complete on Master Target
+            FAPI_TRY(linktrain_poll(l_mtgt, l_stgt, State::REPAIR | State::FUNCTIONAL), "P9 I/O DMI Proc Poll DERF Failed.");
+        }
+    }
 
 
     // >> HW390103 -- Leave Tx Unload Clock Disable Off
@@ -820,21 +863,27 @@ fapi2::ReturnCode p9_io_dmi_linktrain(const DMI_TGT& i_mtgt, const CN_TGT& i_stg
     //FAPI_TRY(tx_serializer_sync_power_off(l_mtgt, l_stgt, GRP0),
     //          "tx_serializer_sync_power_off Failed.");
     // << HW390103 -- Leave Tx Unload Clock Disable Off
+    for (auto l_mtgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        //There should only be one centaur child
+        for (auto l_stgt : l_mtgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>())
+        {
 
-    // Record the Bad Lane Vectors after link training.
-    FAPI_TRY(get_dmi_proc_bad_lane_data(i_mtgt, l_m_post_bad_data),
-             "Post Training: Get Bad Lane Vector Failed on Master");
-    FAPI_TRY(get_dmi_cn_bad_lane_data(i_stgt, l_s_post_bad_data),
-             "Post Training: Get Bad Lane Vector Failed on Master");
+            // Record the Bad Lane Vectors after link training.
+            FAPI_TRY(get_dmi_proc_bad_lane_data(l_mtgt, l_m_post_bad_data),
+                     "Post Training: Get Bad Lane Vector Failed on Master");
+            FAPI_TRY(get_dmi_cn_bad_lane_data(l_stgt, l_s_post_bad_data),
+                     "Post Training: Get Bad Lane Vector Failed on Master");
 
 
-    // Check to see if the bad lanes match the bad lanes prior to link training.
-    //   If so, then that error has already been logged and we can clear the firs.
-    FAPI_TRY(check_dmi_proc_bad_lane_data(i_mtgt, l_m_pre_bad_data, l_m_post_bad_data),
-             "Post Training: Evaluate Firs Failed on Master");
-    FAPI_TRY(check_dmi_cn_bad_lane_data(i_stgt, l_s_pre_bad_data, l_s_post_bad_data),
-             "Post Training: Evaluate Firs Failed on Slave");
-
+            // Check to see if the bad lanes match the bad lanes prior to link training.
+            //   If so, then that error has already been logged and we can clear the firs.
+            FAPI_TRY(check_dmi_proc_bad_lane_data(l_mtgt, l_m_pre_bad_data, l_m_post_bad_data),
+                     "Post Training: Evaluate Firs Failed on Master");
+            FAPI_TRY(check_dmi_cn_bad_lane_data(l_stgt, l_s_pre_bad_data, l_s_post_bad_data),
+                     "Post Training: Evaluate Firs Failed on Slave");
+        }
+    }
 
 fapi_try_exit:
 

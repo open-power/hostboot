@@ -49,7 +49,7 @@
 typedef fapi2::Target<fapi2::TARGET_TYPE_DMI> DMI_TGT;
 typedef fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> CN_TGT;
 
-typedef fapi2::ReturnCode (*p9_io_dmi_linktrain_FP_t)(const DMI_TGT&, const CN_TGT&);
+typedef fapi2::ReturnCode (*p9_io_dmi_linktrain_FP_t)(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
@@ -58,12 +58,11 @@ extern "C"
      * @brief A HWP that runs once on every link of the DMI(EDI+).
      *   The HWP will train both ends of the link.
      *
-     * @param[in] i_mtgt Reference to the Master Target
-     * @param[in] i_stgt Reference to the Slave Target
+     * @param[in] i_target_chip Chip target
      *
      * @return FAPI2_RC_SUCCESS on success, error otherwise
      */
-    fapi2::ReturnCode p9_io_dmi_linktrain(const DMI_TGT& i_mtgt, const CN_TGT& i_stgt);
+    fapi2::ReturnCode p9_io_dmi_linktrain(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip);
 
 } // extern "C"
 
