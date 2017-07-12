@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 #include <prdfMemoryMruData.H>
+#include <attributeenums.H>     // For TARGETING::TYPE enum
 
 class ErrlUsrParser;
 
@@ -110,18 +111,20 @@ bool parseDramRepairsData( uint8_t * i_buffer, uint32_t i_buflen,
  * @param i_buffer The data buffer.
  * @param i_buflen The buffer length.
  * @param i_parser The error log parser.
+ * @param i_type   The target type
  */
 bool parseDramRepairsVpd( uint8_t * i_buffer, uint32_t i_buflen,
-                          ErrlUsrParser & i_parser );
+                          ErrlUsrParser & i_parser, TARGETING::TYPE i_type );
 
 /**
  * @brief Parses Bad DQ Bitmap data (Used in IPL UE isolation).
  * @param i_buffer The data buffer.
  * @param i_buflen The buffer length.
  * @param i_parser The error log parser.
+ * @param i_type   The target type
  */
 bool parseBadDqBitmap( uint8_t * i_buffer, uint32_t i_buflen,
-                       ErrlUsrParser & i_parser );
+                       ErrlUsrParser & i_parser, TARGETING::TYPE i_type );
 
 /**
  * @brief Parses TD Controller state data.
