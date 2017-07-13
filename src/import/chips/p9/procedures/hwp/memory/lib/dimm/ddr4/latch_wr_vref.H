@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB Memory
 
 #ifndef _LATCH_WR_VREF_H_
@@ -64,7 +64,7 @@ enum wr_vref_override : uint8_t
 ///
 fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const mrs06_data& i_mrs06,
-        const uint64_t& i_rank,
+        const uint64_t i_rank,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 ///
@@ -77,9 +77,9 @@ fapi2::ReturnCode add_latch_wr_vref_commands( const fapi2::Target<fapi2::TARGET_
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode latch_wr_vref_commands_by_rank_pair( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t& i_rank_pair,
-        const uint8_t& i_train_range,
-        const uint8_t& i_train_value);
+        const uint64_t i_rank_pair,
+        const uint8_t i_train_range,
+        const uint8_t i_train_value);
 
 ///
 /// @brief enables VREF train enable in an MRS06 class
@@ -117,9 +117,9 @@ inline void disable_vref_train_enable(mrs06_data& io_mrs06)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        const uint64_t& i_rank,
-        const uint8_t& i_train_range,
-        const uint8_t& i_train_value,
+        const uint64_t i_rank,
+        const uint8_t i_train_range,
+        const uint8_t i_train_value,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
 } // close namespace DDR4
