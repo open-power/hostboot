@@ -27,22 +27,18 @@
   <hwpError>
     <rc>RC_XIPC_BAD_PG_XLATE</rc>
     <description>Code bug: Invalid translation from PERV target chip unit position to image PG index</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIP_UNIT_POS</ffdc>
+    <ffdc>PG_INDEX</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>CHIP_UNIT_POS</ffdc>
-    <ffdc>PG_INDEX</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_INVALID_INPUT_BUFFER_PARM</rc>
     <description>Caller bug: Caller supplied one or more invalid input buffer pointers</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>HW_IMAGE</ffdc>
     <ffdc>IMAGE_BUF</ffdc>
@@ -50,15 +46,15 @@
     <ffdc>RING_BUF1</ffdc>
     <ffdc>RING_BUF2</ffdc>
     <ffdc>RING_BUF3</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_INVALID_INPUT_BUFFER_SIZE_PARM</rc>
     <description>Caller bug: Caller supplied one or more invalid input buffer sizes</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>INPUT_IMAGE_SIZE</ffdc>
     <ffdc>IMAGE_BUF_SIZE</ffdc>
@@ -67,164 +63,170 @@
     <ffdc>RING_BUF_SIZE2</ffdc>
     <ffdc>RING_BUF_SIZE3</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_INVALID_SYSPHASE_PARM</rc>
     <description>Caller bug: Caller supplied unsupported sysPhase</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SYSPHASE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>SYSPHASE</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_ATTR_MAX_SBE_SEEPROM_SIZE_TOO_SMALL</rc>
     <description>SBE Seeprom size reported in attribute is smaller than MAX_SBE_SEEPROM_SIZE</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>ATTR_MAX_SBE_SEEPROM_SIZE</ffdc>
+    <ffdc>MAX_SBE_SEEPROM_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>ATTR_MAX_SBE_SEEPROM_SIZE</ffdc>
-    <ffdc>MAX_SBE_SEEPROM_SIZE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_INVALID_VPD_KEYWORD</rc>
     <description>Code bug: Unsupported value of vpdKeyword</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>VPD_KEYWORD</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>VPD_KEYWORD</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_MVPD_CHIPLET_ID_MESS</rc>
     <description>VPD ring's chipletId doesn't match requested chipletId</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>MVPD_CHIPLET_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_MVPD_RING_SIZE_MESS</rc>
     <description>VPD ring's size exceeds max ring buffer size</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>RING_BUFFER_SIZE</ffdc>
     <ffdc>MVPD_RING_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_MVPD_RING_SIZE_TOO_BIG</rc>
     <description>VPD ring's size exceed allowed ring buffer space</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>RING_BUFFER_SIZE</ffdc>
     <ffdc>MVPD_RING_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_MVPD_INVALID_RECORD_DATA</rc>
     <description>VPD ring's record data is invalid</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_ID</ffdc>
-    <ffdc>CHIPLET_ID</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_MVPD_FIELD_SIZE_MESS</rc>
     <description>MVPD field size mess</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_FIELD_SIZE</ffdc>
+    <ffdc>EXPECTED_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>MVPD_FIELD_SIZE</ffdc>
-    <ffdc>EXPECTED_SIZE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_RS4_REDUNDANT_ERROR</rc>
     <description>rs4_redundant() failed</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_TOR_APPEND_RING_FAILED</rc>
     <description>tor_append_ring() failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOR_RC</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>TOR_RC</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_SECTION_REMOVAL_ERROR</rc>
     <description>p9_xip_delete_section() failed to remove an XIP section</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_SECTION</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>XIP_SECTION</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_XIP_API_MISC_ERROR</rc>
     <description>An XIP API call failed with a non-categorized error</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>XIP_RC</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>XIP_RC</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_EMPTY_RING_SECTION</rc>
     <description>The ring section size is zero. No TOR. Can't append rings</description>
+    <ffdc>CHIP_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -232,10 +234,6 @@
     <description>
       Ran out of image buffer space trying to append a ring to the .rings section
     </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>CURRENT_RING_SECTION_SIZE</ffdc>
     <ffdc>SIZE_OF_THIS_RING</ffdc>
@@ -243,6 +241,10 @@
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -250,13 +252,13 @@
     <description>
       Additional FFDC info for RC_XIPC_IMAGE_WOULD_OVERFLOW error
     </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
+    <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
-    <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -264,146 +266,159 @@
     <description>
       Image buffer would overflow before reaching minimum number of boot cores
     </description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>REQUESTED_BOOT_CORE_MASK</ffdc>
     <ffdc>CURRENT_BOOT_CORE_MASK</ffdc>
     <ffdc>MIN_REQD_ECS</ffdc>
     <ffdc>ACTUAL_EC_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_SECTION_SIZING</rc>
     <description>Code bug: Ring section size would exceed max ring section size</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_SECTION_SIZE</ffdc>
+    <ffdc>MAX_RING_SECTION_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>RING_SECTION_SIZE</ffdc>
-    <ffdc>MAX_RING_SECTION_SIZE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_IMAGE_SIZING</rc>
     <description>Code bug: Image size would exceed max image size</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>IMAGE_SIZE_WITHOUT_RINGS</ffdc>
     <ffdc>RING_SECTION_SIZE</ffdc>
     <ffdc>MAX_IMAGE_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_IMAGE_TOO_LARGE</rc>
     <description>Image size exceeds max allowed image size</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>IMAGE_SIZE</ffdc>
     <ffdc>MAX_IMAGE_SIZE</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_TOR_GET_BLOCK_OF_RINGS_FAILED</rc>
     <description>tor_get_block_of_rings() failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TOR_RC</ffdc>
+    <ffdc>SYSPHASE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>TOR_RC</ffdc>
-    <ffdc>SYSPHASE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_FAPI_ATTR_SVC_FAIL</rc>
     <description>FAPI attribute service failed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_GPTR_GET_SINGLE_RING_ERROR</rc>
     <description>tor_get_single_ring() for gptr failed</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_RS4_DECOMPRESS_ERROR</rc>
     <description>rs4_decompress() for gptr failed</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_GPTR_RING_SIZES_MISMATCH_ERROR</rc>
-    <description>Vpd and Ovly ring sizes mismatch</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_OVLY_RAW_RING_SIZE_MISMATCH_ERROR</rc>
+    <description>Mvpd and Ovly raw ring size mismatch</description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>VPD_SIZE</ffdc>
+    <ffdc>MVPD_SIZE</ffdc>
     <ffdc>OVLY_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_MVPD_OVLY_RING_HEADER_MISMATCH_ERROR</rc>
+    <description>Mvpd and Ovly ring header mismatch</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_RING_ID</ffdc>
+    <ffdc>OVLY_RING_ID</ffdc>
+    <ffdc>MVPD_SCAN_ADDR</ffdc>
+    <ffdc>OVLY_SCAN_ADDR</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_XIPC_RS4_COMPRESS_ERROR</rc>
     <description>rs4_compress() for gptr failed</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>CHIPLET_ID</ffdc>
     <ffdc>LOCAL_RC</ffdc>
     <ffdc>OCCURRENCE</ffdc>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_XIPC_RING_BUFFER_MISMATCH_ERROR</rc>
-    <description>process_gptr_rings(): Failed with ring buffers mismatch</description>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_XIPC_OVLY_RING_BUFFER_MISMATCH_ERROR</rc>
+    <description>Code bug: process_gptr_rings() failed with ring buffer pointer mismatch</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>RING_ID</ffdc>
     <ffdc>RING_BUF2</ffdc>
     <ffdc>RING_BUF2_LOCAL</ffdc>
     <ffdc>RING_BUF3</ffdc>
     <ffdc>RING_BUF3_LOCAL</ffdc>
-    <ffdc>OCCURRENCE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
 </hwpErrors>
