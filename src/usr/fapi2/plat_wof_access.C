@@ -347,7 +347,6 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             // Compare the fields
             if( (l_wth->core_count == l_numCores) &&
                 (l_wth->socket_power_w == l_socketPower) &&
-                (l_wth->nest_frequency_mhz == l_nestFreq) &&
                 (l_wth->sort_power_freq_mhz == l_sortFreq) )
             {
                 // Found a match
