@@ -28,9 +28,9 @@
 /// @brief configure and start the OCC and thermal cache
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
