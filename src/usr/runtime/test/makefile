@@ -40,9 +40,6 @@ MODULE = testruntime
 #@TODO RTC:178802
 #vpath %.C ../../targeting/runtime
 
-#@TODO RTC:132750
-#TESTS += runtimeattrtest.H
-
 #@TODO RTC:178802
 #EXTRAINCDIR += ${ROOTPATH}/src/include/usr/runtime/
 
