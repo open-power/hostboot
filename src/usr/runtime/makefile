@@ -34,8 +34,6 @@ MODULE = runtime
 
 VPATH += ${ROOTPATH}/src/usr/hdat
 
-#@TODO RTC:132750
-#OBJS += populate_attributes.o
 OBJS += populate_hbruntime.o
 OBJS += hdatservice.o
 OBJS += fakepayload.o
