@@ -27,10 +27,10 @@
 /// @file rcd_load.H
 /// @brief Code to support rcd_loads
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_RCD_LOAD_H_
@@ -54,7 +54,6 @@ namespace mss
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode rcd_load( const fapi2::Target<T>& i_target );
-
 
 //
 // Implement the polymorphism for rcd_load
@@ -128,9 +127,13 @@ template<>
 fapi2::ReturnCode perform_rcd_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& i_inst);
 
-//
-// Boilerplate dispatcher
-//
+///
+/// @brief Start the rcd_load_dispatch boilerplate -- specialization for recursion dispatcher
+/// @param[in] i_kind the dimm kind struct for i_target
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
 template< kind_t K, bool B = perform_rcd_load_overload<K>::available >
 inline fapi2::ReturnCode perform_rcd_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -148,7 +151,14 @@ inline fapi2::ReturnCode perform_rcd_load_dispatch( const kind_t& i_kind,
     return perform_rcd_load<K>(i_target, i_inst);
 }
 
-// DEFAULT_KIND is 0 so this is the end of the recursion
+///
+/// @brief Start the rcd_load_dispatch boilerplate -- specialization for recursion root
+/// @param[in] i_kind the dimm kind struct for i_target
+/// @param[in] i_target a fapi2::Target<TARGET_TYPE_DIMM>
+/// @param[in] i_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note DEFAULT_KIND is 0 so this is the end of the recursion
+///
 template<>
 inline fapi2::ReturnCode perform_rcd_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
