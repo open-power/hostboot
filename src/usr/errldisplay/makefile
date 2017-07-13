@@ -31,8 +31,9 @@ OBJS += errldisplay.o
 OBJS += errldisplaydata.o
 
 #PRDF Error Sigs
-include ${ROOTPATH}/src/usr/diag/prdf/common/rule/tables.mk
-OBJS += $(if $(CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY),$(prd_rule_disp_targets))
+include ${ROOTPATH}/src/usr/diag/prdf/common/rule/prdf_rule.mk
+prd_rule_disp_targets = ${PRDR_RULE_TABLES:.prf=.prf.disp.o}
+OBJS += $(if $(CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY),${prd_rule_disp_targets})
 
 include ${ROOTPATH}/config.mk
 
