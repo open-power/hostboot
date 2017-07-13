@@ -27,10 +27,10 @@
 /// @file mrs00.C
 /// @brief Run and manage the DDR4 MRS00 loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -64,21 +64,22 @@ mrs00_data::mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_write_recovery(0),
     iv_cas_latency(0)
 {
-    FAPI_TRY( mss::eff_dram_rbt(i_target, iv_read_burst_type) );
-    FAPI_TRY( mss::eff_dram_cl(i_target, iv_cas_latency) );
-    FAPI_TRY( mss::eff_dram_dll_reset(i_target, iv_dll_reset) );
-    FAPI_TRY( mss::eff_dram_tm(i_target, iv_test_mode) );
-    FAPI_TRY( mss::eff_dram_twr(i_target, iv_write_recovery) );
+    FAPI_TRY( mss::eff_dram_rbt(i_target, iv_read_burst_type), "Error in mrs00_data()" );
+    FAPI_TRY( mss::eff_dram_cl(i_target, iv_cas_latency), "Error in mrs00_data()" );
+    FAPI_TRY( mss::eff_dram_dll_reset(i_target, iv_dll_reset), "Error in mrs00_data()" );
+    FAPI_TRY( mss::eff_dram_tm(i_target, iv_test_mode), "Error in mrs00_data()" );
+    FAPI_TRY( mss::eff_dram_twr(i_target, iv_write_recovery), "Error in mrs00_data()" );
 
-    FAPI_INF("MR0 Attributes: BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: 0x%x",
-             iv_burst_length, iv_read_burst_type, iv_cas_latency, iv_test_mode, iv_dll_reset, iv_write_recovery);
+    FAPI_INF("%s MR0 Attributes: BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: 0x%x",
+             mss::c_str(i_target), iv_burst_length, iv_read_burst_type, iv_cas_latency, iv_test_mode, iv_dll_reset,
+             iv_write_recovery);
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs00", mss::c_str(i_target));
     return;
 }
 
@@ -95,7 +96,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs00_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS00 data from attributes");
+    FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS00 data from attributes", mss::c_str(i_target) );
     FAPI_TRY( mrs00(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -147,7 +148,9 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 .set_PARAMETER(WRITE_RECOVERY)
                 .set_PARAMETER_VALUE(i_data.iv_write_recovery)
                 .set_DIMM_IN_ERROR(i_target),
-                "Bad value for Write Recovery: %d (%s)", i_data.iv_write_recovery, mss::c_str(i_target));
+                "Bad value for Write Recovery: %d (%s)",
+                i_data.iv_write_recovery,
+                mss::c_str(i_target));
 
     FAPI_ASSERT((i_data.iv_cas_latency >= LOWEST_CL) && (i_data.iv_cas_latency < (LOWEST_CL + CL_COUNT)),
                 fapi2::MSS_BAD_MR_PARAMETER()
@@ -155,7 +158,9 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 .set_PARAMETER(CAS_LATENCY)
                 .set_PARAMETER_VALUE(i_data.iv_cas_latency)
                 .set_DIMM_IN_ERROR(i_target),
-                "Bad value for CAS Latency: %d (%s)", i_data.iv_cas_latency, mss::c_str(i_target));
+                "Bad value for CAS Latency: %d (%s)",
+                i_data.iv_cas_latency,
+                mss::c_str(i_target));
 
     io_inst.arr0.insertFromRight<A0, 2>(i_data.iv_burst_length);
     io_inst.arr0.writeBit<A3>(i_data.iv_read_burst_type);
@@ -177,7 +182,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A10>(l_wr.getBit<6>());
     io_inst.arr0.writeBit<A9>(l_wr.getBit<7>());
 
-    FAPI_INF("MR0: 0x%016llx", uint64_t(io_inst.arr0));
+    FAPI_INF("%s MR0: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
