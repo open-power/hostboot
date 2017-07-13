@@ -27,10 +27,10 @@
 <!-- @file memory_mss_draminit.xml -->
 <!-- @brief Error xml for draminit -->
 <!-- -->
-<!-- *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 2 -->
+<!-- *HWP Level: 3-->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -39,41 +39,53 @@
 <hwpError>
   <rc>RC_MSS_UNKNOWN_DIMM</rc>
   <description>
-    This DIMM's type or DRAM generation are not supported by the system
+    This DIMM's type (RDIMM, LRDIMM, etc) or DRAM generation (DDR3, DDR4, etc) are not supported by the system
   </description>
   <ffdc>DIMM_TYPE</ffdc>
   <ffdc>DRAM_GEN</ffdc>
   <callout>
-    <target>DIMM_IN_ERROR</target>
+    <procedure>MEMORY_PLUGGING_ERROR</procedure>
     <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>DIMM_IN_ERROR</target>
+    <priority>LOW</priority>
   </callout>
   <deconfigure>
     <target>DIMM_IN_ERROR</target>
   </deconfigure>
-  <gard>
-    <target>DIMM_IN_ERROR</target>
-  </gard>
 </hwpError>
 
 
 <hwpError>
   <rc>RC_MSS_BAD_MR_PARAMETER</rc>
   <description>
-    A bad parameter was passed to MR processing
+     A bad parameter was passed to MR processing
+     This is probably due to a bad value received from the SPD (e.g. unsupported cas latency)
+     Could be a code error
   </description>
   <ffdc>MR_NUMBER</ffdc>
   <ffdc>PARAMETER</ffdc>
   <ffdc>PARAMETER_VALUE</ffdc>
   <callout>
-    <target>DIMM_IN_ERROR</target>
+    <procedure>MEMORY_PLUGGING_ERROR</procedure>
     <priority>HIGH</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <target>DIMM_IN_ERROR</target>
+    <priority>LOW</priority>
   </callout>
   <deconfigure>
     <target>DIMM_IN_ERROR</target>
   </deconfigure>
-  <gard>
-    <target>DIMM_IN_ERROR</target>
-  </gard>
 </hwpError>
 
 </hwpErrors>
