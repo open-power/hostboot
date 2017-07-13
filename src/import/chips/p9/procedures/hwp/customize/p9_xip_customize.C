@@ -216,13 +216,14 @@ fapi_try_exit:
 
 
 // Function: get_overlays_ring()
+// @brief: This function is used to get gptr ring from overlays section
 //
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
 // void*     i_overlaysSection:  Pointer to extracted DD section in hw image
 // RingID    i_ringId:           GPTR ring id
-// void*     io_ringBuf2:        Ring work buffer
-// void*     io_ringBuf3:        Ring work buffer
+// void*     io_ringBuf2:        Work buffer which contains RS4 ring on return.
+// void*     io_ringBuf3:        Work buffer which contains data+care raw rings on return.
 // uint32_t* o_ovlyUncmpSize     Overlay/gptr uncompressed ring size
 #ifdef WIN32
 int get_overlays_ring(
@@ -239,14 +240,18 @@ fapi2::ReturnCode get_overlays_ring(
 {
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    int l_rc = 0;
+    int l_rc = INFRASTRUCT_RC_SUCCESS;
     uint8_t* data = NULL;
     uint8_t* care = NULL;
-    uint16_t l_unusedParam1 = 0;    // For dd level
-    uint8_t  l_unusedParam2 = 0;    // For instance id
-    uint32_t l_unusedParam3;        // For ringBlockSize
     uint32_t l_ovlyUncmpSize = 0;
-    size_t byteCopy;
+    size_t byteCopy = 0;
+
+    // As we'll be using tor api tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
+    // to identify TOR layout for overlays/overrides sections we have to define
+    // following variables (though unused in this context) to support the i/f.
+    uint16_t l_ddLevel = 0;    // Unused param (dd level)
+    uint8_t  l_instanceId = 0; // Unused param (instance id)
+    uint32_t l_ringBlockSize = 0xFFFFFFFF;  // Unused param (ringBlockSize)
 
     FAPI_DBG("Entering get_overlays_ring");
 
@@ -254,73 +259,71 @@ fapi2::ReturnCode get_overlays_ring(
     l_rc = P9_TOR::tor_get_single_ring(
                i_overlaysSection,
                P9_XIP_MAGIC_SEEPROM,
-               l_unusedParam1,
+               l_ddLevel,
                i_ringId,
                P9_TOR::SBE,
                OVERLAY,
-               l_unusedParam2,
+               l_instanceId,
                io_ringBuf2,
-               l_unusedParam3);
+               l_ringBlockSize);
 
-    if (l_rc)
+    if (l_rc == INFRASTRUCT_RC_SUCCESS)
     {
-        if (l_rc == TOR_RING_NOT_FOUND)
-        {
-            *io_ringBuf2 = NULL;
-            *io_ringBuf3 = NULL;
+        FAPI_DBG("Successfully found Gptr ringId=0x%x of iv_size=%d bytes", i_ringId,
+                 be16toh(((CompressedScanData*)(*io_ringBuf2))->iv_size));
 
-            FAPI_DBG("GPTR ring %d not found in overlays section", i_ringId);
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            goto fapi_try_exit;
-        }
-        else
-        {
-            FAPI_ASSERT( false,
-                         fapi2::XIPC_GPTR_GET_SINGLE_RING_ERROR().
-                         set_CHIP_TARGET(i_procTarget).
-                         set_RING_ID(i_ringId).
-                         set_CHIPLET_ID(0xff).
-                         set_LOCAL_RC(l_rc).
-                         set_OCCURRENCE(2),
-                         "tor_get_single_ring() for gptr: Failed w/rc=%i for "
-                         "ringId=0x%02X, chipletId=0xff, occurrence=2 ",
-                         l_rc, i_ringId );
-        }
+        //Decompress Gptr ring
+        l_rc = rs4_decompress(
+                   &data,
+                   &care,
+                   &l_ovlyUncmpSize,
+                   (CompressedScanData*)(*io_ringBuf2));
+
+        FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
+                     fapi2::XIPC_RS4_DECOMPRESS_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(i_ringId).
+                     set_CHIPLET_ID(0xff).
+                     set_LOCAL_RC(l_rc).
+                     set_OCCURRENCE(2),
+                     "rs4_decompress() failed w/rc=%i for "
+                     "ringId=0x%x, chipletId=0xff, occurrence=2 ",
+                     l_rc, i_ringId );
+
+        // Copy data and care bits into io_ringBuf3
+        byteCopy = (l_ovlyUncmpSize % 8 == 0 ? l_ovlyUncmpSize / 8 : (l_ovlyUncmpSize / 8) + 1);
+        memcpy(*io_ringBuf3, data, byteCopy);
+        memcpy(((uint8_t*)(*io_ringBuf3) + MAX_RING_BUF_SIZE / 2), care, byteCopy);
+
+        // For debug and testing
+        FAPI_DBG("Overlay raw data+care ring size=%d bits", l_ovlyUncmpSize);
+        print_raw_ring( data, l_ovlyUncmpSize);
+        print_raw_ring( care, l_ovlyUncmpSize);
+
+        // Copy the gptr uncompressed size
+        *o_ovlyUncmpSize = l_ovlyUncmpSize;
     }
+    else
+    {
+        FAPI_ASSERT( l_rc == TOR_RING_NOT_FOUND,
+                     fapi2::XIPC_GPTR_GET_SINGLE_RING_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(i_ringId).
+                     set_CHIPLET_ID(0xff).
+                     set_LOCAL_RC(l_rc).
+                     set_OCCURRENCE(2),
+                     "tor_get_single_ring() for gptr: Failed w/rc=%i for "
+                     "ringId=0x%x, chipletId=0xff, occurrence=2 ",
+                     l_rc, i_ringId );
 
-    FAPI_DBG("Successfully found Gptr ring:=0x%02X of size:=%d bytes", i_ringId,
-             be16toh(((CompressedScanData*)(*io_ringBuf2))->iv_size));
+        *io_ringBuf2 = NULL;
+        *io_ringBuf3 = NULL;
 
-    //Decompress Gptr ring
-    l_rc = rs4_decompress(
-               &data,
-               &care,
-               &l_ovlyUncmpSize,
-               (CompressedScanData*)(*io_ringBuf2));
-
-    FAPI_ASSERT( l_rc == 0,
-                 fapi2::XIPC_RS4_DECOMPRESS_ERROR().
-                 set_CHIP_TARGET(i_procTarget).
-                 set_RING_ID(i_ringId).
-                 set_CHIPLET_ID(0xff).
-                 set_LOCAL_RC(l_rc).
-                 set_OCCURRENCE(2),
-                 "rs4_decompress() for gptr: Failed w/rc=%i for "
-                 "ringId=0x%02X, chipletId=0xff, occurrence=2 ",
-                 l_rc, i_ringId );
-
-    // Copy data and care bits into io_ringBuf3
-    byteCopy = (l_ovlyUncmpSize % 8 == 0 ? l_ovlyUncmpSize / 8 : (l_ovlyUncmpSize / 8) + 1);
-    memcpy(*io_ringBuf3, data, byteCopy);
-    memcpy(((uint8_t*)(*io_ringBuf3) + MAX_RING_BUF_SIZE / 2), care, byteCopy);
-
-    // For debug and testing
-    FAPI_DBG("Overlay ring: data care (size:%d bits)", l_ovlyUncmpSize);
-    print_raw_ring( data, l_ovlyUncmpSize);
-    print_raw_ring( care, l_ovlyUncmpSize);
-
-    // Copy the gptr uncompressed size
-    *o_ovlyUncmpSize = l_ovlyUncmpSize;
+        // Return success here if gptr rings not found as its not an error.
+        // Not finding gptr rings is expected in most cases.
+        FAPI_DBG("GPTR ring %d not found in overlays section", i_ringId);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exiting get_overlays_ring");
@@ -329,13 +332,14 @@ fapi_try_exit:
 
 
 // Function: apply_overlays_ring()
+// @brief: This function is used to apply the overlays logic to gptr rings
+// found in overlays section.
 //
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
-// void*    io_vpdRing:     VPD ring buffer
-// void*    i_ringBuf2:     Ring work buffer
-// void*    i_ringBuf3:     Ring work buffer
-// uint32_t o_ovlyUncmpSize Overlay/gptr uncompressed ring size
+// void*    io_vpdRing:      Contains Mvpd RS4 ring on input and final Vpd RS4 ring on output.
+// void*    i_ovlyRawRing:   Raw data+care overlays ring
+// uint32_t i_ovlyUncmpSize: Overlay/gptr uncompressed ring size
 #ifdef WIN32
 int apply_overlays_ring(
     int i_procTarget,
@@ -343,13 +347,12 @@ int apply_overlays_ring(
 fapi2::ReturnCode apply_overlays_ring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    void* io_vpdRing,
-    void* i_ringBuf2,
-    void* i_ringBuf3,
+    void*    io_vpdRing,
+    void*    i_ovlyRawRing,
     uint32_t i_ovlyUncmpSize)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    int l_rc = 0;
+    int l_rc = INFRASTRUCT_RC_SUCCESS;
     uint8_t* dataVpd = NULL;
     uint8_t* careVpd = NULL;
     uint8_t* dataOvly = NULL;
@@ -360,8 +363,8 @@ fapi2::ReturnCode apply_overlays_ring(
     FAPI_DBG("Entering apply_overlays_ring");
 
     // Get the data & care for Gptr/overlays ring
-    dataOvly = (uint8_t*)i_ringBuf3;
-    careOvly = (uint8_t*)i_ringBuf3 + MAX_RING_BUF_SIZE / 2;
+    dataOvly = (uint8_t*)i_ovlyRawRing;
+    careOvly = (uint8_t*)i_ovlyRawRing + MAX_RING_BUF_SIZE / 2;
 
     FAPI_DBG("Decompress vpd ring");
     l_rc = rs4_decompress(
@@ -370,7 +373,7 @@ fapi2::ReturnCode apply_overlays_ring(
                &vpdUncmpSize,
                (CompressedScanData*)io_vpdRing);
 
-    FAPI_ASSERT( l_rc == 0,
+    FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_RS4_DECOMPRESS_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_RING_ID(0xff).
@@ -385,13 +388,13 @@ fapi2::ReturnCode apply_overlays_ring(
     print_raw_ring( dataVpd, vpdUncmpSize);
     print_raw_ring( careVpd, vpdUncmpSize);
 
-    // Compare uncompressed vpd and overlays ring sizes
+    // Compare uncompressed Mvpd and overlays ring sizes
     FAPI_ASSERT( i_ovlyUncmpSize == vpdUncmpSize,
-                 fapi2::XIPC_GPTR_RING_SIZES_MISMATCH_ERROR().
+                 fapi2::XIPC_MVPD_OVLY_RAW_RING_SIZE_MISMATCH_ERROR().
                  set_CHIP_TARGET(i_procTarget).
-                 set_VPD_SIZE(vpdUncmpSize).
+                 set_MVPD_SIZE(vpdUncmpSize).
                  set_OVLY_SIZE(i_ovlyUncmpSize),
-                 "VPD (size:%d) and overlay (size:%d) rings sizes don't match.",
+                 "MVPD raw size (=%d) and overlay raw size (=%d) don't match.",
                  vpdUncmpSize, i_ovlyUncmpSize);
 
     // Perform Overlay operation:
@@ -431,6 +434,8 @@ fapi2::ReturnCode apply_overlays_ring(
     // Processing remainder of data & care bits (mod 8)
     if (vpdUncmpSize % 8)
     {
+        i = (int)vpdUncmpSize / 8;
+
         careOvly[i] &= ~(0xFF << (8 - (vpdUncmpSize % 8)));
 
         if (careOvly[i] > 0)
@@ -466,8 +471,8 @@ fapi2::ReturnCode apply_overlays_ring(
                dataVpd,
                careVpd,
                vpdUncmpSize,
-               ((CompressedScanData*)io_vpdRing)->iv_scanAddr,
-               ((CompressedScanData*)io_vpdRing)->iv_ringId);
+               be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr),
+               be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId));
 
     FAPI_ASSERT( l_rc == 0,
                  fapi2::XIPC_RS4_COMPRESS_ERROR().
@@ -489,14 +494,14 @@ fapi_try_exit:
 
 
 // Function: process_gptr_rings()
+// @brief: This function is used to check and process gptr rings.
 //
 // Parameter list:
 // const fapi2::Target &i_target: Processor chip target.
-// RingIdList i_ring:             GPTR ring id
 // void*      i_overlaysSection:  Pointer to extracted DD section in hw image
-// void*      io_vpdRing:         VPD ring buffer
-// void*      io_ringBuf2:        Ring work buffer(overlays)
-// void*      io_ringBuf3:        Ring work buffer(mvpd)
+// void*      io_vpdRing:         Has Mvpd RS4 ring on input and final Vpd RS4 ring on output
+// void*      io_ringBuf2:        Ring work buffer(used for RS4 overlays ring)
+// void*      io_ringBuf3:        Ring work buffer(used for raw data+care overlays ring)
 #ifdef WIN32
 int process_gptr_rings(
     int i_procTarget,
@@ -504,7 +509,6 @@ int process_gptr_rings(
 fapi2::ReturnCode process_gptr_rings(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    const RingIdList i_ring,
     void* i_overlaysSection,
     void* io_vpdRing,
     void* io_ringBuf2,
@@ -512,63 +516,80 @@ fapi2::ReturnCode process_gptr_rings(
 {
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    uint32_t ovlyUncmpSize = 0;
+    uint32_t l_ovlyUncmpSize = 0;
+    RingID   l_vpdRingId   = (RingID)be16toh(((CompressedScanData*)io_vpdRing)->iv_ringId);
+    uint32_t l_vpdScanAddr = be32toh(((CompressedScanData*)io_vpdRing)->iv_scanAddr);
 
     FAPI_DBG("Entering process_gptr_rings");
-    FAPI_DBG("Process GPTR ring %d ", i_ring.ringId);
+    FAPI_DBG("Processing GPTR ringId=0x%x", l_vpdRingId);
 
-    // Get Gptr ring from overlay section
-    void* l_ringBuf2 = io_ringBuf2;
-    void* l_ringBuf3 = io_ringBuf3;
+    // Used for getting Gptr ring from overlays section
+    void* l_ovlyRs4Ring = io_ringBuf2;
+    void* l_ovlyRawRing = io_ringBuf3;
 
-    l_fapiRc = get_overlays_ring(
-                   i_procTarget,
-                   i_overlaysSection,
-                   i_ring.ringId,
-                   &l_ringBuf2,
-                   &l_ringBuf3,
-                   &ovlyUncmpSize);
+    FAPI_TRY( get_overlays_ring(
+                  i_procTarget,
+                  i_overlaysSection,
+                  l_vpdRingId,
+                  &l_ovlyRs4Ring, // Has RS4 ring on return
+                  &l_ovlyRawRing, // Has raw data+care ring on return
+                  &l_ovlyUncmpSize),
+              "get_overlays_ring() failed w/rc=0x%08x",
+              (uint32_t)current_err );
 
-    if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
+    // Check whether both ovlyRs4/RawRing ring pointers match the original input buffer
+    // pointers which would verify that an gptr overlays ring was found
+    if (l_ovlyRs4Ring == io_ringBuf2 && l_ovlyRawRing == io_ringBuf3)
     {
-        FAPI_DBG("get_overlays_ring() failed w/rc=0x%08x", (uint64_t)l_fapiRc);
-        fapi2::current_err = l_fapiRc;
-        goto fapi_try_exit;
-    }
-
-    // Check whether overlays/gptr ring was found or not (=NULL)
-    if (l_ringBuf2 == NULL && l_ringBuf3 == NULL)
-    {
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        goto fapi_try_exit;
-    }
-    else if (l_ringBuf2 != io_ringBuf2 || l_ringBuf3 != io_ringBuf3)
-    {
-        FAPI_ASSERT( false,
-                     fapi2::XIPC_RING_BUFFER_MISMATCH_ERROR().
+        // Check that RS4 headers of the Mvpd and overlays rings match
+        FAPI_ASSERT( ( ((CompressedScanData*)io_vpdRing)->iv_ringId ==
+                       ((CompressedScanData*)l_ovlyRs4Ring)->iv_ringId &&
+                       ((CompressedScanData*)io_vpdRing)->iv_scanAddr ==
+                       ((CompressedScanData*)l_ovlyRs4Ring)->iv_scanAddr ),
+                     fapi2::XIPC_MVPD_OVLY_RING_HEADER_MISMATCH_ERROR().
                      set_CHIP_TARGET(i_procTarget).
-                     set_RING_ID(i_ring.ringId).
-                     set_RING_BUF2(io_ringBuf2).
-                     set_RING_BUF2_LOCAL(l_ringBuf2).
-                     set_RING_BUF3(io_ringBuf3).
-                     set_RING_BUF3_LOCAL(l_ringBuf3).
-                     set_OCCURRENCE(1),
-                     "process_gptr_rings(): Failed with ring buffers mismatch");
+                     set_MVPD_RING_ID(l_vpdRingId).
+                     set_OVLY_RING_ID(be16toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_ringId)).
+                     set_MVPD_SCAN_ADDR(l_vpdScanAddr).
+                     set_OVLY_SCAN_ADDR(be32toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_scanAddr)),
+                     "MVPD and Ovly RS4 headers don't match:\n"
+                     " Mvpd ringId: 0x%x\n"
+                     " Ovly ringId: 0x%x\n"
+                     " Mvpd scanAddr: 0x%08x\n"
+                     " Ovly scanAddr: 0x%08x",
+                     l_vpdRingId,
+                     be16toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_ringId),
+                     l_vpdScanAddr,
+                     be32toh(((CompressedScanData*)l_ovlyRs4Ring)->iv_scanAddr) );
+
+        // Apply overlays operations
+        FAPI_TRY( apply_overlays_ring(
+                      i_procTarget,
+                      io_vpdRing,
+                      l_ovlyRawRing,
+                      l_ovlyUncmpSize),
+                  "apply_overlays_ring() failed w/rc=0x%08x for ringId=0x%x",
+                  (uint32_t)current_err, l_vpdRingId);
     }
-
-    // Apply overlays operations
-    l_fapiRc = apply_overlays_ring(
-                   i_procTarget,
-                   io_vpdRing,
-                   io_ringBuf2,
-                   io_ringBuf3,
-                   ovlyUncmpSize);
-
-    if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
+    else
     {
-        FAPI_DBG("apply_overlays_ring() failed w/rc=0x%08x", (uint64_t)l_fapiRc);
-        fapi2::current_err = l_fapiRc;
-        goto fapi_try_exit;
+        // Next, we check that the overlay buffer pointers are NULL which verifies that
+        // no overlays ring was found. This is normal and is NOT an error.  However, if
+        // the overlay buffer pointers neither match the original input work buffers
+        // (which they don't if we here in this spot)  AND if they are not NULL either,
+        // then that is a code bug error case.
+        FAPI_ASSERT( (l_ovlyRs4Ring == NULL && l_ovlyRawRing == NULL),
+                     fapi2::XIPC_OVLY_RING_BUFFER_MISMATCH_ERROR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_RING_ID(l_vpdRingId).
+                     set_RING_BUF2(io_ringBuf2).
+                     set_RING_BUF2_LOCAL(l_ovlyRs4Ring).
+                     set_RING_BUF3(io_ringBuf3).
+                     set_RING_BUF3_LOCAL(l_ovlyRawRing),
+                     "process_gptr_rings(): Code bug: Failed with ring buffer pointer mismatch");
+
+        // Return success
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
 fapi_try_exit:
@@ -713,22 +734,19 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
 
         // Check for Gptr rings (ovly-gptr) in overlays section and if found
         // process it over mvpd-gptr ring.
-        if (i_ring.vpdRingClass == VPD_RING_CLASS_GPTR)
+        if (i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_NEST ||
+            i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
+            i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EX ||
+            i_ring.vpdRingClass == VPD_RING_CLASS_GPTR_EC)
         {
-            l_fapiRc = process_gptr_rings(
-                           i_procTarget,
-                           i_ring,
-                           i_overlaysSection,
-                           i_vpdRing,
-                           i_ringBuf2,
-                           i_ringBuf3);
-
-            if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)
-            {
-                FAPI_DBG("process_gptr_rings() failed w/rc=0x%08x", (uint64_t)l_fapiRc);
-                fapi2::current_err = l_fapiRc;
-                goto fapi_try_exit;
-            }
+            FAPI_TRY( process_gptr_rings(
+                          i_procTarget,
+                          i_overlaysSection,
+                          i_vpdRing,
+                          i_ringBuf2,
+                          i_ringBuf3),
+                      "process_gptr_rings() failed w/rc=0x%08x",
+                      (uint32_t)current_err );
 
             // Update vpdRingSize to new value if any
             l_vpdRingSize = be16toh(((CompressedScanData*)i_vpdRing)->iv_size);
@@ -739,6 +757,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
         //       Also fix p9_mvpd_ring_funcs.C to look for entire RS4_MAGIC string.
         //       Actually, do all the above in connection with RS4 header
         //       shrinkage (RTC158101 and RTC159801).
+        // This TODO item now captured in RTC177327.
         ((CompressedScanData*)i_vpdRing)->iv_magic = htobe16(RS4_MAGIC);
 
         // Initialize variable to check for redundant ring.
@@ -755,7 +774,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      set_LOCAL_RC(l_rc).
                      set_OCCURRENCE(1),
                      "rs4_redundant: Failed w/rc=%i for "
-                     "ringId=0x%02X, chipletId=0x%02X, occurrence=1 ",
+                     "ringId=0x%x, chipletId=0x%02X, occurrence=1 ",
                      l_rc, i_ring.ringId, i_chipletId );
 
         // Regarding Gptr rings processing:
@@ -767,7 +786,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             // Update for ring found in mvpd contains redundant data
             io_ringStatusInMvpd = RING_REDUNDANT;
 
-            FAPI_DBG("Skipping redundant VPD ring: ringId=0x%02X, chipletId=0x%02X ", i_ring.ringId, i_chipletId);
+            FAPI_DBG("Skipping redundant VPD ring: ringId=0x%x, chipletId=0x%02X ", i_ring.ringId, i_chipletId);
             fapi2::current_err = RC_MVPD_RING_REDUNDANT_DATA;
             goto fapi_try_exit;
         }
@@ -838,9 +857,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                     FAPI_ASSERT( false,
                                  fapi2::XIPC_TOR_APPEND_RING_FAILED().
                                  set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc),
-                                 "tor_append_ring() failed w/l_rc=%d",
-                                 l_rc );
+                                 set_TOR_RC(l_rc).
+                                 set_RING_ID(i_ring.ringId).
+                                 set_OCCURRENCE(1),
+                                 "tor_append_ring() failed in HB_SBE phase w/l_rc=%d for ringId=0x%x",
+                                 l_rc, i_ring.ringId );
                 }
 
                 break;
@@ -868,9 +889,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                     FAPI_ASSERT( false,
                                  fapi2::XIPC_TOR_APPEND_RING_FAILED().
                                  set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc),
-                                 "tor_append_ring() failed w/l_rc=%d",
-                                 l_rc );
+                                 set_TOR_RC(l_rc).
+                                 set_RING_ID(i_ring.ringId).
+                                 set_OCCURRENCE(2),
+                                 "tor_append_ring() failed in RT_CME phase w/l_rc=%d for ringId=0x%x",
+                                 l_rc, i_ring.ringId );
                 }
 
                 FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
@@ -900,9 +923,11 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                     FAPI_ASSERT( false,
                                  fapi2::XIPC_TOR_APPEND_RING_FAILED().
                                  set_CHIP_TARGET(i_procTarget).
-                                 set_TOR_RC(l_rc),
-                                 "tor_append_ring() failed w/l_rc=%d",
-                                 l_rc );
+                                 set_TOR_RC(l_rc).
+                                 set_RING_ID(i_ring.ringId).
+                                 set_OCCURRENCE(3),
+                                 "tor_append_ring() failed in RT_SGPE phase w/l_rc=%d for ringId=0x%x",
+                                 l_rc, i_ring.ringId );
                 }
 
                 FAPI_DBG("(After tor_append) io_ringSectionSize = %d", io_ringSectionSize);
@@ -1001,7 +1026,7 @@ fapi2::ReturnCode resolve_gptr_overlays(
 
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     P9XipSection l_xipSection;
-    int      l_rc = 0;
+    int      l_rc = INFRASTRUCT_RC_SUCCESS;
     uint8_t  l_nimbusDd1 = 1;
     bool     l_bDdSupport = false;
 
@@ -1024,7 +1049,7 @@ fapi2::ReturnCode resolve_gptr_overlays(
     // Second determine if there's no overlays support. If no, continue, else err out.
     l_rc = p9_xip_dd_section_support(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, l_bDdSupport);
 
-    FAPI_ASSERT( l_rc == 0,
+    FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_XIP_API_MISC_ERROR().
                  set_CHIP_TARGET(i_procTarget).
                  set_XIP_RC(l_rc).
@@ -1166,8 +1191,14 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
             if ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EQ_INS &&
                  l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EX_INS &&
                  l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_EC_INS &&
-                 ( l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR ||
-                   ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR &&
+                 ( (l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR_NEST &&
+                    l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR_EQ &&
+                    l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR_EX &&
+                    l_ringIdList[iRing].vpdRingClass != VPD_RING_CLASS_GPTR_EC) ||
+                   ( (l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_NEST ||
+                      l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
+                      l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EX ||
+                      l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EC ) &&
                      bGptrMvpdSupport ) ) )
             {
                 // We use ring.instanceIdMax column to govern max value of instanceIdMax (i.e., the
@@ -1191,12 +1222,17 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                     // - Fetch only EC VPD rings for CME.
                     // - Fetch only EX+EQ VPD rings for SGPE.
 
-                    if ( i_sysPhase == SYSPHASE_HB_SBE ||
-                         (i_sysPhase == SYSPHASE_RT_CME  &&
-                          l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EC) ||
-                         (i_sysPhase == SYSPHASE_RT_SGPE &&
-                          (l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX ||
-                           l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EQ)) )
+                    if ( i_sysPhase == SYSPHASE_HB_SBE   ||
+                         ( i_sysPhase == SYSPHASE_RT_CME &&
+                           ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EC ||
+                             ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EC &&
+                               bGptrMvpdSupport ) ) )   ||
+                         ( i_sysPhase == SYSPHASE_RT_SGPE &&
+                           ( l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EX ||
+                             l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_EQ ||
+                             ( (l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EQ ||
+                                l_ringIdList[iRing].vpdRingClass == VPD_RING_CLASS_GPTR_EX) &&
+                               bGptrMvpdSupport ) ) ) )
                     {
                         l_fapiRc = _fetch_and_insert_vpd_rings (
                                        i_procTarget,
@@ -2479,8 +2515,8 @@ ReturnCode p9_xip_customize (
                          set_CHIP_TARGET(i_procTarget).
                          set_TOR_RC(l_rc).
                          set_SYSPHASE(i_sysPhase),
-                         "tor_get_block_of_rings() failed w/rc=0x%08X",
-                         (uint32_t)l_rc );
+                         "tor_get_block_of_rings() failed w/rc=0x%08X in sysPhase=%d",
+                         (uint32_t)l_rc, i_sysPhase );
 
             FAPI_DBG("Size of .rings section before VPD update: %d", io_ringSectionBufSize);
 
