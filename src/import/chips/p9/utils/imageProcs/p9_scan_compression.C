@@ -992,10 +992,7 @@ rs4_extract_cmsk(CompressedScanData* i_rs4,
     return SCAN_COMPRESSION_OK;
 }
 
-
-// This function prints out the raw decompressed ring content in the same
-//   format that it appears as in EKB's ifCompiler generated raw ring
-//   files, i.e. *.bin.srd (DATA) and *.bin.srd.bitsModified (CARE).
+// Prints out the raw decompressed RS4 ring content
 void print_raw_ring( uint8_t*  data,
                      uint32_t  bits )
 {
