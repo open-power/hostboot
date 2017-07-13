@@ -27,7 +27,7 @@
 /// @file rank.H
 /// @brief Do things with or for ranks
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -560,7 +560,8 @@ inline fapi2::ReturnCode map_rank_pair_from_phy( const fapi2::Target<fapi2::TARG
                 fapi2::MSS_NO_DIMM_FOR_MAPPING()
                 .set_FUNCTION(RANK_PAIR_FROM_PHY)
                 .set_MCA_TARGET(i_target),
-                "Tried to map rank pairs on a port without any DIMMs");
+                "%s Tried to map rank pairs on a port without any DIMMs",
+                mss::c_str(i_target));
 
     // copy over so we get the valid bits
     io_data = i_rp_reg_value;
@@ -727,7 +728,7 @@ inline fapi2::ReturnCode read_rank_pair_reg( const fapi2::Target<T>& i_target, f
     fapi2::buffer<uint64_t> l_buf;
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
     FAPI_TRY( mss::getScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
-    FAPI_INF("read_rank_pair_reg: 0x%016lx", l_buf);
+    FAPI_INF("%s read_rank_pair_reg: 0x%016lx", mss::c_str(i_target), l_buf);
     FAPI_TRY( map_rank_pair_from_phy(i_target, l_buf, o_data) );
 fapi_try_exit:
     return fapi2::current_err;
@@ -750,7 +751,7 @@ inline fapi2::ReturnCode write_rank_pair_reg( const fapi2::Target<T>& i_target, 
     static_assert((N < TT::NUM_RANK_PAIR_REGS), "Rank pair register index failed range check");
     FAPI_TRY( map_rank_pair_to_phy(i_target, i_data, l_buf) );
     FAPI_TRY( mss::putScom(i_target, TT::RANK_PAIR_REGS[N], l_buf) );
-    FAPI_INF("write_rank_pair_reg: 0x%016lx", l_buf);
+    FAPI_INF("%s write_rank_pair_reg: 0x%016lx", mss::c_str(i_target), l_buf);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -767,7 +768,7 @@ template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
 inline fapi2::ReturnCode read_rank_group( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::RANK_GROUP, o_data) );
-    FAPI_INF("read_rank_group: 0x%016lx", o_data);
+    FAPI_INF("%s read_rank_group: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -784,7 +785,7 @@ template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
 inline fapi2::ReturnCode write_rank_group( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::RANK_GROUP, i_data) );
-    FAPI_INF("write_rank_group: 0x%016lx", i_data);
+    FAPI_INF("%s write_rank_group: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -801,7 +802,7 @@ template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
 inline fapi2::ReturnCode read_rank_group_ext( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::RANK_GROUP_EXT, o_data) );
-    FAPI_INF("read_rank_group_ext: 0x%016lx", o_data);
+    FAPI_INF("%s read_rank_group_ext: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -818,7 +819,7 @@ template< fapi2::TargetType T, typename TT = rankPairTraits<T, 0> >
 inline fapi2::ReturnCode write_rank_group_ext( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::RANK_GROUP_EXT, i_data) );
-    FAPI_INF("write_rank_group_ext: 0x%016lx", i_data);
+    FAPI_INF("%s write_rank_group_ext: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -1132,8 +1133,8 @@ fapi2::ReturnCode set_ranks_in_pair( const fapi2::Target<T>& i_target,
                  .set_RANK_SIZE(i_ranks.size())
                  .set_MCA_TARGET(i_target)
                  .set_FUNCTION(SET_RANKS_IN_PAIR),
-                 "%s Invalid vector of ranks passed in ",
-                 mss::c_str(i_target));
+                 "%s Invalid vector of ranks passed in (%d) ",
+                 mss::c_str(i_target), i_ranks.size());
 
     // Use the reg API here so we get the PHY to MC rank conversion
     FAPI_TRY( (mss::rank::read_rank_pair_reg< RP, 0 >(i_target, l_reg)) );
