@@ -27,10 +27,10 @@
 /// @file p9_mss_draminit_mc.C
 /// @brief Initialize the memory controller to take over the DRAM
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -67,13 +67,8 @@ extern "C"
                 continue;
             }
 
-            // Don't do this yet - leverage the sim inits for the moment
-#if 0
-            // All the scominit for this MCA
-            l_mc.scominit(p);
-#endif
             // Setup the MC port/dimm address translation registers
-            FAPI_TRY( mss::mc::setup_xlate_map(p) );
+            FAPI_TRY( mss::mc::setup_xlate_map(p), "%s Failed setup_xlate_map", mss::c_str(i_target) );
 
             // Setup the read_pointer_delay
             // TK: Do we need to do this in general or is this a place holder until the
@@ -112,40 +107,42 @@ extern "C"
 
             // Reset addr_mux_sel to “0” to allow the MCA to take control of the DDR interface over from CCS.
             // (Note: this step must remain in this procedure to ensure that data path is placed into mainline
-            // mode prior to running memory diagnostics. This step maybe superfluous but not harmful.)
+            // mode prior to running memory diagnostics. This step may be superfluous but not harmful.)
             // Note: addr_mux_sel is set low in p9_mss_draminit(), however that might be a work-around so we
             // set it low here kind of like belt-and-suspenders. BRS
-            FAPI_TRY( mss::change_addr_mux_sel(p, mss::LOW) );
+            FAPI_TRY( mss::change_addr_mux_sel(p, mss::LOW),
+                      "%s Failed to change_addr_mux_sel", mss::c_str(i_target) );
 
             // Re-enable port fails. Turned off in draminit_training
-            FAPI_TRY( mss::change_port_fail_disable(p, mss::OFF ) );
+            FAPI_TRY( mss::change_port_fail_disable(p, mss::OFF ),
+                      "%s Failed to change_port_fail_disable", mss::c_str(i_target) );
 
             // MC work around for OE bug (seen in periodics + PHY)
 #ifndef REMOVE_FOR_DD2
             // Turn on output-enable always on. Shelton tells me they'll fix for DD2
-            FAPI_TRY( mss::change_oe_always_on(p, mss::ON ) );
+            FAPI_TRY( mss::change_oe_always_on(p, mss::ON ), "%s Failed to change_oe_always_on", mss::c_str(i_target) );
 #endif
             // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
             // Step Two.2: Enable address inversion on each MBA for ALL CARDS
 
             // Start the refresh engines by setting MBAREF0Q(0) = “1”. Note that the remaining bits in
             // MBAREF0Q should retain their initialization values.
-            FAPI_TRY( mss::change_refresh_enable(p, mss::HIGH) );
+            FAPI_TRY( mss::change_refresh_enable(p, mss::HIGH), "%s Failed change_refresh_enable", mss::c_str(i_target) );
 
             // Power management is handled in the init file. (or should be BRS)
 
             // Enabling periodic calibration
-            FAPI_TRY( mss::enable_periodic_cal(p) );
+            FAPI_TRY( mss::enable_periodic_cal(p), "%s Failed enable_periodic_cal", mss::c_str(i_target) );
 
             // Step Six: Setup Control Bit ECC
-            FAPI_TRY( mss::enable_read_ecc(p) );
+            FAPI_TRY( mss::enable_read_ecc(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
 
             // apply marks from MVPD
-            FAPI_TRY( mss::apply_mark_store(p) );
+            FAPI_TRY( mss::apply_mark_store(p), "%s Failed enable_read_ecc", mss::c_str(i_target) );
         }
 
         // At this point the DDR interface must be monitored for memory errors. Memory related FIRs should be unmasked.
-        FAPI_TRY( mss::unmask::after_draminit_mc(i_target) );
+        FAPI_TRY( mss::unmask::after_draminit_mc(i_target), "%s Failed after_draminit_mc", mss::c_str(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit MC");
