@@ -83,14 +83,17 @@ enum VpdKeyword
 enum VpdRingClass
 {
     VPD_RING_CLASS_NEST = 0,   // Indicates NEST [common] rings, except GPTR #G rings.
-    VPD_RING_CLASS_GPTR = 1,   // Indicates GPTR #G [common]rings
-    VPD_RING_CLASS_EQ = 2,     // Indicates EQ [common] rings
-    VPD_RING_CLASS_EX = 3,     // Indicates EX [common] rings
-    VPD_RING_CLASS_EC = 4,     // Indicates EC [common] rings
-    VPD_RING_CLASS_EQ_INS = 5, // Indicates EQ instance rings
-    VPD_RING_CLASS_EX_INS = 6, // Indicates EX instance rings
-    VPD_RING_CLASS_EC_INS = 7, // Indicates EC instance rings
-    VPD_RING_CLASS_LAST = 8,
+    VPD_RING_CLASS_GPTR_NEST = 1,   // Indicates GPTR #G [common]rings-NEST
+    VPD_RING_CLASS_GPTR_EQ = 2,   // Indicates GPTR #G [common]rings-EQ
+    VPD_RING_CLASS_GPTR_EX = 3,   // Indicates GPTR #G [common]rings-EX
+    VPD_RING_CLASS_GPTR_EC = 4,   // Indicates GPTR #G [common]rings-EC
+    VPD_RING_CLASS_EQ = 5,     // Indicates EQ [common] rings
+    VPD_RING_CLASS_EX = 6,     // Indicates EX [common] rings
+    VPD_RING_CLASS_EC = 7,     // Indicates EC [common] rings
+    VPD_RING_CLASS_EQ_INS = 8, // Indicates EQ instance rings
+    VPD_RING_CLASS_EX_INS = 9, // Indicates EX instance rings
+    VPD_RING_CLASS_EC_INS = 10, // Indicates EC instance rings
+    VPD_RING_CLASS_LAST = 11,
 };
 
 
