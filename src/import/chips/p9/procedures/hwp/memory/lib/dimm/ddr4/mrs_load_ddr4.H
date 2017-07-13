@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_MRS_LOAD_DDR4_H_
@@ -1061,16 +1061,23 @@ inline fapi2::ReturnCode set_dram_mpr_mode(const fapi2::Target<fapi2::TARGET_TYP
 {
     constexpr uint64_t MAX_MPR_MODE = 0b1;
 
-    if(i_mode > MAX_MPR_MODE)
-    {
-        FAPI_ERR("Invalid MPR Mode recieved: %d. Max encoding allowed: %d.", i_mode, MAX_MPR_MODE);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( i_mode <= MAX_MPR_MODE,
+                 fapi2::MSS_BAD_MR_PARAMETER()
+                 .set_MR_NUMBER(MRS_LOAD)
+                 .set_PARAMETER(MPR_MODE)
+                 .set_PARAMETER_VALUE(i_mode)
+                 .set_DIMM_IN_ERROR(i_target),
+                 "%s Invalid MPR Mode recieved: %d. Max encoding allowed: %d.",
+                 mss::c_str(i_target),
+                 i_mode,
+                 MAX_MPR_MODE);
 
     // Update field if input check passes
     io_data.iv_mpr_mode = i_mode;
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1088,17 +1095,24 @@ inline fapi2::ReturnCode set_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_TYPE
 
     for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        if(i_value[l_rank] > MAX_RTT_NOM)
-        {
-            FAPI_ERR("Invalid RTT_NOM value recieved: %d. Max encoding allowed: %d.", i_value[l_rank], MAX_RTT_NOM);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
-        }
+        FAPI_ASSERT( i_value[l_rank] <= MAX_RTT_NOM,
+                     fapi2::MSS_BAD_MR_PARAMETER()
+                     .set_MR_NUMBER(MRS_LOAD)
+                     .set_PARAMETER(RTT_NOM)
+                     .set_PARAMETER_VALUE(i_value[l_rank])
+                     .set_DIMM_IN_ERROR(i_target),
+                     "%s Invalid RTT_NOM value recieved: %d. Max encoding allowed: %d.",
+                     mss::c_str(i_target),
+                     i_value[l_rank],
+                     MAX_RTT_NOM);
 
         // Update field if input check passes
         io_data.iv_rtt_nom[l_rank] = i_value[l_rank];
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1116,17 +1130,24 @@ inline fapi2::ReturnCode set_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TYPE_
 
     for (size_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
     {
-        if(i_value[l_rank] > MAX_RTT_WR)
-        {
-            FAPI_ERR("Invalid RTT_WR value recieved: %d. Max encoding allowed: %d.", i_value[l_rank], MAX_RTT_WR);
-            return fapi2::FAPI2_RC_INVALID_PARAMETER;
-        }
+        FAPI_ASSERT( i_value[l_rank] <= MAX_RTT_WR,
+                     fapi2::MSS_BAD_MR_PARAMETER()
+                     .set_MR_NUMBER(MRS_LOAD)
+                     .set_PARAMETER(RTT_WR)
+                     .set_PARAMETER_VALUE(i_value[l_rank])
+                     .set_DIMM_IN_ERROR(i_target),
+                     "%s Invalid RTT_WR value recieved: %d. Max encoding allowed: %d.",
+                     mss::c_str(i_target),
+                     i_value[l_rank],
+                     MAX_RTT_WR);
 
         // Update field if input check passes
         io_data.iv_dram_rtt_wr[l_rank] = i_value[l_rank];
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1142,16 +1163,23 @@ inline fapi2::ReturnCode set_dram_mpr_rd_format(const fapi2::Target<fapi2::TARGE
 {
     constexpr uint64_t MAX_READ_FORMAT = 0b10;
 
-    if(i_format > MAX_READ_FORMAT)
-    {
-        FAPI_ERR("Invalid MPR Read Format recieved: %d. Max encoding allowed: %d.", i_format, MAX_READ_FORMAT);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( i_format <= MAX_READ_FORMAT,
+                 fapi2::MSS_BAD_MR_PARAMETER()
+                 .set_MR_NUMBER(MRS_LOAD)
+                 .set_PARAMETER(MPR_READ_FORMAT)
+                 .set_PARAMETER_VALUE(i_format)
+                 .set_DIMM_IN_ERROR(i_target),
+                 "%s Invalid MPR Read Format recieved: %d. Max encoding allowed: %d.",
+                 mss::c_str(i_target),
+                 i_format,
+                 MAX_READ_FORMAT);
 
     // Update field if input check passes
     io_data.iv_read_format = i_format;
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -1167,16 +1195,23 @@ inline fapi2::ReturnCode set_dram_mpr_page(const fapi2::Target<fapi2::TARGET_TYP
 {
     constexpr uint64_t MAX_PAGE = 0b11;
 
-    if(i_page > MAX_PAGE)
-    {
-        FAPI_ERR("Invalid MPR Page recieved: %d. Max encoding allowed: %d.", i_page, MAX_PAGE);
-        return fapi2::FAPI2_RC_INVALID_PARAMETER;
-    }
+    FAPI_ASSERT( i_page <= MAX_PAGE,
+                 fapi2::MSS_BAD_MR_PARAMETER()
+                 .set_MR_NUMBER(MRS_LOAD)
+                 .set_PARAMETER(MPR_PAGE)
+                 .set_PARAMETER_VALUE(i_page)
+                 .set_DIMM_IN_ERROR(i_target),
+                 "%s Invalid MPR Page received: %d. Max encoding allowed: %d.",
+                 mss::c_str(i_target),
+                 i_page,
+                 MAX_PAGE);
 
     // Update field if input check passes
     io_data.iv_mpr_page = i_page;
 
     return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
