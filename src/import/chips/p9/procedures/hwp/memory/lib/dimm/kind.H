@@ -27,10 +27,10 @@
 /// @file dimm.H
 /// @brief Encapsulation for dimms of all types
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_DIMM_H_
@@ -174,15 +174,20 @@ class kind
             iv_stack_type(i_stack_type)
         {
             // Bit of an idiot-check to be sure a hand-crafted dimm::kind make sense wrt slaves, masters, packages, etc.
+            // Both of these are checked in eff_config. If they are messed up, they should be caught there
             if (iv_master_ranks > iv_total_ranks)
             {
-                FAPI_ERR("Not enough total ranks? master: %d total: %d", iv_master_ranks, iv_total_ranks);
+                FAPI_ERR("Not enough total ranks? master: %d total: %d",
+                         iv_master_ranks,
+                         iv_total_ranks);
                 fapi2::Assert(false);
             }
 
             if ((iv_total_ranks % iv_master_ranks) != 0)
             {
-                FAPI_ERR("total or master ranks seems incorrect. master: %d total: %d", iv_master_ranks, iv_total_ranks);
+                FAPI_ERR("total or master ranks seems incorrect. master: %d total: %d",
+                         iv_master_ranks,
+                         iv_total_ranks);
                 fapi2::Assert(false);
             }
         }
