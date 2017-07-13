@@ -28,9 +28,9 @@
 <!-- @brief Error xml for MSS library routines -->
 <!-- -->
 <!-- *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com> -->
-<!-- *HWP FW Owner: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 1 -->
+<!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
@@ -167,7 +167,7 @@
     <description>
         CCS reports a read miscompare.
     </description>
-    <ffdc>REG_CONTENTS</ffdc>
+    <ffdc>FAIL_TYPE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>MCBIST_TARGET</target>
@@ -191,7 +191,7 @@
         CCS reports a UE or SUE in the CCS program array
         Chould be an indicator of corruption in the CCS program
     </description>
-    <ffdc>REG_CONTENTS</ffdc>
+    <ffdc>FAIL_TYPE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>MCBIST_TARGET</target>
@@ -214,7 +214,7 @@
     <description>
         CCS reports never getting a response back from the PHY on a calibration command
     </description>
-    <ffdc>REG_CONTENTS</ffdc>
+    <ffdc>FAIL_TYPE</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_MSS_CCS_FAILURE</id>
       <target>MCBIST_TARGET</target>
@@ -359,7 +359,7 @@
     <description>PHY APB interface is reporting an invalid address was read or written</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -369,7 +369,7 @@
     <description>PHY APB interface is reporting a read/write parity error</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -379,7 +379,7 @@
     <description>Indicates a non-recoverable FSM state checker error in PHYTOP logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -389,7 +389,7 @@
     <description>Indicates a non-recoverable parity error in PHYTOP logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -399,7 +399,7 @@
     <description>Indicates a recoverable FSM state checker error in PHYTOP logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -409,7 +409,7 @@
     <description>Indicates a recoverable register parity error in PHYTOP logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -419,7 +419,7 @@
     <description>Indicates a non-recoverable register parity error in ADR52 master side logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -429,7 +429,7 @@
     <description>Indicates a non-recoverable register parity error in ADR52 slave side logic</description>
     <ffdc>PORT_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
@@ -440,7 +440,7 @@
     <ffdc>PORT_POSITION</ffdc>
     <ffdc>DP16_POSITION</ffdc>
     <callout>
-      <target>TARGET_IN_ERROR</target>
+      <target>MCA_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
