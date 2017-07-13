@@ -422,10 +422,6 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x00018002,  // EFUSE part 2
         0x00010008,  // Mode reg to enable features
         0x00030008,  // chiplet clk state
-
-        // Hostboot FFDC regs
-        0x41010A89,  // Multicast read of core scratch reg 3
-        0x0005003C,  // MBOX scratch reg 5
     };
 
     io_targMap[TRGT_EC][REG_GLBL] =

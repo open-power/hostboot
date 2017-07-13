@@ -81,20 +81,6 @@
         capture     group default;
     };
 
-    register CORE_SCRATCHREG3_MCAST
-    {
-        name        "Multicast read of core scratch reg 3";
-        scomaddr    0x41010A89;
-        capture     group default;
-    };
-
-    register MBOX_SCRATCHREG5
-    {
-        name        "MBOX Scratch Register 5";
-        scomaddr    0x0005003C;
-        capture     group default;
-    };
-
     register TP_ERROR_REG
     {
         name        "TP PCB Slave error reg";
