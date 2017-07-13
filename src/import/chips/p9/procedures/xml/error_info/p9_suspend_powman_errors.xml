@@ -26,27 +26,38 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_PGPE_SAFEMODE_TIMEOUT</rc>
+    <rc>RC_SUSPEND_FFDC</rc>
     <description>
-      Procedure: p9_suspend_powman
-      The PGPE Timed out trying to get to safe mode 
+      OCC Complex Suspend binary ffdc data
     </description>
     <ffdc>PROC_CHIP_TARGET</ffdc>
-    <ffdc>PPE_BASE_ADDRESSES</ffdc>
-    <!-- <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_BASE_ADDRESSES</collectFfdc> -->
+    <ffdc>PGPE_XSR_AND_IAR</ffdc>
+    <ffdc>PGPE_IR_AND_EDR</ffdc>
+    <ffdc>PGPE_LR_AND_SPRG0</ffdc>
+    <ffdc>PGPE_SRR0_AND_SRR1</ffdc>
+    <ffdc>SGPE_XSR_AND_IAR</ffdc>
+    <ffdc>SGPE_IR_AND_EDR</ffdc>
+    <ffdc>SGPE_LR_AND_SPRG0</ffdc>
+    <ffdc>SGPE_SRR0_AND_SRR1</ffdc>
+    <ffdc>OCCS2_AND_OCCFLG</ffdc>
+    <ffdc>OPIT2C_0_THROUGH_7_B0</ffdc>
+    <ffdc>OPIT2C_8_THROUGH_15_B0</ffdc>
+    <ffdc>OPIT2C_16_THROUGH_23_B0</ffdc>
+    <ffdc>QCSR_B0_TO_B1_AND_CCSR_B0_TO_B2_AND_3B_EMPTY</ffdc>
+    <ffdc>CME0_IAR_AND_CME1_IAR</ffdc>
+    <ffdc>CME2_IAR_AND_CME3_IAR</ffdc>
+    <ffdc>CME4_IAR_AND_CME5_IAR</ffdc>
+    <ffdc>CME6_IAR_AND_CME7_IAR</ffdc>
+    <ffdc>CME8_IAR_AND_CME9_IAR</ffdc>
+    <ffdc>CME10_IAR_AND_CME11_IAR</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+        <procedure>LVL_SUPPORT</procedure>
+        <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_PGPE_SUSPEND_TIMEOUT</rc>
-    <description>
-      Procedure: p9_suspend_powman
-      The PGPE Timed out trying to suspend 
-    </description>
-    <ffdc>PROC_CHIP_TARGET</ffdc>            
-    <!-- <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_BASE_ADDRESSES</collectFfdc> -->
-  </hwpError>
-  <!-- ******************************************************************** -->
-
 </hwpErrors>
-
