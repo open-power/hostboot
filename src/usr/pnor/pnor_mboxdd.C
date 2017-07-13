@@ -250,7 +250,7 @@ errlHndl_t PnorDD::writeFlash(const void* i_buffer,
                               size_t& io_buflen,
                               uint64_t i_address)
 {
-    TRACFCOMP(g_trac_pnor, ENTER_MRK"PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
+    TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorDD::writeFlash(i_address=0x%llx)> ", i_address);
     errlHndl_t l_err = NULL;
 
     uint32_t l_address = i_address & 0x0fffffff;
@@ -264,7 +264,7 @@ errlHndl_t PnorDD::writeFlash(const void* i_buffer,
         io_buflen = 0;
     }
 
-    TRACFCOMP(g_trac_pnor, EXIT_MRK"PnorDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
+    TRACDCOMP(g_trac_pnor, EXIT_MRK"PnorDD::writeFlash(i_address=0x%llx)> io_buflen=%.8X", i_address, io_buflen);
 
     return l_err;
 }
@@ -502,7 +502,7 @@ errlHndl_t PnorDD::_readFlash( uint32_t i_addr,
                                size_t i_size,
                                void* o_data )
 {
-    TRACFCOMP(g_trac_pnor, "PnorDD::_readFlash(i_addr=0x%.8X)> ", i_addr);
+    TRACDCOMP(g_trac_pnor, "PnorDD::_readFlash(i_addr=0x%.8X)> ", i_addr);
     errlHndl_t l_err = NULL;
 
     while (i_size)
