@@ -27,10 +27,10 @@
 /// @file p9_mss_draminit.C
 /// @brief Initialize dram
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob L Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -93,7 +93,9 @@ extern "C"
         {
             fapi2::buffer<uint64_t> l_ccs_config;
 
-            FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config) );
+            FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config),
+                      "%s Failed ccs read_mode in p9_mss_draminit",
+                      mss::c_str(i_target) );
 
             // It's unclear if we want to run with this true or false. Right now (10/15) this
             // has to be false. Shelton was unclear if this should be on or off in general BRS
@@ -102,7 +104,9 @@ extern "C"
             mss::ccs::copy_cke_to_spare_cke(i_target, l_ccs_config, mss::HIGH);
             mss::ccs::parity_after_cmd(i_target, l_ccs_config, mss::HIGH);
 
-            FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config) );
+            FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config),
+                      "%s Failed ccs write_mode in p9_mss_draminit",
+                      mss::c_str(i_target) );
         }
 
         // We initialize dram by iterating over the (ungarded) ports. We could allow the caller
@@ -118,17 +122,22 @@ extern "C"
         //
         for (const auto& p : l_mca)
         {
-            FAPI_TRY( mss::draminit_entry_invariant(p) );
+            FAPI_TRY( mss::draminit_entry_invariant(p),
+                      "%s Failed mss::draminit_entry_invariant in p9_mss_draminit",
+                      mss::c_str(i_target) );
 
             // Begin driving mem clks, and wait 10ns (we'll do this outside the loop)
             // From the RCD Spec, before the DRST_n (resetn) input is pulled HIGH the
             // clock input signal must be stable.
-            FAPI_TRY( mss::drive_mem_clks(p, PCLK_INITIAL_VALUE, NCLK_INITIAL_VALUE) );
+            FAPI_TRY( mss::drive_mem_clks(p, PCLK_INITIAL_VALUE, NCLK_INITIAL_VALUE),
+                      "%s Failed mss::drive_mem_clks in p9_mss_draminit", mss::c_str(i_target) );
 
             // After RESET_n is de-asserted, wait for another 500us until CKE becomes active.
             // During this time, the DRAM will start internal initialization; this will be done
             // independently of external clocks.
-            FAPI_TRY( mss::ddr_resetn(p, mss::HIGH) );
+            FAPI_TRY( mss::ddr_resetn(p, mss::HIGH),
+                      "%s Failed mss::resetn in p9_mss_draminit",
+                      mss::c_str(i_target) );
         }
 
         // From the DDR4 JEDEC Spec (79-A): Power-up Initialization Sequence
@@ -143,7 +152,9 @@ extern "C"
             const uint64_t l_delay_in_cycles = mss::ns_to_cycles(i_target, l_delay_in_ns);
 
             // Set our delay (for HW and SIM)
-            FAPI_TRY( fapi2::delay(l_delay_in_ns, mss::cycles_to_simcycles(l_delay_in_cycles)) );
+            FAPI_TRY( fapi2::delay(l_delay_in_ns, mss::cycles_to_simcycles(l_delay_in_cycles)),
+                      "%s Failed delay in p9_mss_draminit",
+                      mss::c_str(i_target) );
         }
 
         // Also a Deselect command must be registered as required from the Spec.
@@ -152,23 +163,33 @@ extern "C"
         // we'll PDE/DES all DIMM at the same time.
         l_des.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(400);
         l_program.iv_instructions.push_back(l_des);
-        FAPI_TRY( mss::ccs::execute(i_target, l_program, l_mca[0]) );
+        FAPI_TRY( mss::ccs::execute(i_target, l_program, l_mca[0]),
+                  "%s Failed execute in p9_mss_draminit",
+                  mss::c_str(i_target) );
 
         // Per conversation with Shelton and Steve 10/9/15, turn off addr_mux_sel after the CKE CCS but
         // before the RCD/MRS CCSs
         for (const auto& p : l_mca)
         {
-            FAPI_TRY( change_addr_mux_sel(p, mss::LOW) );
+            FAPI_TRY( change_addr_mux_sel(p, mss::LOW),
+                      "%s Failed change_addr_mux_sel in p9_mss_draminit",
+                      mss::c_str(i_target) );
         }
 
         // Load RCD control words
-        FAPI_TRY( mss::rcd_load(i_target) );
+        FAPI_TRY( mss::rcd_load(i_target),
+                  "%s Failed rcd_load in p9_mss_draminit",
+                  mss::c_str(i_target) );
 
         // Load data buffer control words (BCW)
-        FAPI_TRY( mss::bcw_load(i_target) );
+        FAPI_TRY( mss::bcw_load(i_target),
+                  "%s Failed bcw_load in p9_mss_draminit",
+                  mss::c_str(i_target) );
 
         // Load MRS
-        FAPI_TRY( mss::mrs_load(i_target) );
+        FAPI_TRY( mss::mrs_load(i_target),
+                  "%s Failed mrs_load in p9_mss_draminit",
+                  mss::c_str(i_target) );
 
     fapi_try_exit:
         FAPI_INF("End draminit: %s (0x%lx)", mss::c_str(i_target), uint64_t(fapi2::current_err));
