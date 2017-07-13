@@ -27,10 +27,10 @@
 /// @file ccs.C
 /// @brief Run and manage the CCS engine
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -55,7 +55,7 @@ namespace ccs
 /// @return FAPI2_RC_SUCCESS iff success
 ///
 template<>
-fapi2::ReturnCode start_stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target, bool i_start_stop )
+fapi2::ReturnCode start_stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target, const bool i_start_stop )
 {
     typedef ccsTraits<TARGET_TYPE_MCBIST> TT;
 
@@ -73,7 +73,6 @@ fapi_try_exit:
 
 ///
 /// @brief Determine the CCS failure type
-/// @tparam T the fapi2 target type of the target for this error
 /// @param[in] i_target MCBIST target
 /// @param[in] i_type the failure type
 /// @param[in] i_mca The port the CCS instruction is training
@@ -90,16 +89,20 @@ fapi2::ReturnCode fail_type( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     FAPI_ASSERT(STAT_READ_MISCOMPARE != i_type,
                 fapi2::MSS_CCS_READ_MISCOMPARE()
                 .set_MCBIST_TARGET(i_target)
+                .set_FAIL_TYPE(i_type)
                 .set_MCA_TARGET(i_mca),
                 "%s CCS FAIL Read Miscompare", mss::c_str(i_mca));
 
     // This error is likely due to a bad CCS engine/ MCBIST
     FAPI_ASSERT(STAT_UE_SUE != i_type,
-                fapi2::MSS_CCS_UE_SUE().set_MCBIST_TARGET(i_target),
+                fapi2::MSS_CCS_UE_SUE()
+                .set_FAIL_TYPE(i_type)
+                .set_MCBIST_TARGET(i_target),
                 "%s CCS FAIL UE or SUE Error", mss::c_str(i_target));
 
     FAPI_ASSERT(STAT_CAL_TIMEOUT != i_type,
                 fapi2::MSS_CCS_CAL_TIMEOUT()
+                .set_FAIL_TYPE(i_type)
                 .set_MCBIST_TARGET(i_target)
                 .set_MCA_TARGET(i_mca),
                 "%s CCS FAIL Calibration Operation Time Out", mss::c_str(i_mca));
@@ -128,7 +131,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
 
     fapi2::buffer<uint64_t> status;
 
-    FAPI_TRY(start_stop(i_target, mss::START));
+    FAPI_TRY(start_stop(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
 
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -142,13 +145,14 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<TARGET_TYPE_MCBIST>& i_
     // Check for done and success. DONE being the only bit set.
     if (status == STAT_QUERY_SUCCESS)
     {
-        FAPI_INF("CCS Executed Successfully.");
+        FAPI_INF("%s CCS Executed Successfully.", mss::c_str(i_port) );
         goto fapi_try_exit;
     }
 
     // So we failed or we're still in progress. Mask off the fail bits
     // and run this through the FFDC generator.
-    FAPI_TRY( fail_type(i_target, status & 0x1C00000000000000, i_port) );
+    // TK: Put the const below into a traits class? -- JLH
+    FAPI_TRY( fail_type(i_target, status & 0x1C00000000000000, i_port), "Error in execute_inst_array" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -181,15 +185,14 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
     auto l_inst_iter = i_program.iv_instructions.begin();
 
     // Stop the CCS engine just for giggles - it might be running ...
-    FAPI_TRY( start_stop(i_target, mss::states::STOP) );
+    FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
     FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
                            [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
         FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     }),
-    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target),
-    "CCS appears hung (trying to stop)");
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target));
 
     while (l_inst_iter != i_program.iv_instructions.end())
     {
@@ -207,8 +210,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
             l_inst_iter->arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_GOTO_CMD,
                         MCBIST_CCS_INST_ARR1_00_GOTO_CMD_LEN>(l_inst_count + 1);
-            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0) );
-            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1) );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_inst_iter->arr0), "Error in ccs::execute" );
+            FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_inst_iter->arr1), "Error in ccs::execute" );
 
             // arr1 contains a specification of the delay and repeat after this instruction, as well
             // as a repeat. Total up the delays as we go so we know how long to wait before polling
@@ -244,8 +247,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         // here as an instruction forces the CCS engine to wait the delay specified in
         // the last instruction in this array (which it otherwise doesn't do.)
         l_des.arr1.setBit<MCBIST_CCS_INST_ARR1_00_END>();
-        FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0) );
-        FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1) );
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, l_des.arr0), "Error in ccs::execute" );
+        FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, l_des.arr1), "Error in ccs::execute" );
 
         FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
                  l_inst_count, l_des.arr0, l_des.arr1,
@@ -255,8 +258,8 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
         for (const auto& p : i_ports)
         {
             FAPI_INF("executing CCS array for port %d (%s)", mss::relative_pos<TARGET_TYPE_MCBIST>(p), mss::c_str(p));
-            FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)) );
-            FAPI_TRY( execute_inst_array(i_target, i_program, p) );
+            FAPI_TRY( select_ports( i_target, mss::relative_pos<TARGET_TYPE_MCBIST>(p)), "Error in ccs execute" );
+            FAPI_TRY( execute_inst_array(i_target, i_program, p), "Error in ccs execute" );
         }
     }
 
@@ -267,8 +270,6 @@ fapi_try_exit:
 
 ///
 /// @brief Nimbus specialization for modeq_copy_cke_to_spare_cke
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the ccsTraits associated with T - derived
 /// @param[in] fapi2::Target<TARGET_TYPE_MCBIST>& the target to effect
 /// @param[in,out] the buffer representing the mode register
 /// @param[in] mss::states - mss::ON iff Copy CKE signals to CKE Spare on both ports
