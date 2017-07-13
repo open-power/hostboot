@@ -27,7 +27,7 @@
 /// @file mrs_load_ddr4.C
 /// @brief Run and manage the DDR4 mrs loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 1
@@ -110,6 +110,8 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
     // Set this to good in case no dimms and we're running unit tests
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
+    o_is_needed = false;
+
     // Loop over the DIMMs and see if A17 is needed for one of them
     // If so, we enable the parity bit in the PHY
     for (const auto& l_dimm : mss::find_targets<TARGET_TYPE_DIMM>(i_target) )
@@ -119,10 +121,7 @@ fapi2::ReturnCode is_a17_needed(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
         bool l_temp = false;
         FAPI_TRY( is_a17_needed( l_dimm, l_temp), "%s Failed to get a17 boolean", mss::c_str(l_dimm) );
 
-        if (l_temp == true)
-        {
-            o_is_needed = true;
-        }
+        o_is_needed = o_is_needed | l_temp;
     }
 
 fapi_try_exit:

@@ -27,10 +27,10 @@
 /// @file mrs01.C
 /// @brief Run and manage the DDR4 MRS01 loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -61,20 +61,20 @@ mrs01_data::mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_tdqs(0),
     iv_qoff(0)
 {
-    FAPI_TRY( mss::eff_dram_dll_enable(i_target, iv_dll_enable) );
-    FAPI_TRY( mss::vpd_mt_dram_drv_imp_dq_dqs(i_target, &(iv_odic[0])) );
-    FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency) );
-    FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable) );
-    FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(iv_rtt_nom[0])) );
-    FAPI_TRY( mss::eff_dram_tdqs(i_target, iv_tdqs) );
-    FAPI_TRY( mss::eff_dram_output_buffer(i_target, iv_qoff) );
+    FAPI_TRY( mss::eff_dram_dll_enable(i_target, iv_dll_enable), "Error in mrs01_data()" );
+    FAPI_TRY( mss::vpd_mt_dram_drv_imp_dq_dqs(i_target, &(iv_odic[0])), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_al(i_target, iv_additive_latency), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_wr_lvl_enable(i_target, iv_wl_enable), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_rtt_nom(i_target, &(iv_rtt_nom[0])), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_tdqs(i_target, iv_tdqs), "Error in mrs01_data()" );
+    FAPI_TRY( mss::eff_dram_output_buffer(i_target, iv_qoff), "Error in mrs01_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs01");
     return;
 }
 
@@ -91,7 +91,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs01_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS01 data from attributes");
+    FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS01 data from attributes", mss::c_str(i_target) );
     FAPI_TRY( mrs01(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -139,7 +139,9 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                  .set_PARAMETER(OUTPUT_IMPEDANCE)
                  .set_PARAMETER_VALUE(i_data.iv_odic[mss::index(i_rank)])
                  .set_DIMM_IN_ERROR(i_target),
-                 "Bad value for output driver impedance: %d (%s)", i_data.iv_odic[mss::index(i_rank)], mss::c_str(i_target));
+                 "Bad value for output driver impedance: %d (%s)",
+                 i_data.iv_odic[mss::index(i_rank)],
+                 mss::c_str(i_target));
 
     // Map from impedance to bits in MRS1
     l_odic_buffer = (i_data.iv_odic[mss::index(i_rank)] == fapi2::ENUM_ATTR_MSS_VPD_MT_DRAM_DRV_IMP_DQ_DQS_OHM34) ?
@@ -149,10 +151,11 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     l_rtt_nom_buffer = i_data.iv_rtt_nom[mss::index(i_rank)];
 
     // Print this here as opposed to the MRS01 ctor as we want to see the specific rtt now information
-    FAPI_INF("MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x", i_rank,
-             i_data.iv_dll_enable, i_data.iv_odic[mss::index(i_rank)], uint8_t(l_odic_buffer), uint8_t(l_additive_latency),
-             i_data.iv_wl_enable,
+    FAPI_INF("%s MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
+             "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x",
+             mss::c_str(i_target), i_rank, i_data.iv_dll_enable,
+             i_data.iv_odic[mss::index(i_rank)], uint8_t(l_odic_buffer),
+             uint8_t(l_additive_latency), i_data.iv_wl_enable,
              uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
 
     io_inst.arr0.writeBit<A0>(i_data.iv_dll_enable);
@@ -164,7 +167,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A11>(i_data.iv_tdqs);
     io_inst.arr0.writeBit<A12>(i_data.iv_qoff);
 
-    FAPI_INF("MR1: 0x%016llx", uint64_t(io_inst.arr0));
+    FAPI_INF("%s MR1: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -209,9 +212,9 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
     mss::swizzle<5, 3, A10>(i_inst.arr0, o_rtt_nom);
 
     FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x", i_rank,
-             o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency), o_wrl_enable, uint8_t(o_rtt_nom),
-             o_tdqs, o_qoff);
+             "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x",
+             i_rank, o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency),
+             o_wrl_enable, uint8_t(o_rtt_nom), o_tdqs, o_qoff);
 
     return FAPI2_RC_SUCCESS;
 }

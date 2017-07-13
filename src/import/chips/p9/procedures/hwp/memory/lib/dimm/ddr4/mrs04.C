@@ -27,10 +27,10 @@
 /// @file mrs04.C
 /// @brief Run and manage the DDR4 MRS04 loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -70,20 +70,20 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     // From DDR4 Spec: 3.3 RESET and Initialization Procedure
     // PPR and soft PPR must be disabled during initialization
     // so we don't call the attribute accessor for them
-    FAPI_TRY( mss::eff_max_powerdown_mode(i_target, iv_max_pd_mode) );
-    FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range) );
-    FAPI_TRY( mss::mrw_temp_refresh_mode(iv_temp_ref_mode) );
-    FAPI_TRY( mss::eff_internal_vref_monitor(i_target, iv_vref_mon) );
-    FAPI_TRY( mss::eff_cs_cmd_latency(i_target, iv_cs_cmd_latency) );
-    FAPI_TRY( mss::eff_self_ref_abort(i_target, iv_ref_abort) );
-    FAPI_TRY( mss::eff_rd_preamble_train(i_target, iv_rd_pre_train_mode) );
-    FAPI_TRY( mss::eff_rd_preamble(i_target, iv_rd_preamble) );
-    FAPI_TRY( mss::eff_wr_preamble(i_target, iv_wr_preamble) );
+    FAPI_TRY( mss::eff_max_powerdown_mode(i_target, iv_max_pd_mode), "Error in mrs04_data()" );
+    FAPI_TRY( mss::mrw_temp_refresh_range(iv_temp_refresh_range), "Error in mrs04_data()" );
+    FAPI_TRY( mss::mrw_temp_refresh_mode(iv_temp_ref_mode), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_internal_vref_monitor(i_target, iv_vref_mon), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_cs_cmd_latency(i_target, iv_cs_cmd_latency), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_self_ref_abort(i_target, iv_ref_abort), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_rd_preamble_train(i_target, iv_rd_pre_train_mode), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_rd_preamble(i_target, iv_rd_preamble), "Error in mrs04_data()" );
+    FAPI_TRY( mss::eff_wr_preamble(i_target, iv_wr_preamble), "Error in mrs04_data()" );
 
-    FAPI_INF("MR4 attributes: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
+    FAPI_INF("%s MR4 attributes: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
              "WR_PRE: 0x%x, PPR: 0x%x, SOFT PPR: 0x%x",
-             iv_max_pd_mode, iv_temp_refresh_range, iv_temp_ref_mode, iv_vref_mon,
+             mss::c_str(i_target), iv_max_pd_mode, iv_temp_refresh_range, iv_temp_ref_mode, iv_vref_mon,
              iv_cs_cmd_latency, iv_ref_abort,
              iv_rd_pre_train_mode, iv_rd_preamble, iv_wr_preamble, iv_ppr, iv_soft_ppr);
 
@@ -93,7 +93,7 @@ mrs04_data::mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs04", mss::c_str(i_target));
     return;
 }
 
@@ -110,7 +110,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs04_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS04 data from attributes");
+    FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS04 data from attributes", mss::c_str(i_target) );
     FAPI_TRY( mrs04(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -162,7 +162,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A12>(i_data.iv_wr_preamble);
     io_inst.arr0.writeBit<A13>(i_data.iv_ppr);
 
-    FAPI_INF("MR4: 0x%016llx", uint64_t(io_inst.arr0));
+    FAPI_INF("%s MR4: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -217,9 +217,9 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
 
     FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
-             "WR_PRE: 0x%x, PPR: 0x%x", i_rank,
-             o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode, o_vref_mon,
-             uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
+             "WR_PRE: 0x%x, PPR: 0x%x",
+             i_rank, o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode,
+             o_vref_mon, uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
              o_rd_pre_train_mode, o_rd_preamble, o_wr_preamble, o_ppr);
 
     return FAPI2_RC_SUCCESS;

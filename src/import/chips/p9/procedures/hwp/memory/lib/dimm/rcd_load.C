@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,10 @@
 /// @file rcd_load.C
 /// @brief Run and manage the RCD_LOAD engine
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -38,6 +38,7 @@
 #include <mss.H>
 #include <lib/dimm/rcd_load.H>
 #include <lib/dimm/rcd_load_ddr4.H>
+#include <generic/memory/lib/utils/find.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -64,21 +65,18 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
 
-    for (auto c : i_target.getChildren<TARGET_TYPE_MCS>())
+    for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
     {
-        for (auto p : c.getChildren<TARGET_TYPE_MCA>())
+        for (const auto& d : find_targets<TARGET_TYPE_DIMM>(p))
         {
-            for (auto d : p.getChildren<TARGET_TYPE_DIMM>())
-            {
-                FAPI_DBG("rcd load for %s", mss::c_str(d));
-                FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions) );
-            }
-
-            // We have to configure the CCS engine to let it know which port these instructions are
-            // going out (or whether it's broadcast ...) so lets execute the instructions we presently
-            // have so that we kind of do this by port
-            FAPI_TRY( ccs::execute(i_target, l_program, p) );
+            FAPI_DBG("rcd load for %s", mss::c_str(d));
+            FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions) );
         }
+
+        // We have to configure the CCS engine to let it know which port these instructions are
+        // going out (or whether it's broadcast ...) so lets execute the instructions we presently
+        // have so that we kind of do this by port
+        FAPI_TRY( ccs::execute(i_target, l_program, p) );
     }
 
 fapi_try_exit:
@@ -101,7 +99,7 @@ fapi2::ReturnCode perform_rcd_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYP
     FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
     FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
 
-    // If we're here, we have a problem. The DIMM kind (type and/or generation) wasn't know
+    // If we're here, we have a problem. The DIMM kind (type and/or generation) wasn't known
     // to our dispatcher. We have a DIMM plugged in we don't know how to deal with.
     FAPI_ASSERT(false,
                 fapi2::MSS_UNKNOWN_DIMM()

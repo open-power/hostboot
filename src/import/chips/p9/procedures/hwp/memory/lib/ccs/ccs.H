@@ -27,7 +27,7 @@
 /// @file ccs.H
 /// @brief Run and manage the CCS engine
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -174,6 +174,9 @@ namespace mss
 namespace ccs
 {
 
+///
+/// @brief Enums for CCS return codes
+///
 enum
 {
     // Success is defined as done-bit set, no others.
@@ -324,7 +327,6 @@ class program
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in,out] i_arr0 fapi2::buffer<uint64_t> representing the ARR0 of the instruction
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
@@ -679,7 +681,6 @@ inline instruction_t<T> precharge_all_command( const fapi2::Target<fapi2::TARGET
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_ports the buffer representing the ports
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target, uint64_t i_ports)
@@ -706,7 +707,6 @@ fapi_try_exit:
 /// @param[in]  the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff stop whenever failure occurs.
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
@@ -720,7 +720,6 @@ inline void stop_on_err( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer)
@@ -737,7 +736,6 @@ inline void disable_ecc( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_bu
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value true iff ignore any array ue or sue errors.
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
@@ -752,7 +750,6 @@ inline void ue_disable( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buf
 /// @param[in] the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value mss::ON iff delay parity a cycle
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value)
@@ -768,7 +765,6 @@ inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& 
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_count the count to wait for DDR cal to complete.
 /// @param[in] i_mult the DDR calibration time multiplaction factor
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer,
@@ -790,7 +786,6 @@ inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buff
 /// @param[in,out] io_buffer the buffer representing the mode register
 /// @param[in] i_value mss::ON iff Copy CKE signals to CKE Spare on both ports
 /// @note no-op for p9n
-/// @return void
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
 void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer, const states i_value);

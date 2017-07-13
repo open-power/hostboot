@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,9 @@
 /// @brief Run and manage the RCD_LOAD engine
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -70,13 +70,13 @@ fapi2::ReturnCode bcw_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
         for (const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p))
         {
             FAPI_DBG("bcw load for %s", mss::c_str(d));
-            FAPI_TRY( perform_bcw_load(d, l_program.iv_instructions) );
+            FAPI_TRY( perform_bcw_load(d, l_program.iv_instructions), "Failed BCW load %s", mss::c_str(d) );
         }
 
         // We have to configure the CCS engine to let it know which port these instructions are
         // going out (or whether it's broadcast ...) so lets execute the instructions we presently
         // have so that we kind of do this by port
-        FAPI_TRY( ccs::execute(i_target, l_program, p) );
+        FAPI_TRY( ccs::execute(i_target, l_program, p), "Failed executing ccs engine load %s", mss::c_str(i_target));
     }
 
 fapi_try_exit:
@@ -96,8 +96,8 @@ fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<TARGET_TYP
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
 
-    FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
-    FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
+    FAPI_TRY( mss::eff_dimm_type(i_target, l_type), "Error in perform_bcw_load" );
+    FAPI_TRY( mss::eff_dram_gen(i_target, l_gen), "Error in perform_bcw_load" );
 
     // If we're here, we have a problem. The DIMM kind (type and/or generation) wasn't known
     // to our dispatcher. We have a DIMM plugged in we don't know how to deal with.
@@ -124,7 +124,7 @@ fapi2::ReturnCode perform_bcw_load<KIND_LRDIMM_DDR4>( const fapi2::Target<TARGET
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& io_inst)
 {
     FAPI_DBG("perform bcw_load for %s [expecting lrdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( bcw_load_ddr4(i_target, io_inst) );
+    FAPI_TRY( bcw_load_ddr4(i_target, io_inst), "Failed bcw load for lrdimm %s", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -157,8 +157,8 @@ fapi2::ReturnCode perform_bcw_load<FORCE_DISPATCH>( const fapi2::Target<TARGET_T
     uint8_t l_type = 0;
     uint8_t l_gen = 0;
 
-    FAPI_TRY( mss::eff_dimm_type(i_target, l_type) );
-    FAPI_TRY( mss::eff_dram_gen(i_target, l_gen) );
+    FAPI_TRY( mss::eff_dimm_type(i_target, l_type), "Error in perform_bcw_load" );
+    FAPI_TRY( mss::eff_dram_gen(i_target, l_gen), "Error in perform_bcw_load" );
 
     return perform_bcw_load_dispatch<FORCE_DISPATCH>(dimm_kind( l_type, l_gen ), i_target, io_inst);
 

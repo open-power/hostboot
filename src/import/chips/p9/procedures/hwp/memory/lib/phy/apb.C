@@ -62,11 +62,11 @@ fapi2::ReturnCode fir_check(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
         FAPI_TRY( read_error_status0(i_target, l_data) );
 
         FAPI_ASSERT( l_data.getBit<TT::INVALID_ADDRESS>() == false,
-                     fapi2::MSS_APB_INVALID_ADDRESS().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_APB_INVALID_ADDRESS().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting an invalid address on %s", mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::WRITE_PARITY_ERR>() == false,
-                     fapi2::MSS_APB_WR_PAR_ERR().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_APB_WR_PAR_ERR().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a read/write parity error on %s", mss::c_str(i_target) );
     }
 
@@ -76,28 +76,28 @@ fapi2::ReturnCode fir_check(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
         FAPI_TRY( read_fir_err0(i_target, l_data) );
 
         FAPI_ASSERT( l_data.getBit<TT::FATAL_FSM>() == false,
-                     fapi2::MSS_FATAL_FSM_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_FATAL_FSM_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a fatal FSM error in PHYTOP %s", mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::FATAL_PARITY>() == false,
-                     fapi2::MSS_FATAL_PARITY_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_FATAL_PARITY_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a fatal parity error in PHYTOP %s", mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::FSM>() == false,
-                     fapi2::MSS_FSM_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_FSM_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a recoverable FSM error in PHYTOP %s", mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::PARITY>() == false,
-                     fapi2::MSS_PARITY_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_PARITY_PHYTOP().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a recoverable parity error in PHYTOP %s", mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::FATAL_ADR52_MASTER>() == false,
-                     fapi2::MSS_FATAL_ADR52_MASTER().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_FATAL_ADR52_MASTER().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a fatal register parity error in ADR52 master side logic %s",
                      mss::c_str(i_target) );
 
         FAPI_ASSERT( l_data.getBit<TT::FATAL_ADR52_SLAVE>() == false,
-                     fapi2::MSS_FATAL_ADR52_SLAVE().set_PORT_POSITION(mss::fapi_pos(i_target)).set_TARGET_IN_ERROR(i_target),
+                     fapi2::MSS_FATAL_ADR52_SLAVE().set_PORT_POSITION(mss::fapi_pos(i_target)).set_MCA_TARGET(i_target),
                      "APB interface is reporting a fatal register parity error in ADR52 slave side logic %s",
                      mss::c_str(i_target) );
 
@@ -106,7 +106,7 @@ fapi2::ReturnCode fir_check(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
                      fapi2::MSS_FSM_DP16()
                      .set_PORT_POSITION(mss::fapi_pos(i_target))
                      .set_DP16_POSITION(l_dp16)
-                     .set_TARGET_IN_ERROR(i_target),
+                     .set_MCA_TARGET(i_target),
                      "APB interface is reporting a recoverable FSM state checker error in DP16 %s 0x%x",
                      mss::c_str(i_target), l_dp16 );
     }

@@ -27,10 +27,10 @@
 /// @file rcd_load_ddr4.C
 /// @brief Run and manage the DDR4 rcd loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -53,7 +53,7 @@ namespace mss
 ///
 /// @brief Perform the rcd_load_ddr4 operations - TARGET_TYPE_DIMM specialization
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_DIMM>
-/// @param[in,out] a vector of CCS instructions we should add to
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,

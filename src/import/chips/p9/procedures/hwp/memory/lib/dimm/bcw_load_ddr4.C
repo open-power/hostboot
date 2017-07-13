@@ -28,9 +28,9 @@
 /// @brief Run and manage the DDR4 bcw loading
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -56,7 +56,7 @@ namespace mss
 {
 
 ///
-/// @brief Perform the bcw_load_ddr4 operations - TARGET_TYPE_DIMM specialization
+/// @brief Perform the bcw_load_ddr4 operations
 /// @param[in] i_target a DIMM target
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -68,7 +68,7 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
     // Per DDR4BC01
     uint64_t l_tDLLK = 0;
-    FAPI_TRY( tdllk(i_target, l_tDLLK), "Failed to get tDLLK for %s", mss::c_str(i_target) );
+    FAPI_TRY( tdllk(i_target, l_tDLLK), "Failed to get tDLLK for %s in bcw_load_ddr4", mss::c_str(i_target) );
 
     {
         static const std::vector< cw_data > l_bcw_4bit_data =
@@ -101,8 +101,9 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 
         // We set the 4-bit buffer control words first (they live in function space 0
         // hw is supposed to default to function space 0 but Just.In.Case.
-        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst) );
-        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) );
+        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst), "Failed function space select 0", mss::c_str(i_target));
+        FAPI_TRY( control_word_engine<BCW_4BIT>(i_target, l_bcw_4bit_data, io_inst) , "Failed control_word_engine",
+                  mss::c_str(i_target));
 
         // We set our 8-bit buffer control words but have to switch function space
         // number for different control words.  So it doesn't fit cleanly into a
@@ -110,19 +111,21 @@ fapi2::ReturnCode bcw_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         // (feels like we should be initializing more control word....)
         {
             cw_data l_data(FUNC_SPACE_6, BUFF_TRAIN_CONFIG_CW, eff_dimm_ddr4_f6bc4x, mss::tmrc());
-            FAPI_TRY( ddr4::function_space_select<6>(i_target, io_inst) );
-            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst) );
+            FAPI_TRY( ddr4::function_space_select<6>(i_target, io_inst), "Failed function space select 6", mss::c_str(i_target) );
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst), "Failed control_word_engine",
+                      mss::c_str(i_target) );
         }
 
         {
             cw_data l_data(FUNC_SPACE_5, DRAM_VREF_CW, eff_dimm_ddr4_f5bc6x, mss::tmrc());
-            FAPI_TRY( ddr4::function_space_select<5>(i_target, io_inst) );
-            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst) );
+            FAPI_TRY( ddr4::function_space_select<5>(i_target, io_inst), "Failed function space select 5", mss::c_str(i_target) );
+            FAPI_TRY( control_word_engine<BCW_8BIT>(i_target, l_data, io_inst), "Failed control_word_engine",
+                      mss::c_str(i_target) );
         }
 
         // Its recommended to always return to the function space
         // "pointer" back to 0 so we always know where we are starting from
-        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst) );
+        FAPI_TRY( ddr4::function_space_select<0>(i_target, io_inst), "Error in bcw_load_ddr4 for function space select 0" );
     }
 
 fapi_try_exit:

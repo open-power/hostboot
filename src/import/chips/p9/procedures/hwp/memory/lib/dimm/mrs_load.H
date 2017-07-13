@@ -27,10 +27,10 @@
 /// @file mrs_load.H
 /// @brief Code to support mrs_loads
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_MRS_LOAD_H_
@@ -64,7 +64,16 @@ enum mrs_bad_field
     RTT_PARK = 7,
     TCCD = 8,
     RANK = 9,
-    RTT_NOM = 10
+    RTT_NOM = 10,
+    MPR_READ_FORMAT = 11,
+    RTT_WR = 12,
+    MPR_PAGE = 13,
+    MPR_MODE = 14,
+
+    // Following is for MR_NUMBER entry into the BAD_MR_PARAM ffdc
+    // Set to random value so it won't be confused with an actual MR number
+    // This number doesn't really matter, we should be able to back track from the function numbers alone
+    MRS_LOAD = 100,
 };
 
 ///
@@ -165,22 +174,35 @@ typename std::enable_if< perform_mrs_load_overload<DEFAULT_KIND>::available, fap
 perform_mrs_load( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                   std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
 
-//
-// We know we registered overloads for perform_mrs_load, so we need the entry point to
-// the dispatcher. Add a set of these for all TargetTypes which get overloads
-// for this API
-//
+///
+/// @brief Function to perform mrs load overloads
+/// @param[in] i_target the dimm target for the mrs's
+/// @param[in,out] io_inst the MCBIST instruction
+/// @note We know we registered overloads for perform_mrs_load, so we need the entry point to
+/// the dispatcher. Add a set of these for all TargetTypes which get overloads
+/// for this API
+///
 template<>
 fapi2::ReturnCode perform_mrs_load<FORCE_DISPATCH>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
-
+///
+/// @brief Function to perform mrs load overloads
+/// @param[in] i_target the dimm target for the mrs's
+/// @param[in,out] io_inst the MCBIST instruction
+/// @note We know we registered overloads for perform_mrs_load, so we need the entry point to
+/// the dispatcher. Add a set of these for all TargetTypes which get overloads
+/// for this API
+///
 template<>
 fapi2::ReturnCode perform_mrs_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst);
-
-//
-// Boilerplate dispatcher
-//
+///
+/// @brief Function to perform mrs load overloads
+/// @param[in] i_kind the i_target's dimm_kind struct
+/// @param[in] i_target the dimm target for the mrs's
+/// @param[in,out] io_inst the MCBIST instruction
+/// @note boilerplate
+///
 template< kind_t K, bool B = perform_mrs_load_overload<K>::available >
 inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -198,7 +220,13 @@ inline fapi2::ReturnCode perform_mrs_load_dispatch( const kind_t& i_kind,
     return perform_mrs_load<K>(i_target, io_inst);
 }
 
-// DEFAULT_KIND is 0 so this is the end of the recursion
+///
+/// @brief Function to perform mrs load overloads
+/// @param[in] i_kind the i_target's dimm_kind struct
+/// @param[in] i_target the dimm target for the mrs's
+/// @param[in,out] io_inst the MCBIST instruction
+/// @note DEFAULT_KIND is 0 so this is the end of the recursion
+///
 template<>
 inline fapi2::ReturnCode perform_mrs_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,

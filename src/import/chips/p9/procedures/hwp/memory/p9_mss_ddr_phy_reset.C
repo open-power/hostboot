@@ -112,7 +112,8 @@ extern "C"
         {
             FAPI_INF( "starting DLL calibration %s", mss::c_str(i_target) );
             bool l_run_workaround = false;
-            fapi2::ReturnCode l_rc = mss::dll_calibration(i_target, l_run_workaround);
+            FAPI_TRY( mss::dll_calibration(i_target, l_run_workaround), "%s Error in p9_mss_ddr_phy_reset.C",
+                      mss::c_str(i_target)  );
 
             // Only run DLL workaround if we fail DLL cal
             // Note: there is no EC workaround for this workaround
@@ -120,10 +121,9 @@ extern "C"
             if( l_run_workaround )
             {
                 FAPI_INF( "%s Applying DLL workaround", mss::c_str(i_target) );
-                l_rc = mss::workarounds::dll::fix_bad_voltage_settings(i_target);
+                FAPI_TRY( mss::workarounds::dll::fix_bad_voltage_settings(i_target), "%s Error in p9_mss_ddr_phy_reset.C",
+                          mss::c_str(i_target)  );
             }
-
-            FAPI_TRY( l_rc, "Failed DLL calibration" );
         }
 
         //
@@ -132,7 +132,8 @@ extern "C"
 
         // 16. Take dphy_nclk/SysClk alignment circuits out of reset and put into continuous update mode,
         FAPI_INF("set up of phase rotator controls %s", mss::c_str(i_target) );
-        FAPI_TRY( mss::setup_phase_rotator_control_registers(i_target, mss::ON) );
+        FAPI_TRY( mss::setup_phase_rotator_control_registers(i_target, mss::ON), "%s Error in p9_mss_ddr_phy_reset.C",
+                  mss::c_str(i_target)  );
 
         // 17. Wait at least 5932 dphy_nclk clock cycles to allow the dphy_nclk/SysClk alignment circuit to
         // perform initial alignment.
@@ -142,11 +143,12 @@ extern "C"
 
         // 18. Check for LOCK in DDRPHY_DP16_SYSCLK_PR_VALUE registers and DDRPHY_ADR_SYSCLK_PR_VALUE
         FAPI_INF("Checking for bang-bang lock %s ...", mss::c_str(i_target));
-        FAPI_TRY( mss::check_bang_bang_lock(i_target) );
+        FAPI_TRY( mss::check_bang_bang_lock(i_target), "%s Error in p9_mss_ddr_phy_reset.C", mss::c_str(i_target)  );
 
         // 19. Write 0b0 into the DDRPHY_PC_RESETS register bit 1. This write de-asserts the SYSCLK_RESET.
         FAPI_INF("deassert sysclk reset %s", mss::c_str(i_target));
-        FAPI_TRY( mss::deassert_sysclk_reset(i_target), "deassert_sysclk_reset failed for %s", mss::c_str(i_target) );
+        FAPI_TRY( mss::deassert_sysclk_reset(i_target), "deassert_sysclk_reset failed for %s", mss::c_str(i_target),
+                  "%s Error in p9_mss_ddr_phy_reset.C", mss::c_str(i_target)  );
 
         // 20. Write 8020h into the DDRPHY_ADR_SYSCLK_CNTL_PR Registers and
         // DDRPHY_DP16_SYSCLK_PR0/1 registers This write takes the dphy_nclk/
@@ -157,7 +159,8 @@ extern "C"
 
         // 21. Wait at least 32 dphy_nclk clock cycles.
         FAPI_DBG("Wait at least 32 memory clock cycles %s", mss::c_str(i_target));
-        FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 32), mss::cycles_to_simcycles(32)) );
+        FAPI_TRY( fapi2::delay(mss::cycles_to_ns(i_target, 32), mss::cycles_to_simcycles(32)),
+                  "%s Error in p9_mss_ddr_phy_reset.C", mss::c_str(i_target)  );
 
         //
         // Done bang-bang-lock
@@ -168,11 +171,13 @@ extern "C"
                  "force_mclk_low (set low) Failed rc = 0x%08X", uint64_t(fapi2::current_err) );
 
         // Workarounds
-        FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target) );
+        FAPI_TRY( mss::workarounds::dp16::after_phy_reset(i_target), "%s Error in p9_mss_ddr_phy_reset.C",
+                  mss::c_str(i_target) );
 
         // New for Nimbus - perform duty cycle clock distortion calibration (DCD cal)
         // Per PHY team's characterization, the DCD cal needs to be run after DLL calibration
-        FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target) );
+        FAPI_TRY( mss::adr32s::duty_cycle_distortion_calibration(i_target), "%s Error in p9_mss_ddr_phy_reset.C",
+                  mss::c_str(i_target)  );
 
         // mss::check::during_phy_reset checks to see if there are any FIR. We do this 'twice' once here
         // (as part of the good-path) and once if we jump to the fapi_try label.
@@ -185,7 +190,7 @@ extern "C"
         // The algorithm is 'good path do after_phy_reset, all paths (error or not) perform the checks
         // which are defined in during_phy_reset'. We won't run after_phy_reset (unmask of FIR) unless
         // we're done with a success.
-        FAPI_TRY( mss::unmask::after_phy_reset(i_target) );
+        FAPI_TRY( mss::unmask::after_phy_reset(i_target), "%s Error in p9_mss_ddr_phy_reset.C", mss::c_str(i_target)  );
 
         // Leave as we're all good and checked the FIR already ...
         return fapi2::current_err;

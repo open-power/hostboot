@@ -27,10 +27,10 @@
 /// @file mrs06.C
 /// @brief Run and manage the DDR4 MRS06 loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -57,17 +57,17 @@ namespace ddr4
 mrs06_data::mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc ):
     iv_tccd_l(0)
 {
-    FAPI_TRY( mss::eff_vref_dq_train_value(i_target, &(iv_vrefdq_train_value[0])) );
-    FAPI_TRY( mss::eff_vref_dq_train_range(i_target, &(iv_vrefdq_train_range[0])) );
-    FAPI_TRY( mss::eff_vref_dq_train_enable(i_target, &(iv_vrefdq_train_enable[0])) );
-    FAPI_TRY( mss::eff_dram_tccd_l(i_target, iv_tccd_l) );
+    FAPI_TRY( mss::eff_vref_dq_train_value(i_target, &(iv_vrefdq_train_value[0])), "Error in mrs06_data()" );
+    FAPI_TRY( mss::eff_vref_dq_train_range(i_target, &(iv_vrefdq_train_range[0])), "Error in mrs06_data()" );
+    FAPI_TRY( mss::eff_vref_dq_train_enable(i_target, &(iv_vrefdq_train_enable[0])), "Error in mrs06_data()" );
+    FAPI_TRY( mss::eff_dram_tccd_l(i_target, iv_tccd_l), "Error in mrs06_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs06", mss::c_str(i_target));
     return;
 }
 
@@ -84,7 +84,7 @@ fapi2::ReturnCode mrs06(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs06_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS06 data from attributes");
+    FAPI_TRY( fapi2::current_err, "%s Unable to construct MRS06 data from attributes", mss::c_str(i_target) );
     FAPI_TRY( mrs06(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -124,14 +124,16 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                 .set_PARAMETER(TCCD)
                 .set_PARAMETER_VALUE(i_data.iv_tccd_l)
                 .set_DIMM_IN_ERROR(i_target),
-                "Bad value for TCCD: %d (%s)", i_data.iv_tccd_l, mss::c_str(i_target));
+                "Bad value for TCCD: %d (%s)",
+                i_data.iv_tccd_l,
+                mss::c_str(i_target));
 
     l_tccd_l_buffer = tccd_l_map[i_data.iv_tccd_l - LOWEST_TCCD];
     l_vrefdq_train_value_buffer = i_data.iv_vrefdq_train_value[mss::index(i_rank)];
 
-    FAPI_INF("MR6 rank %d attributes: TRAIN_V: 0x%x(0x%x), TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x(0x%x)", i_rank,
-             i_data.iv_vrefdq_train_value[mss::index(i_rank)], uint8_t(l_vrefdq_train_value_buffer),
-             i_data.iv_vrefdq_train_range[mss::index(i_rank)],
+    FAPI_INF("%s MR6 rank %d attributes: TRAIN_V: 0x%x(0x%x), TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x(0x%x)",
+             mss::c_str(i_target), i_rank, i_data.iv_vrefdq_train_value[mss::index(i_rank)],
+             uint8_t(l_vrefdq_train_value_buffer), i_data.iv_vrefdq_train_range[mss::index(i_rank)],
              i_data.iv_vrefdq_train_enable[mss::index(i_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
 
     mss::swizzle<A0, VREFDQ_TRAIN_LENGTH, VREFDQ_TRAIN_START>(l_vrefdq_train_value_buffer, io_inst.arr0);
@@ -139,7 +141,7 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.writeBit<A7>(i_data.iv_vrefdq_train_enable[mss::index(i_rank)]);
     mss::swizzle<A10, TCCD_L_LENGTH, TCCD_L_START>(l_tccd_l_buffer, io_inst.arr0);
 
-    FAPI_INF("MR6: 0x%016llx", uint64_t(io_inst.arr0));
+    FAPI_INF("%s MR6: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -172,8 +174,8 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
     o_vrefdq_train_enable = i_inst.arr0.getBit<A7>();
     mss::swizzle<5, 3, A12>(i_inst.arr0, o_tccd_l_buffer);
 
-    FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x", i_rank,
-             uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
+    FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x",
+             i_rank, uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
              o_vrefdq_train_enable, uint8_t(o_tccd_l_buffer));
 
     return FAPI2_RC_SUCCESS;

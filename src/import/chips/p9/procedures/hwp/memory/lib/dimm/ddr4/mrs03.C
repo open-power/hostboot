@@ -25,12 +25,12 @@
 
 ///
 /// @file mrs03.C
-/// @brief Run and manage the DDR4 DDR4 loading
+/// @brief Run and manage mrs03
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -75,26 +75,26 @@ mrs03_data::mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_fine_refresh(0),
     iv_read_format(fapi2::ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL)
 {
-    FAPI_TRY( mss::eff_mpr_mode(i_target, iv_mpr_mode) );
-    FAPI_TRY( mss::eff_mpr_page(i_target, iv_mpr_page) );
-    FAPI_TRY( mss::eff_geardown_mode(i_target, iv_geardown) );
-    FAPI_TRY( mss::eff_per_dram_access(i_target, iv_pda) );
-    FAPI_TRY( mss::eff_temp_readout(i_target, iv_temp_readout) );
-    FAPI_TRY( mss::mrw_fine_refresh_mode(iv_fine_refresh) );
-    FAPI_TRY( mss::eff_crc_wr_latency(i_target, iv_crc_wr_latency) );
-    FAPI_TRY( mss::eff_mpr_rd_format(i_target, iv_read_format) );
+    FAPI_TRY( mss::eff_mpr_mode(i_target, iv_mpr_mode), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_mpr_page(i_target, iv_mpr_page), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_geardown_mode(i_target, iv_geardown), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_per_dram_access(i_target, iv_pda), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_temp_readout(i_target, iv_temp_readout), "Error in mrs03_data()" );
+    FAPI_TRY( mss::mrw_fine_refresh_mode(iv_fine_refresh), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_crc_wr_latency(i_target, iv_crc_wr_latency), "Error in mrs03_data()" );
+    FAPI_TRY( mss::eff_mpr_rd_format(i_target, iv_read_format), "Error in mrs03_data()" );
 
-    FAPI_INF("MR3 attributes: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
+    FAPI_INF("%s MR3 attributes: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
              "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x",
-             iv_mpr_mode, iv_mpr_page, iv_geardown, iv_pda, iv_temp_readout,
-             iv_fine_refresh, iv_crc_wr_latency, iv_read_format);
+             mss::c_str(i_target), iv_mpr_mode, iv_mpr_page, iv_geardown, iv_pda,
+             iv_temp_readout, iv_fine_refresh, iv_crc_wr_latency, iv_read_format);
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs03");
     return;
 }
 
@@ -111,7 +111,9 @@ fapi2::ReturnCode mrs03(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs03_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS03 data from attributes");
+    FAPI_TRY( fapi2::current_err,
+              "%s Unable to construct MRS03 data from attributes",
+              mss::c_str(i_target) );
     FAPI_TRY( mrs03(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -139,13 +141,16 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     fapi2::buffer<uint8_t> l_crc_wr_latency_buffer;
 
-    FAPI_ASSERT((i_data.iv_crc_wr_latency >= LOWEST_WL) && (i_data.iv_crc_wr_latency < (LOWEST_WL + WL_COUNT)),
+    FAPI_ASSERT((i_data.iv_crc_wr_latency >= LOWEST_WL) &&
+                (i_data.iv_crc_wr_latency < (LOWEST_WL + WL_COUNT)),
                 fapi2::MSS_BAD_MR_PARAMETER()
                 .set_MR_NUMBER(3)
                 .set_PARAMETER(WRITE_CMD_LATENCY)
                 .set_PARAMETER_VALUE(i_data.iv_crc_wr_latency)
                 .set_DIMM_IN_ERROR(i_target),
-                "Bad value for Write CMD Latency: %d (%s)", i_data.iv_crc_wr_latency, mss::c_str(i_target));
+                "Bad value for Write CMD Latency: %d (%s)",
+                i_data.iv_crc_wr_latency,
+                mss::c_str(i_target));
 
     l_crc_wr_latency_buffer = crc_wr_latency_map[i_data.iv_crc_wr_latency - LOWEST_WL];
 
@@ -159,7 +164,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     mss::swizzle<A9, CRC_WR_LATENCY_LENGTH, CRC_WR_LATENCY_START>(l_crc_wr_latency_buffer, io_inst.arr0);
     mss::swizzle<A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format), io_inst.arr0);
 
-    FAPI_INF("MR3: 0x%016llx", uint64_t(io_inst.arr0));
+    FAPI_INF("%s MR3: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

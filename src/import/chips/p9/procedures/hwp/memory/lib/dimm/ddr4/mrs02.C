@@ -27,10 +27,10 @@
 /// @file mrs02.C
 /// @brief Run and manage the DDR4 MRS02 loading
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -59,17 +59,17 @@ mrs02_data::mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, 
     iv_cwl(0),
     iv_write_crc(0)
 {
-    FAPI_TRY( mss::eff_dram_lpasr(i_target, iv_lpasr) );
-    FAPI_TRY( mss::eff_dram_cwl(i_target, iv_cwl) );
-    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])) );
-    FAPI_TRY( mss::eff_write_crc(i_target, iv_write_crc) );
+    FAPI_TRY( mss::eff_dram_lpasr(i_target, iv_lpasr), "Error in mrs02_data()" );
+    FAPI_TRY( mss::eff_dram_cwl(i_target, iv_cwl), "Error in mrs02_data()" );
+    FAPI_TRY( mss::eff_dram_rtt_wr(i_target, &(iv_dram_rtt_wr[0])), "Error in mrs02_data()" );
+    FAPI_TRY( mss::eff_write_crc(i_target, iv_write_crc), "Error in mrs02_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
-    FAPI_ERR("unable to get attributes for mrs0");
+    FAPI_ERR("%s unable to get attributes for mrs02", mss::c_str(i_target));
     return;
 }
 
@@ -86,7 +86,9 @@ fapi2::ReturnCode mrs02(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 {
     // Check to make sure our ctor worked ok
     mrs02_data l_data( i_target, fapi2::current_err );
-    FAPI_TRY( fapi2::current_err, "Unable to construct MRS02 data from attributes");
+    FAPI_TRY( fapi2::current_err,
+              "%s Unable to construct MRS02 data from attributes",
+              mss::c_str(i_target) );
     FAPI_TRY( mrs02(i_target, l_data, io_inst, i_rank) );
 
 fapi_try_exit:
@@ -138,9 +140,9 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
 
     // Printed here as opposed to the ctor as it uses the rank information
-    FAPI_INF("MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x", i_rank,
-             uint8_t(i_data.iv_lpasr), i_data.iv_cwl, uint8_t(l_cwl_buffer),
-             uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
+    FAPI_INF("%s MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x",
+             mss::c_str(i_target), i_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
+             uint8_t(l_cwl_buffer), uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
 
     mss::swizzle<A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
 
@@ -184,8 +186,8 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<TARGET_TYPE_MCBIS
     mss::swizzle<6, 2, A7>(i_inst.arr0, o_lpasr);
     mss::swizzle<5, 3, A11>(i_inst.arr0, o_rtt_wr);
 
-    FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x", i_rank,
-             uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
+    FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x",
+             i_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
 
     return FAPI2_RC_SUCCESS;
 }
