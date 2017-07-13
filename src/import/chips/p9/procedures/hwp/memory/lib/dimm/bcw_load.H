@@ -28,9 +28,9 @@
 /// @brief Code to support bcw_loads
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_BCW_LOAD_H_
@@ -96,12 +96,12 @@ struct perform_bcw_load_overload< KIND_LRDIMM_DDR4 >
     static constexpr bool available = true;
 };
 
-///
-///  Define the default case for overloaded calls. enable_if states that
-/// if there is a DEFAULT_KIND overload for this TargetType, then this
-/// entry point will be defined. Note the general case below is enabled if
-/// there is no overload defined for this TargetType
-///
+//
+// Define the default case for overloaded calls. enable_if states that
+// if there is a DEFAULT_KIND overload for this TargetType, then this
+// entry point will be defined. Note the general case below is enabled if
+// there is no overload defined for this TargetType
+//
 
 ///
 /// @brief Perform the bcw_load operations
@@ -149,8 +149,9 @@ fapi2::ReturnCode perform_bcw_load<DEFAULT_KIND>( const fapi2::Target<fapi2::TAR
 /// @brief Perform the bcw_load operations
 /// @tparam K the kind of DIMM we're operating on (derived)
 /// @tparam B boolean that enables API from K dimm kind
+/// @param[in] i_kind the dimm kind struct for the i_target
 /// @param[in] i_target, a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
-/// @param[in,out] a vector of CCS instructions we should add to
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< kind_t K, bool B = perform_bcw_load_overload<K>::available >
@@ -170,7 +171,14 @@ inline fapi2::ReturnCode perform_bcw_load_dispatch( const kind_t& i_kind,
     return perform_bcw_load<K>(i_target, io_inst);
 }
 
-// DEFAULT_KIND is 0 so this is the end of the recursion
+///
+/// @brief Perform the bcw_load operations
+/// @param[in] i_kind the dimm kind struct for the i_target
+/// @param[in] i_target, a fapi2::Target<fapi2::TARGET_TYPE_DIMM>
+/// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @return FAPI2_RC_SUCCESS if and only if ok
+/// @note DEFAULT_KIND is 0 so this is the end of the recursion
+///
 template<>
 inline fapi2::ReturnCode perform_bcw_load_dispatch<DEFAULT_KIND>(const kind_t&,
         const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
