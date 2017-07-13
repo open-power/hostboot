@@ -27,7 +27,7 @@
 /// @file p9_mss_draminit_training.C
 /// @brief Train dram
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
@@ -78,13 +78,14 @@ extern "C"
         }
 
         uint8_t l_reset_disable = 0;
-        FAPI_TRY( mss::mrw_reset_delay_before_cal(l_reset_disable) );
+        FAPI_TRY( mss::mrw_reset_delay_before_cal(l_reset_disable), "%s Error in p9_mss_draminit_training",
+                  mss::c_str(i_target) );
 
         // Configure the CCS engine.
         {
             fapi2::buffer<uint64_t> l_ccs_config;
 
-            FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config) );
+            FAPI_TRY( mss::ccs::read_mode(i_target, l_ccs_config), "%s Error in p9_mss_draminit_training", mss::c_str(i_target) );
 
             // It's unclear if we want to run with this true or false. Right now (10/15) this
             // has to be false. Shelton was unclear if this should be on or off in general BRS
@@ -95,7 +96,7 @@ extern "C"
 
             // Hm. Centaur sets this up for the longest duration possible. Can we do better?
             mss::ccs::cal_count(i_target, l_ccs_config, ~0, ~0);
-            FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config) );
+            FAPI_TRY( mss::ccs::write_mode(i_target, l_ccs_config), "%s Error in p9_mss_draminit_training", mss::c_str(i_target) );
         }
 
         // Clean out any previous calibration results, set bad-bits and configure the ranks.
@@ -114,20 +115,20 @@ extern "C"
             // if the i_specal_training bits have not been specified.
             if (i_special_training == 0)
             {
-                FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled) );
+                FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled), "Error in p9_mss_draminit_training" );
             }
 
             FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
 
             // ZQCAL (for DRAMs and LRDIMM data buffers) isn't a PHY calibration,
             // so we don't add it in the PHY calibration setup and do it separately here.
-            FAPI_TRY( mss::setup_and_execute_zqcal(p, l_cal_steps_enabled) );
+            FAPI_TRY( mss::setup_and_execute_zqcal(p, l_cal_steps_enabled), "Error in p9_mss_draminit_training" );
 
             FAPI_TRY( mss::putScom(p, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, 0) );
 
             // Disable port fails as it doesn't appear the MC handles initial cal timeouts
             // correctly (cal_length.) BRS, see conversation with Brad Michael
-            FAPI_TRY( mss::change_port_fail_disable(p, mss::ON ) );
+            FAPI_TRY( mss::change_port_fail_disable(p, mss::ON ), "Error in p9_mss_draminit_training" );
 
             // The following registers must be configured to the correct operating environment:
 
@@ -138,7 +139,7 @@ extern "C"
             // Section 5.2.6.3 WC Configuration 2 Register on page 438
 
             // Get our rank pairs.
-            FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
+            FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs), "Error in p9_mss_draminit_training" );
 
             // Hits the resets iff zqcal is set so we don't unnecessarily reset errors
             if  ((l_cal_steps_enabled.getBit<mss::cal_steps::DRAM_ZQCAL>()) ||
@@ -152,13 +153,13 @@ extern "C"
             if ((l_reset_disable == fapi2::ENUM_ATTR_MSS_MRW_RESET_DELAY_BEFORE_CAL_YES) && (i_special_training == 0))
             {
                 FAPI_INF("resetting delay values before cal %s", mss::c_str(p));
-                FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs) );
+                FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs), "Error in p9_mss_draminit_training" );
             }
 
             FAPI_DBG("generating calibration CCS instructions: %d rank-pairs", l_pairs.size());
 
             // Turn on refresh for training
-            FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(p) );
+            FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(p), "Error in p9_mss_draminit_training" );
 
             // For each rank pair we need to calibrate, pop a ccs instruction in an array and execute it.
             // NOTE: IF YOU CALIBRATE MORE THAN ONE RANK PAIR PER CCS PROGRAM, MAKE SURE TO CHANGE
@@ -169,11 +170,12 @@ extern "C"
 
                 if (i_abort_on_error == CAL_ABORT_SENTINAL)
                 {
-                    FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error) );
+                    FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error), "Error in p9_mss_draminit_training" );
                 }
 
                 // Execute selected cal steps
-                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
+                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error),
+                          "Error in p9_mss_draminit_training" );
 
                 fapi2::ReturnCode l_rc (fapi2::current_err);
 
@@ -244,7 +246,7 @@ extern "C"
 #endif
 
         // Unmask FIR
-        FAPI_TRY( mss::unmask::after_draminit_training(i_target) );
+        FAPI_TRY( mss::unmask::after_draminit_training(i_target), "Error in p9_mss_draminit" );
 
     fapi_try_exit:
         FAPI_INF("End draminit training");
