@@ -566,8 +566,7 @@ sub buildAffinity
             $self->setAttribute($target,"FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target,"FAPI_POS",      $sys_pos);
             $self->setAttribute($target,"ORDINAL_ID",    $sys_pos);
-            $sys_phys = $self->getAttribute($target, "PHYS_PATH");
-            $sys_phys = substr($sys_phys, 9);
+            $sys_phys = "sys-0"; # just hardcode this as it does not change
         }
         elsif ($type eq "NODE")
         {
