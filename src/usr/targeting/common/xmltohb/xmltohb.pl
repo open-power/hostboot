@@ -1004,6 +1004,9 @@ sub validateAttributes {
     $elements{"global"} = { required => 0, isscalar => 0};
     $elements{"range"} = { required => 0, isscalar => 0};
 
+    # do NOT export attribute & its associated enum to serverwiz
+    $elements{"no_export"}   = { required => 0, isscalar => 0};
+
     foreach my $attribute (@{$attributes->{attribute}})
     {
         validateSubElements("attribute",1,$attribute,\%elements);

@@ -1116,6 +1116,7 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1126,6 +1127,7 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1264,6 +1266,7 @@
         <id>ATTR_ISDIMM_MBVPD_INDEX</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1275,6 +1278,7 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1286,6 +1290,7 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1300,6 +1305,7 @@
     <persistency>non-volatile</persistency>
     <hasStringConversion/>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1312,6 +1318,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1324,6 +1331,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -1352,6 +1360,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2359,6 +2368,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2375,6 +2385,7 @@
         <id>ATTR_MBA_PORT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2391,6 +2402,7 @@
         <id>ATTR_MBA_DIMM</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2531,6 +2543,7 @@
         <id>ATTR_PROC_FABRIC_GROUP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2552,6 +2565,7 @@
         <id>ATTR_PROC_EFF_FABRIC_GROUP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2574,6 +2588,7 @@
         <id>ATTR_PROC_FABRIC_CHIP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2595,6 +2610,7 @@
         <id>ATTR_PROC_EFF_FABRIC_CHIP_ID</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -2874,6 +2890,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 <attribute>
     <id>SP_FUNCTIONS</id>
@@ -3127,6 +3144,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 
@@ -3140,6 +3158,7 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -6791,6 +6810,7 @@ firmware notes: Used as override attribute for pstate procedure
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 
@@ -11190,6 +11210,7 @@ firmware notes: Used as override attribute for pstate procedure
         <id>ATTR_MEMVPD_POS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -12155,6 +12176,7 @@ Measured in GB</description>
         <id>ATTR_EI_BUS_TX_LANE_INVERT</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -12557,6 +12579,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -12642,6 +12665,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -12690,6 +12714,7 @@ Measured in GB</description>
         <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -14301,6 +14326,7 @@ Measured in GB</description>
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -14491,6 +14517,7 @@ Measured in GB</description>
         <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -15611,6 +15638,7 @@ Measured in GB</description>
     <hasStringConversion/>
     <readable/>
     <writeable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -15792,6 +15820,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -17162,6 +17191,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -17223,6 +17253,7 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -17284,6 +17315,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -17306,6 +17338,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -17480,6 +17513,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -21047,6 +21081,7 @@ Measured in GB</description>
     </hwpfToHbAttrMap>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -21648,6 +21683,7 @@ Measured in GB</description>
     <id>ATTR_DEVICE_ID</id>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
+  <no_export/>
 </attribute>
 
 <!-- Deprecated -->
@@ -22112,6 +22148,7 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <virtual/>
+    <no_export/>
 </attribute>
 
 <!-- ********************************************************************** -->
@@ -22309,6 +22346,7 @@ Measured in GB</description>
     <id>ATTR_OBUS_SLOT_INDEX</id>
     <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
+  <no_export/>
 </attribute>
 
 <enumerationType>
@@ -23466,6 +23504,7 @@ Measured in GB</description>
       <id>ATTR_PROC_PCIE_IOP_SWAP</id>
       <macro>DIRECT</macro>
   </hwpfToHbAttrMap>
+  <no_export/>
 </attribute>
 
 <attribute>
@@ -33119,6 +33158,7 @@ Measured in GB</description>
         <id>ATTR_REL_POS</id>
         <macro>DIRECT</macro>
     </hwpfToHbAttrMap>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -33743,6 +33783,7 @@ Measured in GB</description>
     <persistency>non-volatile</persistency>
     <readable/>
     <writeable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34543,6 +34584,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34554,6 +34596,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34565,6 +34608,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34576,6 +34620,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34587,6 +34632,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34598,6 +34644,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34609,6 +34656,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34619,6 +34667,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34629,6 +34678,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34639,6 +34689,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
@@ -34649,6 +34700,7 @@ Measured in GB</description>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+    <no_export/>
 </attribute>
 
 <attribute>
