@@ -22,73 +22,34 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
-// *!
-/// @file p9_phb_hv_utils.H
-/// @brief Functions to support PHB HV Indirect access procedure (FAPI)
-///
-// *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
-// *HWP FW Owner: Thi Tran thi@us.ibm.com
-// *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: HB
-// ----------------------------------------------------------------------------------
-// *! ADDITIONAL COMMENTS :
-// *!
-// *!
-//-----------------------------------------------------------------------------------
 
+///----------------------------------------------------------------------------
+/// @file p9_phb_hv_utils.H
+/// @brief Functions to support PHB HV Indirect access procedure (FAPI2)
+///
+/// *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
+/// *HWP FW Owner: Thi Tran thi@us.ibm.com
+/// *HWP Team: Nest
+/// *HWP Level: 3
+/// *HWP Consumed by: FSP
+/// ---------------------------------------------------------------------------
 #ifndef _P9_PHB_HV_UTILS_H_
 #define _P9_PHB_HV_UTILS_H_
-
 
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
-
 #include <fapi2.H>
-
-//-----------------------------------------------------------------------------------
-// Structure definitions
-//-----------------------------------------------------------------------------------
-
-//function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_phb_hv_check_etu_state_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&);
-
-typedef fapi2::ReturnCode (*p9_phb_hv_check_args_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const uint32_t,
-        bool const);
-
-typedef fapi2::ReturnCode (*p9_phb_hv_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const uint32_t,
-        bool const);
-
-typedef fapi2::ReturnCode (*p9_phb_hv_write_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const uint32_t,
-        bool const, uint64_t&);
-
-typedef fapi2::ReturnCode (*p9_phb_hv_read_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const uint32_t,
-        bool const, uint64_t&);
-
-typedef fapi2::ReturnCode (*p9_phb_hv_clear_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&);
 
 //-----------------------------------------------------------------------------------
 // Constant definitions
 //-----------------------------------------------------------------------------------
 
-//PHB HV Indirect Address & Data Register BAR
-const uint32_t PHB_HV_INDIRECT_ADDR_REG     = 0x0D010900;
-const uint32_t PHB_HV_INDIRECT_DATA_REG     = 0x0D010901;
-
 //PHB HV Registers
 const uint32_t PHB_CORE_RESET_REGISTER      = 0x1A10;
 
-//PHB HV Register field/bit definition
+//PHB PHB_CORE_RESET_REGISTER field/bit definition
 const uint32_t PHB_HP_PERST_BIT         = 3;
-
-//PHB HV Indirect Address Register field/bit definitions
-const uint32_t PHB_HV_IND_ADDR_VALID_BIT    = 0;
-const uint32_t PHB_HV_IND_ADDR_SIZE_BIT     = 1;
-const uint32_t PHB_HV_IND_ADDR_AUTO_INC_BIT = 2;
-const uint32_t PHB_HV_IND_ADDR_ADDRESS_START_BIT = 51;
-const uint32_t PHB_HV_IND_ADDR_ADDRESS_NUM_OF_BITS = 11;
 
 //8B for PHB register access. 4B for Config Ops
 const uint32_t PHB_HV_IND_ADDR_SIZE_8 = 0;
@@ -97,9 +58,6 @@ const uint32_t PHB_HV_IND_ADDR_SIZE_4 = 1;
 //PHB HV address range definition
 const uint32_t PHB_HV_MAX_ADDR = 0x1FFF;
 
-
-extern "C" {
-
 //-----------------------------------------------------------------------------------
 // Function prototypes
 //-----------------------------------------------------------------------------------
@@ -107,48 +65,59 @@ extern "C" {
 /// @brief check that the ETU is out of reset for PHB HV accesses
 /// @param[in] i_target  => reference for PHB target
 /// @return FAPI_RC_SUCCESS if arguments are valid
-    fapi2::ReturnCode p9_phb_hv_check_etu_state(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target);
+fapi2::ReturnCode p9_phb_hv_check_etu_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target);
 
-/// @brief does the setup for the PHB HV Indirect operation
-/// @brief check that the address is aligned and within the address range allowed by the PHB HV Indirect Address logic
+/// @brief check that the address is aligned and within the address range
+///        allowed by the PHB HV Indirect Address logic
 /// @param[in] i_target  => reference for PHB target
 /// @param[in] i_address => address for the PHB HV Indirect operation
+/// @param[in] i_size    => boolean flag to set the size (true: 4B; false: 8B)
 /// @return FAPI_RC_SUCCESS if arguments are valid
-    fapi2::ReturnCode p9_phb_hv_check_args(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                           bool const i_size);
+fapi2::ReturnCode p9_phb_hv_check_args(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+    const uint32_t i_address,
+    bool const i_size);
 
 /// @brief does the setup for the PHB HV Indirect operation
 /// @param[in] i_target  => reference for PHB target
 /// @param[in] i_address => address for the PHB HV Indirect operation
-/// @param[in] i_size    => boolean flag to set the size for 4B or 8B
+/// @param[in] i_size    => boolean flag to set the size (true: 4B; false: 8B)
 /// @return FAPI_RC_SUCCESS if setting up the phb_hv registers is a success
-    fapi2::ReturnCode p9_phb_hv_setup(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                      bool const i_size);
+fapi2::ReturnCode p9_phb_hv_setup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+    const uint32_t i_address,
+    bool const i_size);
 
 /// @brief does the write for the PHB HV
-/// @param[in] i_target  => reference for PHB target
-/// @param[in] i_address => address for this write
-/// @param[in] i_size    => boolean flag to set the size for 4B or 8B
-/// @param[in] i_write_data => the data that is to be written to the PHB HV Indirect Data Register
+/// @param[in] i_target     => reference for PHB target
+/// @param[in] i_address    => address for this write
+/// @param[in] i_size       => boolean flag to set the size (true: 4B; false: 8B)
+/// @param[in] i_write_data => the data that is to be written to the
+///                            PHB HV Indirect Data Register
 /// @return FAPI_RC_SUCCESS if writing the PHB HV is a success
-    fapi2::ReturnCode p9_phb_hv_write(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                      bool const i_size, uint64_t& i_write_data);
+fapi2::ReturnCode p9_phb_hv_write(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+    const uint32_t i_address,
+    bool const i_size,
+    uint64_t& i_write_data);
 
 /// @brief does the read for the PHB HV
-/// @param[in] i_target  => reference for PHB target
-/// @param[in] i_address => address for this read
-/// @param[in] i_size    => boolean flag to set the size for 4B or 8B
+/// @param[in] i_target     => reference for PHB target
+/// @param[in] i_address    => address for this read
+/// @param[in] i_size       => boolean flag to set the size for 4B or 8B
 /// @param[out] o_read_data => the data that is read from the PHB HV
 /// @return FAPI_RC_SUCCESS if reading the PHB HV is a success
-    fapi2::ReturnCode p9_phb_hv_read(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                     bool const i_size, uint64_t& o_read_data);
+fapi2::ReturnCode p9_phb_hv_read(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+    const uint32_t i_address,
+    bool const i_size,
+    uint64_t& o_read_data);
 
 /// @brief does the clear for the PHB HV
 /// @param[in] i_target => reference for PHB target
-/// @return FAPI_RC_SUCCESS if reading the PHB HV is a success
-    fapi2::ReturnCode p9_phb_hv_clear(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target);
-
-
-} // extern "C"
+/// @return FAPI_RC_SUCCESS if clearing the PHB HV is a success
+fapi2::ReturnCode p9_phb_hv_clear(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target);
 
 #endif //_P9_PHB_HV_UTILS_H_
