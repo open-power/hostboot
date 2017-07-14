@@ -282,7 +282,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         {
             fapi2::toString(l_dmi_target, l_chipletTargetStr, sizeof(l_chipletTargetStr));
             FAPI_DBG("Invoking p9c.dmi.scom.initfile on target %s...", l_chipletTargetStr);
-            FAPI_EXEC_HWP(l_rc, p9c_dmi_scom, l_dmi_target, FAPI_SYSTEM);
+            FAPI_EXEC_HWP(l_rc, p9c_dmi_scom, l_dmi_target, FAPI_SYSTEM, i_target);
 
             if (l_rc)
             {
