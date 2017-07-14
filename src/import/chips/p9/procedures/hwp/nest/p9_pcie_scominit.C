@@ -22,22 +22,22 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
+
+///-----------------------------------------------------------------------------------
 ///
 /// @file p9_pcie_scominit.C
 /// @brief Perform PCIE Phase1 init sequence (FAPI2)
 ///
-// *HWP HWP Owner: Christina Graves clgraves@us.ibm.com
-// *HWP FW Owner: Thi Tran thi@us.ibm.com
-// *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: HB
+/// *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
+/// *HWP Team: Nest
+/// *HWP Level: 3
+/// *HWP Consumed by: HB
+///-----------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------------
 #include <p9_pcie_scominit.H>
-
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fixes.H>
 #include <p9_misc_scom_addresses_fld.H>
@@ -49,6 +49,81 @@ const uint64_t PCI_IOP_FIR_ACTION0_REG = 0x0000000000000000ULL;
 const uint64_t PCI_IOP_FIR_ACTION1_REG = 0xE000000000000000ULL;
 const uint64_t PCI_IOP_FIR_MASK_REG    = 0x1FFFFFFFF8000000ULL;
 
+const uint8_t NUM_PCS_CONFIG = 4;
+const uint8_t NUM_PCIE_LANES = 16;
+const uint8_t NUM_M_CONFIG = 4;
+const uint8_t PEC0_IOP_CONFIG_START_BIT = 13;
+const uint8_t PEC1_IOP_CONFIG_START_BIT = 14;
+const uint8_t PEC2_IOP_CONFIG_START_BIT = 10;
+const uint8_t PEC0_IOP_BIT_COUNT = 1;
+const uint8_t PEC1_IOP_BIT_COUNT = 2;
+const uint8_t PEC2_IOP_BIT_COUNT = 3;
+const uint8_t PEC0_IOP_SWAP_START_BIT = 12;
+const uint8_t PEC1_IOP_SWAP_START_BIT = 12;
+const uint8_t PEC2_IOP_SWAP_START_BIT = 7;
+const uint8_t PEC0_IOP_IOVALID_ENABLE_START_BIT = 4;
+const uint8_t PEC1_IOP_IOVALID_ENABLE_START_BIT = 4;
+const uint8_t PEC2_IOP_IOVALID_ENABLE_START_BIT = 4;
+const uint8_t PEC_IOP_REFCLOCK_ENABLE_START_BIT = 32;
+const uint8_t PEC_IOP_PMA_RESET_START_BIT = 29;
+const uint8_t PEC_IOP_PIPE_RESET_START_BIT = 28;
+const uint8_t PEC_IOP_HSS_PORT_READY_START_BIT = 58;
+
+const uint64_t  PEC_IOP_PLLA_VCO_COURSE_CAL_REGISTER1 = 0x800005010D010C3F;
+const uint64_t  PEC_IOP_PLLB_VCO_COURSE_CAL_REGISTER1 = 0x800005410D010C3F;
+const uint64_t  PEC_IOP_RX_DFE_FUNC_REGISTER1 = 0x8000049F0D010C3F;
+const uint64_t  PEC_IOP_RX_DFE_FUNC_REGISTER2 = 0x800004A00D010C3F;
+
+const uint64_t  RX_VGA_CTRL3_REGISTER[NUM_PCIE_LANES] =
+{
+    0x8000008D0D010C3F,
+    0x800000CD0D010C3F,
+    0x8000018D0D010C3F,
+    0x800001CD0D010C3F,
+    0x8000028D0D010C3F,
+    0x800002CD0D010C3F,
+    0x8000038D0D010C3F,
+    0x800003CD0D010C3F,
+    0x8000088D0D010C3F,
+    0x800008CD0D010C3F,
+    0x8000098D0D010C3F,
+    0x800009CD0D010C3F,
+    0x80000A8D0D010C3F,
+    0x80000ACD0D010C3F,
+    0x80000B8D0D010C3F,
+    0x80000BCD0D010C3F,
+};
+
+const uint64_t  RX_LOFF_CNTL_REGISTER[NUM_PCIE_LANES] =
+{
+    0x800000A60D010C3F,
+    0x800000E60D010C3F,
+    0x800001A60D010C3F,
+    0x800001E60D010C3F,
+    0x800002A60D010C3F,
+    0x800002E60D010C3F,
+    0x800003A60D010C3F,
+    0x800003E60D010C3F,
+    0x800008A60D010C3F,
+    0x800008E60D010C3F,
+    0x800009A60D010C3F,
+    0x800009E60D010C3F,
+    0x80000AA60D010C3F,
+    0x80000AE60D010C3F,
+    0x80000BA60D010C3F,
+    0x80000BE60D010C3F,
+
+};
+
+const uint32_t PCS_CONFIG_MODE0 = 0xA006;
+const uint32_t PCS_CONFIG_MODE1 = 0xA805;
+const uint32_t PCS_CONFIG_MODE2 = 0xB071;
+const uint32_t PCS_CONFIG_MODE3 = 0xB870;
+
+const uint32_t MAX_NUM_POLLS = 100; //Maximum number of iterations (So, 400ns * 100 = 40us before timeout)
+const uint64_t PMA_RESET_NANO_SEC_DELAY = 400; //400ns to wait for PMA RESET to go through
+const uint64_t PMA_RESET_CYC_DELAY = 400; //400ns to wait for PMA RESET to go through
+
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
@@ -59,15 +134,14 @@ const uint64_t PCI_IOP_FIR_MASK_REG    = 0x1FFFFFFFF8000000ULL;
 /// @param[in/out]     io_buf  The buffer
 /// @param[in]         in_pec_id The PEC id
 /// @param[in]         in_attr The attribute value to be set
-/// @param[in]         in_pec_id The PEC id
 /// @param[in]         in_pec[0-2]_s The start bit for pec[0-2]
 /// @param[in]         in_pec[0-2]_c The bit count for pec[0-2]
-//
+///
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
-
 fapi2::ReturnCode set_buf(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& in_target,
                           fapi2::buffer<uint64_t>& io_buf,
-                          const int in_pec_id, const uint8_t in_attr,
+                          const int in_pec_id,
+                          const uint8_t in_attr,
                           const uint32_t in_pec0_s, const uint32_t in_pec0_c,
                           const uint32_t in_pec1_s, const uint32_t in_pec1_c,
                           const uint32_t in_pec2_s, const uint32_t in_pec2_c)
@@ -88,7 +162,8 @@ fapi2::ReturnCode set_buf(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& in_
 
         default:
             FAPI_ASSERT(false,
-                        fapi2::P9_PCIE_SCOMINIT_PECID_ERROR().set_TARGET(in_target),
+                        fapi2::P9_PCIE_SCOMINIT_PECID_ERROR()
+                        .set_TARGET(in_target).set_IN_PEC_ID(in_pec_id),
                         "Unknown PEC ID: %i!", in_pec_id);
             break;
     }
@@ -98,11 +173,11 @@ fapi_try_exit:
 }
 
 //-----------------------------------------------------------------------------------
-// Function definitions
+// See doxygen in header file
 //-----------------------------------------------------------------------------------
 fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("Start");
+    FAPI_DBG("Start");
     uint8_t l_attr_proc_pcie_iop_config = 0;
     uint8_t l_attr_proc_pcie_iop_swap = 0;
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
@@ -128,8 +203,6 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     uint8_t l_hw414759 = 0;
 
     FAPI_DBG("target vec size: %#x", l_pec_chiplets_vec.size());
-    FAPI_DBG("l_buf: %#x", l_buf());
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414759, i_target, l_hw414759),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW414759)");
 
@@ -143,67 +216,86 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
 
         // Phase1 init step 2a
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOP_CONFIG, l_pec_chiplets,
-                               l_attr_proc_pcie_iop_config));
+                               l_attr_proc_pcie_iop_config),
+                 "Error getting ATTR_PROC_PCIE_IOP_CONFIG");
         FAPI_DBG("attr_proc_pcie_iop_config: %#x", l_attr_proc_pcie_iop_config);
+
         l_buf = 0;
         FAPI_TRY(set_buf(i_target, l_buf, l_pec_id, l_attr_proc_pcie_iop_config,
                          PEC0_IOP_CONFIG_START_BIT, PEC0_IOP_BIT_COUNT * 2,
                          PEC1_IOP_CONFIG_START_BIT, PEC1_IOP_BIT_COUNT * 2,
-                         PEC2_IOP_CONFIG_START_BIT, PEC2_IOP_BIT_COUNT * 2));
+                         PEC2_IOP_CONFIG_START_BIT, PEC2_IOP_BIT_COUNT * 2),
+                 "Error from set_buf");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_OR");
 
         // Phase1 init step 2b
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOP_SWAP, l_pec_chiplets,
-                               l_attr_proc_pcie_iop_swap));
+                               l_attr_proc_pcie_iop_swap),
+                 "Error getting ATTR_PROC_PCIE_IOP_SWAP");
         FAPI_DBG("attr_proc_pcie_iop_swap: %#x", l_attr_proc_pcie_iop_swap);
+
         l_buf = 0;
         FAPI_TRY(set_buf(i_target, l_buf, l_pec_id, l_attr_proc_pcie_iop_swap,
                          PEC0_IOP_SWAP_START_BIT, PEC0_IOP_BIT_COUNT,
                          PEC1_IOP_SWAP_START_BIT, PEC1_IOP_BIT_COUNT,
                          PEC2_IOP_SWAP_START_BIT, PEC2_IOP_BIT_COUNT));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_OR");
 
         // Phase1 init step 3a
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOVALID_ENABLE, l_pec_chiplets,
-                               l_attr_proc_pcie_iovalid_enable));
+                               l_attr_proc_pcie_iovalid_enable),
+                 "Error getting ATTR_PROC_PCIE_IOVALID_ENABLE");
         FAPI_DBG("l_attr_proc_pcie_iovalid_enable: %#x", l_attr_proc_pcie_iovalid_enable);
+
         l_buf = 0;
         FAPI_TRY(set_buf(i_target, l_buf, l_pec_id, l_attr_proc_pcie_iovalid_enable,
                          PEC0_IOP_IOVALID_ENABLE_START_BIT, PEC0_IOP_BIT_COUNT,
                          PEC1_IOP_IOVALID_ENABLE_START_BIT, PEC1_IOP_BIT_COUNT,
                          PEC2_IOP_IOVALID_ENABLE_START_BIT, PEC2_IOP_BIT_COUNT));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_OR");
 
         // Phase1 init step 3b (enable clock)
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_REFCLOCK_ENABLE, l_pec_chiplets, l_attr_proc_pcie_refclock_enable));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_REFCLOCK_ENABLE, l_pec_chiplets, l_attr_proc_pcie_refclock_enable),
+                 "Error getting ATTR_PROC_PCIE_REFCLOCK_ENABLE");
         FAPI_DBG("l_attr_proc_pcie_refclock_enable: %#x", l_attr_proc_pcie_refclock_enable);
+
         l_buf = 0;
         FAPI_TRY(l_buf.insertFromRight(l_attr_proc_pcie_refclock_enable, PEC_IOP_REFCLOCK_ENABLE_START_BIT, 1));
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CTRL0_OR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CTRL0_OR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CTRL0_OR");
 
         // Phase1 init step 4 (PMA reset)
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
-
-        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_CLEAR");
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY),
+                 "fapiDelay error.");
 
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf));
-
-        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_OR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_OR");
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY),
+                 "fapiDelay error.");
 
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1));
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PMA_RESET_START_BIT, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_CLEAR");
 
         FAPI_DBG("pec%i: Poll for PRTREADY status on PLLA and PLLB.", l_pec_id);
         l_poll_counter = 0; //Reset poll counter
@@ -211,7 +303,8 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         while (l_poll_counter < MAX_NUM_POLLS)
         {
             l_poll_counter++;
-            FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+            FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY),
+                     "fapiDelay error.");
 
             //Read PLLA VCO Course Calibration Register into l_buf
             FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_PLLA_VCO_COURSE_CAL_REGISTER1, l_buf),
@@ -226,14 +319,12 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
             //Check PRTEADY PLLA and PLLB status bit
             if ((l_buf.getBit(PEC_IOP_HSS_PORT_READY_START_BIT) || l_buf2.getBit(PEC_IOP_HSS_PORT_READY_START_BIT)))
             {
-
                 FAPI_DBG("pec%i: HSS Port is ready.", l_pec_id);
                 break;
             }
         }
 
         FAPI_DBG("pec%i: IOP HSS Port Ready status (poll counter = %d).", l_pec_id, l_poll_counter);
-
         FAPI_ASSERT(l_poll_counter < MAX_NUM_POLLS,
                     fapi2::P9_IOP_HSS_PORT_NOT_READY()
                     .set_TARGET(l_pec_chiplets)
@@ -243,83 +334,116 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                     .set_PLLB_DATA(l_buf2),
                     "pec%i: IOP HSS Port Ready status is not set!", l_pec_id);
 
-
         // Phase1 init step 5 (Set IOP FIR action0)
         FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_ACTION0_REG);
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION0_REG, PCI_IOP_FIR_ACTION0_REG));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION0_REG, PCI_IOP_FIR_ACTION0_REG),
+                 "Error from putScom (0x%.16llX), PEC_FIR_ACTION0_REG");
 
         // Phase1 init step 6 (Set IOP FIR action1)
         FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_ACTION1_REG);
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION1_REG, PCI_IOP_FIR_ACTION1_REG));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_ACTION1_REG, PCI_IOP_FIR_ACTION1_REG),
+                 "Error from putScom (0x%.16llX), PEC_FIR_ACTION1_REG");
 
         // Phase1 init step 7 (Set IOP FIR mask)
         FAPI_DBG("pec%i: %#lx", l_pec_id, PCI_IOP_FIR_MASK_REG);
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, PCI_IOP_FIR_MASK_REG));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_FIR_MASK_REG, PCI_IOP_FIR_MASK_REG),
+                 "Error from putScom (0x%.16llX), PEC_FIR_MASK_REG");
 
         // Phase1 init step 8-11 (Config 0 - 3)
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_CDR_GAIN, l_pec_chiplets, l_pcs_cdr_gain));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_INIT_GAIN, l_pec_chiplets, l_pcs_init_gain));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_PK_INIT, l_pec_chiplets, l_pcs_pk_init));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL, l_pec_chiplets, l_pcs_sigdet_lvl));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_CDR_GAIN, l_pec_chiplets, l_pcs_cdr_gain),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_CDR_GAIN");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_INIT_GAIN, l_pec_chiplets, l_pcs_init_gain),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_INIT_GAIN");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_PK_INIT, l_pec_chiplets, l_pcs_pk_init),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_PK_INIT");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL, l_pec_chiplets, l_pcs_sigdet_lvl),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_SIGDET_LVL");
 
         for (int i = 0; i < NUM_PCS_CONFIG; i++)
         {
             // RX Config Mode
             l_buf = 0;
-            FAPI_TRY(l_buf.insertFromRight(l_pcs_config_mode[i], 48, 16));
+            FAPI_TRY(l_buf.insertFromRight(l_pcs_config_mode[i], 48, 16),
+                     "Error returned from insertFromRight()");
             FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
-            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CONFIG_MODE_REG, l_buf));
+            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CONFIG_MODE_REG, l_buf),
+                     "Error from putScom (0x%.16llX), PEC_PCS_RX_CONFIG_MODE_REG");
 
             // RX CDR GAIN
-            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf));
-            FAPI_TRY(l_buf.insertFromRight(l_pcs_cdr_gain[i], 56, 8));
+            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf),
+                     "Error from getScom (0x%.16llX), PEC_PCS_RX_CDR_GAIN_REG");
+            FAPI_TRY(l_buf.insertFromRight(l_pcs_cdr_gain[i], 56, 8),
+                     "Error returned from insertFromRight()");
             FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
-            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf));
+            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CDR_GAIN_REG, l_buf),
+                     "Error from putScom (0x%.16llX), PEC_PCS_RX_CDR_GAIN_REG");
 
             for  (int l_lane = 0; l_lane < NUM_PCIE_LANES; l_lane++)
             {
                 // RX INITGAIN
-                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf));
-                FAPI_TRY(l_buf.insertFromRight(l_pcs_init_gain[i][l_lane], 48, 5));
+                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf),
+                         "Error from getScom (0x%.16llX), RX_VGA_CTRL3_REGISTER");
+                FAPI_TRY(l_buf.insertFromRight(l_pcs_init_gain[i][l_lane], 48, 5),
+                         "Error returned from insertFromRight()");
                 FAPI_DBG("pec%i cfg%i lane%i: %#lx", l_pec_id, i, l_lane, l_buf());
-                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf));
+                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_VGA_CTRL3_REGISTER[l_lane], l_buf),
+                         "Error from putScom (0x%.16llX), RX_VGA_CTRL3_REGISTER");
 
                 // RX PKINIT
-                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf));
-                FAPI_TRY(l_buf.insertFromRight(l_pcs_pk_init[i][l_lane], 58, 6));
+                FAPI_TRY(fapi2::getScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf),
+                         "Error from getScom (0x%.16llX), RX_LOFF_CNTL_REGISTER");
+                FAPI_TRY(l_buf.insertFromRight(l_pcs_pk_init[i][l_lane], 58, 6),
+                         "Error returned from insertFromRight()");
                 FAPI_DBG("pec%i cfg%i lane%i: %#lx", l_pec_id, i, l_lane, l_buf());
-                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf));
+                FAPI_TRY(fapi2::putScom(l_pec_chiplets, RX_LOFF_CNTL_REGISTER[l_lane], l_buf),
+                         "Error from putScom (0x%.16llX), RX_LOFF_CNTL_REGISTER");
             }
 
             // RX SIGDET LVL
-            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf));
-            FAPI_TRY(l_buf.insertFromRight(l_pcs_sigdet_lvl[i], 59, 5));
+            FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf),
+                     "Error from getScom (0x%.16llX), PEC_PCS_RX_SIGDET_CONTROL_REG");
+            FAPI_TRY(l_buf.insertFromRight(l_pcs_sigdet_lvl[i], 59, 5),
+                     "Error returned from insertFromRight()");
             FAPI_DBG("pec%i cfg%i: %#lx", l_pec_id, i, l_buf());
-            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf));
+            FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_SIGDET_CONTROL_REG, l_buf),
+                     "Error from putScom (0x%.16llX), PEC_PCS_RX_SIGDET_CONTROL_REG");
         }
 
         // Phase1 init step 12 (RX Rot Cntl CDR Lookahead Disabled,SSC Disabled)
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD, l_pec_chiplets,
-                               l_pcs_rot_cntl_cdr_lookahead));
+                               l_pcs_rot_cntl_cdr_lookahead),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_ROT_CDR_LOOKAHEAD");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC, l_pec_chiplets,
-                               l_pcs_rot_cntl_cdr_ssc));
+                               l_pcs_rot_cntl_cdr_ssc),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_ROT_CDR_SSC");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL, l_pec_chiplets,
-                               l_pcs_rot_cntl_extel));
+                               l_pcs_rot_cntl_extel),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_ROT_EXTEL");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW, l_pec_chiplets,
-                               l_pcs_rot_cntl_rst_fw));
-        FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf));
-        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_lookahead, 55, 1));
-        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_ssc, 63, 1));
-        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_extel, 59, 1));
-        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_rst_fw, 62, 1));
+                               l_pcs_rot_cntl_rst_fw),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_ROT_RST_FW");
+
+        FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf),
+                 "Error from getScom (0x%.16llX), PEC_PCS_RX_ROT_CNTL_REG");
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_lookahead, 55, 1),
+                 "Error returned from insertFromRight()");
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_cdr_ssc, 63, 1),
+                 "Error returned from insertFromRight()");
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_extel, 59, 1),
+                 "Error returned from insertFromRight()");
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rot_cntl_rst_fw, 62, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_ROT_CNTL_REG, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_PCS_RX_ROT_CNTL_REG");
 
         // Phase1 init step 13 (RX Config Mode Enable External Config Control)
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(0x8600, 48, 16));
+        FAPI_TRY(l_buf.insertFromRight(0x8600, 48, 16),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CONFIG_MODE_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_CONFIG_MODE_REG, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_PCS_RX_CONFIG_MODE_REG");
 
         // Phase1 init step 14 (PCLCK Control Register - PLLA)
         SET_REG_RMW_WITH_SINGLE_ATTR_8(fapi2::ATTR_PROC_PCIE_PCS_PCLCK_CNTL_PLLA,
@@ -354,8 +478,10 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         // Phase1 init step 20 (RX VGA Control Register 1)
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1,
                                l_pec_chiplets,
-                               l_attr_16));
-        FAPI_TRY(l_buf.insertFromRight(l_attr_16, 48, 16));
+                               l_attr_16),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG1");
+        FAPI_TRY(l_buf.insertFromRight(l_attr_16, 48, 16),
+                 "Error returned from insertFromRight()");
 
         if (l_hw414759)
         {
@@ -363,7 +489,8 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         }
 
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_VGA_CONTROL1_REG, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_PCS_RX_VGA_CONTROL1_REG, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_PCS_RX_VGA_CONTROL1_REG");
 
         // Phase1 init step 21 (RX VGA Control Register 2)
         SET_REG_WR_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_RX_VGA_CNTL_REG2,
@@ -371,11 +498,15 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                        48, 16);
 
         // Phase1 init step 22 (RX DFE Func Control Register 1)
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_DFE_FDDC, l_pec_chiplets, l_pcs_rx_dfe_fddc));
-        FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf));
-        FAPI_TRY(l_buf.insertFromRight(l_pcs_rx_dfe_fddc, 50, 1));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_RX_DFE_FDDC, l_pec_chiplets, l_pcs_rx_dfe_fddc),
+                 "Error getting ATTR_PROC_PCIE_PCS_RX_DFE_FDDC");
+        FAPI_TRY(fapi2::getScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf),
+                 "Error from getScom (0x%.16llX), PEC_IOP_RX_DFE_FUNC_REGISTER1");
+        FAPI_TRY(l_buf.insertFromRight(l_pcs_rx_dfe_fddc, 50, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_IOP_RX_DFE_FUNC_REGISTER1, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_IOP_RX_DFE_FUNC_REGISTER1");
 
         // Phase1 init step 23 (PCS System Control)
         SET_REG_RMW_WITH_SINGLE_ATTR_16(fapi2::ATTR_PROC_PCIE_PCS_SYSTEM_CNTL,
@@ -383,7 +514,9 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                                         55, 9);
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_PCS_M_CNTL, l_pec_chiplets,
-                               l_pcs_m_cntl));
+                               l_pcs_m_cntl),
+                 "Error getting ATTR_PROC_PCIE_PCS_M_CNTL");
+
 
         // Phase1 init step 24 (PCS M1 Control)
         SET_REG_RMW(l_pcs_m_cntl[0],
@@ -406,20 +539,22 @@ fapi2::ReturnCode p9_pcie_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
                     55, 9);
 
         //Delay a minimum of 200ns to allow prior SCOM programming to take effect
-        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY), "fapiDelay error.");
+        FAPI_TRY(fapi2::delay(PMA_RESET_NANO_SEC_DELAY, PMA_RESET_CYC_DELAY),
+                 "fapiDelay error.");
 
         // Phase1 init step 28
         l_buf = 0;
-        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PIPE_RESET_START_BIT, 1));
+        FAPI_TRY(l_buf.insertFromRight(1, PEC_IOP_PIPE_RESET_START_BIT, 1),
+                 "Error returned from insertFromRight()");
         FAPI_DBG("pec%i: %#lx", l_pec_id, l_buf());
-        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf));
+        FAPI_TRY(fapi2::putScom(l_pec_chiplets, PEC_CPLT_CONF1_CLEAR, l_buf),
+                 "Error from putScom (0x%.16llX), PEC_CPLT_CONF1_CLEAR");
 
-        //Delay a minimum of 300ns for reset to complete. Inherent delay before deasserting PCS PIPE Reset is enough here.
-
+        // Delay a minimum of 300ns for reset to complete.
+        // Inherent delay before deasserting PCS PIPE Reset is enough here.
     }
 
-    FAPI_INF("End");
-
 fapi_try_exit:
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
