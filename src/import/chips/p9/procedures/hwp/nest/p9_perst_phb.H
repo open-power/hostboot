@@ -29,8 +29,8 @@
 // *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
-// *HWP Consumed by: HB
+// *HWP Level: 3
+// *HWP Consumed by: FSP
 
 #ifndef _P9_PERST_PHB_H_
 #define _P9_PERST_PHB_H_
@@ -44,7 +44,7 @@
 enum PERST_ACTION
 {
     ACTIVATE_PERST,     //Drive PERST signal active from the PHB. Put in to Reset.
-    DEACTIVATE_PERST        //Drive PERST signal inactive from the PHB. Take out of Reset.
+    DEACTIVATE_PERST    //Drive PERST signal inactive from the PHB. Take out of Reset.
 };
 #endif
 
@@ -61,30 +61,21 @@ enum PERST_ACTION
 //function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_perst_phb_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const PERST_ACTION);
 
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
-
-// PCI Nest FIR Register bit26 for SW Freeze enablement
-const uint8_t PHB_NFIR_REG_SW_DEFINED_FREEZE = 26;
-//Maximum number of iterations (So, 20ms * 100 = 2s before timeout)
-const uint32_t MAX_NUM_POLLS = 100;
-//(40000000 ns = 20 ms) to wait for PBCQ inbound/outbound to become inactive
-const uint64_t NANO_SEC_DELAY = 256;
-//400,000 simulation cycles to wait for PBCQ inbound/outbound to become inactive
-const uint64_t SIM_CYC_DELAY = 512;
-
-
 extern "C" {
 
 //-----------------------------------------------------------------------------------
 // Function prototype
 //-----------------------------------------------------------------------------------
-/// @briefF perform read/write to PHB HV register space
-/// @param[in] i_target         => phb target
-/// @param[in] i_perst_action   => input ACTIVATE or DEACTIVATE to control PERST signal from PHB>
 ///
-/// @return FAPI_RC_SUCCESS if the PERST action completes successfully.
+/// @brief Assert/deassert PERST signal from PHB.
+///
+/// @param[in] i_target         => PHB target
+/// @param[in] i_perst_action   => Input ACTIVATE or DEACTIVATE
+///                                to control PERST signal from PHB.
+///
+/// @return FAPI_RC_SUCCESS if the PERST action completes successfully, else
+///         FAPI2 error code.
+///
     fapi2::ReturnCode p9_perst_phb(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
                                    const PERST_ACTION i_perst_action);
 
