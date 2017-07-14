@@ -36,7 +36,7 @@
     <!-- Add procedure callout -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -47,10 +47,11 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>ADDRESS</ffdc>
+    <ffdc>SIZE</ffdc>
     <!-- Add procedure callout -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
