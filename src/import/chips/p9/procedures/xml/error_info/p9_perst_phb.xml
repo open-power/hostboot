@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9_perst_phb procedure -->
+
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
@@ -35,7 +36,7 @@
     <!-- Add procedure callout -->
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -51,15 +52,15 @@
     <ffdc>PHB_RESET_DATA</ffdc>
     <ffdc>CQ_STAT_ADDR</ffdc>
     <ffdc>CQ_STAT_DATA</ffdc>
-    <!-- Add procedure callout -->
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
     <!-- Add hw callout -->
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
@@ -73,15 +74,15 @@
     <ffdc>NFIR_DATA</ffdc>
     <ffdc>PFIR_ADDR</ffdc>
     <ffdc>PFIR_DATA</ffdc>
-    <!-- Add procedure callout -->
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
     <!-- Add hw callout -->
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
