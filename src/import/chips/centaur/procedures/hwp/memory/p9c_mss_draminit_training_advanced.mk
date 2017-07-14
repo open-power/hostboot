@@ -33,6 +33,7 @@ OBJS+=p9c_mss_mcbist_address.o
 OBJS+=p9c_dimmBadDqBitmapFuncs.o
 OBJS+=p9c_mss_termination_control.o
 OBJS+=p9c_mss_generic_shmoo.o
+OBJS+=p9c_mss_unmask_errors.o
 OBJS+=p9c_mss_mrs6_DDR4.o
 OBJS+=p9c_mss_access_delay_reg.o
 OBJS+=p9c_mss_funcs.o
