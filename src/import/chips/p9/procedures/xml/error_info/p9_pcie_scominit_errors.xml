@@ -31,6 +31,11 @@
       Invalid pec id encountered.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>IN_PEC_ID</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -45,15 +50,15 @@
     <ffdc>PLLA_DATA</ffdc>
     <ffdc>PLLB_ADDR</ffdc>
     <ffdc>PLLB_DATA</ffdc>
-    <!-- Add procedure callout -->
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
     <!-- Add hw callout -->
     <callout>
       <target>TARGET</target>
       <priority>HIGH</priority>
+    </callout>
+    <!-- Add procedure callout -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
 </hwpErrors>
