@@ -45,8 +45,7 @@
 #include <lib/utils/swizzle.H>
 #include <lib/mc/port.H>
 #include <lib/shared/mss_const.H>
-
-constexpr uint64_t CKE_HIGH = 0b1111;
+#include <lib/eff_config/timing.H>
 
 // I have a dream that the CCS engine code can be shared among controllers. So, I drive the
 // engine from a set of traits. This might be folly. Allow me to dream. BRS
@@ -171,6 +170,10 @@ class ccsTraits<fapi2::TARGET_TYPE_MCBIST>
 
 namespace mss
 {
+
+static constexpr uint64_t CKE_HIGH = 0b1111;
+static constexpr uint64_t CKE_LOW  = 0b0000;
+
 namespace ccs
 {
 
@@ -351,13 +354,15 @@ static void mrs_rcd_helper( fapi2::buffer<uint64_t>& i_arr0 )
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the DIMM this instruction is headed for
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
 /// @return the RCD CCS instruction
 /// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
 /// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
 /// in this template definition)
 ///
 template< fapi2::TargetType T, typename TT = ccsTraits<T> >
-inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
+inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                     const bool i_turn_on_cke = true)
 {
     fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
     fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
@@ -366,6 +371,12 @@ inline instruction_t<T> rcd_command( const fapi2::Target<fapi2::TARGET_TYPE_DIMM
     // Generic DDR4 MRS setup (RCD is an MRS)
     //
     mrs_rcd_helper<fapi2::TARGET_TYPE_MCBIST>(rcd_boilerplate_arr0);
+
+    // Not adding i_turn_on_cke in the mrs_rcd helper because we only need this
+    // for RCWs and there is no need to complicate/change the MRS cmd API with
+    // uneeded functionality. Little duplication, but this isolates the change.
+    const uint64_t l_cke = i_turn_on_cke ? CKE_HIGH : CKE_LOW;
+    rcd_boilerplate_arr0.insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(l_cke);
 
     //
     // RCD setup
@@ -444,6 +455,32 @@ inline instruction_t<T> des_command()
     // Device Deslect wants CS_n always high (select nothing using rank NO_CHIP_SELECT_ACTIVE)
     return instruction_t<T>(fapi2::Target<fapi2::TARGET_TYPE_DIMM>(), NO_CHIP_SELECT_ACTIVE,
                             rcd_boilerplate_arr0, rcd_boilerplate_arr1);
+}
+
+///
+/// @brief Create, initialize a JEDEC Device Power Down Entry CCS command
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @return the Device Deselect CCS instruction
+/// @note THIS IS DDR4 ONLY RIGHT NOW. We can (and possibly should) specialize this
+/// for the controller (Nimbus v Centaur) and then correct for DRAM generation (not included
+/// in this template definition)
+///
+template< fapi2::TargetType T, typename TT = ccsTraits<T> >
+inline instruction_t<T> pde_command()
+{
+    fapi2::buffer<uint64_t> rcd_boilerplate_arr0;
+    fapi2::buffer<uint64_t> rcd_boilerplate_arr1;
+
+    // Power Down Entry just like a DES, but we set CKE low
+    instruction_t<T> l_inst = des_command<T>();
+
+    // CKE is low. Note: P8 set all 4 of these low - not sure if that's correct.
+    l_inst.arr0.template insertFromRight<TT::ARR0_DDR_CKE, TT::ARR0_DDR_CKE_LEN>(CKE_LOW);
+
+    l_inst.arr1.template insertFromRight<TT::ARR1_IDLES, TT::ARR1_IDLES_LEN>( mss::tcpded() );
+
+    return l_inst;
 }
 
 ///
