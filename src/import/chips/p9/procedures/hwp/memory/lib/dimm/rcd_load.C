@@ -49,6 +49,7 @@ using fapi2::FAPI2_RC_SUCCESS;
 
 namespace mss
 {
+
 ///
 /// @brief Perform the rcd_load operations - TARGET_TYPE_MCBIST specialization
 /// @param[in] i_target, a fapi2::Target<TARGET_TYPE_MCBIST>
@@ -65,19 +66,25 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
 
-    for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
+    for ( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
     {
-        for (const auto& d : find_targets<TARGET_TYPE_DIMM>(p))
+        for ( const auto& d : mss::find_targets<TARGET_TYPE_DIMM>(p) )
         {
+            // CKE needs to be LOW before running the RCW sequence
+            // So we use the power down entry command to achieve this
+            l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
+
             FAPI_DBG("rcd load for %s", mss::c_str(d));
-            FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions) );
-        }
+            FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions),
+                      "Failed perform_rcd_load() for %s", mss::c_str(d) );
+        }// dimms
 
         // We have to configure the CCS engine to let it know which port these instructions are
         // going out (or whether it's broadcast ...) so lets execute the instructions we presently
         // have so that we kind of do this by port
-        FAPI_TRY( ccs::execute(i_target, l_program, p) );
-    }
+        FAPI_TRY( ccs::execute(i_target, l_program, p),
+                  "Failed to execute ccs for %s", mss::c_str(p) );
+    }// ports
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -124,7 +131,8 @@ fapi2::ReturnCode perform_rcd_load<KIND_RDIMM_DDR4>( const fapi2::Target<TARGET_
         std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> >& i_inst)
 {
     FAPI_DBG("perform rcd_load for %s [expecting rdimm (ddr4)]", mss::c_str(i_target));
-    FAPI_TRY( rcd_load_ddr4(i_target, i_inst) );
+    FAPI_TRY( rcd_load_ddr4(i_target, i_inst),
+              "Failed rcd_load_ddr4() for %s", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
