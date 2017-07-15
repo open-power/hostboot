@@ -186,13 +186,14 @@ fapi2::ReturnCode execute( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop(i_target, mss::states::STOP), "Error in ccs::execute" );
+
     FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
                            [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
         FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     }),
-    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target));
+    fapi2::MSS_CCS_HUNG_TRYING_TO_STOP().set_MCBIST_TARGET(i_target) );
 
     while (l_inst_iter != i_program.iv_instructions.end())
     {

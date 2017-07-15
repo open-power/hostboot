@@ -313,6 +313,16 @@ constexpr uint64_t tmrd()
 }
 
 ///
+/// @brief Command Pass Disable Delay Time
+/// @return constexpr value of 4 clocks
+///
+constexpr uint64_t tcpded()
+{
+    // Per DDR4 Full spec update (79-4A) - timing requirements
+    return 4;
+}
+
+///
 /// @brief Control word to control word delay
 /// @return constexpr value of 16 clocks
 ///

@@ -221,6 +221,10 @@ struct cw_data
 
     ///
     /// @brief ctor for attribute driven data
+    /// @param[in] i_func_space the function space number
+    /// @param[in] i_number register control word number
+    /// @param[in] i_func attribute accessor function pointer
+    /// @param[in] i_delay delay in cycles after current RCW
     ///
     cw_data( const uint64_t i_func_space,
              const uint64_t i_number,
@@ -235,6 +239,10 @@ struct cw_data
 
     ///
     /// @brief ctor for custom data
+    /// @param[in] i_func_space the function space number
+    /// @param[in] i_number register control word number
+    /// @param[in] i_data RCW data to write
+    /// @param[in] i_delay delay in cycles after current RCW
     ///
     cw_data( const uint64_t i_func_space,
              const uint64_t i_number,
@@ -260,16 +268,18 @@ struct cw_data
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data control word data to send
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for this RCW (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const cw_data& i_data,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst)
+                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      const bool i_turn_on_cke = true)
 {
-    ccs::instruction_t<OT> l_inst =  ccs::rcd_command<OT>(i_target);
+    ccs::instruction_t<OT> l_inst =  ccs::rcd_command<OT>(i_target, i_turn_on_cke);
 
-    // RCW or BCW access is selected by A12
+    // A12 is the RCW/ BCW selector
     constexpr uint64_t DDR_ADDRESS_12 = 12;
     l_inst.arr0.template writeBit<DDR_ADDRESS_12>(TT::CW_ACCESS);
 
@@ -320,12 +330,14 @@ fapi_try_exit:
 /// @param[in] i_target a DIMM target
 /// @param[in] i_data_list a vector of control word data to send
 /// @param[in,out] io_inst a vector of CCS instructions we should add to
+/// @param[in] i_turn_on_cke flag that states whether we want CKE on for all RCWs in the vector (defaulted to true)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< control_word T, typename TT = cwTraits<T>, fapi2::TargetType OT >
 fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                       const std::vector<cw_data>& i_data_list,
-                                      std::vector< ccs::instruction_t<OT> >& io_inst)
+                                      std::vector< ccs::instruction_t<OT> >& io_inst,
+                                      const bool i_turn_on_cke = true)
 {
     if( i_data_list.empty() )
     {
@@ -335,7 +347,7 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
     for (const auto& data : i_data_list)
     {
-        FAPI_TRY( control_word_engine<T>(i_target, data, io_inst) );
+        FAPI_TRY( control_word_engine<T>(i_target, data, io_inst, i_turn_on_cke) );
     }
 
 fapi_try_exit:
