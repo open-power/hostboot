@@ -61,6 +61,9 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
 {
     FAPI_INF("rcd_load_ddr4 %s", mss::c_str(i_target));
 
+    constexpr uint64_t CKE_HIGH = mss::ON;
+    constexpr uint64_t CKE_LOW = mss::OFF;
+
     // Per DDR4RCD02, tSTAB is us. We want this in cycles for the CCS.
     const uint64_t tSTAB = mss::us_to_cycles(i_target, mss::tstab());
     constexpr uint8_t FS0 = 0; // Function space 0
@@ -78,7 +81,6 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         // The concern is that if geardown mode is ever required in the future, we would need the longer timing
         { FS0, 6,  eff_dimm_ddr4_rc06_07, mss::tmrc1()   },
         { FS0, 8,  eff_dimm_ddr4_rc08,    mss::tmrd()    },
-        { FS0, 9,  eff_dimm_ddr4_rc09,    mss::tmrd()    },
         { FS0, 10, eff_dimm_ddr4_rc0a,    tSTAB          },
         { FS0, 11, eff_dimm_ddr4_rc0b,    mss::tmrd_l()  },
         { FS0, 12, eff_dimm_ddr4_rc0c,    mss::tmrd()    },
@@ -86,6 +88,9 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         { FS0, 14, eff_dimm_ddr4_rc0e,    mss::tmrd()    },
         { FS0, 15, eff_dimm_ddr4_rc0f,    mss::tmrd_l2() },
     };
+
+    // RCD 4-bit data - integral represents rc#
+    static const cw_data l_rc09_4bit_data( FS0, 9, eff_dimm_ddr4_rc09, mss::tmrd() );
 
     // RCD 8-bit data - integral represents rc#
     static const std::vector< cw_data > l_rcd_8bit_data =
@@ -103,17 +108,25 @@ fapi2::ReturnCode rcd_load_ddr4( const fapi2::Target<TARGET_TYPE_DIMM>& i_target
         { FS0, 11, eff_dimm_ddr4_rc_bx, mss::tmrd_l() },
     };
 
+    // Secret sauce : insider knowledge
+    // The JEDEC spec doesn't mention anything about ordering of RCWs
+    // but a supplier informed us that we need to send with CKE low:
+    // 4-bit RCWs first (excluding RC09), followed by 8-bit RCWs.
+    // Then with CKE high (We raise it w/the RCW): 4-bit RC09
+
     // Load 4-bit data
-    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, io_inst), "%s failed to load 4-bit control words",
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rcd_4bit_data, io_inst, CKE_LOW),
+              "Failed to load 4-bit control words for %s",
               mss::c_str(i_target));
 
     // Load 8-bit data
-    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, io_inst), "%s failed to load 8-bit control words",
+    FAPI_TRY( control_word_engine<RCW_8BIT>(i_target, l_rcd_8bit_data, io_inst, CKE_LOW),
+              "Failed to load 8-bit control words for %s",
               mss::c_str(i_target));
 
-    // DD2 hardware has an issue with properly resetting the DRAM
-    // The below workaround toggles RC06 again to ensure the DRAM is reset properly
-    FAPI_TRY( mss::workarounds::rcw_reset_dram(i_target, io_inst), "%s failed to add reset workaround functionality",
+    // Load RC09
+    FAPI_TRY( control_word_engine<RCW_4BIT>(i_target, l_rc09_4bit_data, io_inst, CKE_HIGH),
+              "Failed to load 4-bit RC09 control word for %s",
               mss::c_str(i_target));
 
 fapi_try_exit:
