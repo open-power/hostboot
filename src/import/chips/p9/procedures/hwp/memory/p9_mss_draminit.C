@@ -68,12 +68,12 @@ extern "C"
         constexpr uint64_t PCLK_INITIAL_VALUE = 0b10;
         constexpr uint64_t NCLK_INITIAL_VALUE = 0b01;
 
-        const auto l_mca = mss::find_targets<TARGET_TYPE_MCA>(i_target);
+        const auto l_mcas = mss::find_targets<TARGET_TYPE_MCA>(i_target);
 
         FAPI_INF("Start draminit: %s", mss::c_str(i_target));
 
         // If we don't have any ports, lets go.
-        if (l_mca.size() == 0)
+        if (l_mcas.size() == 0)
         {
             FAPI_INF("++++ No ports? %s ++++", mss::c_str(i_target));
             return fapi2::FAPI2_RC_SUCCESS;
@@ -120,7 +120,7 @@ extern "C"
         // 3. CCS_ADDR_MUX_SEL (FARB5Q(5)) - 1
         // 4. CKE out of high impedence
         //
-        for (const auto& p : l_mca)
+        for (const auto& p : l_mcas)
         {
             FAPI_TRY( mss::draminit_entry_invariant(p),
                       "%s Failed mss::draminit_entry_invariant in p9_mss_draminit",
@@ -163,13 +163,14 @@ extern "C"
         // we'll PDE/DES all DIMM at the same time.
         l_des.arr1.insertFromRight<MCBIST_CCS_INST_ARR1_00_IDLES, MCBIST_CCS_INST_ARR1_00_IDLES_LEN>(400);
         l_program.iv_instructions.push_back(l_des);
-        FAPI_TRY( mss::ccs::execute(i_target, l_program, l_mca[0]),
+
+        FAPI_TRY( mss::ccs::execute(i_target, l_program, l_mcas[0]),
                   "%s Failed execute in p9_mss_draminit",
                   mss::c_str(i_target) );
 
         // Per conversation with Shelton and Steve 10/9/15, turn off addr_mux_sel after the CKE CCS but
         // before the RCD/MRS CCSs
-        for (const auto& p : l_mca)
+        for (const auto& p : l_mcas)
         {
             FAPI_TRY( change_addr_mux_sel(p, mss::LOW),
                       "%s Failed change_addr_mux_sel in p9_mss_draminit",
