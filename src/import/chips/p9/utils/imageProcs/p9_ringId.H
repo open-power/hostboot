@@ -1261,7 +1261,7 @@ ringid_get_chiplet_properties(
 
 // Returns properties of a ring as determined by ringId
 GenRingIdList*
-ringid_get_ring_list(RingId_t i_ringId);
+_ringid_get_ring_list(RingId_t i_ringId);
 
 
 #endif
