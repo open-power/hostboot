@@ -150,6 +150,14 @@ extern "C"
         FAPI_TRY( mss::deassert_sysclk_reset(i_target), "deassert_sysclk_reset failed for %s", mss::c_str(i_target),
                   "%s Error in p9_mss_ddr_phy_reset.C", mss::c_str(i_target)  );
 
+        // Reset the windage registers
+        // According to the PHY team, resetting the read delay offset must be done after SYSCLK_RESET
+        for( const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target) )
+        {
+            FAPI_TRY( mss::dp16::reset_read_delay_offset_registers(p),
+                      "Failed reset_read_delay_offset_registers() for %s", mss::c_str(p) );
+        }
+
         // 20. Write 8020h into the DDRPHY_ADR_SYSCLK_CNTL_PR Registers and
         // DDRPHY_DP16_SYSCLK_PR0/1 registers This write takes the dphy_nclk/
         // SysClk alignment circuit out of the Continuous Update mode.
