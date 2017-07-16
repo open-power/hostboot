@@ -45,14 +45,10 @@
 #include <pnor/pnorif.H>
 #include <p9_xip_image.h>
 #include <p9_tor.H>
-#include <common_ringId.H>
 #include <p9_scan_compression.H>
+#include <cen_ringId.H>
 
 #include "handleSpecialWakeup.H"
-
-namespace CEN_RID {
-#include <cen_ringId.H>
-}
 
 //******************************************************************************
 // Trace descriptors
@@ -96,7 +92,7 @@ ReturnCode current_err;
 
 template<>
 ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
-        const uint16_t i_ringId,
+        const RingId_t i_ringId,
         unsigned char *&o_ringData,
         size_t  &o_ringLength,
         uint64_t &o_ringAddress)
@@ -227,7 +223,7 @@ ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
 
             FAPI_INF("get_ring() - got the ring section..");
 
-            char ringName[50] = {0};
+            char ringName[MAX_RING_NAME_LENGTH] = {0};
 
             // only a single instance for centaur
             uint8_t instanceId = 1;
@@ -348,8 +344,39 @@ ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
                 o_ringLength    = l_ringSizeInBits;
 
                 // grab the address from the Generic ring id list
-                GenRingIdList* l_idList =
-                    CEN_RID::ringid_get_ring_list(l_ringId);
+                GenRingIdList* l_idList;
+
+                rc = ringid_get_ring_list(CT_CEN, l_ringId, &l_idList);
+
+                if (rc != INFRASTRUCT_RC_SUCCESS)
+                {
+                    FAPI_ERR("get_ring() - call to ringid_get_ring_list() "
+                             "failed w/rc=%d", rc);
+
+                    /*@
+                     * @errortype
+                     * @moduleid     fapi2::MOD_FAPI2_GET_RING
+                     * @reasoncode   fapi2::RC_FAILED_TO_GET_RING_LIST
+                     * @userdata1    return code from ringid_get_ring_list
+                     * @devdesc      There was an error returned from the
+                     *               common ringid_get_ring_list API - see
+                     *               userdata1 for return code value.
+                     * @custdesc     Internal firmware error
+                     */
+                    l_err = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            fapi2::MOD_FAPI2_GET_RING,
+                            fapi2::RC_FAILED_TO_GET_RING_LIST,
+                            rc,
+                            0,
+                            true /*SW error*/);
+
+                    l_err->collectTrace(FAPI_TRACE_NAME);
+
+                    l_fapi2Rc.setPlatDataPtr(reinterpret_cast<void *>(l_err));
+
+                    break;
+                }
 
                 o_ringAddress = l_idList->scanScomAddress;
 

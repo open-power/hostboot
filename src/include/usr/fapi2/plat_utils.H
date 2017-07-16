@@ -34,6 +34,7 @@
 #define PLAT_UTILS_H_
 
 #include <return_code.H>
+#include <common_ringId.H>
 
 namespace fapi2
 {
@@ -106,7 +107,8 @@ ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
 ///
 template<fapi2::TargetType T>
 ReturnCode get_ring(fapi2::Target<T> i_target,
-        const uint16_t i_ringId, unsigned char *&o_ringData,
+        const RingId_t i_ringId, 
+        unsigned char *&o_ringData,
         uint64_t &o_ringLength,
         uint64_t &o_ringAddress);
 
