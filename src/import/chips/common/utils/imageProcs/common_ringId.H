@@ -29,8 +29,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define   TORV3_SUPPORT
-
 ///////////////////////////////////////////////////////////////////////////////
 //                     Declare assumptions - Begin                           //
 //                                                                           //
@@ -87,29 +85,14 @@ typedef struct
     uint32_t   magic;       // =TOR_MAGIC_xyz
     uint8_t    version;     // =TOR_VERSION
     ChipType_t chipType;    // Value from ChipType enum
-#ifdef TORV3_SUPPORT
-    uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
-    uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
-#else
     uint8_t    ddLevel;     // Actual DD level of ringSection
     uint8_t    undefined;
-#endif
     uint32_t   size;        // Size of ringSection.
 } TorHeader_t;
 
 //
 // Subsequent TOR fields (listed in order they appear in TOR ringSections)
 //
-#ifdef TORV3_SUPPORT
-typedef struct
-{
-    uint32_t offset;
-    uint32_t size;
-    uint8_t  ddLevel;
-    uint8_t  reserved[3];
-} TorDdBlock_t;
-#endif
-
 typedef struct
 {
     uint32_t offset;
@@ -258,11 +241,8 @@ enum RingType
 enum RingBlockType
 {
     GET_SINGLE_RING     = 0x00,
-#ifdef TORV3_SUPPORT
-    GET_DD_LEVEL_RINGS  = 0x01,
-#endif
-    GET_PPE_LEVEL_RINGS = 0x02,
-    PUT_SINGLE_RING     = 0x03
+    GET_PPE_LEVEL_RINGS = 0x01,
+    PUT_SINGLE_RING     = 0x02
 };
 
 typedef struct
@@ -351,9 +331,16 @@ int ringid_get_raw_ring_file_path( uint32_t       i_magic,
                                    char*          io_directory );
 #endif
 
+int ringid_get_noof_ring_ids( ChipType_t  i_chipType,
+                              RingId_t*   o_numRingIds);
+
 int ringid_get_noof_chiplets( ChipType_t  i_chipType,
                               uint32_t    i_torMagic,
                               uint8_t*    o_numChiplets );
+
+int ringid_get_ring_list( ChipType_t       i_chipType,
+                          RingId_t         i_ringId,
+                          GenRingIdList**  o_ringIdList);
 
 int ringid_get_properties( ChipType_t         i_chipType,
                            uint32_t           i_torMagic,
