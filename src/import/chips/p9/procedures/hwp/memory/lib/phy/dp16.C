@@ -52,6 +52,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 
 #include <lib/workarounds/dp16_workarounds.H>
+#include <generic/memory/lib/utils/mss_math.H>
 
 using fapi2::TARGET_TYPE_MCS;
 using fapi2::TARGET_TYPE_MCA;
@@ -2206,19 +2207,37 @@ fapi2::ReturnCode reset_read_delay_offset_registers( const fapi2::Target<TARGET_
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
+    // Represents the number phase rotator ticks per clock
+    constexpr int64_t TICKS_PER_CLK = 128;
+
     // We grab the information from the VPD and blast it in to all the registers. Note the
-    // VPD is picoseconds but the register wants clocks - so we convert. Likewise, the VPD
+    // VPD is picoseconds but the register wants phase rotator ticks - so we convert. Likewise, the VPD
     // is per port so we can easily cram the data in to the port using the blastah.
     fapi2::buffer<uint64_t> l_data;
-    int64_t l_clocks = 0;
+    int64_t l_phase_rot_ticks = 0;
     int16_t l_windage = 0;
+    int64_t l_tck_in_ps = 0;
+    uint64_t l_freq = 0;
 
-    FAPI_TRY( mss::vpd_mt_windage_rd_ctr(i_target, l_windage) );
-    l_clocks = mss::ps_to_cycles(i_target, l_windage);
+
+    FAPI_TRY( mss::vpd_mt_windage_rd_ctr(i_target, l_windage),
+              "Failed vpd_mt_windage_rd_ctr accessor for %s", mss::c_str(i_target) );
+
+    FAPI_TRY( mss::freq(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq),
+              "Failed freq accessor for %s", mss::c_str(i_target) );
+
+    FAPI_TRY( mss::freq_to_ps(l_freq, l_tck_in_ps),
+              "Failled to convert freq_to_ps for %s",  mss::c_str(i_target) );
+
+    // Static cast to be explicit that calculation should produce a floating point result
+    l_phase_rot_ticks = mss::round_half_away_from_zero( (l_windage * TICKS_PER_CLK) / static_cast<double>(l_tck_in_ps) );
 
     l_data
-    .insertFromRight<TT::READ_OFFSET_LOWER, TT::READ_OFFSET_LOWER_LEN>(l_clocks)
-    .insertFromRight<TT::READ_OFFSET_UPPER, TT::READ_OFFSET_UPPER_LEN>(l_clocks);
+    .insertFromRight<TT::READ_OFFSET_LOWER, TT::READ_OFFSET_LOWER_LEN>(l_phase_rot_ticks)
+    .insertFromRight<TT::READ_OFFSET_UPPER, TT::READ_OFFSET_UPPER_LEN>(l_phase_rot_ticks);
+
+    FAPI_INF( "vpd_mt_windage_rd_ctr = %d, ticks = %d for %s",
+              l_windage, l_phase_rot_ticks, mss::c_str(i_target) );
 
     FAPI_TRY( mss::scom_blastah(i_target, TT::READ_DELAY_OFFSET_REG, l_data) );
 
