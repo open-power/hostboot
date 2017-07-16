@@ -38,21 +38,13 @@
 //
 
 #include  <stdint.h>
-#include  <p9_scan_compression.H>
 
-namespace P9_RID
-{
-#include  <p9_ringId.H>
-}
-
-#include  <p9_mvpd_ring_funcs.H>
-
-//  fapi2 support
 #include  <fapi2.H>
 #include  <utils.H>
 #include  <mvpd_access.H>
-
-using   namespace P9_RID;
+#include  <p9_mvpd_ring_funcs.H>
+#include  <p9_scan_compression.H>
+#include  <p9_ringId.H>
 
 extern "C"
 {
@@ -534,17 +526,25 @@ extern "C"
                be64toh(l_pScanDataOld->iv_scanSelect) & l_evenOddMask ) )
         {
             // look up ring in p9_ringId and retrieve scanAddr
-            GenRingIdList* l_ringProp = ringid_get_ring_list(i_ringId);
+            int l_rc = INFRASTRUCT_RC_SUCCESS;
+            ChipType_t l_chipType = CT_P9N; // Any P9 CT will do here
+            GenRingIdList* l_ringProp = NULL;
 
-            FAPI_ASSERT(l_ringProp,
-                        fapi2::MVPD_RINGID_DATA_NOT_FOUND().
-                        set_CHIP_TARGET(i_fapiTarget).
-                        set_RING_ID(i_ringId).
-                        set_CHIPLET_ID(i_chipletId),
-                        "mvpdRingFuncFind: lookup of scanAddr failed "
-                        "for ringId=0x%x, chipletId=0x%x",
-                        i_ringId,
-                        i_chipletId);
+            l_rc = ringid_get_ring_list( l_chipType,
+                                         i_ringId,
+                                         &l_ringProp );
+
+            FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS ||
+                         l_ringProp != NULL,
+                         fapi2::MVPD_RINGID_DATA_NOT_FOUND().
+                         set_CHIP_TARGET(i_fapiTarget).
+                         set_RING_ID(i_ringId).
+                         set_CHIPLET_ID(i_chipletId),
+                         "mvpdRingFuncFind: lookup of scanAddr failed "
+                         "for chipType=%d, ringId=0x%x, chipletId=0x%x",
+                         l_chipType,
+                         i_ringId,
+                         i_chipletId );
 
             // update chipletId in iv_scanScomAddress (for instance rings)
             uint32_t l_scanScomAddr = l_ringProp->scanScomAddress;
