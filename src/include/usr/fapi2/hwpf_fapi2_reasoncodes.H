@@ -143,6 +143,7 @@ namespace fapi2
         RC_INCORRECT_HW_IMAGE_TYPE     = FAPI2_COMP_ID | 0x3D,
         RC_DD_SUPPORT_CHECK_FAILED     = FAPI2_COMP_ID | 0x3E,
         RC_SET_ATTR_NOT_VALID          = FAPI2_COMP_ID | 0x3F,
+        RC_FAILED_TO_GET_RING_LIST     = FAPI2_COMP_ID | 0x40,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,

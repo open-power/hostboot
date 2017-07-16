@@ -303,15 +303,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
     int rc = 0;
     uint32_t       torMagic;
     TorHeader_t*   torHeader;
-#ifdef TORV3_SUPPORT
-    TorDdBlock_t*  torDdBlock;
-    uint32_t ddLevelCount = 0;
-    uint32_t ddLevelOffset = 0;
-    uint32_t ddBlockSize = 0;
-    void*    ddBlockStart = NULL;
-    uint8_t  bDdCheck = 0;
-    uint32_t ddLevel = 0;
-#endif
     uint8_t* postHeaderStart = (uint8_t*)i_ringSection + sizeof(TorHeader_t);
 
     if (i_dbgl > 1)
@@ -329,9 +320,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                "  version:       %d\n"
                "  chipType:      %d\n"
                "  ddLevel:       0x%x\n"
-#ifdef TORV3_SUPPORT
-               "  numDdLevels:   %d\n"
-#endif
                "  size:          %d\n"
                "API parms\n"
                "  i_ddLevel:     0x%x\n"
@@ -339,9 +327,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                "  i_ringVariant: %d\n",
                torMagic, torHeader->version, torHeader->chipType,
                torHeader->ddLevel,
-#ifdef TORV3_SUPPORT
-               torHeader->numDdLevels,
-#endif
                be32toh(torHeader->size),
                i_ddLevel, i_ppeType, i_ringVariant);
 
@@ -371,95 +356,20 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                "  version:     %d\n"
                "  chipType:    %d\n"
                "  ddLevel:     0x%x  (requested ddLevel=0x%x)\n"
-#ifdef TORV3_SUPPORT
-               "  numDdLevels: %d\n"
-#endif
                "  size:        %d\n",
                torMagic, torHeader->version, torHeader->chipType,
                torHeader->ddLevel, i_ddLevel,
-#ifdef TORV3_SUPPORT
-               torHeader->numDdLevels,
-#endif
                be32toh(torHeader->size));
         return TOR_INVALID_MAGIC_NUMBER;
     }
 
-#ifdef TORV3_SUPPORT
-
-    if (torMagic == TOR_MAGIC_HW && torHeader->version < 5)
+    if ( i_ddLevel != torHeader->ddLevel &&
+         i_ddLevel != UNDEFINED_DD_LEVEL )
     {
-
-        ddLevelCount = torHeader->numDdLevels;
-
-        if (ddLevelCount > MAX_NOOF_DD_LEVELS_IN_IMAGE)
-        {
-            MY_ERR("Too many DD levels in image:\n"
-                   "  ddLevelCount = %d\n"
-                   "  Max no of DD levels = %d\n",
-                   ddLevelCount, MAX_NOOF_DD_LEVELS_IN_IMAGE);
-
-            return TOR_TOO_MANY_DD_LEVELS;
-        }
-        else if (i_dbgl > 1)
-        {
-            MY_DBG("tor_access_ring(): No of DD levels: %d \n", ddLevelCount);
-        }
-
-        for (uint8_t i = 0; i < ddLevelCount; i++)
-        {
-            torDdBlock = (TorDdBlock_t*)( (uint8_t*)torHeader +
-                                          sizeof(TorHeader_t) +
-                                          i * sizeof(TorDdBlock_t) );
-            ddLevel = torDdBlock->ddLevel;
-            // Local ddLevelOffset (relative to where the DD blocks start)
-            ddLevelOffset = be32toh(torDdBlock->offset);
-
-            if (i_dbgl > 1)
-            {
-                MY_DBG("tor_access_ring(): Local DD level offset: 0x%08x for DD level: 0x%x \n",
-                       ddLevelOffset, ddLevel );
-            }
-
-            if (ddLevel == i_ddLevel)
-            {
-                // Calc ddBlockStart from origin of the ringSection to where
-                //   the DD block's PPE block starts.
-                ddBlockStart = (void*)((uint8_t*)i_ringSection +
-                                       sizeof(TorHeader_t) +
-                                       ddLevelOffset);
-                ddBlockSize = htobe32(torDdBlock->size);
-                bDdCheck = 1;
-                break;
-            }
-        }
-
-        if (!bDdCheck)
-        {
-            MY_ERR("Input DD level not found and/or image indicates zero no of DD levels\n"
-                   "  i_ddLevel = 0x%x\n"
-                   "  ddLevelCount = %d\n",
-                   i_ddLevel, ddLevelCount);
-
-            return TOR_DD_LEVEL_NOT_FOUND;
-        }
-
+        MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL (=0x%x) \n",
+               i_ddLevel, torHeader->ddLevel, UNDEFINED_DD_LEVEL);
+        return TOR_DD_LEVEL_NOT_FOUND;
     }
-    else
-    {
-#endif
-
-        if ( i_ddLevel != torHeader->ddLevel &&
-             i_ddLevel != UNDEFINED_DD_LEVEL )
-        {
-            MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL (=0x%x) \n",
-                   i_ddLevel, torHeader->ddLevel, UNDEFINED_DD_LEVEL);
-            return TOR_DD_LEVEL_NOT_FOUND;
-        }
-
-#ifdef TORV3_SUPPORT
-    }
-
-#endif
 
     if ( i_ringBlockType == GET_SINGLE_RING ||       // All Magics support GET
          ( i_ringBlockType == PUT_SINGLE_RING  &&    // Can only append to SBE,CME,SGPE
@@ -474,22 +384,8 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             // Update l_ringSection:
             // Extract the offset to the specified ppeType's ring section TOR header and update l_ringSection
             TorPpeBlock_t*  torPpeBlock;
-#ifdef TORV3_SUPPORT
-
-            if (torHeader->version < 5)
-            {
-                torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
-                l_ringSection = (void*)((uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset));
-            }
-            else
-            {
-#endif
-                torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
-                l_ringSection = (void*)(postHeaderStart + be32toh(torPpeBlock->offset));
-#ifdef TORV3_SUPPORT
-            }
-
-#endif
+            torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
+            l_ringSection = (void*)(postHeaderStart + be32toh(torPpeBlock->offset));
         }
 
         rc =  get_ring_from_ring_section( l_ringSection,
@@ -505,38 +401,6 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         return rc;
     }
 
-#ifdef TORV3_SUPPORT
-    else if ( i_ringBlockType == GET_DD_LEVEL_RINGS &&
-              torMagic == TOR_MAGIC_HW &&
-              torHeader->version < 5 )
-    {
-        if (io_ringBlockSize >= ddBlockSize)
-        {
-            memcpy( (uint8_t*)(*io_ringBlockPtr), ddBlockStart, ddBlockSize );
-            io_ringBlockSize =  ddBlockSize;
-
-            return TOR_SUCCESS;
-        }
-        else if (io_ringBlockSize == 0)
-        {
-            if (i_dbgl > 0)
-            {
-                MY_DBG("io_ringBlockSize is zero. Returning required size.\n");
-            }
-
-            io_ringBlockSize =  ddBlockSize;
-
-            return TOR_SUCCESS;
-        }
-        else
-        {
-            MY_ERR("io_ringBlockSize is less than required size.\n");
-
-            return TOR_BUFFER_TOO_SMALL;
-        }
-    }
-
-#endif
     else if ( i_ringBlockType == GET_PPE_LEVEL_RINGS &&
               torMagic == TOR_MAGIC_HW &&
               (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE) )
@@ -544,42 +408,14 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
         TorPpeBlock_t*  torPpeBlock;
         uint32_t ppeSize;
 
-#ifdef TORV3_SUPPORT
-
-        if (torHeader->version < 5)
-        {
-            torPpeBlock = (TorPpeBlock_t*)((uint8_t*)ddBlockStart + i_ppeType * sizeof(TorPpeBlock_t));
-        }
-        else
-        {
-#endif
-            torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
-#ifdef TORV3_SUPPORT
-        }
-
-#endif
+        torPpeBlock = (TorPpeBlock_t*)(postHeaderStart + i_ppeType * sizeof(TorPpeBlock_t));
         ppeSize = be32toh(torPpeBlock->size);
 
         if (io_ringBlockSize >= ppeSize)
         {
-#ifdef TORV3_SUPPORT
-
-            if (torHeader->version < 5)
-            {
-                memcpy( (uint8_t*)(*io_ringBlockPtr),
-                        (uint8_t*)ddBlockStart + be32toh(torPpeBlock->offset),
-                        ppeSize );
-            }
-            else
-            {
-#endif
-                memcpy( (uint8_t*)(*io_ringBlockPtr),
-                        postHeaderStart + be32toh(torPpeBlock->offset),
-                        ppeSize );
-#ifdef TORV3_SUPPORT
-            }
-
-#endif
+            memcpy( (uint8_t*)(*io_ringBlockPtr),
+                    postHeaderStart + be32toh(torPpeBlock->offset),
+                    ppeSize );
             io_ringBlockSize = ppeSize;
 
             return TOR_SUCCESS;
@@ -699,46 +535,26 @@ int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section 
 
     if ( torMagic == TOR_MAGIC_HW && chipType != CT_CEN )
     {
-#ifdef TORV3_SUPPORT
-
-        if ( i_ppeType == NUM_PPE_TYPES &&
-             torHeader->version < 5 )
+        if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
         {
-            // Get DD level block of rings
+            // Get specific PPE block of rings
             rc = tor_access_ring( i_ringSection,
                                   UNDEFINED_RING_ID,
                                   i_ddLevel,
                                   i_ppeType,
                                   i_ringVariant,
                                   l_instanceId,
-                                  GET_DD_LEVEL_RINGS,
+                                  GET_PPE_LEVEL_RINGS,
                                   io_ringBlockPtr,
                                   io_ringBlockSize,
                                   i_ringName,
                                   i_dbgl );
         }
         else
-#endif
-            if (i_ppeType == PT_SBE || i_ppeType == PT_CME || i_ppeType == PT_SGPE)
-            {
-                // Get specific PPE block of rings
-                rc = tor_access_ring( i_ringSection,
-                                      UNDEFINED_RING_ID,
-                                      i_ddLevel,
-                                      i_ppeType,
-                                      i_ringVariant,
-                                      l_instanceId,
-                                      GET_PPE_LEVEL_RINGS,
-                                      io_ringBlockPtr,
-                                      io_ringBlockSize,
-                                      i_ringName,
-                                      i_dbgl );
-            }
-            else
-            {
-                MY_ERR("tor_get_block_of_rings(): Ambiguous API parameters\n");
-                return TOR_AMBIGUOUS_API_PARMS;
-            }
+        {
+            MY_ERR("tor_get_block_of_rings(): Ambiguous API parameters\n");
+            return TOR_AMBIGUOUS_API_PARMS;
+        }
     }
     else
     {

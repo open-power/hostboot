@@ -34,7 +34,7 @@ namespace CEN_RID
 };
 #include <p9_infrastruct_help.H>
 
-// These strings must adhere precisely to the enum of ppeType.
+// These strings must adhere precisely to the enum of PpeType.
 const char* ppeTypeName[] = { "SBE",
                               "CME",
                               "SGPE"
@@ -250,6 +250,64 @@ int ringid_get_raw_ring_file_path( uint32_t        i_magic,
 }
 
 #endif // End of  ifndef __HOSTBOOT_MODULE
+
+
+int ringid_get_noof_ring_ids( ChipType_t  i_chipType,
+                              RingId_t*   o_numRingIds)
+{
+    int rc = INFRASTRUCT_RC_SUCCESS;
+
+    switch (i_chipType)
+    {
+        case CT_P9N:
+        case CT_P9C:
+        case CT_P9A:
+            *o_numRingIds = P9_RID::NUM_RING_IDS;
+            break;
+
+        case CT_CEN:
+            *o_numRingIds = CEN_RID::NUM_RING_IDS;
+            break;
+
+        default:
+            MY_ERR("ringid_get_noof_ring_ids(): Unsupported chipType (=%d) supplied",
+                   i_chipType);
+            rc = TOR_INVALID_CHIPTYPE;
+            break;
+    }
+
+    return rc;
+}
+
+
+int ringid_get_ring_list( ChipType_t       i_chipType,
+                          RingId_t         i_ringId,
+                          GenRingIdList**  o_ringIdList)
+{
+    int rc = INFRASTRUCT_RC_SUCCESS;
+
+    switch (i_chipType)
+    {
+        case CT_P9N:
+        case CT_P9C:
+        case CT_P9A:
+            *o_ringIdList = P9_RID::_ringid_get_ring_list(i_ringId);
+            break;
+
+        case CT_CEN:
+            *o_ringIdList = CEN_RID::_ringid_get_ring_list(i_ringId);
+            break;
+
+        default:
+            MY_ERR("ringid_get_ring_list(): Unsupported chipType (=%d) supplied",
+                   i_chipType);
+            rc = TOR_INVALID_CHIPTYPE;
+            break;
+    }
+
+    return rc;
+}
+
 
 int ringid_get_noof_chiplets( ChipType_t  i_chipType,
                               uint32_t    i_torMagic,
