@@ -68,6 +68,7 @@ typedef ssize_t             ptrdiff_t;
 #define UINT16_MAX	(65535U)
 #define UINT32_MAX	(4294967295U)
 #define UINT64_MAX	(18446744073709551615U)
+#define INT64_MAX	(9223372036854775807U)
 
 //  add (u)intptr_t support
 typedef long int            intptr_t;
