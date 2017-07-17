@@ -83,6 +83,14 @@ class SbeFFDCParser
         void * getFFDCPackage(uint8_t i_index);
 
         /**
+         * @brief Get the raw ffdc package stored
+         *  @retval: True if an ffdc package is stored at index, else false.
+         *  @param[in]  i_index  index number
+         *  @param[out] o_package The package structure to fill.
+         */
+        bool getFFDCPackage(uint8_t i_index, ffdc_package& o_package);
+
+        /**
          * @brief Get the return code of the package
          *  @retval: return code of the ffdc package
          *  @param[in]  i_index  index number

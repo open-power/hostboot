@@ -282,7 +282,7 @@ class SbeFifo
          * @param[in]  i_len         data buffer len to copy
          */
 
-        void writeFFDCBuffer(void * i_data, uint32_t i_len);
+        void writeFFDCBuffer(const void * i_data, uint32_t i_len);
 
     private:
 
