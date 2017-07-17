@@ -1072,6 +1072,15 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
+            //@fixme - RTC:177372
+            // Block any use of overrides if we're secure
+            if( PNOR::isInhibitedSection(PNOR::RINGOVD) )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "getRingOvd: ignore overrides in secure mode" );
+                break;
+            }
+
             uint32_t l_lidId = Util::HWREFIMG_RINGOVD_LIDID;
             if(g_pRingOvdLidMgr.get() == nullptr)
             {
