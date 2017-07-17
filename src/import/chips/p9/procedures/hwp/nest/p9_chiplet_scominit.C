@@ -61,6 +61,7 @@
 #include <p9_obus_scom_addresses.H>
 #include <p9_obus_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
 #include <p9_perv_scom_addresses.H>
 
 //------------------------------------------------------------------------------
@@ -95,6 +96,7 @@ static const uint8_t PERV_OB_CPLT_CONF1_OBRICKC_IOVALID = 0x8;
 fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_scom_data;
     char l_procTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     char l_chipletTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -114,6 +116,9 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     fapi2::buffer<uint64_t> l_ob3data(0x0);
     uint8_t l_no_ndl_iovalid = 0;
     uint8_t l_is_simulation = 0;
+    uint8_t l_nmmu_ndd1 = 0;
+    uint32_t l_eps_write_cycles_t1 = 0;
+    uint32_t l_eps_write_cycles_t2 = 0;
 
     FAPI_DBG("Start");
 
@@ -400,6 +405,28 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         FAPI_ERR("Error from p9_vas_scom");
         fapi2::current_err = l_rc;
         goto fapi_try_exit;
+    }
+
+    // Setup NMMU epsilon write cycles
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_NMMU_NDD1, i_target, l_nmmu_ndd1),
+             "Error from FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NMMU_NDD1)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T1, FAPI_SYSTEM, l_eps_write_cycles_t1),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_WRITE_CYCLES_T1)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_WRITE_CYCLES_T2, FAPI_SYSTEM, l_eps_write_cycles_t2),
+             "Error from FAPI_ATTR_GET(ATTR_PROC_EPS_WRITE_CYCLES_T2)");
+
+    if (!l_nmmu_ndd1)
+    {
+        FAPI_TRY(fapi2::getScom(i_target, PU_NMMU_MM_EPSILON_COUNTER_VALUE, l_scom_data),
+                 "Error from getScom (PU_NMMU_MM_EPSILON_COUNTER_VALUE)");
+
+        l_scom_data.insertFromRight<PU_NMMU_MM_EPSILON_COUNTER_VALUE_WR_TIER_1_CNT_VAL, PU_NMMU_MM_EPSILON_COUNTER_VALUE_WR_TIER_1_CNT_VAL_LEN>
+        (l_eps_write_cycles_t1);
+        l_scom_data.insertFromRight<PU_NMMU_MM_EPSILON_COUNTER_VALUE_WR_TIER_2_CNT_VAL, PU_NMMU_MM_EPSILON_COUNTER_VALUE_WR_TIER_2_CNT_VAL_LEN>
+        (l_eps_write_cycles_t2);
+
+        FAPI_TRY(fapi2::putScom(i_target, PU_NMMU_MM_EPSILON_COUNTER_VALUE, l_scom_data),
+                 "Error from putScom (PU_NMMU_MM_EPSILON_COUNTER_VALUE)");
     }
 
 fapi_try_exit:
