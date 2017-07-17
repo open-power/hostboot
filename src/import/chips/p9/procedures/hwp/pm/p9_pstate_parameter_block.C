@@ -2962,8 +2962,15 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
         {
-            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F), // N_L
-                                           ((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F), //N_S
+            // These fields are 4 bits wide, and stored in a uint8, hence the shifting            
+            // N_S, N_L, L_S, S_N
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_S = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_L = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP L_S = %d", p, ((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP S_N = %d", p, ((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F));
+
+            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F), //N_L
+                                           ((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F), // N_S
                                            ((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F), //L_S
                                            ((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F), //S_N
                                            l_frequency_value_state);
