@@ -47,7 +47,6 @@
     <writeable/>
     <odmVisable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_ZMODE_PORT</id>
@@ -125,6 +124,7 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_FREQ_BIAS_PERCENTAGE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -140,6 +140,7 @@ Set by: PLL settings written by Dave Cadigan</description>
     <odmChangeable/>
     <persistRuntime/>
 </attribute>
+-->
 
 <attribute>
 <id>ATTR_CEN_MSS_VREF_CAL_CNTL</id>
@@ -498,6 +499,7 @@ firmware notes: none</description>
     <array> 2</array>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_SPARE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -511,6 +513,7 @@ OBSOLETE: Use ATTR_CEN_VPD_DIMM_SPARE
     <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_EFF_DRAM_WR_VREF</id>
@@ -1620,6 +1623,7 @@ firmware notes: none</description>
     <array> 2 2</array>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RCD_IBT</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1634,7 +1638,9 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_EFF_DIMM_RCD_MIRROR_MODE</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -1649,6 +1655,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_EFF_SCHMOO_MODE</id>
@@ -2127,6 +2134,7 @@ firmware notes: none</description>
     <odmVisable/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_INTERLEAVE_ENABLE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2136,6 +2144,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
 </attribute>
+-->
 
 <!--
 <attribute>
@@ -2160,6 +2169,7 @@ This attribute will only be found in a Tuelta system.
     <odmChangeable/>
     <writeable/>
 </attribute>
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -2172,6 +2182,7 @@ This attribute will only be alive in the Tuelta system.
     <odmVisable/>
     <odmChangeable/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE</id>
@@ -2229,6 +2240,7 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <odmChangeable/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_MEM_MC_IN_GROUP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2240,6 +2252,8 @@ Note: Cronus and Firmware plus our initfiles do not really support any of the UN
     <array>8</array>
     <persistRuntime/>
 </attribute>
+-->
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_MCS_GROUP_32</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
@@ -2251,6 +2265,7 @@ Measured in GB</description>
     <odmChangeable/>
     <array>16 16</array>
 </attribute>
+-->
 <attribute>
     <id>ATTR_CEN_MSS_EFF_DIMM_FUNCTIONAL_VECTOR</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2556,6 +2571,7 @@ firmware notes: none</description>
     <odmChangeable/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_EFF_RTT_PARK</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2570,6 +2586,7 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2 2 4</array>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_EFF_CA_PARITY</id>
@@ -2968,6 +2985,7 @@ DRAM Rtt_WR for all ranks, DRAM Rtt_Nom for ranks 0 and 1, DRAM driver impedance
 </attribute>
 -->
 
+<!--
 <attribute>
     <id>ATTR_CEN_EFF_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2981,7 +2999,9 @@ Eff config should set this up</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_LRDIMM_ADDITIONAL_CNTL_WORDS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2995,6 +3015,7 @@ Eff config should set this up</description>
     <odmChangeable/>
     <array> 2 2</array>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_LRDIMM_RANK_MULT_MODE</id>
@@ -3146,6 +3167,7 @@ Will be set at an MBA level with one policy to be used</description>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_MRW_MCS_GROUP_ALLOW_ONLY_ADJ_PAIR</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3156,7 +3178,9 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_MRW_ENHANCED_GROUPING_NO_MIRRORING</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
@@ -3167,6 +3191,7 @@ Will be set at an MBA level with one policy to be used</description>
     <platInit/>
     <enum>FALSE = 0, TRUE = 1</enum>
 </attribute>
+-->
 
 <!--
 <attribute>
