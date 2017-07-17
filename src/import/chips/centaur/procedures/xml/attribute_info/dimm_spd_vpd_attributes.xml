@@ -169,7 +169,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 12, bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <!-- RX means an invalid value, only used to init vars -->
     <enum>R1 = 0x00, R2 = 0x01, R4 = 0x03, RX = 0xFF</enum>
     <platInit/>
 </attribute>
@@ -466,6 +465,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <platInit/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_NUM_OF_REGISTERS_USED_ON_RDIMM</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -476,7 +476,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_SPECIFIC_SECTION</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -489,7 +491,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <array>57</array>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -501,7 +505,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -513,7 +519,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -525,7 +533,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_SERIAL_NUMBER</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -537,7 +547,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_CYCLICAL_REDUNDANCY_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -548,7 +560,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_PART_NUMBER</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -561,7 +575,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <array>18</array>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_REVISION_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -576,7 +592,9 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -588,6 +606,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_SPD_BAD_DQ_DATA</id>
@@ -605,6 +624,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <writeable/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_DIMM_RCD_CNTL_WORD_0_15</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -617,6 +637,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <odmVisable/>
     <odmChangeable/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_VPD_DIMM_RCD_CNTL_WORD_0_15</id>
@@ -750,7 +771,6 @@ Querying them from DDR4 DIMMs will result in an error
 </attribute>
 
 <!--
-
 <attribute>
     <id>ATTR_CEN_SPD_LR_ADDR_MIRRORING</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -765,7 +785,9 @@ Querying them from DDR4 DIMMs will result in an error
     </enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F0RC3_F0RC2</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -777,7 +799,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F0RC5_F0RC4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -789,7 +813,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F1RC11_F1RC8</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -801,7 +827,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F1RC13_F1RC12</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -813,7 +841,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F1RC15_F1RC14</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -825,7 +855,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F3RC9_F3RC8_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -837,7 +869,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F34RC11_F34RC10_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -849,7 +883,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F56RC11_F56RC10_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -861,7 +897,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F78RC11_F78RC10_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -873,7 +911,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F910RC11_F910RC10_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -885,7 +925,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_MR12_FOR_800_1066</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -897,7 +939,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F3RC9_F3RC8_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -909,7 +953,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F34RC11_F34RC10_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -921,7 +967,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F56RC11_F56RC10_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -933,7 +981,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F78RC11_F78RC10_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -945,7 +995,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F910RC11_F910RC10_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -957,7 +1009,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_MR12_FOR_1333_1600</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -969,7 +1023,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F3RC9_F3RC8_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -981,7 +1037,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F34RC11_F34RC10_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -993,7 +1051,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F56RC11_F56RC10_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1005,7 +1065,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F78RC11_F78RC10_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1017,7 +1079,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_F910RC11_F910RC10_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1029,7 +1093,9 @@ Querying them from DDR4 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_MR12_FOR_1866_2133</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1042,12 +1108,14 @@ Querying them from DDR4 DIMMs will result in an error
     <platInit/>
 </attribute>
 -->
+
 <!--
 *******************************************************************************
 The following attributes can be queried from DDR4 DIMMs only
 Querying them from DDR3 DIMMs will result in an error
 *******************************************************************************
 -->
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_SDRAM_BANKGROUPS_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1059,6 +1127,7 @@ Querying them from DDR3 DIMMs will result in an error
     <enum>BG0 = 0x00, BG2 = 0x01, BG4 = 0x02</enum>
     <platInit/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_SPD_TIMEBASE_MTB_DDR4</id>
@@ -1177,6 +1246,7 @@ Querying them from DDR3 DIMMs will result in an error
     <platInit/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TCCDLMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1190,7 +1260,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TRRDLMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1204,7 +1276,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TRRDSMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1218,7 +1292,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TCKMAX_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1229,7 +1305,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_CRC_BASE_CONFIG_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1240,7 +1318,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_DRAM_STEPPING_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1254,7 +1334,9 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_CRC_MNFG_SEC_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1265,6 +1347,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_VPD_VERSION</id>
@@ -1273,7 +1356,6 @@ Querying them from DDR3 DIMMs will result in an error
         The VPD Version of this DIMM.  The version number can be an indication of when different DIMM keywords are valid and is loaded from the platform. The version represented here represents one of three distinct vintages of parts : unknown/error, early build CDIMMs with VZ less than 10, everything else.  In other words, this attribute does NOT equate to the VZ keyword.
     </description>
     <valueType>uint32</valueType>
-    <!-- Values are ASCII numbers to match previous VZ usage -->
     <enum>UNKNOWN = 0x3030, OLD_CDIMM = 0x3031, CURRENT = 0x3230</enum>
     <platInit/>
 </attribute>
@@ -1283,6 +1365,7 @@ Querying them from DDR3 DIMMs will result in an error
 The following attributes can be queried from LRDIMM type DDR4 DIMMs only
 *******************************************************************************
 -->
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_DIMM_MODULE_ATTRIBUTES</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1296,7 +1379,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_REGISTER_MANF_ID</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1307,7 +1392,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1320,7 +1407,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_REG_OUTPUT_DRV_STRENGTH_CK</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1331,7 +1420,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_VREF_DQ_RANK0</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1342,7 +1433,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_VREF_DQ_RANK1</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1353,7 +1446,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_VREF_DQ_RANK2</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1364,7 +1459,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_VREF_DQ_RANK3</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1375,7 +1472,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_BUF_VREF_DQ_FOR_DRAM</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1386,7 +1485,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_BUF_MDQ_DRV_LESS_THAN_1866</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1399,7 +1500,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_BUF_MDQ_DRV_1866_2400</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1412,7 +1515,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_BUF_MDQ_DRV_2400_3200</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1425,7 +1530,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_DRV_STRENGTH</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1439,7 +1546,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_WR_LESS_THAN_1866</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1450,7 +1559,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_NOM_LESS_THAN_1866</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1461,7 +1572,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_WR_1866_2400</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1472,7 +1585,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_NOM_1866_2400</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1483,7 +1598,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_WR_2400_3200</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1494,7 +1611,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_NOM_2400_3200</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1505,7 +1624,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_PARK_LESS_THAN_1866</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1518,7 +1639,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_PARK_1866_2400</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1531,7 +1654,9 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_LR_DRAM_ODT_RTT_PARK_2400_3200</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1544,6 +1669,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 <!--
 *******************************************************************************
 The following attributes are DDR3 specific. Regular HWPs should query the DDR
@@ -1551,6 +1677,7 @@ neutral attribute, these attributes should only be queried by the Accessor HWP
 that handles the DDR neutral attribute.
 *******************************************************************************
 -->
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_SDRAM_BANKS_DDR3</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1564,7 +1691,9 @@ that handles the DDR neutral attribute.
     <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03</enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_NOMINAL_VOLTAGE_DDR3</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1578,7 +1707,9 @@ that handles the DDR neutral attribute.
     <enum>NOTOP1_5 = 0x01, OP1_35 = 0x02, OP1_2X = 0x04</enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_CAS_LATENCIES_SUPPORTED_DDR3</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1608,7 +1739,9 @@ that handles the DDR neutral attribute.
     </enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR3</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1621,6 +1754,7 @@ that handles the DDR neutral attribute.
     <valueType>uint32</valueType>
     <platInit/>
 </attribute>
+-->
 
 <!--
 *******************************************************************************
@@ -1629,6 +1763,7 @@ neutral attribute, these attributes should only be queried by the Accessor HWP
 that handles the DDR neutral attribute.
 *******************************************************************************
 -->
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_SDRAM_BANKS_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1642,7 +1777,9 @@ that handles the DDR neutral attribute.
     <enum>B4 = 0x00, B8 = 0x01</enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_NOMINAL_VOLTAGE_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1653,7 +1790,7 @@ that handles the DDR neutral attribute.
         Regular HWPs must use ATTR_CEN_SPD_MODULE_NOMINAL_VOLTAGE.
     </description>
     <valueType>uint8</valueType>
-    <!-- Note that current DDR4 spec has TBD for bits 2-5 -->
+    Note that current DDR4 spec has TBD for bits 2-5 
     <enum>
         OP1_2V = 0x01, END1_2V = 0x02,
         OPTBD1V = 0x04, ENDTBD1V = 0x08,
@@ -1661,7 +1798,9 @@ that handles the DDR neutral attribute.
     </enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_CAS_LATENCIES_SUPPORTED_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1694,7 +1833,9 @@ that handles the DDR neutral attribute.
     </enum>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1707,6 +1848,7 @@ that handles the DDR neutral attribute.
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
 <!--
 *******************************************************************************
@@ -2624,6 +2766,7 @@ This Attribute is to be interpreted as an Integer</description>
     <array> 2</array>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_VPD_PERIODIC_MEMCAL_MODE_OPTIONS</id>
     <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2635,6 +2778,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_VPD_CKE_PRI_MAP</id>
@@ -2705,6 +2849,7 @@ This Attribute is to be interpreted as an Integer</description>
     <array>2</array>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2723,7 +2868,9 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2742,6 +2889,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED</id>
@@ -2794,6 +2942,7 @@ Comes from the VPD MW Keyword</description>
     <persistRuntime/>
 </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_L4_BANK_DELETE_VPD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2805,7 +2954,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <writeable/>
     <persistent/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_VPD_MT_VERSION_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2814,7 +2965,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
    <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_VPD_MR_VERSION_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2823,7 +2976,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
  <attribute>
     <id>ATTR_CEN_VPD_MR_DATA_CONTROL_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2832,7 +2987,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
  <attribute>
     <id>ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2841,7 +2998,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
  <attribute>
     <id>ATTR_CEN_VPD_VM_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2850,7 +3009,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
  <attribute>
     <id>ATTR_CEN_VPD_VD_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2859,7 +3020,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
+<!--
  <attribute>
     <id>ATTR_CEN_VPD_DW_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2868,8 +3031,10 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <platInit/>
      <odmVisable/>
  </attribute>
+-->
 
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODSPEC_COM_REF_RAW_CARD_REV</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -2881,7 +3046,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODSPEC_COM_REF_RAW_CARD</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -2896,6 +3063,7 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     </enum>
     <platInit/>
 </attribute>
+-->
 
  <attribute>
      <id>ATTR_CEN_VPD_POWER_CONTROL_CAPABLE</id>
@@ -2923,6 +3091,7 @@ firmware notes: none</description>
 </attribute>
 
 
+<!--
  <attribute>
      <id>ATTR_CEN_VPD_RD_CTR_WINDAGE_OFFSET</id>
      <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
@@ -2936,8 +3105,10 @@ firmware notes: none</description>
     <odmChangeable/>
     <array> 2</array>
 </attribute>
+-->
 
 
+<!--
 <attribute>
     <id>ATTR_CEN_ISDIMM_MBVPD_INDEX</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2945,6 +3116,7 @@ firmware notes: none</description>
     <valueType>uint8</valueType>
     <platInit/>
 </attribute>
+-->
 
 <attribute>
     <id>ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE</id>

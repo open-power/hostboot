@@ -26,6 +26,7 @@
 
 <attributes>
 <!-- ********************************************************************* -->
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_TRACE_ARRAY_CLKSTOP_ON_XSTOP_FW624741</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -42,7 +43,9 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_SAFE_MODE_THROTTLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -59,6 +62,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_RCE_WITH_OTHER_ERRORS_HW246685</id>
@@ -77,6 +81,7 @@
     </chipEcFeature>
   </attribute>
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_PAGE_MODE_FOR_RRQ</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -93,7 +98,9 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_TRACE_LCL_CLK_GATE_CTRL</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -110,7 +117,9 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_NM_CHANGE_AFTER_SYNC</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -128,7 +137,9 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_ROW_HAMMER_FEATURE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -145,7 +156,9 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_WRITE_FIR_MASK_FEATURE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -163,6 +176,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
 
   <attribute>
@@ -199,6 +213,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     </chipEcFeature>
   </attribute>
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_MSS_READ_PHASE_SELECT_RESET</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -216,6 +231,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_CHECK_L4_CACHE_ENABLE_UNKNOWN</id>
@@ -237,6 +253,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     </chipEcFeature>
   </attribute>
 
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_EC_FEATURE_DISABLE1_REG_FIXED</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -251,7 +268,9 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
 </attribute>
+-->
 
+<!--
 <attribute>
     <id>ATTR_CEN_MSS_EC_FEATURE_DISABLE1_RDCLK_REG_FIXED</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -266,6 +285,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
 </attribute>
+-->
 
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ECID_CONTAINS_PORT_LOGIC_BAD_INDICATION</id>
@@ -287,6 +307,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     </chipEcFeature>
   </attribute>
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_MCBIST_RANDOM_DATA_GEN</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -303,7 +324,9 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_MCBIST_TRAP_RESET</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -320,7 +343,9 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_MCBIST_RANDOM_ADDRESS</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -337,7 +362,9 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
     <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_SCOM_PARITY_ERROR_HW244827_FIXED</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -354,6 +381,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
     <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED</id>
@@ -372,6 +400,7 @@ Controls the ddr_phy_reset procedure.  When set to TRUE, the procedure will cont
     </chipEcFeature>
   </attribute>
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_USE_FIRST_SUPPLIER_FOR_INVALID_MODULE_ID</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -392,7 +421,9 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_SAFEMODE_THROTTLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -409,6 +440,7 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
     <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES</id>
@@ -461,6 +493,7 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
     </chipEcFeature>
   </attribute>
 
+<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_DISABLE_VDDR_DYNAMIC_VID</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -477,6 +510,7 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
+-->
 
   <!-- ********************************************************************* -->
 
