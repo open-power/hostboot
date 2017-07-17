@@ -38,6 +38,7 @@
 #include <errl/errlreasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <initservice/initserviceif.H> //@todo-RTC:149454-Remove
+#include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_psudd.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <arch/ppc.H>
@@ -360,17 +361,21 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                       o_pPsuResponse->secondaryStatus,
                       i_pPsuRequest->seqID,
                       o_pPsuResponse->seqID);
-            SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
+            SBE_TRACFBIN( "Full response:",
+                           o_pPsuResponse,
+                           sizeof(psuResponse));
             break;
         }
 
         //check status and seq ID in response messages
-        else if ((SBE_PRI_OPERATION_SUCCESSFUL != o_pPsuResponse->primaryStatus) ||
-            (SBE_SEC_OPERATION_SUCCESSFUL != o_pPsuResponse->secondaryStatus) ||
-            (i_pPsuRequest->seqID != o_pPsuResponse->seqID) )
+        else if ((SBE_PRI_OPERATION_SUCCESSFUL !=
+                                              o_pPsuResponse->primaryStatus) ||
+           (SBE_SEC_OPERATION_SUCCESSFUL != o_pPsuResponse->secondaryStatus) ||
+           (i_pPsuRequest->seqID != o_pPsuResponse->seqID))
         {
 
-            SBE_TRACF(ERR_MRK "sbe_psudd.C :: readResponse: failing response status "
+            SBE_TRACF(ERR_MRK "sbe_psudd.C :: readResponse: "
+                      "failing response status "
                       " cmd=0x%02x%02x prim=0x%08x secondary=0x%08x"
                       " expected seqID=%d actual seqID=%d",
                       i_pPsuRequest->commandClass,
@@ -379,7 +384,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                       o_pPsuResponse->secondaryStatus,
                       i_pPsuRequest->seqID,
                       o_pPsuResponse->seqID);
-            SBE_TRACFBIN( "Full response:", o_pPsuResponse, sizeof(psuResponse) );
+            SBE_TRACFBIN("Full response:", o_pPsuResponse, sizeof(psuResponse));
 
 
             /*@
@@ -427,12 +432,31 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
                     uint8_t i;
                     for(i = 0; i < l_pkgs; i++)
                     {
+                        ffdc_package l_package = {nullptr, 0, 0};
+                        if(!l_ffdc_parser->getFFDCPackage(i, l_package))
+                        {
+                            continue;
+                        }
+
                         errl->addFFDC( SBEIO_COMP_ID,
-                                   l_ffdc_parser->getFFDCPackage(i),
-                                   l_ffdc_parser->getPackageLength(i),
+                                   l_package.ffdcPtr,
+                                   l_package.size,
                                    0,
                                    SBEIO_UDT_PARAMETERS,
                                    false );
+
+                         //If FFDC schema is known and a processing routine
+                         //is defined then perform the processing.
+                         //For scom PIB errors, addFruCallputs is invoked.
+                         //Only processing known FFDC schemas protects us
+                         //from trying to process FFDC formats we do not
+                         //anticipate. For example, the SBE can send
+                         //user and attribute FFDC information after the
+                         //Scom Error FFDC. We do not want to process that
+                         //type of data here.
+                         FfdcParsedPackage::doDefaultProcessing(l_package,
+                                                                i_target,
+                                                                errl);
                     }
                     delete l_ffdc_parser;
                 }
@@ -696,7 +720,8 @@ errlHndl_t SbePsu::allocateFFDCBuffer(TARGETING::Target * i_target)
         if(errl)
         {
             PageManager::freePage(l_ffdcPtr);
-            SBE_TRACF(ERR_MRK"Error setting FFDC address for proc huid=0x%08lx", l_huid);
+            SBE_TRACF(ERR_MRK"Error setting FFDC address for "
+                      "proc huid=0x%08lx", l_huid);
         }
         else
         {

@@ -223,6 +223,25 @@ void * SbeFFDCParser::getFFDCPackage(uint8_t i_index)
 }
 
 /*
+ * @brief returns the FFDC package
+ */
+bool SbeFFDCParser::getFFDCPackage(uint8_t i_index, ffdc_package& o_package)
+{
+    bool retval{false};
+    uint8_t l_size = getTotalPackages();
+    if((i_index >= 0) && (i_index < l_size))
+    {
+        ffdc_package *l_ffdcPkg = iv_ffdcPackages.at(i_index);
+        if(l_ffdcPkg)
+        {
+            o_package = *l_ffdcPkg;
+            retval = true;
+        }
+    }
+    return retval;
+}
+
+/*
  * @brief returns the RC word
  */
 uint32_t SbeFFDCParser::getPackageRC(uint8_t i_index)
