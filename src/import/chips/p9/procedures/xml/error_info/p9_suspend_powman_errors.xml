@@ -44,11 +44,9 @@
       The PGPE Timed out trying to suspend 
     </description>
     <ffdc>PROC_CHIP_TARGET</ffdc>            
-    <ffdc>PPE_BASE_ADDRESSES</ffdc>
     <!-- <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, PPE_BASE_ADDRESSES</collectFfdc> -->
   </hwpError>
   <!-- ******************************************************************** -->
-
 
 </hwpErrors>
 
