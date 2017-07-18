@@ -90,28 +90,43 @@ _ROM_verify:
 # the parameters in the Hostboot C code, we have these helper functions to
 # provide springboard with the offest to subtract to find the base secureROM
 # address.
+
+# NOTE: Originally each of the following helper functions was formatted to
+# subtract the starting offset of the calling assembly from r10 like the
+# following example:
+#     li r10, -_SHA512_Init
+#     b springboard
+# However, some tool chain versions do not correctly support this convention, so
+# instead put the non-negative offset into r10 and then negate it
+
 remove_sha512_init_offset:
-    li r10, -_SHA512_Init
+    li r10, _SHA512_Init
+    neg r10,r10
     b springboard
 
 remove_sha512_update_offset:
-    li r10, -_SHA512_Update
+    li r10, _SHA512_Update
+    neg r10,r10
     b springboard
 
 remove_sha512_final_offset:
-    li r10, -_SHA512_Final
+    li r10, _SHA512_Final
+    neg r10,r10
     b springboard
 
 remove_sha512_hash_offset:
-    li r10, -_SHA512_Hash
+    li r10, _SHA512_Hash
+    neg r10,r10
     b springboard
 
 remove_ec_verify_offset:
-    li r10, -_ec_verify
+    li r10, _ec_verify
+    neg r10,r10
     b springboard
 
 remove_rom_verify_offset:
-    li r10, -_ROM_verify
+    li r10, _ROM_verify
+    neg r10,r10
     b springboard
 
 springboard:
