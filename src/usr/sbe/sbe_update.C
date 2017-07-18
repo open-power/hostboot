@@ -377,25 +377,58 @@ namespace SBE
                 /**********************************************/
                 if ((err == NULL) && (sbeState.update_actions & DO_UPDATE))
                 {
-                    err = performUpdateActions(sbeState);
-                    if (err)
+                    // If update is needed, check to see if it's in MPIPL
+                    if(sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
                     {
                         TRACFCOMP( g_trac_sbe,
-                                   INFO_MRK"updateProcessorSbeSeeproms(): "
-                                   "performUpdateActions() Failed "
-                                   "rc=0x%.4X, Target UID=0x%X",
-                                   err->reasonCode(),
-                                   TARGETING::get_huid(sbeState.target));
-
-                        // Don't break - handle error at the end of the loop,
+                                       INFO_MRK"updateProcessorSbeSeeproms(): "
+                                       "Skip SBE update during MPIPL "
+                                       ", Target UID=0x%X",
+                                       TARGETING::get_huid(sbeState.target));
+                        /*@
+                         * @errortype
+                         * @moduleid          SBE_UPDATE_SEEPROMS
+                         * @reasoncode        SBE_UPDATE_DURING_MPIPL
+                         * @userdata1         Target huid id
+                         * @userdata2[0:31]   Update actions
+                         * @userdata2[32:63]  SEEPROM side to update
+                         * @devdesc           SBE update is being skipped
+                         *                    during MPIPL
+                         * @custdesc          SBE is not being updated
+                         */
+                        err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                  SBE_UPDATE_SEEPROMS,
+                                  SBE_UPDATE_DURING_MPIPL,
+                                  TARGETING::get_huid(sbeState.target),
+                                  TWO_UINT32_TO_UINT64(
+                                      TO_UINT32(sbeState.update_actions),
+                                      TO_UINT32(sbeState.seeprom_side_to_update)
+                                  )
+                        );
+                        err->collectTrace(SBE_COMP_NAME);
                     }
                     else
                     {
-                        // Target updated without failure, so set IPL_RESTART
-                        // flag, if necessary
-                        if (sbeState.update_actions & IPL_RESTART)
+                        err = performUpdateActions(sbeState);
+                        if (err)
                         {
-                            l_restartNeeded = true;
+                            TRACFCOMP( g_trac_sbe,
+                                       INFO_MRK"updateProcessorSbeSeeproms(): "
+                                       "performUpdateActions() Failed "
+                                       "rc=0x%.4X, Target UID=0x%X",
+                                       err->reasonCode(),
+                                       TARGETING::get_huid(sbeState.target));
+
+                            //Don't break - handle error at the end of the loop,
+                        }
+                        else
+                        {
+                            //Target updated without failure, so set IPL_RESTART
+                            //flag, if necessary
+                            if (sbeState.update_actions & IPL_RESTART)
+                            {
+                                l_restartNeeded = true;
+                            }
                         }
                     }
 

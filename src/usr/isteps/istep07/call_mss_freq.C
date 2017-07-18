@@ -72,6 +72,7 @@ void*    call_mss_freq( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = NULL;
+
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
     TARGETING::TargetHandleList l_membufTargetList;
@@ -201,23 +202,52 @@ void*    call_mss_freq( void *io_pArgs )
                       " Original Nest: %d New Nest: %d"
                       " Original syncMode: %d New syncMode: %d",
                       l_originalNest, l_newNest, l_bootSyncMode, l_mcSyncMode );
-
-            TARGETING::setFrequencyAttributes(l_sys,
-                                              l_newNest);
-
-            l_err = SBE::updateProcessorSbeSeeproms();
-
-            if( l_err )
+            if(l_sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Error: SBE update detected in MPIPL");
+
+                /*@
+                 * @errortype
+                 * @moduleid          MOD_SBE_PERFORM_UPDATE_CHECK
+                 * @reasoncode        RC_SBE_UPDATE_IN_MPIPL
+                 * @userdata1[0:31]   original mc sync mode
+                 * @userdata1[32:63]  new mc sync mode
+                 * @userdata2[0:31]   original nest frequency
+                 * @userdata2[32:63]  new nest frequency
+                 * @devdesc           SBE cannot be reset during MPIPL
+                 * @custdesc          Illegal action during boot
+                 */
+                l_err = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                 MOD_SBE_PERFORM_UPDATE_CHECK,
+                                 RC_SBE_UPDATE_IN_MPIPL,
+                                 TWO_UINT32_TO_UINT64(
+                                     TO_UINT32(l_bootSyncMode),
+                                     TO_UINT32(l_mcSyncMode)),
+                                 TWO_UINT32_TO_UINT64(
+                                     l_originalNest, l_newNest));
+
+                l_StepError.addErrorDetails( l_err );
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TARGETING::setFrequencyAttributes(l_sys,
+                                              l_newNest);
+                l_err = SBE::updateProcessorSbeSeeproms();
+                if( l_err )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "call_mss_freq.C - Error calling updateProcessorSbeSeeproms");
 
-                // Create IStep error log and cross reference to error
-                // that occurred
-                l_StepError.addErrorDetails( l_err );
+                    // Create IStep error log and cross reference to error
+                    // that occurred
+                    l_StepError.addErrorDetails( l_err );
 
-                // Commit Error
-                errlCommit( l_err, ISTEP_COMP_ID );
+                    // Commit Error
+                    errlCommit( l_err, ISTEP_COMP_ID );
+                }
             }
         }
     }
