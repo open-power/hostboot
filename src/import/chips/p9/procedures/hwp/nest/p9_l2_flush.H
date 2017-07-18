@@ -22,15 +22,16 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
 /// @file p9_l2_flush.H
 /// @brief Flush the P9 L2 cache (FAPI)
 ///
 /// *HWP HWP Owner   : Benjamin Gass <bgass@us.ibm.com>
-/// *HWP FW Owner    : Bilicon Patil <bilpatil@in.ibm.com>
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
 /// *HWP Team        : Quad
-/// *HWP Consumed by : FSP
-/// *HWP Level       : 2
+/// *HWP Consumed by : FSP and SBE
+/// *HWP Level       : 3
 ///
 ///  Procedure Additional Comments:
 ///
@@ -60,9 +61,8 @@
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Constants
+// Structure definitions
 //------------------------------------------------------------------------------
-
 namespace p9core
 {
 
@@ -84,13 +84,8 @@ struct purgeData_t
 } // end of p9core namespace
 
 //------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
-
 typedef fapi2::ReturnCode (*p9_l2_flush_FP_t)
 (const fapi2::Target < fapi2::TARGET_TYPE_EX >& i_target,
  const p9core::purgeData_t& i_purgeData);
@@ -99,12 +94,10 @@ extern "C"
 {
 
 ///
-/// @brief p9_l2_flush HWP to flush entire content of L2 cache via purge engine
-/// @param[in] i_target Ex target
+/// @brief Flush entire content of L2 cache via purge engine
+/// @param[in] i_target EX target
 /// @param[in] i_purgeData Specifies a particular purge type
 /// @return: FAPI2_RC_SUCCESS if purge operation completes successfully,
-///          RC_P9_L2_FLUSH_UNKNOWN_PLATFORM
-///              if executed on unsupported platform,
 ///          RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING
 ///              if called when existing L2 purge is in progress,
 ///          RC_P9_L2_FLUSH_CMD_TIMEOUT
