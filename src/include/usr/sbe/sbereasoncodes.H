@@ -104,6 +104,7 @@ enum sbeReasonCode
     ERROR_FROM_XIP_DELETE               = SBE_COMP_ID | 0x18,
     ERROR_FROM_XIP_FIND                 = SBE_COMP_ID | 0x19,
     SBE_MISMATCHED_HW_KEY_HASH          = SBE_COMP_ID | 0x1A,
+    SBE_UPDATE_DURING_MPIPL             = SBE_COMP_ID | 0x1B,
 };
 
 };  // end SBE

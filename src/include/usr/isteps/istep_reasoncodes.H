@@ -59,6 +59,7 @@ namespace ISTEP
         MOD_SBE_THRESHOLD_FSM                             = 0x17,
         MOD_SBE_EXTRACT_RC_HANDLER                        = 0x18,
         MOD_HANDLE_SBE_REG_VALUE                          = 0x19,
+        MOD_SBE_PERFORM_UPDATE_CHECK                      = 0x1A,
     };
 
     /**
@@ -116,6 +117,7 @@ namespace ISTEP
         RC_HWSV_COLLECT_SBE_RC                   = ISTEP_COMP_ID | 0x2F,
         RC_PROC_EXTRACT_SBE_MAIN_ERROR           = ISTEP_COMP_ID | 0x30,
         RC_SBE_BOOTED_UNEXPECTED_SIDE_UPD        = ISTEP_COMP_ID | 0x31,
+        RC_SBE_UPDATE_IN_MPIPL                   = ISTEP_COMP_ID | 0x32,
     };
 
 };
