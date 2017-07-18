@@ -1355,7 +1355,7 @@ sub createMappingFile
 sub createVMFile
 {
     # open file for binary version of mapping data
-    my %fileInfo = newFileInfo( $cfgPrefix . ".bin", VM_BIN_FILE_SIZE );
+    my %fileInfo = newFileInfo( $cfgPrefix . "_VM.bin", VM_BIN_FILE_SIZE );
     trace( "Create output binary file: " . $fileInfo{FILE_NAME} );
 
     my $time = time;
