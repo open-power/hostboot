@@ -582,11 +582,11 @@ void ErrlEntry::checkHiddenLogsEnable( )
     else
     {
         // need to check based on severity
-        switch( iv_User.iv_severity )
+        switch( sev() )
         {
             case ERRL_SEV_INFORMATIONAL:
 
-                if(l_enableLogs == ENABLE_INFORMATIONAL_LOGS )
+                if(l_enableLogs & ENABLE_INFORMATIONAL_LOGS )
                 {
                     iv_skipShowingLog = false;
                 }
@@ -594,7 +594,7 @@ void ErrlEntry::checkHiddenLogsEnable( )
 
             case ERRL_SEV_RECOVERED:
 
-                if(l_enableLogs == ENABLE_RECOVERABLE_LOGS )
+                if(l_enableLogs & ENABLE_RECOVERABLE_LOGS )
                 {
                     iv_skipShowingLog = false;
                 }
@@ -1109,6 +1109,13 @@ void ErrlEntry::processCallout()
 {
     TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout");
 
+    // Skip all callouts if this is a non-visible log
+    if( !isSevVisible() )
+    {
+        TRACDCOMP(g_trac_errl, "Error log is non-visible - skipping callouts");
+        return;
+    }
+
     // see if HWAS has been loaded and has set the processCallout function
     HWAS::processCalloutFn pFn =
             ERRORLOG::theErrlManager::instance().getHwasProcessCalloutFn();
@@ -1160,6 +1167,13 @@ void ErrlEntry::deferredDeconfigure()
     // the HWAS functionality.
 
     TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
+
+    // Skip all callouts if this is a non-visible log
+    if( !isSevVisible() )
+    {
+        TRACDCOMP(g_trac_errl, "Error log is non-visible - skipping callouts");
+        return;
+    }
 
     // see if HWAS has been loaded and has set the processCallout function
     HWAS::processCalloutFn pFn =
@@ -1542,6 +1556,33 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
 
     return copy_vector;
 }
+
+/**
+ * @brief Check if the severity of this log indicates it is
+ *   customer visible, note this ignores any override flags that
+ *   might change standard behavior
+ * @return true if log is visible
+ */
+bool ErrlEntry::isSevVisible( void )
+{
+    bool l_vis = true;
+    switch( sev() )
+    {
+        // Hidden logs
+        case( ERRL_SEV_INFORMATIONAL ): l_vis = false; break;
+        case( ERRL_SEV_RECOVERED ): l_vis = false; break;
+
+        // Visible logs
+        case( ERRL_SEV_PREDICTIVE ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_SYS_TERM ): l_vis = true; break;
+
+        // Error case, shouldn't happen so make it show up
+        case( ERRL_SEV_UNKNOWN ): l_vis = true; break;
+    }
+    return l_vis;
+}
+
 
 } // End namespace
 

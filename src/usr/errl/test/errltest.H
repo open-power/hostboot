@@ -40,6 +40,7 @@
 
 #include <errl/errludtarget.H>
 #include <targeting/common/target.H>
+#include <targeting/namedtarget.H>
 #include <targeting/common/iterators/rangefilter.H>
 #include <targeting/common/predicates/predicates.H>
 #include <hwas/common/hwasCallout.H>
@@ -1097,6 +1098,82 @@ public:
             l_lastType = TARGET_TO_SUBSYS_TABLE[i].xType;
         }
     }
+
+
+    /**
+     * @brief Guarantee non-visible logs do not post callouts
+     */
+    void testErrl_hidecallouts(void)
+    {
+        // Find a non-master core that is currently functional
+        TARGETING::TargetHandleList l_cores;
+        TARGETING::getAllChiplets( l_cores, TARGETING::TYPE_CORE, true );
+        TARGETING::Target* l_victim = nullptr;
+        const TARGETING::Target* l_master = TARGETING::getMasterCore();
+        for( auto c : l_cores )
+        {
+            if( c != l_master )
+            {
+                l_victim = c;
+                break;
+            }
+        }
+        if( l_victim == nullptr )
+        {
+            TS_FAIL( "Could not find a non-master core" );
+            return;
+        }
+
+        // Create an informational log
+        errlHndl_t l_err = nullptr;
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                        ERRORLOG::ERRL_TEST_MOD_ID,
+                                        ERRORLOG::ERRL_TEST_REASON_CODE,
+                                        0x494E464F, //INFO
+                                        0 );
+        // Add a callout with deconfig and gard
+        l_err->addHwCallout( l_victim,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_Fatal );
+        // Commit the log
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        // Verify that the target wasn't actually deconfigured
+        TARGETING::ATTR_HWAS_STATE_type l_state =
+          l_victim->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if( !l_state.functional )
+        {
+            TS_FAIL( "Info log incorrectly caused deconfig" );
+        }
+
+
+        // Create a recovered log
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_RECOVERED,
+                                        ERRORLOG::ERRL_TEST_MOD_ID,
+                                        ERRORLOG::ERRL_TEST_REASON_CODE,
+                                        0x52454300, //REC
+                                        0 );
+        // Add a callout with deconfig and gard
+        l_err->addHwCallout( l_victim,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_Fatal );
+        // Commit the log
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        // Verify that the target wasn't actually deconfigured
+        l_state =
+          l_victim->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if( !l_state.functional )
+        {
+            TS_FAIL( "Recovered log incorrectly caused deconfig" );
+        }
+    }
+
+
 
 };
 }

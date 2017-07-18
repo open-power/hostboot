@@ -753,11 +753,27 @@ private:
     bool getSkipShowingLog();
 
     /**
-     * @brief Set iv_skipShowingLogs based on the passed in value
+     * @brief Sets internal flag to indicate if this log should be
+     *    saved to PNOR and sent to the BMC
      *
      * @return nothing
      */
     void checkHiddenLogsEnable( );
+
+    /**
+     * @brief Check if the severity of this log indicates it is
+     *   customer visible, note this ignores any override flags that
+     *   might change standard behavior
+     *
+     *  INFORMATIONAL = false
+     *  RECOVERED = false
+     *  PREDICTIVE = true
+     *  UNRECOVERABLE = true
+     *  CRITICAL_SYS_TERM = true
+     *
+     * @return true if log is visible
+     */
+    bool isSevVisible( void );
 
 
     /**
