@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -71,6 +73,7 @@ namespace ERRORLOG
         ERRL_UDT_LOGREGISTER      = 0x05,
         ERRL_UDT_CALLOUT          = 0x06,
         ERRL_UDT_PRINTK           = 0x07,
+        ERRL_UDT_SENSOR           = 0x08,
     };
 };
 

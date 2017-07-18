@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/errl/plugins/errludparserfactoryerrl.H $              */
+/* $Source: src/usr/errl/errludsensor.C $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,59 +22,48 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef ERRL_UDPARSERFACTORYERRL_H
-#define ERRL_UDPARSERFACTORYERRL_H
-
 /**
- *  @file errludparserfactoryerrl.H
+ *  @file errludsensor.C
  *
- *  Defines the errlUserDetailsParserFactoryErrl.H class
-*/
-#include "errludparserfactory.H"
-#include "errludstring.H"
-#include "errludtarget.H"
-#include "errludbacktrace.H"
-#include "errludattribute.H"
-#include "errludlogregister.H"
-#include "errludcallout.H"
-#include "errludsensor.H"
+ *  @brief Implementation of ErrlUserDetailsSensor
+ */
+#include <errl/errludsensor.H>
+#include <errl/errlreasoncodes.H>
 
 namespace ERRORLOG
 {
 
-/**
- * @class ErrlUserDetailsParserFactoryErrl
- *
- * This factory produces ErrlUserDetailsParser objects to parse the specified
- * ERRL user detail data.
- */
-class ErrlUserDetailsParserFactoryErrl : public ErrlUserDetailsParserFactory
-{
-public:
-
-    /**
-     *  @brief Constructor
-     */
-    ErrlUserDetailsParserFactoryErrl()
+    ErrlUserDetailsSensor::ErrlUserDetailsSensor(
+                            TARGETING::ATTR_FRU_ID_type i_fru_id,
+                            uint8_t i_sensor_number,
+                            HWAS::callOutPriority i_priority)
     {
-        registerParser<ErrlUserDetailsParserString>(ERRL_UDT_STRING);
-        registerParser<ErrlUserDetailsParserTarget>(ERRL_UDT_TARGET);
-        registerParser<ErrlUserDetailsParserBackTrace>(ERRL_UDT_BACKTRACE);
-        registerParser<ErrlUserDetailsParserAttribute>(ERRL_UDT_ATTRIBUTE);
-        registerParser<ErrlUserDetailsParserLogRegister>(ERRL_UDT_LOGREGISTER);
-        registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
-        registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
+        typedef struct {
+            TARGETING::ATTR_FRU_ID_type fru;
+            uint8_t pad[3];
+            uint8_t sensorNum;
+            HWAS::callOutPriority priority;
+        } sensorDetails_t;
+
+        sensorDetails_t l_sensorDetails;
+
+        l_sensorDetails.fru = i_fru_id;
+        l_sensorDetails.sensorNum = i_sensor_number;
+        memset(l_sensorDetails.pad, 0, sizeof(l_sensorDetails.pad));
+        l_sensorDetails.priority = i_priority;
+
+        uint8_t* l_buf = reinterpret_cast<uint8_t*>(
+                            reallocUsrBuf(sizeof(l_sensorDetails)));
+        memcpy(l_buf, &l_sensorDetails, sizeof(l_sensorDetails));
+
+        // Set up ErrlUserDetails instance variables
+        iv_CompId = ERRL_COMP_ID;
+        iv_Version = 1;
+        iv_SubSection = ERRL_UDT_SENSOR;
     }
 
-private:
+    ErrlUserDetailsSensor::~ErrlUserDetailsSensor()
+    {
 
-    // Disabled
-    ErrlUserDetailsParserFactoryErrl(const ErrlUserDetailsParserFactoryErrl &);
-    ErrlUserDetailsParserFactoryErrl & operator=(
-        const ErrlUserDetailsParserFactoryErrl &);
-};
-
+    }
 }
-
-#endif
-

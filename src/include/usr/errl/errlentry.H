@@ -736,6 +736,18 @@ private:
      * @param[in]       i_target        The target to get the numbers for
      */
     void addPartAndSerialNumbersToErrLog(const TARGETING::Target * i_target);
+
+    /**
+     * @brief called by addHwCallout to retrieve the FRU ID and sensor ID
+     * from the current target. If the current target does not contain
+     * ATTR_FRU_ID, find the first parent that does and add the attribute
+     * to the error log.
+     *
+     * @param[in]       i_target        The target to get the IDs for
+     * @param[in]       i_priority      This target's callout priority
+     */
+    void addSensorDataToErrLog(TARGETING::Target * i_target,
+                               HWAS::callOutPriority i_priority );
 #endif
 
     /**

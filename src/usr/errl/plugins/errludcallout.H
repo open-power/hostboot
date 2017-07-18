@@ -322,6 +322,8 @@ case HWAS::_type: i_parser.PrintString( "Priority", #_type); break;
 #undef case_PRIORITY
     } // parse
 
+    friend class ErrlUserDetailsParserSensor;
+
 private:
     // Disabled
     ErrlUserDetailsParserCallout(const ErrlUserDetailsParserCallout &);

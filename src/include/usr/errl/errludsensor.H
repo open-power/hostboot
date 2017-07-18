@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/errl/plugins/errludparserfactoryerrl.H $              */
+/* $Source: src/include/usr/errl/errludsensor.H $                         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,59 +22,58 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef ERRL_UDPARSERFACTORYERRL_H
-#define ERRL_UDPARSERFACTORYERRL_H
+#ifndef ERRL_UDSENSOR_H
+#define ERRL_UDSENSOR_H
 
 /**
- *  @file errludparserfactoryerrl.H
+ *  @file errludsensor.H
  *
- *  Defines the errlUserDetailsParserFactoryErrl.H class
-*/
-#include "errludparserfactory.H"
-#include "errludstring.H"
-#include "errludtarget.H"
-#include "errludbacktrace.H"
-#include "errludattribute.H"
-#include "errludlogregister.H"
-#include "errludcallout.H"
-#include "errludsensor.H"
+ *  Defines the ErrlUserDetailsSensor class that adds fault sensor
+ *  information to an error log as user detail data
+ */
 
+#include <errl/errluserdetails.H>
+#include <stdint.h>
+
+
+//Forward reference
 namespace ERRORLOG
 {
 
 /**
- * @class ErrlUserDetailsParserFactoryErrl
+ * @class ErrlUserDetailsSensor
  *
- * This factory produces ErrlUserDetailsParser objects to parse the specified
- * ERRL user detail data.
+ * Adds fault sensor number and fru id to an error log as user detail data
  */
-class ErrlUserDetailsParserFactoryErrl : public ErrlUserDetailsParserFactory
+class ErrlUserDetailsSensor : public ErrlUserDetails
 {
 public:
-
     /**
      *  @brief Constructor
+     *
+     *  @param i_fru_id: FRU ID of part called out
+     *  @param i_sensor_number: faulty sensor number
+     *  @param i_priority: Priority callout of the part
+     *
+     *  Creates a Fault Sensor UserDetail, storing the faulty sensor
+     *  number for the hw callout. User must call addToLog() in order
+     *  to push the data to the error log.
      */
-    ErrlUserDetailsParserFactoryErrl()
-    {
-        registerParser<ErrlUserDetailsParserString>(ERRL_UDT_STRING);
-        registerParser<ErrlUserDetailsParserTarget>(ERRL_UDT_TARGET);
-        registerParser<ErrlUserDetailsParserBackTrace>(ERRL_UDT_BACKTRACE);
-        registerParser<ErrlUserDetailsParserAttribute>(ERRL_UDT_ATTRIBUTE);
-        registerParser<ErrlUserDetailsParserLogRegister>(ERRL_UDT_LOGREGISTER);
-        registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
-        registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
-    }
+    ErrlUserDetailsSensor(TARGETING::ATTR_FRU_ID_type i_fru_id,
+                          uint8_t i_sensor_number,
+                          HWAS::callOutPriority i_priority);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~ErrlUserDetailsSensor();
 
 private:
-
     // Disabled
-    ErrlUserDetailsParserFactoryErrl(const ErrlUserDetailsParserFactoryErrl &);
-    ErrlUserDetailsParserFactoryErrl & operator=(
-        const ErrlUserDetailsParserFactoryErrl &);
+    ErrlUserDetailsSensor(const ErrlUserDetailsSensor &);
+    ErrlUserDetailsSensor & operator=(const ErrlUserDetailsSensor &);
 };
 
 }
 
 #endif
-
