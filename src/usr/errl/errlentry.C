@@ -55,7 +55,10 @@
 #include <attributeenums.H>
 #include "errlentry_consts.H"
 #include <util/misc.H>
-
+#ifdef CONFIG_BMC_IPMI
+#include <ipmi/ipmisensor.H>
+#include <errl/errludsensor.H>
+#endif
 // Hostboot Image ID string
 extern char hbi_ImageId;
 
@@ -671,10 +674,88 @@ void ErrlEntry::checkHiddenLogsEnable( )
         ErrlUserDetailsAttribute( l_target,
                           TARGETING::ATTR_SERIAL_NUMBER).addToLog(this);
 
+
     }while( 0 );
 
     TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addPartAndSerialNumbersToErrLog()");
 }
+
+
+// Find the FRU ID associated with target.
+// Returns first FRU ID found as it navigates the target's parent hierarchy
+TARGETING::ATTR_FRU_ID_type getFRU_ID(TARGETING::Target * i_target)
+{
+    TARGETING::ATTR_FRU_ID_type l_fruid = 0;  // set to invalid FRU ID
+    TARGETING::TargetHandleList l_parentList;
+    TARGETING::Target * l_target = i_target;
+
+    uint16_t level = 0; // just a basic parent level counter
+
+    TRACDCOMP(g_trac_errl,"Looking for FRU ID starting at HUID 0x%X target",
+        TARGETING::get_huid(i_target));
+
+    bool foundFru = i_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid);
+    while (!foundFru)
+    {
+        level++;
+
+        // Get immediate parent
+        TARGETING::targetService().getAssociated(
+                                        l_parentList,
+                                        l_target,
+                                        TARGETING::TargetService::PARENT,
+                                        TARGETING::TargetService::IMMEDIATE);
+
+        if (l_parentList.size() != 1)
+        {
+            TRACDCOMP(g_trac_errl,"%d No Parent for HUID 0x%X target",
+                level, TARGETING::get_huid(l_target));
+            break;
+        }
+
+        l_target = l_parentList[0];
+
+        if (l_target->tryGetAttr<TARGETING::ATTR_FRU_ID>(l_fruid))
+        {
+            // Found 1st parent with a FRU ID
+            foundFru = true;
+        }
+
+        l_parentList.clear();  // clear out old entry
+
+    } // end while
+
+    if (foundFru)
+    {
+        TRACDCOMP(g_trac_errl,"level %d FRU ID 0x%X found for target HUID 0x%X",
+                    level, l_fruid, TARGETING::get_huid(l_target));
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl,"Failed to find a FRU ID for target HUID 0x%X. Looked at %d levels.",
+            TARGETING::get_huid(i_target), level);
+    }
+
+    return l_fruid;
+}
+
+void ErrlEntry::addSensorDataToErrLog(TARGETING::Target * i_target,
+                                      HWAS::callOutPriority i_priority )
+{
+    TRACDCOMP(g_trac_errl,
+        ENTER_MRK"ErrlEntry::addSensorDataToErrLog(HUID 0x%X, priority %d)",
+        TARGETING::get_huid(i_target), i_priority);
+
+    uint8_t l_sensorNum = SENSOR::getFaultSensorNumber(i_target);
+    TARGETING::ATTR_FRU_ID_type l_fru_id = getFRU_ID(i_target);
+
+    // Add the sensor details to the error log
+    ErrlUserDetailsSensor(l_fru_id, l_sensorNum, i_priority).addToLog(this);
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"ErrlEntry::addSensorDataToErrLog()");
+}
+
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -733,6 +814,7 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
                     {
 #ifdef CONFIG_BMC_IPMI
                         addPartAndSerialNumbersToErrLog( l_target );
+                        addSensorDataToErrLog( l_target, l_ud->priority);
 #endif
                     }
                     else
