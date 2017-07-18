@@ -818,9 +818,17 @@ errlHndl_t DeconfigGard::processFieldCoreOverride()
                         get_huid(pNode));
                 continue; // next node
             }
-
-            HWAS_INF("FCO: node %.8X: value %d",
-                get_huid(pNode), l_fco);
+            else if (is_fused_mode())
+            {
+                l_fco += l_fco;
+                HWAS_INF("FCO: node %.8X: Doubling EC count in fused_mode. "
+                         "l_fco=0x%X", get_huid(pNode), l_fco);
+            }
+            else
+            {
+                HWAS_INF("FCO: node %.8X: value %d",
+                         get_huid(pNode), l_fco);
+            }
 
             // find all functional child PROC targets
             TargetHandleList pProcList;
