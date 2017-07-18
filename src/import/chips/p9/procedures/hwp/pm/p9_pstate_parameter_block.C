@@ -486,8 +486,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb); //Remote this RTC: 174743
         p9_pstate_compute_PStateV_slope(l_operating_points, &l_globalppb);
 
-        l_globalppb.dpll_pstate0_value = revle32((revle32(l_globalppb.reference_frequency_khz) + revle32(
-                                             l_globalppb.frequency_step_khz) - 1) / revle32(
+        l_globalppb.dpll_pstate0_value = revle32(revle32(l_globalppb.reference_frequency_khz)  / revle32(
                                              l_globalppb.frequency_step_khz));
 
         FAPI_INF("l_globalppb.dpll_pstate0_value %X", revle32(l_globalppb.dpll_pstate0_value));
@@ -510,8 +509,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_localppb.vdm = l_lp_vdmpb;
 
 
-        l_localppb.dpll_pstate0_value = revle32((revle32(l_localppb.operating_points[ULTRA].frequency_mhz) * 1000 / revle32(
-                l_globalppb.frequency_step_khz)));
+        l_localppb.dpll_pstate0_value = revle32(revle32(l_globalppb.reference_frequency_khz)  / revle32(
+                                             l_globalppb.frequency_step_khz));
+
 
         FAPI_INF("l_localppb.dpll_pstate0_value %X", revle32(l_localppb.dpll_pstate0_value));
 
