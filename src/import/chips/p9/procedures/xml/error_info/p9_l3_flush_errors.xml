@@ -28,22 +28,33 @@
     <rc>RC_P9_L3_FLUSH_INVALID_ARGS_ERR</rc>
     <description>
       Procedure: p9_l3_flush
-      L3 flush not attempted, L3 flush is stopped
+      Invalid parameters passed in for a L3 flush operation.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>PURGETYPE</ffdc>
     <ffdc>PURGEADDR</ffdc>
-    <ffdc>PURGEMEMBER</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_L3_FLUSH_PREVIOUS_PURGE_ACTIVE_ERR</rc>
     <description>
       Procedure: p9_l3_flush
-      There is another purge that has not finished yet
+      A previous L3 purge request has not finished.
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>PURGEREG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -55,7 +66,18 @@
     <ffdc>TARGET</ffdc>
     <ffdc>PURGETYPE</ffdc>
     <ffdc>PURGEADDR</ffdc>
-    <ffdc>PURGEMEMBER</ffdc>
+    <ffdc>EX_PRD_PURGE_REG_DATA</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+    </deconfigure>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
