@@ -620,7 +620,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
         TARG_ERR( "LPC attribute=%.16llX, live=%.16llX",
            l_pMasterProcChip->getAttr<ATTR_LPC_BUS_ADDR>(),
            LPC::get_lpc_bar() );
-        TARG_ASSERT( true, "LPC BARs are inconsistent" );
+        TARG_ASSERT( false, "LPC BARs are inconsistent" );
     }
     if( l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>()
         != XSCOM::get_master_bar() )
@@ -628,7 +628,7 @@ static void adjustMemoryMap( TargetService& i_targetService )
         TARG_ERR( "XSCOM attribute=%.16llX, live=%.16llX",
            l_pMasterProcChip->getAttr<ATTR_XSCOM_BASE_ADDRESS>(),
            XSCOM::get_master_bar() );
-        TARG_ASSERT( true, "XSCOM BARs are inconsistent" );
+        TARG_ASSERT( false, "XSCOM BARs are inconsistent" );
     }
 }
 
