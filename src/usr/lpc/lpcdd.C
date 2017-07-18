@@ -387,8 +387,10 @@ void block_lpc_ops( bool i_block )
  */
 uint64_t get_lpc_bar( void )
 {
+    LpcDD l_LpcDD = Singleton<LpcDD>::instance();
     return mm_virt_to_phys( reinterpret_cast<void*>(
-    Singleton<LpcDD>::instance().getLPCBaseAddr() ));
+                            l_LpcDD.getLPCBaseAddr() )) -
+                            l_LpcDD.getLPCStartAddr();
 }
 
 

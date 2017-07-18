@@ -132,6 +132,16 @@ class LpcDD
     };
 
     /**
+    * @brief Get the start offset in the LPC space
+    *
+    * @return Offset to LPC start address
+    */
+    uint64_t getLPCStartAddr(void)
+    {
+        return LPC_ADDR_START;
+    };
+
+    /**
      * @brief Block/unblock all LPC operations
      * @param[in] i_block  true: block ops, false: allow ops
      */
