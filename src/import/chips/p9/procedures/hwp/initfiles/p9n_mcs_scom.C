@@ -35,6 +35,7 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_8 = 8;
 constexpr uint64_t literal_25 = 25;
 constexpr uint64_t literal_0b001111 = 0b001111;
+constexpr uint64_t literal_0b0000000000001000000 = 0b0000000000001000000;
 constexpr uint64_t literal_0b0001100000000 = 0b0001100000000;
 constexpr uint64_t literal_1350 = 1350;
 constexpr uint64_t literal_1000 = 1000;
@@ -110,6 +111,7 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
 
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE1_DISABLE_FP_M_BIT_ON = 0x1;
             l_scom_buffer.insert<10, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE1_DISABLE_FP_M_BIT_ON );
+            l_scom_buffer.insert<33, 19, 45, uint64_t>(literal_0b0000000000001000000 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010812ull, l_scom_buffer));
         }
         {
