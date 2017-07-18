@@ -46,6 +46,7 @@
 #include <config.h>
 #include <util/utilrsvdmem.H>
 #include <sys/misc.h>
+#include <errno.h>
 
 
 trace_desc_t* g_trac_hbrt = NULL;
@@ -145,6 +146,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->ipmi_msg= rt_ipmi_msg;
                 intf->clock_gettime = clock_gettime;
                 intf->hcode_scom_update = rt_hcode_update;
+                intf->firmware_request = rt_firmware_request;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -700,6 +702,73 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
                       i_chipId, i_section, i_operation, i_scomAddr, i_scomData);
             return 0;
+        }
+
+        //--------------------------------------------------------------------
+        static int rt_firmware_request(uint64_t i_reqLen, void *i_req,
+                             uint64_t* o_respLen, void *o_resp  )
+        {
+            int retVal = 0;
+            do
+            {
+               if (i_req == nullptr ||
+                   o_respLen == nullptr ||
+                   o_resp == nullptr)
+               {
+                  retVal = -EINVAL;
+                  break;
+               }
+
+               hostInterfaces::hbrt_fw_msg* l_req_fw_msg =
+                                (hostInterfaces::hbrt_fw_msg*) i_req;
+               hostInterfaces::hbrt_fw_msg* l_resp_fw_msg =
+                                (hostInterfaces::hbrt_fw_msg*) o_resp;
+
+               if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                             sizeof(l_req_fw_msg->req_hcode_update)))
+               {
+                  retVal = -EINVAL;
+                  break;
+               }
+
+                if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                             sizeof(l_resp_fw_msg->resp_generic)))
+               {
+                  retVal = -EINVAL;
+                  break;
+               }
+
+               if (hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE
+                                              == l_req_fw_msg->io_type)
+               {
+                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                      "rt_firmware_request for HCODE SCOM update: "
+                      "type:%d, chipId:0x%X, section:%d, "
+                      "operation:%d, scomAddr:0x%X scomData:0x%X",
+                      l_req_fw_msg->io_type,
+                      l_req_fw_msg->req_hcode_update.i_chipId,
+                      l_req_fw_msg->req_hcode_update.i_section,
+                      l_req_fw_msg->req_hcode_update.i_operation,
+                      l_req_fw_msg->req_hcode_update.i_scomAddr,
+                      l_req_fw_msg->req_hcode_update.i_scomData);
+               }
+               else
+               {
+                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                      "rt_firmware_request an unrecognized request: "
+                      "type:%d", l_req_fw_msg->io_type);
+               }
+
+               l_resp_fw_msg->io_type =
+                          hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
+               // dummy return value for testing
+               l_resp_fw_msg->resp_generic.o_status = 264;
+
+               TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
+               retVal = 1;  // just return 1 for testing
+
+            } while (0) ;
+            return retVal;
         }
 
         static uint64_t cv_hb_data_addr;

@@ -490,6 +490,56 @@ typedef struct hostInterfaces
                               uint64_t i_scomData );
 
     /**
+     *  @brief Structure to be sent and received in the
+     *         firmware_request call
+     *
+     */
+    enum
+    {
+       HBRT_FW_MSG_TYPE_REQ_NOP = 0,
+       HBRT_FW_MSG_TYPE_RESP_NOP = 1,
+       HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,
+       HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,
+    };
+
+    struct hbrt_fw_msg   // define struct hbrt_fw_msg
+    {
+       hbrt_fw_msg() { req_hcode_update = { 0 }; };  // ctor
+
+       uint64_t io_type;          // message type from HBRT_FW_MSG_TYPE enum
+       union
+       {
+          // This struct is returned from skiboot with
+          // io_type set to HBRT_FW_MSG_TYPE_RESP_GENERIC or
+          // with HBRT_FW_MSG_TYPE_RESP_NOP
+          struct
+          {
+             uint64_t o_status;      // return code for a generic response
+          } resp_generic;
+
+          // This struct is sent from HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE
+          struct
+          {
+             uint64_t i_chipId;     // processor chip ID plus ID type,
+                                      // always proc (0x0)
+             uint32_t i_section;    // runtime section to update
+                                      // (passthru to pore_gen_scom)
+             uint32_t i_operation;  // type of operation to perform
+                                      // (passthru to pore_gen_scom)
+             uint64_t i_scomAddr;   // fully qualified scom address
+             uint64_t i_scomData;   // data for operation
+          } req_hcode_update;
+       };
+    };
+
+    // Created this enum to hold the base size of hbrt_fw_msg
+    // Can't do #define - sizeof not allowed to be used in #defines
+    // Can't do a constant, if you do, you will need to create
+    // an instance of this struct to get to it
+    enum { HBRT_FW_MSG_BASE_SIZE = sizeof(uint64_t) };
+
+    /**
      * @brief Send a request to firmware, and receive a response
      * @details
      *   req_len bytes are sent to runtime firmware, and resp_len
