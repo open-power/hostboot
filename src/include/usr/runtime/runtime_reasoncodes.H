@@ -57,6 +57,7 @@ namespace RUNTIME
         MOD_POPULATE_TPMINFOBYNODE       = 0x19,  /**< populate_hbruntime.C */
         MOD_FILL_RSVMEM_HBDATA           = 0x20,  /**< populate_hbruntime.C */
         MOD_ATTR_RUNTIME_CHECK_PREP_FAIL = 0x21,  /**< populate_hbruntime.C */
+        MOD_PM_RT_FIRMWARE_REQUEST       = 0x22,  /**< rt_pm.C */
     };
 
     enum RuntimeReasonCode

@@ -334,11 +334,12 @@ namespace RTPM
             }
 
             if( g_hostInterfaces == NULL ||
-                g_hostInterfaces->hcode_scom_update == NULL )
+                ( g_hostInterfaces->hcode_scom_update == NULL &&
+                  g_hostInterfaces->firmware_request == NULL ))
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"hcode_update: "
-                          "Hypervisor hcode_scom_update interface not linked");
+                          ERR_MRK"hcode_update: Hypervisor hcode_scom_update"
+                                 "/firmware_request interface not linked");
                 /*@
                 * @errortype
                 * @moduleid         MOD_PM_RT_HCODE_UPDATE
@@ -346,15 +347,17 @@ namespace RTPM
                 * @userdata1[0:31]  Target HUID
                 * @userdata1[32:63] SCOM restore section
                 * @userdata2        SCOM address
-                * @devdesc      HCODE scom update runtime interface not linked.
+                * @devdesc          HCODE scom update runtime
+                *                   interface not linked.
                 */
-                l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                               MOD_PM_RT_HCODE_UPDATE,
-                                               RC_PM_RT_INTERFACE_ERR,
-                                               TWO_UINT32_TO_UINT64(
+                l_err= new ERRORLOG::ErrlEntry(
+                                              ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                              MOD_PM_RT_HCODE_UPDATE,
+                                              RC_PM_RT_INTERFACE_ERR,
+                                              TWO_UINT32_TO_UINT64(
                                                  TARGETING::get_huid(i_target),
                                                  i_section),
-                                               i_rel_scom_addr);
+                                              i_rel_scom_addr);
                 break;
             }
 
@@ -393,37 +396,130 @@ namespace RTPM
                 break;
             }
 
-            rc = g_hostInterfaces->hcode_scom_update(l_chipId,
-                                                     i_section,
-                                                     i_operation,
-                                                     l_scomAddr,
-                                                     i_scom_data);
-
-            if(rc)
+            // If hcode_scom_update is not NULL then use that method
+            // else use firmware_request.  hcode_scom_update takes
+            // precedence over firmware_request
+            if (g_hostInterfaces->hcode_scom_update != nullptr)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"hcode_update: "
-                          "HCODE scom update failed. "
-                          "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
-                          "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
-                          rc, get_huid(i_target), l_chipId, i_section,
-                          i_operation, l_scomAddr, i_scom_data);
+               rc = g_hostInterfaces->hcode_scom_update(l_chipId,
+                                                        i_section,
+                                                        i_operation,
+                                                        l_scomAddr,
+                                                        i_scom_data);
+               if(rc)
+               {
+                   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            ERR_MRK"hcode_update: "
+                            "HCODE scom update failed. "
+                            "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
+                            "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                            rc, get_huid(i_target), l_chipId, i_section,
+                            i_operation, l_scomAddr, i_scom_data);
 
-                // convert rc to error log
-                /*@
-                * @errortype
-                * @moduleid     MOD_PM_RT_HCODE_UPDATE
-                * @reasoncode   RC_PM_RT_HCODE_UPDATE_ERR
-                * @userdata1    Hypervisor return code
-                * @userdata2    SCOM address
-                * @devdesc      HCODE SCOM update error
-                */
-                l_err=new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                              MOD_PM_RT_HCODE_UPDATE,
-                                              RC_PM_RT_HCODE_UPDATE_ERR,
-                                              rc,
-                                              l_scomAddr);
-                break;
+                   // convert rc to error log
+                   /*@
+                   * @errortype
+                   * @moduleid     MOD_PM_RT_HCODE_UPDATE
+                   * @reasoncode   RC_PM_RT_HCODE_UPDATE_ERR
+                   * @userdata1    Hypervisor return code
+                   * @userdata2    SCOM address
+                   * @devdesc      HCODE SCOM update error
+                   */
+                   l_err=new ERRORLOG::ErrlEntry(
+                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                             MOD_PM_RT_HCODE_UPDATE,
+                                             RC_PM_RT_HCODE_UPDATE_ERR,
+                                             rc,
+                                             l_scomAddr);
+                   break;
+               }
+            }
+            else if (g_hostInterfaces->firmware_request != nullptr)
+            {
+               hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+               l_req_fw_msg.io_type =
+                         hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE;
+               l_req_fw_msg.req_hcode_update.i_chipId = l_chipId;
+               l_req_fw_msg.req_hcode_update.i_section = i_section;
+               l_req_fw_msg.req_hcode_update.i_operation = i_operation;
+               l_req_fw_msg.req_hcode_update.i_scomAddr = l_scomAddr;
+               l_req_fw_msg.req_hcode_update.i_scomData = i_scom_data;
+
+               hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+               uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+               rc = g_hostInterfaces->firmware_request(sizeof(l_req_fw_msg),
+                       &l_req_fw_msg, &l_resp_fw_msg_size, &l_resp_fw_msg);
+               if(rc)
+               {
+                   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            ERR_MRK"firmware request: "
+                            "firmware request for hcode scom update failed. "
+                            "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
+                            "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                            rc, get_huid(i_target), l_chipId, i_section,
+                            i_operation, l_scomAddr, i_scom_data);
+
+                   // convert rc to error log
+                   /*@
+                   * @errortype
+                   * @moduleid         MOD_PM_RT_FIRMWARE_REQUEST
+                   * @reasoncode       RC_PM_RT_HCODE_UPDATE_ERR
+                   * @userdata1[0:31]  Firmware Request return code
+                   * @userdata1[32:63] SCOM address
+                   * @userdata2[0:31]  Generic response code - if it exits
+                   * @userdata2[32:63] Firmware Respone type
+                   * @devdesc          Firmware Request for
+                   *                   HCODE SCOM update error
+                   */
+                   //
+                   // Pack the generic responce code if the response
+                   // is of type "RESP_GENERIC"
+                   // else just send the response type alone
+                   uint64_t l_userData2 = 0;
+                   if (l_resp_fw_msg_size >=
+                                        hostInterfaces::HBRT_FW_MSG_BASE_SIZE)
+                   {
+                      // just assign the response type for now
+                      l_userData2 = l_resp_fw_msg.io_type;
+
+                      // Pack the response code if it is available
+                      if ((l_resp_fw_msg_size >=
+                                     (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                      sizeof(l_resp_fw_msg.resp_generic)))  &&
+                           hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC ==
+                                      l_resp_fw_msg.io_type)
+                      {
+                         l_userData2 = TWO_UINT32_TO_UINT64
+                                       (l_resp_fw_msg.resp_generic.o_status,
+                                        l_resp_fw_msg.io_type);
+                      }
+                   }
+
+                   l_err=new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                          MOD_PM_RT_FIRMWARE_REQUEST,
+                                          RC_PM_RT_HCODE_UPDATE_ERR,
+                                          TWO_UINT32_TO_UINT64(rc, l_scomAddr),
+                                          l_userData2);
+
+                   if (l_resp_fw_msg_size > 0)
+                   {
+                      l_err->addFFDC( ISTEP_COMP_ID,
+                                      &l_resp_fw_msg,
+                                      l_resp_fw_msg_size,
+                                      0, 0, false );
+                   }
+
+                   if (sizeof(l_req_fw_msg) > 0)
+                   {
+                      l_err->addFFDC( ISTEP_COMP_ID,
+                                      &l_req_fw_msg,
+                                      sizeof(l_req_fw_msg),
+                                      0, 0, false );
+                   }
+
+                   break;
+               }
             }
 
             // Disable special wakeup
