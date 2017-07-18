@@ -96,20 +96,11 @@
     <deconfigure>
       <target>TARGET</target>
     </deconfigure>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_P9_L2_FLUSH_UNKNOWN_PLATFORM</rc>
-    <ffdc>TARGET</ffdc>
-    <ffdc>PLATFORM</ffdc>
-    <description>
-      Procedure: p9_l2_flush
-      Unable to determine which scom registers to use for the current platform.
-    </description>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ********************************************************************* -->
+
 </hwpErrors>
