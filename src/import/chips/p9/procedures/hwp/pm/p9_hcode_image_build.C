@@ -901,6 +901,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_PROC_FABRIC_PUMP_MODE_MODE");
     FAPI_DBG("Fabric Pump Attr Value :   %d", attrVal );
+
     //Attribute set to 0x01 for CHIP_IS_NODE
     if( attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE )
     {
@@ -909,6 +910,30 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("Fabric Pump Mode              :   %s", (
     attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_CACHE_SKEWADJ_DISABLE_BIT_POS;
+    }
+
+    FAPI_DBG("Cache Skew Adjust Disabled    :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_CACHE_DCADJ_DISABLE_BIT_POS;
+    }
+
+    FAPI_DBG("Cache DC Adjust Disabled      :   %s", attrVal ? "TRUE" : "FALSE" );
 
     // Set PGPE Header Flags from Attributes
     FAPI_DBG(" -------------------- PGPE Flags -----------------");
