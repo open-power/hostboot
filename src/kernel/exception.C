@@ -308,12 +308,14 @@ void kernel_execute_softpatch()
 const uint64_t EXCEPTION_MSR_PR_BIT_MASK       = 0x0000000000004000;
 const uint64_t EXCEPTION_SRR1_LOADSTORE_ERR    = 0x0000000000200000;
 const uint64_t EXCEPTION_DSISR_LD_UE_INTERRUPT = 0x0000000000008000;
-const uint64_t EXCEPTION_DSISR_SLB_ERRORS      = 0x00000000000000C0;
+const uint64_t EXCEPTION_DSISR_SLB_ERRORS      = 0x0000000000000080;
 
 extern "C"
 void kernel_execute_machine_check()
 {
     task_t* t = TaskManager::getCurrentTask();
+
+    printk("Machine Check Occurred!\n");
 
     //PR (bit 49) = 0 indicates hypervisor mode
     //  Which indicates kernel mode in Hostboot env.
@@ -334,14 +336,17 @@ void kernel_execute_machine_check()
     // Error in load/store.
     if (getSRR1() & EXCEPTION_SRR1_LOADSTORE_ERR)
     {
+        printk("found a loadstore err!\n");
         // SUE on load instruction.
         if (getDSISR() & EXCEPTION_DSISR_LD_UE_INTERRUPT)
         {
+            printk("handling Load UE exception..\n");
             handled = Kernel::MachineCheck::handleLoadUE(t);
         }
         // SLB parity or multi-hit.
         else if (getDSISR() & EXCEPTION_DSISR_SLB_ERRORS)
         {
+            printk("handling SLB exception..\n");
             handled = Kernel::MachineCheck::handleSLB(t);
         }
     }
@@ -368,6 +373,7 @@ void kernel_execute_machine_check()
             case SRR1_ERR_IFU_SLB_P:
             case SRR1_ERR_IFU_SLB_MH:
             case SRR1_ERR_IFU_SLB_MHP:
+                printk("handling Load SLB ... \n");
                 handled = Kernel::MachineCheck::handleSLB(t);
                 break;
         }
