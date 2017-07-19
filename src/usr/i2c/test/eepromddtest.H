@@ -42,6 +42,8 @@
 #include "i2ctest.H"
 #include "../eepromdd.H"
 
+#include <secureboot/service.H>
+
 extern trace_desc_t* g_trac_eeprom;
 
 // NOTE: TRACUCOMP defined/controlled in i2ctest.H
@@ -104,8 +106,9 @@ class EEPROMTest: public CxxTest::TestSuite
 
             const uint32_t NUM_CMDS = sizeof(testData)/sizeof(testData[0]);
 
-            // Skipping EEPROM test altogether in VBU/VPO environment
-            if( TARGETING::is_vpo() )
+            // Skipping EEPROM test altogether in VBU/VPO environment or in
+            // Secure mode
+            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
             {
                 return;
             }
@@ -247,8 +250,9 @@ class EEPROMTest: public CxxTest::TestSuite
             TRACFCOMP( g_trac_eeprom,
                        "testEEPROMReadWriteLarge - Start" );
 
-            // Skipping EEPROM test altogether in VBU/VPO environment
-            if( TARGETING::is_vpo() )
+            // Skipping EEPROM test altogether in VBU/VPO environment or in
+            // Secure mode
+            if( TARGETING::is_vpo() || SECUREBOOT::enabled() )
             {
                 return;
             }

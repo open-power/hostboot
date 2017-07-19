@@ -32,6 +32,9 @@ source "$PROJECT_ROOT/src/build/citest/setup-env"
 
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
+# Force simics into Secure Mode
+export SECURITY_HW_POLICY="1"
+
 # Check copyright.
 check-copyright > copyright.log 2>&1 &
 COPYRIGHT_PID=$!
