@@ -73,7 +73,6 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_start_cbs.mk
 
 # proc_check_slave_sbe_seeprom_complete : Check Slave SBE Complete
 include ${PROCEDURES_PATH}/hwp/perv/p9_check_slave_sbe_seeprom_complete.mk
-include ${PROCEDURES_PATH}/hwp/perv/p9_extract_sbe_rc.mk
 include ${PROCEDURES_PATH}/hwp/sbe/p9_get_sbe_msg_register.mk
 include ${PROCEDURES_PATH}/hwp/perv/p9_getecid.mk
 

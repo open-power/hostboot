@@ -366,6 +366,7 @@ errlHndl_t IntrRp::_init()
         uint64_t l_en_threads = get_enabled_threads();
         TRACFCOMP(g_trac_intr, "IntrRp::_init() Threads enabled:"
                                 " %lx", l_en_threads);
+
     } while(0);
 
     return l_err;
@@ -1312,7 +1313,6 @@ void IntrRp::routeInterrupt(intr_hdlr_t* i_proc,
     }
     else if (i_type == LSI_PSU)
     {
-        TRACFCOMP(g_trac_intr, "PSU Interrupt Detected");
         handlePsuInterrupt(i_type, i_proc, i_pir);
     }
     else  // no queue registered for this interrupt type
@@ -1623,84 +1623,44 @@ errlHndl_t IntrRp::handlePsuInterrupt(ext_intr_t i_type,
     // Long term will leverage mask register to avoid
     // polling loop below
     errlHndl_t l_err = NULL;
-    uint32_t l_addr = PSI_BRIDGE_PSU_DOORBELL_REG;
-    size_t scom_len = sizeof(uint64_t);
-    uint64_t reg = 0x0;
-    uint64_t l_elapsed_time_ns = 0;
     TARGETING::Target* procTarget = i_proc->proc;
 
-    do
-    {
-        l_err = deviceRead(procTarget,
-                           &reg,
-                           scom_len,
-                           DEVICE_SCOM_ADDRESS(l_addr));
-
-        if (l_err)
-        {
-            TRACFCOMP(g_trac_intr, "Error Reading PSU SCOM address: %lx",
-                                   l_addr);
-            break;
-        }
-
-        //If the PSU Host Doorbell bit is on, wait for the
-        // PSU DD to handle
-        if (reg & PSI_BRIDGE_PSU_HOST_DOORBELL)
-        {
-            TRACDCOMP(g_trac_intr, "Host/SBE Mailbox "
-                                   "response. Wait for Polling to handle"
-                                   " response");
-            nanosleep(0,10000);
-            l_elapsed_time_ns += 10000;
-        }
-        else
-        {
-            //Polling Complete
-            break;
-        }
-        if (l_elapsed_time_ns > MAX_PSU_LONG_TIMEOUT_NS)
-        {
-            TRACFCOMP(g_trac_intr, "PSU Timeout hit");
-            /*@ errorlog tag
-             * @errortype       ERRL_SEV_UNRECOVERABLE
-             * @moduleid        INTR::MOD_INTRRP_HNDLPSUINTERRUPT
-             * @reasoncode      INTR::RC_PSU_DOORBELL_TIMEOUT
-             * @userdata1       Scom Address with interrupt condition
-             * @userdata2       Register Value
-             * @devdesc         PSU Doorbell Timeout hit waiting for doorbell
-             *                  interrupt condition to be cleared
-             */
-            l_err = new ERRORLOG::ErrlEntry
-              (
-               ERRORLOG::ERRL_SEV_UNRECOVERABLE,    // severity
-               INTR::MOD_INTRRP_HNDLPSUINTERRUPT,   // moduleid
-               INTR::RC_PSU_DOORBELL_TIMEOUT,       // reason code
-               l_addr,
-               reg
-               );
-            break;
-        }
-
-    } while(1);
-
     do {
-
+        size_t scom_len = 8;
+        uint64_t l_reg = 0x0;
+        l_err = deviceRead(procTarget,
+                           &l_reg,
+                           scom_len,
+                           DEVICE_SCOM_ADDRESS(PSI_BRIDGE_PSU_DOORBELL_REG));
         if (l_err)
         {
             break;
+        }
+        TRACDCOMP( g_trac_intr, "%.8X = %.16llX",
+                   PSI_BRIDGE_PSU_DOORBELL_REG, l_reg );
+
+        //If the interrupt is driven by the doorbell, yield
+        //  to give the driver a chance to take care of it
+        if( l_reg & PSI_BRIDGE_PSU_HOST_DOORBELL )
+        {
+            nanosleep(0,10000);
+            task_yield();
         }
 
         //Clear the PSU Scom Reg Interrupt Status register
-        uint64_t l_barValue = 0;
-        uint64_t size = sizeof(l_barValue);
+        //  but ignore the bit that the PSU driver uses
+        //  to avoid a race condition
+        uint64_t l_andVal = PSI_BRIDGE_PSU_HOST_DOORBELL;
+        uint64_t size = sizeof(l_andVal);
         l_err = deviceWrite(procTarget,
-                            &l_barValue,
-                            size,
-                            DEVICE_SCOM_ADDRESS(l_addr));
+                        &l_andVal,
+                        size,
+                        DEVICE_SCOM_ADDRESS(PSI_BRIDGE_PSU_DOORBELL_ANDREG));
 
         if (l_err)
         {
-            TRACFCOMP(g_trac_intr, "Error clearing scom - %x", l_addr);
+            TRACFCOMP(g_trac_intr, "Error clearing scom - %x",
+                      PSI_BRIDGE_PSU_DOORBELL_ANDREG);
             break;
         }
 
@@ -3714,3 +3674,4 @@ errlHndl_t INTR::IntrRp::enableSlaveProcInterrupts(TARGETING::Target * i_target)
     TRACFCOMP(g_trac_intr, INFO_MRK"Slave Proc Interrupt Routing setup complete\n");
     return l_err;
 }
+
