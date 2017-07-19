@@ -716,6 +716,7 @@
   to enable systems without cfam access to fifo registers (WAFER/RBI). </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0,TRUE = 0x1</enum>
+  <platInit/>
   <initToZero/>
 </attribute>
 
