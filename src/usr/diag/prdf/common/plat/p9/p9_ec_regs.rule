@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -33,14 +33,14 @@
     register EC_CONFIG_REG
     {
         name        "EC Chiplet PCB SLAVE CONFIG REG";
-        scomaddr    0x100F001E;
+        scomaddr    0x200F001E;
         capture     group PllFIRs;
     };
 
     register EC_ERROR_REG
     {
         name        "EC Chiplet PCB SLAVE ERROR REG";
-        scomaddr    0x100F001F;
+        scomaddr    0x200F001F;
         capture     group PllFIRs;
     };
 

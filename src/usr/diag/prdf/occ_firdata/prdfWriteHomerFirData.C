@@ -115,34 +115,38 @@ void initChipMasks( typeMaxMap_t & io_typeMap,
  */
 void getAddresses( TrgtMap_t & io_targMap )
 {
-
     io_targMap[TRGT_PROC][REG_GLBL] =
     {
         0x500F001C, // GLOBAL_CS_FIR
         0x500F001B, // GLOBAL_RE_FIR
         0x50040018, // GLOBAL_UNIT_CS_FIR
-        0x50040009, // GLOBAL_HOST_ATTN_FIR
+
+        // NOTE: The SPA/HOST_ATTN global/chiplet registers will not be captured
+        //       because those attention types are not used for checkstop
+        //       analysis.
     };
 
     io_targMap[TRGT_PHB][REG_FIR] =
     {
-        0x04010C40, // PCINESTFIR_0 = PHBNFIR
-        0x0D010908, // ETU FIR register
-        0x0D010840, // PCIFIR 0
+        0x04010C40, // PHBNFIR
+        0x0D010840, // PCIFIR
+        0x0D010908, // ETUFIR
     };
 
     io_targMap[TRGT_PHB][REG_REG] =
     {
+        // c_err_rpt registers
         0x0D01084B, // PBAIB CERR Report Hold Reg
     };
 
     io_targMap[TRGT_CAPP][REG_FIR] =
     {
-        0x02010800, // NXCXAFIR (CAPP0) - 0x04010800 for CAPP1
+        0x02010800, // CXAFIR
     };
 
     io_targMap[TRGT_CAPP][REG_REG] =
     {
+        // c_err_rpt registers
         0x0201080a, // Snoop Error Report Reg
         0x0201080b, // APC CERR Hold
         0x0201080c, // XPT Error Report
@@ -150,22 +154,19 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x0201080e, // Capp Error Status and Ctrl Reg
     };
 
-    io_targMap[TRGT_XBUS][REG_GLBL] =
-    {
-        0x06040000, // XBUS_CHIPLET_CS_FIR
-        0x06040001, // XBUS_CHIPLET_RE_FIR
-    };
-
     io_targMap[TRGT_XBUS][REG_FIR] =
     {
-        0x0604000a, // XBUS_LFIR
-        0x06010840, // XBPPEFIR
         0x06010c00, // IOXBFIR
         0x06011800, // IOELFIR
     };
 
     io_targMap[TRGT_XBUS][REG_REG] =
     {
+        // PLL registers
+        0x060F001E, // OBUS_CONFIG_REG
+        0x060F001F, // OBUS_ERROR_REG
+
+        // c_err_rpt registers
         0x06011816, // PB ELL Link0 ErrStatus
         0x06011817, // PB ELL Link1 ErrStatus
     };
@@ -174,6 +175,7 @@ void getAddresses( TrgtMap_t & io_targMap )
     {
         0x09040000, // OB_CHIPLET_CS_FIR
         0x09040001, // OB_CHIPLET_RE_FIR
+        0x09040018, // OB_CHIPLET_UCS_FIR
     };
 
     io_targMap[TRGT_OBUS][REG_FIR] =
@@ -186,21 +188,42 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_OBUS][REG_REG] =
     {
+        // Chiplet FIRs
         0x09040002, // OB_CHIPLET_FIR_MASK
-        0x09040018, // unitCS
-        0x09040019, // unitCS mask
+        0x09040019, // OB_CHIPLET_UCS_FIR_MASK
+
+        // PLL registers
+        0x090F001E, // OBUS_CONFIG_REG
+        0x090F001F, // OBUS_ERROR_REG
+
+        // c_err_rpt registers
         0x09010816, // PB OLL Link0 ErrStatus
         0x09010817, // PB OLL Link1 ErrStatus
     };
 
     io_targMap[TRGT_PEC][REG_FIR] =
     {
-        0x0D010C00, // IOPCIFIR_0
-        0x0D04000a, // PCIE_LFIR
+        0x0D04000a, // PCI_LFIR
+        0x0D010C00, // IOPCIFIR
     };
 
     io_targMap[TRGT_PEC][REG_REG] =
     {
+        // Chiplet FIRs
+        //   NOTE: This is slightly different from the PRD rule code. These
+        //         chiplet FIRs do exist on the PEC target, but PRD had to put
+        //         these chiplet FIRs on the PROC target because of the way the
+        //         PEC/PHB units are defined. However, that is not an issue when
+        //         gathering this data and it is safe to use the PEC targets.
+        //   NOTE: We cannot use these chiplet FIRs as global registers because
+        //         there is a PHB FIR that is defined on the N2 chiplet and we
+        //         don't want to skip collection of that FIR if there is nothing
+        //         in the PEC chiplete FIRs.
+        0x0D040000, // PCI_CHIPLET_CS_FIR
+        0x0D040001, // PCI_CHIPLET_RE_FIR
+        0x0D040002, // PCI_CHIPLET_FIR_MASK
+
+        // PLL registers
         0x0D0F001E, // PCI_CONFIG_REG
         0x0D0F001F, // PCI_ERROR_REG
     };
@@ -212,18 +235,28 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_MCS][REG_REG] =
     {
+        // c_err_rpt registers
         0x0501081a, // MC Error Report 2
         0x0501081e, // MC Error Report 0
         0x0501081f, // MC Error Report 1
 
+        // Memory config registers
         0x0501080a, // Primary MemCfg Reg
         0x0501080b, // MCFGPA
         0x0501080c, // MCFGPM
         0x0501080d, // MCFGPMA
     };
 
+    io_targMap[TRGT_MCBIST][REG_GLBL] =
+    {
+        0x07040000, // MC_CHIPLET_CS_FIR
+        0x07040001, // MC_CHIPLET_RE_FIR
+        0x07040018, // MC_CHIPLET_UCS_FIR
+    };
+
     io_targMap[TRGT_MCBIST][REG_FIR] =
     {
+        0x0704000A, // MC_LFIR
         0x07012300, // MCBISTFIR
     };
 
@@ -236,13 +269,13 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_MCBIST][REG_REG] =
     {
-        0x07040000, // MC_CHIPLET_CS_FIR
-        0x07040001, // MC_CHIPLET_RE_FIR
+        // Chiplet FIRs
         0x07040002, // MC_CHIPLET_FIR_MASK
-        0x07040018,  // unitCS
-        0x07040019,  // unitCS mask
-        0x07040009,  // hostAttn
-        0x0704001A,  // hostAttn mask
+        0x07040019, // MC_CHIPLET_UCS_FIR_MASK
+
+        // PLL registers
+        0x070F001E, // MC_CONFIG_REG
+        0x070F001F, // MC_ERROR_REG
 
         // AUE/IAUE analysis
         0x0701236D, // MCB0_MBUER
@@ -253,119 +286,117 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x07012378, // MCB2_MBAUER
         0x0701237C, // MCB3_MBUER
         0x0701237D, // MCB3_MBAUER
-        0x070123D7  // MCBMCAT
+        0x070123D7, // MCBMCAT
     };
 
     io_targMap[TRGT_EQ][REG_GLBL] =
     {
-        0x10040000, // CACHE_CHIPLET_CS_FIR
-        0x10040001, // CACHE_CHIPLET_RE_FIR
+        0x10040000, // EQ_CHIPLET_CS_FIR
+        0x10040001, // EQ_CHIPLET_RE_FIR
+    };
+
+    io_targMap[TRGT_EQ][REG_FIR] =
+    {
+        0x1004000A, // EQ_LFIR
     };
 
     io_targMap[TRGT_EQ][REG_REG] =
     {
-        0x10040002, // CACHE_CHIPLET_FIR_MASK
-    };
+        // Chiplet FIRs
+        0x10040002, // EQ_CHIPLET_FIR_MASK
 
+        // PLL registers
+        0x100F001E, // EQ_CONFIG_REG
+        0x100F001F, // EQ_ERROR_REG
+    };
 
     io_targMap[TRGT_PROC][REG_FIR] =
     {
-        0x01010800, // OCCFIR
-        0x050129C0, // PBAMFIR
         0x0104000a, // TP_LFIR
+        0x01010800, // OCCFIR
 
-        0x05012840, // PBAFIR
-        0x05012900, // PSIHBFIR
-        0x05012940, // ENHCAFIR
+        0x0204000a, // N0_LFIR
+        0x02011080, // NXCQFIR
+        0x02011100, // NXDMAENGFIR
 
+        0x0304000a, // N1_LFIR
+        0x03011000, // MCDFIR_0
+        0x03011400, // MCDFIR_1
+        0x03011800, // VASFIR
+
+        0x0404000a, // N2_LFIR
+        0x04011800, // PSIFIR
+
+        0x0504000a, // N3_LFIR
         0x05011800, // PBWESTFIR
         0x05011C00, // PBCENTFIR
         0x05012000, // PBEASTFIR
-
-        0x02011080, // NXCQFIR - PBI CQ FIR Register
-        0x02011100, // NXDMAENGFIR
-        0x03011000, // MCDFIR
-        0x03011400, // MCDFIR
-        0x03011800, // VASFIR    - Nimbus addition
-        0x0204000a, // PB_LFIR
-        0x0304000a, // N1_LFIR   - Nimbus addition
-        0x0404000a, // N2_LFIR   - Nimbus addition
-        0x0504000a, // N3_LFIR   - Nimbus addition
-        0x05013400, // PBENFIR
-
-        0x05013800, // PBESFIR
-        0x04011800, // PSI NEST FIR
         0x05012400, // PBPPEFIR
+        0x05012840, // PBAFIR
+        0x05012900, // PSIHBFIR
+        0x05012940, // ENHCAFIR
+        0x050129C0, // PBAMFIR
         0x05012C00, // NMMUCQFIR
         0x05012C40, // NMMUFIR
         0x05013030, // INTCQFIR
+        0x05013400, // PBIOEFIR
+        0x05013800, // PBIOOFIR
+
+        0x0604000a, // XBUS_LFIR
+        0x06010840, // XBPPEFIR
     };
 
     io_targMap[TRGT_PROC][REG_REG] =
     {
         // Global FIRs
-        0x500F001A, // GLOBAL_SPA (for FFDC only)
-        0x500F0040, // NET CTRL 0 - chiplet enable
-        //0x51040001, // GLOBALUNITXSTPFIR (not even accessible during IPL)
+        0x500F001A, // GLOBAL_SPA (FFDC only, in case there was a TI)
 
         // Chiplet FIRs
         0x01040000, // TP_CHIPLET_CS_FIR
         0x01040001, // TP_CHIPLET_RE_FIR
         0x01040002, // TP_CHIPLET_FIR_MASK
 
-        0x0101080a, // OCC Error Report Reg
-
-        // Skipping SPEC attn regs for chiplets (xxx40004  xxx40007)
-
         0x02040000, // N0_CHIPLET_CS_FIR
         0x02040001, // N0_CHIPLET_RE_FIR
         0x02040002, // N0_CHIPLET_FIR_MASK
+        0x02040018, // N0_CHIPLET_UCS_FIR
+        0x02040019, // N0_CHIPLET_UCS_FIR_MASK
 
         0x03040000, // N1_CHIPLET_CS_FIR
         0x03040001, // N1_CHIPLET_RE_FIR
         0x03040002, // N1_CHIPLET_FIR_MASK
+        0x03040018, // N1_CHIPLET_UCS_FIR
+        0x03040019, // N1_CHIPLET_UCS_FIR_MASK
 
         0x04040000, // N2_CHIPLET_CS_FIR
         0x04040001, // N2_CHIPLET_RE_FIR
         0x04040002, // N2_CHIPLET_FIR_MASK
+        0x04040018, // N2_CHIPLET_UCS_FIR
+        0x04040019, // N2_CHIPLET_UCS_FIR_MASK
 
         0x05040000, // N3_CHIPLET_CS_FIR
         0x05040001, // N3_CHIPLET_RE_FIR
         0x05040002, // N3_CHIPLET_FIR_MASK
+        0x05040018, // N3_CHIPLET_UCS_FIR
+        0x05040019, // N3_CHIPLET_UCS_FIR_MASK
 
-        0x06040002, // XBUS_CHIPLET_FIR_MASK
+        0x06040000, // XB_CHIPLET_CS_FIR
+        0x06040001, // XB_CHIPLET_RE_FIR
+        0x06040002, // XB_CHIPLET_FIR_MASK
+        0x06040018, // XB_CHIPLET_UCS_FIR
+        0x06040019, // XB_CHIPLET_UCS_FIR_MASK
 
-        0x0D040000, // PCIE_CHIPLET_CS_FIR
-        0x0D040001, // PCIE_CHIPLET_RE_FIR
-        0x0D040002, // PCIE_CHIPLET_FIR_MASK
-        0x0E040000, // PCIE_CHIPLET_CS_FIR
-        0x0E040001, // PCIE_CHIPLET_RE_FIR
-        0x0E040002, // PCIE_CHIPLET_FIR_MASK
-        0x0F040000, // PCIE_CHIPLET_CS_FIR
-        0x0F040001, // PCIE_CHIPLET_RE_FIR
-        0x0F040002, // PCIE_CHIPLET_FIR_MASK
+        // Misc registers needed for PRD analysis
+        0x05011C2E, // PBEXTFIR (does not raise attn, used for fabric sorting)
+        0x05011C0A, // PB_CENT_MODE
+        0x00040020, // TODWOF
 
-        // FIRs for FFDC only
-        0x05011C2E, // PBEXTFIR
-        0x050129C0, // PBAMFIR
-        0x050129C3, // PBAMFIR MASK
+        // PLL registers
+        0x010F001E, // TP_CONFIG_REG
+        0x010F001F, // TP_ERROR_REG
 
-        // UnitCS and HostAttn Chiplet regs
-        0x02040018,  // unitCS
-        0x02040019,  // unitCS mask
-        0x03040018,  // unitCS
-        0x03040019,  // unitCS mask
-        0x03040009,  // hostAttn
-        0x0304001A,  // hostAttn mask
-        0x04040018,  // unitCS
-        0x04040019,  // unitCS mask
-        0x05040018,  // unitCs
-        0x05040019,  // unitCS mask
-        0x05040009,  // hostAttn
-        0x0504001A,  // hostAttn mask
-        0x06040018,  // unitCS
-        0x06040019,  // unitCS mask
-
+        // c_err_rpt registers
+        0x0101080a, // OCC Error Report Reg
         0x020110a1, // PB Error Report
         0x020110a2, // PB Pty Error Report
         0x02011057, // DMA CERR 0
@@ -377,117 +408,96 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x05012C22, // PB Pty Error Report
 
         // TOD registers
-        0x00040000,  // TOD: master paths control reg
-        0x00040001,  // TOD: primary config p0
-        0x00040002,  // TOD: primary config p1
-        0x00040003,  // TOD: secondary config p0
-        0x00040004,  // TOD: secondary config p1
-
-        0x00040005,  // TOD: Slave path ctrl reg
-        0x00040006,  // TOD: Internal path ctrl reg
-
-        0x00040007,  // TOD: primary/secondary config ctrl
-
-        0x00040008,  // TOD: PSS MSS Status Reg
-        0x00040009,  // TOD: Master Path Status Reg
-
-        0x0004000A,  // TOD: slave path status
-
-        0x0004000E,  // TOD: Master Path0 Step Steering
-        0x0004000F,  // TOD: Master Path1 Step Steering
-
-        0x0004000D,  // TOD: timer register
-        0x00040010,  // TOD: chip control register
-        0x00040011,  // TOD: TX TTYPE-0 triggering register
-
-        0x0004001D,  // TOD: Trace dataset 1
-        0x0004001E,  // TOD: Trace dataset 2
-        0x0004001F,  // TOD: Trace dataset 3
-
-        0x01020019,  // OSC Error Hold
-        0x0102001A,  // OSC Error Mask
-        0x0102001B,  // OSC Error Mode
-
-        0x00040024,  // TOD:FSM Register
-        0x00040027,  // TOD: TX TType Ctrl reg
-        0x00040029,  // TOD: RX TType Ctrl reg
-        0x00040030,  // TOD: Error and Interrupts
-        0x00040032,  // TOD: C_Err_Rpt
-        0x00040033,  // TOD: Route Errors to Core/FIR
-
-        // Other HDCT items
-        0x00050001,  // CBS Ctrl/Status reg
-        0x00018000,  // EFUSE part 0
-        0x00018001,  // EFUSE part 1
-        0x00018002,  // EFUSE part 2
-        0x00010008,  // Mode reg to enable features
-        0x00030008,  // chiplet clk state
+        0x00040005, // TOD: Slave path ctrl reg
+        0x00040006, // TOD: Internal path ctrl reg
+        0x00040007, // TOD: primary/secondary config ctrl
+        0x00040008, // TOD: PSS MSS Status Reg
+        0x00040009, // TOD: Master Path Status Reg
+        0x0004000E, // TOD: Master Path0 Step Steering
+        0x0004000F, // TOD: Master Path1 Step Steering
+        0x0004001D, // TOD: Trace dataset 1
+        0x0004001E, // TOD: Trace dataset 2
+        0x0004001F, // TOD: Trace dataset 3
+        0x01020019, // OSC Error Hold
+        0x0102001A, // OSC Error Mask
+        0x0102001B, // OSC Error Mode
+        0x00040024, // TOD:FSM Register
+        0x00040027, // TOD: TX TType Ctrl reg
+        0x00040029, // TOD: RX TType Ctrl reg
+        0x00040030, // TOD: Error and Interrupts
+        0x00040032, // TOD: C_Err_Rpt
+        0x00040033, // TOD: Route Errors to Core/FIR
     };
 
     io_targMap[TRGT_EC][REG_GLBL] =
     {
         0x20040000, // EC_CHIPLET_CS_FIR
         0x20040001, // EC_CHIPLET_RE_FIR
+        0x20040018, // EC_CHIPLET_UCS_FIR
     };
 
     io_targMap[TRGT_EC][REG_FIR] =
     {
-        0x20010A40, // COREFIR
         0x2004000A, // EC_LFIR
+        0x20010A40, // COREFIR
     };
 
     io_targMap[TRGT_EC][REG_REG] =
     {
-        0x20040002, // EX_CHIPLET_FIR_MASK
-        0x20010A48, // COREFIR_WOF
+        // Chiplet FIRs
+        0x20040002, // EC_CHIPLET_FIR_MASK
+        0x20040019, // EC_CHIPLET_UCS_FIR_MASK
 
-        0x20010A96,  // COREHMEER
-        0x20010A99,  // SPATTN
-        0x20010A9A,  // SPATTN MASK
+        // Local FIRs
+        0x20010A48, // COREFIR_WOF (required for analysis)
 
-        // CERR Holdout regs
+        // PLL registers
+        0x200F001E, // EC_CONFIG_REG
+        0x200F001F, // EC_ERROR_REG
+
+        // Misc
+        0x20010A96, // HOMER_ENABLE
+        0x20010A99, // SPEC_ATTN_REASON
+        0x20010A9A, // SPEC_ATTN_REASON_MASK
+
+        // c_err_rpt registers
         0x20010AB5, // SPR Core Error Report Hold Out Reg
         0x20010AB6, // PMU Error Report Hold Out Register
         0x20010AB7, // TFAC Error Report Hold Out Register
         0x20010AB8, // SPR Common Error Report Hold Out Register
-
         0x20010C00, // IFU Error Report Hold Out 0 Register
         0x20010C01, // IFU Error Report Hold Out 1 Register
         0x20010C02, // IFU Error Report Hold Out 2 Register
         0x20010C03, // IFU Error Report Hold Out 3 Register
-
         0x20010C40, // ISU error report hold_out register 0
         0x20010C41, // ISU error report hold_out register 1
         0x20010C42, // ISU error report hold_out register 2
         0x20010C43, // ISU error report hold_out register 3
         0x20010C44, // ISU error report hold_out register 4
         0x20010C45, // ISU error report hold_out register 5
-
         0x20010C80, // LSU error report hold_out register 0
         0x20010C81, // LSU error report hold_out register 1
         0x20010C82, // LSU error report hold_out register 2
         0x20010C83, // LSU error report hold_out register 3
-
         0x20010A51, // FIR/RECOV Error Report Hold Out Register
         0x20010A03, // Thread Control Error Report Hold Out Register
-
-        0x200F0110, //PPM STOP_STATE_HIST_SRC_REG
+        0x200F0110, // PPM STOP_STATE_HIST_SRC_REG
     };
 
     io_targMap[TRGT_EX][REG_FIR] =
     {
-        0x10011800, // L3FIR
-        0x10011000, // NCUFIR
         0x10010800, // L2FIR
+        0x10011000, // NCUFIR
+        0x10011800, // L3FIR
         0x10012000, // CMEFIR
     };
 
     io_targMap[TRGT_EX][REG_REG] =
     {
+        // c_err_rpt registers
         0x10010812, // ERROR REPORT REGISTER0
         0x10010813, // ERROR REPORT REGISTER1
         0x1001100E, // NCU error rpt register
-
         0x1001180E, // L3 PRD Purge Register
         0x10011810, // L3 Error Report Reg 0
         0x10011817, // L3 Error Report Reg 1
@@ -496,7 +506,7 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x1001181B, // L3 Edram Bank Fail
     };
 
-
+/* TODO: RTC 177481
     // These are all Centaur addresses below
     // (Should match P8 except for global broadcast FIRs)
     io_targMap[TRGT_MEMBUF][REG_GLBL] =
@@ -643,6 +653,7 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x8001D0060301143Fll, // DDRPHY_APB_FIR_ERR0_P1
         0x8001D0070301143Fll, // DDRPHY_APB_FIR_ERR1_P1
     };
+*/
 
     // EC level handling will be done with a
     // structure and separate register count field.
