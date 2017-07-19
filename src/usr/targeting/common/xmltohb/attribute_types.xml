@@ -431,6 +431,9 @@
     <enumerator>
         <name>BMC</name>
     </enumerator>
+    <enumerator>
+        <name>AST2500</name>
+    </enumerator>
     <default>NA</default>
 </enumerationType>
 
