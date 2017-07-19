@@ -392,6 +392,8 @@ hb_startsimics()
     fi
 
     needs_machine_variable
+    # Force simics into Secure Mode
+    export SECURITY_HW_POLICY="1"
     execute_in_sandbox \
         "start_simics -machine ${MACHINE} ${SIMICSOPTIONS} $*"  "ppc"
 }
