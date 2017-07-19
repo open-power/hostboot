@@ -97,6 +97,16 @@ namespace Util
      * @return Data in mailbox scratch reg
      */
     uint32_t readScratchReg(uint64_t i_addr);
+
+    /**
+     * @brief This uses the stashed away mbox scratch regs to
+     *         determine the frequency the SBE booted the nest
+     *         at
+     *
+     * @return uint32_t -- Nest freq SBE booted with
+     */
+    uint32_t getBootNestFreq( void);
+
 };
 
 #endif //UTILMEM_H

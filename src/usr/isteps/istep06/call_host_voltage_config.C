@@ -30,6 +30,8 @@
 #include <initservice/isteps_trace.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <arch/pirformat.H>
+#include <sys/task.h>
 
 //Targeting
 #include    <targeting/common/commontargeting.H>
@@ -37,11 +39,13 @@
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/common/target.H>
 
+#include    <p9_pm_get_poundv_bucket_attr.H>
 #include    <p9_pm_get_poundv_bucket.H>
 #include    <p9_setup_evid.H>
 #include    <p9_frequency_buckets.H>
 
-#include    <initservice/mboxRegs.H>
+#include    <util/utilmbox_scratch.H>
+#include    <vpd/mvpdenums.H>
 
 using namespace TARGETING;
 
@@ -49,49 +53,211 @@ using namespace TARGETING;
 namespace ISTEP_06
 {
 
-errlHndl_t getBootNestFreq( uint32_t & o_bootNestFreq )
+/**
+ * @brief This function will query MVPD and get the #V data for the
+ *        master core
+ *
+ * @return uint32_t - Returns Indicates if half of cache is deconfigured or not.
+ *                true - half cache deconfigured, only 4MB available
+ *                false -> No Cache deconfigured, 8MB available.
+*/
+errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& l_firstPBFreq)
+{
+    //#V Keyword in LPRx Record of MVPD contains the info we need
+    //the x in LPRx is the EQ number.
+    errlHndl_t  l_errl  =   NULL;
+    uint64_t theRecord = 0x0;
+    uint64_t theKeyword = MVPD::pdV;
+    uint8_t * theData = NULL;
+    size_t theSize = 0;
+    TARGETING::Target* l_procTarget = NULL;
+    uint64_t cpuid = task_getcpuid();
+    uint64_t l_masterCoreId = PIR_t::coreFromPir(cpuid);
+    l_firstPBFreq = 0;
+
+    do {
+        // Target: Find the Master processor
+        TARGETING::targetService().masterProcChipTargetHandle(l_procTarget);
+        assert(l_procTarget != NULL);
+
+        //Convert core number to LPRx Record ID.
+        //TODO: use a common utility function for conversion. RTC: 60552
+        switch (l_masterCoreId)
+        {
+        case 0x00:
+        case 0x01:
+        case 0x02:
+        case 0x03:
+        default:    // if not anything else try LRP0
+            theRecord = MVPD::LRP0;
+            break;
+        case 0x04:
+        case 0x05:
+        case 0x06:
+        case 0x07:
+            theRecord = MVPD::LRP1;
+            break;
+        case 0x08:
+        case 0x09:
+        case 0x0A:
+        case 0x0B:
+            theRecord = MVPD::LRP2;
+            break;
+        case 0x0C:
+        case 0x0D:
+        case 0x0E:
+        case 0x0F:
+            theRecord = MVPD::LRP3;
+            break;
+        case 0x10:
+        case 0x11:
+        case 0x12:
+        case 0x13:
+            theRecord = MVPD::LRP4;
+            break;
+        case 0x14:
+        case 0x15:
+        case 0x16:
+        case 0x17:
+            theRecord = MVPD::LRP5;
+            break;
+        }
+
+        //First call is just to get the Record size.
+        l_errl = deviceRead(l_procTarget,
+                          NULL,
+                          theSize,
+                          DEVICE_MVPD_ADDRESS( theRecord,
+                                               theKeyword ) );
+
+        if (l_errl) { break; }
+
+        //2nd call is to get the actual data.
+        theData = static_cast<uint8_t*>(malloc( theSize ));
+        l_errl = deviceRead(l_procTarget,
+                          theData,
+                          theSize,
+                          DEVICE_MVPD_ADDRESS( theRecord,
+                                               theKeyword ) );
+        if( l_errl ) { break; }
+
+
+        //Version 3:
+        //#V record is laid out as follows:
+        //Name:     0x2 byte
+        //Length:   0x2 byte
+        //Version:  0x1 byte **buffer starts here
+        //PNP:      0x3 byte
+        //bucket a: 0x3D byte
+        //bucket b: 0x3D byte
+        //bucket c: 0x3D byte
+        //bucket d: 0x3D byte
+        //bucket e: 0x3D byte
+        //bucket f: 0x3D byte
+        if( *theData == POUNDV_VERSION_3 )
+        {
+            //cast the voltage data into an array of buckets
+            fapi2::voltageBucketData_t* l_buckets = reinterpret_cast
+                                              <fapi2::voltageBucketData_t*>
+                                              (theData + POUNDV_BUCKET_OFFSET);
+
+            for(int i = 0; i < NUM_BUCKETS; i++)
+            {
+                //To be valid the bucketId must be set (!=0) and pbFreq !=0
+                if((l_buckets[i].bucketId != 0) && (l_buckets[i].pbFreq != 0))
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "First valid #V bucket[%x], pbus_freq %d",
+                              l_buckets[i].bucketId, l_buckets[i].pbFreq);
+                    l_firstPBFreq = l_buckets[i].pbFreq;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //emit trace for debug, but not finding pbus freq is not fatal
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "Invalid #V version, default powerbus freq to boot freq");
+        }
+    } while(0);
+
+    free(theData);
+    return l_errl;
+}
+
+
+errlHndl_t determineNestFreq( uint32_t& o_nestFreq )
 {
     errlHndl_t l_err = nullptr;
-
-    INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+    o_nestFreq = 0x0;
 
     TARGETING::Target * l_sys = nullptr;
     (void) TARGETING::targetService().getTopLevelTarget( l_sys );
-    assert( l_sys, "getBootNestFreq() system target is NULL");
+    assert( l_sys, "determineNestFreq() system target is NULL");
 
-
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               ENTER_MRK"Enter getBootNestFreq()");
     do
     {
-        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
-        assert(l_sys->tryGetAttr
-                         <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
-               "getBootNestFreq() failed to get MASTER_MBOX_SCRATCH");
-        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
+        // Set the Nest frequency to whatever we boot with
+        // Note that all freq are supported in the nest pll buckets
+        // so we can safely customize to any -- however #V may only
+        // contain a subset.  Instead of defaulting to the freq
+        // we booted with, target the freq we intend to run at:
+        //
+        // ATTR_REQUIRED_SYNCH_MODE == --> memory freq forces the nest freq,
+        //                  thus default to whatever we booted with
+        // ATTR_ASYNC_NEST_FREQ_MHZ != 0xFFFF --> System owner wants
+        //                  specified ASYNC freq to be the default
+        // ATTR_ASYNC_NEST_FREQ_MHZ == 0xFFFF --> System owner wants
+        //                  Nest freq to be determined by 1st valid #V
+        //                  bucket
+        //
 
-        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "The nest PLL bucket id is %d",
-                  l_scratch4.nestPllBucket );
+        //Default to the boot freq
+        o_nestFreq = Util::getBootNestFreq();
 
-        size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
-                           sizeof(NEST_PLL_FREQ_LIST[0]);
+        if(l_sys->getAttr<ATTR_REQUIRED_SYNCH_MODE>() == 0x1) //ALWAYS
+        {
+            //Leave nest freq as is, istep 7 will handle
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_voltage_config.C::"
+                      "REQUIRED_SYNCH_MODE = 0x1, nest at boot %d Mhz",
+                      o_nestFreq);
+        }
+        else if (l_sys->getAttr<ATTR_ASYNC_NEST_FREQ_MHZ>() != 0xFFFF)
+        {
+            o_nestFreq = l_sys->getAttr<ATTR_ASYNC_NEST_FREQ_MHZ>();
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_voltage_config.C::"
+                      "ASYNC Freq specified by MRW, using %d Mhz",
+                      o_nestFreq);
+        }
+        else
+        {
+            uint32_t l_pdV_nestFreq = 0x0;
+            l_err = get_first_valid_pdV_pbFreq( l_pdV_nestFreq );
+            if( l_err )
+            {
+                //Fatal error on VPD access
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_voltage_config.C::"
+                          "Failed to get nest freq from VPD");
+                break;
+            }
+            else if (l_pdV_nestFreq != 0)
+            {
+                //got a valid freq
+                o_nestFreq = l_pdV_nestFreq;
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          "call_host_voltage_config.C::"
+                          "First valid #V controls freq, found %d Mhz",
+                          o_nestFreq);
+            }
+        }
 
-        assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
-
-        // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
-        // take zero-based indexing into account.
-        o_bootNestFreq = NEST_PLL_FREQ_LIST[l_scratch4.nestPllBucket-1];
-
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
-                  o_bootNestFreq,
-                  l_scratch4.nestPllBucket );
-
+        l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(o_nestFreq);
 
     }while( 0 );
-    TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              EXIT_MRK "Exit getBootNestFreq()");
 
     return l_err;
 }
@@ -134,18 +300,15 @@ void* call_host_voltage_config( void *io_pArgs )
         // Get the system target
         targetService().getTopLevelTarget(l_sys);
 
-        // Set the Nest frequency to whatever we boot with
-        l_err = getBootNestFreq( l_nestFreq );
-
+        // Set the Nest frequency based on ATTR
+        l_err = determineNestFreq(l_nestFreq);
         if( l_err )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_host_voltage_config.C::"
-                    "Failed getting the boot nest frequency");
+                      "call_host_voltage_config.C::"
+                      "Failed setting the nest frequency");
             break;
         }
-
-        l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>( l_nestFreq );
 
         // Get the child proc chips
         getChildAffinityTargets( l_procList,

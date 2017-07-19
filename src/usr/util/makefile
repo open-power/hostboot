@@ -44,4 +44,7 @@ OBJS += utilxipimage.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
+#Add all the extra include paths
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+
 include ${ROOTPATH}/config.mk

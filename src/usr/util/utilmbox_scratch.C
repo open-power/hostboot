@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <sys/task.h>
 #include <sys/misc.h>
 #include <util/utilmbox_scratch.H>
+#include <p9_frequency_buckets.H>
 
 #include "utilbase.H"
 
@@ -116,5 +117,37 @@ namespace Util
         //Release lock
         mutex_unlock(&g_mutex);
     }
+
+    uint32_t getBootNestFreq()
+    {
+        uint32_t l_bootNestFreq;
+        INITSERVICE::SPLESS::MboxScratch4_t l_scratch4;
+
+        TARGETING::Target * l_sys = nullptr;
+        (void) TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert( l_sys, "getBootNestFreq() system target is NULL");
+
+        TARGETING::ATTR_MASTER_MBOX_SCRATCH_type l_scratchRegs;
+        assert(l_sys->tryGetAttr
+               <TARGETING::ATTR_MASTER_MBOX_SCRATCH>(l_scratchRegs),
+               "getBootNestFreq() failed to get MASTER_MBOX_SCRATCH");
+        l_scratch4.data32 = l_scratchRegs[INITSERVICE::SPLESS::SCRATCH_4];
+
+        size_t sizeOfPll = sizeof(NEST_PLL_FREQ_LIST)/
+          sizeof(NEST_PLL_FREQ_LIST[0]);
+
+        assert((uint8_t)(l_scratch4.nestPllBucket-1) < (uint8_t) sizeOfPll );
+
+        // The nest PLL bucket IDs are numbered 1 - 5. Subtract 1 to
+        // take zero-based indexing into account.
+        l_bootNestFreq = NEST_PLL_FREQ_LIST[l_scratch4.nestPllBucket-1];
+
+        UTIL_FT("getBootNestFreq::The boot frequency was %d: Bucket Id = %d",
+                l_bootNestFreq,
+                l_scratch4.nestPllBucket );
+
+        return l_bootNestFreq;
+    }
+
 
 };
