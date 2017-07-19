@@ -1680,7 +1680,7 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         // For all Nimbus parts we want to run DLL workaround so
         // Instead of using FAPI_ASSERT or returning an error
         // We'll use a bool to tell if we need to run the workaround
-        o_run_workaround = (mss::pc::get_dll_cal_status(l_read) != mss::YES);
+        o_run_workaround |= (mss::pc::get_dll_cal_status(l_read) != mss::YES);
 
     }// mca
 
