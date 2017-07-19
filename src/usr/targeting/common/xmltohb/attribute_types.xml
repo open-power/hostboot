@@ -30866,10 +30866,14 @@ Measured in GB</description>
         p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
             reaction
     </description>
-    <simpleType><uint8_t></uint8_t></simpleType>
+    <simpleType>
+    <uint8_t>
+        <default>0x01</default>
+    </uint8_t>
+    </simpleType>
     <readable/>
     <writeable/>
-    <persistency>volatile-zeroed</persistency>
+    <persistency>volatile</persistency>
     <hwpfToHbAttrMap>
       <id>ATTR_SYSTEM_VDM_DISABLE</id>
       <macro>DIRECT</macro>
