@@ -700,6 +700,14 @@
         <id>ATTR_SKIP_WAKEUP</id>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+
+    <!-- This is only enabled for Wafer Test -->
+    <attribute>
+        <id>ATTR_START_CBS_FIFO_RESET_SKIP</id>
+        <no_export/>
+        <persistency>volatile-zeroed</persistency>
+    </attribute>
+
     <attribute>
         <id>ATTR_EI_BUS_TX_MSBSWAP</id>
         <global/>
