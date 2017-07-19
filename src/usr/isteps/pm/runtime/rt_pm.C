@@ -158,6 +158,7 @@ namespace RTPM
                 break;
             }
 
+
             l_err = HBPM::loadPMComplex(proc_target,
                                         i_homer_addr,
                                         i_occ_common_addr,
@@ -167,7 +168,17 @@ namespace RTPM
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"load_pm_complex: "
                            "load PM complex failed!" );
+                proc_target->setAttr<ATTR_HOMER_HCODE_LOADED>(
+                    HBPM::HCODE_NOT_LOADED);
                 break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "load_pm_complex: "
+                           "load PM complex successfully." );
+                proc_target->setAttr<ATTR_HOMER_HCODE_LOADED>(
+                    HBPM::HCODE_LOADED);
             }
 
         } while(0);
@@ -304,6 +315,24 @@ namespace RTPM
         int rc = 0;
 
         do {
+            const TARGETING::Target * l_pChipTarget =
+                getParentChip(const_cast<TARGETING::Target *>(i_target));
+
+            // Check to see if hcode is loaded
+            uint8_t l_hcode_loaded =
+                l_pChipTarget->getAttr<ATTR_HOMER_HCODE_LOADED>();
+
+            if(l_hcode_loaded == HBPM::HCODE_NOT_LOADED)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                          ERR_MRK"hcode_update: HCODE not loaded."
+                          " Target 0x%llX section 0x%X "
+                          "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                          get_huid(i_target), i_section,
+                          i_operation, i_rel_scom_addr, i_scom_data);
+                break;
+            }
+
             if( g_hostInterfaces == NULL ||
                 g_hostInterfaces->hcode_scom_update == NULL )
             {
@@ -340,8 +369,6 @@ namespace RTPM
             }
 
             // Get the Proc Chip Id
-            const TARGETING::Target * l_pChipTarget =
-                getParentChip(const_cast<TARGETING::Target *>(i_target));
             RT_TARG::rtChipId_t l_chipId = 0;
 
             l_err = RT_TARG::getRtTarget(l_pChipTarget, l_chipId);
@@ -371,6 +398,7 @@ namespace RTPM
                                                      i_operation,
                                                      l_scomAddr,
                                                      i_scom_data);
+
             if(rc)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

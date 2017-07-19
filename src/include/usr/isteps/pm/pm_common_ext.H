@@ -74,6 +74,16 @@ namespace HBPM
     };
 
     /**
+     * @brief Enumeration of the HOMER_HCODE_LOADED attribute
+     *
+     */
+    enum loadHCODE
+    {
+        HCODE_NOT_LOADED = 0x0,
+        HCODE_LOADED     = 0x1,
+    };
+
+    /**
      *  @brief Convert HOMER physical address space to a vitual address
      *  @param[in]  i_proc_target  Processsor target
      *  @param[in]  i_phys_addr    Physical address
@@ -116,8 +126,11 @@ namespace HBPM
      * @return errlHndl_t  Error log if resetPMAll failed
      */
     errlHndl_t getRingOvd(void*& io_overrideImg);
+} //namespace HBPM ends
 
 #if __HOSTBOOT_RUNTIME
+namespace RTPM
+{
     /**
      *  @brief Modify the SCOM restore section of the HCODE image with the
      *          given register data
@@ -135,7 +148,7 @@ namespace HBPM
                              TARGETING::Target*  i_target,
                              uint64_t i_rel_scom_addr,
                              uint64_t i_scom_data );
+} //namespace RTPM ends
 #endif
-} //namespace HBPM ends
 
 #endif

@@ -144,6 +144,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 intf->pnor_write= rt_pnor_write;
                 intf->ipmi_msg= rt_ipmi_msg;
                 intf->clock_gettime = clock_gettime;
+                intf->hcode_scom_update = rt_hcode_update;
 
                 // Call init.
                 runtimeInterfaces_t* rtInterface =
@@ -684,6 +685,21 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
             TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_ipmi_msg");
             return l_plid;
+        }
+
+        //--------------------------------------------------------------------
+        static int rt_hcode_update( uint64_t i_chipId,
+                                    uint32_t i_section,
+                                    uint32_t i_operation,
+                                    uint64_t i_scomAddr,
+                                    uint64_t i_scomData )
+        {
+            TRACFCOMP(g_trac_hbrt,
+                      "Loading runtime hcode_update: "
+                      "target 0x%llX chipId 0x%llX section 0x%X "
+                      "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                      i_chipId, i_section, i_operation, i_scomAddr, i_scomData);
+            return 0;
         }
 
         static uint64_t cv_hb_data_addr;
