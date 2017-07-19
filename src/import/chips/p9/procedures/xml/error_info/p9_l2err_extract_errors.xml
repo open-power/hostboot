@@ -30,9 +30,13 @@
       Procedure: p9_l2err_extract
       Specified trace array length does not match expected length
     </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>TA_DATA_SIZE</ffdc>
-	<ffdc>EXP_TA_DATA_SIZE</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TA_DATA_SIZE</ffdc>
+    <ffdc>EXP_TA_DATA_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -41,9 +45,13 @@
       Procedure: p9_l2err_extract
       Could not find DW
     </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>TRACE_ARRAY_1</ffdc>
-	<ffdc>TRACE_ARRAY_2</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_ARRAY_1</ffdc>
+    <ffdc>TRACE_ARRAY_2</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
@@ -52,38 +60,13 @@
       Procedure: p9_l2err_extract
       Syndrome ECC is unknown
     </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>SYNDROME</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SYNDROME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError> 
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_L2ERR_EXTRACT_BUILDING_DATA_ERROR</rc>
-    <description>
-      Procedure: p9_l2err_extract
-	  Error while extracting/building address data
-    </description>
-	<ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_L2ERR_EXTRACT_DATA_BUFFER_ERROR</rc>
-    <description>
-      Procedure: p9_l2err_extract
-	  Error while extracting from trace array data buffer
-    </description>
-	<ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_L2ERR_EXTRACT_NO_CEUE_FOUND</rc>
-    <description>
-      Procedure: p9_l2err_extract
-	  No CE or UE found in trace array
-    </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>TA_DATA</ffdc>
-	<ffdc>ERR_REQ_TYPE</ffdc>
-  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_L2ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
@@ -91,29 +74,34 @@
       Procedure: p9_l2err_extract
       Could not find syndrome
     </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>TRACE_ARRAY_1</ffdc>
-	<ffdc>TRACE_ARRAY_2</ffdc>
-	<ffdc>TRACE_ARRAY_3</ffdc>
-	<ffdc>TRACE_ARRAY_4</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_P9_L2ERR_EXTRACT_SYNDROME_DATA</rc>
-    <description>
-      Procedure: p9_l2err_extract
-      Error while extracting syndrome data
-    </description>
-	<ffdc>TARGET</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>TRACE_ARRAY_1</ffdc>
+    <ffdc>TRACE_ARRAY_2</ffdc>
+    <ffdc>TRACE_ARRAY_3</ffdc>
+    <ffdc>TRACE_ARRAY_4</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
     <rc>RC_P9_L2ERR_LINE_DELETE_REG_BUSY</rc>
     <description>
       Procedure: p9_l2err_linedelete
-      Error while try to update PRD Purge Engine Command Register
+      Time out waiting for PRD L2 Purge engine busy bit.
     </description>
-	<ffdc>TARGET</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
+    <ffdc>PRD_PURGE_CMD_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
