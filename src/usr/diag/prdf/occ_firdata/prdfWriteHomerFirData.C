@@ -695,6 +695,26 @@ errlHndl_t getPnorInfo( HOMER_Data_t & o_data )
 }
 
 //------------------------------------------------------------------------------
+
+/* Helper struct for chip information inserted into HOMER data section after the
+ * header. There is basically an array of these after the initial HOMER section
+ * (HOMER_Data_t).  The register info then follows.
+ */
+typedef struct __attribute__((packed))
+{
+    HOMER_Chip_t  hChipType;  /* Nimbus, Centaur, EC Level, etc...*/
+
+    union
+    {
+        HOMER_ChipNimbus_t   hChipN;
+        HOMER_ChipCumulus_t  hChipC;
+        HOMER_ChipCentaur_t  hChipM;
+    };
+
+} HOMER_ChipInfo_t;
+
+//------------------------------------------------------------------------------
+
 errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
                         const HwInitialized_t i_curHw )
 {
@@ -719,7 +739,6 @@ errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
 
         l_procModelType = (MODEL_CUMULUS == getChipModel(masterProc)) ?
                            HOMER_CHIP_CUMULUS : HOMER_CHIP_NIMBUS;
-
 
         // Iterate the list of functional PROCs.
         TargetHandleList procList = getFunctionalTargetList( TYPE_PROC );
@@ -965,6 +984,9 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
     errlHndl_t errl = NULL;
     TrgtMap_t  l_targMap;
 
+    const size_t u32 = sizeof(uint32_t);
+    const size_t u64 = sizeof(uint64_t);
+
     do
     {
         size_t sz_hBuf = 0;
@@ -973,10 +995,12 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         size_t sz_data = sizeof(io_homerData);
         sz_hBuf += sz_data;
 
+        // The HOMER_Data_t struct may have an uneven size. Add some padding to
+        // ensure the subsequent HOMER_Chip_t structs are word aligned. */
+        const size_t padding = (u32 - (sizeof(HOMER_Data_t) % u32)) % u32;
+        sz_hBuf += padding;
 
         // Add register counts to the data.
-        const size_t u32 = sizeof(uint32_t);
-        const size_t u64 = sizeof(uint64_t);
         // initialize SCOM addresses for all targets & regs
         getAddresses(l_targMap);
 
@@ -1024,6 +1048,9 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
         io_homerData.chipCount = i_chipVector.size();
         // Fill the input buffer with chipcount, regcount, pnor info
         memcpy( &i_hBuf[idx], &io_homerData,  sz_data   ); idx += sz_data;
+
+        // Add the padding at the end of the HOMER_Data_t struct.
+        idx += padding;
 
         // We want a list of chips next
         if (0 != io_homerData.chipCount)

@@ -44,6 +44,13 @@
  *      - A list of all regular registers (PNOR_Reg_t).
  *      - A list of all indirect-SCOM registers (PNOR_IdReg_t).
  *
+ *  IMPORTANT NOTE: All of the structs used here are packed. Therefore, we must
+ *      ensure the variables within the struct are byte aligned. Meaning each
+ *      uint32_t within the struct must be 4-byte aligned and each uint16_t must
+ *      be 2-byte aligned. This also means the structs must always start on a
+ *      4-bye word boundary to maintain alignment. This is required due to the
+ *      limitations of the PPE42/SRAM hardware.
+ *
  *  The PNOR has limited data space. So the following rules will apply:
  *      - Any registers with the value of zero will not be captured.
  *      - Registers with SCOM errors will not be captured, however, the number
@@ -70,14 +77,15 @@ typedef enum
 } PNOR_Version_t;
 
 /** PNOR data header information. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint16_t trgts    : 12; /** Number of targets with register data */
-    uint16_t full     :  1; /** 1 if PNOR data is full and data incomplete */
-    uint16_t iplState :  1; /** See enum IplState_t */
-    uint16_t reserved :  2;
+    uint32_t trgts    : 12; /** Number of targets with register data */
+    uint32_t full     :  1; /** 1 if PNOR data is full and data incomplete */
+    uint32_t iplState :  1; /** See enum IplState_t */
+    uint32_t reserved : 18;
 
 } PNOR_Data_t;
 
@@ -101,16 +109,17 @@ typedef enum
 } PNOR_Trgt_RegLimits_t;
 
 /** Information for each target with SCOM data. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
-    uint32_t chipPos  : 6; /** Parent chip position relative to the node */
-    uint32_t unitPos  : 5; /** Unit position relative to the parent chip */
-    uint32_t regs     : 9; /** Number of normal registers */
-    uint32_t idRegs   : 4; /** Number of indirect-SCOM registers */
-    uint32_t scomErrs : 8; /** Number of SCOM errors detected */
+    uint32_t chipPos  :  6; /** Parent chip position relative to the node */
+    uint32_t unitPos  :  5; /** Unit position relative to the parent chip */
+    uint32_t regs     :  9; /** Number of normal registers */
+    uint32_t idRegs   :  4; /** Number of indirect-SCOM registers */
+    uint32_t scomErrs :  8; /** Number of SCOM errors detected */
 
-    uint8_t trgtType  : 6; /** Target type. See enum TrgtType_t */
-    uint8_t reserved  : 2;
+    uint32_t trgtType :  6; /** Target type. See enum TrgtType_t */
+    uint32_t reserved : 26;
 
 } PNOR_Trgt_t;
 
@@ -132,6 +141,7 @@ static inline PNOR_Trgt_t PNOR_getTrgt( uint32_t i_trgtType, uint32_t i_chipPos,
 };
 
 /** Information for a normal register. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t addr;  /** 32-bit address */
@@ -140,6 +150,7 @@ typedef struct __attribute__((packed))
 } PNOR_Reg_t;
 
 /** Information for an indirect-SCOM register. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint64_t addr;  /** 64-bit address */

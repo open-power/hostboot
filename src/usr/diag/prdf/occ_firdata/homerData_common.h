@@ -52,8 +52,20 @@
  *  - Register address lists - These lists vary in size depending on the number
  *      of register addresses needed in each list. The list counts are stored in
  *      HOMER_Data_t::regCounts. Order of the lists must match the array indexes
- *      HOMER_Data_t::regCounts, which are specified in TrgtType_t and
+ *      of HOMER_Data_t::regCounts, which are specified in TrgtType_t and
  *      RegType_t.
+ *
+ *  - Chip specific address list - This is a list of HOMER_ChipSpecAddr_t
+ *      structs and will vary in size depending on the number of register
+ *      addresses that are specific to a certain chip or DD level. The number of
+ *      entries in this list is stored in HOMER_Data_t::ecDepCounts.
+ *
+ *  IMPORTANT NOTE: All of the structs used here are packed. Therefore, we must
+ *      ensure the variables within the struct are byte aligned. Meaning each
+ *      uint32_t within the struct must be 4-byte aligned and each uint16_t must
+ *      be 2-byte aligned. This also means the structs must always start on a
+ *      4-bye word boundary to maintain alignment. This is required due to the
+ *      limitations of the PPE42/SRAM hardware.
  *
  *  Note that FIRs and indirect-SCOM FIRs characterize a set of registers to
  *  capture. In addition to capturing the FIR (or ID FIR), the OCC will need to
@@ -79,6 +91,7 @@ typedef enum
 } HOMER_Version_t;
 
 /** PNOR information contained within the HOMER data. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t pnorOffset;     /** Physical offset of FIRDATA in PNOR */
@@ -90,24 +103,25 @@ typedef struct __attribute__((packed))
 
 /** HOMER data header information containing hardware configurations and
  *  register counts. */
+/* NOTE: This structure may, or may not, be 4-byte word aligned. It all depends
+ *       on the size of regCounts, which will change based on the number of
+ *       target types and register types we support. When reading/writing this
+ *       data ensure that proper padding has been added after this structure so
+ *       that subsequent structures are 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t header; /** Magic number to indicate valid data and version */
 
-    uint8_t chipCount; /** Number of configured chips per node */
-
-    uint8_t iplState : 1; /** See IplState_t. */
-    uint8_t reserved : 7;
-
-    /** Contains number of registers per type for each target type. */
-    uint8_t regCounts[TRGT_MAX][REG_MAX];
-
-    /** Number of regs that are dependent on EC level      **/
-    /** (these registers follow the normal register list)  **/
-    uint8_t ecDepCounts;
+    uint32_t chipCount   :  8; /** Number of configured chips per node */
+    uint32_t ecDepCounts :  8; /** Number of regs that are EC dependent */
+    uint32_t iplState    :  1; /** See IplState_t. */
+    uint32_t reserved    : 15;
 
     /** Information regarding the PNOR location and size. */
     HOMER_PnorInfo_t pnorInfo;
+
+    /** Contains number of registers per type for each target type. */
+    uint8_t regCounts[TRGT_MAX][REG_MAX];
 
 } HOMER_Data_t;
 
@@ -133,20 +147,20 @@ typedef enum
 } HOMER_ChipType_t;
 
 /** Information for each configured chip. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t fsiBaseAddr;   /** FSI base address for the chip. */
 
-    uint16_t chipType :  4; /** Chip type (see HOMER_ChipType_t) */
-    uint16_t chipPos  :  6; /** Chip position relative to the node. */
-    uint16_t reserved :  6;
-
-    uint8_t  chipEcLevel;   /** EC level for this chip */
+    uint32_t chipType    :  4; /** Chip type (see HOMER_ChipType_t) */
+    uint32_t chipPos     :  6; /** Chip position relative to the node. */
+    uint32_t chipEcLevel :  8; /** EC level for this chip */
+    uint32_t reserved    : 14;
 
 } HOMER_Chip_t;
 
-
 /** Used for Registers that have EC level dependencies */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t chipType :  4; /** See HOMER_ChipType_t. */
@@ -159,7 +173,6 @@ typedef struct __attribute__((packed))
     uint64_t address;
 
 } HOMER_ChipSpecAddr_t;
-
 
 /** @return An initialized HOMER_Chip_t struct. */
 static inline HOMER_Chip_t HOMER_getChip( HOMER_ChipType_t i_type )
@@ -175,6 +188,7 @@ static inline HOMER_Chip_t HOMER_getChip( HOMER_ChipType_t i_type )
 /*----------------------------------------------------------------------------*/
 
 /** Information specific to a P9 Nimbus processor chip. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t isMaster   :  1; /** 1 if this is the master PROC, 0 otherwise */
@@ -188,10 +202,10 @@ typedef struct __attribute__((packed))
     uint32_t mcsMask    :  4; /** Mask of configured MCS units (0-3) */
     uint32_t mcaMask    :  8; /** Mask of configured MCA units (0-7) */
 
-    uint16_t cappMask   :  2; /** Mask of configured CAPP units (0-1) */
-    uint16_t pecMask    :  3; /** Mask of configured PEC units (0-2) */
-    uint16_t phbMask    :  6; /** Mask of configured PHB units (0-5) */
-    uint16_t reserved   :  5;
+    uint32_t cappMask   :  2; /** Mask of configured CAPP units (0-1) */
+    uint32_t pecMask    :  3; /** Mask of configured PEC units (0-2) */
+    uint32_t phbMask    :  6; /** Mask of configured PHB units (0-5) */
+    uint32_t reserved   : 21;
 
 } HOMER_ChipNimbus_t;
 
@@ -206,6 +220,7 @@ static inline HOMER_ChipNimbus_t HOMER_initChipNimbus()
 /*----------------------------------------------------------------------------*/
 
 /** Information specific to a P9 Cumulus processor chip. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
     uint32_t isMaster :  1; /** 1 if this is the master PROC, 0 otherwise */
@@ -219,10 +234,10 @@ typedef struct __attribute__((packed))
     uint32_t miMask   :  4; /** Mask of configured MI units (0-3) */
     uint32_t dmiMask  :  8; /** Mask of configured DMI units (0-7) */
 
-    uint16_t cappMask :  2; /** Mask of configured CAPP units (0-1) */
-    uint16_t pecMask  :  3; /** Mask of configured PEC units (0-2) */
-    uint16_t phbMask  :  6; /** Mask of configured PHB units (0-5) */
-    uint16_t reserved :  5;
+    uint32_t cappMask :  2; /** Mask of configured CAPP units (0-1) */
+    uint32_t pecMask  :  3; /** Mask of configured PEC units (0-2) */
+    uint32_t phbMask  :  6; /** Mask of configured PHB units (0-5) */
+    uint32_t reserved : 21;
 
 } HOMER_ChipCumulus_t;
 
@@ -237,10 +252,11 @@ static inline HOMER_ChipCumulus_t HOMER_initChipCumulus()
 /*----------------------------------------------------------------------------*/
 
 /** Information specific to a Centaur memory buffer chip. */
+/* NOTE: This structure is 4-byte word aligned. */
 typedef struct __attribute__((packed))
 {
-    uint8_t mbaMask  : 2; /** Mask of configured MBA units (0-1) */
-    uint8_t reserved : 6;
+    uint32_t mbaMask  :  2; /** Mask of configured MBA units (0-1) */
+    uint32_t reserved : 30;
 
 } HOMER_ChipCentaur_t;
 
@@ -251,24 +267,5 @@ static inline HOMER_ChipCentaur_t HOMER_initChipCentaur()
 
     return c;
 }
-
-/** @brief Chip information inserted into HOMER data section after header
- *
- *         There is basically an array of these after the initial HOMER
- *         section (HOMER_Data_t).  The register info then follows.
- */
-typedef struct __attribute__((packed))
-{
-    HOMER_Chip_t  hChipType;  /* Nimbus, Centaur, EC Level, etc...*/
-
-    union
-    {
-        HOMER_ChipNimbus_t   hChipN;
-        HOMER_ChipCumulus_t  hChipC;
-        HOMER_ChipCentaur_t  hChipM;
-    };
-
-} HOMER_ChipInfo_t;
-
 
 #endif /* __homerData_common_h */
