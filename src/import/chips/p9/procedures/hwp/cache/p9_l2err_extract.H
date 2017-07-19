@@ -22,29 +22,30 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-// *|
-// *! TITLE       : p9_l2err_extract.H
-// *! DESCRIPTION : Parse and extract error information from L2 trace array (FAPI)
-// *!
-// *! OWNER NAME  : Chen Qian           Email: qianqc@cn.ibm.com
-// *!
-// *! ADDITIONAL COMMENTS :
-// *!
-// *! Parses the contents of the L2_T0 trace array for L2 error data.
-// *! Will look for occurances of an L2 CE or UE and capture associated data.
-// *!
-// *! Assume that the L2 trace array is set up to capture CEs/UEs, and
-// *! that it is NOT running in banked mode. Also trace must have been set to
-// *! stop on error.
-// *|
-// *! NOTE: Trace entries must be provided within data buffer from oldest->youngest entry.
-// *!
-// *! NOTE: This procedure only looks for the oldest error in the trace array. Other
-// *! errors can be present in the first or second beat of data, or for datawords
-// *! greater than the one with the first error.
-//------------------------------------------------------------------------------
-
+///----------------------------------------------------------------------------
+///
+/// @file p9_l2err_extract.H
+///
+/// @brief Parse and extract error information from L2 trace array (FAPI2)
+///
+/// Parses the contents of the L2_T0 trace array for L2 error data.
+/// Will look for occurances of an L2 CE or UE and capture associated data.
+///
+/// Assume that the L2 trace array is set up to capture CEs/UEs, and
+/// that it is NOT running in banked mode. Also trace must have been set to
+/// stop on error.
+///
+/// NOTE: Trace entries must be provided within data buffer from
+/// oldest->youngest entry. This procedure only looks for the oldest error
+/// in the trace array. Other errors can be present in the first or second
+/// beat of data, or for datawords greater than the one with the first error.
+///
+/// *HWP HWP Owner   : Chen Qian <qianqc@cn.ibm.com>
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : Quad
+/// *HWP Consumed by : PRDF
+/// *HWP Level       : 3
+///----------------------------------------------------------------------------
 #ifndef _P9_L2ERR_EXTRACT_H_
 #define _P9_L2ERR_EXTRACT_H_
 
@@ -81,12 +82,12 @@ struct p9_l2err_extract_err_data
 };
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_l2err_extract_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
-                          const fapi2::variable_buffer&,
-                          p9_l2err_extract_err_type,
-                          p9_l2err_extract_err_data&,
-                          bool&);
+typedef fapi2::ReturnCode (*p9_l2err_extract_FP_t)
+(const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
+ const fapi2::variable_buffer&,
+ p9_l2err_extract_err_type,
+ p9_l2err_extract_err_data&,
+ bool&);
 
 extern "C"
 {
@@ -94,21 +95,23 @@ extern "C"
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
-
-// function: FAPI2 p9_l2err_extract HWP entry point
-//           Parse and extract L2 error information from provided
-//           L2_T0 trace array that has been stopped on an L2 CE or UE.
-// parameters: i_target      => chiplet target for callouts
-//             i_ta_data     => ecmdDataBufferBase that contains the trace data
-//             i_err_type    => type of error that is to be extracted (CE,UE,both)
-//             o_err_data    => failing location information for CE or UE
-//             o_error_found => error is found
-
-    fapi2::ReturnCode p9_l2err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                       const fapi2::variable_buffer& i_ta_data,
-                                       p9_l2err_extract_err_type i_err_type,
-                                       p9_l2err_extract_err_data& o_err_data,
-                                       bool& o_error_found);
+///
+/// @brief  FAPI2 p9_l2err_extract HWP entry point
+///         Parse and extract L2 error information from provided
+///         L2_T0 trace array that has been stopped on an L2 CE or UE.
+///
+/// @param[in]  i_target      => EX chiplet target
+/// @param[in]  i_ta_data     => Input trace data buffer
+/// @param[in]  i_err_type    => Type of error that is to be extracted (CE,UE,both)
+/// @param[out] o_err_data    => Failing location information for CE or UE
+/// @param[out] o_error_found => Error is found
+///
+    fapi2::ReturnCode p9_l2err_extract(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const fapi2::variable_buffer& i_ta_data,
+        p9_l2err_extract_err_type i_err_type,
+        p9_l2err_extract_err_data& o_err_data,
+        bool& o_error_found);
 
 } // extern "C"
 

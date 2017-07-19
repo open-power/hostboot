@@ -23,5 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_l2err_extract
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/perv)
 $(call BUILD_PROCEDURE)
-
