@@ -22,26 +22,30 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-// *|
-// *! TITLE       : p9_l3err_linedelete.H
-// *! DESCRIPTION : Delete the L3 error cache line according to the error extraction information
-// *!
-// *! OWNER NAME  : Alex Taft           Email: amtaft@us.ibm.com
-// *!
-// *! ADDITIONAL COMMENTS :
-// *!
-// *! EXP.L3.L3_MISC.L3CERRS.PRD_PURGE_REG
-// *! Write member, cgc address into PRD Purge Engine Command Register
-// *! SCOM Addr: 0x000000001001180E
-// *| bit 0 is the trigger, the act of writing this bit to 1 sets off the line delete
-// *| bits 1:4 is ttype 0b0010 = line delete
-// *| bits 12:16 is the member
-// *| bits 17:28 is the cgc address
-// *! NOTE: The error information is extracted by the HWP p9_l3err_extract.
-// *|       An output data structure is dumped to this proceder and wrapped
-//------------------------------------------------------------------------------
 
+///----------------------------------------------------------------------------
+///
+/// @file p9_l3err_linedelete.H
+///
+/// @brief Delete the L3 error cache line according to the error extraction
+///        information.
+///
+///  EXP.L3.L3_MISC.L3CERRS.PRD_PURGE_REG
+///  Write member, cgc address into PRD Purge Engine Command Register
+///  SCOM Addr: 0x000000001001180E
+///  bit 0 is the trigger, the act of writing this bit to 1 sets off the line delete
+///  bits 1:4 is ttype 0b0010 = line delete
+///  bits 12:16 is the member
+///  bits 17:28 is the cgc address
+///  NOTE: The error information is extracted by the HWP p9_l3err_extract.
+///        An output data structure is dumped to this proceder and wrapped
+///
+/// *HWP HWP Owner   : Alex Taft <amtaft@us.ibm.com>
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : Quad
+/// *HWP Consumed by : PRDF
+/// *HWP Level       : 3
+///----------------------------------------------------------------------------
 #ifndef _P9_L3ERR_LINEDELETE_H_
 #define _P9_L3ERR_LINEDELETE_H_
 
@@ -56,18 +60,30 @@
 //------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode
-(*p9_l3err_linedelete_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
-                             const p9_l3err_extract_err_data&,
-                             const uint64_t p9_l3err_linedelete_TryBusyCounts);
+typedef fapi2::ReturnCode(*p9_l3err_linedelete_FP_t)
+(const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
+ const p9_l3err_extract_err_data&,
+ const uint64_t p9_l3err_linedelete_TryBusyCounts);
 
 extern "C"
 {
 
 
-    fapi2::ReturnCode p9_l3err_linedelete(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                          const p9_l3err_extract_err_data& i_err_data,
-                                          const uint64_t p9_l3err_linedelete_TryBusyCounts);
+//------------------------------------------------------------------------------
+// Function prototype
+//------------------------------------------------------------------------------
+///
+/// @brief  Perform L3 Line Delete on an EX target using input L3
+///         error data information.
+///
+/// @param[in]  i_target       => EX chiplet target
+/// @param[in]  i_err_data     => L2 error data
+/// @param[in]  i_busyCount    => Max busy count waiting for PURGE to complete.
+///
+    fapi2::ReturnCode p9_l3err_linedelete(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const p9_l3err_extract_err_data& i_err_data,
+        const uint64_t i_busyCount);
 
 } // extern "C"
 
