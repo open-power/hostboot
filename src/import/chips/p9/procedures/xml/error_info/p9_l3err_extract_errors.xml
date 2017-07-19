@@ -25,21 +25,18 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_L3ERR_EXTRACT_NO_CEUE_FOUND</rc>
-    <description>
-      Procedure: p9_l3err_extract
-      NO CE or UE is captured
-    </description>
-	<ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_P9_L3ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
     <description>
       Procedure: p9_l3err_extract
       Could not find syndrome
     </description>
-	<ffdc>TARGET</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>FIRST_BEAT_SYNDROME</ffdc>
+    <ffdc>SECOND_BEAT_SYNDROME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
@@ -48,17 +45,31 @@
       Procedure: p9_l3err_extract
       Syndrome ECC is unknown
     </description>
-	<ffdc>TARGET</ffdc>
-	<ffdc>SYNDROME</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>SYNDROME</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError> 
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_L3ERR_LINE_DELETE_REG_BUSY</rc>
     <description>
       Procedure: p9_l3err_linedelete
-      Error while trying to update PRD Purge Engine Command Register
+      Time out waiting for PRD L3 Purge engine busy bit.
     </description>
-	<ffdc>TARGET</ffdc>
+    <ffdc>TARGET</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
+    <ffdc>PRD_PURGE_REG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError> 
   <!-- ******************************************************************** -->
 </hwpErrors>
