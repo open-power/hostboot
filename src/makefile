@@ -319,6 +319,7 @@ RUNTIME_TESTCASE_MODULES += testpnor_rt
 RUNTIME_TESTCASE_MODULES += testsecureboot_rt
 RUNTIME_TESTCASE_MODULES += testtargeting_rt
 RUNTIME_TESTCASE_MODULES += testsbeio_rt
+RUNTIME_TESTCASE_MODULES += testpm_rt
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic
 

@@ -422,6 +422,20 @@
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>HOMER_HCODE_LOADED</id>
+    <description>
+        Attribute to check if HCODE is loaded in HOMER
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+</attribute>
+
 <enumerationType>
     <id>IPMI_SENSOR_ARRAY</id>
     <description>Enumeration defining the offsets into the

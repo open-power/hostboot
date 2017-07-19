@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/pm/runtime/makefile $
+# $Source: src/usr/isteps/pm/runtime/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -25,20 +25,13 @@
 
 HOSTBOOT_RUNTIME = 1
 
-ROOTPATH = ../../../../..
+ROOTPATH = ../../../../../..
 
-VPATH += ../
+MODULE = testpm_rt
 
-MODULE = pm_rt
+EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/pm
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/utils
 
-EXTRAINCDIR += ${ROOTPATH}/src/usr/scom/runtime
-
-## Objects unique to HBRT
-OBJS += rt_pm.o
-
-SUBDIRS += test.d
-
-## Objects common to HBRT and HB IPL
-include ../pm.mk
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
