@@ -48,6 +48,7 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+#include    <util/utilmbox_scratch.H>
 
 
 // SBE
@@ -114,15 +115,12 @@ void*    call_mss_freq( void *io_pArgs )
         }
     } // End memBuf loop
 
-    // Set PB frequency to ASYNC_FREQ_MHZ
+    // PB frequency was set in istep 6 for non MC SYNC mode
+    // allow it to change here
     TARGETING::Target * l_sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( l_sys );
 
-    uint32_t l_originalNest = l_sys->getAttr<TARGETING::ATTR_FREQ_PB_MHZ>();
-    uint32_t l_asyncFreq =
-          l_sys->getAttr<TARGETING::ATTR_ASYNC_NEST_FREQ_MHZ>();
-
-    l_sys->setAttr<TARGETING::ATTR_FREQ_PB_MHZ>(l_asyncFreq);
+    uint32_t l_originalNest = Util::getBootNestFreq();
 
     // Read MC_SYNC_MODE from SBE itself and set the attribute
     uint8_t l_bootSyncMode = 0;
