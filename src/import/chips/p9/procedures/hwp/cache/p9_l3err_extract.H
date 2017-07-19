@@ -22,17 +22,19 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//------------------------------------------------------------------------------
-// *|
-// *! TITLE       : p3_l3err_extract.H
-// *! DESCRIPTION : Parse and extract error information from L3 Scom Register (FAPI2)
-// *!
-// *! OWNER NAME  : Chen Qian              Email: qianqc@cn.ibm.com
-// *!
-// *! ADDITIONAL COMMENTS :
-// *!
-//------------------------------------------------------------------------------
 
+///----------------------------------------------------------------------------
+///
+/// @file p9_l3err_extract.H
+///
+/// @brief Parse and extract error information from L3 Scom Registers (FAPI2)
+///
+/// *HWP HWP Owner   : Chen Qian <qianqc@cn.ibm.com>
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : Quad
+/// *HWP Consumed by : HB
+/// *HWP Level       : 3
+///----------------------------------------------------------------------------
 #ifndef _P9_L3ERR_EXTRACT_H_
 #define _P9_L3ERR_EXTRACT_H_
 
@@ -67,9 +69,10 @@ struct p9_l3err_extract_err_data
 };
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_l3err_extract_FP_t)( const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-        p9_l3err_extract_err_data& o_err_data,
-        bool& o_err_found);
+typedef fapi2::ReturnCode (*p9_l3err_extract_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+    p9_l3err_extract_err_data& o_err_data,
+    bool& o_err_found);
 
 extern "C"
 {
@@ -78,16 +81,18 @@ extern "C"
 // Function prototype
 //------------------------------------------------------------------------------
 
-// function: FAPI p9_l3err_extract HWP entry point
-//           Parse and extract L3 error information from provided
-// parameters: i_ex_chiplet => chiplet target used for callouts
-//             i_err_type   => type of error that is to be extracted (CE,UE,both)
-//             o_err_data   => failing location information for CE or UE
-//             o_err_found  => error is found
-
-    fapi2::ReturnCode p9_l3err_extract(const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-                                       p9_l3err_extract_err_data& o_err_data,
-                                       bool& o_error_found);
+///
+/// @brief  FAPI p9_l3err_extract HWP entry point
+///         Parse and extract L3 error information from provided
+///
+/// @param[in]  i_target      => EX chiplet target
+/// @param[out] o_err_data    => Failing location information for CE or UE
+/// @param[out] o_error_found => Error is found
+///
+    fapi2::ReturnCode p9_l3err_extract(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        p9_l3err_extract_err_data& o_err_data,
+        bool& o_error_found);
 
 } // extern "C"
 
