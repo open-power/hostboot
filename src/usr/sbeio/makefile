@@ -31,6 +31,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 
 OBJS += sbe_psudd.o
 OBJS += sbe_coreStateControl.o
@@ -44,6 +45,10 @@ OBJS += sbe_scomAccessdd.o
 OBJS += sbe_ffdc_parser.o
 OBJS += sbe_setFFDCAddr.o
 OBJS += sbe_memRegionMgr.o
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
+include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_extract_sbe_rc.mk
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

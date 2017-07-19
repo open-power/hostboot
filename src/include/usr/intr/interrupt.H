@@ -268,7 +268,6 @@ namespace INTR
      * drain     */
     void drainQueue(void);
 
-
 };
 
 #endif

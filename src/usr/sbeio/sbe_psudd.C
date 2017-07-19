@@ -43,6 +43,10 @@
 #include <arch/ppc.H>
 #include <kernel/pagemgr.H>
 #include <sbeio/sbeioif.H>
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p9_extract_sbe_rc.H>
+#include <errl/errludlogregister.H>
 
 trace_desc_t* g_trac_sbeio;
 TRAC_INIT(&g_trac_sbeio, SBEIO_COMP_NAME, 6*KILOBYTE, TRACE::BUFFER_SLOW);
@@ -342,6 +346,7 @@ errlHndl_t SbePsu::readResponse(TARGETING::Target  * i_target,
         errl = writeScom(i_target,PSU_HOST_DOORBELL_REG_AND,&l_data);
         if (errl) break;
 
+
         //If the command is not supported, then print a statement and break out
         if(o_pPsuResponse->primaryStatus == SBE_PRI_INVALID_COMMAND &&
            o_pPsuResponse->secondaryStatus == SBE_SEC_COMMAND_NOT_SUPPORTED)
@@ -458,7 +463,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                       const uint64_t i_timeout,
                                       psuCommand* i_pPsuRequest)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t l_errl = NULL;
 
     SBE_TRACD(ENTER_MRK "pollForPsuComplete");
 
@@ -469,8 +474,8 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
     do
     {
         // read response doorbell to see if ready
-        errl = readScom(i_target,PSU_HOST_DOORBELL_REG_RW,&l_data,l_trace);
-        if (errl) break; // return with error
+        l_errl = readScom(i_target,PSU_HOST_DOORBELL_REG_RW,&l_data,l_trace);
+        if (l_errl) break; // return with error
 
         // check if response is now ready to be read
         if (l_data & HOST_RESPONSE_WAITING)
@@ -481,27 +486,87 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
         // time out if wait too long
         if (l_elapsed_time_ns > i_timeout )
         {
+            //read the response registers for FFDC
+            uint64_t l_respRegs[4];
+            ERRORLOG::ErrlUserDetailsLogRegister l_respRegsFFDC(i_target);
+            uint64_t l_addr = PSU_HOST_SBE_MBOX4_REG;
+            for (uint8_t i=0;i<4;i++)
+            {
+                l_errl = readScom(i_target,l_addr,&l_respRegs[i]);
+                if (l_errl)
+                {
+                    l_respRegs[i] = 0;
+                    delete l_errl;
+                }
+
+                l_respRegsFFDC.addData(DEVICE_XSCOM_ADDRESS(l_addr));
+
+                l_addr++;
+            }
+            psuResponse* l_resp = reinterpret_cast<psuResponse*>(l_respRegs);
+
+
             SBE_TRACF(ERR_MRK "pollForPsuComplete: "
                       "timeout waiting for PSU request to complete"
-                      ": doorbell=%.8X", l_data);
+                      ": doorbell=%.8X, mbox4=%.16llX",
+                      l_data, l_respRegs[0]);
 
-            /*@
-             * @errortype
-             * @moduleid     SBEIO_PSU
-             * @reasoncode   SBEIO_PSU_RESPONSE_TIMEOUT
-             * @userdata1[00:31]    Timeout in NS
-             * @userdata1[32:63]    Processor Target
-             * @userdata2    Failing Request
-             * @devdesc      Timeout waiting for PSU command to complete
-             * @custdesc     Firmware error communicating with boot device
-             */
-            errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                 SBEIO_PSU,
-                                 SBEIO_PSU_RESPONSE_TIMEOUT,
-                                 TWO_UINT32_TO_UINT64(i_timeout,
-                                    TARGETING::get_huid(i_target)),
-                                 i_pPsuRequest->mbxReg0);
+            // Look for a hardware failure first
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+              l_fapiTarg(i_target);
+            P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
+              P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            FAPI_INVOKE_HWP( l_errl, p9_extract_sbe_rc,
+                             l_fapiTarg, l_rcAction );
+            if( l_rcAction != P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION )
+            {
+                // saw an error on the sbe itself, use the error we
+                //  got back from the HWP
+            }
+            else
+            {
+                // got an error in the attempt to find a hw fail, just
+                //  commit it as info
+                if( l_errl )
+                {
+                    l_errl->setSev( ERRORLOG::ERRL_SEV_INFORMATIONAL );
+                    ERRORLOG::errlCommit( l_errl, SBEIO_COMP_ID );
+                    l_errl = nullptr;
+                }
 
+                // we don't know what caused the timeout, make a generic log
+
+                /*@
+                 * @errortype
+                 * @moduleid     SBEIO_PSU
+                 * @reasoncode   SBEIO_PSU_RESPONSE_TIMEOUT
+                 * @userdata1[00:15]    Primary Status in mbox4
+                 * @userdata1[16:31]    Sequence Id in mbox4
+                 * @userdata1[32:63]    Processor Target
+                 * @userdata2    Failing Request
+                 * @devdesc      Timeout waiting for PSU command to complete
+                 * @custdesc     Firmware error communicating with boot device
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       SBEIO_PSU,
+                                       SBEIO_PSU_RESPONSE_TIMEOUT,
+                                       TWO_UINT32_TO_UINT64(
+                                         TWO_UINT16_TO_UINT32(
+                                           l_resp->primaryStatus,
+                                           l_resp->secondaryStatus),
+                                         TARGETING::get_huid(i_target)),
+                                       i_pPsuRequest->mbxReg0);
+                // Code should be okay so callout hardware
+                l_errl->addHwCallout( i_target,
+                                      HWAS::SRCI_PRIORITY_HIGH,
+                                      HWAS::NO_DECONFIG,
+                                      HWAS::GARD_NULL );
+            }
+
+            // log the failing proc as FFDC
+            ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+
+            // check for any FFDC logged by the SBE itself
             void * l_ffdcPkg = findFFDCBufferByTarget(i_target);
             if(l_ffdcPkg != NULL)
             {
@@ -511,19 +576,20 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 uint8_t i;
                 for(i = 0; i < l_pkgs; i++)
                 {
-                    errl->addFFDC( SBEIO_COMP_ID,
-                               l_ffdc_parser->getFFDCPackage(i),
-                               l_ffdc_parser->getPackageLength(i),
-                               0,
-                               SBEIO_UDT_PARAMETERS,
-                               false );
+                    l_errl->addFFDC( SBEIO_COMP_ID,
+                                     l_ffdc_parser->getFFDCPackage(i),
+                                     l_ffdc_parser->getPackageLength(i),
+                                     0,
+                                     SBEIO_UDT_PARAMETERS,
+                                     false );
                 }
                 delete l_ffdc_parser;
             }
 
-            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                 HWAS::SRCI_PRIORITY_HIGH);
-            errl->collectTrace(SBEIO_COMP_NAME);
+            // save the mbox status regs as FFDC
+            l_respRegsFFDC.addToLog(l_errl);
+
+            l_errl->collectTrace(SBEIO_COMP_NAME);
             MAGIC_INST_GET_SBE_TRACES(
                   i_target->getAttr<TARGETING::ATTR_POSITION>(),
                   SBEIO_PSU_RESPONSE_TIMEOUT);
@@ -548,7 +614,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
     SBE_TRACD(EXIT_MRK "pollForPsuComplete");
 
-    return errl;
+    return l_errl;
 }
 
 /**

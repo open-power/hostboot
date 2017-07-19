@@ -185,6 +185,7 @@ namespace INTR
                 PSI_BRIDGE_ESB_OFF_OFFSET =    0xD00,
                 PSI_BRIDGE_ESB_RESET_OFFSET =  0XC00,
                 PSI_BRIDGE_PSU_DOORBELL_REG =  0x000D0063,
+                PSI_BRIDGE_PSU_DOORBELL_ANDREG =  0x000D0064,
                 PSI_BRIDGE_PSU_HOST_DOORBELL = 0x8000000000000000,
 
                 //XIVE Interrupt Controller Constants
