@@ -2849,7 +2849,6 @@ This Attribute is to be interpreted as an Integer</description>
     <array>2</array>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_VPD_CDIMM_SENSOR_MAP_PRIMARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2868,9 +2867,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_VPD_CDIMM_SENSOR_MAP_SECONDARY</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2889,7 +2886,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED</id>

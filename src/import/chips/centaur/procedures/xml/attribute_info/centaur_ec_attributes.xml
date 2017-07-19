@@ -423,7 +423,6 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
   </attribute>
 -->
 
-<!--
   <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_ENABLE_SAFEMODE_THROTTLE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -440,7 +439,6 @@ The getMBvpdSlopeInterceptData Attribute Accessor, if it does not find a matchin
       </chip>
     </chipEcFeature>
   </attribute>
--->
 
     <attribute>
     <id>ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES</id>
