@@ -51,6 +51,24 @@
 
 namespace PRDF
 {
+
+/* Helper struct for chip information inserted into HOMER data section after the
+ * header. There is basically an array of these after the initial HOMER section
+ * (HOMER_Data_t).  The register info then follows.
+ */
+typedef struct __attribute__((packed))
+{
+    HOMER_Chip_t  hChipType;  /* Nimbus, Centaur, EC Level, etc...*/
+
+    union
+    {
+        HOMER_ChipNimbus_t   hChipN;
+        HOMER_ChipCumulus_t  hChipC;
+        HOMER_ChipCentaur_t  hChipM;
+    };
+
+} HOMER_ChipInfo_t;
+
 // these functions from prdfWriteHomerFirData.C are needed for the
 // fakeWriteHomerFirData() function
 errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
@@ -129,6 +147,9 @@ private:
     {
         using namespace PRDF;
 
+        const size_t sz_u32 = sizeof(uint32_t);
+        const size_t sz_hd  = sizeof(HOMER_Data_t);
+
         if (MASTER_PROC_CORE == i_curHw || ALL_PROC_MASTER_CORE == i_curHw)
         {
             // Should have at least one processor chip
@@ -138,9 +159,14 @@ private:
             } // end if no chips
             else
             {
-                uint8_t  *l_bytePtr = (reinterpret_cast<uint8_t *>(d)) +
-                                       sizeof(HOMER_Data_t);
+                uint8_t  *l_bytePtr = (reinterpret_cast<uint8_t *>(d)) + sz_hd;
                 HOMER_Chip_t  *l_chipPtr = NULL;
+
+              // The HOMER_Data_t struct may have an uneven size. Add some
+              // padding to ensure the subsequent HOMER_Chip_t structs are
+              // word aligned.
+              const size_t padding = (sz_u32 - (sz_hd % sz_u32)) % sz_u32;
+              l_bytePtr += padding;
 
                 // Have a chip or more to look thru
                 for ( uint32_t  l_chipNum=0;
