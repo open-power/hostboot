@@ -109,11 +109,14 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_TRY(l_rc, "ERROR: Failed to mask OCC FIRs.");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After masking FIRs"));
 
-    // Clear the OCC's PIB I2C engine locks.
-    // All other OCC owned flag bits are retained.
-    l_data64.setBit<17>().setBit<19>().setBit<21>();
-    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM1, l_data64),
-             "ERROR: Failed to write to OCC FLAG");
+    // Clear the OCC Flag and Scratch2 registers
+    // which contain runtime settings and modes for PM GPEs (Pstate and Stop functions)
+    l_data64.flush<0>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCFLG_SCOM, l_data64),
+             "ERROR: Failed to write to OCC Flag Register");
+
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_data64),
+             "ERROR: Failed to write to OCC Scratch2 Register");
 
     //  ************************************************************************
     //  Halt the OCC PPC405 and reset it safely
