@@ -857,45 +857,45 @@ sub validateRangeMinsAndMaxes {
     my $i=0;
     # if the first range is an unbounded max then it stands alone
     my $prevMax = "-inf"; # default prevMax is negative infinity
-    if (!exists @rangeArray->[$i]->{min})
+    if (!exists $rangeArray[$i]->{min})
     {
-        if (!exists @rangeArray->[$i]->{max})
+        if (!exists $rangeArray[$i]->{max})
         {
             die "$attr_id has range tag with no min or max!";
         }
-        $prevMax = @rangeArray->[$i]->{max};
+        $prevMax = $rangeArray[$i]->{max};
         $i++;
     }
 
     # go through the list and check for undesired overlap of ranges
-    while (exists @rangeArray->[$i]->{min} && exists @rangeArray->[$i]->{max})
+    while (exists $rangeArray[$i]->{min} && exists $rangeArray[$i]->{max})
     {
-        if (@rangeArray->[$i]->{max} < @rangeArray->[$i]->{min})
+        if ($rangeArray[$i]->{max} < $rangeArray[$i]->{min})
         {
-            print Dumper(@rangeArray[$i]);
+            print Dumper($rangeArray[$i]);
             die "Min/max pair in <range> tag inverted!";
         }
-        if ($prevMax > @rangeArray->[$i]->{min})
+        if ($prevMax > $rangeArray[$i]->{min})
         {
             print "Previous max: $prevMax\n";
-            print Dumper(@rangeArray[$i]);
+            print Dumper($rangeArray[$i]);
             die "Range overlap! Previous <max> tag $prevMax "
-            . "exceeds <min> tag value! @rangeArray->[$i]->{min}";
+            . "exceeds <min> tag value! $rangeArray[$i]->{min}";
         }
-        $prevMax = @rangeArray->[$i]->{max};
+        $prevMax = $rangeArray[$i]->{max};
         $i++;
     }
 
     # check for stray min tag at the end
-    if (exists @rangeArray->[$i]->{min})
+    if (exists $rangeArray[$i]->{min})
     {
         # make sure trailing min is greater than previous max
-        if ($prevMax > @rangeArray->[$i]->{min})
+        if ($prevMax > $rangeArray[$i]->{min})
         {
             print "Previous max: $prevMax\n";
-            print Dumper(@rangeArray[$i]);
+            print Dumper($rangeArray[$i]);
             die "Range overlap! Previous <max> tag $prevMax "
-            . "exceeds <min> tag value! @rangeArray->[$i]->{min}";
+            . "exceeds <min> tag value! $rangeArray[$i]->{min}";
         }
     }
 
