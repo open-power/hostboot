@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,23 +28,11 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_THREAD_CONTROL_SRESET_PRE_FAIL</rc>
-    <description>SReset command precondition not met: Not all threads are running.</description>
-    <ffdc>CORE_TARGET</ffdc>
-    <ffdc>THREAD</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_P9_THREAD_CONTROL_SRESET_FAIL</rc>
+    <description>SReset command failed: Not all threads are running after sreset command.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
-    <description>SReset command failed: Not all threads are running after sreset command.</description>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <callout>
       <target>CORE_TARGET</target>
       <priority>HIGH</priority>
@@ -60,7 +48,6 @@
       <target>CORE_TARGET</target>
     </gard>
   </hwpError>
-
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
@@ -68,12 +55,12 @@
     <description>Start command precondition not met: RAS STAT Maintenance bit is not set.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
@@ -81,25 +68,22 @@
     <description>Start command failed: RAS STAT instruction completed bit was not set after start command.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <target>CORE_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_THREAD_CONTROL_STOP_PRE_NOTRUNNING</rc>
-    <description>Stop command precondition not met: Not all threads are running.</description>
-    <ffdc>CORE_TARGET</ffdc>
-    <ffdc>THREAD</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>CORE_TARGET</target>
+    </gard>
   </hwpError>
-
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
@@ -107,10 +91,23 @@
     <description>Stop command issued to core PC, but RAS STAT maintenance bit is not set.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <callout>
-      <procedure>CODE</procedure>
+      <target>CORE_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
+    <!-- Note:  FW will attempt to ensure instructions are stopped in many
+         different cases with no interlock that we're in a reasonable state
+         for the HWP to succeed.  Therefore, we should not gard out the HW,
+         only deconfigure it.
+    -->
   </hwpError>
 
   <!-- ********************************************************************* -->
@@ -120,6 +117,7 @@
     <description>Step command precondition not met: Not all threads are stopped.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -133,6 +131,7 @@
     <description>Step command issued to core PC, but RAS STAT run bit is still set.</description>
     <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <ffdc>C_RAS_STATUS_REG</ffdc>
     <ffdc>PTC_STEP_COMP_POLL_LIMIT</ffdc>
     <callout>
       <target>CORE_TARGET</target>
@@ -141,6 +140,23 @@
     <callout>
       <procedure>CODE</procedure>
       <priority>LOW</priority>
+    </callout>
+    <!-- Note:  FW would only attempt to step in a debug support capacity,
+         we don't want to remove (deconfig/gard) HW for a fail in this use case
+    -->
+  </hwpError>
+
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_THREAD_CONTROL_INVALID_COMMAND</rc>
+    <description>p9_thread_control is called with an invalid command </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>THREAD</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
 
