@@ -2644,6 +2644,20 @@
     </attribute>
 </targetType>
 
+<!-- Centaur MBA -->
+<targetType>
+    <id>unit-mba-centaur</id>
+    <parent>unit</parent>
+    <attribute>
+        <id>TYPE</id>
+        <default>MBA</default>
+    </attribute>
+    <attribute><id>DECONFIG_GARDABLE</id><default>1</default></attribute>
+    <attribute><id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
+        <default>0x00000001</default> <!--GARD -->
+    </attribute>
+</targetType>
+
 <targetType>
     <id>unit-nx-power9</id>
     <parent>unit</parent>
