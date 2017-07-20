@@ -31,21 +31,14 @@ using namespace fapi2;
 
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0b0 = 0b0;
+constexpr uint64_t literal_0b10100 = 0b10100;
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_6 = 6;
-constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_4 = 4;
-constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b00110 = 0b00110;
 constexpr uint64_t literal_0b01000 = 0b01000;
 constexpr uint64_t literal_0b01010 = 0b01010;
+constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0b01100 = 0b01100;
-constexpr uint64_t literal_0b01110 = 0b01110;
-constexpr uint64_t literal_0b10000 = 0b10000;
-constexpr uint64_t literal_0b10010 = 0b10010;
-constexpr uint64_t literal_7 = 7;
-constexpr uint64_t literal_0b10100 = 0b10100;
 constexpr uint64_t literal_0b00011 = 0b00011;
 constexpr uint64_t literal_120 = 120;
 constexpr uint64_t literal_100 = 100;
@@ -55,12 +48,6 @@ constexpr uint64_t literal_110 = 110;
 constexpr uint64_t literal_105 = 105;
 constexpr uint64_t literal_0b01011 = 0b01011;
 constexpr uint64_t literal_125 = 125;
-constexpr uint64_t literal_0b01111 = 0b01111;
-constexpr uint64_t literal_0b10001 = 0b10001;
-constexpr uint64_t literal_0b10011 = 0b10011;
-constexpr uint64_t literal_0b10101 = 0b10101;
-constexpr uint64_t literal_0b10110 = 0b10110;
-constexpr uint64_t literal_0b10111 = 0b10111;
 constexpr uint64_t literal_0b11000 = 0b11000;
 constexpr uint64_t literal_0b11001 = 0b11001;
 constexpr uint64_t literal_0b11010 = 0b11010;
@@ -112,24 +99,23 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
+        fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_TGT1_ATTR_PROC_EPS_TABLE_TYPE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, TGT1, l_TGT1_ATTR_PROC_EPS_TABLE_TYPE));
+        uint64_t l_def_IS_FLAT_8 = (l_TGT1_ATTR_PROC_EPS_TABLE_TYPE == fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8);
         fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
                                l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_NUM_X_LINKS_CFG = ((((((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] +
-                                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]) +
-                                             l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4]) +
-                                           l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6]);
+        uint64_t l_def_NUM_X_LINKS_CFG = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] +
+                                           l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]);
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
         fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_X_MHZ, TGT1, l_TGT1_ATTR_FREQ_X_MHZ));
         uint64_t l_def_X_RATIO_120_100 = ((literal_100 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_120 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, TGT0,
-                               l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_NUM_A_LINKS_CFG = (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] +
-                                            l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_2]) +
-                                          l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3]);
+        fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE));
+        uint64_t l_def_SMP_OPTICS_MODE = (l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE ==
+                                          fapi2::ENUM_ATTR_PROC_FABRIC_SMP_OPTICS_MODE_OPTICS_IS_A_BUS);
         uint64_t l_def_X_RATIO_115_100 = ((literal_100 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_115 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_110_100 = ((literal_100 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_110 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_105_100 = ((literal_100 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_105 * l_TGT1_ATTR_FREQ_PB_MHZ));
@@ -139,10 +125,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         uint64_t l_def_X_RATIO_100_115 = ((literal_115 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_100_120 = ((literal_120 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
         uint64_t l_def_X_RATIO_100_125 = ((literal_125 * l_TGT1_ATTR_FREQ_X_MHZ) >= (literal_100 * l_TGT1_ATTR_FREQ_PB_MHZ));
-        fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE));
-        uint64_t l_def_SMP_OPTICS_MODE = (l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE ==
-                                          fapi2::ENUM_ATTR_PROC_FABRIC_SMP_OPTICS_MODE_OPTICS_IS_A_BUS);
         fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_Type l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_ASYNC_SAFE_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE));
         uint64_t l_def_TRUE = ((l_TGT1_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE == ENUM_ATTR_PROC_FABRIC_ASYNC_SAFE_MODE_SAFE_MODE)
@@ -172,7 +154,11 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b0 );
                 }
 
-                if ((l_def_NUM_X_LINKS_CFG == literal_0))
+                if (l_def_IS_FLAT_8)
+                {
+                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
+                }
+                else if ((l_def_NUM_X_LINKS_CFG == literal_0))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b00110 );
                 }
@@ -187,22 +173,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 else if ((l_def_NUM_X_LINKS_CFG == literal_3))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
-                }
-                else if ((l_def_NUM_X_LINKS_CFG == literal_4))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
-                }
-                else if ((l_def_NUM_X_LINKS_CFG == literal_5))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10000 );
-                }
-                else if ((l_def_NUM_X_LINKS_CFG == literal_6))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10010 );
-                }
-                else if ((l_def_NUM_X_LINKS_CFG == literal_7))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
                 }
 
                 if (literal_1)
@@ -224,181 +194,89 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b0 );
                 }
 
-                if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
+                if (l_def_IS_FLAT_8)
+                {
+                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
+                }
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_120_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01001 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_115_100))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_115_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_110_100))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_110_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_105_100))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_105_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_100))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_105))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_105))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01011 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_110))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_110))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01011 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_115))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_115))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01011 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_120))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_120))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01011 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_125))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_X_RATIO_100_125))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01100 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_115_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_110_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_105_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10000 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_105))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10000 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_110))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10001 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_115))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10001 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_120))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10010 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_1) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_125))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_115_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10011 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_110_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_105_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10101 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10110 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_105))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_110))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10111 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_115))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_120_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11000 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_120))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_115_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11001 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_2) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_125))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_110_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11010 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_120_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11000 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_115_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11001 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_110_100))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11010 );
-                }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_105_100))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_105_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11011 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_100))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_100))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11100 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_105))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_105))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11101 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_110))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_110))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11101 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_115))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_115))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_120))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_120))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
                 }
-                else if ((((l_def_NUM_A_LINKS_CFG == literal_3) && (l_def_NUM_X_LINKS_CFG < literal_4)) && l_def_X_RATIO_100_125))
+                else if ((l_def_SMP_OPTICS_MODE && l_def_X_RATIO_100_125))
                 {
                     l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b11111 );
-                }
-                else if (((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG == literal_4)))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b01110 );
-                }
-                else if (((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG == literal_5)))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10000 );
-                }
-                else if (((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG == literal_6)))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10010 );
-                }
-                else if (((l_def_NUM_A_LINKS_CFG == literal_0) && (l_def_NUM_X_LINKS_CFG == literal_7)))
-                {
-                    l_scom_buffer.insert<54, 5, 59, uint64_t>(literal_0b10100 );
                 }
 
                 if (literal_1)
@@ -451,11 +329,11 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 {
                     l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b101 );
                 }
-                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG > literal_3)))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && l_def_IS_FLAT_8))
                 {
                     l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b001 );
                 }
-                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG <= literal_3)))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && ( ! l_def_IS_FLAT_8)))
                 {
                     l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b000 );
                 }
@@ -564,15 +442,11 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     l_scom_buffer.insert<57, 1, 63, uint64_t>(literal_0b1 );
                 }
 
-                if (((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
-                     || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_TRUE)))
+                if ((l_def_SMP_OPTICS_MODE || l_def_IS_FLAT_8))
                 {
                     l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b1 );
                 }
-                else if (((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] ==
-                           fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-                          && (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] ==
-                              fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE)))
+                else if ((( ! l_def_SMP_OPTICS_MODE) && ( ! l_def_IS_FLAT_8)))
                 {
                     l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b0 );
                 }
