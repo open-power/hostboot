@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -696,8 +696,8 @@ void IpmiRP::execute(void)
             }
             break;
 
-            // begin a graceful reboot initated by us
-        case IPMI::MSG_STATE_INITATE_POWER_CYCLE:
+        // begin a graceful reboot initiated by us
+        case IPMI::MSG_STATE_INITIATE_POWER_CYCLE:
             {
                 msg_free(msg);
 
@@ -1078,15 +1078,27 @@ namespace IPMI
         return err;
     }
 
-    ///
-    /// @brief  kick off a reboot
-    ///
+    void initiateShutdownOrReboot(const IPMI::msg_type i_msgType)
+    {
+        const auto valid = IPMI::validShutdownRebootMsgType(i_msgType);
+        assert(valid,"BUG! IPMI message type of 0x%08X is not a valid shutdown "
+            "or reboot type",i_msgType);
+        static auto mq = Singleton<IpmiRP>::instance().msgQueue();
+        auto pMsg = msg_allocate();
+        assert(pMsg != nullptr,"BUG! msg_allocate returned nullptr.");
+        pMsg->type = i_msgType;
+        auto rc = msg_send(mq,pMsg);
+        assert(!rc,"BUG! msg_send failed with rc of %d",rc);
+    }
+
     void initiateReboot()
     {
-        static msg_q_t mq = Singleton<IpmiRP>::instance().msgQueue();
-        msg_t * msg = msg_allocate();
-        msg->type =  IPMI::MSG_STATE_INITATE_POWER_CYCLE;
-        msg_send(mq, msg);
+        (void)initiateShutdownOrReboot(MSG_STATE_INITIATE_POWER_CYCLE);
+    }
+
+    void initiatePowerOff()
+    {
+        (void)initiateShutdownOrReboot(MSG_STATE_GRACEFUL_SHUTDOWN);
     }
 
     ///
@@ -1163,4 +1175,4 @@ namespace IPMI
         return l_info;
     }
 
-};
+}; // End namespace IPMI

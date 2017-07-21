@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,12 +78,16 @@ void stopIpl( void );
 
 #ifdef CONFIG_BMC_IPMI
 /**
- * @brief This function is to be used by external code to
- *        initate a system reboot via IPMI commands
- *
- * @return Nothing
+ *  @brief This function is to be used by external code to
+ *    initiate a system reboot via IPMI commands
  */
 void requestReboot( void );
+
+/**
+ *  @brief This function is to be used by external code to
+ *    initiate a system power off via IPMI commands
+ */
+void requestPowerOff( void );
 #endif
 
 /**
