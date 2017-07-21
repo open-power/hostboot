@@ -164,6 +164,30 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
                     continue;
                 }
             }
+            else
+            {
+                // DDR3 ONLY
+                FAPI_DBG("DDR3 detected");
+
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_MTB_DIVIDEND, l_dimm, l_spd_mtb_dividend),
+                         "Unable to read SPD Medium Timebase Dividend.");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_MTB_DIVISOR, l_dimm, l_spd_mtb_divisor),
+                         "Unable to read SPD Medium Timebase Divisor.");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_FTB_DIVIDEND,  l_dimm, l_spd_ftb_dividend),
+                         "Unable to read the SPD FTB dividend");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_FTB_DIVISOR,  l_dimm, l_spd_ftb_divisor),
+                         "Unable to read the SPD FTB divisor");
+                FAPI_ASSERT((l_spd_mtb_dividend != 0) && (l_spd_mtb_divisor != 0) && (l_spd_ftb_dividend != 0)
+                            && (l_spd_ftb_divisor != 0),
+                            fapi2::CEN_MSS_UNSUPPORTED_SPD_DATA_DDR3().
+                            set_MTB_DIVIDEND(l_spd_mtb_dividend).
+                            set_MTB_DIVISOR(l_spd_mtb_divisor).
+                            set_FTB_DIVIDEND(l_spd_ftb_dividend).
+                            set_FTB_DIVISOR(l_spd_ftb_divisor).
+                            set_DIMM_TARGET(l_dimm),
+                            "Invalid data received from SPD within MTB/FTB Dividend, MTB/FTB Divisor");
+
+            }
 
             // common to both DDR3 & DDR4
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_TCKMIN, l_dimm,  l_spd_min_tck_MTB));
@@ -192,6 +216,7 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
                                    set_MIN_TCK(l_spd_min_tck_MTB).
                                    set_MIN_TAA(l_spd_min_taa_MTB).
                                    set_DIMM_TARGET(l_dimm).
+
                                    set_TARGET(i_target_memb),
                                    "Invalid data received from SPD within TCK Min, or TAA Min");
                 continue;
