@@ -288,6 +288,7 @@ ImgSizeBank::ImgSizeBank()
     iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_LVL2_BL, (char*)"PGPE Boot Loader")]  =   PGPE_BOOT_LOADER_SIZE;;
     iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_HCODE,   (char*)"PGPE Hcode")]        =   PGPE_IMAGE_SIZE;
     iv_secSize[ImgSec(PLAT_PGPE, PGPE_SRAM_IMAGE,             (char*)"PGPE SRAM Image")]   =   PGPE_IMAGE_SIZE;
+    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_AUX_TASK,    (char*)"PGPE Aux Task")]   =   PGPE_AUX_TASK_SIZE;
 }
 
 /**
@@ -1658,13 +1659,24 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
         io_ppmrHdr.g_ppmr_hcode_offset = io_ppmrHdr.g_ppmr_bl_offset + PGPE_BOOT_LOADER_SIZE;
         io_ppmrHdr.g_ppmr_hcode_length = ppeSection.iv_size;
 
+        rcTemp = copySectionToHomer( i_pChipHomer->ppmrRegion.aux_task,
+                                     pPgpeImg,
+                                     P9_XIP_SECTION_PGPE_AUX_TASK,
+                                     PLAT_PGPE,
+                                     i_procFuncModel.getChipLevel(),
+                                     ppeSection );
+
+        io_ppmrHdr.g_ppmr_aux_task_offset = io_ppmrHdr.g_ppmr_aux_task_offset + PGPE_AUX_TASK_SIZE;
+        io_ppmrHdr.g_ppmr_aux_task_length = ppeSection.iv_size;
+
         //Finally let us take care of endianess
         io_ppmrHdr.g_ppmr_bc_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bc_offset);
         io_ppmrHdr.g_ppmr_bl_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_offset);
         io_ppmrHdr.g_ppmr_bl_length    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_length);
         io_ppmrHdr.g_ppmr_hcode_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_offset);
         io_ppmrHdr.g_ppmr_hcode_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
-
+        io_ppmrHdr.g_ppmr_aux_task_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_aux_task_offset);
+        io_ppmrHdr.g_ppmr_aux_task_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_aux_task_length);
     }
 
 fapi_try_exit:
@@ -2038,6 +2050,8 @@ fapi2::ReturnCode updatePpmrHeader( void* const i_pHomer, PpmrHeader_t& io_ppmrH
     FAPI_DBG("BC Offset             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bc_offset));
     FAPI_DBG("BL Offset             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bl_offset));
     FAPI_DBG("BL Length             :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_bl_length));
+    FAPI_DBG("Char Offset           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_aux_task_offset));
+    FAPI_DBG("Char Length           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_aux_task_length));
     FAPI_DBG("Hcode Offset          :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_hcode_offset));
     FAPI_DBG("Hcode Length          :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_hcode_length));
     FAPI_DBG("GPPB Offset           :    0x%08x", SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_gppb_offset));
