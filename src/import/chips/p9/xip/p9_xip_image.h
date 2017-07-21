@@ -1948,7 +1948,8 @@ typedef enum
     P9_XIP_SECTION_PGPE_LVL1_BL  = P9_XIP_SECTIONS_PLUS(1),
     P9_XIP_SECTION_PGPE_LVL2_BL  = P9_XIP_SECTIONS_PLUS(2),
     P9_XIP_SECTION_PGPE_HCODE    = P9_XIP_SECTIONS_PLUS(3),
-    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(4) // # sections
+    P9_XIP_SECTION_PGPE_AUX_TASK = P9_XIP_SECTIONS_PLUS(4),
+    P9_XIP_SECTIONS_PGPE         = P9_XIP_SECTIONS_PLUS(5) // # sections
 } p9_xip_section_pgpe_t;
 
 #define P9_XIP_SECTION_NAMES_PGPE(var)         \
@@ -1956,7 +1957,8 @@ typedef enum
                          ".ppmr_header",       \
                          ".lvl1_bl",           \
                          ".lvl2_bl",           \
-                         ".hcode")
+                         ".hcode",             \
+                         ".aux_task")
 
 /**************************************************************************/
 /* IOPPE Image                                                            */
