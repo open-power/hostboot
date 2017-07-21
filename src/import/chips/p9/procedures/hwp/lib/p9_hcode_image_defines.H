@@ -198,6 +198,8 @@ HCD_HDR_UINT32(g_ppmr_pgpe_sram_img_size, 0); // PGPE Actual SRAM Image Size
 HCD_HDR_UINT32(g_ppmr_pgpe_boot_prog_code, 0 );// for debug of PGPE booting
 HCD_HDR_UINT32(g_ppmr_wof_table_offset, 0 );    // Offset to start of WOF Table
 HCD_HDR_UINT32(g_ppmr_wof_table_length, 0 );   // Length of WOF table
+HCD_HDR_UINT32(g_ppmr_aux_task_offset,    0 );  // PGPE Aux Task Offset
+HCD_HDR_UINT32(g_ppmr_aux_task_length,    0 );  // PGPE Aux Task Length
 HCD_HDR_PAD(0x200);
 #ifdef __ASSEMBLER__
 .endm
@@ -327,17 +329,17 @@ typedef struct
 {
 #endif
 HCD_HDR_UINT64(g_pgpe_magic_number, PGPE_MAGIC_NUMBER);     // PGPE_1.0
-HCD_HDR_UINT32(g_pgpe_sys_reset_addr,           0 );        // Fully qualified OCC address where pk_init resides
-HCD_HDR_UINT32(g_pgpe_shared_sram_addr,         0 );        // SRAM address where shared SRAM begins
-HCD_HDR_UINT32(g_pgpe_ivpr_addr,                0 );        // Beginning of PGPE region in OCC SRAM
-HCD_HDR_UINT32(g_pgpe_shared_sram_len,          0 );        // Length of shared SRAM area
-HCD_HDR_UINT32(g_pgpe_build_date,               0 );        // Build date for PGPE Image
-HCD_HDR_UINT32(g_pgpe_build_ver,                0 );        // Build Version
-HCD_HDR_UINT16(g_pgpe_flags,                    0 );        // PGPE Flags
-HCD_HDR_UINT16(g_pgpe_reserve1,                 0 );        // Reserve field
-HCD_HDR_UINT32(g_pgpe_reserve2,                 0 );        // Reserve field
-HCD_HDR_UINT32(g_pgpe_gppb_sram_addr,           0 );        // Offset to Global P State Parameter Block
-HCD_HDR_UINT32(g_pgpe_hcode_length,             0 );        // Length of PGPE Hcode
+HCD_HDR_UINT32(g_pgpe_sys_reset_addr,             0 );      // Fully qualified OCC address where pk_init resides
+HCD_HDR_UINT32(g_pgpe_shared_sram_addr,           0 );      // SRAM address where shared SRAM begins
+HCD_HDR_UINT32(g_pgpe_ivpr_addr,                  0 );      // Beginning of PGPE region in OCC SRAM
+HCD_HDR_UINT32(g_pgpe_shared_sram_len,            0 );      // Length of shared SRAM area
+HCD_HDR_UINT32(g_pgpe_build_date,                 0 );      // Build date for PGPE Image
+HCD_HDR_UINT32(g_pgpe_build_ver,                  0 );      // Build Version
+HCD_HDR_UINT16(g_pgpe_flags,                      0 );      // PGPE Flags
+HCD_HDR_UINT16(g_pgpe_reserve1,                   0 );      // Reserve field
+HCD_HDR_UINT32(g_pgpe_reserve2,                   0 );      // Reserve field
+HCD_HDR_UINT32(g_pgpe_gppb_sram_addr,             0 );      // Offset to Global P State Parameter Block
+HCD_HDR_UINT32(g_pgpe_hcode_length,               0 );      // Length of PGPE Hcode
 HCD_HDR_UINT32(g_pgpe_gppb_mem_offset,
                0 );        // Offset to start of Global PS Param Block wrt start of HOMER.
 HCD_HDR_UINT32(g_pgpe_gppb_length,              0 );        // Length of Global P State Parameter Block
@@ -620,6 +622,7 @@ typedef struct
     uint8_t  l1BootLoader[PGPE_BOOT_COPIER_SIZE];
     uint8_t  l2BootLoader[PGPE_BOOT_LOADER_SIZE];
     uint8_t  pgpeSramImage[PGPE_IMAGE_SIZE];     // Includes the Global Pstate Parameter Block
+    uint8_t  aux_task[PGPE_AUX_TASK_SIZE];
     uint8_t  ppmr_reserved0[PGPE_IMAGE_RESERVE_SIZE];
     uint8_t  occParmBlock[sizeof(OCCPstateParmBlock)];  // PPMR + 128KB
     uint8_t  occParmBlockReserve[OCC_PSTATE_PARAM_BLOCK_REGION_SIZE - sizeof(OCCPstateParmBlock)];
