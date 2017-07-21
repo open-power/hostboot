@@ -216,9 +216,14 @@ public:
     void stop();
 #ifdef CONFIG_BMC_IPMI
     /**
-     * @brief This function will trigger a reboot via ipmi commands
+     * @brief Trigger a reboot via IPMI commands
      */
     void requestReboot();
+
+    /**
+     * @brief Trigger a power off via IPMI commands
+     */
+    void requestPowerOff();
 #endif
 
     /**

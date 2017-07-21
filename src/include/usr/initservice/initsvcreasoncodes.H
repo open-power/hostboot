@@ -77,6 +77,7 @@ enum    InitServiceReasonCode
     //termination_rc
     SHUTDOWN_NOT_RECONFIG_LOOP   =   INITSVC_COMP_ID | 0x10,
     ISTEP_SKIP_ATTEMPTED         =   INITSVC_COMP_ID | 0x11,
+    ISTEP_PROCESSING_DISABLED    =   INITSVC_COMP_ID | 0x12,
 };
 
 enum InitServiceUserDetailDataSubSection

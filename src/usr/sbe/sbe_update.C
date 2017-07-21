@@ -54,6 +54,8 @@
 #include <sbeio/sbeioif.H>
 #include <sbe/sbereasoncodes.H>
 #include <sbe/sbe_update.H>
+#include <initservice/initsvcreasoncodes.H>
+
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #include <ipmi/ipmiwatchdog.H>
@@ -481,8 +483,10 @@ namespace SBE
             /**************************************************************/
             /*  Perform System Operation                                  */
             /**************************************************************/
-            // Restart IPL if SBE Update requires it
-            if ( l_restartNeeded == true )
+
+            // Restart IPL if SBE Update requires it or key transition occurred
+            if (   (l_restartNeeded == true)
+                || (g_do_hw_keys_hash_transition))
             {
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateProcessorSbeSeeproms(): Restart "
@@ -5037,25 +5041,58 @@ errlHndl_t sbeDoReboot( void )
 #endif
 
 #ifdef CONFIG_CONSOLE
-        CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
-                          "Perform SBE Update\n");
-        CONSOLE::flush();
+        if(g_do_hw_keys_hash_transition)
+        {
+            CONSOLE::displayf(SBE_COMP_NAME, "Performing Secure Boot key transition\n");
+            CONSOLE::displayf(SBE_COMP_NAME, "System will power off after completion\n");
+            CONSOLE::flush();
+        }
+        else
+        {
+            CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
+                              "Perform SBE Update\n");
+            CONSOLE::flush();
+        }
 #endif
 
 
 #ifdef CONFIG_BMC_IPMI
-        // initate a graceful power cycle
-        TRACFCOMP( g_trac_sbe,"sbeDoReboot: "
-                   "requesting chassis power cycle");
-        INITSERVICE::requestReboot();
+        if(g_do_hw_keys_hash_transition)
+        {
+            // Initiate a graceful power off
+            TRACFCOMP(g_trac_sbe,
+                INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
+                "Requesting power off");
+            INITSERVICE::requestPowerOff();
+        }
+        else
+        {
+            // Initiate a graceful power cycle
+            TRACFCOMP( g_trac_sbe,"sbeDoReboot: "
+                       "requesting power cycle");
+            INITSERVICE::requestReboot();
+        }
 #else //non-IPMI
-        TRACFCOMP( g_trac_sbe,
-                   INFO_MRK"sbeDoReboot(): Calling "
-                   "INITSERVICE::doShutdown() with "
-                   "SBE_UPDATE_REQUEST_REIPL = 0x%X",
-                   SBE_UPDATE_REQUEST_REIPL );
-        // shutdown/TI hostboot
-        INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+        if(g_do_hw_keys_hash_transition)
+        {
+            TRACFCOMP(g_trac_sbe,
+                INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
+                "Calling INITSERVICE::doShutdown() with "
+                "SHUTDOWN_NOT_RECONFIG_LOOP = 0x%08X",
+                INITSERVICE::SHUTDOWN_NOT_RECONFIG_LOOP );
+            INITSERVICE::doShutdown(INITSERVICE::
+                                    SHUTDOWN_NOT_RECONFIG_LOOP);
+        }
+        else
+        {
+            TRACFCOMP( g_trac_sbe,
+                       INFO_MRK"sbeDoReboot(): Calling "
+                       "INITSERVICE::doShutdown() with "
+                       "SBE_UPDATE_REQUEST_REIPL = 0x%08X",
+                       SBE_UPDATE_REQUEST_REIPL );
+            // shutdown/TI hostboot
+            INITSERVICE::doShutdown(SBE_UPDATE_REQUEST_REIPL);
+        }
 #endif
 
     }while(0);

@@ -655,6 +655,9 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 // possible
                 ERRORLOG::ErrlManager::callFlushErrorLogs();
 
+                // Quiesce new isteps, including external requests
+                (void)setStopIpl();
+
                 // Stop the IPL
                 stop();
             }
@@ -1505,11 +1508,20 @@ void IStepDispatcher::handleShutdownMsg(msg_t * & io_pMsg)
 #ifdef CONFIG_BMC_IPMI
 void IStepDispatcher::requestReboot()
 {
-    // always stop dispatching isteps before calling for the reboot
-    setStopIpl();
+    // Always stop dispatching isteps before calling for the reboot
+    (void)setStopIpl();
 
-    // send a reboot message to the BMC
-    IPMI::initiateReboot();
+    // Send a reboot message to the BMC
+    (void)IPMI::initiateReboot();
+}
+
+void IStepDispatcher::requestPowerOff()
+{
+    // Always stop dispatching isteps before calling for the power off
+    (void)setStopIpl();
+
+    // Send a power off message to the BMC
+    (void)IPMI::initiatePowerOff();
 }
 #endif
 // ----------------------------------------------------------------------------
@@ -1744,21 +1756,42 @@ void IStepDispatcher::handleIStepRequestMsg(msg_t * & io_pMsg)
     l_acceptMessages = iv_acceptIstepMessages;
     mutex_unlock(&iv_mutex);
 
-    if (l_acceptMessages)
+    // If istep dispatching has ceased, prevent new isteps from executing
+    if(iv_stopIpl == true)
+    {
+        /*@
+         * @errortype
+         * @reasoncode  ISTEP_PROCESSING_DISABLED
+         * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
+         * @moduleid    ISTEP_INITSVC_MOD_ID
+         * @userdata1   Istep Requested
+         * @userdata2   Substep Requested
+         * @devdesc     Istep processing has terminated due to normal shutdown
+         *   activity, secure boot key transition, or terminating error
+         * @custdesc    Node is no longer accepting istep requests
+         */
+        err = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+            ISTEP_INITSVC_MOD_ID,
+            ISTEP_PROCESSING_DISABLED,
+            istep,
+            substep);
+    }
+    else if (l_acceptMessages)
     {
         err = doIstep (istep, substep, l_doReconfig);
     }
     else
     {
         /*@
-             * @errortype
-             * @reasoncode       ISTEP_NON_MASTER_NODE_MSG
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         ISTEP_INITSVC_MOD_ID
-             * @userdata1        Istep Requested
-             * @userdata2        Substep Requested
-             * @devdesc          Istep messaged received by non-master node.
-        */
+         * @errortype
+         * @reasoncode  ISTEP_NON_MASTER_NODE_MSG
+         * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid    ISTEP_INITSVC_MOD_ID
+         * @userdata1   Istep Requested
+         * @userdata2   Substep Requested
+         * @devdesc     Istep messaged received by non-master node.
+         */
         err = new ERRORLOG::ErrlEntry(
                                       ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                       ISTEP_INITSVC_MOD_ID,
@@ -2236,9 +2269,15 @@ void requestReboot()
 {
     IStepDispatcher::getTheInstance().requestReboot();
 }
+
+void requestPowerOff()
+{
+    IStepDispatcher::getTheInstance().requestPowerOff();
+}
 #endif
 void stopIpl()
 {
+    // Disable the istep dispatcher
     return IStepDispatcher::getTheInstance().setStopIpl();
 }
 

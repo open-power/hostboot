@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,12 +54,29 @@ namespace IPMI
 
         MSG_STATE_GRACEFUL_SHUTDOWN,
 
-        // initate a reboot request
-        MSG_STATE_INITATE_POWER_CYCLE,
+        // initiate a reboot request
+        MSG_STATE_INITIATE_POWER_CYCLE,
 
         // Used to check range. Leave as last.
-        MSG_LAST_TYPE = MSG_STATE_INITATE_POWER_CYCLE,
+        MSG_LAST_TYPE = MSG_STATE_INITIATE_POWER_CYCLE,
     };
+
+    /**
+     *  @brief Returns whether IPMI message type is related to
+     *    system shutdown/reboot or not
+     *
+     *  @param[in] i_msgType IPMI message type in question
+     *
+     *  @return bool True or false value indicating whether requested IPMI
+     *     message type is related to system shutdown/reboot or not
+     */
+    inline bool validShutdownRebootMsgType(const msg_type i_msgType)
+    {
+        return (   (i_msgType == MSG_STATE_SHUTDOWN)
+                || (i_msgType == MSG_STATE_SHUTDOWN_SEL)
+                || (i_msgType == MSG_STATE_GRACEFUL_SHUTDOWN)
+                || (i_msgType == MSG_STATE_INITIATE_POWER_CYCLE));
+    }
 
     // chassis power off request types
     enum power_request_type
@@ -349,10 +366,15 @@ namespace IPMI
     size_t max_buffer(void);
 
     /**
-     * Tells ipmirp to start a graceful reboot sequence
-     *
+     *  @brief Initiate a graceful reboot sequence via the IPMI resource
+     *    provider
      */
     void initiateReboot();
+
+    /**
+     *  @brief Initiate a power off sequence via the IPMI resource provider
+     */
+    void initiatePowerOff();
 
     /**
      * Structure to return BMC/IPMI information in
