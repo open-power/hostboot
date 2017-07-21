@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,6 +24,19 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- Error definitions for p9 ram procedures                                --> 
 <hwpErrors>
+
+  <!-- This has all the Ram core registers that we need to collect for debug -->
+  <registerFfdc>
+    <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+    <scomRegister>C_RAS_STATUS</scomRegister>
+    <scomRegister>C_RAM_MODEREG</scomRegister>
+    <scomRegister>C_RAM_CTRL</scomRegister>
+    <scomRegister>C_RAM_STATUS</scomRegister>
+    <scomRegister>C_THRCTL_HOLD_OUT</scomRegister>
+    <scomRegister>C_FIR_HOLD_OUT</scomRegister>
+    <scomRegister>C_THREAD_INFO</scomRegister>
+  </registerFfdc>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
@@ -33,7 +46,7 @@
     </description>
     <callout>
       <procedure>CODE</procedure>
-      <priority>LOW</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -46,7 +59,7 @@
     <ffdc>REGNAME</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -56,6 +69,10 @@
     <description>
       RAM is not setup as active before doing ram or cleanup
     </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>REG_TYPE</ffdc>
+    <ffdc>REG_NUM</ffdc>
+    <ffdc>ALLOW_MULT</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -68,7 +85,13 @@
     <description>
       The thread to perform ramming is not stopped
     </description>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -81,7 +104,13 @@
     <description>
       The thread to perform ramming is not active
     </description>
+    <ffdc>CORE_TARGET</ffdc>
     <ffdc>THREAD</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -94,6 +123,12 @@
     <description>
       Attempt to perform ramming during recovery
     </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -106,9 +141,19 @@
     <description>
       Exception or interrupt happened during ramming
     </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -118,9 +163,20 @@
     <description>
       Polling for ram done reached threshold
     </description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>C_RAM_STATUS_REG</ffdc>
+    <collectRegisterFfdc>
+      <id>REG_FFDC_RAM_CORE_REGISTERS</id>
+      <targetType>TARGET_TYPE_CORE</targetType>
+      <target>CORE_TARGET</target>
+    </collectRegisterFfdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
     <callout>
       <procedure>CODE</procedure>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
@@ -133,7 +189,7 @@
     <ffdc>REGTYPE</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : SBE
 //-----------------------------------------------------------------------------------
 
@@ -56,7 +56,6 @@ enum Enum_RegType
     REG_VSR
 };
 
-
 class RamCore
 {
     public:
@@ -67,7 +66,8 @@ class RamCore
 /// @param[in] i_target => core target
 /// @param[in] i_thread => thread number
 //
-        RamCore(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target, const uint8_t i_thread);
+        RamCore(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+                const uint8_t i_thread);
 
 //-----------------------------------------------------------------------------------
 /// @brief Destructor of the class that implements the base ramming capability
@@ -75,7 +75,8 @@ class RamCore
         ~RamCore();
 
 //-----------------------------------------------------------------------------------
-/// @brief Enable RAM mode and backup the registers(SCR0/GPR0/GPR1) that will be destroyed later during ramming
+/// @brief Enable RAM mode and backup the registers(SCR0/GPR0/GPR1) that
+///        will be destroyed later during ramming
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 //
         fapi2::ReturnCode ram_setup();
@@ -84,11 +85,13 @@ class RamCore
 /// @brief Perform the ram and check ram is done
 /// @param[in] i_opcode     => opcode to ram
 /// @param[in] i_allow_mult => indicate whether to setup and cleanup
-///                            true: only perform ram, not to call ram_setup and ram_cleanup
+///                            true: only perform ram, do not call ram_setup
+///                                  and ram_cleanup
 ///                            false: call ram_setup and ram_cleanup
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 //
-        fapi2::ReturnCode ram_opcode(const uint32_t i_opcode, const bool i_allow_mult = false);
+        fapi2::ReturnCode ram_opcode(const uint32_t i_opcode,
+                                     const bool i_allow_mult = false);
 
 //-----------------------------------------------------------------------------------
 /// @brief Clear RAM mode and restore the backup registers
@@ -102,11 +105,14 @@ class RamCore
 /// @param[in] i_reg_num    => register nubmer
 /// @param[out] o_buffer    => register value
 /// @param[in] i_allow_mult => indicate whether to setup and cleanup
-///                            true: only perform ram, not to call ram_setup and ram_cleanup
+///                            true: only perform ram, do not call ram_setup
+///                                  and ram_cleanup
 ///                            false: call ram_setup and ram_cleanup
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 //
-        fapi2::ReturnCode get_reg(const Enum_RegType i_type, const uint32_t i_reg_num, fapi2::buffer<uint64_t>* o_buffer,
+        fapi2::ReturnCode get_reg(const Enum_RegType i_type,
+                                  const uint32_t i_reg_num,
+                                  fapi2::buffer<uint64_t>* o_buffer,
                                   const bool i_allow_mult = false);
 
 //-----------------------------------------------------------------------------------
@@ -115,11 +121,14 @@ class RamCore
 /// @param[in] i_reg_num    => register nubmer
 /// @param[in] i_buffer     => register value
 /// @param[in] i_allow_mult => indicate whether to setup and cleanup
-///                            true: only perform ram, not to call ram_setup and ram_cleanup
+///                            true: only perform ram, do not call ram_setup
+///                                  and ram_cleanup
 ///                            false: call ram_setup and ram_cleanup
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 //
-        fapi2::ReturnCode put_reg(const Enum_RegType i_type, const uint32_t i_reg_num, const fapi2::buffer<uint64_t>* i_buffer,
+        fapi2::ReturnCode put_reg(const Enum_RegType i_type,
+                                  const uint32_t i_reg_num,
+                                  const fapi2::buffer<uint64_t>* i_buffer,
                                   const bool i_allow_mult = false);
 
 //-----------------------------------------------------------------------------------
@@ -130,7 +139,7 @@ class RamCore
         uint8_t gen_predecode(const uint32_t i_opcode);
 
 //-----------------------------------------------------------------------------------
-/// @brief Check the opcode is load/store or not
+/// @brief Check if the opcode is load/store or not
 /// @param[in] i_opcode => opcode to ram
 /// @return TRUE if it is load/store
 //
@@ -144,7 +153,7 @@ class RamCore
         bool iv_ram_setup;     // ram mode is enabled and register backup is done
         bool iv_ram_err;       // error happened during ram
         bool iv_write_gpr0;    // putGPR0 operation is executed
-        bool iv_write_gpr1;    // putGPR1 operatoin is executed
+        bool iv_write_gpr1;    // putGPR1 operation is executed
         fapi2::buffer<uint64_t> iv_backup_buf0;  // register backup data
         fapi2::buffer<uint64_t> iv_backup_buf1;  // register backup data
         fapi2::buffer<uint64_t> iv_backup_buf2;  // register backup data

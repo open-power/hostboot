@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -250,7 +250,7 @@ extern "C" {
 //-----------------------------------------------------------------------------------
 // Function prototype
 //-----------------------------------------------------------------------------------
-/// @brief Initial the map between SPR name and SPR number
+/// @brief Initialize the map between SPR name and SPR number
 /// @return TRUE if the mapping completes successfully
 //
     bool p9_spr_name_map_init();

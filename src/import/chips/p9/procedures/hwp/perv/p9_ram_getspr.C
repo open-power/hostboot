@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ fapi2::ReturnCode p9_ram_getspr(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_
                                 const std::string i_name,
                                 fapi2::buffer<uint64_t>* o_buffer)
 {
-    FAPI_INF("Start");
+    FAPI_DBG("Start");
     uint32_t spr_num = 0;
     bool l_check_flag = false;
 
@@ -74,7 +74,7 @@ fapi2::ReturnCode p9_ram_getspr(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_
     FAPI_TRY(ram.get_reg(REG_SPR, spr_num, o_buffer));
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 

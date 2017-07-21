@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -45,20 +45,21 @@
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
+// See doxygen in header file
 fapi2::ReturnCode p9_ram_getreg(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
                                 const uint8_t i_thread,
                                 const Enum_RegType i_type,
                                 const uint32_t i_reg_num,
                                 fapi2::buffer<uint64_t>* o_buffer)
 {
-    FAPI_INF("Start");
+    FAPI_DBG("Start");
     // instantiate the basic RamCore class
     RamCore ram(i_target, i_thread);
     // call RamCore get_reg method
     FAPI_TRY(ram.get_reg(i_type, i_reg_num, o_buffer));
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
 

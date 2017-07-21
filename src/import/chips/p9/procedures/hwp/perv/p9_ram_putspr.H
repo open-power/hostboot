@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -47,10 +47,11 @@
 #include <p9_spr_name_map.H>
 
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_ram_putspr_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-        const uint8_t i_thread,
-        const std::string i_name,
-        const fapi2::buffer<uint64_t>* i_buffer);
+typedef fapi2::ReturnCode (*p9_ram_putspr_FP_t)
+(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+ const uint8_t i_thread,
+ const std::string i_name,
+ const fapi2::buffer<uint64_t>* i_buffer);
 
 
 extern "C" {
@@ -62,7 +63,7 @@ extern "C" {
 /// @param[in] i_thread   => thread number
 /// @param[in] i_name     => register name
 /// @param[in] i_buffer   => register value
-/// @return FAPI_RC_SUCCESS if the setup completes successfully
+/// @return FAPI_RC_SUCCESS if the operation completes successfully
 //
     fapi2::ReturnCode p9_ram_putspr(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
                                     const uint8_t i_thread,

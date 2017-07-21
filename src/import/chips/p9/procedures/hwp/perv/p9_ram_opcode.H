@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -46,9 +46,10 @@
 #include <p9_ram_core.H>
 
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_ram_opcode_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
-        const uint8_t i_thread,
-        const uint32_t i_opcode);
+typedef fapi2::ReturnCode (*p9_ram_opcode_FP_t)
+(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
+ const uint8_t i_thread,
+ const uint32_t i_opcode);
 
 
 extern "C" {
