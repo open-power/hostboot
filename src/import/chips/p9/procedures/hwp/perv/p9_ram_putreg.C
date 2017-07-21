@@ -32,7 +32,7 @@
 // *HWP HWP Backup Owner : Gou Peng Fei <shgoupf@cn.ibm.com>
 // *HWP FW Owner         : Thi Tran <thi@us.ibm.com>
 // *HWP Team             : Perv
-// *HWP Level            : 2
+// *HWP Level            : 3
 // *HWP Consumed by      : None (Cronus test only)
 //-----------------------------------------------------------------------------------
 
@@ -51,13 +51,13 @@ fapi2::ReturnCode p9_ram_putreg(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_
                                 const uint32_t i_reg_num,
                                 const fapi2::buffer<uint64_t>* i_buffer)
 {
-    FAPI_INF("Start");
+    FAPI_DBG("Start");
     // instantiate the basic RamCore class
     RamCore ram(i_target, i_thread);
     // call RamCore put_reg method
     FAPI_TRY(ram.put_reg(i_type, i_reg_num, i_buffer));
 
 fapi_try_exit:
-    FAPI_INF("End");
+    FAPI_DBG("End");
     return fapi2::current_err;
 }
