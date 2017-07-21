@@ -49,6 +49,7 @@ BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 #   on 1/3/2017
 # Modified PG record to have proper XBUS data and only the first 4 cores
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:ca32d9418a7ff3781a2989b230c2f915e20d47af
+BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:423208204c2f0e759610f4f39243362fd4b6d103
 
 
 #Update to Centaur DD2.0 for CCIN 31E8

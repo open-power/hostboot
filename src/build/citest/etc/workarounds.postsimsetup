@@ -39,3 +39,8 @@ cd $sb/sbei/sbfw/
 mk -a && mk install_all
 cd -
 
+#changes needed for Cumulus
+echo "Applying SIMICS workaround to support Cumulus"
+sbex -t 1031560
+cd $sb/simu
+mk -a

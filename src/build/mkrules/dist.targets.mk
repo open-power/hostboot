@@ -230,6 +230,7 @@ simics.tar_CONTENTS = \
     img/procmvpd.dat \
     img/procmvpd_ven.dat \
     img/procmvpd_p9n.dat \
+    img/procmvpd_p9c.dat \
     img/cvpd.dat \
     img/dvpd.dat \
     obj/genfiles/attrInfo.csv \

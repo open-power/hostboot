@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -57,6 +57,7 @@ my $emptyMemVPD;
 my $mvpdFile = "procmvpd.dat";
 my $mvpdFile_ven = "procmvpd_ven.dat";
 my $mvpdFile_p9n = "procmvpd_p9n.dat";
+my $mvpdFile_p9c = "procmvpd_p9c.dat";
 my $cvpdFile = "cvpd.dat";
 my $dvpdFile = "dvpd.dat";
 my $memVpdFile = $cvpdFile;
@@ -302,6 +303,10 @@ sub createMVPDData
             {
                 $sourceFile = "$dataPath/$mvpdFile_p9n";
             }
+            elsif( $procChipType eq "p9c")
+            {
+                $sourceFile = "$dataPath/$mvpdFile_p9c";
+            }
             else
             {
                 $sourceFile = "$dataPath/$mvpdFile";
@@ -503,7 +508,7 @@ sub getMemoryConfig
         #use pre-defined Centaur Plugging order
         for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {
-            debugMsg( "Mcs: $mcs" );
+            debugMsg( "Mcs: $mcs CentPerProc: $numCentPerProc" );
             if( $machine eq "MURANO" || $machine eq "NO_SP")
             {
                 # Plugging order is:
@@ -549,6 +554,16 @@ sub getMemoryConfig
                     {
                         $mcsArray[$mcs] = 1;
                     }
+                }
+            }
+            elsif( $machine eq "CUMULUS" )
+            {
+                # Plugging order is:
+                #   Processor 0 - 3
+                #   MCS 0 - 3 (1 Centaur/MCS)
+                if(($mcs % $MAX_MCS) >= 0 && ($mcs % $MAX_MCS) < 4)
+                {
+                    $mcsArray[$mcs] = 1;
                 }
             }
             elsif( $procChipType eq "p9n")

@@ -125,7 +125,7 @@
 
     <attribute>
         <id>ASYNC_NEST_FREQ_MHZ</id>
-        <default>2400</default>
+        <default>0xFFFF</default>
     </attribute>
 
     <attribute>
@@ -5572,6 +5572,10 @@
         <id>TYPE</id>
         <default>MEMBUF</default>
     </attribute>
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>0</default>
+    </attribute>
 
 </targetInstance>
 <targetInstance>
@@ -5653,90 +5657,26 @@
 <targetInstance>
     <id>sys0node0dimm0</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030000</default></attribute>
+    <attribute><id>POSITION</id><default>0</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0/dimm-0</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p00</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p00</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030000</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
+        <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
     <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0/dimm-0</default>
     </attribute>
-
     <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
+        <id>FAPI_POS</id>
         <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x34</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-0</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
-    </attribute>
-    <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -5746,96 +5686,33 @@
 <targetInstance>
     <id>sys0node0dimm1</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030001</default></attribute>
+    <attribute><id>POSITION</id><default>1</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0/dimm-1</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p01</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p01</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030001</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
+        <id>ORDINAL_ID</id>
         <default>1</default>
     </attribute>
     <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
-        <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x36</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-0</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>1</default>
     </attribute>
-</targetInstance>
+ </targetInstance>
+
 <targetInstance>
     <id>sys0node0membuf0mba1</id>
     <type>unit-mba-centaur</type>
@@ -5856,90 +5733,26 @@
 <targetInstance>
     <id>sys0node0dimm2</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030002</default></attribute>
+    <attribute><id>POSITION</id><default>2</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-0</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p02</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p02</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>2</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030002</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-2</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
+        <id>ORDINAL_ID</id>
         <default>2</default>
     </attribute>
     <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
-        <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x38</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-0</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -5949,96 +5762,32 @@
 <targetInstance>
     <id>sys0node0dimm3</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030003</default></attribute>
+    <attribute><id>POSITION</id><default>3</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-1</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p03</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p03</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>3</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030003</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-3</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
+        <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-
-
     <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x3A</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-0</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
-        <default>6</default>
+        <default>3</default>
     </attribute>
-</targetInstance>
+ </targetInstance>
 
 <targetInstance>
     <id>sys0node0membuf1</id>
@@ -6164,7 +5913,10 @@
         <id>TYPE</id>
         <default>MEMBUF</default>
     </attribute>
-
+    <attribute>
+        <id>VPD_REC_NUM</id>
+        <default>1</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0membuf1l40</id>
@@ -6245,90 +5997,26 @@
 <targetInstance>
     <id>sys0node0dimm4</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030004</default></attribute>
+    <attribute><id>POSITION</id><default>4</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-0</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p04</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p04</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>4</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030004</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-4</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
+        <id>ORDINAL_ID</id>
         <default>4</default>
     </attribute>
     <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
-        <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x34</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-1</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-0</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -6338,90 +6026,26 @@
 <targetInstance>
     <id>sys0node0dimm5</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030005</default></attribute>
+    <attribute><id>POSITION</id><default>5</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-1/mba-0/dimm-5</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p05</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p05</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>5</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030005</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-5</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
-        <default>5</default>
-    </attribute>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
+        <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-
-
     <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x36</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-1</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-0/dimm-1</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -6448,183 +6072,55 @@
 <targetInstance>
     <id>sys0node0dimm6</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030006</default></attribute>
+    <attribute><id>POSITION</id><default>6</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-0</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p06</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p06</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>6</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030006</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-6</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
+        <id>ORDINAL_ID</id>
         <default>6</default>
     </attribute>
     <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
-        <default>0</default>
-    </attribute>
-
-
-    <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x38</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-1</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-0</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>6</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
-        <default>4</default>
+        <default>6</default>
     </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0dimm7</id>
     <type>lcard-dimm-jedec</type>
+    <attribute><id>HUID</id><default>0x00030007</default></attribute>
+    <attribute><id>POSITION</id><default>7</default></attribute>
     <attribute>
-        <id>AFFINITY_PATH</id>
-        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-1</default>
+        <id>FAPI_NAME</id><default>dimm:k0:n0:s0:p07</default>
     </attribute>
-
-    <attribute>
-        <id>CDM_DOMAIN</id>
-        <default>DIMM</default>
-    </attribute>
-
-    <attribute>
-        <id>CLASS</id>
-        <default>CARD</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-
-
-    <attribute>
-        <id>FAPI_NAME</id>
-        <default>dimm:k0:n0:s0:p07</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>7</default>
-    </attribute>
-
-
-    <attribute>
-        <id>HUID</id>
-        <default>0x00030007</default>
-    </attribute>
-
-    <attribute>
-        <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-        <default>0x00000003</default>
-    </attribute>
-
-
-
-
-
-
-
-
-
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-7</default>
     </attribute>
     <attribute>
-        <id>POSITION</id>
-        <default>7</default>
-    </attribute>
-    <attribute>
-        <id>PRIMARY_CAPABILITIES</id>
-        <default>
-            <field><id>reserved</id><value/></field>
-            <field><id>supportsFsiScom</id><value/></field>
-            <field><id>supportsInbandScom</id><value/></field>
-            <field><id>supportsXscom</id><value/></field>
-        </default>
-    </attribute>
-
-    <attribute>
-        <id>RESOURCE_IS_CRITICAL</id>
+        <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-
-
     <attribute>
-        <id>TEMP_SENSOR_I2C_CONFIG</id>
-        <default>
-            <field><id>devAddr</id><value>0x3A</value></field>
-            <field><id>engine</id><value>6</value></field>
-            <field><id>i2cMasterPath</id><value>physical:sys-0/node-0/membuf-1</value></field>
-            <field><id>port</id><value>0</value></field>
-        </default>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1/dimm-1</default>
     </attribute>
     <attribute>
-        <id>TYPE</id>
-        <default>DIMM</default>
+        <id>FAPI_POS</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
@@ -8840,6 +8336,35 @@
     <attribute>
         <id>TYPE</id>
         <default>OCC</default>
+    </attribute>
+</targetInstance>
+
+<targetInstance>
+    <id>sys0node0proc0nx0</id>
+    <type>unit-nx-power9</type>
+    <attribute><id>HUID</id><default>0x001E0000</default></attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>NA</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/nx-0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_POS</id>
+        <default>0xFFFFFFFF</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
     </attribute>
 </targetInstance>
 
