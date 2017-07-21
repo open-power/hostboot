@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2016
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -32,10 +32,11 @@ import shlex
 toolLoc = os.environ.get("HB_TOOLPATH");
 thisSys = os.environ.get("HB_MACHINE").upper();
 numProcs = os.environ.get( "NUM_PROCS");
+dimmsPerProc = os.environ.get( "DIMMS_PER_PROC");
 numCentaurPerProcParm = "";
 numCentaurPerProc = "0";
-if os.environ.has_key( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys ):
-    numCentaurPerProc=os.environ.get( "GFW_P9_%s_CENTAURS_PER_PROC" % thisSys );
+if (thisSys == "CUMULUS"):
+    numCentaurPerProc=str(int(dimmsPerProc)/2);
     numCentaurPerProcParm=" --numCentPerProc " + numCentaurPerProc;
 pass
 procChipTypeParm = "";
