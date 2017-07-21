@@ -74,7 +74,7 @@ fapi_try_exit:
 }
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode scomWrite(CONST_XBUS& iTgt, const uint64_t iAddr, const uint64_t iData)
+fapi2::ReturnCode scomWrite(CONST_PROC& iTgt, const uint64_t iAddr, const uint64_t iData)
 {
     fapi2::buffer<uint64_t> data64(iData);
     // Xscom -- Scom from core in Hostboot mode
@@ -83,7 +83,7 @@ fapi2::ReturnCode scomWrite(CONST_XBUS& iTgt, const uint64_t iAddr, const uint64
 
 
 //---------------------------------------------------------------------------
-fapi2::ReturnCode p9_io_xbus_image_build(CONST_XBUS& iTgt, void* const iHwImagePtr)
+fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iHwImagePtr)
 {
     FAPI_IMP("Entering p9_io_xbus_image_build.");
 
