@@ -32,6 +32,9 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <arch/pirformat.H>
 #include <sys/task.h>
+#include <sys/mmio.h>
+#include <arch/pvrformat.H>
+
 
 //Targeting
 #include    <targeting/common/commontargeting.H>
@@ -57,11 +60,9 @@ namespace ISTEP_06
  * @brief This function will query MVPD and get the #V data for the
  *        master core
  *
- * @return uint32_t - Returns Indicates if half of cache is deconfigured or not.
- *                true - half cache deconfigured, only 4MB available
- *                false -> No Cache deconfigured, 8MB available.
+ * @return errlHndl_t -- returns error if it can't get to MVPDe.
 */
-errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& l_firstPBFreq)
+errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& o_firstPBFreq)
 {
     //#V Keyword in LPRx Record of MVPD contains the info we need
     //the x in LPRx is the EQ number.
@@ -73,7 +74,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& l_firstPBFreq)
     TARGETING::Target* l_procTarget = NULL;
     uint64_t cpuid = task_getcpuid();
     uint64_t l_masterCoreId = PIR_t::coreFromPir(cpuid);
-    l_firstPBFreq = 0;
+    o_firstPBFreq = 0;
 
     do {
         // Target: Find the Master processor
@@ -169,7 +170,7 @@ errlHndl_t get_first_valid_pdV_pbFreq(uint32_t& l_firstPBFreq)
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                               "First valid #V bucket[%x], pbus_freq %d",
                               l_buckets[i].bucketId, l_buckets[i].pbFreq);
-                    l_firstPBFreq = l_buckets[i].pbFreq;
+                    o_firstPBFreq = l_buckets[i].pbFreq;
                     break;
                 }
             }
@@ -215,6 +216,7 @@ errlHndl_t determineNestFreq( uint32_t& o_nestFreq )
 
         //Default to the boot freq
         o_nestFreq = Util::getBootNestFreq();
+        PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
 
         if(l_sys->getAttr<ATTR_REQUIRED_SYNCH_MODE>() == 0x1) //ALWAYS
         {
@@ -231,6 +233,17 @@ errlHndl_t determineNestFreq( uint32_t& o_nestFreq )
                       "call_host_voltage_config.C::"
                       "ASYNC Freq specified by MRW, using %d Mhz",
                       o_nestFreq);
+        }
+        //Nimbus DD1.0 parts don't handle this well, if DD1 and
+        //ATTR_ASYNC_NEST_FREQ_MHZ == 0xFFFF, force to 2.0Ghz
+        else if ((l_sys->getAttr<ATTR_ASYNC_NEST_FREQ_MHZ>() == 0xFFFF)
+                 && l_pvr.isNimbusDD1() )
+        {
+            o_nestFreq = 2000;
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "call_host_voltage_config.C::"
+                      "ASYNC Freq to be determined by #V, but Nimbus DD1.0"
+                      " -- force to 2000 Mhz");
         }
         else
         {
