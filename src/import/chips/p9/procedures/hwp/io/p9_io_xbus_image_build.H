@@ -43,17 +43,17 @@
 #include <fapi2.H>
 
 
-typedef  const fapi2::Target<fapi2::TARGET_TYPE_XBUS> CONST_XBUS;
+typedef  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> CONST_PROC;
 
-typedef fapi2::ReturnCode (*p9_io_xbus_image_build_FP_t)(CONST_XBUS&, void* const);
+typedef fapi2::ReturnCode (*p9_io_xbus_image_build_FP_t)(CONST_PROC&, void* const);
 
 extern "C"
 {
     /**
     * @brief   Pulls out I/O PPE Xbus Section from Hw Image
-    * @param   iTgt       fapi2 target for xbus chip unit.
+    * @param   iTgt       fapi2 target.
     * @param   iImagePtr  points to memory mapped refrence image in PNOR.
     */
-    fapi2::ReturnCode p9_io_xbus_image_build(CONST_XBUS& iTgt, void* const iImagePtr);
+    fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iImagePtr);
 } // extern C
 #endif //__IO_IOO_HCODE_IMG_BUILD_H_
