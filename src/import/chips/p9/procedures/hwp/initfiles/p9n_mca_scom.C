@@ -61,10 +61,10 @@ constexpr uint64_t literal_2134 = 2134;
 constexpr uint64_t literal_2401 = 2401;
 constexpr uint64_t literal_2666 = 2666;
 constexpr uint64_t literal_9 = 9;
+constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_267 = 267;
 constexpr uint64_t literal_1866 = 1866;
-constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_0b1000 = 0b1000;
 constexpr uint64_t literal_0b011000 = 0b011000;
@@ -420,7 +420,7 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             else if ((((l_def_MSS_FREQ_EQ_2666 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_8 + l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX]) );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_9 + l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX]) );
             }
             else if ((((l_def_MSS_FREQ_EQ_1866 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
@@ -440,7 +440,7 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             else if ((((l_def_MSS_FREQ_EQ_2666 == literal_1)
                        && (l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_3)) && l_def_IS_HW))
             {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_9 + l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX]) );
+                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_10 + l_TGT2_ATTR_EFF_DRAM_CL[l_def_PORT_INDEX]) );
             }
 
             if ((l_TGT2_ATTR_EFF_DIMM_TYPE[l_def_PORT_INDEX][literal_0] == literal_1))
