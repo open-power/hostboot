@@ -1065,4 +1065,18 @@
     <hbOnly/>
 </attribute>
 
+<attribute>
+    <id>MEMD_OFFSET</id>
+    <description>
+            Working offset for MEMD section, this allows us to move between
+            the different MEMD instances and the MEMD header.
+    </description>
+    <simpleType>
+        <uint64_t></uint64_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
 </attributes>

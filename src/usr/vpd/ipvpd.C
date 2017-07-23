@@ -41,6 +41,7 @@
 #include <vpd/vpd_if.H>
 #include <config.h>
 #include <vpd/ipvpdenums.H>
+#include <vpd/memd_vpdenums.H>
 
 #include "vpd.H"
 #include "cvpd.H"
@@ -67,7 +68,7 @@ extern trace_desc_t* g_trac_vpd;
 static const uint64_t IPVPD_TOC_SIZE = 0x100;  //256
 static const uint64_t IPVPD_TOC_ENTRY_SIZE = 8;
 static const uint64_t IPVPD_TOC_INVALID_DATA = 0xFFFFFFFFFFFFFFFF;
-
+uint64_t MEMD_HEADER_SIZE = sizeof(MemdHeader_t);
 
 /**
  * @brief  Constructor
@@ -91,6 +92,7 @@ IpVpdFacade::IpVpdFacade(uint64_t i_vpdSectionSize,
 ,iv_mutex(i_mutex)
 ,iv_cachePnorAddr(0x0)
 ,iv_vpdMsgType(i_vpdMsgType)
+,iv_memdAccessed(false)
 {
     iv_configInfo.vpdReadPNOR   = false;
     iv_configInfo.vpdReadHW     = false;
@@ -1753,6 +1755,24 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
         if( err )
         {
             break;
+        }
+
+        if((iv_pnorSection == PNOR::MEMD))
+        {
+            static uint64_t l_basePnorAddr = 0;//getPnorAddr(*this);
+            uint64_t l_cache_address = 0;
+
+            if((iv_cachePnorAddr !=0) && !(iv_memdAccessed))
+            {
+                l_basePnorAddr = getPnorAddr(*this);
+                iv_memdAccessed = true;
+            }
+
+            TARGETING::ATTR_MEMD_OFFSET_type l_memd_offset =
+                    i_target->getAttr<TARGETING::ATTR_MEMD_OFFSET>();
+            l_cache_address = l_basePnorAddr +
+                              MEMD_HEADER_SIZE + l_memd_offset;
+            setPnorAddr(l_cache_address);
         }
 
         // Byte Swap

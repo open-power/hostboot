@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #define _FAPI2_PLAT_VPDACCESS_H_
 
 #include <fapi2_vpd_access.H>
+#include <vpd/memd_vpdenums.H>
 
 namespace fapi2
 {
@@ -50,6 +51,20 @@ fapi2::ReturnCode platGetVPD(
                         const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                         VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
                         uint8_t* o_blob);
+
+/**
+ * @brief Search through the PNOR::MEMD section to find the copy with
+ *        a matching VM keyword compared to the EEPROM's VM.
+ *
+ * @param[in] i_eepromVM - The EEPROM's copy of the VM keyword
+ * @param[in] i_header   - The header from PNOR::MEMD
+ * @param[in] i_target   - A valid fapi2 MCS target
+ * @param[in] i_vm_size  - Size of the VM keyword
+ *
+ * @return boolean - true if a matching MEMD was found, false if not
+ */
+bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
+                       TARGETING::Target * i_target, size_t i_vm_size);
 
 };
 #endif // _FAPI2_PLAT_VPDACCESS_H_
