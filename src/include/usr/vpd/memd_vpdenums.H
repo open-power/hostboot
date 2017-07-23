@@ -27,6 +27,27 @@
 
 #include <vpd/ipvpdenums.H>
 
+/**
+ * @brief Define the set of information included at the beginning of the
+ *        MEMD PNOR section
+ */
+struct MemdHeader_t
+{
+    uint32_t eyecatch;         /* Eyecatch to determine validity. "OKOK" */
+    uint32_t header_version;   /* What version of the header this is in */
+    uint32_t memd_version;     /* What version of the MEMD this includes */
+    uint32_t expected_size_kb; /* Size in kilobytes of each MEMD instance */
+    uint16_t expected_num;     /* Number of MEMD instances in this section */
+    uint8_t  padding[14];      /* Padding for future changes */
+}__attribute__((packed));
+
+enum MEMD_valid_constants
+{
+    MEMD_VALID_HEADER = 0x4f4b4f4b, // "OKOK"
+    MEMD_VALID_HEADER_VERSION = 0x30312e30, // "01.0";
+    MEMD_VALID_MEMD_VERSION = 0x30312e30, //"01.0";
+};
+
 namespace MEMD_VPD
 {
 

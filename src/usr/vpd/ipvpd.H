@@ -785,6 +785,12 @@ class IpVpdFacade
      */
     configInfo iv_configInfo;
 
+    /**
+     * @brief Boolean variable to denote if the pnor section was
+     *        accessed for the MEMD section
+     */
+    bool iv_memdAccessed;
+
 };
 
 

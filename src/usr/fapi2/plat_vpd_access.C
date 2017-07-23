@@ -36,8 +36,7 @@
 #include <attribute_service.H>
 #include <vpd/dvpdenums.H>
 #include <vpd/memd_vpdenums.H>
-#include <pnor/pnorif.H>
-
+#include <errl/errlmanager.H>
 //The following can be uncommented for unit testing
 //#undef FAPI_DBG
 //#define FAPI_DBG(args...) FAPI_INF(args)
@@ -206,21 +205,117 @@ fapi2::ReturnCode platGetVPD(
             break; //return with error
         }
 
+        // The PNOR::MEMD section potentially contains multiple copies of the
+        // MEMD VPD.  This next section searches through the PNOR copy for a
+        // valid copy if it exists and uses that instead of the DVPD section.
+
         //Read mapping keyword
         size_t l_buffSize = VPD_KEYWORD_SIZE;
-        uint8_t * l_pMapping = new uint8_t[VPD_KEYWORD_SIZE];
-        l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
-                            l_pMapping,
-                            l_buffSize,
-                            DEVICE_DVPD_ADDRESS(DVPD::MEMD,
-                                                l_mapKeyword));
-        if (l_errl)
+        uint8_t * l_pMapping = new uint8_t[VPD_KEYWORD_SIZE]();
+
+        // MEMD Processing
+        PNOR::SectionInfo_t l_memd_info;
+        l_errl = PNOR::getSectionInfo(PNOR::MEMD,l_memd_info);
+        bool l_memd_found = false;
+        MemdHeader_t l_header;
+        uint8_t* l_dvpd_vm = nullptr;
+        uint32_t* l_full_dvpdVM = nullptr;
+
+        if( l_errl )
         {
-            delete l_pMapping;
-            FAPI_ERR("platGetVPD: ERROR reading mapping keyword");
-            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
-            break; //return with error
+            FAPI_INF("platGetVPD: Optional MEMD section not found.");
+            delete l_errl;
+            l_errl = NULL;
         }
+        else
+        {
+            do
+            {
+                const uint8_t * vaddr = reinterpret_cast<const uint8_t *>(
+                                l_memd_info.vaddr);
+                // Get and process the header
+                memcpy(&l_header, vaddr, sizeof(l_header));
+
+                size_t theSize = 0;
+
+                // Get the VM keyword size
+                l_errl = deviceRead( l_pMcsTarget, nullptr,
+                                 theSize, DEVICE_DVPD_ADDRESS(
+                                 DVPD::MEMD, DVPD::VM));
+
+                if( l_errl )
+                {
+                    FAPI_ERR("platGetVPD: ERROR getting MEMD VM size");
+                    l_rc.setPlatDataPtr(reinterpret_cast<void *>( l_errl ));
+                    break;
+                }
+
+                // Get the VM keyword from the real VPD
+                l_dvpd_vm = static_cast<uint8_t*>(malloc( theSize ));
+
+                l_errl = deviceRead( l_pMcsTarget, l_dvpd_vm,
+                                    theSize, DEVICE_DVPD_ADDRESS(
+                                            DVPD::MEMD, DVPD::VM));
+                if( l_errl )
+                {
+                    FAPI_ERR("platGetVPD: ERROR getting DVPD VM keyword");
+                    l_rc.setPlatDataPtr(reinterpret_cast<void *>( l_errl ));
+                    break;
+                }
+                l_full_dvpdVM = reinterpret_cast<uint32_t*>(l_dvpd_vm);
+
+                l_memd_found = find_memd_in_pnor(l_dvpd_vm,
+                                l_header, l_pMcsTarget, theSize);
+                uint64_t l_memd_offset_bytes = l_pMcsTarget->getAttr<
+                        TARGETING::ATTR_MEMD_OFFSET>();
+
+                if(l_memd_found)
+                {
+                    FAPI_INF("platGetVPD: Matching MEMD data was found in the "
+                             "PNOR section, VM value is %llx. Reading in at "
+                             "offset %llx",l_full_dvpdVM, l_memd_offset_bytes);
+                    l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
+                                     l_pMapping,
+                                     l_buffSize,
+                                     DEVICE_MEMD_VPD_ADDRESS(MEMD_VPD::MEMD,
+                                         l_mapKeyword) + l_memd_offset_bytes );
+                }else
+                {
+                    FAPI_INF("platGetVPD: Matching MEMD data was not found in "
+                             "the PNOR section, DVPD VM value is %llx",
+                             l_full_dvpdVM);
+                }
+
+            }while(0);
+
+        }
+        if( !(l_memd_found) )
+        {
+            FAPI_INF("platGetVPD: MEMD data was not found in the PNOR "
+                     "section. Using EEPROM. VM value is: %llx",
+                     l_full_dvpdVM);
+
+            l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
+                                l_pMapping,
+                                l_buffSize,
+                                DEVICE_DVPD_ADDRESS(DVPD::MEMD,
+                                                l_mapKeyword));
+            if (l_errl)
+            {
+                delete l_pMapping;
+                free(l_dvpd_vm);
+                l_dvpd_vm = nullptr;
+                l_full_dvpdVM = nullptr;
+                l_pMapping = nullptr;
+                FAPI_ERR("platGetVPD: ERROR reading mapping keyword");
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break; //return with error
+            }
+        }
+        free(l_dvpd_vm);
+        l_dvpd_vm = nullptr;
+        l_full_dvpdVM = nullptr;
+
 
         // Find vpd keyword name based on VPDInfo
         FAPI_EXEC_HWP(l_rc,
@@ -281,11 +376,24 @@ fapi2::ReturnCode platGetVPD(
 
             //Read vpd blob
             l_buffSize = l_keywordInfo.kwBlobSize;
-            l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
+            if(l_memd_found)
+            {
+                l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
+                                    o_blob,
+                                    l_buffSize,
+                                    DEVICE_MEMD_VPD_ADDRESS(MEMD_VPD::MEMD,
+                                                l_keywordEnum));
+
+            }
+            else
+            {
+                l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
                                 o_blob,
                                 l_buffSize,
                                 DEVICE_DVPD_ADDRESS(DVPD::MEMD,
                                                     l_keywordEnum));
+            }
+
             if (l_errl)
             {
                 FAPI_ERR("platGetVPD: ERROR reading keyword");
@@ -336,5 +444,87 @@ fapi2::ReturnCode platGetVPD(
 
     return l_rc;
 }
+
+bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
+                       TARGETING::Target * i_target, size_t i_vm_size)
+{
+    errlHndl_t l_errl = nullptr;
+
+    static bool memdFoundInPnor = false;
+    bool l_valid_memd = ((i_header.eyecatch == MEMD_VALID_HEADER) &
+                    (i_header.header_version == MEMD_VALID_HEADER_VERSION) &
+                    (i_header.memd_version == MEMD_VALID_MEMD_VERSION) );
+
+    uint8_t* l_memd_vm = nullptr;
+    uint32_t l_memd_iteration = 0;
+    bool l_retValue = false;
+
+    if(l_valid_memd && !memdFoundInPnor)
+    {
+        // Reset memd offset before we start the first iteration
+        i_target->setAttr<TARGETING::ATTR_MEMD_OFFSET>(0);
+
+        //do-while loop (needs to be executed at least once)
+        //    while VM keywods don't match, and we haven't gone
+        //    through all the MEMD copies
+        do
+        {
+            // Get the VM keyword from the copy in PNOR
+            l_memd_vm = static_cast<uint8_t*>(malloc( i_vm_size ));
+
+            uint64_t l_memd_offset = i_target->getAttr<
+                        TARGETING::ATTR_MEMD_OFFSET>();
+
+            l_errl = deviceRead( i_target, l_memd_vm, i_vm_size,
+                            DEVICE_MEMD_VPD_ADDRESS(
+                                MEMD_VPD::MEMD, MEMD_VPD::VM));
+            if(l_errl)
+            {
+                FAPI_ERR("find_memd_in_pnor: ERROR getting MEMD VM keyword");
+                errlCommit(l_errl, FAPI2_COMP_ID);
+                break;
+            }
+
+            assert(i_vm_size != 0);
+
+            // Compare the last nibbles
+            if( !((i_eepromVM[i_vm_size-1] & 0x0F) ==
+                  (l_memd_vm[i_vm_size-1] & 0x0F)) )
+            {
+                // VM's don't match, we need to keep looking
+                FAPI_INF("find_memd_in_pnor: DVPD and MEMD VM's last nibble"
+                         " don't match: %llx and %llx",
+                         reinterpret_cast<uint32_t*>(i_eepromVM),
+                         reinterpret_cast<uint32_t*>(l_memd_vm) );
+                i_target->setAttr<TARGETING::ATTR_MEMD_OFFSET
+                        >(l_memd_offset +
+                          (i_header.expected_size_kb * 1000));
+            }
+            else
+            {
+                FAPI_INF("find_memd_in_pnor: Matching MEMD data was found in "
+                         "the PNOR section.  VM value is: %llx. Offset "
+                         "is %llx", reinterpret_cast<uint32_t*>(l_memd_vm),
+                         l_memd_offset);
+                memdFoundInPnor = true;
+                l_retValue = true;
+                break;
+            }
+
+            l_memd_iteration = l_memd_iteration + 1;
+            free(l_memd_vm);
+            l_memd_vm = nullptr;
+
+        }while(l_memd_iteration < i_header.expected_num);
+
+        free(l_memd_vm);
+        l_memd_vm = nullptr;
+    }
+
+    return l_retValue;
+
+}
+
+
 
 } // namespace
