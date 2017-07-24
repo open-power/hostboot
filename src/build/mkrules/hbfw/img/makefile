@@ -42,11 +42,12 @@ build_all: cp_hbfiles gen_default_images
 install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
 #Some useful search paths
-HBFW_OBJPATH = ${.PATH:M*obj*}
-ENGD_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
-ENGD_SRCPATH = ${SRCPATH:S/hbfw\/img/engd\/href/g}
-SBEI_OBJPATH = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
-ENGD_WOFPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
+HBFW_OBJPATH  = ${.PATH:M*obj*}
+ENGD_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/href/g}
+ENGD_SRCPATH  = ${SRCPATH:S/hbfw\/img/engd\/href/g}
+SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
+ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
+ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
 
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
@@ -240,11 +241,13 @@ NIMBUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 CUMULUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 ## System Specific
 ZZ_WOFDATA_IMG = ${ENGD_WOFPATH:Fzz_wof_data.bin}
+ZZ_MEMD_IMG = ${ENGD_MEMDPATH:Fzz_memd_data.bin}
 
 # Input fake images
 NIMBUS_VPO_HBD_IMG = vbu_NIMBUS_targeting.bin
 
 # Output final images
+# Final eyecatch name must match PNOR xml layout
 ## Chip Specific
 NIMBUS_HBD_FINAL_IMG = NIMBUS.HBD.bin
 CUMULUS_HBD_FINAL_IMG = CUMULUS.HBD.bin
@@ -256,6 +259,7 @@ NIMBUS_OCC_FINAL_IMG = NIMBUS.OCC.bin
 CUMULUS_OCC_FINAL_IMG = CUMULUS.OCC.bin
 ## System Specific
 ZZ_WOFDATA_FINAL_IMG = ZZ.WOFDATA.bin
+ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
 
 
 # Decide which PNOR to build
@@ -268,11 +272,11 @@ ZZ_WOFDATA_FINAL_IMG = ZZ.WOFDATA.bin
         GEN_NIMBUS_BIN_FILES = NIMBUS:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P}
         GEN_CUMULUS_BIN_FILES = CUMULUS:SBE=${${CUMULUS_SBE_IMG}:P},HCODE=${${CUMULUS_HCODE_IMG}:P},HBD=${${CUMULUS_HBD_IMG}:P}
     .endif
-    GEN_ZZ_BIN_FILES = ZZ:WOFDATA=${${ZZ_WOFDATA_IMG}:P}
+    GEN_ZZ_BIN_FILES = ZZ:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P}
     #@TODO RTC:163810 - Put SBEC back "--systemBinFile  SBEC=${${SBEC_IMG}:P}"
     SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
-                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES} \                            
+                             --systemBinFiles ${GEN_NIMBUS_BIN_FILES} \
                              --systemBinFiles ${GEN_CUMULUS_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ_BIN_FILES} \
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
