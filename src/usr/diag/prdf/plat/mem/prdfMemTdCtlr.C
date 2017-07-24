@@ -384,9 +384,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::maskEccAttns()
     uint32_t o_rc = SUCCESS;
 
     // Loop through all MCAs.
-    for ( uint32_t ps = 0; ps < MAX_PORT_PER_MCBIST; ps++ )
+    for ( auto mcaChip : getConnected(iv_chip, TYPE_MCA) )
     {
-        ExtensibleChip * mcaChip = getConnectedChild( iv_chip, TYPE_MCA, ps );
         SCAN_COMM_REGISTER_CLASS * mask =
             mcaChip->getRegister( "MCAECCFIR_MASK_OR" );
 
@@ -421,9 +420,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::unmaskEccAttns()
     // thresholded so clear and unmask them as well.
 
     // Loop through all MCAs.
-    for ( uint32_t ps = 0; ps < MAX_PORT_PER_MCBIST; ps++ )
+    for ( auto mcaChip : getConnected(iv_chip, TYPE_MCA) )
     {
-        ExtensibleChip * mcaChip = getConnectedChild( iv_chip, TYPE_MCA, ps );
         SCAN_COMM_REGISTER_CLASS * fir =
             mcaChip->getRegister( "MCAECCFIR_AND" );
         SCAN_COMM_REGISTER_CLASS * mask =
@@ -433,7 +431,7 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::unmaskEccAttns()
 
         // Don't clear the NCE and TCE attentions if specified to save the mask
         // in the iv_saveEccMask array.
-        if ( !iv_saveEccMask[ps] )
+        if ( !iv_saveEccMask[mcaChip->getPos()%MAX_PORT_PER_MCBIST] )
         {
             fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
             fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE
