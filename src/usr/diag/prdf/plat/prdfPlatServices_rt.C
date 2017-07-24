@@ -36,6 +36,7 @@
 #include <prdfTrace.H>
 
 // Platform includes
+#include <prdfMemScrubUtils.H>
 #include <prdfPlatServices.H>
 
 // Other includes
@@ -165,22 +166,37 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCBIST == i_chip->getType() );
 
-    uint32_t rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
+    // Get the MCBIST fapi target
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
-    errlHndl_t errl;
-    FAPI_INVOKE_HWP( errl, memdiags::continue_cmd, fapiTrgt );
-
-    if ( nullptr != errl )
+    do
     {
-        PRDF_ERR( PRDF_FUNC "memdiags::continue_cmd(0x%08x) failed",
-                  i_chip->getHuid() );
-        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
-        rc = FAIL;
-    }
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_MCBIST>( i_chip );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            break;
+        }
 
-    return rc;
+        // Resume the command on the next address.
+        errlHndl_t errl;
+        FAPI_INVOKE_HWP( errl, memdiags::continue_cmd, fapiTrgt );
+
+        if ( nullptr != errl )
+        {
+            PRDF_ERR( PRDF_FUNC "memdiags::continue_cmd(0x%08x) failed",
+                      i_chip->getHuid() );
+            PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+            o_rc = FAIL; break;
+        }
+
+    } while (0);
+
+    return o_rc;
 
     #undef PRDF_FUNC
 }
