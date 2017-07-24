@@ -189,11 +189,8 @@ uint32_t clearEccFirs<TYPE_MCBIST>( ExtensibleChip * i_chip )
                                         0xf83fffffffffffffull );
         if ( SUCCESS != o_rc ) break;
 
-        for ( uint32_t p = 0; p < MAX_PORT_PER_MCBIST; p++ )
+        for ( auto mcaChip : getConnected(i_chip, TYPE_MCA) )
         {
-            ExtensibleChip * mcaChip = getConnectedChild( i_chip, TYPE_MCA, p );
-            if ( nullptr == mcaChip ) continue;
-
             // Maintenance AUEs/IAUEs will be reported as system checkstops.
             // Maintenance IMPEs will be reported as recoverable attentions at
             // all times. Maintence IUEs will be masked during Memory

@@ -243,26 +243,29 @@ TargetHandleList MemoryMru::getCalloutList() const
         }
         else if ( TARGETING::TYPE_MCA == getTargetType(iv_target) )
         {
-            if ( NO_SPECIAL_CALLOUT != iv_special )
+            if ( CALLOUT_ALL_MEM == iv_special )
             {
-                switch ( iv_special )
+                o_list = getConnected( iv_target, TYPE_DIMM );
+            }
+            else if ( (CALLOUT_RANK       == iv_special) ||
+                      (NO_SPECIAL_CALLOUT == iv_special) )
+            {
+                // Rank callouts and symbol callouts both callout a single DIMM.
+                uint32_t ds = iv_rank.getDimmSlct();
+                TargetHandle_t dimm = getConnectedChild( iv_target,
+                                                         TYPE_DIMM, ds );
+                if ( nullptr == dimm )
                 {
-                    case CALLOUT_RANK:
-                        o_list.push_back(getConnectedChild(iv_target, TYPE_DIMM,
-                                            iv_rank.getDimmSlct()) );
-                        break;
-                    case CALLOUT_ALL_MEM:
-                        o_list = getConnected( iv_target, TYPE_DIMM );
-                        break;
-                    default:
-                        PRDF_ERR( PRDF_FUNC "MemoryMruData::Callout 0x%02x not "
-                                "supported", iv_special );
+                    PRDF_ERR( PRDF_FUNC "getConnectedChild(0x%08x,%d) returned "
+                              "nullptr", getHuid(iv_target), ds );
                 }
+                else
+                    o_list.push_back( dimm );
             }
             else
             {
-                o_list.push_back(getConnectedChild(iv_target, TYPE_DIMM,
-                            iv_rank.getDimmSlct()) );
+                PRDF_ERR( PRDF_FUNC "MemoryMruData::Callout 0x%02x not "
+                          "supported", iv_special );
             }
         }
         else
