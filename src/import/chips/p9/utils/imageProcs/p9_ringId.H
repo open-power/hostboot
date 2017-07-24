@@ -196,7 +196,7 @@ enum RINGTYPE
 
 }; //end of RS4 namespace
 
-enum CHIPLET_TYPE
+enum CHIPLET_TYPE : uint8_t
 {
     PERV_TYPE,
     N0_TYPE,
