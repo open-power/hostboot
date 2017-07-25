@@ -114,9 +114,6 @@ enum ReturnCodes : uint32_t
 
     FAPI2_RC_PLAT_RS4_HEADER_DATA_INVALID = FAPI2_RC_PLAT_MASK | 0x06,
     //Operation on putring fail because of ringId not found in RS4 image
-    //
-    FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT = FAPI2_RC_PLAT_MASK | 0x06,
-    //Operation on putring fail because of ringId not found in RS4 image
 };
 
 }
