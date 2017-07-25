@@ -59,7 +59,7 @@ class SecureRomManager
          * @return errlHndl_t NULL on success
          */
         errlHndl_t verifyContainer(void * i_container,
-                                   const sha2_hash_t* i_hwKeyHash = nullptr);
+                                   const SHA512_t* i_hwKeyHash = nullptr);
 
         /**
          * @brief Hash Blob
@@ -77,10 +77,10 @@ class SecureRomManager
          * @brief Retrieve the internal hardware keys' hash from secure ROM
          *        object.
          *
-         * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+         * @param[out] o_hash  Reference to the SHA512_t array to copy the
          *                     hash to.
          */
-        void getHwKeyHash(sha2_hash_t o_hash);
+        void getHwKeyHash(SHA512_t o_hash);
 
         /*
          * @brief Hash the concatenation of N Blobs
@@ -158,7 +158,7 @@ class SecureRomManager
         /**
          * HW key' hash retrieved from system
          */
-        const sha2_hash_t* iv_key_hash;
+        const SHA512_t* iv_key_hash;
 
         /**
          * @brief Map to find verify SecureROM function types and their

@@ -68,7 +68,7 @@ typedef struct
   uint32_t        flags;
   uint8_t         sw_key_count;
   uint64_t        payload_size;
-  sha2_hash_t     payload_hash;
+  SHA512_t        payload_hash;
   uint8_t         ecid_count;
   // optional ecid place holder ecid_count * ecid_size(128 bits)
   uint8_t         ecid[ECID_SIZE];
@@ -96,7 +96,7 @@ typedef struct
   uint32_t        flags;
   uint8_t         reserved_0;
   uint64_t        payload_size;
-  sha2_hash_t     payload_hash;
+  SHA512_t        payload_hash;
   uint8_t         ecid_count;
   // optional ecid place holder ecid_count * ecid_size(128 bits)
   uint8_t         ecid[ECID_SIZE];
@@ -120,10 +120,10 @@ typedef enum { ROM_DONE, ROM_FAILED } ROM_response;
 
 typedef struct
 {
-  sha2_hash_t         hw_key_hash;
-  uint8_t             my_ecid[ECID_SIZE];
-  uint64_t            entry_point;
-  uint64_t 	      log;
+  SHA512_t        hw_key_hash;
+  uint8_t         my_ecid[ECID_SIZE];
+  uint64_t        entry_point;
+  uint64_t        log;
 }__attribute__((packed)) ROM_hw_params;
 
 extern void ROM_sreset (void);
@@ -220,11 +220,11 @@ ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);
  * @param[in] void*            Address of function offset into Secure ROM
  * @param[in] sha2_byte*       Pointer to effective address of blob to hash
  * @param[in] size_t           Size of blob to hash
- * @param[in/out] sha2_hash_t* Pointer to resulting hash value
+ * @param[in/out] SHA512_t*    Pointer to resulting hash value
  *
  * @return N/A
  */
-void call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);
+void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
 
 #ifdef __cplusplus
 }
@@ -306,7 +306,7 @@ enum SB_FUNC_VERS : sbFuncVer_t
     // rom_entry.S
 
     // SHA512 Hash function definition(s) per version
-    SHA512_INIT = 0x0001, // void call_rom_SHA512(void*, const sha2_byte *, size_t, sha2_hash_t*);
+    SHA512_INIT = 0x0001, // void call_rom_SHA512(void*, const sha2_byte *, size_t, SHA512_t*);
 
     // ECDSA521 function definition(s) per version
     ECDSA521_INIT = 0x0001, // ROM_response call_rom_verify(void*, const ROM_container_raw*, ROM_hw_params*);

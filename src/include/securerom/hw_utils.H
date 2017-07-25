@@ -78,7 +78,7 @@ typedef struct
         uint64_t   mask;
     }            FSP_BAR;
     uint8_t      ECID[ECID_SIZE];
-    sha2_hash_t  PIBMEM_HW_KEY_HASH;
+    SHA512_t     PIBMEM_HW_KEY_HASH;
     uint8_t*     data;    // 64M+4K malloc/mmap
     uint8_t*     memory;  // 64M (4K aligned)
     int          mfd;

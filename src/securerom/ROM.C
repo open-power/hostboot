@@ -121,7 +121,7 @@ asm(".globl .L.ROM_verify");
 ROM_response ROM_verify( ROM_container_raw* container,
                          ROM_hw_params* params )
 {
-    sha2_hash_t digest;
+    SHA512_t digest;
     ROM_prefix_header_raw* prefix;
     ROM_prefix_data_raw* hw_data;
     ROM_sw_header_raw* header;
@@ -140,7 +140,7 @@ ROM_response ROM_verify( ROM_container_raw* container,
     // process hw keys
     // test for valid hw keys
     SHA512_Hash(container->hw_pkey_a, HW_KEY_COUNT*sizeof(ecc_key_t), &digest);
-    if(memcmp(params->hw_key_hash, digest, sizeof(sha2_hash_t)))
+    if(memcmp(params->hw_key_hash, digest, sizeof(SHA512_t)))
     {
         FAILED(HW_KEY_HASH_TEST,"invalid hw keys");
     }
@@ -169,7 +169,7 @@ ROM_response ROM_verify( ROM_container_raw* container,
     // test for valid prefix payload hash
     size = GET64(prefix->payload_size);
     SHA512_Hash(hw_data->sw_pkey_p, size, &digest);
-    if(memcmp(prefix->payload_hash, digest, sizeof(sha2_hash_t)))
+    if(memcmp(prefix->payload_hash, digest, sizeof(SHA512_t)))
     {
         FAILED(PREFIX_HASH_TEST,"invalid prefix payload hash");
     }
@@ -223,7 +223,7 @@ ROM_response ROM_verify( ROM_container_raw* container,
     // begin test for valid sw payload hash
     SHA512_Hash((uint8_t*)container + 4096, size, &digest);
 
-    if(memcmp(header->payload_hash, digest, sizeof(sha2_hash_t)))
+    if(memcmp(header->payload_hash, digest, sizeof(SHA512_t)))
     {
         FAILED(HEADER_HASH_TEST,"invalid sw payload hash");
     }

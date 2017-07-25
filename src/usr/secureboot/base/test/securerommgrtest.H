@@ -69,7 +69,7 @@ void unloadSignedFile( void * & io_signedFile_pageAddr,
 
 // secureboot_signed_container was generated using this hw hash key. If another
 // key is in the HBBL, this test will always fail.
-const sha2_hash_t hw_key_hash =
+const SHA512_t hw_key_hash =
 {
     0x40,0xd4,0x87,0xff,0x73,0x80,0xed,0x6a,
     0xd5,0x47,0x75,0xd5,0x79,0x5f,0xea,0x0d,
