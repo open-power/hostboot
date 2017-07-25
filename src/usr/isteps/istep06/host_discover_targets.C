@@ -286,10 +286,10 @@ errlHndl_t powerDownSlaveQuads()
     TARGETING::TargetHandleList l_eqTargetList;
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
     uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
-    uint64_t CME_SCOM_SICR_PM_EXIT_C0_MASK = 0x0800000000000000;
+    uint64_t CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK = 0x0C00000000000000;
     uint64_t CPPM_CORE_POWMAN_MODE_REG = 0x200F0108;
     uint64_t SET_WKUP_SELECT_MASK = 0x0004000000000000;
-    size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_MASK);
+    size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK);
 
 
 
@@ -338,15 +338,15 @@ errlHndl_t powerDownSlaveQuads()
             //TODO 171763 Core state setup for MPIPL should be done in a HWP
             for(const auto & l_ex_child : l_exChildren)
             {
-                // Clear bit 4 of CME_SCOM_SICR which sets PM_EXIT
+                // Clear bits 4 & 5 of CME_SCOM_SICR which sets PM_EXIT for C0 and C1 respectively
                 l_err = deviceWrite(l_ex_child,
-                                    &CME_SCOM_SICR_PM_EXIT_C0_MASK,
+                                    &CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK,
                                     MASK_SIZE,
                                     DEVICE_SCOM_ADDRESS(EX_0_CME_SCOM_SICR_SCOM1)); //0x1001203E
                 if(l_err)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error clearing bit 4 of CME_SCOM_SICR on ex %d", l_ex_child->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                              "Error clearing bits 4 and 5 of CME_SCOM_SICR on ex %d", l_ex_child->getAttr<TARGETING::ATTR_CHIP_UNIT>());
                     break;
                 }
             }
