@@ -406,7 +406,7 @@ static void SHA512_Last(SHA512_CTX* context)
 }
 
 asm(".globl .L.SHA512_Final");
-void SHA512_Final(SHA512_CTX* context, sha2_hash_t *result) {
+void SHA512_Final(SHA512_CTX* context, SHA512_t *result) {
     /* Sanity check: */
     //assert(context != (SHA512_CTX*)0);
 
@@ -421,7 +421,7 @@ void SHA512_Final(SHA512_CTX* context, sha2_hash_t *result) {
 }
 
 asm(".globl .L.SHA512_Hash");
-void SHA512_Hash(const sha2_byte* data, size_t len, sha2_hash_t *result) {
+void SHA512_Hash(const sha2_byte* data, size_t len, SHA512_t *result) {
     SHA512_CTX context;
 
     SHA512_Init(&context);

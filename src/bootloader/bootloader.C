@@ -207,7 +207,7 @@ namespace Bootloader{
 
             // Use current hw hash key
             memcpy (&l_hw_parms.hw_key_hash, g_blData->blToHbData.hwKeysHash,
-                    sizeof(sha2_hash_t));
+                    sizeof(SHA512_t));
 
             const auto l_container = reinterpret_cast<const ROM_container_raw*>
                                                                  (i_pContainer);

@@ -33,8 +33,6 @@
 #include <securerom/sha512.H>
 #include <securerom/ROM.H>
 
-typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
-
 /*
  * @brief Used to capture the first 4 bytes of the hash for tracing purposes
  */
@@ -222,7 +220,7 @@ namespace SECUREBOOT
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t verifyContainer(void * i_container,
-                               const sha2_hash_t* i_hwKeyHash = nullptr);
+                               const SHA512_t* i_hwKeyHash = nullptr);
 
     /**
      * @brief Hash Signed Blob
@@ -238,10 +236,10 @@ namespace SECUREBOOT
     /**
      * @brief Retrieve the internal hardware keys' hash used to validate
      *     containers
-     * @param[out] o_hash  Reference to the sha2_hash_t array to copy the
+     * @param[out] o_hash  Reference to the SHA512_t array to copy the
      *                     hash to.
      */
-     void getHwKeyHash(sha2_hash_t o_hash);
+     void getHwKeyHash(SHA512_t o_hash);
 
      /*
       * @brief Hash the concatenation of N Blobs

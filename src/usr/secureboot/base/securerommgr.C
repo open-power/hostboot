@@ -67,7 +67,7 @@ errlHndl_t initializeSecureRomManager(void)
 /**
  * @brief Verify Signed Container
  */
-errlHndl_t verifyContainer(void * i_container, const sha2_hash_t* i_hwKeyHash)
+errlHndl_t verifyContainer(void * i_container, const SHA512_t* i_hwKeyHash)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -112,7 +112,7 @@ void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
 /*
  * @brief  Externally available hardware keys' hash retrieval function
  */
-void getHwKeyHash(sha2_hash_t o_hash)
+void getHwKeyHash(SHA512_t o_hash)
 {
     // @TODO RTC:170136 remove isValid check
     if(Singleton<SecureRomManager>::instance().isValid())
@@ -269,7 +269,7 @@ errlHndl_t SecureRomManager::initialize()
  * @brief Verify Container against system hash keys
  */
 errlHndl_t SecureRomManager::verifyContainer(void * i_container,
-                                      const sha2_hash_t* i_hwKeyHash)
+                                      const SHA512_t* i_hwKeyHash)
 {
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
@@ -300,16 +300,16 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
         // struct elements my_ecid, entry_point and log
         memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
-        // Now set hw_key_hash, which is of type sha2_hash_t, to iv_key_hash
+        // Now set hw_key_hash, which is of type SHA512_t, to iv_key_hash
         if (i_hwKeyHash == nullptr)
         {
             // Use current hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, iv_key_hash, sizeof(sha2_hash_t));
+            memcpy (&l_hw_parms.hw_key_hash, iv_key_hash, sizeof(SHA512_t));
         }
         else
         {
             // Use custom hw hash key
-            memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(sha2_hash_t));
+            memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(SHA512_t));
         }
 
         /*******************************************************************/
@@ -408,7 +408,7 @@ void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_b
         call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
                         reinterpret_cast<const sha2_byte*>(i_blob),
                         i_size,
-                        reinterpret_cast<sha2_hash_t*>(o_buf));
+                        reinterpret_cast<SHA512_t*>(o_buf));
 
         TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
                   "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
@@ -460,7 +460,7 @@ void SecureRomManager::getHwKeyHash()
     // Check if secureboot data is valid.
     if (iv_secureromValid)
     {
-        iv_key_hash  = reinterpret_cast<const sha2_hash_t*>(
+        iv_key_hash  = reinterpret_cast<const SHA512_t*>(
                                            g_BlToHbDataManager.getHwKeysHash());
     }
 }
@@ -468,12 +468,12 @@ void SecureRomManager::getHwKeyHash()
 /**
  * @brief  Retrieve the internal hardware keys' hash from secure ROM object.
  */
-void SecureRomManager::getHwKeyHash(sha2_hash_t o_hash)
+void SecureRomManager::getHwKeyHash(SHA512_t o_hash)
 {
     // Check if secureboot data is valid.
     if (iv_secureromValid)
     {
-        memcpy(o_hash, iv_key_hash, sizeof(sha2_hash_t));
+        memcpy(o_hash, iv_key_hash, sizeof(SHA512_t));
     }
 }
 

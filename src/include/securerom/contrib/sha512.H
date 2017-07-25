@@ -59,8 +59,7 @@
 
 #include <stdlib.h>
 
-typedef uint8_t __attribute__((aligned(8))) \
-    sha2_hash_t[ SHA512_DIGEST_LENGTH / sizeof(uint8_t) ];
+typedef uint8_t SHA512_t[SHA512_DIGEST_LENGTH];
 
 typedef uint8_t  sha2_byte;     /* Exactly 1 byte */
 typedef uint32_t sha2_word32;   /* Exactly 4 bytes */
@@ -73,13 +72,14 @@ typedef struct _SHA512_CTX
     uint8_t buffer[SHA512_BLOCK_LENGTH];
 } SHA512_CTX;
 
+
 extern "C"
 void SHA512_Init(SHA512_CTX* context);
 extern "C"
 void SHA512_Update(SHA512_CTX* context, const sha2_byte *data, size_t len);
 extern "C"
-void SHA512_Final(SHA512_CTX* context, sha2_hash_t *result);
+void SHA512_Final(SHA512_CTX* context, SHA512_t *result);
 extern "C"
-void SHA512_Hash(const sha2_byte *data, size_t len, sha2_hash_t *result);
+void SHA512_Hash(const sha2_byte *data, size_t len, SHA512_t *result);
 
 #endif
