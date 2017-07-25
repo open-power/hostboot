@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,11 @@
 #include    <errl/errludtarget.H>
 #include    <intr/interrupt.H>
 #include    <console/consoleif.H>
+
+#include <arch/pirformat.H>
+#include <arch/pvrformat.H>
+#include <sys/task.h>
+#include <sys/mmio.h>
 
 //  targeting support
 #include    <targeting/namedtarget.H>
@@ -68,9 +73,15 @@ void* call_host_activate_master (void *io_pArgs)
     errlHndl_t  l_errl  =   NULL;
 
     do  {
+        bool l_isFusedMode = is_fused_mode();
         // find the master core, i.e. the one we are running on
         TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_host_activate_master: Find master core: " );
+                   //Determine top-level system target
+        TARGETING::Target* l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget(l_sys);
+        assert( l_sys != NULL );
+
 
         const TARGETING::Target*  l_masterCore  = getMasterCore( );
         assert( l_masterCore != NULL );
@@ -81,6 +92,76 @@ void* call_host_activate_master (void *io_pArgs)
         // Cast OUR type of target to a FAPI2 type of target.
         const fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_coreTarget(
                                 const_cast<TARGETING::Target*> (l_masterCore));
+
+        bool l_isDD1 = false;
+        PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+        if( l_pvr.isNimbusDD1() )
+        {
+            l_isDD1 = true;
+        }
+
+        fapi2::Target<fapi2::TARGET_TYPE_CORE> l_fapi2_fusedTarget = NULL;
+        const TARGETING::Target* l_fusedCore = NULL;
+
+        if(l_isFusedMode && !l_isDD1)
+        {
+            uint64_t cpuid = task_getcpuid();
+            uint64_t l_masterCoreID = PIR_t::coreFromPir(cpuid);
+            uint64_t l_fusedCoreID = l_masterCoreID + 1;
+
+            // get the list of core targets for this proc chip
+            TARGETING::TargetHandleList l_coreTargetList;
+            TARGETING::getChildChiplets( l_coreTargetList,
+                                         l_proc_target,
+                                         TARGETING::TYPE_CORE,
+                                         false);
+
+            //Find the core that matched with the fusedCoreID we
+            //calculated above. This core is the core that will
+            //be fused with the master.
+            for( const auto & l_core:l_coreTargetList)
+            {
+                TARGETING::ATTR_CHIP_UNIT_type l_coreId =
+                (l_core)->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                if( l_coreId == l_fusedCoreID )
+                {
+                    l_fusedCore = (l_core);
+                    break;
+                }
+            }
+
+            if( l_fusedCore == NULL )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Could not find a target for core %d",
+                        l_fusedCoreID );
+                /*@
+                * @errortype
+                * @moduleid     ISTEP::MOD_HOST_ACTIVATE_MASTER
+                * @reasoncode   ISTEP::RC_NO_FUSED_CORE_TARGET
+                * @userdata1    Master-fused core id
+                * @userdata2    Master-fused processor chip huid
+                * @devdesc      activate_master> Could not find a target
+                *               for the master-fused core
+                * @custdesc     A problem occurred during the IPL
+                *               of the system.
+                */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    ISTEP::MOD_HOST_ACTIVATE_MASTER,
+                                    ISTEP::RC_NO_FUSED_CORE_TARGET,
+                                    l_fusedCoreID,
+                                    TARGETING::get_huid(l_proc_target));
+                l_errl->collectTrace("TARG",256);
+                l_errl->collectTrace(FAPI_TRACE_NAME,256);
+                l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
+
+                break;
+            }
+
+            // Cast OUR type of target to a FAPI2 type of target.
+            l_fapi2_fusedTarget = const_cast<TARGETING::Target*> (l_fusedCore);
+        }
 
         //Because of a bug in how the SBE injects the IPI used to wake
         //up the master core, need to ensure no mailbox traffic
@@ -101,9 +182,10 @@ void* call_host_activate_master (void *io_pArgs)
                    "Target HUID %.8X",
                     TARGETING::get_huid(l_proc_target));
 
-        //In the future possibly move default "waitTime" value to SBEIO code
-        uint64_t waitTime = 1000000; // bump the wait time to 1 sec
-        l_errl = SBEIO::startDeadmanLoop(waitTime);
+            //In the future possibly move default "waitTime" value to SBEIO code
+            uint64_t waitTime = 1000000; // bump the wait time to 1 sec
+            l_errl = SBEIO::startDeadmanLoop(waitTime);
+
         if ( l_errl )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -136,6 +218,7 @@ void* call_host_activate_master (void *io_pArgs)
                    "call_host_activated_master: call p9_block_wakeup_intr(SET) "
                    "Target HUID %.8x",
                    TARGETING::get_huid(l_fapi2_coreTarget) );
+
 
         FAPI_INVOKE_HWP( l_errl,
                         p9_block_wakeup_intr,
@@ -187,6 +270,63 @@ void* call_host_activate_master (void *io_pArgs)
                       "Disable special wakeup on master core SUCCESS");
         }
 
+        if(l_fusedCore != NULL)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "call_host_activated_master: call p9_block_wakeup_intr(SET) "
+            "Target HUID %.8x",
+            TARGETING::get_huid(l_fapi2_fusedTarget) );
+
+            FAPI_INVOKE_HWP( l_errl,
+                            p9_block_wakeup_intr,
+                             l_fapi2_fusedTarget,
+                            p9pmblockwkup::SET );
+
+            if ( l_errl )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "p9_block_wakeup_intr ERROR : Returning errorlog, reason=0x%x",
+                    l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "p9_block_wakeup_intr SUCCESS"  );
+            }
+
+            // Clear special wakeup
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Disable special wakeup on fused core");
+
+            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
+                            l_fapi2_fusedTarget,
+                            SPCWKUP_DISABLE,
+                            HOST);
+
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Disable p9_cpu_special_wakeup_core ERROR : Returning errorlog,"
+                " reason=0x%x",
+                    l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Disable special wakeup on master core SUCCESS");
+            }
+        }
 
         //  put the master into winkle.
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -194,9 +334,8 @@ void* call_host_activate_master (void *io_pArgs)
 
         // Flush any lingering console traces first
         CONSOLE::flush();
-        bool l_fusedCores = is_fused_mode();
 
-        int l_rc    =   cpu_master_winkle(l_fusedCores);
+        int l_rc    =   cpu_master_winkle(l_isFusedMode);
         if ( l_rc )
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -216,7 +355,7 @@ void* call_host_activate_master (void *io_pArgs)
             new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                     MOD_HOST_ACTIVATE_MASTER,
                                     RC_FAIL_MASTER_WINKLE,
-                                    l_rc, l_fusedCores );
+                                    l_rc, l_isFusedMode );
             break;
         }
 
@@ -287,6 +426,36 @@ void* call_host_activate_master (void *io_pArgs)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "Enable special wakeup on master core SUCCESS");
+        }
+
+        if(l_fusedCore != NULL)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+            "Enable special wakeup on fused core");
+
+
+            FAPI_INVOKE_HWP(l_errl, p9_cpu_special_wakeup_core,
+                            l_fapi2_fusedTarget,
+                            SPCWKUP_ENABLE,
+                            HOST);
+
+            if(l_errl)
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Enable p9_cpu_special_wakeup_core ERROR : Returning errorlog, "
+                "reason=0x%x",
+                    l_errl->reasonCode() );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_fusedCore).addToLog( l_errl );
+
+                break;
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Enable special wakeup on master core SUCCESS");
+            }
         }
 
     }   while ( 0 );
