@@ -70,6 +70,7 @@
 #include <util/utilrsvdmem.H>
 #include <util/utillidpnor.H>
 #include <stdio.h>
+#include <console/consoleif.H>
 
 
 namespace RUNTIME
@@ -227,12 +228,22 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
     TRACFCOMP(g_trac_runtime,
               "Setting HDAT HB Reserved Memory Range: "
               "%s RangeType 0x%X RangeId 0x%X "
-              "StartAddress 0x%16X EndAddress 0x%16X",
+              "StartAddress 0x%16llX EndAddress 0x%16llX",
               i_rngPtr->hdatRhbLabelString,
               i_rngPtr->hdatRhbRngType,
               i_rngPtr->hdatRhbRngId,
               i_rngPtr->hdatRhbAddrRngStrAddr,
               i_rngPtr->hdatRhbAddrRngEndAddr);
+
+    CONSOLE::displayf(NULL,
+                     "dw-Setting HDAT HB Reserved Memory Range: "
+                     "%s RangeType 0x%X RangeId 0x%X "
+                     "StartAddress 0x%016llX EndAddress 0x%016llX",
+                      i_rngPtr->hdatRhbLabelString,
+                      i_rngPtr->hdatRhbRngType,
+                      i_rngPtr->hdatRhbRngId,
+                      i_rngPtr->hdatRhbAddrRngStrAddr,
+                      i_rngPtr->hdatRhbAddrRngEndAddr);
 }
 
 /**

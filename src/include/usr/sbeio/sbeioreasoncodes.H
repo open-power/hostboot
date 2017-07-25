@@ -49,6 +49,7 @@ enum sbeioModuleId
     SBEIO_FIFO_CONTINUE_MPIPL           = 0x04,
     SBEIO_RUNTIME                       = 0x05,
     SBEIO_MEM_REGION                    = 0x06,
+    SBEIO_RUNTIME_ATTR_OVERRIDE         = 0x07,
 };
 
 /**
@@ -99,6 +100,7 @@ enum sbeioReasonCode
     SBEIO_RT_FUNCTION_NOT_FOUND        = SBEIO_COMP_ID | 0x39,
     SBEIO_RT_NO_INTERFACE_POINTER      = SBEIO_COMP_ID | 0x3A,
     SBEIO_RT_NO_INTERFACE_FUNCTION     = SBEIO_COMP_ID | 0x3B,
+    SBEIO_RT_NO_APPLY_ATTR_FUNCTION    = SBEIO_COMP_ID | 0x3C,
 
     // SBE Unsecure Memory Region error codes
     SBEIO_MEM_REGION_DOES_NOT_EXIST    = SBEIO_COMP_ID | 0x50,
