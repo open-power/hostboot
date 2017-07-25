@@ -30,6 +30,12 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/target.H>
 
+//Determine the Data Offset of an SBE Message
+#define SBE_MSG_DATA_OFFSET \
+static_cast<uint32_t>((reinterpret_cast<uint64_t>(\
+ (((const SBE_MSG::sbeMessage_t*)(0))->data)) - \
+reinterpret_cast<uint64_t>( \
+&(((const SBE_MSG::sbeMessage_t*)(0))->cmdHdr))))
 
 namespace SBE_MSG
 {
@@ -82,6 +88,8 @@ namespace SBE_MSG
         PASSTHRU_HTMGT_GET_PSTATE   = 0x00E00002, // HTMGT Get PState Table
         // Command Class 0xE1 - HBRT Messages
         PASSTHRU_HBRT_GET_PSTATE    = 0x00E10001, // HBRT Get PState Table
+        PASSTHRU_HBRT_OVERRIDE_ATTR = 0x00E10002, // HBRT Apply Override
+                                                  // attributes
     };
 
 

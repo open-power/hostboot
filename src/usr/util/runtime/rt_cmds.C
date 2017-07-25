@@ -125,7 +125,17 @@ void cmd_getattr( char*& o_output,
     UTIL_FT( "cmd_getattr> huid=%.8X, attr=%.8X, size=%d",
              i_huid, i_attrId, i_size );
 
-    TARGETING::Target* l_targ = getTargetFromHUID(i_huid);
+    TARGETING::Target* l_targ{};
+
+    if(0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
     if( l_targ == NULL )
     {
         o_output = new char[100];

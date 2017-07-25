@@ -36,9 +36,12 @@
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <runtime/rt_targeting.H>
+#include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <devicefw/userif.H>
+
+#include "sbeiotestRtConstants.H"
 
 
 //trace
@@ -62,11 +65,7 @@ using namespace TARGETING;
 using namespace SBE_MSG;
 using namespace CxxTest;
 
-// Constants for SBE Message bits in SCOM_ADDR_5003B
-const uint32_t SCOM_ADDR_5003B = 0x0005003B; // CFAM Reg 0x283B
-const uint32_t SBE_MSG_IN_PROGRESS = 0x40000000;
-const uint32_t SBE_MSG_COMPLETE = 0x80000000;
-const uint32_t SBE_MSG_MASK = SBE_MSG_COMPLETE | SBE_MSG_IN_PROGRESS;
+
 
 /**
  * @brief SbeMessagePassingRtTest Unit test for runtime SBE message passing.

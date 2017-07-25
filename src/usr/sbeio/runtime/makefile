@@ -32,6 +32,7 @@ MODULE = sbeio_rt
 
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
+OBJS += sbeio_attr_override.o
 
 SUBDIRS += test.d
 
