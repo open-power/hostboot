@@ -425,8 +425,6 @@ void hdatGetLocationCodePrefix(char *o_locCode)
         {
             strcat(o_locCode,"OPWR");
             strcat(o_locCode,".");
-            strcat(o_locCode,"BAR");
-            strcat(o_locCode,".");
             strcat(o_locCode,(const char*)l_serialNumber);
         }
         else

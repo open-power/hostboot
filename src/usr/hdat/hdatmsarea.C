@@ -308,7 +308,8 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
                                     uint32_t i_procChipId,
                                     bool i_rangeIsMirrorable,
                                     uint8_t i_mirroringAlgorithm,
-                                    hdatMsAddr_t &i_startMirrAddr)
+                                    hdatMsAddr_t &i_startMirrAddr,
+                                    uint32_t  i_memcntlrId)
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
@@ -327,6 +328,7 @@ errlHndl_t HdatMsArea::addAddrRange(hdatMsAddr_t &i_start,
                 i_rangeIsMirrorable ? 1 : 0; 
         l_addr->hdatSMMAttributes.hdatMirroringAlgorithm = i_mirroringAlgorithm;
         l_addr->hdatStartMirrAddr = i_startMirrAddr;
+        l_addr->hdatMsAreaMemCntId = i_memcntlrId;
         iv_addrRngArrayHdr.hdatArrayCnt++;
     }
     else
