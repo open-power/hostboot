@@ -81,6 +81,40 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[VcmEvent::cleanup] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // If there is a symbol mark on the same DRAM as the newly verified chip
+        // mark, remove the symbol mark.
+        o_rc = MarkStore::balance<T>( iv_chip, iv_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x,0x%02x) failed",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+        // Set the entire chip in DRAM Repairs VPD.
+        // TODO: RTC 169939
+
+        // Add a DRAM sparing procedure to the queue, if supported.
+        // TODO: RTC 157888
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 // Avoid linker errors with the template.
 template class VcmEvent<TYPE_MCA>;
 template class VcmEvent<TYPE_MBA>;

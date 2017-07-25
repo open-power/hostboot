@@ -896,41 +896,17 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru );
 
-        // Initialize threshold, if it doesn't exist yet.
-        if ( 0 == db->iv_impeThMap.count(rank) )
+        // Increment the count and check threshold.
+        if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
         {
-            db->iv_impeThMap[rank] = TimeBasedThreshold( getImpeTh() );
-        }
-
-        // Clear out the list of DRAMs, if the threshold time has elapsed.
-        if ( db->iv_impeThMap[rank].timeElapsed(io_sc) )
-        {
-            db->iv_impeDramMap[rank].clear();
-        }
-
-        // Increment the count.
-        bool thReached = db->iv_impeThMap[rank].inc(io_sc);
-
-        // Update the DRAM list.
-        // Note that the value here is not important. The only reason to use the
-        // map verses a vector is to ensure unique entries in the DRAM list.
-        db->iv_impeDramMap[rank][dram] = 1;
-
-        if ( mfgMode() )
-        {
-            // Make the error log predictive if threshold is reached.
-            if ( thReached ) io_sc.service_data->setServiceCall();
-        }
-        else
-        {
-            // If at any point there is more than one DRAM reporting an IMPE on
-            // a rank, make the error log predictive.
-            if ( 1 < db->iv_impeDramMap[rank].size() )
+            // Make the error log predictive if DRAM Repairs are disabled or if
+            // there has been more than one DRAM on this rank with and IMPE.
+            if ( areDramRepairsDisabled() ||
+                 db->getImpeThresholdCounter()->queryDrams(rank, io_sc) )
             {
                 io_sc.service_data->setServiceCall();
             }
-            // Otherwise, place a chip mark on the failing DRAM if at threshold.
-            else if ( thReached )
+            else // Otherwise, place a chip mark on the failing DRAM.
             {
                 MemMark chipMark( trgt, rank, galois );
                 o_rc = MarkStore::writeChipMark<T>( i_chip, rank, chipMark );

@@ -38,6 +38,29 @@ using namespace PlatServices;
 
 //##############################################################################
 //
+//                               Helper functions
+//
+//##############################################################################
+
+template<TARGETING::TYPE T>
+VcmFalseAlarm * __getFalseAlarmCounter( ExtensibleChip * i_chip );
+
+template<>
+VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MCA>( ExtensibleChip * i_chip )
+{
+    return getMcaDataBundle(i_chip)->getVcmFalseAlarmCounter();
+}
+
+template<>
+VcmFalseAlarm * __getFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
+{
+    // TODO: RTC 157888
+    //return getMbaDataBundle(i_chip)->getVcmFalseAlarmCounter();
+    return nullptr;
+}
+
+//##############################################################################
+//
 //                          Generic template functions
 //
 //##############################################################################
@@ -65,10 +88,10 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Increment the false alarm counter and check threshold.
-        if ( cv_falseAlarm.inc(iv_chip, getKey(), io_sc) )
+        uint8_t dram = iv_mark.getSymbol().getDram();
+        if ( __getFalseAlarmCounter<T>(iv_chip)->inc(iv_rank, dram, io_sc) )
         {
-            // False alarm threshold has been reached. Leave the mark in place
-            // and treat the chip mark as verified.
+            // False alarm threshold has been reached.
 
             io_sc.service_data->setSignature( iv_chip->getHuid(),
                                               PRDFSIG_VcmFalseAlarmTH );
@@ -76,10 +99,11 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
             PRDF_TRAC( PRDF_FUNC "False alarm threshold: 0x%08x,0x%02x",
                        iv_chip->getHuid(), getKey() );
 
-            o_rc = verified( io_sc );
+            // Leave the chip mark in place and do any necessary cleanup.
+            o_rc = cleanup( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "verified() failed" );
+                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
                 break;
             }
         }
@@ -104,6 +128,45 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[VcmEvent::cleanup] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // If there is a symbol mark on the same DRAM as the newly verified chip
+        // mark, remove the symbol mark.
+        o_rc = MarkStore::balance<T>( iv_chip, iv_rank, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x,0x%02x) failed",
+                      iv_chip->getHuid(), getKey() );
+            break;
+        }
+
+        // Set the entire chip in DRAM Repairs VPD.
+        // TODO: RTC 169939
+
+        // Add a DRAM sparing procedure to the queue, if supported.
+        // TODO: RTC 157888
+
+        // If there was more than one DRAM on this rank with a false alarm, make
+        // the error log predictive.
+        if ( __getFalseAlarmCounter<T>(iv_chip)->queryDrams(iv_rank, io_sc) )
+            io_sc.service_data->setServiceCall();
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 // Avoid linker errors with the template.
 template class VcmEvent<TYPE_MCA>;
 template class VcmEvent<TYPE_MBA>;
@@ -113,12 +176,6 @@ template class VcmEvent<TYPE_MBA>;
 //                          Specializations for MCA
 //
 //##############################################################################
-
-template<>
-TdFalseAlarm VcmEvent<TYPE_MCA>::cv_falseAlarm
-                            = TdFalseAlarm { 4, ThresholdResolution::ONE_DAY };
-
-//------------------------------------------------------------------------------
 
 template<>
 uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
@@ -201,12 +258,6 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
 //                          Specializations for MBA
 //
 //##############################################################################
-
-template<>
-TdFalseAlarm VcmEvent<TYPE_MBA>::cv_falseAlarm
-                        = TdFalseAlarm { 4, 7 * ThresholdResolution::ONE_DAY };
-
-//------------------------------------------------------------------------------
 
 template<>
 uint32_t VcmEvent<TYPE_MBA>::checkEcc( const uint32_t & i_eccAttns,

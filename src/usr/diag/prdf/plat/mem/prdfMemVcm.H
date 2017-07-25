@@ -260,37 +260,35 @@ class VcmEvent : public TdEntry
         io_sc.service_data->setSignature( iv_chip->getHuid(),
                                           PRDFSIG_VcmVerified );
 
-        do
+        if ( PlatServices::areDramRepairsDisabled() )
         {
-            // If DRAM repairs are disabled, make the error log predictive.
-            if ( PlatServices::areDramRepairsDisabled() )
-            {
-                io_sc.service_data->setServiceCall();
-                break; // Nothing more to do.
-            }
-
-            // If there is a symbol mark on the same DRAM as the newly verified
-            // chip mark, remove the symbol mark.
-            o_rc = MarkStore::balance<T>( iv_chip, iv_rank, io_sc );
+            // Make the error log predictive, nothing else to do.
+            io_sc.service_data->setServiceCall();
+        }
+        else
+        {
+            // Leave the chip mark in place and do any necessary cleanup.
+            o_rc = cleanup( io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "MarkStore::balance(0x%08x,0x%02x) failed",
-                          iv_chip->getHuid(), getKey() );
-                break;
+                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
             }
-
-            // Set the entire chip in DRAM Repairs VPD.
-            // TODO: RTC 169939
-
-            // Add a DRAM sparing procedure to the queue, if supported.
-            // TODO: RTC 157888
-
-        } while (0);
+        }
 
         return o_rc;
 
         #undef PRDF_FUNC
     }
+
+    /**
+     * @brief  Cleanup required when a chip mark is left in place (i.e. chip
+     *         mark verified or false alarm threshold). Will balance the chip
+     *         and symbol marks, set VPD, and initiate DRAM sparing if
+     *         supported.
+     * @param  io_sc  The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t cleanup( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
      * @brief  Verification failed. Do additional processing such as removing
@@ -303,11 +301,6 @@ class VcmEvent : public TdEntry
   private: // instance variables
 
     const MemMark iv_mark; ///< The chip mark from hardware.
-
-    #ifdef __HOSTBOOT_RUNTIME
-    /** False alarm counter for all instances of this class. */
-    static TdFalseAlarm cv_falseAlarm;
-    #endif
 };
 
 } // end namespace PRDF
