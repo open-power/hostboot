@@ -43,6 +43,7 @@
 #include <vpd/mvpdenums.H>
 #include <pnor/pnorif.H>
 #include <util/align.H>
+#include <arch/pvrformat.H>
 
 #include <devicefw/userif.H>
 #include <targeting/common/util.H>
@@ -569,73 +570,12 @@ void HdatIplParms::hdatGetSystemParamters()
     // No Anchor Card in BMC systems
     this->iv_hdatIPLParams->iv_sysParms.hdatProcFeatCode = 0;
 
-    // Get system information - effective PVR
-    TARGETING::ATTR_EFFECTIVE_EC_type l_effectiveEc;
-    if(l_pSysTarget->tryGetAttr<TARGETING::ATTR_EFFECTIVE_EC>(l_effectiveEc))
-    {
-        //Convert Ec format to PVR Ec format
-        uint32_t l_pvrEc = ( ((l_effectiveEc & 0xF0) << 4) |
-                                                 (l_effectiveEc  & 0xF) );
+    // Set the PVR        
+    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr = l_pvr.word;
 
-        TARGETING::PredicateCTM l_procFilter(TARGETING::CLASS_CHIP,
-                                             TARGETING::TYPE_PROC);
-
-        TARGETING::PredicateHwas l_predHwas;
-        l_predHwas.present(true);
-
-        TARGETING::PredicatePostfixExpr l_presentProc;
-        l_presentProc.push(&l_procFilter).push(&l_predHwas).And();
-
-        TARGETING::TargetHandleList l_procList;
-
-        //Get all Procs in the system
-        TARGETING::targetService().
-                  getAssociated(l_procList, l_pSysTarget,
-                          TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::ALL, &l_presentProc);
-
-        if(l_procList.size() > 0)
-        {
-            TARGETING::Target *l_procTarget = l_procList[0];
-            ATTR_MODEL_type l_procModel;
-
-            if(l_procTarget->tryGetAttr<ATTR_MODEL>(l_procModel))
-            {
-                //Effective Processor Version Register (PVR)
-                // bits 0-15: Processor version number
-                // bits 16-19: Reserved
-                // bits 20-23: Full RIT
-                // bits 24-27: Reserved
-                // bits 28-31: Minor revision level
-
-                if(l_procModel == MODEL_MURANO)
-                {
-                    this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr =
-                                                 0x004B0000 | l_pvrEc;
-                }
-                else if(l_procModel == MODEL_VENICE)
-                {
-                    this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr =
-                                                 0x004D0200 ;
-                }
-                HDAT_DBG(" Effective PVR :0X%x",
-                        this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr);
-            }
-            else
-            {
-                HDAT_ERR("Error reading attribute ATTR_MODEL");
-            }
-        }
-        else
-        {
-            HDAT_ERR("No Processors found in the system");
-            assert(l_procList.size() > 0);
-        }
-    }
-    else
-    {
-        HDAT_ERR(" Error in getting attribute EFFECTIVE_EC");
-    }
+    HDAT_DBG(" Effective PVR :0X%x",
+            this->iv_hdatIPLParams->iv_sysParms.hdatEffectivePvr);
 
     // Get system type
     iv_hdatIPLParams->iv_sysParms.hdatSysType =

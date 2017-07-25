@@ -604,7 +604,8 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
                                     uint32_t i_procChipId,
                                     bool i_rangeIsMirrorable,
                                     uint8_t i_mirroringAlgorithm,
-                                    uint64_t i_startMirrAddr)
+                                    uint64_t i_startMirrAddr,
+                                    uint32_t i_hdatMemCntrlID)
 {
     errlHndl_t l_errlHndl = NULL;
     HdatMsArea *l_obj;
@@ -616,7 +617,7 @@ errlHndl_t HdatMsVpd::addMsAreaAddr(uint16_t i_msAreaId,
     {
         l_obj = HDAT_MS_AREA(i_msAreaId);
         l_errlHndl = l_obj->addAddrRange(i_start, i_end, i_procChipId,
-        i_rangeIsMirrorable, i_mirroringAlgorithm, l_startMirrAddr);
+        i_rangeIsMirrorable, i_mirroringAlgorithm, l_startMirrAddr, i_hdatMemCntrlID);
     }
     else
     {
@@ -1463,6 +1464,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
 
                         uint64_t l_hdatMirrorAddr_x = 0x0ull;
                         uint64_t l_hdatMirrorAddr = 0x0ull;
+                        uint32_t l_hdatMemcntrlID = 0x0 ;
                         uint8_t l_hdatMirrorAlogrithm = 0xFF;
                         bool l_rangeIsMirrorable = false;
 
@@ -1515,13 +1517,26 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                 }
                             }
                         }
+                        if(l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_NIMBUS)
+                        {
+                            // Set the memory controller ID 
+                            l_hdatMemcntrlID |= 1 << (31 - l_pMcbistTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>());
+                            l_hdatMemcntrlID |= 1 << (31 - (l_pMcsTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>() + 4));
+                            l_hdatMemcntrlID |= 1 << (31 - (l_pMcaTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>() + 8));
+                        }
+                        else if(l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_CUMULUS)
+                        {
+                            //TODO : MEmory controller ID for cumulus need to be defined.
+                            HDAT_INF("Memory controller ID : 0 since this is Cumulus proc");
+                        }
                         l_err = addMsAreaAddr(l_index,
                                               l_addr_range,
                                               l_end,
                                               l_procChipId,
                                               l_rangeIsMirrorable,
                                               l_hdatMirrorAlogrithm,
-                                              l_hdatMirrorAddr);
+                                              l_hdatMirrorAddr,
+                                              l_hdatMemcntrlID);
                         if(NULL != l_err)
                         {
                             HDAT_ERR("Error in adding addMsAreaAddr"

@@ -137,6 +137,7 @@ struct hdatMsAreaAddrRange_t
     hdatSMMAttributes_t hdatSMMAttributes; // 0x0014 SMM Attributes
     hdatMsAddr_t      hdatStartMirrAddr;   // 0x0018 Starting Mirrorable Address
                                           // for range
+    uint32_t     hdatMsAreaMemCntId;  // 0x0020 Memory Controller ID
 }  __attribute__ ((packed));
 
 
@@ -425,6 +426,7 @@ public:
    *                               algorithm to use
    * @param[in] i_startMirrAddr - Specifies the starting mirrorable
    *                          address for range
+   * @param[in] i_memcntlrId - Memory Controller ID
    *
    * @return A null error log handle if successful, else the return code pointed
    *         to by o_errlHndl contains one of:
@@ -436,7 +438,8 @@ public:
                           uint32_t i_procChipId,
 			  bool i_rangeIsMirrorable,
 			  uint8_t i_mirroringAlgorithm,
-			  hdatMsAddr_t &i_startMirrAddr);
+			  hdatMsAddr_t &i_startMirrAddr,
+              uint32_t  i_memcntlrId);
 
 
   /**
