@@ -259,8 +259,14 @@ avsPollVoltageTransDone(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     {
         // This will set current_err to a non success value that can be
         // checked by the caller.
-        l_rc = fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT;
-        fapi2::current_err = l_rc;
+        FAPI_ASSERT(false,
+                    fapi2::PROCPM_AVSBUS_POLL_TIMEOUT()
+                    .set_CHIP_TARGET(i_target)
+                    .set_AVSBUS_NUM(i_avsBusNum)
+                    .set_AVSBUS_BRIDGE_NUM(i_o2sBridgeNum)
+                    .set_AVSBUS_MAX_POLL_CNT(p9avslib::MAX_POLL_COUNT_AVS),
+                    "avsPollVoltageTransDone poll timeout");
+
     }
 
 fapi_try_exit:
@@ -341,7 +347,7 @@ avsDriveCommand(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
 fapi_try_exit:
 
-    if (fapi2::current_err == fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT)
+    if (fapi2::current_err)
     {
         FAPI_ASSERT(false,
                     fapi2::PROCPM_AVSBUS_VOLTAGE_TIMEOUT()
@@ -466,7 +472,7 @@ avsIdleFrame(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
 fapi_try_exit:
 
-    if (fapi2::current_err == fapi2::FAPI2_RC_PLAT_AVSBUS_POLL_TIMEOUT)
+    if (fapi2::current_err)
     {
         FAPI_ASSERT(false,
                     fapi2::PROCPM_AVSBUS_IDLEFRAME_TIMEOUT()
