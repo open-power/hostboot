@@ -107,8 +107,8 @@ define def_NUM_RANKS            = (   MCS.ATTR_EFF_NUM_RANKS_PER_DIMM[def_PORT_I
 # We don't have a div 0 problem here as we don't run this if we don't have DIMM so the number of ranks won't be 0.
 define def_REFRESH_INTERVAL     =   ((MCS.ATTR_EFF_DRAM_TREFI[def_PORT_INDEX])/(8*def_NUM_RANKS));
 
-define def_RANK_SWITCH_TCK      =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2666: 7
-define def_BUS_TURNAROUND_TCK   =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/267);         # 1866: 4  2133: 5  2400: 6  2666: 7
+define def_RANK_SWITCH_TCK      =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/266);         # 1866: 4  2133: 5  2400: 6  2666: 7
+define def_BUS_TURNAROUND_TCK   =   4 + ((MCBIST.ATTR_MSS_FREQ-1866)/266);         # 1866: 4  2133: 5  2400: 6  2666: 7
 
 # Funky ... If the attribute is 0, then the value of the == operation will be 1 which bitwise-or'd with 0 gives us 1. If the attribute is != 0, then the
 # value of the == operation will be 0 which when bitwise-or'd with the attribute will give us the attribute value. Love, Prachi, Jenny, Shelton and Brian.
