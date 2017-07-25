@@ -33,6 +33,16 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
     <hwpError>
+    <rc>RC_PROCPM_AVSBUS_POLL_TIMEOUT</rc>
+    <description>
+    A timeout occured while polling OCB status register O2SST for o2s_ongoing=0
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>AVSBUS_NUM</ffdc>
+    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+    <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
+    </hwpError>
+    <hwpError>
     <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
     <description>
     A timeout occured reading/writing voltage from an AVSBus
