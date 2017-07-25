@@ -23,6 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_ppe_state
-$(PROCEDURE)_DEPLIBS += p9_ppe_utils
+lib$(PROCEDURE)_DEPLIBS += p9_ppe_utils
 $(call BUILD_PROCEDURE)
 
