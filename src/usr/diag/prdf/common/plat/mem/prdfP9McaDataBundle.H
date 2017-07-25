@@ -36,12 +36,15 @@
 #include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_MODULE
+
+  #include <prdfMemTdFalseAlarm.H>
   #include <prdfMemThresholds.H>
   #include <prdfP9McbistDataBundle.H>
-#endif
 
-#if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
-  #include <prdfMemIplCeStats.H>
+  #ifndef __HOSTBOOT_RUNTIME
+    #include <prdfMemIplCeStats.H>
+  #endif
+
 #endif
 
 namespace PRDF
@@ -61,7 +64,17 @@ class McaDataBundle : public DataBundle
     {}
 
     /** @brief Destructor */
-    ~McaDataBundle() = default;
+    ~McaDataBundle()
+    {
+        #ifdef __HOSTBOOT_MODULE
+            delete iv_impeThresholdCounter;
+            #ifdef __HOSTBOOT_RUNTIME
+                delete iv_vcmFalseAlarmCounter;
+            #else
+                delete iv_iplCeStats;
+            #endif
+        #endif
+    }
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -76,9 +89,33 @@ class McaDataBundle : public DataBundle
         return mcbdb->getTdCtlr();
     }
 
-    #endif
+    /** @return The VCM false alarm counter. */
+    VcmFalseAlarm * getImpeThresholdCounter()
+    {
+        if ( nullptr == iv_impeThresholdCounter )
+        {
+            iv_impeThresholdCounter = new VcmFalseAlarm(
+                                           TimeBasedThreshold { getImpeTh() } );
+        }
 
-    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+        return iv_impeThresholdCounter;
+    }
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /** @return The VCM false alarm counter. */
+    VcmFalseAlarm * getVcmFalseAlarmCounter()
+    {
+        if ( nullptr == iv_vcmFalseAlarmCounter )
+        {
+            iv_vcmFalseAlarmCounter = new VcmFalseAlarm(
+                       TimeBasedThreshold { 4, ThresholdResolution::ONE_DAY } );
+        }
+
+        return iv_vcmFalseAlarmCounter;
+    }
+
+    #else // IPL only
 
     /** @return The IPL CE statistics object. */
     MemIplCeStats<TARGETING::TYPE_MCA> * getIplCeStats()
@@ -91,7 +128,9 @@ class McaDataBundle : public DataBundle
         return iv_iplCeStats;
     }
 
-    #endif
+    #endif // __HOSTBOOT_RUNTIME
+
+    #endif // __HOSTBOOT_MODULE
 
   private: // functions
 
@@ -103,12 +142,24 @@ class McaDataBundle : public DataBundle
 
     ExtensibleChip * iv_chip; // This MCA.
 
-    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+    #ifdef __HOSTBOOT_MODULE
+
+    /** IMPE threshold counter. */
+    VcmFalseAlarm * iv_impeThresholdCounter = nullptr;
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /** VCM false alarm counter. */
+    VcmFalseAlarm * iv_vcmFalseAlarmCounter = nullptr;
+
+    #else // IPL only
 
     /** MNFG IPL CE statistics. */
     MemIplCeStats<TARGETING::TYPE_MCA> * iv_iplCeStats = nullptr;
 
-    #endif
+    #endif // __HOSTBOOT_RUNTIME
+
+    #endif // __HOSTBOOT_MODULE
 
   public: // instance variables
 
@@ -122,12 +173,6 @@ class McaDataBundle : public DataBundle
 
     /** Threshold table for IUEs. Threshold per DIMM */
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
-
-    /** Threshold table for IMPEs. Threshold per rank */
-    std::map<MemRank, TimeBasedThreshold> iv_impeThMap;
-
-    /** Map to keep track of which DRAMs on which ranks have reported IMPEs */
-    std::map< MemRank, std::map<uint8_t, uint8_t> > iv_impeDramMap;
 
     #endif
 };
