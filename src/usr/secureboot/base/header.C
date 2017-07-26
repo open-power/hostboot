@@ -36,7 +36,7 @@ namespace SECUREBOOT
         return Singleton<Header>::instance();
     }
 
-    // @TODO RTC 168021 Converge on a single method of reading the secure
+    // @TODO RTC 178520 Converge on a single method of reading the secure
     // header
     void Header::loadSecurely()
     {
@@ -49,7 +49,7 @@ namespace SECUREBOOT
         _set(pSecureHeader);
     }
 
-    // @TODO RTC 168021 Converge on a single method of reading the secure
+    // @TODO RTC 178520 Converge on a single method of reading the secure
     // header
     void Header::setNonSecurely(
         const void* const i_pHeader)

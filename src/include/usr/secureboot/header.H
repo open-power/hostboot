@@ -59,7 +59,7 @@ namespace SECUREBOOT
                 iv_data=NULL;
             }
 
-            // @TODO RTC 168021 Converge to single method of reading
+            // @TODO RTC 178520 Converge to single method of reading
             // secure header
 
             /**
@@ -72,7 +72,7 @@ namespace SECUREBOOT
              */
             void loadSecurely();
 
-            // @TODO RTC 168021 Converge to single method of reading
+            // @TODO RTC 178520 Converge to single method of reading
             // secure header
 
             /**

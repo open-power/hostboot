@@ -34,14 +34,6 @@ class BlToHbDataManager
 {
     private:
 
-        /**
-         * @brief Performs a printk along with a kassert to be more verbose if
-         *        Data is not valid.
-         *
-         * @return N/A
-         */
-        void validAssert() const;
-
         /*
          * @brief Prints, via printkd, important parts of the structure
          *

@@ -4,9 +4,9 @@ config SECUREBOOT
     help
         Enable and enforce secure boot
 
-# @TODO RTC:155374 Remove this in the future
+# @TODO RTC:178520 Remove this in the future
 config SECUREBOOT_BEST_EFFORT
-    default y if SECUREBOOT
+    default n
     depends on SECUREBOOT
     help
         Enable Best effort Secureboot. Should only be used for

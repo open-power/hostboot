@@ -97,11 +97,13 @@ class SecureRomManager
         void hashConcatBlobs (const blobPair_t &i_blobs, SHA512_t o_buf) const;
 
         /*
-         * @brief Getter for private "is valid" variable
+         * @brief Determines if best effort policy is enabled and allowed when
+         *        SecureROM is invalid.
+         *        Asserts secure rom is valid if bestEffortPolicy is false
          *
-         * @return bool - True if valid, false otherwise
+         * @return bool - True if enabled, false otherwise
          */
-        bool isValid();
+        bool secureRomValidPolicy() const;
 
         /*
          * @brief Get offset of function from the start of the SecureROM

@@ -293,12 +293,6 @@ sub verifyCommitMsg
         # Verify format of RTC message.
         if ($line =~ m/^\s*RTC:\s*[0-9]+(.*)/)
         {
-            if ("" ne $rtcTag)
-            {
-                error("Commit Message",$line,$lineCount,
-                      "Duplicate RTC tag found.");
-            }
-
             $rtcTag = $line;
             if ("" ne $1)
             {
@@ -309,12 +303,6 @@ sub verifyCommitMsg
 
         if ($line =~ m/^\s*CQ:\s*[A-Z][A-Z][0-9]+(.*)/)
         {
-            if ("" ne $cqTag)
-            {
-                error("Commit Message",$line,$lineCount,
-                      "Duplicate CQ tag found.");
-            }
-
             $cqTag = $line;
             if ("" ne $1)
             {

@@ -79,6 +79,7 @@ my %traceText = (
     "F9" => "PNOR Access getHBBSection findTOC error",
     "FA" => "PNOR Access getHBBSection findTOC no HBB section",
     "FB" => "main verifyBaseImage failed",
+    "FC" => "main verifyBaseImage secure rom invalid",
 );
 
 sub formatTrace

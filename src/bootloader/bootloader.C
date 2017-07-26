@@ -198,18 +198,35 @@ namespace Bootloader{
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
         }
-        // # @TODO RTC:170136 terminate in this case
-        // Ensure SecureRom is actually present
+        // Terminate if a valid securerom is not present
         else if ( !g_blData->secureRomValid )
         {
+#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
+#else
+            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_INVALID_SECROM);
+            /*@
+             * @errortype
+             * @moduleid     Bootloader::MOD_BOOTLOADER_VERIFY
+             * @reasoncode   SECUREBOOT::RC_SECROM_INVALID
+             * @userdata1[0:15]   TI_WITH_SRC
+             * @userdata1[16:31]  TI_BOOTLOADER
+             * @userdata1[32:63]  Failing address = 0
+             * @devdesc      Valid securerom not present
+             * @custdesc     Security failure occurred while running processor
+             *               boot code.
+             */
+            bl_terminate(Bootloader::MOD_BOOTLOADER_VERIFY,
+                         SECUREBOOT::RC_SECROM_INVALID);
+#endif
         }
-        // # @TODO RTC:170136 terminate in this case
+#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
         else if ( !PNOR::cmpSecurebootMagicNumber(
                     reinterpret_cast<const uint8_t*>(i_pContainer)))
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM);
         }
+#endif
         else
         {
             // Set startAddr to ROM_verify() function at an offset of Secure ROM

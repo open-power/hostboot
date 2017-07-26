@@ -345,7 +345,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
 
 #ifdef BOOTLOADER
         io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
-#elif !defined(__HOSTBOOT_RUNTIME) // runtime is handled by rt_pnor code
+#else
         // Check if PNOR section has a secureHeader or not.
         l_errhdl = PNOR::setSecure(secId, io_TOC);
         if (l_errhdl)
