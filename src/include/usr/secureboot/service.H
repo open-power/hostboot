@@ -299,6 +299,13 @@ namespace SECUREBOOT
      */
     bool allowAttrOverrides();
 
+    /* Definition in settings.H */
+    bool bestEffortPolicy();
+
+    /* Definition in securerommgr.H */
+    bool secureRomValidPolicy();
+
+
 }
 
 #endif

@@ -92,13 +92,8 @@ void* initializeBase(void* unused)
 
     do
     {
-
-        // Load original secureboot header.
-        if (enabled())
-        {
-            Singleton<Header>::instance().loadSecurely();
-        }
-
+        // SecureROM manager verifies if the content necessary for secureboot in
+        // the BltoHbData is valid or not. So initialize before anything else.
         // Don't enable SecureRomManager in VPO
 #ifndef CONFIG_P9_VPO_COMPILE
 
@@ -109,6 +104,12 @@ void* initializeBase(void* unused)
             break;
         }
 #endif
+
+        // Load original secureboot header.
+        if (enabled())
+        {
+            Singleton<Header>::instance().loadSecurely();
+        }
     } while(0);
 
     return l_errl;
@@ -120,6 +121,11 @@ bool enabled()
     return Singleton<Settings>::instance().getEnabled();
 }
 #endif
+
+bool bestEffortPolicy()
+{
+    return Singleton<Settings>::instance().getBestEffortPolicy();
+}
 
 errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
 {
@@ -177,6 +183,9 @@ void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
                                HWAS::SRCI_PRIORITY_HIGH);
 
     // Add Security related user details
+    // @TODO RTC: 176134 A chain of calls leads to a portion of code in the ext
+    //                   img. If we get an HBI page verify failure and the ext
+    //                   image is corrupted, we will hang.
     addSecureUserDetailsToErrolog(io_err);
 
     io_err->collectTrace(SECURE_COMP_NAME,MAX_ERROR_TRACE_SIZE);

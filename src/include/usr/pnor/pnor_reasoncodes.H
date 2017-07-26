@@ -177,6 +177,7 @@ namespace PNOR
         RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x31,
         RC_MBOX_BAD_SEQUENCE         = PNOR_COMP_ID | 0x32,
         RC_MBOX_ERROR_STATUS         = PNOR_COMP_ID | 0x33,
+        RC_UNSIGNED_PNOR_SECTION     = PNOR_COMP_ID | 0x34,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

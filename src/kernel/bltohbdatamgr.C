@@ -44,15 +44,6 @@ bool BlToHbDataManager::iv_initialized = false;
 bool BlToHbDataManager::iv_dataValid = false;
 size_t BlToHbDataManager::iv_preservedSize = 0;
 
-void BlToHbDataManager::validAssert() const
-{
-    if(!iv_dataValid)
-    {
-        printk("E> BlToHbDataManager is invalid, cannot access\n");
-        kassert(iv_dataValid);
-    }
-}
-
 void BlToHbDataManager::print() const
 {
     if(iv_dataValid)
@@ -269,13 +260,21 @@ const uint64_t BlToHbDataManager::getBranchtableOffset() const
 
 const void* BlToHbDataManager::getSecureRom() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access SecureRom\n");
+        crit_assert(iv_dataValid);
+    }
     return iv_data.secureRom;
 }
 
 const uint64_t BlToHbDataManager::getSecureRomAddr() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access SecureRomAddr\n");
+        crit_assert(iv_dataValid);
+    }
     return reinterpret_cast<uint64_t>(iv_data.secureRom);
 }
 
@@ -286,13 +285,21 @@ const size_t BlToHbDataManager::getSecureRomSize() const
 
 const void* BlToHbDataManager::getHwKeysHash() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access HwKeysHash\n");
+        crit_assert(iv_dataValid);
+    }
     return iv_data.hwKeysHash;
 }
 
 const uint64_t BlToHbDataManager::getHwKeysHashAddr() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access HwKeysHashAddr\n");
+        crit_assert(iv_dataValid);
+    }
     return reinterpret_cast<uint64_t>(iv_data.hwKeysHash);
 }
 
@@ -303,13 +310,21 @@ const size_t BlToHbDataManager::getHwKeysHashSize() const
 
 const void* BlToHbDataManager::getHbbHeader() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access HbbHeader\n");
+        crit_assert(iv_dataValid);
+    }
     return iv_data.hbbHeader;
 }
 
 const uint64_t BlToHbDataManager::getHbbHeaderAddr() const
 {
-    validAssert();
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access HbbHeaderAddr\n");
+        crit_assert(iv_dataValid);
+    }
     return reinterpret_cast<uint64_t>(iv_data.hbbHeader);
 }
 

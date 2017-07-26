@@ -54,6 +54,7 @@ namespace SECUREBOOT
         RC_ROM_SHA512                   = SECURE_COMP_ID | 0x08,
         RC_SECURE_BAD_TARGET            = SECURE_COMP_ID | 0x09,
         RC_SECURE_BOOT_DISABLED         = SECURE_COMP_ID | 0x0A,
+        RC_SECROM_INVALID               = SECURE_COMP_ID | 0x0B,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

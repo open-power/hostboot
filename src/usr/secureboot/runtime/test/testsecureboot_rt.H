@@ -42,6 +42,8 @@
 #include "common/securetrace.H"
 #include <secureboot/service.H>
 #include <secureboot/settings.H>
+#include <pnor/pnorif.H>
+#include <pnor/pnor_reasoncodes.H>
 
 class SecurebootRtTestSuite: public CxxTest::TestSuite
 {
@@ -156,6 +158,66 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
         }
 
         SB_EXIT("SecurebootRtTestSuite::testBaseInterfaces");
+    }
+
+    void testAccessSecurePnorSection()
+    {
+        SB_ENTER("testAccessSecurePnorSection");
+
+        errlHndl_t l_err = nullptr;
+        PNOR::SectionId l_id = PNOR::OCC;
+        PNOR::SectionInfo_t l_info;
+
+        // Ensure we cannot read secure sections from PNOR at Runtime
+        l_err = PNOR::getSectionInfo(l_id, l_info);
+        if(l_err)
+        {
+            if (l_err->reasonCode() == PNOR::RC_RTPNOR_INVALID_SECTION)
+            {
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                TS_FAIL("testAccessSecurePnorSection: unexpected reason code for Secure Section %s. Expected RC 0x%.4X Actual RC 0x%.4X",
+                        PNOR::SectionIdToString(l_id),
+                        PNOR::RC_RTPNOR_INVALID_SECTION,
+                        l_err->reasonCode());
+                errlCommit(l_err, SECURE_COMP_ID);
+            }
+        }
+        else
+        {
+            TS_FAIL("testAccessSecurePnorSection: Did not catch illegal PNOR access of Secure Section %s",
+                        PNOR::SectionIdToString(l_id));
+        }
+
+        l_id = PNOR::HB_EXT_CODE;
+        l_err = PNOR::getSectionInfo(l_id, l_info);
+        if(l_err)
+        {
+            if (l_err->reasonCode() == PNOR::RC_RTPNOR_INVALID_SECTION)
+            {
+                delete l_err;
+                l_err = nullptr;
+            }
+            else
+            {
+                TS_FAIL("testAccessSecurePnorSection: unexpected reason code for Secure Section %s. Expected RC 0x%.4X Actual RC 0x%.4X",
+                        PNOR::SectionIdToString(l_id),
+                        PNOR::RC_RTPNOR_INVALID_SECTION,
+                        l_err->reasonCode());
+                errlCommit(l_err, SECURE_COMP_ID);
+            }
+        }
+        else
+        {
+            TS_FAIL("testAccessSecurePnorSection: Did not catch illegal PNOR access of Secure Section %s",
+                        PNOR::SectionIdToString(l_id));
+        }
+
+
+        SB_EXIT("testAccessSecurePnorSection");
     }
 
 

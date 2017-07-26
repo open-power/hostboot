@@ -177,23 +177,6 @@ class RtPnor
          */
         errlHndl_t readTOC();
 
-        // @TODO RTC:155374 Remove this in the future
-        /**
-         * @brief  Check if PNOR sections appear to be secure and sets the
-         *         internal TOC of PnorRp accordingly.
-         *         Note: The setting of the flag is based on the Secureboot policy.
-         *         Note: Done separately from pnor common code to prevent PNOR
-         *               deadlock when reading section bytes.
-         *
-         * @param[in] io_TOC  Pointer to internal array of section data that
-         *                    represents the TOC of pnor flash
-         *                    Asserts if nullptr
-         *
-         * @return errlHndl_t  Error log if request was invalid
-         */
-        errlHndl_t setSecure(const uint8_t* i_tocBuffer,
-                             PNOR::SectionData_t* io_TOC) const;
-
         /**
          * @brief Get processor id of master proc and cache in internal variable
          *

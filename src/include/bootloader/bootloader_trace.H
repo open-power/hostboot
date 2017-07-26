@@ -181,6 +181,9 @@ enum BootloaderTraces
 
     /** Bootloader main verifyContainer failed */
     BTLDR_TRC_MAIN_VERIFY_FAIL               = 0xFB,
+
+    /** Bootloader main verifyContainer secure rom invalid */
+    BTLDR_TRC_MAIN_VERIFY_INVALID_SECROM     = 0xFC,
 };
 
 #ifndef BOOTLOADER_TRACE

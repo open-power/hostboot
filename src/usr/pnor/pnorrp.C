@@ -356,7 +356,7 @@ void PnorRP::initDaemon()
             break;
         }
 
-        // @TODO RTC 168021 Remove the non-secure extension path and
+        // @TODO RTC 178520 Remove the non-secure extension path and
         // always used the converged HBB extension path.
 
         // If secured, extend base image (HBB) when Hostboot first starts.

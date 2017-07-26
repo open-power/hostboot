@@ -284,18 +284,38 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 
         if (!l_info.secure)
         {
-#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-            TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on unsecured section - Best effort policy skipping");
-            break;
-#else
-            TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::verifySections> called on "
-                "unsecured section");
+            if(SECUREBOOT::bestEffortPolicy())
+            {
+                TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on unsecured section - Best effort policy skipping");
+                break;
+            }
+            else
+            {
+                TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::verifySections> called on "
+                    "unsecured section");
 
-            // TODO securebootp9 revisit this assert code and replace with error log
-            // code if it is deemed that this assert could happen in the field
-            assert(false,"PNOR::loadSection> section %i is not a secure section",
-                                                                    i_id);
-#endif
+                /*@
+                 * @errortype
+                 * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+                 * @moduleid     PNOR::MOD_SPNORRP_VERIFYSECTIONS
+                 * @reasoncode   PNOR::RC_UNSIGNED_PNOR_SECTION
+                 * @userdata1    PNOR section requested to verify
+                 * @userdata2    0
+                 * @devdesc      Cannot verify unsigned PNOR section
+                 * @custdesc     Security failure: unable to securely load
+                 *               requested firmware.
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                       ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                       PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                                       PNOR::RC_UNSIGNED_PNOR_SECTION,
+                                       TO_UINT64(i_id),
+                                       0,
+                                       true /*Add HB SW Callout*/);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                l_errhdl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
         }
 
         l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header

@@ -50,9 +50,6 @@ extern trace_desc_t* g_trac_pnor;
  */
 TASK_ENTRY_MACRO( RtPnor::init );
 
-// @TODO RTC:155374 Remove this in the future
-const size_t BEST_EFFORT_NUM_BYTES = 32;
-
 /**
  * @brief  Return the size and address of a given section of PNOR data
  */
@@ -159,33 +156,42 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
     do
     {
         bool l_inhibited = false;
-        #ifdef CONFIG_SECUREBOOT
+        bool l_secure = false;
+#ifdef CONFIG_SECUREBOOT
         l_inhibited = PNOR::isInhibitedSection(i_section);
-        #endif
-        if (i_section == PNOR::INVALID_SECTION || l_inhibited)
+        l_secure =  iv_TOC[i_section].secure;
+#endif
+        if (i_section == PNOR::INVALID_SECTION || l_inhibited || l_secure)
         {
-            TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: Invalid Section"
-                    " %d", (int)i_section);
-            #ifdef CONFIG_SECUREBOOT
+            TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: Invalid Section %d",
+                      static_cast<int>(i_section));
+#ifdef CONFIG_SECUREBOOT
             if (l_inhibited)
             {
-                TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: "
-                    "attribute overrides inhibited by secureboot");
+                TRACFCOMP(g_trac_pnor, ERR_MRK"RtPnor::getSectionInfo: attribute overrides inhibited by secureboot");
             }
-            #endif
+            else if (l_secure)
+            {
+                TRACFCOMP(g_trac_pnor, ERR_MRK"RtPnor::getSectionInfo: secure sections should be loaded via Hostboot Reserved Memory");
+            }
+#endif
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
              * @reasoncode  PNOR::RC_RTPNOR_INVALID_SECTION
              * @userdata1   PNOR::SectionId
-             * @userdata2   Inhibited by secureboot
+             * @userdata2[0:31]   Inhibited by secureboot
+             * @userdata2[32:63]  Indication of a secure section
              * @devdesc     invalid section passed to getSectionInfo  or
              *              section prohibited by secureboot
              */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
                                             PNOR::RC_RTPNOR_INVALID_SECTION,
-                                            i_section, l_inhibited, true);
+                                            i_section,
+                                            TWO_UINT32_TO_UINT64(l_inhibited,
+                                                                 l_secure),
+                                            true);
             break;
         }
 
@@ -258,16 +264,6 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
             (iv_TOC[i_section].version & FFS_VERS_SHA512) ? true : false;
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
-#ifdef CONFIG_SECUREBOOT
-        o_info.secure = iv_TOC[i_section].secure;
-        // We don't verify PNOR sections at runtime, but we
-        // still have to bypass the secure header
-        if(o_info.secure)
-        {
-            o_info.vaddr += PAGESIZE;
-            o_info.size -= PAGESIZE;
-        }
-#endif
     } while (0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo");
@@ -722,15 +718,6 @@ errlHndl_t RtPnor::readTOC ()
                 TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: parseTOC failed");
                 break;
             }
-
-            // Check if PNOR section has a secureHeader or not.
-            // Cannot do a device read during parseTOC in Runtime, so do after.
-            l_err = setSecure(l_toc0Buffer, iv_TOC);
-            if (l_err)
-            {
-                TRACFCOMP(g_trac_pnor, "RtPnor::readTOC: setSecure failed");
-                break;
-            }
         }
     } while (0);
 
@@ -741,73 +728,6 @@ errlHndl_t RtPnor::readTOC ()
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::readTOC" );
     return l_err;
-}
-
-// @TODO RTC:155374 Remove this in the future
-errlHndl_t RtPnor::setSecure(const uint8_t* i_tocBuffer,
-                             PNOR::SectionData_t* io_TOC) const
-{
-    errlHndl_t l_errhdl = nullptr;
-
-    assert(i_tocBuffer != nullptr, "RtPnor::setSecure received a NULL tocBuffer to read");
-    assert(io_TOC != nullptr, "RtPnor::setSecure received a NULL toc to modify");
-
-    do {
-        // Set secure flag for each section after the TOC
-        // Walk through all the entries in the table and parse the data.
-        auto const l_ffs_hdr = reinterpret_cast<const ffs_hdr*>(i_tocBuffer);
-        for(uint32_t i=0; i<l_ffs_hdr->entry_count; ++i)
-        {
-            PNOR::SectionId l_secId = PNOR::INVALID_SECTION;
-
-            // Get current entry section id
-            auto cur_entry = &(l_ffs_hdr->entries[i]);
-            PNOR::getSectionEnum(cur_entry, &l_secId);
-            if(l_secId == PNOR::INVALID_SECTION)
-            {
-              TRACFCOMP(g_trac_pnor, "RtPnor::setSecure Unrecognized Section name(%s), skipping",cur_entry->name);
-              continue;
-            }
-
-            // Set secure field based on enforced policy
-            io_TOC[l_secId].secure = PNOR::isEnforcedSecureSection(l_secId);
-
-#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-            if (io_TOC[l_secId].secure)
-            {
-                // Apply best effort policy by checking if the section appears to have a
-                // secure header
-                // Need to read first 4 bytes of data to check version header
-                // Note: For OPAL and PHYP need to read 8 bytes for ECC checking
-                //       In CXX test a pnorDD read is called and requires a
-                //       multiple of 4 bytes. If the section as ECC then it
-                //       needs to be a multiple of 4 bytes after ECC.
-                //       32 Bytes fulfills both requirements.
-                size_t l_size = BEST_EFFORT_NUM_BYTES;
-                uint8_t l_buf[l_size] = {0};
-
-                bool l_ecc = io_TOC[l_secId].integrity & FFS_INTEG_ECC_PROTECT;
-                // Read first 8 bytes of section data from PNOR
-                l_errhdl = readFromDevice(iv_masterProcId,
-                                          static_cast<PNOR::SectionId>(l_secId),
-                                          0, l_size, l_ecc, l_buf);
-                if (l_errhdl)
-                {
-                    break;
-                }
-
-                // Check if first 4 bytes match the Secureboot Magic Number
-                io_TOC[l_secId].secure &= PNOR::cmpSecurebootMagicNumber(l_buf);
-            }
-#endif
-        }
-        if (l_errhdl)
-        {
-            break;
-        }
-    } while(0);
-
-    return l_errhdl;
 }
 
 /***********************************************************/
