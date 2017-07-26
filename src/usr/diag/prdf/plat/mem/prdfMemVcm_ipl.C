@@ -115,8 +115,18 @@ uint32_t VcmEvent<TYPE_MCA>::checkEcc( const uint32_t & i_eccAttns,
                                                            ? PRDFSIG_MaintUE
                                                            : PRDFSIG_MaintIUE );
 
-            o_rc = MemEcc::handleMemUe<TYPE_MCA>( iv_chip,
-                                                  MemAddr::fromRank(iv_rank),
+            // At this point we don't actually have an address for the UE. The
+            // best we can do is get the address in which the command stopped.
+            MemAddr addr;
+            o_rc = getMemMaintAddr<TYPE_MCA>( iv_chip, addr );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemMaintAddr(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            o_rc = MemEcc::handleMemUe<TYPE_MCA>( iv_chip, addr,
                                                   UE_TABLE::SCRUB_UE, io_sc );
             if ( SUCCESS != o_rc )
             {
