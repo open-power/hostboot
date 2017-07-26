@@ -79,11 +79,6 @@ extern "C"
         FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()) );
         FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets));
 
-        FAPI_ASSERT( i_targets.size() != 0,
-                     fapi2::MSS_EMPTY_VECTOR_PASSED_TO_EFF_CONFIG_THERMAL()
-                     .set_MCS_COUNT(0),
-                     "Empty vector passed into p9_mss_eff_config_thermal procedure");
-
         for (size_t i = 0; i < mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS; ++i)
         {
             for (const auto l_cur : l_tslope)
@@ -169,6 +164,11 @@ extern "C"
         //Set VDDR+VPP power curve values
         for ( const auto& l_mcs : i_targets )
         {
+            if (mss::count_dimm(l_mcs) == 0)
+            {
+                continue;
+            }
+
             FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
                       l_intercept,
