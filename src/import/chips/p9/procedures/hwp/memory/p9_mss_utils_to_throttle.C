@@ -73,6 +73,11 @@ extern "C"
 
         for( const auto& l_mcs : i_targets )
         {
+            if (mss::count_dimm(l_mcs) == 0)
+            {
+                continue;
+            }
+
             uint32_t l_input_databus_util [mss::PORTS_PER_MCS] = {};
             uint32_t l_max_databus_util  = {};
             uint32_t l_dram_clocks = 0;
@@ -94,9 +99,8 @@ extern "C"
                          l_input_databus_util[mss::index(l_mca)]);
 
                 const auto l_port_num = mss::index(l_mca );
-                const auto l_count = mss::count_dimm(l_mca);
 
-                if (l_count == 0)
+                if (mss::count_dimm(l_mca) == 0)
                 {
                     continue;
                 }
