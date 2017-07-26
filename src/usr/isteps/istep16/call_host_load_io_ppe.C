@@ -124,29 +124,25 @@ void* call_host_load_io_ppe (void *io_pArgs)
         // Get all OBUS targets
         TARGETING::TargetHandleList l_obusTargetList;
         getAllChiplets(l_obusTargetList, TYPE_OBUS);
-        // Get all XBUS targets
-        TARGETING::TargetHandleList l_xbusTargetList;
-        getAllChiplets(l_xbusTargetList, TYPE_XBUS);
+        // Get all PROC targets for XBUS
+        TARGETING::TargetHandleList l_procTargetList;
+        getAllChips(l_procTargetList, TYPE_PROC);
 
         // Loop through OBUS
         for (const auto & l_obusTarget: l_obusTargetList)
         {
-
             const fapi2::Target<fapi2::TARGET_TYPE_OBUS>
                 l_obusFapi2Target(
                 (const_cast<TARGETING::Target*>(l_obusTarget)));
-
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_io_obus_image_build HWP on "
                      "OBUS target %.8X",
                        TARGETING::get_huid(l_obusTarget));
-// TODO RTC 176314
-#if 0
 
             FAPI_INVOKE_HWP( l_err,
                       p9_io_obus_image_build,
-                      l_obusTarget,
+                      l_obusFapi2Target,
                       reinterpret_cast<void*>(l_pHcodeImage));
 
             if(l_err)
@@ -161,28 +157,23 @@ void* call_host_load_io_ppe (void *io_pArgs)
                 l_stepError.addErrorDetails(l_err);
                 errlCommit(l_err, HWPF_COMP_ID);
             }
-#endif
-        }
+        } // end of looping through obus
 
-        // Loop through XBUS
-        for (const auto & l_xbusTarget: l_xbusTargetList)
+        // Loop through PROC (for XBUS)
+        for (const auto & l_procTarget: l_procTargetList)
         {
-
-            const fapi2::Target<fapi2::TARGET_TYPE_XBUS>
-                l_xbusFapi2Target(
-                (const_cast<TARGETING::Target*>(l_xbusTarget)));
-
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                l_procFapi2Target(
+                (const_cast<TARGETING::Target*>(l_procTarget)));
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                      "Running p9_io_xbus_image_build HWP on "
                      "XBUS target %.8X",
-                       TARGETING::get_huid(l_xbusTarget));
+                       TARGETING::get_huid(l_procTarget));
 
-// TODO RTC 176314
-#if 0
             FAPI_INVOKE_HWP( l_err,
                       p9_io_xbus_image_build,
-                      l_xbusTarget,
+                      l_procFapi2Target,
                       reinterpret_cast<void*>(l_pHcodeImage));
 
             if(l_err)
@@ -191,14 +182,13 @@ void* call_host_load_io_ppe (void *io_pArgs)
                          "ERROR 0x%.8X: returned from p9_io_xbus_image_build on "
                          "XBUS target %.8X, PLID=0x%x",
                         l_err->reasonCode(),
-                        TARGETING::get_huid(l_xbusTarget),
+                        TARGETING::get_huid(l_procTarget),
                         l_err->plid());
 
                 l_stepError.addErrorDetails(l_err);
                 errlCommit(l_err, HWPF_COMP_ID);
             }
-#endif
-        } // end of looping through Obus pairs
+        } // end of looping through xbus
     } while( 0 );
 
 #ifdef CONFIG_SECUREBOOT
