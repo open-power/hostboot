@@ -472,87 +472,94 @@ void collectRegFfdc(const fapi2::ffdc_t i_parent,
 
     std::vector<fapi2::Target<C> > l_targets;
 
-    Target<T> l_parent =
-        *(static_cast<const Target<T>*>(i_parent.ptr()));
-
-    // Collect FFDC for functional or present chiplets of
-    // type C associated with i_target - yeah, odd syntax.
-    l_targets = l_parent.template getChildren<C>(i_childState);
-
-    if (l_targets.empty())
+    if( i_parent.ptr() == nullptr )
     {
-        FAPI_INF("collect_reg_ffdc.C: Error: No chiplets found. ");
-        return;
+        FAPI_ERR("Target ptr in FFDC object was null, skipping register data collection.");
     }
-
-    std::vector<uint32_t> l_cfamAddresses;
-    std::vector<uint64_t> l_scomAddresses;
-
-    uint32_t l_ffdcSize = 0;        // total size needed for all entries
-    uint32_t l_ffdcRegReadSize = 0; // readRegisters size addition
-
-    // call generated code to fetch the address vectors
-    getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcRegReadSize);
-
-    uint32_t l_position = 0;
-
-    // initialize to single readRegister entry
-    l_ffdcSize = l_ffdcRegReadSize;
-
-    // add the position size to the total
-    l_ffdcSize += sizeof(l_position);
-
-    // update size for each target
-    l_ffdcSize = (l_ffdcSize * l_targets.size());
-
-    uint8_t  l_pBuf[l_ffdcSize];
-
-    uint8_t* l_pData = &l_pBuf[0];
-
-    // grab the data for each child target
-    for( auto target : l_targets)
+    else
     {
-        ReturnCode l_rc =
-            TargetPosition<C>(target).getPosition(l_position);
 
-        // add chip/chiplets position to the data
-        memcpy(l_pData, &l_position, sizeof(l_position));
+        Target<T> l_parent =
+            *(static_cast<const Target<T>*>(i_parent.ptr()));
 
-        // advance the pointer into our buffer
-        l_pData += sizeof(l_position);
+        // Collect FFDC for functional or present chiplets of
+        // type C associated with i_target - yeah, odd syntax.
+        l_targets = l_parent.template getChildren<C>(i_childState);
 
-        if(i_childState == TARGET_STATE_FUNCTIONAL)
+        if (l_targets.empty())
         {
-            FAPI_INF(" calling version for TARGET_STATE_FUNCTIONAL ");
-
-            // since its functional just read from the child target
-            readRegisters(target, l_pData, l_cfamAddresses,
-                          l_scomAddresses, i_childOffsetMult);
-        }
-        else
-        {
-            // use the parent and read address + offset since the
-            // child targets may not be functional
-            uint32_t l_offset = i_childOffsetMult * l_position;
-
-            FAPI_INF(" calling version for TARGET_STATE_PRESENT ");
-
-            readRegisters(l_parent, l_pData, l_cfamAddresses,
-                          l_scomAddresses, l_offset);
+            FAPI_INF("collect_reg_ffdc.C: Error: No chiplets found. ");
+            return;
         }
 
-        // advance the pointer past readRegisters data entry
-        l_pData += l_ffdcRegReadSize;
+        std::vector<uint32_t> l_cfamAddresses;
+        std::vector<uint64_t> l_scomAddresses;
+
+        uint32_t l_ffdcSize = 0;        // total size needed for all entries
+        uint32_t l_ffdcRegReadSize = 0; // readRegisters size addition
+
+        // call generated code to fetch the address vectors
+        getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcRegReadSize);
+
+        uint32_t l_position = 0;
+
+        // initialize to single readRegister entry
+        l_ffdcSize = l_ffdcRegReadSize;
+
+        // add the position size to the total
+        l_ffdcSize += sizeof(l_position);
+
+        // update size for each target
+        l_ffdcSize = (l_ffdcSize * l_targets.size());
+
+        uint8_t  l_pBuf[l_ffdcSize];
+
+        uint8_t* l_pData = &l_pBuf[0];
+
+        // grab the data for each child target
+        for( auto target : l_targets)
+        {
+            ReturnCode l_rc =
+                TargetPosition<C>(target).getPosition(l_position);
+
+            // add chip/chiplets position to the data
+            memcpy(l_pData, &l_position, sizeof(l_position));
+
+            // advance the pointer into our buffer
+            l_pData += sizeof(l_position);
+
+            if(i_childState == TARGET_STATE_FUNCTIONAL)
+            {
+                FAPI_INF(" calling version for TARGET_STATE_FUNCTIONAL ");
+
+                // since its functional just read from the child target
+                readRegisters(target, l_pData, l_cfamAddresses,
+                              l_scomAddresses, i_childOffsetMult);
+            }
+            else
+            {
+                // use the parent and read address + offset since the
+                // child targets may not be functional
+                uint32_t l_offset = i_childOffsetMult * l_position;
+
+                FAPI_INF(" calling version for TARGET_STATE_PRESENT ");
+
+                readRegisters(l_parent, l_pData, l_cfamAddresses,
+                              l_scomAddresses, l_offset);
+            }
+
+            // advance the pointer past readRegisters data entry
+            l_pData += l_ffdcRegReadSize;
+        }
+
+        FAPI_INF("collectRegFfdc. SCOM address count: %#lx", l_scomAddresses.size());
+        FAPI_INF("collectRegFfdc. CFAM address count: %#lx", l_cfamAddresses.size());
+
+        FAPI_DBG("size info i_ffdcId = %d, l_pBuf = %p, l_ffdcSize=%d", i_ffdcId, l_pBuf, l_ffdcSize);
+
+        // Create a ErrorInfoFfdc object and pass it back
+        o_errorInfoFfdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new ErrorInfoFfdc(i_ffdcId, l_pBuf, l_ffdcSize)));
     }
-
-    FAPI_INF("collectRegFfdc. SCOM address count: %#lx", l_scomAddresses.size());
-    FAPI_INF("collectRegFfdc. CFAM address count: %#lx", l_cfamAddresses.size());
-
-    FAPI_DBG("size info i_ffdcId = %d, l_pBuf = %p, l_ffdcSize=%d", i_ffdcId, l_pBuf, l_ffdcSize);
-
-    // Create a ErrorInfoFfdc object and pass it back
-    o_errorInfoFfdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new ErrorInfoFfdc(i_ffdcId, l_pBuf, l_ffdcSize)));
-
 }
 ///
 /// @brief Collect register data for a single target
@@ -573,43 +580,51 @@ void collectRegFfdc(const fapi2::ffdc_t i_target,
 
     FAPI_INF("single target no children - ");
 
-    Target<T> l_target =
-        *(static_cast<const Target<T>*>(i_target.ptr()));
+    if( i_target.ptr() == nullptr )
+    {
+        FAPI_ERR("Target ptr in FFDC object was null, skipping register data collection.");
+    }
+    else
+    {
 
-    std::vector<uint32_t> l_cfamAddresses;
-    std::vector<uint64_t> l_scomAddresses;
+        Target<T> l_target =
+            *(static_cast<const Target<T>*>(i_target.ptr()));
 
-    uint32_t l_ffdcSize = 0;
+        std::vector<uint32_t> l_cfamAddresses;
+        std::vector<uint64_t> l_scomAddresses;
 
-    // call generated code to fetch the address vectors
-    getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcSize);
+        uint32_t l_ffdcSize = 0;
 
-    uint32_t l_position = 0;
+        // call generated code to fetch the address vectors
+        getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcSize);
 
-    ReturnCode l_rc = TargetPosition<T>(l_target).getPosition(l_position);
+        uint32_t l_position = 0;
 
-    l_ffdcSize += sizeof(l_position);
+        ReturnCode l_rc = TargetPosition<T>(l_target).getPosition(l_position);
 
-    uint8_t l_pBuf[l_ffdcSize];
+        l_ffdcSize += sizeof(l_position);
 
-    uint8_t* l_pData = &l_pBuf[0];
+        uint8_t l_pBuf[l_ffdcSize];
 
-    // add chip/chiplets position to the data
-    memcpy(l_pData, &l_position, sizeof(l_position));
+        uint8_t* l_pData = &l_pBuf[0];
 
-    l_pData += sizeof(l_position);
+        // add chip/chiplets position to the data
+        memcpy(l_pData, &l_position, sizeof(l_position));
 
-    // do the work
-    readRegisters(l_target, l_pData, l_cfamAddresses, l_scomAddresses,
-                  i_childOffset);
+        l_pData += sizeof(l_position);
 
-    FAPI_DBG("size info i_ffdcId = %d, l_pBuf = %p, l_ffdcSize=%d", i_ffdcId, l_pBuf, l_ffdcSize);
-    // Create a ErrorInfoFfdc object and add it to the Error Information
-    // object of the FFDC class
-    o_errorInfoFfdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new ErrorInfoFfdc(i_ffdcId, l_pBuf, l_ffdcSize)));
+        // do the work
+        readRegisters(l_target, l_pData, l_cfamAddresses, l_scomAddresses,
+                      i_childOffset);
 
-    FAPI_INF("collectRegFfdc. SCOM address count:  %d", (uint32_t)(l_scomAddresses.size()));
-    FAPI_INF("collectRegFfdc. CFAM address count:  %d", (uint32_t)(l_cfamAddresses.size()));
+        FAPI_DBG("size info i_ffdcId = %d, l_pBuf = %p, l_ffdcSize=%d", i_ffdcId, l_pBuf, l_ffdcSize);
+        // Create a ErrorInfoFfdc object and add it to the Error Information
+        // object of the FFDC class
+        o_errorInfoFfdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(new ErrorInfoFfdc(i_ffdcId, l_pBuf, l_ffdcSize)));
+
+        FAPI_INF("collectRegFfdc. SCOM address count:  %d", (uint32_t)(l_scomAddresses.size()));
+        FAPI_INF("collectRegFfdc. CFAM address count:  %d", (uint32_t)(l_cfamAddresses.size()));
+    }
 
     FAPI_INF("collectRegFfdc() - exit");
 }
