@@ -190,19 +190,6 @@
     </callout>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_MSS_EMPTY_VECTOR_PASSED_TO_EFF_CONFIG_THERMAL</rc>
-    <description>
-        There are either no DIMMS or no MCS in the vector passed into the memory power thermal functions
-    </description>
-    <ffdc>MCS_COUNT</ffdc>
-    <ffdc>DIMM_COUNT</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
- </hwpError>
-
  <hwpError>
      <rc>RC_MSS_OUTPUT_OVERFLOW_CALC_UTIL</rc>
     <description>

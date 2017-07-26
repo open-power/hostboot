@@ -672,6 +672,11 @@ fapi2::ReturnCode update_runtime_throttles( const std::vector< fapi2::Target<fap
 {
     for (const auto& l_mcs : i_targets)
     {
+        if (mss::count_dimm(l_mcs) == 0)
+        {
+            continue;
+        }
+
         uint16_t l_run_slot [PORTS_PER_MCS] = {};
         uint16_t l_run_port [PORTS_PER_MCS] = {};
         uint16_t l_calc_slot [PORTS_PER_MCS] = {};
@@ -729,12 +734,11 @@ fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target
         l_count_dimms_vec += mss::count_dimm(l_mcs);
     }
 
-    //Let's make sure we have some DIMMs installed or else we get a divide by zero
-    FAPI_ASSERT( l_count_dimms_vec != 0,
-                 fapi2::MSS_EMPTY_VECTOR_PASSED_TO_EFF_CONFIG_THERMAL()
-                 .set_DIMM_COUNT(l_count_dimms_vec)
-                 .set_MCS_COUNT(i_targets.size()),
-                 "No DIMMS installed on vector of MCS");
+    if ( l_count_dimms_vec == 0)
+    {
+        FAPI_INF("No DIMMs found. Can't calculate WATT_TARGET");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     //Now calculate the watt target
     //Calculate max power available / number of dimms configured on the VDDR rail
