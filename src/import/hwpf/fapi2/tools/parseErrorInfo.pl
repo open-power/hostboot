@@ -301,8 +301,9 @@ sub addFfdcMethod
         {
             $method_body = "    {\n        $ffdc_uc.ptr() = &i_value;\n        $ffdc_uc.size() =";
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
-            $methods->{$key}{member}            = "$ffdc_type $ffdc_uc;";
-            $methods->{$objectNumber}{localvar} = "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
+            $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
+            $methods->{$objectNumber}{localvar} =
+                "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -333,8 +334,9 @@ sub addFfdcMethod
         $method_body .= "        $ffdc_uc.size() = $param.template getLength<uint8_t>();\n";
         $method_body .= "        return *this;\n";
         $method_body .= "    }\n\n";
-        $methods->{$key}{member}            = "$ffdc_type $ffdc_uc;";
-        $methods->{$objectNumber}{localvar} = "$buffer_ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
+        $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
+        $methods->{$objectNumber}{localvar} =
+            "$buffer_ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
     }
 
@@ -369,15 +371,16 @@ sub addFfdcMethod
                 . "        return *this;\n    }\n\n";
         }
 
-        $methods->{$key}{member}                     = "$ffdc_type $ffdc_uc;";
-        $methods->{$objectNumber}{localvar}          = "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
+        $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
+        $methods->{$objectNumber}{localvar} =
+            "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
     }
     elsif ( $type eq $scom_addr_type )
     {
         if ( $arg_local_ffdc eq undef )
         {
-            $method = "\n    static $type $ffdc_uc(const sbeFfdc_t *ffdc)\n";
+            $method      = "\n    static $type $ffdc_uc(const sbeFfdc_t *ffdc)\n";
             $method_body = "    {\n        return ffdc[$objectNumber].data;\n    }\n\n";
         }
     }
@@ -389,8 +392,9 @@ sub addFfdcMethod
         {
             $method_body = "    { $ffdc_uc = i_value; ";
             $method_body .= " return *this;}\n\n";
-            $methods->{$key}{member}                     = "$type $ffdc_uc;";
-            $methods->{$objectNumber}{localvar}          = "$type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber]);";
+            $methods->{$key}{member} = "$type $ffdc_uc;";
+            $methods->{$objectNumber}{localvar} =
+                "$type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -548,6 +552,7 @@ print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
 print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
 print SBFILE "#define FAPI_SET_SBE_ERROR(RC,ERRVAL,FFDC_BUFFER,SBE_INSTANCE)\\\n";
 print SBFILE "{\\\n";
+print SBFILE "bool invalid_data = false;\\\n";
 print SBFILE "switch (ERRVAL)\\\n";
 print SBFILE "{\\\n";
 
@@ -1610,7 +1615,10 @@ foreach my $argnum ( 0 .. $#ARGV )
             {
                 print SBFILE "$objectStr";
             }
-            print SBFILE "        l_obj.execute(); \\\n";
+            print SBFILE "        if(!invalid_data) \\\n";
+            print SBFILE "        { \\\n";
+            print SBFILE "          l_obj.execute(); \\\n";
+            print SBFILE "        } \\\n";
             print SBFILE "        break; \\\n    } \\\n";
         }
 
@@ -1750,8 +1758,18 @@ print ECFILE "\n\n#endif\n";
 #------------------------------------------------------------------------------
 print SBFILE "    default:\\\n";
 
-#print SBFILE "        FAPI_SET_HWP_ERROR(RC, RC_SBE_UNKNOWN_ERROR,0);\\\n";
+print SBFILE "       invalid_data = true;\\\n";
 print SBFILE "        break;\\\n";
+print SBFILE "}\\\n";
+print SBFILE "if(invalid_data)\\\n";
+print SBFILE "{\\\n";
+print SBFILE "  /* create a new rc and capture invalid ffdc buffer */\\\n";
+print SBFILE "  /* FFDC buffer size is 20 sbeFfdc_t entries */\\\n";
+print SBFILE "  /* variable buffer needs size in uint32_t, and the resulting bit count  */\\\n";
+print SBFILE "   const uint32_t size_bytes = (sizeof(sbeFfdc_t)*20);\\\n";
+print SBFILE "   fapi2::variable_buffer l_buffer((uint32_t*)FFDC_BUFFER, size_bytes/4, size_bytes*8);\\\n";
+print SBFILE "   fapi2::INVALID_SBE_FFDC_PACKET(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC).";
+print SBFILE "set_FFDC_BUFFER(l_buffer).execute();\\\n";
 print SBFILE "}\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";
