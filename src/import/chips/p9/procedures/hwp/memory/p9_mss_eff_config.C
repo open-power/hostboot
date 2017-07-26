@@ -50,6 +50,7 @@
 #include <lib/shared/mss_kind.H>
 #include <lib/dimm/eff_dimm.H>
 #include <lib/eff_config/plug_rules.H>
+#include <lib/utils/count_dimm.H>
 
 ///
 /// @brief Configure the attributes for each controller
@@ -60,6 +61,12 @@
 fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
                                      const bool i_decode_spd_only )
 {
+    if ( mss::count_dimm(i_target) == 0 )
+    {
+        FAPI_INF("No DIMMs found on %s... Skipping p9_mss_eff_config", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     fapi2::ReturnCode l_rc;
     std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
     // Caches
@@ -84,8 +91,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     for( const auto& l_cache : l_factory_caches )
     {
-
-
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
 
         FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm));
