@@ -433,6 +433,11 @@ BitStringBuffer::BitStringBuffer( const BitStringBuffer & i_bsb ) :
 
 BitStringBuffer & BitStringBuffer::operator=( const BitString & i_bs )
 {
+    // The initBuffer() function will deallocate the buffer as well, however we
+    // also need to deallocate the buffer here before we set the length.
+    delete [] getBufAddr();
+    setBufAddr( nullptr );
+
     setBitLen( i_bs.getBitLen() );
     initBuffer();
     if ( !i_bs.isZero() ) setString( i_bs );
@@ -446,6 +451,11 @@ BitStringBuffer & BitStringBuffer::operator=( const BitStringBuffer & i_bsb )
 {
     if ( this != &i_bsb ) // Check for assignment to self
     {
+        // The initBuffer() function will deallocate the buffer as well, however
+        // we also need to deallocate the buffer here before we set the length.
+        delete [] getBufAddr();
+        setBufAddr( nullptr );
+
         setBitLen( i_bsb.getBitLen() );
         initBuffer();
         if ( !i_bsb.isZero() ) setString( i_bsb );
