@@ -249,7 +249,14 @@
 	<target>TARGET_CHIPLET</target>
       </gard>
     </hwpError>
-   <!-- ******************************************************************** -->
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <sbeError/>
+      <rc>RC_INVALID_SBE_FFDC_PACKET</rc>
+      <description>Invalid data detected in the SBE FFDC buffer</description>
+      <buffer>FFDC_BUFFER</buffer>
+     </hwpError>
+    <!-- ******************************************************************** -->
     <hwpError>
       <sbeError/>
       <rc>RC_CPLT_NOT_ALIGNED_ERR</rc>
