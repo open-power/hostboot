@@ -510,6 +510,16 @@ TARGETING::TargetHandle_t getActiveRefClk(
                             TARGETING::TYPE i_connType,
                             uint32_t i_oscPos);
 
+
+/**
+ * @brief   Add callouts and FFDC for Deadman timer
+ * @param   i_target      target for processor chip
+ * @param   io_sc         service data structure
+ * @return  Nothing.
+ */
+void deadmanTimerFFDC( TARGETING::TargetHandle_t  i_target,
+                       STEP_CODE_DATA_STRUCT & io_sc );
+
 } // end namespace PlatServices
 
 } // end namespace PRDF

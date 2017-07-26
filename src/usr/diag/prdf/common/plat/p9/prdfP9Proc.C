@@ -32,6 +32,7 @@
 #include <iipServiceDataCollector.h>
 #include <prdfExtensibleChip.H>
 #include <prdfPluginMap.H>
+#include <xspprdService.h>
 
 #ifdef __HOSTBOOT_MODULE
 #include <prdfPlatServices_ipl.H>
@@ -328,6 +329,23 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
+
+/** Call HW server rtn for Deadman Timer */
+int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc )
+{
+    TARGETING::TargetHandle_t  l_target = i_chip->getTrgt();
+
+
+    // This routine adds FFDC information to the elog
+    // and will also do the callouts as needed.
+    deadmanTimerFFDC( l_target, io_sc );
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, handleDeadmanTimer );
+//------------------------------------------------------------------------------
+
 
 } // end namespace Proc
 

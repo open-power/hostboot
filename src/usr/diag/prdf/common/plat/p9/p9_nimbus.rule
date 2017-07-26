@@ -4672,7 +4672,7 @@ group gN3_LFIR filter singlebit, cs_root_cause
     /** N3_LFIR[32]
      *  deadman timer expired
      */
-    (rN3_LFIR, bit(32)) ? self_th_1;
+    (rN3_LFIR, bit(32)) ? deadmanTimer;
 
     /** N3_LFIR[33]
      *  system quiesce failed
@@ -8454,3 +8454,9 @@ actionclass analyzeConnectedMCS0    { analyze(connected(TYPE_MCS,     0)); };
 actionclass analyzeConnectedMCS1    { analyze(connected(TYPE_MCS,     1)); };
 actionclass analyzeConnectedMCS2    { analyze(connected(TYPE_MCS,     2)); };
 actionclass analyzeConnectedMCS3    { analyze(connected(TYPE_MCS,     3)); };
+
+actionclass deadmanTimer
+{
+    funccall("handleDeadmanTimer");
+};
+
