@@ -1,15 +1,16 @@
 config SBE_UPDATE_SEQUENTIAL
-    default y if !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT
-    depends on !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT
+    default y if !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT && !SBE_UPDATE_CONSECUTIVE
+    depends on !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT && !SBE_UPDATE_CONSECUTIVE
     help
         If an update is necessary, only 1 SBE SEEPROM per processor will be
-        updated on each IPL.  If a 2nd SBE SEEPROM needs to be updated, a re-IPL
-        will be requested.  The end result is that both SBE SEEPROMs will
-        contain the same code.
+        updated on each IPL (the SEEPROM not used to boot).  If a 2nd SBE
+        SEEPROM needs to be updated (one used to boot), a re-IPL from the
+        updated SBE SEEPROM will be requested.  The end result is that both
+        SBE SEEPROMs will contain the same code.
 
 config SBE_UPDATE_SIMULTANEOUS
     default n
-    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_INDEPENDENT
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_INDEPENDENT && !SBE_UPDATE_CONSECUTIVE
     help
         If an update is necessary, both SBE SEEPROMs on a processor will be
         updated at the same time before a re-IPL request is issued.  The end
@@ -17,12 +18,23 @@ config SBE_UPDATE_SIMULTANEOUS
 
 config SBE_UPDATE_INDEPENDENT
     default y if PNOR_TWO_SIDE_SUPPORT
-    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_CONSECUTIVE
     help
         If an update is necessary, and if the "current" SBE SEEPROM of this
         IPL is not pointing at PNOR's 'GOLDEN' side, then only the current SBE
         SEEPROM will be updated.  After the update a re-IPL request will be
         issued. The other SBE SEEPROM will not be updated.
+
+config SBE_UPDATE_CONSECUTIVE
+    default n
+    depends on !SBE_UPDATE_SEQUENTIAL && !SBE_UPDATE_SIMULTANEOUS && !SBE_UPDATE_INDEPENDENT
+    help
+        If an update is necessary for the primary SBE SEEPROM (side 0), it will
+        be updated.  After the update, a re-IPL is requested and the reboot
+        count will be set to the default so side 0 is used to boot.  If during
+        the re-IPL an update is necessary for the backup SBE SEEPROM (side 1),
+        it will be updated and the IPL is allowed to continue. The end result
+        is that both SBE SEEPROMs will contain the same code.
 
 config NO_SBE_UPDATES
     default n

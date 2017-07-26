@@ -49,6 +49,11 @@ namespace SENSOR
     const uint8_t INVALID_TYPE = 0xFF;
 
     /**
+     * @brief Default reboot count value.
+     */
+    static const uint16_t DEFAULT_REBOOT_COUNT = 0x0002;
+
+    /**
      *  @enum sensorReadingTypes
      *  Sensor specific completion codes, defined in IPMI Spec.
      *
@@ -626,7 +631,6 @@ namespace SENSOR
              *
              */
             errlHndl_t getRebootCount( uint16_t& o_rebootCount );
-
 
     };
 

@@ -188,31 +188,7 @@ namespace SBE
             {
                 TRACFCOMP(g_trac_sbe,
                             INFO_MRK"Update Both Sides of SBE Flag Indicated.");
-                bool l_isGoldenSide=true;
-                errlHndl_t l_err = isGoldenSide(l_isGoldenSide);
-
-                if(l_err)
-                {
-                    TRACFCOMP(g_trac_sbe,
-                              ERR_MRK"updateProcessorSbeSeeproms::isGoldenSide "
-                                     "returned an error, RC=0x%X, PLID=0x%lX",
-                              ERRL_GETRC_SAFE(err),
-                              ERRL_GETPLID_SAFE(err));
-                    errlCommit( l_err, SBE_COMP_ID );
-                    l_isGoldenSide = true;
-                }
-
-                if (l_isGoldenSide)
-                {
-                    g_update_both_sides = false;
-                    TRACFCOMP(g_trac_sbe,
-                                INFO_MRK"Boot on Golden Side - Ignoring Update "
-                                        "both sides of SBE Flag");
-                }
-                else
-                {
-                    g_update_both_sides = true;
-                }
+                g_update_both_sides = true;
             }
 
             //Make sure procedure constants keep within expected range.
@@ -2841,14 +2817,19 @@ namespace SBE
 
         bool seeprom_0_isDirty =    false;
         bool seeprom_1_isDirty =    false;
+#ifndef CONFIG_SBE_UPDATE_CONSECUTIVE
         bool current_side_isDirty = false;
         bool alt_side_isDirty     = false;
+#endif
 
         bool pnor_check_dirty     = false;
         bool crc_check_dirty      = false;
         bool isSimics_check       = false;
 
         TARGETING::Target * l_sys = nullptr;
+
+        // Set system_situation - bits defined in sbe_update.H
+        uint8_t system_situation = 0x00;
 
         do{
 
@@ -2885,6 +2866,9 @@ namespace SBE
                  && !isSimics_check )
             {
                 seeprom_0_isDirty = true;
+#ifdef CONFIG_SBE_UPDATE_CONSECUTIVE
+                system_situation |= SITUATION_SIDE_0_DIRTY;
+#endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom0 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s0=0x%X), "
                            "isSimics=%d",
@@ -2944,6 +2928,9 @@ namespace SBE
                  && !isSimics_check )
             {
                 seeprom_1_isDirty = true;
+#ifdef CONFIG_SBE_UPDATE_CONSECUTIVE
+                system_situation |= SITUATION_SIDE_1_DIRTY;
+#endif
                 TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: Seeprom1 "
                            "dirty: pnor=%d, crc=%d (custom=0x%X/s1=0x%X), "
                            "isSimics=%d",
@@ -2994,6 +2981,7 @@ namespace SBE
             /**************************************************************/
             /*  Determine what side to update                             */
             /**************************************************************/
+#ifndef CONFIG_SBE_UPDATE_CONSECUTIVE
             // Set cur and alt isDirty values
             if( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 )
             {
@@ -3005,9 +2993,6 @@ namespace SBE
                 current_side_isDirty = seeprom_1_isDirty;
                 alt_side_isDirty     = seeprom_0_isDirty;
             }
-
-            // Set system_situation - bits defined in sbe_update.H
-            uint8_t system_situation = 0x00;
 
             // Bit 0: current_side is permanent (0) or temp (1)
             // -- defaulted to 0 (cur=perm) above
@@ -3029,7 +3014,12 @@ namespace SBE
             {
                 system_situation |= SITUATION_ALT_IS_DIRTY;
             }
-
+#else
+            if (io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
+            {
+                system_situation |= SITUATION_BOOT_SIDE_1;
+            }
+#endif
 
             // Call function to update actions
             err = decisionTreeForUpdates(io_sbeState, system_situation);
@@ -3568,6 +3558,177 @@ namespace SBE
                     TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
                                "Unsupported Scenario.  Just Continue IPL. "
                                "(sit=0x%.2X, act=0x%.8X, cur=%d)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               i_system_situation, l_actions,
+                               io_sbeState.cur_seeprom_side);
+
+                    break;
+            }
+            ///////////////////////////////////////////////////////////////////
+            //  End of i_system_situation switch statement
+            ///////////////////////////////////////////////////////////////////
+
+#elif CONFIG_SBE_UPDATE_CONSECUTIVE
+            // Updating the SEEPROMs 1-at-a-time (OP systems)
+
+            // Check system situation ignoring perm/temp bit
+            switch ( i_system_situation )
+            {
+
+            //// 0x0E: side0=dirty, side1=dirty, boot=1 ///////////////////////
+            // Uncommon situation:
+                case ( SITUATION_SIDE_0_DIRTY  |
+                       SITUATION_SIDE_1_DIRTY |
+                       SITUATION_BOOT_SIDE_1  ) :
+                    // fall through
+
+            //// 0x0C: side0=dirty, side1=dirty, boot=0 ///////////////////////
+            // Common situation: likely first step of code update
+                case ( SITUATION_SIDE_0_DIRTY  |
+                       SITUATION_SIDE_1_DIRTY |
+                       SITUATION_BOOT_SIDE_0  ) :
+                    // fall through
+
+            //// 0x0A: side0=dirty, side1=clean, boot=1 ///////////////////////
+            // Uncommon situation:
+                case ( SITUATION_SIDE_0_DIRTY  |
+                       SITUATION_SIDE_1_CLEAN |
+                       SITUATION_BOOT_SIDE_1  ) :
+                    // fall through
+
+            //// 0x08: side0=dirty, side1=clean, boot=0 ///////////////////////
+            // Uncommon situation:
+                case ( SITUATION_SIDE_0_DIRTY  |
+                       SITUATION_SIDE_1_CLEAN |
+                       SITUATION_BOOT_SIDE_0  ) :
+
+                    // Update side 0 and re-ipl
+
+                    l_actions |= IPL_RESTART;
+                    l_actions |= DO_UPDATE;
+                    l_actions |= UPDATE_MVPD;
+                    l_actions |= UPDATE_SBE;
+
+                    // Set Update side to primary
+                    io_sbeState.seeprom_side_to_update =  EEPROM::SBE_PRIMARY;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "side 0=dirty, side 1=%s. Boot side %d. "
+                               "Update side 0 (primary). re-IPL. "
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               ( i_system_situation & SITUATION_SIDE_1_DIRTY)
+                                   ? "dirty" : "clean",
+                               io_sbeState.cur_seeprom_side,
+                               i_system_situation, l_actions);
+
+                    break;
+
+
+            //// 0x06: side0=clean, side1=dirty, boot=1 ///////////////////////
+            // Uncommon situation: booting from dirty side after other side
+            //                     was updated
+                case ( SITUATION_SIDE_0_CLEAN  |
+                       SITUATION_SIDE_1_DIRTY |
+                       SITUATION_BOOT_SIDE_1  ) :
+
+                    // No update, log error and continue IPL
+
+                    l_actions = CLEAR_ACTIONS;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "side 0=clean, side 1=dirty. Boot side 1. "
+                               "Call-out SBE code. Continue IPL. "
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               i_system_situation, l_actions);
+
+                    /*
+                     * errortype
+                     * moduleid     SBE_DECISION_TREE
+                     * reasoncode   SBE_BOOT_SIDE_DIRTY_BAD_PATH
+                     * userdata1    System Situation
+                     * userdata2    Update Actions
+                     * devdesc      Bad Path in decisionUpdateTree:
+                     *               cur=DIRTY, alt=CLEAN
+                     * custdesc     A problem occurred while updating
+                     *               processor boot code.
+                     */
+                    err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
+                                        SBE_DECISION_TREE,
+                                        SBE_BOOT_SIDE_DIRTY_BAD_PATH,
+                                        TO_UINT64(i_system_situation),
+                                        TO_UINT64(l_actions));
+                    // Target isn't directly related to fail, but could be
+                    // useful to see how far we got before failing.
+                    ErrlUserDetailsTarget(io_sbeState.target
+                                          ).addToLog(err);
+                    err->collectTrace(SBE_COMP_NAME);
+                    err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                              HWAS::SRCI_PRIORITY_HIGH );
+
+                    break;
+
+
+            //// 0x04: side0=clean, side1=dirty, boot=0 ///////////////////////
+            // Common situation: likely second step of code update
+                case ( SITUATION_SIDE_0_CLEAN  |
+                       SITUATION_SIDE_1_DIRTY |
+                       SITUATION_BOOT_SIDE_0  ) :
+
+                    // Update side 1 and continue IPL
+
+                    l_actions |= DO_UPDATE;
+                    l_actions |= UPDATE_MVPD;
+                    l_actions |= UPDATE_SBE;
+
+                    // Set Update side to backup
+                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "side 0=clean, side 1=dirty. Boot side 0. "
+                               "Update side 1 (backup). Continue IPL. "
+                               "(sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               i_system_situation, l_actions);
+
+                    break;
+
+
+            //// 0x02: side0=clean, side1=clean, boot=1 ///////////////////////
+            // Uncommon situation: booting from side 1 when both sides clean
+                case ( SITUATION_SIDE_0_CLEAN  |
+                       SITUATION_SIDE_1_CLEAN |
+                       SITUATION_BOOT_SIDE_1  ) :
+                    // fall through
+
+            //// 0x00: side0=clean, side1=clean, boot=0 ///////////////////////
+            // Common situation: normal boot
+                case ( SITUATION_SIDE_0_CLEAN  |
+                       SITUATION_SIDE_1_CLEAN |
+                       SITUATION_BOOT_SIDE_0  ) :
+
+                    // No update (both sides are clean) and continue IPL
+
+                    l_actions = CLEAR_ACTIONS;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "Both sides clean-no updates. Boot side %d. "
+                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
+                               TARGETING::get_huid(io_sbeState.target),
+                               io_sbeState.cur_seeprom_side,
+                               i_system_situation, l_actions);
+
+                    break;
+
+            ///////////////////////////////////////////////////////////////////
+                default:
+
+                    l_actions = UNSUPPORTED_SITUATION;
+
+                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                               "Unsupported Scenario.  Just Continue IPL. "
+                               "(sit=0x%.2X, act=0x%.8X, Boot side %d)",
                                TARGETING::get_huid(io_sbeState.target),
                                i_system_situation, l_actions,
                                io_sbeState.cur_seeprom_side);
@@ -4226,7 +4387,7 @@ namespace SBE
 
         errlHndl_t err = NULL;
 
-        // MVPD PERMANT and Re-IPL Seeprom flags
+        // MVPD PERMANENT and Re-IPL Seeprom flags
         uint8_t perm_and_reipl = 0x0;
         uint8_t flags_mask = (PERMANENT_FLAG_MASK | REIPL_SEEPROM_MASK);
         uint8_t flags_match_0 =    SEEPROM_0_PERMANENT_VALUE |
@@ -4715,69 +4876,6 @@ namespace SBE
 
     }
 
-/////////////////////////////////////////////////////////////////////
-    errlHndl_t isGoldenSide( bool & o_isGolden )
-    {
-        errlHndl_t l_errl = NULL;
-        o_isGolden = false;
-
-#ifndef CONFIG_SBE_UPDATE_SEQUENTIAL
-        do
-        {
-            // Get the master processor
-            TARGETING::Target * l_masterProc = NULL;
-            TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
-            assert( l_masterProc != NULL );
-
-            sbeSeepromSide_t l_currentSide = SBE_SEEPROM_INVALID;
-
-            // Get Seeprom side
-            l_errl = getSbeBootSeeprom(l_masterProc, l_currentSide);
-
-            if( l_errl )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK
-                           "isGoldenSide() - Error returned "
-                           "from getSbeBootSeeprom() "
-                           "rc=0x%.4X, Target UID=0x%X",
-                           l_errl->reasonCode(),
-                           TARGETING::get_huid(l_masterProc));
-                break;
-            }
-
-            //Get PNOR Side
-            PNOR::SideId l_pnorSide = PNOR::WORKING;
-            PNOR::SideInfo_t l_sideInfo;
-
-            l_errl = PNOR::getSideInfo( l_pnorSide, l_sideInfo );
-
-            if( l_errl )
-            {
-                TRACFCOMP(g_trac_sbe, ERR_MRK
-                          "isGoldenSide() - Error returned "
-                          "from PNOR::getSideInfo() "
-                          "rc=0x%.4X, Target UID=0x%X",
-                          l_errl->reasonCode(),
-                          TARGETING::get_huid( l_masterProc ));
-                break;
-            }
-
-            // SBE_SEEPROM1 by itself does not imply golden side.
-            // cross reference sbe side with pnor side to make sure.
-            if(( l_currentSide == SBE_SEEPROM1 ) &&
-               (( l_sideInfo.isGolden ) || (l_sideInfo.hasOtherSide == false )))
-            {
-                TRACUCOMP(g_trac_sbe, INFO_MRK
-                          "sbe_update.C::isGoldenSide() - "
-                          "Booted from Golden side!");
-                o_isGolden = true;
-            }
-
-        }while( 0 );
-#endif
-        return l_errl;
-    }
-
 
 /////////////////////////////////////////////////////////////////////
     size_t setECCSize(size_t i_srcSz,
@@ -4966,51 +5064,30 @@ errlHndl_t sbeDoReboot( void )
 
     do{
 #ifdef CONFIG_BMC_IPMI
-        uint16_t count = 0;
+        uint16_t count = SENSOR::DEFAULT_REBOOT_COUNT;
         SENSOR::RebootCountSensor l_sensor;
 
-        // Read reboot count sensor
-        err = l_sensor.getRebootCount(count);
+        // Set reboot count to default value
+        TRACFCOMP( g_trac_sbe,
+                   INFO_MRK"sbeDoReboot: "
+                   "Writing Reboot Sensor Count=%d", count);
+
+        err = l_sensor.setRebootCount( count );
         if ( err )
         {
             TRACFCOMP( g_trac_sbe,
                        ERR_MRK"sbeDoReboot: "
-                       "FAIL Reading Reboot Sensor Count. "
+                       "FAIL Writing Reboot Sensor Count to %d. "
                        "Committing Error Log rc=0x%.4X eid=0x%.8X "
                        "plid=0x%.8X, but continuing shutdown",
+                       count,
                        err->reasonCode(),
                        err->eid(),
                        err->plid());
             err->collectTrace(SBE_COMP_NAME);
             errlCommit( err, SBE_COMP_ID );
 
-            // No Break - Still do reboot
-        }
-        else
-        {
-            // Increment Reboot Count Sensor
-            count++;
-            TRACFCOMP( g_trac_sbe,
-                       INFO_MRK"sbeDoReboot: "
-                       "Writing Reboot Sensor Count=%d", count);
-
-            err = l_sensor.setRebootCount( count );
-            if ( err )
-            {
-                TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"sbeDoReboot: "
-                           "FAIL Writing Reboot Sensor Count to %d. "
-                           "Committing Error Log rc=0x%.4X eid=0x%.8X "
-                           "plid=0x%.8X, but continuing shutdown",
-                           count,
-                           err->reasonCode(),
-                           err->eid(),
-                           err->plid());
-                err->collectTrace(SBE_COMP_NAME);
-                errlCommit( err, SBE_COMP_ID );
-
-                // No Break - Still send chassis power cycle
-            }
+            // No Break - Still send chassis power cycle
         }
 
 #else //non-IPMI

@@ -115,7 +115,11 @@ namespace SBE
     const uint8_t REIPL_SEEPROM_1_VALUE           = 0x40;
 
     // Situation constants -- bits numbered from left to right
+#ifndef CONFIG_SBE_UPDATE_CONSECUTIVE
     const uint8_t SITUATION_ALL_BITS_MASK = 0xE0;
+#else
+    const uint8_t SITUATION_ALL_BITS_MASK = 0x0E;
+#endif
     // Bit 0: current side is permanent (=0) or temp (=1)
     const uint8_t SITUATION_CUR_IS_PERM   = 0x00;
     const uint8_t SITUATION_CUR_IS_TEMP   = 0x80;
@@ -127,6 +131,18 @@ namespace SBE
     // Bit 2:  alt side clean (=0) or dirty (=1)
     const uint8_t SITUATION_ALT_IS_CLEAN  = 0x00;
     const uint8_t SITUATION_ALT_IS_DIRTY  = 0x20;
+
+    // Bit 4:  side 0 clean (=0) or dirty (=1)
+    const uint8_t SITUATION_SIDE_0_CLEAN  = 0x00;
+    const uint8_t SITUATION_SIDE_0_DIRTY  = 0x08;
+
+    // Bit 5:  side 1 clean (=0) or dirty (=1)
+    const uint8_t SITUATION_SIDE_1_CLEAN  = 0x00;
+    const uint8_t SITUATION_SIDE_1_DIRTY  = 0x04;
+
+    // Bit 6:  boot side is side 0 (=0) or side 1 (=1)
+    const uint8_t SITUATION_BOOT_SIDE_0   = 0x00;
+    const uint8_t SITUATION_BOOT_SIDE_1   = 0x02;
 
     // For mbox messages to FSP
     const uint32_t MSG_IPL_DUE_TO_SBE_UPDATE = 0x40000012;
