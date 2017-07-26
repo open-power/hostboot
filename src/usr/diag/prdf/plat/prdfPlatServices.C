@@ -645,6 +645,16 @@ int32_t restartTraceArray(TargetHandle_t i_tgt)
 
 //------------------------------------------------------------------------------
 
+// For handling DEADMAN timer callouts (FSP uses HWSV routine)
+void deadmanTimerFFDC( TargetHandle_t  i_target, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // Hostboot Code - no HWSV is running here ( self_th_1 )
+    io_sc.service_data->SetCallout( i_target, MRU_MED );
+    io_sc.service_data->SetThresholdMaskId(0);
+} // end deadmanTimerFFDC
+
+//------------------------------------------------------------------------------
+
 } // end namespace PlatServices
 
 } // end namespace PRDF
