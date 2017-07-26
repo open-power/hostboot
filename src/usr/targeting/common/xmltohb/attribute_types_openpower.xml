@@ -888,7 +888,7 @@ ID for the sensor number returned with the elog. -->
     </description>
     <simpleType>
         <uint32_t>
-            <default>0x00000800</default> <!-- FLAG_DISABLE_MEM_CONFIG -->
+            <default>0x00000000</default>
         </uint32_t>
     </simpleType>
     <persistency>volatile</persistency>
