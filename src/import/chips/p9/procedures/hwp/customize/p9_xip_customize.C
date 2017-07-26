@@ -295,6 +295,17 @@ fapi2::ReturnCode get_overlays_ring(
         memcpy(*io_ringBuf3, data, byteCopy);
         memcpy(((uint8_t*)(*io_ringBuf3) + MAX_RING_BUF_SIZE / 2), care, byteCopy);
 
+        // free memory allocated by rs4_decompress
+        if (data)
+        {
+            free(data);
+        }
+
+        if (care)
+        {
+            free(care);
+        }
+
         // For debug and testing
         FAPI_DBG("Overlay raw data+care ring size=%d bits", l_ovlyUncmpSize);
         //print_raw_ring( data, l_ovlyUncmpSize);
@@ -486,6 +497,22 @@ fapi2::ReturnCode apply_overlays_ring(
 
     // Copy rs4 ring into i_vpdRing
     memcpy(io_vpdRing, rs4Ring, rs4Ring->iv_size);
+
+    // free memory allocated by rs4_(de)compress
+    if (dataVpd)
+    {
+        free(dataVpd);
+    }
+
+    if (careVpd)
+    {
+        free(careVpd);
+    }
+
+    if (rs4Ring)
+    {
+        free(rs4Ring);
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exiting apply_overlays_ring");
