@@ -297,8 +297,8 @@ fapi2::ReturnCode get_overlays_ring(
 
         // For debug and testing
         FAPI_DBG("Overlay raw data+care ring size=%d bits", l_ovlyUncmpSize);
-        print_raw_ring( data, l_ovlyUncmpSize);
-        print_raw_ring( care, l_ovlyUncmpSize);
+        //print_raw_ring( data, l_ovlyUncmpSize);
+        //print_raw_ring( care, l_ovlyUncmpSize);
 
         // Copy the gptr uncompressed size
         *o_ovlyUncmpSize = l_ovlyUncmpSize;
@@ -385,8 +385,8 @@ fapi2::ReturnCode apply_overlays_ring(
 
     // For debug and testing
     FAPI_DBG("Mvpd ring: data care (size:%d bits)", vpdUncmpSize);
-    print_raw_ring( dataVpd, vpdUncmpSize);
-    print_raw_ring( careVpd, vpdUncmpSize);
+    //print_raw_ring( dataVpd, vpdUncmpSize);
+    //print_raw_ring( careVpd, vpdUncmpSize);
 
     // Compare uncompressed Mvpd and overlays ring sizes
     FAPI_ASSERT( i_ovlyUncmpSize == vpdUncmpSize,
@@ -462,8 +462,8 @@ fapi2::ReturnCode apply_overlays_ring(
     }
 
     FAPI_DBG("Mvpd ring(modified): data care (size:%d bits)", vpdUncmpSize);
-    print_raw_ring( dataVpd, vpdUncmpSize);
-    print_raw_ring( careVpd, vpdUncmpSize);
+    //print_raw_ring( dataVpd, vpdUncmpSize);
+    //print_raw_ring( careVpd, vpdUncmpSize);
 
     // Recompress vpd ring
     l_rc = rs4_compress(
