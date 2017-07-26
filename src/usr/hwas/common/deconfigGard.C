@@ -1374,6 +1374,12 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
     return l_pErr;
 }
 
+bool DeconfigGard::isMagicMca(Target & i_target)
+{
+    return ((i_target.getAttr<ATTR_TYPE>() == TYPE_MCA) &&
+                   ((i_target.getAttr<ATTR_CHIP_UNIT>() % 4) == 0));
+}
+
 //******************************************************************************
 void DeconfigGard::enforceMagicMcaDeconfig(
         Target & i_target,
@@ -1381,8 +1387,7 @@ void DeconfigGard::enforceMagicMcaDeconfig(
         const DeconfigureFlags i_deconfigRule)
 {
     // Check if "magic" port is the target
-    if ((i_target.getAttr<ATTR_TYPE>() == TYPE_MCA) &&
-        ((i_target.getAttr<ATTR_CHIP_UNIT>() % 4) == 0))
+    if (isMagicMca(i_target))
     {
         HWAS_INF("enforceMagicMcaDeconfig for MCA%d %.8X (i_deconfigRule %d)",
             i_target.getAttr<ATTR_CHIP_UNIT>(), get_huid(&i_target),
@@ -1919,21 +1924,30 @@ void DeconfigGard::_deconfigureByAssoc(
 
                    // if parent MCA has no functional memory
                    if (pDimmList.empty())
-                   {
-                       // deconfigure parent MCA
-                       HWAS_INF("_deconfigureByAssoc MCA parent with no memory: %.8X",
+                   {    
+                       //Only deconfigure parent MCA if it's not a magic port
+                       if (isMagicMca(*l_parentMca))
+                       {
+                           HWAS_INF("Skipping deconfigure by assoc for MCA"
+                              " parent with no memory: %.8X, as it is the magic MCA",
+                                get_huid(l_parentMca));
+                       }
+                       else
+                       {
+                           // deconfigure parent MCA iff it isn't a magic MCA
+                           HWAS_INF("_deconfigureByAssoc MCA parent with no memory: %.8X",
                                get_huid(l_parentMca));
-                       _deconfigureTarget(const_cast<Target &> (*l_parentMca),
+                           _deconfigureTarget(const_cast<Target &> (*l_parentMca),
                                            i_errlEid, NULL, i_deconfigRule);
-                       _deconfigureByAssoc(const_cast<Target &> (*l_parentMca),
+                           _deconfigureByAssoc(const_cast<Target &> (*l_parentMca),
                                            i_errlEid, i_deconfigRule);
 
+                       }
                        // and we're done, so break;
                        break;
-                   }
-
+                  }
+                  break;
                 }
-                break;
             } // TYPE_DIMM
 
             // If target is a bus endpoint, deconfigure its peer

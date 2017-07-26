@@ -734,6 +734,8 @@ private:
      */
     bool iv_XABusEndpointDeconfigured;
 
+    bool isMagicMca(TARGETING::Target & i_target);
+
 
 }; // DeconfigGard
 HWAS_DECLARE_SINGLETON(HWAS::DeconfigGard,theDeconfigGardSingleton);
