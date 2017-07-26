@@ -66,6 +66,11 @@ extern "C"
 
         for ( const auto& l_mcs : i_targets)
         {
+            if (mss::count_dimm (l_mcs) == 0)
+            {
+                continue;
+            }
+
             uint16_t l_slot [mss::PORTS_PER_MCS] = {};
             uint16_t l_port [mss::PORTS_PER_MCS] = {};
             uint32_t l_power [mss::PORTS_PER_MCS] = {};
