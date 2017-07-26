@@ -50,7 +50,7 @@ MemAddr MemAddr::fromReadAddr<TYPE_MCBIST>( uint64_t i_addr )
 {
     uint64_t mrnk = (i_addr >> 59) &     0x7; //  2: 4
     uint64_t srnk = (i_addr >> 56) &     0x7; //  5: 7
-    uint64_t row  = (i_addr >> 38) & 0x1ffff; //  8:25
+    uint64_t row  = (i_addr >> 38) & 0x3ffff; //  8:25
     uint64_t col  = (i_addr >> 31) &    0x7f; // 26:32
     uint64_t bnk  = (i_addr >> 26) &    0x1f; // 33:37
 
@@ -75,9 +75,9 @@ MemAddr MemAddr::fromReadAddr<TYPE_MEMBUF>( uint64_t i_addr )
 template<>
 MemAddr MemAddr::fromMaintAddr<TYPE_MCBIST>( uint64_t i_addr )
 {
-    uint64_t rslct = (i_addr >> 59) &     0x7; //  3: 4
+    uint64_t rslct = (i_addr >> 59) &     0x3; //  3: 4
     uint64_t srnk  = (i_addr >> 56) &     0x7; //  5: 7
-    uint64_t row   = (i_addr >> 38) & 0x1ffff; //  8:25
+    uint64_t row   = (i_addr >> 38) & 0x3ffff; //  8:25
     uint64_t col   = (i_addr >> 31) &    0x7f; // 26:32
     uint64_t bnk   = (i_addr >> 26) &    0x1f; // 33:37
     uint64_t dslct = (i_addr >> 23) &     0x1; // 40
