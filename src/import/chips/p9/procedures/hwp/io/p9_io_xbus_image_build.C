@@ -43,7 +43,7 @@
 //---------------------------------------------------------------------------
 fapi2::ReturnCode extractPpeImgXbus(void* const iImagePtr, uint8_t*& oPpeImgPtr, uint32_t& oSize)
 {
-    FAPI_IMP("Entering getObusImageFromHwImage.");
+    FAPI_IMP("Entering getXbusImageFromHwImage.");
     P9XipSection ppeSection;
     ppeSection.iv_offset = 0;
     ppeSection.iv_size = 0;
@@ -69,7 +69,7 @@ fapi2::ReturnCode extractPpeImgXbus(void* const iImagePtr, uint8_t*& oPpeImgPtr,
     oSize = ppeSection.iv_size;
 
 fapi_try_exit:
-    FAPI_IMP("Exiting getObusImageFromHwImage.");
+    FAPI_IMP("Exiting getXbusImageFromHwImage.");
     return fapi2::current_err;
 }
 
@@ -80,7 +80,6 @@ fapi2::ReturnCode scomWrite(CONST_PROC& iTgt, const uint64_t iAddr, const uint64
     // Xscom -- Scom from core in Hostboot mode
     return fapi2::putScom(iTgt, iAddr, data64);
 }
-
 
 //---------------------------------------------------------------------------
 fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iHwImagePtr)
@@ -103,40 +102,51 @@ fapi2::ReturnCode p9_io_xbus_image_build(CONST_PROC& iTgt, void* const iHwImageP
     uint8_t* pPpeImg = NULL;
     uint32_t imgSize   = 0;
 
-    FAPI_TRY(extractPpeImgXbus(iHwImagePtr, pPpeImg, imgSize), "Extract PPE Image Failed.");
+    // Get vector of xbus units from the processor
+    auto xbusUnits = iTgt.getChildren<fapi2::TARGET_TYPE_XBUS>();
 
-    // PPE Reset
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
-
-    // Set PPE Base Address
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSAR, SRAM_BASE_ADDR), "Set Base Address Failed.");
-
-    // Set PPE into Autoincrement Mode
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_EN), "Auto-Increment Enable Failed.");
-
-    for(uint32_t i = 0; i < imgSize; i += 8)
+    // Make sure we have functional xbus units before we load the ppe
+    if(!xbusUnits.empty())
     {
-        data = (((uint64_t) * (pPpeImg + i + 0) << 56) & 0xFF00000000000000ull) |
-               (((uint64_t) * (pPpeImg + i + 1) << 48) & 0x00FF000000000000ull) |
-               (((uint64_t) * (pPpeImg + i + 2) << 40) & 0x0000FF0000000000ull) |
-               (((uint64_t) * (pPpeImg + i + 3) << 32) & 0x000000FF00000000ull) |
-               (((uint64_t) * (pPpeImg + i + 4) << 24) & 0x00000000FF000000ull) |
-               (((uint64_t) * (pPpeImg + i + 5) << 16) & 0x0000000000FF0000ull) |
-               (((uint64_t) * (pPpeImg + i + 6) <<  8) & 0x000000000000FF00ull) |
-               (((uint64_t) * (pPpeImg + i + 7) <<  0) & 0x00000000000000FFull);
+        FAPI_TRY(extractPpeImgXbus(iHwImagePtr, pPpeImg, imgSize), "Extract PPE Image Failed.");
 
-        // Write Data, as the address will be autoincremented.
-        FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSDR, data), "Data Write Failed.");
+        // PPE Reset
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+
+        // Set PPE Base Address
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSAR, SRAM_BASE_ADDR), "Set Base Address Failed.");
+
+        // Set PPE into Autoincrement Mode
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_EN), "Auto-Increment Enable Failed.");
+
+        for(uint32_t i = 0; i < imgSize; i += 8)
+        {
+            data = (((uint64_t) * (pPpeImg + i + 0) << 56) & 0xFF00000000000000ull) |
+                   (((uint64_t) * (pPpeImg + i + 1) << 48) & 0x00FF000000000000ull) |
+                   (((uint64_t) * (pPpeImg + i + 2) << 40) & 0x0000FF0000000000ull) |
+                   (((uint64_t) * (pPpeImg + i + 3) << 32) & 0x000000FF00000000ull) |
+                   (((uint64_t) * (pPpeImg + i + 4) << 24) & 0x00000000FF000000ull) |
+                   (((uint64_t) * (pPpeImg + i + 5) << 16) & 0x0000000000FF0000ull) |
+                   (((uint64_t) * (pPpeImg + i + 6) <<  8) & 0x000000000000FF00ull) |
+                   (((uint64_t) * (pPpeImg + i + 7) <<  0) & 0x00000000000000FFull);
+
+            // Write Data, as the address will be autoincremented.
+            FAPI_TRY(scomWrite(iTgt, MEM_ARB_CSDR, data), "Data Write Failed.");
+        }
+
+        // Disable Auto Increment
+        FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_DIS), "Auto-Increment Disable Failed.");
+
+        // PPE Reset
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
+
+        // PPE Resume From Halt
+        FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
     }
-
-    // Disable Auto Increment
-    FAPI_TRY(scomWrite(iTgt, MEM_ARB_SCR, AUTOINC_DIS), "Auto-Increment Disable Failed.");
-
-    // PPE Reset
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, HARD_RESET), "Hard Reset Failed.");
-
-    // PPE Resume From Halt
-    FAPI_TRY(scomWrite(iTgt, XCR_NONE, RESUME_FROM_HALT), "Resume From Halt Failed.");
+    else
+    {
+        FAPI_INF("No functional xbus units found. Skipping Xbus PPE Load...");
+    }
 
 fapi_try_exit:
     FAPI_IMP("Exit p9_io_xbus_image_build.");
