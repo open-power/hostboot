@@ -74,7 +74,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
     //  figure out what targets we need
     //  customize any other inputs
     //  set up loops to go through all targets (if parallel, spin off a task)
-    //  extend the memory space from 8MEG to 32Meg
+    //  extend the memory space from 8MEG to 48Meg
 
     //if mirrored then check that there is going to be memory at that location.
     //For sapphire with mirrored location flipped and at zero,
@@ -360,7 +360,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
 
-            // Call the function to extend VMM to 32MEG
+            // Call the function to extend VMM to 48MEG
             int rc = mm_extend();
 
             if (rc!=0)
@@ -372,7 +372,7 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                  * @userdata1    rc from mm_extend
                  * @userdata2    <UNUSED>
                  *
-                 *   @devdesc  Failure extending memory to 32MEG after
+                 *   @devdesc  Failure extending memory to 48MEG after
                  *        exiting cache contained mode.
                  */
                 l_errl = new ERRORLOG::ErrlEntry

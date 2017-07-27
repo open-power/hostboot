@@ -898,7 +898,7 @@ namespace Systemcalls
      *
      * Depending on the syscall parameter, we will either switch from 4MB
      * to a cache-contained mode (either full 10MB or reduced 8MB) or will
-     * expand into 32MB of space using real system memory.
+     * expand into 48MB of space using real system memory.
 
      * @param[in] t: The task used to extend Memory
      */

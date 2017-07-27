@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,7 +136,7 @@ class BaseSegment : public Segment
 
         /**
          * @brief Allocates a block of virtual memory that extends the VMM
-         *          space up to 32MEG of Mainstore.
+         *          space up to 48MEG of Mainstore.
          */
         static int mmExtend(void);
 
@@ -206,7 +206,7 @@ class BaseSegment : public Segment
 
         /**
          * @brief Allocates a block of virtual memory that extends the VMM
-         *          space up to 32MEG of Mainstore.
+         *          space up to 48MEG of Mainstore.
          */
          int _mmExtend(void);
 

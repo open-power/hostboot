@@ -36,7 +36,7 @@ use constant    MEMSTATE_NO_MEM => 0x0;
 use constant    MEMSTATE_HALF_CACHE => 0x4;
 use constant    MEMSTATE_REDUCED_CACHE => 0x8;
 use constant    MEMSTATE_FULL_CACHE => 0xa;
-use constant    MEMSTATE_MS_32MEG => 0x20;
+use constant    MEMSTATE_MS_48MEG => 0x30;
 
 use constant    _KB => 1024;
 use constant    _MB => 1024 * 1024;
@@ -71,9 +71,9 @@ our %memory_maps = (
         [ 8 * _MB,                      1 * _MB,
           9 * _MB,                      1 * _MB
         ],
-    MEMSTATE_MS_32MEG() =>
-        # Add next 22MB after we expand to memory.
-        [ 10 * _MB,                      22 * _MB
+    MEMSTATE_MS_48MEG() =>
+        # Add next 38MB after we expand to memory.
+        [ 10 * _MB,                      38 * _MB
         ]
 );
 
@@ -88,9 +88,9 @@ our %memory_states = (
     MEMSTATE_FULL_CACHE() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
                              MEMSTATE_FULL_CACHE ],
-    MEMSTATE_MS_32MEG() => [ MEMSTATE_NO_MEM,
+    MEMSTATE_MS_48MEG() => [ MEMSTATE_NO_MEM,
                              MEMSTATE_HALF_CACHE, MEMSTATE_REDUCED_CACHE,
-                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_32MEG ]
+                             MEMSTATE_FULL_CACHE, MEMSTATE_MS_48MEG ]
 );
 
 sub main

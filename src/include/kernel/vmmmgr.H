@@ -192,7 +192,7 @@ class VmmManager
 
         /**
          * @brief Allocates a block of virtual memory that extends the VMM
-         *          space up to 32MEG of Mainstore.
+         *          space up to 48MEG of Mainstore.
          */
         static int mmExtend( void);
 
