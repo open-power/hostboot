@@ -104,7 +104,7 @@
       <attribute>
        <id>ATTR_PGPE_HCODE_FUNCTION_ENABLE</id>
        <!-- this setting enables the OCC Immediate Resp Mode Only -->
-       <default>0x0</default>
+       <default>0x1</default>
      </attribute>
      <attribute>
        <id>ATTR_CME_INSTRUCTION_TRACE_ENABLE</id>
