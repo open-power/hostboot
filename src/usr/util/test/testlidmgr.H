@@ -35,25 +35,11 @@
 
 #include <errl/errlmanager.H>
 #include "../utilbase.H"
-#include "../utillidpnor.H"
+#include <util/utillidmgr.H>
 
 class LidMgrTest : public CxxTest::TestSuite
 {
 public:
-
-    /**
-     *  @brief Test to check if the const array lidToPnor is sorted
-     */
-    void testLidToPnorSorted(void)
-    {
-        for (size_t i = 0; (i+1) < Util::NUM_LID_TO_PNOR; ++i)
-        {
-            if (Util::lidToPnor[i].first > Util::lidToPnor[i+1].first)
-            {
-                TS_FAIL("testLidToPnorSorted: utilidmgr lidToPnor[] is not sorted");
-            }
-        }
-    }
 
     /**
      *  @brief Test to check if the structure that maps lidID's to pnor sections

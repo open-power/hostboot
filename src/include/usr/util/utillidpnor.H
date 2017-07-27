@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/util/utillidpnor.H $                                  */
+/* $Source: src/include/usr/util/utillidpnor.H $                          */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -25,49 +25,54 @@
 #ifndef _UTILLIDPNOR_H
 #define _UTILLIDPNOR_H
 
-/**
- * @file lidpnor.H
- *
- * @brief brief Provides the lid to pnor mapping currently used in the lidmgr
- *              In its own file to limit number of duplicate definitions for
- *              every user compared to being defined in utillidmgr
- *
- */
-
 #include <util/utillidmgr.H>
 #include <utility>
+#include <map>
 
 namespace Util
 {
 
-/**
- *  @brief Simple compare function for lidToPnor elements
+/** @struct LidAndContainerLid
+ *  @brief  Stores the Lid ID and corresponding Container Lid ID for a lid
+ *
+ *  A Container Lid can be referred to as a Secure Header. The Container Lid ID
+ *  is associated with the header data that sits in front of an image.
  */
-bool cmpLidToPnor (const std::pair<uint32_t, PNOR::SectionId> p1,
-                   const std::pair<uint32_t, PNOR::SectionId> p2)
+struct LidAndContainerLid
 {
-    return (p1.first < p2.first);
-}
+    // Lid ID for content
+    LidId lid;
+    // Lid ID for Container Lid (Secure Header)
+    LidId containerLid;
+    LidAndContainerLid() : lid(INVALID_LIDID),containerLid(INVALID_LIDID) {}
+    LidAndContainerLid(LidId i_lid, LidId i_containerLid) :
+        lid(i_lid), containerLid(i_containerLid) {}
+};
+
+typedef std::map<PNOR::SectionId, LidAndContainerLid > PnorLidsMap;
+typedef std::pair<PNOR::SectionId, LidAndContainerLid> PnorLidsPair;
 
 /**
- *  @brief Array containing lid to pnor mappings
- *         When adding maintain order by uint32_t (lidID)
- *         There is a test case to confirm this is sorted
- */
-const std::pair<uint32_t, PNOR::SectionId>
-    lidToPnor[] =
-    {
-        std::make_pair(Util::TEST_LIDID, PNOR::TESTRO),            // 0x00000111
-        std::make_pair(Util::OCC_LIDID, PNOR::OCC),                // 0x81e00430
-        std::make_pair(Util::WOF_LIDID, PNOR::WOFDATA),            // 0x81e00440
-        std::make_pair(Util::NIMBUS_HCODE_LIDID, PNOR::HCODE),     // 0x81e00602
-        std::make_pair(Util::CUMULUS_HCODE_LIDID, PNOR::HCODE),    // 0x81e00603
-        std::make_pair(Util::HWREFIMG_RINGOVD_LIDID, PNOR::RINGOVD)// 0x81e00620
-    };
+  * @brief Returns Lid and ContainerLid (Secure Header) Ids associated with a
+  *        PNOR section.
+  *
+  * @param[in] i_sec     Pnor section to find associated LIDs for
+  *
+  * @return  LidAndContainerLid - If found, valid LidIds
+  *                               else, invalid LidIds
+  * Note: May return valid LidId with an invalid ContainerLid
+*/
+LidAndContainerLid getPnorSecLidIds(PNOR::SectionId i_sec);
 
-// Size of lidToPnor[]
-const size_t NUM_LID_TO_PNOR = ( sizeof(lidToPnor) /
-                                 sizeof(std::pair<uint32_t, PNOR::SectionId>));
+/**
+  * @brief Returns PNOR section ID associated with a LidID.
+  *
+  * @param[in] i_lid     LidId to find associated PNOR section for
+  *
+  * @return  PNOR::SectionId - If found, valid PNOR section
+  *                            else, INVALID_SECTION
+*/
+PNOR::SectionId getLidPnorSection(LidId i_lid);
 
 }
 
