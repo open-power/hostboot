@@ -41,18 +41,23 @@
 namespace MDIA
 {
 
+// Maint cmd timeout values are in nanosecs. This is just for easy conversions.
+static const uint64_t NANOSEC_PER_SEC = 1000000000;
+
 // HW timeout value - 30 secs
-// Nimbus DD1.0 has a workaround that will go over 30 seconds. Will need to bump
-// it up for now. May consider lowering it later, but only if there is a
+static const uint64_t MAINT_CMD_TIMEOUT = 30 * NANOSEC_PER_SEC;
+
+// Nimbus DD1.0 has a workaround that will go over 30 seconds. Will bump it up
+// to 110 secs for now. May consider lowering it later, but only if there is a
 // problem.
-static const uint64_t MAINT_CMD_TIMEOUT = 30000000000 * 10;
+static const uint64_t MAINT_CMD_TIMEOUT_DD10 = 110 * NANOSEC_PER_SEC;
 
-//Longer MBA timeout to be used when continuous tracing is enabled - 30 min
-static const uint64_t MAINT_CMD_TIMEOUT_LONG = 1800000000000;
+// Longer MBA timeout to be used when continuous tracing is enabled - 30 min
+static const uint64_t MAINT_CMD_TIMEOUT_LONG = 1800 * NANOSEC_PER_SEC;
 
-//Commit an info log for SW timeout every 10 mins
+// Commit an info log for SW timeout every 10 mins
 static const uint64_t MAINT_CMD_TIMEOUT_LOG =
-          ( 10 * 60000000000 ) / MAINT_CMD_TIMEOUT;
+          ( 600 * NANOSEC_PER_SEC ) / MAINT_CMD_TIMEOUT;
 
 /**
  * @brief work flow phases

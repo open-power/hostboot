@@ -236,6 +236,52 @@ fapi2::TargetType getMdiaTargetType()
     return targetType;
 }
 
+uint64_t getTimeoutValue()
+{
+    // Out maintenance command timeout value will differ depending on a few
+    // conditions. This function will find the timeout value we need and
+    // return it.
+
+    // Start with the default timeout value.
+    uint64_t timeout = MAINT_CMD_TIMEOUT;
+
+    // If continuous tracing is enabled.
+    TargetHandle_t sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+    HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
+
+    if ( hbSettings.traceContinuous && timeout < MAINT_CMD_TIMEOUT_LONG )
+    {
+        timeout = MAINT_CMD_TIMEOUT_LONG;
+    }
+
+    // Nimbus DD1.0 workaround.
+    TARGETING::Target* masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+    if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() &&
+         0x10 == masterProc->getAttr<ATTR_EC>() &&
+         timeout < MAINT_CMD_TIMEOUT_DD10 )
+    {
+        timeout = MAINT_CMD_TIMEOUT_DD10;
+    }
+
+    // Ensure that the MDIA timeout is less than the watchdog timer.
+    if ( timeout >= (IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN*NANOSEC_PER_SEC) )
+    {
+        // If the watchdog timer for some reason happens to be 10 sec or less,
+        // just set the MDIA timeout to the watchdog timeout.
+        // Else set it to ten seconds lower than the watchdog timer.
+        timeout = ( IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN <= 10 )
+                      ? ( IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN *
+                          NANOSEC_PER_SEC )
+                      : ( (IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN-10) *
+                          NANOSEC_PER_SEC );
+    }
+
+    return timeout;
+}
+
 // Do the setup for CE thresholds
 errlHndl_t ceErrorSetup( TargetHandle_t i_mba )
 {
@@ -441,7 +487,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                               (*wit)->timeoutCnt);
                     // register a new timeout monitor
                     uint64_t monitorId =
-                        getMonitor().addMonitor(MAINT_CMD_TIMEOUT);
+                        getMonitor().addMonitor( getTimeoutValue() );
                     (*wit)->timer = monitorId;
 
                     break;
@@ -910,13 +956,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
     TargetHandle_t target;
 
     // starting a maint cmd ...  register a timeout monitor
-    TargetHandle_t sys = nullptr;
-    targetService().getTopLevelTarget(sys);
-
-    HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
-
-    uint64_t maintCmdTO =
-        hbSettings.traceContinuous ? MAINT_CMD_TIMEOUT_LONG : MAINT_CMD_TIMEOUT;
+    uint64_t maintCmdTO = getTimeoutValue();
 
     mutex_lock(&iv_mutex);
 
