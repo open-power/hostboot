@@ -241,7 +241,7 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     {
         // If it's in PNOR it's not technically a lid
         // so use a slightly different extension
-        iv_isLidInPnor = getLidPnorSection(iv_lidId, iv_lidPnorInfo);
+        iv_isLidInPnor = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
     }
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
     iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);

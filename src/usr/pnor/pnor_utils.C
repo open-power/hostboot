@@ -471,8 +471,8 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
     static_assert (numEntries == (PNOR::NUM_SECTIONS),
                "Mismatch between number of SectionIds and correlating strings");
 
-    // Assert if accessing index out of array.
-    assert(i_secIdIndex < (PNOR::NUM_SECTIONS),
+    // Assert if accessing index out of array or not INVALID section
+    assert(i_secIdIndex <= (PNOR::NUM_SECTIONS),
 #ifdef BOOTLOADER
            BTLDR_TRC_UTILS_PNOR_SECID_OUT_OF_RANGE,
            Bootloader::RC_PNOR_SECID_OUT_OF_RANGE
@@ -481,7 +481,13 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
 #endif
     );
 
-    return SectionIdToStringArr[i_secIdIndex];
+    const char * l_str = "INVALID_SECTION";
+    if(i_secIdIndex < PNOR::INVALID_SECTION)
+    {
+       l_str = SectionIdToStringArr[i_secIdIndex];
+    }
+
+    return l_str;
 }
 
 bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)

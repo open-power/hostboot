@@ -1469,7 +1469,7 @@ public:
      * @brief Test to check if the const array tankLayerToPnor is sorted
      *        which also indicates in enum order
      */
-    void testLidToPnorSorted(void)
+    void testTankLayerToPnorSorted(void)
     {
         for (size_t i = 0; i < (AttributeTank::TANK_LAYER_LAST - 1); ++i)
         {

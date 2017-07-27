@@ -24,61 +24,117 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <util/utillidmgr.H>
-#include <utility>
-#include "utillidpnor.H"
+#include <util/utillidpnor.H>
 #include <config.h>
 #ifdef CONFIG_SECUREBOOT
 #include <pnor/pnorif.H>
 #include <errl/errlmanager.H>
 #endif
 
-bool UtilLidMgr::getLidPnorSection(uint32_t i_lidId,
-                                   PNOR::SectionInfo_t &o_lidPnorInfo)
+#include <utility>
+#include <map>
+
+namespace Util
+{
+
+//  Map of PNOR section Ids to pairs of LidIds
+//  Key - PNOR section
+//  Value - LidAndContainerLid
+//          The first Lid in the pair is the image content
+//          The second Lid in the pair is the Container LID (Secure Header)
+static const PnorLidsMap PnorToLidsMap =
+{
+    { PNOR::TESTRO,  LidAndContainerLid(TEST_LIDID, INVALID_LIDID)},
+    { PNOR::OCC,     LidAndContainerLid(OCC_LIDID, OCC_CONTAINER_LIDID)},
+    { PNOR::WOFDATA, LidAndContainerLid(WOF_LIDID, WOF_CONTAINER_LIDID)},
+    { PNOR::HCODE,   LidAndContainerLid(NIMBUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    /* @TODO RTC:177927 - Figure out how to handle different Lids for the
+                              same PNOR section based on chip.
+    { PNOR::HCODE,   LidAndContainerLid(CUMULUS_HCODE_LIDID, HCODE_CONTAINER_LIDID)},
+    */
+    { PNOR::RINGOVD, LidAndContainerLid(HWREFIMG_RINGOVD_LIDID,INVALID_LIDID)},
+};
+
+LidAndContainerLid getPnorSecLidIds(const PNOR::SectionId i_sec)
+{
+    LidAndContainerLid l_lids;
+
+    auto l_secIter = PnorToLidsMap.find(i_sec);
+    if (l_secIter != PnorToLidsMap.end())
+    {
+        l_lids.lid = l_secIter->second.lid;
+        l_lids.containerLid = l_secIter->second.containerLid;
+    }
+
+    return l_lids;
+}
+
+PNOR::SectionId getLidPnorSection(const LidId i_lid)
+{
+    PNOR::SectionId l_secId  = PNOR::INVALID_SECTION;
+
+    // Search map by value
+    // Note: Sacrificed constant look up with another map in the reverse
+    //       direction to simplify maintenance with a single map
+    auto l_secIter = std::find_if( PnorToLidsMap.begin(),
+                                   PnorToLidsMap.end(),
+                                   [i_lid](const PnorLidsPair & pair) -> bool
+                                 {
+                                     return pair.second.lid == i_lid;
+                                 });
+    // Check if we found a valid entry.
+    if (l_secIter != PnorToLidsMap.end())
+    {
+        l_secId = l_secIter->first;
+    }
+
+    return l_secId;
+}
+
+} // end Util namespace
+
+bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
+                                       PNOR::SectionInfo_t &o_lidPnorInfo)
 {
     errlHndl_t l_err = NULL;
     bool l_lidInPnor = false;
 
-    const std::pair<uint32_t, PNOR::SectionId> l_lid(i_lidId,
-                                                     PNOR::INVALID_SECTION);
-
-    const std::pair<uint32_t, PNOR::SectionId>* l_result =
-                            std::lower_bound (Util::lidToPnor,
-                                        Util::lidToPnor + Util::NUM_LID_TO_PNOR,
-                                        l_lid,
-                                        Util::cmpLidToPnor);
-
-    if (l_result != (Util::lidToPnor + Util::NUM_LID_TO_PNOR) &&
-        l_result->first == l_lid.first &&
-        l_result->second != PNOR::INVALID_SECTION)
+    // Search if a lid id maps to pnor section
+    auto l_secId = Util::getLidPnorSection(static_cast<Util::LidId>(i_lidId));
+    // LidToPnor will return INVALID_SECITON if no mapping found
+    if (l_secId == PNOR::INVALID_SECTION)
     {
-        l_err = PNOR::getSectionInfo(l_result->second, o_lidPnorInfo);
+        o_lidPnorInfo.id = PNOR::INVALID_SECTION;
+    }
+    // A mapping was found
+    else
+    {
+        l_err = PNOR::getSectionInfo(l_secId, o_lidPnorInfo);
         // Section is optional or lid is not in PNOR, so just delete error
         if (l_err)
         {
             o_lidPnorInfo.id = PNOR::INVALID_SECTION;
-            l_lidInPnor = false;
             delete l_err;
             l_err = NULL;
         }
         else
         {
             l_lidInPnor = true;
-
 #ifdef CONFIG_SECUREBOOT
 #ifndef __HOSTBOOT_RUNTIME
             // The lid could be securely signed in PNOR
             if(o_lidPnorInfo.secure)
             {
                 // Load the secure section
-                l_err = loadSecureSection(l_result->second);
+                l_err = loadSecureSection(l_secId);
 
                 // If secure section fails to load log the error and assert
                 if (l_err)
                 {
                     errlCommit(l_err, UTIL_COMP_ID);
-                    assert(false,"UtilLidMgr::getLidPnorSection: attempt to "
+                    assert(false,"UtilLidMgr::getLidPnorSectionInfo: attempt to "
                                  "load Secure Section %d failed",
-                                 l_result->second);
+                                 l_secId);
                 }
 
                 // In Secureboot, rather than using the whole partition size,
@@ -94,5 +150,4 @@ bool UtilLidMgr::getLidPnorSection(uint32_t i_lidId,
         }
     }
     return l_lidInPnor;
-
 }

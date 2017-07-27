@@ -41,17 +41,24 @@
 
 namespace Util
 {
-// Lid id's
+
+// Lid Ids
+//  A Container Lid can be referred to as a Secure Header. The Container Lid ID
+//  is associated with the header data that sits in front of an image.
 enum LidId
 {
     TEST_LIDID = 0x00000111,
     OCC_LIDID = 0x81e00430,
+    OCC_CONTAINER_LIDID = 0x80d0000b,
     // TODO RTC 172767 Make utillidmgr LIDID structure attribute driven
     WOF_LIDID = 0x81e00440,
+    WOF_CONTAINER_LIDID = 0x80d00015,
     // Hcode Reference Image LIDs
     NIMBUS_HCODE_LIDID = 0x81e00602,
     CUMULUS_HCODE_LIDID = 0x81e00603,
+    HCODE_CONTAINER_LIDID = 0x80d0000c,
     HWREFIMG_RINGOVD_LIDID = 0x81e00620,
+    INVALID_LIDID = 0xFFFFFFFF
 };
 
 }
@@ -415,16 +422,17 @@ class UtilLidMgr
 #endif // __HOSTBOOT_RUNTIME
 
     /**
-     *  @brief search lidToPnor array for the pnor section for the given lid
-     *         lidToPnor array does not includes the ext img section
+     *  @brief Determines if a Lid Id has a corresponding PNOR section ID
+     *         and sets PNOR info if it exists
      *
-     *  @param[in] i_lidId          - provide lid id to search for
-     *  @param[out] o_lidPnorInfo   - pnor section that the lid is in
+     *  @param[in] i_lidId          - lid id to search for
+     *  @param[out] o_lidPnorInfo   - pnor section info associated with the lid
+     *                                if it exists in pnor
      *
      *  @return bool - True if lid is in a section, false otherwise
     */
-    bool getLidPnorSection(uint32_t i_lidId,
-                           PNOR::SectionInfo_t &o_lidPnorInfo);
+    bool getLidPnorSectionInfo(uint32_t i_lidId,
+                               PNOR::SectionInfo_t &o_lidPnorInfo);
     /**
      * @brief LID fileName
      */
