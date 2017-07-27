@@ -1880,7 +1880,7 @@
      Consumer: p9_hcode_image_build.c ->
                   PGPE Header field
 
-     Platform default:  OFF
+     Platform default: ON 
      <!--
         @todo RTC 169662 at some point in the program, this default may be switched to
          the opposite setting.  However, coordination needs to occur with all CIs
@@ -1893,7 +1893,6 @@
         OFF = 0x00, ON = 0x01
     </enum>
     <platInit/>
-    <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
