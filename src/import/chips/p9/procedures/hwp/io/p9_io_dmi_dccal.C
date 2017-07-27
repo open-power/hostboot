@@ -226,29 +226,29 @@ fapi2::ReturnCode tx_zcal_verify_results(
     if(io_pval > ZCAL_MAX)
     {
         io_pval = ZCAL_MAX;
-        FAPI_ERR("tx_zcal_verify_results: Tx Zcal Pval(0x%X) > Max Allowed(0x%X)",
-                 io_pval, ZCAL_MAX);
+        FAPI_ERR("I/O EDI+ DMI Tx Zcal Pval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pval, ZCAL_MAX, ZCAL_MAX);
     }
 
     if(io_nval > ZCAL_MAX)
     {
         io_nval = ZCAL_MAX;
-        FAPI_ERR("tx_zcal_verify_results: Tx Zcal Nval(0x%X) > Max Allowed(0x%X)",
-                 io_nval, ZCAL_MAX);
+        FAPI_ERR("I/O EDI+ DMI Tx Tx Zcal Nval(0x%X) > Max Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nval, ZCAL_MAX, ZCAL_MAX);
     }
 
     if(io_pval < ZCAL_MIN)
     {
         io_pval = ZCAL_MIN;
-        FAPI_ERR("tx_zcal_verify_results: Tx Zcal Pval(0x%X) < Min Allowed(0x%X)",
-                 io_pval, ZCAL_MIN);
+        FAPI_ERR("I/O EDI+ DMI Tx Tx Zcal Pval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_pval, ZCAL_MIN, ZCAL_MIN);
     }
 
     if(io_nval < ZCAL_MIN)
     {
         io_nval = ZCAL_MIN;
-        FAPI_ERR("tx_zcal_verify_results: Tx Zcal Nval(0x%X) < Min Allowed(0x%X)",
-                 io_nval, ZCAL_MIN);
+        FAPI_ERR("I/O EDI+ DMI Tx Tx Zcal Nval(0x%X) < Min Allowed(0x%X); Code will override with 0x%X and continue.",
+                 io_nval, ZCAL_MIN, ZCAL_MIN);
     }
 
     FAPI_IMP("tx_zcal_verify_results: I/O EDI+ Dmi Exiting");
@@ -323,18 +323,22 @@ fapi2::ReturnCode tx_zcal_run_bus_poll(const DMI_TGT i_tgt)
         FAPI_TRY(io::read(EDIP_TX_IMPCAL_PB, i_tgt, GRP3, LN0, l_data));
     }
 
-
+    // Check for Zcal Done
     if(io::get(EDIP_TX_ZCAL_DONE, l_data) == 1)
     {
-        FAPI_DBG("tx_zcal_run_sm: I/O EDI+ Dmi Tx Zcal Poll Completed(%d/%d).", l_count, TIMEOUT);
+        FAPI_DBG("I/O EDI+ Dmi Tx Zcal Poll Completed(%d/%d).", l_count, TIMEOUT);
     }
-    else if(io::get(EDIP_TX_ZCAL_ERROR, l_data) == 1)
+
+    // Check for Zcal Error
+    if(io::get(EDIP_TX_ZCAL_ERROR, l_data) == 1)
     {
-        FAPI_ERR("tx_zcal_run_sm: WARNING: Tx Z Calibration Error");
+        FAPI_ERR("I/O EDI+ DMI Tx Z Calibration Error");
     }
-    else
+
+    // Check for Zcal Timeout
+    if( l_count >= TIMEOUT)
     {
-        FAPI_ERR("tx_zcal_run_sm: WARNING: Tx Z Calibration Timeout: Loops(%d)", l_count);
+        FAPI_ERR("I/O EDI+ DMI Tx Z Calibration Timeout: Loops(%d)", l_count);
     }
 
 fapi_try_exit:
@@ -842,4 +846,3 @@ fapi_try_exit:
     FAPI_IMP("rx_dccal_poll_grp: I/O EDI+ Dmi Exiting");
     return fapi2::current_err;
 }
-
