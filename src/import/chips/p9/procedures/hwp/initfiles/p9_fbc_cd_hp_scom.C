@@ -100,9 +100,9 @@ constexpr uint64_t literal_0x21B = 0x21B;
 constexpr uint64_t literal_0x30D = 0x30D;
 constexpr uint64_t literal_0x7 = 0x7;
 constexpr uint64_t literal_0x5 = 0x5;
+constexpr uint64_t literal_0x000 = 0x000;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0b11111110 = 0b11111110;
-constexpr uint64_t literal_0x000 = 0x000;
 
 fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT0,
                                     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -419,70 +419,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000cf405011c11ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
-            {
-                l_scom_buffer.flush<0> ();
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<45, 4, 60, uint64_t>(literal_0b1110 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<45, 4, 60, uint64_t>(literal_0b1100 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<49, 3, 61, uint64_t>(literal_0b100 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<49, 3, 61, uint64_t>(literal_0b000 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<52, 2, 62, uint64_t>(literal_0b00 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b101 );
-                }
-                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG > literal_3)))
-                {
-                    l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b001 );
-                }
-                else if ((( ! l_def_SMP_OPTICS_MODE) && (l_def_NUM_X_LINKS_CFG <= literal_3)))
-                {
-                    l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b000 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b01 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<59, 2, 62, uint64_t>(literal_0b00 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b100 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b000 );
-                }
-
-                FAPI_TRY(fapi2::putScom(TGT0, 0x90000d0f05011c11ull, l_scom_buffer));
-            }
-        }
-        {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
@@ -545,17 +483,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
-            {
-                l_scom_buffer.flush<0> ();
-                l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b11 );
-                l_scom_buffer.insert<43, 2, 62, uint64_t>(literal_0b01 );
-                l_scom_buffer.insert<45, 19, 45, uint64_t>(literal_0x00000 );
-                FAPI_TRY(fapi2::putScom(TGT0, 0x90000d6805011c11ull, l_scom_buffer));
-            }
-        }
-        {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
                 l_scom_buffer.insert<41, 2, 62, uint64_t>(literal_0b11 );
@@ -565,103 +494,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             }
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
-            {
-                l_scom_buffer.flush<0> ();
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<36, 3, 61, uint64_t>(literal_0b100 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<39, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<40, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<41, 8, 56, uint64_t>(literal_0b00100000 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<49, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<51, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<54, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<55, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<56, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<57, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] == fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE)
-                     || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_TRUE)))
-                {
-                    l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b1 );
-                }
-                else if (((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] ==
-                           fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-                          && (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] ==
-                              fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE)))
-                {
-                    l_scom_buffer.insert<58, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<60, 4, 60, uint64_t>(literal_0b1000 );
-                }
-
-                FAPI_TRY(fapi2::putScom(TGT0, 0x90000d8c05011c11ull, l_scom_buffer));
-            }
-        }
-        {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
@@ -1093,116 +927,6 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f2005011c11ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
-            {
-                l_scom_buffer.flush<0> ();
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<12, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<13, 4, 60, uint64_t>(literal_0b0100 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<17, 4, 60, uint64_t>(literal_0b0100 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<21, 4, 60, uint64_t>(literal_0b0100 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<25, 3, 61, uint64_t>(literal_0b011 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<25, 3, 61, uint64_t>(literal_0b001 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<28, 3, 61, uint64_t>(literal_0b001 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<31, 3, 61, uint64_t>(literal_0b010 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<31, 3, 61, uint64_t>(literal_0b001 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<34, 8, 56, uint64_t>(literal_0b11111110 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<42, 8, 56, uint64_t>(literal_0b11111110 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<50, 2, 62, uint64_t>(literal_0b01 );
-                }
-
-                if (l_def_SMP_OPTICS_MODE)
-                {
-                    l_scom_buffer.insert<52, 2, 62, uint64_t>(literal_0b01 );
-                }
-                else if (( ! l_def_SMP_OPTICS_MODE))
-                {
-                    l_scom_buffer.insert<52, 2, 62, uint64_t>(literal_0b00 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b010 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b10 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<59, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<60, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<61, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<62, 1, 63, uint64_t>(literal_0b0 );
-                }
-
-                if (literal_1)
-                {
-                    l_scom_buffer.insert<63, 1, 63, uint64_t>(literal_0b1 );
-                }
-
-                FAPI_TRY(fapi2::putScom(TGT0, 0x90000f3d05011c11ull, l_scom_buffer));
-            }
-        }
-        {
             l_scom_buffer.flush<0> ();
 
             if ((l_def_TRUE == literal_1))
@@ -1388,7 +1112,8 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
             FAPI_TRY(fapi2::putScom(TGT0, 0x90000f4005012011ull, l_scom_buffer));
         }
         {
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6)
+                    && (l_chip_ec == 0x10)) )
             {
                 l_scom_buffer.flush<0> ();
 
