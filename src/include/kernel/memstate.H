@@ -45,7 +45,7 @@ namespace KernelMemState
      - - 4 = Hostboot is using half a cache
      - - 8 = Hostboot is using reduced cache
      - - 10 = Hostboot is using the full cache
-     - - 32 = Hostboot is using 32 MB of mainstore*/
+     - - 48 = Hostboot is using 48 MB of mainstore*/
 
 
     enum MemLocation
@@ -62,7 +62,7 @@ namespace KernelMemState
           HALF_CACHE      =  0x00000004,
           REDUCED_CACHE   =  0x00000008,
           FULL_CACHE      =  0x0000000A,
-          MS_32MEG        =  0x00000020,
+          MS_48MEG        =  0x00000030,
     };
 
     struct mem_location

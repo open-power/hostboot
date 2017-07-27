@@ -71,7 +71,7 @@
 #define VMM_ADDR_EXTEND_BLOCK (VMM_ADDR_BASE_BLOCK + VMM_BASE_BLOCK_SIZE)
 
 /** Maximize size of Base Segment Memory after expansion */
-#define VMM_MEMORY_SIZE (32*MEGABYTE)
+#define VMM_MEMORY_SIZE (48*MEGABYTE)
 
 /** Base Segment Extended Memory Block Size */
 #define VMM_EXTEND_BLOCK_SIZE (VMM_MEMORY_SIZE-VMM_BASE_BLOCK_SIZE)
@@ -141,7 +141,7 @@ enum BlockPriority
 
 /** Hardwired offsets from HRMOR to HOMER images in real mem */
 /** HOMER starts immediately after our HB memory */
-/**    <n0p0 HRMOR = 128MB> + <memory size = 32MB> = 160MB */
+/**    <n0p0 HRMOR = 128MB> + <memory size = 48MB> = 176 MB */
 /** HOMER is 4 MB per proc, 8 procs = 32MB */
 /** Each HOMER must start on a 4MB offset to meet OCC requirements */
 #define VMM_HOMER_REGION_START_OFFSET (VMM_MEMORY_SIZE)
@@ -151,18 +151,18 @@ enum BlockPriority
 #define VMM_HOMER_REGION_SIZE (VMM_HOMER_INSTANCE_SIZE*8)
 #define VMM_HOMER_REGION_END_OFFSET \
  (VMM_HOMER_REGION_START_OFFSET + VMM_HOMER_REGION_SIZE)
-/** HOMER_REGION_END = 192MB */
+/** HOMER_REGION_END = 208MB */
 
 /** Physical Memory for OCC common space - 8MB total */
 /** OCC Common must be on an 8MB offset */
-/** Start = End of Homer, currently 192MB */
+/** Start = End of Homer, currently 208MB */
 #define VMM_OCC_COMMON_START_OFFSET VMM_HOMER_REGION_END_OFFSET
 #define VMM_OCC_COMMON_SIZE_IN_MB 8
 #define VMM_OCC_COMMON_SIZE \
  (VMM_OCC_COMMON_SIZE_IN_MB*MEGABYTE)
 #define VMM_OCC_COMMON_END_OFFSET \
  (VMM_OCC_COMMON_START_OFFSET + VMM_OCC_COMMON_SIZE)
-/** End of Common Area = 200MB */
+/** End of Common Area = 216MB */
 
 /** Total Memory required for HOMERs and OCC Common */
 #define VMM_ALL_HOMER_OCC_MEMORY_SIZE \
@@ -171,17 +171,17 @@ enum BlockPriority
 /** Memory for attribute data */
 #define VMM_ATTR_DATA_START_OFFSET  VMM_OCC_COMMON_END_OFFSET
 #define VMM_ATTR_DATA_SIZE (1*MEGABYTE)
-/** End of Attr Area = 201MB */
+/** End of Attr Area = 217MB */
 
 /** Chunk of physical memory used for Dump Source Table */
 #define DUMP_TEST_MEMORY_ADDR \
- (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)  /* currently 201MB */
+ (VMM_ATTR_DATA_START_OFFSET + VMM_ATTR_DATA_SIZE)  /* currently 217MB */
 #define DUMP_TEST_MEMORY_SIZE (4*MEGABYTE)
-/** End of Dump Source Table = 205MB */
+/** End of Dump Source Table = 221MB */
 
 /** Memory for hostboot data Table of Contents */
 #define VMM_HB_DATA_TOC_START_OFFSET \
-    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 205MB */
+    (DUMP_TEST_MEMORY_ADDR + DUMP_TEST_MEMORY_SIZE) /* currently 221MB */
 
 /** Variable Attribute overrides and Attributes memory here **/
 
