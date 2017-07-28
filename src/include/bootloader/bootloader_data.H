@@ -95,14 +95,22 @@ namespace Bootloader{
                        "size changed.  Check bootloader_data.H alignment.  "
                        "Fix BlData.pm processing.");
     } blData_t;
-
-    /**
-     * @brief Pointer to bootloader external data
-     *
-     * Pointer to location in main storage which bootloader uses for
-     * storing data
-     */
-    extern blData_t *g_blData;
 } // end namespace Bootloader
+
+/**
+ * @brief Pointer to bootloader external data
+ *
+ * Pointer to location in main storage which bootloader uses for
+ * storing data
+ */
+extern Bootloader::blData_t *g_blData;
+
+/**
+ * @brief Pointer to bootloader scratch space
+ *
+ * Pointer to location in main storage which bootloader uses as
+ * scratch space
+ */
+extern uint8_t *g_blScratchSpace;
 
 #endif

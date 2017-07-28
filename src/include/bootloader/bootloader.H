@@ -65,28 +65,13 @@ extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
   * @param[in] i_error_info  Optional error data to go in the TI
   *                             data area
   * */
-inline void bl_terminate(uint8_t  i_moduleID,
-                             uint16_t i_reasoncode,
-                             uint32_t i_word7 = 0,
-                             uint32_t i_word8 = 0,
-                             bool     i_executeTI = true,
-                             uint64_t i_failAddr = 0,
-                             uint32_t i_error_info = 0)
-    {
-        termWriteSRC(TI_BOOTLOADER,
-                     i_reasoncode,
-                     i_failAddr,
-                     i_error_info);
-
-        termModifySRC(i_moduleID,
-                      i_word7,
-                      i_word8);
-
-        if(i_executeTI)
-        {
-            terminateExecuteTI();
-        }
-    }
+void bl_terminate(uint8_t  i_moduleID,
+                  uint16_t i_reasoncode,
+                  uint32_t i_word7 = 0,
+                  uint32_t i_word8 = 0,
+                  bool     i_executeTI = true,
+                  uint64_t i_failAddr = 0,
+                  uint32_t i_error_info = 0);
 
 
 /**

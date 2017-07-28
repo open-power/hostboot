@@ -186,9 +186,9 @@ enum BootloaderTraces
 #ifndef BOOTLOADER_TRACE
 #define BOOTLOADER_TRACE(trace_value) \
 { \
-    Bootloader::g_blData->bl_trace[Bootloader::g_blData->bl_trace_index++] = \
+    g_blData->bl_trace[g_blData->bl_trace_index++] = \
         trace_value; \
-    Bootloader::g_blData->bl_trace_index %= BOOTLOADER_TRACE_SIZE; \
+    g_blData->bl_trace_index %= BOOTLOADER_TRACE_SIZE; \
     lwsync(); \
 }
 #endif
