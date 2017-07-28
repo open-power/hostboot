@@ -90,13 +90,18 @@
 // are warrented
 
 /// VPD #V Data from keyword (eg VPD order)
-#define NUM_OP_POINTS 4
+
 #define NUM_JUMP_VALUES 4
 #define NUM_THRESHOLD_POINTS 4
+
+#define NUM_OP_POINTS      4
+#define NUM_PV_POINTS      5
 #define VPD_PV_POWERSAVE   1
 #define VPD_PV_NOMINAL     0
 #define VPD_PV_TURBO       2
 #define VPD_PV_ULTRA       3
+#define VPD_PV_POWERBUS    4
+
 #define VPD_PV_ORDER {VPD_PV_POWERSAVE, VPD_PV_NOMINAL, VPD_PV_TURBO, VPD_PV_ULTRA}
 #define VPD_PV_ORDER_STR {"Nominal   ","PowerSave ", "Turbo     ", "UltraTurbo"}
 #define VPD_THRESHOLD_ORDER_STR {"Overvolt", "Small", "Large", "Extreme" }

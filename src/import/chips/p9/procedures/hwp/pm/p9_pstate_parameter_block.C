@@ -141,6 +141,21 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54, 0x00, 0x00, 0x02, 0x01, 0x01, 0x06, /// V
 #define VALIDATE_WOF_HEADER_DATA(a,b,c,d,e,f,g,state)        if ( ((!a) || (!b) || (!c) || (!d) || (!e) || (!f) || (!g)))  \
                                                                 {state = 0; }
 
+
+
+double internal_ceil(double x)
+{
+    if ((x-(int)(x))>0) return (int)x+1;
+    return ((int)x);
+}
+
+double internal_floor(double x)
+{
+    if(x>=0)return (int)x;
+    return (int)(x-0.9999999999999999);
+}
+
+
 // Struct Variable for all attributes
 AttributeList attr;
 
@@ -256,6 +271,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // VPD voltage and frequency biases
         VpdBias l_vpdbias[NUM_OP_POINTS];
+        memset (l_vpdbias,0,sizeof(VpdBias));
 
 
         // -------------------------
@@ -314,6 +330,18 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             break;
         }
 
+        FAPI_DBG("Pstate Base Frequency - Raw %X (%d)",
+                 attr_mvpd_voltage_control[ULTRA][0] * 1000,
+                 attr_mvpd_voltage_control[ULTRA][0] * 1000);
+
+        //Calculate freq step value
+        l_frequency_step_khz = (attr.attr_freq_proc_refclock_khz / attr.attr_proc_dpll_divider);
+
+        VpdOperatingPoint l_raw_operating_points[NUM_OP_POINTS];
+        FAPI_INF("Load RAW VPD");
+        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_raw_operating_points, l_frequency_step_khz),
+                 "Loading MVPD operating point failed");
+
         // ---------------------------------------------
         // process external and internal bias attributes
         // ---------------------------------------------
@@ -321,6 +349,20 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         FAPI_TRY(proc_get_extint_bias(attr_mvpd_voltage_control, &attr, l_vpdbias),
                  "Bias application function failed");
+
+        //Validating Bias values
+        FAPI_INF("Validate Biasd Voltage and Frequency values");
+
+        FAPI_TRY(proc_chk_valid_poundv( i_target,
+                                        attr_mvpd_voltage_control,
+                                        &valid_pdv_points,
+                                        i_target.getChipletNumber(),
+                                        l_poundv_bucketId,
+                                        &l_state));
+
+        FAPI_DBG("Pstate Base Frequency - after bias %X (%d)",
+                 attr_mvpd_voltage_control[ULTRA][0] * 1000,
+                 attr_mvpd_voltage_control[ULTRA][0] * 1000);
 
         // -----------------------------------------------
         // System power distribution parameters
@@ -406,13 +448,14 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // Pstate Options @todo RTC 161279, Check what needs to be populated here
 
         // @todo RTC 161279 - Corresponds to Pstate 0 . Setting to ULTRA TURBO frequency point. REVIEW with Greg
+        // FIXME this should be the l_operating_points[VPD_PT_SET_BIASED][ULTRA].frequency_mhz value with
+        // p9_pstate_compute_vpd_pts ahead of this!!!!
         l_globalppb.reference_frequency_khz = revle32((attr_mvpd_voltage_control[ULTRA][0] * 1000));
         FAPI_INF("Pstate Base Frequency %X (%d)",
                  revle32(l_globalppb.reference_frequency_khz),
                  revle32(l_globalppb.reference_frequency_khz));
 
         // frequency_step_khz
-        l_frequency_step_khz = (attr.attr_freq_proc_refclock_khz / attr.attr_proc_dpll_divider);
         l_globalppb.frequency_step_khz = revle32(l_frequency_step_khz);
         l_globalppb.nest_frequency_mhz = revle32(attr.attr_nest_frequency_mhz);
 
@@ -456,6 +499,12 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // vrm_stepdelay_value -@todo RTC 161279 potential attributes to be defined
 
+        VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS];
+        // Compute VPD points
+        p9_pstate_compute_vpd_pts(l_operating_points, &l_globalppb, l_raw_operating_points);
+
+        memcpy(l_globalppb.operating_points_set, l_operating_points, sizeof(l_operating_points));
+
         // ----------------
         // get Resonant clocking attributes
         // ----------------
@@ -484,12 +533,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         // IvrmParmBlock
         l_globalppb.ivrm = l_ivrmpb;
-
-        VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS];
-        // Compute VPD points
-        p9_pstate_compute_vpd_pts(l_operating_points, &l_globalppb);
-
-        memcpy(l_globalppb.operating_points_set, l_operating_points, sizeof(l_operating_points));
 
         // Calculate pre-calculated slopes
         p9_pstate_compute_PsV_slopes(l_operating_points, &l_globalppb); //Remote this RTC: 174743
@@ -893,7 +936,7 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     // ----------------------------
 #define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, io_attr->attr_assign),"Attribute read failed"); \
-FAPI_INF("%-60s = 0x%08x %u", #attr_name, io_attr->attr_assign, io_attr->attr_assign);
+FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_assign);
 
     // Frequency Bias attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS_ULTRATURBO, i_target, attr_freq_bias_ultraturbo);
@@ -1424,127 +1467,113 @@ fapi_try_exit:
 
 /// START OF BIAS APPLICATION FUNCTION
 
+// Bias multiplier helper function
+// NOTE: BIAS_PCT_UNIT is a multipler on the percentage that the value represents
+double
+calc_bias(const int8_t i_value)
+{
+    double temp = 1.0 + ((BIAS_PCT_UNIT/100) * (double)i_value);
+    FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; biased multiplier = %f",
+                i_value, temp);
+    return temp;
+}
+
+
+
 fapi2::ReturnCode
 proc_get_extint_bias( uint32_t io_attr_mvpd_data[PV_D][PV_W],
                       const AttributeList* i_attr,
                       VpdBias o_vpdbias[NUM_OP_POINTS]
                     )
 {
-
-    //int    i                 = 0;
-    //double freq_bias         = 1.0;
-    //double volt_ext_vdd_bias = 1.0;
-    //double volt_ext_vcs_bias = 1.0;
-
-    double freq_bias_ultraturbo;
-    double freq_bias_turbo;
-    double freq_bias_nominal;
-    double freq_bias_powersave;
-
-    double voltage_ext_vdd_bias_ultraturbo;
-    double voltage_ext_vdd_bias_turbo;
-    double voltage_ext_vdd_bias_nominal;
-    double voltage_ext_vdd_bias_powersave;
-
-    //double voltage_int_vdd_bias_ultraturbo;
-    //double voltage_int_vdd_bias_turbo;
-    //double voltage_int_vdd_bias_nominal;
-    //double voltage_int_vdd_bias_powersave;
-
+    double freq_bias[NUM_OP_POINTS];
+    double voltage_ext_vdd_bias[NUM_OP_POINTS];
     double voltage_ext_vcs_bias;
     double voltage_ext_vdn_bias;
 
-    freq_bias_ultraturbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_freq_bias_ultraturbo);
-    freq_bias_turbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_freq_bias_turbo);
-    freq_bias_nominal = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_freq_bias_nominal);
-    freq_bias_powersave = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_freq_bias_powersave);
+    // Calculate the frequency multiplers and load the biases into the exported
+    // structure
+    for (auto p = 0; p < NUM_OP_POINTS; p++)
+    {
+        switch (p)
+        {
+            case POWERSAVE:
+               o_vpdbias[p].frequency_hp    = i_attr->attr_freq_bias_powersave;
+               o_vpdbias[p].vdd_ext_hp      = i_attr->attr_voltage_ext_vdd_bias_powersave;
+               o_vpdbias[p].vdd_int_hp      = i_attr->attr_voltage_int_vdd_bias_powersave;
 
-    voltage_ext_vdd_bias_ultraturbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_ultraturbo);
-    voltage_ext_vdd_bias_turbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_turbo);
-    voltage_ext_vdd_bias_nominal = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_nominal);
-    voltage_ext_vdd_bias_powersave = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdd_bias_powersave);
+               break;
+            case NOMINAL:
+               o_vpdbias[p].frequency_hp    = i_attr->attr_freq_bias_nominal;
+               o_vpdbias[p].vdd_ext_hp      = i_attr->attr_voltage_ext_vdd_bias_nominal;
+               o_vpdbias[p].vdd_int_hp      = i_attr->attr_voltage_int_vdd_bias_nominal;
+               break;
+            case TURBO:
+               o_vpdbias[p].frequency_hp    = i_attr->attr_freq_bias_turbo;
+               o_vpdbias[p].vdd_ext_hp      = i_attr->attr_voltage_ext_vdd_bias_turbo;
+               o_vpdbias[p].vdd_int_hp      = i_attr->attr_voltage_int_vdd_bias_turbo;
+               break;
+            case ULTRA:
+               o_vpdbias[p].frequency_hp    = i_attr->attr_freq_bias_ultraturbo;
+               o_vpdbias[p].vdd_ext_hp      = i_attr->attr_voltage_ext_vdd_bias_ultraturbo;
+               o_vpdbias[p].vdd_int_hp      = i_attr->attr_voltage_int_vdd_bias_ultraturbo;
+        }
 
-    // @todo RTC 161279 - Where should we apply int_vdd bias ?, Read in attributes for all VPD points. REVIEW with Greg
-    //voltage_int_vdd_bias_ultraturbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_ultraturbo);
-    //voltage_int_vdd_bias_turbo = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_turbo);
-    //voltage_int_vdd_bias_nominal = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_nominal);
-    //voltage_int_vdd_bias_powersave = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_int_vdd_bias_powersave);
+        o_vpdbias[p].vdn_ext_hp      = i_attr->attr_voltage_ext_vdn_bias;
+        o_vpdbias[p].vcs_ext_hp      = i_attr->attr_voltage_ext_vcs_bias;
 
-    // @todo RTC 161279 - Should VCS bias be applied to all operating points ? Currently applied to all. REVIEW with Greg
-    voltage_ext_vcs_bias = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vcs_bias);
+        freq_bias[p]                 = calc_bias(o_vpdbias[p].frequency_hp);
+        voltage_ext_vdd_bias[p]      = calc_bias(o_vpdbias[p].vdd_ext_hp);
 
-    // @todo RTC 161279 - VDN bias corresponds to Power Bus operating point ? Currently applied to power bus point. REVIEW with Greg
-    voltage_ext_vdn_bias = 1.0 + (BIAS_PCT_UNIT * (double)i_attr->attr_voltage_ext_vdn_bias);
+        FAPI_DBG("    Biases[%d](bias): Freq=%f (%f%%); VDD=%f (%f%%)",
+                    p,
+                    freq_bias[p],            o_vpdbias[p].frequency_hp/2,
+                    voltage_ext_vdd_bias[p], o_vpdbias[p].vdd_ext_hp/2);
+    }
 
+    // VCS bias applied to all operating points
+    voltage_ext_vcs_bias = calc_bias(i_attr->attr_voltage_ext_vcs_bias);
 
-    // Nominal frequency operating point
-    io_attr_mvpd_data[VPD_PV_NOMINAL][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][0]) *
-                                           freq_bias_nominal));
-    io_attr_mvpd_data[VPD_PV_NOMINAL][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][1]) *
-                                           voltage_ext_vdd_bias_nominal));
-    io_attr_mvpd_data[VPD_PV_NOMINAL][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_NOMINAL][3]) *
-                                           voltage_ext_vcs_bias));
+    // VDN bias applied to all operating points
+    voltage_ext_vdn_bias = calc_bias(i_attr->attr_voltage_ext_vdn_bias);
 
-    // Power Save frequency operating point
-    io_attr_mvpd_data[VPD_PV_POWERSAVE][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][0]) *
-            freq_bias_powersave));
-    io_attr_mvpd_data[VPD_PV_POWERSAVE][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][1]) *
-            voltage_ext_vdd_bias_powersave));
-    io_attr_mvpd_data[VPD_PV_POWERSAVE][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_POWERSAVE][3]) *
-            voltage_ext_vcs_bias));
+    // Change the VPD frequency, VDD and VCS values with the bias multiplers
+    for (auto p = 0; p < NUM_OP_POINTS; p++)
+    {
+        FAPI_DBG("    Orig values[%d](bias): Freq=%d (%f); VDD=%d (%f), VCS=%d (%f)",
+                    p,
+                    io_attr_mvpd_data[p][VPD_PV_CORE_FREQ_MHZ], freq_bias[p],
+                    io_attr_mvpd_data[p][VPD_PV_VDD_MV], voltage_ext_vdd_bias[p],
+                    io_attr_mvpd_data[p][VPD_PV_VCS_MV], voltage_ext_vcs_bias);
 
-    // Turbo frequency operating point
-    io_attr_mvpd_data[VPD_PV_TURBO][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][0]) * freq_bias_turbo));
-    io_attr_mvpd_data[VPD_PV_TURBO][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][1]) *
-                                         voltage_ext_vdd_bias_turbo));
-    io_attr_mvpd_data[VPD_PV_TURBO][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_TURBO][3]) *
-                                         voltage_ext_vcs_bias));
+        double freq_mhz =
+            (( (double)io_attr_mvpd_data[p][VPD_PV_CORE_FREQ_MHZ]) * freq_bias[p]);
+        double vdd_mv =
+            (( (double)io_attr_mvpd_data[p][VPD_PV_VDD_MV]) * voltage_ext_vdd_bias[p]);
+        double vcs_mv =
+            (( (double)io_attr_mvpd_data[p][VPD_PV_VCS_MV]) * voltage_ext_vcs_bias);
 
-    // Ultraturbo frequency operating point
-    io_attr_mvpd_data[VPD_PV_ULTRA][0] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][0]) *
-                                         freq_bias_ultraturbo));
-    io_attr_mvpd_data[VPD_PV_ULTRA][1] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][1]) *
-                                         voltage_ext_vdd_bias_ultraturbo));
-    io_attr_mvpd_data[VPD_PV_ULTRA][3] = (uint32_t) ((( (double)io_attr_mvpd_data[VPD_PV_ULTRA][3]) *
-                                         voltage_ext_vcs_bias));
+        io_attr_mvpd_data[p][VPD_PV_CORE_FREQ_MHZ] = (uint32_t)internal_floor(freq_mhz);
+        io_attr_mvpd_data[p][VPD_PV_VDD_MV] = (uint32_t)internal_ceil(vdd_mv);
+        io_attr_mvpd_data[p][VPD_PV_VCS_MV] = (uint32_t)(vcs_mv);
+
+        FAPI_DBG("    Biased values[%d]: Freq=%f %d; VDD=%f %d, VCS=%f %d ",
+                    p,
+                    freq_mhz, io_attr_mvpd_data[p][VPD_PV_CORE_FREQ_MHZ],
+                    vdd_mv, io_attr_mvpd_data[p][VPD_PV_VDD_MV],
+                    vcs_mv, io_attr_mvpd_data[p][VPD_PV_VCS_MV]);
+    }
 
     // Power bus operating point
-    io_attr_mvpd_data[4][1] = (uint32_t) ((( (double)io_attr_mvpd_data[4][1]) * voltage_ext_vdn_bias));
-
-    //VPD Biases per operating point
-    // Nominal
-    o_vpdbias[VPD_PV_NOMINAL].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_nominal;
-    o_vpdbias[VPD_PV_NOMINAL].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_nominal;
-    o_vpdbias[VPD_PV_NOMINAL].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[VPD_PV_NOMINAL].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[VPD_PV_NOMINAL].frequency_hp = i_attr->attr_freq_bias_nominal;
-
-    // PowerSave
-    o_vpdbias[VPD_PV_POWERSAVE].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_powersave;
-    o_vpdbias[VPD_PV_POWERSAVE].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_powersave;
-    o_vpdbias[VPD_PV_POWERSAVE].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[VPD_PV_POWERSAVE].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[VPD_PV_POWERSAVE].frequency_hp = i_attr->attr_freq_bias_powersave;
-
-    // Turbo
-    o_vpdbias[VPD_PV_TURBO].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_turbo;
-    o_vpdbias[VPD_PV_TURBO].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_turbo;
-    o_vpdbias[VPD_PV_TURBO].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[VPD_PV_TURBO].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[VPD_PV_TURBO].frequency_hp = i_attr->attr_freq_bias_turbo;
-
-    // UltraTurbo
-    o_vpdbias[VPD_PV_ULTRA].vdd_ext_hp = i_attr->attr_voltage_ext_vdd_bias_ultraturbo;
-    o_vpdbias[VPD_PV_ULTRA].vdd_int_hp = i_attr->attr_voltage_int_vdd_bias_ultraturbo;
-    o_vpdbias[VPD_PV_ULTRA].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
-    o_vpdbias[VPD_PV_ULTRA].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
-    o_vpdbias[VPD_PV_ULTRA].frequency_hp = i_attr->attr_freq_bias_ultraturbo;
+    double vdn_mv =
+           (( (double)io_attr_mvpd_data[VPD_PV_POWERBUS][VPD_PV_VDN_MV]) * voltage_ext_vdn_bias);
+    io_attr_mvpd_data[VPD_PV_POWERBUS][VPD_PV_VDN_MV] = (uint32_t)internal_ceil(vdn_mv);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 } // end proc_get_extint_bias
 
-/// ssrivath END OF BIAS APPLICATION FUNCTION
+/// END OF BIAS APPLICATION FUNCTION
 
 
 
@@ -1682,27 +1711,27 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                          pv_op_order[i]);
 #define POUNDV_SLOPE_CHECK(x,y)   x > y ? " is GREATER (ERROR!) than " : " is less than "
                 FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][0], 
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
                        POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][0], i_chiplet_mvpd_data[pv_op_order[i]][0]),
                        pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][0]);
 
                 FAPI_INF("%s VDD voltage value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][1], 
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
                        POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][1], i_chiplet_mvpd_data[pv_op_order[i]][1]),
                        pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][1]);
 
                 FAPI_INF("%s VDD current value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][2], 
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
                        POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][2], i_chiplet_mvpd_data[pv_op_order[i]][2]),
                        pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][2]);
 
                 FAPI_INF("%s VCS voltage value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][3], 
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
                        POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][3], i_chiplet_mvpd_data[pv_op_order[i]][3]),
                        pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][3]);
 
                 FAPI_INF("%s VCS current value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][4], 
+                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
                        POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][4], i_chiplet_mvpd_data[pv_op_order[i]][4]),
                        pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
@@ -1987,21 +2016,42 @@ sysparm_uplift(const uint32_t i_vpd_mv,
                     ) / 1000);  // uV -> mV
 }
 
-// Bias Adjust a data value using a 1/2 percent bias amount
+// Bias Adjust a voltage data value using a 1/2 percent bias amount.  Value
+// is always taken to the higher integer value.
 uint32_t
-bias_adjust(const uint32_t i_value,
-            const int32_t i_bias_0p5pct)
+bias_adjust_mv(const uint32_t i_value,
+               const int32_t i_bias_0p5pct)
 {
-    return  revle32((uint32_t)((int32_t)i_value * (200 + i_bias_0p5pct) / 200));
+    double l_mult = calc_bias(i_bias_0p5pct);
+    double l_biased_value = (double)i_value * l_mult;
+    FAPI_DBG("  bias_adjust_mv:  i_value=%d; mult=%f; biased value=%f",
+                i_value,
+                l_mult,
+                l_biased_value);
+    return revle32((uint32_t)internal_ceil(l_biased_value));
 }
 
-
+// Bias Adjust a frequency data value using a 1/2 percent bias amount.  Value
+// is always taken to the lower integer value.
+uint32_t
+bias_adjust_mhz(const uint32_t i_value,
+                const int32_t i_bias_0p5pct)
+{
+    double l_mult = calc_bias(i_bias_0p5pct);
+    double l_biased_value = (double)i_value * l_mult;
+    FAPI_DBG("  bias_adjust_mhz: i_value=%d; mult=%f; biased value=%f",
+                i_value,
+                l_mult,
+                l_biased_value);
+    return revle32((uint32_t)internal_floor(l_biased_value));
+}
 
 //
 // p9_pstate_compute_vpd_pts
 //
 void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_POINTS],
-                               GlobalPstateParmBlock* i_gppb)
+                               GlobalPstateParmBlock* i_gppb,
+                               VpdOperatingPoint* i_raw_vpd_pts)
 {
     int p = 0;
 
@@ -2015,14 +2065,14 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
     //RAW POINTS. We just copy them as is
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
-        o_operating_points[VPD_PT_SET_RAW][p].vdd_mv = i_gppb->operating_points[p].vdd_mv ;
-        o_operating_points[VPD_PT_SET_RAW][p].vcs_mv = i_gppb->operating_points[p].vcs_mv;
-        o_operating_points[VPD_PT_SET_RAW][p].idd_100ma = i_gppb->operating_points[p].idd_100ma;
-        o_operating_points[VPD_PT_SET_RAW][p].ics_100ma = i_gppb->operating_points[p].ics_100ma;
-        o_operating_points[VPD_PT_SET_RAW][p].frequency_mhz = i_gppb->operating_points[p].frequency_mhz;
-        o_operating_points[VPD_PT_SET_RAW][p].pstate = i_gppb->operating_points[p].pstate;
+        o_operating_points[VPD_PT_SET_RAW][p].vdd_mv = i_raw_vpd_pts[p].vdd_mv;
+        o_operating_points[VPD_PT_SET_RAW][p].vcs_mv = i_raw_vpd_pts[p].vcs_mv;
+        o_operating_points[VPD_PT_SET_RAW][p].idd_100ma = i_raw_vpd_pts[p].idd_100ma;
+        o_operating_points[VPD_PT_SET_RAW][p].ics_100ma = i_raw_vpd_pts[p].ics_100ma;
+        o_operating_points[VPD_PT_SET_RAW][p].frequency_mhz = i_raw_vpd_pts[p].frequency_mhz;
+        o_operating_points[VPD_PT_SET_RAW][p].pstate = i_raw_vpd_pts[p].pstate;
 
-        FAPI_DBG("GP: OpPoint=[%d][%d], PS=%2d, Freq=%3X (%4d), Vdd=%3X (%4d)",
+        FAPI_DBG("GP: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d)",
                     VPD_PT_SET_RAW, p,
                     o_operating_points[VPD_PT_SET_RAW][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_RAW][p].frequency_mhz),
@@ -2063,7 +2113,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
         o_operating_points[VPD_PT_SET_SYSP][p].pstate =
                    i_gppb->operating_points[p].pstate;
 
-        FAPI_DBG("SP: OpPoint=[%d][%d], PS=%2d, Freq=%3X (%4d), Vdd=%3X (%4d)",
+        FAPI_DBG("SP: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d)",
                     VPD_PT_SET_RAW, p,
                     o_operating_points[VPD_PT_SET_SYSP][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_SYSP][p].frequency_mhz),
@@ -2080,13 +2130,13 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
         uint32_t l_vcs_mv = revle32(i_gppb->operating_points[p].vcs_mv);
 
         o_operating_points[VPD_PT_SET_BIASED][p].vdd_mv =
-                    bias_adjust(l_vdd_mv, revle32(i_gppb->ext_biases[p].vdd_ext_hp));
+                    bias_adjust_mv(l_vdd_mv, revle32(i_gppb->ext_biases[p].vdd_ext_hp));
 
         o_operating_points[VPD_PT_SET_BIASED][p].vcs_mv =
-                    bias_adjust(l_vcs_mv, revle32(i_gppb->ext_biases[p].vcs_ext_hp));
+                    bias_adjust_mv(l_vcs_mv, revle32(i_gppb->ext_biases[p].vcs_ext_hp));
 
         o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz =
-                    bias_adjust(l_frequency_mhz, revle32(i_gppb->ext_biases[p].vcs_ext_hp));
+                    bias_adjust_mhz(l_frequency_mhz, revle32(i_gppb->ext_biases[p].frequency_hp));
 
         o_operating_points[VPD_PT_SET_BIASED][p].idd_100ma =
                     i_gppb->operating_points[p].idd_100ma;
@@ -2103,7 +2153,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
                revle32(o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz)) * 1000) /
              revle32(i_gppb->frequency_step_khz));
 
-        FAPI_DBG("Bi: OpPoint=[%d][%d], PS=%2d, Freq=%3X (%4d), Vdd=%3X (%4d), UT Freq=%3X (%4d) Step Freq=%5d",
+        FAPI_DBG("Bi: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d), UT Freq=%3X (%4d) Step Freq=%5d",
                     VPD_PT_SET_RAW, p,
                     o_operating_points[VPD_PT_SET_BIASED][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz),
@@ -2148,7 +2198,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
         o_operating_points[VPD_PT_SET_BIASED_SYSP][p].pstate =
                     o_operating_points[VPD_PT_SET_BIASED][p].pstate;
 
-        FAPI_DBG("BS: OpPoint=[%d][%d], PS=%d, Freq=%x (%d), Vdd=%x (%d)",
+        FAPI_DBG("BS: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d)",
                     VPD_PT_SET_RAW, p,
                     o_operating_points[VPD_PT_SET_SYSP][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_SYSP][p].frequency_mhz),
@@ -2169,6 +2219,7 @@ compute_slope_4_12(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
                // Store resulting slope in 4.12 Fixed-Pt format
                ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << VID_SLOPE_FP_SHIFT_12)
            );
+
 }
 
 //  Slope of m = (y1-y0)/(x1-x0) in 3.13 Fixed-Pt format
@@ -2769,6 +2820,13 @@ freq2pState (const GlobalPstateParmBlock* gppb,
     // ----------------------------------
     pstate32 = ((float)(revle32(gppb->reference_frequency_khz) - (float)freq_khz)) /
                (float)revle32(gppb->frequency_step_khz);
+    // @todo Bug fix from Characterization team to deal with VPD not being
+    // exactly in step increments
+    //       - not yet included to separate changes
+    // As higher Pstate numbers represent lower frequencies, the pstate must be
+    // snapped to the nearest *higher* integer value for safety.  (e.g. slower
+    // frequencies are safer).
+    //*pstate  = (Pstate)internal_ceil(pstate32);
     *pstate  = (Pstate)pstate32;
 
     // ------------------------------
@@ -3001,7 +3059,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
         {
-            // These fields are 4 bits wide, and stored in a uint8, hence the shifting            
+            // These fields are 4 bits wide, and stored in a uint8, hence the shifting
             // N_S, N_L, L_S, S_N
             FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_S = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F));
             FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_L = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F));
@@ -3044,7 +3102,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
         {
-            l_pound_w_points[i]  = 1.0 + (BIAS_PCT_UNIT * (float)l_bias_value[i]);
+            l_pound_w_points[i]  = calc_bias(l_bias_value[i]);
             o_data->poundw[i].vdm_vid_compare_ivid = (uint32_t)(o_data->poundw[i].vdm_vid_compare_ivid * l_pound_w_points[i]);
 
             FAPI_INF ("vdm_vid_compare_ivid %x %x, %x", o_data->poundw[i].vdm_vid_compare_ivid,
