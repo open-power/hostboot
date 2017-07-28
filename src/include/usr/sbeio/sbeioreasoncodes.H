@@ -102,6 +102,7 @@ enum sbeioReasonCode
 
     // SBE Unsecure Memory Region error codes
     SBEIO_MEM_REGION_DOES_NOT_EXIST    = SBEIO_COMP_ID | 0x50,
+    SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS  = SBEIO_COMP_ID | 0x51,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
@@ -115,6 +116,6 @@ enum UserDetailsTypes
 };
 
 
-};  // end SBE
+};  // end SBEIO
 
 #endif
