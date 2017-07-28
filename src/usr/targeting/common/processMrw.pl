@@ -735,6 +735,10 @@ sub processProcessor
         {
             $targetObj->copyAttribute($socket_target,$target,$attr);
         }
+        elsif ($attr =~/NO_APSS_PROC_POWER_VCS_VIO_WATTS/)
+        {
+            $targetObj->copyAttribute($socket_target,$target,$attr);
+        }
     }
 
     # Both for FSP and BMC based systems, it's good  enough

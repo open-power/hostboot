@@ -1008,6 +1008,7 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
                                  uint64_t & o_size )
 {
     uint64_t index      = 0;
+    o_size = 0;
 
     assert( o_data != nullptr );
 
@@ -1024,8 +1025,19 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
     o_data[index++] = 0xFF;                                     //reserved
     o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_BUSNUM>();//Vdn Bus
     o_data[index++] = l_proc->getAttr<ATTR_VDN_AVSBUS_RAIL>();  //Vdn Rail sel
-    o_data[index++] = 0xFF;                                     //reserved
-    o_data[index++] = 0xFF;                                     //reserved
+
+    ATTR_NO_APSS_PROC_POWER_VCS_VIO_WATTS_type PowerAdder = 0;
+    if ( l_proc->tryGetAttr          //if attr exists populate Proc Power Adder.
+           <ATTR_NO_APSS_PROC_POWER_VCS_VIO_WATTS>(PowerAdder))
+    {
+        o_data[index++] = ((PowerAdder>>8)&0xFF);
+        o_data[index++] = ((PowerAdder)&0xFF);
+    }
+    else                            //else attr not def. set to 0x0000.
+    {
+        o_data[index++] = 0x00;
+        o_data[index++] = 0x00;
+    }
     o_size = index;
 
 }
