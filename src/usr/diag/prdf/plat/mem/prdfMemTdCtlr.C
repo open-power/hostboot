@@ -32,6 +32,7 @@
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistExtraSig.H>
 #include <prdfParserEnums.H>
+#include <UtilHash.H> // for Util::hashString
 
 // External includes
 #include <util/misc.H>
@@ -228,7 +229,7 @@ uint32_t __analyzeCmdComplete<TYPE_MCBIST>( ExtensibleChip * i_chip,
         // subtest will be the last configured address. To maintain sanity, we
         // will simply short-circuit the code and ensure we always get the last
         // configured rank.
-        if ( Util::isSimicsRunning() )
+        if ( ::Util::isSimicsRunning() )
         {
             std::vector<MemRank> list;
             getSlaveRanks<TYPE_MCA>( stopChip->getTrgt(), list );
@@ -547,6 +548,75 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
     //} while (0);
 
     return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template <TARGETING::TYPE T>
+void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
+                                            const char * i_startEnd )
+{
+    #define PRDF_FUNC "[MemTdCtlr<T>::collectStateCaptureData] "
+
+    // Get the number of entries in the TD queue (limit 15)
+    TdQueue::Queue queue = iv_queue.getQueue();
+    uint8_t queueCount = queue.size();
+    if ( 15 < queueCount ) queueCount = 15;
+
+    // Get the buffer
+    uint32_t bitLen = 22 + queueCount*10; // Header + TD queue
+    BitStringBuffer bsb( bitLen );
+    uint32_t curPos = 0;
+
+    //######################################################################
+    // Header data (18 bits)
+    //######################################################################
+
+    // Specifies running at IPL. Also ensures our data is non-zero. 4-bit
+    bsb.setFieldJustify( curPos, 4, TD_CTLR_DATA::Version::IPL ); curPos+=4;
+
+    uint8_t mrnk  = 0;
+    uint8_t srnk  = 0;
+    uint8_t phase = TdEntry::Phase::TD_PHASE_0;
+    uint8_t type  = TdEntry::TdType::INVALID_EVENT;
+
+    if ( nullptr != iv_curProcedure )
+    {
+        mrnk  = iv_curProcedure->getRank().getMaster(); // 3-bit
+        srnk  = iv_curProcedure->getRank().getSlave();  // 3-bit
+        phase = iv_curProcedure->getPhase();            // 4-bit
+        type  = iv_curProcedure->getType();             // 4-bit
+    }
+
+    bsb.setFieldJustify( curPos, 3, mrnk  ); curPos+=3;
+    bsb.setFieldJustify( curPos, 3, srnk  ); curPos+=3;
+    bsb.setFieldJustify( curPos, 4, phase ); curPos+=4;
+    bsb.setFieldJustify( curPos, 4, type  ); curPos+=4;
+
+    //######################################################################
+    // TD Request Queue (min 4 bits, max 164 bits)
+    //######################################################################
+
+    bsb.setFieldJustify( curPos, 4, queueCount ); curPos+=4; // 4-bit
+
+    for ( uint32_t n = 0; n < queueCount; n++ )
+    {
+        uint8_t itMrnk = queue[n]->getRank().getMaster(); // 3-bit
+        uint8_t itSrnk = queue[n]->getRank().getSlave();  // 3-bit
+        uint8_t itType = queue[n]->getType();             // 4-bit
+
+        bsb.setFieldJustify( curPos, 3, itMrnk ); curPos+=3;
+        bsb.setFieldJustify( curPos, 3, itSrnk ); curPos+=3;
+        bsb.setFieldJustify( curPos, 4, itType ); curPos+=4;
+    }
+
+    //######################################################################
+    // Add the capture data
+    //######################################################################
+    CaptureData & cd = io_sc.service_data->GetCaptureData();
+    cd.Add( iv_chip->getTrgt(), Util::hashString(i_startEnd), bsb );
 
     #undef PRDF_FUNC
 }

@@ -628,19 +628,6 @@ uint32_t __checkEcc<TYPE_MBA>( ExtensibleChip * i_chip, TdQueue & io_queue,
 
 //------------------------------------------------------------------------------
 
-template <TARGETING::TYPE T>
-void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
-                                            const char * i_startEnd )
-{
-    #define PRDF_FUNC "[MemTdCtlr<T>::collectStateCaptureData] "
-
-    // TODO RTC 167827
-
-    #undef PRDF_FUNC
-}
-
-//------------------------------------------------------------------------------
-
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_MBA>;
