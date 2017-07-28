@@ -53,15 +53,19 @@ namespace HBOCC
         OCC_GPE1_SRAM_ADDRESS = 0xFFF10000,
 
         // SRAM Address and length for FIR HOMER data
-        OCC_SRAM_FIR_DATA   = 0xFFFBA000,
-        OCC_SRAM_FIR_LENGTH = 0x3000,
+        OCC_SRAM_FIR_DATA   = 0xFFFBD000,
+        OCC_SRAM_FIR_LENGTH = 0x1000,
 
         // offsets for OCC loading during IPL
         OCC_OFFSET_LENGTH      = 0x48,
         OCC_OFFSET_GPE0_LENGTH = 0x64,
         OCC_OFFSET_GPE1_LENGTH = 0x68,
+        OCC_OFFSET_MAIN_EP     = 0x6C,
         OCC_OFFSET_IPL_FLAG    = 0x92,
         OCC_OFFSET_FREQ        = 0x94,
+
+        OCC_BRANCH_INSTR = 0x4B00000200000000,
+        BRANCH_ADDR_MASK = 0x00FFFFFC,
 
     };
 
@@ -97,6 +101,17 @@ namespace HBOCC
 #endif
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+
+    /**
+     * @brief Starts OCC that has been loaded to SRAM (used during IPL time
+     *        checkstop analysis.
+     *
+     * @param[in] i_target: the proc we're operating on (should be masterproc)
+     *
+     * @return errlHndl_t Error log if start fails
+     */
+    errlHndl_t startOCCFromSRAM(TARGETING::Target* i_proc);
+
     /**
      * @brief Loads the OCC image from PNOR to SRAM
      *

@@ -54,6 +54,7 @@
 
 #include <arch/ppc.H>
 #include <fapi2.H>
+#include <fapi2/plat_hwp_invoker.H>
 
 #include <pnorif.H>
 #include <pnor_const.H>
@@ -63,9 +64,14 @@
   #include <diag/prdf/prdfWriteHomerFirData.H>
 #endif
 
+#include <p9_pm_utils.H>
+#include <p9_pm_init.H>
+
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
+#define OCB_OITR0 0x6C008
+#define OCB_OIEPR0 0x6C00C
 
 extern trace_desc_t* g_fapiTd;
 extern trace_desc_t* g_fapiImpTd;
@@ -76,6 +82,254 @@ namespace HBOCC
 {
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+
+    errlHndl_t makeStart405Instruction(const TARGETING::Target* i_target,
+                                       uint64_t* o_instr)
+    {
+        errlHndl_t l_errl = NULL;
+        uint64_t l_epAddr;
+
+        l_errl = HBOCC::readSRAM(i_target,
+                                 OCC_405_SRAM_ADDRESS + OCC_OFFSET_MAIN_EP,
+                                 &l_epAddr,
+                                 sizeof(uint64_t));
+
+        // The branch instruction is of the form 0x4BXXXXX200000000, where X
+        // is the address of the 405 main's entry point (alligned as shown).
+        // Example: If 405 main's EP is FFF5B570, then the branch instruction
+        // will be 0x4bf5b57200000000. The last two bits of the first byte of
+        // the branch instruction must be '2' according to the OCC instruction
+        // set manual.
+        *o_instr = OCC_BRANCH_INSTR |
+                              (((uint64_t)(BRANCH_ADDR_MASK & l_epAddr)) << 32);
+        TRACFCOMP(g_fapiTd, "makeStart405Instruction instruction = %16x",
+                                                                      *o_instr);
+        return l_errl;
+    }
+
+    errlHndl_t startOCCFromSRAM(TARGETING::Target* i_proc)
+    {
+        TRACUCOMP(g_fapiTd, ENTER_MRK"startOCCFromSRAM");
+
+        errlHndl_t l_errl = NULL;
+        uint64_t l_start405MainInstr = 0;
+
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_target(i_proc);
+        fapi2::ReturnCode l_rc;
+
+        do {
+            //  ************************************************************
+            //  Initialize Cores and Quads
+            //  ************************************************************
+            FAPI_DBG("Executing p9_pm_corequad_init to"
+                                                   " initialize cores & quads");
+            FAPI_INVOKE_HWP(l_errl, p9_pm_corequad_init,
+                          l_target,
+                          p9pm::PM_INIT,
+                          0,//CME FIR MASK for reset
+                          0,//Core Error Mask for reset
+                          0 //Quad Error Mask for reset
+                         );
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd,
+                                  "ERROR: Failed to initialize cores & quads");
+                break;
+            }
+
+            //  ************************************************************
+            //  Issue init to OCB
+            //  ************************************************************
+            FAPI_DBG("Executing p9_pm_ocb_init to initialize OCB channels");
+            FAPI_INVOKE_HWP(l_errl, p9_pm_ocb_init,
+                          l_target,
+                          p9pm::PM_INIT,// Channel setup type
+                          p9ocb::OCB_CHAN1,// Channel
+                          p9ocb:: OCB_TYPE_NULL,// Channel type
+                          0,// Channel base address
+                          0,// Push/Pull queue length
+                          p9ocb::OCB_Q_OUFLOW_NULL,// Channel flow control
+                          p9ocb::OCB_Q_ITPTYPE_NULL// Channel interrupt ctrl
+                         );
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "ERROR: Failed to initialize channel 1");
+                break;
+            }
+
+            //  ************************************************************
+            //  Initializes P2S and HWC logic
+            //  ************************************************************
+            FAPI_DBG("Executing p9_pm_pss_init");
+            FAPI_INVOKE_HWP(l_errl, p9_pm_pss_init, l_target, p9pm::PM_INIT);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "ERROR: Failed to initialize PSS & HWC");
+                break;
+            }
+
+            //  ************************************************************
+            //  Set the OCC FIR actions
+            //  ************************************************************
+            FAPI_DBG("Executing p9_pm_occ_firinit to set FIR actions.");
+            FAPI_INVOKE_HWP(l_errl, p9_pm_occ_firinit, l_target, p9pm::PM_INIT);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "ERROR: Failed to set OCC FIR actions.");
+                break;
+            }
+
+            // *************************************************************
+            // Switch off OCC initiated special wakeup on EX to allowSTOP
+            // functionality
+            // *************************************************************
+            FAPI_DBG("Clear off the wakeup");
+            FAPI_INVOKE_HWP(l_errl, clear_occ_special_wakeups, l_target);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "ERROR: Failed to clear off the wakeup");
+                break;
+            }
+
+            //  ************************************************************
+            //  Take all EX chiplets out of special wakeup
+            //  ************************************************************
+            FAPI_DBG("Disable special wakeup for all functional"
+                                                               "  EX targets.");
+            FAPI_INVOKE_HWP(l_errl, special_wakeup_all, l_target, false);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd,
+                     "ERROR: Failed to remove EX chiplets from special wakeup");
+            }
+
+            // Hack provided by Doug Gilbert (@dgilbert). The following six
+            // scoms set up the communications between GPE0 and the 405. This
+            // allows to not load and start SGPE that is responsible for setting
+            // up the IRQ routing.
+            // TODO: RTC 178699 come up with a more permanent solution for
+            // communication setup
+            uint64_t l_writeData;
+            uint32_t l_writeAddress;
+            size_t l_writeSize = sizeof(l_writeData);
+
+            l_writeAddress = 0x6C040;
+            l_writeData = 0x218780f800000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = 0x6C050;
+            l_writeData = 0x0003d03c00000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = 0x6C044;
+            l_writeData = 0x2181801800000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = 0x6C054;
+            l_writeData = 0x0003d00c00000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = 0x6C048;
+            l_writeData = 0x010280ac00000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = 0x6C058;
+            l_writeData = 0x0001901400000000;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            //  ************************************************************
+            //  Start OCC PPC405
+            //  ************************************************************
+            l_errl = makeStart405Instruction(i_proc, &l_start405MainInstr);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "startOCCFromSRAM: could not make instr"
+                                    " to start 405 main");
+                break;
+            }
+            FAPI_DBG("Executing p9_pm_occ_control to start OCC PPC405");
+            FAPI_INVOKE_HWP(l_errl, p9_pm_occ_control, l_target,
+                          p9occ_ctrl::PPC405_START,// Operation on PPC405
+                          p9occ_ctrl::PPC405_BOOT_WITHOUT_BL, // PPC405 boot loc
+                          l_start405MainInstr);
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "ERROR: Failed to initialize OCC PPC405");
+                break;
+            }
+
+            // Set checkstop interrupt to be active-high and rising edge
+            // TODO RTC:178798 Remove the following workaround
+            l_writeAddress = OCB_OITR0;
+            l_writeData = 0xffffffffffffffff;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+            l_writeAddress = OCB_OIEPR0;
+            l_writeData = 0xffffffffffffffff;
+            l_errl = deviceWrite(i_proc, &l_writeData, l_writeSize,
+                                 DEVICE_SCOM_ADDRESS(l_writeAddress));
+            if(l_errl)
+            {
+                TRACFCOMP(g_fapiTd, "SCOM to address 0x%08x failed",
+                                                               l_writeAddress);
+                break;
+            }
+
+
+        } while(0);
+
+        return l_errl;
+    }
+
     errlHndl_t loadOCCImageDuringIpl(TARGETING::Target* i_target,
                                                             void* i_occVirtAddr)
     {
@@ -267,6 +521,7 @@ namespace HBOCC
 
         return l_errl;
     } // loadHostDataToSRAM
+
 #endif
 
 }  //end HBOCC namespace

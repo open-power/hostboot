@@ -33,6 +33,7 @@
 #include <sys/mm.h>
 #include <pm/pm_common.H>
 #include <targeting/common/commontargeting.H>
+#include <isteps/pm/occCheckstop.H>
 
 namespace ISTEP_06
 {
@@ -75,11 +76,11 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
             break;
         }
 
-        //l_errl = HBPM::startPMComplex(masterproc);
+        l_errl = HBOCC::startOCCFromSRAM(masterproc);
         if(l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                                       "startPMComplex failed");
+                                                     "startOCCFromSRAM failed");
             l_stepError.addErrorDetails(l_errl);
             ERRORLOG::errlCommit(l_errl, HWPF_COMP_ID);
             break;
