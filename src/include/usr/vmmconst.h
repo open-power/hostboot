@@ -214,11 +214,21 @@ enum BlockPriority
 /** Block size used in remove pages test */
 #define VMM_SIZE_RMVPAGE_TEST (8 * PAGESIZE)
 
+/**
+ * Physical Memory Constants
+ */
+
 /** Physical memory location of the TCE Table */
 /** - needs to be aligned on 4MB boundary     */
 #define TCE_TABLE_ADDR  (88*MEGABYTE)
 
 /** The TCE Table size is 512K entries each uint64_t (8 bytes) in size */
 #define TCE_TABLE_SIZE  ((512*KILOBYTE)*sizeof(uint64_t))
+
+/** Physical memory location used for Unsecure Memory Region Testing */
+/** - place it after TCE Table */
+#define UNSECURE_MEM_REGION_ADDR_TEST (TCE_TABLE_ADDR + TCE_TABLE_SIZE)
+
+#define UNSECURE_MEM_REGION_SIZE_TEST (1*KILOBYTE)
 
 #endif /* _VMMCONST_H */

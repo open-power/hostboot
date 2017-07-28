@@ -32,6 +32,11 @@
 
 namespace SBEIO
 {
+/*
+ * @brief Define Specifying The Maximum Number Of Unsecure Memory Regions That
+ *        the SBE Supports
+ */
+#define SBEIO_MAX_UNSECURE_MEMORY_REGIONS 8
 
 /*
  * @brief Struct containing specifics of a Unsecure Memory Region
@@ -77,6 +82,18 @@ class MemRegionMgr
      */
     errlHndl_t doUnsecureMemRegionOp(regionData & i_region);
 
+    /**
+     * @brief Checks That The Maximum Number of Unsecure Memory Regions That The
+     *        SBE Supports Is Not Exceeded If A New Region Is Opened
+     *
+     * @param[in] i_count Current count of opened unsecure memory regions
+     *
+     * @return errlHndl_t Error log handle if current size of iv_memRegions is
+     *                    equal to or exceeds the maximum number of regions that
+     *                    the SBE Supports; otherwise, returns nullptr
+     */
+    errlHndl_t checkNumberOfMemRegions(uint8_t i_count) const;
+
   public:
     /**
      * @brief Constructor.  Initializes instance variables.
@@ -120,7 +137,7 @@ class MemRegionMgr
         const bool     i_isWritable,
         TARGETING::Target* i_target);
 
-   /**
+    /**
      * @brief Close Unsecure Memory Region
      *
      * @note: See closeUnsecureMemRegion() function in sbeioif.H for details

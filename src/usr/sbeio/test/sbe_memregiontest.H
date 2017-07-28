@@ -22,11 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __SBE_MEMREGION_H
-#define __SBE_MEMREGION_H
+#ifndef __SBE_MEMREGIONTEST_H
+#define __SBE_MEMREGIONTEST_H
 
 /**
- *  @file sbe_ffdctest.H
+ *  @file sbe_memregiontest.H
  *
  *  @brief Test cases for Opening/Closing SBE/HB Memory Regions
 */
@@ -35,7 +35,14 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <sbeio/sbeioif.H>
+#include <sbeio/sbeioreasoncodes.H>
+#include <vmmconst.h>
+#include <sys/mm.h>
 
+#include "../sbe_memRegionMgr.H"
+
+#define SBE_TRACD_MRT(printf_string,args...) \
+    TRACDCOMP(g_trac_sbeio,"memRegionTest: " printf_string,##args)
 #define SBE_TRACF_MRT(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"memRegionTest: " printf_string,##args)
 
@@ -57,16 +64,67 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           // Reserve and Open Random Overlapping Memory Regions to force
           // MemRegionMgr to update regions around each other
 
-          // Malloc memory buffer to play with
-          // @TODO RTC 174970 - reserve a buffer of Physical Memory and use
-          //   Physical addresses so that SBEIO commands will be successful
-          uint32_t mem_buf_size = 256;
-          void * mem_buf = malloc(mem_buf_size);
-          uint64_t mem_buf_start_addr =
-                       reinterpret_cast<uint64_t>(mem_buf);
+          // Reserve the Physical Memory set aside in vmmconst.h to use
+          // for this test so that the SBEIO commands will work
+          uint32_t mem_buf_size = UNSECURE_MEM_REGION_SIZE_TEST;
+          uint64_t mem_buf_start_addr = UNSECURE_MEM_REGION_ADDR_TEST;
+          void * tmp_virtual_addr = mm_block_map(
+                                        reinterpret_cast<void*>
+                                           (UNSECURE_MEM_REGION_ADDR_TEST),
+                                        UNSECURE_MEM_REGION_SIZE_TEST);
+          assert(tmp_virtual_addr!=nullptr, "memRegionTest1: tmp_virtual_addr is nullptr");
 
           do
           {
+
+          // Loop Test: Open MAX+1 to force a fail
+          for (size_t i = 1; i<=SBEIO_MAX_UNSECURE_MEMORY_REGIONS+1 ; i++)
+          {
+              errl = SBEIO::openUnsecureMemRegion(mem_buf_start_addr +
+                                                      ((i-1)*32),
+                                                  16,
+                                                  true); //true=Read-Write
+
+              if (i <= SBEIO_MAX_UNSECURE_MEMORY_REGIONS)
+              {
+                  // Expect the open to succeed
+                  if (errl)
+                  {
+                      TS_FAIL("memRegionTest1: Loop Test-%d: SBEIO::openUnsecureMemRegion() Failed: rc=0x%X, plid=0x%X",
+                              i, ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+                      break;
+                  }
+                  else
+                  {
+                      SBE_TRACD_MRT("memRegionTest1: Loop Test-%d: SBEIO::openUnsecureMemRegion() SUCCESSFUL", i);
+                  }
+              }
+              else // i = SBEIO_MAX_UNSECURE_MEMORY_REGIONS + 1
+              {
+                  // Expect the open to fail with the return code
+                  // SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS
+                  if (ERRL_GETRC_SAFE(errl)==SBEIO::SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS)
+                  {
+                      SBE_TRACF_MRT("memRegionTest1: Loop Test-%d: SBEIO::openUnsecureMemRegion() Returned Expected Fail: rc=0x%X, plid=0x%X",
+                              i, ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+                      delete errl;
+                      errl = nullptr;
+                  }
+                  else
+                  {
+                      TS_FAIL("memRegionTest1: Loop Test-%d: SBEIO::openUnsecureMemRegion() Did NOT Return Expected Fail rc=0x%X: got rc=0x%X, plid=0x%X",
+                              i, SBEIO::SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS,
+                              ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+                      break;
+                  }
+              }
+          }
+
+          // Skip the rest of the testcase if we already have an error log
+          if(errl)
+          {
+              break;
+          }
 
           // Test 1: Open Read-Write region for front half of memory buffer
           errl = SBEIO::openUnsecureMemRegion(mem_buf_start_addr,
@@ -80,7 +138,7 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           }
           else
           {
-              SBE_TRACF_MRT("memRegionTest1: T1: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
+              SBE_TRACD_MRT("memRegionTest1: T1: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
           }
 
           // Test 2: Open Overlapping Read-Only region for middle chunk of
@@ -96,7 +154,7 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           }
           else
           {
-              SBE_TRACF_MRT("memRegionTest1: T2: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
+              SBE_TRACD_MRT("memRegionTest1: T2: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
           }
 
           // Test 3: Open Overlapping Read-Write region completely enclosed by
@@ -112,7 +170,7 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           }
           else
           {
-              SBE_TRACF_MRT("memRegionTest1: T3: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
+              SBE_TRACD_MRT("memRegionTest1: T3: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
           }
 
           // Test 4: Open Overlapping Read-Write region that completely encloses
@@ -128,7 +186,7 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           }
           else
           {
-              SBE_TRACF_MRT("memRegionTest1: T4: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
+              SBE_TRACD_MRT("memRegionTest1: T4: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
           }
 
           // Test 5: Open Non-Overlapping Read-Only Region at the end
@@ -144,10 +202,38 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           }
           else
           {
-              SBE_TRACF_MRT("memRegionTest1: T5: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
+              SBE_TRACD_MRT("memRegionTest1: T5: SBEIO::openUnsecureMemRegion() SUCCESSFUL");
           }
 
-          // @TODO RTC 174970 Add testcases for open/close fail scenarios
+          // Test 6: Close Single Region That Exists
+          errl = SBEIO::closeUnsecureMemRegion(mem_buf_start_addr+(mem_buf_size/8)*7);
+          if (errl)
+          {
+              TS_FAIL("memRegionTest1: T6: SBEIO::closeUnsecureMemRegion() Failed: rc=0x%X, plid=0x%X",
+                      ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+              break;
+          }
+          else
+          {
+              SBE_TRACD_MRT("memRegionTest1: T6: SBEIO::closeUnsecureMemRegion() SUCCESSFUL");
+          }
+
+          // Test 7: Re-Close Single Region and look for expected fail
+          errl = SBEIO::closeUnsecureMemRegion(mem_buf_start_addr+(mem_buf_size/8)*7);
+          if (ERRL_GETRC_SAFE(errl) == SBEIO::SBEIO_MEM_REGION_DOES_NOT_EXIST)
+          {
+              SBE_TRACF_MRT("memRegionTest1: T7: SBEIO::closeUnsecureMemRegion() Returned Expected Fail: rc=0x%X, plid=0x%X",
+                            ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+              delete errl;
+              errl = nullptr;
+          }
+          else
+          {
+              TS_FAIL("memRegionTest1: T7: SBEIO::closeUnsecureMemRegion() Did NOT Return Expected Fail rc=0x%X: got rc=0x%X, plid=0x%X",
+                      SBEIO::SBEIO_MEM_REGION_DOES_NOT_EXIST,
+                      ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+              break;
+          }
 
           // Test 99: Close all Memory Regions
           errl = SBEIO::closeAllUnsecureMemRegions();
@@ -155,6 +241,7 @@ class SbeMemRegionTest : public CxxTest::TestSuite
           {
               TS_FAIL("memRegionTest1: T99: SBEIO::closeAllUnsecureMemRegions Failed: rc=0x%X, plid=0x%X",
                       ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+              break;
           }
           else
           {
@@ -163,12 +250,18 @@ class SbeMemRegionTest : public CxxTest::TestSuite
 
           }while(0);
 
-          free (mem_buf);
-          mem_buf = nullptr;
-
+          // Commit any unexpected error logs
           if (errl)
           {
-                errlCommit(errl, SBEIO_COMP_ID);
+              errlCommit(errl, SBEIO_COMP_ID);
+          }
+
+          // Unmap the reserved memory using the virtual address
+          int rc = mm_block_unmap(tmp_virtual_addr);
+
+          if (rc)
+          {
+              TS_FAIL("memRegionTest1: mm_block_unmap failed with rc=%d", rc);
           }
 
           TS_TRACE(EXIT_MRK"memRegionTest1");

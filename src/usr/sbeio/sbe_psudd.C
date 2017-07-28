@@ -164,7 +164,11 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target * i_target,
 
     mutex_unlock(&l_psuOpMux);
 
-    if( errl && (SBEIO_PSU == errl->moduleId()) )
+    if( errl && (SBEIO_PSU == errl->moduleId())
+        // For this special case pass back errl without commiting or
+        // collecting FFDC/shutting down
+        && (SBE_PSU_SET_UNSECURE_MEMORY_REGION_CMD != i_pPsuRequest->command)
+      )
     {
         SBE_TRACF( "Forcing shutdown for FSP to collect FFDC" );
 
@@ -217,7 +221,11 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
     {
         // assign sequence ID and save to check that response matches
         i_pPsuRequest->seqID = ++l_seqID;
-        SBE_TRACF("Sending Req = %.16X", i_pPsuRequest->mbxReg0);
+        SBE_TRACF("Sending Req = %.16X %.16X %.16X %.16X",
+                  i_pPsuRequest->mbxReg0,
+                  i_pPsuRequest->mbxReg1,
+                  i_pPsuRequest->mbxReg2,
+                  i_pPsuRequest->mbxReg3);
 
         // Read SBE doorbell to confirm ready to accept command.
         // Since the device driver single threads the requests, we should

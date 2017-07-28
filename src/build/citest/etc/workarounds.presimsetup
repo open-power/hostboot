@@ -35,3 +35,10 @@
 #echo "WSALIAS DEFAULT FIPSLEVEL env/gfwb/simics-4.2.0/simics-4.2.83/fips/fld36/fi120201a700.42" >> $sb/simu/data/simicsInfo
 #echo "WSALIAS DEFAULT SIMICSLEVEL env/vtechb/simics-4.2.0/simics-4.2.83/bin" >> $sb/simu/data/simicsInfo
 
+# Pull in SBE Support of Unsecure Memory Regions
+echo "Pull in SBE Support of Unsecure Memory Regions"
+sbex -t 1030098
+mkdir -p $sb/sbei/sbfw/
+cd $sb/sbei/sbfw
+chmod 777 -R .
+mk -a -k

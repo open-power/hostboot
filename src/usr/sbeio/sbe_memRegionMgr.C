@@ -36,16 +36,16 @@
 #include <targeting/common/targetservice.H>
 #include <vmmconst.h>
 #include <sys/misc.h>
+#include <secureboot/service.H>
 
 #include "sbe_memRegionMgr.H"
 
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
-TRACDCOMP(g_trac_sbeio,"memRegion: " printf_string,##args)
-
+    TRACDCOMP(g_trac_sbeio,"memRegion: " printf_string,##args)
 #define SBE_TRACF(printf_string,args...) \
-TRACFCOMP(g_trac_sbeio,"memRegion: " printf_string,##args)
+    TRACFCOMP(g_trac_sbeio,"memRegion: " printf_string,##args)
 
 namespace SBEIO
 {
@@ -102,7 +102,7 @@ MemRegionMgr::MemRegionMgr()
     hb_dump_region.flags = SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY;
     iv_memRegions.push_back(hb_dump_region);
 
-    SBE_TRACF("MemRegionMgr Constructor: Initial region(s):");
+    SBE_TRACD("MemRegionMgr Constructor: Initial region(s):");
     printIvMemRegions();
 
     SBE_TRACD(EXIT_MRK"MemRegionMgr Constructor");
@@ -130,6 +130,7 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
 
     errlHndl_t errl = nullptr;
     regionData l_region;
+    uint8_t region_count = iv_memRegions.size();
     bool itr_region_closed = false;
     const uint8_t input_flags = i_isWritable ?
                                   SbePsu::SBE_MEM_REGION_OPEN_READ_WRITE :
@@ -137,22 +138,19 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
 
     SBE_TRACF(ENTER_MRK"openUnsecureMemRegion: i_tgt=0x%X: "
               "i_start_addr=0x%.16llX, i_size=0x%.8X, i_isWritable=%d "
-              "(flags=0x%.2X)",
+              "(flags=0x%.2X), count=%d",
               TARGETING::get_huid(i_target), i_start_addr, i_size,
-              i_isWritable, input_flags);
+              i_isWritable, input_flags, region_count);
     assert(i_size!=0, "openUnsecureMemRegion: i_size=0");
 
     do
     {
         // Handle 'Open' Request
-        // -- Look for identical region
-        // ---- if so, fail
         // -- Look for possible overlap with existing regions
         // ---- If overlap, close existing regions and re-open
         //      all regions as necessary
         // ---- If no overlap, open requested region
-
-        // @TODO RTC 174970 - Add checks to not exceed 8 memory regions
+        // Throughout check that no more than 8 memory regions are opened
 
         auto itr = iv_memRegions.begin();
         while (itr != iv_memRegions.end())
@@ -191,31 +189,42 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 }
                 else
                 {
+                    // Update count
+                    --region_count;
+
                     // This region will be removed from the cache list later
                     itr_region_closed = true;
                 }
 
                 // Re-Open Non-overlapping initial part of Existing Region
-                l_region.start_addr = itr->start_addr;
+                // NOTE: skipping max count check since we already closed a
+                //       region above
                 l_region.size = i_start_addr - itr->start_addr;
                 l_region.flags = itr->flags;
                 l_region.tgt = itr->tgt;
 
-                errl = doUnsecureMemRegionOp(l_region);
-
-                if (errl)
+                if (l_region.size > 0)
                 {
-                    SBE_TRACF(ERR_MRK "openUnsecureMemRegion: Re-Open Op "
-                              "Failed: err rc=0x%.4X plid=0x%.8X",
-                              ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+                    errl = doUnsecureMemRegionOp(l_region);
 
-                    // Return error to caller ASAP
-                    break;
-                }
-                else
-                {
-                    // Add the region to the cache list
-                    iv_memRegions.push_front(l_region);
+                    if (errl)
+                    {
+                        SBE_TRACF(ERR_MRK "openUnsecureMemRegion: Re-Open Op "
+                                  "Failed: err rc=0x%.4X plid=0x%.8X",
+                                  ERRL_GETRC_SAFE(errl),
+                                  ERRL_GETPLID_SAFE(errl));
+
+                        // Return error to caller ASAP
+                        break;
+                    }
+                    else
+                    {
+                        // Update count
+                        ++region_count;
+
+                        // Add the region to the cache list
+                        iv_memRegions.push_front(l_region);
+                    }
                 }
             }
 
@@ -258,7 +267,14 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 }
 
                 // Re-open, non-overlapping back end part of
-                // Existing Region
+                // Existing Region, but first check that we're not exceeding
+                // the maximum allowed number of regions
+                errl = checkNumberOfMemRegions(region_count);
+                if (errl)
+                {
+                    break;
+                }
+
                 l_region.start_addr = i_start_addr + i_size;
                 l_region.size = (itr->start_addr + itr->size) -
                                   (i_start_addr + i_size);
@@ -279,6 +295,9 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                 }
                 else
                 {
+                    // Update count
+                    ++region_count;
+
                     // Add the region to the cache list
                     iv_memRegions.push_front(l_region);
                 }
@@ -317,6 +336,9 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
                     }
                     else
                     {
+                        // Update count
+                        --region_count;
+
                         // This region will be removed from the cache list later
                         itr_region_closed = true;
                     }
@@ -340,8 +362,14 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
             break;
         }
 
+        // Open Requested Region, but first check that we're not exceeding
+        // the maximum allowed number of regions
+        errl = checkNumberOfMemRegions(region_count);
+        if (errl)
+        {
+            break;
+        }
 
-        // Open Requested Region
         l_region.start_addr = i_start_addr;
         l_region.size = i_size;
         l_region.flags = input_flags;
@@ -366,13 +394,24 @@ errlHndl_t MemRegionMgr::openUnsecureMemRegion(
     }
     while (0);
 
-    // TODO RTC 174970 remove when base support is working
     printIvMemRegions();
 
     SBE_TRACF(EXIT_MRK "openUnsecureMemRegion: i_tgt=0x%X: "
               "i_start_addr=0x%.16llX: err_rc=0x%.4X",
               TARGETING::get_huid(i_target), i_start_addr,
               ERRL_GETRC_SAFE(errl));
+
+    if(errl)
+    {
+        errl->collectTrace(SBEIO_COMP_NAME);
+
+        // If error log is informational, commit it here rather
+        // than passing back an error and risk stopping the IPL
+        if (errl->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            errlCommit(errl, SBEIO_COMP_ID);
+        }
+    }
 
     return errl;
 }
@@ -457,6 +496,9 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
                          i_start_addr,
                          iv_memRegions.size(),
                          true /*Add HB SW Callout*/ );
+
+            errl->collectTrace(SBEIO_COMP_NAME);
+
             break;
         }
 
@@ -464,9 +506,21 @@ errlHndl_t MemRegionMgr::closeUnsecureMemRegion(
     while (0);
 
     SBE_TRACF(EXIT_MRK "closeUnsecureMemRegion: i_tgt: 0x%X: "
-              "i_start_addr0x%.16llX: err_rc=0x%4X",
+              "i_start_addr0x%.16llX: err_rc=0x%.4X",
               TARGETING::get_huid(i_target), i_start_addr,
               ERRL_GETRC_SAFE(errl));
+
+    if(errl)
+    {
+        errl->collectTrace(SBEIO_COMP_NAME);
+
+        // If error log is informational, commit it here rather
+        // than passing back an error and risk stopping the IPL
+        if (errl->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            errlCommit(errl, SBEIO_COMP_ID);
+        }
+    }
 
     return errl;
 }
@@ -513,7 +567,7 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
 
                 // commit new error with orignal err PLID
                 errl->plid(errl_orig->plid());
-
+                errl->collectTrace(SBEIO_COMP_NAME);
                 errlCommit(errl, SBEIO_COMP_ID);
 
                 // Skip region since it failed to close
@@ -547,6 +601,17 @@ errlHndl_t MemRegionMgr::closeAllUnsecureMemRegions()
               "err_rc=0x%.4X",
               iv_memRegions.size(),
               ERRL_GETRC_SAFE(errl_orig));
+    if(errl_orig)
+    {
+        errl_orig->collectTrace(SBEIO_COMP_NAME);
+
+        // If error log is informational, commit it here rather
+        // than passing back an error and risk stopping the IPL
+        if (errl_orig->sev() == ERRORLOG::ERRL_SEV_INFORMATIONAL)
+        {
+            errlCommit(errl_orig, SBEIO_COMP_ID);
+        }
+    }
 
     return errl_orig;
 }
@@ -560,8 +625,7 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
     errlHndl_t errl = nullptr;
     TARGETING::Target * l_tgt = i_region.tgt;
 
-    // @TODO RTC 174970 - make TRACD when SBE support is tested
-    SBE_TRACF(ENTER_MRK"doUnsecureMemRegionOp: tgt=0x%.8X: "
+    SBE_TRACD(ENTER_MRK"doUnsecureMemRegionOp: tgt=0x%.8X: "
               "start_addr=0x%.16llX, size=0x%.8X, controlFlags=0x%.2X",
               TARGETING::get_huid(l_tgt), i_region.start_addr,
               i_region.size, i_region.flags);
@@ -599,33 +663,84 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
         l_psuCommand.cd6_memRegion_Size = i_region.size;
         l_psuCommand.cd6_memRegion_Start_Addr = i_region.start_addr;
 
-// @TODO RTC 174970 - Activate code block when SBE support is tested
-#if 0
         errl =  SBEIO::SbePsu::getTheInstance().performPsuChipOp(l_tgt,
                                 &l_psuCommand,
                                 &l_psuResponse,
                                 SbePsu::MAX_PSU_SHORT_TIMEOUT_NS,
-                                SbePsu::SBE_MEMORY_REGION_REQ_USED_REGS,
-                                SbePsu::SBE_MEMORY_REGION_RSP_USED_REGS);
-#endif
+                                SbePsu::SBE_MEM_REGION_REQ_USED_REGS,
+                                SbePsu::SBE_MEM_REGION_RSP_USED_REGS);
+
         if (errl)
         {
             SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: PSU Cmd Failed: "
                       "err rc=0x%.4X plid=0x%.8X (mbxReg0=0x%.16llX)",
                       ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl),
                       l_psuCommand.mbxReg0);
+
+            // If Secureboot is not enabled, make the error from the SBE not
+            // supporting Security Control Messages Control command class (which
+            // includes the Unsecure Memory Region commands) Informational
+            if ((!SECUREBOOT::enabled()) &&
+                (l_psuResponse.primaryStatus ==
+                   SbePsu::SBE_PRI_INVALID_COMMAND) &&
+                (l_psuResponse.secondaryStatus ==
+                   SbePsu::SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED)
+               )
+            {
+                SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Secureboot NOT "
+                          "Enabled - Changing 'Command Class Not Supported' "
+                          "Error Log To Informational.");
+                errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errl->collectTrace(SBEIO_COMP_NAME);
+            }
+
             break;
         }
-
     }
     while (0);
 
-    // @TODO RTC 174970 - make TRACD when SBE support is tested
-    SBE_TRACF(EXIT_MRK "doUnsecureMemRegionOp: tgt=0x%.8X: "
+    SBE_TRACD(EXIT_MRK "doUnsecureMemRegionOp: tgt=0x%.8X: "
               "start_addr=0x%.16llX, size=0x%.8X, controlFlags=0x%.2X: "
               "err_rc=0x%.4X",
               TARGETING::get_huid(l_tgt), i_region.start_addr, i_region.size,
               i_region.flags, ERRL_GETRC_SAFE(errl));
+
+    return errl;
+}
+
+/**
+ * MemRegionMgr::checkNumberOfMemRegions
+ * - see sbe_unsecureMemRegionMgr.H for details
+ */
+errlHndl_t MemRegionMgr::checkNumberOfMemRegions(uint8_t i_count) const
+{
+    errlHndl_t errl = nullptr;
+
+    if (i_count >= SBEIO_MAX_UNSECURE_MEMORY_REGIONS)
+    {
+        SBE_TRACF(ERR_MRK"checkNumberOfMemRegions: Current count=%d, max=%d. "
+                  "New Region Cannot Be Opened",
+                  i_count, SBEIO_MAX_UNSECURE_MEMORY_REGIONS);
+
+        /*@
+         * @errortype
+         * @moduleid     SBEIO_MEM_REGION
+         * @reasoncode   SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS
+         * @userdata1    Current Count of Unsecure Memory Regions
+         * @userdata2    Maximum Number of Unsecure Memomory Regions
+         * @devdesc      Attempt To Open Too Many Unsecure Memory Regions
+         * @custdesc     A problem occurred during the IPL
+         */
+        errl = new ERRORLOG::ErrlEntry(
+                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                     SBEIO_MEM_REGION,
+                     SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS,
+                     i_count,
+                     SBEIO_MAX_UNSECURE_MEMORY_REGIONS,
+                     true /*Add HB SW Callout*/ );
+
+        errl->collectTrace(SBEIO_COMP_NAME);
+    }
 
     return errl;
 }
@@ -636,17 +751,26 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
  */
 void MemRegionMgr::printIvMemRegions(void) const
 {
-    SBE_TRACF("MemRegionMgr::printIvMemRegions: number of entries=%d",
-              iv_memRegions.size());
+    const uint8_t size = iv_memRegions.size();
 
-    for ( const auto& itr : iv_memRegions )
+    if ( size == 0 )
     {
-        SBE_TRACF("printIvMemRegions: tgt=0x%.8X: start_addr=0x%.16llX, "
-                  "size=0x%.8X, flags=0x%.2X (%s)",
-                  TARGETING::get_huid(itr.tgt), itr.start_addr,
-                  itr.size, itr.flags,
-                  itr.flags == SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY ?
-                    "Read-Only" : "Read-Write");
+        SBE_TRACD("MemRegionMgr::printIvMemRegions: number of entries=%d",
+                  iv_memRegions.size());
+    }
+    else
+    {
+        uint8_t count = 1;
+        for ( const auto& itr : iv_memRegions )
+        {
+            SBE_TRACD("printIvMemRegions: %d/%d: tgt=0x%.8X: "
+                      "start_addr=0x%.16llX, size=0x%.8X, flags=0x%.2X (%s)",
+                      count, size, TARGETING::get_huid(itr.tgt),
+                      itr.start_addr, itr.size, itr.flags,
+                      itr.flags == SbePsu::SBE_MEM_REGION_OPEN_READ_ONLY ?
+                        "Read-Only" : "Read-Write");
+            ++count;
+        }
     }
 }
 
