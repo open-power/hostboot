@@ -492,7 +492,8 @@ proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
 // p9_pstate_compute_vpd_pts
 //
 void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_POINTS],
-                               GlobalPstateParmBlock* i_gppb);
+                               GlobalPstateParmBlock* i_gppb,
+                               VpdOperatingPoint* i_raw_vpd_pts);
 //
 // p9_pstate_compute_PsV_slopes
 //
