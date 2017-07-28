@@ -51,6 +51,7 @@
 #ifdef __HOSTBOOT_MODULE
 
   #include <stdio.h>
+  #include <errludstring.H>
 
   #ifdef __HOSTBOOT_RUNTIME
 //    #include <prdfCenMbaDynMemDealloc_rt.H> TODO: RTC 136129
@@ -613,11 +614,31 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
 */
     }
 
-    // Note moved the code from here, that was associated with checking for the last
-    // functional core to be before the PFA data is placed in error log.
+    //**************************************************************************
+    // Additional FFDC
+    //**************************************************************************
 
-    // Collect PRD trace
-    // NOTE: Each line of trace is on average 36 bytes so 768 bytes should get
+    // For OP checkstop analysis, add a string indicating a system checkstop
+    // occurred and when. This will be printed out in the console traces along
+    // with the error log.
+    #if defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME) // IPL only
+    #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
+    if ( MACHINE_CHECK == i_attnType )
+    {
+        const char * const str =
+            PnorFirDataReader::getPnorFirDataReader().isIplState()
+                ? "System checkstop occurred during IPL on previous boot"
+                : "System checkstop occurred during runtime on previous boot";
+
+        ErrlUserDetailsString(str).addToLog(iv_errl);
+    }
+
+    #endif
+    #endif
+
+    // Collect PRD traces.
+    // NOTE: Each line of a trace is on average 36 bytes so 768 bytes should get
     //       us around 21 lines of trace output.
     PRDF_COLLECT_TRACE(iv_errl, 768);
 
