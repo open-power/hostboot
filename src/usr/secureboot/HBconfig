@@ -13,7 +13,7 @@ config SECUREBOOT_BEST_EFFORT
         phasing in new secureboot functionality.
 
 config DRTM #TODO RTC: 170487 Disable for relevant platforms
-    default y if (SECUREBOOT && TPMDD)
+    default n
     depends on (SECUREBOOT && TPMDD)
     help
         Enable DRTM support
