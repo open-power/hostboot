@@ -5738,84 +5738,123 @@
             type to the HDAT.  This is for I2C devices only.
     </description>
     <enumerator>
-      <name>955X</name>
-      <value>1</value>
+        <name>9551</name>
+        <value>0x1</value>
     </enumerator>
     <enumerator>
-      <name>SEEPROM</name>
-      <value>2</value>
+        <name>955x</name> <!-- deprecated -->
+        <value>0x1</value>
     </enumerator>
     <enumerator>
-      <name>NUVOTON_TPM</name>
-      <value>3</value>
+        <name>SEEPROM</name> <!-- deprecated -->
+        <value>0x2</value>
     </enumerator>
     <enumerator>
-      <name>MEX_FPGA</name>
-      <value>4</value>
+        <name>SEEPROM_Atmel28c128</name>
+        <value>0x2</value>
     </enumerator>
     <enumerator>
-      <name>UCX90XX</name>
-      <value>5</value>
+        <name>NUVOTON_TPM</name>
+        <value>0x3</value>
     </enumerator>
     <enumerator>
-      <name>NVLINK</name>
-      <value>6</value>
+        <name>MEX_FPGA</name>
+        <value>0x4</value>
     </enumerator>
     <enumerator>
-      <name>UNKNOWN</name>
-      <value>FF</value>
+        <name>UCX90XX</name>
+        <value>0x5</value>
+    </enumerator>
+    <enumerator>
+        <name>NVLINK</name> <!-- deprecated -->
+        <value>0x6</value>
+    </enumerator>
+    <enumerator>
+        <name>9552</name>
+        <value>0x6</value>
+    </enumerator>
+    <enumerator>
+        <name>9553</name>
+        <value>0x7</value>
+    </enumerator>
+    <enumerator>
+        <name>9554</name>
+        <value>0x8</value>
+    </enumerator>
+    <enumerator>
+        <name>9555</name>
+        <value>0x9</value>
+    </enumerator>
+    <enumerator>
+        <name>SMP_or_OpenCAPI_Cable</name>
+        <value>0xA</value>
+    </enumerator>
+    <enumerator>
+        <name>SEEPROM_Atmel28c256</name>
+        <value>0xB</value>
+    </enumerator>
+    <enumerator>
+        <name>UNKNOWN</name>
+        <value>0xFF</value>
     </enumerator>
     <id>HDAT_I2C_DEVICE_TYPE</id>
   </enumerationType>
 
   <enumerationType>
-    <id>HDAT_I2C_DEVICE_PURPOSE</id>
     <description>Pulled from the MRW, this describes the device
             purpose to the HDAT.  This is for I2C devices only.
     </description>
     <enumerator>
         <name>CABLE_CARD_PRES</name>
-        <value>1</value>
+        <value>0x1</value>
     </enumerator>
     <enumerator>
-        <name>CABLE_CARD_POWER_SENSE</name>
-        <value>2</value>
+        <name>PCI_HOTPLUG_PGOOD</name>
+        <value>0x2</value>
     </enumerator>
     <enumerator>
-        <name>CABLE_CARD_POWER_CONTROL</name>
-        <value>3</value>
+        <name>PCI_HOTPLUG_CONTROL</name>
+        <value>0x3</value>
     </enumerator>
     <enumerator>
         <name>TPM</name>
-        <value>4</value>
+        <value>0x4</value>
     </enumerator>
     <enumerator>
         <name>MODULE_VPD</name>
-        <value>5</value>
+        <value>0x5</value>
     </enumerator>
     <enumerator>
         <name>DIMM_SPD</name>
-        <value>6</value>
+        <value>0x6</value>
     </enumerator>
     <enumerator>
         <name>PROC_MODULE_VPD</name>
-        <value>7</value>
+        <value>0x7</value>
     </enumerator>
     <enumerator>
         <name>SBE_SEEPROM</name>
-        <value>8</value>
+        <value>0x8</value>
     </enumerator>
     <enumerator>
         <name>PLANAR_VPD</name>
-        <value>9</value>
+        <value>0x9</value>
     </enumerator>
     <enumerator>
-        <name>PCI_HOTPLUG</name>
-        <value>A</value>
+        <name>NVLINK_CABLE_TOPOLOGY_VERIFICATION</name>
+        <value>0xA</value>
     </enumerator>
     <enumerator>
-        <name>NVLINK</name>
-        <value>B</value>
+        <name>NVLINK</name> <!-- deprecated -->
+        <value>0xB</value>
+    </enumerator>
+    <enumerator>
+        <name>NVLINK_CABLE_MICRO_RESET</name>
+        <value>0xB</value>
+    </enumerator>
+    <enumerator>
+        <name>I2C_ASSOC_WITH_NVLINK_CABLE</name>
+        <value>0xC</value>
     </enumerator>
     <enumerator>
         <name>WINDOW_OPEN</name>
@@ -5826,10 +5865,16 @@
         <value>0xE</value>
     </enumerator>
     <enumerator>
-        <name>UNKNOWN</name>
-        <value>FF</value>
+        <name>MEX_FPGA</name>
+        <value>0xF</value>
     </enumerator>
+    <enumerator>
+        <name>UNKNOWN</name>
+        <value>0xFF</value>
+    </enumerator>
+    <id>HDAT_I2C_DEVICE_PURPOSE</id>
   </enumerationType>
+
 
 <attribute>
     <id>FREQ_CORE_MAX</id>

@@ -171,7 +171,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -187,7 +186,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -203,7 +201,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -219,7 +216,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -235,7 +231,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -251,7 +246,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -267,7 +261,23 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
+</attribute>
+
+<attribute>
+    <id>HDAT_I2C_DEVICE_LABEL</id>
+    <description>
+        This attribute holds the string descriptions of the I2C devices from
+        the i2c device connections as defined in the MRW.  It is parsed into
+        a struct in i2c.C
+    </description>
+    <simpleType>
+        <string>
+            <sizeInclNull>64</sizeInclNull>
+        </string>
+        <array>32</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
 </attribute>
 
 <attribute>
@@ -281,7 +291,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <writeable/>
 </attribute>
 
 <attribute>

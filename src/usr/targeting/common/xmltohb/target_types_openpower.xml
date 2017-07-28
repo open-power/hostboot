@@ -40,6 +40,7 @@
     <attribute><id>HDAT_I2C_SLAVE_PORT</id></attribute>
     <attribute><id>HDAT_I2C_BUS_FREQ</id></attribute>
     <attribute><id>HDAT_I2C_DEVICE_PURPOSE</id></attribute>
+    <attribute><id>HDAT_I2C_DEVICE_LABEL</id></attribute>
     <attribute><id>HDAT_I2C_ELEMENTS</id></attribute>
     <attribute>
         <id>IPMI_INSTANCE</id>
