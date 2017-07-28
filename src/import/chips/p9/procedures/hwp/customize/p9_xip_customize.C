@@ -530,7 +530,7 @@ fapi2::ReturnCode apply_overlays_ring(
                  "ringId=0xff, chipletId=0xff, occurrence=2 ", l_rc );
 
     // Copy rs4 ring into i_vpdRing
-    memcpy(io_vpdRing, rs4Ring, rs4Ring->iv_size);
+    memcpy(io_vpdRing, rs4Ring, be16toh(rs4Ring->iv_size));
 
     // free memory allocated by rs4_(de)compress
     if (dataVpd)
