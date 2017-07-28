@@ -104,6 +104,8 @@
 <targetTypeExtension>
     <id>chip-processor-power9</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+
+    <attribute><id>NO_APSS_PROC_POWER_VCS_VIO_WATTS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
@@ -134,6 +136,7 @@
 <targetTypeExtension>
     <id>unit-core-power9</id>
     <attribute><id>IPMI_SENSORS</id></attribute>
+
 </targetTypeExtension>
 
 <targetTypeExtension>

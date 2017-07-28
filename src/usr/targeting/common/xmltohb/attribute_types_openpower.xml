@@ -1248,6 +1248,22 @@ ID for the sensor number returned with the elog. -->
     <writeable/>
 </attribute>
 
+<attribute>
+    <id>NO_APSS_PROC_POWER_VCS_VIO_WATTS</id>
+    <description>
+        A constant power (in watts) that the OCC is to add onto Vdd and Vdn
+        power to represent any processor part that is not measured(i.e.Vcs,Vio)
+        This is used by the OCC to calculate a total processor socket power.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <!-- end HTMGT attributes -->
 
 <attribute>
