@@ -109,7 +109,6 @@ namespace MVPD
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdRead()" );
 
-        // eliner here here.
         err = Singleton<MvpdFacade>::instance().read(i_target,
                                                   io_buffer,
                                                   io_buflen,
@@ -164,7 +163,6 @@ namespace MVPD
         TRACSSCOMP( g_trac_vpd,
                     ENTER_MRK"mvpdWrite()" );
 
-        // eliner here here.
         err = Singleton<MvpdFacade>::instance().write(i_target,
                                                    io_buffer,
                                                    io_buflen,
@@ -195,7 +193,6 @@ bool VPD::mvpdPresent( TARGETING::Target * i_target )
 
     return EEPROM::eepromPresence( i_target );
 #else
-    // eliner here.
     return Singleton<MvpdFacade>::instance().hasVpdPresent( i_target,
                                                             MVPD::CP00,
                                                             MVPD::VD );
@@ -219,7 +216,6 @@ IpVpdFacade(MVPD::SECTION_SIZE,
             VPD::VPD_WRITE_PROC)
 {
     TRACUCOMP(g_trac_vpd, "MvpdFacade::MvpdFacade> " );
-    // eliner here.
 
 #ifdef CONFIG_MVPD_READ_FROM_PNOR
     iv_configInfo.vpdReadPNOR = true;
