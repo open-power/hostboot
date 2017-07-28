@@ -339,6 +339,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                                                      : HWAS::GARD_Predictive;
     }
 
+    if ( io_sdc.IsSUE() && ( MACHINE_CHECK == i_attnType ) )
+    {
+        // If we are logging an error for an SUE consumed, we should not
+        // perform any GARD here. Appropriate resources should have already
+        // been GARDed for the original UE.
+        gardPolicy = HWAS::GARD_NULL;
+    }
+
     // Apply special policies for OPAL.
     if ( isHyprConfigOpal() &&                          // OPAL is used
          !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() ) // No AVPs running
