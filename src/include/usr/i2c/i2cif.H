@@ -204,18 +204,6 @@ errlHndl_t i2cEnableSensorCache( TARGETING::Target * i_target );
 #endif //__HOSTBOOT_RUNTIME
 
 
-/**
- * Enumeration that defines possible I2C device types
- */
-enum DeviceType_t
-{
-    DEVTYPE_955x            = 0x01,
-    DEVTYPE_SEEPROM         = 0x02,
-    DEVTYPE_NUVOTON_TPM     = 0x03,
-    DEVTYPE_MEX_FPGA        = 0x04,
-    DEVTYPE_UCX90XX         = 0x05,
-    DEVTYPE_UNKNOWN         = 0xFF,
-};
 
 /**
  * Structure to return I2C information in
@@ -225,13 +213,19 @@ struct DeviceInfo_t
     TARGETING::Target* masterChip; //< I2C Master Chip
     uint8_t engine; //< I2C engine (relative to master chip)
     uint8_t masterPort; //< I2C port (relative to engine)
-    uint8_t deviceType; //< Slave device Type (from enum)
+    TARGETING::HDAT_I2C_DEVICE_TYPE deviceType; //< Slave device Type
     uint8_t addr; //< I2C Slave device address (relative to port)
     uint8_t slavePort; //< I2C Slave Port. 0xFF if N/A
     uint16_t busFreqKhz; //< Bus speed in KHz
-    uint8_t devicePurpose; //< Slave device purpose (from enum)
+    TARGETING::HDAT_I2C_DEVICE_PURPOSE devicePurpose; //< Slave device purpose
     TARGETING::ATTR_ORDINAL_ID_type assocNode; //< Upstream node's ordinal ID
     TARGETING::ATTR_POSITION_type assocProc; //< Upstream proc's position
+
+    // describes i2c device, null-terminated string
+    // SEEPROMS:        <vendor>,<device type>,<data type>,<hw subsystem>
+    // GPIO expanders:  <vendor>,<device type>,<domain>,<purpose>
+    // TPM:             <vendor>,<device type>,<purpose>,<scope>
+    char deviceLabel[64];
 };
 
 /**

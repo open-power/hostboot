@@ -2372,6 +2372,7 @@ sub writeTraitFileTraits {
                         $type = $simpleTypeProperties->{$typeName}{typeName};
                     }
 
+
                     if(   (exists $simpleType->{array})
                         && ($simpleTypeProperties->{$typeName}{supportsArray}) )
                     {
@@ -2381,7 +2382,8 @@ sub writeTraitFileTraits {
                             $dimensions .= "[$bound]";
                         }
                     }
-                    elsif(exists $simpleType->{string})
+
+                    if(exists $simpleType->{string})
                     {
                         # Create the string dimension
                         if(exists $simpleType->{string}->{sizeInclNull})
@@ -2390,6 +2392,7 @@ sub writeTraitFileTraits {
                             "[$simpleType->{string}->{sizeInclNull}]";
                         }
                     }
+
                     last;
                 }
             }
@@ -4608,7 +4611,7 @@ sub simpleTypeProperties {
 
     # Intentionally didn't wrap these to 80 columns to keep them lined up and
     # more readable/editable
-    $typesHoH{"string"}      = { supportsArray => 0, canBeHex => 0, complexTypeSupport => 0, typeName => "char"                       , bytes => 1, bits => 8 , default => \&defaultString, alignment => 1, specialPolicies =>\&enforceString,  packfmt =>\&packString};
+    $typesHoH{"string"}      = { supportsArray => 1, canBeHex => 0, complexTypeSupport => 0, typeName => "char"                       , bytes => 1, bits => 8 , default => \&defaultString, alignment => 1, specialPolicies =>\&enforceString,  packfmt =>\&packString};
     $typesHoH{"int8_t"}      = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int8_t"                     , bytes => 1, bits => 8 , default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt => "C" };
     $typesHoH{"int16_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int16_t"                    , bytes => 2, bits => 16, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack2byte};
     $typesHoH{"int32_t"}     = { supportsArray => 1, canBeHex => 1, complexTypeSupport => 1, typeName => "int32_t"                    , bytes => 4, bits => 32, default => \&defaultZero  , alignment => 1, specialPolicies =>\&null,           packfmt =>\&pack4byte};
@@ -5327,6 +5330,7 @@ sub packAttribute {
                     # an array, if there are not enough values for the whole
                     # array then use the last value to fill in the remainder
 
+
                     # Figure out the array size (possibly multidimensional)
                     my $arraySize = 1;
                     my @bounds = split(/,/,$simpleType->{array});
@@ -5336,7 +5340,16 @@ sub packAttribute {
                     }
 
                     # Split the values into an array
-                    my @values = split(/,/,$value);
+                    my @values;
+                    if ($typeName eq "string")
+                    {
+                        # using "" around strings for array of strings
+                        (@values) = $value =~ m/"(.*?)"/g;
+                    }
+                    else
+                    {
+                        @values = split(/,/,$value);
+                    }
                     my $valueArraySize = scalar(@values);
 
                     # Iterate over the entire array creating values

@@ -290,7 +290,7 @@ void hdatPopulateMTMAndSerialNumber()
         {
             const uint8_t l_mtmSize= 0x08;
             //phyp would requre just 8 character of MTM
-            strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata), 
+            strncpy(l_rawMTM,reinterpret_cast<const char*>(l_vpddata),
                     l_mtmSize);
             for(uint8_t i=0; i<sizeof(l_rawMTM); i++)
             {
@@ -612,7 +612,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(TARGETING::Target * i_target,
             theKeyword = i_fetchVpd[curCmd].keyword;
 
             //this conidtion is , if in the top loop there is a fail then
-            //theSize[curCmd] will be 0. 
+            //theSize[curCmd] will be 0.
             if( theSize[curCmd] == 0)
             {
                 continue;
@@ -1183,7 +1183,7 @@ errlHndl_t hdatGetAsciiKwdForCvpd(TARGETING::Target * i_target,
             theKeyword = i_fetchVpd[curCmd].keyword;
 
             //this conidtion is , if in the top loop there is a fail then
-            //theSize[curCmd] will be 0. 
+            //theSize[curCmd] will be 0.
             if( theSize[curCmd] == 0)
             {
                 continue;
@@ -1372,9 +1372,9 @@ void hdatPrintKwd(const char *i_kwd,
         for (l_cnt = 0; l_cnt < l_lines; l_cnt++)
         {
             HDAT_INF( "0X %08X %08X %08X %08X",
-                    (*(reinterpret_cast<uint32_t *>(l_kwd    ))) , 
+                    (*(reinterpret_cast<uint32_t *>(l_kwd    ))) ,
                     (*(reinterpret_cast<uint32_t *>(l_kwd +  4))),
-                    (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) , 
+                    (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) ,
                     (*(reinterpret_cast<uint32_t *>(l_kwd + 12)))  );
 
             i_kwd += 16;
@@ -1392,22 +1392,22 @@ void hdatPrintKwd(const char *i_kwd,
           else if ( l_rem < 9 )
           {
               HDAT_INF( "0X %08X %08X ",
-                   (*(reinterpret_cast<uint32_t *>(l_kwd    ))) , 
+                   (*(reinterpret_cast<uint32_t *>(l_kwd    ))) ,
                    (*(reinterpret_cast<uint32_t *>(l_kwd +  4))) );
           }
           else if ( l_rem < 13 )
           {
               HDAT_INF( "0X %08X %08X %08X ",
-                      (*(reinterpret_cast<uint32_t *>(l_kwd    ))) , 
+                      (*(reinterpret_cast<uint32_t *>(l_kwd    ))) ,
                       (*(reinterpret_cast<uint32_t *>(l_kwd +  4))),
                       (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) );
           }
           else
           { // remainder is up to 15 bytes
               HDAT_INF( "0X %08X %08X %08X %08X",
-                    (*(reinterpret_cast<uint32_t *>(l_kwd    ))) , 
+                    (*(reinterpret_cast<uint32_t *>(l_kwd    ))) ,
                     (*(reinterpret_cast<uint32_t *>(l_kwd +  4))),
-                    (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) , 
+                    (*(reinterpret_cast<uint32_t *>(l_kwd + 8))) ,
                     (*(reinterpret_cast<uint32_t *>(l_kwd + 12)))  );
           }
 
@@ -1592,7 +1592,7 @@ errlHndl_t hdatformatAsciiKwd(const struct vpdData i_fetchVpd[],
             l_loc += 2;
 
             uint8_t l_var = theSize[curCmd];
-            memcpy(reinterpret_cast<void *>(o_fmtKwd + l_loc),&l_var, 
+            memcpy(reinterpret_cast<void *>(o_fmtKwd + l_loc),&l_var,
                    sizeof(uint8_t));
 
             l_loc += sizeof(uint8_t);
@@ -1624,7 +1624,7 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
     HDAT_ENTER();
     if(i_target != NULL)
     {
-        o_data = new char[io_dataSize];   
+        o_data = new char[io_dataSize];
 
         //Collecting Full module VPD data
         err = deviceOp( DeviceFW::READ,
@@ -1760,11 +1760,10 @@ void hdatGetI2cDeviceInfo(
             l_hostI2cObj.hdatI2cSlavePort    = i2cDevice.slavePort;
             l_hostI2cObj.hdatI2cSlaveDevPurp = i2cDevice.devicePurpose;
             l_hostI2cObj.hdatI2cLinkId       = linkId.val;
-
-            // @TODO RTC 176759 Populate SLCA and I2C label
-            l_hostI2cObj.hdatI2cSlcaIndex    = 0;
-            memset(&l_hostI2cObj.hdatI2cLabel,0x00,
-                   sizeof(l_hostI2cObj.hdatI2cLabel));
+            strncpy(l_hostI2cObj.hdatI2cLabel,
+                    i2cDevice.deviceLabel,
+                    sizeof(l_hostI2cObj.hdatI2cLabel)-1);
+            // SLCA Index will be filled in by HDAT code
 
             // Don't include the device if the slave address is
             // invalid

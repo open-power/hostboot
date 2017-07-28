@@ -55,6 +55,7 @@
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
 
+
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
@@ -3840,6 +3841,7 @@ void getMasterInfo( const TARGETING::Target* i_chip,
     }
 }
 
+
 //******************************************************************************
 // areI2cDevicesLogicallyEqual (std::unique equality comparison)
 //******************************************************************************
@@ -3881,6 +3883,67 @@ bool byI2cDeviceOrder(
         }
     }
     return lhsLogicallyBeforeRhs;
+}
+
+//******************************************************************************
+// removeI2CDeviceDuplicates
+//******************************************************************************
+void removeI2cDeviceDuplicates(std::vector<DeviceInfo_t>& io_deviceInfo)
+{
+    std::vector<DeviceInfo_t> l_unique_deviceInfo;
+
+    // Begin by sorting the list
+    // Order I2C devices by chip, engine, port, address, slave port
+    std::sort(io_deviceInfo.begin(), io_deviceInfo.end(),
+        byI2cDeviceOrder);
+
+    // Build up new unique list (thus removing duplicates)
+    if (io_deviceInfo.size() > 1)
+    {
+        auto currentItr = io_deviceInfo.begin();
+        auto nextItr = currentItr + 1;
+
+        do {
+            if (nextItr != io_deviceInfo.end() && (currentItr != NULL))
+            {
+                if (areI2cDevicesLogicallyEqual(*currentItr, *nextItr))
+                {
+                    // skip if first letter is ?, these are guessed defaults
+                    if (currentItr->deviceLabel[0] == '?')
+                    {
+                        // don't save currentItr as it is a guessed default
+                        currentItr = nextItr;
+                    }
+                }
+                else
+                {
+                    // Save currentItr as nextItr isn't the same logical device
+                    if (currentItr != NULL)
+                    {
+                        l_unique_deviceInfo.push_back(*currentItr);
+                    }
+                    currentItr = nextItr;
+                }
+            }
+            else
+            {
+                // Save currentItr if pointing at something valid
+                if (currentItr != NULL)
+                {
+                    l_unique_deviceInfo.push_back(*currentItr);
+                    currentItr = nextItr;
+                }
+            }
+
+            if (nextItr != io_deviceInfo.end())
+            {
+                ++nextItr;
+            }
+
+        } while (currentItr != io_deviceInfo.end());
+
+        io_deviceInfo = l_unique_deviceInfo;
+    }
 }
 
 /**
@@ -4029,11 +4092,15 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                         //TODO RTC:165485 this isn't currently right. we'll need
                         //to add the changes in the enum and possibly the other
                         //struct/attribute.
+                        strcpy(l_currentDI.deviceLabel,
+                               "?atmel,28c128,vpd,module");
                         break;
                     case EEPROM::SBE_PRIMARY:
                     case EEPROM::SBE_BACKUP:
                         l_currentDI.devicePurpose =
                                 TARGETING::HDAT_I2C_DEVICE_PURPOSE_SBE_SEEPROM;
+                        strcpy(l_currentDI.deviceLabel,
+                               "?atmel,28c128,unknown,unknown");
                         break;
                     case EEPROM::LAST_CHIP_TYPE:
                         break;
@@ -4083,7 +4150,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                         TARGETING::HDAT_I2C_DEVICE_TYPE_NUVOTON_TPM;
                 l_currentDI.devicePurpose =
                     TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM;
-
+                strcpy(l_currentDI.deviceLabel,"?nuvoton,npct601,tpm,host");
                 o_deviceInfo.push_back(l_currentDI);
 
             } //end of tpm iter
@@ -4150,6 +4217,12 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             "ATTR_HDAT_I2C_DEVICE_PURPOSE attribute",
             TARGETING::get_huid(pChipTarget));
 
+        TARGETING::ATTR_HDAT_I2C_DEVICE_LABEL_type l_i2cDevLabel;
+        present = pChipTarget->tryGetAttr<
+            TARGETING::ATTR_HDAT_I2C_DEVICE_LABEL>(l_i2cDevLabel);
+        assert(present,"Target 0x%08X does not have ATTR_HDAT_I2C_DEVICE_LABEL "
+            "attribute",TARGETING::get_huid(pChipTarget));
+
         for(TARGETING::ATTR_HDAT_I2C_ELEMENTS_type l_idx=0;
             l_idx < l_arrayLength;
             ++l_idx)
@@ -4178,8 +4251,17 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
             l_currentDevice.slavePort = l_i2cSlavePort[l_idx];
             l_currentDevice.busFreqKhz = l_i2cBusFreq[l_idx]
                 / FREQ_CONVERSION::HZ_PER_KHZ;
-            l_currentDevice.deviceType = l_i2cDevType[l_idx];
-            l_currentDevice.devicePurpose = l_i2cDevPurpose[l_idx];
+            l_currentDevice.deviceType =
+                                static_cast<TARGETING::HDAT_I2C_DEVICE_TYPE>(
+                                                        l_i2cDevType[l_idx]);
+            l_currentDevice.devicePurpose =
+                                static_cast<TARGETING::HDAT_I2C_DEVICE_PURPOSE>(
+                                                        l_i2cDevPurpose[l_idx]);
+
+            memcpy(l_currentDevice.deviceLabel, l_i2cDevLabel[l_idx],
+                sizeof(l_currentDevice.deviceLabel));
+            l_currentDevice.deviceLabel[sizeof(l_currentDevice.deviceLabel) - 1]
+                = '\0';
 
             o_deviceInfo.push_back(l_currentDevice);
         }
@@ -4187,23 +4269,13 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
 
     } //end of per chip loop
 
-    // Order I2C devices by chip, engine, port, address, slave port
-    std::sort(o_deviceInfo.begin(), o_deviceInfo.end(),
-        byI2cDeviceOrder);
-
-    // Move logical duplicates to end
-    std::vector<DeviceInfo_t>::iterator
-        pInvalidEntries = std::unique(
-            o_deviceInfo.begin(),
-            o_deviceInfo.end(),
-            areI2cDevicesLogicallyEqual);
-
-    // Erase the duplicates
-    o_deviceInfo.erase(pInvalidEntries,o_deviceInfo.end());
+    // remove duplicates (also use deviceLabel from MRW, when possible)
+    removeI2cDeviceDuplicates(o_deviceInfo);
 
     TRACFCOMP(g_trac_i2c,"<<getDeviceInfo");
     return;
-};
+}
+
 
 /**
  * @brief Utility Function to capture error log user data consisting of

@@ -1487,7 +1487,9 @@ errlHndl_t populate_TpmInfoByNode()
                     l_i2cDev->hdatI2cSlaveDevType == i_i2cDevMrw.deviceType &&
                     l_i2cDev->hdatI2cSlaveDevAddr == i_i2cDevMrw.addr &&
                     l_i2cDev->hdatI2cSlavePort == i_i2cDevMrw.slavePort &&
-                    l_i2cDev->hdatI2cSlaveDevPurp == i_i2cDevMrw.devicePurpose;
+                    l_i2cDev->hdatI2cSlaveDevPurp == i_i2cDevMrw.devicePurpose
+                    &&
+                    !strcmp(l_i2cDev->hdatI2cLabel, i_i2cDevMrw.deviceLabel);
             });
 
             if (itr == l_i2cTargetList.end())

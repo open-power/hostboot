@@ -628,6 +628,7 @@ sub processProcessor
     my @speed = ();
     my @type = ();
     my @purpose = ();
+    my @label = ();
 
     $targetObj->log($target, "Processing PROC");
     foreach my $child (@{ $targetObj->getTargetChildren($target) })
@@ -696,7 +697,7 @@ sub processProcessor
         elsif (index($child,"i2c-master") != -1)
         {
             my ($i2cEngine, $i2cPort, $i2cSlavePort, $i2cAddr,
-                $i2cSpeed, $i2cType, $i2cPurpose) =
+                $i2cSpeed, $i2cType, $i2cPurpose, $i2cLabel) =
                     processI2C($targetObj, $child, $target);
 
             # Add this I2C device's information to the proc array
@@ -707,6 +708,7 @@ sub processProcessor
             push(@speed,@$i2cSpeed);
             push(@type,@$i2cType);
             push(@purpose,@$i2cPurpose);
+            push(@label, @$i2cLabel);
 
         }
     }
@@ -720,6 +722,7 @@ sub processProcessor
     my $speed_attr   = $speed[0];
     my $type_attr    = $type[0];
     my $purpose_attr = $purpose[0];
+    my $label_attr   = $label[0];
 
     # Parse out array to print as a string
     foreach my $n (1..($size-1))
@@ -731,6 +734,7 @@ sub processProcessor
         $speed_attr     .= ",".$speed[$n];
         $type_attr      .= ",".$type[$n];
         $purpose_attr   .= ",".$purpose[$n];
+        $label_attr     .= ",".$label[$n];
     }
 
     # Set the arrays to the corresponding attribute on the proc
@@ -741,6 +745,7 @@ sub processProcessor
     $targetObj->setAttribute($target,"HDAT_I2C_BUS_FREQ",$speed_attr);
     $targetObj->setAttribute($target,"HDAT_I2C_DEVICE_TYPE",$type_attr);
     $targetObj->setAttribute($target,"HDAT_I2C_DEVICE_PURPOSE",$purpose_attr);
+    $targetObj->setAttribute($target,"HDAT_I2C_DEVICE_LABEL", $label_attr);
     $targetObj->setAttribute($target,"HDAT_I2C_ELEMENTS",$size);
 
     ## update path for mvpd's and sbe's
@@ -1737,6 +1742,7 @@ sub processI2C
     my @i2cSpeed = ();
     my @i2cType = ();
     my @i2cPurpose = ();
+    my @i2cLabel = ();
 
     # Step 1: get I2C_ENGINE and PORT from <targetInstance>
 
@@ -1765,16 +1771,16 @@ sub processI2C
             # Most I2C devices will default the slave port, it is only valid
             # for gpio expanders.
             my $slavePort = "0xFF";
-            my $purpose = undef;
+            my $purpose_str = undef;
             if ($targetObj->isBusAttributeDefined(
                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE"))
             {
-                $purpose = $targetObj->getBusAttribute(
+                $purpose_str = $targetObj->getBusAttribute(
                                $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE");
             }
 
-            if(   defined $purpose
-               && $purpose ne "")
+            if(   defined $purpose_str
+               && $purpose_str ne "")
             {
                 my $parent = $targetObj->getTargetParent($i2c->{DEST});
                 foreach my $aTarget ( sort keys %{ $targetObj->getAllTargets()})
@@ -1788,7 +1794,7 @@ sub processI2C
 
                         my $pin = $targetObj->getAttribute($aTarget,
                                                            "PIN_NAME");
-                        if($pin eq $purpose)
+                        if($pin eq $purpose_str)
                         {
                             ($slavePort) = $aTarget =~ m/\-([0-9]+)$/g;
                             last;
@@ -1797,10 +1803,12 @@ sub processI2C
                 }
             }
 
+            my $type_str;
+            my $purpose;
             my $addr;
             my $speed;
             my $type;
-            my $purpose;
+            my $label;
 
             # For all these attributes, we need to check if they're defined,
             # and if not we set them to a default value.
@@ -1825,35 +1833,163 @@ sub processI2C
             if ($targetObj->isBusAttributeDefined(
                      $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_TYPE"))
             {
-                $type = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_TYPE");
+                $type_str = $targetObj->getBusAttribute(
+                                $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_TYPE");
             }
 
-            if ($type eq "")
+            if ($type_str eq "")
             {
                 $type = "0xFF";
             }
             else
             {
-                $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type);
+                $type = $targetObj->getEnumValue("HDAT_I2C_DEVICE_TYPE",$type_str);
             }
 
             if ($targetObj->isBusAttributeDefined(
                      $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE"))
             {
-                $purpose = $targetObj->getBusAttribute(
-                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE");
+                $purpose_str = $targetObj->getBusAttribute(
+                                $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_PURPOSE");
             }
 
-            if ($purpose eq "")
+            if ($purpose_str eq "")
             {
                 $purpose = "0xFF";
             }
             else
             {
                 $purpose = $targetObj->getEnumValue("HDAT_I2C_DEVICE_PURPOSE",
-                                                    $purpose);
+                                                    $purpose_str);
             }
+
+
+            if ($targetObj->isBusAttributeDefined(
+                     $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_LABEL"))
+            {
+                $label = $targetObj->getBusAttribute(
+                           $i2c->{SOURCE},$i2c->{BUS_NUM},"I2C_LABEL");
+            }
+
+            if ($label eq "")
+            {
+                # For SEEPROMS:
+                # <vendor>,<device type>, <data type>, <hw subsystem>
+                if (($type_str eq  "SEEPROM") ||
+                    ($type_str =~ m/SEEPROM_Atmel28c128/i))
+                {
+                    $label = "atmel,28c128,";
+                }
+                elsif($type_str =~ m/SEEPROM_Atmel28c256/i)
+                {
+                    $label = "atmel,28c256,";
+                }
+                if ($label ne "")
+                {
+                    if ($purpose_str =~ m/MODULE_VPD/)
+                    {
+                        $label .= "vpd,module";
+                    }
+                    elsif ($purpose_str =~ m/DIMM_SPD/)
+                    {
+                        $label .= "spd,dimm";
+                    }
+                    elsif ($purpose_str =~ m/PROC_MODULE_VPD/)
+                    {
+                        $label .= "vpd,module";
+                    }
+                    elsif ($purpose_str =~ m/SBE_SEEPROM/)
+                    {
+                        $label .= "image,sbe";
+                    }
+                    elsif ($purpose_str =~ m/PLANAR_VPD/)
+                    {
+                        $label .= "vpd,planar";
+                    }
+                    else
+                    {
+                        $label .= "unknown,unknown";
+                    }
+                }
+                # For GPIO expanders:
+                # <vendor>,<device type>,<domain>,<purpose>
+                if ($label eq "")
+                {
+                    if ($type_str =~ m/9551/)
+                    {
+                        $label = "nxp,pca9551,";
+                    }
+                    elsif ($type_str =~ m/9552/)
+                    {
+                        $label = "nxp,pca9552,";
+                    }
+                    elsif ($type_str =~ m/9553/)
+                    {
+                        $label = "nxp,pca9553,";
+                    }
+                    elsif ($type_str =~ m/9554/)
+                    {
+                        $label = "nxp,pca9554,";
+                    }
+                    elsif ($type_str =~ m/9555/)
+                    {
+                        $label = "nxp,pca9555,";
+                    }
+                    elsif($type_str =~ m/UCX90XX/)
+                    {
+                        $label = "ti,ucx90xx,";
+                    }
+
+                    if ($label ne "")
+                    {
+                        if ($purpose_str =~ m/CABLE_CARD_PRES/)
+                        {
+                            $label .= "cablecard,presence";
+                        }
+                        elsif ($purpose_str =~ m/PCI_HOTPLUG_PGOOD/)
+                        {
+                            $label .= "pcie-hotplug,pgood";
+                        }
+                        elsif ($purpose_str =~ m/PCI_HOTPLUG_CONTROL/)
+                        {
+                            $label .= "pcie-hotplug,control";
+                        }
+                        elsif ($purpose_str =~ m/WINDOW_OPEN/)
+                        {
+                            $label .= "secure-boot,window-open";
+                        }
+                        elsif ($purpose_str =~ m/PHYSICAL_PRESENCE/)
+                        {
+                            $label .= "secure-boot,physical-presence";
+                        }
+                        else
+                        {
+                            $label .= "unknown,unknown";
+                        }
+                    }
+                }
+
+                # For TPM:
+                # <vendor>,<device type>,<purpose>,<scope>
+                if ($type_str eq "NUVOTON_TPM")
+                {
+                    $label = "nuvoton,npct601,tpm,host";
+                }
+
+                if ($label eq "")
+                {
+                    $label = "unknown,unknown,unknown,unknown"
+                }
+
+                $label = '"' . $label . '"';
+
+            } # end of filling in default label values
+            elsif ($label !~ m/^\".*\"$/)
+            {
+                # add quotes around label
+                $label = '"' . $label . '"';
+            }
+
 
             # Step 3: For each connection, create an instance in the array
             #         for the DeviceInfo_t struct.
@@ -1864,13 +2000,14 @@ sub processI2C
             push @i2cSpeed, $speed;
             push @i2cType, $type;
             push @i2cPurpose, $purpose;
+            push @i2cLabel, $label;
 
         }
     }
 
     # Return this i2c device's information back to the processor
     return (\@i2cEngine, \@i2cPort, \@i2cSlave, \@i2cAddr,
-            \@i2cSpeed, \@i2cType, \@i2cPurpose);
+            \@i2cSpeed, \@i2cType, \@i2cPurpose, \@i2cLabel);
 }
 
 
