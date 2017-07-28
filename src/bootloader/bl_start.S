@@ -26,16 +26,19 @@
 
 .include "kernel/ppcconsts.S"
 
-.set SBE_HB_VERSION,      sbe_hb_structures    ;// uint32_t
-.set SBE_HB_SBEBOOTSIDE,  sbe_hb_structures+4  ;// uint8_t
-.set SBE_HB_PNORBOOTSIDE, sbe_hb_structures+5  ;// uint8_t
-.set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
+# .set SBE_HB_VERSION,      sbe_hb_structures    ;// uint32_t
+# .set SBE_HB_SBEBOOTSIDE,  sbe_hb_structures+4  ;// uint8_t
+# .set SBE_HB_PNORBOOTSIDE, sbe_hb_structures+5  ;// uint8_t
+# .set SBE_HB_PNORSIZEMB,   sbe_hb_structures+6  ;// uint16_t
 .set SBE_HB_BLLOADSIZE,   sbe_hb_structures+8  ;// uint64_t
-.set SBE_HB_SECUREACCESSBIT, sbe_hb_structures+16  ;// uint8_t
-.set SBE_HB_XSCOMMMIOBAR, sbe_hb_structures+17 ;// uint64_t
-.set SBE_HB_LPCMMIOBAR,   sbe_hb_structures+25 ;// uint64_t
+# .set SBE_HB_SECUREACCESSBIT, sbe_hb_structures+16  ;// uint8_t
+# .set SBE_HB_XSCOMMMIOBAR, sbe_hb_structures+24 ;// uint64_t
+# .set SBE_HB_LPCMMIOBAR,   sbe_hb_structures+32 ;// uint64_t
 .set HBBL_BASE_ADDRESS,   base_load_address
 .set HBBL_END_ADDRESS,    end_load_address
+.set HBBL_DATA_ADDR_OFFSET,      0x00008000 ;// offset of external data
+.set HBBL_TI_OFFSET,             0x50       ;// offset within external data
+.set HBBL_SCRATCH_ADDR_OFFSET,   0x00010000 ;// offset of scratch space
 .set HBBL_system_reset,          0x100
 .set HBBL_machine_check,         0x200
 .set HBBL_data_storage,          0x300
@@ -98,7 +101,69 @@ _main:
     lis r1, _start@h
     addis r1, r1, 1 ;// 64k (1 * 0x10000)
 
+    ;// Save HRMOR in r11 for use in multiple places
+    mfspr r11, HRMOR    ;// save HRMOR
+
+    ;// Do dcbz from end of Bootloader load to end of HBB ECC working space
+_dcbz_after_bl:
+    lis r5, SBE_HB_BLLOADSIZE@h
+    ori r5, r5, SBE_HB_BLLOADSIZE@l
+    ld r5, 0(r5)       ;// get ending EA from SBE HB structure
+    lis r6, 0
+    addis r6, r6, 32   ;// 2M (32 * 0x10000)
+    addi r6, r6, -1    ;// end before 2M
+_dcbz_after_bl_loop:
+    dcbz 0,r5
+    addi r5, r5, 128
+    cmpld cr7, r5, r6
+    blt cr7, _dcbz_after_bl_loop
+
+    ;// Do dcbz from start of HBB running space to start of Bootloader load
+_dcbz_before_bl:
+    li r7, 1
+    rotldi r7, r7, 63  ;// set bit mask for ignoring HRMOR
+
+    subis r5, r11, 32  ;// start of HBB is HRMOR - 2MB (32 * 0x10000)
+    or r5, r5, r7      ;// ignore HRMOR
+    addi r8, r5, 0x2000 ;// add offset of TI info, save in r8 for later
+
+    addi r6, r11, -1   ;// use HRMOR as Bootloader start, end before Bootloader
+    or r6, r6, r7      ;// ignore HRMOR
+_dcbz_before_bl_loop:
+    dcbz 0,r5
+    addi r5, r5, 128
+    cmpld cr7, r5, r6
+    blt cr7, _dcbz_before_bl_loop
+
+
+_updates_and_setup:
+    ;// Update external data address with HRMOR
+    lis r5, g_blData@h
+    ori r5, r5, g_blData@l
+    ld r7, 0(r5)       ;// get data address offset
+    or r7, r7, r11     ;// or HRMOR with offset to calculate address
+    addi r9, r7, HBBL_TI_OFFSET ;// add offset of HBBL's TI data, save in r9
+    std r7, 0(r5)      ;// set external data address
+
+
+    ;// Update scratch address with HRMOR
+    lis r5, g_blScratchSpace@h
+    ori r5, r5, g_blScratchSpace@l
+    ld r7, 0(r5)       ;// get scratch address offset
+    or r7, r7, r11     ;// or HRMOR with offset to calculate address
+    std r7, 0(r5)      ;// set scratch address
+
+
+    ;// Set up TI info
+    lis r5, hbb_ti_descriptor@h
+    ori r5, r5, hbb_ti_descriptor@l
+    ld r7, 0(r5)       ;// get TI magic signature
+    std r7, 0(r8)      ;// save using pointer for TI info put in r8 earlier
+    std r9, 8(r8)      ;// store pointer to HBBL's TI data in next location
+
+
     ;// Set r5 to base load address where exception vectors are loaded
+_load_exception_vectors:
     lis r5, HBBL_BASE_ADDRESS@h
     ori r5, r5, HBBL_BASE_ADDRESS@l
 
@@ -215,38 +280,6 @@ _main:
     st r7, HBBL_debug(r5)
 
 
-    ;// Do dcbz from end of Bootloader load to end of HBB ECC working space
-_dcbz_after_bl:
-    lis r5, SBE_HB_BLLOADSIZE@h
-    ori r5, r5, SBE_HB_BLLOADSIZE@l
-    ld r5, 0(r5)       ;// get ending EA from SBE HB structure
-    lis r6, 0
-    addis r6, r6, 32   ;// 2M (32 * 0x10000)
-    addi r6, r6, -1    ;// end before 2M
-_dcbz_after_bl_loop:
-    dcbz 0,r5
-    addi r5, r5, 128
-    cmpld cr7, r5, r6
-    blt cr7, _dcbz_after_bl_loop
-
-    ;// Do dcbz from start of HBB running space to start of Bootloader load
-_dcbz_before_bl:
-    li r7, 1
-    rotldi r7, r7, 63  ;// set bit mask for ignoring HRMOR
-
-    mfspr r5, HRMOR    ;// start of HBB is HRMOR - 2MB
-    subis r5, r5, 32   ;// 2M (32 * 0x10000) is start of HBB
-    or r5, r5, r7      ;// ignore HRMOR
-
-    mfspr r6, HRMOR    ;// use HRMOR as start of Bootloader
-    addi r6, r6, -1    ;// end before Bootloader
-    or r6, r6, r7      ;// ignore HRMOR
-_dcbz_before_bl_loop:
-    dcbz 0,r5
-    addi r5, r5, 128
-    cmpld cr7, r5, r6
-    blt cr7, _dcbz_before_bl_loop
-
     ;// Call main.
     bl main
 _main_loop:
@@ -356,3 +389,14 @@ switchToHBB:
 .global bootloader_end_address
 bootloader_end_address:
     .quad HBBL_END_ADDRESS
+
+.global g_blData
+g_blData:
+    .quad HBBL_DATA_ADDR_OFFSET
+
+.global g_blScratchSpace
+g_blScratchSpace:
+    .quad HBBL_SCRATCH_ADDR_OFFSET
+
+hbb_ti_descriptor:
+    .byte 'H', 'O', 'S', 'T', 'B', 'O', 'O', 'T'

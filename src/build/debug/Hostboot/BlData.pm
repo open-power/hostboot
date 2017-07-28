@@ -74,7 +74,7 @@ sub main
         $dataAddr = $args->{"addr"};
     }
 
-    my ($dataSym, $dataSize) = ::findSymbolAddress("Bootloader::g_blData");
+    my ($dataSym, $dataSize) = ::findSymbolAddress("g_blData");
     if (not defined $dataSym) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $dataSymStr = sprintf("0x%08X", $dataSym);
     my $dataAddress = ::read64($dataSym|$btLdrHrmorOffset);
@@ -87,7 +87,7 @@ sub main
     ::userDisplay $dataAddrStr;
 
     my ($scratchSym, $scratchSize) =
-        ::findSymbolAddress("Bootloader::g_blScratchSpace");
+        ::findSymbolAddress("g_blScratchSpace");
     if (not defined $scratchSym) { ::userDisplay "Cannot find symbol.\n"; die; }
     my $scratchSymStr = sprintf("0x%08X", $scratchSym);
     my $scratchAddr = ::read64($scratchSym|$btLdrHrmorOffset);

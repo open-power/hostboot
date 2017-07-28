@@ -29,13 +29,41 @@
 #define bl_terminate_C
 
 // Redefine kernel_TIDataArea to use space in Bootloader data
-#define kernel_TIDataArea Bootloader::g_blData->bl_TIDataArea
+#define kernel_TIDataArea g_blData->bl_TIDataArea
 
 #include <../kernel/terminate.C>
 
 #define UINT64_HIGH(data) ((data & 0xFFFFFFFF00000000) >> 32)
 #define UINT64_LOW(data) (data & 0x00000000FFFFFFFF)
 #define WORD7_WORD8(data) UINT64_HIGH(data), UINT64_LOW(data)
+
+void bl_terminate(uint8_t  i_moduleID,
+                  uint16_t i_reasoncode,
+                  uint32_t i_word7,
+                  uint32_t i_word8,
+                  bool     i_executeTI,
+                  uint64_t i_failAddr,
+                  uint32_t i_error_info)
+{
+    termWriteSRC(TI_BOOTLOADER,
+                 i_reasoncode,
+                 i_failAddr,
+                 i_error_info);
+
+    termModifySRC(i_moduleID,
+                  i_word7,
+                  i_word8);
+
+    // ptr to the TI data area structure
+    HB_TI_DataArea *TI_DataAreaPtr = reinterpret_cast<HB_TI_DataArea*>(
+        (HBB_WORKING_ADDR | Bootloader::IGNORE_HRMOR_MASK) + 0x2008);
+    *TI_DataAreaPtr = g_blData->bl_TIDataArea;
+
+    if(i_executeTI)
+    {
+        terminateExecuteTI();
+    }
+}
 
 
 extern "C"

@@ -193,7 +193,7 @@ void bl_pnorAccess::readTOC(uint8_t i_tocBuffer[PNOR::TOC_SIZE],
 void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
                             uint32_t& o_errCode, uint64_t& o_pnorStart)
 {
-    uint8_t *l_tocBuffer = Bootloader::g_blScratchSpace;
+    uint8_t *l_tocBuffer = g_blScratchSpace;
 
     //The first TOC is 1 TOC size + 1 page back from the end of the flash (+ 1)
     uint64_t l_mmioAddr = i_pnorEnd - PNOR::TOC_OFFSET_FROM_TOP_OF_FLASH;
@@ -228,27 +228,23 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
                 l_mmioAddr = o_pnorStart;
 
                 // Reset saved trace index
-                Bootloader::g_blData->bl_trace_index_saved =
-                    BOOTLOADER_TRACE_SIZE;
+                g_blData->bl_trace_index_saved = BOOTLOADER_TRACE_SIZE;
             }
             else
             {
                 // Check if a trace index is not saved
-                if(Bootloader::g_blData->bl_trace_index_saved >=
-                   BOOTLOADER_TRACE_SIZE)
+                if(g_blData->bl_trace_index_saved >= BOOTLOADER_TRACE_SIZE)
                 {
                     // Save trace index for future passes through loop
-                    Bootloader::g_blData->bl_trace_index_saved =
-                        Bootloader::g_blData->bl_trace_index;
+                    g_blData->bl_trace_index_saved = g_blData->bl_trace_index;
 
                     // Save this PNOR MMIO address
-                    Bootloader::g_blData->bl_first_pnor_mmio = l_mmioAddr;
+                    g_blData->bl_first_pnor_mmio = l_mmioAddr;
                 }
                 else // A trace index was saved
                 {
                     // Replace trace index, reuse trace entries for this loop
-                    Bootloader::g_blData->bl_trace_index =
-                        Bootloader::g_blData->bl_trace_index_saved;
+                    g_blData->bl_trace_index = g_blData->bl_trace_index_saved;
                 }
 
                 // Adjust to new location in PNOR flash for next MMIO
@@ -256,12 +252,12 @@ void bl_pnorAccess::findTOC(uint64_t i_pnorEnd, PNOR::SectionData_t * o_TOC,
                 l_mmioAddr -= PAGESIZE;
 
                 // Increment loop counter
-                Bootloader::g_blData->bl_pnor_loop_count++;
+                g_blData->bl_pnor_loop_count++;
             }
 
             // Check that address is still in FW space
             if(l_mmioAddr <
-                (Bootloader::g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE))
+                (g_blData->blToHbData.lpcBAR + LPC::LPCHC_FW_SPACE))
             {
                 BOOTLOADER_TRACE_W_BRK(BTLDR_TRC_PA_FINDTOC_READTOC_ERR);
 

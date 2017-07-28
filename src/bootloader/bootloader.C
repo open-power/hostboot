@@ -59,22 +59,6 @@ const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
 
 namespace Bootloader{
     /**
-     * @brief Pointer to bootloader scratch space
-     *
-     * Pointer to location in main storage which bootloader uses as
-     * scratch space
-     */
-    uint8_t *g_blScratchSpace = nullptr;
-
-    /**
-     * @brief Pointer to bootloader external data
-     *
-     * Pointer to location in main storage which bootloader uses for
-     * storing data
-     */
-    blData_t *g_blData = nullptr;
-
-    /**
      * @brief Set Secureboot Config Data structure so it is accessible via
      *        Hostboot code
      *
@@ -291,7 +275,6 @@ namespace Bootloader{
     int main()
     {
         // Initialization
-        g_blData = reinterpret_cast<blData_t *>(HBBL_DATA_ADDR);
         g_blData->bl_trace_index = 0;
         g_blData->bl_trace_index_saved = BOOTLOADER_TRACE_SIZE;
         BOOTLOADER_TRACE(BTLDR_TRC_MAIN_START);
@@ -321,7 +304,6 @@ namespace Bootloader{
         uint64_t l_pnorStart = 0;
 
         uint32_t l_errCode = PNOR::NO_ERROR;
-        g_blScratchSpace = reinterpret_cast<uint8_t*>(HBBL_SCRATCH_SPACE_ADDR);
         g_blData->secureRomValid = false;
 
         // Get location of HB base code in PNOR from TOC
