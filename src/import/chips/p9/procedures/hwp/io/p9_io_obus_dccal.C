@@ -649,9 +649,18 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
 {
     FAPI_IMP( "p9_io_obus_dccal: I/O Obus Entering" );
     uint8_t dccal_flags = 0x0;
+    uint8_t l_run_dccal = 1;
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::toString( i_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN );
     FAPI_DBG( "I/O Obus Dccal %s, Lane Vector(0x%X)", l_tgtStr, i_lane_vector );
+
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE, i_tgt, l_run_dccal ) );
+
+    if (!l_run_dccal)
+    {
+        FAPI_DBG( "Skipping link, not active for FBC protocol" );
+        goto fapi_try_exit;
+    }
 
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
 
