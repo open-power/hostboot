@@ -29,6 +29,15 @@
 <attributes>
 
 <attribute>
+  <id>ATTR_PROC_NPU_REGION_ENABLED</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Boolean indicating accessibilty of NPU logic region</description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
   <id>ATTR_CLOCK_PLL_MUX</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>setup clock mux settings</description>
