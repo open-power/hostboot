@@ -475,6 +475,38 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_PROC_FABRIC_LINK_ACTIVE</id>
+  <targetType>TARGET_TYPE_XBUS,TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates if the endpoint target is actively being used as a fabric link
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    FALSE = 0x0,
+    TRUE = 0x1
+  </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_LINK_TRAIN</id>
+  <targetType>TARGET_TYPE_XBUS,TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates which sublinks should be initialized/trained
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    BOTH = 0x0,
+    EVEN_ONLY = 0x1,
+    ODD_ONLY = 0x2
+  </enum>
+  <writeable/>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -485,8 +517,21 @@
   <array>7</array>
   <enum>
     FALSE = 0x0,
-    TRUE = 0x1
+    TRUE = 0x1,
+    EVEN_ONLY = 0x2,
+    ODD_ONLY = 0x3
   </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_X_LINKS_CNFG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Contains the total number of active X links on this chip
+  </description>
+  <valueType>uint8</valueType>
   <writeable/>
   <initToZero/>
 </attribute>
@@ -502,8 +547,21 @@
   <array>4</array>
   <enum>
     FALSE = 0x0,
-    TRUE = 0x1
+    TRUE = 0x1,
+    EVEN_ONLY = 0x2,
+    ODD_ONLY = 0x3
   </enum>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PROC_FABRIC_A_LINKS_CNFG</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Contains the total number of active A links on this chip
+  </description>
+  <valueType>uint8</valueType>
   <writeable/>
   <initToZero/>
 </attribute>

@@ -33,9 +33,9 @@ constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_0b10100 = 0b10100;
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b00110 = 0b00110;
 constexpr uint64_t literal_0b01000 = 0b01000;
+constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0b01010 = 0b01010;
 constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0b01100 = 0b01100;
@@ -104,11 +104,9 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_TGT1_ATTR_PROC_EPS_TABLE_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, TGT1, l_TGT1_ATTR_PROC_EPS_TABLE_TYPE));
         uint64_t l_def_IS_FLAT_8 = (l_TGT1_ATTR_PROC_EPS_TABLE_TYPE == fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8);
-        fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
-                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_NUM_X_LINKS_CFG = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] +
-                                           l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]);
+        fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG));
+        uint64_t l_def_NUM_X_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
         fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
         fapi2::ATTR_FREQ_X_MHZ_Type l_TGT1_ATTR_FREQ_X_MHZ;
@@ -422,7 +420,11 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     l_scom_buffer.insert<42, 4, 60, uint64_t>(literal_0b0100 );
                 }
 
-                if (literal_1)
+                if (l_def_SMP_OPTICS_MODE)
+                {
+                    l_scom_buffer.insert<46, 3, 61, uint64_t>(literal_0b001 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
                 {
                     l_scom_buffer.insert<46, 3, 61, uint64_t>(literal_0b000 );
                 }
@@ -442,9 +444,13 @@ fapi2::ReturnCode p9_fbc_cd_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                     l_scom_buffer.insert<51, 3, 61, uint64_t>(literal_0b000 );
                 }
 
-                if (literal_1)
+                if (l_def_SMP_OPTICS_MODE)
                 {
                     l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b001 );
+                }
+                else if (( ! l_def_SMP_OPTICS_MODE))
+                {
+                    l_scom_buffer.insert<54, 3, 61, uint64_t>(literal_0b000 );
                 }
 
                 if (literal_1)

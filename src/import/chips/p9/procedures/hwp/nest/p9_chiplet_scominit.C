@@ -83,6 +83,8 @@ static const uint8_t PERV_OB_CPLT_CONF1_OBRICKA_IOVALID = 0x6;
 static const uint8_t PERV_OB_CPLT_CONF1_OBRICKB_IOVALID = 0x7;
 static const uint8_t PERV_OB_CPLT_CONF1_OBRICKC_IOVALID = 0x8;
 
+static const uint8_t N3_PG_NPU_REGION_BIT = 7;
+
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -108,6 +110,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     uint8_t l_nmmu_ndd1 = 0;
     uint32_t l_eps_write_cycles_t1 = 0;
     uint32_t l_eps_write_cycles_t2 = 0;
+    uint8_t l_npu_enabled = 0;
 
     FAPI_DBG("Start");
 
@@ -118,6 +121,39 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
     // Get proc target string
     fapi2::toString(i_target, l_procTargetStr, sizeof(l_procTargetStr));
+
+    // check to see if NPU region in N3 chiplet partial good data is enabled
+    // init PG data to disabled
+    {
+        fapi2::buffer<uint16_t> l_pg_value = 0xFFFF;
+
+        for (auto l_tgt : i_target.getChildren<fapi2::TARGET_TYPE_PERV>
+             (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL))
+        {
+            uint8_t l_attr_chip_unit_pos = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_tgt,
+                                   l_attr_chip_unit_pos),
+                     "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+
+            if (l_attr_chip_unit_pos == N3_CHIPLET_ID)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_tgt, l_pg_value));
+                break;
+            }
+        }
+
+        // a bit value of 0 in the PG attribute means the associated region is good
+        if (!l_pg_value.getBit<N3_PG_NPU_REGION_BIT>())
+        {
+            l_npu_enabled = 1;
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_NPU_REGION_ENABLED,
+                               i_target,
+                               l_npu_enabled),
+                 "Error from FAPI_ATTR_SET (ATTR_PROC_NPU_ENABLED)");
+    }
 
     // invoke IOO (OBUS FBC IO) SCOM initfiles
     l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
@@ -132,8 +168,9 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                  "Error from FAPI_ATTR_GET(ATTR_OPTICS_CONFIG_MODE)");
 
         //Update NDL IOValid data as needed
-        if (!l_no_ndl_iovalid && (l_unit_pos == 0 || l_unit_pos == 3) && //NDL only exists on obus 0 and 3
-            l_obus_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_NV)
+        if (!l_no_ndl_iovalid && (l_unit_pos == 0 || l_unit_pos == 3) && // NDL only exists on obus 0 and 3
+            l_obus_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_NV &&     // configured for NV link
+            l_npu_enabled)                                               // NPU is enabled
         {
 
             l_obrick_targets = l_obus_target.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>();

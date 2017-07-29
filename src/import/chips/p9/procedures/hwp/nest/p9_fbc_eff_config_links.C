@@ -48,8 +48,8 @@
 /// @brief Determine fabric link enable state, given endpoint target
 ///
 /// @tparam T template parameter, passed in target.
-/// @param[in]  i_loc_target      Endpoint target (of type T)
-/// @param[out] o_link_is_enabled 1=link enabled, 0=link disabled
+/// @param[in]  i_target          Endpoint target (of type T)
+/// @param[out] o_link_is_enabled 0=link disabled, else enabled
 ///
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
@@ -64,7 +64,29 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_link_en(
     const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& i_target,
     uint8_t& o_link_is_enabled)
 {
-    o_link_is_enabled = 1;
+    FAPI_DBG("Start");
+
+    fapi2::ATTR_LINK_TRAIN_Type l_link_train;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
+                           i_target,
+                           l_link_train),
+             "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+    if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+    }
+    else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+    }
+    else
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End, o_link_is_enabled: 0x%x", o_link_is_enabled);
     return fapi2::current_err;
 }
 
@@ -74,12 +96,70 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_link_en(
     const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& i_target,
     uint8_t& o_link_is_enabled)
 {
+    FAPI_DBG("Start");
+
     // validate that link is configured for SMP operation
     fapi2::ATTR_OPTICS_CONFIG_MODE_Type l_link_config_mode;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OPTICS_CONFIG_MODE, i_target, l_link_config_mode),
              "Error from FAPI_ATTR_GET (ATTR_OPTICS_CONFIG_MODE)");
-    o_link_is_enabled = (l_link_config_mode == fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP) ? (1) : (0);
 
+    if (l_link_config_mode != fapi2::ENUM_ATTR_OPTICS_CONFIG_MODE_SMP)
+    {
+        o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE;
+    }
+    else
+    {
+        fapi2::ATTR_LINK_TRAIN_Type l_link_train;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN,
+                               i_target,
+                               l_link_train),
+                 "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
+
+        if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE;
+        }
+        else if (l_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_EVEN_ONLY;
+        }
+        else
+        {
+            o_link_is_enabled = fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_ODD_ONLY;
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End, o_link_is_enabled: 0x%x", o_link_is_enabled);
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set fabric link enable attribute state, given endpoint target.
+///        This will shadow information posted to
+///        ATTR_PROC_FABRIC_[AX]_ATTACHED_CHIP_CNFG, accesible from the
+///        endpoint target type itself.
+///
+/// @tparam T template parameter, passed in target.
+/// @param[in]  i_target          Endpoint target (of type T)
+/// @param[in]  i_enable          Boolean indicating link state
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode p9_fbc_eff_config_links_set_link_active_attr(
+    const fapi2::Target<T>& i_target,
+    const bool i_enable)
+{
+    fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE_Type l_active =
+        (i_enable) ?
+        (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_TRUE) :
+        (fapi2::ENUM_ATTR_PROC_FABRIC_LINK_ACTIVE_FALSE);
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_LINK_ACTIVE,
+                           i_target,
+                           l_active),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_LINK_ACTIVE");
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -242,7 +322,13 @@ fapi2::ReturnCode p9_fbc_eff_config_links_query_endp(
                         "Local and remote endpoints expected to lie in different groups have different chip IDs");
             o_rem_fbc_id[l_loc_link_id] = l_rem_fbc_group_id;
         }
+
     }
+
+    FAPI_TRY(p9_fbc_eff_config_links_set_link_active_attr(
+                 i_loc_target,
+                 o_loc_link_en[l_loc_link_id]),
+             "Error from p9_fbc_eff_config_links_set_link_active_attr");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -259,6 +345,8 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
 {
     FAPI_DBG("Start");
+    FAPI_DBG("Input args: i_op: %d, i_process_electrical: %d, i_process_optical: %d\n",
+             i_op, i_process_electrical, i_process_optical);
 
     // local chip fabric chip/group IDs
     uint8_t l_loc_fbc_chip_id;
@@ -267,7 +355,9 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     // logical link (X/A) configuration parameters, init arrays to default values
     // enable on local end
     uint8_t l_x_en[P9_FBC_UTILS_MAX_X_LINKS] = { 0 };
+    uint8_t l_x_num = 0;
     uint8_t l_a_en[P9_FBC_UTILS_MAX_A_LINKS] = { 0 };
+    uint8_t l_a_num = 0;
     // link/fabric ID on remote end
     // indexed by link ID on local end
     uint8_t l_x_rem_link_id[P9_FBC_UTILS_MAX_X_LINKS] = { 0 };
@@ -285,6 +375,9 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, i_target, l_x_num),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_x_rem_link_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
 
@@ -293,6 +386,9 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
+                 "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_LINKS_CNFG)");
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID, i_target, l_a_rem_link_id),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
@@ -379,8 +475,30 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
     }
 
     // set attributes
+    l_x_num = 0;
+    l_a_num = 0;
+
+    for (uint8_t l_link_id = 0; l_link_id < P9_FBC_UTILS_MAX_X_LINKS; l_link_id++)
+    {
+        if (l_x_en[l_link_id])
+        {
+            l_x_num++;
+        }
+    }
+
+    for (uint8_t l_link_id = 0; l_link_id < P9_FBC_UTILS_MAX_A_LINKS; l_link_id++)
+    {
+        if (l_a_en[l_link_id])
+        {
+            l_a_num++;
+        }
+    }
+
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, i_target, l_x_en),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG)");
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, i_target, l_x_num),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_LINKS_CNFG)");
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID, i_target, l_x_rem_link_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_X_ATTACHED_LINK_ID)");
@@ -390,6 +508,9 @@ p9_fbc_eff_config_links(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, i_target, l_a_en),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG)");
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, i_target, l_a_num),
+             "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_LINKS_CNFG)");
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID, i_target, l_a_rem_link_id),
              "Error from FAPI_ATTR_SET (ATTR_PROC_FABRIC_A_ATTACHED_LINK_ID)");
