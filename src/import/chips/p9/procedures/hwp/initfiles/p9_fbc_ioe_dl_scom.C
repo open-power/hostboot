@@ -29,6 +29,7 @@
 
 using namespace fapi2;
 
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x0B = 0x0B;
 constexpr uint64_t literal_0xF = 0xF;
 constexpr uint64_t literal_0b111 = 0b111;
@@ -43,12 +44,23 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT1, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
+        fapi2::ATTR_LINK_TRAIN_Type l_TGT0_ATTR_LINK_TRAIN;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_LINK_TRAIN, TGT0, l_TGT0_ATTR_LINK_TRAIN));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x601180aull, l_scom_buffer ));
 
-            constexpr auto l_PB_IOE_LL1_CONFIG_LINK_PAIR_ON = 0x1;
-            l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_IOE_LL1_CONFIG_LINK_PAIR_ON );
+            if ((l_TGT0_ATTR_LINK_TRAIN == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH))
+            {
+                constexpr auto l_PB_IOE_LL1_CONFIG_LINK_PAIR_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_IOE_LL1_CONFIG_LINK_PAIR_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_LL1_CONFIG_LINK_PAIR_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_IOE_LL1_CONFIG_LINK_PAIR_OFF );
+            }
+
             constexpr auto l_PB_IOE_LL1_CONFIG_CRC_LANE_ID_ON = 0x1;
             l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_IOE_LL1_CONFIG_CRC_LANE_ID_ON );
 
