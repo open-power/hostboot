@@ -60,7 +60,8 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
                                l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_X0_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] != literal_0);
+        uint64_t l_def_X0_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] !=
+                                     fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE);
         fapi2::ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS_Type l_TGT0_ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS, TGT0,
                                l_TGT0_ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS));
@@ -77,14 +78,22 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         uint64_t l_def_DD1_LO_LIMIT_R = (l_def_DD1_LO_LIMIT_N % l_def_DD1_LO_LIMIT_D);
         uint64_t l_def_DD1_PARTS = (l_TGT0_ATTR_CHIP_EC_FEATURE_DD1_FBC_SETTINGS == literal_1);
         uint64_t l_def_DD1_LO_LIMIT_P = (l_def_DD1_LO_LIMIT_D % literal_2);
-        uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] != literal_0);
-        uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] != literal_0);
+        uint64_t l_def_X1_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] !=
+                                     fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE);
+        uint64_t l_def_X2_ENABLED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] !=
+                                     fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE);
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE, TGT1, l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE));
         uint64_t l_def_OPTICS_IS_A_BUS = (l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE ==
                                           fapi2::ENUM_ATTR_PROC_FABRIC_SMP_OPTICS_MODE_OPTICS_IS_A_BUS);
         fapi2::ATTR_CHIP_EC_FEATURE_HW384245_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW384245, TGT0, l_TGT0_ATTR_CHIP_EC_FEATURE_HW384245));
+        uint64_t l_def_X0_IS_PAIRED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] ==
+                                       fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE);
+        uint64_t l_def_X1_IS_PAIRED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1] ==
+                                       fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE);
+        uint64_t l_def_X2_IS_PAIRED = (l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2] ==
+                                       fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_TRUE);
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501340aull, l_scom_buffer ));
@@ -398,22 +407,37 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013423ull, l_scom_buffer ));
 
-            if (l_def_X0_ENABLED)
+            if (l_def_X0_IS_PAIRED)
             {
                 constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_ON = 0x1;
                 l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_OFF = 0x0;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE01_IS_LOGICAL_PAIR_OFF );
+            }
 
-            if (l_def_X1_ENABLED)
+            if (l_def_X1_IS_PAIRED)
             {
                 constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_ON = 0x1;
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_ON );
             }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_OFF = 0x0;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE23_IS_LOGICAL_PAIR_OFF );
+            }
 
-            if (l_def_X2_ENABLED)
+            if (l_def_X2_IS_PAIRED)
             {
                 constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_ON = 0x1;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_OFF = 0x0;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_IOE_SCOM_PB_CFG_IOE45_IS_LOGICAL_PAIR_OFF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013423ull, l_scom_buffer));
