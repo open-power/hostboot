@@ -112,6 +112,8 @@ p9_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         if (!io_smp_chip.master_chip_sys_curr ||
             io_smp_chip.master_chip_group_curr)
         {
+            FAPI_DBG("Error: chip does not match flash state of fabric: sys_curr: %d, group_curr: %d",
+                     io_smp_chip.master_chip_sys_curr ? 1 : 0, io_smp_chip.master_chip_group_curr ? 1 : 0);
             l_err = true;
         }
         else
@@ -137,6 +139,7 @@ p9_build_smp_process_chip(fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         // as a master within the scope of its current enclosing fabric
         if (!io_smp_chip.master_chip_sys_curr)
         {
+            FAPI_DBG("Error: newly designated master is not currently a master");
             l_err = true;
         }
     }
@@ -352,7 +355,7 @@ fapi2::ReturnCode p9_build_smp_insert_chips(
                 "No chips found in input vector which match target designated as master");
 
     // check that SMP size does not exceed maximum number of chips supported
-    FAPI_ASSERT(i_chips.size() < P9_BUILD_SMP_MAX_SIZE,
+    FAPI_ASSERT(i_chips.size() <= P9_BUILD_SMP_MAX_SIZE,
                 fapi2::P9_BUILD_SMP_MAX_SIZE_ERR()
                 .set_SIZE(i_chips.size())
                 .set_MAX_SIZE(P9_BUILD_SMP_MAX_SIZE)
