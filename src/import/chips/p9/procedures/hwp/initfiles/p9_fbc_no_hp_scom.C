@@ -30,14 +30,11 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_3 = 3;
-constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_6 = 6;
-constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0x0 = 0x0;
+constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_0x3 = 0x3;
+constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_0x4 = 0x4;
 constexpr uint64_t literal_0x6 = 0x6;
 constexpr uint64_t literal_0x17 = 0x17;
@@ -61,6 +58,7 @@ constexpr uint64_t literal_0x3A = 0x3A;
 constexpr uint64_t literal_0x6D = 0x6D;
 constexpr uint64_t literal_0x50 = 0x50;
 constexpr uint64_t literal_0x98 = 0x98;
+constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0xD = 0xD;
 constexpr uint64_t literal_0xA = 0xA;
 constexpr uint64_t literal_0x10 = 0x10;
@@ -80,19 +78,12 @@ fapi2::ReturnCode p9_fbc_no_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT0, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
-        fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG, TGT0,
-                               l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_NUM_A_LINKS_CFG = (((l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] +
-                                            l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_2]) +
-                                          l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3]);
-        fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
-                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_NUM_X_LINKS_CFG = ((((((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_0] +
-                                               l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_1]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_2]) +
-                                             l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4]) +
-                                           l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5]) + l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6]);
+        fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_A_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG));
+        uint64_t l_def_NUM_A_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_A_LINKS_CNFG;
+        fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_LINKS_CNFG, TGT0, l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG));
+        uint64_t l_def_NUM_X_LINKS_CFG = l_TGT0_ATTR_PROC_FABRIC_X_LINKS_CNFG;
         fapi2::ATTR_PROC_EPS_TABLE_TYPE_Type l_TGT1_ATTR_PROC_EPS_TABLE_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_TABLE_TYPE, TGT1, l_TGT1_ATTR_PROC_EPS_TABLE_TYPE));
         uint64_t l_def_IS_FLAT_8 = (l_TGT1_ATTR_PROC_EPS_TABLE_TYPE == fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8);
