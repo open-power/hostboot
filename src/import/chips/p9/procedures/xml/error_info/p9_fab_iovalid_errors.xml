@@ -112,6 +112,7 @@
     <ffdc>LOC_ENDP_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>LOC_LINK_TRAIN</ffdc>
     <ffdc>REM_ENDP_TARGET</ffdc>
     <ffdc>REM_ENDP_TYPE</ffdc>
     <ffdc>REM_ENDP_UNIT_ID</ffdc>
@@ -151,6 +152,7 @@
     <ffdc>LOC_ENDP_TARGET</ffdc>
     <ffdc>LOC_ENDP_TYPE</ffdc>
     <ffdc>LOC_ENDP_UNIT_ID</ffdc>
+    <ffdc>LOC_LINK_TRAIN</ffdc>
     <ffdc>REM_ENDP_TARGET</ffdc>
     <ffdc>REM_ENDP_TYPE</ffdc>
     <ffdc>REM_ENDP_UNIT_ID</ffdc>
