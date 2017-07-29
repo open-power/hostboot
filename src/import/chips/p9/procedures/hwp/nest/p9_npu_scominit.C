@@ -46,8 +46,6 @@
 //------------------------------------------------------------------------------
 const uint64_t PU_NPU_SM2_XTS_ATRMISS_POST_P9NDD1 = 0x501164AULL;
 
-const uint8_t N3_PG_NPU_REGION_BIT = 7;
-
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -59,28 +57,15 @@ fapi2::ReturnCode p9_npu_scominit(
 {
     FAPI_DBG("Entering ...");
 
-    // check to see if NPU region in N3 chiplet partial good data is enabled
-    // init PG data to disabled
-    fapi2::buffer<uint16_t> l_pg_value = 0xFFFF;
+    uint8_t l_npu_enabled;
 
-    for (auto l_tgt : i_target.getChildren<fapi2::TARGET_TYPE_PERV>
-         (fapi2::TARGET_FILTER_NEST_WEST, fapi2::TARGET_STATE_FUNCTIONAL))
-    {
-        uint8_t l_attr_chip_unit_pos = 0;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
-                               l_tgt,
-                               l_attr_chip_unit_pos),
-                 "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+    // check to see if NPU region in N3 chiplet is enabled
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NPU_REGION_ENABLED,
+                           i_target,
+                           l_npu_enabled),
+             "Error from FAPI_ATTR_GET (ATTR_PROC_NPU_REGION_ENABLED)");
 
-        if (l_attr_chip_unit_pos == N3_CHIPLET_ID)
-        {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_tgt, l_pg_value));
-            break;
-        }
-    }
-
-    // a bit value of 0 in the PG attribute means the associated region is good
-    if (!l_pg_value.getBit<N3_PG_NPU_REGION_BIT>())
+    if (l_npu_enabled)
     {
         fapi2::ReturnCode l_rc;
         fapi2::buffer<uint64_t> l_atrmiss = 0;
