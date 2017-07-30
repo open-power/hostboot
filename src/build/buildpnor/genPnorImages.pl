@@ -461,12 +461,16 @@ foreach my $header (keys %sb_hdrs)
 # Custom sort to ensure images are handled in the correct dependency order.
 # If a dependency is not specified in the hash used, use default behavior.
 ################################################################################
-# Hardcoded defined order that binfiles should be handled.
-my %partitionDeps = ( HBBL => 0,
-                      HBB => 1,
-                      HBI => 2);
+
 sub partitionDepSort
 {
+    # Hardcoded defined order that binfiles should be handled. Fails to work
+    # properly unless declared inside the sort routine under some platforms/perl
+    # versions
+    my %partitionDeps = ( HBBL => 0,
+                          HBB => 1,
+                          HBI => 2);
+
     # If $a exists but $b does not, set $a < $b
     if (exists $partitionDeps{$a} && !exists $partitionDeps{$b})
     {
