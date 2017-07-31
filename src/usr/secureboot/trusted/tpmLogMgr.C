@@ -572,6 +572,39 @@ namespace TRUSTEDBOOT
         i_val->devtreeI2cMasterOffset = i_i2cMasterOffset;
     }
 
+    void TpmLogMgr_relocateTpmLog(TpmLogMgr* i_val,
+                                  uint8_t* i_newLog,
+                                  size_t i_maxSize)
+    {
+        mutex_lock( &i_val->logMutex );
+
+        TRACUCOMP( g_trac_trustedboot,
+                   ">>relocateTpmLog() LogSize:%d MaxSize:%d",
+                   i_val->logSize, i_maxSize);
+
+        assert(i_newLog != NULL, "Bug! Log start address is nullptr");
+        assert(i_val->eventLogInMem == NULL,
+               "relocateTpmLog can only be called once");
+        assert(i_val->logSize < i_maxSize,
+               "Logsize is greater than maxsize");
+
+        // Point logMgr to new location
+        i_val->eventLogInMem = i_newLog;
+
+        // Copy log into new location
+        memset(i_val->eventLogInMem, 0, i_maxSize);
+        memcpy(i_val->eventLogInMem, i_val->eventLog, i_val->logSize);
+        i_val->newEventPtr = i_val->eventLogInMem + i_val->logSize;
+
+        mutex_unlock( &i_val->logMutex );
+
+        TRACUCOMP( g_trac_trustedboot,
+                   "<<relocateTpmLog() Addr:%p",
+                   i_newLog);
+        return;
+    }
+
+
 #endif
 
 #ifdef __cplusplus

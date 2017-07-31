@@ -164,6 +164,15 @@ namespace TRUSTEDBOOT
     void TpmLogMgr_setTpmDevtreeInfo(TpmLogMgr* i_val,
                                      uint64_t i_xscomAddr,
                                      uint32_t i_i2cMasterOffset);
+    /**
+     * @brief Relocate the TPM log to the provided location
+     * @param[in] i_val TpmLogMgr structure
+     * @param[in] i_newLog Pointer to locate to place log
+     * @param[in] i_maxSize Size of newLog location
+     */
+    void TpmLogMgr_relocateTpmLog(TpmLogMgr* i_val,
+                                  uint8_t* i_newLog,
+                                  size_t i_maxSize);
 #endif
 
 

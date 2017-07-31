@@ -1252,18 +1252,16 @@ errlHndl_t populate_TpmInfoByNode()
         if(pLogMgr != nullptr)
         {
             #ifdef CONFIG_TPMDD
-            auto const * const pLogStart =
-                TRUSTEDBOOT::TpmLogMgr_getLogStartPtr(pLogMgr);
-            assert(pLogStart != nullptr,"populate_TpmInfoByNode: BUG! An "
-                "allocated log manager's log start pointer should never be "
-                "nullptr");
 
-            logSize = (pLogMgr->logSize < TPM_SRTM_EVENT_LOG_MAX) ?
-                pLogMgr->logSize : TPM_SRTM_EVENT_LOG_MAX;
+            // The log size always has to be specified to the max
+            //  this is because after HDAT is populated additional
+            //  entries can be posted to the log to cause it to
+            //  grow beyond its current size
+            logSize = TPM_SRTM_EVENT_LOG_MAX;
 
-            memcpy(reinterpret_cast<void*>(l_baseAddr + l_currOffset),
-                pLogStart,
-                logSize);
+            TRUSTEDBOOT::TpmLogMgr_relocateTpmLog(pLogMgr,
+                          reinterpret_cast<uint8_t*>(l_baseAddr + l_currOffset),
+                          logSize);
             #endif
         }
         else
