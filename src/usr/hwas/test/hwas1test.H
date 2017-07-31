@@ -1422,7 +1422,234 @@ public:
 
                         break;
 
-                    case TYPE_OBUS_BRICK:
+                    case TYPE_MC:
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "MC%d is not functional", l_chipUnit);
+                        if (l_chipUnit)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "N1/N3 for MC%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    l_chipUnit ? pgData[VPD_CP00_PG_N1_INDEX]
+                                               : pgData[VPD_CP00_PG_N3_INDEX]);
+                        }
+
+                        if (l_chipUnit)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
+                                & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
+                                    &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]]
+                                    |= l_mask;
+                            }
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for MC%d = 0x%04x, "
+                                        "mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        l_chipUnit ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit * 2]],
+                                        l_mask);
+                            }
+
+                            // Restore the "all good" data
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit * 2]] =
+                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                        }
+
+                        break;
+
+                    case TYPE_MI:
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "MI%d is not functional", l_chipUnit);
+                        if (l_chipUnit / 2)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "N1/N3 for MI%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    (l_chipUnit / 2)
+                                        ? pgData[VPD_CP00_PG_N1_INDEX]
+                                        : pgData[VPD_CP00_PG_N3_INDEX]);
+                        }
+
+                        if (l_chipUnit / 2)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
+                                & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
+                                    &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]]
+                                    |= l_mask;
+                            }
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for MI%d = 0x%04x, "
+                                        "mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        (l_chipUnit / 2) ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit]],
+                                        l_mask);
+                            }
+
+                            // Restore the "all good" data
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit]] =
+                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                        }
+
+                        break;
+
+                    case TYPE_DMI:
+                        TS_INFO( "testHWASisDescFunctional: "
+                                  "DMI%d is not functional", l_chipUnit);
+                        if (l_chipUnit / 4)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N1_MCS23;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] |=
+                                (uint16_t)VPD_CP00_PG_N3_MCS01;
+                        }
+
+                        if (isDescFunctional(pDesc, pgData))
+                        {
+                            TS_FAIL("testHWASisDescFunctional>"
+                                    "functional = 0x%x, should be false, "
+                                    "N1/N3 for DMI%d = 0x%04x.",
+                                    isDescFunctional(pDesc, pgData),
+                                    l_chipUnit,
+                                    (l_chipUnit / 4)
+                                        ? pgData[VPD_CP00_PG_N1_INDEX]
+                                        : pgData[VPD_CP00_PG_N3_INDEX]);
+                        }
+
+                        if (l_chipUnit / 4)
+                        {
+                            pgData[VPD_CP00_PG_N1_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N1_GOOD;
+                        }
+                        else
+                        {
+                            pgData[VPD_CP00_PG_N3_INDEX] =
+                                (uint16_t)VPD_CP00_PG_N3_GOOD;
+                        }
+
+                        for (l_mask = 0x8000;
+                             l_mask > 0;
+                             l_mask >>= 1)
+                        {
+                            if (pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
+                                & l_mask)
+                            {
+                                // Turn off a bit that should be on
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
+                                    &= ~l_mask;
+                            }
+                            else
+                            {
+                                // Turn on a bit that should be off
+                                pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]]
+                                    |= l_mask;
+                            }
+
+                            if (isDescFunctional(pDesc, pgData))
+                            {
+                                TS_FAIL("testHWASisDescFunctional>"
+                                        "functional = 0x%x, should be false, "
+                                        "MC%s for DMI%d = 0x%04x, "
+                                        "mask = 0x%04x.",
+                                        isDescFunctional(pDesc, pgData),
+                                        (l_chipUnit / 4) ? "01" : "23",
+                                        l_chipUnit,
+                                        pgData[VPD_CP00_PG_MCxx_INDEX
+                                                   [l_chipUnit / 2]],
+                                        l_mask);
+                            }
+
+                            // Restore the "all good" data
+                            pgData[VPD_CP00_PG_MCxx_INDEX[l_chipUnit / 2]] =
+                            (uint16_t)VPD_CP00_PG_MCxx_GOOD;
+                        }
+
+                        break;
+
+                     case TYPE_OBUS_BRICK:
                         {
                             //Two cases here:
                             //OBRICK==SMP --> Target should be present regardless of PG
