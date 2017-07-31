@@ -649,13 +649,11 @@ namespace HBPM
                 break;
             }
 
-            // @todo RTC 168580 Remove workaround zeroing out HOMER
-            //                  for PM load and reload
             // Zero out the HOMER memory for LOAD only
-            //if(PM_LOAD == i_mode)
-            //{
+            if(PM_LOAD == i_mode)
+            {
                 memset(l_homerVAddr, 0, VMM_HOMER_INSTANCE_SIZE);
-            //}
+            }
 
             uint64_t l_occImgPaddr = i_homerPhysAddr
                                             + HOMER_OFFSET_TO_OCC_IMG;
