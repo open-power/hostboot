@@ -620,7 +620,7 @@ _rs4_compress(CompressedScanData* io_rs4,
               const uint8_t* i_care_str,
               const uint32_t i_length,
               const uint32_t i_scanAddr,
-              const uint8_t i_ringId)
+              const uint16_t i_ringId)
 {
     int rc;
     uint32_t nibbles = rs4_max_compressed_nibbles(i_length);
