@@ -250,15 +250,15 @@ fapi_try_exit:
 
 
 // Function: get_overlays_ring()
-// @brief: This function is used to get gptr ring from overlays section
+// @brief: This function is used to get Gptr overlay ring from overlays section
 //
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
 // void*     i_overlaysSection:  Pointer to extracted DD section in hw image
 // RingID    i_ringId:           GPTR ring id
-// void*     io_ringBuf2:        Work buffer which contains RS4 ring on return.
-// void*     io_ringBuf3:        Work buffer which contains data+care raw rings on return.
-// uint32_t* o_ovlyUncmpSize     Overlay/gptr uncompressed ring size
+// void*     io_ringBuf2:        Work buffer which contains RS4 overlay ring on return.
+// void*     io_ringBuf3:        Work buffer which contains data+care raw overlay ring on return.
+// uint32_t* o_ovlyUncmpSize     Uncompressed overlay ring size
 #ifdef WIN32
 int get_overlays_ring(
     int i_procTarget,
@@ -275,21 +275,19 @@ fapi2::ReturnCode get_overlays_ring(
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     int l_rc = INFRASTRUCT_RC_SUCCESS;
-    uint8_t* data = NULL;
-    uint8_t* care = NULL;
+    uint32_t l_maxRingByteSize = MAX_RING_BUF_SIZE;
     uint32_t l_ovlyUncmpSize = 0;
-    size_t byteCopy = 0;
 
-    // As we'll be using tor api tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
+    // As we'll be using tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
     // to identify TOR layout for overlays/overrides sections we have to define
-    // following variables (though unused in this context) to support the i/f.
+    // following variables (though unused in this context) to support the API.
     uint16_t l_ddLevel = 0;    // Unused param (dd level)
     uint8_t  l_instanceId = 0; // Unused param (instance id)
     uint32_t l_ringBlockSize = 0xFFFFFFFF;  // Unused param (ringBlockSize)
 
     FAPI_DBG("Entering get_overlays_ring");
 
-    // Get Gptr ring from overlays section into ringBuf2
+    // Get Gptr overlay ring from overlays section into ringBuf2
     l_rc = P9_TOR::tor_get_single_ring(
                i_overlaysSection,
                P9_XIP_MAGIC_SEEPROM,
@@ -298,7 +296,7 @@ fapi2::ReturnCode get_overlays_ring(
                P9_TOR::SBE,
                OVERLAY,
                l_instanceId,
-               io_ringBuf2,
+               io_ringBuf2,  //Has RS4 Gptr overlay ring on return
                l_ringBlockSize);
 
     if (l_rc == INFRASTRUCT_RC_SUCCESS)
@@ -306,12 +304,13 @@ fapi2::ReturnCode get_overlays_ring(
         FAPI_DBG("Successfully found Gptr ringId=0x%x of iv_size=%d bytes", i_ringId,
                  be16toh(((CompressedScanData*)(*io_ringBuf2))->iv_size));
 
-        //Decompress Gptr ring
-        l_rc = rs4_decompress(
-                   &data,
-                   &care,
-                   &l_ovlyUncmpSize,
-                   (CompressedScanData*)(*io_ringBuf2));
+        // Decompress Gptr overlay ring
+        l_rc = _rs4_decompress(
+                   (uint8_t*)(*io_ringBuf3),
+                   (uint8_t*)(*io_ringBuf3) + l_maxRingByteSize / 2,
+                   l_maxRingByteSize / 2, // Max allowable raw ring size (in bytes)
+                   &l_ovlyUncmpSize,      // Actual raw ring size (in bits) on return.
+                   (CompressedScanData*)(*io_ringBuf2) );
 
         FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                      fapi2::XIPC_RS4_DECOMPRESS_ERROR().
@@ -324,28 +323,12 @@ fapi2::ReturnCode get_overlays_ring(
                      "ringId=0x%x, chipletId=0xff, occurrence=2 ",
                      l_rc, i_ringId );
 
-        // Copy data and care bits into io_ringBuf3
-        byteCopy = (l_ovlyUncmpSize % 8 == 0 ? l_ovlyUncmpSize / 8 : (l_ovlyUncmpSize / 8) + 1);
-        memcpy(*io_ringBuf3, data, byteCopy);
-        memcpy(((uint8_t*)(*io_ringBuf3) + MAX_RING_BUF_SIZE / 2), care, byteCopy);
-
-        // free memory allocated by rs4_decompress
-        if (data)
-        {
-            free(data);
-        }
-
-        if (care)
-        {
-            free(care);
-        }
-
         // For debug and testing
-        FAPI_DBG("Overlay raw data+care ring size=%d bits", l_ovlyUncmpSize);
-        //print_raw_ring( data, l_ovlyUncmpSize);
-        //print_raw_ring( care, l_ovlyUncmpSize);
+        FAPI_DBG("Overlay raw ring size=%d bits", l_ovlyUncmpSize);
+        //print_raw_ring( (uint8_t*)(*io_ringBuf3), l_ovlyUncmpSize);
+        //print_raw_ring( (uint8_t*)(*io_ringBuf3) + l_maxRingByteSize / 2, l_ovlyUncmpSize);
 
-        // Copy the gptr uncompressed size
+        // Copy the overlay ring's raw size
         *o_ovlyUncmpSize = l_ovlyUncmpSize;
     }
     else
@@ -377,13 +360,14 @@ fapi_try_exit:
 
 
 // Function: apply_overlays_ring()
-// @brief: This function is used to apply the overlays logic to gptr rings
-// found in overlays section.
+// @brief: This function applies the Gptr overlay ring from the overlays section to the Gptr
+//         ring from the Mvpd.
 //
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
-// void*    io_vpdRing:      Contains Mvpd RS4 ring on input and final Vpd RS4 ring on output.
-// void*    i_ovlyRawRing:   Raw data+care overlays ring
+// void*    io_vpdRing:      Contains Mvpd RS4 ring on input and final Vpd RS4 ring on output
+// void*    io_ringBuf2:     Work buffer (has raw Mvpd ring on output)
+// void*    i_ovlyRawRing:   Raw data+care overlay ring
 // uint32_t i_ovlyUncmpSize: Overlay/gptr uncompressed ring size
 #ifdef WIN32
 int apply_overlays_ring(
@@ -393,30 +377,32 @@ fapi2::ReturnCode apply_overlays_ring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
     void*    io_vpdRing,
+    void*    io_ringBuf2,
     void*    i_ovlyRawRing,
     uint32_t i_ovlyUncmpSize)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     int l_rc = INFRASTRUCT_RC_SUCCESS;
-    uint8_t* dataVpd = NULL;
-    uint8_t* careVpd = NULL;
+    uint32_t maxRingByteSize = MAX_RING_BUF_SIZE;
+    uint8_t* dataVpd = (uint8_t*)io_ringBuf2;
+    uint8_t* careVpd = (uint8_t*)io_ringBuf2 + maxRingByteSize / 2;
     uint8_t* dataOvly = NULL;
     uint8_t* careOvly = NULL;
     uint32_t vpdUncmpSize = 0;
-    CompressedScanData* rs4Ring = NULL;
 
     FAPI_DBG("Entering apply_overlays_ring");
 
-    // Get the data & care for Gptr/overlays ring
+    // Get the data+care raw Gptr overlay ring
     dataOvly = (uint8_t*)i_ovlyRawRing;
-    careOvly = (uint8_t*)i_ovlyRawRing + MAX_RING_BUF_SIZE / 2;
+    careOvly = (uint8_t*)i_ovlyRawRing + maxRingByteSize / 2;
 
-    FAPI_DBG("Decompress vpd ring");
-    l_rc = rs4_decompress(
-               &dataVpd,
-               &careVpd,
-               &vpdUncmpSize,
-               (CompressedScanData*)io_vpdRing);
+    // Decompress Gptr Mvpd ring
+    l_rc = _rs4_decompress(
+               dataVpd,
+               careVpd,
+               maxRingByteSize / 2, // Max allowable raw ring size (in bytes)
+               &vpdUncmpSize,         // Actual raw ring size (in bits) on return.
+               (CompressedScanData*)io_vpdRing );
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
                  fapi2::XIPC_RS4_DECOMPRESS_ERROR().
@@ -429,11 +415,11 @@ fapi2::ReturnCode apply_overlays_ring(
                  "ringId=0xff, chipletId=0xff, occurrence=2 ", l_rc );
 
     // For debug and testing
-    FAPI_DBG("Mvpd ring: data care (size:%d bits)", vpdUncmpSize);
+    FAPI_DBG("Mvpd raw ring size=%d bits)", vpdUncmpSize);
     //print_raw_ring( dataVpd, vpdUncmpSize);
     //print_raw_ring( careVpd, vpdUncmpSize);
 
-    // Compare uncompressed Mvpd and overlays ring sizes
+    // Compare uncompressed Mvpd ring and overlay ring sizes
     FAPI_ASSERT( i_ovlyUncmpSize == vpdUncmpSize,
                  fapi2::XIPC_MVPD_OVLY_RAW_RING_SIZE_MISMATCH_ERROR().
                  set_CHIP_TARGET(i_procTarget).
@@ -443,8 +429,8 @@ fapi2::ReturnCode apply_overlays_ring(
                  vpdUncmpSize, i_ovlyUncmpSize);
 
     // Perform Overlay operation:
-    // if overlays data is '1' and care is '1', set vpd data to '1' and care to '1'
-    // if overlays data is '0' and care is '1', set vpd data to '0' and care to '0'
+    // if overlay data is '1' and care is '1', set vpd data to '1' and care to '1'
+    // if overlay data is '0' and care is '1', set vpd data to '0' and care to '0'
     // Note that the latter can be done bcoz GPTR rings are scanned on flushed latches.
     // And since writing a 0 data to a flushed latch result in no change, hence we can
     // save RS4 ring space in image as well as improve scan time by clearing the
@@ -506,13 +492,14 @@ fapi2::ReturnCode apply_overlays_ring(
         }
     }
 
-    FAPI_DBG("Mvpd ring(modified): data care (size:%d bits)", vpdUncmpSize);
+    //FAPI_DBG("Mvpd ring(modified): data care (size:%d bits)", vpdUncmpSize);
     //print_raw_ring( dataVpd, vpdUncmpSize);
     //print_raw_ring( careVpd, vpdUncmpSize);
 
     // Recompress vpd ring
-    l_rc = rs4_compress(
-               &rs4Ring,
+    l_rc = _rs4_compress(
+               (CompressedScanData*)io_vpdRing,
+               maxRingByteSize,
                dataVpd,
                careVpd,
                vpdUncmpSize,
@@ -529,25 +516,6 @@ fapi2::ReturnCode apply_overlays_ring(
                  "rs4_compress() for gptr: Failed w/rc=%i for "
                  "ringId=0xff, chipletId=0xff, occurrence=2 ", l_rc );
 
-    // Copy rs4 ring into i_vpdRing
-    memcpy(io_vpdRing, rs4Ring, be16toh(rs4Ring->iv_size));
-
-    // free memory allocated by rs4_(de)compress
-    if (dataVpd)
-    {
-        free(dataVpd);
-    }
-
-    if (careVpd)
-    {
-        free(careVpd);
-    }
-
-    if (rs4Ring)
-    {
-        free(rs4Ring);
-    }
-
 fapi_try_exit:
     FAPI_DBG("Exiting apply_overlays_ring");
     return fapi2::current_err;
@@ -561,8 +529,8 @@ fapi_try_exit:
 // const fapi2::Target &i_target: Processor chip target.
 // void*      i_overlaysSection:  Pointer to extracted DD section in hw image
 // void*      io_vpdRing:         Has Mvpd RS4 ring on input and final Vpd RS4 ring on output
-// void*      io_ringBuf2:        Ring work buffer(used for RS4 overlays ring)
-// void*      io_ringBuf3:        Ring work buffer(used for raw data+care overlays ring)
+// void*      io_ringBuf2:        Ring work buffer(used for RS4 overlay ring)
+// void*      io_ringBuf3:        Ring work buffer(used for raw data+care overlay ring)
 #ifdef WIN32
 int process_gptr_rings(
     int i_procTarget,
@@ -585,7 +553,7 @@ fapi2::ReturnCode process_gptr_rings(
     FAPI_DBG("Processing GPTR ringId=0x%x", l_vpdRingId);
 
     // Used for getting Gptr ring from overlays section
-    void* l_ovlyRs4Ring = io_ringBuf2;
+    void* l_ovlyRs4Ring = io_ringBuf2; //This content will be destroyed later in this function!
     void* l_ovlyRawRing = io_ringBuf3;
 
     FAPI_TRY( get_overlays_ring(
@@ -599,10 +567,10 @@ fapi2::ReturnCode process_gptr_rings(
               (uint32_t)current_err );
 
     // Check whether both ovlyRs4/RawRing ring pointers match the original input buffer
-    // pointers which would verify that an gptr overlays ring was found
+    // pointers which would verify that an Gptr overlay ring was found
     if (l_ovlyRs4Ring == io_ringBuf2 && l_ovlyRawRing == io_ringBuf3)
     {
-        // Check that RS4 headers of the Mvpd and overlays rings match
+        // Check that RS4 headers of the Mvpd and overlay rings match
         FAPI_ASSERT( ( ((CompressedScanData*)io_vpdRing)->iv_ringId ==
                        ((CompressedScanData*)l_ovlyRs4Ring)->iv_ringId &&
                        ((CompressedScanData*)io_vpdRing)->iv_scanAddr ==
@@ -627,6 +595,7 @@ fapi2::ReturnCode process_gptr_rings(
         FAPI_TRY( apply_overlays_ring(
                       i_procTarget,
                       io_vpdRing,
+                      io_ringBuf2, //We can now destroy ovlyRs4Ring
                       l_ovlyRawRing,
                       l_ovlyUncmpSize),
                   "apply_overlays_ring() failed w/rc=0x%08x for ringId=0x%x",
@@ -635,7 +604,7 @@ fapi2::ReturnCode process_gptr_rings(
     else
     {
         // Next, we check that the overlay buffer pointers are NULL which verifies that
-        // no overlays ring was found. This is normal and is NOT an error.  However, if
+        // no overlay ring was found. This is normal and is NOT an error.  However, if
         // the overlay buffer pointers neither match the original input work buffers
         // (which they don't if we here in this spot)  AND if they are not NULL either,
         // then that is a code bug error case.
