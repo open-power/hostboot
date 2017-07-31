@@ -246,6 +246,7 @@ Layout Description - Used when building an FSP driver
         <physicalOffset>0x2B7E000</physicalOffset>
         <physicalRegionSize>0x300000</physicalRegionSize>
         <side>sideless</side>
+        <sha512Version/>
         <ecc/>
     </section>
     <section>
