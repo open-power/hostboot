@@ -30,10 +30,10 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_0x0B = 0x0B;
-constexpr uint64_t literal_0x0 = 0x0;
-constexpr uint64_t literal_0xE00 = 0xE00;
-constexpr uint64_t literal_0x0000 = 0x0000;
-constexpr uint64_t literal_0b11 = 0b11;
+constexpr uint64_t literal_0xF = 0xF;
+constexpr uint64_t literal_0b111 = 0b111;
+constexpr uint64_t literal_0x6 = 0x6;
+constexpr uint64_t literal_0x7 = 0x7;
 
 fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& TGT0,
                                      const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT1)
@@ -62,7 +62,7 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
                 l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0x0B );
             }
 
-            l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0x0 );
+            l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0xF );
             constexpr auto l_PB_IOE_LL1_CONFIG_SL_UE_CRC_ERR_ON = 0x1;
             l_scom_buffer.insert<4, 1, 63, uint64_t>(l_PB_IOE_LL1_CONFIG_SL_UE_CRC_ERR_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x601180aull, l_scom_buffer));
@@ -70,11 +70,9 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x6011818ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0xE00 );
-            l_scom_buffer.insert<32, 16, 48, uint64_t>(literal_0x0000 );
-            l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x0 );
-            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0x0 );
+            l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0b111 );
+            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0xF );
+            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0x6 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x6011818ull, l_scom_buffer));
         }
         {
@@ -82,18 +80,16 @@ fapi2::ReturnCode p9_fbc_ioe_dl_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS
 
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<8, 2, 62, uint64_t>(literal_0b11 );
+                l_scom_buffer.insert<8, 2, 62, uint64_t>(literal_0b111 );
             }
             else if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21))
                      || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
             {
-                l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0b11 );
+                l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0b111 );
             }
 
-            l_scom_buffer.insert<32, 16, 48, uint64_t>(literal_0x0000 );
-            l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0x0 );
-            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0x0 );
+            l_scom_buffer.insert<4, 4, 60, uint64_t>(literal_0xF );
+            l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_0x7 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x6011819ull, l_scom_buffer));
         }
 
