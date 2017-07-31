@@ -179,10 +179,14 @@ const uint32_t VPD_CP00_PG_XBUS_PG_MASK     = 0x00170;
 const uint32_t VPD_CP00_PG_XBUS_IOX[3] = {0x0040, 0x0020, 0x0010};
 
 const uint32_t VPD_CP00_PG_MCxx_INDEX[4]    = {7, 7, 8, 8}; // by MCS
-// all good - 3:VITAL, 4:PRV, 5:MCA01, 6:IOM01+, 7:IOM23+, 14:PLLMEM
-// all good - 3:VITAL, 4:PRV, 5:MCA23, 6:IOM45+, 7:IOM67+, 14:PLLMEM
+// Nimbus:
+// all good - 3:VITAL, 4:PRV, 5:MC01, 6:IOM01+, 7:IOM23+, 14:PLLMEM
+// all good - 3:VITAL, 4:PRV, 5:MC23, 6:IOM45+, 7:IOM67+, 14:PLLMEM
+// Cumulus:
+// all good - 3:VITAL, 4:PRV, 5:MC01, 6:IOM01, 7:IOM01PPE, 14:PLLMEM
+// all good - 3:VITAL, 4:PRV, 5:MC23, 6:IOM23, 7:IOM23PPE, 14:PLLMEM
 const uint32_t VPD_CP00_PG_MCxx_GOOD        = 0xE0FD;
-const uint32_t VPD_CP00_PG_MCxx_PG_MASK     = 0x0300;
+const uint32_t VPD_CP00_PG_MCxx_PG_MASK     = 0x0300; // Nimbus only
 // iom0 and iom4 need to be good for zqcal to work on any
 // of the MCAs on that side
 const uint32_t VPD_CP00_PG_MCA_MAGIC_PORT_MASK = 0x0200;

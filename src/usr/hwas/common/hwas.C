@@ -350,7 +350,9 @@ errlHndl_t discoverTargets()
                     {
                         // look at the 'nest' logic to override the
                         //  functionality of this proc
-                        chipFunctional = isChipFunctional(pTarget, pgData);
+                        chipFunctional =
+                            isChipFunctional(pTarget,
+                                             pgData);
 
                         // Fill in a dummy restrict list
                         l_procEntry.target = pTarget;
@@ -386,7 +388,8 @@ errlHndl_t discoverTargets()
                 {   // if the chip is functional, then look through the
                     //  partialGood vector to see if its chiplets
                     //  are functional
-                    descFunctional = isDescFunctional(pDesc, pgData);
+                    descFunctional = isDescFunctional(pDesc,
+                                                      pgData);
                 }
 
                 if (pDesc->getAttr<ATTR_TYPE>() == TYPE_PERV)
@@ -631,10 +634,9 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         }
         else
         // Check PBIOO0 bit in N1 entry
-        // @TODO RTC:134608 PBIOO0 seems to be good with Nimbus and Cumulus
-        //                  except Nimbus Sforza (without optics and NVLINK)
-        //                  so is it associated with all OBUS entries or just
-        //                  with OBUS0 and OBUS3 -- verify this
+        // Rule 3 / Rule 4  PBIOO0 to be good with Nimbus and Cumulus except
+        //                  Nimbus Sforza (without optics and NVLINK), so is
+        //                  associated with all OBUS entries
         if ((i_pgData[VPD_CP00_PG_N1_INDEX] &
               VPD_CP00_PG_N1_PBIOO0) != 0)
         {
@@ -649,8 +651,8 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         }
         else
         // Check PBIOO1 bit in N1 entry if second or third OBUS
-        // @TODO RTC:134608 PBIOO1 seems to be associated with OBUS1 and OBUS2
-        //                  which only are valid on a Cumulus -- verify this
+        // Rule 4  PBIOO1 to be associated with OBUS1 and OBUS2 which only are
+        //         valid on a Cumulus
         if (((1 == indexOB) || (2 == indexOB)) &&
             ((i_pgData[VPD_CP00_PG_N1_INDEX] &
               VPD_CP00_PG_N1_PBIOO1) != 0))
@@ -819,7 +821,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             l_descFunctional = false;
         }
     }
-    else
+    else // MCBIST is found on Nimbus chips
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCBIST)
     {
         ATTR_CHIP_UNIT_type indexMCBIST =
@@ -886,7 +888,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
         }
 
     }
-    else
+    else // MCS is found on Nimbus chips
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCS)
     {
         ATTR_CHIP_UNIT_type indexMCS =
@@ -952,7 +954,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
             l_descFunctional = false;
         }
     }
-    else
+    else // MCA is found on Nimbus chips
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MCA)
     {
         ATTR_CHIP_UNIT_type indexMCA =
@@ -986,6 +988,80 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                      VPD_CP00_PG_MCA_MAGIC_PORT_MASK);
             l_descFunctional = false;
         }
+    }
+    else // MC/MI/DMI is found on Cumulus chips
+    if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_MC) ||
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI) ||
+        (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI))
+    {
+        ATTR_CHIP_UNIT_type index =
+            i_desc->getAttr<ATTR_CHIP_UNIT>();
+
+        // 2 MCs/chip, 2 MIs/MC, 2 DMIs/MI
+        size_t indexMC = 0;
+        size_t indexMI = 0;
+
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MC)
+        {
+            indexMC = index;
+            indexMI = index * 2;
+        }
+        else
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_MI)
+        {
+            indexMI = index;
+            indexMC = index / 2;
+        }
+        else
+        if (i_desc->getAttr<ATTR_TYPE>() == TYPE_DMI)
+        {
+            indexMI = index / 2;
+            indexMC = index / 4;
+        }
+
+        // Check MCS01 bit in N3 entry if first MC
+        if ((0 == indexMC) &&
+            ((i_pgData[VPD_CP00_PG_N3_INDEX] &
+              VPD_CP00_PG_N3_MCS01) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMC,
+                     VPD_CP00_PG_N3_INDEX,
+                     i_pgData[VPD_CP00_PG_N3_INDEX],
+                     (i_pgData[VPD_CP00_PG_N3_INDEX] &
+                      ~VPD_CP00_PG_N3_MCS01));
+            l_descFunctional = false;
+        }
+        else
+        // Check MCS23 bit in N1 entry if second MC
+        if ((1 == indexMC) &&
+            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+              VPD_CP00_PG_N1_MCS23) != 0))
+        {
+            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMC,
+                     VPD_CP00_PG_N1_INDEX,
+                     i_pgData[VPD_CP00_PG_N1_INDEX],
+                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                      ~VPD_CP00_PG_N1_MCS23));
+            l_descFunctional = false;
+        }
+        else
+        // Check bits in MCxx entry except those in partial good region
+        if (i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMI]] !=
+             VPD_CP00_PG_MCxx_GOOD)
+        {
+            HWAS_INF("pDesc %.8X - MC%d pgData[%d]: "
+                     "actual 0x%04X, expected 0x%04X - bad",
+                     i_desc->getAttr<ATTR_HUID>(), indexMC,
+                     VPD_CP00_PG_MCxx_INDEX[indexMI],
+                     i_pgData[VPD_CP00_PG_MCxx_INDEX[indexMI]],
+                     VPD_CP00_PG_MCxx_GOOD);
+            l_descFunctional = false;
+        }
+
     }
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS_BRICK)
@@ -2134,7 +2210,7 @@ void invokePresentByAssoc()
 #endif
 
     // get the functional membufs
-    // note: do not expect membufs for NIMBUS 
+    // note: do not expect membufs for NIMBUS
     TargetHandleList l_funcMembufTargetList;
     getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -2265,7 +2341,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
     size_t l_MIIndex = __INT_MAX__;
     size_t l_DMIIndex = __INT_MAX__;
     size_t l_MEMBUFIndex = __INT_MAX__;
-    size_t l_MBAIndex = __INT_MAX__;    
+    size_t l_MBAIndex = __INT_MAX__;
     size_t i = 0;
 
     // Perform presentByAssoc algorithm
@@ -2726,7 +2802,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 else if ( l_MEMBUFIndex != __INT_MAX__)
                 {
                     i = l_MEMBUFIndex;
-                }                
+                }
                 //Backtrack to last DMI (CUMULUS),if no MEMBUF has been seen yet
                 else if ( l_DMIIndex != __INT_MAX__ )
                 {
