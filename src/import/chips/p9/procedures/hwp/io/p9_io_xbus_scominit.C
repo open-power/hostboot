@@ -54,6 +54,7 @@
 #include <p9_io_xbus_scominit.H>
 #include <p9_xbus_g0_scom.H>
 #include <p9_xbus_g1_scom.H>
+#include <p9_xbus_scom_addresses.H>
 
 enum
 {
@@ -64,6 +65,9 @@ enum
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FIR_ACTION1 = 0xFFFFFFFFFFFF0000ULL;
+const uint64_t FIR_MASK    = 0xDF9797FFFFFFC000ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -213,6 +217,22 @@ fapi2::ReturnCode p9_io_xbus_scominit(
             }
 
             break;
+    }
+
+    // configure FIR
+    {
+        FAPI_TRY(fapi2::putScom(i_target,
+                                XBUS_FIR_ACTION0_REG,
+                                FIR_ACTION0),
+                 "Error from putScom (XBUS_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target,
+                                XBUS_FIR_ACTION1_REG,
+                                FIR_ACTION1),
+                 "Error from putScom (XBUS_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(i_target,
+                                XBUS_FIR_MASK_REG,
+                                FIR_MASK),
+                 "Error from putScom (XBUS_FIR_MASK_REG)");
     }
 
     // mark HWP exit
