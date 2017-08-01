@@ -2008,6 +2008,7 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     FAPI_DBG("WOF Length                :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length));
     FAPI_DBG("Core Assert Count         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt));
     FAPI_DBG("Core De - Assert Count    :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt));
+    FAPI_DBG("Auxiliary Control         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_aux_controls));
 
     FAPI_DBG("==============================PGPE Image Header End========================================")
 
@@ -3939,6 +3940,33 @@ fapi_try_exit:
 }
 
 //---------------------------------------------------------------------------
+/**
+ * @brief   Updates PGPE Image header with Auxiliary Controls.
+ * @param[in]   i_pHomer    points to HOMER.
+ * @return  fapi2 return code
+ */
+fapi2::ReturnCode buildPgpeAux( Homerlayout_t*     i_pHomer )
+{
+    FAPI_INF(">> buildPgpeAux");
+    PgpeHeader_t*  pPgpeHdr = (PgpeHeader_t*)&i_pHomer->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE];
+    uint8_t l_pgpeAuxFunc = 0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_AUX_FUNC_INVOCATION_TIME_MS,
+                             FAPI_SYSTEM,
+                             l_pgpeAuxFunc ),
+              "Error From FAPI_ATTR_GET For Attribute ATTR_AUX_FUNC_INVOCATION_TIME_MS" );
+
+    pPgpeHdr->g_pgpe_aux_controls = (l_pgpeAuxFunc << 24 );
+    pPgpeHdr->g_pgpe_aux_controls = SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_aux_controls);
+
+fapi_try_exit:
+    FAPI_INF("<< buildPgpeAux");
+    return fapi2::current_err;
+
+}
+
+//---------------------------------------------------------------------------
 
 /**
  * @brief customizes the magic words in various HOMER headers.
@@ -4069,7 +4097,7 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
               "Failed to build QPMR-SGPE region of HOMER" );
 
     FAPI_TRY( buildSgpeAux( i_procTgt, pChipHomer, l_qpmrHdr ),
-              "Failed to build Auxiliary section" );
+              "Failed to build auxiliary section in QPMR" );
 
     FAPI_INF("SGPE built");
 
@@ -4104,6 +4132,9 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     PpmrHeader_t l_ppmrHdr;
     FAPI_TRY( buildPgpeImage( i_pImageIn, pChipHomer, l_ppmrHdr, i_imgType, l_chipFuncModel ),
                   "Failed To Copy PGPE region in HOMER" );
+
+    FAPI_TRY( buildPgpeAux( pChipHomer ),
+              "Failed to build auxiliary function in PPMR" );
 
     //Update P State parameter block info in HOMER
     FAPI_TRY( buildParameterBlock( pChipHomer, i_procTgt, l_ppmrHdr, i_imgType, i_pBuf1, i_sizeBuf1 ),
