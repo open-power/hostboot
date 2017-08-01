@@ -459,20 +459,22 @@ else
     push @systemAttr, ['PROC_FABRIC_X_BUS_WIDTH', '4_BYTE'];
 }
 
-if( exists $reqPol->{'system_wof_disable'} )
-{
-    push @systemAttr, ['SYSTEM_WOF_DISABLE',
-        $reqPol->{'system_wof_disable'}];
-}
-elsif ( exists $reqPol->{'system_wof_enabled'} )
-{
-    push @systemAttr, ['SYSTEM_WOF_DISABLE',
-        !($reqPol->{'system_wof_enabled'})];
-}
-else
-{
+#TODO: RTC 177909 / SW397632 -- re-enable once OOM is fixed
+# on ZZ
+#if( exists $reqPol->{'system_wof_disable'} )
+#{
+#    push @systemAttr, ['SYSTEM_WOF_DISABLE',
+#        $reqPol->{'system_wof_disable'}];
+#}
+#elsif ( exists $reqPol->{'system_wof_enabled'} )
+#{
+#    push @systemAttr, ['SYSTEM_WOF_DISABLE',
+#        !($reqPol->{'system_wof_enabled'})];
+#}
+#else
+#{
     push @systemAttr, ['SYSTEM_WOF_DISABLE', 'ON' ];
-}
+#}
 
 # Note - if below attribute is specified with im-id, it will not get
 #  set into the output
