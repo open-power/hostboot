@@ -153,20 +153,20 @@
         <id>DMI_EREPAIR_THRESHOLD_MNFG</id>
         <default>0</default>
     </attribute>
-    
-    
-    
-    
+
+
+
+
     <attribute>
         <id>EXECUTION_PLATFORM</id>
         <default>1</default>
     </attribute>
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>k0</default>
@@ -191,7 +191,7 @@
         <id>FIELD_TH_P8EX_L3_LINE_DELETES</id>
         <default>6</default>
     </attribute>
-    
+
     <attribute>
         <id>FREQ_CORE_MAX</id>
         <default>4000</default>
@@ -202,8 +202,8 @@
     </attribute>
 
 
-    
-    
+
+
     <attribute>
         <id>FREQ_PROC_REFCLOCK</id>
         <default>133</default>
@@ -213,10 +213,10 @@
         <default>133333</default>
     </attribute>
 
-    
-    
-    
-    
+
+
+
+
     <attribute>
         <id>HB_SETTINGS</id>
         <default>
@@ -226,13 +226,11 @@
             <field><id>traceScanDebug</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>HUID</id>
         <default>0x00010000</default>
     </attribute>
-    
-    
 
 
 
@@ -240,21 +238,23 @@
 
 
 
-    
+
+
+
     <attribute>
         <id>IS_SIMULATION</id>
         <default>0</default>
     </attribute>
-    
-    
-    
-    
-    
-    
 
 
 
-    
+
+
+
+
+
+
+
     <attribute>
         <id>MAX_CHIPLETS_PER_PROC</id>
         <default>32</default>
@@ -283,17 +283,17 @@
         <id>MAX_PROC_CHIPS_PER_NODE</id>
         <default>4</default>
     </attribute>
-    
+
     <attribute>
         <id>MEM_MIRROR_PLACEMENT_POLICY</id>
         <default>0</default>
     </attribute>
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     <attribute>
         <id>MNFG_TH_CEN_L4_CACHE_CES</id>
         <default>2</default>
@@ -310,8 +310,8 @@
         <id>MNFG_TH_CEN_MBA_RT_SOFT_CE_TH_ALGO</id>
         <default>2</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>MNFG_TH_P8EX_L2_CACHE_CES</id>
         <default>1</default>
@@ -344,29 +344,23 @@
         <id>MNFG_TH_P8EX_L3_LINE_DELETES</id>
         <default>0</default>
     </attribute>
-    
-    
-    <attribute>
-        <id>MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id>
-        <default>false</default>
-    </attribute>
-    <attribute>
-        <id>MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id>
-        <default>true</default>
-    </attribute>
+
+
+
+
     <attribute>
         <id>MRW_DDR3_VDDR_MAX_LIMIT</id>
         <default>1425</default>
     </attribute>
-    
+
     <attribute>
         <id>MRW_DDR4_VDDR_MAX_LIMIT</id>
         <default>1260</default>
     </attribute>
-    
-    
-    
-    
+
+
+
+
 
 
 
@@ -374,18 +368,9 @@
         <id>MRW_MEM_THROTTLE_DENOMINATOR</id>
         <default>512</default>
     </attribute>
-    <attribute>
-        <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
-        <default>32</default>
-    </attribute>
-    <attribute>
-        <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id>
-        <default>96</default>
-    </attribute>
-    <attribute>
-        <id>MRW_STRICT_MBA_PLUG_RULE_CHECKING</id>
-        <default>true</default>
-    </attribute>
+
+
+
 
     <attribute>
         <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3</id>
@@ -395,17 +380,14 @@
         <id>MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
         <default>3449</default>
     </attribute>
-    
 
-    <attribute>
-        <id>MSS_DRAMINIT_RESET_DISABLE</id>
-        <default>0</default>
-    </attribute>
+
+
     <attribute>
         <id>MSS_INTERLEAVE_ENABLE</id>
         <default>0x06</default>
     </attribute>
-    
+
     <attribute>
         <id>MSS_MBA_ADDR_INTERLEAVE_BIT</id>
         <default>24</default>
@@ -414,62 +396,56 @@
         <id>MSS_MBA_CACHELINE_INTERLEAVE_MODE</id>
         <default>2</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>MSS_VOLT_DDR3_VDDR_INTERCEPT</id>
         <default>1425</default>
     </attribute>
-    
+
     <attribute>
         <id>MSS_VOLT_DDR3_VDDR_SLOPE</id>
         <default>1375</default>
     </attribute>
-    
+
     <attribute>
         <id>MSS_VOLT_DDR4_VDDR_INTERCEPT</id>
         <default>1225</default>
     </attribute>
-    
+
     <attribute>
         <id>MSS_VOLT_DDR4_VDDR_SLOPE</id>
         <default>425</default>
     </attribute>
-    
-    
-    
-    
-    
-    
 
 
 
@@ -495,15 +471,18 @@
 
 
 
-    <attribute>
-        <id>OPT_MEMMAP_GROUP_POLICY</id>
-        <default>1</default>
-    </attribute>
+
+
+
+
+
+
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-    
+
     <attribute>
         <id>PAYLOAD_KIND</id>
         <default>NONE</default>
@@ -515,17 +494,17 @@
         <id>PCI_REFCLOCK_RCVR_TERM</id>
         <default>0x0</default>
     </attribute>
-    
-    
-    
-    
-    
+
+
+
+
+
 
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0</default>
     </attribute>
-    
+
     <attribute>
         <id>PM_RESONANT_CLOCK_FULL_CLOCK_SECTOR_BUFFER_FREQUENCY</id>
         <default>0x1e8480</default>
@@ -550,8 +529,8 @@
         <id>PM_SAFE_FREQUENCY</id>
         <default>2028</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>PM_SPIVID_FREQUENCY</id>
         <default>0x0</default>
@@ -560,7 +539,7 @@
         <id>PM_SYSTEM_IVRM_VPD_MIN_LEVEL</id>
         <default>0x00</default>
     </attribute>
-    
+
     <attribute>
         <id>PRIMARY_CAPABILITIES</id>
         <default>
@@ -574,50 +553,50 @@
         <id>PROC_EPS_TABLE_TYPE</id>
         <default>1</default>
     </attribute>
-    
-    
-    
+
+
+
     <attribute>
         <id>PROC_FABRIC_PUMP_MODE</id>
         <default>1</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>PROC_REFCLOCK_RCVR_TERM</id>
         <default>0x0</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>REDUNDANT_CLOCKS</id>
         <default>1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
     </attribute>
-    
-    
-    
-    
-    
+
+
+
+
+
     <attribute>
         <id>SP_FUNCTIONS</id>
         <default>
@@ -630,28 +609,28 @@
             <field><id>reserved</id><value/></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
 
 
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>TYPE</id>
         <default>SYS</default>
     </attribute>
-    
-    
-    
-    
-    
+
+
+
+
+
     <attribute>
         <id>X_EREPAIR_THRESHOLD_FIELD</id>
         <default>1</default>
@@ -705,13 +684,13 @@
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>HUID</id>
         <default>0x00020000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000009</default>
@@ -746,7 +725,7 @@
         <id>TYPE</id>
         <default>NODE</default>
     </attribute>
-    
+
 </targetInstance>
 
 <!-- System node 0 -->
@@ -765,21 +744,18 @@
         <id>ALTFSI_MASTER_PORT</id>
         <default>0xFF</default>
     </attribute>
-    
+
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    <attribute>
-        <id>CHIP_HAS_SBE</id>
-        <default>1</default>
-    </attribute>
+
     <attribute>
         <id>CLASS</id>
         <default>CHIP</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>CPU_ATTR</id>
         <default>0x0000001D</default>
@@ -804,8 +780,8 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>EEPROM_SBE_BACKUP_INFO</id>
         <default>
@@ -862,8 +838,8 @@
             <field><id>writePageSize</id><value>0x80</value></field>
         </default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>FABRIC_CHIP_ID</id>
         <default>0</default>
@@ -880,11 +856,8 @@
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
-    
-    <attribute>
-        <id>FSI_GP_REG_SCOM_ACCESS</id>
-        <default>1</default>
-    </attribute>
+
+
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0</default>
@@ -908,7 +881,7 @@
         <id>FSI_SLAVE_CASCADE</id>
         <default>0</default>
     </attribute>
-    
+
     <attribute>
         <id>FSP_BASE_ADDR</id>
         <default>0x0006030100000000</default>
@@ -921,23 +894,23 @@
 
 
 
-    
+
     <attribute>
         <id>HUID</id>
         <default>0x00050000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>I2C_BUS_SPEED_ARRAY</id>
         <default>400,400,0,0,0,0,,,,,,,,400,400,400,400,,,,,,,,,,400,400,,,,,,,,,,,,,,,,,,,,,,,,</default>
     </attribute>
-    
+
     <attribute>
         <id>ICACHE_ASSOC_SETS</id>
         <default>8</default>
@@ -954,12 +927,12 @@
         <id>ICACHE_SIZE</id>
         <default>32</default>
     </attribute>
-    
-    
 
 
 
-    
+
+
+
     <attribute>
         <id>L2_CACHE_ASSOC_SETS</id>
         <default>8</default>
@@ -981,22 +954,19 @@
         <default>10240</default>
     </attribute>
 
-    
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x00010000</default>
     </attribute>
 
-    
-    
-    
-    
-    
-    
-    <attribute>
-        <id>NPU_MMIO_BAR_SIZE</id>
-        <default>0</default>
-    </attribute>
+
+
+
+
+
+
+
     <attribute>
         <id>NVIDIA_NPU_PRIVILEGED_ADDR</id>
         <default>0x0006030200000000</default>
@@ -1017,41 +987,41 @@
         <id>NX_RNG_ADDR</id>
         <default>0x00060302031d0000</default>
     </attribute>
-    
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>POSITION</id>
         <default>0</default>
@@ -1065,7 +1035,7 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>PROC_EFF_FABRIC_CHIP_ID</id>
         <default>0</default>
@@ -1074,37 +1044,25 @@
         <id>PROC_EFF_FABRIC_GROUP_ID</id>
         <default>0</default>
     </attribute>
-    
-    
 
-    
+
+
+
     <attribute>
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
-    
-    
-    
-    
 
-    <attribute>
-        <id>PROC_PCIE_NUM_IOP</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>24</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_PEC</id>
-        <default>3</default>
-    </attribute>
-    <attribute>
-        <id>PROC_PCIE_NUM_PHB</id>
-        <default>3</default>
-    </attribute>
-    
-    
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>PROC_R_DISTLOSS_VCS_UOHM</id>
         <default>0x640</default>
@@ -1129,7 +1087,7 @@
         <id>PROC_R_LOADLINE_VDN_UOHM</id>
         <default>0x1F4</default>
     </attribute>
-    
+
     <attribute>
         <id>PROC_VRM_VOFFSET_VCS_UV</id>
         <default>0x30D4</default>
@@ -1142,14 +1100,14 @@
         <id>PROC_VRM_VOFFSET_VDN_UV</id>
         <default>0x30D4</default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
     </attribute>
-    
 
-    
+
+
     <attribute>
         <id>SCOM_SWITCHES</id>
         <default>
@@ -1160,8 +1118,8 @@
             <field><id>useXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>TLB_DATA_ASSOC_SETS</id>
         <default>4</default>
@@ -1194,19 +1152,19 @@
         <id>VAS_USER_WINDOW_CONTEXT_ADDR</id>
         <default>0x0006013100000000</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
     <attribute>
         <id>VPD_REC_NUM</id>
         <default>0</default>
     </attribute>
-    
+
 </targetInstance>
 
 
@@ -1222,7 +1180,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -1247,8 +1205,8 @@
         <id>HUID</id>
         <default>0x00210000</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>MRU_ID</id>
@@ -1301,7 +1259,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -1326,8 +1284,8 @@
         <id>HUID</id>
         <default>0x00210001</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>MRU_ID</id>
@@ -1380,7 +1338,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -1405,7 +1363,7 @@
         <id>HUID</id>
         <default>0x00070000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1463,7 +1421,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -1488,7 +1446,7 @@
         <id>HUID</id>
         <default>0x00070001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1546,7 +1504,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -1571,7 +1529,7 @@
         <id>HUID</id>
         <default>0x00070002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1629,7 +1587,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -1654,7 +1612,7 @@
         <id>HUID</id>
         <default>0x00070003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1712,7 +1670,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -1737,7 +1695,7 @@
         <id>HUID</id>
         <default>0x00070004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1795,7 +1753,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -1820,7 +1778,7 @@
         <id>HUID</id>
         <default>0x00070005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1878,7 +1836,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -1903,7 +1861,7 @@
         <id>HUID</id>
         <default>0x00070006</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -1961,7 +1919,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -1986,7 +1944,7 @@
         <id>HUID</id>
         <default>0x00070007</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2044,7 +2002,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
@@ -2069,7 +2027,7 @@
         <id>HUID</id>
         <default>0x00070008</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2127,7 +2085,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
@@ -2152,7 +2110,7 @@
         <id>HUID</id>
         <default>0x00070009</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2210,7 +2168,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
@@ -2235,7 +2193,7 @@
         <id>HUID</id>
         <default>0x0007000A</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2293,7 +2251,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>11</default>
@@ -2318,7 +2276,7 @@
         <id>HUID</id>
         <default>0x0007000B</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2376,7 +2334,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>12</default>
@@ -2401,7 +2359,7 @@
         <id>HUID</id>
         <default>0x0007000C</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2459,7 +2417,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>13</default>
@@ -2484,7 +2442,7 @@
         <id>HUID</id>
         <default>0x0007000D</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2542,7 +2500,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>14</default>
@@ -2567,7 +2525,7 @@
         <id>HUID</id>
         <default>0x0007000E</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2625,7 +2583,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>15</default>
@@ -2650,7 +2608,7 @@
         <id>HUID</id>
         <default>0x0007000F</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2708,7 +2666,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>16</default>
@@ -2733,7 +2691,7 @@
         <id>HUID</id>
         <default>0x00070010</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2791,7 +2749,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>17</default>
@@ -2816,7 +2774,7 @@
         <id>HUID</id>
         <default>0x00070011</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2874,7 +2832,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>18</default>
@@ -2899,7 +2857,7 @@
         <id>HUID</id>
         <default>0x00070012</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -2957,7 +2915,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>19</default>
@@ -2982,7 +2940,7 @@
         <id>HUID</id>
         <default>0x00070013</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -3040,7 +2998,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>20</default>
@@ -3065,7 +3023,7 @@
         <id>HUID</id>
         <default>0x00070014</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -3123,7 +3081,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>21</default>
@@ -3148,7 +3106,7 @@
         <id>HUID</id>
         <default>0x00070015</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -3206,7 +3164,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>22</default>
@@ -3231,7 +3189,7 @@
         <id>HUID</id>
         <default>0x00070016</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -3289,7 +3247,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>23</default>
@@ -3314,7 +3272,7 @@
         <id>HUID</id>
         <default>0x00070017</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -3368,7 +3326,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -3400,10 +3358,10 @@
         <id>HUID</id>
         <default>0x00270000</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3447,7 +3405,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -3479,10 +3437,10 @@
         <id>HUID</id>
         <default>0x00270001</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3526,7 +3484,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/dmi-2</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -3558,10 +3516,10 @@
         <id>HUID</id>
         <default>0x00270002</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3605,7 +3563,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1/dmi-3</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -3637,10 +3595,10 @@
         <id>HUID</id>
         <default>0x00270003</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3684,7 +3642,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-2/dmi-4</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -3716,10 +3674,10 @@
         <id>HUID</id>
         <default>0x00270004</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3763,7 +3721,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-2/dmi-5</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -3795,10 +3753,10 @@
         <id>HUID</id>
         <default>0x00270005</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3842,7 +3800,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-3/dmi-6</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -3874,10 +3832,10 @@
         <id>HUID</id>
         <default>0x00270006</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -3921,7 +3879,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-3/dmi-7</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -3953,10 +3911,10 @@
         <id>HUID</id>
         <default>0x00270007</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4004,7 +3962,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -4029,7 +3987,7 @@
         <id>HUID</id>
         <default>0x00230000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4037,7 +3995,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4085,7 +4043,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -4110,13 +4068,13 @@
         <id>HUID</id>
         <default>0x00230001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4164,7 +4122,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -4189,13 +4147,13 @@
         <id>HUID</id>
         <default>0x00230002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4243,7 +4201,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -4268,13 +4226,13 @@
         <id>HUID</id>
         <default>0x00230003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4322,7 +4280,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -4347,13 +4305,13 @@
         <id>HUID</id>
         <default>0x00230004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4401,7 +4359,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -4426,13 +4384,13 @@
         <id>HUID</id>
         <default>0x00230005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -4480,7 +4438,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -4505,7 +4463,7 @@
         <id>HUID</id>
         <default>0x00060000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4558,7 +4516,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -4583,7 +4541,7 @@
         <id>HUID</id>
         <default>0x00060001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4636,7 +4594,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -4661,7 +4619,7 @@
         <id>HUID</id>
         <default>0x00060002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4714,7 +4672,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -4739,7 +4697,7 @@
         <id>HUID</id>
         <default>0x00060003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4792,7 +4750,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -4817,7 +4775,7 @@
         <id>HUID</id>
         <default>0x00060004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4870,7 +4828,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -4895,7 +4853,7 @@
         <id>HUID</id>
         <default>0x00060005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -4948,7 +4906,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -4973,7 +4931,7 @@
         <id>HUID</id>
         <default>0x00060006</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5026,7 +4984,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -5051,7 +5009,7 @@
         <id>HUID</id>
         <default>0x00060007</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5104,7 +5062,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
@@ -5129,7 +5087,7 @@
         <id>HUID</id>
         <default>0x00060008</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5182,7 +5140,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
@@ -5207,7 +5165,7 @@
         <id>HUID</id>
         <default>0x00060009</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5260,7 +5218,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
@@ -5285,7 +5243,7 @@
         <id>HUID</id>
         <default>0x0006000A</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5338,7 +5296,7 @@
         <id>CDM_DOMAIN</id>
         <default>CPU</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>11</default>
@@ -5363,7 +5321,7 @@
         <id>HUID</id>
         <default>0x0006000B</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -5412,7 +5370,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -5445,12 +5403,12 @@
         <id>HUID</id>
         <default>0x00450000</default>
     </attribute>
-    
-    
 
 
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5501,8 +5459,8 @@
         <id>ALTFSI_MASTER_PORT</id>
         <default>0xFF</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>MEM</default>
@@ -5511,10 +5469,7 @@
         <id>CENTAUR_ECID_FRU_ID</id>
         <default>0xFF</default>
     </attribute>
-    <attribute>
-        <id>CHIP_HAS_SBE</id>
-        <default>0</default>
-    </attribute>
+
     <attribute>
         <id>CLASS</id>
         <default>CHIP</default>
@@ -5523,22 +5478,19 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    
 
-    
+
+
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>0</default>
     </attribute>
 
-    
-    
-    
 
-    <attribute>
-        <id>FSI_GP_REG_SCOM_ACCESS</id>
-        <default>0</default>
-    </attribute>
+
+
+
+
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -5567,7 +5519,7 @@
         <id>HUID</id>
         <default>0x00040000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -5579,23 +5531,20 @@
 
 
 
-    
-    
+
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x00060000</default>
     </attribute>
-    <attribute>
-        <id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
-        <default>0x20304050</default>
-    </attribute>
 
-    
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-0</default>
     </attribute>
-    
+
     <attribute>
         <id>POSITION</id>
         <default>0</default>
@@ -5614,12 +5563,12 @@
         <default>0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>TYPE</id>
         <default>MEMBUF</default>
     </attribute>
-    
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0membuf0l40</id>
@@ -5629,7 +5578,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/l4-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -5642,21 +5591,21 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>HUID</id>
         <default>0x000A0000</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>MRU_ID</id>
         <default>0x020D0000</default>
     </attribute>
 
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-0/l4-0</default>
@@ -5670,7 +5619,7 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -5709,7 +5658,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -5728,13 +5677,13 @@
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -5744,16 +5693,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-0</default>
@@ -5771,7 +5714,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -5808,7 +5751,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -5827,13 +5770,13 @@
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -5843,16 +5786,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-1</default>
@@ -5870,7 +5807,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -5924,7 +5861,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -5943,13 +5880,13 @@
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -5959,16 +5896,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-2</default>
@@ -5986,7 +5917,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6023,7 +5954,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -6042,13 +5973,13 @@
         <id>FAPI_POS</id>
         <default>3</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6058,16 +5989,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-3</default>
@@ -6085,7 +6010,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6126,8 +6051,8 @@
         <id>ALTFSI_MASTER_PORT</id>
         <default>0xFF</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>CDM_DOMAIN</id>
         <default>MEM</default>
@@ -6136,10 +6061,7 @@
         <id>CENTAUR_ECID_FRU_ID</id>
         <default>0xFF</default>
     </attribute>
-    <attribute>
-        <id>CHIP_HAS_SBE</id>
-        <default>0</default>
-    </attribute>
+
     <attribute>
         <id>CLASS</id>
         <default>CHIP</default>
@@ -6148,22 +6070,19 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    
 
-    
+
+
     <attribute>
         <id>EI_BUS_TX_MSBSWAP</id>
         <default>0</default>
     </attribute>
 
-    
-    
-    
 
-    <attribute>
-        <id>FSI_GP_REG_SCOM_ACCESS</id>
-        <default>0</default>
-    </attribute>
+
+
+
+
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -6192,7 +6111,7 @@
         <id>HUID</id>
         <default>0x00040001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6204,23 +6123,20 @@
 
 
 
-    
-    
+
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x00060001</default>
     </attribute>
-    <attribute>
-        <id>MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
-        <default>0x20304050</default>
-    </attribute>
 
-    
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-1</default>
     </attribute>
-    
+
     <attribute>
         <id>POSITION</id>
         <default>1</default>
@@ -6239,12 +6155,12 @@
         <default>0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>TYPE</id>
         <default>MEMBUF</default>
     </attribute>
-    
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0membuf1l40</id>
@@ -6254,7 +6170,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/l4-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -6267,21 +6183,21 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    
-    
+
+
     <attribute>
         <id>HUID</id>
         <default>0x000A0001</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>MRU_ID</id>
         <default>0x020D0001</default>
     </attribute>
 
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/membuf-1/l4-0</default>
@@ -6295,7 +6211,7 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6334,7 +6250,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -6353,13 +6269,13 @@
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6369,16 +6285,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-4</default>
@@ -6396,7 +6306,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6433,7 +6343,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -6452,13 +6362,13 @@
         <id>FAPI_POS</id>
         <default>5</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6468,16 +6378,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-5</default>
@@ -6495,7 +6399,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6549,7 +6453,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -6568,13 +6472,13 @@
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030006</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6584,16 +6488,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-6</default>
@@ -6611,7 +6509,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6648,7 +6546,7 @@
         <id>CDM_DOMAIN</id>
         <default>DIMM</default>
     </attribute>
-    
+
     <attribute>
         <id>CLASS</id>
         <default>CARD</default>
@@ -6667,13 +6565,13 @@
         <id>FAPI_POS</id>
         <default>7</default>
     </attribute>
-    
+
 
     <attribute>
         <id>HUID</id>
         <default>0x00030007</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000003</default>
@@ -6683,16 +6581,10 @@
 
 
 
-    <attribute>
-        <id>MBA_DIMM</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>MBA_PORT</id>
-        <default>0</default>
-    </attribute>
 
-    
+
+
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/dimm-7</default>
@@ -6710,7 +6602,7 @@
             <field><id>supportsXscom</id><value/></field>
         </default>
     </attribute>
-    
+
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
@@ -6744,7 +6636,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -6777,12 +6669,12 @@
         <id>HUID</id>
         <default>0x00450001</default>
     </attribute>
-    
-    
 
 
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -6826,7 +6718,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -6851,10 +6743,10 @@
         <id>HUID</id>
         <default>0x00260000</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -6898,7 +6790,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -6923,10 +6815,10 @@
         <id>HUID</id>
         <default>0x00260001</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -6970,7 +6862,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-2</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -6995,10 +6887,10 @@
         <id>HUID</id>
         <default>0x00260002</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7042,7 +6934,7 @@
         <default>affinity:sys-0/node-0/proc-0/mc-1/mi-3</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -7067,10 +6959,10 @@
         <id>HUID</id>
         <default>0x00260003</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7114,7 +7006,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -7139,10 +7031,10 @@
         <id>HUID</id>
         <default>0x00290000</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7182,7 +7074,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -7207,10 +7099,10 @@
         <id>HUID</id>
         <default>0x00290001</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7250,7 +7142,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-2</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -7275,10 +7167,10 @@
         <id>HUID</id>
         <default>0x00290002</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7318,7 +7210,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-3</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -7343,10 +7235,10 @@
         <id>HUID</id>
         <default>0x00290003</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7386,7 +7278,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-4</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -7411,10 +7303,10 @@
         <id>HUID</id>
         <default>0x00290004</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7454,7 +7346,7 @@
         <default>affinity:sys-0/node-0/proc-0/nv-5</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -7479,10 +7371,10 @@
         <id>HUID</id>
         <default>0x00290005</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7526,7 +7418,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -7551,12 +7443,12 @@
         <id>HUID</id>
         <default>0x00280000</default>
     </attribute>
-    
-    
 
-    
 
-    
+
+
+
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
@@ -7565,7 +7457,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0</default>
@@ -7604,7 +7496,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -7629,12 +7521,12 @@
         <id>HUID</id>
         <default>0x00280001</default>
     </attribute>
-    
-    
 
-    
 
-    
+
+
+
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>1</default>
@@ -7643,7 +7535,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-10</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-1</default>
@@ -7682,7 +7574,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -7707,12 +7599,12 @@
         <id>HUID</id>
         <default>0x00280002</default>
     </attribute>
-    
-    
 
-    
 
-    
+
+
+
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>2</default>
@@ -7721,7 +7613,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-11</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-2</default>
@@ -7760,7 +7652,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -7785,12 +7677,12 @@
         <id>HUID</id>
         <default>0x00280003</default>
     </attribute>
-    
-    
 
-    
 
-    
+
+
+
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>3</default>
@@ -7799,7 +7691,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3</default>
@@ -7838,7 +7730,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -7864,23 +7756,20 @@
         <id>HUID</id>
         <default>0x00420000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
@@ -7889,7 +7778,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-0</default>
@@ -7928,7 +7817,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -7954,23 +7843,20 @@
         <id>HUID</id>
         <default>0x00420001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>1</default>
@@ -7979,7 +7865,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-1</default>
@@ -8018,7 +7904,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -8044,23 +7930,20 @@
         <id>HUID</id>
         <default>0x00420002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>2</default>
@@ -8069,7 +7952,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-0/obus_brick-2</default>
@@ -8108,7 +7991,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -8134,23 +8017,20 @@
         <id>HUID</id>
         <default>0x00420003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>3</default>
@@ -8159,7 +8039,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-10</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-1/obus_brick-0</default>
@@ -8198,7 +8078,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -8224,23 +8104,20 @@
         <id>HUID</id>
         <default>0x00420004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>4</default>
@@ -8249,7 +8126,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-10</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-1/obus_brick-1</default>
@@ -8288,7 +8165,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -8314,23 +8191,20 @@
         <id>HUID</id>
         <default>0x00420005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>5</default>
@@ -8339,7 +8213,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-10</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-1/obus_brick-2</default>
@@ -8378,7 +8252,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -8404,23 +8278,20 @@
         <id>HUID</id>
         <default>0x00420006</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>6</default>
@@ -8429,7 +8300,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-11</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-2/obus_brick-0</default>
@@ -8468,7 +8339,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -8494,23 +8365,20 @@
         <id>HUID</id>
         <default>0x00420007</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>7</default>
@@ -8519,7 +8387,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-11</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-2/obus_brick-1</default>
@@ -8558,7 +8426,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
@@ -8584,23 +8452,20 @@
         <id>HUID</id>
         <default>0x00420008</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>8</default>
@@ -8609,7 +8474,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-11</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-2/obus_brick-2</default>
@@ -8648,7 +8513,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
@@ -8674,23 +8539,20 @@
         <id>HUID</id>
         <default>0x00420009</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>9</default>
@@ -8699,7 +8561,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-0</default>
@@ -8738,7 +8600,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
@@ -8764,23 +8626,20 @@
         <id>HUID</id>
         <default>0x0042000A</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>10</default>
@@ -8789,7 +8648,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-1</default>
@@ -8828,7 +8687,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>11</default>
@@ -8854,23 +8713,20 @@
         <id>HUID</id>
         <default>0x0042000B</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
 
-    
+
+
     <attribute>
         <id>OBUS_SLOT_INDEX</id>
         <default>-1</default>
     </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>SMP</default>
-    </attribute>
+
     <attribute>
         <id>ORDINAL_ID</id>
         <default>11</default>
@@ -8879,7 +8735,7 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
-    
+
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/obus-3/obus_brick-2</default>
@@ -8914,7 +8770,7 @@
         <default>affinity:sys-0/node-0/proc-0/occ-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -8939,8 +8795,8 @@
         <id>HUID</id>
         <default>0x00130000</default>
     </attribute>
-    
-    
+
+
 
 
     <attribute>
@@ -8995,7 +8851,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -9020,12 +8876,12 @@
         <id>HUID</id>
         <default>0x002D0000</default>
     </attribute>
-    
-    
 
 
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9035,15 +8891,15 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
-    
-    
-    
-    
+
+
+
+
     <attribute>
         <id>PEC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
         <default>0</default>
     </attribute>
-    
+
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>,0x0000,0x0000,0x0000</default>
@@ -9073,28 +8929,28 @@
         <id>PROC_PCIE_LANE_MASK</id>
         <default>,0x0000,0x0000,0x0000</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
@@ -9120,7 +8976,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -9145,12 +9001,12 @@
         <id>HUID</id>
         <default>0x002D0001</default>
     </attribute>
-    
-    
 
 
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9160,15 +9016,15 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
-    
-    
-    
-    
+
+
+
+
     <attribute>
         <id>PEC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
         <default>0</default>
     </attribute>
-    
+
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>,0x0000,0x0000,0x0000</default>
@@ -9198,28 +9054,28 @@
         <id>PROC_PCIE_LANE_MASK</id>
         <default>,0x0000,0x0000,0x0000</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
@@ -9245,7 +9101,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -9270,10 +9126,10 @@
         <id>HUID</id>
         <default>0x002D0002</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9283,15 +9139,15 @@
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
-    
-    
-    
-    
+
+
+
+
     <attribute>
         <id>PEC_PCIE_IOP_SWAP_NON_BIFURCATED</id>
         <default>0</default>
     </attribute>
-    
+
     <attribute>
         <id>PEC_PCIE_LANE_MASK_NON_BIFURCATED</id>
         <default>,0x0000,0x0000,0x0000</default>
@@ -9321,28 +9177,28 @@
         <id>PROC_PCIE_LANE_MASK</id>
         <default>,0x0000,0x0000,0x0000</default>
     </attribute>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>2</default>
@@ -9364,7 +9220,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -9389,10 +9245,10 @@
         <id>HUID</id>
         <default>0x002C0001</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9432,7 +9288,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-2</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -9457,10 +9313,10 @@
         <id>HUID</id>
         <default>0x002C0002</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9500,7 +9356,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-3</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -9525,10 +9381,10 @@
         <id>HUID</id>
         <default>0x002C0003</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9568,7 +9424,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-4</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -9593,10 +9449,10 @@
         <id>HUID</id>
         <default>0x002C0004</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9636,7 +9492,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-5</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -9661,10 +9517,10 @@
         <id>HUID</id>
         <default>0x002C0005</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9704,7 +9560,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-6</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>6</default>
@@ -9729,10 +9585,10 @@
         <id>HUID</id>
         <default>0x002C0006</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9772,7 +9628,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-7</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>7</default>
@@ -9797,10 +9653,10 @@
         <id>HUID</id>
         <default>0x002C0007</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9840,7 +9696,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-8</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>8</default>
@@ -9865,10 +9721,10 @@
         <id>HUID</id>
         <default>0x002C0008</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9908,7 +9764,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-9</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
@@ -9933,10 +9789,10 @@
         <id>HUID</id>
         <default>0x002C0009</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -9976,7 +9832,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-12</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>12</default>
@@ -10001,10 +9857,10 @@
         <id>HUID</id>
         <default>0x002C000C</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10044,7 +9900,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-13</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>13</default>
@@ -10069,10 +9925,10 @@
         <id>HUID</id>
         <default>0x002C000D</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10112,7 +9968,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-14</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>14</default>
@@ -10137,10 +9993,10 @@
         <id>HUID</id>
         <default>0x002C000E</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10180,7 +10036,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-15</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>15</default>
@@ -10205,10 +10061,10 @@
         <id>HUID</id>
         <default>0x002C000F</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10248,7 +10104,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-16</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>16</default>
@@ -10273,10 +10129,10 @@
         <id>HUID</id>
         <default>0x002C0010</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10316,7 +10172,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>17</default>
@@ -10341,10 +10197,10 @@
         <id>HUID</id>
         <default>0x002C0011</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10384,7 +10240,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-18</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>18</default>
@@ -10409,10 +10265,10 @@
         <id>HUID</id>
         <default>0x002C0012</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10452,7 +10308,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-19</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>19</default>
@@ -10477,10 +10333,10 @@
         <id>HUID</id>
         <default>0x002C0013</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10520,7 +10376,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-20</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>20</default>
@@ -10545,10 +10401,10 @@
         <id>HUID</id>
         <default>0x002C0014</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10588,7 +10444,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-21</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>21</default>
@@ -10613,10 +10469,10 @@
         <id>HUID</id>
         <default>0x002C0015</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10656,7 +10512,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-32</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>32</default>
@@ -10681,10 +10537,10 @@
         <id>HUID</id>
         <default>0x002C0020</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10724,7 +10580,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-33</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>33</default>
@@ -10749,10 +10605,10 @@
         <id>HUID</id>
         <default>0x002C0021</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10792,7 +10648,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-34</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>34</default>
@@ -10817,10 +10673,10 @@
         <id>HUID</id>
         <default>0x002C0022</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10860,7 +10716,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-35</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>35</default>
@@ -10885,10 +10741,10 @@
         <id>HUID</id>
         <default>0x002C0023</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10928,7 +10784,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-36</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>36</default>
@@ -10953,10 +10809,10 @@
         <id>HUID</id>
         <default>0x002C0024</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -10996,7 +10852,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-37</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>37</default>
@@ -11021,10 +10877,10 @@
         <id>HUID</id>
         <default>0x002C0025</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11064,7 +10920,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-38</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>38</default>
@@ -11089,10 +10945,10 @@
         <id>HUID</id>
         <default>0x002C0026</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11132,7 +10988,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-39</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>39</default>
@@ -11157,10 +11013,10 @@
         <id>HUID</id>
         <default>0x002C0027</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11200,7 +11056,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-40</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>40</default>
@@ -11225,10 +11081,10 @@
         <id>HUID</id>
         <default>0x002C0028</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11268,7 +11124,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-41</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>41</default>
@@ -11293,10 +11149,10 @@
         <id>HUID</id>
         <default>0x002C0029</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11336,7 +11192,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-42</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>42</default>
@@ -11361,10 +11217,10 @@
         <id>HUID</id>
         <default>0x002C002A</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11404,7 +11260,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-43</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>43</default>
@@ -11429,10 +11285,10 @@
         <id>HUID</id>
         <default>0x002C002B</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11472,7 +11328,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-44</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>44</default>
@@ -11497,10 +11353,10 @@
         <id>HUID</id>
         <default>0x002C002C</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11540,7 +11396,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-45</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>45</default>
@@ -11565,10 +11421,10 @@
         <id>HUID</id>
         <default>0x002C002D</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11608,7 +11464,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-46</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>46</default>
@@ -11633,10 +11489,10 @@
         <id>HUID</id>
         <default>0x002C002E</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11676,7 +11532,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-47</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>47</default>
@@ -11701,10 +11557,10 @@
         <id>HUID</id>
         <default>0x002C002F</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11744,7 +11600,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-48</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>48</default>
@@ -11769,10 +11625,10 @@
         <id>HUID</id>
         <default>0x002C0030</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11812,7 +11668,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-49</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>49</default>
@@ -11837,10 +11693,10 @@
         <id>HUID</id>
         <default>0x002C0031</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11880,7 +11736,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-50</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>50</default>
@@ -11905,10 +11761,10 @@
         <id>HUID</id>
         <default>0x002C0032</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -11948,7 +11804,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-51</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>51</default>
@@ -11973,10 +11829,10 @@
         <id>HUID</id>
         <default>0x002C0033</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12016,7 +11872,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-52</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>52</default>
@@ -12041,10 +11897,10 @@
         <id>HUID</id>
         <default>0x002C0034</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12084,7 +11940,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-53</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>53</default>
@@ -12109,10 +11965,10 @@
         <id>HUID</id>
         <default>0x002C0035</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12152,7 +12008,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-54</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>54</default>
@@ -12177,10 +12033,10 @@
         <id>HUID</id>
         <default>0x002C0036</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12220,7 +12076,7 @@
         <default>affinity:sys-0/node-0/proc-0/perv-55</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>55</default>
@@ -12245,10 +12101,10 @@
         <id>HUID</id>
         <default>0x002C0037</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12292,7 +12148,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -12305,10 +12161,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c0</default>
@@ -12321,7 +12174,7 @@
         <id>HUID</id>
         <default>0x002E0000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12329,7 +12182,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12352,15 +12205,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>0</default>
@@ -12375,10 +12225,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0pec1phb1</id>
@@ -12392,7 +12239,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -12405,10 +12252,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c1</default>
@@ -12421,7 +12265,7 @@
         <id>HUID</id>
         <default>0x002E0001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12429,7 +12273,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12452,15 +12296,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>1</default>
@@ -12475,10 +12316,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0pec1phb2</id>
@@ -12492,7 +12330,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -12505,10 +12343,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c2</default>
@@ -12521,7 +12356,7 @@
         <id>HUID</id>
         <default>0x002E0002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12529,7 +12364,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12552,15 +12387,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>2</default>
@@ -12575,10 +12407,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0pec2phb3</id>
@@ -12592,7 +12421,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>3</default>
@@ -12605,10 +12434,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c3</default>
@@ -12621,7 +12447,7 @@
         <id>HUID</id>
         <default>0x002E0003</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12629,7 +12455,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12652,15 +12478,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>3</default>
@@ -12675,10 +12498,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0pec2phb4</id>
@@ -12692,7 +12512,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>4</default>
@@ -12705,10 +12525,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c4</default>
@@ -12721,7 +12538,7 @@
         <id>HUID</id>
         <default>0x002E0004</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12729,7 +12546,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12752,15 +12569,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>4</default>
@@ -12775,10 +12589,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0pec2phb5</id>
@@ -12792,7 +12603,7 @@
         <id>CDM_DOMAIN</id>
         <default>IO</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>5</default>
@@ -12805,10 +12616,7 @@
         <id>DECONFIG_GARDABLE</id>
         <default>1</default>
     </attribute>
-    <attribute>
-        <id>DEVICE_ID</id>
-        <default>0x34C1</default>
-    </attribute>
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.phb:k0:n0:s0:p00:c5</default>
@@ -12821,7 +12629,7 @@
         <id>HUID</id>
         <default>0x002E0005</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
@@ -12829,7 +12637,7 @@
 
 
 
-    
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12852,15 +12660,12 @@
             <field><id>supportsXscom</id><value>1</value></field>
         </default>
     </attribute>
-    
-    
-    
-    
-    
-    <attribute>
-        <id>PROC_PCIE_NUM_LANES</id>
-        <default>32</default>
-    </attribute>
+
+
+
+
+
+
     <attribute>
         <id>REL_POS</id>
         <default>5</default>
@@ -12875,10 +12680,7 @@
         <id>TYPE</id>
         <default>PHB</default>
     </attribute>
-    <attribute>
-        <id>VENDOR_ID</id>
-        <default>0x1014</default>
-    </attribute>
+
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc0ppe0</id>
@@ -12888,7 +12690,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -12913,10 +12715,10 @@
         <id>HUID</id>
         <default>0x002B0000</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -12956,7 +12758,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-10</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
@@ -12981,10 +12783,10 @@
         <id>HUID</id>
         <default>0x002B000A</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13024,7 +12826,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-11</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>11</default>
@@ -13049,10 +12851,10 @@
         <id>HUID</id>
         <default>0x002B000B</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13092,7 +12894,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-12</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>12</default>
@@ -13117,10 +12919,10 @@
         <id>HUID</id>
         <default>0x002B000C</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13160,7 +12962,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-13</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>13</default>
@@ -13185,10 +12987,10 @@
         <id>HUID</id>
         <default>0x002B000D</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13228,7 +13030,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-20</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>20</default>
@@ -13253,10 +13055,10 @@
         <id>HUID</id>
         <default>0x002B0014</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13296,7 +13098,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-21</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>21</default>
@@ -13321,10 +13123,10 @@
         <id>HUID</id>
         <default>0x002B0015</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13364,7 +13166,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-22</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>22</default>
@@ -13389,10 +13191,10 @@
         <id>HUID</id>
         <default>0x002B0016</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13432,7 +13234,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-23</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>23</default>
@@ -13457,10 +13259,10 @@
         <id>HUID</id>
         <default>0x002B0017</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13500,7 +13302,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-24</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>24</default>
@@ -13525,10 +13327,10 @@
         <id>HUID</id>
         <default>0x002B0018</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13568,7 +13370,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-25</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>25</default>
@@ -13593,10 +13395,10 @@
         <id>HUID</id>
         <default>0x002B0019</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13636,7 +13438,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-30</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>30</default>
@@ -13661,10 +13463,10 @@
         <id>HUID</id>
         <default>0x002B001E</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13704,7 +13506,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-31</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>31</default>
@@ -13729,10 +13531,10 @@
         <id>HUID</id>
         <default>0x002B001F</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13772,7 +13574,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-32</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>32</default>
@@ -13797,10 +13599,10 @@
         <id>HUID</id>
         <default>0x002B0020</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13840,7 +13642,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-33</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>33</default>
@@ -13865,10 +13667,10 @@
         <id>HUID</id>
         <default>0x002B0021</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13908,7 +13710,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-34</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>34</default>
@@ -13933,10 +13735,10 @@
         <id>HUID</id>
         <default>0x002B0022</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -13976,7 +13778,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-35</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>35</default>
@@ -14001,10 +13803,10 @@
         <id>HUID</id>
         <default>0x002B0023</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14044,7 +13846,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-40</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>40</default>
@@ -14069,10 +13871,10 @@
         <id>HUID</id>
         <default>0x002B0028</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14112,7 +13914,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-41</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>41</default>
@@ -14137,10 +13939,10 @@
         <id>HUID</id>
         <default>0x002B0029</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14180,7 +13982,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-42</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>42</default>
@@ -14205,10 +14007,10 @@
         <id>HUID</id>
         <default>0x002B002A</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14248,7 +14050,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-43</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>43</default>
@@ -14273,10 +14075,10 @@
         <id>HUID</id>
         <default>0x002B002B</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14316,7 +14118,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-45</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>45</default>
@@ -14341,10 +14143,10 @@
         <id>HUID</id>
         <default>0x002B002D</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14384,7 +14186,7 @@
         <default>affinity:sys-0/node-0/proc-0/ppe-50</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>50</default>
@@ -14409,10 +14211,10 @@
         <id>HUID</id>
         <default>0x002B0032</default>
     </attribute>
-    
-    
 
-    
+
+
+
 
     <attribute>
         <id>ORDINAL_ID</id>
@@ -14452,7 +14254,7 @@
         <default>affinity:sys-0/node-0/proc-0/sbe-0</default>
     </attribute>
 
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -14477,8 +14279,8 @@
         <id>HUID</id>
         <default>0x002A0000</default>
     </attribute>
-    
-    
+
+
 
     <attribute>
         <id>MRU_ID</id>
@@ -14527,7 +14329,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>0</default>
@@ -14541,7 +14343,7 @@
         <default>1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.xbus:k0:n0:s0:p00:c0</default>
@@ -14554,14 +14356,14 @@
         <id>HUID</id>
         <default>0x000E0000</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
-    
+
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x03020000</default>
@@ -14617,7 +14419,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
@@ -14631,7 +14433,7 @@
         <default>1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.xbus:k0:n0:s0:p00:c1</default>
@@ -14644,14 +14446,14 @@
         <id>HUID</id>
         <default>0x000E0001</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
-    
+
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x03020001</default>
@@ -14707,7 +14509,7 @@
         <id>CDM_DOMAIN</id>
         <default>FABRIC</default>
     </attribute>
-    
+
     <attribute>
         <id>CHIP_UNIT</id>
         <default>2</default>
@@ -14721,7 +14523,7 @@
         <default>1</default>
     </attribute>
 
-    
+
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.xbus:k0:n0:s0:p00:c2</default>
@@ -14734,14 +14536,14 @@
         <id>HUID</id>
         <default>0x000E0002</default>
     </attribute>
-    
+
     <attribute>
         <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
         <default>0x00000001</default>
     </attribute>
 
-    
-    
+
+
     <attribute>
         <id>MRU_ID</id>
         <default>0x03020002</default>
