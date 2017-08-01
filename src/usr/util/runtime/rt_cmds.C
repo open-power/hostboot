@@ -34,9 +34,10 @@
 #include <targeting/common/iterators/rangefilter.H>
 #include <pnor/pnorif.H>
 #include <devicefw/userif.H>
+#include <devicefw/driverif.H>
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
-
+#include <vector>
 
 namespace Util
 {
@@ -182,6 +183,304 @@ void cmd_getattr( char*& o_output,
         o_output[l_len1+i_size*2+2] = '\0';
     }
 }
+
+
+/**
+ * @brief Read or write data out/into SPD, MVPD or PVPD
+ * @param[out] o_output  Output display buffer, memory allocated here
+ * @param[in] i_rtCmd  write or read data flag
+ * @param[in] i_huid  HUID associated with Target to read/write to/from
+ * @param[in] i_keyword keyword to be used for SPD, MVPD or PVPD
+ * @param[in] i_record  record to be used for MVPD or PVPD
+ * @param[in] i_data The data supplied for a write or returned from a read
+ */
+void cmd_readwritevpd(char*& o_output, DeviceFW::OperationType i_rtCmd,
+                      uint32_t i_huid, uint64_t i_keyword,
+                      uint64_t i_record = 0, uint64_t i_data = 0)
+{
+    UTIL_FT( "cmd_readwritevpd> rtcmd=%s, huid=%.8X, "
+             "keyword=%lx, record=%lx, data=%lx",
+             (i_rtCmd == DeviceFW::OperationType::READ ? "read" : "write"),
+              i_huid, i_keyword, i_record, i_data);
+
+    o_output = new char[100];   // info for user to consume
+    char o_readWriteCmd[20];    // repeat the command the user requested
+    bool l_isSpd(false);        // are we doing SPD command
+    size_t l_size(0);           // size of the date from/to device read/write
+    errlHndl_t l_errhdl(nullptr); // handle to capture errors
+
+    do
+    {
+        // get the target, if it exists from user supplied HUID
+        TARGETING::Target* l_target = getTargetFromHUID(i_huid);
+        if (nullptr == l_target)
+        {
+           sprintf( o_output, "HUID %.8X not found", i_huid );
+           break;
+        }
+
+       // get the TYPE of the HUID (we are looking for DIMM, PROC and NODE)
+       TARGETING::AttributeTraits<TARGETING::ATTR_TYPE>::Type l_targetType;
+       if (!l_target->tryGetAttr<TARGETING::ATTR_TYPE>(l_targetType))
+       {
+           sprintf( o_output, "No TARGETING::ATTR_TYPE associated "
+                              "with HUID %.8X", i_huid );
+           break;
+       }
+
+       // vector to hold data that will be returned/sent to device read/write
+       std::vector<uint64_t> l_dataVec;
+
+       if (DeviceFW::OperationType::READ == i_rtCmd)   // reading data from vpd
+       {
+          if (TARGETING::TYPE_DIMM == l_targetType)  // SPD
+          {
+              sprintf( o_readWriteCmd, "read SPD");
+              l_isSpd = true;
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                    DEVICE_SPD_ADDRESS(i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // read in the data
+              l_errhdl = deviceRead(l_target, &l_dataVec.front(), l_size,
+                                    DEVICE_SPD_ADDRESS(i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else if (TARGETING::TYPE_PROC == l_targetType)  // MVPD
+          {
+              sprintf( o_readWriteCmd, "read MVPD");
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                    DEVICE_MVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // read in the data
+              l_errhdl = deviceRead(l_target, &l_dataVec.front(), l_size,
+                                    DEVICE_MVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else if (TARGETING::TYPE_NODE == l_targetType)  // PVPD
+          {
+              sprintf( o_readWriteCmd, "read PVPD");
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                    DEVICE_PVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // read in the data
+              l_errhdl = deviceRead(l_target, &l_dataVec.front(), l_size,
+                                    DEVICE_PVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else
+          {
+              sprintf( o_output, "cmd_readvpd> VPD %.8X is currently not"
+                        " supported for HUID %.8x", l_targetType, i_huid);
+              break;
+          }
+       }
+       else   // writing data to vpd
+       {
+          if (TARGETING::TYPE_DIMM == l_targetType)  // SPD
+          {
+              sprintf( o_readWriteCmd, "write SPD");
+              l_isSpd = true;
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                    DEVICE_SPD_ADDRESS(i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // populate buffer with user data, repeat user data
+              // if necessary to fill buffer
+              for (size_t i = 0; i < l_dataVec.size(); ++i)
+              {
+                 l_dataVec[i] = i_data;
+              }
+
+              // write the data to the VPD
+              l_errhdl = deviceWrite(l_target, &l_dataVec.front(), l_size,
+                                     DEVICE_SPD_ADDRESS(i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else if (TARGETING::TYPE_PROC == l_targetType)  // MVPD
+          {
+              sprintf( o_readWriteCmd, "write MVPD");
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                    DEVICE_MVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // populate buffer with user data, repeat user data
+              // if necessary to fill buffer
+              for (size_t i = 0; i < l_dataVec.size(); ++i)
+              {
+                 l_dataVec[i] = i_data;
+              }
+
+              l_errhdl = deviceWrite(l_target, &l_dataVec.front(), l_size,
+                                    DEVICE_MVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else if (TARGETING::TYPE_NODE == l_targetType)  // PVPD
+          {
+              sprintf( o_readWriteCmd, "write PVPD");
+
+              // first get size of data with NULL call
+              l_errhdl = deviceRead(l_target, NULL, l_size,
+                                     DEVICE_PVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+
+              // resize buffer to hold data, +1 to get "trailing bytes"
+              l_dataVec.resize(l_size/sizeof(uint64_t) + 1);
+
+              // populate buffer with user data, repeat user data
+              // if necessary to fill buffer
+              for (size_t i = 0; i < l_dataVec.size(); ++i)
+              {
+                 l_dataVec[i] = i_data;
+              }
+
+              l_errhdl = deviceWrite(l_target, &l_dataVec.front(), l_size,
+                                     DEVICE_PVPD_ADDRESS(i_record, i_keyword));
+              if (l_errhdl)
+              {
+                  break;
+              }
+          }
+          else
+          {
+              sprintf( o_output, "cmd_writevpd> VPD %.8X is currently not"
+                        " supported for HUID %.8x", l_targetType, i_huid);
+              break;
+          }
+       }
+
+       // resize o_output to hold the extra data from the device read/writes
+       delete o_output;
+       size_t l_newOutputSize = 100 +
+                 (l_dataVec.size() * sizeof(uint64_t) * 2) + l_dataVec.size();
+       o_output = new char[l_newOutputSize];
+
+       if (l_isSpd)
+       {
+           // write out results for SPD
+           sprintf( o_output, "%s - HUID=%.8X Keyword=%.8X %.8X, Data=",
+                    &o_readWriteCmd,
+                    i_huid,
+                    (uint32_t)(i_keyword>>32), (uint32_t)i_keyword);
+       }
+       else
+       {
+           // write out results for MVPD or PVPD
+           sprintf( o_output, "%s - HUID=%.8X Record=%.8X %.8X, "
+                              "Keyword=%.8X %.8X, Data=",
+                    &o_readWriteCmd,
+                    i_huid,
+                    (uint32_t)(i_record>>32), (uint32_t)i_record,
+                    (uint32_t)(i_keyword>>32), (uint32_t)i_keyword);
+       }
+
+       // write out the data from the device read/write
+       // first get the data that is a multiple of 8
+       size_t l_len(strlen(o_output));
+       uint64_t l_tempValue(0);
+
+       size_t i(0);
+       for (; i < l_dataVec.size() -1; ++i )
+       {
+           l_tempValue = l_dataVec[i];
+           sprintf(&o_output[l_len],"\n%.8X ",(uint32_t)(l_tempValue>>32));
+           l_len = strlen(o_output);
+
+           sprintf(&o_output[l_len],"%.8X",(uint32_t)(l_tempValue));
+           l_len = strlen(o_output);
+       }
+
+       // write out the rest of the date that is not a multiple of 8
+       uint8_t* l_lastBytes = (uint8_t*)(&(l_dataVec[i]));
+       size_t l_numLastBytes = l_size % sizeof(uint64_t);
+
+       if (l_numLastBytes)
+       {
+           sprintf(&o_output[l_len],"\n");
+           l_len = strlen(o_output);
+
+           for (size_t i = 0; i < l_numLastBytes; ++i)
+           {
+              sprintf(&o_output[l_len],"%.2X", l_lastBytes[i]);
+              l_len = strlen(o_output);
+
+              if (i == 4)
+              {
+                 sprintf(&o_output[l_len]," ");
+                 l_len = strlen(o_output);
+              }
+           }
+       }
+   } while(0);
+
+   if (l_errhdl)
+   {
+      sprintf( o_output, "cmd_readwritevpd> FAIL - %s: RC=%.4X",
+               &o_readWriteCmd,
+               ERRL_GETRC_SAFE(l_errhdl) );
+   }
+}
+
 
 /**
  * @brief Read data out of pnor
@@ -440,6 +739,60 @@ int hbrtCommand( int argc,
         *l_output = new char[strlen(argv[1])+1+5];//arg0+arg1+\0
         sprintf( *l_output, "TEST:%s", argv[1] );
     }
+    else if( !strcmp( argv[0], "readvpd" ))
+    {
+        // readvpd <huid> <keyword> [<record>]
+        if (argc == 3)
+        {
+            cmd_readwritevpd( *l_output,
+                         DeviceFW::OperationType::READ,
+                         strtou64( argv[1], NULL, 16 ),   // huid
+                         strtou64( argv[2], NULL, 16 ));  // keyword
+
+        }
+        else if (argc == 4)
+        {
+            cmd_readwritevpd( *l_output,
+                         DeviceFW::OperationType::READ,
+                         strtou64( argv[1], NULL, 16 ),   // huid
+                         strtou64( argv[2], NULL, 16 ),   // keyword
+                         strtou64( argv[3], NULL, 16 ));  // record
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output,
+                     "ERROR: readvpd <huid> <keyword> [<record>]\n" );
+        }
+    }
+    else if( !strcmp( argv[0], "writevpd" ) )
+    {
+        // writevpd <vpd> <huid> <keyword> [<record>] <data>
+        if( argc == 4 )
+        {
+            cmd_readwritevpd( *l_output,
+                         DeviceFW::OperationType::WRITE,
+                         strtou64( argv[1], NULL, 16 ),   // huid
+                         strtou64( argv[2], NULL, 16 ),   // keyword
+                         0,                               // record
+                         strtou64( argv[3], NULL, 16 ));   // data
+        }
+        else if (argc == 5)
+        {
+            cmd_readwritevpd( *l_output,
+                         DeviceFW::OperationType::WRITE,
+                         strtou64( argv[1], NULL, 16 ),   // huid
+                         strtou64( argv[2], NULL, 16 ),   // keyword
+                         strtou64( argv[3], NULL, 16 ),   // record
+                         strtou64( argv[4], NULL, 16 ));  // data
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output,
+                     "ERROR: writevpd <huid> <keyword> [<record>] <data>\n" );
+        }
+    }
     else if( !strcmp( argv[0], "getattr" ) )
     {
         // getattr <huid> <attribute id> <size>
@@ -557,6 +910,10 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "sbemsg <chipid>\n" );
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "readvpd <huid> <keyword> [record]\n" );
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
         strcat( *l_output, l_tmpstr );
     }
 
