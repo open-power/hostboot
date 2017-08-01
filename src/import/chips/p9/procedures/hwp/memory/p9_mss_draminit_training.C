@@ -63,6 +63,7 @@ extern "C"
     {
         // Keep track of the last error seen by a port
         fapi2::ReturnCode l_port_error ( fapi2::FAPI2_RC_SUCCESS );
+
         fapi2::buffer<uint32_t> l_cal_steps_enabled( i_special_training );
 
         std::vector<fapi2::ReturnCode> l_fails;
@@ -78,8 +79,15 @@ extern "C"
         }
 
         uint8_t l_reset_disable = 0;
+        uint8_t l_cal_abort_on_error = i_abort_on_error;
         FAPI_TRY( mss::mrw_reset_delay_before_cal(l_reset_disable), "%s Error in p9_mss_draminit_training",
                   mss::c_str(i_target) );
+        // Flag to abort on error
+
+        if (i_abort_on_error == CAL_ABORT_SENTINAL)
+        {
+            FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error) );
+        }
 
         // Configure the CCS engine.
         {
@@ -104,9 +112,6 @@ extern "C"
 
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
-            // Keep track of the last error seen by a rank pair
-            fapi2::ReturnCode l_rank_pair_error(fapi2::FAPI2_RC_SUCCESS);
-
             // Returned from set_rank_pairs, it tells us how many rank pairs
             // we configured on this port.
             std::vector<uint64_t> l_pairs;
@@ -156,95 +161,34 @@ extern "C"
                 FAPI_TRY( mss::dp16::reset_delay_values(p, l_pairs), "Error in p9_mss_draminit_training" );
             }
 
-            FAPI_DBG("generating calibration CCS instructions: %d rank-pairs", l_pairs.size());
+            FAPI_DBG("generating calibration CCS instructions: %d rank-pairs %s", l_pairs.size(), mss::c_str(p));
 
             // Turn on refresh for training
-            FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(p), "Error in p9_mss_draminit_training" );
+            FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(p), "Error in p9_mss_draminit_training %s", mss::c_str(p) );
 
             // For each rank pair we need to calibrate, pop a ccs instruction in an array and execute it.
             // NOTE: IF YOU CALIBRATE MORE THAN ONE RANK PAIR PER CCS PROGRAM, MAKE SURE TO CHANGE
             // THE PROCESSING OF THE ERRORS. (it's hard to figure out which DIMM failed, too) BRS.
             for (const auto& rp : l_pairs)
             {
-                uint8_t l_cal_abort_on_error = i_abort_on_error;
+                FAPI_INF("Execute cal on rp %d %s", rp, mss::c_str(p));
 
-                if (i_abort_on_error == CAL_ABORT_SENTINAL)
-                {
-                    FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error), "Error in p9_mss_draminit_training" );
-                }
-
-                // Execute selected cal steps
-                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error),
-                          "Error in p9_mss_draminit_training" );
-
-                fapi2::ReturnCode l_rc (fapi2::current_err);
-
-                // If we're aborting on error we can just jump to the end.
-                // If we're not, we don't want to exit if there's
-                // an error but we want to log the error and keep on keeping on.
-                if ((l_rc = mss::process_initial_cal_errors(p)) != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    if (l_cal_abort_on_error)
-                    {
-                        FAPI_TRY( l_rc );
-                    }
-
-                    l_fails.push_back(l_rc);
-
-                    // Keep tack of the last cal error we saw.
-                    l_rank_pair_error = l_rc;
-                }
+                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
+                FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_fails) );
 
             }// rank pairs
 
             {
-                fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
                 // Conducts workarounds after training if needed
-                l_rc = mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled );
+                // if we get fails here,it's due to scom errors
+                FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ));
 
-                if ( l_rc != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    l_fails.push_back(l_rc);
-                }
-
-                // Going to treat bad_bits errors as similar to training errors
-                // If we're in hostboot, we update the attribute and keep running
-                // If we're cronus, we'll error out
-                l_rc =  mss::dp16::record_bad_bits(p);
-
-                if ( l_rc != fapi2::FAPI2_RC_SUCCESS)
-                {
-                    l_fails.push_back(l_rc);
-                }
-            }
-
-            // Resetting current_err.
-            // The error has either already been "logged" or we have exited and returned the error up the call stack.
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        }
-
-// So we want to record the errors as informational and not mess with current_err
-#ifdef __HOSTBOOT_MODULE
-
-        for (auto l_iter = l_fails.begin(); l_iter != l_fails.end(); ++l_iter)
-        {
-            // fapi2 doesn't have INFO flag, so the RECOVERED flag will do
-            // Same behavior (no printouts to the custonmer and no deconfigures/ fail outs)
-            // We want to have these fail logs for the future, but we'll let memdiags catch the errors
-            fapi2::logError(*l_iter, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        }
-
-// If we're in cronus, we're just going to bomb out. Error logging doesn't work as of 6/17 JLH
-// The errors should be printed out as FAPI_ERR's when the ReturnCode was made though
-#else
-        {
-            if (l_fails.size() != 0)
-            {
-                FAPI_TRY(l_fails[0]);
             }
         }
-#endif
 
+        // Let's handle the cal fails on the MCBIST
+        // We do it here in order to train every port
+        FAPI_TRY( mss::draminit_training_error_handler(l_fails) );
         // Unmask FIR
         FAPI_TRY( mss::unmask::after_draminit_training(i_target), "Error in p9_mss_draminit" );
 

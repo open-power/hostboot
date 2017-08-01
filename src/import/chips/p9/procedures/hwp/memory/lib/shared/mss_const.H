@@ -145,6 +145,9 @@ enum ffdc_function_codes
     // MSS_INVALID_INDEX_PASSED
     SYMBOL_COUNT_READ = 50,
     SYMBOL_COUNT_WRITE = 51,
+
+    // Used in rank.H
+    MAP_RP_PRIMARY_TO_INIT_CAL = 60,
 };
 
 enum states

@@ -531,7 +531,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     FAPI_INF("initial cal err: 0x%016llx, rp: 0x%016llx (0x%016llx)", l_errors, l_rank_pairs, uint64_t(l_err_data));
 
     // Check for RDVREF calibration errors. This fapi_try catches scom errors. Any errors from the
-    // RDVREF itself are assumed errors only after read centering
+    // RDVREF itself are assumed errors only after read centering (caught in general error above)
     FAPI_TRY( dp16::process_rdvref_cal_errors(i_target) );
 
     // WR VREF error processing acts the same as the RD VREF processing
@@ -539,7 +539,7 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 
     if ((l_rank_pairs == 0) || (l_errors == 0))
     {
-        FAPI_INF("Initial cal - no errors reported");
+        FAPI_INF("Initial cal - no errors reported %s", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -550,38 +550,16 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
     // fails ...) Note first_bit_set gives a bit position (0 being left most.) So, the rank
     // in question is the bit postion minus the position of the 0th rank in the register.
     // (the rank bits are bits 60:63, for example, so rank 0 is in position 60)
-    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target, mss::first_bit_set(l_rank_pairs) - TT::INIT_CAL_ERROR_RANK_PAIR,
+    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
+              mss::first_bit_set(l_rank_pairs) - TT::INIT_CAL_ERROR_RANK_PAIR,
               l_failed_dimm) );
-    FAPI_ERR("initial cal failed for %s", mss::c_str(l_failed_dimm));
 
-    // If we aborted on error, the disable bits aren't complete so we can't make a determination about
-    // whether the port is repairable.
-    if (cal_abort_on_error == fapi2::ENUM_ATTR_MSS_CAL_ABORT_ON_ERROR_YES)
-    {
-        FAPI_INF("can't process disable bits as we aborted on error - disable bits might be incomplete");
-    }
-    else
-    {
-        // Process the disable bits. The PHY will disable bits that it finds don't work for whatever reason.
-        // However, we can handle a number of bad bits without resorting to killing the DIMM. Do the bad
-        // bit processing here, and if we can go on and ignore these bad bits, we'll see a succcess here.
-        if (dp16::process_bad_bits(i_target, l_failed_dimm, l_rank_pairs) == fapi2::FAPI2_RC_SUCCESS)
-        {
-            FAPI_INF("Initial cal - errors reported, but only 1 nibble + 1 bit marked %s", mss::c_str(l_failed_dimm));
-
-            // If we're on a pre-DD1.02 Nimbus, Anuwat requests we 'pass' training with 1 nibble + 1 bit.
-            if (mss::chip_ec_feature_mss_training_bad_bits(i_target))
-            {
-                return fapi2::FAPI2_RC_SUCCESS;
-            }
-        }
-    }
 
     // So we can do a few things here. If we're aborting on the first calibration error,
     // we only expect to have one error bit set. If we ran all the calibrations, we can
     // either have one bit set or more than one bit set. If we have more than one bit set
-    // the result is the same - a broken DIMM which will be deconfigured. So put enough
-    // information in the FFDC for the lab but we don't need one error for every cal fail.
+    // the result is the same - a broken DIMM.
+    // So put enough information in the FFDC for the lab but we don't need one error for every cal fail.
     FAPI_ASSERT(mss::bit_count(l_errors) == 1,
                 fapi2::MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS()
                 .set_FAILED_STEPS(uint64_t(l_err_data))
@@ -716,6 +694,128 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_MC
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Finds the calibration errors from draminit training
+/// @param[in] i_target the port target
+/// @param[in] i_rp the rank pair we are calibrating
+/// @param[in] i_cal_abort_on_error denoting if we aborted on first fail
+/// @param[in,out] io_fails a vector storing all of our cal fails
+/// @return FAPI2_RC_SUCCESS iff all of the scoms and functionality were good
+///
+template<>
+fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_cal_abort_on_error,
+        std::vector<fapi2::ReturnCode>& io_fails)
+{
+    fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
+    fapi2::Target<TARGET_TYPE_DIMM> l_dimm;
+
+    // Let's get the DIMM since we train per rank pair (primary rank pair)
+    FAPI_TRY( mss::rank_pair_primary_to_dimm(i_target,
+              i_rp,
+              l_dimm),
+              "Failed getting the DIMM for %s", mss::c_str(i_target) );
+
+    // Let's keep track of the error.
+    // We don't want to error out here because we want to run on the other ports/ranks
+    // We'll add this to io_fails if we fail too many DQ's
+    l_rc = mss::process_initial_cal_errors(i_target);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        // If we're aborting on error we jump to the end and error out.
+        // We don't care about other ports or ranks because the hardware stopped when it saw the error
+        if (i_cal_abort_on_error)
+        {
+            FAPI_TRY( l_rc, "Training failed for %s. Set to abort on error, so cal didn't finish",
+                      mss::c_str(l_dimm) );
+        }
+
+        // Process the disable bits. The PHY will disable bits that it finds don't work for whatever reason.
+        // However, we can handle a number of bad bits without resorting to killing the DIMM. Do the bad
+        // bit processing here, and if we can go on and ignore these bad bits, we'll see a succcess here.
+        // Needs to be bit representation for process_bad_bits (it can handle fails for multiple rp for 1 dimm)
+        uint64_t l_encoding = 0;
+        FAPI_TRY( mss::rank::map_rp_primary_to_init_cal(i_target, i_rp, l_encoding) );
+
+        if (dp16::process_bad_bits(i_target, l_dimm, l_encoding) == fapi2::FAPI2_RC_SUCCESS)
+        {
+            // If we're on a Nimbus, lab team requests we 'pass' training with 1 nibble + 1 bit
+            if (mss::chip_ec_feature_mss_training_bad_bits(i_target))
+            {
+                FAPI_INF("p9_mss_draminit_training: errors reported, but 1 nibble + 1 bit or less was marked.%s",
+                         mss::c_str(l_dimm));
+
+                // Let's log the error as RECOVERED (logs should be hidden and no deconfigs take place) - JLH
+                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                // Set l_rc to success so we will still record the bad bits into the attribute
+                l_rc = fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+
+        FAPI_ERR("Seeing calibration errors for p9_mss_draminit_training %s: Keep running? %s",
+                 mss::c_str(l_dimm),
+                 (l_rc == fapi2::FAPI2_RC_SUCCESS) ? "Yes" : "no");
+
+        // Let's update the attribute with the failing DQ bits since we had a training error
+        // The only fail we get here is a scom error, so we should error out
+        // We only want to update the attribute for hostboot runs though
+        // Updating the attribute updates the DIMM's VPD and actually disabled those DQ bits for good
+        // Commenting out until PRD has the backside implementation complete
+#ifdef __HOSTBOOT_MODULE
+        // TODO RTC:178400 Come back and use the ATTR_BAD_BITS accessor functions from PRD when available
+        //FAPI_TRY( mss::dp16::record_bad_bits(i_target) );
+#endif
+
+        // Let's add the error to our vector for later processing (if it didn't affect too many DQ bits)
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            io_fails.push_back(l_rc);
+        }
+    }
+
+    // Calling process_bad_bits above sets fapi2::current_err; Need to explicitly return SUCCESS here
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Handle draminit_training cal fails
+/// @param[in] i_fails vector holding the return codes for calibration failures
+/// @note We handle errors differently depending on if we're HB or cronus
+/// If we're cronus, we want to error out.
+/// If we're hostboot, we want to log the error as hidden and let PRD choose to deconfigure
+///
+fapi2::ReturnCode draminit_training_error_handler( const std::vector<fapi2::ReturnCode>& i_fails)
+{
+// If we're in hostboot, we want to log all of the errors as hidden
+// and let PRD deconfigure based off of ATTR_BAD_DQ_BITMAP
+#ifdef __HOSTBOOT_MODULE
+    for (auto l_iter : i_fails)
+    {
+        fapi2::logError(l_iter, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    }
+
+    return fapi2::current_err;
+
+// If we're cronus, let's bomb out
+#else
+
+    if (i_fails.size() != 0)
+    {
+        // We can't log errors in cronus, so let's take the first one and end the IPL
+        FAPI_ERR("Failed p9_mss_draminit_training");
+        return i_fails[0];
+    }
+
+#endif
+    // Need this for compiler/ if i_fails is empty
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
 
 ///
 /// @brief Sets up the IO impedances (ADR DRV's and DP DRV's/RCV's) - MCA specialization

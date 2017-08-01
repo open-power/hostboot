@@ -44,6 +44,7 @@
 #include <lib/utils/num.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/shared/mss_const.H>
+#include <lib/phy/phy_cntrl.H>
 
 namespace mss
 {
@@ -427,6 +428,39 @@ inline uint64_t map_rank_ordinal_from_phy( const fapi2::Target<fapi2::TARGET_TYP
     return i_rank;
 }
 
+///
+/// @brief Maps a ordinal rank pair to INIT_CAL_ERROR register encoding
+/// @param[in] i_target the fapi2 target of the MCA
+/// @param[in] i_rp rank pair 0-3
+/// @param[out] o_encoding
+/// @return the mapped value
+// i_rank passed by value to save a local
+///
+inline fapi2::ReturnCode map_rp_primary_to_init_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        uint64_t& o_encoding)
+{
+    typedef pcTraits<fapi2::TARGET_TYPE_MCA> TT;
+    fapi2::buffer<uint64_t> l_temp;
+
+    FAPI_ASSERT( i_rp < MAX_RANK_PAIRS,
+                 fapi2::MSS_INVALID_RANK_PAIR()
+                 .set_RANK_PAIR(i_rp)
+                 .set_MCA_TARGET(i_target)
+                 .set_FUNCTION(MAP_RP_PRIMARY_TO_INIT_CAL),
+                 "Error in map_rp_primary_init_cal for %s on rp %d",
+                 mss::c_str(i_target),
+                 i_rp);
+
+    FAPI_INF("Setting bit for rp %d", i_rp);
+    //INIT_CAL_ERROR == 60, the bit position offset for the register
+    FAPI_TRY( l_temp.setBit(i_rp + TT::INIT_CAL_ERROR_RANK_PAIR) );
+
+    o_encoding = l_temp;
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 ///
 /// @brief Convert rank indexes in a rank_pair reg value from MC perspective to PHY perspective
 /// @tparam T fapi2 Target Type the type of the MC target
@@ -1327,8 +1361,8 @@ inline fapi2::ReturnCode get_ranks_in_pair( const fapi2::Target<T>& i_target,
             FAPI_ASSERT( false,
                          fapi2::MSS_INVALID_RANK_PAIR()
                          .set_RANK_PAIR(i_rp)
-                         .set_FUNCTION(GET_RANKS_IN_PAIR)
-                         .set_MCA_TARGET(i_target),
+                         .set_MCA_TARGET(i_target)
+                         .set_FUNCTION(GET_RANKS_IN_PAIR),
                          "%s Invalid number of rankpairs entered. num: %lu max: %lu",
                          mss::c_str(i_target),
                          i_rp,

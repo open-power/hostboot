@@ -426,6 +426,30 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(const fapi2::Target<T>& i_target, co
         fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm);
 
 ///
+/// @brief Handle draminit_training cal fails
+/// @param[in] i_fails vector holding the return codes for calibration failures
+/// @note We handle errors differently depending on if we're HB or cronus
+/// If we're cronus, we want to error out.
+/// If we're hostboot, we want to log the error as hidden and let PRD choose to deconfigure
+///
+fapi2::ReturnCode draminit_training_error_handler ( const std::vector<fapi2::ReturnCode>& i_fails);
+
+///
+/// @brief Finds the calibration errors from draminit training
+/// @tparam T fapi2::TargetType of the port target
+/// @param[in] i_target the port target
+/// @param[in] i_rp the rank pair we are calibrating
+/// @param[in] i_cal_abort_on_error denoting if we aborted on first fail
+/// @param[in,out] io_fails a vector storing all of our cal fails
+/// @return FAPI2_RC_SUCCESS iff all of the scoms and functionality were good
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<T>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_cal_abort_on_error,
+        std::vector<fapi2::ReturnCode>& io_fails);
+
+///
 /// @brief Sets up the IO impedances (ADR DRV's and DP DRV's/RCV's)
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA/MCBIST or MBA?)
