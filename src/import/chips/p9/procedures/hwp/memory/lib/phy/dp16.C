@@ -2662,12 +2662,12 @@ fapi_try_exit:
 fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     const auto& l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
-    uint8_t l_value[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] = { 0 };
+    uint8_t l_value[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = { 0 };
 
     // Process the bad bits into an array. We copy these in to their own array
     // as it allows the compiler to check indexes where a passed pointer wouldn't
     // otherwise do.
-    uint8_t l_data[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] = { 0 };
+    uint8_t l_data[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = { 0 };
     FAPI_TRY( mss::dp16::record_bad_bits_helper(i_target, l_data) );
 
     // Read the attribute
@@ -2732,7 +2732,7 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
                 l_bad_bits[l_byte_index]    = (v.first & 0xFF00) >> 8;
                 l_bad_bits[l_byte_index + 1] = v.first & 0x00FF;
 
-                FAPI_DBG("writing %s value 0x%0lX to 0x%X, 0x%X from 0x%016lx",
+                FAPI_DBG("%s Recording ATTR_BAD_DQ_BITMAP value 0x%0lX to 0x%X, 0x%X from 0x%016lx",
                          mss::c_str(i_target),
                          v.first,
                          l_bad_bits[l_byte_index],
