@@ -571,7 +571,8 @@
 <hwpError>
   <rc>RC_MSS_FAILED_RDVREF_CAL</rc>
   <description>
-    A DP16 has failed read vREF calibration
+      A DP16 has failed read vREF calibration.
+      If this fails, RDCNTR cal will also catch the fail
   </description>
   <ffdc>REGISTER</ffdc>
   <ffdc>VALUE</ffdc>
@@ -589,12 +590,6 @@
     <target>MCA_TARGET</target>
     <priority>HIGH</priority>
   </callout>
-  <deconfigure>
-    <target>MCA_TARGET</target>
-  </deconfigure>
-  <gard>
-      <target>MCA_TARGET</target>
-  </gard>
 </hwpError>
 
 <hwpError>
