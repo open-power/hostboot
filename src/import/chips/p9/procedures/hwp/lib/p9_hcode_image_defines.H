@@ -353,6 +353,7 @@ HCD_HDR_UINT32(g_wof_table_addr,                0 );        // SRAM address wher
 HCD_HDR_UINT32(g_wof_table_length,              0 );        // WOF Table length in bytes
 HCD_HDR_UINT32(g_pgpe_core_throttle_assert_cnt, 0 );        // Core throttle assert count
 HCD_HDR_UINT32(g_pgpe_core_throttle_deassert_cnt, 0 );      // Core throttle de-aasert count
+HCD_HDR_UINT32(g_pgpe_aux_controls,             0 );        // Auxiliary Controls
 #ifdef __ASSEMBLER__
 .endm
 #else
