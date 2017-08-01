@@ -25,7 +25,7 @@
 
 actionclass l3_cache_ce
 {
-    calloutSelfHigh;
+    calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_CACHE_CES) );
     funccall("L3CE");
     funccall("cacheCeWorkaround");
@@ -39,7 +39,7 @@ actionclass l3_cache_ue
 
 actionclass l3_dir_ce
 {
-    calloutSelfHigh;
+    calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L3_DIR_CES) );
     funccall("cacheCeWorkaround");
 };
@@ -52,7 +52,7 @@ actionclass l3_lru_parity_error
 
 actionclass l2_cache_ce
 {
-    calloutSelfHigh;
+    calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_CACHE_CES) );
     funccall("L2CE");
     funccall("cacheCeWorkaround");
@@ -66,7 +66,7 @@ actionclass l2_cache_ue
 
 actionclass l2_dir_ce
 {
-    calloutSelfHigh;
+    calloutSelfMed;
     threshold( field(32 / day), mfg_file(ATTR_MNFG_TH_P8EX_L2_DIR_CES) );
 };
 
