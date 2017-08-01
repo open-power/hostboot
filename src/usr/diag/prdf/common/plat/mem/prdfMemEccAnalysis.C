@@ -328,7 +328,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
     uint32_t o_rc = SUCCESS;
 
-    #ifndef __HOSTBOOT_RUNTIME // IPL
+    #if !defined(__HOSTBOOT_RUNTIME) && defined(__HOSTBOOT_MODULE) // HB IPL
 
     PRDF_ERR( PRDF_FUNC "Mainline MPE attns should be masked during IPL" );
     PRDF_ASSERT(false); // HWP bug.
@@ -379,6 +379,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         MemoryMru mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
         io_sc.service_data->SetCallout( mm );
 
+        #ifdef __HOSTBOOT_RUNTIME
         // Add a VCM request to the TD queue.
         o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc );
         if ( SUCCESS != o_rc )
@@ -388,6 +389,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                       i_rank.getSlave() );
             break;
         }
+        #endif // __HOSTBOOT_RUNTIME
 
     } while (0);
 
@@ -854,13 +856,8 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 
     uint32_t o_rc = SUCCESS;
 
-    #ifdef __HOSTBOOT_MODULE
-
     do
     {
-        // get data bundle from chip
-        D db = static_cast<D>( i_chip->getDataBundle() );
-
         // get the mark shadow register
         SCAN_COMM_REGISTER_CLASS * msr = i_chip->getRegister("MSR");
 
@@ -890,11 +887,15 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
             o_rc = FAIL;
             break;
         }
-        uint8_t dram = symbol.getDram();
 
         // Add the DIMM to the callout list
         MemoryMru memmru( trgt, rank, MemoryMruData::CALLOUT_RANK );
         io_sc.service_data->SetCallout( memmru );
+
+        #ifdef __HOSTBOOT_MODULE
+        // get data bundle from chip
+        D db = static_cast<D>( i_chip->getDataBundle() );
+        uint8_t dram = symbol.getDram();
 
         // Increment the count and check threshold.
         if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
@@ -949,10 +950,10 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
                 break;
             }
         }
+        #endif // __HOSTBOOT_MODULE
 
     } while (0);
 
-    #endif
 
     return o_rc;
 
