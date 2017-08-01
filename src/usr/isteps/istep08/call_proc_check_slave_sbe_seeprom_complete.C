@@ -162,6 +162,18 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // we can still at least boot with master proc
             errlCommit(l_errl,ISTEP_COMP_ID);
 
+            //@fixme - RTC:177921
+            // Do not call p9_extract_sbe_rc because it corrupts
+            //  live debug of fails.  Need to make some other
+            //  changes before turning this back on.
+#if 1 // get rid of this
+            // Create IStep error log and cross reference to error
+            l_stepError.addErrorDetails( l_errl );
+            
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+#else
+
             // Setup for the HWP
             P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
@@ -218,6 +230,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                 proc_extract_sbe_handler( l_cpu_target,
                                 l_prevError, l_rcAction);
             }
+#endif //@fixme - RTC:177921
 
         }
         else if (l_errl)
