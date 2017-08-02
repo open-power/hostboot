@@ -1724,50 +1724,6 @@
     </attribute>
 </targetType>
 
-<!-- @TODO RTC:173529 - Remove NV once it is not used anywhere -->
-<targetType>
-  <id>unit-nv-power9</id>
-  <parent>unit-obus-power9</parent>
-  <attribute>
-    <default>NV</default>
-    <id>TYPE</id>
-  </attribute>
-  <attribute>
-    <default>1</default>
-    <id>DECONFIG_GARDABLE</id>
-  </attribute>
-  <attribute><id>HUID</id></attribute>
-  <attribute>
-    <default>FABRIC</default>
-    <id>CDM_DOMAIN</id>
-  </attribute>
-  <attribute>
-    <id>PARENT_PERVASIVE</id>
-  </attribute>
-  <attribute>
-    <default>0x00000001</default>
-    <id>HWAS_STATE_CHANGED_SUBSCRIPTION_MASK</id>
-  </attribute>
-</targetType>
-
-<targetType>
-  <id>unit-nv-nimbus</id>
-  <parent>unit-nv-power9</parent>
-  <attribute>
-    <default>NIMBUS</default>
-    <id>MODEL</id>
-  </attribute>
-</targetType>
-
-<targetType>
-  <id>unit-nv-cumulus</id>
-  <parent>unit-nv-power9</parent>
-  <attribute>
-    <default>CUMULUS</default>
-    <id>MODEL</id>
-  </attribute>
-</targetType>
-
 <!-- One NPU per proc -->
 <targetType>
     <id>unit-npu-power9</id>
