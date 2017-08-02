@@ -35,7 +35,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
         <mssBlobStart>0</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_cke_map</mssAccessorName>
