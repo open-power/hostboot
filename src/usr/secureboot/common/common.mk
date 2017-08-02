@@ -25,4 +25,5 @@
 
 SECUREBOOT_COMMON_OBJS += securetrace.o
 SECUREBOOT_COMMON_OBJS += errlud_secure.o
+SECUREBOOT_COMMON_OBJS += containerheader.o
 

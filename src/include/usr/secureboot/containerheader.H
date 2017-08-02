@@ -195,7 +195,9 @@ class ContainerHeader
          *        and then take sha512 hash.
          *        Also sets iv_hwKeyHash private member
          */
+#ifndef __HOSTBOOT_RUNTIME
         void genHwKeyHash();
+#endif
 
         /**
          * @brief Weak check to determine if secureboot header looks right.
