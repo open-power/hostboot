@@ -34,9 +34,3 @@
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 #pull in new actions in p9_memory.act RTC 171066
 
-#wof data image
-echo "Applying SIMICS workaround to support WOF data generation"
-sbex -t 1025390
-mkdir -p $sb/engd/wofdata/
-cd $sb/engd/wofdata
-mk -a -k
