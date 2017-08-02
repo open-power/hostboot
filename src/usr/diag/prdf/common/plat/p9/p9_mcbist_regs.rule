@@ -29,10 +29,19 @@
     ###########################################################################
     # P9 MCBIST target MCBISTFIR
     ###########################################################################
+
     register MCBISTFIR_AND
     {
         name        "P9 MCBIST target MCBISTFIR AND";
         scomaddr    0x07012301;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MCBISTFIR_MASK_OR
+    {
+        name        "P9 MCBIST target MCBISTFIR MASK OR";
+        scomaddr    0x07012305;
         capture     group never;
         access      write_only;
     };

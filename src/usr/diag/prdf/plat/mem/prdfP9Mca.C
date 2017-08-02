@@ -112,6 +112,8 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
         return SUCCESS;
 
+    ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
+
     #ifdef __HOSTBOOT_RUNTIME // TPS only supported at runtime.
 
     // Recovery is always enabled during runtime. If the threshold is reached,
@@ -120,8 +122,6 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
     if ( getMcaDataBundle(i_mcaChip)->iv_rcdParityTh.inc(io_sc) )
     {
         io_sc.service_data->setServiceCall();
-
-        ExtensibleChip * mcbChip = getConnectedParent( i_mcaChip, TYPE_MCBIST );
 
         McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
 
@@ -162,6 +162,44 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
         // predictive if threshold is reached.
         if ( rcdParityErrorReconfigLoop(i_mcaChip->getTrgt()) )
             io_sc.service_data->setServiceCall();
+
+        if ( isInMdiaMode() )
+        {
+            uint32_t l_rc = SUCCESS;
+            SCAN_COMM_REGISTER_CLASS * mask = nullptr;
+
+            // Stop any further commands on this MCBIST to avoid subsequent RCD
+            // errors or potential AUEs.
+            l_rc = mdiaSendEventMsg( mcbChip->getTrgt(), MDIA::STOP_TESTING );
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
+            }
+
+            // Mask the maintenance AUE/IAUE attentions on this MCA because they
+            // are potential side-effects of the RCD parity errors.
+            mask = i_mcaChip->getRegister( "MCAECCFIR_MASK_OR" );
+            mask->SetBit(33); // maintenance AUE
+            mask->SetBit(36); // maintenance IAUE
+            l_rc = mask->Write();
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCAECCFIR_MASK_OR: "
+                          "i_mcaChip=0x%08x", i_mcaChip->getHuid() );
+            }
+
+            // Mask the maintenance command complete bits to avoid false
+            // attentions.
+            mask = mcbChip->getRegister( "MCBISTFIR_MASK_OR" );
+            mask->SetBit(10); // Command complete
+            mask->SetBit(12); // WAT workaround
+            l_rc = mask->Write();
+            if ( SUCCESS != l_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCBISTFIR_MASK_OR: "
+                          "mcbChip=0x%08x", mcbChip->getHuid() );
+            }
+        }
     }
     else
     {
