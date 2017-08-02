@@ -49,7 +49,6 @@
       </enumeration>
     </simpleType>
   </attribute>
-
   <attribute>
     <description>Attribute indicating the target's model</description>
     <hasStringConversion></hasStringConversion>
@@ -4716,10 +4715,6 @@
     <enumerator>
       <name>OBUS</name>
       <value>40</value>
-    </enumerator>
-    <enumerator>
-      <name>NV</name>
-      <value>41</value>
     </enumerator>
     <enumerator>
       <name>SBE</name>

@@ -417,9 +417,6 @@ const char* EntityPath::pathElementTypeAsString(
             return "DMI";
         case TYPE_OBUS:
             return "OBUS";
-        //@TODO RTC:173529 -- Remove NV once it is not used anywhere
-        case TYPE_NV:
-            return "NV";
         case TYPE_OBUS_BRICK:
             return "OBUS_BRICK";
         case TYPE_NPU:
