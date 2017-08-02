@@ -62,7 +62,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
         <mssBlobStart>2</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
         <mssAccessorName>vpd_mt_2_signature_hash</mssAccessorName>
@@ -205,6 +204,30 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_BIAS_TRIM</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Adjusts the receiver internal current bias. ONLY set range 0-7. Default value is 3.
+            [VPD Value] = [Binary bit value set in register]
+            0 = 110 (Minimal power)
+            1 = 010
+            2 = 100
+            3 = 000 (Default)
+            4 = 111
+            5 = 011
+            6 = 101
+            7 = 001 (Maximum power)
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssBlobStart>86</mssBlobStart>
+        <mssBlobLength>2</mssBlobLength>
+        <mssAccessorName>vpd_mt_mc_bias_trim</mssAccessorName>
+        <array>2</array>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_VPD_MT_MC_DQ_ACBOOST_RD_UP</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
@@ -223,8 +246,7 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>86</mssBlobStart>
+        <mssBlobStart>88</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_rd_up</mssAccessorName>
         <array>2</array>
@@ -249,8 +271,7 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>94</mssBlobStart>
+        <mssBlobStart>96</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_wr_down</mssAccessorName>
         <array>2</array>
@@ -275,8 +296,7 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>102</mssBlobStart>
+        <mssBlobStart>104</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_acboost_wr_up</mssAccessorName>
         <array>2</array>
@@ -299,8 +319,7 @@
         <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>110</mssBlobStart>
+        <mssBlobStart>112</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_ctle_cap</mssAccessorName>
         <array>2</array>
@@ -323,8 +342,7 @@
         <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>126</mssBlobStart>
+        <mssBlobStart>128</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_dq_ctle_res</mssAccessorName>
         <array>2</array>
@@ -341,7 +359,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>142</mssBlobStart>
+        <mssBlobStart>144</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_clk</mssAccessorName>
         <array>2</array>
@@ -358,7 +376,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>144</mssBlobStart>
+        <mssBlobStart>146</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2</array>
@@ -375,7 +393,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>146</mssBlobStart>
+        <mssBlobStart>148</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_cntl</mssAccessorName>
         <array>2</array>
@@ -392,7 +410,7 @@
         <writeable/>
         <enum>OHM30 = 30, OHM40 = 40</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>148</mssBlobStart>
+        <mssBlobStart>150</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_cscid</mssAccessorName>
         <array>2</array>
@@ -409,7 +427,7 @@
         <writeable/>
         <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>150</mssBlobStart>
+        <mssBlobStart>152</mssBlobStart>
         <mssBlobLength>10</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_drv_imp_dq_dqs</mssAccessorName>
         <array>2 5</array>
@@ -426,7 +444,7 @@
         <writeable/>
         <enum>DISABLE = 0, OHM34 = 34, OHM40 = 40, OHM48 = 48, OHM60 = 60, OHM80 = 80, OHM120 = 120, OHM240 = 240</enum>
         <mssUnits>ohm</mssUnits>
-        <mssBlobStart>160</mssBlobStart>
+        <mssBlobStart>162</mssBlobStart>
         <mssBlobLength>10</mssBlobLength>
         <mssAccessorName>vpd_mt_mc_rcv_imp_dq_dqs</mssAccessorName>
         <array>2 5</array>
@@ -442,8 +460,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>170</mssBlobStart>
+        <mssBlobStart>172</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_odt_rd</mssAccessorName>
         <array>2 2 4</array>
@@ -459,8 +476,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>186</mssBlobStart>
+        <mssBlobStart>188</mssBlobStart>
         <mssBlobLength>16</mssBlobLength>
         <mssAccessorName>vpd_mt_odt_wr</mssAccessorName>
         <array>2 2 4</array>
@@ -478,7 +494,7 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssUnits>nCK</mssUnits>
-        <mssBlobStart>202</mssBlobStart>
+        <mssBlobStart>204</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_preamble</mssAccessorName>
         <array>2</array>
@@ -493,8 +509,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssUnits></mssUnits>
-        <mssBlobStart>204</mssBlobStart>
+        <mssBlobStart>206</mssBlobStart>
         <mssBlobLength>2</mssBlobLength>
         <mssAccessorName>vpd_mt_vref_dram_wr</mssAccessorName>
         <array>2</array>
@@ -511,7 +526,7 @@
         <writeable/>
         <enum>VDD91875 = 91875, VDD91333 = 91333, VDD90791 = 90791, VDD90250 = 90250, VDD89708 = 89708, VDD89166 = 89166, VDD88625 = 88625, VDD88083 = 88083, VDD87541 = 87541, VDD87000 = 87000, VDD86458 = 86458, VDD85916 = 85916, VDD85375 = 85375, VDD84833 = 84833, VDD84291 = 84291, VDD83750 = 83750, VDD83208 = 83208, VDD82666 = 82666, VDD82125 = 82125, VDD81583 = 81583, VDD81041 = 81041, VDD80500 = 80500, VDD79958 = 79958, VDD79416 = 79416, VDD78875 = 78875, VDD78333 = 78333, VDD77791 = 77791, VDD77250 = 77250, VDD76708 = 76708, VDD76166 = 76166, VDD75625 = 75625, VDD75083 = 75083, VDD74541 = 74541, VDD74000 = 74000, VDD73458 = 73458, VDD72916 = 72916, VDD72375 = 72375, VDD71833 = 71833, VDD71291 = 71291, VDD70750 = 70750, VDD70208 = 70208, VDD69666 = 69666, VDD69125 = 69125, VDD68583 = 68583, VDD68041 = 68041, VDD67500 = 67500, VDD66958 = 66958, VDD66416 = 66416, VDD65875 = 65875, VDD65333 = 65333, VDD64791 = 64791, VDD64250 = 64250, VDD63708 = 63708, VDD63166 = 63166, VDD62625 = 62625, VDD62083 = 62083, VDD61541 = 61541, VDD61000 = 61000, VDD60458 = 60458, VDD59916 = 59916, VDD59375 = 59375, VDD58833 = 58833, VDD58291 = 58291, VDD57750 = 57750, VDD57208 = 57208, VDD56666 = 56666, VDD56125 = 56125, VDD55583 = 55583, VDD55041 = 55041, VDD54500 = 54500, VDD53958 = 53958, VDD53416 = 53416, VDD52875 = 52875, VDD52333 = 52333, VDD51791 = 51791, VDD51250 = 51250, VDD50708 = 50708, VDD50166 = 50166, VDD49625 = 49625, VDD49083 = 49083, VDD48541 = 48541, VDD48000 = 48000, VDD47458 = 47458, VDD46916 = 46916, VDD46375 = 46375, VDD45833 = 45833, VDD45291 = 45291, VDD44750 = 44750, VDD44208 = 44208, VDD43666 = 43666, VDD43125 = 43125, VDD42583 = 42583, VDD42041 = 42041, VDD41500 = 41500, VDD40958 = 40958, VDD40416 = 40416, VDD39875 = 39875, VDD39333 = 39333, VDD38791 = 38791, VDD38250 = 38250, VDD37708 = 37708, VDD37166 = 37166, VDD36625 = 36625, VDD36083 = 36083, VDD35541 = 35541, VDD35000 = 35000, VDD34458 = 34458, VDD33916 = 33916, VDD33375 = 33375, VDD32833 = 32833, VDD32291 = 32291, VDD31750 = 31750, VDD31208 = 31208</enum>
         <mssUnits>percent of Vdd</mssUnits>
-        <mssBlobStart>206</mssBlobStart>
+        <mssBlobStart>208</mssBlobStart>
         <mssBlobLength>8</mssBlobLength>
         <mssAccessorName>vpd_mt_vref_mc_rd</mssAccessorName>
         <array>2</array>
@@ -521,13 +536,14 @@
         <id>ATTR_MSS_VPD_MT_WINDAGE_RD_CTR</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps]. If this is enabled, disable periodic rd_ctr in draminit_mc. Default is 0
+            Derived from calibration/characterization of read centering. Number of windage offset in units of pico-seconds[ps]. Default is 0
+            Specification of the value in this file is 2's compliment hex
         </description>
         <initToZero></initToZero>
         <valueType>int16</valueType>
         <writeable/>
         <mssUnits>signed</mssUnits>
-        <mssBlobStart>214</mssBlobStart>
+        <mssBlobStart>216</mssBlobStart>
         <mssBlobLength>4</mssBlobLength>
         <mssAccessorName>vpd_mt_windage_rd_ctr</mssAccessorName>
         <array>2</array>
