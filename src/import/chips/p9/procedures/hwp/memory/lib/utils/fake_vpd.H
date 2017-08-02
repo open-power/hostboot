@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,23 +46,14 @@ namespace mss
 ///
 /// @brief Return a blob of memory VPD data associated with the input target
 /// @param[in] i_target     a valid fapi2 target
+/// @param[in] i_version_layout version layout number
 /// @param[in] io_vpd_info  fapi2::VPDInfo class that specifies which piece of data to return
 /// @param[out] o_blob      the blob of raw data from the vpd
 /// @return FAPI2_RC_SUCCESS if there's no problem
 /// @note passing nullptr for o_blob will return the size of the keyword
 ///
-/// Example:
-/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> vpdInfo(MR_keyword);
-/// vpdInfo.iv_freq = 2667;
-///
-/// uint8_t * blob = NULL;
-///
-/// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob = static_cast<uint8_t *>(malloc(vpdInfo.iv_size));
-/// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob now contains the VPD data for the MCS.
-///
 fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                         const uint64_t i_version_layout,
                          fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
                          uint8_t* o_blob);
 

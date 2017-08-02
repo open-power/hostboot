@@ -337,6 +337,10 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_VPD_MT_MC_BIAS_TRIM</id>
+    </attribute>
+
+    <attribute>
         <id>ATTR_CORE_INSIDE_SPECIAL_WAKEUP</id>
         <default>0x00</default>
     </attribute>
@@ -349,7 +353,7 @@
     <attribute>
         <id>ATTR_SYSTEM_CORE_PERIODIC_QUIESCE_DISABLE</id>
         <default>0x00</default>
-    </attribute>    
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions

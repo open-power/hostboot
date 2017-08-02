@@ -36,6 +36,7 @@
 #include <lib/utils/fake_vpd.H>
 #include <lib/shared/mss_const.H>
 #include <generic/memory/lib/utils/pos.H>
+#include <generic/memory/lib/utils/c_str.H>
 
 #ifndef DOXYGEN
 
@@ -44,7 +45,7 @@ namespace mss
 
 // VPD data from template_mt and template_mr - should be VBU/sim settings
 constexpr auto raw_mt_size = 255;
-static constexpr uint8_t raw_mt[raw_mt_size] =
+static constexpr uint8_t raw_mt_layout_ver0[raw_mt_size] =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
     0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
@@ -64,8 +65,34 @@ static constexpr uint8_t raw_mt[raw_mt_size] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+static constexpr uint8_t zz_ver1_raw_bin_zz_mt_X0_bin[raw_mt_size] =
+{
+    0x01, 0x01, 0x86, 0xb8, 0x63, 0xa8, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
+    0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x22, 0x22,
+    0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+    0x22, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x03, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x55, 0x55, 0x55, 0x55, 0x55, 0x00, 0x00, 0x00,
+    0x55, 0x55, 0x55, 0x55, 0x55, 0x00, 0x00, 0x00, 0xb6, 0xdb, 0x6d, 0xb6,
+    0xdb, 0x6d, 0xb6, 0xd0, 0xb6, 0xdb, 0x6d, 0xb6, 0xdb, 0x6d, 0xb6, 0xd0,
+    0x1e, 0x1e, 0x1e, 0x1e, 0x1e, 0x1e, 0x1e, 0x1e, 0x22, 0x22, 0x22, 0x22,
+    0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c,
+    0x3c, 0x3c, 0x3c, 0x3c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x0d, 0x0d, 0x00, 0x01, 0x17, 0x44, 0x00, 0x01, 0x17, 0x44,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00
+};
+
 constexpr auto raw_mr_size = 255;
-static constexpr uint8_t raw_mr[raw_mr_size] =
+static constexpr uint8_t raw_mr_layout_ver0[raw_mr_size] =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x05, 0x01, 0x01, 0x01, 0x01, 0x03, 0x08, 0x03, 0x06,
     0x03, 0x09, 0x04, 0x04, 0x00, 0x01, 0x01, 0x00, 0x04, 0x02, 0x03, 0x00, 0x06, 0x0a, 0x02, 0x01,
@@ -85,13 +112,13 @@ static constexpr uint8_t raw_mr[raw_mr_size] =
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-// The CKE blob has a header on it, and we want to return a pointer past that. Howevre, to
+// The CKE blob has a header on it, and we want to return a pointer past that. However, to
 // make creating this file easier we take the entire blob (header included)
 // Note:: ZZ (and hence Monza?) CKE mapping is the same for VBU - so only one mapping needed
-constexpr auto raw_cke_header = 4;
-constexpr auto raw_cke_size = 136;
+constexpr auto raw_ck_size = 136;
+constexpr auto raw_ck_header = 4;
 
-static constexpr uint8_t raw_cke[raw_cke_size] =
+static constexpr uint8_t raw_ck[raw_ck_size] =
 {
     0x01, 0x08, 0x10, 0x00, 0x80, 0x40, 0x00, 0x00, 0x08, 0x04, 0x00, 0x00, 0x80, 0x40, 0x00, 0x00,
     0x08, 0x04, 0x00, 0x00, 0x80, 0x40, 0x00, 0x00, 0x08, 0x04, 0x00, 0x00, 0x80, 0x40, 0x00, 0x00,
@@ -181,25 +208,149 @@ static constexpr uint8_t zz_dq[MCS_PER_MC * MC_PER_MODULE][raw_dq_size] =
 };
 
 ///
+/// @brief VPD helper function that imitates getVPD behavior
+/// @tparam N size of the input array
+/// @param[in] i_raw_vpd array of VPD data
+/// @param[in,out] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of data from the DIMM - raw
+/// @note passing nullptr for o_blob will return the size of the keyword
+///
+template< size_t N >
+void vpd_helper( const uint8_t (&i_raw_vpd)[N],
+                 fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                 uint8_t* o_blob)
+{
+    io_vpd_info.iv_size = sizeof( i_raw_vpd );
+
+    if( o_blob != nullptr )
+    {
+        memcpy( o_blob, i_raw_vpd, io_vpd_info.iv_size );
+    }
+
+    return;
+}
+
+///
+/// @brief Helper function to retrieve MT raw data
+/// @param[in] i_target a valid fapi2 target
+/// @param[in] i_version_layout version layout number
+/// @param[in,out] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of raw data from the vpd
+/// @note passing nullptr for o_blob will return the size of the keyword
+///
+void mt_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                const uint64_t i_version_layout,
+                fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                uint8_t* o_blob )
+{
+    switch(i_version_layout)
+    {
+        case 0:
+            vpd_helper(raw_mt_layout_ver0, io_vpd_info, o_blob);
+            break;
+
+        case 1:
+            vpd_helper(zz_ver1_raw_bin_zz_mt_X0_bin, io_vpd_info, o_blob);
+            break;
+
+        default:
+            FAPI_ERR("Invalid layout version layout received %d for %s", i_version_layout, mss::c_str(i_target));
+            fapi2::Assert(false);
+            break;
+    };
+
+    return;
+}
+
+///
+/// @brief Helper function to retrieve MR raw data
+/// @param[in] i_target a valid fapi2 target
+/// @param[in] i_version_layout version layout number
+/// @param[in,out] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of raw data from the vpd
+/// @note passing nullptr for o_blob will return the size of the keyword
+///
+void mr_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                const uint64_t i_version_layout,
+                fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                uint8_t* o_blob )
+{
+    switch(i_version_layout)
+    {
+        case 0:
+            vpd_helper(raw_mr_layout_ver0, io_vpd_info, o_blob);
+            break;
+
+        default:
+            FAPI_ERR("Invalid layout version layout received %d for %s", i_version_layout, mss::c_str(i_target));
+            fapi2::Assert(false);
+            break;
+    };
+
+    return;
+}
+
+///
+/// @brief Helper function to retrieve CK raw data
+/// @param[in] i_target a valid fapi2 target
+/// @param[in,out] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of raw data from the vpd
+/// @note passing nullptr for o_blob will return the size of the keyword
+///
+static void ck_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                       fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                       uint8_t* o_blob )
+{
+    io_vpd_info.iv_size = raw_ck_size - raw_ck_header;
+
+    if (o_blob != nullptr)
+    {
+        memcpy(o_blob, raw_ck + raw_ck_header, io_vpd_info.iv_size);
+    }
+}
+
+///
+/// @brief Helper function to retrieve DQ raw data
+/// @param[in] i_target a valid fapi2 target
+/// @param[in,out] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of raw data from the vpd
+/// @note passing nullptr for o_blob will return the size of the keyword
+///
+static fapi2::ReturnCode dq_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                                    fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
+                                    uint8_t* o_blob )
+{
+    io_vpd_info.iv_size = raw_dq_size;
+
+    if (o_blob != nullptr)
+    {
+        uint8_t l_sim = 0;
+        FAPI_TRY( is_simulation(l_sim) );
+
+        // If we're in sim, we return the DQ map of the VBU (raw) DQ map - 1-1 more or less
+        // If we're not in sim, we return the DQ map which corresponds with our MCS relative
+        // postion.
+        const uint8_t* blob = l_sim ? raw_dq : zz_dq[mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)];
+        memcpy(o_blob, blob, io_vpd_info.iv_size);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Return a blob of memory VPD data associated with the input target
-/// @param[in] i_target     a valid fapi2 target
-/// @param[in] io_vpd_info  fapi2::VPDInfo class that specifies which piece of data to return
-/// @param[out] o_blob      the blob of raw data from the vpd
+/// @param[in] i_target a valid fapi2 target
+/// @param[in] i_version_layout version layout number
+/// @param[in] io_vpd_info fapi2::VPDInfo class that specifies which piece of data to return
+/// @param[out] o_blob the blob of raw data from the vpd
 /// @return FAPI2_RC_SUCCESS if there's no problem
 /// @note passing nullptr for o_blob will return the size of the keyword
 ///
-/// Example:
-/// fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS> vpdInfo(MR_keyword);
-/// vpdInfo.iv_freq = 2667;
-///
-/// uint8_t * blob = NULL;
-///
-/// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob = static_cast<uint8_t *>(malloc(vpdInfo.iv_size));
-/// FAPI_TRY(getVPD( mcs, vpdInfo, blob ));
-/// blob now contains the VPD data for the MCS.
-///
 fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                         const uint64_t i_version_layout,
                          fapi2::VPDInfo<fapi2::TARGET_TYPE_MCS>& io_vpd_info,
                          uint8_t* o_blob)
 {
@@ -207,60 +358,30 @@ fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
     switch (io_vpd_info.iv_vpd_type)
     {
         case fapi2::MemVpdData::MR:
-            io_vpd_info.iv_size = raw_mr_size;
-
-            if (o_blob != nullptr)
-            {
-                memcpy(o_blob, raw_mr, raw_mr_size);
-            }
-
+            mr_helper(i_target, i_version_layout, io_vpd_info, o_blob);
             break;
 
         case fapi2::MemVpdData::MT:
-            io_vpd_info.iv_size = raw_mt_size;
-
-            if (o_blob != nullptr)
-            {
-                memcpy(o_blob, raw_mt, raw_mt_size);
-            }
-
+            mt_helper(i_target, i_version_layout, io_vpd_info, o_blob);
             break;
 
         case fapi2::MemVpdData::CK:
-            io_vpd_info.iv_size = raw_cke_size - raw_cke_header;
-
-            if (o_blob != nullptr)
-            {
-                memcpy(o_blob, raw_cke + raw_cke_header, io_vpd_info.iv_size);
-            }
-
+            FAPI_INF("CK isn't layout version dependent for %s", mss::c_str(i_target));
+            ck_helper(i_target, io_vpd_info, o_blob);
             break;
 
         case fapi2::MemVpdData::DQ:
-            {
-                io_vpd_info.iv_size = raw_dq_size;
-
-                if (o_blob != nullptr)
-                {
-                    uint8_t l_sim = 0;
-                    FAPI_TRY( is_simulation(l_sim) );
-
-                    // If we're in sim, we return the DQ map of the VBU (raw) DQ map - 1-1 more or less
-                    // Ifwe're not in sim, we return the DQ map which corresponds with our MCS relative
-                    // postion.
-                    const uint8_t* blob = l_sim ? raw_dq : zz_dq[mss::relative_pos<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)];
-                    memcpy(o_blob, blob, io_vpd_info.iv_size);
-                }
-            }
+            FAPI_INF("DQ isn't layout version dependent for %s", mss::c_str(i_target));
+            FAPI_TRY( dq_helper(i_target, io_vpd_info, o_blob) );
             break;
 
         case fapi2::MemVpdData::MP:
-            FAPI_ERR("No MP?");
+            FAPI_ERR("No MP? for %s", mss::c_str(i_target));
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
             break;
 
         default:
-            FAPI_ERR("No vpd type %d?", io_vpd_info.iv_vpd_type);
+            FAPI_ERR("No vpd type %d? for %s", io_vpd_info.iv_vpd_type, mss::c_str(i_target));
             return fapi2::FAPI2_RC_INVALID_PARAMETER;
             break;
     };
@@ -269,7 +390,6 @@ fapi2::ReturnCode getVPD(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
 
 fapi_try_exit:
     return fapi2::current_err;
-
 }
 
 } // ns mss
