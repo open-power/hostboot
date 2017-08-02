@@ -2312,12 +2312,19 @@ fapi2::ReturnCode layoutCmnRingsForCme( Homerlayout_t*   i_pHomer,
             ringSize = i_ringData.iv_sizeWorkBuf1;
             coreCmnRingId = io_cmeRings.getCommonRingId( ringIndex );
 
+            RingVariant_t l_ringVariant = i_ringVariant;
+            if ((coreCmnRingId == ec_gptr) || // EC GPTR
+                (coreCmnRingId == ec_time))   // EC TIME
+            {
+                l_ringVariant = BASE;
+            }
+
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       P9_XIP_MAGIC_CME,
                                       i_chipState.getChipLevel(),
                                       coreCmnRingId,
                                       P9_TOR::CME,
-                                      i_ringVariant,
+                                      l_ringVariant,
                                       CORE0_CHIPLET_ID ,
                                       &i_ringData.iv_pWorkBuf1,
                                       ringSize,
@@ -2944,12 +2951,26 @@ fapi2::ReturnCode layoutCmnRingsForSgpe( Homerlayout_t*     i_pHomer,
             torRingId = (EQ_INEX_INDEX  == ringIndex) ? eqInexBucketId :
                         io_sgpeRings.getCommonRingId( ringIndex );
 
+            RingVariant_t l_ringVariant = i_ringVariant;
+            if ((EQ_INEX_INDEX != ringIndex) &&
+                ((torRingId == eq_gptr)         || // EQ GPTR
+                 (torRingId == eq_ana_gptr)     ||
+                 (torRingId == eq_dpll_gptr)    ||
+                 (torRingId == ex_l3_gptr)      || // EX GPTR
+                 (torRingId == ex_l2_gptr)      ||
+                 (torRingId == ex_l3_refr_gptr) ||
+                 (torRingId == eq_time)         || // EQ TIME
+                 (torRingId == ex_l3_time)      || // EX TIME
+                 (torRingId == ex_l2_time)))
+            {
+                l_ringVariant = BASE;
+            }
             rc = tor_get_single_ring( i_ringData.iv_pRingBuffer,
                                       P9_XIP_MAGIC_SGPE,
                                       i_chipState.getChipLevel(),
                                       torRingId,
                                       P9_TOR::SGPE,
-                                      i_ringVariant,
+                                      l_ringVariant,
                                       CACHE0_CHIPLET_ID,
                                       &i_ringData.iv_pWorkBuf1,
                                       tempBufSize,
