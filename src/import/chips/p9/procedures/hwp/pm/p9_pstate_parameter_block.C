@@ -54,7 +54,22 @@
 //the value in this table are in Index format
 uint8_t g_GreyCodeIndexMapping [] =
 {
-    0, 1, 3, 2, 6, 7, 5, 4, 12, 13, 15, 14, 10, 11, 9, 8,
+/*    0x00*/ 0,
+/*    0x01*/ 1,
+/*    0x02*/ 3,
+/*    0x03*/ 2,
+/*    0x04*/ 7,
+/*    0x05*/ 6,
+/*    0x06*/ 4,
+/*    0x07*/ 5,
+/*    0x08*/ 12,
+/*    0x09*/ 12,
+/*    0x0a*/ 12,
+/*    0x0b*/ 12,
+/*    0x0c*/ 8,
+/*    0x0d*/ 9,
+/*    0x0e*/ 11,
+/*    0x0f*/ 10
 };
 
 fapi2::vdmData_t g_vpdData = {1,
