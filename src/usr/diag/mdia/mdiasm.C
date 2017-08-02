@@ -44,6 +44,7 @@
 #include <initservice/istepdispatcherif.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
+#include <initservice/initserviceif.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -52,6 +53,27 @@ using namespace DeviceFW;
 
 namespace MDIA
 {
+
+// Maint cmd timeout values are in nanosecs. This is just for easy conversions.
+static const uint64_t NANOSEC_PER_SEC = 1000000000;
+
+// HW timeout value (in seconds).
+static const uint64_t MAINT_CMD_HW_TIMEOUT = 30;
+
+// Nimbus DD1.0 has a workaround that will likely cause the command to exceed
+// the normal timout value. In test 110 seconds was not enough on ZZ systems.
+// Bumping up to 300 seconds.
+static const uint64_t MAINT_CMD_HW_TIMEOUT_DD10 = 300;
+
+// When continuous traces are enabled, Hostboot will likely be throttled because
+// of the sheer amount traces that need to be processed. 30 minutes seems to be
+// working so far.
+static const uint64_t MAINT_CMD_HW_TIMEOUT_LONG = 1800;
+
+// The software timeout will be 10 minutes. Note that we will use the hardare
+// timeout and commit informational error logs each time that expires until it
+// eventually reachs the software threshold. This value contains the threshold.
+static const uint64_t MAINT_CMD_SW_TIMEOUT_TH = 600 / MAINT_CMD_HW_TIMEOUT;
 
 void StateMachine::running(bool & o_running)
 {
@@ -236,6 +258,7 @@ fapi2::TargetType getMdiaTargetType()
     return targetType;
 }
 
+// Returns the calculated timeout value in nanoseconds.
 uint64_t getTimeoutValue()
 {
     // Out maintenance command timeout value will differ depending on a few
@@ -243,43 +266,49 @@ uint64_t getTimeoutValue()
     // return it.
 
     // Start with the default timeout value.
-    uint64_t timeout = MAINT_CMD_TIMEOUT;
+    uint64_t timeout = MAINT_CMD_HW_TIMEOUT; // in seconds
 
     // If continuous tracing is enabled.
-    TargetHandle_t sys = nullptr;
-    targetService().getTopLevelTarget(sys);
-    HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
-
-    if ( hbSettings.traceContinuous && timeout < MAINT_CMD_TIMEOUT_LONG )
+    if ( timeout < MAINT_CMD_HW_TIMEOUT_LONG )
     {
-        timeout = MAINT_CMD_TIMEOUT_LONG;
+        TargetHandle_t sys = nullptr;
+        targetService().getTopLevelTarget(sys);
+        HbSettings hbSettings = sys->getAttr<ATTR_HB_SETTINGS>();
+
+        if ( hbSettings.traceContinuous )
+        {
+            timeout = MAINT_CMD_HW_TIMEOUT_LONG;
+        }
     }
 
     // Nimbus DD1.0 workaround.
-    TARGETING::Target* masterProc = nullptr;
-    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
-
-    if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() &&
-         0x10 == masterProc->getAttr<ATTR_EC>() &&
-         timeout < MAINT_CMD_TIMEOUT_DD10 )
+    if ( timeout < MAINT_CMD_HW_TIMEOUT_DD10 )
     {
-        timeout = MAINT_CMD_TIMEOUT_DD10;
+        TARGETING::Target* masterProc = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+        if ( MODEL_NIMBUS == masterProc->getAttr<ATTR_MODEL>() &&
+             0x10         == masterProc->getAttr<ATTR_EC>() )
+        {
+            timeout = MAINT_CMD_HW_TIMEOUT_DD10;
+        }
     }
 
-    // Ensure that the MDIA timeout is less than the watchdog timer.
-    if ( timeout >= (IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN*NANOSEC_PER_SEC) )
+    // Ensure that the timeout is less than the watchdog timer.
+    // NOTE: This should only be done on BMC based machines. The watch dog timer
+    // is not checked on FSP based machines.
+    if ( !INITSERVICE::spBaseServicesEnabled() &&
+         timeout >= IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN )
     {
-        // If the watchdog timer for some reason happens to be 10 sec or less,
-        // just set the MDIA timeout to the watchdog timeout.
-        // Else set it to ten seconds lower than the watchdog timer.
+        // If the watchdog timer for some reason happens to be 10 seconds or
+        // less, just set the MDIA timeout to the watchdog timeout. Otherwise,
+        // set it to ten seconds less than the watchdog timer.
         timeout = ( IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN <= 10 )
-                      ? ( IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN *
-                          NANOSEC_PER_SEC )
-                      : ( (IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN-10) *
-                          NANOSEC_PER_SEC );
+                      ? IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN
+                      : IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN - 10;
     }
 
-    return timeout;
+    return timeout * NANOSEC_PER_SEC;
 }
 
 // Do the setup for CE thresholds
@@ -447,7 +476,7 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 if(firData & ~mskData)
                 {
                     // Committing an info log to help debug SW timeout
-                    if((*wit)->timeoutCnt >= MAINT_CMD_TIMEOUT_LOG)
+                    if((*wit)->timeoutCnt >= MAINT_CMD_SW_TIMEOUT_TH)
                     {
                         MDIA_FAST("sm: committing a SW timeout info log "
                                   "for HUID:0x%08X", get_huid(target));
