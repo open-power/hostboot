@@ -335,9 +335,9 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
         tmpId < PNOR::NUM_SECTIONS;
         tmpId ++ )
         {
-            TRACFCOMP(g_trac_pnor, "%s:    size=0x%.8X  flash=0x%.8X ",
-                  PNOR::SectionIdToString(tmpId), o_TOC[tmpId].size,
-                  o_TOC[tmpId].flashAddr);
+            TRACFCOMP(g_trac_pnor, "%s:    secure=0x%.2X  size=0x%.8X  flash=0x%.8X ",
+                  PNOR::SectionIdToString(tmpId), o_TOC[tmpId].secure,
+                  o_TOC[tmpId].size, o_TOC[tmpId].flashAddr);
         }
 
     } while (0);

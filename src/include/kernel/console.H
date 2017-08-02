@@ -45,7 +45,7 @@ class Console : public Util::ConsoleBufferInterface
     int putc(int);
         size_t operator()(int c) { return putc(c); };
 
-    enum { BUFFER_SIZE = 1024 * 12 };
+    enum { BUFFER_SIZE = 1024 * 20 };
 
     protected:
     Console();

@@ -285,10 +285,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         if (!l_info.secure)
         {
 #ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-            TRACDCOMP(g_trac_pnor,"PNOR::loadSecureSection> called on unsecured section - Best effort policy skipping");
+            TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on unsecured section - Best effort policy skipping");
             break;
 #else
-            TRACDCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> called on "
+            TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::verifySections> called on "
                 "unsecured section");
 
             // TODO securebootp9 revisit this assert code and replace with error log
@@ -317,7 +317,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // calcluate unsecured address from temp address
         uint8_t* l_unsecuredAddr = l_tempAddr - VMM_VADDR_SPNOR_DELTA;
 
-        TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
+        TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections section start address "
                     "in temp space is 0x%.16llX, "
                     "section start address in unsecured space is 0x%.16llX, "
                     "l_info.size = 0x%.16llX, "
@@ -337,7 +337,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         SECUREBOOT::ContainerHeader l_conHdr(l_tempAddr);
         size_t l_totalContainerSize = l_conHdr.totalContainerSize();
 
-        TRACDCOMP(g_trac_pnor, "SPnorRP::verifySections "
+        TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections "
                 "Total container size = 0x%.16llX", l_totalContainerSize);
 
         assert(l_totalContainerSize >= PAGESIZE +
@@ -359,8 +359,8 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections temp mem now: ",
                              l_tempAddr, 128);
 
-        // store secure space pointer in load record
-        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr) + PAGESIZE;
+        // store secure space pointer in load record (Includes Header)
+        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
 
         TRACDCOMP(g_trac_pnor,"section start address in secure space is "
                               "0x%.16llX",o_rec->secAddr);
@@ -401,9 +401,15 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // store the payload text size in the section load record
         // Note: the text size we get back is now trusted
         o_rec->textSize = l_conHdr.payloadTextSize();
-        l_totalContainerSize = l_conHdr.totalContainerSize();
-
         assert(o_rec->textSize == l_info.secureProtectedPayloadSize);
+        // Size of data loaded into Secure PnorRP vaddr space (Includes Header)
+        size_t l_protectedSizeWithHdr = PAGESIZE + o_rec->textSize;
+        TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections Total Protected size with Header = 0x%.16llX",
+                  l_protectedSizeWithHdr);
+
+        l_totalContainerSize = l_conHdr.totalContainerSize();
+        // keep track of info size in load record (Includes Header)
+        o_rec->infoSize = l_totalContainerSize;
 
         // pcr extension of PNOR hash
         l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
@@ -415,14 +421,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
             break;
         }
 
-        // remove secure header page in temp space
-        mm_remove_pages(RELEASE, l_tempAddr, PAGESIZE);
-
-        // keep track of info size in load record
-        o_rec->infoSize = l_totalContainerSize - PAGESIZE;
-
         // set permissions on the secured pages to writable
-        l_errhdl = setPermission(o_rec->secAddr, o_rec->textSize, WRITABLE);
+        l_errhdl = setPermission(o_rec->secAddr, l_protectedSizeWithHdr,
+                                 WRITABLE);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections set permissions "
@@ -449,7 +450,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
                     "payload",
                     l_info.name);
 
-            l_errhdl = setPermission(o_rec->secAddr + o_rec->textSize,
+            l_errhdl = setPermission(o_rec->secAddr + l_protectedSizeWithHdr,
                                        unprotectedPayloadSize,
                                        WRITABLE | WRITE_TRACKED);
             if(l_errhdl)
@@ -461,7 +462,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 
             // Register the write tracked memory range to be flushed on
             // shutdown.
-            INITSERVICE::registerBlock(o_rec->secAddr + o_rec->textSize,
+            INITSERVICE::registerBlock(o_rec->secAddr + l_protectedSizeWithHdr,
                                         unprotectedPayloadSize, SPNOR_PRIORITY);
         }
         else
@@ -534,6 +535,7 @@ void SPnorRP::waitForMessage()
 
                         // check and see if our cached section information
                         // is obsolete and if so, change it
+                        // NOTE: secAddr points to Secure Header
                         if ( (eff_addr < l_rec.secAddr) ||
                              (eff_addr >= (l_rec.secAddr + l_rec.infoSize))
                            )
@@ -580,7 +582,9 @@ void SPnorRP::waitForMessage()
                         // whether it is part of the secure payload.
                         // by the way, this if could be removed to make this
                         // purely arithmetic
-                        if (eff_addr >= (l_rec.secAddr + l_rec.textSize))
+                        // NOTE: secAddr points to Secure Header
+                        if (eff_addr >= ( (l_rec.secAddr + PAGESIZE) +
+                                           l_rec.textSize))
                         {
                             delta += VMM_VADDR_SPNOR_DELTA;
                         }
@@ -593,7 +597,9 @@ void SPnorRP::waitForMessage()
                         memcpy(user_addr, eff_addr - delta, PAGESIZE);
                         // if the page came from temp space then free up
                         // the temp page now that we're done with it
-                        if (eff_addr < (l_rec.secAddr + l_rec.textSize))
+                        // NOTE: secAddr points to Secure Header
+                        if (eff_addr < ( (l_rec.secAddr + PAGESIZE) +
+                                          l_rec.textSize))
                         {
                             mm_remove_pages(RELEASE, eff_addr - delta,
                                             PAGESIZE);
@@ -718,7 +724,7 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     msg->data[0] = static_cast<uint64_t>(i_section);
     int rc = msg_sendrecv(spnorQ, msg);
 
-    TRACDCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
+    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
               i_section,PNOR::SectionIdToString(i_section));
 
     // TODO securebootp9 - Need to be able to receive an error from the
@@ -810,7 +816,7 @@ errlHndl_t SPnorRP::miscSectionVerification(const uint8_t *i_vaddr,
     errlHndl_t l_errl = NULL;
     assert(i_vaddr != NULL);
 
-    TRACDCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d (%s)",
+    TRACFCOMP(g_trac_pnor, "SPnorRP::miscSectionVerification section=%d (%s)",
               i_secId,PNOR::SectionIdToString(i_secId));
 
     // Do any additional verification needed for a specific PNOR section
@@ -867,9 +873,9 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
                 HASH_PAGE_TABLE_ENTRY_SIZE) != 0 )
     {
         TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck Hostboot Base and Extended image mismatch");
-        TRACDBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
+        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck Measured sw key hash",
                             l_hashSwSigs, HASH_PAGE_TABLE_ENTRY_SIZE);
-        TRACDBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
+        TRACFBIN(g_trac_pnor,"SPnorRP::baseExtVersCheck HBI's hash page table salt entry",
                         l_hashPageTableSaltEntry, HASH_PAGE_TABLE_ENTRY_SIZE);
 
         // Memcpy needed for measured hash to avoid gcc error: dereferencing
