@@ -103,15 +103,7 @@ void initiateUnitDump( TargetHandle_t i_target,
 
 bool isSpConfigFsp()
 {
-    #ifdef __HOSTBOOT_RUNTIME
-
-    return false; // Should never have an FSP when using HBRT.
-
-    #else
-
     return INITSERVICE::spBaseServicesEnabled();
-
-    #endif
 }
 
 //------------------------------------------------------------------------------
