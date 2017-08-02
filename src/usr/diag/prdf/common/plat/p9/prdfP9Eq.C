@@ -50,7 +50,7 @@ namespace p9_eq
 int32_t PostAnalysis( ExtensibleChip * i_chip,
                       STEP_CODE_DATA_STRUCT & io_sc )
 {
-#ifdef __HOSTBOOT_MODULE
+#ifdef __HOSTBOOT_RUNTIME
     int32_t l_rc = restartTraceArray(i_chip->GetChipHandle());
     if (SUCCESS != l_rc)
     {
