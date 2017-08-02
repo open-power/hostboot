@@ -34,7 +34,6 @@ OBJS += securerommgr.o
 OBJS += rom_entry.o
 OBJS += trustedboot_base.o
 OBJS += $(if $(CONFIG_TPMDD),trustedbootMsg.o,)
-OBJS += containerheader.o
 OBJS += ${SECUREBOOT_COMMON_OBJS}
 OBJS += targutilbase.o
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/secureboot/base/containerheader.C $                   */
+/* $Source: src/usr/secureboot/common/containerheader.C $                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -80,8 +80,10 @@ void ContainerHeader::parse_header(const void* i_header)
     // Parse hw and sw flags
     parseFlags();
 
+#ifndef __HOSTBOOT_RUNTIME
     // Generate hw hash key
     genHwKeyHash();
+#endif
 
     // After parsing check if header is valid, do some quick bound checks
     validate();
@@ -239,11 +241,15 @@ void ContainerHeader::parseFlags()
                                    & KEY_TRANSITION_FLAG);
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 void ContainerHeader::genHwKeyHash()
 {
+
     // Generate and store hw hash key
     SECUREBOOT::hashBlob(&iv_headerInfo.hw_hdr.hw_pkey_a,
                          totalHwKeysSize, iv_hwKeyHash);
+
 }
+#endif
 
 }; //end of SECUREBOOT namespace
