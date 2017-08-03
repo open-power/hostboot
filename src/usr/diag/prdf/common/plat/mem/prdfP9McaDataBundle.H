@@ -70,6 +70,7 @@ class McaDataBundle : public DataBundle
             delete iv_impeThresholdCounter;
             #ifdef __HOSTBOOT_RUNTIME
                 delete iv_vcmFalseAlarmCounter;
+                delete iv_tpsFalseAlarmCounter;
             #else
                 delete iv_iplCeStats;
             #endif
@@ -115,6 +116,18 @@ class McaDataBundle : public DataBundle
         return iv_vcmFalseAlarmCounter;
     }
 
+    /** @return The TPS false alarm counter. */
+    TpsFalseAlarm * getTpsFalseAlarmCounter()
+    {
+        if ( nullptr == iv_tpsFalseAlarmCounter )
+        {
+            iv_tpsFalseAlarmCounter = new TpsFalseAlarm(
+                TimeBasedThreshold{ 3, ThresholdResolution::ONE_DAY } );
+        }
+
+        return iv_tpsFalseAlarmCounter;
+    }
+
     #else // IPL only
 
     /** @return The IPL CE statistics object. */
@@ -151,6 +164,9 @@ class McaDataBundle : public DataBundle
 
     /** VCM false alarm counter. */
     VcmFalseAlarm * iv_vcmFalseAlarmCounter = nullptr;
+
+    /** TPS false alarm counter. */
+    TpsFalseAlarm * iv_tpsFalseAlarmCounter = nullptr;
 
     #else // IPL only
 
