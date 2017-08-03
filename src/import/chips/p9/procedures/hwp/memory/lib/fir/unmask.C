@@ -84,8 +84,8 @@ fapi2::ReturnCode after_draminit_mc( const fapi2::Target<TARGET_TYPE_MCBIST>& i_
         fir::reg<MCA_FIR> l_mca_fir_reg(p, l_rc);
         FAPI_TRY(l_rc, "unable to create fir::reg for %d", MCA_FIR);
 
-        l_mca_fir_reg.checkstop<MCA_FIR_MAINTENANCE_AUE>()
-        .checkstop<MCA_FIR_MAINTENANCE_IAUE>()
+        l_mca_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_AUE>()
+        .recoverable_error<MCA_FIR_MAINTENANCE_IAUE>()
         .recoverable_error<MCA_FIR_SCOM_PARITY_CLASS_STATUS>()
         .recoverable_error<MCA_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
         .checkstop<MCA_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
