@@ -95,6 +95,8 @@ my $str=sprintf(
     "----------");
 
 $targetObj->writeReport($str);
+
+my @dimmTargets = ();
 #--------------------------------------------------
 ## loop through all targets and do stuff
 foreach my $target (sort keys %{ $targetObj->getAllTargets() })
@@ -116,9 +118,29 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processMembuf($targetObj, $target);
     }
+    elsif ($type eq "DIMM")
+    {
+        #Save Dimm Targets for later affinity swapping
+        push(@dimmTargets, $target);
+    }    
 
     processIpmiSensors($targetObj,$target);
 }
+
+processDimmAffinity($targetObj, @dimmTargets);
+
+#print Dumper $targetObj->getAllTargets();
+
+#foreach my $target (sort keys %{ $targetObj->getAllTargets() })
+#{
+#    my $type = $targetObj->getType($target);
+#
+#    if ($type eq "DIMM" or $type =~ /lcard-dimm-ddr4/i)
+#    {
+#        print "Calling Process Dimm Affinity Swap\n";
+#        processDimmAffinitySwap($targetObj, $target);
+#    }
+#}
 
 ## check topology
 foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
@@ -1558,6 +1580,159 @@ sub processMembuf
         }
     }
 }
+sub processDimmAffinity
+{
+    my $targetObj = shift;
+    my @dimmTargets = @_;
+    my %dimmsSwapped;
+
+    foreach my $target (@dimmTargets)
+    {
+        my $fapiPos = $targetObj->getAttribute($target, "FAPI_POS");
+        if (exists $dimmsSwapped{$fapiPos})
+        {
+            next;
+        }
+        my $affinityPath = $targetObj->getAttribute($target, "AFFINITY_PATH");
+        if ($affinityPath =~ /mcbist-1/)
+        {
+            print "Found Dimm behind mcbist-1, performing connection swap.\n";
+
+            #Find affinity path of other dimm to swap with
+            my $otherAffinityPath = $affinityPath;
+            if ($affinityPath =~ /mcs-0/)
+            {
+                $otherAffinityPath =~ s/mcs-0/mcs-1/g;
+            }
+            else
+            {
+                $otherAffinityPath =~ s/mcs-1/mcs-0/g;
+            }
+
+            print "affinityPath: $affinityPath\n";
+            print "otherAffinityPath: $otherAffinityPath\n";
+
+            #loop through dimm targets to find other dimm tos wap with
+            foreach my $iterTarget (@dimmTargets)
+            {
+                print "itertarget = $iterTarget\n";
+                if($otherAffinityPath ==
+                        $targetObj->getAttribute($iterTarget, "AFFINITY_PATH"))
+                {
+                    print "Found match!\n";
+                    my $iterFapiPos = $targetObj->getAttribute($iterTarget,
+                                                                    "FAPI_POS");
+                    if (exists $dimmsSwapped{$iterFapiPos}) 
+                    {
+                        next;
+                    }
+                    $dimmsSwapped{$iterFapiPos} = 1;
+                    $dimmsSwapped{$fapiPos} = 1;
+                    $targetObj->swapAttribute($target, $iterTarget, "AFFINITY_PATH");
+                    $targetObj->swapAttribute($target, $iterTarget, "HUID");
+                    $targetObj->swapAttribute($target, $iterTarget, "FAPI_POS");
+                    $targetObj->swapAttribute($target, $iterTarget, "FAPI_NAME");
+                }
+            }
+        }
+    }
+}
+
+sub processDimmAffinitySwap
+{
+    my $targetObj = shift;
+    my $target = shift;
+
+    my $affinityPath = $targetObj->getAttribute($target, "AFFINITY_PATH");
+
+    print "Target: $target - affinityPath = $affinityPath\n";
+    if ($affinityPath =~ /mcbist-1/)
+    {
+        my $huid =      $targetObj->getAttribute($target, "HUID");
+        my $origFapiPos =  $targetObj->getAttribute($target, "FAPI_POS");
+        my $fapiName = $targetObj->getAttribute($target, "FAPI_NAME");
+        my $newFapiPos;
+
+        if ($affinityPath =~ /mcs-0/)
+        {
+            print "Target: $target - Swapping MCS 0 for 1\n";
+            $affinityPath =~ s/mcs-0/mcs-1/g;
+            $newFapiPos = $origFapiPos + 4;
+            $huid = $huid + 4;
+        }
+        else
+        {
+            print "Target: $target - Swapping MCS 1 for 0\n";
+            $affinityPath =~ s/mcs-1/mcs-0/g;
+            $newFapiPos = $origFapiPos - 4;
+            $huid = $huid - 4;
+        }
+        
+        $fapiName =~ s/p$origFapiPos/p$newFapiPos/g;
+
+        print "final affinityPath = $affinityPath\n";
+
+        $targetObj->setAttribute($target,
+                                 "AFFINITY_PATH",
+                                 $affinityPath);
+
+        $targetObj->setAttribute($target,
+                                 "FAPI_POS",
+                                 $newFapiPos);
+
+        $targetObj->setAttribute($target,
+                                 "FAPI_NAME",
+                                 $fapiName);
+        
+        $targetObj->setAttribute($target,
+                                 "HUID",
+                                 $huid);
+
+        my $check = $targetObj->getAttribute($target, "AFFINITY_PATH");
+        print "Final check shows $target has affinity Path: $check\n";
+
+        
+    }
+
+}
+#    my $fapiPos = $targetObj->getAttribute($target, "FAPI_POS");
+#    if ( ($fapiPos == 12) or ($fapiPos == 13)
+#              or ($fapiPos == 8) or ($fapiPos == 9) )
+#    {
+#        
+#    }
+
+    #FAPI_POS 12, 8, 13, 9, ...
+    
+#    my $mca_target          = $targetObj->getTargetParent($target);
+#    my $mcs_target          = $targetObj->getTargetParent($mca_target);
+#    my $mcbist_target       = $targetObj->getTargetParent($mcs_target);
+#
+#    my $mca     = $targetObj->getAttribute($mca_target,    "CHIP_UNIT")%2;
+#    my $mcs     = $targetObj->getAttribute($mcs_target,    "CHIP_UNIT")%2;
+#    my $mcbist  = $targetObj->getAttribute($mcbist_target, "CHIP_UNIT");
+#    my $port_num = $targetObj->getAttribute($target,       "MBA_PORT");
+
+    #Horrible hack to swap mca0 and mca1 on mcbist1 to properly
+    # correlate the affinity path with the physical path
+
+#    if ($mcbist == 1)
+#    {
+#        if ($mca == 0)
+#        {
+#            $targetObj->setAttribute($target, "AFFINITY_PATH",
+#                   $targetObj->getAttribute($mcbist_target, "AFFINITY_PATH")
+#                         . "/mcs-$mcs/mca-1/dimm-$port_num"
+#                );
+#        }
+#        else
+#        {
+#            $targetObj->setAttribute($target, "AFFINITY_PATH",
+#                $targetObj->getAttribute($mcbist_target, "AFFINITY_PATH")
+#                        . "/mcs-$mcs/mca-0/dimm-$port_num"
+#                );
+#        }
+#    }
 
 sub getI2cMapField
 {

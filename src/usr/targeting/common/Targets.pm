@@ -1765,6 +1765,20 @@ sub setAttribute
     $target_ptr->{ATTRIBUTES}->{$attribute}->{default} = $value;
     $self->log($target, "Setting Attribute: $attribute=$value");
 }
+## Swaps attributes from one target to the other
+sub swapAttribute
+{ 
+    my $self         = shift;
+    my $target       = shift;
+    my $other_target = shift;
+    my $attribute    = shift;
+
+    my $val = $self->getAttribute($target, $attribute);
+    my $other_val = $self->getAttribute($other_target, $attribute);
+
+    $self->setAttribute($target, $attribute, $other_val);
+    $self->setAttribute($other_target, $attribute, $val);
+}
 ## sets the field of a complex attribute
 sub setAttributeField
 {
