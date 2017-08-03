@@ -146,6 +146,61 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SAFE_MODE_NOVDM_UPLIFT_MV</id>
+
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Safe mode voltage in mv
+      Consumer: p9_setup_evid.C
+
+      Overridden by p9_pstate_parameter_block
+
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <writeable/>
+  </attribute>
+
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAFE_MODE_VOLTAGE_MV</id>
+
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Safe mode voltage in mv
+      Consumer: p9_setup_evid.C
+
+      Overridden by p9_pstate_parameter_block
+
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <writeable/>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAFE_MODE_FREQUENCY_MHZ</id>
+
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Safe mode frequency in MHZ
+      Consumer: p9_setup_evid.C
+
+      Overridden by p9_pstate_parameter_block
+
+    </description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <initToZero/>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+
+  <attribute>
     <id>ATTR_AVSBUS_FREQUENCY</id>
 
     <targetType>TARGET_TYPE_SYSTEM</targetType>
