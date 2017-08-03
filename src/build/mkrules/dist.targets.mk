@@ -82,6 +82,7 @@ COPY_FILES = \
     src/build/buildpnor/PnorUtils.pm:openpower \
     src/build/buildpnor/imprintHwKeyHash:openpower \
 	src/build/buildpnor/wof-tables-img:openpower \
+	src/build/buildpnor/memd_creation.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
     src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower \
