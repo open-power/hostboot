@@ -221,10 +221,16 @@ public:
      * This is called for ALL FAPI Attributes even if they are
      * directly backed into HB targeting
      *
+     * @param[in] i_type     FAPI type to limit scope to, default none
+     * @param[in] i_fapiPos  FAPI pos to limit scope to, default none
+     * @param[in] i_attrHash Attribute hash to limit scope to, default none
+     *
      * - The attribute is saved to be synced to debug interface (Cronus)
      *
      */
-    void triggerAttrSync();
+    void triggerAttrSync(fapi2::TargetType i_type = fapi2::TARGET_TYPE_NONE,
+                         uint32_t i_fapiPos = TARGETING::FAPI_POS_NA,
+                         uint32_t i_attrHash = 0x0);
 
     /**
      * @brief This function will clear all attribute overrides in effect.
@@ -235,13 +241,24 @@ public:
 
     /**
      * @brief This function will allow the debug interface to set
-     *        attribut overrides "dynamically" at any point in the IPL
+     *        attribute overrides "dynamically" at any point in the IPL
      *        between isteps.  The debug interface is used to process
      *        the attributes in the same format as the ATTR_TMP and ATTR_PERM
      *        PNOR partition binary blobs
      *
      */
     void dynSetAttrOverrides();
+
+    /**
+     * @brief This function will allow the debug interface to dump a
+     *        specific attribute from a given fapi target type/pos
+     *        at any point in the IPL between isteps.  The debug interface
+     *        is used to process a simple request, and then dump the
+     *        atrribute(s) back down the debug interface via same
+     *        mechanism as triggerAttrSync
+     *
+     */
+    void dynAttrGet();
 
     /**
      * @brief This function actually sends the FAPI Sync tank attributes
