@@ -86,7 +86,9 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_AUE>()
         .recoverable_error<MCA_FIR_MAINLINE_UE>()
         .checkstop<MCA_FIR_MAINLINE_IAUE>()
-        .recoverable_error<MCA_FIR_MAINLINE_IUE>();
+        .recoverable_error<MCA_FIR_MAINLINE_IUE>()
+        .checkstop<MCA_FIR_MAINTENANCE_AUE>()
+        .checkstop<MCA_FIR_MAINTENANCE_IAUE>();
 
         // If ATTR_CHIP_EC_FEATURE_HW414700 is enabled set checkstops
         auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
