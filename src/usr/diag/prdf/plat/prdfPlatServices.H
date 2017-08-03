@@ -154,6 +154,17 @@ template<TARGETING::TYPE T>
 uint32_t startTpsPhase2( ExtensibleChip * i_chip, const MemRank & i_rank );
 
 /**
+ * @brief  Starts a targeted scrub command on the target rank for runtime TPS.
+ * @param  i_chip MCA or MBA chip.
+ * @param  i_rank The rank to target.
+ * @param  i_countAllCes True if we should count all CEs.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t startTpsRuntime( ExtensibleChip * i_chip, const MemRank & i_rank,
+                          bool i_countAllCes );
+
+/**
  * @brief Restarts Trace arrays after having stopped on error
  * @param i_tgt EC/EQ target
  * @return non-SUCCESS for failure, SUCCESS otherwise

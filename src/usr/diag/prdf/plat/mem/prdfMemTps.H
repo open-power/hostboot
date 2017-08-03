@@ -59,6 +59,27 @@ class TpsEvent : public TdEntry
 
     uint32_t getKey() const { return iv_rank.getKey(); } // Master and slave
 
+  private: // functions
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief  Starts phase 1 of the procedure.
+     * @param  io_sc  The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t startTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief  Analyzes phase 1 of the procedure.
+     * @param  io_sc  The step code data struct.
+     * @param  o_done True if the procedure is complete or has aborted.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzeTpsPhase1_rt(STEP_CODE_DATA_STRUCT & io_sc, bool & o_done);
+
+    #endif // __HOSTBOOT_RUNTIME
+
 };
 
 } // end namespace PRDF
