@@ -713,7 +713,8 @@ void AttrOverrideSync::setAttrActions(const AttributeId i_attrId,
 }
 
 //******************************************************************************
-void AttrOverrideSync::triggerAttrSync()
+void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
+                                       uint32_t i_fapiPos, uint32_t i_attrHash)
 {
     uint8_t * l_buf = NULL;
 
@@ -733,6 +734,22 @@ void AttrOverrideSync::triggerAttrSync()
         if(l_fType == fapi2::TARGET_TYPE_NONE)
         {
             continue; //not a FAPI2 target -- skip to next target
+        }
+
+        //Check to see if looking for a specific type/fapi_pos
+        if(i_type != fapi2::TARGET_TYPE_NONE)
+        {
+            if (i_type != l_fType) // types don't match, skip
+            {
+                continue;
+            }
+
+            //Now look for specific pos (if set)
+            if((i_fapiPos != TARGETING::FAPI_POS_NA) && // specific pos
+               (i_fapiPos != l_pTarget->getAttr<TARGETING::ATTR_FAPI_POS>()))
+            {
+                continue;
+            }
         }
 
         //skip if not functional
@@ -770,6 +787,13 @@ void AttrOverrideSync::triggerAttrSync()
 
         for(size_t i = 0; i < l_elems; i++)
         {
+            //Look for specific ATTR
+            if((i_attrHash!= 0x0) &&  //looking for specific ATTR
+               (i_attrHash != l_attrs[i].iv_attrId))
+            {
+                continue;
+            }
+
             // Write the attribute to the SyncAttributeTank to sync to Cronus
             size_t l_bytes =
               l_attrs[i].iv_attrElemSizeBytes * l_attrs[i].iv_dims[0] *
@@ -840,51 +864,22 @@ void AttrOverrideSync::dynSetAttrOverrides()
     }
 
 #ifndef __HOSTBOOT_RUNTIME
-    errlHndl_t err = NULL;
-    int64_t rc = 0;
+    errlHndl_t err = nullptr;
+    void * l_vaddr = nullptr;
 
     do
     {
-        // Create a memory block to serve as Debug Comm channel
-        // NOTE: using mm_alloc_block since this code is running before we
-        // have mainstore and we must have contiguous blocks of memory for
-        // Cronus putmempba
-        rc = mm_alloc_block( NULL,
-                             reinterpret_cast<void*>
-                             (VMM_VADDR_DEBUG_COMM),
-                             VMM_DEBUG_COMM_SIZE);
-        if(rc == -EALREADY)
-        {
-            //-EALREADY inidciates the block is already mapped -- ignore
-            rc = 0;
-        }
+        // Allocate a contiguous block of memory -- can just use malloc for
+        // this because Cronus will use putmempba to load
+        l_vaddr = malloc(VMM_DEBUG_COMM_SIZE);
 
-        if( rc )
-        {
-            // This is a debug interface, just emit trace and exit
-            FAPI_ERR("dynSetAttrOverrides() - "
-                     "Error from mm_alloc_block : rc=%d", rc );
-            break;
-        }
-
-        rc = mm_set_permission(reinterpret_cast<void*>
-                               (VMM_VADDR_DEBUG_COMM),
-                               VMM_DEBUG_COMM_SIZE,
-                               WRITABLE | ALLOCATE_FROM_ZERO);
-        if( rc )
-        {
-            // This is a debug interface, just emit trace and exit
-            FAPI_ERR("dynSetAttrOverrides() - "
-                     "Error from mm_set_permission : rc=%d", rc );
-            break;
-        }
 
         //Now masquerade this at the ATTR_TMP PNOR section so the underlying
         //ATTR override and bin file can be used as is
         PNOR::SectionInfo_t l_sectionInfo;
         l_sectionInfo.id = PNOR::ATTR_TMP;
         l_sectionInfo.name = "ATTR_TMP";
-        l_sectionInfo.vaddr = VMM_VADDR_DEBUG_COMM;
+        l_sectionInfo.vaddr = reinterpret_cast<uint64_t>(l_vaddr);
         l_sectionInfo.flashAddr = 0xFFFFFFFF; //Not used
         l_sectionInfo.size = VMM_DEBUG_COMM_SIZE;
         l_sectionInfo.eccProtected = false;
@@ -897,11 +892,9 @@ void AttrOverrideSync::dynSetAttrOverrides()
 
         //Send debug message to tool to update memory
         //Must clear data to actually alloction phys pages
-        memset (reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM), 0xFF,
-                VMM_DEBUG_COMM_SIZE);
-        uint64_t l_addr =
-          mm_virt_to_phys(reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM));
-        FAPI_INF("virt[%llx] phys[%llx]", VMM_VADDR_DEBUG_COMM, l_addr);
+        memset (l_vaddr, 0xFF, VMM_DEBUG_COMM_SIZE);
+        uint64_t l_addr = mm_virt_to_phys(l_vaddr);
+        FAPI_INF("virt[%p] phys[%llx]", l_vaddr, l_addr);
         Util::writeDebugCommRegs(Util::MSG_TYPE_ATTROVERRIDE,
                                  l_addr,
                                  VMM_DEBUG_COMM_SIZE);
@@ -917,13 +910,47 @@ void AttrOverrideSync::dynSetAttrOverrides()
         }
     }while(0);
 
-    // Attempt to clean up after ourselves.  Ignore errors on cleanup
-    // path in debug interface
-    //release all pages in page block
-    rc = mm_remove_pages(RELEASE, reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM),
-                         VMM_DEBUG_COMM_SIZE);
-    rc = mm_set_permission(reinterpret_cast<void*>(VMM_VADDR_DEBUG_COMM),
-                           VMM_DEBUG_COMM_SIZE, NO_ACCESS | ALLOCATE_FROM_ZERO);
+    // Attempt to clean up after ourselves
+    free(l_vaddr);
+    l_vaddr = nullptr;
+#endif
+}
+
+//******************************************************************************
+void AttrOverrideSync::dynAttrGet()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    void * l_vaddr = nullptr;
+
+    do
+    {
+        // Create a memory block to serve as Debug Comm channel
+        // Allocate a contiguous block of memory -- can just use malloc for
+        // this because Cronus will use putmempba to load
+        l_vaddr = malloc(VMM_DEBUG_COMM_SIZE);
+
+        //Send debug message to tool to update memory
+        //Must clear data to actually alloction phys pages
+        memset (l_vaddr, 0xFF, VMM_DEBUG_COMM_SIZE);
+        uint64_t l_addr = mm_virt_to_phys(l_vaddr);
+        FAPI_INF("virt[%p] phys[%llx]", l_vaddr, l_addr);
+        Util::writeDebugCommRegs(Util::MSG_TYPE_ATTRGET,
+                                 l_addr,
+                                 VMM_DEBUG_COMM_SIZE);
+
+        uint32_t * l_targInfo =
+          reinterpret_cast<uint32_t*>(VMM_VADDR_DEBUG_COMM);
+
+        FAPI_INF("init: processing dynamic ATTR get");
+        triggerAttrSync(static_cast<fapi2::TargetType>(
+                          l_targInfo[Util::DEBUG_ATTRGET_FAPI_TYPE]),
+                        l_targInfo[Util::DEBUG_ATTRGET_FAPI_POS],
+                        l_targInfo[Util::DEBUG_ATTRGET_HASH]);
+    }while(0);
+
+    // Attempt to clean up after ourselves.
+    free(l_vaddr);
+    l_vaddr = nullptr;
 #endif
 }
 

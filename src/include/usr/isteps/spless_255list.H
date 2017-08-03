@@ -66,6 +66,7 @@ namespace   INITSERVICE
     const   uint8_t     DUMP_FAPI_ATTR         =   0x03;
     const   uint8_t     SET_ATTR_OVERRIDES     =   0x04;
     const   uint8_t     CLEAR_ATTR_OVERRIDES   =   0x05;
+    const   uint8_t     GET_FAPI_ATTR          =   0x06;
 
 
     const   TaskInfo    g_istep255[]  =   {
@@ -96,6 +97,11 @@ namespace   INITSERVICE
         },
         {
                 ISTEPNAME(255,5, "clear_attr_overrides"),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
+        {
+                ISTEPNAME(255,6, "get_fapi_attr"),
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },

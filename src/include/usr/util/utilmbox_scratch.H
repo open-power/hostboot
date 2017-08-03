@@ -61,7 +61,12 @@ namespace Util
         MSG_TYPE_TRACE          =       0x00,
         MSG_TYPE_ATTRDUMP       =       0x01,
         MSG_TYPE_ATTROVERRIDE   =       0x02,
+        MSG_TYPE_ATTRGET        =       0x03,
 
+        //ATTR GET control words
+        DEBUG_ATTRGET_FAPI_TYPE =       0x0,
+        DEBUG_ATTRGET_FAPI_POS  =       0x1,
+        DEBUG_ATTRGET_HASH      =       0x2,
     };
 
     /**

@@ -92,6 +92,7 @@ namespace SPLESS
             uint32_t allowAttrOverrides  :1;   //7
             uint32_t reserved2           :24;  //8:31
         } PACKED;
+        // NOTE: Used for debug tool communication during Hostboot IPL
     };
 
     // Mailbox Scratch Register 4

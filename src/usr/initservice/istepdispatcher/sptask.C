@@ -120,6 +120,10 @@ void handleControlCmd( SPLessCmd & io_cmd )
         fapi2::theAttrOverrideSync().dynSetAttrOverrides();
         break;
 
+    case GET_FAPI_ATTR:
+        fapi2::theAttrOverrideSync().dynAttrGet();
+        break;
+
     case CLEAR_ATTR_OVERRIDES:
         fapi2::theAttrOverrideSync().clearAttrOverrides();
         break;
