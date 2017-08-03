@@ -561,26 +561,6 @@ void* call_host_voltage_config( void *io_pArgs )
             // Don't set the boot voltage ATTR -- instead the
             // setup_evid will calculate from each chips #V and factor
             // in loadline/distloss/etc
-
-            // call p9_setup_evid for each processor
-            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
-            FAPI_INVOKE_HWP(l_err, p9_setup_evid, l_fapiProc, COMPUTE_VOLTAGE_SETTINGS);
-
-            if( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Error in call_host_voltage_config::p9_setup_evid");
-
-                // Create IStep error log and cross reference occurred error
-                //@fixme-RTC:176741-Ignore these logs until HWPs are fixed
-                //l_stepError.addErrorDetails( l_err );
-                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-
-                // Commit Error
-                errlCommit( l_err, ISTEP_COMP_ID );
-                continue;
-            }
-
         } // PROC for-loop
 
         // If we hit an error from p9_setup_evid, quit
@@ -627,6 +607,38 @@ void* call_host_voltage_config( void *io_pArgs )
 
         l_sys->setAttr<ATTR_SOCKET_POWER_NOMINAL>(l_powerModeNom);
         l_sys->setAttr<ATTR_SOCKET_POWER_TURBO>(l_powerModeTurbo);
+
+
+        // for each proc target
+        for( const auto & l_proc : l_procList )
+        {
+            // call p9_setup_evid for each processor
+            fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+            FAPI_INVOKE_HWP(l_err, p9_setup_evid, l_fapiProc, COMPUTE_VOLTAGE_SETTINGS);
+
+            if( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "Error in call_host_voltage_config::p9_setup_evid");
+
+                // Create IStep error log and cross reference occurred error
+                //@fixme-RTC:176741-Ignore these logs until HWPs are fixed
+                //l_stepError.addErrorDetails( l_err );
+                l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+                continue;
+            }
+
+        } // PROC for-loop
+
+        // If we hit an error from p9_setup_evid, quit
+        if( l_err )
+        {
+            break;
+        }
+
 
     } while( 0 );
 
