@@ -27,11 +27,11 @@
 /// @file  p9_setup_evid.C
 /// @brief Setup External Voltage IDs
 ///
-// *HW Owner    : Sudheendra K Srivathsa <sudheendraks@in.ibm.com>
-// *FW Owner    : Sangeetha T S <sangeet2@in.ibm.com>
-// *Team        : PM
-// *Consumed by : HB
-// *Level       : 2
+// *HWP HW Owner        : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
+// *Team                : PM
+// *Consumed by         : HB
+// *Level               : 3
 ///
 /// @verbatim
 ///
@@ -47,7 +47,8 @@
 #include <p9_setup_evid.H>
 #include <p9_avsbus_lib.H>
 #include <p9_avsbus_scom.H>
-#include <p9_pstate_parameter_block.H>
+#include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 
 enum P9_SETUP_EVID_CONSTANTS
 {
@@ -60,75 +61,6 @@ enum P9_SETUP_EVID_CONSTANTS
 
 };
 
-
-//##############################################################################
-// Function to initiate an eVRM voltage change.
-//##############################################################################
-// Voltage write and Status Check performed in main procedure
-fapi2::ReturnCode
-driveVoltageChange(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
-                   i_target,
-                   const p9avslib::avsRails i_Rail,
-                   const uint32_t i_Voltage )
-{
-
-    uint32_t l_CmdDataRead = 0;
-    uint32_t l_avsBusNum = 0, l_RailSelect = 0;
-    uint32_t l_o2sBridgeNum = BRIDGE_NUMBER;
-
-    // Hardcoded for now
-    if (i_Rail == p9avslib::VDD)
-    {
-        l_avsBusNum = 0;
-        l_RailSelect = 0;
-    }
-    else if (i_Rail == p9avslib::VDN)
-    {
-        l_avsBusNum = 1;
-        l_RailSelect = 0;
-    }
-    else
-    {
-        FAPI_ERR("Invalid AVSBus Rail: i_Rail = %u", i_Rail);
-        //return fapi2::current_err;
-
-    }
-
-    // Drive AVS transaction with a frame value 0xFFFFFFFF (idle frame) to
-    // initialize the AVS slave
-    FAPI_TRY(avsIdleFrame(i_target, l_avsBusNum, l_o2sBridgeNum),
-             "AVS Idle frame transaction failed");
-
-    // Drive write transaction with a target voltage on a particular rail
-    // and wait on o2s_ongoing=0
-    FAPI_TRY(avsVoltageWrite(i_target, l_avsBusNum, l_o2sBridgeNum,
-                             l_RailSelect, i_Voltage),
-             "AVS Voltage write transaction failed");
-
-
-    // *** The following is used for procedure validation testing an will be removed
-    // *** from the final code as will be replaced with a checkStatus() routine.
-
-    // Drive read transaction to return the voltage on the same rail
-    // and wait on o2s_ongoing=0
-    FAPI_TRY(avsVoltageRead(i_target, l_avsBusNum, l_o2sBridgeNum,
-                            l_RailSelect, l_CmdDataRead),
-             "AVS Voltage read transaction failed");
-
-    // Compare write voltage value with read voltage value
-    if (i_Voltage == l_CmdDataRead)
-    {
-        //PASS
-    }
-    else
-    {
-        //@todo L3 - Update once RTC item for drive Voltage change and
-        // check status routine is completed and L3 FFDC // FAIL
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 //-----------------------------------------------------------------------------
 // Procedure
@@ -171,15 +103,19 @@ struct avsbus_attrs_t
     uint32_t vrm_voffset_vcs_uv;
 };
 
+//##############################################################################
 //@brief Initialize VDD/VCS/VDN bus num, rail select and voltage values
-//@param[i] i_target       Chip target
-//@param[i] attrs    VDD/VCS/VDN attributes
-//@return   Return code void
+//@param[in] i_target   Proc Chip target
+//@param[in] attrs      VDD/VCS/VDN attributes
+//@param[in] i_action   Voltage Config action
+//@return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+//##############################################################################
 fapi2::ReturnCode
 avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                   avsbus_attrs_t* attrs,
                   const VoltageConfigActions_t i_action)
 {
+    fapi2::ReturnCode l_rc;
     uint32_t attr_mvpd_data[PV_D][PV_W];
     uint32_t valid_pdv_points;
     uint8_t present_chiplets;
@@ -189,6 +125,9 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     l_state.iv_vdm_enabled     = true;
     l_state.iv_ivrm_enabled    = true;
     l_state.iv_wof_enabled     = true;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint32_t attr_freq_proc_refclock_khz = 0;
+    uint32_t attr_proc_dpll_divider = 0;
 
 #define DATABLOCK_GET_ATTR(_attr_name, _target, _attr_assign) \
     FAPI_TRY(FAPI_ATTR_GET(fapi2::_attr_name, _target, _attr_assign),"Attribute read failed"); \
@@ -213,6 +152,8 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS_UOHM, i_target, attrs->r_loadline_vcs_uohm);
     DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS_UOHM, i_target, attrs->r_distloss_vcs_uohm);
     DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS_UV,  i_target, attrs->vrm_voffset_vcs_uv);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz);
+    DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER, i_target, attr_proc_dpll_divider);
 
     do
     {
@@ -221,13 +162,14 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         //inputed to the HWP tells us to
         if(i_action == COMPUTE_VOLTAGE_SETTINGS)
         {
+            uint8_t l_poundv_bucketId = 0;
+            fapi2::voltageBucketData_t l_poundv_data;
+
             // query VPD if any of the voltage attributes are zero
             if (!attrs->vdd_voltage_mv ||
                 !attrs->vcs_voltage_mv ||
                 !attrs->vdn_voltage_mv)
             {
-                uint8_t l_poundv_bucketId = 0;
-                fapi2::voltageBucketData_t l_poundv_data;
                 // Get #V data from MVPD for VDD/VDN and VCS voltage values
                 FAPI_TRY(proc_get_mvpd_data(i_target,
                                             attr_mvpd_data,
@@ -242,6 +184,72 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     FAPI_IMP("**** WARNING : There are no EQ chiplets present which means there is no valid #V VPD");
                     break;
                 }
+
+                // Compute safe mode values
+                LP_VDMParmBlock   l_lp_vdmpb;
+                PoundW_data l_poundw_data;
+                memset (&l_poundw_data, 0, sizeof(PoundW_data));
+                LocalPstateParmBlock l_localppb;
+                memset(&l_localppb, 0, sizeof(LocalPstateParmBlock));
+                Safe_mode_parameters l_safe_mode_values;
+                uint8_t l_pstate = 0xFF;
+                AttributeList l_attr;
+                VpdBias l_vpdbias[NUM_OP_POINTS];
+                memset (l_vpdbias, 0, sizeof(VpdBias));
+
+                //set to default value if dpll divider is 0
+                if (!attr_proc_dpll_divider)
+                {
+                    attr_proc_dpll_divider = 8;
+                }
+
+                // Read the Biased attribute data
+                FAPI_TRY(proc_get_attributes(i_target, &l_attr), "Get attributes function failed");
+
+                // Apply Bias values
+                FAPI_TRY(proc_get_extint_bias(attr_mvpd_data,
+                                              &l_attr,
+                                              l_vpdbias),
+                         "Bias application function failed");
+
+
+                uint32_t l_frequency_step_khz = attr_freq_proc_refclock_khz / attr_proc_dpll_divider;
+                uint32_t l_ref_freq_khz = attr_mvpd_data[ULTRA][VPD_PV_CORE_FREQ_MHZ] * 1000;
+
+                l_pstate = ((attr_mvpd_data[ULTRA][VPD_PV_CORE_FREQ_MHZ] -
+                             attr_mvpd_data[POWERSAVE][VPD_PV_CORE_FREQ_MHZ]) * 1000) /
+                           l_frequency_step_khz;
+                l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state, true);
+
+                if (l_rc)
+                {
+                    FAPI_ASSERT_NOEXIT(false,
+                                       fapi2::PSTATE_PB_POUND_W_ACCESS_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                       .set_CHIP_TARGET(i_target)
+                                       .set_FAPI_RC(l_rc),
+                                       "Pstate Parameter Block proc_get_mvpd_poundw function failed");
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                }
+
+                FAPI_INF ("l_frequency_step_khz %08x", l_frequency_step_khz);
+                FAPI_INF ("l_ref_freq_khz %08X", l_ref_freq_khz);
+                FAPI_INF ("l_pstate %x", l_pstate);
+
+                //Compute safe mode values
+                FAPI_TRY(p9_pstate_safe_mode_computation (i_target, attr_mvpd_data,
+                         l_ref_freq_khz, l_frequency_step_khz,
+                         l_pstate, &l_safe_mode_values,
+                         l_poundw_data),
+                         "Error from p9_pstate_safe_mode_computation function");
+
+                // Set the DPLL frequency values to safe mode values
+                FAPI_TRY (p9_setup_dpll_values(i_target,
+                                               l_safe_mode_values,
+                                               attrs->vdd_voltage_mv,
+                                               attr_freq_proc_refclock_khz,
+                                               attr_proc_dpll_divider),
+                          "Error from p9_setup_dpll_values function");
+
 
                 // set VDD voltage to PowerSave Voltage from MVPD data (if no override)
                 if (attrs->vdd_voltage_mv)
@@ -328,6 +336,7 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             {
                 FAPI_INF("Using override for all boot voltages (VDD/VCS/VDN)");
             }
+
         }
     }
     while(0);
@@ -489,3 +498,96 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 fapi_try_exit:
     return fapi2::current_err;
 } // Procedure
+
+fapi2::ReturnCode
+p9_setup_dpll_values (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                      const Safe_mode_parameters i_safe_mode_values,
+                      uint32_t& o_vddm_mv,
+                      const uint32_t  i_freq_proc_refclock_khz,
+                      const uint32_t i_proc_dpll_divider)
+
+{
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
+    fapi2::Target<fapi2::TARGET_TYPE_EQ> l_firstEqChiplet;
+    l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>(fapi2::TARGET_STATE_FUNCTIONAL);
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_fmult;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t l_chipNum = 0xFF;
+
+
+    for ( auto l_itr = l_eqChiplets.begin(); l_itr != l_eqChiplets.end(); ++l_itr)
+    {
+        l_fmult.flush<0>();
+        FAPI_TRY(fapi2::getScom(*l_itr, EQ_QPPM_DPLL_FREQ , l_data64),
+                 "ERROR: Failed to read EQ_QPPM_DPLL_FREQ");
+
+        l_data64.extractToRight<EQ_QPPM_DPLL_FREQ_FMULT,
+                                EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_fmult);
+
+        // Convert back to the complete frequency value
+        l_fmult =  ((l_fmult * i_freq_proc_refclock_khz ) / i_proc_dpll_divider ) / 1000;
+
+        // Convert frequency value to a format that needs to be written to the
+        // register
+        uint32_t l_safe_mode_freq = ((i_safe_mode_values.safe_mode_freq_mhz * 1000) * i_proc_dpll_divider) /
+                                    i_freq_proc_refclock_khz;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_itr, l_chipNum));
+        FAPI_INF("For EQ number %u, l_fmult %08X l_safe_mode_freq %08X",
+                 l_chipNum, l_fmult, l_safe_mode_freq);
+
+        if (l_fmult > i_safe_mode_values.safe_mode_freq_mhz)
+        {
+            FAPI_INF("DPLL setting: Lowering the dpll frequency");
+        }
+        else if (l_fmult < i_safe_mode_values.safe_mode_freq_mhz)
+        {
+            FAPI_INF("DPLL setting: Raising the dpll frequency");
+        }
+        else
+        {
+            FAPI_INF("DPLL setting: Leaving the dpll frequency as it is");
+        }
+
+        //FMax
+        l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMAX,
+                                 EQ_QPPM_DPLL_FREQ_FMAX_LEN>(l_safe_mode_freq);
+        //FMin
+        l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMIN,
+                                 EQ_QPPM_DPLL_FREQ_FMIN_LEN>(l_safe_mode_freq);
+        //FMult
+        l_data64.insertFromRight<EQ_QPPM_DPLL_FREQ_FMULT,
+                                 EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_safe_mode_freq);
+
+        FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_DPLL_FREQ, l_data64),
+                 "ERROR: Failed to write for EQ_QPPM_DPLL_FREQ");
+
+        //Update external voltage to boot mode value
+        o_vddm_mv = i_safe_mode_values.boot_mode_mv;
+
+
+        //Update VDM VID compare to safe mode value
+        const uint16_t VDM_VOLTAGE_IN_MV = 512;
+        const uint16_t VDM_GRANULARITY = 4;
+
+        //Convert same mode value to a format that needs to be written to
+        //the register
+        uint32_t l_vdm_vid_value = (i_safe_mode_values.safe_mode_mv - VDM_VOLTAGE_IN_MV) / VDM_GRANULARITY;
+
+        FAPI_INF ("l_vdm_vid_value %x, i_safe_mode_values.safe_mode_mv %x", l_vdm_vid_value, i_safe_mode_values.safe_mode_mv);
+
+        FAPI_TRY(fapi2::getScom(*l_itr, EQ_QPPM_VDMCFGR, l_data64),
+                 "ERROR: Failed to read EQ_QPPM_VDMCFGR");
+
+        l_data64.insertFromRight<0, 8>(l_vdm_vid_value);
+
+        FAPI_TRY(fapi2::putScom(*l_itr, EQ_QPPM_VDMCFGR, l_data64),
+                 "ERROR: Failed to write for EQ_QPPM_VDMCFGR");
+    } //end of eq list
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+

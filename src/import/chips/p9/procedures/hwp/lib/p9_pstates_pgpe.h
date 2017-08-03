@@ -208,13 +208,11 @@ typedef struct
     /// The "Safe" Voltage
     ///
     /// A voltage to be used when safe-mode is activated
-    /// @todo Need to detail this out yet.
     uint32_t safe_voltage_mv;
 
     /// The "Safe" Frequency
     ///
     /// A voltage to be used when safe-mode is activated
-    /// @todo Need to detail this out yet.
     uint32_t safe_frequency_khz;
 
     /// The exponent of the exponential encoding of Pstate stepping delay

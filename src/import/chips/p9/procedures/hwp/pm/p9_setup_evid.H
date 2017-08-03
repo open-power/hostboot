@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,17 +27,18 @@
 /// @file  p9_setup_evid.H
 /// @brief Setup External Voltage IDs
 ///
-/// *HW Owner    : Sudheendra K Srivathsa <sudheendraks@in.ibm.com>
-/// *FW Owner    : Sangeetha T S <sangeet2@in.ibm.com>
-/// *Team        : PM
-/// *Consumed by : HB
-/// *Level       : 2
+// *HWP HW Owner        : Greg Still <stillgs@us.ibm.com>
+// *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
+// *Team                : PM
+// *Consumed by         : HB
+// *Level               : 3
 ///
 
 #ifndef __P9_SETUP_EVID_H__
 #define __P9_SETUP_EVID_H__
 
 #include <fapi2.H>
+#include <p9_pstate_parameter_block.H>
 
 extern "C"
 {
@@ -58,6 +59,21 @@ extern "C"
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
         const VoltageConfigActions_t);
 
+/// @brief Set safe mode values to DPLL fmult,fmin and fmax
+/// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+/// @param [in]  i_safe_mode_values   Safe mode values
+/// @param [out] o_vddm_mv  external vdd voltaget value
+/// @param [in]  i_freq_proc_refclock_khz proc clock frequency
+/// @param [in]  i_proc_dpll_divider proc dpll divider value
+//@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode
+    p9_setup_dpll_values (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                          const Safe_mode_parameters i_safe_mode_values,
+                          uint32_t& o_vddm_mv,
+                          const uint32_t  i_freq_proc_refclock_khz,
+                          const uint32_t i_proc_dpll_divider);
+
+
 /// @brief Read attributes containing part's boot voltages(VDD,VCS and VDN)
 /// and set these voltage using the AVSBUS interface (VDD, VDN and VCS).
 ///
@@ -75,7 +91,7 @@ extern "C"
 /// @attritem  ATTR_VCS_AVSBUS_BUSNUM - AVSBus Number having the VCS VRM
 /// @attritem  ATTR_VCS_AVSBUS_RAIL   - AVSBus Rail number for VCS VRM
 ///
-/// @retval FAPI_RC_SUCCESS
+///@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
     fapi2::ReturnCode
     p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                   const VoltageConfigActions_t i_action);

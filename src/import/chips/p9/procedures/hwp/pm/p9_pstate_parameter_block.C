@@ -333,7 +333,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                                     &present_chiplets,
                                     l_poundv_bucketId,
                                     &l_poundv_data, &l_state),
-                 "proc_get_mvpd_data function failed to retrieve porund V data");
+                 "proc_get_mvpd_data function failed to retrieve pound V data");
 
         if (!present_chiplets)
         {
@@ -1057,9 +1057,8 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_as
     DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_PB_MHZ, FAPI_SYSTEM, attr_nest_frequency_mhz);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_CEILING_MHZ, FAPI_SYSTEM, attr_freq_core_ceiling_mhz);
-    // @todo RTC 169768 Safe mode and use of boot mode
-//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_FREQUENCY_MHZ, FAPI_SYSTEM, attr_pm_safe_frequency_mhz);
-//    DATABLOCK_GET_ATTR(ATTR_PM_SAFE_VOLTAGE_MV, FAPI_SYSTEM, attr_pm_safe_voltage_mv);
+    DATABLOCK_GET_ATTR(ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, attr_pm_safe_frequency_mhz);
+    DATABLOCK_GET_ATTR(ATTR_SAFE_MODE_VOLTAGE_MV, i_target, attr_pm_safe_voltage_mv);
     DATABLOCK_GET_ATTR(ATTR_FREQ_CORE_FLOOR_MHZ, FAPI_SYSTEM, attr_freq_core_floor_mhz);
 
     // Loadline, Distribution loss and Distribution offset attributes
@@ -1084,12 +1083,6 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_as
     DATABLOCK_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE, FAPI_SYSTEM, attr_pstate_mode);
 
     DATABLOCK_GET_ATTR(ATTR_TDP_RDP_CURRENT_FACTOR, i_target, attr_tdp_rdp_current_factor);
-
-    // @todo RTC 169768   Safe mode and use of boot mode
-
-    // Setting Safe Mode to the core floor frequency as this is the minimum
-    // allowed for this system.
-    io_attr->attr_pm_safe_frequency_mhz = io_attr->attr_freq_core_floor_mhz;
 
 
     DATABLOCK_GET_ATTR(ATTR_EXTERNAL_VRM_TRANSITION_START_NS, FAPI_SYSTEM,
@@ -1275,7 +1268,6 @@ proc_get_mvpd_data(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
     while(0);
 
-    free (l_buffer);
 
 fapi_try_exit:
 
@@ -1283,6 +1275,7 @@ fapi_try_exit:
     {
         o_state->iv_pstates_enabled = false;
     }
+    free (l_buffer);
 
     return fapi2::current_err;
 
@@ -2517,6 +2510,7 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
              revle32(i_gppb->nest_frequency_mhz),
              revle32(i_gppb->nest_frequency_mhz));
 
+
     // 2 Slope sets
 
     sprintf(l_buffer, "PsVSlopes:");
@@ -3153,7 +3147,8 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_data,
                      fapi2::voltageBucketData_t i_poundv_data,
-                     PSTATE_attribute_state* o_state)
+                     PSTATE_attribute_state* o_state,
+                     bool i_skip_check)
 {
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::vdmData_t l_vdmBuf;
@@ -3171,8 +3166,9 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
          FAPI_DBG("proc_get_mvpd_poundw: VDM enable = %d, WOF enable %d",
                     is_vdm_enabled(o_state), is_wof_enabled(o_state));
 
-        // Exit if both VDM and WOF are disabled
-        if (!is_vdm_enabled(o_state) && !is_wof_enabled(o_state))
+        // Exit if both VDM and WOF is disabled
+        if ((!is_vdm_enabled(o_state) && !is_wof_enabled(o_state)) && 
+            !i_skip_check)
         {
             FAPI_INF("   proc_get_mvpd_poundw: BOTH VDM and WOF are disabled.  Skipping remaining checks");
             o_state->iv_vdm_enabled = false;
@@ -4167,6 +4163,149 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, attr_assign, attr_assign);
 
     o_qm_flags->value = revle16(l_data16);
     FAPI_INF("%-60s = 0x%04x %d", "QM Flags", revle16(o_qm_flags->value));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//large_jump_interpolate
+uint32_t large_jump_interpolate (const Pstate i_pstate,const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                                 const uint32_t i_step_frequency, const Pstate i_ps_pstate,
+                                 const PoundW_data i_data)
+{
+    VpdOperatingPoint operating_points[NUM_OP_POINTS];
+    load_mvpd_operating_point(i_attr_mvpd_data, operating_points, i_step_frequency);
+    uint8_t l_jump_value_set_ps = (i_data.poundw[POWERSAVE].vdm_small_large_normal_freq >> 4) & 0x0F;
+    uint8_t l_jump_value_set_nom = (i_data.poundw[NOMINAL].vdm_small_large_normal_freq >> 4) & 0x0F;
+
+    uint32_t l_slope_value = compute_slope_thresh(l_jump_value_set_nom,l_jump_value_set_ps,
+                                                  operating_points[POWERSAVE].pstate,
+                                                  operating_points[NOMINAL].pstate);
+
+    uint32_t l_vdm_jump_value = (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value * 
+                                (i_ps_pstate - i_pstate)) >> THRESH_SLOPE_FP_SHIFT));
+   return l_vdm_jump_value;
+}
+
+//pstate2voltage
+uint32_t pstate2voltage(const Pstate i_pstate, 
+                        const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                        const uint32_t i_step_frequency)
+{
+    VpdOperatingPoint operating_points[NUM_OP_POINTS];
+    load_mvpd_operating_point(i_attr_mvpd_data, operating_points, i_step_frequency);
+
+    uint32_t l_SlopeValue = revle16(compute_slope_4_12(revle32(operating_points[NOMINAL].vdd_mv),
+                                               revle32(operating_points[POWERSAVE].vdd_mv),
+                                               operating_points[POWERSAVE].pstate,
+                                               operating_points[NOMINAL].pstate));
+
+    FAPI_INF("l_globalppb.operating_points[NOMINAL].vdd_mv %x",revle32(operating_points[NOMINAL].vdd_mv));
+    FAPI_INF("l_globalppb.operating_points[POWERSAVE].vdd_mv%x",revle32(operating_points[POWERSAVE].vdd_mv));
+    FAPI_INF("l_globalppb.operating_points[NOMINAL].pstate %x",operating_points[NOMINAL].pstate);
+    FAPI_INF("l_globalppb.operating_points[POWERSAVE].pstate %x",operating_points[POWERSAVE].pstate);
+
+    FAPI_INF ("l_SlopeValue %x",l_SlopeValue);
+
+
+    uint32_t l_vdd = (( (l_SlopeValue * (-i_pstate + operating_points[POWERSAVE].pstate)) >> 
+                      VID_SLOPE_FP_SHIFT_12) + revle32(operating_points[POWERSAVE].vdd_mv));
+
+    FAPI_INF ("l_vdd %x",l_vdd);
+
+    return l_vdd;
+}
+
+//p9_pstate_safe_mode_computation
+fapi2::ReturnCode
+p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                const uint32_t i_attr_mvpd_data[PV_D][PV_W],const uint32_t i_reference_freq,
+                                const uint32_t i_step_frequency,
+                                const Pstate i_ps_pstate,
+                                Safe_mode_parameters *o_safe_mode_values,
+                                const PoundW_data i_poundw_data)
+{
+    Safe_mode_parameters l_safe_mode_values;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq;
+    fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_safe_mode_mv;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, FAPI_SYSTEM, l_safe_mode_values.safe_op_freq_mhz));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_safe_mode_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_mv));
+
+    FAPI_INF ("l_safe_mode_values.safe_op_freq_mhz %08x",l_safe_mode_values.safe_op_freq_mhz);
+    FAPI_INF ("i_reference_freq %08x",i_reference_freq);
+    FAPI_INF ("i_step_frequency %08x",i_step_frequency);
+
+    // Calculate safe op pstate for Power save
+    l_safe_mode_values.safe_op_ps = ((float)(i_reference_freq) -
+                                     (float)(l_safe_mode_values.safe_op_freq_mhz * 1000)) /
+                                     (float)i_step_frequency;
+    FAPI_INF("l_safe_mode_values.safe_op_ps %x",l_safe_mode_values.safe_op_ps);
+
+    // Calculate safe jump value for large frequency
+    l_safe_mode_values.safe_vdm_jump_value = large_jump_interpolate
+                                            (l_safe_mode_values.safe_op_ps,
+                                             i_attr_mvpd_data, i_step_frequency,
+                                             i_ps_pstate, i_poundw_data);
+    FAPI_INF ("l_safe_mode_values.safe_vdm_jump_value %x",l_safe_mode_values.safe_vdm_jump_value);
+
+
+    // Calculate safe mode freq
+    l_safe_mode_values.safe_mode_freq_mhz = ((1 + l_safe_mode_values.safe_vdm_jump_value /32) *
+                                              l_safe_mode_values.safe_op_freq_mhz  /
+                                             (i_step_frequency / 1000)) *  //converting from khz to mhz
+                                             (i_step_frequency / 1000);
+
+
+    if (l_safe_mode_freq)
+    {
+        l_safe_mode_values.safe_mode_freq_mhz = l_safe_mode_freq;
+        FAPI_INF("Applying override safe mode freq value");
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_safe_mode_values.safe_mode_freq_mhz));
+    }
+    FAPI_INF ("l_safe_mode_values.safe_mode_freq_mhz %0x",l_safe_mode_values.safe_mode_freq_mhz);
+
+
+    l_safe_mode_values.safe_mode_ps = ((float)(i_reference_freq) -
+                                       (float)(l_safe_mode_values.safe_mode_freq_mhz * 1000)) /
+                                       (float)i_step_frequency;
+
+    FAPI_INF ("l_safe_mode_values.safe_mode_ps %x",l_safe_mode_values.safe_mode_ps);
+
+    // Calculate safe mode voltage
+    l_safe_mode_values.safe_mode_mv = pstate2voltage(l_safe_mode_values.safe_mode_ps,
+                                                     i_attr_mvpd_data,
+                                                     i_step_frequency);
+
+
+    if (l_safe_mode_mv)
+    {
+        l_safe_mode_values.safe_mode_mv = l_safe_mode_mv;
+        FAPI_INF("Applying override safe mode voltage value");
+    }
+    else
+    {
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_values.safe_mode_mv));
+    }
+
+    FAPI_INF ("l_safe_mode_values.safe_mode_mv %x",l_safe_mode_values.safe_mode_mv);
+
+
+    fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV_Type l_uplift_mv;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_NOVDM_UPLIFT_MV, i_target, l_uplift_mv));
+
+    // Calculate boot mode voltage
+    l_safe_mode_values.boot_mode_mv = l_safe_mode_values.safe_mode_mv + l_uplift_mv;
+
+    FAPI_INF("l_safe_mode_values.boot_mode_mv %x",l_safe_mode_values.boot_mode_mv);
+
+    memcpy (o_safe_mode_values,&l_safe_mode_values, sizeof(Safe_mode_parameters));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -88,6 +88,19 @@ typedef struct
     bool iv_wof_enabled;
 } PSTATE_attribute_state;
 
+// Safe mode frequency and voltage params
+
+typedef struct
+{
+    uint32_t safe_op_freq_mhz;
+    uint8_t  safe_op_ps;
+    uint32_t safe_vdm_jump_value;
+    uint32_t safe_mode_freq_mhz;
+    uint8_t  safe_mode_ps;
+    uint32_t safe_mode_mv;
+    uint32_t boot_mode_mv;
+} Safe_mode_parameters;
+
 
 /// Constants required to compute and interpolate operating points
 ///
@@ -314,6 +327,7 @@ proc_chk_valid_poundv ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_tar
 /// @brief Get IQ (IDDQ) data and put into array
 /// @param[in]    i_target          => Proc Target
 /// @param[inout] iddqt             => IDDQ table to hold MVPD IDDQ data
+/// @param[out]   o_state           => pstate attribute state
 /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
 /// ----------------------------------------------------------------
 
@@ -337,7 +351,8 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_poundw_data,
                      fapi2::voltageBucketData_t i_poundv_data,
-                     PSTATE_attribute_state* o_state
+                     PSTATE_attribute_state* o_state,
+                     bool i_skip_check = false
                     );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
@@ -687,6 +702,50 @@ void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
                                    uint32_t& io_size,
                                    PSTATE_attribute_state* o_state,
                                    const uint32_t i_base_state_frequency);
+
+/// -------------------------------------------------------------------
+/// @brief This function computes the safe mode frequency and voltage value
+/// @param[in] i_target  proc chip target
+/// @param[in] i_attr_mvpd_data #V vpd data
+/// @param[in] i_reference_freq proc reference freq
+/// @param[in] i_step_frequency Step frequency
+/// @param[in] i_ps_pstate power save pstate
+/// @param[out] o_safe_mode_values safe mode values
+/// @paramgin] i_data  Pound W vpd data
+/// @return FAPI2::SUCCESS
+fapi2::ReturnCode
+p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                                const uint32_t i_reference_freq,
+                                const uint32_t i_step_frequency,
+                                const Pstate i_ps_pstate,
+                                Safe_mode_parameters* o_safe_mode_values,
+                                const PoundW_data i_poundw_data);
+
+/// -------------------------------------------------------------------
+/// @brief For a given pstate.. gets the vdd voltge value
+/// @param[in] i_pstate  safe mode pstate
+/// @param[in] i_attr_mvpd_data #V vpd data
+/// @param[in] i_step_frequency Step frequency
+/// @return uint32_t vdd voltage value
+uint32_t pstate2voltage(const Pstate i_pstate,
+                        const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                        const uint32_t i_step_frequency);
+
+/// -------------------------------------------------------------------
+/// @brief This function calculates large jump value.. for the given pstate
+//         values and jump values read from the pound w vpd.
+/// @param[in] i_pstate  safe mode pstate
+/// @param[in] i_attr_mvpd_data #V vpd data
+/// @param[in] i_step_frequency Step frequency
+/// @param[in] i_ps_pstate power save pstate
+/// @paramgin] i_data  Pound W vpd data
+/// @return uint32_t jump value
+uint32_t large_jump_interpolate (const Pstate i_pstate, const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                                 const uint32_t i_step_frequency, Pstate i_ps_pstate,
+                                 const PoundW_data i_data);
+
+
 
 // p9_pstate_set_global_feature_attributes
 /// -------------------------------------------------------------------
