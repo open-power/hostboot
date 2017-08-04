@@ -263,7 +263,8 @@ fapi_try_exit:
 fapi2::ReturnCode p9_pm_occ_control
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
  const p9occ_ctrl::PPC_CONTROL i_ppc405_reset_ctrl,
- const p9occ_ctrl::PPC_BOOT_CONTROL i_ppc405_boot_ctrl)
+ const p9occ_ctrl::PPC_BOOT_CONTROL i_ppc405_boot_ctrl,
+ const uint64_t i_ppc405_jump_to_main_instr)
 {
     FAPI_IMP("Entering p9_pm_occ_control ....");
 
@@ -294,6 +295,11 @@ fapi2::ReturnCode p9_pm_occ_control
         {
             FAPI_INF("Setting up for memory boot");
             FAPI_TRY(bootMemory(i_target, l_data64), "Booting from Memory Failed");
+        }
+        else if(i_ppc405_boot_ctrl == p9occ_ctrl::PPC405_BOOT_WITHOUT_BL)
+        {
+            FAPI_DBG("Setting up for boot without bootloader");
+            l_data64.flush<0>().insertFromRight(i_ppc405_jump_to_main_instr, 0, 64);
         }
         else
         {
