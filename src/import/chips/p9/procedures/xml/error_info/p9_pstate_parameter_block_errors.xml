@@ -24,13 +24,97 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- Error definitions for p9_pstate_parameter_block procedure -->
+
+
+<!--
+    Notes on callout/deconfigure/gard.
+
+    To boot the computer, good #V is needed.  If failures occur, the chip and/or
+    its VPD contents is the likely suspect.  The chip is called out, deconfigured,
+    and garded to allow the remainder of the computer to boot and be used.
+
+    If IQ VPD accesses or the validity checking are in error, the computer can
+    still boot but WOF will be disabled.  The chip is called out but it is NOT
+    deconfigured or garded.
+
+    If #W VPD accesses or the validity checking are in error, the computer can
+    still boot but WOF and/or VDMs will be disabled depending on the portion of
+    #W in error.  The chip is called out (due to VPD error) but it is NOT
+    deconfigured or garded.
+
+    If WOF Table accesses or contents are in error, the computer can still boot
+    but WOF will be disabled.  As the WOF tables are part of the code, CODE
+    is called out nothing is deconfigured or garded.
+-->
+
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_GET_MVPD_FOR_POUND_V_FAILED</rc>
-    <description>MVPD function failed to read #V VPD</description>
+    <rc>RC_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
+    <description>#V data is not same across EQ chiplets</description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>PRESENT_CHIPLETS</ffdc>
+    <ffdc>CURRENT_EQ_CHIPLET_TARGET</ffdc>
+    <ffdc>FIRST_EQ_CHIPLET_TARGET</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+       <target>CHIP_TARGET</target>
+    </deconfigure>
+    <gard>
+       <target>CHIP_TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR</rc>
+    <description>During #V Biased data validity checking, the data did not have at or
+    increasing slopes (eg Power Save LE Nominal LE Turbo LE UltraTurbo).
+    Pstates are being disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY_A</ffdc>
+    <ffdc>VDD_A</ffdc>
+    <ffdc>IDD_A</ffdc>
+    <ffdc>VCS_A</ffdc>
+    <ffdc>ICS_A</ffdc>
+    <ffdc>FREQUENCY_B</ffdc>
+    <ffdc>VDD_B</ffdc>
+    <ffdc>IDD_B</ffdc>
+    <ffdc>VCS_B</ffdc>
+    <ffdc>ICS_B</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUNDV_SLOPE_ERROR</rc>
+    <description>During #V validity checking, the data did not have at or
+    increasing slopes (eg Power Save LE Nominal LE Turbo LE UltraTurbo).
+    Pstates are being disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY_A</ffdc>
+    <ffdc>VDD_A</ffdc>
+    <ffdc>IDD_A</ffdc>
+    <ffdc>VCS_A</ffdc>
+    <ffdc>ICS_A</ffdc>
+    <ffdc>FREQUENCY_B</ffdc>
+    <ffdc>VDD_B</ffdc>
+    <ffdc>IDD_B</ffdc>
+    <ffdc>VCS_B</ffdc>
+    <ffdc>ICS_B</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -38,19 +122,49 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_NO_PRESENT_CHIPLETS_ERROR</rc>
-    <description>No cores are present from which to read #V VPD</description>
+    <rc>RC_PSTATE_PB_POUNDV_ZERO_ERROR</rc>
+    <description>During #V validity checking, one or more required fields
+    were found to contain zero contents.  Pstates are being disabled.
+    </description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>PRESENT_CHIPLETS</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>VDD</ffdc>
+    <ffdc>IDD</ffdc>
+    <ffdc>VCS</ffdc>
+    <ffdc>ICS</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+<!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_BIASED_POUNDV_ZERO_ERROR</rc>
+    <description>During #V Biased data validity checking, one or more required fields
+    were found to contain zero contents.  Pstates are being disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>POINT</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>VDD</ffdc>
+    <ffdc>IDD</ffdc>
+    <ffdc>VCS</ffdc>
+    <ffdc>ICS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_POUNDV_WOF_UT_ERROR</rc>
-    <description>WOF was intending to be enable but could not due to #V validity
+    <description>WOF was intending to be enabled but could not due to #V validity
     checking issue of the UltraTurbo content.  The machine continues as
     functional but with WOF disabled.
     </description>
@@ -62,11 +176,37 @@
     <ffdc>IDD</ffdc>
     <ffdc>VCS</ffdc>
     <ffdc>ICS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR</rc>
+    <description>WOF was intending to be enabled but could not due to #V validity
+    checking issue of the biased UltraTurbo content.  The machine continues as
+    functional but with WOF disabled.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CHIPLET_NUMBER</ffdc>
+    <ffdc>BUCKET</ffdc>
+    <ffdc>FREQUENCY</ffdc>
+    <ffdc>VDD</ffdc>
+    <ffdc>IDD</ffdc>
+    <ffdc>VCS</ffdc>
+    <ffdc>ICS</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_WOF_HEADER_DATA_INVALID</rc>
-    <description>WOF Header data is invalid</description>
+    <description>WOF Header data is invalid.  The machine continues as
+    functional but with WOF disabled.
+    </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAGIC_NUMBER</ffdc>
     <ffdc>VERSION</ffdc>
@@ -75,32 +215,36 @@
     <ffdc>VFRT_DATA_SIZE</ffdc>
     <ffdc>QUADS_ACTIVE_SIZE</ffdc>
     <ffdc>CORE_COUNT</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_VFRT_HEADER_DATA_INVALID</rc>
-    <description>VFRT Header data is invalid</description>
+    <description>VFRT Header data is invalid. The machine continues as
+    functional but with WOF disabled.
+    </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MAGIC_NUMBER</ffdc>
     <ffdc>VFRT_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_FUNCTION_FAIL</rc>
-    <description>pstate parameter sub function failed
+    <rc>RC_PSTATE_PB_WOF_TABLE_ACCESS_FAIL</rc>
+    <description>Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute access failed
     </description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>FAPI_RC</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL</rc>
-    <description>#V data is not same across EQ chiplets</description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>CURRENT_EQ_CHIPLET_TARGET</ffdc>
-    <ffdc>FIRST_EQ_CHIPLET_TARGET</ffdc>
-    <ffdc>BUCKET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -111,6 +255,22 @@
     <ffdc>GOOD_QUADS_PER_SORT</ffdc>
     <ffdc>GOOD_NORMAL_CORES_PER_SORT</ffdc>
     <ffdc>GOOD_CACHES_PER_SORT</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_IQ_ACCESS_ERROR</rc>
+    <description>pstate parameter accesses within proc_get_mvpd_iddq failed
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>FAPI_RC</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -149,6 +309,10 @@
     <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>ULTRA_VID_COMPARE_IVID_VALUE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -159,12 +323,13 @@
     <ffdc>POWERSAVE_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>TURBO_VID_COMPARE_IVID_VALUE</ffdc>
     <ffdc>ULTRA_VID_COMPARE_IVID_VALUE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>    <callout>
+    <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_POUND_W_INVALID_THRESHOLD_VALUE</rc>
     <description>#W threshold values are invalid</description>
     <ffdc>CHIP_TARGET</ffdc>
@@ -173,6 +338,10 @@
     <ffdc>VDM_SMALL</ffdc>
     <ffdc>VDM_EXTREME</ffdc>
     <ffdc>VDM_LARGE</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -184,59 +353,26 @@
     <ffdc>VDM_NORMAL_LARGE</ffdc>
     <ffdc>VDM_LARGE_SMALL</ffdc>
     <ffdc>VDM_SMALL_NORMAL</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PSTATE_PB_POUNDV_ZERO_ERROR</rc>
-    <description>During #V validity checking, one or more required fields
-    were found to contain zero contents.  Pstates are being disabled.
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>CHIPLET_NUMBER</ffdc>
-    <ffdc>BUCKET</ffdc>
-    <ffdc>POINT</ffdc>
-    <ffdc>FREQUENCY</ffdc>
-    <ffdc>VDD</ffdc>
-    <ffdc>IDD</ffdc>
-    <ffdc>VCS</ffdc>
-    <ffdc>ICS</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
     </callout>
   </hwpError>
-  <!-- ******************************************************************** -->
+ <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_POUNDV_SLOPE_ERROR</rc>
-    <description>During #V validity checking, the data did not have at or
-    increasing slopes (eg Power Save LE Nominal LE Turbo LE UltraTurbo).
-    Pstates are being disabled.
+    <rc>RC_PSTATE_PB_POUND_W_ACCESS_FAIL</rc>
+    <description>pstate parameter accesses within proc_get_mvpd_poundw failed
     </description>
     <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>CHIPLET_NUMBER</ffdc>
-    <ffdc>BUCKET</ffdc>
-    <ffdc>POINT</ffdc>
-    <ffdc>FREQUENCY_A</ffdc>
-    <ffdc>VDD_A</ffdc>
-    <ffdc>IDD_A</ffdc>
-    <ffdc>VCS_A</ffdc>
-    <ffdc>ICS_A</ffdc>
-    <ffdc>FREQUENCY_B</ffdc>
-    <ffdc>VDD_B</ffdc>
-    <ffdc>IDD_B</ffdc>
-    <ffdc>VCS_B</ffdc>
-    <ffdc>ICS_B</ffdc>
+    <ffdc>FAPI_RC</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PSTATE_PB_WOF_VFRT_ERROR</rc>
-    <description>The WOF VFRT
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -278,19 +414,6 @@
   <hwpError>
     <rc>RC_PSTATE_PB_FREQ2PS_LT_PSTATE_MIN_ERROR</rc>
     <description>The calculated Pstate is less than the allowed minimum..
-    </description>
-    <ffdc>FREQ</ffdc>
-    <ffdc>PSTATE32</ffdc>
-    <ffdc>PSTATE</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PSTATE_PB_FREQ2PS_GT_PSTATE_MAX_ERROR</rc>
-    <description>The calculated Pstate is greater than the allowed maximum.
     </description>
     <ffdc>FREQ</ffdc>
     <ffdc>PSTATE32</ffdc>
