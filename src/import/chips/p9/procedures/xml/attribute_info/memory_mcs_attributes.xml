@@ -3162,11 +3162,19 @@
         <id>ATTR_EFF_RANK_GROUP_OVERRIDE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-          Override PHY RANK_PAIR settings. First uint16 value is for RANK_PAIR0
-          register value, and second is for RANK_PAIR1. Note that DIMM1 ranks in
-          a dual-drop config will be converted from Centaur canonical number
-          (4,5) to correct PHY settings (2,3). Set this attribute to zero
-          to use default settings.
+          Override PHY rank group settings. The two uint16 values map to rank
+          group0/1(Pri/Sec ranks) for unt16[X][0] and rank group2/3(Pri/Sec ranks)
+          for uint16[X][1]. Bits map as follows: uint16[X][0]: (0:2)=RP0_primary,
+          (3)=RP0_primary_valid, (4:6)=RP0_secondary, (7)=RP0_secondary_valid,
+          (8:10)=RP1_primary, (11)=RP1_primary_valid, (12:14)=RP1_secondary,
+          (15)=RP1_secondary_valid, uint16[X][1]: (0:2)=RP2_primary,
+          (3)=RP2_primary_valid, (4:6)=RP2_secondary, (7)=RP2_secondary_valid,
+          (8:10)=RP3_primary, (11)=RP3_primary_valid, (12:14)=RP3_secondary,
+          (15)=RP3_secondary_valid. Note: that the DIMM1 ranks in a dual-drop
+          config are stored in the attribute as the centaur canonical number (4,5).
+          The code will automatically do the conversion from the Centaur canonical
+          to the correct PHY nomenclature (2,3 for 4,5 respectively). Set this
+          attribute to zero to use default settings.
         </description>
         <initToZero></initToZero>
         <valueType>uint16</valueType>
