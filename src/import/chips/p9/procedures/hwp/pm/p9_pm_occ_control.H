@@ -94,7 +94,8 @@ enum PPC_BOOT_CONTROL
     PPC405_BOOT_NULL,        ///< Do nothing
     PPC405_BOOT_SRAM,        ///< Boot from OCC SRAM
     PPC405_BOOT_MEM,         ///< Boot from memory
-    PPC405_BOOT_OLD          ///< Deprecated
+    PPC405_BOOT_OLD,         ///< Deprecated
+    PPC405_BOOT_WITHOUT_BL   ///< Bypass OCC bootloader and execute main
 };
 }
 
@@ -102,7 +103,8 @@ enum PPC_BOOT_CONTROL
 typedef fapi2::ReturnCode (*p9_pm_occ_control_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
  const p9occ_ctrl::PPC_CONTROL,
- const p9occ_ctrl::PPC_BOOT_CONTROL);
+ const p9occ_ctrl::PPC_BOOT_CONTROL,
+ const uint64_t i_ppc405_jump_to_main_instr);
 
 extern "C" {
 
@@ -114,12 +116,15 @@ extern "C" {
 /// @param [in]  i_target            Chip Target
 /// @param [in]  i_ppc405_reset_ctrl Actionto be taken on PPC405
 /// @param [in]  i_ppc405_boot_ctrl  Location of boot instruction
+/// @param [in]  i_ppc405_jump_to_main_instr The instruction to jump to PPC405
+///              main. Used to bypass the OCC bootloader. Default = 0
 ///
 /// @return FAPI_RC_SUCCESS on success or error return code
     fapi2::ReturnCode p9_pm_occ_control(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const p9occ_ctrl::PPC_CONTROL i_ppc405_reset_ctrl,
-        const p9occ_ctrl::PPC_BOOT_CONTROL i_ppc405_boot_ctrl);
+        const p9occ_ctrl::PPC_BOOT_CONTROL i_ppc405_boot_ctrl,
+        const uint64_t i_ppc405_jump_to_main_instr = 0);
 } // extern "C"
 
 #endif // _P9_OCC_CONTROL_H_
