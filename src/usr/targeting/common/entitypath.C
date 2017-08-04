@@ -379,6 +379,8 @@ const char* EntityPath::pathElementTypeAsString(
             return "PNOR";
         case TYPE_OSC:
             return "OSC";
+        case TYPE_MFREFCLK:
+            return "MFREFClock";
         case TYPE_TODCLK:
             return "TodClock";
         case TYPE_CONTROL_NODE:
