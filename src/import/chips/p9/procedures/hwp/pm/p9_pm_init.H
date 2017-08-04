@@ -76,6 +76,17 @@ extern "C"
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         const p9pm::PM_FLOW_MODE i_mode,
         void* i_pHomerImage);
+
+//------------------------------------------------------------------------------
+///
+/// @brief Clears special wakeups on OCC.
+///
+/// @param[in] i_target Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+///
+    fapi2::ReturnCode clear_occ_special_wakeups(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 }
 
 #endif // _P9_PM_INIT_H
