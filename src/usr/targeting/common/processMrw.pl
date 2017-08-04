@@ -42,11 +42,13 @@ my $version        = 0;
 my $debug          = 0;
 my $report         = 0;
 my $sdr_file       = "";
+my $build          = "hb";
 
 # TODO RTC:170860 - Remove this after dimm connector defines VDDR_ID
 my $num_voltage_rails_per_proc = 1;
 
 GetOptions(
+    "build=s" => \$build,
     "f"   => \$force,             # numeric
     "x=s" => \$serverwiz_file,    # string
     "d"   => \$debug,
@@ -81,6 +83,13 @@ $targetObj->setVersion($VERSION);
 my $xmldir = dirname($serverwiz_file);
 $targetObj->loadXML($serverwiz_file);
 
+our %hwsvmrw_plugins;
+# FSP-specific functions
+if ($build eq "fsp")
+{
+    eval ("use processMrw_fsp; return 1;");
+    processMrw_fsp::return_plugins();
+}
 
 my $str=sprintf(
     " %30s | %10s | %6s | %4s | %9s | %4s | %4s | %4s | %10s | %s\n",
@@ -107,6 +116,10 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     elsif ($type eq "PROC")
     {
         processProcessor($targetObj, $target);
+        if ($build eq "fsp")
+        {
+            do_plugin("fsp_proc", $targetObj, $target);
+        }
     }
     elsif ($type eq "APSS")
     {
@@ -120,6 +133,10 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     processIpmiSensors($targetObj,$target);
 }
 
+if ($build eq "fsp")
+{
+    processMrw_fsp::loadFSP($targetObj);
+}
 ## check topology
 foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
     foreach my $p (keys %{$targetObj->{TOPOLOGY}->{$n}}) {
@@ -145,10 +162,17 @@ foreach my $target (keys %{ $targetObj->getAllTargets() })
 #--------------------------------------------------
 ## write out final XML
 my $xml_fh;
-my $filename = $xmldir . "/" . $targetObj->getSystemName() . "_hb.mrw.xml";
+my $filename;
+if ( $build eq "fsp" ){
+    $filename = $xmldir . "/" . $targetObj->getSystemName() . "_fsp.mrw.xml";
+}
+else{
+    $filename = $xmldir . "/" . $targetObj->getSystemName() . "_hb.mrw.xml";
+}
 print "Creating XML: $filename\n";
 open($xml_fh, ">$filename") || die "Unable to create: $filename";
-$targetObj->printXML($xml_fh, "top");
+
+$targetObj->printXML($xml_fh, "top", $build);
 close $xml_fh;
 if (!$targetObj->{errorsExist})
 {
@@ -1950,4 +1974,20 @@ Options:
         -v = version
 ";
     exit(1);
+}
+################################################################################
+# utility function used to call plugins. if none exists, call is skipped.
+################################################################################
+
+sub do_plugin
+{
+    my $step = shift;
+    if (exists($hwsvmrw_plugins{$step}))
+    {
+        $hwsvmrw_plugins{$step}(@_);
+    }
+    elsif ($debug && ($build eq "fsp"))
+    {
+        print STDERR "build is $build but no plugin for $step\n";
+    }
 }
