@@ -77,16 +77,6 @@ fapi2::ReturnCode pm_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     void* i_pHomerImage);
 
-///
-/// @brief Clears OCC special wake-up on all configured EX chiplets
-///
-/// @param[in] i_target   Chip target
-///
-/// @return FAPI2_RC_SUCCESS on success, else error code.
-///
-fapi2::ReturnCode clear_occ_special_wakeups(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
-
 // -----------------------------------------------------------------------------
 // Function definitions
 // -----------------------------------------------------------------------------
@@ -237,7 +227,8 @@ fapi2::ReturnCode pm_init(
     FAPI_DBG("Executing p9_pm_occ_control to start OCC PPC405");
     FAPI_EXEC_HWP(l_rc, p9_pm_occ_control, i_target,
                   p9occ_ctrl::PPC405_START,// Operation on PPC405
-                  p9occ_ctrl::PPC405_BOOT_MEM // PPC405 boot location
+                  p9occ_ctrl::PPC405_BOOT_MEM, // PPC405 boot location
+                  0 //Jump to 405 main instruction - not used here
                  );
     FAPI_TRY(l_rc, "ERROR: Failed to initialize OCC PPC405");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
