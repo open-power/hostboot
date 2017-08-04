@@ -372,8 +372,12 @@
         <value>69</value>
     </enumerator>
     <enumerator>
-        <name>LAST_IN_RANGE</name>
+        <name>MFREFCLK</name>
         <value>70</value>
+    </enumerator>
+    <enumerator>
+        <name>LAST_IN_RANGE</name>
+        <value>71</value>
     </enumerator>
     <default>NA</default>
 </enumerationType>
