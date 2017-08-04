@@ -380,6 +380,16 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     #undef PRDF_FUNC
 }
 
+template
+int32_t getBadDqBitmap<DIMMS_PER_RANK::MCA>(
+    TargetHandle_t i_trgt, const MemRank & i_rank,
+    MemDqBitmap<DIMMS_PER_RANK::MCA> & o_bitmap );
+
+template
+int32_t getBadDqBitmap<DIMMS_PER_RANK::MBA>(
+    TargetHandle_t i_trgt, const MemRank & i_rank,
+    MemDqBitmap<DIMMS_PER_RANK::MBA> & o_bitmap );
+
 //------------------------------------------------------------------------------
 
 template <DIMMS_PER_RANK T>
@@ -396,7 +406,7 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     if ( !areDramRepairsDisabled() )
     {
-        const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
+        //const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
 
         for ( int32_t ps = 0; ps < T; ps++ )
         {
@@ -428,6 +438,16 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     #undef PRDF_FUNC
 }
+
+template
+int32_t setBadDqBitmap<DIMMS_PER_RANK::MCA>(
+    TargetHandle_t i_trgt, const MemRank & i_rank,
+    const MemDqBitmap<DIMMS_PER_RANK::MCA> & i_bitmap );
+
+template
+int32_t setBadDqBitmap<DIMMS_PER_RANK::MBA>(
+    TargetHandle_t i_trgt, const MemRank & i_rank,
+    const MemDqBitmap<DIMMS_PER_RANK::MBA> & i_bitmap );
 
 //------------------------------------------------------------------------------
 
