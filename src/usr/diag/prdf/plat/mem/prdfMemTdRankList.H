@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,13 @@ class TdRankList
 
         return *next_it;
     }
+
+   /**
+     * @brief  Get the list of ranks.
+     * @return The vector of list entries.
+     */
+   const std::vector<TdRankListEntry> & getList() { return iv_list; }
+
 
   private: // instance variables
 
