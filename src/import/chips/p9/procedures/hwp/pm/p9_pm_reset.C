@@ -111,7 +111,8 @@ fapi2::ReturnCode p9_pm_reset(
     FAPI_EXEC_HWP(l_rc, p9_pm_occ_control,
                   i_target,
                   p9occ_ctrl::PPC405_RESET_SEQUENCE, //Operation on PPC405
-                  p9occ_ctrl::PPC405_BOOT_NULL); // Boot instruction location
+                  p9occ_ctrl::PPC405_BOOT_NULL, // Boot instruction location
+                  0); //Jump to 405 main instruction - not used here
     FAPI_TRY(l_rc, "ERROR: Failed to reset OCC PPC405");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After safe reset of OCC PPC405"));
 
