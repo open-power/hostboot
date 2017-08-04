@@ -70,22 +70,149 @@ sub usage
     print "Any attribute not referenced in hostboot's target_types.xml\n";
     print "are deleted from mrw xml.\n";
     print "Usage: ./filter_out_unwanted_attributes.pl --mrw-xml [mrw xml]\\\n";
-    print "     --tgt-xml [target xml] <--tgt-xml [target xml]>\n";
+    print "     --tgt-xml [common target xml] <--tgt-xml [platform target xml]>\n";
     exit (-1);
 }
 
 
-#Load all the target_type xmls
-my @tgt_xmls;
 $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
-foreach my $i (0 .. $#tgt_files)
+
+#Merge both the files to merge all extension target into target types and add
+#new target types which is coming from platform specific target
+open (FH, "<$tgt_files[0]") ||
+    die "ERROR: unable to open $tgt_files[0]\n";
+close (FH);
+
+open (FH, "<$tgt_files[1]") ||
+    die "ERROR: unable to open $tgt_files[1]\n";
+close (FH);
+
+
+my $fileCommon = XMLin("$tgt_files[0]");
+my $filePlatform = XMLin("$tgt_files[1]", ForceArray=>1);
+
+# This loop will fetch all targetTypeExtension from platform target types xml
+# and push it in an array "@NewAttr"
+my @NewAttr;
+foreach my $Extension ( @{$filePlatform->{targetTypeExtension}} )
 {
-    my $tgt_file  = $tgt_files[$i];
-    print "Loading TGT XML: $tgt_file in $i\n";
-    $tgt_xmls[$i] =
-           XMLin($tgt_file,
-                forcearray => ['attribute', 'targetType', 'field', 'targetTypeExtension']);
+    my $id = $Extension->{id}->[0];
+    foreach my $attr ( @{$Extension->{attribute}} )
+    {
+        my $attribute_id = $attr->{id}->[0];
+        my $default = "";
+        if (exists $attr->{default})
+        {
+            $default = $attr->{default}->[0];
+        }
+        if (! exists $fileCommon->{targetType}->{$id}->{attribute}->{$attribute_id})
+        {
+            push @NewAttr, [ $id, $attribute_id, $default ];
+        }
+    }
 }
+
+# Pick up all new added targets which are platform specific fsp/hb, and push the
+# same into an array "@NewTargetType"
+my @NewTargetType;
+foreach my $newTarget ( @{$filePlatform->{targetType}} )
+{
+    my $targetId = $newTarget->{id}->[0];
+    push @NewTargetType, [$targetId, $newTarget];
+}
+
+#Create a new file from the common target types xml, over which 
+#the new targets from platform target types xml will be merged,
+#then the extension targets will be merged over the existing one.
+
+my $file_name  = 'merged_target_types.xml'; # Temporary File created for merger
+open (my $FILE, '>', $file_name );# To be updated by reading FH
+open (FH, "<$tgt_files[0]"); #To read out each line
+
+my $check = 0;
+my $id = "";
+my $endOfLine = 0;
+while (my $line = <FH>)
+{
+    if ( $line =~ /^\s*<targetType>.*/)
+    {
+        $check = 1;
+    }
+    elsif ($check == 1 && $line =~ /^\s*<id>/)
+    {
+        $check = 0;
+        $id = $line;
+        $id =~ s/\n//;
+        $id =~ s/.*<id>(.*)<\/id>.*/$1/;
+    }
+    elsif ($line =~ /^\s*<\/targetType>.*/)
+    {
+        for my $i ( 0 .. $#NewAttr )
+        {
+            if ($NewAttr[$i][0] eq $id)
+            {
+                print $FILE "    <attribute>\n";
+                print $FILE "        <id>$NewAttr[$i][1]</id>\n";
+                if ($NewAttr[$i][2] ne "")
+                {
+                    print $FILE "        <default>$NewAttr[$i][2]</default>\n";
+                }
+                print $FILE "    </attribute>\n";
+            }
+        }
+    }
+    if ($line =~ /^\s*<\/attributes>.*/)
+    {
+        foreach my $newTarget (@NewTargetType)
+        {
+            print $FILE "<targetType>\n";
+            print $FILE "    <id>$newTarget->[1]->{id}->[0]</id>\n";
+            print $FILE "    <parent>$newTarget->[1]->{parent}->[0]</parent>\n";
+            foreach my $attrNewTarget ( @{$newTarget->[1]->{attribute}} )
+            {
+                print $FILE "    <attribute>\n";
+                print $FILE "        <id>$attrNewTarget->{id}->[0]</id>\n";
+                if (exists $attrNewTarget->{default})
+                {
+                    if (ref($attrNewTarget->{default}->[0])  eq "HASH")
+                    {
+                        if(exists $attrNewTarget->{default}->[0]->{field})
+                        {
+                            print $FILE "        <default>\n";
+                            print $FILE "            <field>\n";
+                            foreach my $attrField ( @{$attrNewTarget->{default}->[0]->{field}} )
+                            {
+                                print $FILE "                <id>$attrField->{id}->[0]</id><value>$attrField->{value}->[0]</value>\n";
+                            }
+                            print $FILE "            </field>\n";
+                            print $FILE "        </default>\n";
+                        }
+                    }
+                    else
+                    {
+                        print $FILE "        <default>$attrNewTarget->{default}->[0]</default>\n";
+                    }
+                }
+                print $FILE "    </attribute>\n";
+            }
+            if(exists $newTarget->[1]->{fspOnly})
+            {
+                print $FILE "    <fspOnly/>\n";
+            }
+            print $FILE "</targetType>\n";
+        }
+    }
+    print $FILE "$line";
+}
+
+close (FH);
+close ($FILE);
+
+
+print "Loading Merged Targeting XML: $file_name\n";
+#Load all the merged (common & platform) target_type xml
+my $tgt_xmls = XMLin($file_name,
+                forcearray => ['attribute', 'targetType', 'field', 'targetTypeExtension']);
 
 #Load MRW XML
 #Using LibXML parser to parse mrw xml to keep the order of the input xml in the
@@ -99,19 +226,16 @@ my $mrw_parsed  = $parser->parse_file($mrw_file);
 print "The following target and attribute pairs are being removed from";
 print " SYSTEM_hb.mrw.xml as they are not used by hostboot:\n";
 
-#foreach targetInstance
+#foreach targetInstance in the MRW file
 foreach my $tgt
     ($mrw_parsed->findnodes('/attributes/targetInstance'))
 {
-    #get target type
     my $tgt_type = $tgt->findnodes('./type');
 
     #foreach attribute defined in this target
     foreach my $attr ($tgt->findnodes('./attribute'))
     {
-        #get attribute id == attribute name
         my $attr_id = $attr->findnodes('./id');
-
         #findAttribute searches for this target and attribute
         #pair in all the target type xmls
         my $found = findAttribute($tgt_type, $attr_id);
@@ -119,8 +243,12 @@ foreach my $tgt
         {
             #if the attribute is not found in any of the target_type
             #xmls, then remove it from the mrw xml
-            print "Target: $tgt_type Attr: $attr_id\n";
+            print "Removing Attr: $attr_id from Target: $tgt_type \n";
             $tgt->removeChild($attr);
+        }
+        else
+        {
+            print "Found Attr $attr_id for Target Type $tgt_type\n";
         }
     }
 }
@@ -133,38 +261,21 @@ sub findAttribute
 {
     my $tgt  = shift;
     my $attr = shift;
-    #foreach target type xml
-    foreach my $i (0 .. $#tgt_xmls)
-    {
-        my $tgt_xml = $tgt_xmls[$i];
-        my $targetType;
-        if (defined $tgt_xml->{targetType})
-        {
-            $targetType = "targetType";
-        }
-        elsif (defined $tgt_xml->{targetTypeExtension})
-        {
-            $targetType = "targetTypeExtension";
-        }
-        else
-        {
-            next;
-        }
+    my $targetType;
 
-        if (defined $tgt_xml->{$targetType}{$tgt}{attribute}{$attr})
+    if (defined $tgt_xmls->{'targetType'}{$tgt}{attribute}{$attr})
+    {
+        #attribute found under the passed in target in this xml
+        return 1;
+    }
+    else
+    {
+        my %tgt_hash = %$tgt_xmls;
+        #if not found in this target, look under parent target
+        #some targets are inherrited
+        if (lookAtParentAttributes (\%tgt_hash, $tgt, $attr) eq 1)
         {
-            #attribute found under the passed in target in this xml
             return 1;
-        }
-        else
-        {
-            my %tgt_hash = %$tgt_xml;
-            #if not found in this target, look under parent target
-            #some targets are inherrited
-            if (lookAtParentAttributes (\%tgt_hash, $tgt, $attr, $targetType) eq 1)
-            {
-                return 1;
-            }
         }
     }
     return 0;
@@ -173,42 +284,43 @@ sub findAttribute
 # sub - lookAtParentAttributes
 #       recursively looks for an attribute in current
 #       target's parent because some attributes are inherrited from parents
-# param[in]: tgt_xml - hash containing the entire target type xml
+# param[in]: tgt_xmls - hash containing the entire target type xml
 # param[in]: tgt - look at the parent of this target
 # param[in]: attr - attribute to look for
 # retval: true == attr found, false == attr not found
 sub lookAtParentAttributes
 {
-    my ($tgt_xml, $tgt, $attr, $targetType) = @_;
+    my ($tgt_xmls, $tgt, $attr) = @_;
 
-    my $parent = $tgt_xml->{$targetType}{$tgt}{parent};
+    my $parent = $tgt_xmls->{'targetType'}{$tgt}{parent};
     if ($parent eq "")
     {
         return 0;
     }
     elsif ($parent eq "base")
     {
-         return (defined  $tgt_xml->{$targetType}{$parent}{attribute}{$attr}) ?
+         return (defined  $tgt_xmls->{'targetType'}{$parent}{attribute}{$attr}) ?
                         1 : 0;
     }
     else
     {
-        if (defined  $tgt_xml->{$targetType}{$parent}{attribute}{$attr})
+        if (defined  $tgt_xmls->{'targetType'}{$parent}{attribute}{$attr})
         {
             return 1;
         }
         else
         {
-            my %tgt_hash = %$tgt_xml;
+            my %tgt_hash = %$tgt_xmls;
             #attribute not found, maybe it is inherrited from the parent
             #recursively look for the attribute in this target's parent
             #We will look until we find the attribute, or there is no parent
             #(parent == "") or we have reached the "base" target
             #"base" is the topmost target defined in target_type xml
-            return lookAtParentAttributes(\%tgt_hash, $parent, $attr, $targetType);
+            return lookAtParentAttributes(\%tgt_hash, $parent, $attr);
         }
     }
 }
+
 #OUTPUT
 my $xml_fh;
 my $filename = $mrw_file . ".updated";

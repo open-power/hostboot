@@ -76,6 +76,7 @@ my %maxInstance = (
     "MI"            => 4,
     "DMI"           => 8,
     "OCC"           => 1,
+    "NV"            => 6,
 );
 sub new
 {
@@ -137,6 +138,7 @@ sub loadXML
 {
     my $self = shift;
     my $filename = shift;
+
     $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
     print "Loading MRW XML: $filename\n";
     $self->{xml} =
@@ -165,6 +167,7 @@ sub printXML
     my $self = shift;
     my $fh   = shift;
     my $t    = shift;
+    my $build= shift;
 
     my $atTop = 0;
     if ($t eq "top")
@@ -182,13 +185,13 @@ sub printXML
     {
         if (ref($t->[$p]) ne "HASH") { next; }
         my $target = $t->[$p]->{KEY};
-        $self->printTarget($fh, $target);
+        $self->printTarget($fh, $target, $build);
         my $children = $t->[$p];
         foreach my $u (sort(keys %{$children}))
         {
             if ($u ne "KEY")
             {
-                $self->printXML($fh, $t->[$p]->{$u});
+                $self->printXML($fh, $t->[$p]->{$u}, $build);
             }
         }
     }
@@ -203,6 +206,7 @@ sub printTarget
     my $self   = shift;
     my $fh     = shift;
     my $target = shift;
+    my $build  = shift;
 
     my $target_ptr = $self->getTarget($target);
 
@@ -224,7 +228,7 @@ sub printTarget
     ## get attributes
     foreach my $attr (sort (keys %{ $target_ptr->{ATTRIBUTES} }))
     {
-        $self->printAttribute($fh, $target_ptr->{ATTRIBUTES}, $attr);
+        $self->printAttribute($fh, $target_ptr->{ATTRIBUTES}, $attr, $build);
     }
     print $fh "</targetInstance>\n";
 }
@@ -235,6 +239,7 @@ sub printAttribute
     my $fh         = shift;
     my $target_ptr = shift;
     my $attribute  = shift;
+    my $build      = shift;
     my $r          = "";
 
     # TODO RTC: TBD
@@ -246,7 +251,11 @@ sub printAttribute
     {
         return;
     }
-    print $fh "\t<attribute>\n";
+    if ( $build eq "fsp" && ($attribute eq "INSTANCE_PATH" || $attribute eq "PEER_HUID"))
+    {
+        print $fh "\t<compileAttribute>\n";
+    }
+    else{   print $fh "\t<attribute>\n";}
     print $fh "\t\t<id>$attribute</id>\n";
     my $value = $target_ptr->{$attribute}->{default};
 
@@ -269,7 +278,11 @@ sub printAttribute
                 print $fh "\t\t<default>$value</default>\n";
         }
     }
-    print $fh "\t</attribute>\n";
+    if ( $build eq "fsp" && ($attribute eq "INSTANCE_PATH" || $attribute eq "PEER_HUID"))
+    {
+        print $fh "\t</compileAttribute>\n";
+    }
+    else{    print $fh "\t</attribute>\n";}
 }
 
 ## stores TYPE enumeration values which is used to generate HUIDs
@@ -406,7 +419,14 @@ sub buildHierarchy
             }
             else
             {
-                $self->setAttribute($key, $attribute, "");
+                if ($attribute eq "FSI_MASTER_CHIP" || $attribute eq "ALTFSI_MASTER_CHIP" )
+                {
+                    $self->setAttribute($key, $attribute, "physical:sys-0");
+                }
+                else
+                {
+                    $self->setAttribute($key, $attribute, "");
+                }
             }
         }
         else
@@ -543,7 +563,7 @@ sub buildAffinity
 
             #SYS target has PHYS_PATH and AFFINITY_PATH defined in the XML
             #Also, there is no HUID for SYS
-            $self->setAttribute($target,"FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target,"FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target,"FAPI_POS",      $sys_pos);
             $self->setAttribute($target,"ORDINAL_ID",    $sys_pos);
             $sys_phys = $self->getAttribute($target, "PHYS_PATH");
@@ -561,7 +581,7 @@ sub buildAffinity
             $self->{targeting}{SYS}[0]{NODES}[$node]{KEY} = $target;
 
             $self->setHuid($target, $sys_pos, $node);
-            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $node_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $node_aff);
@@ -578,8 +598,8 @@ sub buildAffinity
             my $tpm_aff  = $node_aff  . "/tpm-$tpm";
 
 
-            $self->setHuid($target, $sys_pos, $tpm);
-            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setHuid($target, $sys_pos, $node);
+            $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $tpm_aff);
@@ -594,7 +614,7 @@ sub buildAffinity
             my $bmc_aff  = $node_aff  . "/bmc-$bmc";
 
             $self->setHuid($target, $sys_pos, $bmc);
-            $self->setAttribute($target, "FAPI_NAME",getFapiName($type));
+            $self->setAttribute($target, "FAPI_NAME",$self->getFapiName($type));
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $bmc_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $bmc_aff);
@@ -660,7 +680,7 @@ sub buildAffinity
             my $parent_affinity = $node_aff  . "/proc-$proc";
             my $parent_physical = $node_phys . "/proc-$proc";
 
-            my $fapi_name = getFapiName($type, $node, $proc);
+            my $fapi_name = $self->getFapiName($type, $node, $proc);
 
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
@@ -791,8 +811,10 @@ sub iterateOverChiplets
                 #System XML has some sensor target as hidden children
                 #of targets. We don't care for sensors in this function
                 #So, we can avoid them with this conditional
-                if ($unit_type ne "NA" && $unit_type ne "FSI" &&
-                    $unit_type ne "PCI")
+
+                if ($unit_type ne "PCI" && $unit_type ne "NA" &&
+                    $unit_type ne "FSI" && $unit_type ne "PSI" &&
+                    $unit_type ne "SYSREFCLKENDPT" && $unit_type ne "MFREFCLKENDPT")
                 {
                     #set common attrs for child
                     $self->setCommonAttrForChiplet($child, $sys, $node, $proc);
@@ -870,7 +892,7 @@ sub setCommonAttrForChiplet
     my $affinity_path   = $parent_affinity . "/" . lc $tgt_type ."-". $unit_pos;
     my $physical_path   = $parent_physical . "/" . lc $tgt_type ."-". $unit_pos;
 
-    my $fapi_name       = getFapiName($tgt_type, $node, $proc, $pos);
+    my $fapi_name       = $self->getFapiName($tgt_type, $node, $proc, $pos);
 
     #unique offset per system
     my $offset = ($proc * $maxInstance{$tgt_type}) + $pos;
@@ -894,6 +916,7 @@ sub setCommonAttrForChiplet
 
 sub getFapiName
 {
+    my $self        = shift;
     my $target      = shift;
     my $node        = shift;
     my $chipPos     = shift;
@@ -1115,7 +1138,7 @@ sub processDimms
               $self->getAttribute($dimm,"REL_POS");
 
             $self->setAttribute($dimm,"FAPI_NAME",
-                    getFapiName($type, $node, $dimm_pos));
+                    $self->getFapiName($type, $node, $dimm_pos));
 
             $self->setAttribute($mcbist_target, "FAPI_POS",  $mcbist_pos);
             $self->setAttribute($mcs_target, "FAPI_POS",  $mcs_pos);
@@ -1335,9 +1358,9 @@ sub setFsiAttributes
     {
         $self->setAttribute($target, "FSI_MASTER_TYPE","CMFSI");
     }
-    $self->setAttribute($target, "FSI_MASTER_CHIP","physical:sys");
+    $self->setAttribute($target, "FSI_MASTER_CHIP","physical:sys-0");
     $self->setAttribute($target, "FSI_MASTER_PORT","0xFF");
-    $self->setAttribute($target, "ALTFSI_MASTER_CHIP","physical:sys");
+    $self->setAttribute($target, "ALTFSI_MASTER_CHIP","physical:sys-0");
     $self->setAttribute($target, "ALTFSI_MASTER_PORT","0xFF");
     $self->setAttribute($target, "FSI_SLAVE_CASCADE", "0");
     if ($cmfsi == 0)
@@ -1908,7 +1931,17 @@ sub setHuid
 
     my $type    = $self->getType($target);
     my $type_id = $self->{enumeration}->{TYPE}->{$type};
+    if ($type eq "" || $type eq "NA")
+    {
+        if (defined ($self->getAttribute($target,"BUS_TYPE")))
+        {
+            $type = $self->getAttribute($target,"BUS_TYPE");
+            $type_id = $self->{enumeration}->{TYPE}->{$type};
+            if ($type_id eq "") {$type_id = $self->{enumeration}->{BUS_TYPE}->{$type};}
+        }
+    }
     if ($type_id eq "") { $type_id = 0; }
+
     if ($type_id == 0) { return; }
     my $index = 0;
     if (defined($self->{huid_idx}->{$type}))
