@@ -22,6 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+//
+//  @file p9_xip_customize.C
+//
+//  @brief Customize images to be used by SBE, CME and SGPE PPEs
+//
+//  *HWP HWP Owner: Mike Olsen <cmolsen@us.ibm.com>
+//  *HWP HWP Backup Owner: Sumit Kumar <sumit_kumar@in.ibm.com>
+//  *HWP Team: Infrastructure
+//  *HWP Level: 3
+//  *HWP Consumed by: HOSTBOOT, CRONUS
+//
+
 #ifdef WIN32
     #include "win32_stdint.h"
     #include "endian.h"
@@ -715,9 +727,9 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     /////////////////////////////////////////////////////////////////////
     // Fetch rings from the MVPD:
     /////////////////////////////////////////////////////////////////////
-    l_fapiRc = getMvpdRing( MVPD_RECORD_CP00,
+    l_fapiRc = getMvpdRing( i_procTarget,
+                            MVPD_RECORD_CP00,
                             l_mvpdKeyword,
-                            i_procTarget,
                             i_chipletId,
                             i_evenOdd,
                             i_ring.ringId,
@@ -1010,14 +1022,6 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
                      "_fetch_and_insert_vpd_ring(): VPD ring size (=0x%X) exceeds"
                      " allowed ring buffer size (=0x%X)",
                      l_vpdRingSize, i_vpdRingSize );
-
-        // getMvpdRing failed due to invalid record data magic word.
-        FAPI_ASSERT( (uint32_t)l_fapiRc != RC_MVPD_INVALID_RS4_HEADER,
-                     fapi2::XIPC_MVPD_INVALID_RECORD_DATA().
-                     set_CHIP_TARGET(i_procTarget).
-                     set_RING_ID(i_ring.ringId).
-                     set_CHIPLET_ID(i_chipletId),
-                     "_fetch_and_insert_vpd_ring(): MVPD has invalid record data" );
 
         // getMvpdRing failed for some other reason aside from above handled cases.
         if (l_fapiRc != fapi2::FAPI2_RC_SUCCESS)

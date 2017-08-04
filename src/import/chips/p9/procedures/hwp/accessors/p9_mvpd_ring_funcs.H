@@ -47,10 +47,10 @@ enum mvpdRingFuncOp
 };
 
 typedef ReturnCode (*mvpdRingFuncs_FP_t) (
+    const Target<TARGET_TYPE_PROC_CHIP>&,
     mvpdRingFuncOp,
     MvpdRecord,
     MvpdKeyword,
-    const Target<TARGET_TYPE_PROC_CHIP>&,
     const uint8_t,
     const uint64_t,
     const uint8_t,
@@ -67,28 +67,28 @@ extern "C"
      *          detailed comments on get and set are in the
      *          getMvpdRing.H and setMvpdRing.H and apply here as well.
      *
+     * @param i_fapiTarget     - cpu target
      * @param i_mvpdRingFuncOp - indicate get or set via enum mvpdRingFuncOp
      * @param i_record         - Record enumerator
      * @param i_keyword        - Keyword enumerator
-     * @param i_fapiTarget     - cpu target
      * @param i_chipletId      - Chiplet ID
      * @param i_evenOddMask    - Even (0) or odd (1) EX. Disregarded for other chiplets.
      * @param i_ringId         - Ring ID
-     * @param i_pRingBuf       - The buffer to receive or send the ring
+     * @param o_pRingBuf       - The buffer to receive or send the ring
      * @param io_rRingBufsize  - Size of ring / ring buffer
      *
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
      *                              relevant error code for failure.
      */
-    ReturnCode mvpdRingFunc( mvpdRingFuncOp       i_mvpdRingFuncOp,
+    ReturnCode mvpdRingFunc( const Target<TARGET_TYPE_PROC_CHIP>&
+                             i_fapiTarget,
+                             mvpdRingFuncOp       i_mvpdRingFuncOp,
                              MvpdRecord           i_record,
                              MvpdKeyword          i_keyword,
-                             const Target<TARGET_TYPE_PROC_CHIP>&
-                             i_fapiTarget,
                              const uint8_t        i_chipletId,
                              const uint8_t        i_evenOdd,
                              const uint8_t        i_ringId,
-                             uint8_t*             i_pRingBuf,
+                             uint8_t*             o_pRingBuf,
                              uint32_t&            io_rRingBufsize );
 
 } // extern "C"
