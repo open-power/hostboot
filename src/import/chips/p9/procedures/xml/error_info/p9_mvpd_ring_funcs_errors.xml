@@ -26,8 +26,13 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_RING_FUNC_ENDLESS</rc>
-    <description>failed to interprete VPD data buffer</description>
+    <rc>RC_MVPD_RING_FUNC_ENDLESS_BUFFER</rc>
+    <description>Corrupted MVPD data buffer</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>RECORD_VAL</ffdc>
+    <ffdc>KEYWORD_VAL</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -35,8 +40,19 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_RING_FUNC_INVALID_PARAMETER</rc>
-    <description>MVPD ring function parameter is not valid</description>
+    <rc>RC_MVPD_RING_FUNC_INVALID_RS4_HEADER</rc>
+    <description>One or more fields in the RS4 header or ring block buffer is wrong</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>HEADER_MAGIC</ffdc>
+    <ffdc>REF_MAGIC</ffdc>
+    <ffdc>HEADER_RING_ID</ffdc>
+    <ffdc>REF_RING_ID</ffdc>
+    <ffdc>HEADER_SCAN_ADDR</ffdc>
+    <ffdc>REF_CHIPLET_ID</ffdc>
+    <ffdc>HEADER_RING_SIZE</ffdc>
+    <ffdc>REF_RING_SIZE</ffdc>
+    <ffdc>SIZEOF_COMPRESSED_SCAN_DATA</ffdc>
+    <ffdc>FAILED_TEST_VEC</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -44,41 +60,46 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_INVALID_RS4_HEADER</rc>
-    <description>Record's data had invalid RS4 magic word</description>
+    <rc>RC_MVPD_RING_FUNC_NULL_POINTER</rc>
+    <description>NULL pointer passed to mvpdRingFunc(SET) is not allowed</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_RING_FUNC_INVALID_RECORD_KEYWORD_PAIR</rc>
+    <description>The Mvpd record and keyword don't pair up properly</description>
     <ffdc>CHIP_TARGET</ffdc>
     <ffdc>MVPD_RECORD</ffdc>
     <ffdc>MVPD_KEYWORD</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_NOT_FOUND</rc>
-    <description>Specified MVPD ring for this target was not found</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <ffdc>CHIP_TARGET</ffdc>
-<!--    <ffdc>RING_ID</ffdc> -->
-<!--    <ffdc>CHIPLET_ID</ffdc> -->
+    <description>Specified MVPD ring was not found (Not a bug. Info to caller.)</description>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_BUFFER_TOO_SMALL</rc>
-    <description>Data does not fit into supplied buffer</description>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
+    <description>Data does not fit into supplied buffer (Not a bug. Info to caller.)</description>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_INSUFFICIENT_RECORD_SPACE</rc>
-    <description>Data does not fit into output buffer</description>
+    <description>Ring content does not fit into Mvpd record buffer</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>REM_RING_SIZE</ffdc>
+    <ffdc>REM_RECORD_SPACE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -86,8 +107,14 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_MVPD_RING_FUNC_INVALID_RECORD</rc>
-    <description>MVPD ring function record is not valid</description>
+    <rc>RC_MVPD_INSUFFICIENT_RING_BUFFER_SPACE</rc>
+    <description>Data does not fit into output ring buffer</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
+    <ffdc>BUFFER_SIZE</ffdc>
+    <ffdc>RING_SIZE</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -97,6 +124,9 @@
   <hwpError>
     <rc>RC_MVPD_RINGID_DATA_NOT_FOUND</rc>
     <description>Data for given ringId missing in p9_ringId</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>RING_ID</ffdc>
+    <ffdc>CHIPLET_ID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -105,7 +135,14 @@
   <!-- ********************************************************************* -->
   <hwpError>
     <rc>RC_MVPD_RING_REDUNDANT_DATA</rc>
-    <description>MVPD ring has redundant data</description>
+    <description>MVPD ring has redundant data (Not a bug. Info to caller.)</description>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_MVPD_CODE_BUG</rc>
+    <description>Code bug: Fix code!</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>OCCURRENCE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
