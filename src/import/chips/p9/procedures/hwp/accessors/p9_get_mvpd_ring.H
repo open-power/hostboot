@@ -40,9 +40,9 @@ namespace fapi2
 
 // function pointer typedef definition for HWP call support
 typedef ReturnCode (*getMvpdRing_FP_t) (
+    const Target<TARGET_TYPE_PROC_CHIP>&,
     MvpdRecord,
     MvpdKeyword,
-    const Target<TARGET_TYPE_PROC_CHIP>&,
     const uint8_t,
     const uint64_t,
     const uint8_t,
@@ -58,16 +58,16 @@ extern "C"
      * The code does not validate. No assumption should be made on which would
      * be returned if there are multiple.
      *
+     * @param i_fapiTarget      -   Processor chip target
      * @param i_record          -   Record enumerator
      * @param i_keyword         -   Keyword enumerator
      * Supported Rings are:
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDR
      *                   MVPD_RECORD_CP00 - MVPD_KEYWORD_PDG
-     * @param i_fapiTarget      -   cpu target
      * @param i_chipletId       -   Chiplet ID
      * @param i_evenOdd         -   Even (0) or odd (1) EX. Disregarded for other chiplets.
      * @param i_ringId          -   Ring ID
-     * @param i_pRingBuf        -   pointer to a buffer allocated by the caller
+     * @param o_pRingBuf        -   pointer to a buffer allocated by the caller
      *                              to receive the ring header and data.
      *                              if NULL, the size of the min buffer required
      *                              buffer will be returned in io_rRingBufsize
@@ -92,14 +92,14 @@ extern "C"
      * @return fapi2::ReturnCode -   FAPI_RC_SUCCESS if success,
      *                               relevant error code for failure.
      */
-    ReturnCode getMvpdRing( MvpdRecord     i_record,
-                            MvpdKeyword    i_keyword,
-                            const Target<TARGET_TYPE_PROC_CHIP>&
+    ReturnCode getMvpdRing( const Target<TARGET_TYPE_PROC_CHIP>&
                             i_fapiTarget,
+                            MvpdRecord     i_record,
+                            MvpdKeyword    i_keyword,
                             const uint8_t  i_chipletId,
                             const uint8_t  i_evenOdd,
                             const uint8_t  i_ringId,
-                            uint8_t*       io_pRingBuf,
+                            uint8_t*       o_pRingBuf,
                             uint32_t&      io_rRingBufsize );
 
 }
