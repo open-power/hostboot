@@ -799,7 +799,7 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
 
     {
         // Calculate refresh cycle time in nCK & set attribute
-        constexpr double PERCENT_ADJUST = 0.999;
+        constexpr double PERCENT_ADJUST = 0.99;
         std::vector<uint16_t> l_mcs_attrs_trefi(PORTS_PER_MCS, 0);
 
         uint64_t l_trefi_in_nck  = 0;
@@ -814,10 +814,11 @@ fapi2::ReturnCode eff_dimm::dram_trefi()
                                   l_trefi_in_nck),
                    "Error in calculating tREFI for target %s, with value of l_trefi_in_ps: %d", mss::c_str(iv_dimm), l_trefi_in_ps);
 
-        // Per Mike P., requested 99.9% of tREFI calculation to avoid any latency impact and violation of any
-        // refresh specification (across all number of ranks and frequencies) observed during lab tests.
+        // Lab requested 99% of tREFI calculation to avoid any latency impact and violation of any
+        // refresh specification (across all number of ranks and frequencies) observed
+        // during lab power/thermal tests.
 
-        FAPI_INF("For %s, adjusting tREFI calculation by 99.9%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
+        FAPI_INF("For %s, adjusting tREFI calculation by 99%, calculated tREFI (nck): %lu, adjusted tREFI (nck): %lu,",
                  mss::c_str(iv_dimm), l_trefi_in_nck, l_trefi_in_nck * PERCENT_ADJUST);
 
         // The compiler does this under the covers but just to be explicit on intent:
