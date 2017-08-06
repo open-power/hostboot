@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -52,7 +52,8 @@
       All of these details are hidden from the user of this attribute.
     </description>
     <valueType>uint8</valueType>
-    <array>2 2 4 10</array>
+    <mssAccessorName>bad_dq_bitmap</mssAccessorName>    
+    <array>2 2 4 10</array>    
     <platInit/>
     <initToZero/>
     <writeable/>

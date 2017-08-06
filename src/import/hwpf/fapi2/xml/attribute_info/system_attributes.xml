@@ -30,6 +30,7 @@
     <description>env: 1 = Awan/HWSimulator. 0 = Simics/RealHW.</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <mssAccessorName>is_simulation</mssAccessorName>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -77,6 +78,7 @@
 -->
     </enum>
     <platInit/>
+    <mssAccessorName>mnfg_flags</mssAccessorName>
   </attribute>
   <attribute>
     <id>ATTR_RECONFIGURE_LOOP</id>
@@ -95,4 +97,3 @@
 
   <!-- ********************************************************************* -->
 </attributes>
-

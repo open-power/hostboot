@@ -43,6 +43,7 @@
   </enum>
   <writeable/>
   <platInit/>
+  <mssAccessorName>freq_pb_mhz</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
