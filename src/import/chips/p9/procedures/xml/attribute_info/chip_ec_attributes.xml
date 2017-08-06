@@ -3907,6 +3907,24 @@
       </chip>
     </chipEcFeature>
   </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_PERIODICS</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      For Nimbus DD1.** turn off periodics by default (zqcal and memcal).
+      For Nimbus DD2.** it will be attribute driven without any restrictions.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <!-- ******************************************************************** -->
   <!-- End Memory Section                                                   -->
   <!-- ******************************************************************** -->
