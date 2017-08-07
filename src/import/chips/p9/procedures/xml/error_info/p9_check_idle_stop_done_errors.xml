@@ -1,0 +1,258 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/p9/procedures/xml/error_info/p9_check_idle_stop_done_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- Error definitions for p9_cpu_special_wakeup procedure -->
+
+<!---FIXME RTC 178623 Level 3 Effort for HWP p9_check_idle_stop_state -->
+
+<hwpErrors>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SGPE_HCODE_HALTED</rc>
+    <description> SGPE Hcode is in HALT state</description> 
+    <ffdc>OCC_LFIR</ffdc>
+    <ffdc>CHIP</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>SGPE_FFDC_REGISTERS</id>
+       <target>CHIP</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_SGPE_HW_HALTED</rc>
+    <description>SGPE is in HALT state due to an error detected by hardware</description>
+
+     <ffdc>CHIP</ffdc>
+     <ffdc>EDR</ffdc>
+     <ffdc>OCC_LFIR</ffdc>
+     <ffdc>SSH_CORE_0</ffdc>
+     <ffdc>SSH_CORE_1</ffdc>
+     <ffdc>SSH_CORE_2</ffdc>
+     <ffdc>SSH_CORE_3</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>SGPE_FFDC_REGISTERS</id>
+       <target>CHIP</target>
+       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_CORE_ATTENTION</rc>
+    <description>Special Attention is detected in core</description>
+
+     <ffdc>XSR_VALUE</ffdc>
+     <ffdc>SISR_VALUE</ffdc>
+     <ffdc>CORE</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CORE</target>
+      <priority>LOW</priority>
+    </callout>
+
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_CME_NOT_ACCESSIBLE</rc>
+    <description>CME is not accessible</description>
+
+     <ffdc>CHIP</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_SGPE_NOT_ACCESSIBLE</rc>
+    <description>SGPE is not accessible</description>
+     <ffdc>CHIP</ffdc>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_CME_HCODE_HALTED</rc>
+    <description> CME halt due to hardware error</description>
+
+     <ffdc>CHIP</ffdc>
+     <ffdc>OCC_LFIR</ffdc>
+     <ffdc>SSH_CORE_0</ffdc>
+     <ffdc>SSH_CORE_1</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_CME_ERROR_HALT</rc>
+    <description> CME Hardware is in HALT state.</description>
+
+     <ffdc>CHIP</ffdc>
+     <ffdc>OCC_LFIR</ffdc>
+     <ffdc>NET_CTRL0</ffdc>
+     <ffdc>NET_CTRL1</ffdc>
+     <ffdc>CPMMR_0</ffdc>
+     <ffdc>CPMMR_1</ffdc>
+     <ffdc>GPMMR_0</ffdc>
+     <ffdc>GPMMR_1</ffdc>
+     <ffdc>SSH_CORE_0</ffdc>
+     <ffdc>SSH_CORE_1</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_CORE_POWERED_AND_RUNNING</rc>
+    <description> Core is powered up and not in any STOP state, therefore active</description>
+  </hwpError>
+
+  <!-- *********************************************************************** -->
+
+  <hwpError>
+    <rc>RC_UNKNOWN_PM_STATE</rc>
+    <description> PM Complex in unknown state.</description>
+
+     <ffdc>CHIP</ffdc>
+     <ffdc>OCC_LFIR</ffdc>
+     <ffdc>NET_CTRL0</ffdc>
+     <ffdc>NET_CTRL1</ffdc>
+     <ffdc>CPMMR_0</ffdc>
+     <ffdc>CPMMR_1</ffdc>
+     <ffdc>GPMMR_0</ffdc>
+     <ffdc>GPMMR_1</ffdc>
+     <ffdc>SSH_CORE_0</ffdc>
+     <ffdc>SSH_CORE_1</ffdc>
+
+     <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+
+     <callout>
+      <target>CHIP</target>
+      <priority>LOW</priority>
+    </callout>
+
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
+
+    <collectRegisterFfdc>
+       <id>CME_FFDC_REGISTERS</id>
+       <target>EX</target>
+       <targetType>TARGET_TYPE_EX</targetType>
+    </collectRegisterFfdc>
+
+  </hwpError>
+  <!-- *********************************************************************** -->
+
+</hwpErrors>
