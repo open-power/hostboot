@@ -129,7 +129,10 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
 
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatSize   =
-                                                 sizeof(hdatPcrdPnor_t);   
+                                                 sizeof(hdatPcrdPnor_t);
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatSize   = 0;
+
 
   return l_errlHndl;
 }
@@ -144,7 +147,9 @@ HdatPcrd::HdatPcrd(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr)
     iv_numPcrdEntries = HDAT_NUM_P7_PCRD_ENTRIES;
     iv_spPcrdEntrySize = sizeof(hdatSpPcrd_t) + HDAT_FULL_MVPD_SIZE +
            sizeof(hdatHDIFVersionedDataArray_t) + ((sizeof(hdatI2cData_t)
-               * HDAT_PCRD_MAX_I2C_DEV));
+               * HDAT_PCRD_MAX_I2C_DEV))
+               + sizeof(hdatHDIFDataArray_t)
+               + (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
 
     // Allocate space for each CHIP -- will use max amount to start
     uint64_t l_base_addr = ((uint64_t) i_msAddr.hi << 32) | i_msAddr.lo;
@@ -561,6 +566,54 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             // Add pnor struct size to whole pcrd size, since all pcrd
             // structs should be of same size
             this->iv_spPcrd->hdatHdr.hdatSize += sizeof(hdatPcrdPnor_t);
+
+            // Setting SMP Link info
+            uint32_t l_pcrdSMPTotalSize = 0;
+
+            hdatHDIFDataArray_t *l_SMPInfoFullPcrdHdrPtr = NULL;
+            l_SMPInfoFullPcrdHdrPtr = reinterpret_cast<hdatHDIFDataArray_t *>
+                                ((uint8_t*)l_pnor + sizeof(hdatPcrdPnor_t));
+
+            // Need to get SMP Link info  data correctly
+            std::vector<hdatSMPLinkInfo_t> l_SMPInfoEntries;
+
+            hdatGetSMPLinkInfo(l_pProcTarget, l_SMPInfoEntries);
+
+            l_pcrdSMPTotalSize = sizeof(hdatHDIFDataArray_t) +
+                    (sizeof(hdatSMPLinkInfo_t) * l_SMPInfoEntries.size());
+
+            HDAT_INF("pcrdSMPNumEntries=0x%x, l_pcrdSMPTotalSize=0x%x",
+                    l_SMPInfoEntries.size(), l_pcrdSMPTotalSize);
+            l_SMPInfoFullPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
+            l_SMPInfoFullPcrdHdrPtr->hdatArrayCnt =
+                     l_SMPInfoEntries.size();
+            l_SMPInfoFullPcrdHdrPtr->hdatAllocSize =
+                    sizeof(hdatSMPLinkInfo_t);
+            l_SMPInfoFullPcrdHdrPtr->hdatActSize =
+                    sizeof(hdatSMPLinkInfo_t);
+
+
+            hdatSMPLinkInfo_t *l_SMPInfoFullPcrdDataPtr = NULL;
+            l_SMPInfoFullPcrdDataPtr = reinterpret_cast<hdatSMPLinkInfo_t *>
+                            ((uint8_t*)l_SMPInfoFullPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
+
+            if ( l_SMPInfoEntries.size() != 0 )
+            {
+                //copy data from vector to data ptr
+                std::copy(l_SMPInfoEntries.begin(),
+                    l_SMPInfoEntries.end(), l_SMPInfoFullPcrdDataPtr);
+            }
+            else
+            {
+                HDAT_INF("Empty SMP Link info vector : Size=%d",
+                    l_SMPInfoEntries.size());
+            }
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset =
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset +
+                    sizeof(hdatPcrdPnor_t);
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatSize = l_pcrdSMPTotalSize;
+            this->iv_spPcrd->hdatHdr.hdatSize +=
+            sizeof(hdatHDIFDataArray_t) + (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
 
             if( NULL != l_errl)
             {

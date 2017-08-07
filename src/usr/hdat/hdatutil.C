@@ -36,6 +36,48 @@ namespace HDAT
 {
 extern trace_desc_t *g_trac_hdat;
 
+// HARD codes of sequoia and redbud GPU configurations for SMP link struct
+// TODO:SW398487 : Need to replace this with PNOR : HDAT partition consumption.
+// The below hardcoding is for temporary purpose but still valid values from mrw.
+
+// SEQUOIA
+const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc0_6gpucfg[] = {
+ {0,0x01,0x00,0xF1E00000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {1,0x01,0x01,0x07187000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {2,0x01,0x02,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {3,0x01,0x09,0xF1E00000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {4,0x01,0x0A,0x07187000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {5,0x01,0x0B,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+};
+const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc1_6gpucfg[] = {
+ {0,0x01,0x00,0xF1E00000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {1,0x01,0x01,0x07187000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {2,0x01,0x02,0x00078F00,12,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {3,0x01,0x09,0xF1E00000,27,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {4,0x01,0x0A,0x07187000,27,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {5,0x01,0x0B,0x00078F00,12,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+};
+
+// REDBUD
+const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc0_4gpucfg[] = {
+ {0,0x01,0x00,0xF1E00000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {1,0x01,0x01,0x07187000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {2,0x01,0x02,0x00078F00,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {3,0x01,0x09,0xF1E00000,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {4,0x01,0x0A,0x07187000,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {5,0x01,0x0B,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+};
+const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc1_4gpucfg[] = {
+ {0,0x01,0x00,0xF1E00000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {1,0x01,0x01,0x07187000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {2,0x01,0x02,0x00078F00,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {3,0x01,0x09,0xF1E00000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {4,0x01,0x0A,0x07187000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
+ {5,0x01,0x0B,0x00078F00,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+};
+
+
+
 /*****************************************************************************n
 *  hdatBldErrLog
 *******************************************************************************/
@@ -1808,6 +1850,142 @@ void hdatGetI2cDeviceInfo(
             i2cDevice.hdatI2cLinkId,
             i2cDevice.hdatI2cSlcaIndex,
             i2cDevice.hdatI2cLabel);
+    }
+
+    HDAT_EXIT();
+}
+
+
+/*******************************************************************************
+ * hdatGetSMPLinkInfo
+ *
+ * @brief Routine returns the Host SMP Link info entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The SMP link master target handle
+ * @param[out] o_SMPLinkEntries
+ *       The host SMP Link info entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+
+
+void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
+    std::vector<hdatSMPLinkInfo_t>&o_SMPLinkEntries)
+{
+    HDAT_ENTER();
+
+    errlHndl_t l_err = NULL;
+    uint8_t *l_NVKwd = NULL;
+    PVPD::pvpdRecord l_Record = PVPD::VNDR;
+    PVPD::pvpdKeyword l_KeyWord = PVPD::NV;
+    size_t l_nvKwdSize = 0;
+
+    TARGETING::TargetHandleList l_targList;
+    PredicateCTM predNode(TARGETING::CLASS_ENC, TARGETING::TYPE_NODE);
+    PredicateHwas predFunctional;
+    predFunctional.functional(true);
+    PredicatePostfixExpr nodeCheckExpr;
+    nodeCheckExpr.push(&predNode).push(&predFunctional).And();
+
+    targetService().getAssociated(l_targList, i_pTarget,
+                TargetService::PARENT, TargetService::IMMEDIATE,
+                &nodeCheckExpr);
+    TARGETING::Target* l_target = l_targList[0];
+
+    l_err = deviceRead(l_target,NULL,l_nvKwdSize,
+                            DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+    if(l_err == NULL)
+    {
+        if(l_nvKwdSize == sizeof(hdatNVKwdStruct_t))
+        {
+            uint8_t l_kwd[l_nvKwdSize] = {0};
+            l_err = deviceRead(l_target,l_kwd,l_nvKwdSize,
+                            DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+
+            if(l_err == NULL)
+            {
+                l_NVKwd = new uint8_t[sizeof(hdatNVKwdStruct_t)];
+                memcpy(l_NVKwd, l_kwd, sizeof(hdatNVKwdStruct_t));
+            }
+            else
+            {
+                HDAT_ERR(" Device Read for NV keyword errored out ");
+                ERRORLOG::errlCommit(l_err,HDAT_COMP_ID);
+            }
+        }
+        else
+        {
+            HDAT_ERR("Returned length for NV keyword is 0x%x which is not 0x%x",
+                            l_nvKwdSize,sizeof(hdatNVKwdStruct_t));
+        }
+    }
+    else
+    {
+        HDAT_ERR("deviceRead failed for NV keyword VNDR record");
+    }
+
+    const hdatSMPLinkInfo_t *l_smpLinkInfoPtr = NULL;
+    uint32_t           l_smpLinkInfoSize = 0;
+
+    if(l_NVKwd != NULL)
+    {
+        if((reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->magic == HDAT_NV_KWD_MAGIC_WRD)
+                        &&(reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->version == 0x01))
+        {
+            if(reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->config == HDAT_REDBUD_NV_CNFG)
+            {
+                if(i_pTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>() == 0)
+                {
+                    l_smpLinkInfoPtr = l_hdatSMPLinkInfoProc0_4gpucfg;
+                    l_smpLinkInfoSize = sizeof(l_hdatSMPLinkInfoProc0_4gpucfg)/sizeof(hdatSMPLinkInfo_t);
+                }
+                else
+                {
+                    l_smpLinkInfoPtr = l_hdatSMPLinkInfoProc1_4gpucfg;
+                    l_smpLinkInfoSize = sizeof(l_hdatSMPLinkInfoProc1_4gpucfg)/sizeof(hdatSMPLinkInfo_t);
+                }
+            }
+            else if(reinterpret_cast<hdatNVKwdStruct_t *>(l_NVKwd)->config == HDAT_SEQUOIA_NV_CNFG)
+            {
+                if(i_pTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>() == 0)
+                {
+                    l_smpLinkInfoPtr = l_hdatSMPLinkInfoProc0_6gpucfg;
+                    l_smpLinkInfoSize = sizeof(l_hdatSMPLinkInfoProc0_6gpucfg)/sizeof(hdatSMPLinkInfo_t);
+                }
+                else
+                {
+                    l_smpLinkInfoPtr = l_hdatSMPLinkInfoProc1_6gpucfg;
+                    l_smpLinkInfoSize = sizeof(l_hdatSMPLinkInfoProc1_6gpucfg)/sizeof(hdatSMPLinkInfo_t);
+                }
+            }
+        }
+        else
+        {
+            HDAT_ERR(" Unknown config : NV KWD Magic = 0X%8X, Version = 0x%x");
+        }
+    }
+
+    for( uint32_t l_count = 0; l_count < l_smpLinkInfoSize ; l_count++)
+    {
+        hdatSMPLinkInfo_t l_hdatSMPLinkInfo;
+        memcpy(&l_hdatSMPLinkInfo, &l_smpLinkInfoPtr[l_count], sizeof(hdatSMPLinkInfo_t));
+        o_SMPLinkEntries.push_back(l_hdatSMPLinkInfo);
+    }
+    if(l_NVKwd != NULL)
+    {
+        delete l_NVKwd;
+        l_NVKwd = NULL;
+    }
+    if(l_err != NULL)
+    {
+        delete l_err;
+        l_err = NULL;
     }
 
     HDAT_EXIT();

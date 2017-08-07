@@ -60,6 +60,7 @@ const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 
 //Max number of I2c devices for any given proc
 #define HDAT_PCRD_MAX_I2C_DEV  64
+#define HDAT_PCRD_MAX_SMP_LINK 12
 
 /** @enum hdatDataPtrs
  * Enumeration which defines the data sections of the PCRD
@@ -74,8 +75,9 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_CHIP_VPD       = 4,
     HDAT_PCRD_DA_HOST_I2C       = 5,
     HDAT_PCRD_DA_PNOR           = 6,
-    HDAT_PCRD_DA_CNT            = 7,
-    HDAT_PCRD_DA_LAST           = 8,
+    HDAT_PCRD_DA_SMP            = 7,
+    HDAT_PCRD_DA_CNT            = 8,
+    HDAT_PCRD_DA_LAST           = 9,
 };
 
 /*----------------------------------------------------------------------------*/
