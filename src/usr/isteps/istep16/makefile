@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/pmlib/include/registers/
 
 OBJS += call_host_activate_master.o
 OBJS += call_host_activate_slave_cores.o
@@ -49,12 +50,12 @@ OBJS += call_host_ipl_complete.o
 OBJS += call_host_load_io_ppe.o
 
 include ${ROOTPATH}/procedure.rules.mk
-include  ${PROCEDURES_PATH}/hwp/pm/p9_dump_stop_info.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_cfsim.mk
 include  ${PROCEDURES_PATH}/hwp/perv/p9_switch_rec_attn.mk
 include  ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase2.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_check_idle_stop_done.mk
 include ${ROOTPATH}/config.mk
 
 
