@@ -62,6 +62,8 @@ const uint16_t HDAT_VPD_VERSION = 0x0020;
 const uint16_t HDAT_IO_VERSION = 0x7B;
 
 const uint32_t HDAT_MAX_IO_CHIPS = 10;
+const uint32_t HDAT_MAX_SLOT_PER_HUB = 32;
+
 
 /*---------------------------------------------------------------------------*/
 /* Type definitions                                                          */
@@ -127,6 +129,60 @@ struct hdatHubEntry_t
   }
 }  __attribute__ ((packed));
 
+struct hdatSlotMapArea_t
+{
+    uint16_t   hdatEntryId;
+    uint16_t   hdatParentEntryId;
+    uint8_t    hdatPHBId;
+    uint8_t    hdatEntryType;
+    uint8_t    hdatLaneSwapCnfg;
+    uint8_t    hdatReserved1;
+    uint16_t   hdatLaneMask;
+    uint16_t   hdatLaneReversal;
+    uint16_t   hdatSLCAIndx;
+    uint16_t   hdatSlotIndx;
+    uint32_t   hdatEntryFeatures;
+    uint8_t    hdatStationId;
+    uint8_t    hdatPortNum;
+    uint32_t   hdatSwitchVendorId;
+    uint32_t   hdatSwitchDeviceId;
+    uint32_t   hdatSubSysVendorId;
+    uint32_t   hdatSubSysDeviceId;
+    char       hdatSlotName[8];
+} __attribute__ ((packed));
+
+
+struct hdatSlotEntryInfo_t
+{
+    uint16_t   hdatEntryId;
+    uint8_t    hdatMGCLoadSource;
+    uint8_t    hdatHddwOrder;
+    uint16_t   hdat32MmioSizeInMB;
+    uint16_t   hdat64MmioSizeInGB;
+    uint16_t   hdat32DMASizeInGB;
+    uint16_t   hdat64DMASizeInGB;
+    uint8_t    hdatSlotPwrCtrlType;
+    uint8_t    hdatPresCtrlType;
+    uint8_t    hdatPERSTCtrlType;
+    uint8_t    hdatPERSTCtrlGPIOPin;
+    uint16_t   hdatMAxPowrSupported;
+    uint32_t   hdatSlotCaps;
+    uint16_t   hdatMSI;
+    uint32_t   hdatI2cIdSlotPwrCtrl;
+    uint32_t   hdatI2cSlotPwrPgood;
+    uint32_t   hdatI2cCableCardPres;
+    uint32_t   hdatI2cCableCardSlotEnable;
+    uint32_t   hdatI2cMexFPGA;
+} __attribute__ ((packed));
+
+enum hdatSlotMapDataPtrs
+{
+    HDAT_SLOT_MAP_AREA    = 0,
+    HDAT_SLOT_MAP_ENTRY   = 1,
+    HDAT_SLOT_MAP_RSVD1   = 2,
+    HDAT_SLOT_MAP_RSVD2   = 3,
+    HDAT_SLOT_MAP_LAST    = 4
+};
 
 
 /** @enum hdatDataPtrs
@@ -151,8 +207,9 @@ enum hdatioDataPtrs
 enum hdatioChildPtrs
 {
     HDAT_DAUGHTER_CARD   = 0,
-    HDAT_CHILD_RESERVED1 = 1,
-    HDAT_CHILD_LAST      = 2
+    HDAT_SLOT_MAP_INFO   = 1,
+    HDAT_CHILD_RESERVED1 = 2,
+    HDAT_CHILD_LAST      = 3
 };
 
 
@@ -394,6 +451,26 @@ public:
   errlHndl_t bldDaughterStruct( const TARGETING::Target * i_target,
                                 uint32_t i_index );
 
+  /**
+   * @brief Build the hypervisor data area structres for Slot Map structure.
+   *
+   *       Each PCIe slot connected to I/O hub will have a datastructure built
+   *
+   * @pre None
+   *
+   * @param i_target     - input parameter - TARGET value of IO Hub ( proc)
+   * @param i_virtAddr   - input parameter - mainstore virtual address
+   *
+   * @return A null error log handle if successful, else the return code pointed
+   *         to by errlHndl_t contains one of:
+   *
+   */
+
+  errlHndl_t bldSlotMapInfoStruct(uint32_t i_numProc);
+                                           
+
+  errlHndl_t hdatGetSlotMapTableAreas(uint32_t i_numProc);
+  errlHndl_t hdatGetSlotMapEntryInfos(uint32_t i_numProc);
 
   /*
    * @brief fetches all the daughter card information for a proc when the
@@ -491,6 +568,12 @@ public:
   hdatHDIFDataArray_t  iv_hubArrayHdr;
   hdatHubEntry_t      *iv_hubArray;
   HdatVpd            **iv_daughterPtrs;
+  std::vector<HdatHdif>     iv_slotMapInfoObjs;
+  uint32_t             iv_slotMapInfoSize;
+  hdatHDIFDataArray_t  iv_hdatSlotMapAreaArrayHdr;
+  hdatHDIFDataArray_t  iv_hdatSlotMapEntryArrayHdr;
+  hdatSlotMapArea_t    *iv_hdatSlotMapAreaPtr;
+  hdatSlotEntryInfo_t  *iv_hdatSlotMapEntryInfoPtr;
 
 }; // end of HdatIoHubFru class
 

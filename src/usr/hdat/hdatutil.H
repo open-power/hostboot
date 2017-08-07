@@ -95,6 +95,9 @@ const uint16_t HDAT_VERSION3 = 3;
 
 #define UINT64_LOW(u) (u & 0x00000000FFFFFFFF)
 
+#define HDAT_ADD_PAD(x) x += (16 - ((uint64_t)x % 16))
+
+#define HDAT_NV_KWD_MAGIC_WRD  0x4E563030    // "NV00"
 
 namespace HDAT
 {
@@ -123,6 +126,45 @@ struct hdatI2cData_t
     char     hdatI2cLabel[64];
 
 }__attribute__ ((packed));
+
+/* @brief Defines the SMP Link info */
+struct hdatSMPLinkInfo_t
+{
+    uint32_t hdatSMPLinkID;
+    uint32_t hdatSMPLinkUsage;
+    uint32_t hdatSMPLinkBrickID;
+    uint32_t hdatSMPLinkLaneMask;
+    uint16_t hdatSMPLinkPCISlotIndex;
+    uint16_t hdatSMPLinkPCISlotSideBand;
+    uint16_t hdatSMPLinkSLCAIndex;
+    uint16_t hdatReserved1;
+    uint32_t hdatSMPLinkI2cLinkId;
+    uint32_t hdatSMPLinkI2cLinkIdPres;
+    uint32_t hdatSMPLinkI2cLinkIdMicro;
+
+}__attribute__ ((packed));
+
+/** NV Keyword header struct */
+typedef struct{
+    uint32_t magic;     // = "NV00"
+    uint8_t  version;   // Version of the structure = 0x01 start
+    uint8_t  config;    // Configuration specifier : redbud=0x01,sequoia=0x02
+    uint8_t  reserved[249];  // keyword is 255 bytes long
+}hdatNVKwdStruct_t;
+
+enum hdatSMPLinkUsage
+{
+    HDAT_SMP_LINK_USAGE_SMP         = 0,
+    HDAT_SMP_LINK_USAGE_NATIVE_GPU  = 1,
+    HDAT_SMP_LINK_USAGE_EXT_IODRW   = 2,
+    HDAT_SMP_LINK_USAGE_GPU_TO_GPU  = 3,
+    HDAT_SMP_LINK_USAGE_UNKNOWN     = 0xFFFF,
+};
+enum hdatWitherspoonNVCnfg
+{
+    HDAT_REDBUD_NV_CNFG             = 1,
+    HDAT_SEQUOIA_NV_CNFG            = 2,
+};
 
 
 /**
@@ -505,6 +547,27 @@ errlHndl_t hdatGetFullEepromVpd ( TARGETING::Target * i_target,
 *******************************************************************************/
 void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
     std::vector<hdatI2cData_t>&o_i2cDevEntries);
+
+/*******************************************************************************
+ * hdatGetSMPLinkInfo
+ *
+ * @brief Routine returns the Host SMP Link info entries
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param[in] i_pTarget
+ *       The SMP Link  master target handle
+ * @param[out] o_SMPLinkEntries
+ *       The host SMP Link entries
+ *
+ * @return void
+ *
+*******************************************************************************/
+void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
+    std::vector<hdatSMPLinkInfo_t>&o_SMPLinkEntries);
+
 
 
 };// end namespace
