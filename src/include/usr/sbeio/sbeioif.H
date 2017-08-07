@@ -168,6 +168,19 @@ namespace SBEIO
     errlHndl_t sendFifoReset(TARGETING::Target * i_target);
 
     /**
+    * @brief Get the SBE FFDC.  Request that SBE retrieve the SBE FFDC
+    *
+    * @param[in]     i_procChip      The proc from which to get the SBE FFDC
+    * @param[out]    o_pFifoResponse Pointer to response
+    * @param[in]     i_responseSize  Size of response in bytes
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_procChip,
+                              uint32_t *o_pFifoResponse,
+                              uint32_t &i_responseSize);
+    /**
     * @brief Set the FFDC address for the SBE so it is aware of the FFDC buffer
     *        and its size and it is aware of the SBE Communication buffer and
     *        its size

@@ -317,8 +317,15 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                         uint32_t   i_responseSize)
 {
     errlHndl_t errl = NULL;
+    SbeFifo::fifoGetSbeFfdcRequest *l_pFifoRequest =
+        reinterpret_cast<SbeFifo::fifoGetSbeFfdcRequest *>(i_pFifoRequest);
+    bool l_getSbeFfdcReq =
+        ((l_pFifoRequest->commandClass == SBE_FIFO_CLASS_GENERIC_MESSAGE) &&
+         (l_pFifoRequest->command == SBE_FIFO_CMD_GET_SBE_FFDC))
+        ? true : false;
     SbeFifoRespBuffer l_fifoBuffer{o_pFifoResponse,
-                                   i_responseSize/sizeof(uint32_t)};
+                                   i_responseSize/sizeof(uint32_t),
+                                   l_getSbeFfdcReq};
 
     SBE_TRACD(ENTER_MRK "readResponse");
 

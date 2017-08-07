@@ -44,6 +44,7 @@ OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_ffdc_parser.o
 OBJS += sbe_setFFDCAddr.o
+OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o

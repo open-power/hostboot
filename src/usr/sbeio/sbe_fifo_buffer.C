@@ -51,12 +51,14 @@ const char* SbeFifoRespBuffer::cv_stateStrings[] = {
 
 //-------------------------------------------------------------------------
 SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
-                                     size_t bufferWordSize):
+                                     size_t bufferWordSize,
+                                     bool i_getSbeFfdcFmt):
                                             iv_callerBufferPtr(i_fifoBuffer),
                                             iv_callerWordSize(
                                                  std::min(bufferWordSize,
                                                           MSG_BUFFER_SIZE)
-                                                             )
+                                                             ),
+                                            iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
     do
     {
@@ -127,8 +129,9 @@ void SbeFifoRespBuffer::completeMessage()
             if(iv_index < (STATUS_WORD_SIZE + 2))
             {
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
-                          "Complete call caused short read."
-                         );
+                          "Complete call caused short read. (%d < %d)",
+                          iv_index,
+                          STATUS_WORD_SIZE + 2);
                 iv_state = MSG_SHORT_READ;
                 break;
             }
@@ -143,8 +146,10 @@ void SbeFifoRespBuffer::completeMessage()
             {
                 //offset is to large - would go before the buffer.
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
-                         "The offset to the StatusHeader is too large."
-                         );
+                         "The offset to the StatusHeader is too large. "
+                         "(%d > %d)",
+                         iv_localMsgBuffer[iv_offsetIndex] - 1,
+                         iv_offsetIndex);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
@@ -153,8 +158,10 @@ void SbeFifoRespBuffer::completeMessage()
             {
                 //Minimum offset (no ffdc) is StatusHeader size + 1
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
-                         "The offset to the StatusHeader is too small."
-                         );
+                         "The offset to the StatusHeader is too small. "
+                         "(%d < %d)",
+                         iv_localMsgBuffer[iv_offsetIndex],
+                         STATUS_WORD_SIZE + 1);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
@@ -163,11 +170,21 @@ void SbeFifoRespBuffer::completeMessage()
             iv_statusIndex = iv_offsetIndex -
                                        (iv_localMsgBuffer[iv_offsetIndex] - 1);
 
-            //Determine if there is FFDC data in the buffer. We do this by
+            //Determine if there is FFDC data in the buffer. We check if the
+            //buffer contains a get SBE FFDC response. If so, the FFDC is at the
+            //start of the buffer in the return data. Otherwise, we do this by
             //checking that the index after the status header is less than the
             //offset index. If the offset index immediately follows the status
             //header then there is no FFDC in the header.
-            if((iv_statusIndex + STATUS_WORD_SIZE) < iv_offsetIndex)
+            if(iv_getSbeFfdcFmt)
+            {
+                iv_ffdcIndex = 0;
+                iv_ffdcSize = iv_statusIndex;
+                assert( iv_localMsgBuffer[iv_offsetIndex] ==
+                        (STATUS_WORD_SIZE + 1),
+                        "Offset to status header is not 3");
+            }
+            else if((iv_statusIndex + STATUS_WORD_SIZE) < iv_offsetIndex)
             {
                 iv_ffdcIndex = iv_statusIndex + STATUS_WORD_SIZE;
                 iv_ffdcSize = (iv_offsetIndex - iv_ffdcIndex);
