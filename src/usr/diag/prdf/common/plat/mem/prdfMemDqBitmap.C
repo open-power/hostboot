@@ -283,6 +283,115 @@ int32_t MemDqBitmap<T>::getPortByteBitIdx( const MemSymbol & i_symbol,
 
 //------------------------------------------------------------------------------
 
+template<>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MCA>::isChipMark(
+    const MemSymbol & i_symbol, bool & o_cm )
+{
+    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MCA>::isChipMark] "
+
+    int32_t o_rc = SUCCESS;
+    o_cm = false;
+
+    do
+    {
+        // If 2 or more symbols are set in a nibble, the chip mark is present.
+
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
+            break;
+        }
+
+        uint8_t cmData = iv_data[portSlct][byteIdx];
+
+        // Find which nibble to check.
+        uint8_t nibble;
+        if ( bitIdx < 4 )
+            nibble = ( (cmData>>4) & 0xf );
+        else
+            nibble = cmData & 0xf;
+
+        // This nibble must have 2 or more symbols set.
+        o_cm = ( (0x0 != nibble) &&
+                 (0x8 != nibble) &&
+                 (0x4 != nibble) &&
+                 (0x2 != nibble) &&
+                 (0x1 != nibble) );
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+int32_t MemDqBitmap<DIMMS_PER_RANK::MBA>::isChipMark(
+    const MemSymbol & i_symbol, bool & o_cm )
+{
+    #define PRDF_FUNC "[MemDqBitmap<DIMMS_PER_RANK::MBA>::isChipMark] "
+
+    int32_t o_rc = SUCCESS;
+    o_cm = false;
+
+    do
+    {
+        // If 2 or more symbols are set in a nibble, the chip mark is present.
+
+        uint8_t portSlct, byteIdx, bitIdx;
+        o_rc = getPortByteBitIdx( i_symbol, portSlct, byteIdx, bitIdx );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getPortByteBitIdx() failed" );
+            break;
+        }
+
+        uint8_t cmData = iv_data[portSlct][byteIdx];
+
+        // x4 Drams
+        if ( iv_x4Dram )
+        {
+            // Find which nibble to check.
+            uint8_t nibble;
+            if ( bitIdx < 4 )
+                nibble = ( (cmData>>4) & 0xf );
+            else
+                nibble = cmData & 0xf;
+
+            // This nibble must have 2 or more symbols set.
+            o_cm = ( (0x0 != nibble) &&
+                     (0x8 != nibble) &&
+                     (0x4 != nibble) &&
+                     (0x2 != nibble) &&
+                     (0x1 != nibble) );
+        }
+        // x8 Drams
+        else
+        {
+            uint32_t count = 0;
+            while ( 0 != cmData )
+            {
+                if ( 0 != (cmData & 0x3) )
+                    count++;
+
+                cmData >>= 2;
+            }
+            o_cm = ( count >= 2 );
+        }
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template <>
 std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MCA>::getSymbolList(
     uint8_t i_portSlct )
