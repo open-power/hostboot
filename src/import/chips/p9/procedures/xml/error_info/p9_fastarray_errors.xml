@@ -155,6 +155,15 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <hwpError>
+    <rc>RC_FASTARRAY_INVALID_FARR_FLAG</rc>
+    <description>An unknown flag was requested.</description>
+    <ffdc>FLAG</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 <!-- template for copying
   <hwpError>
     <rc>RC_FASTARRAY_</rc>
