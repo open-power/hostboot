@@ -43,7 +43,7 @@
 
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_cpu_special_wakeup.H>
-#include    <p9_dump_stop_info.H>
+#include    <p9_check_idle_stop_done.H>
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
   #include <isteps/pm/occCheckstop.H>
@@ -54,6 +54,7 @@ using   namespace   TARGETING;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   p9specialWakeup;
+using   namespace   p9_check_idle_stop;
 
 namespace ISTEP_16
 {
@@ -138,16 +139,16 @@ void* call_host_activate_slave_cores (void *io_pArgs)
                                  sizeof(l_targName) );
 
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Call p9_dump_stop_info on processor %s", l_targName );
+                    "Call p9_check_idle_stop_done on processor %s", l_targName );
 
                 FAPI_INVOKE_HWP( l_timeout_errl,
-                                 p9_dump_stop_info,
-                                 l_fapi2ProcTarget );
+                                 p9_check_idle_stop_done,
+                                 l_fapi2_coreTarget );
 
                 if (l_timeout_errl)
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p9_dump_stop_info" );
+                          "ERROR : p9_check_idle_stop_done" );
 
                     // Add chip target info
                     ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
