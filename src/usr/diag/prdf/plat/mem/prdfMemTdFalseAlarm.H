@@ -136,6 +136,8 @@ class TdFalseAlarm
     /** Threshold for each entries in the map. */
     const TimeBasedThreshold iv_th;
 
+  protected: // instance variables
+
     /** A map containing the thresholds for each key. */
     std::map<uint32_t, TimeBasedThreshold> iv_thMap;
 };
@@ -200,7 +202,9 @@ class VcmFalseAlarm : public TdFalseAlarm
         uint32_t key = initThMap( i_rank );
 
         // Clear out the list of DRAMs if the threshold time has elapsed.
-        if ( elapsed(i_rank, io_sc) ) iv_dramMap[key].clear();
+        // Note that we cannot call elapsed() because it will do a recursive
+        // call to init().
+        if ( iv_thMap[key].timeElapsed(io_sc) ) iv_dramMap[key].clear();
 
         return key;
     }
