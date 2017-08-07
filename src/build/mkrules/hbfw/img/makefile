@@ -169,11 +169,14 @@ clobber_cp_hbfiles:
 #################################################
 SBE_BUILD_SCRIPT = ${buildSbePart.pl:P}
 
+NIMBUS_SBE_IMG = p9n.SbePartition.bin
+CUMULUS_SBE_IMG = p9c.SbePartition.bin
+
 P9N_EC10_BIN = ${SBEI_OBJPATH:Fp9n_10.sbe_seeprom.hdr.bin}
 P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  p9nSbePartition.bin:10=${P9N_EC10_BIN},20=${P9N_EC20_BIN}
+  ${NIMBUS_SBE_IMG}:10=${P9N_EC10_BIN},20=${P9N_EC20_BIN}
 
 
 __SBE_PART_BUILD/% : .SPECTARG .PMAKE
@@ -233,8 +236,6 @@ NIMBUS_HBD_IMG = simics_NIMBUS_targeting.bin
 CUMULUS_HBD_IMG = simics_CUMULUS_targeting.bin
 NIMBUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9n.hw_ref_image.bin}
 CUMULUS_HCODE_IMG = ${ENGD_SRCPATH:Fp9c.hw_ref_image.bin}
-NIMBUS_SBE_IMG = p9nSbePartition.bin
-CUMULUS_SBE_IMG = p9cSbePartition.bin
 NIMBUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 CUMULUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 ## System Specific
@@ -292,6 +293,9 @@ gen_system_specific_images_bypass_cache :
 	.if(${FAKEPNOR} != "")
 	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
 	.endif
+
+	# @TODO RTC 178235 Remove Symbolic Link Creation Below
+	ln -f -s p9n.SbePartition.header.bin p9nSbePartition.header.bin 
 
 # build_sbe_partitions build step generates SBE partition files that ODE is
 # unaware of due to the file cache that we cannot disable.  To work around that,
