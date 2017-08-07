@@ -465,17 +465,17 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
                                    fapi2::buffer<uint8_t>& o_repairs_applied,
                                    fapi2::buffer<uint8_t>& o_repairs_exceeded)
 {
-    uint8_t l_bad_bits[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT];
-
-    FAPI_TRY( mss::bad_dq_bitmap(i_target, &(l_bad_bits[0][0][0])) );
+    uint8_t l_bad_bits[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
 
     o_repairs_applied = 0;
     o_repairs_exceeded = 0;
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
+        FAPI_TRY( mss::bad_dq_bitmap(l_dimm, &(l_bad_bits[0][0])) );
+
         FAPI_TRY( (restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_DIMM, BAD_DQ_BYTE_COUNT>(
-                       l_dimm, l_bad_bits[mss::index(l_dimm)], o_repairs_applied, o_repairs_exceeded)) );
+                       l_dimm, l_bad_bits, o_repairs_applied, o_repairs_exceeded)) );
     }
 
 fapi_try_exit:
