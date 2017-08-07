@@ -43,7 +43,7 @@
 
   <attribute>
     <id>ATTR_BAD_DQ_BITMAP</id>
-    <targetType>TARGET_TYPE_MCS</targetType>
+    <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
       Bad DQ bitmap from a controller point of view.
       The data is a 10 byte bitmap for each of 4 possible ranks.
@@ -53,7 +53,7 @@
     </description>
     <valueType>uint8</valueType>
     <mssAccessorName>bad_dq_bitmap</mssAccessorName>    
-    <array>2 2 4 10</array>    
+    <array>4 10</array>
     <platInit/>
     <initToZero/>
     <writeable/>

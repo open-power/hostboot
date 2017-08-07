@@ -939,8 +939,8 @@ fapi2::ReturnCode reset_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 /// @param[in] i_bad_dq array representing the data from the bad dq bitmap
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-fapi2::ReturnCode reset_bad_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                        const uint8_t i_bad_dq[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10]);
+fapi2::ReturnCode reset_bad_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                        const uint8_t i_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT]);
 
 ///
 /// @brief Configure the DP16 io_tx config0 registers
@@ -1936,11 +1936,11 @@ fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 /// @note This is different than a register write as it writes attributes which
 /// cause firmware to act on the disabled bits.
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] containing the attribute information
+/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] containing the attribute information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
-fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        uint8_t (&o_bad_dq)[MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][10] );
+fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_bad_dq)[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] );
 
 ///
 /// @brief Process read vref calibration errors
