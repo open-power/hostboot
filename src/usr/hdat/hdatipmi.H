@@ -72,7 +72,8 @@ struct hdatIPMIFRUSensorMapEntry_t
     uint32_t SLCAIndex;
     uint8_t  IPMISensorType;
     uint8_t  IPMISensorID;
-    uint16_t Reserved;
+    uint8_t  IPMIEntityID;
+    uint8_t Reserved;
 }__attribute__ ((packed));
 
 struct hdatIPMILEDSensorMapEntry_t

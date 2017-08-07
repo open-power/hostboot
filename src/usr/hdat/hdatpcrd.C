@@ -657,16 +657,25 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         }
 
-        uint32_t l_procFabricId =
+        uint32_t l_procRealFabricGrpId =
                     i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_GROUP_ID>();
 
-        // Set fabric nodeid (NNN) and chip (CC) into xscom id:  NN_N0CC
-        uint32_t l_XscomChipId =
+        // Set fabric Groupid (NNN) and chip (CC) into Real fabric grp ID
+        uint32_t l_RealFabricChipId =
                     i_pProcTarget->getAttr<TARGETING::ATTR_FABRIC_CHIP_ID>();
-        l_XscomChipId |= l_procFabricId << 3;
 
+        iv_spPcrd->hdatChipData.hdatPcrdRealFabricGrpId = 
+                        (l_RealFabricChipId | (l_procRealFabricGrpId << 3));
 
-        iv_spPcrd->hdatChipData.hdatPcrdXscomChipId = l_XscomChipId;
+        uint32_t l_procEffFabricGrpId =
+                    i_pProcTarget->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_GROUP_ID>();
+
+        // Set Effective fabric Groupid (NNN) and chip (CC) into Effective fabric grp ID
+        uint32_t l_EffFabricChipId =
+                    i_pProcTarget->getAttr<TARGETING::ATTR_PROC_EFF_FABRIC_CHIP_ID>();
+
+        iv_spPcrd->hdatChipData.hdatPcrdEffFabricGrpId = 
+                        (l_EffFabricChipId | (l_procEffFabricGrpId << 3));
 
 
         TARGETING::TargetHandleList targetListNode;
@@ -738,7 +747,7 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         HDAT_DBG("hw card ID:0x%llx", l_HWCardId);
 
         iv_spPcrd->hdatChipData.hdatPcrdHwCardID = l_HWCardId;
-        iv_spPcrd->hdatChipData.hdatPcrdFabricId = l_procFabricId;
+        iv_spPcrd->hdatChipData.hdatPcrdFabricId = l_procRealFabricGrpId;
         iv_spPcrd->hdatChipData.hdatPcrdCcmNodeID =
                     l_pNodeTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
@@ -777,6 +786,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         iv_spPcrd->hdatChipData.hdatPcrdStopLevelSupport =
             l_pSysTarget->getAttr<TARGETING::ATTR_SUPPORTED_STOP_STATES>();
+        iv_spPcrd->hdatChipData.hdatPcrdCheckstopAddr = HDAT_SW_CHKSTP_FIR_SCOM;
+        iv_spPcrd->hdatChipData.hdatPcrdSpareBitNum   = HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS;
 
     }
     while(0);
