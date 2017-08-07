@@ -78,26 +78,39 @@ HdatIpmi::HdatIpmi(errlHndl_t &o_errlHndl, const hdatMsAddr_t &i_msAddr):
         TARGETING::PredicateCTM l_dimmFilter(TARGETING::CLASS_LOGICAL_CARD,
                                              TARGETING::TYPE_DIMM);
 
+        TARGETING::PredicateCTM l_occFilter(TARGETING::CLASS_UNIT,
+                                             TARGETING::TYPE_OCC);
+
         TARGETING::PredicatePostfixExpr l_presentTargExpr;
         l_presentTargExpr.push(&l_procFilter).push(&l_sysFilter).Or().
                      push(&l_nodeFilter).Or().push(&l_dimmFilter).Or().
-                     push(&l_predHwas).And();
+                     push(&l_occFilter).Or().push(&l_predHwas).And();
 
         TARGETING::TargetRangeFilter l_targFilter(
         l_targetService.begin(),
         l_targetService.end(),
         &l_presentTargExpr);
         
-        TARGETING::ATTR_IPMI_SENSORS_type sensors = {{0}};
         for(; l_targFilter; ++l_targFilter)
         {
             // Create a new array entry and push it to FRU/LED sensor vector
+            TARGETING::ATTR_IPMI_SENSORS_type sensors = {{0}};
             hdatIPMIFRUSensorMapEntry_t l_fruEntry;
-            l_fruEntry.SLCAIndex = (*l_targFilter)->getAttr<ATTR_SLCA_INDEX>();
-            assert((*l_targFilter)->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(sensors));
+            if((*l_targFilter)->getAttr<ATTR_CLASS>() == TARGETING::CLASS_UNIT)
+            {
+                const TARGETING::Target *l_parentTarget = getParentChip(*l_targFilter); 
+                l_fruEntry.SLCAIndex = (l_parentTarget)->getAttr<ATTR_SLCA_INDEX>();
+            }
+            else
+            {
+                l_fruEntry.SLCAIndex = (*l_targFilter)->getAttr<ATTR_SLCA_INDEX>();
+            }
+            (*l_targFilter)->tryGetAttr<TARGETING::ATTR_IPMI_SENSORS>(sensors);
+
             for(auto & l_sensor : sensors)
             {
                 l_fruEntry.IPMISensorID = l_sensor[1];
+                l_fruEntry.IPMIEntityID = (uint8_t)(l_sensor[0] & 0x00FF);
                 l_fruEntry.IPMISensorType = (uint8_t)(l_sensor[0] >> 8);
                 // OPAL doesn't like sensor types of 0xFF, so filter them out.
                 if( l_fruEntry.IPMISensorType != 0xFF )

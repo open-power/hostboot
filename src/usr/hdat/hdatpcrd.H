@@ -53,8 +53,10 @@ namespace HDAT
 
 #define HDAT_NUM_P7_PCRD_ENTRIES    32
 #define HDAT_FULL_MVPD_SIZE 0x10000
-const uint16_t HDAT_PCRD_VERSION    = 0x20;
+const uint16_t HDAT_PCRD_VERSION    = 0x21;
 const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
+#define HDAT_SW_CHKSTP_FIR_SCOM         0x05012000
+#define HDAT_SW_CHKSTP_FIR_SCOM_BIT_POS 0x1F  
 
 //Max number of I2c devices for any given proc
 #define HDAT_PCRD_MAX_I2C_DEV  64
@@ -89,8 +91,8 @@ struct hdatPcrdChipInfo_t
     uint32_t  hdatPcrdStatusFlags;      // 0x0004 verify/exist flags
     uint32_t  hdatPcrdNxFunctional;     // 0x0008 NX functional
     uint32_t  hdatPcrdPoreFunctional;   // 0x000C Pore functional
-    uint32_t  hdatPcrdXscomChipId;      // 0x0010 XSCOM chip ID
-    uint32_t  reserved_01;              // 0x0014 ECO Cores
+    uint32_t  hdatPcrdRealFabricGrpId;  // 0x0010 Real Fabric Group ID
+    uint32_t  hdatPcrdEffFabricGrpId;   // 0x0014 Effective Fabric Group ID
     uint32_t  hdatPcrdDbobId;           // 0x0018 Drawer/Book/Octant/Blade ID
                                         //          (DBOB)
     uint32_t  hdatPcrdOccFuncState;     // 0x001C OCC Functional State
@@ -104,6 +106,9 @@ struct hdatPcrdChipInfo_t
     uint32_t  hdatPcrdCappFunc_unit0;   // 0x0038 Capp functional state unit0
     uint32_t  hdatPcrdCappFunc_unit1;   // 0x003C Capp functional state unit1
     uint32_t  hdatPcrdStopLevelSupport; // 0x0040 Supported Stop Level
+    uint32_t  hdatPcrdCheckstopAddr;    // 0x0044 SW Checkstop FIR SCom address
+    uint8_t   hdatPcrdSpareBitNum;      // 0x0048 Bit position to set for FIR scom
+    uint8_t   reserved_02[3];           // 0x0049 Reserved 
 } __attribute__ ((packed));
 
 /* @brief Defines 'chip time-of-day structure in the PCRD */
