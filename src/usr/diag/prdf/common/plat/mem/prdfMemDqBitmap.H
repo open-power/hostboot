@@ -152,6 +152,15 @@ class MemDqBitmap
                                uint8_t & o_byteIdx, uint8_t & o_bitIdx ) const;
 
     /**
+     * @brief  Checks if chip mark is present on specified DRAM.
+     * @note   Will adjust for DRAM or ECC spares, if applicable.
+     * @param  i_symbol A symbol on the target DRAM.
+     * @param  o_cm     True if chip mark is present false otherwise.
+     * @return Non-SUCCESS if an internal function failed, SUCCESS otherwise.
+     */
+    int32_t isChipMark( const MemSymbol & i_symbol, bool & o_cm );
+
+    /**
      * @brief  Returns a list of all active (non-zero) symbols.
      * @param  i_portSlct The port select. Default is 0. Only needed for MBA.
      * @return Vector of all active symbols.
