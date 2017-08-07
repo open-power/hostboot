@@ -319,6 +319,63 @@ uint32_t addTpsEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T, typename D>
+uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
+                    STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[MemEcc::handleMpe] "
+
+    PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Read the chip mark from markstore.
+        MemMark chipMark;
+        o_rc = MarkStore::readChipMark<T>( i_chip, i_rank, chipMark );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
+                      i_chip->getHuid(), i_rank.getMaster() );
+            break;
+        }
+
+        // If the chip mark is not valid, then somehow the chip mark was
+        // placed on a rank other than the rank in which the command
+        // stopped. This would most likely be a code bug.
+        PRDF_ASSERT( chipMark.isValid() );
+
+        // Add the mark to the callout list.
+        MemoryMru mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
+        io_sc.service_data->SetCallout( mm );
+
+        #ifdef __HOSTBOOT_RUNTIME
+        // Add a VCM request to the TD queue.
+        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
+                      "i_rank=m%ds%d", i_chip->getHuid(), i_rank.getMaster(),
+                      i_rank.getSlave() );
+            break;
+        }
+        #endif // __HOSTBOOT_RUNTIME
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+// To resolve template linker errors.
+template
+uint32_t handleMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
+    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc );
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T, typename D>
 uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                           STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -360,36 +417,13 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         D db = static_cast<D>(i_chip->getDataBundle());
         db->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
 
-        // Read the chip mark from markstore.
-        MemMark chipMark;
-        o_rc = MarkStore::readChipMark<T>( i_chip, i_rank, chipMark );
+        o_rc = MemEcc::handleMpe<T,D>( i_chip, i_rank, io_sc );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
-                      i_chip->getHuid(), i_rank.getMaster() );
+            PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",
+                      i_chip->getHuid(), i_rank.getKey() );
             break;
         }
-
-        // If the chip mark is not valid, then somehow the chip mark was placed
-        // on a rank other than the rank with the attention. This would most
-        // likely be a code bug.
-        PRDF_ASSERT( chipMark.isValid() );
-
-        // Add the mark to the callout list.
-        MemoryMru mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
-        io_sc.service_data->SetCallout( mm );
-
-        #ifdef __HOSTBOOT_RUNTIME
-        // Add a VCM request to the TD queue.
-        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
-                      "i_rank=%d,%d", i_chip->getHuid(), i_rank.getMaster(),
-                      i_rank.getSlave() );
-            break;
-        }
-        #endif // __HOSTBOOT_RUNTIME
 
     } while (0);
 

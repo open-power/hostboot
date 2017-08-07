@@ -664,28 +664,13 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             D db = static_cast<D>(i_chip->getDataBundle());
             db->iv_ueTable.addEntry( UE_TABLE::SCRUB_MPE, i_addr );
 
-            // Read the chip mark from markstore.
-            MemMark chipMark;
-            o_rc = MarkStore::readChipMark<T>( i_chip, rank, chipMark );
+            o_rc = MemEcc::handleMpe<T,D>( i_chip, rank, io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "readChipMark<T>(0x%08x,%d) failed",
-                          huid, rank.getMaster() );
+                PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",
+                          i_chip->getHuid(), rank.getKey() );
                 break;
             }
-
-            // If the chip mark is not valid, then somehow the chip mark was
-            // placed on a rank other than the rank in which the command
-            // stopped. This would most likely be a code bug.
-            PRDF_ASSERT( chipMark.isValid() );
-
-            // Add the mark to the callout list.
-            MemoryMru mm { trgt, rank, chipMark.getSymbol() };
-            io_sc.service_data->SetCallout( mm );
-
-            // Add a VCM procedure to the queue.
-            TdEntry * e = new VcmEvent<T>{ i_chip, rank, chipMark };
-            io_queue.push( e );
         }
 
         if ( 0 != (eccAttns & MAINT_RCE_ETE) )
