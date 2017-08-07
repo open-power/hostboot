@@ -35,6 +35,8 @@
 
 extern trace_desc_t* g_trac_sbeio;
 
+#define SBE_BUFFER_TRACF(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"sbeFifoBufferTest: " printf_string,##args)
 #define SBE_BUFFER_TRACD(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"sbeFifoBufferTest: " printf_string,##args)
 
@@ -45,9 +47,11 @@ class SbeFifoRespBufferTestFixture:public SbeFifoRespBuffer
 public:
 
     explicit SbeFifoRespBufferTestFixture(uint32_t * i_fifoBuffer,
-                                          size_t bufferWordSize):
+                                          size_t bufferWordSize,
+                                          bool i_getSbeFfdcFmt = false):
                                                SbeFifoRespBuffer(i_fifoBuffer,
-                                                               bufferWordSize)
+                                                               bufferWordSize,
+                                                               i_getSbeFfdcFmt)
     {
     }
 
@@ -129,6 +133,19 @@ std::vector<uint32_t> bufferShortRead = {
                                             0x00000001  //EOT
                                         };
 
+std::vector<uint32_t>  bufferGetSbeFFDC = {
+                                    0xFFDC0024, //FFDC 1
+                                    0x00983AB6, //FFDC 2 - RC_SBE_SCOM_FAILURE
+                                    0x00000008, //FFDC 3 - scom addr size
+                                    0x12345678, //FFDC 4 - scom addr
+                                    0x00000008, //FFDC 5 - PIB RC size
+                                    0x00000006, //FFDC 6 - PIB_PARITY_ERROR
+                                    0xC0DEA801, //Status Header 1
+                                    0x00000000, //Status Header 2
+                                    0x00000003, //Offset to Status Header
+                                    0x00000001, //EOT
+                                };
+
 size_t overrun_element_count{2096};
 uint32_t overrun_element_value{34};
 std::vector<uint32_t> bufferOverrun(overrun_element_count,
@@ -164,7 +181,7 @@ public:
     //------------------------------------------------
     void testState()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testState");
+        SBE_BUFFER_TRACF("Enter sbeFifoBufferTest testState");
 
         bool result{true};
 
@@ -1346,6 +1363,141 @@ public:
         else
         {
             SBE_BUFFER_TRACD("sbeFifoBufferTest testOverrun test failed!");
+        }
+    }
+
+    //-----------------------------------------------------------------------
+    void testGetSbeFFDC()
+    {
+        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testGetSbeFFDC");
+
+        //Test with buffer data that has FFDC data in get SBE FFDC format
+
+        bool result{true};
+
+        do
+        {
+            uint32_t callerBuffer[10] = {0};
+            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
+                                       sizeof(callerBuffer)/sizeof(uint32_t),
+                                       true);
+
+            if(not fifoBuffer)
+            {
+                TS_FAIL("sbeFifoBufferTest testGetSbeFFDC: "
+                        "The FIFO buffer is not in a good state after "
+                        "CTOR call. Buffer state: %s",
+                         fifoBuffer.getStateString()
+                       );
+
+                result = false;
+                break;
+            }
+
+            setTestData(&bufferGetSbeFFDC);
+
+            while(fifoBuffer)
+            {
+                uint32_t value{};
+                bool rc = readTestData(value);
+                if(rc)
+                {
+                    rc = fifoBuffer.append(value);
+                    if(not rc)
+                    {
+                        TS_FAIL("sbeFifoBufferTest testGetSbeFFDC: "
+                                "append operation unexpectedly failed. "
+                                "Fifo Buffer state = %s",
+                                 fifoBuffer.getStateString()
+                               );
+
+                        result = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    fifoBuffer.completeMessage();
+                }
+            }
+
+            if(not result)
+            {
+                break;
+            }
+
+            if(SbeFifoRespBuffer::MSG_COMPLETE != fifoBuffer.getState())
+            {
+                TS_FAIL("sbeFifoBufferTest testGetSbeFFDC: "
+                        "Buffer unexpectedly not in the complete state after "
+                        "populating buffer. State = %s.",
+                        fifoBuffer.getStateString()
+                       );
+
+                result = false;
+                break;
+            }
+
+            if(not fifoBuffer.isMsgComplete())
+            {
+                TS_FAIL("sbeFifoBufferTest testGetSbeFFDC: "
+                        "unexpectedly returned false for isMsgComplete"
+                       );
+
+                result = false;
+                break;
+            }
+
+            if(not fifoBuffer.getStatus())
+            {
+                TS_FAIL("sbeFifoBufferTest testGetSbeFFDC: "
+                        "unexpectedly returned false for getStatus"
+                       );
+
+                result = false;
+                break;
+            }
+
+            expected_data expData;
+            memset(&expData, 0, sizeof(expData));
+
+            expData.test_name = "GetSbeFFDC";
+            expData.index = 10;
+            expData.offset_index = 8;
+            expData.offset = 3;
+
+            expData.statusIndex = 6;
+            expData.expected_status = &bufferGetSbeFFDC[6];
+
+            // NOTE: FFDC is in the return data for get SBE FFDC response.
+            expData.expectFFDC = true;
+            expData.ffdcIndex = 0;
+            expData.ffdcByteSize = sizeof(uint32_t)*6;
+            expData.expected_ffdc_data = &bufferGetSbeFFDC[0];
+
+            expData.expectReturnData = true;
+            expData.dataByteSize = sizeof(uint32_t) * 6;
+            expData.expected_data = &bufferGetSbeFFDC[0];
+
+            bool check_result = runChecks(expData, fifoBuffer);
+
+            if(not check_result)
+            {
+                TS_FAIL("%s", expData.strMessage);
+
+                result = false;
+                break;
+            }
+        }
+        while(0);
+
+        if(result)
+        {
+            SBE_BUFFER_TRACD("sbeFifoBufferTest testGetSbeFFDC test passed!");
+        }
+        else
+        {
+            SBE_BUFFER_TRACD("sbeFifoBufferTest testGetSbeFFDC test failed!");
         }
     }
 

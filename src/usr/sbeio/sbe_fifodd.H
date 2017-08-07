@@ -48,7 +48,7 @@ namespace SBEIO
 //-----------------------------------------------------------------------------
 
 /** @class SbeFifo
- *  *  @brief Class for SBE/PSU communication
+ *  *  @brief Class for SBE/FIFO communication
  *  */
 
 class SbeFifo
@@ -92,6 +92,14 @@ class SbeFifo
         };
 
         /**
+        * @brief enums for FIFO Generic Messages
+        */
+        enum fifoGenericMessage
+        {
+            SBE_FIFO_CMD_GET_SBE_FFDC        = 0x01,
+        };
+
+        /**
         * @brief enums for FIFO MPIPL Messages
         */
         enum fifoMpiplMessage
@@ -112,6 +120,23 @@ class SbeFifo
             uint8_t  commandClass;
             uint8_t  command;
             fifoContinueMpiplRequest() :
+            wordCnt(2),
+            reserved(0)
+            {
+            }
+        } PACKED;
+
+        /**
+        * @brief Struct for FIFO Get SBE FFDC request
+        *
+        */
+        struct fifoGetSbeFfdcRequest
+        {
+            uint32_t wordCnt;
+            uint16_t reserved;
+            uint8_t  commandClass;
+            uint8_t  command;
+            fifoGetSbeFfdcRequest() :
             wordCnt(2),
             reserved(0)
             {
@@ -179,6 +204,15 @@ class SbeFifo
         } PACKED;
 
         /**
+        * @brief enums for FIFO Magic values
+        */
+        enum fifoMagic
+        {
+            FIFO_STATUS_MAGIC = 0xC0DE,
+            FIFO_FFDC_MAGIC   = 0xFFDC,
+        };
+
+        /**
          * @brief Struct for FIFO status
          *
          */
@@ -190,7 +224,20 @@ class SbeFifo
             uint16_t  primaryStatus;
             uint16_t  secondaryStatus;
         } PACKED;
-        const uint16_t FIFO_STATUS_MAGIC = 0xC0DE;
+
+        /**
+         * @brief Struct for FIFO FFDC
+         *
+         */
+        struct ffdcHeader
+        {
+            uint16_t  magic;     // set to 0xFFDC
+            uint16_t  lengthWords;
+            uint16_t  sequenceId;
+            uint8_t   commandClass;
+            uint8_t   command;
+            uint32_t  returnCode;
+        } PACKED;
 
         /**
          * @brief Struct for FIFO Put SCOM and Put SCOM under mask response

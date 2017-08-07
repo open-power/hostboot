@@ -50,6 +50,7 @@ enum sbeioModuleId
     SBEIO_RUNTIME                       = 0x05,
     SBEIO_MEM_REGION                    = 0x06,
     SBEIO_RUNTIME_ATTR_OVERRIDE         = 0x07,
+    SBEIO_FIFO_GET_SBE_FFDC             = 0x08,
 };
 
 /**

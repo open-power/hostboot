@@ -59,8 +59,11 @@ public:
      * @param[in] i_fifoBuffer -   The caller supplied buffer.
      * @param[in] bufferWordSize - The size of the caller supplied buffer in
      *                             uint32_t units.
+     * @param[in] i_getSbeFfdcFmt - A bool indicating if this is for a get SBE
+     *                              FFDC request with a special buffer format.
      */
-    explicit SbeFifoRespBuffer(uint32_t * i_fifoBuffer, size_t bufferWordSize);
+    explicit SbeFifoRespBuffer(uint32_t * i_fifoBuffer, size_t bufferWordSize,
+                               bool i_getSbeFfdcFmt = false);
 
     //This is a helper class intended for local use only.
     SbeFifoRespBuffer(const SbeFifoRespBuffer&) = delete;
@@ -296,6 +299,11 @@ private:
                                              return data and status */
 
    const size_t iv_callerWordSize; /**< caller buffer size in uint32_t units */
+
+   bool iv_getSbeFfdcFmt; /**< indicates if buffer is for a get SBE FFDC request
+                             and has a special format where the return data is
+                             the FFDC and there is no FFDC after the status
+                             header */
 
    //====================
    // Index and State
