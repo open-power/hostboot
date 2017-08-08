@@ -151,15 +151,6 @@ struct hdatMsAreaAffinity_t
 }  __attribute__ ((packed));
 
 
-/** @brief Structure definition for an entry in the chip's engineering change
- *         level array         
- */
-struct hdatMsAreaEcLvl_t
-{
-    uint32_t hdatChipManfId;  // 0x0000 Memory interface chip manufacturing id
-    uint32_t hdatChipEcLvl;   // 0x0004 Memory interface chip EC level
-}  __attribute__ ((packed));
-
 /*----------------------------------------------------------------------------*/
 /* Constants                                                                  */
 /*----------------------------------------------------------------------------*/
@@ -617,7 +608,7 @@ private:
     hdatMsAreaAddrRange_t        *iv_addrRange;
     hdatMsAreaAffinity_t         iv_aff;
     hdatHDIFDataArray_t          iv_ecArrayHdr;
-    hdatMsAreaEcLvl_t           *iv_ecLvl;
+    hdatEcLvl_t           *iv_ecLvl;
     hdatHDIFVersionedDataArray_t iv_msaI2cHdr;
     uint8_t                     *iv_msaI2cDataPtr;
     HdatRam                    **iv_ramPtrs;

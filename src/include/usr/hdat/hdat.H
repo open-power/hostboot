@@ -179,7 +179,8 @@ enum hdatProcStatus
   HDAT_PROC_NOT_USABLE    = 0xC0000000,  // Unusable
   HDAT_PROC_STAT_BITS     = 0xC0000000,  // constant to and off all bits
                                          //  but 2 status bits
-  HDAT_RESERVE_FOR_CCM    = 0x10000000   // reserved for future use
+  HDAT_RESERVE_FOR_CCM    = 0x10000000,  // reserved for future use
+  HDAT_PROC_IPL_MASTER    = 0x08000000   // Master Proc from IPL perspective
 };
 
 /* @enum hdatThreadIndicator

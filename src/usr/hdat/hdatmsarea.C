@@ -130,8 +130,8 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
 
     iv_ecArrayHdr.hdatOffset    = sizeof(hdatHDIFDataArray_t);
     iv_ecArrayHdr.hdatArrayCnt  = 0;
-    iv_ecArrayHdr.hdatAllocSize = sizeof(hdatMsAreaEcLvl_t);
-    iv_ecArrayHdr.hdatActSize   = sizeof(hdatMsAreaEcLvl_t);
+    iv_ecArrayHdr.hdatAllocSize = sizeof(hdatEcLvl_t);
+    iv_ecArrayHdr.hdatActSize   = sizeof(hdatEcLvl_t);
     l_slcaIdx = i_slcaIdx;
 
 
@@ -182,7 +182,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     if (NULL == o_errlHndl)
     {
         iv_fru.hdatSlcaIdx = l_slcaIdx;
-        iv_ecLvl = new hdatMsAreaEcLvl_t[iv_maxEcCnt];
+        iv_ecLvl = new hdatEcLvl_t[iv_maxEcCnt];
     }
     // Allocate space for the RAM entries
     if (NULL == o_errlHndl)
@@ -365,13 +365,13 @@ errlHndl_t HdatMsArea::addEcEntry(uint32_t i_manfId,
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
-    hdatMsAreaEcLvl_t *l_ec;
+    hdatEcLvl_t *l_ec;
 
 
     if (iv_ecArrayHdr.hdatArrayCnt < iv_maxEcCnt)
     {
-        l_ec = reinterpret_cast<hdatMsAreaEcLvl_t*>(reinterpret_cast<char*>
-        (iv_ecLvl) + iv_ecArrayHdr.hdatArrayCnt * sizeof(hdatMsAreaEcLvl_t));
+        l_ec = reinterpret_cast<hdatEcLvl_t*>(reinterpret_cast<char*>
+        (iv_ecLvl) + iv_ecArrayHdr.hdatArrayCnt * sizeof(hdatEcLvl_t));
         l_ec->hdatChipManfId = i_manfId;
         l_ec->hdatChipEcLvl  = i_ecLvl;
         iv_ecArrayHdr.hdatArrayCnt++;
@@ -522,7 +522,7 @@ void HdatMsArea::finalizeObjSize()
 
     this->addData(HDAT_MS_AREA_AFF, sizeof(hdatMsAreaAffinity_t));
     this->addData(HDAT_MS_AREA_EC_ARRAY, sizeof(hdatHDIFDataArray_t) +
-                    iv_maxEcCnt * sizeof(hdatMsAreaEcLvl_t));
+                    iv_maxEcCnt * sizeof(hdatEcLvl_t));
     this->addData(HDAT_MS_AREA_HOST_I2C, iv_msaHostI2cSize);
 
     this->align();
@@ -587,7 +587,7 @@ uint32_t  HdatMsArea::getMsAreaSize()
 
     l_size += sizeof(hdatHDIFDataArray_t);
 
-    l_size += (iv_maxEcCnt * sizeof(hdatMsAreaEcLvl_t));
+    l_size += (iv_maxEcCnt * sizeof(hdatEcLvl_t));
 
     l_size += sizeof(iv_msaI2cHdr);
 
@@ -652,7 +652,7 @@ void HdatMsArea::commit(UtilMem &i_data)
 
     i_data.write(&iv_ecArrayHdr, sizeof(hdatHDIFDataArray_t));
 
-    i_data.write(iv_ecLvl,iv_maxEcCnt * sizeof(hdatMsAreaEcLvl_t));
+    i_data.write(iv_ecLvl,iv_maxEcCnt * sizeof(hdatEcLvl_t));
 
     i_data.write(&iv_msaI2cHdr, sizeof(iv_msaI2cHdr));
 
@@ -695,7 +695,7 @@ void HdatMsArea::commitRamAreas(UtilMem &i_data)
 void HdatMsArea::prt()
 {
     uint32_t l_cnt;
-    hdatMsAreaEcLvl_t *l_ec;
+    hdatEcLvl_t *l_ec;
     hdatMsAreaAddrRange_t *l_addr;
     HdatRam *l_ramObj;
 
@@ -746,7 +746,7 @@ void HdatMsArea::prt()
     HDAT_INF("      hdatMsAreaModuleId = %u", iv_aff.hdatMsAreaModuleId);
     HDAT_INF("      hdatMsAffinityDomain = %u", iv_aff.hdatMsAffinityDomain);
 
-    HDAT_INF("  **hdatMsAreaEcLvl_t**");
+    HDAT_INF("  **hdatEcLvl_t**");
     hdatPrintHdrs(NULL, NULL, &iv_ecArrayHdr, NULL);
     l_ec = iv_ecLvl;
     for (l_cnt = 0; l_cnt < iv_ecArrayHdr.hdatArrayCnt; l_cnt++)

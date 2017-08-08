@@ -133,6 +133,10 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatSize   = 0;
 
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize   = 0;
+
+
 
   return l_errlHndl;
 }
@@ -510,7 +514,8 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 uint8_t* l_temp = reinterpret_cast<uint8_t *>
                                                  (l_hostI2cFullPcrdHdrPtr);
 
-                l_temp += l_pcrdHI2cTotalSize;
+                l_temp += sizeof(*l_hostI2cFullPcrdHdrPtr) + (sizeof(hdatI2cData_t)
+                                    * HDAT_PCRD_MAX_I2C_DEV);
                 l_pnor = reinterpret_cast<hdatPcrdPnor_t *>(l_temp);
             }
 
@@ -615,6 +620,50 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             this->iv_spPcrd->hdatHdr.hdatSize +=
             sizeof(hdatHDIFDataArray_t) + (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
 
+
+
+            // Need to populate EC level info
+            // PCRD is only one per chip . Hence the array count of EC level int pntr will be only 1.
+        
+            hdatHDIFDataArray_t *l_ECLvlInfoPcrdHdrPtr = NULL;
+            l_ECLvlInfoPcrdHdrPtr = reinterpret_cast<hdatHDIFDataArray_t *>
+                                ((uint8_t *)l_SMPInfoFullPcrdHdrPtr + sizeof(hdatHDIFDataArray_t) +
+                                (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK));
+            uint32_t l_pcrdECLvlTotalSize = sizeof(hdatHDIFDataArray_t) +
+                                          sizeof(hdatEcLvl_t); 
+            
+
+            l_ECLvlInfoPcrdHdrPtr->hdatOffset = 0x0010; // All array entries start right after header which is of 4 word size
+            l_ECLvlInfoPcrdHdrPtr->hdatArrayCnt = 1;
+            l_ECLvlInfoPcrdHdrPtr->hdatAllocSize =
+                    sizeof(hdatEcLvl_t);
+            l_ECLvlInfoPcrdHdrPtr->hdatActSize =
+                    sizeof(hdatEcLvl_t);
+
+            uint32_t l_ecLevel = 0;
+            uint32_t l_chipId = 0;
+
+            l_errl = hdatGetIdEc( l_pProcTarget, 
+                                  l_ecLevel,
+                                  l_chipId);
+            if(l_errl)
+            {
+                HDAT_ERR(" Getting the chip EC and ID value for proc chip with HUID 0X%8x failed",
+                                    l_pProcTarget->getAttr<ATTR_HUID>());
+                break;
+            }
+            hdatEcLvl_t *l_hdatEcLvl = reinterpret_cast<hdatEcLvl_t *>
+                                    ((uint8_t *)l_ECLvlInfoPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
+            l_hdatEcLvl->hdatChipManfId = l_chipId;
+            l_hdatEcLvl->hdatChipEcLvl  = l_ecLevel;
+            
+
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset =
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset + sizeof(hdatHDIFDataArray_t) +
+                                            (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize = l_pcrdECLvlTotalSize;
+            this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdECLvlTotalSize;
+
             if( NULL != l_errl)
             {
                 break;
@@ -677,6 +726,12 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
 
         iv_spPcrd->hdatChipData.hdatPcrdStatusFlags =
             isFunctional(i_pProcTarget)? i_procstatus : HDAT_PROC_NOT_USABLE;
+
+        if(i_pProcTarget->getAttr<ATTR_PROC_MASTER_TYPE>() == 
+                        TARGETING::PROC_MASTER_TYPE_ACTING_MASTER)
+        {
+            iv_spPcrd->hdatChipData.hdatPcrdStatusFlags |= HDAT_PROC_IPL_MASTER;
+        }
 
         //Set NxFunctional State
         iv_spPcrd->hdatChipData.hdatPcrdNxFunctional = 0;
