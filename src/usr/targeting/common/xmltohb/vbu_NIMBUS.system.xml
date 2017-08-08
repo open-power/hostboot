@@ -119,10 +119,6 @@
         <default>0x000603FC00000000</default>
     </attribute>
     <attribute>
-        <id>TPM_REQUIRED</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>ISTEP_MODE</id>
         <default>0x1</default>
     </attribute>

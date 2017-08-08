@@ -3478,11 +3478,16 @@
     <id>TPM_REQUIRED</id>
     <persistency>non-volatile</persistency>
     <readable></readable>
+    <writeable></writeable>
     <simpleType>
       <uint8_t>
-        <default>0</default>
+        <default>1</default>
       </uint8_t>
     </simpleType>
+    <range>
+        <min>0</min>
+        <max>1</max>
+    </range>
   </attribute>
 
   <attribute>
