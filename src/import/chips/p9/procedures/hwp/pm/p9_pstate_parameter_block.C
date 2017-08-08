@@ -1219,14 +1219,7 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     uint8_t*        l_buffer_iq_c =  reinterpret_cast<uint8_t*>(malloc(IQ_BUFFER_ALLOC));
     uint32_t        l_record = 0;
     uint32_t        l_bufferSize_iq  = IQ_BUFFER_ALLOC;
-    uint8_t         i, j;
-    const char*     idd_meas_str[IDDQ_MEASUREMENTS] = IDDQ_ARRAY_VOLTAGES_STR;
-    char            l_buffer_str[256];   // Temporary formatting string buffer
-    char            l_line_str[256];     // Formatted output line string
 
-    static const uint32_t IDDQ_DESC_SIZE = 56;
-    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
-                                            strlen("Quad X:");
 
     // --------------------------------------------
     // Process IQ Keyword (IDDQ) Data
@@ -1277,193 +1270,8 @@ proc_get_mvpd_iddq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // get IQ version and advance pointer 1-byte
-    FAPI_INF("  IDDQ Version Number = %u", io_iddqt->iddq_version);
-    FAPI_INF("  Sort Info:         Good Quads = %02d Good Cores = %02d Good Caches = %02d",
-             io_iddqt->good_quads_per_sort,
-             io_iddqt->good_normal_cores_per_sort,
-             io_iddqt->good_caches_per_sort);
-
-    // get number of good normal cores in each quad
-    strcpy(l_line_str, "  Good normal cores:");
-    strcpy(l_buffer_str, "");
-
-    for (i = 0; i < MAXIMUM_QUADS; i++)
-    {
-        sprintf(l_buffer_str, " Quad %d = %u ", i, io_iddqt->good_normal_cores[i]);
-        strcat(l_line_str, l_buffer_str);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get number of good caches in each quad
-    strcpy(l_line_str, "  Good caches:      ");
-    strcpy(l_buffer_str, "");
-
-    for (i = 0; i < MAXIMUM_QUADS; i++)
-    {
-        sprintf(l_buffer_str, " Quad %d = %u ", i, io_iddqt->good_caches[i]);
-        strcat(l_line_str, l_buffer_str);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get RDP TO TDP scalling factor
-    FAPI_INF("  RDP TO TDP scalling factor = %u", revle16(io_iddqt->rdp_to_tdp_scale_factor));
-
-    // get WOF IDDQ margin factor
-    FAPI_INF("  WOF IDDQ margin factor     = %u", revle16(io_iddqt->wof_iddq_margin_factor));
-
-    // get VDD Temperature scaling factor
-    FAPI_INF("  VDD  Temperature scaling factor = %u", revle16(io_iddqt->vdd_temperature_scale_factor));
-
-    // get VDN Temperature scaling factor
-    FAPI_INF("  VDN  Temperature scaling factor = %u", revle16(io_iddqt->vdn_temperature_scale_factor));
-
-    // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
-    // consume these at 1mA values.  thus, all values are multiplied by
-    // 5 upon installation into the paramater block.
-    static const uint32_t CONST_5MA_1MA = 5;
-    FAPI_INF("  IDDQ data is converted 5mA units to 1mA units");
-
-    // Put out the measurement voltages to the trace.
-    strcpy(l_line_str, "  Measurement voltages:");
-    sprintf(l_buffer_str, "%-*s", IDDQ_DESC_SIZE, l_line_str);
-    strcpy(l_line_str, l_buffer_str);
-    strcpy(l_buffer_str, "");
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        sprintf(l_buffer_str, "  %sV", idd_meas_str[i]);
-        strcat(l_line_str, l_buffer_str);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-#define IDDQ_CURRENT_EXTRACT(_member) \
-        io_iddqt->_member = revle16(io_iddqt->_member) * CONST_5MA_1MA;     \
-        sprintf(l_buffer_str, "  %04u ", io_iddqt->_member);                \
-        strcat(l_line_str, l_buffer_str);
-
-#define IDDQ_TEMP_EXTRACT(_member) \
-        sprintf(l_buffer_str, "  %04u ", io_iddqt->_member);                \
-        strcat(l_line_str, l_buffer_str);
-
-#define IDDQ_TRACE(string, size) \
-        strcpy(l_line_str, string); \
-        sprintf(l_buffer_str, "%-*s", size, l_line_str);\
-        strcpy(l_line_str, l_buffer_str); \
-        strcpy(l_buffer_str, "");
-
-    // get IVDDQ measurements with all good cores ON
-    IDDQ_TRACE ("  IDDQ all good cores ON:", IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_on_caches_on[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get IVDDQ measurements with all cores and caches OFF
-    IDDQ_TRACE ("  IVDDQ all cores and caches OFF:", IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-       IDDQ_CURRENT_EXTRACT(ivdd_all_cores_off_caches_off[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);;
-
-    // get IVDDQ measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  IVDDQ all good cores OFF and caches ON:", IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_off_good_caches_on[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get IVDDQ measurements with all good cores in each quad
-    for (i = 0; i < MAXIMUM_QUADS; i++)
-    {
-        IDDQ_TRACE ("  IVDDQ all good cores ON and caches ON ", IDDQ_QUAD_SIZE);
-        sprintf(l_buffer_str, "Quad %d:", i);
-        strcat(l_line_str, l_buffer_str);
-
-        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
-        {
-            IDDQ_CURRENT_EXTRACT(ivdd_quad_good_cores_on_good_caches_on[i][j]);
-        }
-
-        FAPI_INF("%s", l_line_str);
-    }
-
-    // get IVDN data
-    IDDQ_TRACE ("  IVDN", IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_CURRENT_EXTRACT(ivdn[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get average temperature measurements with all good cores ON
-    IDDQ_TRACE ("  Average temp all good cores ON:",IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-         IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_on[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get average temperature measurements with all cores and caches OFF
-    IDDQ_TRACE ("  Average temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_TEMP_EXTRACT(avgtemp_all_cores_off_caches_off[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get average temperature measurements with all good cores OFF and caches ON
-    IDDQ_TRACE ("  Average temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_off[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
-
-    // get average temperature measurements with all good cores in each quad
-    for (i = 0; i < MAXIMUM_QUADS; i++)
-    {
-        IDDQ_TRACE ("  Average temp all good cores ON, good caches ON ",IDDQ_QUAD_SIZE);
-        sprintf(l_buffer_str, "Quad %d:", i);
-        strcat(l_line_str, l_buffer_str);
-
-        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
-        {
-            IDDQ_TEMP_EXTRACT(avgtemp_quad_good_cores_on[i][j]);
-        }
-
-        FAPI_INF("%s", l_line_str);
-    }
-
-    // get average nest temperature nest
-    IDDQ_TRACE ("  Average temp Nest:",IDDQ_DESC_SIZE);
-
-    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
-    {
-        IDDQ_TEMP_EXTRACT(avgtemp_vdn[i]);
-    }
-
-    FAPI_INF("%s", l_line_str);
+    // Put out the structure to the trace
+    iddq_print(io_iddqt);
 
 fapi_try_exit:
 
@@ -2460,7 +2268,7 @@ gppb_print(GlobalPstateParmBlock* i_gppb)
             revle32(i_gppb->vcs_sysparm.loadline_uohm));
     strcat(l_buffer, l_temp_buffer);
 
-    sprintf(l_temp_buffer, " %04X (%3d) ",
+    sprintf(l_temp_buffer, " %04X (%3d)i_iddqt ",
             revle32(i_gppb->vdn_sysparm.loadline_uohm),
             revle32(i_gppb->vdn_sysparm.loadline_uohm));
     strcat(l_buffer, l_temp_buffer);
@@ -2816,7 +2624,212 @@ oppb_print(OCCPstateParmBlock* i_oppb)
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
 
+/// Print an iddq_print structure on a given stream
+///
+/// \param i_iddqt pointer to Iddq structure to output
 
+void
+iddq_print(IddqTable* i_iddqt)
+{
+    uint32_t        i, j;
+    const char*     idd_meas_str[IDDQ_MEASUREMENTS] = IDDQ_ARRAY_VOLTAGES_STR;
+    char            l_buffer_str[256];   // Temporary formatting string buffer
+    char            l_line_str[256];     // Formatted output line string
+
+    static const uint32_t IDDQ_DESC_SIZE = 56;
+    static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
+                                            strlen("Quad X:");
+
+    // Put out the endian-corrected scalars
+
+    // get IQ version and advance pointer 1-byte
+    FAPI_INF("  IDDQ Version Number = %u", i_iddqt->iddq_version);
+    FAPI_INF("  Sort Info:         Good Quads = %02d Good Cores = %02d Good Caches = %02d",
+             i_iddqt->good_quads_per_sort,
+             i_iddqt->good_normal_cores_per_sort,
+             i_iddqt->good_caches_per_sort);
+
+    // get number of good normal cores in each quad
+    strcpy(l_line_str, "  Good normal cores:");
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        sprintf(l_buffer_str, " Quad %d = %u ", i, i_iddqt->good_normal_cores[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get number of good caches in each quad
+    strcpy(l_line_str, "  Good caches:      ");
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        sprintf(l_buffer_str, " Quad %d = %u ", i, i_iddqt->good_caches[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get RDP TO TDP scalling factor
+    FAPI_INF("  RDP TO TDP scalling factor = %u", revle16(i_iddqt->rdp_to_tdp_scale_factor));
+
+    // get WOF IDDQ margin factor
+    FAPI_INF("  WOF IDDQ margin factor     = %u", revle16(i_iddqt->wof_iddq_margin_factor));
+
+    // get VDD Temperature scaling factor
+    FAPI_INF("  VDD  Temperature scaling factor = %u", revle16(i_iddqt->vdd_temperature_scale_factor));
+
+    // get VDN Temperature scaling factor
+    FAPI_INF("  VDN  Temperature scaling factor = %u", revle16(i_iddqt->vdn_temperature_scale_factor));
+
+    // All IQ IDDQ measurements are at 5mA resolution. The OCC wants to
+    // consume these at 1mA values.  thus, all values are multiplied by
+    // 5 upon installation into the paramater block.
+    static const uint32_t CONST_5MA_1MA = 5;
+    FAPI_INF("  IDDQ data is converted 5mA units to 1mA units");
+
+    // Put out the measurement voltages to the trace.
+    strcpy(l_line_str, "  Measurement voltages:");
+    sprintf(l_buffer_str, "%-*s", IDDQ_DESC_SIZE, l_line_str);
+    strcpy(l_line_str, l_buffer_str);
+    strcpy(l_buffer_str, "");
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        sprintf(l_buffer_str, "  %*sV", 5, idd_meas_str[i]);
+        strcat(l_line_str, l_buffer_str);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+#define IDDQ_CURRENT_EXTRACT(_member) \
+        i_iddqt->_member = revle16(i_iddqt->_member) * CONST_5MA_1MA;     \
+        sprintf(l_buffer_str, "  %05u ", i_iddqt->_member);                \
+        strcat(l_line_str, l_buffer_str);
+
+#define IDDQ_TEMP_EXTRACT(_member) \
+        sprintf(l_buffer_str, "  %05u ", i_iddqt->_member);                \
+        strcat(l_line_str, l_buffer_str);
+
+#define IDDQ_TRACE(string, size) \
+        strcpy(l_line_str, string); \
+        sprintf(l_buffer_str, "%-*s", size, l_line_str);\
+        strcpy(l_line_str, l_buffer_str); \
+        strcpy(l_buffer_str, "");
+
+    // get IVDDQ measurements with all good cores ON
+    IDDQ_TRACE ("  IDDQ all good cores ON:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_on_caches_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get IVDDQ measurements with all cores and caches OFF
+    IDDQ_TRACE ("  IVDDQ all cores and caches OFF:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+       IDDQ_CURRENT_EXTRACT(ivdd_all_cores_off_caches_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);;
+
+    // get IVDDQ measurements with all good cores OFF and caches ON
+    IDDQ_TRACE ("  IVDDQ all good cores OFF and caches ON:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdd_all_good_cores_off_good_caches_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get IVDDQ measurements with all good cores in each quad
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        IDDQ_TRACE ("  IVDDQ all good cores ON and caches ON ", IDDQ_QUAD_SIZE);
+        sprintf(l_buffer_str, "Quad %d:", i);
+        strcat(l_line_str, l_buffer_str);
+
+        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
+        {
+            IDDQ_CURRENT_EXTRACT(ivdd_quad_good_cores_on_good_caches_on[i][j]);
+        }
+
+        FAPI_INF("%s", l_line_str);
+    }
+
+    // get IVDN data
+    IDDQ_TRACE ("  IVDN", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_CURRENT_EXTRACT(ivdn[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores ON
+    IDDQ_TRACE ("  Average temp all good cores ON:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+         IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_on[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperatur}e measurements with all cores and caches OFF
+    IDDQ_TRACE ("  Average temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_all_cores_off_caches_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores OFF and caches ON
+    IDDQ_TRACE ("  Average temp all good cores OFF, caches ON:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_all_good_cores_off[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+
+    // get average temperature measurements with all good cores in each quad
+    for (i = 0; i < MAXIMUM_QUADS; i++)
+    {
+        IDDQ_TRACE ("  Average temp all good cores ON, good caches ON ",IDDQ_QUAD_SIZE);
+        sprintf(l_buffer_str, "Quad %d:", i);
+        strcat(l_line_str, l_buffer_str);
+
+        for (j = 0; j < IDDQ_MEASUREMENTS; j++)
+        {
+            IDDQ_TEMP_EXTRACT(avgtemp_quad_good_cores_on[i][j]);
+        }
+
+        FAPI_INF("%s", l_line_str);
+    }
+
+    // get average nest temperature nest
+    IDDQ_TRACE ("  Average temp Nest:",IDDQ_DESC_SIZE);
+
+    for (i = 0; i < IDDQ_MEASUREMENTS; i++)
+    {
+        IDDQ_TEMP_EXTRACT(avgtemp_vdn[i]);
+    }
+
+    FAPI_INF("%s", l_line_str);
+}
 
 // Convert frequency to Pstate number
 ///
@@ -2878,6 +2891,8 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     const uint16_t VDM_VOLTAGE_IN_MV = 512;
     const uint16_t VDM_GRANULARITY = 4;
 
+    const char*     pv_op_str[NUM_OP_POINTS] = PV_OP_ORDER_STR;
+
     FAPI_INF(">> proc_get_mvpd_poundw");
 
     do
@@ -2930,15 +2945,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             }
         }
 
-        // The rest of the processing here is all checking of the VDM content
-        // within #W.  If VDMs are not enabled (or supported), skip all of it
-        if (!is_vdm_enabled())
-        {
-            FAPI_INF("   proc_get_mvpd_poundw: VDM is disabled.  Skipping remaining checks");
-            o_state->iv_vdm_enabled = false;
-            break;
-        }
-
         uint8_t l_poundw_static_data = 0;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_W_STATIC_DATA_ENABLE,
@@ -2967,6 +2973,69 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         memcpy (&l_tmp_data, &(o_data->poundw[VPD_PV_NOMINAL]), sizeof (poundw_entry_t));
         memcpy(&(o_data->poundw[VPD_PV_NOMINAL]), &(o_data->poundw[VPD_PV_POWERSAVE]), sizeof(poundw_entry_t));
         memcpy (&(o_data->poundw[VPD_PV_POWERSAVE]), &l_tmp_data, sizeof(poundw_entry_t));
+
+        // Validate the WOF content is non-zero if WOF is enabled
+        if (is_wof_enabled())
+        {
+            bool b_tdp_ac = true;
+            bool b_tdp_dc = true;
+            // Check that the WOF currents are non-zero
+            for (auto p = 0; p < NUM_OP_POINTS; ++p)
+            {
+                FAPI_INF("%s ivdd_tdp_ac_current %5d (10mA) %6.2f (A)",
+                    pv_op_str[p],
+                    revle16(o_data->poundw[p].ivdd_tdp_ac_current_10ma),
+                    ((double)revle16(o_data->poundw[p].ivdd_tdp_ac_current_10ma)/100));
+                FAPI_INF("%s ivdd_tdp_dc_current %5d (10mA) %6.2f (A)",
+                    pv_op_str[p],
+                    revle16(o_data->poundw[p].ivdd_tdp_dc_current_10ma),
+                    ((double)revle16(o_data->poundw[p].ivdd_tdp_dc_current_10ma)/100));
+                if (!o_data->poundw[p].ivdd_tdp_ac_current_10ma)
+                {
+                    FAPI_ERR("%s.ivdd_tdp_ac_current_10ma is zero!!!",
+                                pv_op_str[p]);
+                    b_tdp_ac = false;
+                    o_state->iv_wof_enabled = false;
+
+                }
+                if (!o_data->poundw[p].ivdd_tdp_dc_current_10ma)
+                {
+                    FAPI_ERR("%s.ivdd_tdp_dc_current_10ma is zero!!!",
+                                pv_op_str[p]);
+                    b_tdp_dc = false;
+                    o_state->iv_wof_enabled = false;
+                }
+            }
+
+            FAPI_ASSERT_NOEXIT(b_tdp_ac,
+                               fapi2::PSTATE_PB_POUND_W_TDP_IAC_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_target)
+                               .set_NOMINAL_TDP_IAC(o_data->poundw[NOMINAL].ivdd_tdp_dc_current_10ma)
+                               .set_POWERSAVE_TDP_IAC(o_data->poundw[POWERSAVE].ivdd_tdp_dc_current_10ma)
+                               .set_TURBO_TDP_IAC(o_data->poundw[TURBO].ivdd_tdp_dc_current_10ma)
+                               .set_ULTRA_TDP_IAC(o_data->poundw[ULTRA].ivdd_tdp_dc_current_10ma),
+                               "Pstate Parameter Block #W : one or more Idd TDP AC values are zero");
+            FAPI_ASSERT_NOEXIT(b_tdp_dc,
+                               fapi2::PSTATE_PB_POUND_W_TDP_IDC_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_target)
+                               .set_NOMINAL_TDP_IDC(o_data->poundw[NOMINAL].ivdd_tdp_dc_current_10ma)
+                               .set_POWERSAVE_TDP_IDC(o_data->poundw[POWERSAVE].ivdd_tdp_dc_current_10ma)
+                               .set_TURBO_TDP_IDC(o_data->poundw[TURBO].ivdd_tdp_dc_current_10ma)
+                               .set_ULTRA_TDP_IDC(o_data->poundw[ULTRA].ivdd_tdp_dc_current_10ma),
+                               "Pstate Parameter Block #W : one or more Idd TDP DC values are zero");
+
+            // Set the return code to success to keep going.
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        // The rest of the processing here is all checking of the VDM content
+        // within #W.  If VDMs are not enabled (or supported), skip all of it
+        if (!is_vdm_enabled())
+        {
+            FAPI_INF("   proc_get_mvpd_poundw: VDM is disabled.  Skipping remaining checks");
+            o_state->iv_vdm_enabled = false;
+            break;
+        }
 
         FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
         FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
