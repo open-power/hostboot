@@ -3006,6 +3006,9 @@ oppb_print(OCCPstateParmBlock* i_oppb)
     strcat(l_buffer, l_temp_buffer);
     FAPI_INF("%s", l_buffer);
 
+    // Put out the structure to the trace
+    iddq_print(&(i_oppb->iddq));
+
     FAPI_INF("---------------------------------------------------------------------------------------");
 }
 
@@ -3024,6 +3027,8 @@ iddq_print(IddqTable* i_iddqt)
     static const uint32_t IDDQ_DESC_SIZE = 56;
     static const uint32_t IDDQ_QUAD_SIZE = IDDQ_DESC_SIZE -
                                             strlen("Quad X:");
+
+    FAPI_INF("IDDQ");
 
     // Put out the endian-corrected scalars
 
@@ -3078,25 +3083,28 @@ iddq_print(IddqTable* i_iddqt)
 
     // Put out the measurement voltages to the trace.
     strcpy(l_line_str, "  Measurement voltages:");
-    sprintf(l_buffer_str, "%-*s", IDDQ_DESC_SIZE, l_line_str);
+    sprintf(l_buffer_str, "%-*s ", IDDQ_DESC_SIZE, l_line_str);
     strcpy(l_line_str, l_buffer_str);
     strcpy(l_buffer_str, "");
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
     {
-        sprintf(l_buffer_str, "  %*sV", 5, idd_meas_str[i]);
+        sprintf(l_buffer_str, "  %*sV  ", 5, idd_meas_str[i]);
         strcat(l_line_str, l_buffer_str);
     }
 
     FAPI_INF("%s", l_line_str);
 
 #define IDDQ_CURRENT_EXTRACT(_member) \
-        i_iddqt->_member = revle16(i_iddqt->_member) * CONST_5MA_1MA;     \
-        sprintf(l_buffer_str, "  %05u ", i_iddqt->_member);                \
-        strcat(l_line_str, l_buffer_str);
+        { \
+        uint16_t _temp = revle16(i_iddqt->_member) * CONST_5MA_1MA;     \
+        sprintf(l_buffer_str, "  %6.3f ", (double)_temp/1000);          \
+        strcat(l_line_str, l_buffer_str); \
+        }
 
+// Temps are all 1B quantities.  Not endianess issues.
 #define IDDQ_TEMP_EXTRACT(_member) \
-        sprintf(l_buffer_str, "  %05u ", i_iddqt->_member);                \
+        sprintf(l_buffer_str, "   %4.1f  ", ((double)i_iddqt->_member)/2); \
         strcat(l_line_str, l_buffer_str);
 
 #define IDDQ_TRACE(string, size) \
@@ -3217,9 +3225,6 @@ iddq_print(IddqTable* i_iddqt)
 }
 
 // Convert frequency to Pstate number
-///
-/// \param stream The output stream
-
 int
 freq2pState (const GlobalPstateParmBlock* gppb,
              const uint32_t freq_khz,
@@ -3256,6 +3261,27 @@ freq2pState (const GlobalPstateParmBlock* gppb,
         rc = -PSTATE_GT_PSTATE_MAX;
         *pstate = PSTATE_MAX;
     }
+
+    return rc;
+}
+
+// Convert Pstate number to frequency
+int
+pState2freq (const GlobalPstateParmBlock* gppb,
+             const Pstate i_pstate,
+             uint32_t*   o_freq_khz)
+{
+    int rc = 0;
+    float pstate32 = i_pstate;
+    float l_freq_khz = 0;
+
+    // ----------------------------------
+    // compute frequency from a pstate
+    // ----------------------------------
+    l_freq_khz = ((float)(revle32(gppb->reference_frequency_khz)) -
+                          (pstate32 * (float)revle32(gppb->frequency_step_khz)));
+
+    *o_freq_khz  = (uint32_t)l_freq_khz;
 
     return rc;
 }
@@ -3765,11 +3791,27 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
     strcat(l_line_str, l_buffer_str);
     FAPI_INF("%s", l_line_str);
 
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_WOF_ENABLE_FRATIO_Type l_enable_fratio;
+    FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_FRATIO,
+                  FAPI_SYSTEM,
+                  l_enable_fratio);
+
+    fapi2::ATTR_WOF_ENABLE_VRATIO_Type l_enable_vratio;
+    FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_VRATIO,
+                  FAPI_SYSTEM,
+                  l_enable_vratio);
+
+    bool b_fratio_set = true;
+
     //Initialize VFRT data part
     for (l_index_0 = 0; l_index_0 < VFRT_FRATIO_SIZE; ++l_index_0)
     {
         strcpy(l_buffer_str, "");
         strcpy(l_line_str, "    ");
+
+        bool b_first_vratio_set = true;
 
         for (l_index_1 = 0; l_index_1 < VFRT_VRATIO_SIZE; ++l_index_1)
         {
@@ -3792,17 +3834,21 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
             // in a loop that is processing over 1000 tables, the first
             // 8 gives a view that can correlate that the input data read
             // is correct without overfilling the HB trace buffer.
-            if (!((l_index_1 + 1) % 8))
+            if (!((l_index_1 + 1) % 8) && b_first_vratio_set && b_fratio_set)
             {
                 FAPI_INF("%s", l_line_str);
                 strcpy(l_buffer_str, "");
                 strcpy(l_line_str, "    ");
+                b_first_vratio_set = false;
             }
 
             i_pBuffer++;
         }
 
-//        FAPI_INF("%s", l_line_str);
+        // If fratio is not enabled, don't trace the remaining, duplicate entries.
+        if (!l_enable_fratio)
+            b_fratio_set = false;
+
     }
 
     // Flip the type from System (0) to HOMER (1)
