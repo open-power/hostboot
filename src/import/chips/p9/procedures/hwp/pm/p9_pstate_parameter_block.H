@@ -532,6 +532,13 @@ gppb_print(GlobalPstateParmBlock* i_gppb);
 void
 oppb_print(OCCPstateParmBlock* i_oppb);
 
+/// Print an iddq_print structure on a given stream
+///
+/// \param i_iddqt pointer to Iddq structure to output
+
+void
+iddq_print(IddqTable* i_iddqt);
+
 
 /// Convert frequency to Pstate number
 ///
