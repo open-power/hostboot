@@ -36,7 +36,8 @@ typedef union sbeMsgReg
     {
 #ifdef _BIG_ENDIAN
         uint32_t sbeBooted : 1; ///< SBE control loop initialized
-        uint32_t reserved1 : 3; ///< Reserved
+        uint32_t asyncFFDC : 1; // < async ffdc present on sbe
+        uint32_t reserved1 : 2; ///< Reserved
         uint32_t prevState : 4; ///< Previous SBE state
         uint32_t currState : 4; ///< Current SBE state
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
@@ -48,7 +49,8 @@ typedef union sbeMsgReg
         uint32_t majorStep : 8; ///< Last major istep executed by the SBE
         uint32_t currState : 4; ///< Current SBE state
         uint32_t prevState : 4; ///< Previous SBE state
-        uint32_t reserved1 : 3; ///< Reserved
+        uint32_t reserved1 : 2; ///< Reserved
+        uint32_t asyncFFDC : 1; // < async ffdc present on sbe
         uint32_t sbeBooted : 1; ///< SBE control loop initialized
 #endif
     };
