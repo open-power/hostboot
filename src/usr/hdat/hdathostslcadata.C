@@ -94,7 +94,8 @@ bool getVPDCollectedStatus(TARGETING::Target *i_Target)
 //@TODO: RTC 149382: Method to get VPD collected status for Targets
 
     if((i_Target->getAttr<ATTR_TYPE>() != TYPE_PCI) &&
-                   (i_Target->getAttr<ATTR_TYPE>() != TYPE_SYS))
+              (i_Target->getAttr<ATTR_TYPE>() != TYPE_SYS) &&
+              (i_Target->getAttr<ATTR_TYPE>() != TYPE_BMC))
     {
         l_vpdCollectedStatus = pvpdPresent(i_Target);
     }
