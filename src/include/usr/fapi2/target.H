@@ -235,6 +235,9 @@ inline TARGETING::TYPE convertFapi2TypeToTargeting(fapi2::TargetType i_T)
         case fapi2::TARGET_TYPE_PHB:
             o_targetingType = TARGETING::TYPE_PHB;
             break;
+        case fapi2::TARGET_TYPE_MC:
+            o_targetingType = TARGETING::TYPE_MC;
+            break;
         default:
             FAPI_ERR("convertFapi2TypeToTargeting:: Chiplet type not supported 0x%.8X!", i_T);
             assert(false);
@@ -332,6 +335,9 @@ inline fapi2::TargetType  convertTargetingTypeToFapi2(TARGETING::TYPE i_T)
         case TARGETING::TYPE_PHB:
             o_targetingType = fapi2::TARGET_TYPE_PHB;
             break;
+        case TARGETING::TYPE_MC:
+            o_targetingType = fapi2::TARGET_TYPE_MC;
+            break;
         default:
             o_targetingType = fapi2::TARGET_TYPE_NONE;
             break;
@@ -364,6 +370,7 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
             fapi2::TARGET_TYPE_EQ |
             fapi2::TARGET_TYPE_MCA |
             fapi2::TARGET_TYPE_MCBIST |
+            fapi2::TARGET_TYPE_MC |
             fapi2::TARGET_TYPE_MI |
             fapi2::TARGET_TYPE_CAPP |
             fapi2::TARGET_TYPE_DMI |
@@ -389,6 +396,7 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
             fapi2::TARGET_TYPE_MCS |
             fapi2::TARGET_TYPE_MCA |
             fapi2::TARGET_TYPE_MI |
+            fapi2::TARGET_TYPE_MC |
             fapi2::TARGET_TYPE_DMI |
             fapi2::TARGET_TYPE_PEC |
             fapi2::TARGET_TYPE_PHB;
@@ -491,20 +499,32 @@ inline Target<K_PARENT, V> Target<T_SELF, V>::getParent(void) const
                     (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_MCBIST");
 
+    // valid parents for MC
+    // MC -> PERV
+    // MC -> PROC
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_MC) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
+                  "improper parent of fapi2::TARGET_TYPE_MC");
+
     // valid parents for MI
+    // MI -> MC
     // MI -> PERV
     // MI -> PROC
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MI) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MC) &&
                     (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
                     (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_MI");
 
     // valid parents for DMI
     // DMI -> MI
+    // DMI -> MC
     // DMI -> PERV
     // DMI -> PROC
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_DMI) &&
                     (K_PARENT != fapi2::TARGET_TYPE_MI) &&
+                    (K_PARENT != fapi2::TARGET_TYPE_MC) &&
                     (K_PARENT != fapi2::TARGET_TYPE_PERV) &&
                     (K_PARENT != fapi2::TARGET_TYPE_PROC_CHIP)),
                   "improper parent of fapi2::TARGET_TYPE_DMI");
@@ -660,6 +680,7 @@ inline std::vector<Target<K_CHILD, V> >
     // PERV -> MCA
     // PERV -> PEC
     // PERV -> PHB
+    // PERV -> MC
     // PERV -> MI
     // PERV -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_PERV) &&
@@ -674,6 +695,7 @@ inline std::vector<Target<K_CHILD, V> >
                     (K_CHILD != fapi2::TARGET_TYPE_MCA) &&
                     (K_CHILD != fapi2::TARGET_TYPE_PEC) &&
                     (K_CHILD != fapi2::TARGET_TYPE_PHB) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_MC) &&
                     (K_CHILD != fapi2::TARGET_TYPE_MI) &&
                     (K_CHILD != fapi2::TARGET_TYPE_DMI)),
                   "improper child of fapi2::TARGET_TYPE_PERV");
@@ -731,6 +753,12 @@ inline std::vector<Target<K_CHILD, V> >
                   "improper child of fapi2::TARGET_TYPE_MCBIST");
 
     // Cumulus Memory
+    // valid children for MC
+    // MC -> MI
+    static_assert(!((T_SELF == fapi2::TARGET_TYPE_MC) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_MI)),
+                  "improper child of fapi2::TARGET_TYPE_MC");
+
     // valid children for MI
     // MI -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MI) &&

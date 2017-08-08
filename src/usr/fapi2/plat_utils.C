@@ -333,6 +333,10 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
         o_class = TARGETING::CLASS_UNIT;
         o_type = TARGETING::TYPE_PHB;
         break;
+    case fapi2::TARGET_TYPE_MC:
+        o_class = TARGETING::CLASS_UNIT;
+        o_type = TARGETING::TYPE_MC;
+        break;
     default:
         o_class = TARGETING::CLASS_NA;
         o_type = TARGETING::TYPE_NA;
@@ -358,6 +362,7 @@ bool isPhysParentChild(const TargetType i_parentType,
                              TARGET_TYPE_EQ     |
                              TARGET_TYPE_MCA    |
                              TARGET_TYPE_MCBIST |
+                             TARGET_TYPE_MC     |
                              TARGET_TYPE_MI     |
                              TARGET_TYPE_CAPP   |
                              TARGET_TYPE_DMI    |

@@ -155,6 +155,12 @@ void directOverride()
             case fapi2::TARGET_TYPE_CAPP:
                 l_targetType = TARGETING::TYPE_CAPP;
                 break;
+            case fapi2::TARGET_TYPE_MC:
+                l_targetType = TARGETING::TYPE_MC;
+                break;
+            case fapi2::TARGET_TYPE_MI:
+                l_targetType = TARGETING::TYPE_MI;
+                break;
             case fapi2::TARGET_TYPE_DMI:
                 l_targetType = TARGETING::TYPE_DMI;
                 break;
