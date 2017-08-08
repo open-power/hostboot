@@ -41,7 +41,6 @@
 #include <p9_pstates_occ.h>
 #include "p9_pm_get_poundv_bucket.H"
 
-// ssrivath- See if this is required
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -569,7 +568,6 @@ oppb_print(OCCPstateParmBlock* i_oppb);
 void
 iddq_print(IddqTable* i_iddqt);
 
-
 /// -------------------------------------------------------------------
 /// @brief Convert frequency to Pstate number
 /// @param[in]     i_gppb     The Global Pstate Parameter Block
@@ -579,7 +577,17 @@ iddq_print(IddqTable* i_iddqt);
 /// -------------------------------------------------------------------
 int freq2pState (const GlobalPstateParmBlock* i_gppb,
                  const uint32_t i_freq_khz,
-                 Pstate* o_pstate);
+                 Pstate*        o_pstate);
+
+/// -------------------------------------------------------------------
+/// @brief Convert Pstate number to frequency
+/// @param[in]     i_gppb     The Global Pstate Parameter Block
+/// @param[in]     i_pstate   Computed Pstate to convert
+/// @param[out]    o_freq_khz Computed frequency
+/// -------------------------------------------------------------------
+int pState2freq (const GlobalPstateParmBlock* gppb,
+                 const Pstate i_pstate,
+                 uint32_t*    o_freq_khz);
 
 /// -------------------------------------------------------------------
 /// @brief Pstate VFRT initialization
@@ -787,7 +795,6 @@ extern "C"
 
 // End of function declarations
 
-// ssrivath- See if this is required
 #ifdef __cplusplus
 } // end extern C
 #endif
