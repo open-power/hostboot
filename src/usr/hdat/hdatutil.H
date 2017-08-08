@@ -167,6 +167,17 @@ enum hdatWitherspoonNVCnfg
 };
 
 
+/** @brief Structure definition for an entry in the chip's engineering change
+ *         level array
+ */
+struct hdatEcLvl_t
+{
+    uint32_t hdatChipManfId;  // 0x0000 Memory interface chip manufacturing id
+    uint32_t hdatChipEcLvl;   // 0x0004 Memory interface chip EC level
+}  __attribute__ ((packed));
+
+
+
 /**
  * @brief Create/Build an Error log and add HADT component trace
  * if the log exists then FFDC will be added to the existing log and
