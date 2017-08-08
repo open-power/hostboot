@@ -181,10 +181,20 @@ fapi2::ReturnCode progMCMODE0(
         l_scomData.setBit<MCS_MCMODE0_DISABLE_MC_SYNC>();
         l_scomMask.setBit<MCS_MCMODE0_DISABLE_MC_SYNC>();
     }
+    else
+    {
+        l_scomData.clearBit<MCS_MCMODE0_DISABLE_MC_SYNC>();
+        l_scomMask.setBit<MCS_MCMODE0_DISABLE_MC_SYNC>();
+    }
 
     if (!l_same_side_functional)
     {
         l_scomData.setBit<MCS_MCMODE0_DISABLE_MC_PAIR_SYNC>();
+        l_scomMask.setBit<MCS_MCMODE0_DISABLE_MC_PAIR_SYNC>();
+    }
+    else
+    {
+        l_scomData.clearBit<MCS_MCMODE0_DISABLE_MC_PAIR_SYNC>();
         l_scomMask.setBit<MCS_MCMODE0_DISABLE_MC_PAIR_SYNC>();
     }
 
