@@ -153,9 +153,14 @@ uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
         // Add a DRAM sparing procedure to the queue, if supported.
         // TODO: RTC 157888
 
-        // If there was more than one DRAM on this rank with a false alarm, make
-        // the error log predictive.
-        if ( __getFalseAlarmCounter<T>(iv_chip)->queryDrams(iv_rank, io_sc) )
+        // The cleanup() function is called by both verified() and falseAlarm().
+        // In either case, we can pass in the DRAM characterized by iv_mark to
+        // determine if there has been a least one false alarm on any DRAM on
+        // this rank other than this DRAM. If so, the error log should be
+        // predictive.
+        VcmFalseAlarm * faCntr = __getFalseAlarmCounter<T>(iv_chip);
+        uint8_t dram = iv_mark.getSymbol().getDram();
+        if ( faCntr->queryDrams(iv_rank, dram, io_sc) )
             io_sc.service_data->setServiceCall();
 
     } while (0);

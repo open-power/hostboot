@@ -176,16 +176,30 @@ class VcmFalseAlarm : public TdFalseAlarm
 
     /**
      * @param  i_rank The rank with the false alarm.
+     * @param  i_dram The DRAM with the false alarm.
      * @param  io_sc  The step code data struct.
-     * @return True there is more than one DRAM on this rank and the timer has
-     *         not elapsed, false otherwise.
+     * @return True if there is at least one DRAM on this rank with a false
+     *         alarm other than i_dram.
      */
-    bool queryDrams( MemRank i_rank, STEP_CODE_DATA_STRUCT & io_sc )
+    bool queryDrams( MemRank i_rank, uint8_t i_dram,
+                     STEP_CODE_DATA_STRUCT & io_sc )
     {
         uint32_t key = init( i_rank, io_sc ); // will clear list if time elapsed
 
-        // Return true if there is more than one DRAM on this rank.
-        return ( 1 < iv_dramMap[key].size() );
+        if ( 2 <= iv_dramMap[key].size() )
+        {
+            // Regardless if i_dram is in the list, or not, there is at least
+            // one extra DRAM.
+            return true;
+        }
+        else if ( 1 == iv_dramMap[key].size() &&
+                  i_dram != iv_dramMap[key].begin()->first )
+        {
+            // The only DRAM in the list is not i_dram.
+            return true;
+        }
+
+        return false; // No extra DRAMs.
     }
 
   private: // functions

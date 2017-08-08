@@ -901,9 +901,9 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
         if ( db->getImpeThresholdCounter()->inc(rank, dram, io_sc) )
         {
             // Make the error log predictive if DRAM Repairs are disabled or if
-            // there has been more than one DRAM on this rank with and IMPE.
+            // the number of DRAMs on this rank with IMPEs has reached threshold
             if ( areDramRepairsDisabled() ||
-                 db->getImpeThresholdCounter()->queryDrams(rank, io_sc) )
+                 db->getImpeThresholdCounter()->queryDrams(rank, dram, io_sc) )
             {
                 io_sc.service_data->setServiceCall();
             }
