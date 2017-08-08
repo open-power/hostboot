@@ -1493,7 +1493,7 @@ sub newNum
 {
     my ( $value, $type ) = @_;
 
-    my ($decSize) = $type =~ /u(\d+)/;
+    my ($sign, $decSize) = $type =~ /(u|s)(\d+)/;
     my $byteSize = $decSize / 8;
 
     my %number = ();
@@ -1510,7 +1510,7 @@ sub str2num
     my $value   = shift;
     my $type    = shift;
 
-    my ($decSize) = $type =~ /u(\d+)/;
+    my ($sign, $decSize) = $type =~ /(u|s)(\d+)/;
     my $byteSize = $decSize / 8;
 
     $ref_num->{NUM_VALUE} = str2value($value);
