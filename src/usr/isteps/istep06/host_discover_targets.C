@@ -257,19 +257,26 @@ errlHndl_t powerDownSlaveQuads()
     const uint8_t SIZE_OF_RING_DATA_PER_EQ = 0x40;
     const uint8_t NUM_ENTRIES_IN_RING_DATA = 0x8;
     const uint32_t OCC_SRAM_RING_STASH_BAR = 0xFFF3FC00;
+    uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
+    uint64_t CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK = 0x0C00000000000000;
+    uint64_t CPPM_CORE_POWMAN_MODE_REG = 0x200F0108;
+    uint64_t SET_WKUP_SELECT_MASK = 0x0004000000000000;
+
     bool l_isMasterEq = false;
     uint64_t l_ringData[8] = {0,0,0,0,0,0,0,0};
     uint32_t l_ocb_buff_length_act = 0;
     uint8_t l_quad_pos;
     uint32_t l_ringStashAddr;
-    TARGETING::TargetHandleList l_eqTargetList;
-    getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
-    uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
-    uint64_t CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK = 0x0C00000000000000;
-    uint64_t CPPM_CORE_POWMAN_MODE_REG = 0x200F0108;
-    uint64_t SET_WKUP_SELECT_MASK = 0x0004000000000000;
     size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK);
 
+    TARGETING::TargetHandleList l_eqTargetList;
+    getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
+
+    TARGETING::TargetHandleList l_procChips;
+    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+
+    uint8_t  l_isRingSaveMpipl = 0;
+    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_procChips[0], l_isRingSaveMpipl);
 
 
     //Need to know who master is so we can skip them
@@ -484,30 +491,33 @@ errlHndl_t powerDownSlaveQuads()
                 break;
             }
 
-            FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_fapi_eq_target, l_quad_pos);
-
-            l_ringStashAddr = OCC_SRAM_RING_STASH_BAR + (SIZE_OF_RING_DATA_PER_EQ * l_quad_pos);
-
-            // Setup use OCB channel 0 for placing ring data in SRAM
-            FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_setup_linear, l_chip,
-                        p9ocb::OCB_CHAN0,
-                        p9ocb::OCB_TYPE_LINSTR,
-                        l_ringStashAddr);   // Bar
-
-            FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_access,
-                        l_chip,
-                        p9ocb::OCB_CHAN0,
-                        p9ocb::OCB_PUT,
-                        NUM_ENTRIES_IN_RING_DATA,
-                        true,
-                        l_ringStashAddr,
-                        l_ocb_buff_length_act,
-                        l_ringData);
-
-            for(int x = 0; x < NUM_ENTRIES_IN_RING_DATA; x++)
+            if(l_isRingSaveMpipl)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
+                FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_fapi_eq_target, l_quad_pos);
+
+                l_ringStashAddr = OCC_SRAM_RING_STASH_BAR + (SIZE_OF_RING_DATA_PER_EQ * l_quad_pos);
+
+                // Setup use OCB channel 0 for placing ring data in SRAM
+                FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_setup_linear, l_chip,
+                            p9ocb::OCB_CHAN0,
+                            p9ocb::OCB_TYPE_LINSTR,
+                            l_ringStashAddr);   // Bar
+
+                FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_access,
+                            l_chip,
+                            p9ocb::OCB_CHAN0,
+                            p9ocb::OCB_PUT,
+                            NUM_ENTRIES_IN_RING_DATA,
+                            true,
+                            l_ringStashAddr,
+                            l_ocb_buff_length_act,
+                            l_ringData);
+
+                for(int x = 0; x < NUM_ENTRIES_IN_RING_DATA; x++)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
+                }
             }
 
             //TODO 171763 Core state setup for MPIPL should be done in a HWP
