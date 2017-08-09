@@ -86,6 +86,8 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS));
         uint64_t l_def_POSITION = l_TGT0_ATTR_CHIP_UNIT_POS;
         uint64_t l_def_is_master = literal_1;
+        fapi2::ATTR_EI_BUS_TX_MSBSWAP_Type l_TGT0_ATTR_EI_BUS_TX_MSBSWAP;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EI_BUS_TX_MSBSWAP, TGT0, l_TGT0_ATTR_EI_BUS_TX_MSBSWAP));
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800000600701103full, l_scom_buffer ));
@@ -4253,6 +4255,10 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
 
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_FENCE_FENCED = 0x1;
             l_scom_buffer.insert<57, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_FENCE_FENCED );
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON = 0x1;
+            l_scom_buffer.insert<58, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON );
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_SUSPEND_ON = 0x1;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_SUSPEND_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800990600701103full, l_scom_buffer));
         }
         {
@@ -4295,6 +4301,8 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 = 0x5;
             l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 );
             l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b101 );
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE_ON = 0x1;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009c8600701103full, l_scom_buffer));
         }
         {
@@ -4303,6 +4311,8 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0111111 );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 = 0x5;
             l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 );
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE2_ON = 0x1;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE2_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009d0600701103full, l_scom_buffer));
         }
         {
@@ -4322,6 +4332,8 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
 
             constexpr auto l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_DESKEW_BUMP_AFTER_AFTER = 0x1;
             l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_DESKEW_BUMP_AFTER_AFTER );
+            constexpr auto l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_SLS_RCVY_DISABLE_ON = 0x1;
+            l_scom_buffer.insert<57, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_SLS_RCVY_DISABLE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800a80600701103full, l_scom_buffer));
         }
         {
@@ -4417,6 +4429,15 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<53, 5, 59, uint64_t>(literal_0b00010 );
             constexpr auto l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DESKEW_RATE_DIV1 = 0x1;
             l_scom_buffer.insert<62, 1, 63, uint64_t>(l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_DESKEW_RATE_DIV1 );
+
+            if ((l_TGT0_ATTR_EI_BUS_TX_MSBSWAP != fapi2::ENUM_ATTR_EI_BUS_TX_MSBSWAP_NO_SWAP))
+            {
+                constexpr auto l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_MSBSWAP_MSBSWAP = 0x1;
+                l_scom_buffer.insert<58, 1, 63, uint64_t>(l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_MSBSWAP_MSBSWAP );
+            }
+
+            constexpr auto l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PDWN_LITE_DISABLE_ON = 0x1;
+            l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOMP_TX_WRAP_TX3_TXCTL_CTL_REGS_TX_CTL_REGS_TX_PDWN_LITE_DISABLE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800c14600701103full, l_scom_buffer));
         }
         {
