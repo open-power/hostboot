@@ -85,7 +85,7 @@ extern "C" {
             // Step Two.1: Check RCD protect time on RDIMM and LRDIMM
             FAPI_INF( "+++ Check RCD protect time on RDIMM and LRDIMM +++");
             //forced this to only run if the test type is NOT DDR4 - as DDR4 ISRDIMMs are having IPL issues
-            FAPI_TRY(mss_check_RCD_protect_time(l_mba), "---Error During Check RCD protect time");
+            //FAPI_TRY(mss_check_RCD_protect_time(l_mba), "---Error During Check RCD protect time");
 
             //Step Two.2: Enable address inversion on each MBA for ALL CARDS
             FAPI_INF("+++ Setting up adr inversion for port 1 +++");
