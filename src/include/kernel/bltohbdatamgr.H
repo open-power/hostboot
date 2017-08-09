@@ -210,6 +210,13 @@ class BlToHbDataManager
          * @return size_t     BlToHbData size
          */
         const size_t getBlToHbDataSize() const;
+
+        /*
+        * @brief Returns internal BlToHbData keyAddr pairs
+        *
+        * @return keyAddrPair_t     Key Address Pairs Struct
+        */
+        const Bootloader::keyAddrPair_t getKeyAddrPairs() const;
 };
 
 // Extern global instance of the class

@@ -110,6 +110,9 @@ namespace Bootloader{
         switch(l_blConfigData->version)
         {
             // Add cases as additional versions are created
+            case ADDR_STASH_SUPPORT_ADDED:
+                g_blData->blToHbData.version = BLTOHB_KEYADDR;
+                break;
             default:
                 g_blData->blToHbData.version = BLTOHB_SIZE;
                 break;
@@ -147,14 +150,32 @@ namespace Bootloader{
             // Set Bootloader preceived size of structure
             g_blData->blToHbData.sizeOfStructure = sizeof(BlToHbData);
         }
+    }
 
+    void setKeyAddrMapData(const void * i_pHbbSrc)
+    {
+        // Read SBE HB shared data.
+        const auto l_blConfigData = reinterpret_cast<BootloaderConfigData_t *>(
+                                                              SBE_HB_COMM_ADDR);
+
+        // Set copy keyaddr stash data
+        // Ensure SBE to Bootloader structure has key addr stash info
+        if (l_blConfigData->version >= ADDR_STASH_SUPPORT_ADDED)
+        {
+            memcpy(&g_blData->blToHbData.keyAddrStashData,
+                   &l_blConfigData->pair,
+                   sizeof(keyAddrPair_t));
+        }
+    }
+
+    void copyBlToHbtoHbLocation()
+    {
         // Place BlToHb into proper location for HB to find
         memcpy(reinterpret_cast<void *>(BLTOHB_COMM_DATA_ADDR_LATEST |
                                         IGNORE_HRMOR_MASK),
-               &g_blData->blToHbData,
-               sizeof(BlToHbData));
+                &g_blData->blToHbData,
+                sizeof(BlToHbData));
     }
-
 
     /**
      * @brief Verify Container against system hash keys
@@ -365,6 +386,11 @@ namespace Bootloader{
 
                 // Get Secure Data from SBE HBBL communication area
                 setSecureData(l_src_addr);
+
+                // Get Key-Addr Mapping from SBE HBBL communication area
+                setKeyAddrMapData(l_src_addr);
+
+                copyBlToHbtoHbLocation();
 
                 // ROM verification of HBB image
                 verifyContainer(l_src_addr);

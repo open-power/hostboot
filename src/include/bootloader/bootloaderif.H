@@ -43,6 +43,9 @@ namespace Bootloader{
 // Size of PNOR partition without ECC, page algined down, minus 4K header
 #define MAX_HBB_SIZE (904 * KILOBYTE)
 
+// Max Pairs
+#define MAX_ROW_COUNT 8
+
 // Location of running copy of HBB
 #ifdef BOOTLOADER
 #define HBB_HRMOR               (getHRMOR() - ( 2*MEGABYTE))
@@ -70,6 +73,7 @@ enum BlToHbDataVersion
     BLTOHB_MMIOBARS         = 0x0000000900000003,
     BLTOHB_SECURE_OVERRIDES = 0x0000000900000004,
     BLTOHB_SIZE             = 0x0000000900000005,
+    BLTOHB_KEYADDR          = 0x0000000900000006,
 };
 
 enum
@@ -78,6 +82,27 @@ enum
     // This will only be used when there is a BL/HB mismatch
     INITIAL_BLTOHB_PADDED_SIZE = 256
 };
+
+
+//-----------------------------------------------------------------------------------
+// Structure definitions
+//-----------------------------------------------------------------------------------
+
+
+// To keep all the Stashed Keys & Addrs together within this struct
+struct keyAddrPair_t
+{
+    keyAddrPair_t(uint8_t initVal) {
+        for(uint8_t i=0; i < MAX_ROW_COUNT; i++)
+        {
+            key[i] = initVal;
+            addr[i] = initVal;
+        }
+    }
+    uint8_t  key[MAX_ROW_COUNT];
+    uint64_t addr[MAX_ROW_COUNT];
+} __attribute__((packed));
+
 
 /** @struct BlToHbData
  *  @brief  Shared data between bootloader and Hostboot.
@@ -98,7 +123,7 @@ struct BlToHbData
                    xscomBAR(MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR),
                    lpcBAR(MMIO_GROUP0_CHIP0_LPC_BASE_ADDR),
                    securityOverride(0), allowAttrOverrides(0),
-                   sizeOfStructure(0) {}
+                   sizeOfStructure(0), keyAddrStashData(0) {}
 
     // Simple way to tell if data is valid
     uint64_t eyeCatch;
@@ -130,6 +155,8 @@ struct BlToHbData
     bool allowAttrOverrides;
     // Size of this structure (Use for backwards compatibility)
     size_t sizeOfStructure;
+    //keyAddr stash data
+    keyAddrPair_t  keyAddrStashData;
 } __attribute__((packed));
 
 /**

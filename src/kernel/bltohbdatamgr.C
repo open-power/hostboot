@@ -182,6 +182,13 @@ printk("lpc=%lX, xscom=%lX, iv_data=%p\n", iv_data.lpcBAR, iv_data.xscomBAR,
         iv_data.sizeOfStructure = Bootloader::INITIAL_BLTOHB_PADDED_SIZE;
     }
 
+    if(iv_data.version >= Bootloader::BLTOHB_KEYADDR)
+    {
+        memcpy(&iv_data.keyAddrStashData,
+               &i_data.keyAddrStashData,
+               sizeof(Bootloader::keyAddrPair_t));
+    }
+
     // Size of data that needs to be preserved and pinned.
     iv_preservedSize = ALIGN_PAGE(iv_data.secureRomSize +
                                  iv_data.hwKeysHashSize +
@@ -344,6 +351,11 @@ const uint64_t BlToHbDataManager::getLpcBAR() const
 const uint64_t BlToHbDataManager::getXscomBAR() const
 {
     return reinterpret_cast<uint64_t>(iv_data.xscomBAR);
+}
+
+const Bootloader::keyAddrPair_t BlToHbDataManager::getKeyAddrPairs() const
+{
+    return iv_data.keyAddrStashData;
 }
 
 const size_t BlToHbDataManager::getBlToHbDataSize() const
