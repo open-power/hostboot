@@ -57,6 +57,7 @@ namespace fapi2
         MOD_FAPI2_PLAT_GET_VPD                      = 0x0E,
         MOD_FAPI2_PIB_ERR_MASK                      = 0x0F,
         MOD_FAPI2_PLAT_PARSE_WOF_TABLES             = 0x10,
+        MOD_FAPI2_CVPD_ACCESS                       = 0x11,
     };
 
     /**

@@ -65,6 +65,7 @@ OBJS += target.o
 OBJS += plat_hw_access.o
 OBJS += plat_spd_access.o
 OBJS += plat_mvpd_access.o
+OBJS += plat_mbvpd_access.o
 OBJS += plat_vpd_access.o
 OBJS += plat_wof_access.o
 
