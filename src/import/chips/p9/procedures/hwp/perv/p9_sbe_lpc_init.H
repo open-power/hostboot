@@ -53,6 +53,7 @@ extern "C"
 {
     const uint64_t LPC_LRESET_OE = 23;
     const uint64_t LPC_LRESET_OUT = 22;
+    const uint32_t LPC_LRESET_DELAY_NS = 200000;
     const uint64_t LPCM_OPB_MASTER_CONTROL_REG = 0xC0010008;
     const uint32_t CPLT_CONF1_TC_LP_RESET = 12;
     fapi2::ReturnCode p9_sbe_lpc_init(const
