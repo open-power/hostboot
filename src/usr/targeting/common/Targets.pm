@@ -217,13 +217,39 @@ sub printTarget
 
     print $fh "<targetInstance>\n";
     my $target_id = $self->getAttribute($target, "PHYS_PATH");
+    my $target_TYPE = $self->getAttribute($target, "TYPE");
     $target_id = substr($target_id, 9);
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
 
 
     print $fh "\t<id>" . $target_id . "</id>\n";
-    print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
+    if($self->getTargetType($target) eq 'unit-clk-slave')
+    {
+        if($target_TYPE eq 'SYSREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-sysclk-slave"."</type>\n";
+        }
+        elsif($target_TYPE eq 'MFREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-mfclk-slave"."</type>\n";
+        }
+    }
+    elsif($self->getTargetType($target) eq 'unit-clk-master')
+    {
+        if($target_TYPE eq 'SYSREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-sysclk-master"."</type>\n";
+        }
+        elsif($target_TYPE eq 'MFREFCLKENDPT')
+        {
+            print $fh "\t<type>"."unit-mfclk-master"."</type>\n";
+        }
+    }
+    else
+    {
+        print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
+    }
 
     ## get attributes
     foreach my $attr (sort (keys %{ $target_ptr->{ATTRIBUTES} }))
