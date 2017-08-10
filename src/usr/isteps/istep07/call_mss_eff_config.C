@@ -56,6 +56,9 @@
 #include    <p9_mss_eff_config.H>
 #include    <p9_mss_eff_config_thermal.H>
 #include    <p9_mss_eff_grouping.H>
+#include    <p9c_mss_eff_config.H>
+#include    <p9c_mss_eff_mb_interleave.H>
+#include    <p9c_mss_eff_config_thermal.H>
 
 namespace   ISTEP_07
 {
@@ -111,34 +114,36 @@ errlHndl_t call_mss_eff_grouping(IStepError & io_istepErr)
 
 errlHndl_t call_mss_eff_mb_interleave()
 {
-    errlHndl_t l_err = nullptr;
-/* TOOD RTC: 144076 --- cumulus only ---
+    errlHndl_t l_err = NULL;
+
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
     for (const auto & l_membuf_target : l_membufTargetList)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "=====  Running mss_eff_mb_interleave HWP on HUID %.8X",
+                "=====  Running p9c_mss_eff_mb_interleave HWP on HUID %.8X",
                 TARGETING::get_huid(l_membuf_target));
-        fapi::Target l_membuf_fapi_target(fapi::TARGET_TYPE_MEMBUF_CHIP,
-                    (const_cast<TARGETING::Target*>(l_membuf_target)) );
-        FAPI_INVOKE_HWP(l_err, mss_eff_mb_interleave, l_membuf_fapi_target);
+
+        fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_membuf_fapi_target
+                (l_membuf_target);
+
+        FAPI_INVOKE_HWP(l_err, p9c_mss_eff_mb_interleave, l_membuf_fapi_target);
+
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: mss_eff_mb_interleave HWP returns error",
+                      "ERROR 0x%.8X: p9c_mss_eff_mb_interleave HWP returns error",
                       l_err->reasonCode());
             ErrlUserDetailsTarget(l_membuf_target).addToLog(l_err);
         }
         else
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Successfully ran mss_eff_mb_interleave HWP on HUID %.8X",
+                      "Successfully ran p9c_mss_eff_mb_interleave HWP on HUID %.8X",
                       TARGETING::get_huid(l_membuf_target));
         }
     }
-*/
     return l_err;
 }
 
@@ -176,6 +181,65 @@ void*    call_mss_eff_config( void *io_pArgs )
     TARGETING::Target* l_sys = nullptr;
     targetService().getTopLevelTarget(l_sys);
     assert( l_sys != nullptr );
+
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_membufTargetList;
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    for (TargetHandleList::const_iterator
+         l_membuf_iter = l_membufTargetList.begin();
+         l_membuf_iter != l_membufTargetList.end();
+         ++l_membuf_iter)
+    {
+        //  make a local copy of the target for ease of use
+        TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
+        TARGETING::TargetHandleList l_mbaTargetList;
+
+        getChildChiplets(l_mbaTargetList,
+                        l_pCentaur,
+                        TYPE_MBA);
+
+        for (TargetHandleList::const_iterator
+             l_mba_iter = l_mbaTargetList.begin();
+             l_mba_iter != l_mbaTargetList.end();
+             ++l_mba_iter)
+         {
+            //  Make a local copy of the target for ease of use
+            TARGETING::Target*  l_mbaTarget = *l_mba_iter;
+
+           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                      "p9c_mss_eff_config HWP target HUID %.8x",
+                      TARGETING::get_huid(l_mbaTarget));
+
+            //  call the HWP with each target
+            fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
+
+            FAPI_INVOKE_HWP(l_err, p9c_mss_eff_config, l_fapi_mba_target);
+
+            //  process return code.
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  p9c_mss_eff_config HWP on target HUID %.8x",
+                    l_err->reasonCode(), TARGETING::get_huid(l_mbaTarget) );
+
+                // capture the target data in the elog
+                ErrlUserDetailsTarget(l_mbaTarget).addToLog( l_err );
+
+                // Create IStep error log and cross reference to error that occurred
+                l_StepError.addErrorDetails( l_err );
+
+                // Commit Error
+                errlCommit( l_err, ISTEP_COMP_ID );
+            }
+            else
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                     "SUCCESS :  p9c_mss_eff_config HWP");
+            }
+        }
+    }
 
     // The attribute ATTR_MEM_MIRROR_PLACEMENT_POLICY should already be
     // correctly set by default for all platforms except for sapphire.
@@ -229,57 +293,129 @@ void*    call_mss_eff_config( void *io_pArgs )
             "SUCCESS :  p9_mss_eff_config HWP");
     } // end membuf loop
 
-    std::map<ATTR_VDDR_ID_type,TARGETING::TargetHandleList> l_domainIdGroups;
-    TARGETING::TargetHandleList l_mcbistTargetList;
-    getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
-
-    // Iterate over all MCBIST, calling mss_eff_config_thermal
-    for (const auto & l_mcbist_target : l_mcbistTargetList)
+    if(l_StepError.isNull())
     {
-        TARGETING::TargetHandleList l_mcsChildren;
-        getChildChiplets(l_mcsChildren,l_mcbist_target, TARGETING::TYPE_MCS);
-
-        ATTR_VDDR_ID_type l_vddr_id = l_mcbist_target->getAttr<ATTR_VDDR_ID>();
-        if(l_domainIdGroups.find(l_vddr_id) == l_domainIdGroups.end())
-        {
-            std::pair<ATTR_VDDR_ID_type, TARGETING::TargetHandleList> tuple(l_vddr_id, l_mcsChildren);
-            l_domainIdGroups.insert(tuple);
-        }
-        else
-        {
-            l_domainIdGroups[l_vddr_id].insert(l_domainIdGroups[l_vddr_id].end(), l_mcsChildren.begin(), l_mcsChildren.end());
-        }
-    }
-
-    for (auto & l_tuple : l_domainIdGroups)
-    {
-        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_fapi_mcs_targs;
-        for(const auto & l_mcs_target : l_tuple.second)
-        {
-            // Create a FAPI target representing the MCS
-            const fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_mcs_target
-            (l_mcs_target);
-            l_fapi_mcs_targs.push_back(l_fapi_mcs_target);
-        }
-        // Call the mss_eff_config_thermal HWP
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "p9_mss_eff_config_thermal HWP. ");
-        FAPI_INVOKE_HWP(l_err, p9_mss_eff_config_thermal,l_fapi_mcs_targs);
+        l_err = call_mss_eff_mb_interleave();
 
         if (l_err)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X:  p9_mss_eff_config_thermal HWP ",
-                        l_err->reasonCode());
-
             // Ensure istep error created and has same plid as this error
-            l_StepError.addErrorDetails(l_err);
-            errlCommit(l_err, HWPF_COMP_ID);
+            l_StepError.addErrorDetails( l_err );
+            errlCommit( l_err, HWPF_COMP_ID );
         }
         else
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+            {
+                //  Make a local copy of the target for ease of use
+                TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
+                TARGETING::TargetHandleList l_mbaTargetList;
+                getChildChiplets(l_mbaTargetList,
+                            l_pCentaur,
+                            TYPE_MBA);
+
+                for (TargetHandleList::const_iterator
+                    l_mba_iter = l_mbaTargetList.begin();
+                    l_mba_iter != l_mbaTargetList.end();
+                    ++l_mba_iter)
+                {
+                    //  Make a local copy of the target for ease of use
+                    TARGETING::Target*  l_mbaTarget = *l_mba_iter;
+
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "p9c_mss_eff_config_thermal HWP target HUID %.8x",
+                    TARGETING::get_huid(l_mbaTarget));
+
+                    //  call the HWP with each target
+                    fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
+
+                    FAPI_INVOKE_HWP(l_err, p9c_mss_eff_config_thermal, l_fapi_mba_target);
+
+                    //  process return code.
+                    if ( l_err )
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X:  p9c_mss_eff_config_thermal HWP on target HUID %.8x",
+                        l_err->reasonCode(), TARGETING::get_huid(l_mbaTarget) );
+
+                        // capture the target data in the elog
+                        ErrlUserDetailsTarget(l_mbaTarget).addToLog( l_err );
+
+                        // Create IStep error log and cross reference to error that occurred
+                        l_StepError.addErrorDetails( l_err );
+
+                        // Commit Error
+                        errlCommit( l_err, ISTEP_COMP_ID );
+                    }
+                    else
+                    {
+                        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "SUCCESS :  p9c_mss_eff_config_thermal HWP");
+                    }
+                }
+            }
+        }
+    }
+
+    if(l_StepError.isNull())
+    {
+
+        std::map<ATTR_VDDR_ID_type,TARGETING::TargetHandleList> l_domainIdGroups;
+        TARGETING::TargetHandleList l_mcbistTargetList;
+        getAllChiplets(l_mcbistTargetList, TYPE_MCBIST);
+
+        // Iterate over all MCBIST, calling mss_eff_config_thermal
+        for (const auto & l_mcbist_target : l_mcbistTargetList)
+        {
+            TARGETING::TargetHandleList l_mcsChildren;
+            getChildChiplets(l_mcsChildren,l_mcbist_target, TARGETING::TYPE_MCS);
+
+            ATTR_VDDR_ID_type l_vddr_id = l_mcbist_target->getAttr<ATTR_VDDR_ID>();
+            if(l_domainIdGroups.find(l_vddr_id) == l_domainIdGroups.end())
+            {
+                std::pair<ATTR_VDDR_ID_type, TARGETING::TargetHandleList> tuple(l_vddr_id, l_mcsChildren);
+                l_domainIdGroups.insert(tuple);
+            }
+            else
+            {
+                l_domainIdGroups[l_vddr_id].insert(l_domainIdGroups[l_vddr_id].end(), l_mcsChildren.begin(), l_mcsChildren.end());
+            }
+        }
+
+        for (auto & l_tuple : l_domainIdGroups)
+        {
+            std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_fapi_mcs_targs;
+            for(const auto & l_mcs_target : l_tuple.second)
+            {
+                // Create a FAPI target representing the MCS
+                const fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_mcs_target
+                (l_mcs_target);
+                l_fapi_mcs_targs.push_back(l_fapi_mcs_target);
+            }
+            // Call the mss_eff_config_thermal HWP
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "p9_mss_eff_config_thermal HWP. ");
+            FAPI_INVOKE_HWP(l_err, p9_mss_eff_config_thermal,l_fapi_mcs_targs);
+
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X:  p9_mss_eff_config_thermal HWP ",
+                        l_err->reasonCode());
+
+                // Ensure istep error created and has same plid as this error
+                l_StepError.addErrorDetails(l_err);
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+            else
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "SUCCESS : p9_mss_eff_config_thermal HWP");
+            }
         }
     }
 
@@ -288,12 +424,6 @@ void*    call_mss_eff_config( void *io_pArgs )
     {
         // Stack the memory on each chip
         l_err = call_mss_eff_grouping(l_StepError);
-
-        // TODO RTC: 144076
-        //if(!l_err) //Cumulus only
-        //{
-        //    l_err = call_mss_eff_mb_interleave();
-        //}
 
         if (l_err)
         {
