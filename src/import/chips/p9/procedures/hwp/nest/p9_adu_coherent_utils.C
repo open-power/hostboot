@@ -267,6 +267,8 @@ extern "C"
         p9_ADU_oper_flag l_myAduFlag;
         p9_ADU_oper_flag::OperationType_t l_operType;
         p9_ADU_oper_flag::Transaction_size_t l_transSize;
+        uint32_t var_PU_ALTD_CMD_REG_FBC_TTYPE = 0;
+        uint32_t var_PU_ALTD_CMD_REG_FBC_TSIZE = 0;
 
         //Write the address into altd_addr_reg
         FAPI_TRY(fapi2::putScom(i_target, PU_ALTD_ADDR_REG, altd_addr_reg_data),
@@ -318,40 +320,36 @@ extern "C"
                 // Set TTYPE
                 if (i_rnw)
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_CI_PR_RD);
+                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CI_PR_RD;
                 }
                 else
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_CI_PR_WR);
+                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CI_PR_WR;
                 }
 
                 // Set TSIZE
                 if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_CI_TSIZE_1);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_1;
                 }
                 else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_CI_TSIZE_2);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_2;
                 }
                 else if ( l_transSize == p9_ADU_oper_flag::TSIZE_4 )
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_CI_TSIZE_4);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_4;
                 }
                 else
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_CI_TSIZE_8);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_CI_TSIZE_8;
                 }
             }
 
             // ---------------------------------------------------
             // DMA specific: TTYPE & TSIZE
             // ---------------------------------------------------
-            else if (l_operType == p9_ADU_oper_flag::DMA_PARTIAL)
+            else
             {
                 FAPI_DBG("ADU operation type: DMA");
 
@@ -359,16 +357,14 @@ extern "C"
                 // Set the tsize to ALTD_CMD_DMAR_TSIZE
                 if (i_rnw)
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_CL_DMA_RD);
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_DMAR_TSIZE);
+                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_CL_DMA_RD;
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAR_TSIZE;
                 }
                 // If a write set ALTD_CMD_TTYPE_DMA_PR_WR
                 // Set the tsize according to flag setting
                 else
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE,
-                                                      PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_DMA_PR_WR);
+                    var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_DMA_PR_WR;
 
                     //Set scope to group scope
                     altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_SCOPE, PU_ALTD_CMD_REG_FBC_SCOPE_LEN>(ALTD_CMD_SCOPE_GROUP);
@@ -376,23 +372,19 @@ extern "C"
                     // Set TSIZE
                     if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
                     {
-                        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_DMAW_TSIZE_1);
+                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_1;
                     }
                     else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                     {
-                        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_DMAW_TSIZE_2);
+                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_2;
                     }
                     else if ( l_transSize == p9_ADU_oper_flag::TSIZE_4 )
                     {
-                        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_DMAW_TSIZE_4);
+                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_4;
                     }
                     else
                     {
-                        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_DMAW_TSIZE_8);
+                        var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_DMAW_TSIZE_8;
                     }
                 }
             }
@@ -432,16 +424,14 @@ extern "C"
                 FAPI_DBG("ADU operation type: PB OPERATION");
 
                 // Set TTYPE
-                altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE,
-                                                  PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_PB_OPER);
+                var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_PB_OPER;
                 // Set TM_QUIESCE
                 altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE>();
 
                 if (l_operType == p9_ADU_oper_flag::PB_DIS_OPER)
                 {
                     // TSIZE for PB operation is fixed value: 0b00001000
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_PB_DIS_OPERATION_TSIZE);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PB_DIS_OPERATION_TSIZE;
                 }
                 else
                 {
@@ -457,21 +447,19 @@ extern "C"
                              "Error writing to ALTD_OPTION Register");
 
                     // TSIZE for PB operation is fixed value: 0b00001011
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_PB_INIT_OPERATION_TSIZE);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PB_INIT_OPERATION_TSIZE;
                 }
             }
 
             // ---------------------------------------------------
             // PMISC specific: TTYPE & TSIZE
             // ---------------------------------------------------
-            else if (l_operType == p9_ADU_oper_flag::PMISC_OPER)
+            else
             {
                 FAPI_DBG("ADU operation type: PMISC");
 
                 // Set TTYPE
-                altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE,
-                                                  PU_ALTD_CMD_REG_FBC_TTYPE_LEN>(ALTD_CMD_TTYPE_PMISC_OPER);
+                var_PU_ALTD_CMD_REG_FBC_TTYPE = ALTD_CMD_TTYPE_PMISC_OPER;
 
                 // Set TSIZE
                 if ( l_transSize == p9_ADU_oper_flag::TSIZE_1 )
@@ -479,19 +467,22 @@ extern "C"
                     // Set TM_QUIESCE
                     altd_cmd_reg_data.setBit<PU_ALTD_CMD_REG_FBC_WITH_TM_QUIESCE>();
 
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_PMISC_TSIZE_1);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PMISC_TSIZE_1;
                     // Set quiesce and init around a switch operation in option reg
                     FAPI_TRY(setQuiesceInit(i_target), "setQuiesceInit() returns error");
                 }
                 else if ( l_transSize == p9_ADU_oper_flag::TSIZE_2 )
                 {
-                    altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
-                                                      PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(ALTD_CMD_PMISC_TSIZE_2);
+                    var_PU_ALTD_CMD_REG_FBC_TSIZE = ALTD_CMD_PMISC_TSIZE_2;
                 }
 
             }
         }
+
+        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TTYPE, PU_ALTD_CMD_REG_FBC_TTYPE_LEN>
+        (var_PU_ALTD_CMD_REG_FBC_TTYPE);
+        altd_cmd_reg_data.insertFromRight<PU_ALTD_CMD_REG_FBC_TSIZE,
+                                          PU_ALTD_CMD_REG_FBC_TSIZE_LEN>(var_PU_ALTD_CMD_REG_FBC_TSIZE);
 
         //Print out what we are setting for altd cmd register data
         FAPI_DBG("CMD reg value 0x%016llX", altd_cmd_reg_data);
