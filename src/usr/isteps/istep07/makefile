@@ -25,7 +25,9 @@
 ROOTPATH = ../../../..
 MODULE = istep07
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
-HWP_PATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+HWP_PATH_1 += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory
+HWP_PATH_2 += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
+HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
 
 #Add all the object files required for istep07 module
 OBJS += call_mss_volt.o
@@ -44,17 +46,20 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${HWP_PATH}
-EXTRAINCDIR += ${HWP_PATH}/lib/
-EXTRAINCDIR += ${HWP_PATH}/lib/dimm/
-EXTRAINCDIR += ${HWP_PATH}/lib/freq/
-EXTRAINCDIR += ${HWP_PATH}/lib/utils/
-EXTRAINCDIR += ${HWP_PATH}/lib/eff_config/
+EXTRAINCDIR += ${HWP_PATH_1}/lib/
+EXTRAINCDIR += ${HWP_PATH_1}/lib/dimm/
+EXTRAINCDIR += ${HWP_PATH_1}/lib/freq/
+EXTRAINCDIR += ${HWP_PATH_1}/lib/utils/
+EXTRAINCDIR += ${HWP_PATH_1}/lib/eff_config/
 EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/nest
+EXTRAINCDIR += ${HWP_PATH_2}/lib/
+EXTRAINCDIR += ${HWP_PATH_2}/lib/shared/
+EXTRAINCDIR += ${HWP_PATH_2}/lib/utils/
 
-VPATH += ${HWP_PATH} ${HWP_PATH}/lib/spd
+VPATH += ${HWP_PATH} ${HWP_PATH_1}/lib/spd
 VPATH += $(PROCEDURES_PATH)/hwp/nest ${ROOTPATH}/src/usr/fapi2
-VPATH += ${HWP_PATH}/lib ${HWP_PATH}/lib/utils ${HWP_PATH}/lib/eff_config
-VPATH += ${HWP_PATH}/lib/freq ${HWP_PATH}/lib/dimm
+VPATH += ${HWP_PATH_1}/lib ${HWP_PATH_1}/lib/utils ${HWP_PATH_1}/lib/eff_config
+VPATH += ${HWP_PATH_1}/lib/freq ${HWP_PATH_1}/lib/dimm
 VPATH += ${ROOTPATH}/src/usr/sbe
 
 #Required include before all the procedure.mk are included
@@ -63,20 +68,26 @@ include ${ROOTPATH}/procedure.rules.mk
 #Include all the procedure makefiles
 
 #mss_volt : Calc dimm voltage
-include $(HWP_PATH)/p9_mss_volt.mk
+include $(HWP_PATH_1)/p9_mss_volt.mk
+include $(HWP_PATH_2)/p9c_mss_volt.mk
 
 #mss_freq : Calc dimm frequency
-include $(HWP_PATH)/p9_mss_freq.mk
-include $(HWP_PATH)/p9_mss_freq_system.mk
+include $(HWP_PATH_1)/p9_mss_freq.mk
+include $(HWP_PATH_1)/p9_mss_freq_system.mk
+include $(HWP_PATH_2)/p9c_mss_freq.mk
 
 #mss_eff_config : Determine effective config
 include $(PROCEDURES_PATH)/hwp/nest/p9_mss_eff_grouping.mk
-include $(HWP_PATH)/p9_mss_eff_config.mk
-include $(HWP_PATH)/p9_mss_eff_config_thermal.mk
-include $(HWP_PATH)/p9_mss_bulk_pwr_throttles.mk
+include $(HWP_PATH_1)/p9_mss_eff_config.mk
+include $(HWP_PATH_1)/p9_mss_eff_config_thermal.mk
+include $(HWP_PATH_1)/p9_mss_bulk_pwr_throttles.mk
+include $(HWP_PATH_2)/p9c_mss_eff_config.mk
+include $(HWP_PATH_2)/p9c_mss_eff_config_thermal.mk
+include $(HWP_PATH_2)/p9c_mss_bulk_pwr_throttles.mk
+include $(HWP_PATH_2)/p9c_mss_eff_mb_interleave.mk
 
 #mss_attr_update : MSS ATTR Overrides
-include $(HWP_PATH)/p9_mss_attr_update.mk
+include $(HWP_PATH_1)/p9_mss_attr_update.mk
 
 
 include ${ROOTPATH}/config.mk
