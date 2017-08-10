@@ -407,7 +407,7 @@ group gL2FIR filter singlebit, cs_root_cause
     (rL2FIR, bit(17)) ? level2_th_1;
 
     /** L2FIR[18]
-     *  (RC) store received pb cresp add error
+     *  (RC) store received pb cresp addr error
      */
     (rL2FIR, bit(18)) ? level2_th_1;
 
@@ -432,7 +432,7 @@ group gL2FIR filter singlebit, cs_root_cause
     (rL2FIR, bit(22)) ? self_th_1;
 
     /** L2FIR[23]
-     *  RC fabric op Ld cresp add error
+     *  RC fabric op Ld cresp addr error for hyp
      */
     (rL2FIR, bit(23)) ? defaultMaskedError;
 
@@ -444,7 +444,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[25]
      *  L2 castout or CN cresp addr err
      */
-    (rL2FIR, bit(25)) ? defaultMaskedError;
+    (rL2FIR, bit(25)) ? self_th_1;
 
     /** L2FIR[26]
      *  LVDIR tracking PE
@@ -618,7 +618,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     (rNCUFIR, bit(20)) ? level2_M_self_L_th_1;
 
     /** NCUFIR[21]
-     *  addr darn type while darn not enabled
+     *  Darn cresp address error
      */
     (rNCUFIR, bit(21)) ? level2_M_self_L_th_1;
 
@@ -900,12 +900,12 @@ group gCMEFIR filter singlebit, cs_root_cause
     (rCMEFIR, bit(11|12)) ? defaultMaskedError;
 
     /** CMEFIR[13]
-     *  PPE Dropout on Core0 Chiplet iVRM.
+     *  Dropout detected on Core0 Chiplet iVRM
      */
     (rCMEFIR, bit(13)) ? threshold_and_mask;
 
     /** CMEFIR[14]
-     *  CME Dropout Core0 Chiplet iVRM.
+     *  Dropout detected on Core1 Chiplet iVRM
      */
     (rCMEFIR, bit(14)) ? threshold_and_mask;
 

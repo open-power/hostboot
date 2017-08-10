@@ -349,7 +349,7 @@ group gCXAFIR filter singlebit, cs_root_cause
     /** CXAFIR[35]
      *  CXA: UE on data received from PowerBus
      */
-    (rCXAFIR, bit(35)) ? defaultMaskedError;
+    (rCXAFIR, bit(35)) ? self_th_1; # NIMBUS_20
 
     /** CXAFIR[36]
      *  CXA: SUE on data received from PowerBus
