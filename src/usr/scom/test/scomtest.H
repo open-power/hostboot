@@ -192,8 +192,8 @@ public:
   void test_FSISCOMreadWrite_centaur(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
-      //FIXME: RTC 129630
-/*      uint64_t fails = 0;
+
+      uint64_t fails = 0;
       uint64_t total = 0;
       errlHndl_t l_err = NULL;
 
@@ -370,7 +370,6 @@ public:
       }
 
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> %d/%d fails", fails, total );
-*/
   }
 
 
@@ -755,7 +754,7 @@ public:
 
 
   void test_P9_ScomTranslations(void)
-{
+  {
     TRACFCOMP( g_trac_scom, "ScomTest::test_P9_ScomTranslations> Start" );
 
     uint64_t fails = 0;
@@ -1146,7 +1145,121 @@ public:
         }
       }
          TRACFCOMP( g_trac_scom, "ScomTest::test_P9_translateScom_SBE> %d/%d fails", fails, total );
-}
+  }
+
+
+  void test_Centaur_ScomTranslations(void)
+  {
+    TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_ScomTranslations> Start" );
+
+    uint64_t fails = 0;
+    uint64_t total = 0;
+    errlHndl_t l_err = NULL;
+
+    // Setup some targets to use
+    enum {
+        myMembuf0,
+        myMBA0,
+        myMBA1,
+        NUM_TARGETS
+    };
+
+    TARGETING::Target* scom_targets[NUM_TARGETS];
+    for( uint64_t x = 0; x < NUM_TARGETS; x++ )
+    {
+        scom_targets[x] = NULL;
+    }
+
+    /////////////////////////////////////////////////////////////////
+    // Set up targets
+    /////////////////////////////////////////////////////////////////
+
+    // Centaur0 - the local centaur
+    TARGETING::EntityPath epath(TARGETING::EntityPath::PATH_PHYSICAL);
+    epath.addLast(TARGETING::TYPE_SYS,0);
+    epath.addLast(TARGETING::TYPE_NODE,0);
+    epath.addLast(TARGETING::TYPE_MEMBUF,0);
+    scom_targets[myMembuf0] = TARGETING::targetService().toTarget(epath);
+
+    if(scom_targets[myMembuf0] != NULL)
+    {
+        // Add MBA0 target.
+        epath.addLast(TARGETING::TYPE_MBA,0);
+        scom_targets[myMBA0] = TARGETING::targetService().toTarget(epath);
+
+        // Add MBA1 target
+        epath.removeLast();
+        epath.addLast(TARGETING::TYPE_MBA,1);
+        scom_targets[myMBA1] = TARGETING::targetService().toTarget(epath);
+    }
+
+    struct {
+        TARGETING::Target* target;
+        uint64_t initAddr;
+        uint64_t expectedAddr;
+        bool     expectError;
+    } test_data[] = {
+        //Target            Address       Expected    error
+        { scom_targets[myMBA0], 0x03010655 ,0x111111111111DDDD,false},
+        { scom_targets[myMBA1], 0x03010655, 0x333333334444EEEE,false},
+        { scom_targets[myMBA0], 0x8000C0140301143F,0x1111111111111212,false},
+        { scom_targets[myMBA1], 0x8000C0140301143F, 0x333333334444abcd,false},
+        { scom_targets[myMBA0], 0x8000C0140301183F,0x111111111111ccee,true}, // invalid non zero indirect address
+        { scom_targets[myMBA0], 0x03010E55, 0x010101010101CCCC,true},  // invalid passing in a non-0 unit address
+    };
+
+    int numOfAddr = sizeof test_data / sizeof(test_data[0]);
+
+    for (int i = 0; i < numOfAddr; i++)
+    {
+        if(test_data[i].target != NULL)
+        {
+            total++;
+            uint64_t tempAddr = test_data[i].initAddr;
+            bool needsWakeup = false;
+            l_err  = SCOM::scomTranslate(test_data[i].target,
+                    tempAddr,
+                    needsWakeup);
+
+            if( l_err && !test_data[i].expectError)
+            {
+                TRACFCOMP(g_trac_scom, "ScomTest::test_Centaur_translate_scom> Write: Error from device : addr=0x%X, HUID 0x%X, RC=%X",
+                          test_data[i].initAddr,
+                          TARGETING::get_huid(test_data[i].target),
+                          l_err->reasonCode() );
+                TS_FAIL( "ScomTest::test_Centaur_translate> ERROR : Unexpected error log from write1" );
+                fails++;
+                errlCommit(l_err,SCOM_COMP_ID);
+            }
+            else if(l_err == NULL && test_data[i].expectError)
+            {
+                TRACFCOMP(g_trac_scom,  "ScomTest::test_Centaur_translate> ERROR : Expected an error and did not recieve one for : addr=0x%X, HUID 0x%X",
+                          test_data[i].initAddr,
+                          TARGETING::get_huid(test_data[i].target))
+                TS_FAIL( "ScomTest::test_Centaur_translate> ERROR : Expected an error and did not recieve one" );
+                fails++;
+            }
+            else if(tempAddr!= test_data[i].expectedAddr &&
+                    l_err == NULL && !test_data[i].expectError)
+            {
+                TRACFCOMP(g_trac_scom, "ScomTest::test_Centaur_translate_scom> Incorrect translation of: 0x%X produced: 0x%X  expected: 0x%X",
+                    test_data[i].initAddr, tempAddr, test_data[i].expectedAddr);
+                TS_FAIL( "ScomTest::test_Centaur_translate> ERROR : Unexpected error log from write1" );
+                fails++;
+            }
+            else if(l_err && test_data[i].expectError)
+            {
+                delete l_err;
+                TRACFCOMP(g_trac_scom, "ScomTest::test_Centaur_translate_scom> Previous error expected");
+            }
+        }
+        else
+        {
+          TRACFCOMP(g_trac_scom, "ScomTest::test_Centaur_translate_scom> Target %d in the list of targets does not exist in the system", i);
+        }
+    }
+    TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_translateScom_SBE> %d/%d fails", fails, total );
+  }
 
 
   /**

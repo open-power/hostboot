@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@ namespace SCOM
         SCOM_TRANSLATE_P9               = 0x05,
         SCOM_DO_FORM_1_INDIRECT_SCOM    = 0x06,
         SCOM_HANDLE_SPECIAL_WAKEUP      = 0x07,
+        SCOM_TRANSLATE_CENTAUR          = 0x08,
     };
 
     enum scomReasonCode
@@ -62,6 +63,7 @@ namespace SCOM
         SCOM_RUNTIME_WAKEUP_ERR        = SCOM_COMP_ID | 0x11,
         SCOM_RUNTIME_INTERFACE_ERR     = SCOM_COMP_ID | 0x12,
         SCOM_RUNTIME_SPCWKUP_COUNT_ERR = SCOM_COMP_ID | 0x13,
+        SCOM_CEN_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x14,
     };
 
     enum UserDetailsTypes
