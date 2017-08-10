@@ -23,17 +23,12 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <hwpErrors>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_RAS_STATUS_ERR</rc>
-    <description>
-      Procedure: p9_sbe_check_quiesce
-      RAS Status is not in the STOP state 
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>RASSTATUS</ffdc>
-  </hwpError>
+
+  <!-- Note:
+       The p9_sbe_check_quiesce HWP is to be called during MPIPL.
+       We just want to log the error and then continue on. No callout,
+       deconfigure, or gard HW for the errors below -->
+
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
@@ -97,7 +92,7 @@
     <rc>RC_P9_NX_STOP_UMAC_FETCHING_NEW_CRBS_TIMEOUT</rc>
     <description>
       Procedure: p9_sbe_check_quiesce
-      UMAC was not stopped from fetchihng new CRBs
+      UMAC was not stopped from fetching new CRBs
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DATA</ffdc>
@@ -160,17 +155,6 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_UMAC_QUIESCE_TIMEOUT</rc>
-    <description>
-      Procedure: p9_sbe_check_quiesce
-      UMAC status control quiesce timed out 
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>DATA</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_P9_PSIHBCR_INBOUND_QUEUE_NOT_EMPTY</rc>
     <description>
       Procedure: p9_sbe_check_quiesce
@@ -189,18 +173,6 @@
     </description>
     <ffdc>TARGET</ffdc>
     <ffdc>DATA</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_CHECK_XSTOP</rc>
-    <description>
-      Procedure: p9_sbe_check_quiesce
-      If we hit a checkstop add the value of register 0x570F001C
-      If there is an error with setting the checkstop the value here will be 
-      0xDEADBEEFDEADBEEF 
-    </description>
-    <ffdc>CHECKSTOP_DATA</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
