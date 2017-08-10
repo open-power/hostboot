@@ -78,8 +78,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 // Defines
 // ----------------------------------------------
 #define I2C_RESET_DELAY_NS (5 * NS_PER_MSEC)  // Sleep for 5 ms after reset
-#define P8_MASTER_ENGINES 2        // Number of Engines used in P8
-#define P8_MASTER_PORTS 3          // Number of Ports used in P8
+#define P9_MASTER_PORTS 13          // Number of Ports used in P9
 #define CENTAUR_MASTER_ENGINES 1   // Number of Engines in a Centaur
 #define MAX_NACK_RETRIES 3
 #define PAGE_OPERATION 0xffffffff  // Special value use to determine type of op
@@ -89,7 +88,7 @@ TRAC_INIT( & g_trac_i2cr, "I2CR", KILOBYTE );
 const TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type g_var = {{NULL}};
 #define I2C_BUS_ATTR_MAX_ENGINE  I2C_BUS_MAX_ENGINE(g_var)
 #define I2C_BUS_ATTR_MAX_PORT    I2C_BUS_MAX_PORT(g_var)
-
+#define FSI_MODE_MAX_PORT 15
 
 // ----------------------------------------------
 
@@ -136,7 +135,6 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
     // attribute in i2cCommonOp()
     args.switches.useHostI2C = 0;
     args.switches.useFsiI2C  = 0;
-
 
     // Decide if page select was requested (denoted with special device address)
     if( args.devAddr == PAGE_OPERATION )
@@ -2560,8 +2558,16 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
             break;
         }
 
+        uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
+        if (i_args.switches.useFsiI2C == 1)
+        {
+            TRACDCOMP( g_trac_i2c,INFO_MRK
+                      "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
+            l_numPorts = FSI_MODE_MAX_PORT;
+        }
+
         // Need to send slave stop to all ports with a device on the engine
-        for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
+        for( uint32_t port = 0; port < l_numPorts; port++ )
         {
             //Check if diag mode should be skipped
             TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -2576,12 +2582,12 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 // cannot be used. -- skip it if the attribute state it
                 // should not be used
                 // This also applies to FSI mode for engine 0,1,2 ports 0..3
-                // as they directly map to FSI port 0..3 which have SBE
-                // security
+                // as they directly map to FSI mode for engine 0, ports 0..3
+                // which have SBE security
                 if (l_disable_diag_mode)
                 {
                     if(((0 == port) && (2 == i_args.engine)) || //host
-                     ((i_args.switches.useFsiI2C) && (i_args.engine < 3))) //FSI
+                     ((i_args.switches.useFsiI2C) && (port < 4))) //FSI (eng 0)
                     {
                         TRACFCOMP( g_trac_i2c,
                                    "Not doing i2cForceResetAndUnlock() for"
@@ -2593,14 +2599,20 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 }
             }
 
-            // Only send stop to a port if there are devices on it
-            l_speed = speed_array[i_args.engine][port];
+            size_t logical_engine = i_args.engine;
+            size_t logical_port = port;
+            if (i_args.switches.useFsiI2C == 1)
+            {
+                setLogicalFsiEnginePort(logical_engine, logical_port);
+            }
+
+            l_speed = speed_array[logical_engine][logical_port];
             if ( l_speed == 0 )
             {
                 continue;
             }
 
-            TRACUCOMP( g_trac_i2c,
+            TRACFCOMP( g_trac_i2c,
                        INFO_MRK"i2cForceResetAndUnlock() - Performing op on "
                        "engine=%d, port=%d",
                        i_args.engine, port);
@@ -2800,13 +2812,31 @@ errlHndl_t i2cSendSlaveStop ( TARGETING::Target * i_target,
             break;
         }
 
+        uint32_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
+        if (i_args.switches.useFsiI2C == 1)
+        {
+            TRACDCOMP( g_trac_i2c,INFO_MRK
+                      "Using FSI I2C, use numports: %d", FSI_MODE_MAX_PORT);
+            l_numPorts = FSI_MODE_MAX_PORT;
+        }
+
         // Need to send slave stop to all ports with a device on the engine
-        for( uint32_t port = 0; port < P8_MASTER_PORTS; port++ )
+        for( uint32_t port = 0; port < l_numPorts; port++ )
         {
             // Only send stop to a port if there are devices on it
             l_speed = speed_array[i_args.engine][port];
             if ( l_speed == 0 )
             {
+                continue;
+            }
+
+            // TODO RTC 178394: Investigate XSCOM errros and improve i2c
+            //   presence detect here to remove this workaround
+            if ( (i_args.engine == 1) && (port >= 4) )
+            {
+                TRACDCOMP( g_trac_i2c,
+                  "Saw Errors resetting these devices, temporarily skipping engine: %d, port: %d",
+                   i_args.engine, port);
                 continue;
             }
 
@@ -3229,6 +3259,8 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                      ( engine != 0 ) &&
                      (io_args.switches.useFsiI2C == 1) )
                 {
+                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                        "Only reset engine 0 for FSI");
                     continue;
                 }
 
@@ -3237,14 +3269,30 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 if ( ( engine == 0 ) &&
                      (io_args.switches.useHostI2C == 1) )
                 {
+                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                        "Never touch engine 0 for Host");
                     continue;
                 }
 
                 // Look for any device on this engine based on speed_array
                 bool skip = true;
-                for ( size_t j = 0; j < I2C_BUS_ATTR_MAX_PORT; j++ )
+                size_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
+                if (io_args.switches.useFsiI2C == 1)
                 {
-                    if ( speed_array[engine][j] != 0 )
+                    TRACDCOMP( g_trac_i2c,INFO_MRK
+                      "Using FSI I2c, use numports: %d", FSI_MODE_MAX_PORT);
+                    l_numPorts = FSI_MODE_MAX_PORT;
+                }
+                for ( size_t j = 0; j < l_numPorts; j++ )
+                {
+                    size_t logical_engine = engine;
+                    size_t logical_port = j;
+                    if (io_args.switches.useFsiI2C == 1)
+                    {
+                        setLogicalFsiEnginePort(logical_engine, logical_port);
+                    }
+
+                    if ( speed_array[logical_engine][logical_port] != 0 )
                     {
                         skip = false;
                         io_args.port = j; // use this port
@@ -4183,4 +4231,32 @@ uint64_t I2C_SET_USER_DATA_2 ( misc_args_t args)
 }
 
 
-} // end namespace I2C
+void setLogicalFsiEnginePort(size_t &io_logical_engine, size_t &io_logical_port)
+{
+    assert( (io_logical_engine == 0),
+            "setLogicalFsiEnginePort not intended for engines other than 0."
+            " Engine passed in: %d", io_logical_engine);
+
+    switch (io_logical_port)
+    {
+        case (13):
+        {
+            io_logical_engine = 3;
+            io_logical_port = 0;
+            break;
+        }
+        case (14):
+        {
+            io_logical_engine = 3;
+            io_logical_port = 1;
+            break;
+        }
+        default:
+        {
+            io_logical_engine = 1;
+            break;
+        }
+    }
+}
+
+}; // end namespace I2C
