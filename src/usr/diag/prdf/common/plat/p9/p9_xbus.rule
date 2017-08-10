@@ -217,14 +217,14 @@ group gIOXBFIR filter singlebit, cs_root_cause
     (rIOXBFIR, bit(8)) ? defaultMaskedError;
 
     /** IOXBFIR[9]
-     *  RX_BUS0_SPARE_DEPLOYED
+     *  Spare lane deployed on clock group 0
      */
-    (rIOXBFIR, bit(9)) ? spareDeployed;
+    (rIOXBFIR, bit(9)) ? spareDeployed_xbus_clkgrp0;
 
     /** IOXBFIR[10]
-     *  RX_BUS0_MAX_SPARES_EXCEEDED
+     *  Max spares exceeded on clock group 0
      */
-    (rIOXBFIR, bit(10)) ? maxSparesExceeded;
+    (rIOXBFIR, bit(10)) ? maxSparesExceeded_xbus_clkgrp0;
 
     /** IOXBFIR[11]
      *  RX_BUS0_RECAL_OR_DYN_REPAIR_ERROR
@@ -232,9 +232,9 @@ group gIOXBFIR filter singlebit, cs_root_cause
     (rIOXBFIR, bit(11)) ? defaultMaskedError;
 
     /** IOXBFIR[12]
-     *  RX_BUS0_TOO_MANY_BUS_ERRORS
+     *  Too many bus errors on clock group 0
      */
-    (rIOXBFIR, bit(12)) ? tooManyBusErrors;
+    (rIOXBFIR, bit(12)) ? tooManyBusErrors_xbus_clkgrp0;
 
     /** IOXBFIR[13:15]
      *  spare
@@ -247,14 +247,14 @@ group gIOXBFIR filter singlebit, cs_root_cause
     (rIOXBFIR, bit(16)) ? defaultMaskedError;
 
     /** IOXBFIR[17]
-     *  RX_BUS1_SPARE_DEPLOYED
+     *  Spare lane deployed on clock group 1
      */
-    (rIOXBFIR, bit(17)) ? defaultMaskedError;
+    (rIOXBFIR, bit(17)) ? spareDeployed_xbus_clkgrp1;
 
     /** IOXBFIR[18]
-     *  RX_BUS1_MAX_SPARES_EXCEEDED
+     *  Max spares exceeded on clock group 1
      */
-    (rIOXBFIR, bit(18)) ? defaultMaskedError;
+    (rIOXBFIR, bit(18)) ? maxSparesExceeded_xbus_clkgrp1;
 
     /** IOXBFIR[19]
      *  RX_BUS1_RECAL_OR_DYN_REPAIR_ERROR
@@ -262,9 +262,9 @@ group gIOXBFIR filter singlebit, cs_root_cause
     (rIOXBFIR, bit(19)) ? defaultMaskedError;
 
     /** IOXBFIR[20]
-     *  RX_BUS1_TOO_MANY_BUS_ERRORS
+     *  Too many bus errors on clock group 1
      */
-    (rIOXBFIR, bit(20)) ? defaultMaskedError;
+    (rIOXBFIR, bit(20)) ? tooManyBusErrors_xbus_clkgrp1;
 
     /** IOXBFIR[21:23]
      *  spare

@@ -68,16 +68,24 @@ actionclass rcd_parity_error
 };
 
 /** Handle Mainline IUEs */
-actionclass mainline_iue_handling_UERE
+actionclass mainline_iue_handling
 {
+    # An IUE itself is not a SUE source, however, a threshold of IUEs will
+    # trigger a port failure, which will generate SUEs. The port failure could
+    # also crash the machine so we want to make sure this bit is flagged as an
+    # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
     funccall("AnalyzeMainlineIue");
 };
 
 /**  Handle Maintenance IUEs */
-actionclass maintenance_iue_handling_UERE
+actionclass maintenance_iue_handling
 {
+    # An IUE itself is not a SUE source, however, a threshold of IUEs will
+    # trigger a port failure, which will generate SUEs. The port failure could
+    # also crash the machine so we want to make sure this bit is flagged as an
+    # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
     funccall("AnalyzeMaintIue");

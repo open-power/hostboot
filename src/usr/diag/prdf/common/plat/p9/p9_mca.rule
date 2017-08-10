@@ -310,7 +310,7 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
     (rMCACALFIR, bit(14)) ? rcd_parity_error;
 
     /** MCACALFIR[15]
-     *  scom error
+     *  Parity error on debug bus SCOM registers
      */
     (rMCACALFIR, bit(15)) ? defaultMaskedError;
 
@@ -318,6 +318,11 @@ group gMCACALFIR filter priority( 13 ), cs_root_cause( 4, 13, 14 )
      *  scom error
      */
     (rMCACALFIR, bit(16)) ? defaultMaskedError;
+
+    /** MCACALFIR[17]
+     *  scom error copy
+     */
+    (rMCACALFIR, bit(17)) ? defaultMaskedError;
 
 };
 
@@ -423,7 +428,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[15]
      *  Mainline read RCD
      */
-    (rMCAECCFIR, bit(15)) ? defaultMaskedError;
+    (rMCAECCFIR, bit(15)) ? self_th_1; # NIMBUS_20
 
     /** MCAECCFIR[16]
      *  Mainline read IAUE
@@ -433,7 +438,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[17]
      *  Mainline read IUE
      */
-    (rMCAECCFIR, bit(17)) ? mainline_iue_handling_UERE;
+    (rMCAECCFIR, bit(17)) ? mainline_iue_handling;
 
     /** MCAECCFIR[18]
      *  Mainline read IRCD
@@ -498,7 +503,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[37]
      *  Maintenance IUE
      */
-    (rMCAECCFIR, bit(37)) ? maintenance_iue_handling_UERE;
+    (rMCAECCFIR, bit(37)) ? maintenance_iue_handling;
 
     /** MCAECCFIR[38]
      *  Maintenance IRCD
