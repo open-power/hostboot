@@ -38,28 +38,6 @@
 
 <attributes>
 <attribute>
-    <id>ATTR_CEN_ZMODE</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>
-        Set to activate System Z mode, used to mask opposite port on Mcbist and Schmoos.
-    </description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_ZMODE_PORT</id>
-    <targetType>TARGET_TYPE_MBA</targetType>
-    <description>
-          Used to set the port under test for System Z.  Opposite port will be masked from MCBIST/Schmoo
-    </description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-</attribute>
-
-<attribute>
     <id>ATTR_CEN_EFF_DRAM_ADDRESS_MIRRORING</id>
     <targetType>TARGET_TYPE_MBA</targetType>
     <description>

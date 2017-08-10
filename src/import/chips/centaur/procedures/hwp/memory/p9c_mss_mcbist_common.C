@@ -74,8 +74,6 @@ extern "C"
         uint8_t l_new_addr = 1;
         uint32_t i_mcbpatt = 0;
         uint32_t i_mcbtest = 0;
-        uint8_t i_zmode_port = 0;
-        uint8_t i_zmode = 0;
         uint8_t l_mba_position = 0;
         mcbist_test_mem i_mcbtest1;
         mcbist_data_gen i_mcbpatt1;
@@ -107,8 +105,6 @@ extern "C"
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_PATTERN, i_target_mba,  i_mcbpatt));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MCBIST_TEST_TYPE, i_target_mba,  i_mcbtest));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_ZMODE, i_target_mba, i_zmode));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_ZMODE_PORT, i_target_mba, i_zmode_port));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_mba,  l_mba_position));
 
         mss_conversion_testtype(i_target_mba, i_mcbtest, i_mcbtest1);
@@ -217,48 +213,6 @@ extern "C"
             FAPI_TRY(cfg_byte_mask(i_target_mba));
 
         }
-
-        if(i_zmode)   //zMode must mask opposite port
-        {
-            l_data_buffer_mask0_64.insert<0, 64, 0>(0xFFFFFFFFFFFFFFFF);
-
-            if(l_mba_position == 0)
-            {
-                FAPI_TRY(fapi2::getScom(l_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer_mask1a_64));
-                FAPI_TRY(fapi2::getScom(l_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer_mask1b_64));
-                l_data_buffer_mask1a_64.insert<0, 16>(0xFFFFFFFFFFFFFFFF);
-                l_data_buffer_mask1b_64.insert<16, 16>(0xFFFFFFFFFFFFFFFF);
-
-                if(i_zmode_port == 0)  //EVEN port under test : 0, mask port 1
-                {
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS01_MCBCMB1Q, l_data_buffer_mask0_64));
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer_mask1b_64));
-                }
-                else  // ODD port under test : 1, mask port 0
-                {
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS01_MCBCMA1Q, l_data_buffer_mask0_64));
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS01_MCBCMABQ, l_data_buffer_mask1a_64));
-                }
-            }
-            else
-            {
-                FAPI_TRY(fapi2::getScom(l_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer_mask1a_64));
-                FAPI_TRY(fapi2::getScom(l_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer_mask1b_64));
-                l_data_buffer_mask1a_64.insert<0, 16>(0xFFFFFFFFFFFFFFFF);
-                l_data_buffer_mask1b_64.insert<16, 16>(0xFFFFFFFFFFFFFFFF);
-
-                if(i_zmode_port == 0)  //EVEN port under test : 2, mask port 3
-                {
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS23_MCBCMB1Q, l_data_buffer_mask0_64));
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer_mask1b_64));
-                }
-                else   //ODD port under test: 3, mask port 2
-                {
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS23_MCBCMA1Q, l_data_buffer_mask0_64));
-                    FAPI_TRY(fapi2::putScom(l_target_centaur, CEN_MCBISTS23_MCBCMABQ, l_data_buffer_mask1a_64));
-                }
-            }
-        } // if zmode
 
     fapi_try_exit:
         return fapi2::current_err;
@@ -902,8 +856,6 @@ extern "C"
         FAPI_DBG("%s:Function MCB_ERROR_MAP", mss::c_str(i_target_mba));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target_mba,  l_mba_position));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_ZMODE, i_target_mba,  l_zmode));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_ZMODE_PORT, i_target_mba,  l_zmode_port));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba,  dram_stack));
 
         if (dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)

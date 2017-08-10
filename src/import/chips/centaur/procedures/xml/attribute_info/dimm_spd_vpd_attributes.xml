@@ -640,18 +640,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 -->
 
 <attribute>
-    <id>ATTR_CEN_VPD_DIMM_RCD_CNTL_WORD_0_15</id>
-    <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>This will be replaced by ATTR_CEN_SPD_DIMM_RCD_CNTL_WORD_0_15. Until migration is complete USE as is. (Will be deleted soon)
-         IE this is pulled from SPD bytes 69 - 76. (DDR3)
-    The attribute would contain byte 69 nibble 1, followed by byte 69 nibble 0, followed by byte 70 nibble 1, and so forth.
-   </description>
-    <valueType>uint64</valueType>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
-
-<attribute>
     <id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id>
     <targetType>TARGET_TYPE_MBA</targetType>
     <description>RCD Timing. Supplied by VPD, used by mss_eff_config.C. Each dimm will have a value.
@@ -1371,7 +1359,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Indicates number of registers used and number of rows of DRAM's on LRDIMM.
-	Byte 131, Bits 1-0 for # of registers used on LRDIMM. 
+	Byte 131, Bits 1-0 for # of registers used on LRDIMM.
   	 00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
         Byte 131, Bits 3-2 for # of rows of DRAM's on LRDIMM
          00,11- Undefined, 01- 1 Row, 10 - 2 Rows.
@@ -1386,7 +1374,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <id>ATTR_CEN_SPD_REGISTER_MANF_ID</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
-        Manufacturer of the memory buffer on DIMM module. 
+        Manufacturer of the memory buffer on DIMM module.
 	     Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
     </description>
     <valueType>uint32</valueType>
@@ -1790,7 +1778,7 @@ that handles the DDR neutral attribute.
         Regular HWPs must use ATTR_CEN_SPD_MODULE_NOMINAL_VOLTAGE.
     </description>
     <valueType>uint8</valueType>
-    Note that current DDR4 spec has TBD for bits 2-5 
+    Note that current DDR4 spec has TBD for bits 2-5
     <enum>
         OP1_2V = 0x01, END1_2V = 0x02,
         OPTBD1V = 0x04, ENDTBD1V = 0x08,

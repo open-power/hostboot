@@ -138,8 +138,6 @@ struct mss_eff_config_spd_data
     uint8_t fine_offset_trrdsmin[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     uint8_t fine_offset_tckmax[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     // ATTR_SPD_MODULE_SPECIFIC_SECTION, Located in DDR3 SPD bytes 60d - 116d
-    uint64_t rdimm_rcd_cntl_word_0_15[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
-
     uint32_t vpd_version[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
 };
 

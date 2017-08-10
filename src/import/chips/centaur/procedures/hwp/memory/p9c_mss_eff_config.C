@@ -251,10 +251,6 @@ extern "C"
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_FINE_OFFSET_TRCMIN, i_target_dimm,
                                o_spd_data->fine_offset_trcmin[i_port][i_dimm]));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DIMM_RCD_CNTL_WORD_0_15,                    // Needed for RDIMM.
-                               i_target_dimm,
-                               o_spd_data->rdimm_rcd_cntl_word_0_15[i_port][i_dimm]));
-
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_VERSION, i_target_dimm,
                                o_spd_data->vpd_version[i_port][i_dimm]));
 
@@ -726,11 +722,6 @@ extern "C"
         uint32_t l_max_delay = 0;             // in ps
         uint8_t l_speed_idx = 0;
         uint8_t l_width_idx = 0;
-        const uint64_t l_rcd_hardcode_mask      = 0xDFFFFFFFF2FFFFFFLL;
-        uint64_t l_mss_freq_mask          = 0xFFFFFFFFFF8FFFFFLL;
-        uint64_t l_mss_volt_mask          = 0xFFFFFFFFFFFCFFFFLL;
-        uint64_t l_rcd_ibt_mask           = 0xFFBFFFFF8FFFFFFFLL;
-        uint64_t l_rcd_output_timing_mask = 0xFFDFFFFFFFFFFFFFLL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING, i_target_mba,  l_vpd_dram_address_mirroring));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED, i_target_mba,  l_mss_dram_2n_mode_enable));
         // DDR4 Vref
@@ -2185,145 +2176,7 @@ extern "C"
                         [l_cur_mba_dimm];
                 }
 
-                // Populate RCD_CNTL_WORD for RDIMM, add hardcode to RC0-DA4=0b0 RC9-DBA1-DBA0-DA4-DA3=0b00X0, merge in ATTR_VPD_DIMM_RCD_IBT ATTR_VPD_DIMM_RCD_OUTPUT_TIMING, and adjust in RC10 and RC11 for freq/voltage
-                if (( o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM )
-                    && (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] != 0))
-                {
-
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        i_data->rdimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm];
-
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_hardcode_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_mss_freq_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_mss_volt_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_ibt_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] & l_rcd_output_timing_mask;
-
-                    if ( i_mss_eff_config_data->mss_freq <= 933 )           // 800Mbps
-                    {
-                        l_mss_freq_mask = 0x0000000000000000LL;
-                    }
-                    else if ( i_mss_eff_config_data->mss_freq <= 1200 )     // 1066Mbps
-                    {
-                        l_mss_freq_mask = 0x0000000000100000LL;
-                    }
-                    else if ( i_mss_eff_config_data->mss_freq <= 1466 )     // 1333Mbps
-                    {
-                        l_mss_freq_mask = 0x0000000000200000LL;
-                    }
-                    else if ( i_mss_eff_config_data->mss_freq <= 1733 )     // 1600Mbps
-                    {
-                        l_mss_freq_mask = 0x0000000000300000LL;
-                    }
-                    else                               // 1866Mbps
-                    {
-                        FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ().
-                                    set_TARGET_MBA(i_target_mba).
-                                    set_INVALID_RDIMM_FREQ(i_mss_eff_config_data->mss_freq),
-                                    "Invalid RDIMM ATTR_MSS_FREQ = %d on %s!", i_mss_eff_config_data->mss_freq, mss::c_str(i_target_mba));
-                    }
-
-                    //1.5V DDR3 or 1.2V DDR4
-                    if ( i_mss_eff_config_data->mss_volt >= 1420 || (o_atts->eff_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4
-                            && i_mss_eff_config_data->mss_volt >= 1130 && i_mss_eff_config_data->mss_volt <= 1270))          // 1.5V
-                    {
-                        l_mss_volt_mask = 0x0000000000000000LL;
-                    }
-                    else if ( i_mss_eff_config_data->mss_volt >= 1270
-                              && o_atts->eff_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR3)   // 1.35V and DDR3
-                    {
-                        l_mss_volt_mask = 0x0000000000010000LL;
-                    }
-                    else                               // not valid DDR3 or DDR4 setting
-                    {
-                        FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_VOLT().
-                                    set_TARGET_MBA(i_target_mba).
-                                    set_INVALID_RDIMM_VOLT( i_mss_eff_config_data->mss_volt),
-                                    "Invalid RDIMM ATTR_MSS_VOLT = %d on %s!", i_mss_eff_config_data->mss_volt, mss::c_str(i_target_mba));
-                    }
-
-                    if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_IBT_IBT_OFF )
-                    {
-                        l_rcd_ibt_mask = 0x0000000070000000LL;
-                    }
-                    else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_IBT_IBT_100 )
-                    {
-                        l_rcd_ibt_mask = 0x0000000000000000LL;
-                    }
-                    else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_IBT_IBT_150 )
-                    {
-                        l_rcd_ibt_mask = 0x0040000000000000LL;
-                    }
-                    else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_IBT_IBT_200 )
-                    {
-                        l_rcd_ibt_mask = 0x0000000020000000LL;
-                    }
-                    else if ( l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_IBT_IBT_300 )
-                    {
-                        l_rcd_ibt_mask = 0x0000000040000000LL;
-                    }
-                    else
-                    {
-                        FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_IBT().
-                                    set_TARGET_MBA(i_target_mba).
-                                    set_INVALID_RDIMM_RCD_IBT_U32ARRAY_0_0(l_rdimm_rcd_ibt[0][0]).
-                                    set_INVALID_RDIMM_RCD_IBT_U32ARRAY_0_1(l_rdimm_rcd_ibt[0][1]).
-                                    set_INVALID_RDIMM_RCD_IBT_U32ARRAY_1_0(l_rdimm_rcd_ibt[1][0]).
-                                    set_INVALID_RDIMM_RCD_IBT_U32ARRAY_1_1(l_rdimm_rcd_ibt[1][1]),
-                                    "Invalid RDIMM_RCD_IBT = %d port %d dimm %d on %s!", l_rdimm_rcd_ibt[l_cur_mba_port][l_cur_mba_dimm], l_cur_mba_port,
-                                    l_cur_mba_dimm, mss::c_str(i_target_mba));
-                    }
-
-                    if ( l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING_1T )
-                    {
-                        l_rcd_output_timing_mask = 0x0000000000000000LL;
-                    }
-                    else if ( l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm] ==
-                              fapi2::ENUM_ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING_3T )
-                    {
-                        l_rcd_output_timing_mask = 0x0020000000000000LL;
-                    }
-                    else
-                    {
-                        FAPI_ASSERT(false,
-                                    fapi2::CEN_MSS_EFF_CONFIG_INVALID_RDIMM_RCD_OUTPUT_TIMING().
-                                    set_TARGET_MBA(i_target_mba).
-                                    set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[0][0]).
-                                    set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[0][1]).
-                                    set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[1][0]).
-                                    set_INVALID_RDIMM_RCD_OUTPUT_TIMING_U8ARRAY_0_0(l_rdimm_rcd_output_timing[1][1]),
-                                    "Invalid RDIMM_RCD_OUTPUT_TIMING = %d port %d dimm %d on %s!",
-                                    l_rdimm_rcd_output_timing[l_cur_mba_port][l_cur_mba_dimm], l_cur_mba_port, l_cur_mba_dimm, mss::c_str(i_target_mba));
-                    }
-
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_mss_freq_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_mss_volt_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_rcd_ibt_mask;
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] =
-                        o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] | l_rcd_output_timing_mask;
-                }
-                else if ((o_atts->eff_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
-                         && ( o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM )
-                         && (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] != 0))
-                {
-                    // AST HERE: Need to add DDR4 RDIMM support.
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = 0x0000000000000000LL;
-                }
-                else
-                {
-                    o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = 0x0000000000000000LL;
-                }
+                o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = 0x0000000000000000LL;
 
                 if(o_atts->eff_vpd_version == 0xFFFFFF ||
                    i_data->vpd_version[l_cur_mba_port][l_cur_mba_dimm] < o_atts->eff_vpd_version )   // find the smallest VPD
