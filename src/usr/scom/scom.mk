@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -25,7 +25,9 @@
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
+VPATH += ${ROOTPATH}/src/import/chips/centaur/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 # Local Objects
 OBJS += scom.o
@@ -34,3 +36,4 @@ OBJS += errlud_pib.o
 
 # Objects From Import Directory
 OBJS += p9_scominfo.o
+OBJS += centaur_scominfo.o
