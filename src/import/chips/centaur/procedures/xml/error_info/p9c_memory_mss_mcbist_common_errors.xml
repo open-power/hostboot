@@ -40,14 +40,14 @@
   <rc>RC_CEN_MSS_MCBIST_TIMEOUT_ERROR</rc>
   <description>Timeout on MCBIST configuration register polling.</description>
   <callout>
-    <target>MBA_CHIPLET</target>
+    <target>MBA_TARGET</target>
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>MBA_CHIPLET</target>
+    <target>MBA_TARGET</target>
   </deconfigure>
   <gard>
-    <target>MBA_CHIPLET</target>
+    <target>MBA_TARGET</target>
   </gard>
 </hwpError>
 </hwpErrors>

@@ -43,7 +43,7 @@
   </description>
   <callout>
     <childTargets>
-      <parent>MBA_CHIPLET</parent>
+      <parent>MBA_TARGET</parent>
       <childType>TARGET_TYPE_DIMM</childType>
       <childPort>MBA_PORT_NUMBER</childPort>
       <childNumber>MBA_DIMM_NUMBER</childNumber>
@@ -52,7 +52,7 @@
   </callout>
   <deconfigure>
     <childTargets>
-      <parent>MBA_CHIPLET</parent>
+      <parent>MBA_TARGET</parent>
       <childType>TARGET_TYPE_DIMM</childType>
       <childPort>MBA_PORT_NUMBER</childPort>
       <childNumber>MBA_DIMM_NUMBER</childNumber>

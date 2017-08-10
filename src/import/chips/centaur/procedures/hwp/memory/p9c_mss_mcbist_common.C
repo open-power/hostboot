@@ -609,7 +609,7 @@ extern "C"
 
             FAPI_ASSERT(l_mcb_timeout < l_time,
                         fapi2::CEN_MSS_MCBIST_TIMEOUT_ERROR().
-                        set_MBA_CHIPLET(i_target_mba),
+                        set_MBA_TARGET(i_target_mba),
                         "poll_mcb:Maximum time out");
 
             l_count++;

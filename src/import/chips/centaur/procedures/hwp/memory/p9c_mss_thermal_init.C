@@ -84,7 +84,7 @@ extern "C" {
         fapi2::buffer<uint64_t> l_reset;
         uint8_t l_enable_safemode_throttle = 0;
         // Get input attributes from MBAs
-        const auto l_target_mba_array = i_target.getChildren<fapi2::TARGET_TYPE_MBA_CHIPLET>();
+        const auto l_target_mba_array = i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
 
         //********************************************
         // Centaur internal temperature polling setup
