@@ -931,7 +931,17 @@ errlHndl_t i2cRegisterOp ( DeviceFW::OperationType i_opType,
                            i2c_reg_offset_t i_reg,
                            misc_args_t & i_args );
 
-
+/**
+ * @brief This function translates the engine/port #'s from
+ *        FSI I2C Mode to host I2C Mode
+ *
+ * @param[in/out] io_logical_engine - fsi engine number to be translated
+ * @param[in/out] io_logical_port   - fsi port number to be translated
+ *
+ * @return void
+ */
+void setLogicalFsiEnginePort(size_t &io_logical_engine,
+                                   size_t &io_logical_port);
 
 }; // end I2C namespace
 
