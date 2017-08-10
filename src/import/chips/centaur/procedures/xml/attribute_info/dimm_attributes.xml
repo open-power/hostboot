@@ -87,7 +87,7 @@
 
 <attribute>
     <id>ATTR_CEN_VPD_DIMM_SPARE</id>
-    <targetType>TARGET_TYPE_MBA_CHIPLET</targetType>
+    <targetType>TARGET_TYPE_MBA</targetType>
     <description>
         Spare DRAM availability for all DIMMs connected to the target MBA.
         For each rank on a DIMM, there are 8 DQ lines to spare DRAMs.
