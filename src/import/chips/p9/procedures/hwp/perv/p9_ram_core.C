@@ -128,6 +128,23 @@ RamCore::RamCore(const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
     iv_backup_buf2   = 0;
 }
 
+// Sequence of operations in put reg and get reg
+// functions follow the below template of a putscom
+// before the opcode ramming and a getscom post that
+// or a combination of these. This structure can be
+// used to streamline these operations with an array
+// of this structure.
+// If the pointers are null, corresponding operations are skipped.
+typedef struct
+{
+    // putscom to be done before ramming opcode
+    fapi2::buffer<uint64_t>* prePutScom;
+    // ramming opcode
+    uint32_t opCode;
+    // getscom to be done after ramming opcode
+    fapi2::buffer<uint64_t>* postGetScom;
+} putreg_op_t;
+
 RamCore::~RamCore()
 {
     if(iv_ram_setup)
@@ -481,6 +498,9 @@ fapi2::ReturnCode RamCore::get_reg(const Enum_RegType i_type,
     fapi2::buffer<uint64_t> l_crf_data = 0;
     uint64_t l_cr_data = 0;
     uint32_t l_cr_num = 0;
+    static const size_t MAX_OPCODES = 10;
+    putreg_op_t opcodes[MAX_OPCODES] = {};
+    bool array_op = false;
 
     // ram_setup
     if(!i_allow_mult)
@@ -510,40 +530,14 @@ fapi2::ReturnCode RamCore::get_reg(const Enum_RegType i_type,
     if(i_type == REG_GPR)
     {
         //1.create mtsprd<i_reg_num> opcode, ram into thread
-        l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-        l_opcode += (i_reg_num << 21);
-        FAPI_TRY(ram_opcode(l_opcode, true));
-
         //2.get GPR value from SCR0
-        FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
+        opcodes[0] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD + (i_reg_num << 21), &o_buffer[0]};
+
+        array_op = true;
     }
     else if(i_type == REG_SPR)
     {
-        if(i_reg_num == RAM_REG_NIA)
-        {
-            //1.ram MFNIA_RT opcode
-            l_opcode = OPCODE_MFNIA_RT;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //2.get NIA from GPR0
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
-        }
-        else if(i_reg_num == RAM_REG_MSR)
-        {
-            //1.create mfmsr opcode, ram into thread
-            l_opcode = OPCODE_MFMSR_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //2.get MSR value from SCR0
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
-        }
-        else if(i_reg_num == RAM_REG_CR)
+        if(i_reg_num == RAM_REG_CR)
         {
             for(l_cr_num = 0; l_cr_num < 8; l_cr_num++)
             {
@@ -561,116 +555,76 @@ fapi2::ReturnCode RamCore::get_reg(const Enum_RegType i_type,
 
             o_buffer[0] = l_cr_data;
         }
-        else if(i_reg_num == RAM_REG_FPSCR)
-        {
-            //1.backup FPR0
-            l_opcode = OPCODE_MFFPRD_FROM_FPR0_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_fpr0));
-
-            //2.create mffs opcode, ram into thread
-            l_opcode = OPCODE_MFFS;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //3.get FPSCR value from SCR0
-            l_opcode = OPCODE_MFFPRD_FROM_FPR0_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
-
-            //4.restore FPR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_fpr0));
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTFPRD_FROM_GPR0_TO_FPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-        }
-        else if(i_reg_num == RAM_REG_VSCR)
-        {
-            //1.backup VR0
-            l_opcode = OPCODE_MFVSRD_FROM_VSR32_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_vr0_dw0));
-
-            l_opcode = OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_vr0_dw1));
-
-            //2.create mfvscr opcode, ram into thread
-            l_opcode = OPCODE_MFVSCR_TO_VR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //3.get VSCR value from SCR0
-            l_opcode = OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
-
-            //4.restore VR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_vr0_dw1));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_vr0_dw0));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            l_opcode += (1 << 21);
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-        }
         else
         {
-            //1.create mfspr<gpr0, i_reg_num> opcode, ram into thread
-            l_opcode = OPCODE_MFSPR_FROM_SPR0_TO_GPR0;
-            l_spr_regnum_lo = i_reg_num & 0x0000001F;
-            l_spr_regnum_hi = i_reg_num & 0x000003E0;
-            l_opcode += (l_spr_regnum_lo << 16);
-            l_opcode += (l_spr_regnum_hi << 6);
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            if(i_reg_num == RAM_REG_NIA)
+            {
+                //1.ram MFNIA_RT opcode
+                opcodes[0] = {NULL, OPCODE_MFNIA_RT, NULL};
+                //2.get NIA from GPR0
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+            }
+            else if(i_reg_num == RAM_REG_MSR)
+            {
+                //1.create mfmsr opcode, ram into thread
+                opcodes[0] = {NULL, OPCODE_MFMSR_TO_GPR0, NULL};
+                //2.get MSR value from SCR0
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+            }
+            else if(i_reg_num == RAM_REG_FPSCR)
+            {
+                //1.backup FPR0
+                opcodes[0] = {NULL, OPCODE_MFFPRD_FROM_FPR0_TO_GPR0, NULL};
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_fpr0};
+                //2.create mffs opcode, ram into thread
+                opcodes[2] = {NULL, OPCODE_MFFS, NULL};
+                //3.get FPSCR value from SCR0
+                opcodes[3] = {NULL, OPCODE_MFFPRD_FROM_FPR0_TO_GPR0, NULL};
+                opcodes[4] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+                //4.restore FPR0
+                opcodes[5] = {&l_backup_fpr0, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+                opcodes[6] = {NULL, OPCODE_MTFPRD_FROM_GPR0_TO_FPR0, NULL};
+            }
+            else if(i_reg_num == RAM_REG_VSCR)
+            {
+                //1.backup VR0
+                opcodes[0] = {NULL, OPCODE_MFVSRD_FROM_VSR32_TO_GPR0, NULL};
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_vr0_dw0};
+                opcodes[2] = {NULL, OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0, NULL};
+                opcodes[3] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_vr0_dw1};
+                //2.create mfvscr opcode, ram into thread
+                opcodes[4] = {NULL, OPCODE_MFVSCR_TO_VR0, NULL};
+                //3.get VSCR value from SCR0
+                opcodes[5] = {NULL, OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0, NULL};
+                opcodes[6] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+                //4.restore VR0
+                opcodes[7] = {&l_backup_vr0_dw1, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+                opcodes[8] = {&l_backup_vr0_dw0, OPCODE_MFSPR_FROM_SPRD_TO_GPR0 + (1 << 21), NULL};
+                opcodes[9] = {NULL, OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32, NULL};
+            }
+            else
+            {
+                //1.create mfspr<gpr0, i_reg_num> opcode, ram into thread
+                l_spr_regnum_lo = i_reg_num & 0x0000001F;
+                l_spr_regnum_hi = i_reg_num & 0x000003E0;
+                opcodes[0] = {NULL, OPCODE_MFSPR_FROM_SPR0_TO_GPR0 + (l_spr_regnum_lo << 16) + (l_spr_regnum_hi << 6), NULL};
+                //2.create mtsprd<gpr0> opcode, ram into thread
+                //3.get GPR value from SCR0
+                opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+            }
 
-            //2.create mtsprd<gpr0> opcode, ram into thread
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //3.get GPR value from SCR0
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
+            array_op = true;
         }
     }
     else if(i_type == REG_FPR)
     {
         //1.create mffprd<gpr0, i_reg_num>#SX=0 opcode, ram into thread
-        l_opcode = OPCODE_MFFPRD_FROM_FPR0_TO_GPR0;
-        l_opcode += (i_reg_num << 21);
-        FAPI_TRY(ram_opcode(l_opcode, true));
-
+        opcodes[0] = {NULL, OPCODE_MFFPRD_FROM_FPR0_TO_GPR0 + (i_reg_num << 21), NULL};
         //2.create mtsprd<gpr0> opcode, ram into thread
-        l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-        FAPI_TRY(ram_opcode(l_opcode, true));
-
         //3.get GPR value from SCR0
-        FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, o_buffer[0]));
+        opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &o_buffer[0]};
+
+        array_op = true;
     }
 
 #ifndef __PPE__
@@ -728,6 +682,36 @@ fapi2::ReturnCode RamCore::get_reg(const Enum_RegType i_type,
                     "Type of reg (0x%.8X) is not supported", i_type);
     }
 
+    if(array_op)
+    {
+        // Looping through the opcode structures
+        for(size_t i = 0; i < MAX_OPCODES; i++)
+        {
+            if(opcodes[i].prePutScom)
+            {
+                FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, *opcodes[i].prePutScom));
+            }
+
+            if(opcodes[i].opCode)
+            {
+                FAPI_TRY(ram_opcode(opcodes[i].opCode, true));
+            }
+            else
+            {
+                // Will break after encountering first empty opcode,
+                // as the array will be empty after this
+                break;
+            }
+
+            if(opcodes[i].postGetScom)
+            {
+                fapi2::buffer<uint64_t> scomData;
+                FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, scomData));
+                *opcodes[i].postGetScom = scomData;
+            }
+        }
+    }
+
     //restore GPR0 if necessary
     if(iv_write_gpr0)
     {
@@ -774,7 +758,9 @@ fapi2::ReturnCode RamCore::put_reg(const Enum_RegType i_type,
     fapi2::buffer<uint64_t> l_backup_fpr0 = 0;
     fapi2::buffer<uint64_t> l_backup_vr0_dw0 = 0;
     fapi2::buffer<uint64_t> l_backup_vr0_dw1 = 0;
-    uint32_t l_cr_num = 0;
+    static const size_t MAX_OPCODES = 10;
+    putreg_op_t opcodes[MAX_OPCODES] = {};
+    bool array_op = false;
 
     // ram_setup
     if(!i_allow_mult)
@@ -811,12 +797,8 @@ fapi2::ReturnCode RamCore::put_reg(const Enum_RegType i_type,
     if(i_type == REG_GPR)
     {
         //1.put GPR value into SCR0
-        FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
         //2.create mfsprd<i_reg_num> opcode, ram into thread
-        l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-        l_opcode += (i_reg_num << 21);
-        FAPI_TRY(ram_opcode(l_opcode, true));
+        opcodes[0] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0 + (i_reg_num << 21), NULL};
 
         if(i_reg_num == 0)
         {
@@ -828,181 +810,101 @@ fapi2::ReturnCode RamCore::put_reg(const Enum_RegType i_type,
         {
             iv_write_gpr1 = true;
         }
+
+        array_op = true;
     }
     else if(i_type == REG_SPR)
     {
         if(i_reg_num == RAM_REG_NIA)
         {
             //1.backup LR
-            l_opcode = OPCODE_MFSPR_FROM_LR_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_lr));
-
+            opcodes[0] = {NULL, OPCODE_MFSPR_FROM_LR_TO_GPR0, NULL};
+            opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_lr};
             //2.put NIA value into LR
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_LR;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[2] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[3] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_LR, NULL};
             //3.ram MTNIA_LR opcode
-            l_opcode = OPCODE_MTNIA_LR;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[4] = {NULL, OPCODE_MTNIA_LR, NULL};
             //4.restore LR
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_lr));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_LR;
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[5] = {&l_backup_lr, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[6] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_LR, NULL};
         }
         else if(i_reg_num == RAM_REG_MSR)
         {
             //1.put SPR value into SCR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
             //2.create mfsprd<gpr0> opcode, ram into thread
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[0] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
             //3.create mtmsrd opcode, ram into thread
-            l_opcode = OPCODE_MTMSRD_L0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[1] = {NULL, OPCODE_MTMSRD_L0, NULL};
         }
         else if(i_reg_num == RAM_REG_CR)
         {
             //1.put SPR value into SCR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
             //2.create mfsprd<gpr0> opcode, ram into thread
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[0] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
             //3.create mtcrf opcode, ram into thread
-            for(l_cr_num = 0; l_cr_num < 8; l_cr_num++)
-            {
-                l_opcode = OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> l_cr_num) & 0x000FF000);
-                FAPI_TRY(ram_opcode(l_opcode, true));
-            }
+            opcodes[1] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 0) & 0x000FF000), NULL};
+            opcodes[2] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 1) & 0x000FF000), NULL};
+            opcodes[3] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 2) & 0x000FF000), NULL};
+            opcodes[4] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 3) & 0x000FF000), NULL};
+            opcodes[5] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 4) & 0x000FF000), NULL};
+            opcodes[6] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 5) & 0x000FF000), NULL};
+            opcodes[7] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 6) & 0x000FF000), NULL};
+            opcodes[8] = {NULL, OPCODE_MTOCRF_FROM_GPR0 | ((0x00080000 >> 7) & 0x000FF000), NULL};
         }
         else if(i_reg_num == RAM_REG_FPSCR)
         {
             //1.backup FPR0
-            l_opcode = OPCODE_MFFPRD_FROM_FPR0_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_fpr0));
-
+            opcodes[0] = {NULL, OPCODE_MFFPRD_FROM_FPR0_TO_GPR0, NULL};
+            opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_fpr0};
             //2.put SPR value into FPR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTFPRD_FROM_GPR0_TO_FPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[2] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[3] = {NULL, OPCODE_MTFPRD_FROM_GPR0_TO_FPR0, NULL};
             //3.create mtfsf opcode, ram into thread
-            l_opcode = OPCODE_MTFSF_FROM_FPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[4] = {NULL, OPCODE_MTFSF_FROM_FPR0, NULL};
             //4.restore FPR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_fpr0));
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTFPRD_FROM_GPR0_TO_FPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[5] = {&l_backup_fpr0, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[6] = {NULL, OPCODE_MTFPRD_FROM_GPR0_TO_FPR0, NULL};
         }
         else if(i_reg_num == RAM_REG_VSCR)
         {
             //1.backup VR0
-            l_opcode = OPCODE_MFVSRD_FROM_VSR32_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_vr0_dw0));
-
-            l_opcode = OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPRD;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, l_backup_vr0_dw1));
-
+            opcodes[0] = {NULL, OPCODE_MFVSRD_FROM_VSR32_TO_GPR0, NULL};
+            opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_vr0_dw0};
+            opcodes[2] = {NULL, OPCODE_MFVSRLD_FROM_VSR32_TO_GPR0, NULL};
+            opcodes[3] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPRD, &l_backup_vr0_dw1};
             //2.put SPR value into VR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
+            opcodes[4] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[5] = {NULL, OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32, NULL};
             //3.create mtvscr opcode, ram into thread
-            l_opcode = OPCODE_MTVSCR_FROM_VR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            //4.restore VR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_vr0_dw1));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, l_backup_vr0_dw0));
-
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            l_opcode += (1 << 21);
-            FAPI_TRY(ram_opcode(l_opcode, true));
-
-            l_opcode = OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32;
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[6] = {NULL, OPCODE_MTVSCR_FROM_VR0, NULL};
+            opcodes[7] = {&l_backup_vr0_dw1, OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
+            opcodes[8] = {&l_backup_vr0_dw0, OPCODE_MFSPR_FROM_SPRD_TO_GPR0 + (1 << 21), NULL};
+            opcodes[9] = {NULL, OPCODE_MTVSRDD_FROM_GPR1_0_TO_VSR32, NULL};
         }
         else
         {
             //1.put SPR value into SCR0
-            FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
             //2.create mfsprd<gpr0> opcode, ram into thread
-            l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[0] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
 
             //3.create mtspr<i_reg_num, gpr0> opcode, ram into thread
-            l_opcode = OPCODE_MTSPR_FROM_GPR0_TO_SPR0;
             l_spr_regnum_lo = i_reg_num & 0x0000001F;
             l_spr_regnum_hi = i_reg_num & 0x000003E0;
-            l_opcode += (l_spr_regnum_lo << 16);
-            l_opcode += (l_spr_regnum_hi << 6);
-            FAPI_TRY(ram_opcode(l_opcode, true));
+            opcodes[1] = {NULL, OPCODE_MTSPR_FROM_GPR0_TO_SPR0 + (l_spr_regnum_lo << 16) + (l_spr_regnum_hi << 6), NULL};
         }
+
+        array_op = true;
     }
     else if(i_type == REG_FPR)
     {
         //1.put FPR value into SCR0
-        FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, i_buffer[0]));
-
         //2.create mfsprd<gpr0> opcode, ram into thread
-        l_opcode = OPCODE_MFSPR_FROM_SPRD_TO_GPR0;
-        FAPI_TRY(ram_opcode(l_opcode, true));
-
+        opcodes[0] = {const_cast<fapi2::buffer<uint64_t>* >(&i_buffer[0]), OPCODE_MFSPR_FROM_SPRD_TO_GPR0, NULL};
         //3.create mtfprd<i_reg_num, gpr0>#TX=0 opcode, ram into thread
-        l_opcode = OPCODE_MTFPRD_FROM_GPR0_TO_FPR0;
-        l_opcode += (i_reg_num << 21);
-        FAPI_TRY(ram_opcode(l_opcode, true));
+        opcodes[1] = {NULL, OPCODE_MTFPRD_FROM_GPR0_TO_FPR0 + (i_reg_num << 21), &l_backup_vr0_dw0};
+
+        array_op = true;
     }
 
 #ifndef __PPE__
@@ -1046,6 +948,37 @@ fapi2::ReturnCode RamCore::put_reg(const Enum_RegType i_type,
                     .set_REGTYPE(i_type),
                     "Type of reg (0x%.8X) is not supported", i_type);
     }
+
+    if(array_op)
+    {
+        // Looping through the opcode structures
+        for(size_t i = 0; i < MAX_OPCODES; i++)
+        {
+            if(opcodes[i].prePutScom)
+            {
+                FAPI_TRY(fapi2::putScom(iv_target, C_SCR0, *opcodes[i].prePutScom));
+            }
+
+            if(opcodes[i].opCode)
+            {
+                FAPI_TRY(ram_opcode(opcodes[i].opCode, true));
+            }
+            else
+            {
+                // Will break after encountering first empty opcode,
+                // as the array will be empty after this
+                break;
+            }
+
+            if(opcodes[i].postGetScom)
+            {
+                fapi2::buffer<uint64_t> scomData;
+                FAPI_TRY(fapi2::getScom(iv_target, C_SCR0, scomData));
+                *opcodes[i].postGetScom = scomData;
+            }
+        }
+    }
+
 
     //restore GPR0 if necessary
     if(iv_write_gpr0 && !l_write_gpr0)
