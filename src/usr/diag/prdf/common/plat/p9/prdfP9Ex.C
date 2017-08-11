@@ -78,7 +78,8 @@ int32_t PostAnalysis( ExtensibleChip * i_exChip,
 
     do
     {
-        if ( MODEL_NIMBUS != getChipModel(i_exChip->getTrgt()) ||
+        if ( CHECK_STOP   == io_sc.service_data->getPrimaryAttnType() ||
+             MODEL_NIMBUS != getChipModel(i_exChip->getTrgt()) ||
              0x10         != getChipLevel(i_exChip->getTrgt()) )
         {
             break; // nothing to do
