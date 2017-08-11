@@ -274,6 +274,7 @@ Layout Description
         <physicalOffset>0x38A1000</physicalOffset>
         <physicalRegionSize>0x6000</physicalRegionSize>
         <side>sideless</side>
+        <sha512Version/>
         <ecc/>
     </section>
 </pnor>

@@ -551,6 +551,7 @@ sub manipulateImages
         # enabled for secureboot actions on these partitions to occur.
         my $isNormalSecure = ($eyeCatch eq "HBBL");
         $isNormalSecure ||= ($eyeCatch eq "SBE");
+        $isNormalSecure ||= ($eyeCatch eq "MEMD");
         $isNormalSecure ||= ($eyeCatch eq "HBRT");
         $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
         $isNormalSecure ||= ($eyeCatch eq "OCC");
