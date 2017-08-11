@@ -45,6 +45,7 @@
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
 #include <initservice/initserviceif.H>
+#include <sys/time.h>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -54,11 +55,16 @@ using namespace DeviceFW;
 namespace MDIA
 {
 
-// Maint cmd timeout values are in nanosecs. This is just for easy conversions.
-static const uint64_t NANOSEC_PER_SEC = 1000000000;
-
 // HW timeout value (in seconds).
-static const uint64_t MAINT_CMD_HW_TIMEOUT = 30;
+//    Nimbus can support 256 GB DIMMs and the super fast commands do about 8 GB
+//    per second. So on a dual drop port that is 64 seconds per port. That's not
+//    bad for broadcast mode, however, we also have to support port-by-port
+//    mode. So with 4 ports that 256 seconds per command. Marc recommended we
+//    bump this up to a full 5 minutes to give us some wiggle room. Of course
+//    this is the ultimate worst case and not the average case, but we don't
+//    need to keep mucking with this value every time hardware takes longer
+//    than expected.
+static const uint64_t MAINT_CMD_HW_TIMEOUT = 300;
 
 // Nimbus DD1.0 has a workaround that will likely cause the command to exceed
 // the normal timout value. In test 110 seconds was not enough on ZZ systems.
@@ -70,9 +76,16 @@ static const uint64_t MAINT_CMD_HW_TIMEOUT_DD10 = 300;
 // working so far.
 static const uint64_t MAINT_CMD_HW_TIMEOUT_LONG = 1800;
 
-// The software timeout will be 10 minutes. Note that we will use the hardare
+// The software timeout will be 10 minutes. Note that we will use the hardware
 // timeout and commit informational error logs each time that expires until it
-// eventually reachs the software threshold. This value contains the threshold.
+// eventually reaches the software threshold. This value contains the threshold.
+//
+// Potential improvement:
+//   Since the HW timeout is quite a bit higher then expected, we are going to
+//   get a lot fewer of these informational logs. We could change the design for
+//   both HW and SW timeouts so that we always get an error log every 30 seconds
+//   until either of the timeout thresholds is reached, but that is not required
+//   at this time.
 static const uint64_t MAINT_CMD_SW_TIMEOUT_TH = 600 / MAINT_CMD_HW_TIMEOUT;
 
 void StateMachine::running(bool & o_running)
@@ -308,7 +321,7 @@ uint64_t getTimeoutValue()
                       : IPMIWATCHDOG::DEFAULT_WATCHDOG_COUNTDOWN - 10;
     }
 
-    return timeout * NANOSEC_PER_SEC;
+    return timeout * NS_PER_SEC;
 }
 
 // Do the setup for CE thresholds
