@@ -2053,23 +2053,23 @@ void invokePresentByAssoc()
     // make one list
     TargetHandleList l_funcTargetList;
 
-    // get the functional MCBISTs
+    // get the functional MCBISTs (for Nimbus based systems)
     TargetHandleList l_funcMCBISTTargetList;
     getAllChiplets(l_funcMCBISTTargetList, TYPE_MCBIST, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
                             l_funcMCBISTTargetList.begin(),
                             l_funcMCBISTTargetList.end());
 
-    // If VPO, dump targets (MCBIST) for verification & debug purposes
-    #ifdef CONFIG_VPO_COMPILE
+// If VPO, dump targets (MCBIST) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
     HWAS_INF("invokePresentByAssoc(): MCBIST targets:");
     for (auto l_MCBIST : l_funcMCBISTTargetList)
     {
         HWAS_INF("   MCBIST: HUID %.8x", TARGETING::get_huid(l_MCBIST));
     }
-    #endif
+#endif
 
-    // get the functional MCSs
+    // get the functional MCSs (for Nimbus based systems)
     TargetHandleList l_funcMCSTargetList;
     getAllChiplets(l_funcMCSTargetList, TYPE_MCS, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -2085,8 +2085,56 @@ void invokePresentByAssoc()
     }
 #endif
 
+    // get the functional MCs (for Cumulus based systems)
+    TargetHandleList l_funcMCTargetList;
+    getAllChiplets(l_funcMCTargetList, TYPE_MC, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                            l_funcMCTargetList.begin(),
+                            l_funcMCTargetList.end());
+
+// If VPO, dump targets (MC) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssoc(): MC targets:");
+    for (auto l_MC : l_funcMCTargetList)
+    {
+        HWAS_INF("   MC: HUID %.8x", TARGETING::get_huid(l_MC));
+    }
+#endif
+
+    // get the functional MIs (for Cumulus based systems)
+    TargetHandleList l_funcMITargetList;
+    getAllChiplets(l_funcMITargetList, TYPE_MI, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                            l_funcMITargetList.begin(),
+                            l_funcMITargetList.end());
+
+// If VPO, dump targets (MI) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssoc(): MI targets:");
+    for (auto l_MI : l_funcMITargetList)
+    {
+        HWAS_INF("   MI: HUID %.8x", TARGETING::get_huid(l_MI));
+    }
+#endif
+
+    // get the functional DMIs (for Cumulus based systems)
+    TargetHandleList l_funcDMITargetList;
+    getAllChiplets(l_funcDMITargetList, TYPE_DMI, true );
+    l_funcTargetList.insert(l_funcTargetList.begin(),
+                            l_funcDMITargetList.begin(),
+                            l_funcDMITargetList.end());
+
+// If VPO, dump targets (DMI) for verification & debug purposes
+#ifdef CONFIG_VPO_COMPILE
+    HWAS_INF("invokePresentByAssoc(): MI targets:");
+    for (auto l_DMI : l_funcDMITargetList)
+    {
+        HWAS_INF("   DMI: HUID %.8x", TARGETING::get_huid(l_DMI));
+    }
+#endif
+
     // get the functional membufs
-    // note: do not expect membufs for NIMBUS direct memory attach
+    // note: do not expect membufs for NIMBUS 
     TargetHandleList l_funcMembufTargetList;
     getAllChips(l_funcMembufTargetList, TYPE_MEMBUF, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -2103,7 +2151,7 @@ void invokePresentByAssoc()
 #endif
 
     // get the functional mbas
-    // note: do not expect mbas for NIMBUS direct memory attach
+    // note: do not expect mbas for NIMBUS
     TargetHandleList l_funcMBATargetList;
     getAllChiplets(l_funcMBATargetList, TYPE_MBA, true );
     l_funcTargetList.insert(l_funcTargetList.begin(),
@@ -2191,27 +2239,33 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
     // Sort entire vector by affinity path. This provides the algorithm with
     // an ordered vector of targets, making it easy to check if:
-    // for direct attach memory -
+    // for NIMBUS direct attach memory -
     //   MCS has child MCA
     //   MCA has child DIMM and parent MCS
     //   DIMM has parent MCA.
-    // for non direct attach memory -
-    //   MCS has child MEMBUF
-    //   MEMBUF has parent MCS and child MBA
-    //   MBA has child DIMM and parnent MEMBUF
+    // for CUMULUS non direct attach memory -
+    //   MC has child MI
+    //   MI has parent MC and child DMI
+    //   DMI has parent MI and child MEMBUF
+    //   MEMBUF has parent DMI and child MBA
+    //   MBA has parent MEMBUF and child DIMM
     //   DIMM has parent MBA.
     std::sort(io_funcTargets.begin(), io_funcTargets.end(),
               compareAffinity);
 
 
-    // Keep track of the most recently seen MCS MEMBUF and MBA. This allows the
+    // Keep track of the most recently seen MCBIST, MCS & MCA for NIMBUS
+    //  MC, MI, DMI, MEMBUF and MBA for CUMULUS. This allows the
     // algorithm to quickly check if targets share a MCS or MEMBUF and used
     // for backtracking after deleting a target from the vector
     size_t l_MCBISTIndex = __INT_MAX__;
     size_t l_MCSIndex = __INT_MAX__;
-    size_t l_MEMBUFIndex = __INT_MAX__;
-    size_t l_MBAIndex = __INT_MAX__;
     size_t l_MCAIndex = __INT_MAX__;
+    size_t l_MCIndex = __INT_MAX__;
+    size_t l_MIIndex = __INT_MAX__;
+    size_t l_DMIIndex = __INT_MAX__;
+    size_t l_MEMBUFIndex = __INT_MAX__;
+    size_t l_MBAIndex = __INT_MAX__;    
     size_t i = 0;
 
     // Perform presentByAssoc algorithm
@@ -2237,7 +2291,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
 
         switch (l_curTargetInfo.type)
         {
-        case TYPE_MCBIST:
+        case TYPE_MCBIST:    //NIMBUS
         {
             // No Child MCSs
             // If next is not a MCS sharing the same MCAs, deconfig MCBIST
@@ -2268,18 +2322,18 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             }
             break;
         }// MCBIST
-        case TYPE_MCS:
+
+        case TYPE_MCS:    //NIMBUS
         {
-            // No Child MEMBUFs or MCAs
-            // If next is not a MEMBUF or MCA sharing the same MCS, deconfig MCS
+            // No Child MCAs
+            // If next is not an MCA sharing the same MCS, deconfig MCS
             if ( (l_nextTargetInfo == NULL) ||
-                 ( (l_nextTargetInfo->type != TYPE_MEMBUF) &&
-                   (l_nextTargetInfo->type != TYPE_MCA) ) ||
+                 (l_nextTargetInfo->type != TYPE_MCA) ||
                  !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
             {
-                // Disable MCS - NO_CHILD_MEMBUF_OR_MCA
+                // Disable MCS - NO_CHILD_MCA
                 l_curTargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA;
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MCA;
 
             }
             // No Parent MCBIST
@@ -2319,7 +2373,143 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             break;
         } // MCS
 
-        case TYPE_MEMBUF:
+        case TYPE_MC:    //CUMULUS
+        {
+            // No Child MIs
+            // If next is not a MI sharing the same MC, deconfig MC
+            if ( (l_nextTargetInfo == NULL) ||
+                (l_nextTargetInfo->type != TYPE_MI) ||
+                !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MC - NO_CHILD_MI
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_CHILD_MI;
+                // Add target to Deconfig vector to be deconfigured later
+                o_targToDeconfig.push_back(l_curTargetInfo);
+                // Remove target from funcTargets
+                io_funcTargets.erase(it);
+
+                //Just erased current MC, so MI/DMI index invalid
+                l_MIIndex = __INT_MAX__;
+                l_DMIIndex = __INT_MAX__;
+            }
+            // Update MC Index
+            else
+            {
+                l_MCIndex = i;
+                l_MIIndex = __INT_MAX__; //New MC,so MI index invalid
+                l_DMIIndex = __INT_MAX__; //New MC,so DMI index invalid
+                i++;
+                continue;
+            }
+            break;
+        }// MC
+
+        case TYPE_MI:    //CUMULUS
+        {
+            // No Child DMIs
+            // If next is not a DMI sharing the same MI, deconfig MI
+            if ( (l_nextTargetInfo == NULL) ||
+                 ( l_nextTargetInfo->type != TYPE_DMI) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable MI - NO_CHILD_DMI
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_DMI;
+
+            }
+            // No Parent MC
+            // If MI doesn't share the same MC as MIIndex, deconfig MI
+            else if ( (l_MCIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCIndex]))
+            {
+                // Disable MI - NO_PARENT_MC
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MC;
+            }
+            // Update MI Index
+            else
+            {
+                l_MIIndex = i;
+                l_DMIIndex = __INT_MAX__; //New MI, so DMI index invalid
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MC
+            if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_MIIndex = __INT_MAX__; //New MC, MI index invalid
+                l_DMIIndex = __INT_MAX__; //New MC, DMI index invalid
+            }
+            // Backtrack to beginning if no MC has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // MI
+
+        case TYPE_DMI:    //CUMULUS
+        {
+            // No Child MEMBUFs
+            // If next is not a MEMBUF sharing the same DMI, deconfig DMI
+            if ( (l_nextTargetInfo == NULL) ||
+                 ( l_nextTargetInfo->type != TYPE_MEMBUF) ||
+                 !isSameSubPath(l_curTargetInfo, *l_nextTargetInfo) )
+            {
+                // Disable DMI - NO_CHILD_MEMBUF
+                l_curTargetInfo.reason =
+                        DeconfigGard::DECONFIGURED_BY_NO_CHILD_MEMBUF;
+
+            }
+            // No Parent MI
+            // If DMI doesn't share the same MI as DMIIndex, deconfig DMI
+            else if ( (l_MIIndex == __INT_MAX__) ||
+                !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MIIndex]))
+            {
+                // Disable DMI - NO_PARENT_MI
+                l_curTargetInfo.reason =
+                DeconfigGard::DECONFIGURED_BY_NO_PARENT_MI;
+            }
+            // Update DMI Index
+            else
+            {
+                l_DMIIndex = i;
+                i++;
+                continue;
+            }
+            // Add target to Deconfig vector to be deconfigured later
+            o_targToDeconfig.push_back(l_curTargetInfo);
+            // Remove target from funcTargets
+            io_funcTargets.erase(it);
+
+            // Backtrack to last MI
+            if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+                l_DMIIndex = __INT_MAX__; //New MI, DMI index invalid
+            }
+            //Backtrack to last MC, if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+                l_DMIIndex = __INT_MAX__; //New MC, DMI index invalid
+            }
+            // Backtrack to beginning if no MI has been seen yet
+            else
+            {
+                i = 0;
+            }
+            break;
+        } // DMI
+
+        case TYPE_MEMBUF:   // CUMULUS
         {
             // No Child MBAs
             // If next is not a MBA sharing the same MEMBUF, deconfig MEMBUF
@@ -2331,14 +2521,15 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 l_curTargetInfo.reason =
                         DeconfigGard::DECONFIGURED_BY_NO_CHILD_MBA;
             }
-            // No Parent MCS
-            // If MEMBUF doesn't share the same MCS as MCSIndex, deconfig MEMBUF
-            else if ( (l_MCSIndex == __INT_MAX__) ||
-                    !isSameSubPath(l_curTargetInfo, io_funcTargets[l_MCSIndex]))
+            // No Parent DMI (CUMULUS)
+            // If MEMBUF doesn't share the same same DMI as DMIIndex (for CUMULUS),
+            // deconfig MEMBUF
+            else if ((l_DMIIndex == __INT_MAX__) ||
+                       !isSameSubPath(l_curTargetInfo, io_funcTargets[l_DMIIndex]))
             {
-                // Disable MEMBUF - NO_PARENT_MCS
+                // Disable MEMBUF - NO_PARENT_MCS_OR_DMI
                 l_curTargetInfo.reason =
-                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_MCS;
+                        DeconfigGard::DECONFIGURED_BY_NO_PARENT_DMI;
             }
             // Update MEMBUF Index
             else
@@ -2353,12 +2544,23 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             // Remove target from funcTargets
             io_funcTargets.erase(it);
 
-            // Backtrack to last MCS
-            if ( l_MCSIndex != __INT_MAX__ )
+            //Backtrack to last DMI (CUMULUS), if no MEMBUF has been seen yet
+            if ( l_DMIIndex != __INT_MAX__ )
             {
-                i = l_MCSIndex;
+                i = l_DMIIndex;
             }
-            // Backtrack to beginning if no MCS has been seen yet
+            //Backtrack to last MI (CUMULUS), if no DMI has been seen yet
+            else if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+            }
+            //Backtrack to last MC (CUMULUS), if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+            }
+            // Backtrack to beginning if no MCS (NIMBUS) or DMI (CUMULUS)
+            // has been seen yet
             else
             {
                 i = 0;
@@ -2366,7 +2568,7 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             break;
         } // MEMBUF
 
-        case TYPE_MBA:
+        case TYPE_MBA:   //CUMULUS
         {
             // No Child DIMMs
             // If next is not a DIMM sharing the same MBA, deconfig MBA
@@ -2405,12 +2607,22 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
             {
                 i = l_MEMBUFIndex;
             }
-            // Backtrack to last MCS if no MEMBUF has been seen yet
-            else if ( l_MCSIndex != __INT_MAX__)
+            //Backtrack to last DMI (CUMULUS), if no MEMBUF has been seen yet
+            else if ( l_DMIIndex != __INT_MAX__ )
             {
-                i = l_MCSIndex;
+                i = l_DMIIndex;
             }
-            // Backtrack to beginning if no MCS has been seen yet
+            //Backtrack to last MI (CUMULUS), if no DMI has been seen yet
+            else if ( l_MIIndex != __INT_MAX__ )
+            {
+                i = l_MIIndex;
+            }
+            //Backtrack to last MC (CUMULUS), if no MI has been seen yet
+            else if ( l_MCIndex != __INT_MAX__ )
+            {
+                i = l_MCIndex;
+            }
+            // Backtrack to beginning
             else
             {
                 i = 0;
@@ -2495,25 +2707,40 @@ void presentByAssoc(TargetInfoVector& io_funcTargets,
                 {
                     i = l_MBAIndex;
                 }
-                // Backtrack to last MCA
+                // Backtrack to last MCA (NIMBUS)
                 else if ( l_MCAIndex != __INT_MAX__)
                 {
                     i = l_MCAIndex;
                 }
-                // Backtrack to last MEMBUF if no MBA has been seen yet
-                else if ( l_MEMBUFIndex != __INT_MAX__)
-                {
-                    i = l_MEMBUFIndex;
-                }
-                // Backtrack to last MCS if no MEMBUF has been seen yet
+                // Backtrack to last MCS (NIMBUS) if no MCA has been seen yet
                 else if ( l_MCSIndex != __INT_MAX__)
                 {
                     i = l_MCSIndex;
                 }
-                // Backtrack to last MCS if no MEMBUF has been seen yet
+                // Backtrack to last MCBIST (NIMBUS) if no MCS has been seen yet
                 else if ( l_MCBISTIndex != __INT_MAX__)
                 {
                     i = l_MCBISTIndex;
+                }
+                // Backtrack to last MEMBUF (CUMULUS) if no MBA has been seen yet
+                else if ( l_MEMBUFIndex != __INT_MAX__)
+                {
+                    i = l_MEMBUFIndex;
+                }                
+                //Backtrack to last DMI (CUMULUS),if no MEMBUF has been seen yet
+                else if ( l_DMIIndex != __INT_MAX__ )
+                {
+                    i = l_DMIIndex;
+                }
+                //Backtrack to last MI (CUMULUS), if no DMI has been seen yet
+                else if ( l_MIIndex != __INT_MAX__ )
+                {
+                    i = l_MIIndex;
+                }
+                //Backtrack to last MC (CUMULUS), if no MI has been seen yet
+                else if ( l_MCIndex != __INT_MAX__ )
+                {
+                    i = l_MCIndex;
                 }
                 // Backtrack to beginning if no MCS has been seen yet
                 else

@@ -131,11 +131,13 @@ public:
         // set by call_mss_getecid() in dmi_training.c
         DECONFIGURED_BY_MEMORY_CONFIG,          // BASE | 0x03
 
-        // set by presentByAssoc() when a MCS has no MEMBUFs or MCAs
-        DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA, // BASE | 0x04
+        // set by presentByAssoc() when a MCS has no MCAs
+        DECONFIGURED_BY_NO_CHILD_MCA,           // BASE | 0x04
         // TODO RTC 149367 Remove deprecated enumeration once hwsv is not using
         DECONFIGURED_BY_NO_CHILD_MEMBUF =      //Deprecated
-           DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA,
+           DECONFIGURED_BY_NO_CHILD_MCA,
+        DECONFIGURED_BY_NO_CHILD_MEMBUF_OR_MCA =  //Deprecated, but needed by FSP
+           DECONFIGURED_BY_NO_CHILD_MCA,
 
         // set by deconfigureAssocProc() in hwas/common/deconfigGard.C
         DECONFIGURED_BY_BUS_DECONFIG,           // BASE | 0x05
@@ -154,10 +156,11 @@ public:
 
         // set by presentByAssoc() when a MBA has no DIMMs
         DECONFIGURED_BY_NO_CHILD_DIMM,          // BASE | 0x0A
-
+        
         // set by presentByAssoc() when a MEMBUF has no MCS
-        DECONFIGURED_BY_NO_PARENT_MCS,          // BASE | 0x0B
-
+        DECONFIGURED_BY_NO_PARENT_DMI,   // BASE | 0x0B
+        DECONFIGURED_BY_NO_PARENT_MCS =         
+            DECONFIGURED_BY_NO_PARENT_DMI,
         // set by presentByAssoc() when a MEMBUF has no MBAs
         DECONFIGURED_BY_NO_CHILD_MBA,           // BASE | 0x0C
 
@@ -177,6 +180,11 @@ public:
         DECONFIGURED_BY_NO_CHILD_MCS,           // BASE | 0x14
         DECONFIGURED_BY_NO_PARENT_MCBIST,       // BASE | 0x15
         DECONFIGURED_BY_DISABLED_PORT,          // BASE | 0x16
+        
+        DECONFIGURED_BY_NO_CHILD_MI,            // BASE | 0x17
+        DECONFIGURED_BY_NO_CHILD_DMI,           // BASE | 0x18
+        DECONFIGURED_BY_NO_PARENT_MC,           // BASE | 0x19
+        DECONFIGURED_BY_NO_PARENT_MI,           // BASE | 0x1A
 
         // mask - these bits mean it's a PLID and not an enum
         DECONFIGURED_BY_PLID_MASK                = 0xFFFF0000,
