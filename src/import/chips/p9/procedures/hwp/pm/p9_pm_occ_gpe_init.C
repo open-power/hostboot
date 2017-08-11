@@ -140,6 +140,8 @@ fapi2::ReturnCode pm_occ_gpe_reset(
     uint64_t l_intVecReg = 0;
     uint32_t l_pollCount = 10; // poll 10 times
     uint32_t l_timeout = 1; // in micro seconds;
+    std::vector<uint64_t> l_gpeBaseAddress;
+
 
     if (i_engine == p9occgpe::GPE0)
     {
@@ -147,6 +149,8 @@ fapi2::ReturnCode pm_occ_gpe_reset(
         l_statusReg     =   PU_GPE0_GPEXIXSR_SCOM;
         l_instrAddrReg  =   PU_GPE0_PPE_XIDBGPRO;
         l_intVecReg     =   PU_GPE0_GPEIVPR_SCOM;
+        l_gpeBaseAddress.push_back( GPE0_BASE_ADDRESS );
+
 
         //Check if GPE0 is already halted
         FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
@@ -157,7 +161,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
                      .set_CHIP( i_target )
                      .set_GPE0_STATUS( l_data64 )
                      .set_GPE0_MODE( HALT )
-                     .set_GPE0_BASE_ADDRESS( GPE0_BASE_ADDRESS ),
+                     .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
                      "OCC GPE0 in Halt State Before Reset");
     }
     else if (i_engine == p9occgpe::GPE1)
@@ -166,6 +170,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
         l_statusReg = PU_GPE1_GPEXIXSR_SCOM;
         l_instrAddrReg = PU_GPE1_PPE_XIDBGPRO;
         l_intVecReg = PU_GPE1_GPEIVPR_SCOM;
+        l_gpeBaseAddress.push_back( GPE1_BASE_ADDRESS );
 
         //Check if GPE1 is already halted
         FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
@@ -176,7 +181,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
                      .set_CHIP( i_target )
                      .set_GPE1_STATUS( l_data64 )
                      .set_GPE1_MODE( HALT )
-                     .set_GPE1_BASE_ADDRESS( GPE1_BASE_ADDRESS ),
+                     .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
                      "OCC GPE1 in Halt State Before Reset");
     }
 
@@ -209,7 +214,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
                     fapi2::PM_OCC_GPE0_RESET_TIMEOUT()
                     .set_CHIP( i_target )
                     .set_GPE0_MODE( HALT )
-                    .set_GPE0_BASE_ADDRESS( GPE0_BASE_ADDRESS ),
+                    .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
                     "OCC GPE0 could not be halted during reset operation.");
     }
     else if (i_engine == p9occgpe::GPE1)
@@ -218,7 +223,7 @@ fapi2::ReturnCode pm_occ_gpe_reset(
                     fapi2::PM_OCC_GPE1_RESET_TIMEOUT()
                     .set_CHIP( i_target )
                     .set_GPE1_MODE( HALT )
-                    .set_GPE1_BASE_ADDRESS( GPE1_BASE_ADDRESS ),
+                    .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
                     "OCC GPE1 could not be halted during reset operation.");
     }
 
