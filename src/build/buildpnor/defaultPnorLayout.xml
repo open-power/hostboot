@@ -250,12 +250,12 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>VFRT data for WOF (3MB)</description>
+        <description>VFRT data for WOF (12MB)</description>
         <!-- We need 266KB per module sort, going to support
              10 sorts by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
         <physicalOffset>0x2C9E000</physicalOffset>
-        <physicalRegionSize>0x300000</physicalRegionSize>
+        <physicalRegionSize>0xC00000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>
@@ -263,7 +263,7 @@ Layout Description
     <section>
         <description>FIRDATA (12K)</description>
         <eyeCatch>FIRDATA</eyeCatch>
-        <physicalOffset>0x2F9E000</physicalOffset>
+        <physicalOffset>0x389E000</physicalOffset>
         <physicalRegionSize>0x3000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
@@ -271,7 +271,7 @@ Layout Description
     <section>
         <description>Memory Data (24K)</description>
         <eyeCatch>MEMD</eyeCatch>
-        <physicalOffset>0x2FA1000</physicalOffset>
+        <physicalOffset>0x38A1000</physicalOffset>
         <physicalRegionSize>0x6000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
