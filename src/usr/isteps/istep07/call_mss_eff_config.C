@@ -42,6 +42,8 @@
 
 #include    <initservice/isteps_trace.H>
 
+#include    <pnor/pnorif.H>
+
 //  targeting support
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
@@ -65,7 +67,7 @@ using   namespace   TARGETING;
 
 errlHndl_t call_mss_eff_grouping(IStepError & io_istepErr)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     TARGETING::TargetHandleList l_procsList;
     getAllChips(l_procsList, TYPE_PROC);
@@ -109,7 +111,7 @@ errlHndl_t call_mss_eff_grouping(IStepError & io_istepErr)
 
 errlHndl_t call_mss_eff_mb_interleave()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 /* TOOD RTC: 144076 --- cumulus only ---
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
@@ -147,13 +149,33 @@ errlHndl_t call_mss_eff_mb_interleave()
 void*    call_mss_eff_config( void *io_pArgs )
 {
     IStepError l_StepError;
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
+    auto memdLoaded = false;
+
+    do {
+
+    #ifdef CONFIG_SECUREBOOT
+    // MEMD used by p9_mss_eff_config HWP
+    l_err = loadSecureSection(PNOR::MEMD);
+    if (l_err)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+            ERR_MRK "Failed in call to loadSecureSection for section "
+            "PNOR:MEMD");
+
+        // Create istep error and link it to PLID of original error
+        l_StepError.addErrorDetails(l_err);
+        errlCommit(l_err, HWPF_COMP_ID);
+        break;
+    }
+    memdLoaded = true;
+    #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config entry" );
 
-    TARGETING::Target* l_sys = NULL;
+    TARGETING::Target* l_sys = nullptr;
     targetService().getTopLevelTarget(l_sys);
-    assert( l_sys != NULL );
+    assert( l_sys != nullptr );
 
     // The attribute ATTR_MEM_MIRROR_PLACEMENT_POLICY should already be
     // correctly set by default for all platforms except for sapphire.
@@ -280,6 +302,29 @@ void*    call_mss_eff_config( void *io_pArgs )
             errlCommit( l_err, HWPF_COMP_ID );
         }
     }
+
+    } while (0);
+
+    #ifdef CONFIG_SECUREBOOT
+    if(memdLoaded)
+    {
+        l_err = unloadSecureSection(PNOR::MEMD);
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK "Failed in call to unloadSecureSection for section "
+                "PNOR:MEMD");
+
+            // Create istep error and link it to PLID of original error
+            l_StepError.addErrorDetails(l_err);
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
+        else
+        {
+            memdLoaded = false;
+        }
+    }
+    #endif
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_eff_config exit" );
     return l_StepError.getErrorHandle();
