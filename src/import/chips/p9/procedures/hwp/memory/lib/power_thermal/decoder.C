@@ -45,7 +45,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/count_dimm.H>
 #include <lib/dimm/kind.H>
-
+#include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -157,7 +157,16 @@ fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_slope.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key),
+                .set_GENERATED_KEY(iv_gen_key)
+                .set_FUNCTION(SLOPE)
+                .set_DIMM_TARGET(iv_kind.iv_target)
+                .set_SIZE(iv_kind.iv_size)
+                .set_DRAM_GEN(iv_kind.iv_dram_generation)
+                .set_DIMM_TYPE(iv_kind.iv_dimm_type)
+                .set_DRAM_WIDTH( iv_kind.iv_dram_width)
+                .set_DRAM_DENSITY(iv_kind.iv_dram_density)
+                .set_STACK_TYPE(iv_kind.iv_stack_type)
+                .set_MFGID(iv_kind.iv_mfgid),
                 "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
@@ -197,7 +206,16 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint6
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_intercept.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key),
+                .set_GENERATED_KEY(iv_gen_key)
+                .set_FUNCTION(INTERCEPT)
+                .set_DIMM_TARGET(iv_kind.iv_target)
+                .set_SIZE(iv_kind.iv_size)
+                .set_DRAM_GEN(iv_kind.iv_dram_generation)
+                .set_DIMM_TYPE(iv_kind.iv_dimm_type)
+                .set_DRAM_WIDTH( iv_kind.iv_dram_width)
+                .set_DRAM_DENSITY(iv_kind.iv_dram_density)
+                .set_STACK_TYPE(iv_kind.iv_stack_type)
+                .set_MFGID(iv_kind.iv_mfgid),
                 "Couldn't find %s value for generated key:%08lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
@@ -237,7 +255,16 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_thermal_limits.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
-                .set_GENERATED_KEY(iv_gen_key),
+                .set_GENERATED_KEY(iv_gen_key)
+                .set_FUNCTION(POWER_LIMIT)
+                .set_DIMM_TARGET(iv_kind.iv_target)
+                .set_SIZE(iv_kind.iv_size)
+                .set_DRAM_GEN(iv_kind.iv_dram_generation)
+                .set_DIMM_TYPE(iv_kind.iv_dimm_type)
+                .set_DRAM_WIDTH( iv_kind.iv_dram_width)
+                .set_DRAM_DENSITY(iv_kind.iv_dram_density)
+                .set_STACK_TYPE(iv_kind.iv_stack_type)
+                .set_MFGID(iv_kind.iv_mfgid),
                 "Couldn't find %s value for generated key:%8lx, for target %s. "
                 "DIMM values for generated key are "
                 "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d",
