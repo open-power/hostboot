@@ -30,9 +30,16 @@
 
 // Platform includes
 #include <prdfMemTdQueue.H>
+#include <prdfMemUtils.H>
 
 namespace PRDF
 {
+
+struct CeCount
+{
+    MemUtils::MaintSymbols symList;
+    uint32_t count = 0;
+};
 
 /** @brief Two-Phase Scrub procedure. */
 template <TARGETING::TYPE T>
@@ -89,6 +96,30 @@ class TpsEvent : public TdEntry
     uint32_t analyzeEcc( const uint32_t & i_eccAttns,
                          STEP_CODE_DATA_STRUCT & io_sc,
                          bool & o_done );
+
+    /**
+     * @brief  Gets the counts that summarize the symbol CE counts.
+     * @param  io_badDqCount      Number of nibbles with a bad DQ
+     * @param  io_badChipCount    Number of nibbles with a bad Chip
+     * @param  io_nonZeroSumCount Number of nibbles under threshold with a
+     *                            non-zero sum
+     * @param  io_singleSymCount  Number of nibbles under threshold with a
+     *                            single symbol count greater than one
+     * @param  o_symList          Vector of all symbols with CE counts > 0.
+     * @param  io_sc              The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t getSymbolCeCounts( CeCount & io_badDqCount,
+        CeCount & io_badChipCount, CeCount & io_nonZeroSumCount,
+        CeCount & io_singleSymCount, MemUtils::MaintSymbols & o_symList,
+        STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
+     * @brief  Does isolation for CE attentions.
+     * @param  io_sc      The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzeCe( STEP_CODE_DATA_STRUCT & io_sc );
 
     #endif // __HOSTBOOT_RUNTIME
 
