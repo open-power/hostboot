@@ -167,6 +167,8 @@ class rosettaTraits<fapi2::TARGET_TYPE_MCA, DQ>
     public:
         // Each pin type has a table of vector<vector<pair>>, indexed by [port][c4bit]-->{block, lane}
         static const rosetta_map::PhyMap C4_TO_PHY;
+        // Map from MC index to PHY pin. Not a PhyMap because it's the same for every port
+        static const std::vector<std::pair<uint64_t, uint64_t>> MC_TO_PHY;
 };
 
 ///
@@ -179,6 +181,8 @@ class rosettaTraits<fapi2::TARGET_TYPE_MCA, DQS>
     public:
         // Each pin type has a table of vector<vector<pair>>, indexed by [port][c4bit]-->{block, lane}
         static const rosetta_map::PhyMap C4_TO_PHY;
+        // Map from MC index to PHY pin. Not a PhyMap because it's the same for every port
+        static const std::vector<std::pair<uint64_t, uint64_t>> MC_TO_PHY;
 };
 
 ///
@@ -191,6 +195,8 @@ class rosettaTraits<fapi2::TARGET_TYPE_MCA, ADDRESS>
     public:
         // Each pin type has a table of vector<vector<pair>>, indexed by [port][c4bit]-->{block, lane}
         static const rosetta_map::PhyMap C4_TO_PHY;
+        // Constexpr defines how many pins there are on an ADR instance
+        static constexpr uint64_t PINS_PER_ADR = 12;
 };
 
 ///
