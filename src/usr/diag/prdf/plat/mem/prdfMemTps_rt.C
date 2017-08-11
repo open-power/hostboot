@@ -41,6 +41,28 @@ namespace PRDF
 
 using namespace PlatServices;
 
+const uint8_t CE_REGS_PER_PORT = 9;
+const uint8_t SYMBOLS_PER_CE_REG = 8;
+
+//TODO RTC 166802
+/*
+static const char *mbsCeStatReg[][ CE_REGS_PER_PORT ] = {
+                       { "MBA0_MBSSYMEC0", "MBA0_MBSSYMEC1","MBA0_MBSSYMEC2",
+                         "MBA0_MBSSYMEC3", "MBA0_MBSSYMEC4", "MBA0_MBSSYMEC5",
+                         "MBA0_MBSSYMEC6", "MBA0_MBSSYMEC7", "MBA0_MBSSYMEC8" },
+                       { "MBA1_MBSSYMEC0", "MBA1_MBSSYMEC1","MBA1_MBSSYMEC2",
+                         "MBA1_MBSSYMEC3", "MBA1_MBSSYMEC4", "MBA1_MBSSYMEC5",
+                         "MBA1_MBSSYMEC6", "MBA1_MBSSYMEC7", "MBA1_MBSSYMEC8" }
+                          };
+*/
+
+static const char *mcbCeStatReg[CE_REGS_PER_PORT] =
+                       {
+                           "MCB_MBSSYMEC0", "MCB_MBSSYMEC1", "MCB_MBSSYMEC2",
+                           "MCB_MBSSYMEC3", "MCB_MBSSYMEC4", "MCB_MBSSYMEC5",
+                           "MCB_MBSSYMEC6", "MCB_MBSSYMEC7", "MCB_MBSSYMEC8"
+                       };
+
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
@@ -60,6 +82,160 @@ TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_MBA>( ExtensibleChip * i_chip )
     // TODO RTC 157888
     //return getMbaDataBundle(i_chip)->getTpsFalseAlarmCounter();
     return nullptr;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+bool __badDqCount( MemUtils::MaintSymbols i_nibbleStats,
+                   CeCount & io_badDqCount );
+
+template<>
+bool __badDqCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
+                             CeCount & io_badDqCount )
+{
+    bool badDqFound = false;
+
+    for ( auto symData : i_nibbleStats )
+    {
+        // If one of the four symbols has a count of at least 8.
+        if ( symData.count >= 8 )
+        {
+            // And the sum of the other three symbols is 1 or less.
+            uint8_t sum = 0;
+            for ( auto sumCheck : i_nibbleStats)
+            {
+                if ( !(symData.symbol == sumCheck.symbol) )
+                    sum += sumCheck.count;
+            }
+            if ( sum <= 1 )
+            {
+                io_badDqCount.count++;
+                io_badDqCount.symList.push_back(symData);
+                badDqFound = true;
+                break;
+            }
+        }
+    }
+
+    return badDqFound;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+bool __badChipCount( MemUtils::MaintSymbols i_nibbleStats,
+                     CeCount & io_badChipCount );
+
+template<>
+bool __badChipCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
+                               CeCount & io_badChipCount )
+{
+    bool badChipFound = false;
+    uint8_t nonZeroCount = 0;
+    uint8_t minCountTwo = 0;
+    uint8_t sum = 0;
+    MemUtils::SymbolData highSym;
+
+    for ( auto symData : i_nibbleStats )
+    {
+        sum += symData.count;
+        if ( symData.count > 0 )
+            nonZeroCount++;
+        if ( symData.count >= 2 )
+            minCountTwo++;
+        if ( symData.count > highSym.count )
+            highSym = symData;
+    }
+
+    // If the total sum for all four symbols has a count of at least 5
+    if ( sum >= 5 )
+    {
+        // And either:
+        // 3 or more symbols have a non-zero value.
+        // or 2 symbols, both with a minimum count of 2.
+        if ( nonZeroCount >= 3 || minCountTwo >= 2 )
+        {
+            io_badChipCount.count++;
+            io_badChipCount.symList.push_back(highSym);
+            badChipFound = true;
+        }
+    }
+
+    return badChipFound;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __nonZeroSumCount( MemUtils::MaintSymbols i_nibbleStats,
+                        CeCount & io_nonZeroSumCount );
+
+template<>
+void __nonZeroSumCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
+                                  CeCount & io_nonZeroSumCount )
+{
+    for ( auto symData : i_nibbleStats )
+    {
+        // If there is a non-zero sum.
+        if ( symData.count != 0 )
+        {
+            io_nonZeroSumCount.count++;
+            break;
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __singleSymbolCount( MemUtils::MaintSymbols i_nibbleStats,
+                          CeCount & io_singleSymCount );
+
+template<>
+void __singleSymbolCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
+                                    CeCount & io_singleSymCount )
+{
+    // Count to keep track of the number of symbols whose CE count was > 1
+    uint8_t count = 0;
+
+    for ( auto symData : i_nibbleStats )
+    {
+        if ( symData.count > 1 )
+            count++;
+    }
+
+    // If there was only 1 symbol whose CE count was > 1.
+    if ( 1 == count )
+        io_singleSymCount.count++;
+}
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+void __analyzeNibbleSyms( MemUtils::MaintSymbols i_nibbleStats,
+    CeCount & io_badDqCount, CeCount & io_badChipCount,
+    CeCount & io_nonZeroSumCount, CeCount & io_singleSymCount )
+{
+
+    do
+    {
+        // Check if this nibble has a bad dq.
+        if ( __badDqCount<T>( i_nibbleStats, io_badDqCount ) )
+            break;
+
+        // Check if this nibble has a bad chip.
+        if ( __badChipCount<T>( i_nibbleStats, io_badChipCount ) )
+            break;
+
+        // Check if this nibble is under threshold with a non-zero sum.
+        __nonZeroSumCount<T>( i_nibbleStats, io_nonZeroSumCount );
+
+        // Check if this nibble is under threshold with a single symbol count
+        // greater than 1.
+        __singleSymbolCount<T>( i_nibbleStats, io_singleSymCount );
+
+    }while(0);
 }
 
 //------------------------------------------------------------------------------
@@ -90,7 +266,6 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO RTC 171914
     do
     {
         // Analyze Ecc Attentions
@@ -111,10 +286,17 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         }
         if ( o_done ) break;
 
-        // Analyze CEs
 
+        // Analyze CEs
+        o_rc = analyzeCe( io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "analyzeCe() failed." );
+            break;
+        }
+
+        // At this point, we are done with the procedure.
         o_done = true;
-        PRDF_ERR( PRDF_FUNC "function not implemented yet" );
 
     }while(0);
 
@@ -218,6 +400,160 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeEcc( const uint32_t & i_eccAttns,
             // symbol that triggered TPS
             o_done = true; break;
         }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
+    CeCount & io_badChipCount, CeCount & io_nonZeroSumCount,
+    CeCount & io_singleSymCount, MemUtils::MaintSymbols & o_symList,
+    STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::getSymbolCeCounts] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Get the Bad DQ Bitmap.
+        TargetHandle_t mcaTrgt = iv_chip->getTrgt();
+        MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+
+        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, iv_rank, dqBitmap);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
+                      "(0x%08x,%d) failed", getHuid(mcaTrgt),
+                      iv_rank.getMaster() );
+            break;
+        }
+        std::vector<MemSymbol> bmSymList = dqBitmap.getSymbolList();
+
+        ExtensibleChip * mcbChip = getConnectedParent( iv_chip, TYPE_MCBIST );
+        const char * reg_str = nullptr;
+        SCAN_COMM_REGISTER_CLASS * reg = nullptr;
+
+        for ( uint8_t regIdx = 0; regIdx < CE_REGS_PER_PORT; regIdx++ )
+        {
+            reg_str = mcbCeStatReg[regIdx];
+            reg     = mcbChip->getRegister( reg_str );
+
+            o_rc = reg->Read();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Read() failed on %s.", reg_str );
+                break;
+            }
+            uint8_t baseSymbol = SYMBOLS_PER_CE_REG * regIdx;
+
+            for ( uint8_t i = 0; i < SYMBOLS_PER_CE_REG;
+                  i += MCA_SYMBOLS_PER_NIBBLE )
+            {
+                MemUtils::MaintSymbols nibbleStats;
+
+                // Get a nibble's worth of symbols.
+                for ( uint8_t n = 0; n < MCA_SYMBOLS_PER_NIBBLE; n++ )
+                {
+                    uint8_t sym = baseSymbol + (i+n);
+                    PRDF_ASSERT( sym < SYMBOLS_PER_RANK );
+
+                    MemUtils::SymbolData symData;
+                    symData.symbol = MemSymbol::fromSymbol( mcaTrgt, iv_rank,
+                        sym, CEN_SYMBOL::ODD_SYMBOL_DQ );
+                    if ( !symData.symbol.isValid() )
+                    {
+                        PRDF_ERR( PRDF_FUNC "MemSymbol() failed: symbol=%d",
+                                  sym );
+                        o_rc = FAIL;
+                        break;
+                    }
+
+                    // Any symbol set in the DRAM repairs VPD will have an
+                    // automatic CE count of 0xFF
+                    if ( std::find( bmSymList.begin(), bmSymList.end(),
+                         symData.symbol ) != bmSymList.end() )
+                        symData.count = 0xFF;
+                    else
+                        symData.count = reg->GetBitFieldJustified(((i+n)*8), 8);
+
+                    nibbleStats.push_back( symData );
+                    if ( symData.count > 0 )
+                        o_symList.push_back( symData );
+
+                    // Add all symbols with non-zero counts to the callout list.
+                    if ( symData.count != 0 )
+                    {
+                        MemoryMru mm { mcaTrgt, iv_rank, symData.symbol };
+                        io_sc.service_data->SetCallout( mm );
+                    }
+                }
+                if ( SUCCESS != o_rc ) break;
+
+                // Analyze the nibble of symbols.
+                __analyzeNibbleSyms<TYPE_MCA>( nibbleStats, io_badDqCount,
+                    io_badChipCount, io_nonZeroSumCount, io_singleSymCount );
+
+            }
+            if ( SUCCESS != o_rc ) break;
+        }
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
+template <>
+uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeCe] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+
+
+
+        // The symbol CE counts will be summarized in the following buckets:
+        // Number of nibbles with a bad DQ
+        // Number of nibbles with a bad chip
+        // Number of nibbles under threshold with a non-zero sum
+        // Number of nibbles under threshold with a single symbol count > 1
+        CeCount badDqCount, badChipCount, nonZeroSumCount, singleSymCount;
+        MemUtils::MaintSymbols symList;
+
+        // Get the symbol CE counts.
+        o_rc = getSymbolCeCounts( badDqCount, badChipCount, nonZeroSumCount,
+                                  singleSymCount, symList, io_sc );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getSymbolCeCounts failed." );
+            break;
+        }
+
+        // If DRAM repairs are disabled, make the error log predictive and
+        // abort this procedure.
+        if ( areDramRepairsDisabled() )
+        {
+            io_sc.service_data->setServiceCall();
+            break;
+        }
+
+        // Analyze the symbol CE counts.
+        //TODO RTC 171914
 
     }while(0);
 
