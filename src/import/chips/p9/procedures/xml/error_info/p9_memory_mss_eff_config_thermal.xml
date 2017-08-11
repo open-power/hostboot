@@ -40,6 +40,15 @@
       There was no match or value found in decoding the power thermal attributes
     </description>
     <ffdc>GENERATED_KEY</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>SIZE</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <ffdc>DIMM_TYPE</ffdc>
+    <ffdc>DRAM_WIDTH</ffdc>
+    <ffdc>DRAM_DENSITY</ffdc>
+    <ffdc>STACK_TYPE</ffdc>
+    <ffdc>MFGID</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
