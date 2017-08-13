@@ -372,6 +372,7 @@
     </description>
     <valueType>uint8</valueType>
     <array>4</array>
+    <default>0xA,0xA,0xA,0xA</default>
     <platInit/>
     <persistRuntime/>
   </attribute>
