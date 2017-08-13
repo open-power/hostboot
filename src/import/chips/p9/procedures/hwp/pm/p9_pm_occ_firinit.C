@@ -356,8 +356,10 @@ fapi2::ReturnCode pm_occ_fir_init(
              FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_occFir.setRecvAttn(GPE3_OCISLV_ERR),
              FIR_REC_ATTN_ERROR);
-    FAPI_TRY(l_occFir.setRecvAttn(C405ICU_M_TIMEOUT),
-             FIR_REC_ATTN_ERROR);
+//    FAPI_TRY(l_occFir.setRecvAttn(C405ICU_M_TIMEOUT),
+//             FIR_REC_ATTN_ERROR);
+    FAPI_TRY(l_occFir.mask(C405ICU_M_TIMEOUT),
+             FIR_MASK_ERROR);
     FAPI_TRY(l_occFir.setRecvAttn(C405DCU_M_TIMEOUT),
              FIR_REC_ATTN_ERROR);
     FAPI_TRY(l_occFir.setRecvAttn(OCC_CMPLX_FAULT),
