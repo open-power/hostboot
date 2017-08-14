@@ -1968,6 +1968,25 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_CUSTOM_TRAINING_ADV_PATTERNS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Special training pattern used for draminit_training_advance. Used for read centering
+            There can be two patterns used here.
+            The first 0-15 bits are for PATTERN1,
+            bits 16-32 are for PATTERN2.
+            If this attribute is set to 0, using the default values of:
+            0x952D for PATTERN1
+            0x594A for PATTERN2
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>custom_training_adv_pattern</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_VREF_CAL_ENABLE</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
