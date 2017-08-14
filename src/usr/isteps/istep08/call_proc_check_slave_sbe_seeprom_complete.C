@@ -158,10 +158,6 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
             l_errl->collectTrace( "ISTEPS_TRACE", 256);
 
-            // Commit error and continue, this is not terminating since
-            // we can still at least boot with master proc
-            errlCommit(l_errl,ISTEP_COMP_ID);
-
             //@fixme - RTC:177921
             // Do not call p9_extract_sbe_rc because it corrupts
             //  live debug of fails.  Need to make some other
@@ -173,6 +169,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
 #else
+
+            // Commit error and continue, this is not terminating since
+            // we can still at least boot with master proc
+            errlCommit(l_errl,ISTEP_COMP_ID);
 
             // Setup for the HWP
             P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
