@@ -29,6 +29,15 @@
 
 namespace SBEIO
 {
+    enum KeyAddrStashKeys
+    {
+        RSV_MEM_ATTR_ADDR = 0x01,  //Start at non-zero
+        //On SBE side struct is defaulted so that
+        //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
+        //So a key w/ FF means its empty or at its default val
+        SBE_DEFAULT       = 0xFF
+    };
+
     /**
      * @brief Start Deadman loop
      *
@@ -86,16 +95,18 @@ namespace SBEIO
     errlHndl_t sendPsuQuiesceSbe(TARGETING::Target * i_target);
 
     /**
-    * @brief Sends a PSU chipOp to quiesce the SBE
+    * @brief Sends a PSU chipOp to stash away a key,addr pair on the SBE
     *
-    * @param[in]  i_key   The key used to identify what the value is
-    * @param[in]  i_value Value that will be passed (likely an address)
+    * @param[in]  i_key      The key used to identify what the value is
+    * @param[in]  i_value    Value that will be passed (likely an address)
+    * @param[in]  i_procChip The proc we wish to send the op to
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
     errlHndl_t sendPsuStashKeyAddrRequest(const uint8_t i_key,
-                                          const uint64_t i_value);
+                                          const uint64_t i_value,
+                                          TARGETING::Target * i_procChip);
 
     /**
      * @brief Get SCOM via SBE FIFO

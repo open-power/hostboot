@@ -53,6 +53,9 @@
 #include <targeting/attrPlatOverride.H>
 #include <config.h>
 #include <secureboot/service.H>
+#include <kernel/bltohbdatamgr.H>
+#include <bootloader/bootloaderif.H>
+#include <sbeio/sbeioif.H>
 
 using namespace INITSERVICE;
 using namespace ERRORLOG;
@@ -377,8 +380,25 @@ namespace TARGETING
                 uint64_t l_attr_data_size = 0;
 
                 // Setup physical TOC address
-                uint64_t l_toc_addr = cpu_spr_value(CPU_SPR_HRMOR) +
-                                     VMM_HB_DATA_TOC_START_OFFSET;
+                uint64_t l_toc_addr = 0;
+
+                Bootloader::keyAddrPair_t l_keyAddrPairs =
+                    g_BlToHbDataManager.getKeyAddrPairs();
+
+                for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+                {
+                    if(l_keyAddrPairs.key[keyIndex] == SBEIO::RSV_MEM_ATTR_ADDR)
+                    {
+                        l_toc_addr = l_keyAddrPairs.addr[keyIndex];
+                    }
+                }
+
+                if(!l_toc_addr)
+                {
+                    // Setup physical TOC address to hardcoded value
+                    l_toc_addr = cpu_spr_value(CPU_SPR_HRMOR) +
+                                        VMM_HB_DATA_TOC_START_OFFSET;
+                }
 
                 // Now map the TOC to find the ATTR label address & size
                 Util::hbrtTableOfContents_t * l_toc_ptr =
