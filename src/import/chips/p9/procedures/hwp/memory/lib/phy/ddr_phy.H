@@ -424,6 +424,13 @@ fapi2::ReturnCode reset_seq_rd_wr_data( const fapi2::Target<fapi2::TARGET_TYPE_M
 template<fapi2::TargetType T>
 fapi2::ReturnCode rank_pair_primary_to_dimm(const fapi2::Target<T>& i_target, const uint64_t i_rp,
         fapi2::Target<fapi2::TARGET_TYPE_DIMM>& o_dimm);
+///
+/// @brief Set the custom pattern
+/// @param[in] i_target the port target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Handle draminit_training cal fails
@@ -440,6 +447,7 @@ fapi2::ReturnCode draminit_training_error_handler ( const std::vector<fapi2::Ret
 /// @param[in] i_target the port target
 /// @param[in] i_rp the rank pair we are calibrating
 /// @param[in] i_cal_abort_on_error denoting if we aborted on first fail
+/// @param[out] o_cal_fail a flag that gets set to true if there was a cal fail
 /// @param[in,out] io_fails a vector storing all of our cal fails
 /// @return FAPI2_RC_SUCCESS iff all of the scoms and functionality were good
 ///
@@ -447,6 +455,7 @@ template<fapi2::TargetType T>
 fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
         const uint64_t i_cal_abort_on_error,
+        bool& o_cal_fail,
         std::vector<fapi2::ReturnCode>& io_fails);
 
 ///
