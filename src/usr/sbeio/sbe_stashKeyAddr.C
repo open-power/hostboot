@@ -77,6 +77,30 @@ namespace SBEIO
                                 SbePsu::SBE_STASH_KEY_ADDR_REQ_USED_REGS,
                                 SbePsu::SBE_STASH_KEY_ADDR_RSP_USED_REGS);
 
+        if (errl)
+        {
+            SBE_TRACF(ERR_MRK "sendPsuStashKeyAddrRequest: PSU Cmd Failed: "
+            "err rc=0x%.4X plid=0x%.8X",
+            ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+
+            // If the error states that the command is not supported on SBE then set as informational log
+            if ((l_psuResponse.primaryStatus ==
+                SBE_PRI_INVALID_COMMAND) &&
+                (l_psuResponse.secondaryStatus ==
+                SBE_SEC_COMMAND_NOT_SUPPORTED)
+                )
+            {
+                SBE_TRACF(ERR_MRK "sendPsuStashKeyAddrRequest: Changing 'Command  Not Supported' Error Log To Informational.");
+                errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errl->collectTrace(SBEIO_COMP_NAME);
+            }
+            else if (l_psuResponse.secondaryStatus == SBE_SEC_INPUT_BUFFER_OVERFLOW)
+            {
+                SBE_TRACF(ERR_MRK "sendPsuStashKeyAddrRequest: Input buffer overflow, we are attempting to stash too many pairs");
+                errl->collectTrace(SBEIO_COMP_NAME);
+            }
+        }
+
         SBE_TRACD(EXIT_MRK "stashKeyAddr");
 
         return errl;

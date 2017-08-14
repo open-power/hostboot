@@ -36,6 +36,7 @@
 
 #include <errl/errlentry.H>
 #include <util/singleton.H>
+#include "sbe_sp_intf.H"
 #include <map>
 
 namespace SBEIO
@@ -516,47 +517,6 @@ class SbePsu
          */
         static const uint64_t MAX_PSU_SHORT_TIMEOUT_NS=90*NS_PER_SEC; //=90sec
 
-        /**
-         * @brief enums for primary SBE response
-         *
-        */
-        enum sbePrimResponse
-        {
-            SBE_PRI_OPERATION_SUCCESSFUL        = 0x00,
-            SBE_PRI_INVALID_COMMAND             = 0x01,
-            SBE_PRI_INVALID_DATA                = 0x02,
-            SBE_PRI_SEQUENCE_ERROR              = 0x03,
-            SBE_PRI_INTERNAL_ERROR              = 0x04,
-            SBE_PRI_GENERIC_EXECUTION_FAILURE   = 0xFE,
-        };
-
-        /**
-         * @brief enums for secondary SBE response
-         *         Discuss on SBE_SEC_INVALID_TARGET_ID_PASSED
-         *
-        */
-        enum sbeSecondaryResponse
-        {
-            SBE_SEC_OPERATION_SUCCESSFUL              = 0x00,
-            SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED       = 0x01,
-            SBE_SEC_COMMAND_NOT_SUPPORTED             = 0x02,
-            SBE_SEC_INVALID_ADDRESS_PASSED            = 0x03,
-            SBE_SEC_INVALID_TARGET_TYPE_PASSED        = 0x04,
-            SBE_SEC_INVALID_TARGET_ID_PASSED          = 0x05,
-            SBE_SEC_SPECIFIED_TARGET_NOT_PRESENT      = 0x06,
-            SBE_SEC_SPECIFIED_TARGET_NOT_FUNCTIONAL   = 0x07,
-            SBE_SEC_COMMAND_NOT_ALLOWED_IN_THIS_STATE = 0x08,
-            SBE_SEC_FUNCTIONALITY_NOT_SUPPORTED       = 0x09,
-            SBE_SEC_GENERIC_FAILURE_IN_EXECUTION      = 0x0A,
-            SBE_SEC_BACKLISTED_ACCESS                 = 0x0B,
-            SBE_SEC_OS_FAILURE                        = 0x0C,
-            SBE_SEC_HOST_MBX_REG_ACCESS_FAILURE       = 0x0D,
-            SBE_SEC_INSUFFICIENT_DATA_PASSED          = 0x0E,
-            SBE_SEC_EXCESS_DATA_PASSED                = 0x0F,
-            SBE_SEC_SBE_BUSY_TO_HANDLE_COMMAND        = 0x10,
-            SBE_SEC_MEM_REGION_NOT_FOUND              = 0x11,
-            SBE_SEC_EXCEEDED_MAX_NUM_MEM_REGIONS      = 0x12,
-        };
 
         enum SBE_TARGET_TYPES {
 

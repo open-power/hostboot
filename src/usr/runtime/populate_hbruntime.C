@@ -589,127 +589,127 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
     do {
 
 #ifdef CONFIG_SECUREBOOT
-    // Securely Load PNOR section
-    l_elog = loadSecureSection(i_sec);
-    if (l_elog)
-    {
-        TRACFCOMP( g_trac_runtime,
-                   ERR_MRK"hbResvloadSecureSection() - Error from "
-                   "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
-        break;
-    }
+        // Securely Load PNOR section
+        l_elog = loadSecureSection(i_sec);
+        if (l_elog)
+        {
+            TRACFCOMP( g_trac_runtime,
+                    ERR_MRK"hbResvloadSecureSection() - Error from "
+                    "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+            break;
+        }
 #endif
 
-    l_elog = PNOR::getSectionInfo( i_sec, l_info );
-    if(l_elog)
-    {
-        //No need to commit error here, it gets handled later
-        //just break out to escape this function
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() getSectionInfo failed");
-        break;
-    }
+        l_elog = PNOR::getSectionInfo( i_sec, l_info );
+        if(l_elog)
+        {
+            //No need to commit error here, it gets handled later
+            //just break out to escape this function
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() getSectionInfo failed");
+            break;
+        }
 
-    auto l_pnorVaddr = l_info.vaddr;
-    auto l_imgSize = l_info.size;
-    // If section is signed, only the protected size was loaded into memory
+        auto l_pnorVaddr = l_info.vaddr;
+        auto l_imgSize = l_info.size;
+        // If section is signed, only the protected size was loaded into memory
 #ifdef CONFIG_SECUREBOOT
-    if (l_info.secure)
-    {
-        l_imgSize = l_info.secureProtectedPayloadSize;
-        // Include secure header
-        l_pnorVaddr -= PAGESIZE;
-        l_imgSize += PAGESIZE;
-    }
+        if (l_info.secure)
+        {
+            l_imgSize = l_info.secureProtectedPayloadSize;
+            // Include secure header
+            l_pnorVaddr -= PAGESIZE;
+            l_imgSize += PAGESIZE;
+        }
 #endif
 
-    // Align size for OPAL
-    size_t l_imgSizeAligned = ALIGN_X(l_imgSize, HBRT_RSVD_MEM_OPAL_ALIGN);
+        // Align size for OPAL
+        size_t l_imgSizeAligned = ALIGN_X(l_imgSize, HBRT_RSVD_MEM_OPAL_ALIGN);
 
-    //  For PHYP we build up starting at the end of the  previously allocated
-    //  areas, for OPAL we build downwards from the top of memory
-    uint64_t l_imgAdd = 0x0;
-    if(TARGETING::is_phyp_load())
-    {
-        l_imgAdd = io_prevAddr + io_prevSize;
-    }
-    else if(TARGETING::is_sapphire_load())
-    {
-        l_imgAdd = io_prevAddr - l_imgSizeAligned;
-    }
+        //  For PHYP we build up starting at the end of the  previously allocated
+        //  areas, for OPAL we build downwards from the top of memory
+        uint64_t l_imgAdd = 0x0;
+        if(TARGETING::is_phyp_load())
+        {
+            l_imgAdd = io_prevAddr + io_prevSize;
+        }
+        else if(TARGETING::is_sapphire_load())
+        {
+            l_imgAdd = io_prevAddr - l_imgSizeAligned;
+        }
 
-    auto l_lids = Util::getPnorSecLidIds(i_sec);
-    TRACFCOMP(g_trac_runtime, "hbResvloadSecureSection() getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
-              l_lids.lid, l_lids.containerLid);
-    assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
+        auto l_lids = Util::getPnorSecLidIds(i_sec);
+        TRACFCOMP(g_trac_runtime, "hbResvloadSecureSection() getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
+                l_lids.lid, l_lids.containerLid);
+        assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
 
-// @TODO RTC:178163 enabled when HDAT support is complete for extra HB resv mem entries
-// PHYP will use these 2 entries in the future
-/*
-    // Verified Lid - Header Only
-    char l_containerLidStr [Util::lidIdStrLength];
-    snprintf (l_containerLidStr, Util::lidIdStrLength, "%X",
-              l_lids.containerLid);
-    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
-                                  i_rangeId,
-                                  l_imgAdd,
-                                  l_imgSizeAligned,
-                                  l_containerLidStr);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid header failed");
-        break;
-    }
+    // @TODO RTC:178163 enabled when HDAT support is complete for extra HB resv mem entries
+    // PHYP will use these 2 entries in the future
+    /*
+        // Verified Lid - Header Only
+        char l_containerLidStr [Util::lidIdStrLength];
+        snprintf (l_containerLidStr, Util::lidIdStrLength, "%X",
+                l_lids.containerLid);
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+                                    i_rangeId,
+                                    l_imgAdd,
+                                    l_imgSizeAligned,
+                                    l_containerLidStr);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid header failed");
+            break;
+        }
 
-    // Verified Lid - Content Only
-    char l_lidStr[Util::lidIdStrLength];
-    snprintf (l_lidStr, Util::lidIdStrLength, "%X",l_lids.lid);
-    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
-                                  i_rangeId,
-                                  l_imgAdd+PAGE_SIZE,
-                                  l_imgSizeAligned,
-                                  l_lidStr);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid content failed");
-        break;
-    }
-*/
-    // Verified PNOR - Header + Content
-    l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_PNOR,
-                                  i_rangeId,
-                                  l_imgAdd,
-                                  l_imgSizeAligned,
-                                  PNOR::SectionIdToString(i_sec));
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry PNOR content failed");
-        break;
-    }
+        // Verified Lid - Content Only
+        char l_lidStr[Util::lidIdStrLength];
+        snprintf (l_lidStr, Util::lidIdStrLength, "%X",l_lids.lid);
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+                                    i_rangeId,
+                                    l_imgAdd+PAGE_SIZE,
+                                    l_imgSizeAligned,
+                                    l_lidStr);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid content failed");
+            break;
+        }
+    */
+        // Verified PNOR - Header + Content
+        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_PNOR,
+                                    i_rangeId,
+                                    l_imgAdd,
+                                    l_imgSizeAligned,
+                                    PNOR::SectionIdToString(i_sec));
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry PNOR content failed");
+            break;
+        }
 
-    io_prevAddr = l_imgAdd;
-    // Use aligned size for OPAL alignment even if that means there is some
-    // wasted space.
-    io_prevSize = l_imgSizeAligned;
+        io_prevAddr = l_imgAdd;
+        // Use aligned size for OPAL alignment even if that means there is some
+        // wasted space.
+        io_prevSize = l_imgSizeAligned;
 
-    // Load the Verified image into HB resv memory
-    l_elog = mapPhysAddr(l_imgAdd, l_imgSize, l_tmpVaddr);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() mapPhysAddr failed");
-        break;
-    }
+        // Load the Verified image into HB resv memory
+        l_elog = mapPhysAddr(l_imgAdd, l_imgSize, l_tmpVaddr);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() mapPhysAddr failed");
+            break;
+        }
 
-    // Include Header page from pnor image.
-    memcpy(reinterpret_cast<void*>(l_tmpVaddr),
-           reinterpret_cast<void*>(l_pnorVaddr),
-           l_imgSize);
+        // Include Header page from pnor image.
+        memcpy(reinterpret_cast<void*>(l_tmpVaddr),
+            reinterpret_cast<void*>(l_pnorVaddr),
+            l_imgSize);
 
-    l_elog = unmapVirtAddr(l_tmpVaddr);
-    if(l_elog)
-    {
-        TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() unmapVirtAddr failed");
-        break;
-    }
+        l_elog = unmapVirtAddr(l_tmpVaddr);
+        if(l_elog)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() unmapVirtAddr failed");
+            break;
+        }
     } while(0);
 
     return l_elog;
@@ -877,6 +877,26 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             break;
         }
 
+        // Loop through all functional Procs
+        for (const auto & l_procChip: l_procChips)
+        {
+            //Pass start address down to SBE via chipop
+            l_elog = SBEIO::sendPsuStashKeyAddrRequest(SBEIO::RSV_MEM_ATTR_ADDR,
+                                            l_startAddr,
+                                            l_procChip);
+            if (l_elog)
+            {
+                TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest failed for target: %x",
+                           TARGETING::get_huid(l_procChip) );
+                break;
+            }
+        }
+
+        if (l_elog)
+        {
+            break;
+        }
+
         l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_HBRT,
                                       i_nodeId,
                                       l_startAddr,
@@ -986,7 +1006,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         uint64_t l_sbeffdcSize =
             SBEIO::SbePsu::getTheInstance().getSbeFFDCBufferSize();
 
-        // Algin size for OPAL
+        // Align size for OPAL
         size_t l_sbeCommSizeAligned = ALIGN_X( l_sbeCommSize,
                                               HBRT_RSVD_MEM_OPAL_ALIGN );
         size_t l_sbeffdcSizeAligned = ALIGN_X( l_sbeffdcSize,
@@ -1984,6 +2004,27 @@ errlHndl_t populate_hbRuntimeData( void )
                 if(l_elog != nullptr)
                 {
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData failed" );
+                }
+
+                // Get list of processor chips
+                TARGETING::TargetHandleList l_procChips;
+                getAllChips( l_procChips,
+                            TARGETING::TYPE_PROC,
+                            true);
+                //Pass start address down to SBE via chipop
+                // Loop through all functional Procs
+                for (const auto & l_procChip: l_procChips)
+                {
+                    //Pass start address down to SBE via chip-op
+                    l_elog = SBEIO::sendPsuStashKeyAddrRequest(SBEIO::RSV_MEM_ATTR_ADDR,
+                                                               l_startAddr,
+                                                               l_procChip);
+                    if (l_elog)
+                    {
+                        TRACFCOMP( g_trac_runtime, "sendPsuStashKeyAddrRequest failed for target: %x",
+                                   TARGETING::get_huid(l_procChip) );
+                        break;
+                    }
                 }
             }
             break;

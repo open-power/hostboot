@@ -177,8 +177,9 @@ enum sbePrimResponse
     SBE_PRI_OPERATION_SUCCESSFUL        = 0x00,
     SBE_PRI_INVALID_COMMAND             = 0x01,
     SBE_PRI_INVALID_DATA                = 0x02,
-    SBE_PRI_SEQUENCE_ERROR              = 0x03,
+    SBE_PRI_USER_ERROR                  = 0x03,
     SBE_PRI_INTERNAL_ERROR              = 0x04,
+    SBE_PRI_UNSECURE_ACCESS_DENIED      = 0x05,
     SBE_PRI_GENERIC_EXECUTION_FAILURE   = 0xFE,
 };
 
@@ -195,13 +196,13 @@ enum sbeSecondaryResponse
     SBE_SEC_COMMAND_NOT_SUPPORTED             = 0x02,
     SBE_SEC_INVALID_ADDRESS_PASSED            = 0x03,
     SBE_SEC_INVALID_TARGET_TYPE_PASSED        = 0x04,
-    SBE_SEC_INVALID_TARGET_ID_PASSED          = 0x05,
+    SBE_SEC_INVALID_CHIPLET_ID_PASSED         = 0x05,
     SBE_SEC_SPECIFIED_TARGET_NOT_PRESENT      = 0x06,
     SBE_SEC_SPECIFIED_TARGET_NOT_FUNCTIONAL   = 0x07,
     SBE_SEC_COMMAND_NOT_ALLOWED_IN_THIS_STATE = 0x08,
     SBE_SEC_FUNCTIONALITY_NOT_SUPPORTED       = 0x09,
     SBE_SEC_GENERIC_FAILURE_IN_EXECUTION      = 0x0A,
-    SBE_SEC_SECURITY_VALIDATION_FAILED        = 0x0B,
+    SBE_SEC_BLACKLISTED_REG_ACCESS            = 0x0B,
     SBE_SEC_OS_FAILURE                        = 0x0C,
     SBE_SEC_FIFO_ACCESS_FAILURE               = 0x0D,
     SBE_SEC_UNEXPECTED_EOT_INSUFFICIENT_DATA  = 0x0E,
@@ -210,6 +211,11 @@ enum sbeSecondaryResponse
     SBE_SEC_PCB_PIB_ERR                       = 0x11,
     SBE_SEC_FIFO_PARITY_ERROR                 = 0x12,
     SBE_SEC_TIMER_ALREADY_STARTED             = 0x13,
+    SBE_SEC_BLACKLISTED_MEM_ACCESS            = 0x14,
+    SBE_SEC_MEM_REGION_NOT_FOUND              = 0x15,
+    SBE_SEC_MAXIMUM_MEM_REGION_EXCEEDED       = 0x16,
+    SBE_SEC_MEM_REGION_AMEND_ATTEMPTED        = 0x17,
+    SBE_SEC_INPUT_BUFFER_OVERFLOW             = 0x18,
 };
 
 /**
@@ -293,6 +299,7 @@ enum sbeMemoryAccessFlags
     SBE_MEM_ACCESS_FLAGS_FAST_MODE_ON       = 0x0020,
     SBE_MEM_ACCESS_FLAGS_LCO_ENABLED        = 0x0040, //required only in PBA-PUT
     SBE_MEM_ACCESS_FLAGS_CACHE_INHIBIT      = 0x0080, //required in I/O oper ADU
+    SBE_MEM_ACCESS_FLAGS_HOST_PASS_THROUGH  = 0x0100, // Host pass through mode (PBA)
     SBE_MEM_ACCESS_FLAGS_INJECT_ON          = 0x0200, // Inject mode ( PBA put )
 };
 
@@ -472,6 +479,8 @@ typedef enum
     SBE_RING_MODE_SET_PULSE_ALL             = 0x0010, ///< Set pulse with pulse
                                                     ///  to all hold types
     SBE_RING_MODE_FASTARRAY                 = 0x0020, //Fast array mode
+
+    SBE_RING_MODE_APPLY_OVERRIDE            = 0x0040, //override mode
 } sbeRingAccessModes_t;
 
 // Trace array chip-op operation bitmaps

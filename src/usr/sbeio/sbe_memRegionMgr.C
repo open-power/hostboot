@@ -682,9 +682,9 @@ errlHndl_t MemRegionMgr::doUnsecureMemRegionOp(regionData & i_region)
             // includes the Unsecure Memory Region commands) Informational
             if ((!SECUREBOOT::enabled()) &&
                 (l_psuResponse.primaryStatus ==
-                   SbePsu::SBE_PRI_INVALID_COMMAND) &&
+                   SBE_PRI_INVALID_COMMAND) &&
                 (l_psuResponse.secondaryStatus ==
-                   SbePsu::SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED)
+                   SBE_SEC_COMMAND_CLASS_NOT_SUPPORTED)
                )
             {
                 SBE_TRACF(ERR_MRK "doUnsecureMemRegionOp: Secureboot NOT "
