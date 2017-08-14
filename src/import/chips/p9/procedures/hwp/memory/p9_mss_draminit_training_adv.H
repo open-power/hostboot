@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-/// @file p9_mss_draminit_trainingi_adv.H
-/// @brief Train DRAM
+/// @file p9_mss_draminit_training_adv.H
+/// @brief Perform custom read centering
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
@@ -37,7 +37,6 @@
 #include <fapi2.H>
 
 typedef fapi2::ReturnCode (*p9_mss_draminit_training_adv_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>&,
-        const uint32_t,
         const uint8_t);
 
 // Use a special sentinal to let you know you need to read the attribute (which is 1/0)
@@ -47,14 +46,12 @@ extern "C"
 {
 
     ///
-    /// @brief Train dram, assumes effective config has run
+    /// @brief Training advance, performs read_centering but with custom pattern for better eye
     /// @param[in] i_target the McBIST of the ports of the dram you're training
-    /// @param[in] i_special_training optional CAL_STEP_ENABLE override. Used in sim, debug
     /// @param[in] i_abort_on_error, optional CAL_ABORT_ON_ERROR override. Used in sim, debug
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
     fapi2::ReturnCode p9_mss_draminit_training_adv( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
-            const uint32_t i_special_training = 0,
             const uint8_t i_abort_on_error = CAL_ADV_ABORT_SENTINAL);
 }
 
