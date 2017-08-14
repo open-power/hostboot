@@ -74,6 +74,62 @@ define MCBIST = TGT3; # If referencing Attr from mcbist, add "MCBIST." in front
 
 
 
+##############################
+# NON BUG SETTINGS ADJUSTMENTS
+##############################
+
+# Enable memory controller hang counters
+define def_ENABLE_MCU_TIMEOUTS = 1;
+
+# Use PB-initiated hang mechanism
+espy MC01.PBI01.SCOMFIR.MCTO_SELECT_PB_HANG_PULSE [when=S] {
+  spyv, expr;
+  ON, (def_ENABLE_MCU_TIMEOUTS==1);
+}
+espy MC01.PBI01.SCOMFIR.MCTO_SELECT_LOCAL_HANG_PULSE [when=S] {
+  spyv;
+  OFF;
+}
+
+# Enable all CLSTATE hang mechanisms
+espy MC01.PBI01.SCOMFIR.MCTO_ENABLE_NONMIRROR_HANG [when=S] {
+  spyv, expr;
+  ON, (def_ENABLE_MCU_TIMEOUTS==1); # Hang for all non-mirrored operations
+}
+espy MC01.PBI01.SCOMFIR.MCTO_ENABLE_APO_HANG [when=S] {
+  spyv, expr;
+  ON, (def_ENABLE_MCU_TIMEOUTS==1); # Hang for address protection only CLSTATE machines
+}
+ 
+# Use RPT_HANG.POLL to trigger PB hang
+ispy MC01.PBI01.SCOMFIR.MCTO_RPTHANG_SELECT [when=S && !ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd1 name
+  spyv;
+  0b01; # 0.87381ms
+}
+ispy MC01.PBI01.SCOMFIR.MCTO_RPT_HANG_SELECT [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd2 name
+  spyv;
+  0b01; # 0.87381ms
+}
+
+# Setup hang compare values
+# Count a single pulse and let the secondary counters scale it
+ispy MC01.PBI01.SCOMFIR.MCTO_COMP_MASK [when=S && !ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd1 name
+  spyv, expr;
+  1, (def_ENABLE_MCU_TIMEOUTS==1); # 0.87381ms
+}
+ispy MC01.PBI01.SCOMFIR.MCTO_HANG_COMP [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd2 name
+  spyv, expr;
+  1, (def_ENABLE_MCU_TIMEOUTS==1); # 0.87381ms
+}
+ispy MC01.PBI01.SCOMFIR.MCTO_TIMEOUT_VALUE [when=S && !ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd1 name
+  spyv, expr;
+  7, (def_ENABLE_MCU_TIMEOUTS==1); # 6.11669ms
+}
+ispy MC01.PBI01.SCOMFIR.MCTO_CL_TIMEOUT_VALUE [when=S && ATTR_CHIP_EC_FEATURE_NEW_MC_DD2_SETTINGS] { # dd2 name
+  spyv, expr;
+  7, (def_ENABLE_MCU_TIMEOUTS==1); # 6.11669ms
+}
+
 
 ##########################
 # DD1 WORKAROUNDS
