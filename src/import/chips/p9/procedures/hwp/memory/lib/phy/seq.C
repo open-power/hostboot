@@ -39,6 +39,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <lib/utils/bit_count.H>
 #include <lib/eff_config/timing.H>
+#include <lib/shared/mss_const.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_DIMM;
@@ -174,6 +175,35 @@ fapi2::ReturnCode reset_timing1( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
     return mss::putScom(i_target, TT::SEQ_TIMING1_REG, l_data);
 }
 
+///
+/// @brief Swizzle the MPR pattern to switch bit order in each byte
+/// @param[in] i_patterns the patterns to put in SEQ_RDWR_DATA0 and _DATA1 registers
+/// @param[out] The swizzle pattern
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode swizzle_mpr_pattern( const uint32_t i_pattern, uint32_t& o_swizzled)
+{
+    constexpr uint64_t BYTES_PER_32 = 4;
+    fapi2::buffer<uint32_t> l_buf (i_pattern);
+
+    // loop over each byte and reverse the bits
+    for (size_t count = 0; count < BYTES_PER_32; ++count)
+    {
+        fapi2::buffer<uint8_t> l_temp;
+        FAPI_TRY( l_buf.extract(l_temp, count * BITS_PER_BYTE, BITS_PER_BYTE) );
+
+        // reverse is in swizzle.H. Reverses all of the bits in the buffer
+        mss::reverse(l_temp);
+        FAPI_TRY( l_buf.insert(l_temp, count * BITS_PER_BYTE, BITS_PER_BYTE) );
+    }
+
+    o_swizzled = l_buf;
+
+    FAPI_INF("0x%08x unswizzle 0x%08x swizzled that dizzle", i_pattern, o_swizzled);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief reset SEQ_TIMING2
