@@ -549,11 +549,10 @@ typedef struct hostInterfaces
        };
     };
 
-    // Created this enum to hold the base size of hbrt_fw_msg
+
+    // Created a static constexpr to return the base size of hbrt_fw_msg
     // Can't do #define - sizeof not allowed to be used in #defines
-    // Can't do a constant, if you do, you will need to create
-    // an instance of this struct to get to it
-    enum { HBRT_FW_MSG_BASE_SIZE = sizeof(uint64_t) };
+    static constexpr size_t HBRT_FW_MSG_BASE_SIZE = sizeof(uint64_t);
 
     /**
      * @brief Send a request to firmware, and receive a response
