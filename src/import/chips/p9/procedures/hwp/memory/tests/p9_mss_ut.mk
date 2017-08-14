@@ -37,6 +37,7 @@ $(WRAPPER)_DEPLIBS+=mss_generic
 $(WRAPPER)_DEPLIBS+=p9_mss_ddr_phy_reset
 $(WRAPPER)_DEPLIBS+=p9_mss_draminit
 $(WRAPPER)_DEPLIBS+=p9_mss_draminit_training
+$(WRAPPER)_DEPLIBS+=p9_mss_draminit_training_adv
 $(WRAPPER)_DEPLIBS+=p9_mss_draminit_mc
 $(WRAPPER)_DEPLIBS+=p9_mss_scrub
 $(WRAPPER)_DEPLIBS+=p9_mss_freq
