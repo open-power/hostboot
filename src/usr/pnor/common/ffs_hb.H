@@ -69,8 +69,9 @@ enum
     FFS_MISC_PSEUDO        = 0x20,    /**< Pseudo partition */
     FFS_MISC_REPROVISION   = 0x10,    /**< Erased during reprovision */
     FFS_MISC_VOLATILE      = 0x08,    /**< Loses contents based on boot types*/
+    FFS_MISC_CLR_ECC_ERR   = 0x04,    /**< Clear and reboot on ECC err */
     FFS_MISC_GOLDEN        = 0x01,    /**< Golden side of PNOR */
-    FFS_MISC_UNUSED        = 0x06,    /**< Unused MISC Flags */
+    FFS_MISC_UNUSED        = 0x02,    /**< Unused MISC Flags */
 };
 
 /**

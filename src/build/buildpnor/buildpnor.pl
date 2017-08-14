@@ -245,6 +245,10 @@ sub addUserData
     {
         $miscFlags |= 0x08;
     }
+    if( ($i_sectionHash{$i_key}{clearOnEccErr} eq "yes") )
+    {
+        $miscFlags |= 0x04;
+    }
 
     #First User Data Word
     #[1:chip][1:compressType][2:dataInteg]

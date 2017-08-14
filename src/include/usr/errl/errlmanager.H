@@ -336,6 +336,16 @@ private:
      static void * startup ( void* i_self );
 
     /**
+     *  @brief Performs setup of the PNOR info.  Done as a separate
+     *         thread to handle error conditions (ECC on HBEL) where
+     *         task gets killed.
+     *
+     *  @param[in/out]
+     *  @return NONE
+     */
+     static void * pnorSetupThread ( void* i_self );
+
+    /**
      * @brief Message handler for process Hostboot error log message
      *        and send it to FSP.
      *
