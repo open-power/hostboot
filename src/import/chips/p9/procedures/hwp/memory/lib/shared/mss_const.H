@@ -216,16 +216,28 @@ enum cal_steps : uint64_t
     WRITE_CTR         = 17, ///< Write Centering
     COARSE_WR         = 18, ///< Initial Coarse Pattern Write
     COARSE_RD         = 19, ///< Coarse Read Centering
+    TRAINING_ADV      = 20, ///< Flag for draminit training advance in the attribute/ CUSTOM_READ_CTR in code
 
     // Not *exactly* a cal step but go w/it
-    RUN_ALL_CAL_STEPS          = 0xFFFFF000,
-    RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7000,
+    RUN_ALL_CAL_STEPS          = 0xFFFFF800,
+    RUN_CAL_SKIP_WR_RD_2D_VREF = 0xFFFD7800,
 
     INITIAL_PAT_WR_TO_RD_CTR_LEN = inclusive_range(INITIAL_PAT_WR, READ_CTR),
     WR_VREF_TO_COARSE_RD_LEN = inclusive_range(WRITE_CTR_2D_VREF, COARSE_RD),
     RDCLK_ALIGN_TO_RD_CTR_LEN = inclusive_range(RDCLK_ALIGN, READ_CTR),
     // In this case, we just want to clear everything prior to WR 2D VREF, inclusive range also kills the WR VREF bit
     DRAM_ZQCAL_UP_TO_WRITE_CTR_2D_VREF = WRITE_CTR_2D_VREF,
+};
+
+///
+/// @brief enums for draminit_training_adv procedure
+///
+enum training_advance
+{
+    PATTERN0_START = 0,
+    PATTERN0_LEN = 16,
+    PATTERN1_START = 16,
+    PATTERN1_LEN = 16
 };
 
 // Static consts for DDR4 voltages used in p9_mss_volt
