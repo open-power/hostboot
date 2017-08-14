@@ -2661,7 +2661,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW407065</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW407065
     </description>
@@ -2670,13 +2670,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -2709,7 +2702,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW408628</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW408628
     </description>
@@ -2718,13 +2711,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -2757,7 +2743,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW408917</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW408917
     </description>
@@ -2766,13 +2752,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -2805,7 +2784,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW409270</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW409270
     </description>
@@ -2814,13 +2793,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -2853,21 +2825,14 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW408891</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Cumulus DD1.0 / Nimbus DD1.0 DD2.0
+      Nimbus DD1.0 DD2.0
                   HW408891 - Recovery WAT
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
@@ -2880,7 +2845,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW405021</id>>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      HW409194
+      HW405021
     </description>
     <chipEcFeature>
       <chip>
@@ -2902,7 +2867,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW409194</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW409194
     </description>
@@ -2911,13 +2876,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
@@ -3406,7 +3364,7 @@
   <!-- ******************************************************************** -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW417242</id>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW417242 - Software hang on TM HB Full
     </description>
@@ -3415,13 +3373,6 @@
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
           <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
