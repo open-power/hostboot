@@ -700,6 +700,7 @@ fapi_try_exit:
 /// @param[in] i_target the port target
 /// @param[in] i_rp the rank pair we are calibrating
 /// @param[in] i_cal_abort_on_error denoting if we aborted on first fail
+/// @param[out] o_cal_fail a flag that gets set to true if there was a cal fail
 /// @param[in,out] io_fails a vector storing all of our cal fails
 /// @return FAPI2_RC_SUCCESS iff all of the scoms and functionality were good
 ///
@@ -707,6 +708,7 @@ template<>
 fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
         const uint64_t i_cal_abort_on_error,
+        bool& o_cal_fail,
         std::vector<fapi2::ReturnCode>& io_fails)
 {
     fapi2::ReturnCode l_rc (fapi2::FAPI2_RC_SUCCESS);
@@ -725,6 +727,8 @@ fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE
 
     if (l_rc != fapi2::FAPI2_RC_SUCCESS)
     {
+        o_cal_fail = true;
+
         // If we're aborting on error we jump to the end and error out.
         // We don't care about other ports or ranks because the hardware stopped when it saw the error
         if (i_cal_abort_on_error)
@@ -798,8 +802,6 @@ fapi2::ReturnCode draminit_training_error_handler( const std::vector<fapi2::Retu
     {
         fapi2::logError(l_iter, fapi2::FAPI2_ERRL_SEV_RECOVERED);
     }
-
-    return fapi2::current_err;
 
 // If we're cronus, let's bomb out
 #else
@@ -954,7 +956,8 @@ fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYP
     l_data.writeBit<TT::RDVREF_CALIBRATION_ENABLE>( i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() );
 
     // Check to see if READ_CENTERING is disabled, if so, set the bit
-    l_data.writeBit<TT::SKIP_RDCENTERING>( !i_cal_steps_enabled.getBit<READ_CTR>() );
+    l_data.writeBit<TT::SKIP_RDCENTERING>( !(i_cal_steps_enabled.getBit<READ_CTR>()
+                                           || i_cal_steps_enabled.getBit<TRAINING_ADV>()) );
 
     FAPI_INF("%s %s read VREF cal, read centering is %s",
              mss::c_str(i_target),
@@ -986,9 +989,8 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     FAPI_TRY( mss::is_simulation(l_sim) );
 
     // This is the buffer which will be written to CAL_CONFIG0. It starts
-    // life assuming no cal sequences, no rank pairs - but we set the abort-on-error
-    // bit ahead of time.
-    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(l_cal_abort_on_error);
+    // life assuming no cal sequences, no rank pairs
+
 
     // Sadly, the bits in the register don't align directly with the bits in the attribute.
     // So, arrange the bits accordingly and write the config register.
@@ -1010,12 +1012,29 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>(
             i_cal_steps_enabled.getBit<COARSE_RD>());
 
-        // Always turn on initial pattern write in h/w, never for sim (makes the DIMM behavioral lose it's mind)
+        // Turn on initial pattern write only in h/w, never for sim (makes the DIMM behavioral lose it's mind)
         if (!l_sim)
         {
+            // If we are running training advance, none of the steps above can be enabled.
+            // If they are, we have a code bug and should fapi2:Assert.
+            // This isn't dependent on system or attributes but code structure
+            if ( l_cal_config != 0 && i_cal_steps_enabled.getBit<TRAINING_ADV>())
+            {
+                FAPI_ERR("Error setting up draminit training advance. Set CUSTOM_RD with other cal steps");
+                fapi2::Assert( false );
+            }
+
+            // Enable CUSTOM_RD for training ADV. If this bit is set, only TRAINING_ADV and INIT_PAT_WR can be set
+            // We assert this above.
+            l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_RD>(
+                i_cal_steps_enabled.getBit<TRAINING_ADV>());
+
             l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>(
                 i_cal_steps_enabled.getBit<INITIAL_PAT_WR>());
         }
+
+        // Moved this down here so we can make the training advance check above
+        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(l_cal_abort_on_error);
     }
 
     // Blast the VREF config with the proper setting for these cal bits if there were any enable bits set
@@ -1083,7 +1102,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
         FAPI_TRY( l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + rp) );
     }
 
-    FAPI_INF("cal_config for %s: 0x%04lx (steps: 0x%08lx)",
+    FAPI_INF("cal_config for %s: 0x%04lx (steps: 0x%08x)",
              mss::c_str(i_target), uint16_t(l_cal_config), uint32_t(i_cal_steps_enabled));
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
 
@@ -1215,7 +1234,10 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         }
 
         // Execute WR_LEVEL
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+        FAPI_TRY( execute_cal_steps_helper(i_target,
+                                           i_rp,
+                                           l_steps_to_execute,
+                                           i_abort_on_error) );
 
         // Restore normal terminations
         l_rtt_inst.clear();
@@ -1223,21 +1245,28 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
 
         if (!l_rtt_inst.empty())
         {
-            l_program.iv_instructions.insert(l_program.iv_instructions.end(), l_rtt_inst.begin(), l_rtt_inst.end() );
+            l_program.iv_instructions.insert(l_program.iv_instructions.end(),
+                                             l_rtt_inst.begin(),
+                                             l_rtt_inst.end() );
             FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
         }
     }
 
-    // run Initial Pattern Write
+    // run Initial Pattern Write and custom read centering if enabled
     if(i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>())
     {
         // Sets up the cal steps in the buffer
         fapi2::buffer<uint32_t> l_steps_to_execute;
         l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>
         (i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>());
+        l_steps_to_execute.writeBit<mss::cal_steps::TRAINING_ADV>
+        (i_cal_steps_enabled.getBit<mss::cal_steps::TRAINING_ADV>());
 
-        FAPI_INF("%s Running Initial Pattern Write on RP%d 0x%08lx",
-                 mss::c_str(i_target), i_rp, l_steps_to_execute);
+        FAPI_INF("%s Running Initial Pattern Write and TRAINING_ADV(%s) on RP%d 0x%08x",
+                 mss::c_str(i_target),
+                 (i_cal_steps_enabled.getBit<mss::cal_steps::TRAINING_ADV>() ? "yes" : "no"),
+                 i_rp,
+                 l_steps_to_execute);
 
         // Undertake the calibration steps
         FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
@@ -1250,7 +1279,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         fapi2::buffer<uint32_t> l_steps_to_execute;
         l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
 
-        FAPI_INF("%s Running DQS align on RP%d 0x%08lx",
+        FAPI_INF("%s Running DQS align on RP%d 0x%08x",
                  mss::c_str(i_target), i_rp, l_steps_to_execute);
 
         // Undertake the calibration steps
@@ -1274,7 +1303,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
                                     mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN,
                                     mss::cal_steps::RDCLK_ALIGN>(l_steps_to_execute);
 
-        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%08lx", mss::c_str(i_target), i_rp,
+        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%08x", mss::c_str(i_target), i_rp,
                  l_steps_to_execute);
 
         // Undertake the calibration steps
@@ -1292,7 +1321,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // Run cal steps after RD_CTR if any are selected - note: WRITE_CTR takes place after RD_CTR
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR, mss::cal_steps::WR_VREF_TO_COARSE_RD_LEN>())
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR_2D_VREF, mss::cal_steps::WR_VREF_TO_COARSE_RD_LEN>())
     {
         fapi2::buffer<uint32_t> l_steps_to_execute( i_cal_steps_enabled );
         l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL, mss::cal_steps::DRAM_ZQCAL_UP_TO_WRITE_CTR_2D_VREF>();
@@ -1301,7 +1330,7 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         // Gets set iff the bit is set in i_steps_to_execute
         l_steps_to_execute.writeBit<WR_VREF_LATCH>( i_cal_steps_enabled.getBit<WR_VREF_LATCH>() );
 
-        FAPI_DBG("%s Running remaining cal steps on RP%d 0x%08lx", mss::c_str(i_target), i_rp, l_steps_to_execute);
+        FAPI_DBG("%s Running remaining cal steps on RP%d 0x%08x", mss::c_str(i_target), i_rp, l_steps_to_execute);
 
         FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
     }
@@ -1777,6 +1806,34 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
         o_run_workaround |= (mss::pc::get_dll_cal_status(l_read) != mss::YES);
 
     }// mca
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the custom pattern
+/// @param[in] i_target the port target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    uint32_t l_pattern = 0;
+    uint32_t l_swizzled = 0;
+
+    // Set the custom patterns for training advance
+    // So first get the pattern from the attribute and then put it into the register
+
+    FAPI_TRY( mss::custom_training_adv_patterns( i_target, l_pattern) );
+    FAPI_TRY( mss::seq::swizzle_mpr_pattern(l_pattern, l_swizzled) );
+
+    FAPI_INF("%s the patterns before swizzle are 0x%08x and after 0x%08x",
+             mss::c_str(i_target),
+             l_pattern,
+             l_swizzled);
+
+    FAPI_TRY( mss::seq::setup_rd_wr_data( i_target, l_swizzled) );
 
 fapi_try_exit:
     return fapi2::current_err;

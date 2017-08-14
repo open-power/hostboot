@@ -1951,7 +1951,8 @@
           [17] WRITE_CTR
           [18] COARSE_WR
           [19] COARSE_RD
-          [20]:[31] Reserved for future use
+          [20] TRAINING_ADV Only set for DD2.* machines
+          [21]:[31] Reserved for future use
 
           COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
 
@@ -1971,19 +1972,52 @@
         <id>ATTR_MSS_CUSTOM_TRAINING_ADV_PATTERNS</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
-            Special training pattern used for draminit_training_advance. Used for read centering
+            Special training pattern used in draminit_training_advance.
+            Used for custom pattern write
             There can be two patterns used here.
-            The first 0-15 bits are for PATTERN1,
-            bits 16-32 are for PATTERN2.
+            This attribute is before swizzling for endianness of the registers.
+            CODE WILL SWIZZLE FOR THE SYSTEM
+            The first 0-15 bits are for PATTERN0,
+            bits 16-32 are for PATTERN1.
             If this attribute is set to 0, using the default values of:
-            0x952D for PATTERN1
-            0x594A for PATTERN2
+            0x13EC for PATTERN0
+            0x02FD for PATTERN1
+            Set to default in eff_config
         </description>
-        <initToZero></initToZero>
         <valueType>uint32</valueType>
+        <initToZero></initToZero>
+        <default>0xEA0CA6C9</default>
+        <enum>DEFAULT_PATTERN0 = 0xEA0C, DEFAULT_PATTERN1 = 0xA6C9</enum>
         <writeable/>
         <array>2</array>
-        <mssAccessorName>custom_training_adv_pattern</mssAccessorName>
+        <mssAccessorName>custom_training_adv_patterns</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Special training backup pattern
+            Used for custom_pattern_write in draminit_training_advance.
+            If the main patterns fail, the code will try running this pattern
+            Used for read centering
+            There can be two patterns used here.
+            This attribute is before swizzling for endianness of the registers.
+            CODE WILL SWIZZLE FOR THE SYSTEM
+            The first 0-15 bits are for PATTERN0,
+            bits 16-32 are for PATTERN1.
+            If this attribute is set to 0, using the default values of:
+            0xEA0C for PATTERN0
+            0xA6C9 for PATTERN1
+            Set to default in eff_config
+        </description>
+        <valueType>uint32</valueType>
+        <initToZero></initToZero>
+        <default>0x13EC02FD</default>
+        <enum>DEFAULT_PATTERN0 = 0x13EC, DEFAULT_PATTERN1 = 0x02FD</enum>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>custom_training_adv_backup_patterns</mssAccessorName>
     </attribute>
 
     <attribute>

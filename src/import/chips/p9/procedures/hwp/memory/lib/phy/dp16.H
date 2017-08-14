@@ -180,6 +180,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > DD1_RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DD2_RD_VREF_CNTRL_REG;
         static const std::vector< uint64_t > DRIFT_LIMITS_REG;
+        static const std::vector< uint64_t > DP16_RX_REGS;
 
         static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 
@@ -205,6 +206,7 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > RD_STATUS0_REG;
         static const std::vector< uint64_t > WR_ERROR0_REG;
 
+
         // Definitions of the gate delay and waterfall bits' locations
         constexpr static const uint64_t GATE_DELAY_BIT_POS[NUM_QUAD_PER_DP16] =
         {
@@ -223,6 +225,10 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         enum
         {
+            // Name changes for dd2 to P9N2_MCA_DDRPHY_DP16_RX_CONFIG0_P0_0
+            READ_CENTERING_MODE = MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_0_01_READ_CENTERING_MODE,
+            READ_CENTERING_MODE_LEN = MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_0_01_READ_CENTERING_MODE_LEN,
+
             DLL_CNTL_INIT_RXDLL_CAL_RESET = MCA_DDRPHY_DP16_DLL_CNTL0_P0_0_01_INIT_RXDLL_CAL_RESET,
             DLL_CNTL_INIT_RXDLL_CAL_SKIP = MCA_DDRPHY_DP16_DLL_CNTL0_P0_1_01_REGS_RXDLL_CAL_SKIP,
             DLL_CNTL_INIT_RXDLL_CAL_SKIP_LEN = MCA_DDRPHY_DP16_DLL_CNTL0_P0_1_01_REGS_RXDLL_CAL_SKIP_LEN,
@@ -2113,6 +2119,16 @@ inline void set_blue_waterfall_range( const fapi2::Target<T>& i_target,
     io_data.insertFromRight<TT::DD2_WATERFALL_RNG, TT::DD2_WATERFALL_RNG_LEN>(i_value);
     FAPI_INF("set_blue_waterfall_range: 0x%01lx", i_value);
 }
+
+///
+/// @brief Set RX_CONFIG0_P0_DP16_0_READ_CENTERING_MODE
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = dp16Traits<T> >
+fapi2::ReturnCode setup_custom_read_centering_mode( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Reset rd_lvl_status0 registers

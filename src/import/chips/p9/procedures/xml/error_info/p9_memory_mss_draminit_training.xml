@@ -434,9 +434,6 @@
  <deconfigure>
     <target>DIMM_TARGET</target>
   </deconfigure>
-  <gard>
-    <target>DIMM_TARGET</target>
-  </gard>
   <callout>
     <procedure>CODE</procedure>
     <priority>LOW</priority>

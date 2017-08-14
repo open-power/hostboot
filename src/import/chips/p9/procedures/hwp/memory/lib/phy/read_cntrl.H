@@ -318,6 +318,26 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Set STAGGERED_PATTERN bit in read_config0
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = rcTraits<T> >
+inline fapi2::ReturnCode change_staggered_pattern( const fapi2::Target<T>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY( read_config0( i_target, l_data) );
+
+    l_data.setBit<TT::STAGGERED_PATTERN>();
+
+    FAPI_TRY( write_config0( i_target, l_data) );
+
+    FAPI_DBG("%s set staggered_pattern rc_config0: 0x%016llx", mss::c_str(i_target), l_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief reset rc_config0
 /// @param[in] i_target fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
