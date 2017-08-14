@@ -466,13 +466,13 @@ namespace RTPM
                    * @reasoncode       RC_PM_RT_HCODE_UPDATE_ERR
                    * @userdata1[0:31]  Firmware Request return code
                    * @userdata1[32:63] SCOM address
-                   * @userdata2[0:31]  Generic response code - if it exits
-                   * @userdata2[32:63] Firmware Respone type
+                   * @userdata2[0:31]  Generic response code - if it exists
+                   * @userdata2[32:63] Firmware Response type
                    * @devdesc          Firmware Request for
                    *                   HCODE SCOM update error
                    */
                    //
-                   // Pack the generic responce code if the response
+                   // Pack the generic response code if the response
                    // is of type "RESP_GENERIC"
                    // else just send the response type alone
                    uint64_t l_userData2 = 0;
