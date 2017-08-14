@@ -252,6 +252,18 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::IO_TX_PFET_TERM_REG
     MCA_DDRPHY_DP16_IO_TX_PFET_TERM_P0_4,
 };
 
+// Receiver configuration for the DP16.
+const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DP16_RX_REGS
+{
+    {
+        MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_0,
+        MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_1,
+        MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_2,
+        MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_3,
+        MCA_DDRPHY_DP16_RX_PEAK_AMP_P0_4,
+    },
+};
+
 // Definition of the DD1 DP16 RD_VREF Control registers
 // Note: For DD2 if we use the DD2_PERBIT_RDVREF_DISABLE, then these registers are still valid
 // DP16 RD_VREF Control registers all come in pairs - one per 8 bits
@@ -266,6 +278,7 @@ const std::vector< uint64_t > dp16Traits<TARGET_TYPE_MCA>::DD1_RD_VREF_CNTRL_REG
         MCA_DDRPHY_DP16_RD_VREF_BYTE0_DAC_P0_4, MCA_DDRPHY_DP16_RD_VREF_BYTE1_DAC_P0_4
     },
 };
+
 
 // Definition of the DD2 DP16 RD_VREF Control registers
 // Note: DO NOT use this for DD1 as it will lead to a runtime scom access error
@@ -1401,10 +1414,37 @@ fapi_try_exit:
 };
 
 ///
-/// @brief Reset CTLE_CNTL MCA specialization - for all DP16 in the target
+/// @brief Set RX_CONFIG0_P0_DP16_0_READ_CENTERING_MODE - for all DP16 in the target
 /// @param[in] i_target the fapi2 target of the port
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
+template<>
+fapi2::ReturnCode setup_custom_read_centering_mode( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<TARGET_TYPE_MCA> TT;
+
+    constexpr uint8_t CUSTOM_READ_CENTERING = 0b11;
+    std::vector< fapi2::buffer< uint64_t > > l_data;
+
+    const auto& DP16_RX_REGS = TT::DP16_RX_REGS;
+    FAPI_TRY( mss::scom_suckah(i_target, DP16_RX_REGS, l_data) );
+
+    for (auto& l_reg_data : l_data)
+    {
+        l_reg_data.insertFromRight<TT::READ_CENTERING_MODE, TT::READ_CENTERING_MODE_LEN>(CUSTOM_READ_CENTERING);
+        FAPI_INF("%s setting custom read centering mode 0x%016lx", mss::c_str(i_target), l_reg_data);
+    }
+
+    FAPI_TRY( mss::scom_blastah(i_target, DP16_RX_REGS, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reset CTLE_CNTL MCA specialization - for all DP16 in the target
+/// @param[in] i_target the fapi2 target of the port
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 template<>
 fapi2::ReturnCode reset_ctle_cntl( const fapi2::Target<TARGET_TYPE_MCA>& i_target )
 {
