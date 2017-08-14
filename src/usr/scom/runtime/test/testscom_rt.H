@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,6 +183,8 @@ public:
    */
   void test_FSISCOMreadWrite_centaur(void)
   {
+//@TODO RTC:178802
+#if 0
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> Start" );
       uint64_t fails = 0;
       uint64_t total = 0;
@@ -348,7 +350,7 @@ public:
       }
 
       TRACFCOMP( g_trac_scom, "ScomTest::test_FSISCOMreadWrite_centaur> %d/%d fails", fails, total );
-
+#endif
   }
 
 
@@ -742,7 +744,7 @@ public:
  void test_TranslateScom_MBA_MBS(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_TranslateScom_MBA_MBS Start" );
-
+#if 0
       uint64_t fails = 0;
       uint64_t total = 0;
       errlHndl_t l_err = NULL;
@@ -907,7 +909,7 @@ public:
       }
 
       TRACFCOMP( g_trac_scom, "ScomTest::test_translateScom_MBA_MBS> %d/%d fails", fails, total );
-
+#endif
  }
 
   //@todo - write tests to verify connection between XSCOM and FSISCOM

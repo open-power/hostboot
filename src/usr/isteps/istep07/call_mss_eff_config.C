@@ -136,6 +136,7 @@ errlHndl_t call_mss_eff_mb_interleave()
                       "ERROR 0x%.8X: p9c_mss_eff_mb_interleave HWP returns error",
                       l_err->reasonCode());
             ErrlUserDetailsTarget(l_membuf_target).addToLog(l_err);
+            break;
         }
         else
         {
@@ -193,21 +194,17 @@ void*    call_mss_eff_config( void *io_pArgs )
     {
         //  make a local copy of the target for ease of use
         TARGETING::Target* l_pCentaur = *l_membuf_iter;
-
         TARGETING::TargetHandleList l_mbaTargetList;
-
         getChildChiplets(l_mbaTargetList,
                         l_pCentaur,
                         TYPE_MBA);
-
         for (TargetHandleList::const_iterator
              l_mba_iter = l_mbaTargetList.begin();
              l_mba_iter != l_mbaTargetList.end();
              ++l_mba_iter)
          {
-            //  Make a local copy of the target for ease of use
-            TARGETING::Target*  l_mbaTarget = *l_mba_iter;
-
+           //  Make a local copy of the target for ease of use
+           TARGETING::Target*  l_mbaTarget = *l_mba_iter;
            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                       "p9c_mss_eff_config HWP target HUID %.8x",
                       TARGETING::get_huid(l_mbaTarget));
@@ -325,7 +322,6 @@ void*    call_mss_eff_config( void *io_pArgs )
                 {
                     //  Make a local copy of the target for ease of use
                     TARGETING::Target*  l_mbaTarget = *l_mba_iter;
-
                     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                     "p9c_mss_eff_config_thermal HWP target HUID %.8x",
                     TARGETING::get_huid(l_mbaTarget));

@@ -85,42 +85,47 @@ void* call_mss_volt( void *io_pArgs )
     TARGETING::TargetHandleList l_membufTargetList;
     getAllChips(l_membufTargetList, TYPE_MEMBUF);
 
-    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> > l_membufFapiTargetsList;
-
-    for(auto & l_membuf_target : l_membufTargetList)
-    {
-        fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP>
-                    l_membuf_fapi_target (l_membuf_target);
-
-        l_membufFapiTargetsList.push_back( l_membuf_fapi_target );
-    }
-
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Calling p9c_mss_volt on list of membuf targets");
+                "call_mss_volt: %d membuf targets", l_membufTargetList.size());
 
-    // p9c_mss_volt.C (vector of centaurs)
-    FAPI_INVOKE_HWP(l_err, p9c_mss_volt, l_membufFapiTargetsList);
-
-    // process return code
-    if ( l_err )
+    if (l_membufTargetList.size() > 0)
     {
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> > l_membufFapiTargetsList;
+
+        for(auto & l_membuf_target : l_membufTargetList)
+        {
+            fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP>
+                        l_membuf_fapi_target (l_membuf_target);
+
+            l_membufFapiTargetsList.push_back( l_membuf_fapi_target );
+        }
+
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "ERROR 0x%.8X:  p9c_mss_volt HWP() failed",
-                l_err->reasonCode());
+                    "Calling p9c_mss_volt on list of membuf targets");
 
-        // Create IStep error log and cross reference to error that occurred
-        l_StepError.addErrorDetails(l_err);
+        // p9c_mss_volt.C (vector of centaurs)
+        FAPI_INVOKE_HWP(l_err, p9c_mss_volt, l_membufFapiTargetsList);
 
-        // Commit Error
-        errlCommit( l_err, HWPF_COMP_ID );
+        // process return code
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "ERROR 0x%.8X:  p9c_mss_volt HWP() failed",
+                    l_err->reasonCode());
+
+            // Create IStep error log and cross reference to error that occurred
+            l_StepError.addErrorDetails(l_err);
+
+            // Commit Error
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "SUCCESS :  p9c_mss_volt HWP");
+        }
     }
     else
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-            "SUCCESS :  p9c_mss_volt HWP");
-    }
-
-    if(l_StepError.getErrorHandle() == NULL)
     {
         TARGETING::TargetHandleList l_mcsTargetList;
         getAllChiplets(l_mcsTargetList, TYPE_MCS);

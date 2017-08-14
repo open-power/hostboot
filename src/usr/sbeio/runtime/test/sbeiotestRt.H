@@ -400,7 +400,8 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
             // Test entry
             TRACFCOMP(g_trac_sbeio, ENTER_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingVersions");
-
+//@TODO RTC:178802
+#if 0
             sbeMessage_t l_request;
             sbeMessage_t l_expected_response;
             RT_TARG::rtChipId_t chipId = 0;
@@ -484,7 +485,7 @@ class SbeMessagePassingRtTest : public CxxTest::TestSuite
                     break;
                 }
             }while (0);
-
+#endif
             // Test exit
             TRACFCOMP(g_trac_sbeio, EXIT_MRK "SbeMessagePassingRtTest::"
                                     "testSbeMessagePassingVersions");
