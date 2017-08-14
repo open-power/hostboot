@@ -283,12 +283,12 @@ ImgSizeBank::ImgSizeBank()
     iv_secSize[ImgSec(PLAT_CME,  P9_XIP_SECTION_CME_HCODE,     (char*)"CME Hcode")]        =   CME_SRAM_SIZE;
     iv_secSize[ImgSec(PLAT_CME,  CME_SRAM_IMAGE,               (char*)"CME SRAM Image")]   =   CME_SRAM_SIZE;
 
-    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_PPMR,    (char*)"PPMR Header")]       =   HALF_KB;
+    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_PPMR,    (char*)"PPMR Header")]       =   ONE_KB;
     iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_LVL1_BL, (char*)"PGPE Boot Copier")]  =   PGPE_BOOT_COPIER_SIZE;
     iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_LVL2_BL, (char*)"PGPE Boot Loader")]  =   PGPE_BOOT_LOADER_SIZE;;
-    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_HCODE,   (char*)"PGPE Hcode")]        =   PGPE_IMAGE_SIZE;
+    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_HCODE,   (char*)"PGPE Hcode")]        =   PGPE_HCODE_SIZE;
     iv_secSize[ImgSec(PLAT_PGPE, PGPE_SRAM_IMAGE,             (char*)"PGPE SRAM Image")]   =   PGPE_IMAGE_SIZE;
-    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_AUX_TASK,    (char*)"PGPE Aux Task")]   =   PGPE_AUX_TASK_SIZE;
+    iv_secSize[ImgSec(PLAT_PGPE, P9_XIP_SECTION_PGPE_AUX_TASK, (char*)"PGPE Aux Task")]    =   PGPE_AUX_TASK_SIZE;
 }
 
 /**
@@ -321,7 +321,8 @@ uint32_t ImgSizeBank::isSizeGood( PlatId i_plat, uint8_t i_sec,
             break;
         }
 
-        if( i_size > tempSize )
+        //if size is either zero or greater than max size allowed, return max size allowed.
+        if( ( 0 == i_size ) || ( i_size > tempSize ) )
         {
             rc = tempSize; // returning Max Allowed size  as return code
             break;
@@ -1666,7 +1667,9 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
                                      i_procFuncModel.getChipLevel(),
                                      ppeSection );
 
-        io_ppmrHdr.g_ppmr_aux_task_offset = io_ppmrHdr.g_ppmr_aux_task_offset + PGPE_AUX_TASK_SIZE;
+        //FIXME RTC 178555 Add size check for PGPE Auxiliary Task binary.
+
+        io_ppmrHdr.g_ppmr_aux_task_offset = io_ppmrHdr.g_ppmr_hcode_offset + PGPE_IMAGE_SIZE;
         io_ppmrHdr.g_ppmr_aux_task_length = ppeSection.iv_size;
 
         //Finally let us take care of endianess
