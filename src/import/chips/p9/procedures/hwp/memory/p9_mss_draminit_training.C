@@ -123,6 +123,9 @@ extern "C"
                 FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled), "Error in p9_mss_draminit_training" );
             }
 
+            // Clear the Training Advance bit because this is used in training_adv and not in training
+            l_cal_steps_enabled.clearBit<mss::TRAINING_ADV>();
+
             FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
 
             // ZQCAL (for DRAMs and LRDIMM data buffers) isn't a PHY calibration,
@@ -171,10 +174,11 @@ extern "C"
             // THE PROCESSING OF THE ERRORS. (it's hard to figure out which DIMM failed, too) BRS.
             for (const auto& rp : l_pairs)
             {
+                bool l_cal_fail = false;
                 FAPI_INF("Execute cal on rp %d %s", rp, mss::c_str(p));
 
                 FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
-                FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_fails) );
+                FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails) );
 
             }// rank pairs
 
