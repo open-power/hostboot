@@ -214,6 +214,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         // Sets up the calibration steps
         FAPI_TRY( l_eff_dimm->cal_step_enable(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->rdvref_enable_bit(), "Error from p9_mss_eff_config");
+        FAPI_TRY( l_eff_dimm->training_adv_pattern(), "Error from p9_mss_eff_config");
+        FAPI_TRY( l_eff_dimm->training_adv_backup_pattern(), "Error from p9_mss_eff_config");
 
         //Let's do some checking
         FAPI_TRY( mss::check::temp_refresh_mode(), "Error from p9_mss_eff_config");
