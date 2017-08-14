@@ -375,6 +375,21 @@
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
+    <rc>RC_P9_PGPE_AUX_TASK_BUILD_FAIL</rc>
+    <description>hcode image build procedure failed to update PGPE Aux Task region of HOMER.
+    Note: 0xFFFFFFFF in field MAX_ALLOWED_SIZE is an invalid size suggesting that image
+    section is not found</description>
+    <ffdc>EC_LEVEL</ffdc>
+    <ffdc>CHIP_TYPE</ffdc>
+    <ffdc>MAX_ALLOWED_SIZE</ffdc>
+    <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
     <rc>RC_CORE_SCAN_RING_EXTRACTION_FAIL</rc>
     <description>hcode image build procedure failed to extract core scan rings</description>
     <ffdc>EXTRACTION_FAILURE_CODE</ffdc>

@@ -79,6 +79,7 @@ HCD_CONST(TWO_MB,                               (2 * 1024 * 1024))
 
 HCD_CONST(CME_SRAM_SIZE,                        (32 * ONE_KB))
 HCD_CONST(OCC_SRAM_SIZE,                        (768 * ONE_KB))
+HCD_CONST(PGPE_IMAGE_SIZE,                      (44 * ONE_KB))
 
 HCD_CONST(HOMER_MEMORY_SIZE,                    (4 * ONE_MB))
 HCD_CONST(HOMER_OPMR_REGION_NUM,                0)
@@ -422,7 +423,7 @@ HCD_CONST(CPMR_DEBUG_REGION_SIZE,               (64 * ONE_KB)) // 192K + 64K = 2
 /// PPMR Header
 
 HCD_CONST(PPMR_HOMER_OFFSET,                    (HOMER_PPMR_REGION_NUM* ONE_MB))
-HCD_CONST(PPMR_HEADER_SIZE,                     512)
+HCD_CONST(PPMR_HEADER_SIZE,                     1024)
 
 HCD_CONST(PPMR_MAGIC_NUMBER_BYTE,               0x00)
 HCD_CONST(PPMR_BOOT_COPIER_OFFSET_BYTE,         0x08)
@@ -460,7 +461,7 @@ HCD_CONST(PGPE_INSTRUMENTATION_SIZE,            (2 * ONE_KB))
 HCD_CONST(PGPE_AUX_TASK_SIZE,                   (2 * ONE_KB))
 HCD_CONST(PGPE_IMAGE_PPMR_OFFSET,
           (PGPE_BOOT_LOADER_PPMR_OFFSET + PGPE_BOOT_LOADER_SIZE))
-HCD_CONST(PGPE_IMAGE_SIZE,                      (48 * ONE_KB)) //RTC158543
+HCD_CONST(PGPE_HCODE_SIZE,                     (40 * ONE_KB)) // PGPE Img + GPPB
 HCD_CONST(PGPE_INT_VECTOR_SIZE,                 384)
 HCD_CONST(PGPE_HCODE_RESET_ADDR_VAL,            0x40)
 
