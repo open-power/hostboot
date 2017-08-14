@@ -42,6 +42,7 @@ SUBDIRS+=istep21.d
 SUBDIRS+=pm.d
 SUBDIRS+=p9_stop_util.d
 SUBDIRS+=mss.d
+SUBDIRS+=cen.d
 SUBDIRS+=cpuWkup.d
 
 OBJS += hwpisteperror.o
@@ -51,7 +52,6 @@ OBJS += pbusLinkSvc.o
 
 #TODO: RTC 176018
 EXTRAINCDIR += ${ROOTPATH}/src/import/
-OBJS += hb_temp_p9c_hwp_supports.o
 
 OBJS += $(if $(CONFIG_OPENPOWER_VOLTMSG),openpower_vddr.o,hbToHwsvVoltageMsg.o)
 

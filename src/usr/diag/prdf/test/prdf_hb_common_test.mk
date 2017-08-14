@@ -87,7 +87,8 @@ TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ABus.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_ProcCentFir.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Ex.H
 TESTS += ${PRD_USR_TEST_PATH}/prdfTest_NimbusTpLFir.H
-TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
+#@TODO RTC:178802
+#TESTS += ${PRD_USR_TEST_PATH}/prdfTest_Mcs.H
 
 
 # Wait for PLL code and Ben

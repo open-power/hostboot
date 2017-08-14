@@ -104,16 +104,16 @@ const epath_array EPATH_ARRAY_MAP[] =
     {"CORE{21}",{TYPE_CORE,21}},
     {"CORE{22}",{TYPE_CORE,22}},
     {"CORE{23}",{TYPE_CORE,23}},
-
-    {"MCBIST{0}", {TYPE_MCBIST, 0}},
-    {"MCBIST{1}", {TYPE_MCBIST, 1}},
-    {"MCBIST{2}", {TYPE_MCBIST, 2}},
-    {"MCBIST{3}", {TYPE_MCBIST, 3}},
-
-    {"MCS{0}", {TYPE_MCS, 0}},
-    {"MCS{1}", {TYPE_MCS, 1}},
-    {"MCS{2}", {TYPE_MCS, 2}},
-    {"MCS{3}", {TYPE_MCS, 3}},
+//@TODO RTC:178802
+//    {"MCBIST{0}", {TYPE_MCBIST, 0}},
+//    {"MCBIST{1}", {TYPE_MCBIST, 1}},
+//    {"MCBIST{2}", {TYPE_MCBIST, 2}},
+//    {"MCBIST{3}", {TYPE_MCBIST, 3}},
+//
+//    {"MCS{0}", {TYPE_MCS, 0}},
+//    {"MCS{1}", {TYPE_MCS, 1}},
+//    {"MCS{2}", {TYPE_MCS, 2}},
+//    {"MCS{3}", {TYPE_MCS, 3}},
 
     {"MEMBUF{0}", {TYPE_MEMBUF, 0}},
     {"MEMBUF{1}", {TYPE_MEMBUF, 1}},

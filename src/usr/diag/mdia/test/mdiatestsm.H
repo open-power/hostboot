@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -608,26 +608,29 @@ class MdiaSmTest : public CxxTest::TestSuite
 
             TargetHandleList mcbistList;
             getAllChiplets(mcbistList, TYPE_MCBIST);
-            TargetHandle_t mcbist = mcbistList[0];
 
-            MaintCommandEvent event;
-            event.target = mcbist;
-            event.type = COMMAND_COMPLETE;
-            bool rc = false;
-
-            rc = sm.processMaintCommandEvent(event);
-            if (true == rc)
+            if (mcbistList.size() > 0)
             {
-                TS_TRACE("testProcessMaintCommandEvent: "
-                         "a work item was dispatched");
-            }
-            else
-            {
-                TS_TRACE("testProcessMaintCommandEvent: "
-                         "a work item was not dispatched");
+                TargetHandle_t mcbist = mcbistList[0];
 
-            }
+                MaintCommandEvent event;
+                event.target = mcbist;
+                event.type = COMMAND_COMPLETE;
+                bool rc = false;
 
+                rc = sm.processMaintCommandEvent(event);
+                if (true == rc)
+                {
+                    TS_TRACE("testProcessMaintCommandEvent: "
+                             "a work item was dispatched");
+                }
+                else
+                {
+                    TS_TRACE("testProcessMaintCommandEvent: "
+                             "a work item was not dispatched");
+
+                }
+            }
             TS_TRACE(EXIT_MRK "testProcessMaintCommandEvent");
         }
 

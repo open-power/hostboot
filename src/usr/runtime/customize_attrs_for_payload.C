@@ -148,13 +148,13 @@ errlHndl_t computeNonPhypRtTarget(
             getParentAffinityTargets(targetList,
                                     i_pTarget,
                                     TARGETING::CLASS_UNIT,
-                                    TARGETING::TYPE_MCS);
+                                    TARGETING::TYPE_DMI);
 
             if( targetList.empty() )
             {
                 auto huid = get_huid(i_pTarget);
                 TRACFCOMP(g_trac_runtime, ERR_MRK
-                    "No associated MCS targeting target(s) found for MEMBUF "
+                    "No associated DMI targeting target(s) found for MEMBUF "
                     "targeting target with HUID of 0x%08X",
                     huid);
                 /*@
@@ -162,7 +162,7 @@ errlHndl_t computeNonPhypRtTarget(
                  * @moduleid    RUNTIME::MOD_CUST_COMP_NON_PHYP_RT_TARGET
                  * @reasoncode  RUNTIME::RT_UNIT_TARGET_NOT_FOUND
                  * @userdata1   MEMBUF targeting target's HUID
-                 * @devdesc     No associated MCS targeting target(s) found for
+                 * @devdesc     No associated DMI targeting target(s) found for
                  *              given MEMBUF targeting target
                  */
                 pError = new ERRORLOG::ErrlEntry(

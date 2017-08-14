@@ -245,7 +245,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_PROC_CHIP     => "chip-processor",
     TARGET_TYPE_MEMBUF_CHIP   => "chip-membuf-centaur",
     TARGET_TYPE_EX            => "unit-ex-power9",
-    TARGET_TYPE_MBA           => "unit-mba",
+    TARGET_TYPE_MBA           => "unit-mba-centaur",
     TARGET_TYPE_MCS           => "unit-mcs-power9",
     TARGET_TYPE_XBUS          => "unit-xbus-power9",
     TARGET_TYPE_ABUS          => "unit-abus-power9",

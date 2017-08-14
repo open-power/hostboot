@@ -31,6 +31,7 @@ MODULE = testsbeio_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
-TESTS = *.H
+#@TODO RTC:178802
+#TESTS = *.H
 
 include ${ROOTPATH}/config.mk

@@ -78,7 +78,10 @@ void*    call_mss_freq( void *io_pArgs )
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq entry" );
 
     TARGETING::TargetHandleList l_membufTargetList;
-    getAllChiplets(l_membufTargetList, TYPE_MEMBUF);
+    getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_freq: %d membufs found",
+            l_membufTargetList.size());
 
     for (const auto & l_membuf_target : l_membufTargetList)
     {
@@ -118,30 +121,30 @@ void*    call_mss_freq( void *io_pArgs )
 
     if(l_StepError.getErrorHandle() == NULL)
     {
-        TARGETING::TargetHandleList l_membufTargetList;
-        getAllChiplets(l_membufTargetList, TYPE_MCS);
+        TARGETING::TargetHandleList l_mcsTargetList;
+        getAllChiplets(l_mcsTargetList, TYPE_MCS);
 
-        for (const auto & l_membuf_target : l_membufTargetList)
+        for (const auto & l_mcs_target : l_mcsTargetList)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "p9_mss_freq HWP target HUID %.8x",
-                TARGETING::get_huid(l_membuf_target));
+                TARGETING::get_huid(l_mcs_target));
 
             //  call the HWP with each target   ( if parallel, spin off a task )
-            fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_membuf_target
-            (l_membuf_target);
+            fapi2::Target <fapi2::TARGET_TYPE_MCS> l_fapi_mcs_target
+                (l_mcs_target);
 
-            FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_membuf_target);
+            FAPI_INVOKE_HWP(l_err, p9_mss_freq, l_fapi_mcs_target);
 
             //  process return code.
             if ( l_err )
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "ERROR 0x%.8X:  p9_mss_freq HWP on target HUID %.8x",
-                l_err->reasonCode(), TARGETING::get_huid(l_membuf_target) );
+                l_err->reasonCode(), TARGETING::get_huid(l_mcs_target) );
 
                 // capture the target data in the elog
-                ErrlUserDetailsTarget(l_membuf_target).addToLog( l_err );
+                ErrlUserDetailsTarget(l_mcs_target).addToLog( l_err );
 
                 // Create IStep error log and cross reference to error that occurred
                 l_StepError.addErrorDetails( l_err );

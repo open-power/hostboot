@@ -40,6 +40,7 @@ mk -a && mk install_all
 cd -
 
 #changes needed for Cumulus
+#@TODO RTC:178949
 echo "Applying SIMICS workaround to support Cumulus"
 sbex -t 1031560
 cd $sb/simu

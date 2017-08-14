@@ -593,7 +593,28 @@
           <id>ATTR_PROC_PCIE_IOP_SWAP</id>
           <no_export/>
     </attribute>
-<!-- =====================================================================
+
+    <attribute><id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id><default>FALSE</default></attribute>
+    <attribute><id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id><default>0x01,0x00,0x01,0x00</default></attribute>
+
+    <attribute><id>ATTR_CEN_MRW_POWER_CONTROL_REQUESTED</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL</id><default>0x000015f9</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR</id><default>0x00000200</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id><default>0x08</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT</id><default>0x00000d2f</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id><default>0x00000f29</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id><default>0x00000d79</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id><default>0x04</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_STRICT_MBA_PLUG_RULE_CHECKING</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id><default>0x02</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE</id><default>0x00</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id><default>0x01</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id><default>0x00000060</default></attribute>
+    <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id><default>0x00000020</default></attribute>
+    <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
 </attributes>
