@@ -237,7 +237,11 @@ inline fapi2::ReturnCode cal_timer_setup(const fapi2::Target<T>& i_target,
     l_total_cycles = i_cal_steps_enabled.getBit<WR_LEVEL>()     ? wr_lvl_cycles(i_target)      : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<DQS_ALIGN>()   ? dqs_align_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<RDCLK_ALIGN>() ? rdclk_align_cycles(i_target) : 0;
-    l_total_cycles += i_cal_steps_enabled.getBit<READ_CTR>()    ? read_ctr_cycles(i_target)    : 0;
+
+    // We run either read centering during normal draminit_training and also during draminit_training_advance,
+    // can't be run twice in one cal though
+    l_total_cycles += ( i_cal_steps_enabled.getBit<READ_CTR>() || i_cal_steps_enabled.getBit<TRAINING_ADV>())
+                      ? read_ctr_cycles(i_target)    : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<WRITE_CTR>()   ? l_write_cntr_cycles          : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_WR>()   ? coarse_wr_cycles(i_target)   : 0;
     l_total_cycles += i_cal_steps_enabled.getBit<COARSE_RD>()   ? coarse_rd_cycles(i_target)   : 0;
