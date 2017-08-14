@@ -357,6 +357,80 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Read SEQ_RDWR_DATA0 register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode read_rd_wr_data0( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_RDWR_DATA0, o_data), "%s failed to read rd_wr_data0 register",
+              mss::c_str(i_target) );
+    FAPI_DBG("%s read rd_wr_data0: 0x%016lx", mss::c_str(i_target), o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write SEQ_RDWR_DATA0 register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode write_rd_wr_data0( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("%s write rd_wr_data0: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA0, i_data), "%s failed to write seq_rd_wr_data0 register",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read SEQ_RDWR_DATA1 register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[out] o_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode read_rd_wr_data1( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
+{
+    FAPI_TRY( mss::getScom(i_target, TT::SEQ_RDWR_DATA1, o_data), "%s failed to read rd_wr_data1 register",
+              mss::c_str(i_target) );
+    FAPI_DBG("%s rd_wr_data1: 0x%016lx", mss::c_str(i_target), o_data);
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Write SEQ_RDWR_DATA1 register
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_data the value of the register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+inline fapi2::ReturnCode write_rd_wr_data1( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
+{
+    FAPI_DBG("%s write rd_wr_data1: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA1, i_data), "%s failed to write seq_rd_wr_data1 register",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup odt_wr/rd_config
 /// @tparam T fapi2 Target Type - derived
 /// @tparam TT traits type defaults to seqTraits<T>
@@ -383,13 +457,60 @@ fapi2::ReturnCode reset_rd_wr_data( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_data;
 
     l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR01_PATTERN);
-    FAPI_INF("seq_rd_wr0 0x%llx", l_data);
+    FAPI_INF("%s seq_rd_wr0 0x%llx", mss::c_str(i_target), l_data);
     FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA0, l_data), "%s failed to reset seq_rd_wr0 register via write",
               mss::c_str(i_target) );
 
     l_data.insertFromRight<TT::MPR_PATTERN, TT::MPR_PATTERN_LEN>(MPR23_PATTERN);
-    FAPI_INF("seq_rd_wr1 0x%llx", l_data);
+    FAPI_INF("%s seq_rd_wr1 0x%llx", mss::c_str(i_target), l_data);
     FAPI_TRY( mss::putScom(i_target, TT::SEQ_RDWR_DATA1, l_data), "%s failed to reset seq_rd_wr1 register via write",
+              mss::c_str(i_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Swizzle the MPR pattern for the register
+/// @param[in] i_patterns the patterns to put in SEQ_RDWR_DATA0 and _DATA1 registers
+/// @param[out] The swizzled pattern
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+fapi2::ReturnCode swizzle_mpr_pattern( const uint32_t i_pattern, uint32_t& o_swizzled);
+
+///
+/// @brief Setup odt_wr/rd_config
+/// @tparam T fapi2 Target Type - derived
+/// @tparam TT traits type defaults to seqTraits<T>
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_patterns the patterns to put in SEQ_RDWR_DATA0 and _DATA1 registers
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template< fapi2::TargetType T, typename TT = seqTraits<T> >
+fapi2::ReturnCode setup_rd_wr_data( const fapi2::Target<T>& i_target, const uint32_t i_patterns)
+{
+    fapi2::buffer<uint32_t> l_data (i_patterns);
+    fapi2::buffer<uint64_t> l_temp;
+
+
+    FAPI_TRY( read_rd_wr_data0(i_target, l_temp),
+              "%s failed to reading rd_wr_data",
+              mss::c_str(i_target) );
+
+    l_data.extractToRight<mss::PATTERN0_START, mss::PATTERN0_LEN>(l_temp);
+
+    FAPI_TRY( write_rd_wr_data0(i_target, l_temp),
+              "%s failed to writing rd_wr_data",
+              mss::c_str(i_target) );
+
+    FAPI_TRY( read_rd_wr_data1(i_target, l_temp),
+              "%s failed to read rd_wr0 register via write",
+              mss::c_str(i_target) );
+
+    l_data.extractToRight<mss::PATTERN1_START, mss::PATTERN1_LEN>(l_temp);
+
+    FAPI_TRY( write_rd_wr_data1(i_target, l_temp),
+              "%s failed to write seq_rd_wr1 register via write",
               mss::c_str(i_target) );
 
 fapi_try_exit:
