@@ -40,6 +40,8 @@ constexpr uint64_t literal_0b0001100000000 = 0b0001100000000;
 constexpr uint64_t literal_1350 = 1350;
 constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_0b0000000000001000 = 0b0000000000001000;
+constexpr uint64_t literal_0b01 = 0b01;
+constexpr uint64_t literal_7 = 7;
 
 fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0,
                                const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2,
@@ -59,6 +61,7 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
         fapi2::ATTR_MSS_FREQ_Type l_TGT3_ATTR_MSS_FREQ;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_FREQ, TGT3, l_TGT3_ATTR_MSS_FREQ));
         uint64_t l_def_mn_freq_ratio = ((literal_1000 * l_TGT3_ATTR_MSS_FREQ) / l_TGT1_ATTR_FREQ_PB_MHZ);
+        uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010810ull, l_scom_buffer ));
@@ -149,6 +152,74 @@ fapi2::ReturnCode p9n_mcs_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& TGT0
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501081bull, l_scom_buffer ));
+
+            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON = 0x1;
+                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON );
+            }
+
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_OFF = 0x0;
+            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_OFF );
+
+            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON = 0x1;
+                l_scom_buffer.insert<32, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON );
+            }
+
+            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON = 0x1;
+                l_scom_buffer.insert<34, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                l_scom_buffer.insert<2, 2, 62, uint64_t>(literal_0b01 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+            {
+                l_scom_buffer.insert<2, 2, 62, uint64_t>(literal_0b01 );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+                {
+                    l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_1 );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+            {
+                if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+                {
+                    l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_1 );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x10)) )
+            {
+                if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+                {
+                    l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_7 );
+                }
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+            {
+                if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
+                {
+                    l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_7 );
+                }
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501081bull, l_scom_buffer));
         }
 
     };
