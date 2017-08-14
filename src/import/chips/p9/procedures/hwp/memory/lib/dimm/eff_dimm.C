@@ -4770,16 +4770,87 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Determines and sets the CUSTOM_TRAINING_ADV_PATTERNS settings for training advance
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note overwrite the attribute to default values if it's set to 0
+///
+fapi2::ReturnCode eff_dimm::training_adv_pattern()
+{
+    uint32_t l_special_patterns [PORTS_PER_MCS] = {};
+    FAPI_TRY( custom_training_adv_patterns( iv_mcs, &(l_special_patterns[0])) );
+
+    // Let's not write the defaults if someone wants to overwrite the attribute
+    // 0 is an invalid pattern, so if it's 0, the attribute is empty
+    if ( l_special_patterns[mss::index(iv_mca)] == 0)
+    {
+        fapi2::buffer<uint32_t> l_temp;
+
+        l_temp.insertFromRight<PATTERN0_START, PATTERN0_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_PATTERNS_DEFAULT_PATTERN0);
+
+        l_temp.insertFromRight<PATTERN1_START, PATTERN1_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_PATTERNS_DEFAULT_PATTERN1);
+
+        l_special_patterns[mss::index(iv_mca)] = l_temp;
+
+        FAPI_INF("%s setting training_adv_pattern as 0x%08x", mss::c_str(iv_mca), l_temp);
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CUSTOM_TRAINING_ADV_PATTERNS, iv_mcs, l_special_patterns) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines and sets the CUSTOM_TRAINING_ADV_BACKUP_PATTERNS settings for training advance
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note overwrite the attribute to default values if it's set to 0
+///
+fapi2::ReturnCode eff_dimm::training_adv_backup_pattern()
+{
+    uint32_t l_special_patterns [PORTS_PER_MCS] = {};
+    FAPI_TRY( custom_training_adv_backup_patterns( iv_mcs, &(l_special_patterns[0])) );
+
+    // Let's set the backup pattern as well
+    if ( l_special_patterns[mss::index(iv_mca)] == 0)
+    {
+        fapi2::buffer<uint32_t> l_temp;
+
+        l_temp.insertFromRight<PATTERN0_START, PATTERN0_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS_DEFAULT_PATTERN0);
+
+        l_temp.insertFromRight<PATTERN1_START, PATTERN1_LEN>
+        (fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS_DEFAULT_PATTERN1);
+
+        l_special_patterns[mss::index(iv_mca)] = l_temp;
+
+        FAPI_INF("%s setting training_adv_backup_pattern as 0x%08x", mss::c_str(iv_mca), l_temp);
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CUSTOM_TRAINING_ADV_BACKUP_PATTERNS, iv_mcs, l_special_patterns) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines and sets the cal_step_enable values
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode eff_dimm::cal_step_enable()
 {
-    const uint32_t l_cal_step_value = (mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ?
-                                       RUN_CAL_SKIP_WR_RD_2D_VREF : RUN_ALL_CAL_STEPS);
+    fapi2::buffer<uint32_t> l_cal_step_value = (mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ?
+            RUN_CAL_SKIP_WR_RD_2D_VREF : RUN_ALL_CAL_STEPS);
 
-    FAPI_DBG("%s %s running HW VREF cal. cal_step value: 0x%0x VREF", mss::c_str(iv_mcs),
-             mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? "not" : "", l_cal_step_value);
+    // We only run draminit training advance on DD2 modules
+    l_cal_step_value = l_cal_step_value.writeBit<mss::TRAINING_ADV>( !mss::chip_ec_nimbus_lt_2_0(iv_mcs) );
+
+    FAPI_DBG("%s %s running HW VREF cal. cal_step value: 0x%08x VREF, running training advance %s",
+             mss::c_str(iv_mcs),
+             mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? "not" : "",
+             l_cal_step_value,
+             l_cal_step_value.getBit<mss::TRAINING_ADV>() ? "yes" : "no");
 
     // Sets up the vector
     std::vector<uint32_t> l_cal_step(PORTS_PER_MCS, l_cal_step_value);
