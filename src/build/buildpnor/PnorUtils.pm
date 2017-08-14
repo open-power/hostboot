@@ -156,6 +156,7 @@ sub loadPnorLayout
             my $sha512perEC = (exists $sectionEl->{sha512perEC} ? "yes" : "no");
             my $preserved = (exists $sectionEl->{preserved} ? "yes" : "no");
             my $reprovision = (exists $sectionEl->{reprovision} ? "yes" : "no");
+            my $clearOnEccErr = (exists $sectionEl->{clearOnEccErr} ? "yes" : "no");
             my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
             if (($i_testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
             {
@@ -182,6 +183,7 @@ sub loadPnorLayout
             $$i_pnorLayoutRef{sections}{$physicalOffset}{sha512perEC} = $sha512perEC;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{preserved} = $preserved;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{reprovision} = $reprovision;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{clearOnEccErr} = $clearOnEccErr;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
 
             #store the physical offsets of each section in a hash, so, it is easy

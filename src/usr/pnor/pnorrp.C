@@ -649,6 +649,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                                    != 0) ? true : false;
             o_info.Volatile = ((iv_TOC[id].misc & FFS_MISC_VOLATILE)
                                    != 0) ? true : false;
+            o_info.clearOnEccErr = ((iv_TOC[id].misc & FFS_MISC_CLR_ECC_ERR)
+                                   != 0) ? true : false;
         }
 
     } while(0);
@@ -1360,8 +1362,21 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
             // create an error if we couldn't correct things
             if( ecc_stat == PNOR::ECC::UNCORRECTABLE )
             {
+                PNOR::SectionId l_id = computeSectionPhys(i_offset);
                 TRACFCOMP( g_trac_pnor, "PnorRP::readFromDevice> Uncorrectable ECC error : chip=%d,offset=0x%.X", i_chip, i_offset );
                 CONSOLE::displayf( NULL, "ECC error in PNOR flash in section offset 0x%.8X\n", i_offset );
+
+                //Attempt to find the section and check if we can clear
+                //it to recover
+                if ((l_id != PNOR::INVALID_SECTION )
+                    && ((iv_TOC[l_id].misc & FFS_MISC_CLR_ECC_ERR) != 0))
+                {
+                    CONSOLE::displayf( nullptr, "Clearing section %s due to ECC error\n",
+                                       SectionIdToString(l_id));
+                    clearSection(l_id); //shutting down -- ignore and leak errl
+
+                    CONSOLE::displayf( nullptr, "Done\n");
+                }
 
                 // Need to shutdown here instead of creating an error log
                 //  because the bad page could be critical to the regular
@@ -1587,6 +1602,36 @@ errlHndl_t PnorRP::computeSection( uint64_t i_vaddr,
     }
 
     return errhdl;
+}
+
+/**
+ * @brief  Figure out which section a PA belongs to
+ */
+PNOR::SectionId  PnorRP::computeSectionPhys( uint64_t i_offset)
+{
+    PNOR::SectionId o_id = PNOR::INVALID_SECTION;
+
+    // loop through all sections to find a matching id
+    for( PNOR::SectionId id = PNOR::FIRST_SECTION;
+         id < PNOR::NUM_SECTIONS;
+         id = static_cast<PNOR::SectionId>(id + 1) )
+    {
+        //Need to take ECC into account for the size
+        uint32_t l_size = iv_TOC[id].size;
+        if ((iv_TOC[id].integrity & FFS_INTEG_ECC_PROTECT) != 0) //ECC
+        {
+             l_size = (l_size / 8) * 9;
+        }
+
+        if( (i_offset >= iv_TOC[id].flashAddr)
+            && (i_offset < (iv_TOC[id].flashAddr + l_size)) )
+        {
+            o_id = iv_TOC[id].id;
+            break;
+        }
+    }
+
+    return o_id;
 }
 
 errlHndl_t PnorRP::clearSection(PNOR::SectionId i_section)

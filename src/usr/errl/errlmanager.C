@@ -231,6 +231,20 @@ void * ErrlManager::startup ( void* i_self )
     return NULL;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// ErrlManager::pnorSetupThread()
+///////////////////////////////////////////////////////////////////////////////
+void * ErrlManager::pnorSetupThread ( void* i_self )
+{
+    TRACFCOMP( g_trac_errl, ENTER_MRK "ErrlManager::pnorSetupThread..." );
+
+    //Start a thread to deal with PNOR setup
+    reinterpret_cast<ErrlManager *>(i_self)->setupPnorInfo();
+
+    TRACFCOMP( g_trac_errl, EXIT_MRK "ErrlManager::pnorSetupThread" );
+    return nullptr;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::errlogMsgHndlr()
@@ -250,7 +264,25 @@ void ErrlManager::errlogMsgHndlr ()
             case ERRLOG_ACCESS_PNOR_TYPE:
                 {
                     // PNOR is up and running now.
-                    setupPnorInfo();
+                    // This can fail if there is bad ECC in HBEL (which is
+                    // somewhat common on power faults).  Because of this,
+                    // trigger this as separate task so message that kills
+                    //task on bad ECC doesn't bring down the whole daemon
+                    auto l_tid = task_create(ErrlManager::pnorSetupThread,
+                                             this);
+
+                    //  status of the task ( OK or Crashed )
+                    int l_childsts    = 0;
+                    auto l_tidretrc = task_wait_tid( l_tid, &l_childsts, 0);
+
+                    if ((static_cast<int16_t>(l_tidretrc) < 0 ) ||
+                        (l_childsts != TASK_STATUS_EXITED_CLEAN ))
+                    {
+                        TRACFCOMP(g_trac_errl, ERR_MRK "Failed to setup PNOR; l_tidretrc=0x%x,"
+                                  " l_childsts=0x%x", l_tidretrc, l_childsts);
+                        //Set iv_pnorAddr to nullptr to prevent writes
+                        iv_pnorAddr = nullptr;
+                    }
 
                     //We are done with the msg
                     msg_free(theMsg);

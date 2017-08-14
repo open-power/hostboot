@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -278,6 +278,16 @@ class PnorRP
      */
     errlHndl_t computeSection( uint64_t i_vaddr,
                                PNOR::SectionId& o_id );
+
+    /**
+     * @brief  Figure out which section a PA belongs to
+     *
+     * @param[in] i_offset  Physical offset into PNOR
+     *
+     * @return Which section of PNOR, returns
+     *         PNOR::INVALID_SECTION if not mapped
+     */
+     PNOR::SectionId computeSectionPhys( uint64_t i_offset );
 
     /**
      * @brief  Returns true if the initial startup failed for some reason

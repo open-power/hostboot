@@ -107,6 +107,7 @@ struct SectionInfo_t
     bool reprovision;   /**< Erase this section during a reprovision */
     bool Volatile;   /**< Section loses contents on non HB reboots */
     bool secure;        /**< Indicates if a section is secure */
+    bool clearOnEccErr; /**< Indicates on ECC errors, clear and reboot*/
 #ifdef CONFIG_SECUREBOOT
     size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
                                             that the secure container only
