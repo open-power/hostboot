@@ -51,12 +51,14 @@
 #include <p9_pm_pstate_gpe_init.H>
 #include <p9_pm_occ_control.H>
 #include <p9_pm_reset.H>
+#include <p9_check_proc_config.H>
 
 
 // Function pointer defintion
 typedef fapi2::ReturnCode (*p9_pm_init_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
-    const p9pm::PM_FLOW_MODE);
+    const p9pm::PM_FLOW_MODE,
+    void* i_pHomerImage);
 
 extern "C"
 {
@@ -66,12 +68,14 @@ extern "C"
 ///
 /// @param[in] i_target Chip target
 /// @param[in] i_mode   Mode of operation (PM_INIT/ PM_RESET)
+/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error code.
 ///
     fapi2::ReturnCode p9_pm_init(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        const p9pm::PM_FLOW_MODE i_mode);
+        const p9pm::PM_FLOW_MODE i_mode,
+        void* i_pHomerImage);
 }
 
 #endif // _P9_PM_INIT_H

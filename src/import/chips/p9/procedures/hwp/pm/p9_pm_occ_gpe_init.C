@@ -142,99 +142,111 @@ fapi2::ReturnCode pm_occ_gpe_reset(
     uint32_t l_timeout = 1; // in micro seconds;
     std::vector<uint64_t> l_gpeBaseAddress;
 
-
-    if (i_engine == p9occgpe::GPE0)
-    {
-        l_controlReg    =   PU_GPE0_PPE_XIXCR;
-        l_statusReg     =   PU_GPE0_GPEXIXSR_SCOM;
-        l_instrAddrReg  =   PU_GPE0_PPE_XIDBGPRO;
-        l_intVecReg     =   PU_GPE0_GPEIVPR_SCOM;
-        l_gpeBaseAddress.push_back( GPE0_BASE_ADDRESS );
-
-
-        //Check if GPE0 is already halted
-        FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
-                 "ERROR: Failed to get the OCC GPE0 status");
-
-        FAPI_ASSERT( (l_data64.getBit<0>() != 1),
-                     fapi2::GPE0_IN_HALT_BEFORE_RESET()
-                     .set_CHIP( i_target )
-                     .set_GPE0_STATUS( l_data64 )
-                     .set_GPE0_MODE( HALT )
-                     .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
-                     "OCC GPE0 in Halt State Before Reset");
-    }
-    else if (i_engine == p9occgpe::GPE1)
-    {
-        l_controlReg = PU_GPE1_PPE_XIXCR;
-        l_statusReg = PU_GPE1_GPEXIXSR_SCOM;
-        l_instrAddrReg = PU_GPE1_PPE_XIDBGPRO;
-        l_intVecReg = PU_GPE1_GPEIVPR_SCOM;
-        l_gpeBaseAddress.push_back( GPE1_BASE_ADDRESS );
-
-        //Check if GPE1 is already halted
-        FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
-                 "ERROR: Failed to get the OCC GPE1 status");
-
-        FAPI_ASSERT( (l_data64.getBit<0>() != 1),
-                     fapi2::GPE1_IN_HALT_BEFORE_RESET()
-                     .set_CHIP( i_target )
-                     .set_GPE1_STATUS( l_data64 )
-                     .set_GPE1_MODE( HALT )
-                     .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
-                     "OCC GPE1 in Halt State Before Reset");
-    }
-
-
-    // Halt the OCC GPE
-    l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
-    FAPI_TRY(putScom(i_target, l_controlReg, l_data64),
-             "ERROR: Failed to halt the OCC GPE");
-
-    // Wait for OCC GPE to halt
     do
     {
-        FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
-                 "ERROR: Failed to get the OCC GPE status");
-
-        if (l_data64.getBit<0>() == 1)
+        if (i_engine == p9occgpe::GPE0)
         {
-            FAPI_INF("OCC GPE has been halted");
+            l_controlReg    =   PU_GPE0_PPE_XIXCR;
+            l_statusReg     =   PU_GPE0_GPEXIXSR_SCOM;
+            l_instrAddrReg  =   PU_GPE0_PPE_XIDBGPRO;
+            l_intVecReg     =   PU_GPE0_GPEIVPR_SCOM;
+            l_gpeBaseAddress.push_back( GPE0_BASE_ADDRESS );
+
+
+            //Check if GPE0 is already halted
+            FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
+                     "ERROR: Failed to get the OCC GPE0 status");
+
+            FAPI_ASSERT_NOEXIT( (l_data64.getBit<0>() != 1),
+                                fapi2::GPE0_IN_HALT_BEFORE_RESET(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP( i_target )
+                                .set_GPE0_STATUS( l_data64 )
+                                .set_GPE0_MODE( HALT )
+                                .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
+                                "OCC GPE0 in Halt State Before Reset");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
+
+        }
+        else if (i_engine == p9occgpe::GPE1)
+        {
+            l_controlReg = PU_GPE1_PPE_XIXCR;
+            l_statusReg = PU_GPE1_GPEXIXSR_SCOM;
+            l_instrAddrReg = PU_GPE1_PPE_XIDBGPRO;
+            l_intVecReg = PU_GPE1_GPEIVPR_SCOM;
+            l_gpeBaseAddress.push_back( GPE1_BASE_ADDRESS );
+
+            //Check if GPE1 is already halted
+            FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
+                     "ERROR: Failed to get the OCC GPE1 status");
+
+            FAPI_ASSERT_NOEXIT( (l_data64.getBit<0>() != 1),
+                                fapi2::GPE1_IN_HALT_BEFORE_RESET(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP( i_target )
+                                .set_GPE1_STATUS( l_data64 )
+                                .set_GPE1_MODE( HALT )
+                                .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
+                                "OCC GPE1 in Halt State Before Reset");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             break;
         }
 
-        FAPI_TRY(fapi2::delay(l_timeout * 1000, 200000),
-                 " fapi2::delay Failed. ");   // In microseconds
-    }
-    while(--l_pollCount != 0);
 
-    if (i_engine == p9occgpe::GPE0)
-    {
-        FAPI_ASSERT((l_pollCount != 0),
-                    fapi2::PM_OCC_GPE0_RESET_TIMEOUT()
-                    .set_CHIP( i_target )
-                    .set_GPE0_MODE( HALT )
-                    .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
-                    "OCC GPE0 could not be halted during reset operation.");
-    }
-    else if (i_engine == p9occgpe::GPE1)
-    {
-        FAPI_ASSERT((l_pollCount != 0),
-                    fapi2::PM_OCC_GPE1_RESET_TIMEOUT()
-                    .set_CHIP( i_target )
-                    .set_GPE1_MODE( HALT )
-                    .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
-                    "OCC GPE1 could not be halted during reset operation.");
-    }
+        // Halt the OCC GPE
+        l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
+        FAPI_TRY(putScom(i_target, l_controlReg, l_data64),
+                 "ERROR: Failed to halt the OCC GPE");
 
-    //Clear status (Instruction Address) register
-    l_data64.flush<0>();
-    FAPI_TRY(fapi2::putScom(i_target, l_instrAddrReg, l_data64),
-             "ERROR: Failed to Clear the status register");
+        // Wait for OCC GPE to halt
+        do
+        {
+            FAPI_TRY(fapi2::getScom(i_target, l_statusReg, l_data64),
+                     "ERROR: Failed to get the OCC GPE status");
 
-    //Clear Interrupt vector prefix register
-    FAPI_TRY(putScom(i_target, l_intVecReg, l_data64),
-             "ERROR: Failed to clear interrupt vector prefix register");
+            if (l_data64.getBit<0>() == 1)
+            {
+                FAPI_INF("OCC GPE has been halted");
+                break;
+            }
+
+            FAPI_TRY(fapi2::delay(l_timeout * 1000, 200000),
+                     " fapi2::delay Failed. ");   // In microseconds
+        }
+        while(--l_pollCount != 0);
+
+        if (i_engine == p9occgpe::GPE0)
+        {
+            FAPI_ASSERT_NOEXIT((l_pollCount != 0),
+                               fapi2::PM_OCC_GPE0_RESET_TIMEOUT(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP( i_target )
+                               .set_GPE0_MODE( HALT )
+                               .set_GPE0_BASE_ADDRESS( l_gpeBaseAddress ),
+                               "OCC GPE0 could not be halted during reset operation.");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
+        }
+        else if (i_engine == p9occgpe::GPE1)
+        {
+            FAPI_ASSERT_NOEXIT((l_pollCount != 0),
+                               fapi2::PM_OCC_GPE1_RESET_TIMEOUT(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP( i_target )
+                               .set_GPE1_MODE( HALT )
+                               .set_GPE1_BASE_ADDRESS( l_gpeBaseAddress ),
+                               "OCC GPE1 could not be halted during reset operation.");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            break;
+        }
+
+        //Clear status (Instruction Address) register
+        l_data64.flush<0>();
+        FAPI_TRY(fapi2::putScom(i_target, l_instrAddrReg, l_data64),
+                 "ERROR: Failed to Clear the status register");
+
+        //Clear Interrupt vector prefix register
+        FAPI_TRY(putScom(i_target, l_intVecReg, l_data64),
+                 "ERROR: Failed to clear interrupt vector prefix register");
+    }
+    while(0);
 
 fapi_try_exit:
     FAPI_IMP("<< pm_occ_gpe_reset");

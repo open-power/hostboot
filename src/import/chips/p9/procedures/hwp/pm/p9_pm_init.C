@@ -74,7 +74,8 @@
 /// @return FAPI2_RC_SUCCESS on success, else error code.
 ///
 fapi2::ReturnCode pm_init(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    void* i_pHomerImage);
 
 ///
 /// @brief Clears OCC special wake-up on all configured EX chiplets
@@ -92,7 +93,8 @@ fapi2::ReturnCode clear_occ_special_wakeups(
 
 fapi2::ReturnCode p9_pm_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    const p9pm::PM_FLOW_MODE i_mode)
+    const p9pm::PM_FLOW_MODE i_mode,
+    void* i_pHomerImage = NULL)
 {
     FAPI_INF("Entering p9_pm_init ...");
 
@@ -101,13 +103,13 @@ fapi2::ReturnCode p9_pm_init(
     if (i_mode == p9pm::PM_INIT)
     {
         FAPI_DBG("Initialize the OCC Complex.");
-        FAPI_TRY(pm_init(i_target),
+        FAPI_TRY(pm_init(i_target, i_pHomerImage),
                  "ERROR: Failed to initialize OCC Complex");
     }
     else if (i_mode == p9pm::PM_RESET)
     {
         FAPI_DBG("Reset the OCC Complex.");
-        FAPI_EXEC_HWP(l_rc, p9_pm_reset, i_target);
+        FAPI_EXEC_HWP(l_rc, p9_pm_reset, i_target, i_pHomerImage);
         FAPI_TRY(l_rc, "ERROR: Failed to reset OCC complex");
     }
     else
@@ -123,7 +125,8 @@ fapi_try_exit:
 }
 
 fapi2::ReturnCode pm_init(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    void* i_pHomerImage)
 {
     FAPI_INF("Entering pm_init...");
 
@@ -200,6 +203,16 @@ fapi2::ReturnCode pm_init(
     FAPI_EXEC_HWP(l_rc, p9_pm_pstate_gpe_init, i_target, p9pm::PM_INIT);
     FAPI_TRY(l_rc, "ERROR: Failed to initialize PGPE");
     FAPI_TRY(p9_pm_glob_fir_trace(i_target, "After PGPE initialization"));
+
+    //  ************************************************************************
+    //  Set up the configuration content in HOMER for the 24x7 function
+    //  ************************************************************************
+    if (i_pHomerImage != NULL)
+    {
+        FAPI_DBG("Executing p9_check_proc_config to create configuration settings for 24x7");
+        FAPI_EXEC_HWP(l_rc, p9_check_proc_config, i_target, i_pHomerImage);
+        FAPI_TRY(l_rc, "ERROR: Failed to initialize 24x7 configuration");
+    }
 
     // ************************************************************************
     // Switch off OCC initiated special wakeup on EX to allowSTOP functionality

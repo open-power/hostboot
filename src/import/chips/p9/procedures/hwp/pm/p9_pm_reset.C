@@ -79,7 +79,8 @@ enum PPM_MASK
 // -----------------------------------------------------------------------------
 
 fapi2::ReturnCode p9_pm_reset(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    void* i_pHomerImage = NULL)
 {
     FAPI_IMP(">> p9_pm_reset");
 

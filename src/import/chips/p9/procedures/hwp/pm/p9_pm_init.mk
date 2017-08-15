@@ -25,7 +25,7 @@
 PROCEDURE=p9_pm_init
 libp9_pm_init_DEPLIBS += p9_pm_utils p9_pm_corequad_init p9_pm_ocb_init p9_pm_pss_init
 libp9_pm_init_DEPLIBS += p9_pm_pba_init p9_pm_firinit p9_pm_stop_gpe_init p9_pm_pstate_gpe_init
-libp9_pm_init_DEPLIBS += p9_pm_occ_control p9_pm_reset
+libp9_pm_init_DEPLIBS += p9_pm_occ_control p9_pm_reset p9_check_proc_config
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)

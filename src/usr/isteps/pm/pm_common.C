@@ -787,6 +787,11 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
 
+        //Get homer image buffer
+        uint64_t l_homerPhysAddr = 0x0;
+        l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+        void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -798,7 +803,8 @@ namespace HBPM
             FAPI_INVOKE_HWP( l_errl,
                              p9_pm_init,
                              l_fapiTarg,
-                             p9pm::PM_INIT );
+                             p9pm::PM_INIT,
+                             l_homerVAddr);
 
             if ( l_errl != nullptr )
             {
@@ -830,6 +836,11 @@ namespace HBPM
 
         errlHndl_t l_errl = nullptr;
 
+        //Get homer image buffer
+        uint64_t l_homerPhysAddr = 0x0;
+        l_homerPhysAddr = i_target->getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+        void* l_homerVAddr = convertHomerPhysToVirt(i_target,l_homerPhysAddr);
+
         // cast OUR type of target to a FAPI type of target.
         // figure out homer offsets
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -842,7 +853,8 @@ namespace HBPM
             FAPI_INVOKE_HWP( l_errl,
                              p9_pm_init,
                              l_fapiTarg,
-                             p9pm::PM_RESET );
+                             p9pm::PM_RESET,
+                             l_homerVAddr );
 
             if (l_errl)
             {

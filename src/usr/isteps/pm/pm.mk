@@ -106,3 +106,4 @@ include ${NEST_UTIL_PATH}/p9_fbc_utils.mk
 include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk
+include ${HWP_PM_PATH}/p9_check_proc_config.mk
