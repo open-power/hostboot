@@ -392,6 +392,7 @@ sub processApss {
     my @channel_offsets;
     my @channel_gains;
     my @channel_grounds;
+    my @gpios;
 
     foreach my $child (@{$targetObj->getTargetChildren($target)})
     {
@@ -474,6 +475,18 @@ sub processApss {
 
             $targetObj->writeReport($str);
         }
+        elsif ($targetObj->getMrwType($child) eq "APSS_GPIO")
+        {
+            my $function_id=$targetObj->
+                 getAttribute($child,"FUNCTION_ID");
+            my $port=$targetObj->
+                 getAttribute($child,"PORT");
+
+            if ($port ne "")
+            {
+                $gpios[$port] = $function_id;
+            }
+        }
     }
     for (my $i=0;$i<16;$i++)
     {
@@ -497,6 +510,10 @@ sub processApss {
         {
             $channel_offsets[$i]="0";
         }
+        if ($gpios[$i] eq "")
+        {
+            $gpios[$i]="0";
+        }
     }
 
     $targetObj->setAttribute($systemTarget,
@@ -509,6 +526,8 @@ sub processApss {
                  "ADC_CHANNEL_GAINS",join(',',@channel_gains));
     $targetObj->setAttribute($systemTarget,
                  "ADC_CHANNEL_OFFSETS",join(',',@channel_offsets));
+    $targetObj->setAttribute($systemTarget,
+                 "APSS_GPIO_PORT_PINS",join(',',@gpios));
 
     convertNegativeNumbers($targetObj,$systemTarget,"ADC_CHANNEL_OFFSETS",32);
 }
