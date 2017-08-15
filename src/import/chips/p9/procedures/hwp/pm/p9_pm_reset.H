@@ -60,7 +60,8 @@
 #include <p9_pm_pstate_gpe_init.H>
 
 typedef fapi2::ReturnCode (*p9_pm_reset_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    void* i_pHomerImage);
 
 // -----------------------------------------------------------------------------
 // Function Prototype
@@ -72,11 +73,13 @@ extern "C"
 /// @brief Call underlying unit procedures to reset PM complex
 ///
 /// @param[in] i_target Proc Chip target
+/// @param[in] i_pHomerImage pointer to the beginning of the HOMER image buffer
 ///
 /// @return FAPI2_RC_SUCCESS on success, else error code.
 ///
     fapi2::ReturnCode p9_pm_reset(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        void* i_pHomerImage);
 }
 
 #endif // _P9_PM_RESET_H
