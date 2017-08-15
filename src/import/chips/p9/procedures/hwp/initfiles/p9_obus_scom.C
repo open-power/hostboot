@@ -46,7 +46,7 @@ constexpr uint64_t literal_0b101 = 0b101;
 constexpr uint64_t literal_0b100 = 0b100;
 constexpr uint64_t literal_0b110 = 0b110;
 constexpr uint64_t literal_0b00 = 0b00;
-constexpr uint64_t literal_0b00100 = 0b00100;
+constexpr uint64_t literal_0b01110 = 0b01110;
 constexpr uint64_t literal_0b0010101 = 0b0010101;
 constexpr uint64_t literal_0b0010110 = 0b0010110;
 constexpr uint64_t literal_0b1000110 = 0b1000110;
@@ -3972,7 +3972,7 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800f1c0009010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00100 );
+            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01110 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800f1c0009010c3full, l_scom_buffer));
         }
         {
