@@ -842,6 +842,10 @@ uint8_t getSensorInfo(HWAS::callout_ud_t *i_ud,
     {
         *o_sensorNumber = SENSOR::getBackPlaneFaultSensor();
     }
+    else if (i_ud->type == HWAS::SENSOR_CALLOUT )
+    {
+         *o_sensorNumber = static_cast<uint8_t>(i_ud->sensorId);
+    }
     else
     {
         // for all other types there will be at least

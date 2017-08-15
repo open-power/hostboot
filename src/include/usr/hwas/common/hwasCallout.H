@@ -145,8 +145,13 @@ enum partTypeEnum
     PCI_REF_CLOCK                   = 11,
 };
 
-
-
+enum sensorTypeEnum
+{
+    UNKNOWN_SENSOR                  = 0,
+    GPU_FUNC_SENSOR                 = 1,
+    GPU_TEMPERATURE_SENSOR          = 2,
+    GPU_MEMORY_TEMP_SENSOR          = 3,
+};
 
 //
 const uint8_t HW_CALLOUT        = 0x01;
@@ -154,6 +159,7 @@ const uint8_t PROCEDURE_CALLOUT = 0x02;
 const uint8_t BUS_CALLOUT       = 0x03;
 const uint8_t CLOCK_CALLOUT     = 0x04;
 const uint8_t PART_CALLOUT      = 0x05;
+const uint8_t SENSOR_CALLOUT    = 0x06;
 
 const uint8_t TARGET_IS_SENTINEL = 0xF0;
 
@@ -187,6 +193,10 @@ typedef struct callout_ud
             DeconfigEnum    partDeconfigState;  // uint32_t
             GARD_ErrorType  partGardErrorType;  // uint32_t
             // one Target will follow
+        };
+        struct {  // type == SENSOR_CALLOUT
+            uint32_t        sensorId;
+            sensorTypeEnum  sensorType;
         };
     }; // union
 } callout_ud_t;

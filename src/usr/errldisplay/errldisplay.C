@@ -380,6 +380,25 @@ case HWAS::_type: CONSOLE::displayf(NULL, "  Procedure                : %s", #_t
                 } // switch procedure
 #undef case_PROCEDURE
                 break;
+
+              case HWAS::SENSOR_CALLOUT:
+                CONSOLE::displayf(NULL, "  Sensor ID                   : 0x%x", callout->sensorId);
+
+                switch (callout->sensorType)
+                {
+#define case_SENSOR_TYPE(_type) \
+case HWAS::_type: CONSOLE::displayf(NULL, "  Sensor Type                : %s", #_type); break;
+                    case_SENSOR_TYPE(UNKNOWN_SENSOR)
+                    case_SENSOR_TYPE(GPU_FUNC_SENSOR)
+                    case_SENSOR_TYPE(GPU_TEMPERATURE_SENSOR)
+                    case_SENSOR_TYPE(GPU_MEMORY_TEMP_SENSOR)
+                    default:
+                        CONSOLE::displayf(NULL, "  Sensor Type                : UNKNOWN 0x%X",
+                                          callout->sensorType);
+                } // switch sensorType
+#undef case_SENSOR_TYPE
+                break;
+
             default:
                 CONSOLE::displayf(NULL, "  Callout type             : UNKNOWN: 0x%X",
                                   callout->type);

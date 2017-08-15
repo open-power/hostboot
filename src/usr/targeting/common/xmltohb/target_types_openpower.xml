@@ -46,6 +46,7 @@
         <id>IPMI_INSTANCE</id>
         <default>0xFF</default>
     </attribute>
+    <attribute><id>GPU_SENSORS</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

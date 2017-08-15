@@ -211,6 +211,28 @@ class IpmiConfigLookup
     }
 
 /**
+ *  @brief Determines whether the passed in target has the GPU_SENSORS
+ *         attribute.
+ *
+ *  @param[in] i_tgt. The target to test.
+ *
+ *  @reurn True if the target has the GPU_SENSORS attribute, false otherwise.
+ *
+ */
+    inline static bool doesTargetHaveGPUSensorsAttr(TARGETING::Target * i_tgt)
+    {
+        if(!i_tgt)
+        {
+            return false;
+        }
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_GPU_SENSORS>::Type
+                                                                l_gpuArray;
+        return i_tgt->tryGetAttr<TARGETING::ATTR_GPU_SENSORS>(l_gpuArray);
+    }
+
+
+/**
  *  @brief Given a passed in target, looks up IPMI_SENSOR data based upon
  *         the passed in sensor number.
  *
@@ -236,6 +258,34 @@ class IpmiConfigLookup
                                      uint8_t& o_sensorType,
                                      uint8_t& o_entityId,
                                      TARGETING::SENSOR_NAME& o_sensorName
+                                    );
+
+/**
+ *  @brief Given a passed in target, looks up GPU_SENSOR data based upon
+ *         the passed in sensor number.
+ *
+ *  @param[in] i_target. The target whose GPU_SENSORS attribute will be
+ *                       searched for information based upon the passed
+ *                       in sensor number.
+ *
+ *  @param[in] i_sensorNumber. The GPU sensor whose information we wish
+ *                             to gather.
+ *
+ *  @param[out] o_sensorType. The sensor type as read from the
+ *              from the GPU_SENSOR_ARRAY.
+ *
+ *  @param[out] o_entityId. The entity id associated with
+ *              the sensor as read from the GPU_SENSOR_ARRAY.
+ *
+ *  @param[out] o_sensorName. The sensor name as read from
+ *                            the GPU_SENSOR_ARRAY.
+ *
+ */
+    static bool lookupGPUSensorInfo(TARGETING::Target * i_target,
+                                    uint32_t i_sensorNumber,
+                                    uint8_t& o_sensorType,
+                                    uint8_t& o_entityId,
+                                    TARGETING::SENSOR_NAME& o_sensorName
                                     );
 };
 

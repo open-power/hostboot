@@ -297,6 +297,30 @@ case HWAS::_type: i_parser.PrintString( "Procedure", #_type); break;
 #undef case_PROCEDURE
                 break; // PROCEDURE_CALLOUT
             }
+
+            case HWAS::SENSOR_CALLOUT:
+            {
+                i_parser.PrintString( "Callout type", "Sensor Callout");
+
+                i_parser.PrintNumber( "Sensor ID", "0x%X",
+                                    ntohl(pData->sensorId));
+
+                switch (ntohl(pData->sensorType))
+                {
+#define case_SENSOR_TYPE(_type) \
+case HWAS::_type: i_parser.PrintString( "Sensor Type", #_type); break;
+                    case_SENSOR_TYPE(GPU_FUNC_SENSOR)
+                    case_SENSOR_TYPE(GPU_TEMPERATURE_SENSOR)
+                    case_SENSOR_TYPE(GPU_MEMORY_TEMP_SENSOR)
+                    case_SENSOR_TYPE(UNKNOWN_SENSOR)
+                    default:
+                        i_parser.PrintNumber( "Sensor Type", "UNKNOWN: 0x%X",
+                                        ntohl(pData->sensorType) );
+                        break;
+                } // switch sensorType
+#undef case_SENSOR_TYPE
+                break;
+            }
             default:
                 i_parser.PrintNumber( "Callout type", "UNKNOWN: 0x%X",
                                             ntohl(pData->type) );

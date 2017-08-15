@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,6 +157,22 @@ private:
      */
     ErrlUserDetailsCallout(const HWAS::epubProcedureID i_procedure,
                         const HWAS::callOutPriority i_priority);
+
+
+    /**
+     *  @brief Add a sensor callout
+     *  Adds the given sensor to the list of callouts for the log
+     *
+     *  @param[in]  i_sensorID      Sensor ID
+     *  @param[in]  i_sensorType    Type of sensor being added
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    ErrlUserDetailsCallout(const uint32_t i_sensorID,
+                        const HWAS::sensorTypeEnum i_sensorType,
+                        const HWAS::callOutPriority i_priority );
+
 
 
     // Disabled

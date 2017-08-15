@@ -317,6 +317,56 @@
     <readable/>
 </attribute>
 
+<enumerationType>
+    <id>GPU_SENSOR_ARRAY</id>
+    <description>
+        Enumeration defining the offsets into the GPU_SENSORS array.
+    </description>
+    <enumerator>
+        <name>FUNC_OFFSET</name>
+        <value>0x00</value>
+    </enumerator>
+    <enumerator>
+        <name>FUNC_ID_OFFSET</name>
+        <value>0x01</value>
+    </enumerator>
+    <enumerator>
+        <name>TEMP_OFFSET</name>
+        <value>0x02</value>
+    </enumerator>
+    <enumerator>
+        <name>TEMP_ID_OFFSET</name>
+        <value>0x03</value>
+    </enumerator>
+    <enumerator>
+        <name>MEM_TEMP_OFFSET</name>
+        <value>0x04</value>
+    </enumerator>
+    <enumerator>
+        <name>MEM_TEMP_ID_OFFSET</name>
+        <value>0x05</value>
+    </enumerator>
+    <enumerator>
+        <name>OBUS_CFG_OFFSET</name>
+        <value>0x06</value>
+    </enumerator>
+</enumerationType>
+
+<attribute>
+    <id>GPU_SENSORS</id>
+    <description>Attribute to hold 3 possible GPU sensors.
+    Includes sensor types, ids, and OBUS_CFG bits
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+        <array>3,7</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+</attribute>
+
+
 <attribute>
     <id>OP_TRACE_LITE</id>
     <description>

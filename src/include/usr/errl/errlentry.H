@@ -573,6 +573,22 @@ public:
     void addProcedureCallout(const HWAS::epubProcedureID i_procedure,
                              const HWAS::callOutPriority i_priority);
 
+
+    /**
+     *  @brief Add a special sensor callout
+     *  Adds the given sensor to the list of callouts for the log
+     *
+     *  @param[in]  i_sensorID      Sensor ID
+     *  @param[in]  i_sensorType    Type of sensor being added
+     *  @param[in]  i_priority      Priority of the callout
+     *
+     *  @return void
+     */
+    void addSensorCallout(const uint32_t i_sensorID,
+                          const HWAS::sensorTypeEnum i_sensorType,
+                          const HWAS::callOutPriority i_priority);
+
+
     /**
      * @brief  Import flattened error log
      *
@@ -650,6 +666,14 @@ private:
      */
     epubSubSystem_t getSubSystem( HWAS::partTypeEnum i_partType ) const;
 
+    /**
+     *  @brief maps a sensor type to a subsystem ID
+     *
+     *  @param[in]  i_sensorType   Sensor Type.
+     *
+     *  @return     subsystem ID
+     */
+    epubSubSystem_t getSubSystem( HWAS::sensorTypeEnum i_sensorType ) const;
 
     /**
      * @brief The ErrlManager will call here to ask the
