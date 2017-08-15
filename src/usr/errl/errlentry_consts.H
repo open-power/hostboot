@@ -149,6 +149,19 @@ const epubPartTypeToSub_t PART_TO_SUBSYS_TABLE[] =
     { HWAS::SPIVID_SLAVE_PART_TYPE      , EPUB_POWER_SUBSYS   },
 };
 
+struct epubSensorTypeToSub_t
+{
+    HWAS::sensorTypeEnum  xType;
+    epubSubSystem_t       xSubSys;
+};
+
+struct epubSensorTypeToSub_t SENSOR_TO_SUBSYS_TABLE[] =
+{
+    { HWAS::GPU_FUNC_SENSOR             , EPUB_IO_SUBSYS    },
+    { HWAS::GPU_TEMPERATURE_SENSOR      , EPUB_IO_SUBSYS    },
+    { HWAS::GPU_MEMORY_TEMP_SENSOR      , EPUB_IO_SUBSYS    },
+};
+
 } //end namespace
 
 #endif //#ifndef ERRLENTRY_CONSTS_H

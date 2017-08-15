@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,5 +201,30 @@ ErrlUserDetailsCallout::ErrlUserDetailsCallout(
     TRACDCOMP(g_trac_errl, "Procedure Callout exit");
 
 } // Procedure callout
+
+//------------------------------------------------------------------------------
+// Sensor callout
+ErrlUserDetailsCallout::ErrlUserDetailsCallout(const uint32_t i_sensorID,
+                                        const HWAS::sensorTypeEnum i_sensorType,
+                                        const HWAS::callOutPriority i_priority)
+{
+    TRACDCOMP(g_trac_errl, "Sensor Callout");
+
+    // Set up ErrlUserDetails instance variables
+    iv_CompId = ERRL_COMP_ID;
+    iv_Version = 1;
+    iv_SubSection = ERRL_UDT_CALLOUT;
+
+    HWAS::callout_ud_t *pData;
+    pData = reinterpret_cast<HWAS::callout_ud_t *>
+                (reallocUsrBuf(sizeof(HWAS::callout_ud_t)));
+
+    pData->type = HWAS::SENSOR_CALLOUT;
+    pData->priority = i_priority;
+    pData->sensorId = i_sensorID;
+    pData->sensorType = i_sensorType;
+
+    TRACDCOMP(g_trac_errl, "Sensor Callout exit");
+} // Sensor callout
 
 }

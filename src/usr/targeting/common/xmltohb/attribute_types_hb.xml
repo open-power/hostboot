@@ -461,6 +461,18 @@
         <value>0x01D1</value>
     </enumerator>
     <enumerator>
+        <name>GPU_TEMP</name>
+        <value>0x01D8</value>
+    </enumerator>
+    <enumerator>
+        <name>GPU_MEM_TEMP</name>
+        <value>0x01D9</value>
+    </enumerator>
+    <enumerator>
+        <name>GPU_STATE</name>
+        <value>0x17D8</value>
+    </enumerator>
+    <enumerator>
         <name>PROC_STATE</name>
         <value>0x0703</value>
     </enumerator>

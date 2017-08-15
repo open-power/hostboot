@@ -320,6 +320,17 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
 
 } // addClockCallout
 
+
+void ErrlEntry::addSensorCallout(const uint32_t i_sensorID,
+                            const HWAS::sensorTypeEnum i_sensorType,
+                            const HWAS::callOutPriority i_priority)
+{
+    TRACFCOMP(g_trac_errl, ENTER_MRK"addSensorCallout(0x%X, %d, 0x%x)",
+                i_sensorID, i_sensorType, i_priority);
+
+    ErrlUserDetailsCallout(i_sensorID, i_sensorType, i_priority).addToLog(this);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
@@ -947,6 +958,13 @@ void ErrlEntry::setSubSystemIdBasedOnCallouts()
                     "callout to determine SSID", pData->partType);
             iv_User.setSubSys(getSubSystem(pData->partType));
         }
+        else if ( pData->type == HWAS::SENSOR_CALLOUT )
+        {
+            TRACFCOMP(g_trac_errl, INFO_MRK
+                    "mapping highest priority sensor type 0x%x "
+                    "callout to determine SSID", pData->sensorType);
+            iv_User.setSubSys(getSubSystem(pData->sensorType));
+        }
         else
         {
             TRACFCOMP(g_trac_errl, ERR_MRK
@@ -1147,6 +1165,37 @@ epubSubSystem_t ErrlEntry::getSubSystem( HWAS::clockTypeEnum i_clockType ) const
     {
         TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for clock type 0x%x",
                   i_clockType);
+    }
+
+    TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);
+    return subsystem;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Map a Sensor type to a subsystem ID
+epubSubSystem_t ErrlEntry::getSubSystem(HWAS::sensorTypeEnum i_sensorType) const
+{
+    TRACDCOMP(g_trac_errl, ENTER_MRK"getSubSystem() from sensor type 0x%x",
+              i_sensorType);
+
+    epubSubSystem_t subsystem = EPUB_MISC_UNKNOWN;
+
+    const uint32_t SENSOR_TO_SUBSYS_TABLE_ENTRIES =
+        sizeof(SENSOR_TO_SUBSYS_TABLE)/sizeof(SENSOR_TO_SUBSYS_TABLE[0]);
+
+    for (uint32_t i = 0; i < SENSOR_TO_SUBSYS_TABLE_ENTRIES; i++)
+    {
+        if (SENSOR_TO_SUBSYS_TABLE[i].xType == i_sensorType)
+        {
+            subsystem = SENSOR_TO_SUBSYS_TABLE[i].xSubSys;
+            break;
+        }
+    }
+
+    if(subsystem == EPUB_MISC_UNKNOWN)
+    {
+        TRACFCOMP(g_trac_errl,"WRN>> Failed to find subsystem ID for sensor type 0x%x",
+                  i_sensorType);
     }
 
     TRACDCOMP(g_trac_errl, EXIT_MRK"getSubSystem() ssid 0x%x", subsystem);

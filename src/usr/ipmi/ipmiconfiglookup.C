@@ -92,6 +92,76 @@ bool IpmiConfigLookup::lookupIPMISensorInfo(TARGETING::Target * i_target,
 }
 
 
+//-----------------------------------------------------------------------------
+// Private method used to lookup sensor information from the GPU_SENSORS
+// array attribute of the i_target parameter.
+//
+// Returns true if the sensor was found, false otherwise.
+//-----------------------------------------------------------------------------
+bool IpmiConfigLookup::lookupGPUSensorInfo(TARGETING::Target * i_target,
+                                            uint32_t i_sensorNumber,
+                                            uint8_t& o_sensorType,
+                                            uint8_t& o_entityId,
+                                            TARGETING::SENSOR_NAME& o_sensorName
+                                            )
+{
+    using GPU_ARRAY_ELEMENT = uint16_t[7];
+    bool l_result{false};
+
+    assert(nullptr != i_target);
+    assert(TARGETING::UTIL::INVALID_IPMI_SENSOR != i_sensorNumber);
+
+    // Get the GPU_SENSORS array attribute from i_target
+    TARGETING::AttributeTraits<TARGETING::ATTR_GPU_SENSORS>::Type
+                                                                l_sensorArray;
+    if(!i_target->tryGetAttr<TARGETING::ATTR_GPU_SENSORS>(l_sensorArray))
+    {
+        return l_result;
+    }
+
+    //Search the sensor array for the desired sensor
+    uint32_t elementCount = (sizeof(l_sensorArray)/sizeof(l_sensorArray[0]));
+    const GPU_ARRAY_ELEMENT * begin = &l_sensorArray[0];
+    const GPU_ARRAY_ELEMENT * end = &l_sensorArray[elementCount];
+    const GPU_ARRAY_ELEMENT * itr{nullptr};
+
+    itr = std::find_if(begin,
+                       end,
+                       [i_sensorNumber] (const GPU_ARRAY_ELEMENT& a)
+                       {
+                           return (
+         (a[TARGETING::GPU_SENSOR_ARRAY_FUNC_ID_OFFSET] == i_sensorNumber) ||
+         (a[TARGETING::GPU_SENSOR_ARRAY_TEMP_ID_OFFSET] == i_sensorNumber) ||
+         (a[TARGETING::GPU_SENSOR_ARRAY_MEM_TEMP_ID_OFFSET] == i_sensorNumber));
+                       }
+                      );
+
+    if(itr != end)
+    {
+        l_result = true;
+        uint16_t l_sensorName;
+        if (*itr[TARGETING::GPU_SENSOR_ARRAY_FUNC_ID_OFFSET] == i_sensorNumber)
+        {
+            l_sensorName = *itr[TARGETING::GPU_SENSOR_ARRAY_FUNC_OFFSET];
+        }
+        else if
+        (*itr[TARGETING::GPU_SENSOR_ARRAY_TEMP_ID_OFFSET] == i_sensorNumber)
+        {
+            l_sensorName = *itr[TARGETING::GPU_SENSOR_ARRAY_TEMP_ID_OFFSET];
+        }
+        else
+        {
+            l_sensorName = *itr[TARGETING::GPU_SENSOR_ARRAY_MEM_TEMP_ID_OFFSET];
+        }
+
+        o_sensorName = static_cast<TARGETING::SENSOR_NAME>(l_sensorName);
+        o_sensorType = static_cast<uint8_t>((l_sensorName >> 8) & 0x00FF);
+        o_entityId = static_cast<uint8_t>(l_sensorName & 0x00FF);
+    }
+
+    return l_result;
+}
+
 //--------------------------------------------------------------------------
 //Given a sensor number, lookup and parse SENSOR_NAME into SENSOR_TYPE
 //and ENTITY_ID values.
@@ -149,6 +219,19 @@ bool IpmiConfigLookup::getIPMISensorInfo(uint32_t i_sensorNumber,
                 {
                     break;
                 }
+            }
+            else if (doesTargetHaveGPUSensorsAttr(*itr))
+            {
+                l_result = lookupGPUSensorInfo((*itr),
+                                                i_sensorNumber,
+                                                l_sensorType,
+                                                l_entityId,
+                                                l_sensorName);
+                if (l_result)
+                {
+                    break;
+                }
+
             }
         }
     }
