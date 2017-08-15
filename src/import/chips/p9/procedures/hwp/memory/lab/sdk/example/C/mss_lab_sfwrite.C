@@ -104,8 +104,8 @@ int main(int i_argc, char* i_argv[])
     // retrieve the Cronus string representing the fapi2 target
     mss::logf(mss::DEBUG, "MCBIST C_str: %s", mss::c_str(fapi2_mcbist_target));
 
-    rc = memdiags::sf_init(fapi2_mcbist_target, mss::mcbist::PATTERN_5);
-    mss::lab::is_ok(rc, "memdiags::sf_init failed");
+    rc = mss::memdiags::sf_init(fapi2_mcbist_target, mss::mcbist::PATTERN_5);
+    mss::lab::is_ok(rc, "mss::memdiags::sf_init failed");
 
     // Just for giggles, poll here looking for the FIR bit ...
     {
@@ -128,7 +128,7 @@ int main(int i_argc, char* i_argv[])
         },
         l_probes);
 
-        mss::lab::is_ok(l_poll_results == true, "memdiags::sf_write timedout");
+        mss::lab::is_ok(l_poll_results == true, "mss::memdiags::sf_write timedout");
     }
 
     mss::log(mss::DEBUG, "Finished");
