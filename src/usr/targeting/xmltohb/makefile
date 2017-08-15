@@ -61,14 +61,16 @@ FAPIATTRSRVC_SOURCE = \
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*)
 FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*)
+FAPI2_ATTR_XML += $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*)
+
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
 #       normal structures that define the attribute itself.  It temporarily
 #       provides default values for new attributes defined in other files.
-
 FAPI2_ATTR_XML := $(filter-out $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/hb_temp_defaults.xml,$(FAPI2_ATTR_XML))
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*~) ,$(FAPI2_ATTR_XML))
 FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*~),$(FAPI2_ATTR_XML))
+FAPI2_ATTR_XML := $(filter-out $(wildcard $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*~),$(FAPI2_ATTR_XML))
 
 
 XMLTOHB_FAPIATTR_SOURCES += ${FAPI2_ATTR_XML}

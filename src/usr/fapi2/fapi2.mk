@@ -29,7 +29,9 @@
 #
 GENPATH?=$(ROOTPATH)/obj/genfiles
 
-HWP_PATH   += ${ROOTPATH}/src/import/chips/p9/procedures
+HWP_PATH_1   += ${ROOTPATH}/src/import/chips/p9/procedures
+HWP_PATH_2   += ${ROOTPATH}/src/import/chips/centaur/procedures
+HWP_PATH += ${HWP_PATH_1}/ ${HWP_PATH_2}/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr
@@ -42,6 +44,11 @@ EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${HWP_PATH}
+EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
+EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
+EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
+EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -65,7 +72,7 @@ OBJS += plat_wof_access.o
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk
 
-include ${HWP_PATH}/hwp/accessors/p9_get_mem_vpd_keyword.mk
+include ${HWP_PATH_1}/hwp/accessors/p9_get_mem_vpd_keyword.mk
 
 #EKB Objects (mirrored in src/import)
 OBJS += error_info.o
@@ -93,12 +100,16 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/error_info/*.xml)
+FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/centaur/procedures/xml/error_info/*.xml)
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/fapi2/xml/attribute_info/*.xml)
 FAPI2_ATTR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p9/procedures/xml/attribute_info/*.xml)
+FAPI2_ATTR_XML += $(wildcard \
+  $(ROOTPATH)/src/import/chips/centaur/procedures/xml/attribute_info/*.xml)
 
 # Filter out Temp defaults XML file from Attribute XML files.
 # NOTE: The hb_temp_defaults.xml file is not a normal attribute file with the
@@ -138,7 +149,7 @@ include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucke
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
 
-VPATH += ${HWP_PATH}/hwp/accessors
+VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
