@@ -175,11 +175,15 @@ uint32_t ScomAccessor::Access(TargetHandle_t i_target,
                                 P9_STOP_SECTION_CORE_SCOM :
                                 P9_STOP_SECTION_EQ_SCOM;
 
+                            uint64_t scomVal =
+                                (((uint64_t)bs.getFieldJustify(0, 32)) << 32) |
+                                 ((uint64_t)bs.getFieldJustify(32, 32));
+
                             err = RTPM::hcode_update(sec,
                                                      P9_STOP_SCOM_OR_APPEND,
                                                      i_target,
                                                      registerId,
-                                                     bs.getFieldJustify(0,64));
+                                                     scomVal);
                             if( nullptr != err)
                             {
                                 PRDF_ERR("[ScomAccessor::Access()] Error in"
