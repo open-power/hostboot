@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
@@ -24,10 +25,12 @@
 # IBM_PROLOG_END_TAG
 # A collection of utility functions to convert fapi attributes to targeting attributes
 
-$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
-my $xml = new XML::Simple (KeyAttr=>[]);
+use XML::Simple;
 use Digest::MD5 qw(md5_hex);
 use strict;
+$XML::Simple::PREFERRED_PARSER = 'XML::Parser';
+my $xml = new XML::Simple (KeyAttr=>[]);
+
 
 # Convert a FAPI2 target type to the equivalent TARGETING type
 #   Input: fapi2 type
@@ -360,7 +363,7 @@ sub getArrayDimmensions{
     my (%attrHash) = @_;
     my $retValue = "";
 
-    my $simpleType = %attrHash->{simpleType};
+    my $simpleType = $attrHash{simpleType};
 
     my @keys = keys (%$simpleType);
 
@@ -368,7 +371,7 @@ sub getArrayDimmensions{
     {
         if( $key eq "array")
            {
-                $retValue .= %attrHash->{simpleType}->{$key};
+                $retValue .= $attrHash{simpleType}->{$key};
            }
     }
     #eat whitespace
@@ -407,7 +410,7 @@ sub getAttrType {
     my (%attrHash) = @_;
     my $retValue = "";
 
-    my $simpleType = %attrHash->{simpleType};
+    my $simpleType = $attrHash{simpleType};
 
     my @keys = keys (%$simpleType);
 

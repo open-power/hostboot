@@ -112,7 +112,7 @@ foreach my $attribute (@{$allHBAttributes->{attribute}})
 {
     if (exists $attribute->{hwpfToHbAttrMap} )
     {
-        push (@{%hwpfAttributes->{attribute}}, $attribute);
+        push (@{$hwpfAttributes{attribute}}, $attribute);
     }
 }
 
@@ -147,7 +147,7 @@ foreach my $ekbAttr (@{$allEKBAttributes->{attribute}})
     }
 
     #Loop over HB attrs until we find a match
-    foreach my $hbAttr (@{%hwpfAttributes->{attribute}})
+    foreach my $hbAttr (@{$hwpfAttributes{attribute}})
     {
         my $hbFapiId  = $hbAttr->{hwpfToHbAttrMap}[0]->{id};
 
@@ -217,7 +217,7 @@ foreach my $ekbEnum (@{$allEKBAttributes->{enumerationType}})
     my $ekbEnumId = $ekbEnum->{id};
     my $theHbEnum;
     #we dont want to add duplicates so check if the enumeration exists already in HB
-    foreach my $hbEnum (@{%$allHBAttributes->{enumerationType}})
+    foreach my $hbEnum (@{$allHBAttributes->{enumerationType}})
     {
         my $hbEnumId  = $hbEnum->{id};
 
