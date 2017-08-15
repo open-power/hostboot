@@ -804,7 +804,7 @@ _rs4_decompress(uint8_t* io_data_str,
 {
     uint8_t* rs4_str = (uint8_t*)i_rs4 + sizeof(CompressedScanData);
 
-    if (htobe16(i_rs4->iv_magic) != RS4_MAGIC)
+    if (be16toh(i_rs4->iv_magic) != RS4_MAGIC)
     {
         return BUG(SCAN_DECOMPRESSION_MAGIC_ERROR);
     }
