@@ -113,7 +113,7 @@ foreach my $attribute (@{$allAttributes->{attribute}})
 {
     if (exists $attribute->{hwpfToHbAttrMap} )
     {
-        push (@{%hwpfAttributes->{attribute}}, $attribute);
+        push (@{$hwpfAttributes{attribute}}, $attribute);
     }
 }
 
@@ -192,7 +192,7 @@ foreach my $targetType ( @{$srcTargetTypes->{targetType}})
         }
         if($id eq $NewAttr[$i][0])
         {
-            push (@{%$targetType->{attribute}}, \%attrHash);
+            push (@{$targetType->{attribute}}, \%attrHash);
         }
     }
 }
@@ -205,7 +205,7 @@ foreach my $targetType (@{$srcTargetTypes->{targetType}})
     foreach my $attribute (@{$targetType->{attribute}})
     {
         #check if there is a hostboot mapping w/ a different name
-        foreach my $hbMappedAttr (@{%hwpfAttributes->{attribute}})
+        foreach my $hbMappedAttr (@{$hwpfAttributes{attribute}})
         {
             my $fapiAttrId  = $hbMappedAttr->{hwpfToHbAttrMap}[0]->{id};
             $fapiAttrId = substr $fapiAttrId , 5;
