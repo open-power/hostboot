@@ -35,8 +35,13 @@
 #include <runtime/interface.h>
 #include <config.h>
 
+#include <runtime/rt_targeting.H>
+#include <errl/errlmanager.H>
+#include <devicefw/userif.H>
+
 #include "common/securetrace.H"
 #include <secureboot/service.H>
+#include <secureboot/settings.H>
 
 class SecurebootRtTestSuite: public CxxTest::TestSuite
 {
@@ -100,7 +105,43 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
     {
         SB_ENTER("SecurebootRtTestSuite::testBaseInterfaces");
 
+        errlHndl_t l_errl = nullptr;
+
         do {
+
+        // Runtime scom tests return zeroed buffers unless a write is
+        // performed first, so write Security register.
+        uint64_t l_regValue = 0;
+        size_t l_size = sizeof(l_regValue);
+
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target* masterProcChipTargetHandle = nullptr;
+
+        l_errl = tS.queryMasterProcChipTargetHandle(masterProcChipTargetHandle);
+
+        if (l_errl)
+        {
+            TS_FAIL("SecurebootRtTestSuite::testBaseInterfaces: Failed to get masterProcChipTargetHandle");
+            break;
+        }
+
+        // Set SAB and SUL
+        l_regValue |= static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SabBit);
+        l_regValue |= static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit);
+        l_errl = deviceWrite(
+                     masterProcChipTargetHandle,
+                     &l_regValue, l_size,
+                     DEVICE_SCOM_ADDRESS(
+                         static_cast<uint64_t>(
+                             SECUREBOOT::ProcSecurity::SwitchRegister)));
+
+        if (l_errl)
+        {
+            TS_FAIL("SecurebootRtTestSuite::testBaseInterfaces: Failed to Write Security Switch Register");
+            break;
+        }
+        assert(l_size == sizeof(l_regValue));
+
 
         SB_INF("SECUREBOOT::enabled() = %d", SECUREBOOT::enabled());
 
@@ -108,6 +149,11 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
                SECUREBOOT::allowAttrOverrides());
 
         } while(0);
+
+        if (l_errl)
+        {
+            errlCommit(l_errl, SECURE_COMP_ID);
+        }
 
         SB_EXIT("SecurebootRtTestSuite::testBaseInterfaces");
     }

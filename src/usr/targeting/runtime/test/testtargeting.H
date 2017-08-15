@@ -155,10 +155,29 @@ class TargetingTestSuite : public CxxTest::TestSuite
         void testApplyAttrOverrides()
         {
             using namespace TARGETING;
-            TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides");
+            TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides (temporarily allow Attr Overrides)");
+
+            // Must Temporarily Allow Attribute Overrides since secureboot is
+            // now set at runtime.  Will restore later.
+            bool allow_attr_overrides = false;
+            TargetService& l_targetService = targetService();
+            TARGETING::Target* l_pTarget = nullptr;
+            (void) l_targetService.getTopLevelTarget(l_pTarget);
+            if (l_pTarget == nullptr)
+            {
+                TS_FAIL("Top level target handle is NULL");
+            }
+            else
+            {
+                  allow_attr_overrides = l_pTarget->getAttr<
+                    TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>();
+
+                  l_pTarget->setAttr<
+                    TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(true);
+            }
+
             do
             {
-
                 // Get the address of the runtime apply overrides function
                 runtimeInterfaces_t* rt_intf = getRuntimeInterfaces();
                 if(rt_intf == NULL)
@@ -173,14 +192,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 }
 
                 // Get the initial value of the test attribute
-                TargetService& l_targetService = targetService();
-                TARGETING::Target* l_pTarget = NULL;
-                (void) l_targetService.getTopLevelTarget(l_pTarget);
-                if (l_pTarget == NULL)
-                {
-                    TS_FAIL("Top level target handle is NULL");
-                    break;
-                }
                 uint8_t l_attrVal =
                          l_pTarget->getAttr<TARGETING::ATTR_SCRATCH_UINT8_1>();
                 uint8_t l_attrOverrideVal = l_attrVal + 1;
@@ -263,6 +274,11 @@ class TargetingTestSuite : public CxxTest::TestSuite
 
                 TRACFCOMP(g_trac_targeting,"testApplyAttrOverrides SUCCESS");
             } while (0);
+
+            // Restore allow_attr_overrides setting
+            l_pTarget->setAttr<
+              TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>(
+                allow_attr_overrides);
         }
 
 };

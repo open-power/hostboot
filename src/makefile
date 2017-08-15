@@ -185,7 +185,6 @@ EXTENDED_MODULES += ibscom
 EXTENDED_MODULES += thread_activate
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,dump)
 EXTENDED_MODULES += $(if $(CONFIG_VPO_COMPILE),,runtime)
-EXTENDED_MODULES += secureboot_ext
 EXTENDED_MODULES += $(if $(CONFIG_TPMDD),secureboot_trusted,)
 EXTENDED_MODULES += sbe
 EXTENDED_MODULES += sbeio

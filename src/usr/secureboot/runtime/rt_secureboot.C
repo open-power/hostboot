@@ -40,7 +40,6 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
-#include <util/misc.H>
 
 namespace SECUREBOOT
 {
@@ -95,20 +94,16 @@ bool allowAttrOverrides()
     if (enabled())
     {
         // Check attribute to see if overrides are allowed in secure mode
-        if ( Util::isTargetingLoaded() )
-        {
-            TARGETING::TargetService& tS = TARGETING::targetService();
-            TARGETING::Target* sys = nullptr;
-            (void) tS.getTopLevelTarget( sys );
-            assert(sys, "SECUREBOOT::allowAttrOverrides() system target is NULL");
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target* sys = nullptr;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "SECUREBOOT::allowAttrOverrides() system target is NULL");
 
-            retVal = sys->getAttr<
-                TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>();
+        retVal = sys->getAttr<
+            TARGETING::ATTR_ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE>();
 
-            SB_INF("SECUREBOOT::allowAttrOverrides: "
-                   "Inside Attr check: retVal=0x%X",
-                   retVal);
-       }
+        SB_INF("SECUREBOOT::allowAttrOverrides: Inside Attr check: retVal=0x%X",
+               retVal);
     }
     else
     {
