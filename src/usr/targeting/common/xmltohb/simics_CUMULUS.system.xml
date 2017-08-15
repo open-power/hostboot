@@ -5466,6 +5466,10 @@
         <default>MEM</default>
     </attribute>
     <attribute>
+        <id>CEN_MSS_VOLT_OVERRIDE</id>
+        <default>NONE</default>
+    </attribute>
+    <attribute>
         <id>CENTAUR_ECID_FRU_ID</id>
         <default>0xFF</default>
     </attribute>

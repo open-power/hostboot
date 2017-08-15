@@ -137,7 +137,14 @@ sub createAttrFromFapi(\%)
 
     # description: passed as-is
     my $description = $fapiattr->{description};
-    $targattr->{description} = $description;
+    if(ref $fapiattr->{description} && eval {keys %{$fapiattr->{description}} == 0} )
+    {
+        $targattr->{description} = "place holder description";
+    }
+    else
+    {
+        $targattr->{description} = $description;
+    }
 
     # valueType: convert
     my $valueType = convertValueFapi2Targ($fapiattr->{valueType});
@@ -236,7 +243,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_SYSTEM        => "sys-sys-power9",
     TARGET_TYPE_DIMM          => "lcard-dimm",
     TARGET_TYPE_PROC_CHIP     => "chip-processor",
-    TARGET_TYPE_MEMBUF_CHIP   => "chip-membuf",
+    TARGET_TYPE_MEMBUF_CHIP   => "chip-membuf-centaur",
     TARGET_TYPE_EX            => "unit-ex-power9",
     TARGET_TYPE_MBA           => "unit-mba",
     TARGET_TYPE_MCS           => "unit-mcs-power9",
