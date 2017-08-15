@@ -400,9 +400,11 @@ int32_t l3LineDelete(TargetHandle_t i_exTgt,
     ldData.setFieldJustify(12, 5, i_l3_err_data.member);
     ldData.setFieldJustify(17, 12, i_l3_err_data.hashed_real_address_45_56);
 
+    uint64_t scomVal = (((uint64_t)ldData.getFieldJustify(0, 32)) << 32) |
+                        ((uint64_t)ldData.getFieldJustify(32, 32));
+
     err = RTPM::hcode_update(P9_STOP_SECTION_L3, P9_STOP_SCOM_APPEND,
-                             i_exTgt, 0x1001180E,
-                             ldData.getFieldJustify(0, 64));
+                             i_exTgt, 0x1001180E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l3LineDelete] HUID: 0x%08x hcode_update "
@@ -502,9 +504,11 @@ int32_t l2LineDelete(TargetHandle_t i_exTgt,
     if (i_l2_err_data.bank)
         ldData.setBit(28);
 
+    uint64_t scomVal = (((uint64_t)ldData.getFieldJustify(0, 32)) << 32) |
+                        ((uint64_t)ldData.getFieldJustify(32, 32));
+
     err = RTPM::hcode_update(P9_STOP_SECTION_L2, P9_STOP_SCOM_APPEND,
-                             i_exTgt, 0x1001080E,
-                             ldData.getFieldJustify(0, 64));
+                             i_exTgt, 0x1001080E, scomVal);
     if (nullptr != err)
     {
         PRDF_ERR( "[PlatServices::l2LineDelete] HUID: 0x%08x hcode_update "
