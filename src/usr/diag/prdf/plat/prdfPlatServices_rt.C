@@ -138,11 +138,11 @@ uint32_t stopBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiTrgt ( i_chip->getTrgt() );
 
     errlHndl_t errl;
-    FAPI_INVOKE_HWP( errl, memdiags::stop, fapiTrgt );
+    FAPI_INVOKE_HWP( errl, mss::memdiags::stop, fapiTrgt );
 
     if ( nullptr != errl )
     {
-        PRDF_ERR( PRDF_FUNC "memdiags::stop(0x%08x) failed", i_chip->getHuid());
+        PRDF_ERR( PRDF_FUNC "mss::memdiags::stop(0x%08x) failed", i_chip->getHuid());
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         rc = FAIL;
     }
@@ -191,11 +191,11 @@ uint32_t resumeBgScrub<TYPE_MCBIST>( ExtensibleChip * i_chip )
 
         // Resume the command on the next address.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, memdiags::continue_cmd, fapiTrgt );
+        FAPI_INVOKE_HWP( errl, mss::memdiags::continue_cmd, fapiTrgt );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "memdiags::continue_cmd(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::continue_cmd(0x%08x) failed",
                       i_chip->getHuid() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;

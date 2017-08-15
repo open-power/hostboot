@@ -593,15 +593,15 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 else
                 {
                     fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                    FAPI_INVOKE_HWP( err, memdiags::stop, fapiMcbist );
+                    FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
 
                     if ( nullptr != err )
                     {
-                        MDIA_ERR("sm: memdiags::stop failed");
+                        MDIA_ERR("sm: mss::memdiags::stop failed");
                         errlCommit(err, MDIA_COMP_ID);
                     }
 
-                    //memdiags::stop will set the command complete attention so
+                    //mss::memdiags::stop will set the command complete attention so
                     //we need to clear those
                     bitMask = ~bitMask;
 
@@ -1156,7 +1156,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
             {
                 case START_RANDOM_PATTERN:
 
-                    FAPI_INVOKE_HWP( err, memdiags::sf_init, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiMcbist,
                                      mss::mcbist::PATTERN_RANDOM );
                     MDIA_FAST("sm: random init %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1177,7 +1177,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                         stopCond.set_pause_on_nce_hard(mss::ON);
                     }
 
-                    FAPI_INVOKE_HWP( err, memdiags::sf_read, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_read, fapiMcbist,
                                      stopCond );
                     MDIA_FAST("sm: scrub %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1192,7 +1192,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 case START_PATTERN_6:
                 case START_PATTERN_7:
 
-                    FAPI_INVOKE_HWP( err, memdiags::sf_init, fapiMcbist,
+                    FAPI_INVOKE_HWP( err, mss::memdiags::sf_init, fapiMcbist,
                                      workItem );
                     MDIA_FAST("sm: init %p on: %x", fapiMcbist,
                             get_huid(target));
@@ -1420,11 +1420,11 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
                 MDIA_FAST("sm: stopping command: %p", target);
 
                 fapi2::Target<fapi2::TARGET_TYPE_MCBIST> fapiMcbist(target);
-                FAPI_INVOKE_HWP( err, memdiags::stop, fapiMcbist );
+                FAPI_INVOKE_HWP( err, mss::memdiags::stop, fapiMcbist );
 
                 if(nullptr != err)
                 {
-                    MDIA_ERR("sm: memdiags::stop failed");
+                    MDIA_ERR("sm: mss::memdiags::stop failed");
                     errlCommit(err, MDIA_COMP_ID);
                 }
             }

@@ -263,11 +263,11 @@ uint32_t startSfRead<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
         // Start the super fast read command.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, memdiags::sf_read, fapiTrgt, stopCond, saddr );
+        FAPI_INVOKE_HWP( errl, mss::memdiags::sf_read, fapiTrgt, stopCond, saddr );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "memdiags::sf_read(0x%08x,%d) failed",
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::sf_read(0x%08x,%d) failed",
                       mcbChip->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
