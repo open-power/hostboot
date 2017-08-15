@@ -109,7 +109,7 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     // to call sf_init (0's)
     // TK we need to check FIR given the way this is right now, we should adjust with better stop
     // conditions when we learn more about what we want to find in the lab
-    FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
+    FAPI_TRY( mss::memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 
     // Poll for completion.
     l_poll_results = mss::poll(i_target, MCBIST_MCBISTFIRQ, l_poll_parameters,
@@ -131,10 +131,10 @@ fapi2::ReturnCode p9_mss_scrub( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
     FAPI_TRY ( mss::reset_reorder_queue_settings(i_target) );
 
     // Start background scrub
-    FAPI_TRY ( memdiags::background_scrub( i_target,
-                                           mss::mcbist::stop_conditions(),
-                                           mss::mcbist::speed::BG_SCRUB,
-                                           mss::mcbist::address() ) );
+    FAPI_TRY ( mss::memdiags::background_scrub( i_target,
+               mss::mcbist::stop_conditions(),
+               mss::mcbist::speed::BG_SCRUB,
+               mss::mcbist::address() ) );
 
     // Unmask firs after background scrub is started
     FAPI_TRY ( mss::unmask::after_background_scrub( i_target ) );
