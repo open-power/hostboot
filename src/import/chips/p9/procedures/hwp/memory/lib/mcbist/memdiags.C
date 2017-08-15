@@ -53,6 +53,9 @@ using fapi2::TARGET_TYPE_SYSTEM;
 using fapi2::FAPI2_RC_SUCCESS;
 using fapi2::FAPI2_RC_INVALID_PARAMETER;
 
+namespace mss
+{
+
 namespace memdiags
 {
 
@@ -743,6 +746,8 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<TARGET_TYPE_MCBIST>& i_targe
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
 }
 
 }

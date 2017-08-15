@@ -363,12 +363,12 @@ uint32_t startBgScrub<TYPE_MCA>( ExtensibleChip * i_mcaChip,
 
         // Start the background scrub command.
         errlHndl_t errl = nullptr;
-        FAPI_INVOKE_HWP( errl, memdiags::background_scrub, fapiTrgt, stopCond,
+        FAPI_INVOKE_HWP( errl, mss::memdiags::background_scrub, fapiTrgt, stopCond,
                          scrubSpeed, saddr );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "memdiags::background_scrub(0x%08x,%d) failed",
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::background_scrub(0x%08x,%d) failed",
                       mcbChip->getHuid(), i_rank.getMaster() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;
@@ -427,12 +427,12 @@ uint32_t __startTdScrub_mca( ExtensibleChip * i_mcaChip,
 
         // Start targeted scrub command.
         errlHndl_t errl;
-        FAPI_INVOKE_HWP( errl, memdiags::targeted_scrub, fapiTrgt, i_stopCond,
+        FAPI_INVOKE_HWP( errl, mss::memdiags::targeted_scrub, fapiTrgt, i_stopCond,
                          i_saddr, i_eaddr, mss::mcbist::NONE );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "memdiags::targeted_scrub(0x%08x) failed",
+            PRDF_ERR( PRDF_FUNC "mss::memdiags::targeted_scrub(0x%08x) failed",
                       mcbChip->getHuid() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
             o_rc = FAIL; break;

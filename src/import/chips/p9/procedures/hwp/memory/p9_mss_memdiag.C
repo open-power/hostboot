@@ -122,7 +122,7 @@ extern "C"
 
         // We start the sf_init (write 0's) and it'll tickle the MCBIST complete FIR. PRD will see that
         // and start a background scrub.
-        FAPI_TRY( memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
+        FAPI_TRY( mss::memdiags::sf_init(i_target, mss::mcbist::PATTERN_0) );
 
         // If we're in the sim, we want to poll for the FIR bit. I don't think this ever really happens
         // unless we're expressly testing this API.

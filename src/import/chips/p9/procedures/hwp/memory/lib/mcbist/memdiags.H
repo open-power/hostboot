@@ -43,6 +43,9 @@
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/settings.H>
 
+namespace mss
+{
+
 namespace memdiags
 {
 
@@ -398,4 +401,5 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
 
 } // namespace
 
+} // namespace
 #endif
