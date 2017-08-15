@@ -266,13 +266,13 @@ fapi2::ReturnCode pm_pba_fir_init(
              FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXPUSH_WRERR),
              FIR_CHECKSTOP_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXRCV_DLO_ERR),
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_ERR),
              FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_DLO_TO),
              FIR_MASK_ERROR);
     FAPI_TRY(l_pbaFir.mask(PBAFIR_AXRCV_RSVDATA_TO),
              FIR_MASK_ERROR);
-    FAPI_TRY(l_pbaFir.setCheckStop(PBAFIR_AXFLOW_ERR),
+    FAPI_TRY(l_pbaFir.mask(PBAFIR_AXFLOW_ERR),
              FIR_CHECKSTOP_ERROR);
     FAPI_TRY(l_pbaFir.setRecvAttn(PBAFIR_AXSND_DHI_RTYTO),
              FIR_REC_ATTN_ERROR);
