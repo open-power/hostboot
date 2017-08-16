@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ namespace MBOX
      * Send message asynchronously
      * @param[in] i_q_id id, of the FSP message queue to send the msg to.
      * @param[in] i_msg. The message to send.
-     * @param[in] i_node The destination node [0-7] for IPC messages, 
+     * @param[in] i_node The destination node [0-7] for IPC messages,
      *                   otherwise the default is FSP
      *
      * @return errlHndl_t on error.
@@ -71,8 +71,8 @@ namespace MBOX
      * @pre For FSP mbox messages, i_msg->extra_data must be NULL If there is
      *      no payload associated with the message.
      *
-     * @pre For FSP mbox messages, 
-     *      i_msg->extra_data = malloc(size); i_msg->data[1] = size; 
+     * @pre For FSP mbox messages,
+     *      i_msg->extra_data = malloc(size); i_msg->data[1] = size;
      *      Any extra data associated with i_msg was obtained from the heap
      *      using malloc and i_msg->data[1] contains the length of that data.
      *
@@ -93,7 +93,7 @@ namespace MBOX
      * @pre io_msg->extra_data ==  NULL If there is no extra data is associated
      *      with the message.
      *
-     * @pre io_msg->extra_data = malloc(size); io_msg->data[1] = size; 
+     * @pre io_msg->extra_data = malloc(size); io_msg->data[1] = size;
      *      Any extra data associated with io_msg was obtained from the heap
      *      using malloc and io_msg->data[1] contains the length of that data.
      *
@@ -114,7 +114,7 @@ namespace MBOX
     bool mailbox_enabled();
 
     /**
-     * Suspend the mailbox. 
+     * Suspend the mailbox.
      *
      * @param[in] i_disable_hw_int, disable interrupts from hw along
      *            with SW suspend.  Defaults to SW suspend only
@@ -161,6 +161,12 @@ namespace MBOX
      * @param[in] pointer to storage
      */
     void deallocate(void * i_ptr);
+
+    /**
+     * Reclaim any DMA buffers owned by the FSP
+     * @return errlHndl_t on error
+     */
+    errlHndl_t reclaimDmaBfrsFromFsp( void );
 
 }; // end namespace MBOX
 

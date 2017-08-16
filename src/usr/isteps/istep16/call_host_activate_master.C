@@ -166,9 +166,28 @@ void* call_host_activate_master (void *io_pArgs)
         //Because of a bug in how the SBE injects the IPI used to wake
         //up the master core, need to ensure no mailbox traffic
         //or even an interrupt in the interrupt presenter
-        // 1) suspend the mailbox with interrupt disable
-        // 2) tell the SBE to start the deadman timer
-        // 3) ensure that interrupt presenter is drained
+        // 1) Reclaim all DMA bfrs from the FSP
+        // 2) suspend the mailbox with interrupt disable
+        // 3) tell the SBE to start the deadman timer
+        // 4) ensure that interrupt presenter is drained
+        l_errl = MBOX::reclaimDmaBfrsFromFsp();
+        if (l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "call_host_activate_master ERROR : "
+                       "MBOX::reclaimDmaBfrsFromFsp");
+
+            //  if it not complete then thats okay, but we want to store the
+            //   log away somewhere. Since we didn't get all the DMA buffers
+            //   back its not a big deal to commit a log, even if we lose a
+            //   DMA buffer because of it it doesn't matter that much.
+            //  this will generate more traffic to the FSP
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit( l_errl, HWPF_COMP_ID );
+
+            // (do not break.   keep going to suspend)
+        }
+
         l_errl = MBOX::suspend(true, true);
         if (l_errl)
         {
