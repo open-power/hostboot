@@ -56,6 +56,9 @@ fapi2::ReturnCode p9_cen_framelock_cloned(const fapi2::Target<fapi2::TARGET_TYPE
 const uint8_t P9_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS = 5;
 const uint8_t P9_CEN_FRAMELOCK_MAX_FRTL_POLLS = 5;
 
+const uint8_t P9_CEN_FRAMELOCK_FRTL_MAX_VALUE = 0x6C;
+const uint8_t P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET = 0xA;
+
 // P9 MCI Configuration Register field/bit definitions
 const uint32_t MCI_CFG_FORCE_CHANNEL_FAIL_BIT = 25;
 const uint32_t MCI_CFG_START_FRAMELOCK_BIT = 0;
@@ -75,6 +78,8 @@ const uint32_t MCI_STAT_FRAMELOCK_PASS_BIT = 0;
 const uint32_t MCI_STAT_FRAMELOCK_FAIL_BIT = 1;
 const uint32_t MCI_STAT_FRTL_PASS_BIT = 2;
 const uint32_t MCI_STAT_FRTL_FAIL_BIT = 3;
+const uint32_t MCI_FRTL_START_BIT = 4;
+const uint32_t MCI_FRTL_END_BIT = 10;
 const uint32_t MCI_STAT_CHANNEL_INTERLOCK_PASS_BIT = 11;
 const uint32_t MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT = 12;
 
@@ -510,8 +515,11 @@ fapi2::ReturnCode p9_cen_framelock_run_framelock(
 
         // Fail if P9 MCI Frame Lock FAIL
         FAPI_ASSERT(!(mci_stat.getBit<MCI_STAT_FRAMELOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FAIL_ERR().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_framelock: Framelock fail. P9 MCI STAT"
                    );
 
@@ -520,8 +528,11 @@ fapi2::ReturnCode p9_cen_framelock_run_framelock(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FIR_ERR_DMI().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FIR_ERR_DMI()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_framelock: Framelock fail. P9 DATAPATH FIR errors set (DMI)"
                    );
 
@@ -529,8 +540,11 @@ fapi2::ReturnCode p9_cen_framelock_run_framelock(
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FIR_ERR_MEMBUF().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FL_P9_FIR_ERR_MEMBUF()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_framelock: Framelock fail. P9 DATAPATH FIR errors set (MEMBUF)"
                    );
 
@@ -553,8 +567,11 @@ fapi2::ReturnCode p9_cen_framelock_run_framelock(
     }
 
     FAPI_ASSERT(polls < P9_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS,
-                fapi2::PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                fapi2::PROC_CEN_FRAMELOCK_FL_TIMEOUT_ERR()
+                .set_MCI_STAT(mci_stat)
+                .set_DATAPATH_FIR(datapath_fir)
+                .set_MEMBUF_CHIP(i_mem_target)
+                .set_DMI_CHIPLET(i_pu_target),
                 "p9_cen_framelock_run_framelock:!!!! NO FRAME LOCK STATUS DETECTED !!!!"
                );
 
@@ -594,6 +611,14 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
     // mark function entry
     FAPI_DBG("p9_cen_framelock_run_frtl: Starting FRTL sequence ...");
 
+    // check EC feature to determine if special handling for FRTL overflow/timeout
+    // should be engaged (HW418091)
+    uint8_t l_hw418091;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW418091,
+                           i_pu_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(),
+                           l_hw418091),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW418091");
+
     // start FRTL
     data.flush<0>();
     data.setBit<MCI_CFG_START_FRTL_BIT>();
@@ -606,9 +631,15 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
     // have occurred, or an error is detected
     while (polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS)
     {
+        uint8_t l_frtl = 0;
+        bool l_frtl_overflow = false;
+
         // Read P9 MCI Status Register
         FAPI_TRY(p9_cen_framelock_get_pu_mci_stat_reg(i_pu_target, mci_stat),
                  "p9_cen_framelock_run_frtl: Error reading P9 MCI Status Register");
+        // extract/process FRTL value
+        mci_stat.extractToRight < MCI_FRTL_START_BIT,
+                                MCI_FRTL_END_BIT - MCI_FRTL_START_BIT + 1 > (l_frtl);
 
         // Read P9 DATAPATH FIR Register
         FAPI_TRY(p9_cen_framelock_get_pu_datapath_fir_reg(i_pu_target, datapath_fir),
@@ -617,8 +648,11 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
         // Fail if P9 MCI FRTL FAIL or Channel Interlock Fail
         FAPI_ASSERT(!(mci_stat.getBit<MCI_STAT_FRTL_FAIL_BIT>()  ||
                       mci_stat.getBit<MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FAIL_ERR().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_frtl: FRTL fail. P9 MCI STAT"
                    );
 
@@ -626,18 +660,42 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FIR_ERR_DMI().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FIR_ERR_DMI()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_frtl: FRTL fail. P9 FIR errors set (DMI)"
                    );
+
+        if (l_hw418091)
+        {
+            FAPI_DBG("Examining FRTL for HW418091");
+            l_frtl_overflow = (l_frtl == 0) ||
+                              (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET > P9_CEN_FRAMELOCK_FRTL_MAX_VALUE);
+            FAPI_DBG("HW FRTL value: 0x%02X (0x%02X), HW FRTL overflow: %d, HWP overflow calculation: %d",
+                     l_frtl,
+                     (l_frtl) ? (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET) : 0,
+                     datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ? 1 : 0,
+                     l_frtl_overflow);
+        }
+        else
+        {
+            l_frtl_overflow = datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>();
+        }
 
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ||
+                      l_frtl_overflow ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FIR_ERR_MEMBUF().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FIR_ERR_MEMBUF()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target)
+                    .set_FRTL_OVERFLOW(l_frtl_overflow)
+                    .set_FRTL(l_frtl),
                     "p9_cen_framelock_run_frtl: FRTL fail. P9 FIR errors set (MEMBUF)"
                    );
 
@@ -660,8 +718,11 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
     }
 
     FAPI_ASSERT(polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS,
-                fapi2::PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR().set_MCI_STAT(mci_stat).set_DATAPATH_FIR(datapath_fir)
-                .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                fapi2::PROC_CEN_FRAMELOCK_FRTL_TIMEOUT_ERR()
+                .set_MCI_STAT(mci_stat)
+                .set_DATAPATH_FIR(datapath_fir)
+                .set_MEMBUF_CHIP(i_mem_target)
+                .set_DMI_CHIPLET(i_pu_target),
                 "p9_cen_framelock_run_frtl:!!!! NO FRAME LOCK STATUS DETECTED !!!!"
                );
 
@@ -791,9 +852,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
 
         // Fail if Centaur MBI Frame Lock FAIL
         FAPI_ASSERT(!(mbi_stat.getBit<MBI_STAT_FRAMELOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_framelock: Framelock fail. Centaur MBI STAT"
                    );
 
@@ -803,17 +868,25 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
                       mbi_fir.getBit<MBI_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_MBICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FIR_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_CEN_FIR_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_framelock: Framelock fail. Centaur MBI FIR errors set"
                    );
 
         // Fail if P9 MCI Frame Lock FAIL
         FAPI_ASSERT(!(mci_stat.getBit<MCI_STAT_FRAMELOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_framelock: Framelock fail. P9 MCI STAT"
                    );
 
@@ -821,9 +894,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FIR_ERR_DMI().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FIR_ERR_DMI()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_framelock: Framelock fail. P9 DATAPATH FIR errors set (DMI)"
                    );
 
@@ -832,9 +909,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FIR_ERR_MEMBUF().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FIR_ERR_MEMBUF()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_framelock: Framelock fail. P9 DATAPATH FIR errors set (MEMBUF)"
                    );
 
@@ -858,9 +939,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
     }
 
     FAPI_ASSERT(polls < P9_CEN_FRAMELOCK_MAX_FRAMELOCK_POLLS,
-                fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_TIMEOUT_ERR().set_MCI_STAT(mci_stat)
-                .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_TIMEOUT_ERR()
+                .set_MCI_STAT(mci_stat)
+                .set_DATAPATH_FIR(datapath_fir)
+                .set_MBI_STAT(mbi_stat)
+                .set_MBI_FIR(mbi_fir)
+                .set_MEMBUF_CHIP(i_mem_target)
+                .set_DMI_CHIPLET(i_pu_target),
                 "p9_cen_framelock_run_errstate_framelock:!!!! NO FRAME LOCK STATUS DETECTED !!!!");
 
 fapi_try_exit:
@@ -903,6 +988,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
     // mark function entry
     FAPI_DBG("p9_cen_framelock_run_errstate_frtl: Starting FRTL Error State sequence ...");
 
+    // check EC feature to determine if special handling for FRTL overflow/timeout
+    // should be engaged (HW418091)
+    uint8_t l_hw418091;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW418091,
+                           i_pu_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(),
+                           l_hw418091),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW418091");
 
     // if error state is set, force FRTL bit in Centaur MBI
     data.flush<0>();
@@ -924,10 +1016,12 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
     // have occurred, or an error is detected
     while (polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS)
     {
+        uint8_t l_frtl = 0;
+        bool l_frtl_overflow = false;
+
         // Read Centaur MBI Status Register
         FAPI_TRY(p9_cen_framelock_get_cen_mbi_stat_reg(i_mem_target, mbi_stat),
                  "p9_cen_framelock_run_errstate_frtl: Error reading Centaur MBI Status Register");
-
         // Read Centaur MBI FIR Register
         FAPI_TRY(p9_cen_framelock_get_cen_mbi_fir_reg(i_mem_target, mbi_fir),
                  "p9_cen_framelock_run_errstate_frtl: Error reading Centaur MBI FIR Register");
@@ -935,6 +1029,9 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
         // Read P9 MCI Status Register
         FAPI_TRY(p9_cen_framelock_get_pu_mci_stat_reg(i_pu_target, mci_stat),
                  "p9_cen_framelock_run_errstate_frtl: Error reading P9 MCI Status Register");
+        // extract/process FRTL value
+        mci_stat.extractToRight < MCI_FRTL_START_BIT,
+                                MCI_FRTL_END_BIT - MCI_FRTL_START_BIT + 1 > (l_frtl);
 
         // Read P9 DATAPATH FIR Register
         FAPI_TRY(p9_cen_framelock_get_pu_datapath_fir_reg(i_pu_target, datapath_fir),
@@ -943,9 +1040,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
         // Fail if Centaur MBI FRTL FAIL or Channel Interlock Fail
         FAPI_ASSERT(!(mbi_stat.getBit<MBI_STAT_FRTL_FAIL_BIT>()  ||
                       mbi_stat.getBit<MBI_STAT_CHANNEL_INTERLOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_frtl: FRTL fail. Centaur MBI STAT");
 
         // Fail if Centaur MBI FIR bits are set
@@ -955,38 +1056,72 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
                       mbi_fir.getBit<MBI_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_MBICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FIR_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_CEN_FIR_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_frtl: FRTL fail. Centaur MBI FIR errors set"
                    );
 
         // Fail if P9 MCI FRTL FAIL or Channel Interlock Fail
         FAPI_ASSERT(!(mci_stat.getBit<MCI_STAT_FRTL_FAIL_BIT>()  ||
                       mci_stat.getBit<MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_frtl: FRTL fail. P9 MCI STAT");
 
         // Fail if DATAPATH FIR bits are set
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FIR_ERR_DMI().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FIR_ERR_DMI()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_errstate_frtl: FRTL fail. P9 DATAPATH FIR errors set (DMI)"
                    );
+
+        if (l_hw418091)
+        {
+            FAPI_DBG("Examining FRTL for HW418091");
+            l_frtl_overflow = (l_frtl == 0) ||
+                              (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET > P9_CEN_FRAMELOCK_FRTL_MAX_VALUE);
+            FAPI_DBG("HW FRTL value: 0x%02X (0x%02X), HW FRTL overflow: %d, HWP overflow calculation: %d",
+                     l_frtl,
+                     (l_frtl) ? (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET) : 0,
+                     datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ? 1 : 0,
+                     l_frtl_overflow);
+        }
+        else
+        {
+            l_frtl_overflow = datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>();
+        }
 
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ||
+                      l_frtl_overflow ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FIR_ERR_MEMBUF().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FIR_ERR_MEMBUF()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target)
+                    .set_FRTL_OVERFLOW(l_frtl_overflow)
+                    .set_FRTL(l_frtl),
                     "p9_cen_framelock_run_errstate_frtl: FRTL fail. P9 DATAPATH FIR errors set (MEMBUF)"
                    );
 
@@ -1013,9 +1148,13 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
     }
 
     FAPI_ASSERT(polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS,
-                fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_TIMEOUT_ERR().set_MCI_STAT(mci_stat)
-                .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_TIMEOUT_ERR()
+                .set_MCI_STAT(mci_stat)
+                .set_DATAPATH_FIR(datapath_fir)
+                .set_MBI_STAT(mbi_stat)
+                .set_MBI_FIR(mbi_fir)
+                .set_MEMBUF_CHIP(i_mem_target)
+                .set_DMI_CHIPLET(i_pu_target),
                 "p9_cen_framelock_run_errstate_frtl:!!!! NO FRAME LOCK STATUS DETECTED !!!!"
                );
 
@@ -1060,6 +1199,14 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
 
     // mark function entry
     FAPI_DBG("p9_cen_framelock_run_manual_frtl: Starting FRTL manual sequence ...");
+
+    // check EC feature to determine if special handling for FRTL overflow/timeout
+    // should be engaged (HW418091)
+    uint8_t l_hw418091;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW418091,
+                           i_pu_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(),
+                           l_hw418091),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW418091");
 
     // Manual mode
 
@@ -1143,6 +1290,9 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
     // have occurred, or an error is detected
     while (polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS)
     {
+        uint8_t l_frtl = 0;
+        bool l_frtl_overflow = false;
+
         // Read Centaur MBI Status Register
         FAPI_TRY(p9_cen_framelock_get_cen_mbi_stat_reg(i_mem_target, mbi_stat),
                  "p9_cen_framelock_run_manual_frtl: Error reading Centaur MBI Status Register");
@@ -1154,6 +1304,9 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
         // Read P9 MCI Status Register
         FAPI_TRY(p9_cen_framelock_get_pu_mci_stat_reg(i_pu_target, mci_stat),
                  "p9_cen_framelock_run_manual_frtl: Error reading P9 MCI Status Register");
+        // extract/process FRTL value
+        mci_stat.extractToRight < MCI_FRTL_START_BIT,
+                                MCI_FRTL_END_BIT - MCI_FRTL_START_BIT + 1 > (l_frtl);
 
         // Read P9 DATAPATH FIR Register
         FAPI_TRY(p9_cen_framelock_get_pu_datapath_fir_reg(i_pu_target, datapath_fir),
@@ -1162,9 +1315,13 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
         // Fail if Centaur MBI FRTL FAIL or Channel Interlock Fail
         FAPI_ASSERT(!(mbi_stat.getBit<MBI_STAT_FRTL_FAIL_BIT>()  ||
                       mbi_stat.getBit<MBI_STAT_CHANNEL_INTERLOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_manual_frtl: FRTL fail. Centaur MBI STAT"
                    );
 
@@ -1175,18 +1332,26 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
                       mbi_fir.getBit<MBI_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ||
                       mbi_fir.getBit<MBI_FIR_MBICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FIR_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_CEN_FIR_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_manual_frtl: FRTL fail. Centaur MBI FIR errors set"
                    );
 
         // Fail if P9 MCI FRTL FAIL or Channel Interlock Fail
         FAPI_ASSERT(!(mci_stat.getBit<MCI_STAT_FRTL_FAIL_BIT>()  ||
                       mci_stat.getBit<MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FAIL_ERR().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FAIL_ERR()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_manual_frtl: FRTL fail. P9 MCI STAT"
                    );
 
@@ -1195,20 +1360,46 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FIR_ERR_DMI().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FIR_ERR_DMI()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target),
                     "p9_cen_framelock_run_manual_frtl: FRTL fail. P9 DATAPATH FIR errors set (DMI)"
                    );
+
+        if (l_hw418091)
+        {
+            FAPI_DBG("Examining FRTL for HW418091");
+            l_frtl_overflow = (l_frtl == 0) ||
+                              (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET > P9_CEN_FRAMELOCK_FRTL_MAX_VALUE);
+            FAPI_DBG("HW FRTL value: 0x%02X (0x%02X), HW FRTL overflow: %d, HWP overflow calculation: %d",
+                     l_frtl,
+                     (l_frtl) ? (l_frtl + P9_CEN_FRAMELOCK_FRTL_STATIC_OFFSET) : 0,
+                     datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ? 1 : 0,
+                     l_frtl_overflow);
+        }
+        else
+        {
+            l_frtl_overflow = datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>();
+        }
 
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT>() ||
+                      l_frtl_overflow ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
-                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FIR_ERR_MEMBUF().set_MCI_STAT(mci_stat)
-                    .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                    .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                    fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FIR_ERR_MEMBUF()
+                    .set_MCI_STAT(mci_stat)
+                    .set_DATAPATH_FIR(datapath_fir)
+                    .set_MBI_STAT(mbi_stat)
+                    .set_MBI_FIR(mbi_fir)
+                    .set_MEMBUF_CHIP(i_mem_target)
+                    .set_DMI_CHIPLET(i_pu_target)
+                    .set_FRTL_OVERFLOW(l_frtl_overflow)
+                    .set_FRTL(l_frtl),
                     "p9_cen_framelock_run_manual_frtl: FRTL fail. P9 DATAPATH FIR errors set (MEMBUF)"
                    );
 
@@ -1234,9 +1425,13 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
     }
 
     FAPI_ASSERT(polls < P9_CEN_FRAMELOCK_MAX_FRTL_POLLS,
-                fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_TIMEOUT_ERR().set_MCI_STAT(mci_stat)
-                .set_DATAPATH_FIR(datapath_fir).set_MBI_STAT(mbi_stat).set_MBI_FIR(mbi_fir)
-                .set_MEMBUF_CHIP(i_mem_target).set_DMI_CHIPLET(i_pu_target),
+                fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_TIMEOUT_ERR()
+                .set_MCI_STAT(mci_stat)
+                .set_DATAPATH_FIR(datapath_fir)
+                .set_MBI_STAT(mbi_stat)
+                .set_MBI_FIR(mbi_fir)
+                .set_MEMBUF_CHIP(i_mem_target)
+                .set_DMI_CHIPLET(i_pu_target),
                 "p9_cen_framelock_run_manual_frtl:!!!! NO FRAME LOCK STATUS DETECTED !!!!"
                );
 
