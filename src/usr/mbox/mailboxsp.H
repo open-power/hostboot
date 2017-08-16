@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,13 @@ namespace MBOX
             static errlHndl_t send(queue_id_t i_q_id,
                                    msg_t * io_msg,
                                    msgq_msg_t i_mbox_msg_type);
+
+            /**
+             * Reclaim any DMA buffers owned by the FSP
+             * @return errlHndl_t on error
+             */
+            static errlHndl_t reclaimDmaBfrsFromFsp( void );
+
 
         protected:
 
@@ -200,7 +207,7 @@ namespace MBOX
 
             /**
              * Handle interrupt from Intr presenter
-             * @param[in] i_msg, The message 
+             * @param[in] i_msg, The message
              */
             errlHndl_t handleInterrupt();
 
@@ -285,6 +292,33 @@ namespace MBOX
              */
             bool quiesced();
 
+            /**
+             * Reclaim any DMA buffers owned by the FSP
+             * @return errlHndl_t on error
+             */
+            errlHndl_t _reclaimDmaBfrsFromFsp( void );
+
+            /**
+             * Send a Reclaim DMA Buffers message to FSP
+             * @param[in] i_mbox_msg.  Message Buffer to use,
+             */
+            void sendReclaimDmaBfrsMsg(mbox_msg_t & i_mbox_msg);
+
+            /**
+             * Send a Reclaim DMA Buffers message to FSP
+              */
+            void sendReclaimDmaBfrsMsg( void );
+
+            /**
+             * Determine if a Reclaim Bfr message is outstanding
+             * @return [true - Msg active | false - no msg active]
+             */
+            ALWAYS_INLINE
+            bool isDmaReqBfrMsgOutstanding( void ) const
+            {
+                return ( iv_reclaim_sent_cnt > iv_reclaim_rsp_cnt) ;
+            }
+
 
             enum
             {
@@ -337,7 +371,8 @@ namespace MBOX
             msg_t *     iv_shutdown_msg;//!< Message to shutdown mbox
             msg_t *     iv_suspend_msg; //!< Message to suspend mbox
             bool        iv_rts;         //!< ready to send flag
-            bool        iv_dma_pend;    //!< Request pending for more DMA bufs
+            bool        iv_dma_pend;    //!< Request pending (on Hw)
+                                        //!<   for more DMA bufs
             bool        iv_disabled;    //!< Mailboxsp shut off (rejects new)
             bool        iv_suspended;   //!< Mailbox is suspended (queues new)
             bool        iv_suspend_intr;//!< Disable HW interrupts on suspend
@@ -345,6 +380,8 @@ namespace MBOX
             uint64_t    iv_sum_alloc;   //!< Total extra_data storage allocated
             msg_list_t  iv_pend_alloc;  //!< Pending memory allocations
             addr_list_t iv_allocAddrs;  //!< memory addresses allocated by mbox
+            int         iv_reclaim_sent_cnt;//!< num of reclaim bfr msgs sent
+            int         iv_reclaim_rsp_cnt; //!< num of reclaim responses rcvd
 
     };
 };

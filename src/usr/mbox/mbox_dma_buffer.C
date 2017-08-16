@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,7 @@ extern trace_desc_t * g_trac_mbox;
 DmaBuffer::DmaBuffer() :
     iv_head(NULL),
     iv_dir(makeMask(VmmManager::MBOX_DMA_PAGES)),
-    iv_dma_req_sent(false)
+    iv_dma_req_sent_cnt(0)
 {
     iv_head = malloc(VmmManager::MBOX_DMA_SIZE);
 

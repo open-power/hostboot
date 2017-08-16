@@ -49,6 +49,7 @@
 #include <kernel/console.H>
 #include <arch/pirformat.H>
 #include <sbeio/sbeioif.H>
+#include <sys/time.h>
 
 // Local functions
 namespace MBOX
@@ -90,7 +91,9 @@ MailboxSp::MailboxSp()
         iv_allow_blk_resp(false),
         iv_sum_alloc(0),
         iv_pend_alloc(),
-        iv_allocAddrs()
+        iv_allocAddrs(),
+        iv_reclaim_sent_cnt(0),
+        iv_reclaim_rsp_cnt(0)
 {
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
@@ -280,27 +283,55 @@ void MailboxSp::msgHandler()
                         crit_assert(0);
                     }
 
+                    // note : an outstanding req dma bfrs msg
+                    //         will cause quiesce to be false
                     if(iv_shutdown_msg && quiesced())
                     {
-                        // If all DMA buffers still not owned
-                        // try once to get them all back.
-                        if(!iv_dmaBuffer.ownsAllBlocks() &&
-                           !iv_dmaBuffer.shutdownDmaRequestSent())
+                        if // all DMA buffers have been reclaimed
+                          ( iv_dmaBuffer.ownsAllBlocks() )
                         {
-                            iv_dmaBuffer.setShutdownDmaRequestSent(true);
-                            mbox_msg_t  dma_request_msg;
-                            dma_request_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
-                            dma_request_msg.msg_payload.type =
-                                MSG_REQUEST_DMA_BUFFERS;
-                            dma_request_msg.msg_payload.__reserved__async = 1;
+                            // continue with shutdown
+                            TRACFCOMP(g_trac_mbox,
+                                      INFO_MRK"MBOXSP DMA bfrs reclaimed "
+                                              "on shutdown");
 
-                            send_msg(&dma_request_msg);
-                        }
-                        else
-                        {
                             handleShutdown();
                         }
-                    }
+
+                        else if // a "reclaim bfr" msg is outstanding
+                          ( isDmaReqBfrMsgOutstanding() )
+                        {
+                            // (need to wait for the msg(s) to complete
+                            //   before sending another msg)
+                            TRACFCOMP(g_trac_mbox,
+                                      INFO_MRK
+                                      "MailboxSp::msgHandler - "
+                                      "Wait for Reclaim Msg Completion");
+                        }
+
+                        else if // more "reclaim bfr" msgs can be sent
+                          ( iv_dmaBuffer.maxShutdownDmaRequestSent() == false )
+                        {
+                            TRACFCOMP(g_trac_mbox,
+                                      INFO_MRK
+                                      "MailboxSp::msgHandler - "
+                                      "Send Reclaim Msg to FSP");
+
+                            // send a "reclaim bfr" msg
+                            iv_dmaBuffer.incrementShutdownDmaRequestSentCnt();
+                            sendReclaimDmaBfrsMsg();
+                        }
+
+                        else
+                        {
+                            // continue with shutdown
+                            TRACFCOMP(g_trac_mbox,
+                                      INFO_MRK"MBOXSP DMA bfrs not reclaimed "
+                                              "on shutdown");
+
+                            handleShutdown();
+                        }
+                    } // end shutdown msg & quiesced
 
                     if(iv_suspended && quiesced())
                     {
@@ -364,15 +395,11 @@ void MailboxSp::msgHandler()
                     //         is not pending, but may not get them all back
                     //         at this time.
                     //
-                    if(!iv_dmaBuffer.ownsAllBlocks() && !iv_dma_pend)
+                    if( !iv_dmaBuffer.ownsAllBlocks() &&
+                        !iv_dma_pend &&
+                        !isDmaReqBfrMsgOutstanding() )
                     {
-                        mbox_msg_t  dma_request_msg;
-                        dma_request_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
-                        dma_request_msg.msg_payload.type =
-                            MSG_REQUEST_DMA_BUFFERS;
-                        dma_request_msg.msg_payload.__reserved__async = 1;
-
-                        send_msg(&dma_request_msg);
+                        sendReclaimDmaBfrsMsg();
                     }
 
                     if(quiesced()) //already in shutdown state
@@ -1146,6 +1173,9 @@ void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
     iv_dmaBuffer.addBuffers
         (i_mbox_msg.msg_payload.data[0]);
 
+    // track response received
+    iv_reclaim_rsp_cnt++;
+
     iv_dma_pend = false;
 
     send_msg(); // send next message, if there is one
@@ -1239,6 +1269,121 @@ errlHndl_t MailboxSp::send(queue_id_t i_q_id,
     }
 
     return err;
+}
+
+/**
+ * Reclaim any DMA buffers owned by the FSP
+ */
+errlHndl_t MailboxSp::reclaimDmaBfrsFromFsp( void )
+{
+    errlHndl_t err = NULL;
+
+    // locate the FSP mailbox
+    MailboxSp & fspMbox = Singleton<MailboxSp>::instance();
+
+    // reclaim the dma bfrs
+    err = fspMbox._reclaimDmaBfrsFromFsp();
+
+    return( err );
+}
+
+errlHndl_t MailboxSp::_reclaimDmaBfrsFromFsp( void )
+{
+    errlHndl_t err = NULL;
+    int msgSentCnt = 0;
+    int maxDmaBfrs = iv_dmaBuffer.maxDmaBfrs();
+
+    TRACFBIN(g_trac_mbox,
+             INFO_MRK
+             "MailboxSp::_reclaimDmaBfrsFromFsp - Start."
+             " DmaBuffer = ",
+             &iv_dmaBuffer,
+             sizeof(iv_dmaBuffer) );
+
+    while // bfrs still need to be reclaimed
+        ( iv_dmaBuffer.ownsAllBlocks() == false )
+    {
+        if // request dma bfrs msg is outstanding
+          ( isDmaReqBfrMsgOutstanding() == true )
+        {
+            // (wait for msg to complete)
+            nanosleep( 0, 1000000 );  // 1ms to avoid tight busy loop
+            task_yield();
+        }
+
+        else if // can send another request dma bfrs msg
+          (msgSentCnt < maxDmaBfrs)
+        {
+            // send the message
+            msgSentCnt++;
+            sendReclaimDmaBfrsMsg();
+        }
+
+        else
+        {
+            // (sent max number of reclaims and bfrs still not free)
+            // (something real bad is happening, exit so we don't hang)
+
+            // create a snapshot of DMA buffer control object for tracing
+            char dmyArray[sizeof(iv_dmaBuffer)];
+            memcpy( &dmyArray[0],
+                    (void *)&iv_dmaBuffer,
+                    sizeof(dmyArray) );
+
+            TRACFBIN(g_trac_mbox,
+                     ERR_MRK
+                     "MailboxSp::_reclaimDmaBfrsFromFsp -"
+                     "Reclaim Did Not Complete. "
+                     "DmaBuffer = ",
+                     &dmyArray[0],
+                     sizeof(dmyArray) );
+
+            break;
+        }
+    } // end wait for bfrs to be reclaimed
+
+    return( err );
+}
+
+
+void MailboxSp::sendReclaimDmaBfrsMsg( void )
+{
+    // allocate local msg bfr on the stack
+    mbox_msg_t local_msg_bfr;
+
+    sendReclaimDmaBfrsMsg( local_msg_bfr );
+
+    return;
+}
+
+
+void MailboxSp::sendReclaimDmaBfrsMsg( mbox_msg_t & i_mbox_msg )
+{
+    // isolate all occurrences of this message to this routine
+    //  so the total number of outstanding Request DMA Bfr
+    //  messages can be tracked in one place.   This allows
+    //  a mechanism to determine if any of these messages are
+    //  on either the message Q or have been sent on HW to FSP.
+    // iv_dma_pend only tracks the msg from load on HW to
+    //  response received.  Does not consider Queue.
+    TRACFCOMP(g_trac_mbox,
+              INFO_MRK
+              "MailboxSp::sendReclaimDmaBfrsMsg - "
+              "Send Reclaim Msg to FSP");
+
+    // send a request dma bfrs msg to reclaim from fsp
+    new (&i_mbox_msg) mbox_msg_t();
+
+    i_mbox_msg.msg_queue_id = FSP_MAILBOX_MSGQ;
+    i_mbox_msg.msg_payload.type = MSG_REQUEST_DMA_BUFFERS;
+    i_mbox_msg.msg_payload.__reserved__async = 1;
+
+    // track the msg until completion;
+    iv_reclaim_sent_cnt++;
+
+    send_msg(&i_mbox_msg);
+
+    return;
 }
 
 
@@ -2279,3 +2424,21 @@ void MBOX::deallocate(void * i_ptr)
     }
 }
 
+errlHndl_t MBOX::reclaimDmaBfrsFromFsp( void )
+{
+    errlHndl_t err = NULL;
+
+    msg_q_t mboxQ = msg_q_resolve(VFS_ROOT_MSG_MBOX);
+    if(mboxQ)
+    {
+        // reclaim the dma bfrs
+        err = MailboxSp::reclaimDmaBfrsFromFsp();
+    }
+    else
+    {
+        TRACFCOMP(g_trac_mbox, ERR_MRK"MBOX::reclaimDmaBfrsFromFsp - "
+                  "Mailbox Service not available");
+    }
+
+    return( err );
+}

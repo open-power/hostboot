@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,23 +139,34 @@ namespace MBOX
             }
 
             /**
-             * Set the state of shutdown dma request sent
-             * @param[in] The state to set [true|false]
+             * Increment the count of shutdown dma request sent
              */
             ALWAYS_INLINE
-            void setShutdownDmaRequestSent(bool i_state)
+            void incrementShutdownDmaRequestSentCnt( void )
             {
-                iv_dma_req_sent = i_state;
+                iv_dma_req_sent_cnt++;
             }
 
             /**
-             * Query if the shutdown DMA request has been sent
+             * Query the max number of DMA bfrs
+             * @return [max number of DMA bfrs]
+             */
+            ALWAYS_INLINE
+            int maxDmaBfrs( void )
+            {
+                // max dma bfrs since tracked by a bit mask variable
+                return( sizeof(iv_dir) * 8 );
+            }
+
+            /**
+             * Query if the max number of shutdown DMA request has been sent
              * @return state [true|false]
              */
             ALWAYS_INLINE
-            bool shutdownDmaRequestSent()
+            bool maxShutdownDmaRequestSent( void )
             {
-                return iv_dma_req_sent;
+                // max of max number of bfrs since min released is 1 at a time
+                return( iv_dma_req_sent_cnt >= maxDmaBfrs() );
             }
 
         private:
@@ -177,7 +188,8 @@ namespace MBOX
             void * iv_head;            //!< Start of DMA memory
             uint64_t iv_phys_head;     //!< Physical translation of iv_head
             uint64_t iv_dir;           //!< 1 bit per 1k buffer, 1 = available
-            bool iv_dma_req_sent;      //!< Request sent to retrieve all buffers
+            int iv_dma_req_sent_cnt;   //!< number of Requests sent to
+                                       //    retrieve all buffers
 
     };
 }; // namespace
