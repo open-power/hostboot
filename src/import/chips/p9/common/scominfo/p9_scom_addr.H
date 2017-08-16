@@ -540,10 +540,17 @@ extern "C"
             }
 
             /// @brief Extract the RX or TX Group ID of an indirect scom address
-            /// @retval uint8_t Satellite register offset field value
+            /// @retval uint8_t RX/TX group id
             inline uint8_t get_rxtx_group_id()
             {
                 return (iv_addr >> 37) & 0x3F;
+            }
+
+            /// @brief Extract the indirect address field of a scom address
+            /// @retval uint16_t indirect address field
+            inline uint16_t get_ind_addr()
+            {
+                return (iv_addr >> 43) & 0x1FF;
             }
 
             /// @brief Modify SCOM address, update the RX or TX Group ID
