@@ -1051,7 +1051,14 @@ namespace SBE
             coreCount = __builtin_popcount(coreMask);
             uint32_t desired_min_cores = ((is_fused_mode()) ? 2 : 1) *
                 sys->getAttr<ATTR_SBE_IMAGE_MINIMUM_VALID_ECS>();
-            uint32_t min_cores = std::min(desired_min_cores, coreCount);
+
+            // Find out what chip it is
+            // If NIMBUS DD1, be less restrictive
+            uint32_t min_cores =
+                ( (i_target->getAttr<ATTR_MODEL>() == MODEL_NIMBUS) &&
+                (i_target->getAttr<TARGETING::ATTR_EC>() >= 0x20) ) ?
+                    desired_min_cores :
+                    std::min(desired_min_cores, coreCount);
 
             while( coreCount >= min_cores )
             {
