@@ -67,21 +67,21 @@
  * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt);
+fapi2::ReturnCode tx_zcal_run_bus(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt);
 
 /**
  * @brief Tx Z Impedance Calibration State Machine
  * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_run_bus_poll(const DMI_TGT i_tgt);
+fapi2::ReturnCode tx_zcal_run_bus_poll(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt);
 
 /**
  * @brief Tx Z Impedance Calibration
  * @param[in] i_tgt  FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_set_grp(const DMI_TGT i_tgt);
+fapi2::ReturnCode tx_zcal_set_grp(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt);
 
 /**
  * @brief Rx Dc Calibration Poll
@@ -118,38 +118,35 @@ fapi2::ReturnCode p9_io_dmi_dccal(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
 
     char l_tgtStr[fapi2::MAX_ECMD_STRING_LEN];
 
-    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_MC>())
     {
-        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
-        {
-            fapi2::toString(l_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
-            FAPI_DBG("I/O EDI+ Dmi Dccal %s", l_tgtStr);
+        fapi2::toString(l_tgt, l_tgtStr, fapi2::MAX_ECMD_STRING_LEN);
+        FAPI_DBG("I/O EDI+ Dmi Dccal %s", l_tgtStr);
 
-            // Runs Tx Zcal on a per bus basis
-            FAPI_TRY(tx_zcal_run_bus(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
-        }
+        // Runs Tx Zcal on a per bus basis
+        FAPI_TRY(tx_zcal_run_bus(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
     }
 
 
     // Delay before we start polling.  20ms was use from past p8 learning
     FAPI_TRY(fapi2::delay(DLY_20MS, DLY_10MIL_CYCLES));
 
-    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_MC>())
     {
-        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
-        {
-            // Runs Tx Zcal on a per bus basis
-            FAPI_TRY(tx_zcal_run_bus_poll(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
-        }
+        // Runs Tx Zcal on a per bus basis
+        FAPI_TRY(tx_zcal_run_bus_poll(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Run Bus Failed");
+    }
+
+    for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_MC>())
+    {
+        // Sets Tx Zcal Group Settings based on the bus results
+        FAPI_TRY(tx_zcal_set_grp(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
     }
 
     for (auto l_tgt : i_target_chip.getChildren<fapi2::TARGET_TYPE_DMI>())
     {
         if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
         {
-            // Sets Tx Zcal Group Settings based on the bus results
-            FAPI_TRY(tx_zcal_set_grp(l_tgt), "I/O Edi+ Dmi Tx Z-Cal Set Grp Failed");
-
             // Starts Rx Dccal on a per group basis
             FAPI_TRY(rx_dccal_start_grp(l_tgt), "I/O Edi+ Dmi Rx DC Cal Start Failed");
         }
@@ -260,7 +257,7 @@ fapi2::ReturnCode tx_zcal_verify_results(
  * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_run_bus(const DMI_TGT i_tgt)
+fapi2::ReturnCode tx_zcal_run_bus(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt)
 {
     const uint8_t GRP3              = 3;
     const uint8_t LN0               = 0;
@@ -299,7 +296,7 @@ fapi_try_exit:
  * @param[in] i_tgt FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_run_bus_poll(const DMI_TGT i_tgt)
+fapi2::ReturnCode tx_zcal_run_bus_poll(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt)
 {
     const uint64_t DLY_10US         = 10000;
     const uint64_t DLY_1MIL_CYCLES  = 1000000;
@@ -355,7 +352,7 @@ fapi_try_exit:
  * @retval ReturnCode
  */
 fapi2::ReturnCode tx_zcal_apply(
-    const DMI_TGT i_tgt,
+    const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_tgt,
     const uint32_t i_pval,
     const uint32_t i_nval)
 {
@@ -592,7 +589,7 @@ fapi_try_exit:
  * @param[in] i_tgt  FAPI2 Target
  * @retval ReturnCode
  */
-fapi2::ReturnCode tx_zcal_set_grp(const DMI_TGT i_tgt)
+fapi2::ReturnCode tx_zcal_set_grp(const fapi2::Target<fapi2::TARGET_TYPE_MC>& i_tgt)
 {
     FAPI_IMP("tx_zcal_set_grp: I/O EDI+ Dmi Entering");
 
@@ -629,7 +626,13 @@ fapi2::ReturnCode tx_zcal_set_grp(const DMI_TGT i_tgt)
     }
 
     // Convert the results of the zCal to actual segments.
-    FAPI_TRY(tx_zcal_apply(i_tgt, l_pval, l_nval), "Tx Zcal Apply Segments Failed");
+    for (auto l_tgt : i_tgt.getChildren<fapi2::TARGET_TYPE_DMI>())
+    {
+        if (!l_tgt.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>().empty())
+        {
+            FAPI_TRY(tx_zcal_apply(l_tgt, l_pval, l_nval), "Tx Zcal Apply Segments Failed");
+        }
+    }
 
 fapi_try_exit:
     FAPI_IMP("tx_zcal_set_grp: I/O EDI+ Dmi Exiting");
