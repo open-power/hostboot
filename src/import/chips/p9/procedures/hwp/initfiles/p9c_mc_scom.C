@@ -29,7 +29,7 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0x3 = 0x3;
+constexpr uint64_t literal_0b01110 = 0b01110;
 
 fapi2::ReturnCode p9c_mc_scom(const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT0,
                               const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1)
@@ -37,17 +37,17 @@ fapi2::ReturnCode p9c_mc_scom(const fapi2::Target<fapi2::TARGET_TYPE_MC>& TGT0,
     {
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x7000009ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<16, 2, 62, uint64_t>(literal_0x3 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x7000009ull, l_scom_buffer));
-        }
-        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x70123afull, l_scom_buffer ));
 
             constexpr auto l_MCP_MISC_MBA_SCOMFIR_MCBPARMQ_CFG_CLOCK_MONITOR_EN_ON = 0x1;
             l_scom_buffer.insert<59, 1, 63, uint64_t>(l_MCP_MISC_MBA_SCOMFIR_MCBPARMQ_CFG_CLOCK_MONITOR_EN_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x70123afull, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x800f1c000701103full, l_scom_buffer ));
+
+            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01110 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x800f1c000701103full, l_scom_buffer));
         }
 
     };
