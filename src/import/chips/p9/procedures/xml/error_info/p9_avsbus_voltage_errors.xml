@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,29 +26,17 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PM_VCS_RAIL_ERR</rc>
+    <rc>RC_INVALID_VOLTAGE_RAIL</rc>
     <description>
-      Procedure: p9_avsbus_voltage
-      Programming error via AVSBus.
+      Procedure: p9_avsbus_cmds
+      Invalid input voltage rail detected.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>AVSRAILS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_READVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured reading voltage from an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_WRITEVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured writing a voltage to an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-
   <!-- ******************************************************************** -->
 </hwpErrors>

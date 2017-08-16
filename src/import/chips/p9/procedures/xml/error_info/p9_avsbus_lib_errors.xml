@@ -24,111 +24,118 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>                       -->
-<!-- *HWP FW Owner: Bilicon Patil <bilpatil@in.ibm.com>                     -->
+<!-- *HWP FW Owner : Prasad BG Ranganath <prasadbgr@in.ibm.com>             -->
 <!-- *HWP Team: PM                                                          -->
-<!-- *HWP Level: 1                                                          -->
+<!-- *HWP Level: 3                                                          -->
 <!-- *HWP Consumed by: FSP:HS                                               -->
 
 <!-- Error definitions for p9_avsbus_lib procedure -->
+
+<!-- NOTE:  The AVSBus goes through the PM Subsystem Reset flow that is     -->
+<!-- performed up to 3 times in 24 hour period by TMGT in the event of any  -->
+<!-- failure (including the AVSBus). If the any of these failures persist,  -->
+<!-- the chip is called out by TMGT. Thus, no callouts are made here as     -->
+<!-- they would all result in a chip hardware callout as described.         -->
+
 <hwpErrors>
-  <!-- ******************************************************************** -->
+    <!-- ******************************************************************** -->
     <hwpError>
-    <rc>RC_PROCPM_AVSBUS_POLL_TIMEOUT</rc>
-    <description>
-    A timeout occured while polling OCB status register O2SST for o2s_ongoing=0
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>AVSBUS_NUM</ffdc>
-    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
-    <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
+      <rc>RC_PROCPM_AVSBUS_POLL_TIMEOUT</rc>
+      <description>
+      A timeout occured while polling OCB status register O2SST for o2s_ongoing=0
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+      <ffdc>AVSBUS_MAX_POLL_CNT</ffdc>
     </hwpError>
+    <!-- ******************************************************************** -->
     <hwpError>
-    <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured reading/writing voltage from an AVSBus
-    interface
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>AVSBUS_NUM</ffdc>
-    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
-    <ffdc>AVSBUS_CMD_TYPE</ffdc>
-    <ffdc>AVSBUS_CMD_GROUP</ffdc>
-    <ffdc>AVSBUS_CMD_DATATYPE</ffdc>
-    <ffdc>AVSBUS_RAILSELECT</ffdc>
-    <ffdc>AVSBUS_CMD_DATA</ffdc>
-    <ffdc>CRC</ffdc>
-    <ffdc>AVSBUS_OP_TYPE</ffdc>
+      <rc>RC_PROCPM_AVSBUS_VOLTAGE_TIMEOUT</rc>
+      <description>
+      A timeout occured reading/writing voltage from an AVSBus
+      interface
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+      <ffdc>AVSBUS_CMD_TYPE</ffdc>
+      <ffdc>AVSBUS_CMD_GROUP</ffdc>
+      <ffdc>AVSBUS_CMD_DATATYPE</ffdc>
+      <ffdc>AVSBUS_RAILSELECT</ffdc>
+      <ffdc>AVSBUS_CMD_DATA</ffdc>
+      <ffdc>CRC</ffdc>
+      <ffdc>AVSBUS_OP_TYPE</ffdc>
     </hwpError>
     <!-- ********************************************************************-->
     <hwpError>
-    <rc>RC_PROCPM_AVSBUS_IDLEFRAME_TIMEOUT</rc>
-    <description>
-    A timeout occured writing an idle from to an AVSBus interface
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>AVSBUS_NUM</ffdc>
-    <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
+      <rc>RC_PROCPM_AVSBUS_IDLEFRAME_TIMEOUT</rc>
+      <description>
+        A timeout occured writing an idle from to an AVSBus interface
+      </description>
+      <ffdc>CHIP_TARGET</ffdc>
+      <ffdc>AVSBUS_NUM</ffdc>
+      <ffdc>AVSBUS_BRIDGE_NUM</ffdc>
     </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_ZERO_RESP_ERROR</rc>
-    <description>
-    AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_NO_RESP_ERROR</rc>
-    <description>
-    AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_MASTER_BAD_CRC_ERROR</rc>
-    <description>
-    AVS command failed. Bad CRC detected by P9 on AVSBus Slave Segement.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_SLAVE_BAD_CRC_ERROR</rc>
-    <description>
-    AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR</rc>
-    <description>
-    AVS command failed. Valid data sent but no action is taken due to unavailable resource.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_AVSBUS_INVALID_DATA_ERROR</rc>
-    <description>
-    AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.
-    </description>    
-    <ffdc>TARGET</ffdc>
-    <ffdc>BUS</ffdc>
-    <ffdc>BRIDGE</ffdc>
-  </hwpError>
-
-  <!-- ******************************************************************** -->
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_ZERO_RESP_ERROR</rc>
+      <description>
+        AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_NO_RESP_ERROR</rc>
+      <description>
+        AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_MASTER_BAD_CRC_ERROR</rc>
+      <description>
+        AVS command failed. Bad CRC detected by P9 on AVSBus Slave Segement.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_SLAVE_BAD_CRC_ERROR</rc>
+      <description>
+        AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR</rc>
+      <description>
+        AVS command failed. Valid data sent but no action is taken due to unavailable resource.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
+    <hwpError>
+      <rc>RC_PM_AVSBUS_INVALID_DATA_ERROR</rc>
+      <description>
+        AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.
+      </description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>BUS</ffdc>
+      <ffdc>BRIDGE</ffdc>
+    </hwpError>
+    <!-- ******************************************************************** -->
 </hwpErrors>
