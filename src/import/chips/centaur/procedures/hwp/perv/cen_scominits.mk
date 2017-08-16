@@ -22,5 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+-include 01common.mk
+
 PROCEDURE=cen_scominits
+OBJS+=cen_common_funcs.o
+$(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

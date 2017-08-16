@@ -29,7 +29,7 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0x2000 = 0x2000;
+constexpr uint64_t literal_0b0010000 = 0b0010000;
 constexpr uint64_t literal_0b10110111000 = 0b10110111000;
 constexpr uint64_t literal_0b00000000000000 = 0b00000000000000;
 constexpr uint64_t literal_0b001001 = 0b001001;
@@ -73,7 +73,7 @@ fapi2::ReturnCode centaur_mbs_scan(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         l_MBU_MBI_MBI_WAT0B_WAT_ENABLE.insertFromRight<uint64_t>(l_MBU_MBI_MBI_WAT0B_WAT_ENABLE_ON, 0, 1);
         FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBI.MBI.WAT0B.WAT_ENABLE", l_MBU_MBI_MBI_WAT0B_WAT_ENABLE));
         fapi2::variable_buffer l_MBU_MBI_CFG_DBG_MUX(7);
-        l_MBU_MBI_CFG_DBG_MUX.insertFromRight<uint64_t>(literal_0x2000, 0, 7);
+        l_MBU_MBI_CFG_DBG_MUX.insertFromRight<uint64_t>(literal_0b0010000, 0, 7);
         FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBI.CFG_DBG_MUX", l_MBU_MBI_CFG_DBG_MUX));
         fapi2::variable_buffer l_MBU_MBS_IBB_IBRD_CFG_LATE_OCC_UPDATE_DONE(1);
         constexpr auto l_MBU_MBS_IBB_IBRD_CFG_LATE_OCC_UPDATE_DONE_ON = 0x1;
