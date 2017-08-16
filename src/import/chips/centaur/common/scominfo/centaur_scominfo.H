@@ -36,7 +36,6 @@
 #ifndef centaur_scominfo_h
 #define centaur_scominfo_h
 
-#include <iostream>
 #include <vector>
 #include <stdint.h>
 
