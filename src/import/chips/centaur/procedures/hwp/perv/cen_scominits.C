@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,8 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <cen_scominits.H>
+#include <cen_gen_scom_addresses.H>
+#include <cen_gen_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -55,8 +57,17 @@ cen_scominits(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 {
     FAPI_DBG("Start");
 
-    FAPI_DBG("This procedure is empty.");
+    // ensure that MBI traces are running, to trace framelock/FRTL activity
+    fapi2::buffer<uint64_t> l_trctrl_config = 0;
+    l_trctrl_config.setBit<CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL,
+                           CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG_LCL_CLK_GATE_CTRL_LEN>();
 
+    FAPI_TRY(fapi2::putScom(i_target,
+                            CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG,
+                            l_trctrl_config),
+             "Error from putScom (CEN_TCN_TRA_MBITRA_TRACE_TRCTRL_CONFIG)");
+
+fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
