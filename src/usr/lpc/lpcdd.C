@@ -777,7 +777,7 @@ errlHndl_t LpcDD::_readLPC(LPC::TransType i_type,
             *o_ptr = *l_ptr;
         }
         else if ( i_type == LPC::TRANS_FW
-                                 && (i_addr + io_buflen) < LPC::FW_WINDOW_SIZE)
+                  && (i_addr + io_buflen) <= LPC::FW_WINDOW_SIZE)
         {
             memcpy( o_buffer, reinterpret_cast<void*>(l_addr), io_buflen );
         }
