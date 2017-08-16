@@ -43,6 +43,8 @@
     </description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>DMI_CHIPLET</target>
       <priority>HIGH</priority>
@@ -71,6 +73,8 @@
     </description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -101,6 +105,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>DMI_CHIPLET</target>
       <priority>HIGH</priority>
@@ -131,6 +137,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -158,6 +166,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -183,6 +193,8 @@
     <description>Framelock sequence fail reported in P9 MCI Status Register.</description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -210,6 +222,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -237,6 +251,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -262,6 +278,8 @@
     <description>Framelock sequence timed out waiting for pass/fail indication in P9 MCI Status Register.</description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -289,6 +307,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -317,6 +337,8 @@
     </description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>DMI_CHIPLET</target>
       <priority>HIGH</priority>
@@ -345,6 +367,10 @@
     </description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
+    <ffdc>FRTL_OVERFLOW</ffdc>
+    <ffdc>FRTL</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -375,6 +401,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>DMI_CHIPLET</target>
       <priority>HIGH</priority>
@@ -405,6 +433,10 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
+    <ffdc>FRTL_OVERFLOW</ffdc>
+    <ffdc>FRTL</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -435,6 +467,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>DMI_CHIPLET</target>
       <priority>HIGH</priority>
@@ -465,6 +499,10 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
+    <ffdc>FRTL_OVERFLOW</ffdc>
+    <ffdc>FRTL</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -492,6 +530,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -519,6 +559,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -544,6 +586,8 @@
     <description>FRTL sequence fail reported in P9 MCI Status Register.</description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -571,6 +615,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -598,6 +644,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -625,6 +673,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -652,6 +702,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -677,6 +729,8 @@
     <description>FRTL sequence timed out waiting for pass/fail indication in P9 MCI Status Register.</description>
     <ffdc>MCI_STAT</ffdc>
     <ffdc>DATAPATH_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -704,6 +758,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
@@ -731,6 +787,8 @@
     <ffdc>DATAPATH_FIR</ffdc>
     <ffdc>MBI_STAT</ffdc>
     <ffdc>MBI_FIR</ffdc>
+    <ffdc>MEMBUF_CHIP</ffdc>
+    <ffdc>DMI_CHIPLET</ffdc>
     <callout>
       <target>MEMBUF_CHIP</target>
       <priority>HIGH</priority>
