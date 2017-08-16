@@ -491,20 +491,22 @@ namespace SBE
                     break;
                 }
             }
-
-            /************************************************************/
-            /* Deconfigure any Processors that have a Version different */
-            /*   from the Master Processor's Version                    */
-            /************************************************************/
-            err = masterVersionCompare(sbeStates_vector);
-
-            if ( err )
+            else
             {
-                // Something failed on the check
-                TRACFCOMP( g_trac_sbe,
-                           INFO_MRK"updateProcessorSbeSeeproms(): Call to "
-                           "masterVersionCompare() failed rc=0x%.4X",
-                           err->reasonCode());
+                /************************************************************/
+                /* Deconfigure any Processors that have a Version different */
+                /*   from the Master Processor's Version                    */
+                /************************************************************/
+                err = masterVersionCompare(sbeStates_vector);
+
+                if ( err )
+                {
+                    // Something failed on the check
+                    TRACFCOMP( g_trac_sbe,
+                               INFO_MRK"updateProcessorSbeSeeproms(): Call to "
+                               "masterVersionCompare() failed rc=0x%.4X",
+                               err->reasonCode());
+                }
             }
 
         }while(0);
