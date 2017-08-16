@@ -135,6 +135,10 @@ inline uint32_t get_base_address( const fapi2::Target < K > i_target, uint32_t& 
             o_base_addr = P9_DMI0_PHY_BASE_0x0701103F;
             break;
 
+        case fapi2::TargetType::TARGET_TYPE_MC:
+            o_base_addr = P9_DMI0_PHY_BASE_0x0701103F;
+            break;
+
         case fapi2::TargetType::TARGET_TYPE_ABUS:
         case fapi2::TargetType::TARGET_TYPE_OBUS:
             o_base_addr = P9_OBUS0_PHY_BASE_0x09010C00;
