@@ -866,42 +866,56 @@ extern "C"
                         l_sat_offset == P9C_MC_OFFSET_IND )
                     {
                         uint32_t l_rxtx_grp = l_scom.get_rxtx_group_id();
+                        uint32_t l_ind_addr = l_scom.get_ind_addr();
 
-                        if (l_rxtx_grp >= 0x20)
+                        //From iofrc_bus_reg_intf.vhdl
+                        //gcr_pkt_equal_addr  <=     (gcr_reg_reg_addr(0 to 3) = "1111")
+                        //                            and not (gcr_reg_reg_addr = "111111111");  --Ignore protected FIR address
+                        if (((l_ind_addr & 0x1E0) == 0x1E0) && (l_ind_addr != 0x1FF))
                         {
-                            l_rxtx_grp -= 0x20;
+                            o_chipUnitRelated = true;
+                            o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_MC_CHIPUNIT,
+                                                        l_chiplet_id - MC01_CHIPLET_ID));
+
                         }
-
-                        uint8_t l_adder = 0;
-
-                        switch (l_rxtx_grp % 4)
+                        else
                         {
-                            case 3:
-                                l_adder = 0;
-                                break;
 
-                            case 2:
-                                l_adder = 1;
-                                break;
+                            if (l_rxtx_grp >= 0x20)
+                            {
+                                l_rxtx_grp -= 0x20;
+                            }
 
-                            case 0:
-                                l_adder = 2;
-                                break;
+                            uint8_t l_adder = 0;
 
-                            case 1:
-                                l_adder = 3;
-                                break;
+                            switch (l_rxtx_grp % 4)
+                            {
+                                case 3:
+                                    l_adder = 0;
+                                    break;
 
-                            default:
-                                //escape to bunker - math broke
-                                break;
+                                case 2:
+                                    l_adder = 1;
+                                    break;
+
+                                case 0:
+                                    l_adder = 2;
+                                    break;
+
+                                case 1:
+                                    l_adder = 3;
+                                    break;
+
+                                default:
+                                    //escape to bunker - math broke
+                                    break;
+                            }
+
+                            o_chipUnitRelated = true;
+                            o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
+                                                        ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
+                                                        l_adder));
                         }
-
-                        o_chipUnitRelated = true;
-                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_DMI_CHIPUNIT,
-                                                    ((l_chiplet_id == MC01_CHIPLET_ID ? (0) : (4))) +
-                                                    l_adder));
-
                     }
 
                 }
