@@ -62,7 +62,7 @@ const uint64_t FBC_IOE_DL_FIR_ACTION0 = 0x0000000000000000ULL;
 const uint64_t FBC_IOE_DL_FIR_ACTION1 = 0x0303C00000001FFCULL;
 const uint64_t FBC_IOE_DL_FIR_MASK    = 0xFCFC3FFFFFFFE003ULL;
 
-
+const uint64_t FBC_IOE_TL_PSAVE_CFG   = 0xF1FF01031C000000ULL;
 //------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
@@ -139,6 +139,12 @@ fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_T
                  "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION1_REG)");
         FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK),
                  "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
+    }
+
+    if (l_xbus_chiplets.size())
+    {
+        FAPI_TRY(fapi2::putScom(i_target, PU_PB_PSAVE_CFG, FBC_IOE_TL_PSAVE_CFG),
+                 "Error from putScom (PU_PB_PSAVE_CFG)");
     }
 
     // set FBC optics config mode attribute
