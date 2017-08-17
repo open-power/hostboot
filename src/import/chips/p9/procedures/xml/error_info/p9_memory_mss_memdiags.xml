@@ -32,6 +32,7 @@
     <scomRegister>MCBIST_MCB_CNTLQ</scomRegister>
     <scomRegister>MCBIST_MCB_CNTLSTATQ</scomRegister>
     <scomRegister>MCBIST_MCBSTATQ</scomRegister>
+    <scomRegister>MCBIST_MCBMCATQ</scomRegister>
     <scomRegister>MCBIST_MCBPARMQ</scomRegister>
     <scomRegister>MCBIST_MCBAGRAQ</scomRegister>
     <scomRegister>MCBIST_MBSEC1Q</scomRegister>
@@ -234,6 +235,7 @@
       <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
+    <ffdc>POLL_COUNT</ffdc>
     <callout>
       <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
