@@ -208,7 +208,7 @@ fapi2::ReturnCode EffGroupingProcAttrs::calcProcBaseAddr(
     const EffGroupingSysAttrs i_sysAttrs)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     uint64_t l_memBaseAddr1, l_mmioBaseAddr;
 
     // Get the Mirror/Non-mirror base addresses
@@ -244,7 +244,6 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     const EffGroupingSysAttrs i_sysAttrs)
 {
     FAPI_DBG("Entering EffGroupingProcAttrs::getAttrs");
-    fapi2::ReturnCode l_rc;
 
     // Get Nest Hardware Trace Macro (NHTM) bar size
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_SIZE, i_target, iv_nhtmBarSize),
@@ -343,7 +342,6 @@ fapi2::ReturnCode EffGroupingMcaAttrs::getAttrs(
     const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target)
 {
     FAPI_DBG("Entering EffGroupingMcaAttrs::getAttrs");
-    fapi2::ReturnCode l_rc;
 
     // Get the amount of memory behind this MCA target
     // Note: DIMM must be enabled to be accounted for.
@@ -403,7 +401,6 @@ fapi2::ReturnCode EffGroupingDmiAttrs::getAttrs(
     const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_target)
 {
     FAPI_DBG("Entering EffGroupingDmiAttrs::getAttrs");
-    fapi2::ReturnCode l_rc;
 
     // Get the membuf attached to this DMI
     auto l_attachedMembuf = i_target.getChildren<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
@@ -541,7 +538,6 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Memory info will be filled in differently for Nimbus vs Cumulus
     // due to chip structure
@@ -620,6 +616,7 @@ struct EffGroupingData
     EffGroupingData()
     {
         memset(iv_data, 0, sizeof(iv_data));
+        memset(iv_mirrorOn, 0, sizeof(iv_mirrorOn));
 
         for (uint8_t l_port = 0; l_port < NUM_MC_PORTS_PER_PROC; l_port++)
         {
@@ -638,6 +635,10 @@ struct EffGroupingData
 
     // The total non-mirrored memory size in GB
     uint32_t iv_totalSizeNonMirr = 0;
+
+    // Indicates if mirror group is to be created
+    // from data of this non-mirror group
+    uint8_t iv_mirrorOn[DATA_GROUPS / 2];
 };
 
 
@@ -806,27 +807,24 @@ void EffGroupingBaseSizeData::setBaseSizeData(
         {
             uint8_t l_index = ii + MIRR_OFFSET;
 
-            // Set base address for distinct mirrored ranges
-            iv_mirror_bases[ii] = i_groupData.iv_data[l_index][BASE_ADDR];
-            iv_mirror_bases_ack[ii] = i_groupData.iv_data[l_index][BASE_ADDR];
-
-            // Set sizes for distinct mirrored ranges
-            if (i_groupData.iv_data[ii][PORTS_IN_GROUP] > 1) // ii -> Non-mirror index
+            if (i_groupData.iv_data[l_index][PORTS_IN_GROUP] != 0)
             {
+                // Set base address for distinct mirrored ranges
+                iv_mirror_bases[ii] = i_groupData.iv_data[l_index][BASE_ADDR];
+                iv_mirror_bases_ack[ii] = i_groupData.iv_data[l_index][BASE_ADDR];
+                // Set sizes for distinct mirrored ranges
                 iv_mirror_sizes[ii] = (i_groupData.iv_data[ii][PORT_SIZE] *
                                        i_groupData.iv_data[ii][PORTS_IN_GROUP]) / 2;
+                iv_mirror_sizes_ack[ii] = i_groupData.iv_data[l_index][GROUP_SIZE];
+
+                // Convert to full byte addresses
+                iv_mirror_bases[ii]     <<= 30;
+                iv_mirror_bases_ack[ii] <<= 30;
+                iv_mirror_sizes[ii]     <<= 30;
+                iv_mirror_sizes_ack[ii] <<= 30;
             }
 
-            iv_mirror_sizes_ack[ii] = i_groupData.iv_data[l_index][GROUP_SIZE];
-
-            // Convert to full byte addresses
-            iv_mirror_bases[ii]     <<= 30;
-            iv_mirror_bases_ack[ii] <<= 30;
-            iv_mirror_sizes[ii]     <<= 30;
-            iv_mirror_sizes_ack[ii] <<= 30;
-
             FAPI_DBG("Mirror: %d", ii);
-
             FAPI_DBG("    i_groupData.iv_data[%d][BASE_ADDR] = 0x%.16llX (%d GB)",
                      l_index,  i_groupData.iv_data[l_index][BASE_ADDR],
                      i_groupData.iv_data[l_index][BASE_ADDR] >> 30);
@@ -962,7 +960,6 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     const EffGroupingProcAttrs& i_procAttrs)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Hold mem bases & sizes for mirror/non-mirror
     uint8_t l_numRegions = 0;
@@ -1000,7 +997,7 @@ fapi2::ReturnCode EffGroupingBaseSizeData::set_HTM_OCC_base_addr(
     if (l_htmOccSize == 0)
     {
         FAPI_INF("set_HTM_OCC_base_addr: No HTM/OCC memory requested.");
-        return l_rc;
+        goto fapi_try_exit;
     }
 
     // Setup mem base and size working array depending on mirror setting
@@ -1176,7 +1173,6 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
     EffGroupingData& io_groupData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     //----------------------------------------------------------------------
     //  Setting attributes
@@ -1264,7 +1260,6 @@ fapi2::ReturnCode EffGroupingBaseSizeData::setBaseSizeAttr(
     //----------------------------------------------------------------------
     //  Display attribute values
     //----------------------------------------------------------------------
-
     for (uint8_t ii = 0; ii < NUM_NON_MIRROR_REGIONS; ii++)
     {
         FAPI_INF("ATTR_PROC_MEM_BASES    [%u]: 0x%.16llX (%d GB)",
@@ -1362,7 +1357,6 @@ fapi2::ReturnCode grouping_checkValidAttributes(
     const EffGroupingProcAttrs& i_procAttrs)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // If mirror is disabled, then can not be in FLIPPED mode
     if (!i_sysAttrs.iv_hwMirrorEnabled)
@@ -2316,7 +2310,6 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
     const EffGroupingData& i_groupData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // std_pair<MC number, target>
     std::map<uint8_t, fapi2::Target<T>> l_unGroupedPair;
@@ -2501,6 +2494,74 @@ void grouping_sortGroups(EffGroupingData& io_groupData)
 }
 
 ///
+/// @brief Determine if mirror groups are to be created for existing groups.
+///
+///        Mirror group is created when these conditions are all met:
+///           - Processor is Cumulus
+///           - ATTR_MRW_HW_MIRRORING_ENABLE = true
+///           - Number of MC ports is 2, 4, 6, or 8 and 2 ports are in the same
+///             MCS/MI port pair (see MCFGP(1:4) programming in MC workbook)
+///
+/// @param[in]      i_target       Reference to TARGET_TYPE_PROC_CHIP target
+/// @param[in]      i_sysAttrs     System attribute setting
+/// @param[in/out]  io_groupData   Grouping data
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+void setupMirrorGroup(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const EffGroupingSysAttrs& i_sysAttrs,
+    EffGroupingData& io_groupData)
+{
+    FAPI_DBG("Entering setupMirrorGroup");
+
+    // Get the MI chiplets
+    auto l_miChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
+
+    // No mirroring if Nimbus or ATTR_MRW_HW_MIRRORING_ENABLE is off
+    if ( (l_miChiplets.size() == 0) || (!i_sysAttrs.iv_hwMirrorEnabled) )
+    {
+        FAPI_INF("setupMirrorGroup: No mirror group - Num MI chiplets %d, "
+                 "ATTR_MRW_HW_MIRRORING_ENABLE = %d",
+                 l_miChiplets.size(), i_sysAttrs.iv_hwMirrorEnabled);
+        goto fapi_try_exit;
+    }
+
+    // Loop thru groups to see if mirror group is possible
+    for (uint8_t l_group = 0; l_group < io_groupData.iv_numGroups; l_group++)
+    {
+        // If group of 4, 6, or 8, mirror is allowed
+        // Note: For group of 4/6/8, the ports are always in the same MC
+        //       port pair per design.
+        if ( (io_groupData.iv_data[l_group][PORTS_IN_GROUP] == 4) ||
+             (io_groupData.iv_data[l_group][PORTS_IN_GROUP] == 6) ||
+             (io_groupData.iv_data[l_group][PORTS_IN_GROUP] == 8) )
+        {
+            io_groupData.iv_mirrorOn[l_group] = 1;
+        }
+
+        // For group of 2, determine if both ports are in the same MCS/MI
+        else if (io_groupData.iv_data[l_group][PORTS_IN_GROUP] == 2)
+        {
+            if ( (io_groupData.iv_data[l_group][MEMBER_IDX(0)] / 2) ==
+                 (io_groupData.iv_data[l_group][MEMBER_IDX(1)] / 2) )
+            {
+                io_groupData.iv_mirrorOn[l_group] = 1;
+            }
+        }
+
+        FAPI_INF("setupMirrorGroup: Group %d, PortsInGroup %d, Mirror = %d",
+                 l_group, io_groupData.iv_data[l_group][PORTS_IN_GROUP],
+                 io_groupData.iv_mirrorOn[l_group]);
+
+    } // Group loop
+
+fapi_try_exit:
+    FAPI_DBG("Exiting setupMirrorGroup");
+    return;
+}
+
+///
 /// @brief Calculate Mirror Memory base and alt-base addresses
 ///
 /// @param[in] i_target           Reference to processor chip target
@@ -2517,12 +2578,11 @@ fapi2::ReturnCode grouping_calcMirrorMemory(
     EffGroupingData& io_groupData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Calculate mirrored group size and non mirrored group size
     for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
     {
-        if (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1)
+        if (io_groupData.iv_mirrorOn[pos])
         {
             uint8_t l_mirrorOffset = pos + MIRR_OFFSET;
 
@@ -2690,7 +2750,6 @@ fapi2::ReturnCode grouping_setATTR_MSS_MEM_MC_IN_GROUP(
     const EffGroupingData& i_groupData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     fapi2::buffer<uint8_t> MC_IN_GP;
     uint8_t l_mcPort_in_group[NUM_MC_PORTS_PER_PROC];
@@ -2772,24 +2831,28 @@ void grouping_traceData(const EffGroupingSysAttrs& i_sysAttrs,
         {
             uint8_t l_mirrorOffset = ii + MIRR_OFFSET;
 
-            FAPI_INF("MIRROR - Group %u: ", l_mirrorOffset);
-            FAPI_INF("    MC port size %d GB", i_groupData.iv_data[l_mirrorOffset][PORT_SIZE]);
-            FAPI_INF("    Num of ports %d", i_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP]);
-            FAPI_INF("    Group size  %d GB", i_groupData.iv_data[l_mirrorOffset][GROUP_SIZE]);
-            FAPI_INF("    Base addr 0x%08x", i_groupData.iv_data[l_mirrorOffset][BASE_ADDR]);
-
-            for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+            // Only display valid mirrored group
+            if (i_groupData.iv_data[l_mirrorOffset][GROUP_SIZE] > 0)
             {
-                FAPI_INF("    ALT-BAR(%d) valid %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_VALID(jj)]);
-                FAPI_INF("    ALT-BAR(%d) size %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_SIZE(jj)]);
-                FAPI_INF("    ALT-BAR(%d) base addr 0x%08X", jj, i_groupData.iv_data[l_mirrorOffset][ALT_BASE_ADDR(jj)]);
-            }
+                FAPI_INF("MIRROR - Group %u: ", l_mirrorOffset);
+                FAPI_INF("    MC port size %d GB", i_groupData.iv_data[l_mirrorOffset][PORT_SIZE]);
+                FAPI_INF("    Num of ports %d", i_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP]);
+                FAPI_INF("    Group size  %d GB", i_groupData.iv_data[l_mirrorOffset][GROUP_SIZE]);
+                FAPI_INF("    Base addr 0x%08x", i_groupData.iv_data[l_mirrorOffset][BASE_ADDR]);
 
-            // Display MC in groups
-            for (uint8_t jj = 0; jj < i_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP]; jj++)
-            {
-                FAPI_INF("    Contains MC %d",
-                         i_groupData.iv_data[l_mirrorOffset][MEMBER_IDX(jj)]);
+                for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+                {
+                    FAPI_INF("    ALT-BAR(%d) valid %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_VALID(jj)]);
+                    FAPI_INF("    ALT-BAR(%d) size %d ", jj, i_groupData.iv_data[l_mirrorOffset][ALT_SIZE(jj)]);
+                    FAPI_INF("    ALT-BAR(%d) base addr 0x%08X", jj, i_groupData.iv_data[l_mirrorOffset][ALT_BASE_ADDR(jj)]);
+                }
+
+                // Display MC in groups
+                for (uint8_t jj = 0; jj < i_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP]; jj++)
+                {
+                    FAPI_INF("    Contains MC %d",
+                             i_groupData.iv_data[l_mirrorOffset][MEMBER_IDX(jj)]);
+                }
             }
         }
     }
@@ -2806,7 +2869,6 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Create data structures for grouping operation
     EffGroupingSysAttrs l_sysAttrs;
@@ -2814,6 +2876,7 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     EffGroupingMemInfo l_memInfo;
     EffGroupingBaseSizeData l_baseSizeData;
     EffGroupingData l_groupData;
+    bool l_mirrorIsOn = false;
 
     // ----------------------------------------------
     // Get the attributes needed for memory grouping
@@ -2914,8 +2977,21 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     FAPI_INF("Total non-mirrored size %u GB", l_groupData.iv_totalSizeNonMirr);
 
-    if (l_sysAttrs.iv_hwMirrorEnabled)
+    // Set mirror groups
+    setupMirrorGroup(i_target, l_sysAttrs, l_groupData);
+
+    for (uint8_t l_group = 0; l_group < l_groupData.iv_numGroups; l_group++)
     {
+        if (l_groupData.iv_mirrorOn[l_group] == 1)
+        {
+            l_mirrorIsOn = true;
+            break;
+        }
+    }
+
+    if (l_mirrorIsOn)
+    {
+        FAPI_INF("Mirror memory configured");
         // Calculate base and alt-base addresses
         FAPI_TRY(grouping_calcMirrorMemory(i_target, l_procAttrs, l_groupData),
                  "Error from grouping_calcMirrorMemory, l_rc 0x%.8X",
@@ -2925,6 +3001,7 @@ fapi2::ReturnCode p9_mss_eff_grouping(
     {
         // ATTR_MRW_HW_MIRRORING_ENABLE is false
         // Calculate base and alt-base addresses
+        FAPI_INF("No mirror memory configured");
         grouping_calcNonMirrorMemory(l_procAttrs, l_groupData);
     }
 
