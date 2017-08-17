@@ -91,10 +91,6 @@ avsInitExtVoltageControl(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     fapi2::buffer<uint64_t> l_data64;
     uint32_t l_avsbus_frequency, l_value, l_nest_frequency;
     uint16_t l_divider;
-    // if using interrupt clear ongoing in OITR1 and OIEPR0
-
-    FAPI_TRY(putScom(i_target, OCB_OITR1,  0));  //edge
-    FAPI_TRY(putScom(i_target, OCB_OIEPR0, 0));
 
     // O2SCTRLF
     // [ 0: 5] o2s_frame_size = 32; -> 0x20
