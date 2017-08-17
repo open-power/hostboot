@@ -37,6 +37,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include "scom.H"
+#include "postopchecks.H"
 #include <scom/scomreasoncodes.H>
 #include <scom/errlud_pib.H>
 #include <ibscom/ibscomreasoncodes.H>
@@ -769,8 +770,10 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
                     int64_t i_accessType,
                     uint64_t i_addr)
 {
-
     errlHndl_t l_err = NULL;
+
+    uint32_t l_remainingAttempts{2};
+    uint32_t l_retryCount{0};
 
     // P9 has a bug in the multicast logic that causes it to return a
     //  'chiplet offline' error if there are any chiplets in the multicast
@@ -780,99 +783,141 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     //  get returned will be all FFs.
     bool l_multicastBugError = false;
 
-    do{
-        TARGETING::ScomSwitches scomSetting;
-        scomSetting.useXscom = true;  //Default to Xscom supported.
-        if(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL != i_target)
-        {
-            scomSetting =
-              i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+    do
+    {
+        //number of max remaining attempts after the current attempt.
+        --l_remainingAttempts;
 
-            if( TARGETING::TYPE_PROC
-                == i_target->getAttr<TARGETING::ATTR_TYPE>() )
+        do{
+            TARGETING::ScomSwitches scomSetting;
+            scomSetting.useXscom = true;  //Default to Xscom supported.
+            if(TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL != i_target)
             {
-                l_multicastBugError = true;
+                scomSetting =
+                  i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+
+                if( TARGETING::TYPE_PROC
+                    == i_target->getAttr<TARGETING::ATTR_TYPE>() )
+                {
+                    l_multicastBugError = true;
+                }
             }
-        }
 
-        //Always XSCOM the Master Sentinel
-        if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target) ||
-            (scomSetting.useXscom))
-        {  //do XSCOM
-            // xscom uses ADU so we'll do a workaround instead of ignoring
-            //  the error code
-            l_multicastBugError = false;
+            //Always XSCOM the Master Sentinel
+            if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target) ||
+                (scomSetting.useXscom))
+            {  //do XSCOM
+                // xscom uses ADU so we'll do a workaround instead of ignoring
+                //  the error code
+                l_multicastBugError = false;
 
-            //Check to see if we need to do the multicast bug workaround
-            // and do it, returns true if the workaround was performed
-            // which means we skip the regular call
-            bool l_didWorkaround = false;
-            l_err = doMulticastWorkaround(i_opType,
-                                          i_target,
-                                          io_buffer,
-                                          io_buflen,
-                                          i_addr,
-                                          l_didWorkaround);
-            if( !l_didWorkaround && !l_err )
-            {
+                //Check to see if we need to do the multicast bug workaround
+                // and do it, returns true if the workaround was performed
+                // which means we skip the regular call
+                bool l_didWorkaround = false;
+                l_err = doMulticastWorkaround(i_opType,
+                                              i_target,
+                                              io_buffer,
+                                              io_buflen,
+                                              i_addr,
+                                              l_didWorkaround);
+                if( !l_didWorkaround && !l_err )
+                {
+                    l_err = deviceOp(i_opType,
+                                     i_target,
+                                     io_buffer,
+                                     io_buflen,
+                                     DEVICE_XSCOM_ADDRESS(i_addr));
+                }
+                else if( l_didWorkaround && !l_err )
+                {
+                    //Since this is a pre-workaround, don't
+                    //test for a retry if successful.
+                    l_remainingAttempts = 0;
+                }
+                break;
+            }
+            else if(scomSetting.useSbeScom)
+            {   //do SBESCOM
                 l_err = deviceOp(i_opType,
                                  i_target,
                                  io_buffer,
                                  io_buflen,
-                                 DEVICE_XSCOM_ADDRESS(i_addr));
+                                 DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
             }
-            break;
-        }
-        else if(scomSetting.useSbeScom)
-        {   //do SBESCOM
-            l_err = deviceOp(i_opType,
-                             i_target,
-                             io_buffer,
-                             io_buflen,
-                             DEVICE_SBEFIFOSCOM_ADDRESS(i_addr));
-            if( l_err ) { break; }
-        }
-        else if(scomSetting.useInbandScom)
-        {   //do IBSCOM
-            l_err = deviceOp(i_opType,
-                             i_target,
-                             io_buffer,
-                             io_buflen,
-                             DEVICE_IBSCOM_ADDRESS(i_addr));
-            if( l_err ) { break; }
-        }
-        else if(scomSetting.useFsiScom)
-        {   //do FSISCOM
-            l_err = deviceOp(i_opType,
-                             i_target,
-                             io_buffer,
-                             io_buflen,
-                             DEVICE_FSISCOM_ADDRESS(i_addr));
-            if( l_err ) { break; }
-        }
-        else
+            else if(scomSetting.useInbandScom)
+            {   //do IBSCOM
+                l_err = deviceOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_IBSCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
+            }
+            else if(scomSetting.useFsiScom)
+            {   //do FSISCOM
+                l_err = deviceOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_FSISCOM_ADDRESS(i_addr));
+                if( l_err ) { break; }
+            }
+            else
+            {
+                assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not "
+                        "indicate Xscom, SBESCOM, Ibscom, or FSISCOM is "
+                        "supported. i_target=0x%.8x", get_huid(i_target));
+                l_remainingAttempts = 0;
+                break;
+            }
+
+        }while(0);
+
+        //Check if any retry workaround's are needed.
+        if(l_remainingAttempts > 0)
         {
-            assert(0,"SCOM::scomPerformOp> ATTR_SCOM_SWITCHES does not indicate Xscom, SBESCOM, Ibscom, or FSISCOM is supported. i_target=0x%.8x", get_huid(i_target));
-            break;
+            bool l_doRetry{false};
+            const PostOpChecks* l_postOpPtr = PostOpChecks::theInstance();
+            if(nullptr != l_postOpPtr)
+            {
+                l_doRetry = l_postOpPtr->requestRetry(
+                                                      l_err,
+                                                      l_retryCount,
+                                                      i_opType,
+                                                      i_target,
+                                                      io_buffer,
+                                                      io_buflen,
+                                                      i_accessType,
+                                                      i_addr
+                                                     );
+            }
+
+            if(l_doRetry)
+            {
+                delete l_err;
+                l_err = nullptr;
+
+                TRACFCOMP(g_trac_scom,
+                          "Forcing retry of Scom to 0x%016X on 0x%08X",
+                          i_addr,
+                (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target ?
+                        0xFFFFFFFF : TARGETING::get_huid(i_target)));
+
+            }
+            else
+            {
+                //no retries are needed.
+                l_remainingAttempts = 0;
+                break;
+            }
         }
 
-    }while(0);
-
-    //Look for special retry codes
-    if( l_err
-        && (0xFFFFFFFF != i_accessType)
-        && (l_err->reasonCode() == IBSCOM::IBSCOM_RETRY_DUE_TO_ERROR) )
-    {
-        delete l_err;
-        l_err = nullptr;
-        TRACFCOMP(g_trac_scom, "Forcing retry of Scom to %.16X on %.8X", i_addr,
-            (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target ?
-                    0xFFFFFFFF : TARGETING::get_huid(i_target)));
-        // use the unused i_accessType parameter to avoid an infinite recursion
-        int64_t accessType_flag = 0xFFFFFFFF;
-        l_err = doScomOp( i_opType, i_target, io_buffer,
-                          io_buflen, accessType_flag, i_addr );
+        //keep track of attempts.
+        ++l_retryCount;
     }
+    while(l_remainingAttempts > 0);
 
 
     if( l_err && p9_scom_addr(i_addr).is_multicast() && l_multicastBugError )

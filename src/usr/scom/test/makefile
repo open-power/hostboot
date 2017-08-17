@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2017
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,5 +26,14 @@ ROOTPATH = ../../../..
 
 MODULE = testscom
 TESTS = *.H
+
+OBJS+=retryWorkaroundTestData.o
+
+#To enable tracing of SCOM Unit Tests
+# TRACE_SCOM_UNIT_TEST=1 make -j32
+ifdef TRACE_SCOM_UNIT_TEST
+CXXFLAGS+=-DTRACE_SCOM_UNIT_TEST
+$(info Tracing Enabled For SCOM Unit Tests)
+endif
 
 include ${ROOTPATH}/config.mk

@@ -33,6 +33,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 OBJS += scom.o
 OBJS += scomtrans.o
 OBJS += errlud_pib.o
+OBJS += postopchecks.o
+OBJS += DmiScomWorkaround.o
+OBJS += ibscom_retry.o
 
 # Objects From Import Directory
 OBJS += p9_scominfo.o
