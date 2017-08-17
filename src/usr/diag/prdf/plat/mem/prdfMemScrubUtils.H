@@ -126,6 +126,10 @@ enum MaintEccAttns
     // Nimbus only
     MAINT_IUE           = 0x0080, ///< Intermittent UE
     MAINT_IMPE          = 0x0040, ///< Intermittent chip mark
+
+    // Maintenance CEs
+    MAINT_NCE           = 0x0020, ///< CE
+    MAINT_TCE           = 0x0010, ///< CE on two symbols (Nimbus only)
 };
 
 /**

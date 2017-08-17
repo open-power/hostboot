@@ -289,6 +289,8 @@ uint32_t checkEccFirs<TYPE_MCA>( ExtensibleChip * i_chip,
         if ( 0 != mcaeccfir->GetBitFieldJustified(20,8) )
             o_eccAttns |= MAINT_MPE;
 
+        if ( mcaeccfir->IsBitSet(28) ) o_eccAttns |= MAINT_NCE;
+        if ( mcaeccfir->IsBitSet(29) ) o_eccAttns |= MAINT_TCE;
         if ( mcaeccfir->IsBitSet(30) ) o_eccAttns |= MAINT_SCE;
         if ( mcaeccfir->IsBitSet(31) ) o_eccAttns |= MAINT_MCE;
         if ( mcaeccfir->IsBitSet(34) ) o_eccAttns |= MAINT_UE;
@@ -354,6 +356,7 @@ uint32_t checkEccFirs<TYPE_MBA>( ExtensibleChip * i_chip,
         if ( 0 != mbseccfir->GetBitFieldJustified(20,8) )
             o_eccAttns |= MAINT_MPE;
 
+        if ( mbseccfir->IsBitSet(36) ) o_eccAttns |= MAINT_NCE;
         if ( mbseccfir->IsBitSet(37) ) o_eccAttns |= MAINT_SCE;
         if ( mbseccfir->IsBitSet(38) ) o_eccAttns |= MAINT_MCE;
         if ( mbseccfir->IsBitSet(41) ) o_eccAttns |= MAINT_UE;
