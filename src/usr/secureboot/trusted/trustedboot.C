@@ -1399,6 +1399,7 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
         SENSOR::getSensorReadingData tpmRequiredData;
         SENSOR::SensorBase tpmRequired(TARGETING::SENSOR_NAME_TPM_REQUIRED,
                                        pTopLevel);
+
         errlHndl_t err = tpmRequired.readSensorData(tpmRequiredData);
         if (nullptr == err)
         {
@@ -1418,7 +1419,8 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
             // error reading sensor, so consider sensor not available
             TRACFCOMP( g_trac_trustedboot,ERR_MRK"getTpmRequiredSensorValue: "
                        "Unable to read Tpm Required Sensor: rc = 0x%04X "
-                       "(sensorNum=0x%X, enum=0x%X) Deleting Error plid=0x%04X",
+                       "(sensorNum=0x%X, enum=0x%X) Deleting Error plid=0x%04X."
+                       " Considering Sensor NOT required",
                        err->reasonCode(), sensorNum,
                        TARGETING::SENSOR_NAME_TPM_REQUIRED,
                        err->plid());

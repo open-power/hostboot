@@ -436,7 +436,7 @@
     <id>SENSOR_NAME</id>
     <description>Enumeration indicating the IPMI sensor name, which will
         be used by hostboot when determining the sensor number to return.
-        he sensor name consists of one byte of sensor type plus one byte of
+        The sensor name consists of one byte of sensor type plus one byte of
         sub-type, to differentiate similar sensors under the same target.
         Our implementaion uses the IPMI defined entity ID as the sub-type.
     </description>
@@ -546,7 +546,7 @@
     </enumerator>
     <enumerator>
         <name>TPM_REQUIRED</name>
-        <value>0xFFFF</value>
+        <value>0xCC03</value>
     </enumerator>
 </enumerationType>
 <attribute>
