@@ -48,10 +48,8 @@
 ///----------------------------------------------------------------------------
 /// Constant definitions
 ///----------------------------------------------------------------------------
-const uint8_t MAX_MCS_PER_PROC     = 4;        // 4 MCS per proc chip
 const uint8_t MAX_MC_PORTS_PER_MCS = 2;        // 2 MC ports per MCS
 const uint8_t NO_CHANNEL_PER_GROUP = 0xFF;     // Init value of channel per group
-const uint8_t MAX_ALT_MEM_REGIONS  = 2;        // Max num of memory holes
 
 ///----------------------------------------------------------------------------
 /// Data structure definitions
@@ -145,9 +143,9 @@ struct mcPortGroupInfo_t
     uint8_t channelId;
 
     // ALT_MEM
-    uint8_t altMemValid[MAX_ALT_MEM_REGIONS];
-    uint32_t altMemSize[MAX_ALT_MEM_REGIONS];
-    uint32_t altBaseAddr[MAX_ALT_MEM_REGIONS];
+    uint8_t altMemValid[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t altMemSize[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t altBaseAddr[NUM_OF_ALT_MEM_REGIONS];
 };
 
 /**
@@ -189,14 +187,14 @@ struct mcBarData_t
     uint32_t MCFGPM_groupBaseAddr;
 
     // Info to program MCFGPA reg
-    bool     MCFGPA_HOLE_valid[MAX_ALT_MEM_REGIONS];
-    uint32_t MCFGPA_HOLE_LOWER_addr[MAX_ALT_MEM_REGIONS];
-    uint32_t MCFGPA_HOLE_UPPER_addr[MAX_ALT_MEM_REGIONS];
+    bool     MCFGPA_HOLE_valid[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t MCFGPA_HOLE_LOWER_addr[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t MCFGPA_HOLE_UPPER_addr[NUM_OF_ALT_MEM_REGIONS];
 
     // Info to program MCFGPMA reg
-    bool     MCFGPMA_HOLE_valid[MAX_ALT_MEM_REGIONS];
-    uint32_t MCFGPMA_HOLE_LOWER_addr[MAX_ALT_MEM_REGIONS];
-    uint32_t MCFGPMA_HOLE_UPPER_addr[MAX_ALT_MEM_REGIONS];
+    bool     MCFGPMA_HOLE_valid[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t MCFGPMA_HOLE_LOWER_addr[NUM_OF_ALT_MEM_REGIONS];
+    uint32_t MCFGPMA_HOLE_UPPER_addr[NUM_OF_ALT_MEM_REGIONS];
 };
 
 ///----------------------------------------------------------------------------
@@ -266,7 +264,6 @@ fapi2::ReturnCode getMcMemSize(
     uint64_t& o_mcSize)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Figure out the amount of memory behind this MCS
     // by adding up all memory from its MCA ports
@@ -301,7 +298,6 @@ fapi2::ReturnCode getMcMemSize(
     uint64_t& o_mcSize)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Figure out the amount of memory behind this MI
     // by adding up all memory from its DMI ports
@@ -349,7 +345,6 @@ void getGroupDataMcMemSize(
     uint64_t& o_mcSize)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Loop thru non-mirror groups (0-7)
     for (uint8_t l_group = 0; l_group < (DATA_GROUPS / 2); l_group++)
@@ -408,7 +403,7 @@ fapi2::ReturnCode validateGroupData(
     const uint32_t i_groupData[DATA_GROUPS][DATA_ELEMENTS])
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     uint64_t l_mcSize = 0;
     uint64_t l_mcSizeGroupData = 0;
     uint8_t l_portFound[NUM_MC_PORTS_PER_PROC];
@@ -487,7 +482,6 @@ fapi2::ReturnCode getGroupSizeEncodedValue(
     uint32_t& o_value)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     bool l_sizeFound = false;
 
@@ -516,7 +510,7 @@ fapi2::ReturnCode getGroupSizeEncodedValue(
                      .set_MC_POS(l_mcPos)
                      .set_GROUP_SIZE(i_groupSize),
                      "Error: Can't locate Group size value in GROUP_SIZE_TABLE. "
-                     "MC pos: %d, GroupSize u% GB.", l_mcPos, i_groupSize );
+                     "MC pos: %d, GroupSize %u GB.", l_mcPos, i_groupSize );
     }
 
 fapi_try_exit:
@@ -540,7 +534,6 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
                                       mcBarData_t& o_mcBarData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // This function assign the MCFGP_MC_CHANNELS_PER_GROUP value
     // to the MC according to the rule listed in the Nimbus/Cumulus workbook.
@@ -682,7 +675,7 @@ fapi2::ReturnCode getNonMirrorBarData(const fapi2::Target<T>& i_mcTarget,
     // ----------------------------------------------------
 
     // Alternate Memory MCFGPA
-    for (uint8_t ii = 0; ii < MAX_ALT_MEM_REGIONS; ii++)
+    for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
     {
         if ( i_portInfo[0].altMemValid[ii] )
         {
@@ -725,20 +718,34 @@ fapi_try_exit:
 ///
 /// @param[in]  i_mcTarget     MC target (MCS/MI)
 /// @param[in]  i_portInfo     The port group info
-/// @param[in]  o_mcBarData    MC BAR data
+/// @param[in]  io_mcBarData   MC BAR data
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 template<fapi2::TargetType T>
 fapi2::ReturnCode getMirrorBarData(const fapi2::Target<T>& i_mcTarget,
                                    const mcPortGroupInfo_t i_portInfo[],
-                                   mcBarData_t& o_mcBarData)
+                                   mcBarData_t& io_mcBarData)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
+    // ---------------------------------------------------
+    // Build MC register values for mirror groups
+    // ---------------------------------------------------
+
+    // Check MCFGP value to see if mirror is possible
+    // (See Table 1 of P9 Cumulus Memory Controller Workbook)
+    //
+    if ( (io_mcBarData.MCFGP_chan_per_group < 0b0101) ||
+         (io_mcBarData.MCFGP_chan_per_group > 0b1000) )
+    {
+        FAPI_IMP("Mirror is not possible with MCFGP = 0x%.8X, NO MIRROR is "
+                 "programmed. ", io_mcBarData.MCFGP_chan_per_group);
+        goto fapi_try_exit;
+    }
 
     // Set MCFGPM_VALID
-    o_mcBarData.MCFGPM_valid = true;
+    io_mcBarData.MCFGPM_valid = true;
 
     // ----------------------------------------------------
     // Determine data for MCFGPM register
@@ -746,33 +753,32 @@ fapi2::ReturnCode getMirrorBarData(const fapi2::Target<T>& i_mcTarget,
 
     // MCFGPM Group size
     FAPI_TRY(getGroupSizeEncodedValue(i_mcTarget, i_portInfo[1].groupSize,
-                                      o_mcBarData.MCFGPM_group_size),
+                                      io_mcBarData.MCFGPM_group_size),
              "getGroupSizeEncodedValue() returns error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
     // Group base address
-    o_mcBarData.MCFGPM_groupBaseAddr = i_portInfo[1].groupBaseAddr;
-
+    io_mcBarData.MCFGPM_groupBaseAddr = i_portInfo[1].groupBaseAddr;
 
     // ----------------------------------------------------
     // Determine data for MCFGPMA registers
     // ----------------------------------------------------
     // Alternate Memory MCFGPMA
-    for (uint8_t ii = 0; ii < MAX_ALT_MEM_REGIONS; ii++)
+    for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
     {
         if ( i_portInfo[1].altMemValid[ii] )
         {
-            o_mcBarData.MCFGPMA_HOLE_valid[ii] = 1;
-            o_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] =
+            io_mcBarData.MCFGPMA_HOLE_valid[ii] = 1;
+            io_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] =
                 i_portInfo[1].altBaseAddr[ii];
-            o_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] =
+            io_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] =
                 i_portInfo[1].altBaseAddr[ii] + i_portInfo[1].altMemSize[ii];
         }
         else
         {
-            o_mcBarData.MCFGPMA_HOLE_valid[ii] = 0;
-            o_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] = 0;
-            o_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] = 0;
+            io_mcBarData.MCFGPMA_HOLE_valid[ii] = 0;
+            io_mcBarData.MCFGPMA_HOLE_LOWER_addr[ii] = 0;
+            io_mcBarData.MCFGPMA_HOLE_UPPER_addr[ii] = 0;
         }
 
     }
@@ -795,17 +801,25 @@ void displayMCPortInfoData(const mcPortGroupInfo_t i_portInfo[])
     for (uint8_t ii = 0; ii < MAX_MC_PORTS_PER_MCS; ii++)
     {
         FAPI_INF("    Port %u:", ii);
-        FAPI_INF("        myGroup %u", i_portInfo[ii].myGroup);
-        FAPI_INF("        numPortsInGroup %u", i_portInfo[ii].numPortsInGroup);
-        FAPI_INF("        groupSize %u", i_portInfo[ii].groupSize);
-        FAPI_INF("        groupBaseAddr 0x%.16llX", i_portInfo[ii].groupBaseAddr);
-        FAPI_INF("        channelId %u", i_portInfo[ii].channelId);
 
-        for (uint8_t jj = 0; jj < MAX_ALT_MEM_REGIONS; jj++)
+        if (i_portInfo[ii].numPortsInGroup > 0)
         {
-            FAPI_INF("        altMemValid[%u] %u", jj, i_portInfo[ii].altMemValid[jj]);
-            FAPI_INF("        altMemSize[%u]  %u", jj, i_portInfo[ii].altMemSize[jj]);
-            FAPI_INF("        altBaseAddr[%u] 0x%.16llX", jj, i_portInfo[ii].altBaseAddr[jj]);
+            FAPI_INF("        myGroup %u", i_portInfo[ii].myGroup);
+            FAPI_INF("        numPortsInGroup %u", i_portInfo[ii].numPortsInGroup);
+            FAPI_INF("        groupSize %u", i_portInfo[ii].groupSize);
+            FAPI_INF("        groupBaseAddr 0x%.16llX", i_portInfo[ii].groupBaseAddr);
+            FAPI_INF("        channelId %u", i_portInfo[ii].channelId);
+
+            for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
+            {
+                FAPI_INF("        altMemValid[%u] %u", jj, i_portInfo[ii].altMemValid[jj]);
+                FAPI_INF("        altMemSize[%u]  %u", jj, i_portInfo[ii].altMemSize[jj]);
+                FAPI_INF("        altBaseAddr[%u] 0x%.16llX", jj, i_portInfo[ii].altBaseAddr[jj]);
+            }
+        }
+        else
+        {
+            FAPI_INF("        Not configured");
         }
     }
 
@@ -835,7 +849,7 @@ void displayMCBarData(const uint8_t i_mcPosition,
     FAPI_INF("        MCFGPM_group_size %u", i_mcBarData.MCFGPM_group_size);
     FAPI_INF("        MCFGPM_groupBaseAddr 0x%.16llX", i_mcBarData.MCFGPM_groupBaseAddr);
 
-    for (uint8_t jj = 0; jj < MAX_ALT_MEM_REGIONS; jj++)
+    for (uint8_t jj = 0; jj < NUM_OF_ALT_MEM_REGIONS; jj++)
     {
         FAPI_INF("        MCFGPA_HOLE_valid[%u]      %u", jj, i_mcBarData.MCFGPA_HOLE_valid[jj]);
         FAPI_INF("        MCFGPA_HOLE_LOWER_addr[%u] %u", jj, i_mcBarData.MCFGPA_HOLE_LOWER_addr[jj]);
@@ -868,7 +882,6 @@ void getPortData(const bool i_nonMirror,
                  mcPortGroupInfo_t o_portInfo[MAX_MC_PORTS_PER_MCS])
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
 
     // Non-mirrored groups: 0->7
     // Mirrored groups: 8->11
@@ -880,8 +893,6 @@ void getPortData(const bool i_nonMirror,
         l_startGroup = MIRR_OFFSET;
         l_endGroup = (MIRR_OFFSET + NUM_MIRROR_REGIONS);
     }
-
-    FAPI_INF("getPortData for %s group", i_nonMirror ? "non-mirrored" : "mirrored");
 
     // Loop thru specified groups
     for (uint8_t l_group = l_startGroup; l_group < l_endGroup; l_group++)
@@ -913,7 +924,7 @@ void getPortData(const bool i_nonMirror,
                 o_portInfo[l_mcPortNum].channelId = l_memberIdx;
 
                 // ALT memory regions
-                for (uint8_t ii = 0; ii < MAX_ALT_MEM_REGIONS; ii++)
+                for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
                 {
                     if (i_groupData[l_group][ALT_VALID(ii)])
                     {
@@ -928,7 +939,7 @@ void getPortData(const bool i_nonMirror,
 
     } // Group loop
 
-    // If one of MC port is configured in a group, get the BAR data
+    // Set channel ID for certain scenario
     if ( (o_portInfo[0].numPortsInGroup > 0) ||
          (o_portInfo[1].numPortsInGroup > 0) )
     {
@@ -942,10 +953,12 @@ void getPortData(const bool i_nonMirror,
             o_portInfo[0].channelId = o_portInfo[1].channelId;
             o_portInfo[1].channelId = 0;
         }
-
-        // Display MC port info data
-        displayMCPortInfoData(o_portInfo);
     }
+
+    // Display MC port info data
+    FAPI_INF("getPortData from %s group - Results for MCS/MI pos %d",
+             i_nonMirror ? "NON-MIRROR" : "MIRROR", i_mcPos);
+    displayMCPortInfoData(o_portInfo);
 
     FAPI_DBG("Exit");
     return;
@@ -969,7 +982,7 @@ fapi2::ReturnCode buildMCBarData(
     std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& o_mcBarDataPair)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_mirror_ctl;
@@ -1011,25 +1024,21 @@ fapi2::ReturnCode buildMCBarData(
                      "getNonMirrorBarData() returns error, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
 
-            // ---------------------------------------------------
-            // Build MC register values for mirror groups
-            // Nimbus doesn't use mirror, so this block should
-            // only be run on Cumulus if mirror memory is enabled
-            // ---------------------------------------------------
-            // ******* Need to also program Mirror memory for Cumulus. ********
-            if ( (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE) &&
-                 (l_mcBarData.MCFGPM_valid == false) )
+            // ---------------------------------------------------------------
+            // Set MC register values for mirror groups
+            //   - Nimbus:  No mirror
+            //   - Cumulus: If ATTR_MRW_HW_MIRRORING_ENABLE = true
+            // ---------------------------------------------------------------
+            if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
             {
-                FAPI_INF("Building MC register data for mirrored group - Cumulus only");
-
+                FAPI_INF("ATTR_MRW_HW_MIRRORING_ENABLE is enabled: checking mirrored groups");
                 mcPortGroupInfo_t l_portInfoMirrored[MAX_MC_PORTS_PER_MCS];
-
                 // Get port data from mirrored groups (false = mirrored)
                 getPortData(false, l_unitPos, i_groupData, l_portInfoMirrored);
 
-                // If one of MC port is configured in a group, get the BAR data
-                if ( (l_portInfoMirrored[0].numPortsInGroup > 0) ||
-                     (l_portInfoMirrored[1].numPortsInGroup > 0) )
+                // If at least 2MC ports/group, get the mirror BAR data
+                if ( (l_portInfoMirrored[0].numPortsInGroup >= 2) &&
+                     (l_portInfoMirrored[1].numPortsInGroup >= 2) )
                 {
                     // ---- Build MCFGM data based on port group info ----
                     FAPI_TRY(getMirrorBarData(l_mc, l_portInfoMirrored, l_mcBarData),
@@ -1069,7 +1078,7 @@ fapi2::ReturnCode writeMCBarData(
     const std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& i_mcBarDataPair)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     fapi2::buffer<uint64_t> l_scomData(0);
 
     fapi2::ATTR_MSS_INTERLEAVE_GRANULARITY_Type l_interleave_granule_size;
@@ -1293,7 +1302,7 @@ fapi2::ReturnCode unmaskMCFIR(
     const std::vector<std::pair<fapi2::Target<T>, mcBarData_t>>& i_mcBarDataPair)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     fapi2::buffer<uint64_t> l_mcfiraction;
     fapi2::buffer<uint64_t> l_mcfirmask_and;
 
@@ -1340,7 +1349,7 @@ fapi2::ReturnCode p9_mss_setup_bars(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Entering");
-    fapi2::ReturnCode l_rc;
+
     uint8_t l_mem_ipl_complete = 1;
 
     // Stores data read from ATTR_MSS_MCS_GROUP_32
