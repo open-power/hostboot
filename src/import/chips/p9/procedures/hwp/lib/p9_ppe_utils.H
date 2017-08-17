@@ -491,6 +491,19 @@ fapi2::ReturnCode ppe_write_iar(
     const uint64_t i_base_address,
     const uint64_t i_address );
 
+
+///--------------------------------------------------------------------------------------
+/// @brief Determine if the PPE is halted
+/// @param[in]   i_target        target
+/// @param[in]   i_base_address  base SCOM address of the PPE
+/// @param[out]  o_halted        boolean true if halted; false otherwise
+/// @return  fapi2::ReturnCode
+///--------------------------------------------------------------------------------------
+fapi2::ReturnCode ppe_isHalted(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    bool* o_halted);
+
 #ifndef  __HOSTBOOT_MODULE
 
 ///--------------------------------------------------------------------------------------
