@@ -99,8 +99,11 @@ fapi2::ReturnCode stop( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
 
     // So we've either stopped or we timed out
     FAPI_ASSERT( l_poll_result == true,
-                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP().set_MCBIST_TARGET(i_target),
-                 "The MCBIST engine failed to stop its program" );
+                 fapi2::MSS_MEMDIAGS_MCBIST_FAILED_TO_STOP()
+                 .set_MCBIST_TARGET(i_target)
+                 .set_POLL_COUNT(l_poll_parameters.iv_poll_count),
+                 "%s The MCBIST engine failed to stop its program",
+                 mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
