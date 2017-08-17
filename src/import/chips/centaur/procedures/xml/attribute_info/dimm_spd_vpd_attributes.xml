@@ -40,7 +40,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>DDR3 = 0x0b, DDR4 = 0x0c</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -53,7 +53,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>CDIMM = 0x00, RDIMM = 0x01, UDIMM = 0x02, SO_DIMM=0x03, LRDIMM = 0x0b, INVALID = 0xff</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -66,7 +66,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>NO = 0x0, YES = 0x1</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -89,7 +89,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         D256MB = 0x00, D512Mb = 0x01, D1GB = 0x02, D2GB = 0x03, D4GB = 0x04,
         D8GB = 0x05, D16GB = 0x06, D32GB=0x07
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -107,7 +107,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03, B4 = 0x04, UNKNOWN = 0xff</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -121,7 +121,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <enum>R12 = 0x00, R13 = 0x01, R14 = 0x02, R15 = 0x03,
           R16 = 0x04, R17 = 0x05, R18 = 0x06
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -133,7 +133,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>C9 = 0x00, C10 = 0x01, C11 = 0x02, C12 = 0x03</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -157,7 +157,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
          OP1_2V = 0x08,
          END1_2V = 0x10
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -170,7 +170,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>R1 = 0x00, R2 = 0x01, R4 = 0x03, RX = 0xFF</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -183,7 +183,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>W4 = 0x00, W8 = 0x01, W16 = 0x02, W32 = 0x03</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -201,7 +201,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         W8 = 0x00, W16 = 0x01, W32 = 0x02, W64 = 0x03,
         WE8 = 0x08, WE16 = 0x09, WE32 = 0x0a, WE64 = 0x0b
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -213,7 +213,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 18.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -253,7 +253,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         CL_5  = 0x00000002,
         CL_4  = 0x00000001
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -265,7 +265,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 24.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -277,7 +277,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 25.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -289,7 +289,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 26.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -301,7 +301,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 27, bits 3-0 and byte 28 (LSB)
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -313,7 +313,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 27, bits 7-4 and byte 29 (LSB)
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -325,7 +325,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 36, bits 3-0 and byte 37 (LSB).
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -338,7 +338,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>DLL_OFF = 0x80, RZQ7 = 0x02, RZQ6 = 0x01</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -351,7 +351,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>PASR = 0x80, ODTS = 0x08, ASR = 0x05, ETRR = 0x02, ETR = 0x01</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -364,7 +364,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>PRESENT = 0x80, ACCURACY_MASK = 0x7F</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -377,7 +377,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>STANDARD_MONOLITHIC = 0x00, NON_STANDARD = 0x01</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -390,7 +390,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>NOT_SPECIFIED = 0x00, MULTI_LOAD_STACK = 0x01, SINGLE_LOAD_STACK = 0x02</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -402,7 +402,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <enum>DIE1 = 0x00, DIE2 = 0x01, DIE3 = 0x02, DIE4 = 0x03,DIE5 = 0x04,DIE6 = 0x05,DIE7 = 0x06,DIE8 = 0x07</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -414,7 +414,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 125.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -426,7 +426,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 123.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -438,7 +438,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 122.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -450,7 +450,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 121.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -462,7 +462,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 120.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -474,7 +474,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR3 SPD byte 63 bits 1-0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -489,7 +489,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <array>57</array>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -503,7 +503,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD bytes 320 (LSB) to 321.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -517,7 +517,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD byte 322.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -531,7 +531,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD bytes 323 (BCD year) to byte 324 (BCD week) (LSB).
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -545,7 +545,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD bytes 325 (LSB) to 328.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -558,7 +558,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR3 SPD bytes 126 (LSB) to 127.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -573,7 +573,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <array>18</array>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -590,7 +590,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Platform support must call an Accessor HWP.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -604,7 +604,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD bytes 350 (LSB) to 351.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -620,7 +620,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     </description>
     <valueType>uint8</valueType>
     <array>80</array>
-    <platInit/>
     <writeable/>
 </attribute>
 
@@ -636,6 +635,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint64</valueType>
     <odmVisable/>
     <odmChangeable/>
+    <writeable/>
 </attribute>
 -->
 
@@ -650,6 +650,8 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
+    <platInit/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -667,7 +669,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 9, bits 7-4.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -678,7 +680,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 9, bits 3-0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -689,7 +691,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 10.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -700,7 +702,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 11.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -711,7 +713,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 17.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -722,7 +724,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 19.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -733,7 +735,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 24 (LSB) and byte 25.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -744,7 +746,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 26.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -755,7 +757,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 27.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -771,7 +773,7 @@ Querying them from DDR4 DIMMs will result in an error
         NO_RANKS = 0x00,
         ODD_RANKS = 0x01
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -785,7 +787,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 67.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -799,7 +801,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 68.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -813,7 +815,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 69.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -827,7 +829,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 70.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -841,7 +843,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 71.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -855,7 +857,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 72.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -869,7 +871,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 73.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -883,7 +885,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 74.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -897,7 +899,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 75.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -911,7 +913,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 76.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -925,7 +927,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 77.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -939,7 +941,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 78.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -953,7 +955,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 79.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -967,7 +969,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 80.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -981,7 +983,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 81.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -995,7 +997,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 82.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1009,7 +1011,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 83.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1023,7 +1025,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 84.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1037,7 +1039,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 85.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1051,7 +1053,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 86.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1065,7 +1067,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 87.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1079,7 +1081,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 88.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1093,7 +1095,7 @@ Querying them from DDR4 DIMMs will result in an error
         Located in DDR3 SPD byte 89.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1113,7 +1115,7 @@ Querying them from DDR3 DIMMs will result in an error
     </description>
     <valueType>uint8</valueType>
     <enum>BG0 = 0x00, BG2 = 0x01, BG4 = 0x02</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1128,7 +1130,7 @@ Querying them from DDR3 DIMMs will result in an error
     </description>
     <valueType>uint8</valueType>
     <enum>PS125 = 0x00</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1142,7 +1144,7 @@ Querying them from DDR3 DIMMs will result in an error
     </description>
     <valueType>uint8</valueType>
     <enum>PS1 = 0x00</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1153,7 +1155,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 19.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1164,7 +1166,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD bytes 31(MSB) bits 15-8 and SPD byte 30(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1175,7 +1177,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD bytes 33(MSB) bits 15-8 and SPD byte 32(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1186,7 +1188,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 35(MSB) bits 15-8 and SPD byte 34(LSB) 7-0.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1201,7 +1203,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 38
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1216,7 +1218,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 39
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1231,7 +1233,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 40
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -1246,7 +1248,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 117
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1262,7 +1264,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 118
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1278,7 +1280,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 119
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1291,7 +1293,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 124.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1304,7 +1306,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 126(LSB) and 127(MSB).
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1320,7 +1322,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 352
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1333,7 +1335,7 @@ Querying them from DDR3 DIMMs will result in an error
         Located in DDR4 SPD byte 382(LSB) and 383(MSB).
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1346,6 +1348,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <enum>UNKNOWN = 0x3030, OLD_CDIMM = 0x3031, CURRENT = 0x3230</enum>
     <platInit/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -1359,13 +1362,11 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
     <targetType>TARGET_TYPE_DIMM</targetType>
     <description>
         Indicates number of registers used and number of rows of DRAM's on LRDIMM.
-	Byte 131, Bits 1-0 for # of registers used on LRDIMM.
-  	 00 - Undefined , 01 - 1 Register , 10,11 -Reserved.
         Byte 131, Bits 3-2 for # of rows of DRAM's on LRDIMM
          00,11- Undefined, 01- 1 Row, 10 - 2 Rows.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1373,16 +1374,14 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
 <attribute>
     <id>ATTR_CEN_SPD_REGISTER_MANF_ID</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
-    <description>
         Manufacturer of the memory buffer on DIMM module.
-	     Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
+         Located in DDR4 SPD bytes 133(LSB) and 134(MSB).
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1390,12 +1389,10 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
         Address mapping from Register to DRAM and Drive strength.
               Located in DDR4 SPD bytes 136 and 137.
         Byte 136 bit 0, 0 - Standard, 1 - Mirrored.
-        Byte 137 has drive strength for control and command/Address.
     </description>
-    <valueType>uint32</valueType>
-    <platInit/>
+    <valueType>uint8</valueType>
+    <writeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -1406,7 +1403,20 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 138.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
+</attribute>
+-->
+
+<!--
+<attribute>
+    <id>ATTR_CEN_SPD_REG_OUTPUT_DRV_STRENGTH_CA</id>
+    <targetType>TARGET_TYPE_DIMM</targetType>
+    <description>
+        Drive strength for ca outputs of the registering clock driver.
+              Located in DDR4 SPD bytes 137.
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
 </attribute>
 -->
 
@@ -1419,7 +1429,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 140.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1432,7 +1442,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
                Located in DDR4 SPD bytes 141.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1445,7 +1455,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 142.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1458,7 +1468,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 143.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1471,7 +1481,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 144.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1486,7 +1496,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
         Bits 6-4 for MDQ Drive strength.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1501,7 +1511,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
         Bits 6-4 for MDQ Drive strength.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1516,7 +1526,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
         Bits 6-4 for MDQ Drive strength.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1532,7 +1542,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
         Bits 5-4 for data rate between 2400 and 3200.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1545,7 +1555,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 149 bits 2-0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1558,7 +1568,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 149 bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1571,7 +1581,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 150 bits 2-0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1584,7 +1594,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 150 bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1597,7 +1607,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 151 bits 2-0.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1610,7 +1620,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Located in DDR4 SPD bytes 151 bits 5-3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1625,7 +1635,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1640,7 +1650,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
                 Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1655,7 +1665,7 @@ The following attributes can be queried from LRDIMM type DDR4 DIMMs only
               Bit 5-3 for package ranks 2 and 3.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 <!--
@@ -1677,7 +1687,7 @@ that handles the DDR neutral attribute.
     </description>
     <valueType>uint8</valueType>
     <enum>B8 = 0x00, B16 = 0x01, B32 = 0x02, B64 = 0x03</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1693,7 +1703,7 @@ that handles the DDR neutral attribute.
     </description>
     <valueType>uint8</valueType>
     <enum>NOTOP1_5 = 0x01, OP1_35 = 0x02, OP1_2X = 0x04</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1725,7 +1735,7 @@ that handles the DDR neutral attribute.
         CL_5  = 0x00000002,
         CL_4  = 0x00000001
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1740,7 +1750,7 @@ that handles the DDR neutral attribute.
         Regular HWPs must use ATTR_CEN_SPD_MODULE_REVISION_CODE.
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1763,7 +1773,7 @@ that handles the DDR neutral attribute.
     </description>
     <valueType>uint8</valueType>
     <enum>B4 = 0x00, B8 = 0x01</enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1784,7 +1794,7 @@ that handles the DDR neutral attribute.
         OPTBD1V = 0x04, ENDTBD1V = 0x08,
         OPTBD2V = 0x10, ENDTBD2V = 0x20
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1819,7 +1829,7 @@ that handles the DDR neutral attribute.
         CL_8  = 0x00000002,
         CL_7  = 0x00000001
     </enum>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1834,7 +1844,7 @@ that handles the DDR neutral attribute.
         Regular HWPs must use ATTR_CEN_SPD_MODULE_REVISION_CODE.
     </description>
     <valueType>uint8</valueType>
-    <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -1862,6 +1872,7 @@ The following attributes are from Centaur VPD.
     </enum>
     <platInit/>
     <array> 2 2</array>
+    <writeable/>
 </attribute>
 
 <!-- Attributes added to support the VPD which was formally using the EFF settings -->
@@ -1878,6 +1889,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1892,6 +1904,7 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1909,6 +1922,7 @@ This Attribute is to be interpreted as an Integer </description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1925,6 +1939,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1941,6 +1956,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1958,6 +1974,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1976,6 +1993,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -1997,6 +2015,7 @@ Decode: (R for Range V for Value, blank for unused)
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2015,6 +2034,7 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2032,6 +2052,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2049,6 +2070,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2066,6 +2088,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2083,6 +2106,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2100,6 +2124,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2121,6 +2146,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2142,6 +2168,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2163,6 +2190,7 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2185,6 +2213,7 @@ SLEW_MAXV_NS = 7
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2207,6 +2236,7 @@ SLEW_MAXV_NS = 7
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2224,6 +2254,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2235,6 +2266,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2246,6 +2278,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2257,6 +2290,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2268,6 +2302,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2279,6 +2314,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2290,6 +2326,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2301,6 +2338,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2312,6 +2350,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2323,6 +2362,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2334,6 +2374,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2345,6 +2386,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2356,6 +2398,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2367,6 +2410,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2378,6 +2422,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2389,6 +2434,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2400,6 +2446,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2411,6 +2458,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2422,6 +2470,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2433,6 +2482,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2444,6 +2494,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2455,6 +2506,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2466,6 +2518,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2477,6 +2530,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2488,6 +2542,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2499,6 +2554,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2510,6 +2566,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2521,6 +2578,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2532,6 +2590,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2543,6 +2602,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2554,6 +2614,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2565,6 +2626,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2576,6 +2638,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2587,6 +2650,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2598,6 +2662,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2609,6 +2674,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2620,6 +2686,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2631,6 +2698,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2642,6 +2710,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2653,6 +2722,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2664,6 +2734,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2675,6 +2746,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2686,6 +2758,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2697,6 +2770,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2708,6 +2782,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2719,6 +2794,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2730,6 +2806,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2741,6 +2818,7 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2752,9 +2830,9 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_VPD_PERIODIC_MEMCAL_MODE_OPTIONS</id>
     <targetType>TARGET_TYPE_MBA</targetType>
@@ -2765,8 +2843,8 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_VPD_CKE_PRI_MAP</id>
@@ -2776,6 +2854,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2785,6 +2864,7 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint64</valueType>
     <platInit/>
     <odmVisable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2795,6 +2875,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2805,6 +2886,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2815,6 +2897,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2825,6 +2908,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2835,6 +2919,7 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2854,6 +2939,7 @@ Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
     <odmVisable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2873,6 +2959,7 @@ Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
     <odmVisable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2884,6 +2971,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2894,6 +2982,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2904,6 +2993,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2914,6 +3004,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -2924,6 +3015,7 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <!--
@@ -2937,10 +3029,10 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <writeable/>
     <persistent/>
+    <writeable/>
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_VPD_MT_VERSION_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2948,10 +3040,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
    <platInit/>
      <odmVisable/>
- </attribute>
--->
+     <writeable/>
+</attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_VPD_MR_VERSION_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2959,10 +3050,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
--->
+     <writeable/>
+</attribute>
 
-<!--
  <attribute>
     <id>ATTR_CEN_VPD_MR_DATA_CONTROL_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2970,10 +3060,9 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
--->
+     <writeable/>
+</attribute>
 
-<!--
  <attribute>
     <id>ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -2981,8 +3070,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
--->
+     <writeable/>
+</attribute>
 
 <!--
  <attribute>
@@ -2992,7 +3081,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
+     <writeable/>
+</attribute>
 -->
 
 <!--
@@ -3003,7 +3093,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
+     <writeable/>
+</attribute>
 -->
 
 <!--
@@ -3014,7 +3105,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
- </attribute>
+     <writeable/>
+</attribute>
 -->
 
 
@@ -3029,6 +3121,7 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     </description>
     <valueType>uint8</valueType>
     <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -3046,6 +3139,7 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     A = 0x00, B = 0x01, C = 0x02, D = 0x03, E = 0x04, F = 0x05, G = 0x06, H = 0x07, J = 0x08, K = 0x09, L = 0x0a, M = 0x0b, N = 0x0c, P = 0x0d, R = 0x0e, T = 0x0f, U = 0x10, V = 0x11, W = 0x12, Y = 0x13, AA = 0x14, AB = 0x15, AC = 0x16, AD = 0x17, AE = 0x18, AF = 0x19, AG = 0x1a, AH = 0x1b, AJ = 0x1c, AK = 0x1d, AL = 0x1e, AM = 0x20, AN = 0x21, AP = 0x22, AR = 0x23, AT = 0x24, AU = 0x25, AV = 0x26, AW = 0x27, AY = 0x28, BA = 0x29, BB = 0x2a, BC = 0x2b, BD = 0x2c, BE = 0x2d, BF = 0x2e, BG = 0x2f, BH = 0x30, BJ = 0x31, BK = 0x32, BL = 0x33, BM = 0x34, BN = 0x35, BP = 0x36, BR = 0x37, BT = 0x38, BU = 0x39, BV = 0x3a, BW = 0x3b, BY = 0x3c, CA = 0x3d, CB = 0x3e, ZZ = 0x3f
     </enum>
     <platInit/>
+    <writeable/>
 </attribute>
 -->
 
@@ -3057,7 +3151,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
      <enum>NONE = 0x00, SLOWEXIT_CAPABLE = 0x01, FASTEXIT_CAPABLE = 0x02, FASTSLOW_CAPABLE = 0x03</enum>
      <platInit/>
      <odmVisable/>
- </attribute>
+     <writeable/>
+</attribute>
 
 
  <attribute>
@@ -3072,10 +3167,10 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
+    <writeable/>
 </attribute>
 
 
-<!--
  <attribute>
      <id>ATTR_CEN_VPD_RD_CTR_WINDAGE_OFFSET</id>
      <targetType>TARGET_TYPE_MBA</targetType>
@@ -3088,19 +3183,17 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
+    <writeable/>
 </attribute>
--->
 
-
-<!--
 <attribute>
     <id>ATTR_CEN_ISDIMM_MBVPD_INDEX</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>VPD index for associated chip's memory buffer VPD</description>
     <valueType>uint8</valueType>
     <platInit/>
+    <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE</id>
@@ -3110,6 +3203,7 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -3120,6 +3214,7 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -3130,6 +3225,7 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 <attribute>
@@ -3140,6 +3236,7 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
+    <writeable/>
 </attribute>
 
 </attributes>
