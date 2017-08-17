@@ -641,6 +641,26 @@ fapi_try_exit:
 
 //-----------------------------------------------------------------------------
 
+fapi2::ReturnCode ppe_isHalted(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const uint64_t i_base_address,
+    bool* o_halted)
+{
+    fapi2::buffer<uint64_t> l_data64;
+
+    FAPI_TRY(getScom ( i_target,
+                       i_base_address + PPE_XIRAMDBG,
+                       l_data64 ),
+             "Failed reading XIRAMDBG register!" );
+
+    *o_halted = l_data64.getBit<0>();
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//-----------------------------------------------------------------------------
+
 #ifndef  __HOSTBOOT_MODULE
 
 fapi2::ReturnCode scom_regs_populate_name(
