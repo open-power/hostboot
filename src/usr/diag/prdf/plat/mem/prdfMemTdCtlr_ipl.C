@@ -190,28 +190,24 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             }
         }
         else if ( isMfgCeCheckingEnabled() &&
-                  (0 != (eccAttns & MAINT_HARD_NCE_ETE)) )
+                  (0 != (eccAttns & MAINT_HARD_NCE_ETE)) &&
+                  ( (0 != (eccAttns & MAINT_NCE)) ||
+                    (0 != (eccAttns & MAINT_TCE))    ) )
         {
+            // NOTE: The MAINT_HARD_NCE_ETE attention is reported on the MCBIST.
+            //       If the command is run in broadcast mode, we may end up
+            //       doing TPS on all four ports when only one port has the CE.
+            //       Therefore, we must check for MAINT_NCE or MAINT_TCE, which
+            //       are found on the MCA, to determine if this MCA need a TPS
+            //       procedure.
+
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            // Query the per-symbol counters for the hard CE symbol.
-            MemUtils::MaintSymbols symData; MemSymbol junk;
-            o_rc = MemUtils::collectCeStats<T>( i_chip, rank, symData, junk );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "MemUtils::collectCeStats(0x%08x,m%ds%d) "
-                          "failed", i_chip->GetId(), rank.getMaster(),
-                          rank.getSlave() );
-                break;
-            }
-
-            // The command will have finished at the end of the rank so there
-            // may be more than one symbol. Add all to the callout list.
-            for ( auto & s : symData )
-            {
-                MemoryMru memmru ( trgt, rank, s.symbol );
-                io_sc.service_data->SetCallout( memmru );
-            }
+            // NOTE: Normally we would add each symbol in the per-symbol
+            //       counters to the callout list for FFDC, but the results are
+            //       a bit undefined in broadcast mode. Since this should not be
+            //       a predictive error log, it is fine to have no callouts for
+            //       now.
 
             // Add a TPS procedure to the queue.
             TdEntry * e = new TpsEvent<T>{ i_chip, rank };
