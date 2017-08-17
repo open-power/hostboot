@@ -47,7 +47,8 @@
 /// Block content.
 
 #define MAX_PSTATE_TABLE_ENTRIES  128
-#define GEN_PSTATES_TBL_MAGIC    0x50535441424c3030 //PSTABL00 (last two ASCII characters indicate version number)
+#define GEN_PSTATES_TBL_MAGIC    0x50535441424c3030ULL //PSTABL00 (last two ASCII characters indicate version number)
+#define GEN_PSTATES_TBL_MAGIC_V1    0x50535441424c3031ULL //PSTABL01 (last two ASCII characters indicate version number)
 
 #ifndef __ASSEMBLER__
 #ifdef __cplusplus
@@ -100,11 +101,12 @@ typedef struct
 } PstateTable;
 
 
+/// GeneratedPstateInfo - VERSION0
 typedef struct
 {
 
     /// Magic Number
-    uint64_t magic;   // ASCII: "PSTATABL"
+    uint64_t magic;   // ASCII: "PSTABL00 "
 
     // PGPE content
     GlobalPstateParmBlock globalppb;
@@ -124,6 +126,46 @@ typedef struct
     PstateTable biased_pstates[MAX_PSTATE_TABLE_ENTRIES];
 } GeneratedPstateInfo;
 
+
+/// GeneratedPstateInfo - VERSION1
+typedef struct
+{
+    uint32_t    gppb_offset;
+    uint32_t    gppb_length;
+    uint32_t    ps0_offset;
+    uint32_t    highest_ps_offset;
+    uint32_t    raw_pstate_tbl_offset;
+    uint32_t    raw_pstate_tbl_length;
+    uint32_t    biased_pstate_tbl_offset;
+    uint32_t    biased_pstate_tbl_length;
+} GeneratedPstateInfoHeader_v1;
+
+typedef struct
+{
+
+    /// Magic Number
+    uint64_t magic;   // ASCII: "PSTABL01 "
+
+    /// Offset and lengths for fields of this structure
+    GeneratedPstateInfoHeader_v1 header;
+
+    // PGPE content
+    GlobalPstateParmBlock globalppb;
+
+    /// The fastest frequency - after biases have been applied
+    uint32_t pstate0_frequency_khz;
+
+    /// Highest Pstate Number => slowest Pstate generated
+    uint32_t highest_pstate;
+
+    /// Generated table with system paramters included but without biases
+    PstateTable raw_pstates[MAX_PSTATE_TABLE_ENTRIES];
+
+    /// Generated table with system paramters and biases
+    /// Note: if all bias attributes are 0, this content will be the same
+    /// as the raw_pstates content.
+    PstateTable biased_pstates[MAX_PSTATE_TABLE_ENTRIES];
+} GeneratedPstateInfo_v1;
 
 
 #ifdef __cplusplus
