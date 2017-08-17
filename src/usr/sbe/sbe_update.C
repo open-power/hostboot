@@ -55,6 +55,7 @@
 #include <sbe/sbereasoncodes.H>
 #include <sbe/sbe_update.H>
 #include <initservice/initsvcreasoncodes.H>
+#include <sys/time.h>
 
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
@@ -2666,6 +2667,11 @@ namespace SBE
                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1 ) ) )
             {
                 err = SBEIO::sendPsuQuiesceSbe(io_sbeState.target);
+
+                // @TODO RTC 178620 - Remove after confirming SBE fix
+                //   Give SBE more time as there was a race condition
+                //   in their quiesce path
+                nanosleep(1, 0); //Sleep for 1s
 
                 if(err)
                 {
