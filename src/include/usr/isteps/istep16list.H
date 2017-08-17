@@ -141,7 +141,7 @@ namespace   INITSERVICE
                 // Hostboot PRD should no longer be called after this step.
                 ISTEPNAME(16,04,"mss_scrub"),
                 ISTEP_16::call_mss_scrub,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, false }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
         {
                 ISTEPNAME(16,05,"host_ipl_complete"),
