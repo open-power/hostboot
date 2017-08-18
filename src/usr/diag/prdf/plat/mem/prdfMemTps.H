@@ -98,6 +98,23 @@ class TpsEvent : public TdEntry
                          bool & o_done );
 
     /**
+     * @brief  Analyzes the counts that summarize the symbol CE counts.
+     * @param  i_badDqCount      Number of nibbles with a bad DQ
+     * @param  i_badChipCount    Number of nibbles with a bad Chip
+     * @param  i_nonZeroSumCount Number of nibbles under threshold with a
+     *                           non-zero sum
+     * @param  i_singleSymCount  Number of nibbles under threshold with a
+     *                           single symbol count greater than one
+     * @param  i_symList         Vector of all symbols with counts > 0.
+     * @param  io_sc      The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t analyzeCeSymbolCounts( CeCount i_badDqCount,
+        CeCount i_badChipCount, CeCount i_nonZeroSumCount,
+        CeCount i_singleSymCount, MemUtils::MaintSymbols i_symList,
+        STEP_CODE_DATA_STRUCT & io_sc );
+
+    /**
      * @brief  Gets the counts that summarize the symbol CE counts.
      * @param  io_badDqCount      Number of nibbles with a bad DQ
      * @param  io_badChipCount    Number of nibbles with a bad Chip
@@ -120,6 +137,7 @@ class TpsEvent : public TdEntry
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
     uint32_t analyzeCe( STEP_CODE_DATA_STRUCT & io_sc );
+
 
     #endif // __HOSTBOOT_RUNTIME
 
