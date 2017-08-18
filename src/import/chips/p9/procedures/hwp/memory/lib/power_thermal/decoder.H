@@ -82,7 +82,7 @@ static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP =
 {
     {fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM, 0b00},
     {fapi2::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM, 0b01},
-    {fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM, 0b10}
+    {fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM, 0b10},
 };
 
 static const std::vector< std::pair<uint8_t , uint8_t> > DRAM_GEN_MAP =
