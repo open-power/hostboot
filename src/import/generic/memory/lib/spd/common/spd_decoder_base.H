@@ -188,28 +188,6 @@ class decoder
         }
 
         ///
-        /// @brief Decodes hybrid media field from SPD
-        /// @param[out] o_value hybrid media decoding
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) const
-        {
-            o_value = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief Decodes hybrid field from SPD
-        /// @param[out] o_value hybrid decoding
-        /// @return FAPI2_RC_SUCCESS if okay
-        ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const
-        {
-            o_value = 0;
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
         /// @brief Decodes SDRAM density from SPD
         /// @param[out] o_value SDRAM density in GBs
         /// @return FAPI2_RC_SUCCESS if okay
