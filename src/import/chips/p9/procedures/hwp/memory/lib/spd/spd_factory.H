@@ -83,6 +83,36 @@ fapi2::ReturnCode rev_additions_level(const fapi2::Target<fapi2::TARGET_TYPE_DIM
                                       uint8_t& o_value);
 
 ///
+/// @brief      Decodes hybrid type (whether or not the DIMM is a hybrid) from SPD
+/// @param[in]  i_target dimm target
+/// @param[in]  i_spd_data SPD data
+/// @param[out] o_value hybrid
+/// @return     FAPI2_RC_SUCCESS if okay
+/// @note       Decodes SPD Byte 3 (bit 7)
+/// @note       Item JC-45-2220.01x
+/// @note       Page 17
+/// @note       DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode hybrid(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                         const std::vector<uint8_t>& i_spd_data,
+                         uint8_t& o_value);
+
+///
+/// @brief      Decodes hybrid type (hybrid DIMM type) from SPD
+/// @param[in]  i_target dimm target
+/// @param[in]  i_spd_data SPD data
+/// @param[out] o_value hybrid module type
+/// @return     FAPI2_RC_SUCCESS if okay
+/// @note       Decodes SPD Byte 3 (bits 6~4)
+/// @note       Item JC-45-2220.01x
+/// @note       Page 17
+/// @note       DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode hybrid_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const std::vector<uint8_t>& i_spd_data,
+                              uint8_t& o_value);
+
+///
 /// @brief      Decodes base module type (DIMM type) from SPD
 /// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD data
