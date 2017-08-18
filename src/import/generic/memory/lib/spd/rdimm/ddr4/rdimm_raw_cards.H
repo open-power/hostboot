@@ -52,6 +52,11 @@ namespace rdimm
 ///
 enum raw_card_rev : uint8_t
 {
+
+    // TODO:RTC178807 - Update how NVDIMMs are handled once more are up and running in the lab
+    // NVDIMM's have the same RC value as custom DIMMs, but are defined by SPD byte 03 differently
+    NVDIMM = 0x1F,
+
     A1 = 0x20,
     B1 = 0x21,
 
@@ -76,12 +81,14 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 }// rdimm
 
 // Exposed so we can test them.
-extern rcw_settings rdimm_rc_c1;
-extern rcw_settings rdimm_rc_c2;
+// Alphabetized list below
 extern rcw_settings rdimm_rc_a1;
 extern rcw_settings rdimm_rc_b1;
 extern rcw_settings rdimm_rc_b2;
+extern rcw_settings rdimm_rc_c1;
+extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_custom;
+extern rcw_settings rdimm_rc_nvdimm;
 extern rcw_settings rdimm_rc_vbu;
 
 }// mss
