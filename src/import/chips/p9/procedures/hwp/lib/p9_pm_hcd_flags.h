@@ -117,9 +117,9 @@ typedef union pgpe_flags
         uint16_t  enable_fratio                     : 1;
         uint16_t  enable_vratio                     : 1;
         uint16_t  vratio_modifier                   : 1;
-        uint16_t  reserved_13_15                    : 7;
+        uint16_t  reserved_13_15                    : 3;
 #else
-        uint16_t  reserved_13_15                    : 7;
+        uint16_t  reserved_13_15                    : 3;
         uint16_t  vratio_modifier                   : 1;
         uint16_t  enable_vratio                     : 1;
         uint16_t  enable_fratio                     : 1;
