@@ -284,19 +284,19 @@ p9_hcd_cache_stopclocks(
         FAPI_TRY(putScom(l_chip, l_scom_addr, DATA_SET(7)));
     }
 
-    // -------------------------------
-    // Disable VDM
-    // -------------------------------
-
-    if (l_attr_vdm_enabled == fapi2::ENUM_ATTR_VDM_ENABLED_TRUE)
-    {
-        FAPI_DBG("Clear Jump Protect Enable via DPLL_CTRL[1] (no need to poll DPLL_STAT)");
-        FAPI_TRY(putScom(i_target, EQ_QPPM_DPLL_CTRL_CLEAR, MASK_SET(1)));
-        FAPI_DBG("Set VDM Disable via QPPM_VDMCR[1]");
-        FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_OR, MASK_SET(1)));
-        FAPI_DBG("Drop VDM Poweron via QPPM_VDMCR[0]");
-        FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_CLEAR, MASK_SET(0)));
-    }
+//     // -------------------------------
+//     // Disable VDM
+//     // -------------------------------
+//
+//     if (l_attr_vdm_enabled == fapi2::ENUM_ATTR_VDM_ENABLED_TRUE)
+//     {
+//         FAPI_DBG("Clear Jump Protect Enable via DPLL_CTRL[1] (no need to poll DPLL_STAT)");
+//         FAPI_TRY(putScom(i_target, EQ_QPPM_DPLL_CTRL_CLEAR, MASK_SET(1)));
+//         FAPI_DBG("Set VDM Disable via QPPM_VDMCR[1]");
+//         FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_OR, MASK_SET(1)));
+//         FAPI_DBG("Drop VDM Poweron via QPPM_VDMCR[0]");
+//         FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_CLEAR, MASK_SET(0)));
+//     }
 
     // -------------------------------
     // Shutdown edram
