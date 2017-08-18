@@ -104,13 +104,12 @@ void sbe_threshold_handler( bool i_procSide,
  *        each output of the proc_extract_sbe_rc HWP.
  *
  * @param[in] i_target         - current proc target
- * @param[in] i_previous_error - The previous return value from HWP
  * @param[in] i_current_error  - The most recent return value from HWP
  *
  * @return - NULL
  */
 void proc_extract_sbe_handler( TARGETING::Target * i_target,
-                uint8_t i_previous_error, uint8_t i_current_error);
+                               uint8_t i_current_error);
 
 /**
  * @brief This function handles the call to the p9_get_sbe_msg_handler.
@@ -173,6 +172,28 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION handle_sbe_restart(
 errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                 TARGETING::Target * i_target,
                 SBE_REG_RETURN * o_returnAction);
+
+/**
+ * @brief This is the switch case that identifies the action needed for the RC
+ *        value in an SBE FFDC package.
+ *
+ * @param[in] i_rc            - RC value from SBE FFDC package
+ *
+ * @return - pass(0) or specific returned SBE action
+ */
+P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc( uint32_t i_rc);
+
+/**
+ * @brief  This function handles getting the SBE FFDC.
+ *
+ * @param[in]     i_target        - current proc target
+ *
+ * @return - bool for flow control on return to caller, if false, caller should
+ *           go on with the processing flow, if true, caller should interrupt
+ *           the processing flow and get out of loop or current iteration
+ */
+
+bool sbe_get_ffdc_handler(TARGETING::Target * i_target);
 
 /**
  * @brief  This function deals with the mask needed to switch

@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file sbe_extract_rc_handler.H
+ * @file sbe_extract_rc_handler.C
  *
  * Handle a SBE extract rc error.  We use a switch-case to determine
  * what action to take, and a finite state machine to control the
@@ -53,6 +53,12 @@
 #include <p9_perv_scom_addresses.H>
 #include "sbe_extract_rc_handler.H"
 #include <sbe/sbe_update.H>
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbe_sp_intf.H>
+#include <../../usr/sbeio/sbe_fifodd.H>
+#include <../../usr/sbeio/sbe_fifo_buffer.H>
+#include <sbeio/sbe_ffdc_parser.H>
+#include <sbeio/sbeioreasoncodes.H>
 
 using namespace ISTEP;
 
@@ -243,8 +249,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 #endif
-        proc_extract_sbe_handler(i_target, i_orig_error,
-                        P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
+        proc_extract_sbe_handler(i_target,
+                                 P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
     }
     // Gard and callout proc, return back to 8.4
     else if(i_orig_error == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
@@ -280,7 +286,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
 
 
 void proc_extract_sbe_handler( TARGETING::Target * i_target,
-                uint8_t i_original_error, uint8_t i_current_error)
+                               uint8_t i_current_error)
 {
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK
               "proc_extract_sbe_handler error: %llx",i_current_error);
@@ -295,7 +301,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
      * @userdata1  HUID of proc that had the SBE timeout
      * @userdata2  SBE failing code
      *
-     * @devdesc SBE did not start, this funciton is looking at
+     * @devdesc SBE did not start, this function is looking at
      *          the error to determine next course of action
      *
      * @custdesc The SBE did not start, we will attempt a reboot if possible
@@ -500,47 +506,60 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK
               "check_sbe_reg");
 
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     SBE_REG_RETURN l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_fapi2_proc_target(i_target);
-
-    sbeMsgReg_t l_sbeReg;
-
-    l_errl = sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
-
-    if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
+    do
     {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "SBE 0x%.8X never started, l_sbeReg=0x%.8X",
-                   TARGETING::get_huid(i_target),l_sbeReg.reg );
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                    l_fapi2_proc_target(i_target);
 
-        l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
-    }
-    else if (l_errl)
-    {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "ERROR: call check_sbe_reg, PLID=0x%x", l_errl->plid() );
+        sbeMsgReg_t l_sbeReg;
 
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+        l_errl = sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
 
-        // Commit error log
-        errlCommit( l_errl, HWPF_COMP_ID );
-    }
-    // No error and still functional
-    else if(i_target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
-    {
-        // Set attribute indicating that SBE is started
-        i_target->setAttr<TARGETING::ATTR_SBE_IS_STARTED>(1);
+        if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
+        {
+            // See if async FFDC bit is set in SBE register
+            if(l_sbeReg.asyncFFDC)
+            {
+                bool l_flowCtrl = sbe_get_ffdc_handler(i_target);
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "SUCCESS: check_sbe_reg completed okay for proc 0x%.8X",
-                  TARGETING::get_huid(i_target));
-    }
-    //@TODO-RTC:100963 - this should match the logic in
-    //call_proc_check_slave_sbe_seeprom.C
+                if(l_flowCtrl)
+                {
+                    break;
+                }
+            }
+
+            // Handle that SBE failed to boot in the allowed time
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SBE 0x%.8X never started, l_sbeReg=0x%.8X",
+                       TARGETING::get_huid(i_target),l_sbeReg.reg );
+        }
+        else if (l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR: call check_sbe_reg, PLID=0x%x", l_errl->plid() );
+
+            // capture the target data in the elog
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+            // Commit error log
+            errlCommit( l_errl, HWPF_COMP_ID );
+        }
+        // No error and still functional
+        else if(i_target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+        {
+            // Set attribute indicating that SBE is started
+            i_target->setAttr<TARGETING::ATTR_SBE_IS_STARTED>(1);
+
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SUCCESS: check_sbe_reg completed okay for proc 0x%.8X",
+                      TARGETING::get_huid(i_target));
+        }
+        //@TODO-RTC:100963 - this should match the logic in
+        //call_proc_check_slave_sbe_seeprom.C
+    } while(0);
 
     return l_ret;
 
@@ -589,8 +608,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
 #endif
                 // If we were trying to reipl and hit the error, we need
                 // to start with a new seeprom before hitting the threshold
-                proc_extract_sbe_handler(i_target, i_current_sbe_error,
-                                P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
+                proc_extract_sbe_handler(i_target,
+                                         P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
                 return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
             }
 
@@ -734,6 +753,15 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
             (*o_returnAction) = SBE_REG_RETURN::SBE_AT_RUNTIME;
             break;
         }
+        else if ((*o_sbeReg).asyncFFDC)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "SBE 0x%.8X has async FFDC bit set, o_sbeReg=0x%.8X",
+                      TARGETING::get_huid(i_target), (*o_sbeReg).reg);
+            // Async FFDC is indicator that SBE is failing to boot, and if
+            // in DUMP state, that SBE is done dumping, so leave loop
+            break;
+        }
         else
         {
             if( !(l_loops % 10) )
@@ -748,6 +776,163 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         }
     }
     return l_errl;
+}
+
+P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc(uint32_t i_rc)
+{
+    P9_EXTRACT_SBE_RC::RETURN_ACTION l_action;
+
+    switch(i_rc)
+    {
+        case fapi2::RC_EXTRACT_SBE_RC_RUNNING:
+        case fapi2::RC_EXTRACT_SBE_RC_NEVER_STARTED:
+        case fapi2::RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT:
+        case fapi2::RC_EXTRACT_SBE_RC_ADDR_NOT_RECOGNIZED:
+        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR_INSECURE_MODE:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2CM_BIT_RATE_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_ECC_ERR:
+
+            l_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
+
+            break;
+
+        case fapi2::RC_EXTRACT_SBE_RC_MAGIC_NUMBER_MISMATCH:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR_INSECURE_MODE:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ECC_ERR:
+
+            l_action = P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+
+            break;
+
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_ERROR:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_TIMEOUT:
+        case fapi2::RC_EXTRACT_SBE_RC_UNKNOWN_ERROR:
+
+            l_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+
+            break;
+
+        case fapi2::RC_EXTRACT_SBE_RC_OTP_TIMEOUT:
+        case fapi2::RC_EXTRACT_SBE_RC_OTP_PIB_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_PIBMEM_PIB_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_SPRM_CFG_ERR:
+        case fapi2::RC_EXTRACT_SBE_RC_FI2C_PIB_ERR:
+
+            l_action = P9_EXTRACT_SBE_RC::RESTART_CBS;
+
+            break;
+
+        case fapi2::RC_EXTRACT_SBE_RC_OTP_ECC_ERR_INSECURE_MODE:
+        case fapi2::RC_EXTRACT_SBE_RC_BRANCH_TO_SEEPROM_FAIL:
+        case fapi2::RC_EXTRACT_SBE_RC_UNEXPECTED_OTPROM_HALT:
+        case fapi2::RC_EXTRACT_SBE_RC_OTP_ECC_ERR:
+        default:
+
+            l_action = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+
+            break;
+    }
+
+    return l_action;
+}
+
+bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
+{
+    bool l_flowCtrl = false;
+    errlHndl_t l_errl = nullptr;
+    uint32_t l_responseSize = SBEIO::SbeFifoRespBuffer::MSG_BUFFER_SIZE;
+    uint32_t *l_pFifoResponse =
+        reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+
+    l_errl = SBEIO::getFifoSBEFFDC(i_target,
+                                   l_pFifoResponse,
+                                   l_responseSize);
+
+    // Check if there was an error log created
+    if(l_errl)
+    {
+        // Trace but otherwise silently ignore error
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "sbe_get_ffdc_handler: ignoring error PLID=0x%x from "
+                  "get SBE FFDC FIFO request to proc 0x%.8X",
+                  l_errl->plid(),
+                  TARGETING::get_huid(i_target));
+        delete l_errl;
+        l_errl = nullptr;
+    }
+    else
+    {
+        // Parse the FFDC package(s) in the response
+        SBEIO::SbeFFDCParser * l_ffdc_parser =
+            new SBEIO::SbeFFDCParser();
+        l_ffdc_parser->parseFFDCData(reinterpret_cast<void *>(l_pFifoResponse));
+
+        uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
+        P9_EXTRACT_SBE_RC::RETURN_ACTION l_action;
+
+        // If there are FFDC packages, make a log for FFDC from SBE
+        if(l_pkgs > 0)
+        {
+            /*@
+             * @errortype
+             * @moduleid     MOD_SBE_GET_FFDC_HANDLER
+             * @reasoncode   RC_RETURNED_FFDC
+             * @userdata1    Processor Target
+             * @userdata2    Number of FFDC packages
+             * @devdesc      FFDC returned by SBE after failing to reach runtime
+             * @custdesc     FFDC associated with boot device failing to boot
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                             MOD_SBE_GET_FFDC_HANDLER,
+                                             RC_RETURNED_FFDC,
+                                             TARGETING::get_huid(i_target),
+                                             l_pkgs);
+
+            // Also log the failing proc as FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+        }
+
+        // Process each FFDC package
+        for(auto i=0; i<l_pkgs; i++)
+        {
+            // Add each package to the log
+            l_errl->addFFDC( SBEIO_COMP_ID,
+                             l_ffdc_parser->getFFDCPackage(i),
+                             l_ffdc_parser->getPackageLength(i),
+                             0,
+                             SBEIO::SBEIO_UDT_PARAMETERS,
+                             false );
+
+            // Get the RC from the FFDC package
+            uint32_t l_rc = l_ffdc_parser->getPackageRC(i);
+
+            // Determine an action for the RC
+            l_action = action_for_ffdc_rc(l_rc);
+
+            // Handle that action
+            proc_extract_sbe_handler(i_target,
+                                     l_action);
+        }
+
+        // If there are FFDC packages, commit the log
+        if(l_pkgs > 0)
+        {
+            l_errl->collectTrace( SBEIO_COMP_NAME, KILOBYTE/4);
+            l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
+
+            errlCommit(l_errl, ISTEP_COMP_ID);
+        }
+
+        delete l_ffdc_parser;
+        l_ffdc_parser = nullptr;
+
+        l_flowCtrl = true;
+    }
+
+    free(l_pFifoResponse);
+    l_pFifoResponse = nullptr;
+
+    return l_flowCtrl;
 }
 
 errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
