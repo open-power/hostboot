@@ -47,45 +47,6 @@ namespace mss
 {
 
 ///
-/// @brief raw card C1 settings
-///
-rcw_settings rdimm_rc_c1( 0x02, // RC00
-                          0x0C, // RC01
-                          0x0F, // RC06_07
-                          0x0C, // RC09
-                          0x0E, // RC0B
-                          0x00, // RC0C
-                          0x00, // RC0F
-                          0x00, // RC1X
-                          0x00, // RC2X
-                          0x00, // RC4X
-                          0x00, // RC5X
-                          0x00, // RC6X
-                          0x00, // RC8X
-                          0x00, // RC9X
-                          0x00); // RCAX
-
-///
-/// @brief raw card C2 settings
-/// @note same settings as C1
-///
-rcw_settings rdimm_rc_c2( 0x02, // RC00
-                          0x0C, // RC01
-                          0x0F, // RC06_07
-                          0x0C, // RC09
-                          0x0E, // RC0B
-                          0x00, // RC0C
-                          0x00, // RC0F
-                          0x00, // RC1X
-                          0x00, // RC2X
-                          0x00, // RC4X
-                          0x00, // RC5X
-                          0x00, // RC6X
-                          0x00, // RC8X
-                          0x00, // RC9X
-                          0x00); // RCAX
-
-///
 /// @brief raw card A1 settings
 ///
 rcw_settings  rdimm_rc_a1( 0x02, // RC00
@@ -144,6 +105,44 @@ rcw_settings rdimm_rc_b2( 0x02, // RC00
                           0x00, // RC9X
                           0x00);// RCAX
 
+///
+/// @brief raw card C1 settings
+///
+rcw_settings rdimm_rc_c1( 0x02, // RC00
+                          0x0C, // RC01
+                          0x0F, // RC06_07
+                          0x0C, // RC09
+                          0x0E, // RC0B
+                          0x00, // RC0C
+                          0x00, // RC0F
+                          0x00, // RC1X
+                          0x00, // RC2X
+                          0x00, // RC4X
+                          0x00, // RC5X
+                          0x00, // RC6X
+                          0x00, // RC8X
+                          0x00, // RC9X
+                          0x00); // RCAX
+
+///
+/// @brief raw card C2 settings
+/// @note same settings as C1
+///
+rcw_settings rdimm_rc_c2( 0x02, // RC00
+                          0x0C, // RC01
+                          0x0F, // RC06_07
+                          0x0C, // RC09
+                          0x0E, // RC0B
+                          0x00, // RC0C
+                          0x00, // RC0F
+                          0x00, // RC1X
+                          0x00, // RC2X
+                          0x00, // RC4X
+                          0x00, // RC5X
+                          0x00, // RC6X
+                          0x00, // RC8X
+                          0x00, // RC9X
+                          0x00); // RCAX
 
 ////
 /// @brief raw card for custom dimms
@@ -164,6 +163,24 @@ rcw_settings rdimm_rc_custom ( 0x02, // RC00
                                0x00, // RC9X
                                0x00);// RCAX
 
+////
+/// @brief raw card for NVDIMMs
+///
+rcw_settings rdimm_rc_nvdimm ( 0x00, // RC00
+                               0x00, // RC01
+                               0x0F, // RC06_07
+                               0x00, // RC09
+                               0x0E, // RC0B
+                               0x00, // RC0C
+                               0x00, // RC0F
+                               0x00, // RC1X
+                               0x00, // RC2X
+                               0x00, // RC4X
+                               0x00, // RC5X
+                               0x00, // RC6X
+                               0x00, // RC8X
+                               0x00, // RC9X
+                               0x00); // RCAX
 
 ///
 /// @brief raw card VBU settings
@@ -192,6 +209,8 @@ const std::vector< std::pair< uint8_t , rcw_settings> > RAW_CARDS =
     // I expect this to grow as Warren M. expects us to have
     // settings for every raw card that JEDEC puts out.  Openpower
     // can't break due to a missing raw card...
+    // Note: This list needs to be kept in numerical order of the raw_card_rev
+    {raw_card_rev::NVDIMM, rdimm_rc_nvdimm},
     {raw_card_rev::A1, rdimm_rc_a1},
     {raw_card_rev::B1, rdimm_rc_b1},
     {raw_card_rev::C1, rdimm_rc_c1},
