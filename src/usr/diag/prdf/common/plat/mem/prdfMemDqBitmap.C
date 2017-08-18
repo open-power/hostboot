@@ -491,6 +491,100 @@ std::vector<MemSymbol> MemDqBitmap<DIMMS_PER_RANK::MBA>::getSymbolList(
 template class MemDqBitmap<DIMMS_PER_RANK::MCA>;
 template class MemDqBitmap<DIMMS_PER_RANK::MBA>;
 
+//##############################################################################
+//                              Utility Functions
+//##############################################################################
+
+template<>
+uint32_t setDramInVpd<TARGETING::TYPE_MCA>( ExtensibleChip * i_chip,
+                                            const MemRank & i_rank,
+                                            MemSymbol i_symbol )
+{
+    #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+
+        TARGETING::TargetHandle_t mcaTrgt = i_chip->getTrgt();
+
+        MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>( mcaTrgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>(0x%08x, "
+                    "0x%02x) failed.", getHuid(mcaTrgt), i_rank.getKey() );
+            break;
+        }
+
+        o_rc = dqBitmap.setDram( i_symbol );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setDram() failed." );
+            break;
+        }
+
+        o_rc = setBadDqBitmap<DIMMS_PER_RANK::MCA>( mcaTrgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MCA>(0x%08x, "
+                    "0x%02x) failed.", getHuid(mcaTrgt), i_rank.getKey() );
+            break;
+        }
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t setDramInVpd<TARGETING::TYPE_MBA>( ExtensibleChip * i_chip,
+                                            const MemRank & i_rank,
+                                            MemSymbol i_symbol )
+{
+    #define PRDF_FUNC "[MemDqBitmap::getSymbolList] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+
+        TARGETING::TargetHandle_t mbaTrgt = i_chip->getTrgt();
+
+        MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
+        o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>( mbaTrgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MBA>(0x%08x, "
+                    "0x%02x) failed.", getHuid(mbaTrgt), i_rank.getKey() );
+            break;
+        }
+
+        o_rc = dqBitmap.setDram( i_symbol );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setDram() failed." );
+            break;
+        }
+
+        o_rc = setBadDqBitmap<DIMMS_PER_RANK::MBA>( mbaTrgt, i_rank, dqBitmap );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MBA>(0x%08x, "
+                    "0x%02x) failed.", getHuid(mbaTrgt), i_rank.getKey() );
+            break;
+        }
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
 //------------------------------------------------------------------------------
 
 } // end namespace PRDF

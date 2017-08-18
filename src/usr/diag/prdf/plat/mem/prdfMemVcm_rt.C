@@ -26,6 +26,7 @@
 /** @file prdfMemVcm_rt.C */
 
 // Platform includes
+#include <prdfMemDqBitmap.H>
 #include <prdfMemVcm.H>
 #include <prdfP9McaDataBundle.H>
 
@@ -147,8 +148,14 @@ uint32_t VcmEvent<T>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
-        // Set the entire chip in DRAM Repairs VPD.
-        // TODO: RTC 169939
+        // Set the dram in DRAM Repairs VPD.
+        o_rc = setDramInVpd<T>( iv_chip, iv_rank, iv_mark.getSymbol() );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
+                      iv_chip->getHuid(), iv_rank.getKey() );
+            break;
+        }
 
         // Add a DRAM sparing procedure to the queue, if supported.
         // TODO: RTC 157888

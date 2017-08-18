@@ -28,6 +28,7 @@
 // Platform includes
 #include <prdfMemAddress.H>
 #include <prdfMemCaptureData.H>
+#include <prdfMemDqBitmap.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
 
@@ -960,8 +961,14 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
                     break;
                 }
 
-                // Set the entire chip in DRAM Repairs VPD.
-                // TODO: RTC 169939
+                // Set the dram in DRAM Repairs VPD.
+                o_rc = setDramInVpd<T>( i_chip, rank, symbol );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "setDramInVpd(0x%08x,0x%02x) failed",
+                              i_chip->getHuid(), rank.getKey() );
+                    break;
+                }
 
                 // Add a DRAM sparing procedure to the queue, if supported.
                 // TODO: RTC 157888
