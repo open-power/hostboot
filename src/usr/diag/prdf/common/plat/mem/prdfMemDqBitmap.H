@@ -177,6 +177,20 @@ class MemDqBitmap
     uint8_t iv_data[T][DQ_BITMAP::BITMAP_SIZE];
 };
 
+//##############################################################################
+//                              Utility Functions
+//##############################################################################
+
+/**
+ * @brief  Sets the inputted dram in DRAM repairs VPD.
+ * @param  i_chip MBA or MCA chip.
+ * @param  i_rank Target rank.
+ * @return Non-SUCCESS if an internal function fails. SUCCESS otherwise.
+ */
+template<TARGETING::TYPE T>
+uint32_t setDramInVpd( ExtensibleChip * i_chip, const MemRank & i_rank,
+                       MemSymbol i_symbol );
+
 } // end namespace PRDF
 
 #endif // __prdfMemDqBitmap_H
