@@ -73,6 +73,10 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010811ull, l_scom_buffer ));
 
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_DISABLE_MC_SYNC_ON = 0x1;
+            l_scom_buffer.insert<27, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_DISABLE_MC_SYNC_ON );
+            constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_DISABLE_MC_PAIR_SYNC_ON = 0x1;
+            l_scom_buffer.insert<28, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_DISABLE_MC_PAIR_SYNC_ON );
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_OFF = 0x0;
             l_scom_buffer.insert<48, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_CENTAUR_PERFMON_COMMAND_OFF );
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ENABLE_EMERGENCY_THROTTLE_ON = 0x1;
