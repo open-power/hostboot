@@ -61,6 +61,7 @@ namespace ISTEP
         MOD_HANDLE_SBE_REG_VALUE                          = 0x19,
         MOD_SBE_PERFORM_UPDATE_CHECK                      = 0x1A,
         MOD_MSS_ATTR_UPDATE = 0x1B, /* @TODO-RTC:149250-Remove */
+        MOD_SBE_GET_FFDC_HANDLER                          = 0x1C,
     };
 
     /**
@@ -119,6 +120,8 @@ namespace ISTEP
         RC_PROC_EXTRACT_SBE_MAIN_ERROR           = ISTEP_COMP_ID | 0x30,
         RC_SBE_BOOTED_UNEXPECTED_SIDE_UPD        = ISTEP_COMP_ID | 0x31,
         RC_SBE_UPDATE_IN_MPIPL                   = ISTEP_COMP_ID | 0x32,
+        RC_NO_FFDC_RETURNED                      = ISTEP_COMP_ID | 0x33,
+        RC_RETURNED_FFDC                         = ISTEP_COMP_ID | 0x34,
     };
 
 };
