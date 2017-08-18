@@ -125,6 +125,12 @@ bool rcdParityErrorReconfigLoop( TargetHandle_t i_trgt )
             th = mnfgTh;
     }
 
+    // TODO: RTC 178688
+    // HWSV does not handle the ATTR_RECONFIGURE_LOOP as expected. Until support
+    // is added, do not issue a reconfig loop. Instead, make the error log
+    // predictive on first occurrence.
+    if ( isSpConfigFsp() ) th = 0;
+
     // If the count is under threshold, trigger a reconfig loop.
     if ( count < th )
     {
