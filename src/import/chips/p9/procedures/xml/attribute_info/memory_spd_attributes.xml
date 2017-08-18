@@ -49,7 +49,7 @@
         <description>
           Base Module Type.
           Decodes SPD Byte 3 (bits 3~0).
-          Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDIC standard.
+          Type of DIMM: RDIMM, UDIMM, LRDIMM as specified by the JEDEC standard.
           creator: mss_eff_config
           consumer: various
           firmware notes: none

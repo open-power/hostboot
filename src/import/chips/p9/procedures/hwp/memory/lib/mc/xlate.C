@@ -1864,7 +1864,7 @@ fapi_try_exit:
 ///
 /// @brief Helper to setup the translation map - useful for testing
 /// @param[in,out] io_dimm_kinds std::vector of DIMM kind's representing the DIMM (Not const as we sort the vector)
-/// @param[out] fapi2::buffer<uint64_t> io_xlate00  - xlt register 0's value
+/// @param[out] fapi2::buffer<uint64_t> io_xlate0  - xlt register 0's value
 /// @param[out] fapi2::buffer<uint64_t> io_xlate1  - xlt register 1's value
 /// @param[out] fapi2::buffer<uint64_t> io_xlate2  - xlt register 2's value
 /// @return FAPI2_RC_SUCCESS iff ok

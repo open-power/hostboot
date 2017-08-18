@@ -106,7 +106,6 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
         FAPI_TRY( l_eff_dimm->prim_die_count(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->primary_stack_type(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->dimm_size(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->hybrid_memory_type(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->dram_trefi(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->dram_trfc(), "Error from p9_mss_eff_config");
         FAPI_TRY( l_eff_dimm->dram_trfc_dlr(), "Error from p9_mss_eff_config");

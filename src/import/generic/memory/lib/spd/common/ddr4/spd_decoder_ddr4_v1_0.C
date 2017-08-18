@@ -172,45 +172,6 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Decodes hybrid media field from SPD
-/// @param[out] o_value enum representing hybrid memory type
-/// @return FAPI2_RC_SUCCESS if okay
-/// @note Decodes SPD Byte 3 (bits 4~6)
-/// @note Item JC-45-2220.01x
-/// @note Page 17
-/// @note DDR4 SPD Document Release 3
-///
-fapi2::ReturnCode decoder_v1_0::hybrid_media( uint8_t& o_value) const
-{
-    // For General Section rev 1.0 of the SPD,
-    // Decodes SPD Byte 3 (bits 4~6) were reserved
-    // and coded as zeros. There was no concept of hybrid media so this
-    // is thus hard-wired to zero.
-    o_value = 0x00;
-    return fapi2::FAPI2_RC_SUCCESS;
-
-}
-
-///
-/// @brief Decodes hybrid field from SPD
-/// @param[out] o_value enum representing if module is hybrid
-/// @return fapi2::ReturnCode
-/// @note Decodes SPD Byte 3 (bit 7)
-/// @note Item JC-45-2220.01x
-/// @note Page 17
-/// @note DDR4 SPD Document Release 3
-///
-fapi2::ReturnCode decoder_v1_0::hybrid( uint8_t& o_value) const
-{
-    // For General Section rev 1.0 of the SPD,
-    // Decodes SPD Byte 3 (bit 7) were reserved
-    // and coded as zeros. There was no concept of hybrid media so this
-    // is thus hard-wired to zero.
-    o_value = 0x00;
-    return fapi2::FAPI2_RC_SUCCESS;
-}
-
-///
 /// @brief Decodes SDRAM density from SPD
 /// @param[out] o_value SDRAM density in GBs
 /// @return FAPI2_RC_SUCCESS if okay

@@ -179,12 +179,6 @@ class eff_dimm
         fapi2::ReturnCode primary_stack_type();
 
         ///
-        /// @brief Determines & sets effective config for Hybrid memory type from SPD
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode hybrid_memory_type();
-
-        ///
         /// @brief Determines & sets effective config for refresh interval time (tREFI)
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
