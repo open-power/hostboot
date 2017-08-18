@@ -63,6 +63,18 @@ class MemMark
         iv_symbol( MemSymbol::fromGalois(i_trgt, i_rank, i_galois) )
     {}
 
+    /**
+     * @brief Cosntructor from components.
+     * @param i_trgt   MBA or MCA target.
+     * @param i_rank   The rank this mark is on.
+     * @param i_symbol The symbol representing this mark.
+     */
+    MemMark( TARGETING::TargetHandle_t i_trgt, const MemRank & i_rank,
+             const MemSymbol & i_symbol ) :
+        iv_galois( i_symbol.getGalois() ),
+        iv_symbol( i_symbol )
+    {}
+
   public: // functions
 
     /** @return The Galois field representing this mark. */

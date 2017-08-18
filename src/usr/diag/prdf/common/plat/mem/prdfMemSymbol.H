@@ -118,6 +118,9 @@ class MemSymbol
      *          (x4 mode is 4-bits, x8 mode is 8-bits). */
     uint8_t getDramPins() const;
 
+    /** @return The Galois field associated with this symbol. */
+    uint8_t getGalois() const;
+
     /** @return Marks this symbol as steered to a DRAM spare. */
     void setDramSpared() { iv_isDramSpared = true; }
 
