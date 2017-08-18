@@ -106,13 +106,7 @@ class decoder_v1_0 : public decoder
 
             // Byte 1 - see factory byte enum
             // Byte 2 - Entire byte used
-
-            // Byte 3
-            HYBRID_MEDIA_START = 1,
-            HYBRID_MEDIA_LEN = 3,
-
-            HYBRID_START = 0,
-            HYBRID_LEN = 1,
+            // Byte 3 - used in the SPD factory
 
             // Byte 4
             SDRAM_CAPACITY_START = 4,
@@ -348,8 +342,6 @@ class decoder_v1_0 : public decoder
         // Third field is the decoding bit length
         static constexpr field_t BYTES_USED{0, BYTES_USED_START, BYTES_USED_LEN};
         static constexpr field_t TOTAL_BYTES_USED{0, BYTES_TOTAL_START, BYTES_TOTAL_LEN};
-        static constexpr field_t HYBRID_MEDIA{3, HYBRID_MEDIA_START, HYBRID_MEDIA_LEN};
-        static constexpr field_t HYBRID{3, HYBRID_START, HYBRID_LEN};
         static constexpr field_t SDRAM_CAPACITY{4, SDRAM_CAPACITY_START, SDRAM_CAPACITY_LEN};
         static constexpr field_t SDRAM_BANKS{4, SDRAM_BANKS_START, SDRAM_BANKS_LEN};
         static constexpr field_t BANK_GROUP{4, BANK_GROUP_START, BANK_GROUP_LEN};
@@ -443,28 +435,6 @@ class decoder_v1_0 : public decoder
         /// @note DDR4 SPD Document Release 3
         ///
         virtual fapi2::ReturnCode number_of_total_bytes( uint16_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes hybrid media field from SPD
-        /// @param[out] o_value
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note Decodes SPD Byte 3 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 17
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value ) const override;
-
-        ///
-        /// @brief Decodes hybrid field from SPD
-        /// @param[out] o_value
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note Decodes SPD Byte 3 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 17
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM density from SPD
@@ -1245,28 +1215,6 @@ class decoder_v1_1 : public decoder_v1_0
         /////////////////////////
         // Member Methods
         /////////////////////////
-
-        ///
-        /// @brief Decodes hybrid media field from SPD
-        /// @param[out] o_value
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note Decodes SPD Byte 3 (bits 6~4)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 17
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode hybrid_media( uint8_t& o_value) const override;
-
-        ///
-        /// @brief Decodes hybrid field from SPD
-        /// @param[out] o_value
-        /// @return FAPI2_RC_SUCCESS if okay
-        /// @note Decodes SPD Byte 3 (bit 7)
-        /// @note Item JC-45-2220.01x
-        /// @note Page 17
-        /// @note DDR4 SPD Document Release 3
-        ///
-        virtual fapi2::ReturnCode hybrid( uint8_t& o_value ) const override;
 
         ///
         /// @brief Decodes SDRAM density from SPD
