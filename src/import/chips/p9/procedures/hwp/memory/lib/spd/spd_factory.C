@@ -73,6 +73,10 @@ enum factory_byte_extract
     ADDITIONS_LEVEL_LEN = 4,   ///< SPD additions level bit length
 
     // Byte 3
+    HYBRID_START = 0,          ///< SPD hybrid start bit
+    HYBRID_LEN = 1,            ///< SPD hybrid bit length
+    HYBRID_TYPE_START = 1,     ///< SPD hybrid type start bit
+    HYBRID_TYPE_LEN = 3,       ///< SPD hybrid type bit length
     BASE_MODULE_START = 4,     ///< SPD base module start bit
     BASE_MODULE_LEN = 4,       ///< SPD base module bit length
 };
@@ -163,6 +167,114 @@ fapi_try_exit:
 }
 
 ///
+/// @brief      Decodes hybrid type (whether or not the DIMM is a hybrid) from SPD
+/// @param[in]  i_target dimm target
+/// @param[in]  i_spd_data SPD data
+/// @param[out] o_value hybrid
+/// @return     FAPI2_RC_SUCCESS if okay
+/// @note       Decodes SPD Byte 3 (bit 7)
+/// @note       Item JC-45-2220.01x
+/// @note       Page 17
+/// @note       DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode hybrid(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                         const std::vector<uint8_t>& i_spd_data,
+                         uint8_t& o_value)
+{
+    // =========================================================
+    // Byte 3 maps
+    // Item JC-45-2220.01x
+    // Page 17
+    // DDR4 SPD Document Release 3
+    // Byte 3 (0x003): Key Byte / Module Type - Hybrid
+    // =========================================================
+    static const std::vector<std::pair<uint8_t, uint8_t> > HYBRID_MAP =
+    {
+        //{key byte, dimm type}
+        {0, fapi2::ENUM_ATTR_EFF_HYBRID_NOT_HYBRID},
+        {1, fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID},
+        // All others reserved or not supported
+    };
+
+    constexpr size_t BYTE_INDEX = 3;
+    constexpr field_t HYBRID{BYTE_INDEX, HYBRID_START, HYBRID_LEN};
+
+    // Extracting desired bits
+    const uint8_t l_field_bits = extract_spd_field(i_target, HYBRID, i_spd_data);
+    FAPI_DBG("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
+
+    // Check that value is valid
+    const bool l_is_val_found = find_value_from_key(HYBRID_MAP, l_field_bits, o_value);
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+              l_is_val_found,
+              HYBRID.iv_byte,
+              l_field_bits,
+              "Failed check on Hybrid") );
+
+    FAPI_INF("%s. Hybrid Media: %d",
+             mss::c_str(i_target),
+             o_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief      Decodes hybrid type (hybrid DIMM type) from SPD
+/// @param[in]  i_target dimm target
+/// @param[in]  i_spd_data SPD data
+/// @param[out] o_value hybrid module type
+/// @return     FAPI2_RC_SUCCESS if okay
+/// @note       Decodes SPD Byte 3 (bits 6~4)
+/// @note       Item JC-45-2220.01x
+/// @note       Page 17
+/// @note       DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode hybrid_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                              const std::vector<uint8_t>& i_spd_data,
+                              uint8_t& o_value)
+{
+    // =========================================================
+    // Byte 3 maps
+    // Item JC-45-2220.01x
+    // Page 17
+    // DDR4 SPD Document Release 3
+    // Byte 3 (0x003): Key Byte / Module Type - Hybrid
+    // =========================================================
+    static const std::vector<std::pair<uint8_t, uint8_t> > HYBRID_TYPE_MAP =
+    {
+        //{key byte, dimm type}
+        {0, fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NONE},
+        {1, fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM},
+        // All others reserved or not supported
+    };
+
+    constexpr size_t BYTE_INDEX = 3;
+    constexpr field_t HYBRID_TYPE{BYTE_INDEX, HYBRID_TYPE_START, HYBRID_TYPE_LEN};
+
+    // Extracting desired bits
+    const uint8_t l_field_bits = extract_spd_field(i_target, HYBRID_TYPE, i_spd_data);
+    FAPI_DBG("%s. Field Bits value: %d", mss::c_str(i_target), l_field_bits);
+
+    // Check that value is valid
+    const bool l_is_val_found = find_value_from_key(HYBRID_TYPE_MAP, l_field_bits, o_value);
+
+    FAPI_TRY( mss::check::spd::fail_for_invalid_value(i_target,
+              l_is_val_found,
+              HYBRID_TYPE.iv_byte,
+              l_field_bits,
+              "Failed check on Hybrid Memory Type") );
+
+    FAPI_INF("%s. Hybrid Memory Type: %d",
+             mss::c_str(i_target),
+             o_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief      Decodes base module type (DIMM type) from SPD
 /// @param[in]  i_target dimm target
 /// @param[in]  i_spd_data SPD data
@@ -189,7 +301,7 @@ fapi2::ReturnCode base_module_type(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
         //{key byte, dimm type}
         {1, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM},
         {2, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_UDIMM},
-        {4, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM}
+        {4, fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM},
         // All others reserved or not supported
     };
 
@@ -334,6 +446,68 @@ static fapi2::ReturnCode dimm_type_setter(const fapi2::Target<TARGET_TYPE_DIMM>&
     l_dimm_types_mcs[l_port_num][l_dimm_num] = o_dimm_type;
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_TYPE, l_mcs, l_dimm_types_mcs),
               "%s. Failed to set ATTR_EFF_DIMM_TYPE", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to set hybrid attribute
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_hybrid dimm type encoding needed by factory
+/// @return FAPI2_RC_SUCCESS if okay
+///
+static fapi2::ReturnCode hybrid_setter(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                                       const std::vector<uint8_t>& i_spd_data,
+                                       uint8_t& o_hybrid)
+{
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    const auto l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
+
+    // Get dimm type & set attribute (needed by c_str)
+    uint8_t l_dimm_types_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY( hybrid(i_target, i_spd_data, o_hybrid),
+              "%s. Failed to find hybrid", mss::c_str(i_target) );
+    FAPI_TRY( eff_hybrid(l_mcs, &l_dimm_types_mcs[0][0]),
+              "%s. Failed to invoke hybrid accessor", mss::c_str(i_target));
+
+    l_dimm_types_mcs[l_port_num][l_dimm_num] = o_hybrid;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID, l_mcs, l_dimm_types_mcs),
+              "%s. Failed to set ATTR_EFF_HYBRID", mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function to set hybrid_type attribute
+/// @param[in] i_target dimm target
+/// @param[in] i_spd_data SPD data
+/// @param[out] o_hybrid_type dimm type encoding needed by factory
+/// @return FAPI2_RC_SUCCESS if okay
+///
+static fapi2::ReturnCode hybrid_type_setter(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+        const std::vector<uint8_t>& i_spd_data,
+        uint8_t& o_hybrid_type)
+{
+    const auto l_port_num = index( find_target<TARGET_TYPE_MCA>(i_target) );
+    const auto l_dimm_num = index(i_target);
+    const auto l_mcs = mss::find_target<TARGET_TYPE_MCS>(i_target);
+
+    // Get dimm type & set attribute (needed by c_str)
+    uint8_t l_dimm_types_mcs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    FAPI_TRY( hybrid_type(i_target, i_spd_data, o_hybrid_type),
+              "%s. Failed to find hybrid_memory_type", mss::c_str(i_target) );
+    FAPI_TRY( eff_hybrid_memory_type(l_mcs, &l_dimm_types_mcs[0][0]),
+              "%s. Failed to invoke hybrid_memory_type accessor", mss::c_str(i_target));
+
+    l_dimm_types_mcs[l_port_num][l_dimm_num] = o_hybrid_type;
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, l_mcs, l_dimm_types_mcs),
+              "%s. Failed to set ATTR_EFF_HYBRID_MEMORY", mss::c_str(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -618,11 +792,15 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
                                    rcw_settings& o_raw_card)
 {
     uint8_t l_dimm_type = 0;
+    uint8_t l_hybrid = 0;
+    uint8_t l_hybrid_type = 0;
     uint8_t l_ref_raw_card_rev = 0;
 
     // Lets find out what raw card we are and grab the right
     // raw card settings
     FAPI_TRY( mss::eff_dimm_type(i_target, l_dimm_type) );
+    FAPI_TRY( mss::eff_hybrid(i_target, l_hybrid) );
+    FAPI_TRY( mss::eff_hybrid_memory_type(i_target, l_hybrid_type) );
     FAPI_TRY( reference_raw_card(i_target, i_spd_data, l_ref_raw_card_rev) );
 
     FAPI_INF( "Retrieved dimm_type: %d, raw card reference: 0x%lx from SPD",
@@ -631,6 +809,15 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
     switch(l_dimm_type)
     {
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM:
+
+            // TODO:RTC178807 - Update how NVDIMMs are handled once more are up and running in the lab
+            // NVDIMM is currently considered differently than all other rdimm raw cards, due to settings differences
+            if((l_hybrid == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID) &&
+               (l_hybrid_type == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM))
+            {
+                l_ref_raw_card_rev = mss::rdimm::raw_card_rev::NVDIMM;
+                FAPI_INF("%s is an NVDIMM, overwrote l_ref_raw_card_rev to be 0x%02x", mss::c_str(i_target), l_ref_raw_card_rev);
+            }
 
             FAPI_ASSERT( find_value_from_key( mss::rdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card),
                          fapi2::MSS_INVALID_RAW_CARD()
@@ -688,6 +875,8 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     }
 
     uint8_t l_dimm_type = 0;
+    uint8_t l_hybrid = 0;
+    uint8_t l_hybrid_type = 0;
     uint8_t l_encoding_rev = 0;
     uint8_t l_additions_rev = 0;
     rcw_settings l_raw_card;
@@ -696,6 +885,10 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
     // the SPD decoder for debugging help
     FAPI_TRY( dimm_type_setter(i_target, i_spd_data, l_dimm_type),
               "%s. Failed to set DIMM type", mss::c_str(i_target) );
+    FAPI_TRY( hybrid_setter(i_target, i_spd_data, l_hybrid),
+              "%s. Failed to set hybrid", mss::c_str(i_target) );
+    FAPI_TRY( hybrid_type_setter(i_target, i_spd_data, l_hybrid_type),
+              "%s. Failed to set hybrid_type", mss::c_str(i_target) );
     FAPI_TRY( dram_gen_setter(i_target, i_spd_data),
               "%s. Failed to set DRAM generation", mss::c_str(i_target) );
     FAPI_TRY( raw_card_factory(i_target, i_spd_data, l_raw_card),
