@@ -495,7 +495,7 @@ fapi2::ReturnCode eff_dimm::dram_mfg_id()
 fapi_try_exit:
     return fapi2::current_err;
 
-}// dimm_type
+}
 
 ///
 /// @brief Determines & sets effective config for dram width
@@ -721,27 +721,6 @@ fapi2::ReturnCode eff_dimm::dimm_size()
         l_attrs_dimm_size[iv_port_index][iv_dimm_index] = l_dimm_size;
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_SIZE, iv_mcs, l_attrs_dimm_size), "Failed to get ATTR_MSS_EFF_DIMM_SIZE" );
     }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Determines & sets effective config for Hybrid memory type from SPD
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_dimm::hybrid_memory_type()
-{
-    uint8_t l_decoder_val = 0;
-    uint8_t l_mcs_attrs[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
-
-    // Get & update MCS attribute
-    FAPI_TRY( eff_hybrid_memory_type(iv_mcs, &l_mcs_attrs[0][0]), "Failed to get ATTR_MSS_HYBRID_MEMORY_TYPE" );
-    FAPI_TRY(iv_pDecoder->hybrid_media(l_decoder_val), "Failed to get Hybrid_media from SPD %s", mss::c_str(iv_dimm));
-
-    l_mcs_attrs[iv_port_index][iv_dimm_index] = l_decoder_val;
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_HYBRID_MEMORY_TYPE, iv_mcs, l_mcs_attrs),
-              "Failed to set ATTR_EFF_HYBRID_MEMORY_TYPE" );
 
 fapi_try_exit:
     return fapi2::current_err;
