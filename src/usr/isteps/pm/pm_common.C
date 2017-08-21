@@ -1098,7 +1098,6 @@ namespace HBPM
         do {
             io_overrideImg = nullptr;
 
-            //@fixme - RTC:177372
             // Block any use of overrides if we're secure
             if( PNOR::isInhibitedSection(PNOR::RINGOVD) )
             {

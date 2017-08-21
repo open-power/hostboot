@@ -121,8 +121,9 @@ errlHndl_t populate_TpmInfoByNode();
 
 // How many pointers/sections there are in HB reserved memory data
 // HOMER*8/OCC_Common/VPD/ATTR/HBRT_Image/Res/Res/Res
-// *Note: match with src/hdat/fsp/hdat.H HDAT_RHB_MAX_RANGE_ENTRIES_PER_NODE
-#define HB_RSV_MEM_NUM_PTRS  50
+// *Note: Phyp fills in one extra dummy section so make 1 less than
+//        HDAT_RHB_MAX_RANGE_ENTRIES_PER_NODE in src/hdat/fsp/hdat.H.
+#define HB_RSV_MEM_NUM_PTRS  49
 
 //Note this means the Reserved Mem sub-section is the 6th
 //(0 based) of the MDT section (See HDAT spec)
