@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -654,7 +654,6 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     //If a new processor with more cores comes along,
     //this command will have to change.
     TargetHandleList cores;
-    TargetHandleList::iterator coreIt;
     getChildChiplets(cores, proc, TYPE_CORE, false);
 
     uint16_t tempSensor = 0;
