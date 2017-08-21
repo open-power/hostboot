@@ -47,6 +47,27 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FREQ_MCA_MHZ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The frequency of the memory controller channel. In synchronous mode,
+    this is equivalent to ATTR_FREQ_PB_MHZ. This may be independently set
+    per pair of memory channels if operating in asynchronous mode,
+    but this configuration is not anticipated. This clock drives the MCU queues,
+    and all the associated logic that drives the inputs to the DMI and reads
+    its outputs.
+  </description>
+  <valueType>uint32</valueType>
+  <enum>
+    2000 = 2000,
+    2400 = 2400
+  </enum>
+  <writeable/>
+  <platInit/>
+  <mssAccessorName>freq_mca_mhz</mssAccessorName>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_FREQ_O_MHZ</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
