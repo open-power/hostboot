@@ -228,22 +228,25 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
     TRACFCOMP(g_trac_runtime,
               "Setting HDAT HB Reserved Memory Range: "
               "%s RangeType 0x%X RangeId 0x%X "
-              "StartAddress 0x%16llX EndAddress 0x%16llX",
+              "StartAddress 0x%16llX EndAddress 0x%16llX Permissions 0x%.2X",
               i_rngPtr->hdatRhbLabelString,
               i_rngPtr->hdatRhbRngType,
               i_rngPtr->hdatRhbRngId,
               i_rngPtr->hdatRhbAddrRngStrAddr,
-              i_rngPtr->hdatRhbAddrRngEndAddr);
+              i_rngPtr->hdatRhbAddrRngEndAddr,
+              i_rngPtr->hdatRhbPermission);
 
     CONSOLE::displayf(NULL,
                      "dw-Setting HDAT HB Reserved Memory Range: "
                      "%s RangeType 0x%X RangeId 0x%X "
-                     "StartAddress 0x%016llX EndAddress 0x%016llX",
+                     "StartAddress 0x%016llX EndAddress 0x%016llX "
+                     "Permissions 0x%.2X ",
                       i_rngPtr->hdatRhbLabelString,
                       i_rngPtr->hdatRhbRngType,
                       i_rngPtr->hdatRhbRngId,
                       i_rngPtr->hdatRhbAddrRngStrAddr,
-                      i_rngPtr->hdatRhbAddrRngEndAddr);
+                      i_rngPtr->hdatRhbAddrRngEndAddr,
+                      i_rngPtr->hdatRhbPermission);
 }
 
 /**
@@ -261,7 +264,10 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
                                 const uint16_t i_rangeId,
                                 const uint64_t i_startAddr,
                                 const uint64_t i_size,
-                                const char* i_label)
+                                const char* i_label,
+                                const HDAT::hdatRhbPermType i_permission =
+                                                            HDAT::RHB_READ_WRITE
+                                )
 {
     errlHndl_t l_elog = nullptr;
 
@@ -283,7 +289,8 @@ errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
     uint64_t l_startAddr = i_startAddr | VmmManager::FORCE_PHYS_ADDR;
 
     // Fill in the entry
-    l_rngPtr->set(i_type, i_rangeId, l_startAddr, i_size, i_label);
+    l_rngPtr->set(i_type, i_rangeId, l_startAddr, i_size, i_label,
+                  i_permission);
     traceHbRsvMemRange(l_rngPtr);
 
     } while(0);
@@ -695,7 +702,8 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
                                     i_rangeId,
                                     l_imgAdd,
                                     l_imgSizeAligned,
-                                    PNOR::SectionIdToString(i_sec));
+                                    PNOR::SectionIdToString(i_sec),
+                                    HDAT::RHB_READ_ONLY);
         if(l_elog)
         {
             TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry PNOR content failed");

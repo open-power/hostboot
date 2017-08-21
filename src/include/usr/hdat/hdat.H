@@ -227,6 +227,16 @@ enum hdatMsVpdRhbAddrRangeType : uint8_t
     RHB_TYPE_INVALID         = 0xFF
 };
 
+/** @enum Permission Types for Reserved Hostboot Memory (RHB)
+ */
+enum hdatRhbPermType : uint8_t
+{
+    RHB_NONE = 0x00,
+    RHB_WRITE_ONLY = 0x80,
+    RHB_READ_ONLY = 0x40,
+    RHB_READ_WRITE = RHB_READ_ONLY | RHB_WRITE_ONLY,
+};
+
 /* vpd constants
  *      Defining vpd constants
  */

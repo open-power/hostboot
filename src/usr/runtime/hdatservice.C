@@ -1703,7 +1703,8 @@ void hdatMsVpdRhbAddrRange_t::set(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
                                   const uint16_t i_rangeId,
                                   const uint64_t i_startAddr,
                                   const uint64_t i_size,
-                                  const char* i_label)
+                                  const char* i_label,
+                                  const HDAT::hdatRhbPermType i_permission)
 {
     assert(i_label != nullptr, "Null label for hdatMsVpdRhbAddrRange_t");
 
@@ -1714,6 +1715,7 @@ void hdatMsVpdRhbAddrRange_t::set(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
     hdatRhbLabelSize = strlen(i_label) + 1;
     memset(hdatRhbLabelString, 0, hdatRhbLabelSize);
     memcpy(hdatRhbLabelString, i_label, hdatRhbLabelSize);
+    hdatRhbPermission = i_permission;
 }
 
 /********************

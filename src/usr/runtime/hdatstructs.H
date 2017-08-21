@@ -344,7 +344,9 @@ struct hdatMsVpdRhbAddrRange_t
     hdatMsVpdRhbAddrRange_t(): hdatRhbRngType(HDAT::RHB_TYPE_INVALID),
                                hdatRhbRngId(0), hdatRhbAddrRngStrAddr(0),
                                hdatRhbAddrRngEndAddr(0), hdatRhbLabelSize(1),
-                               hdatRhbLabelString{}, reserved{} {}
+                               hdatRhbLabelString{},
+                               hdatRhbPermission(HDAT::RHB_READ_WRITE),
+                               reserved{} {}
 
     /**
      * Set all member variables of class
@@ -353,11 +355,13 @@ struct hdatMsVpdRhbAddrRange_t
      * @param[in] i_startAddr, Range Starting Address
      * @param[in] i_size, Size of memory region
      * @param[in] i_label, Label String Ptr
+     * @param[in] i_permission, R/W permissions for RHB.
      * @note size of i_label is calculated in function versus a input parameter.
      */
     void set(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
              const uint16_t i_rangeId, const uint64_t i_startAddr,
-             const uint64_t i_endAddr, const char* i_label);
+             const uint64_t i_endAddr, const char* i_label,
+             const HDAT::hdatRhbPermType i_permission = HDAT::RHB_READ_WRITE);
 
     HDAT::hdatMsVpdRhbAddrRangeType hdatRhbRngType; // 0x0000 Range type
     uint8_t  hdatRhbRngRes;            // 0x0001 Reserved
@@ -366,7 +370,8 @@ struct hdatMsVpdRhbAddrRange_t
     uint64_t hdatRhbAddrRngEndAddr;    // 0x000C Range ending
     uint32_t hdatRhbLabelSize;         // 0x0014 Label size
     uint8_t  hdatRhbLabelString[64];   // 0x0018 Label string Ptr
-    uint8_t  reserved[8];              // 0x0058 Reserved
+    HDAT::hdatRhbPermType hdatRhbPermission; // 0x0058 R/W Permissions
+    uint8_t  reserved[7];              // 0x0059 Reserved
 }  __attribute__ ((packed));
 
 #endif
