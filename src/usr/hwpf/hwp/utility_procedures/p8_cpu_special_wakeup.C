@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -153,7 +153,6 @@ p8_cpu_special_wakeup(  const fapi::Target& i_ex_target,
     uint32_t            count = 0;
 
     std::vector<fapi::Target>      l_chiplets;
-    std::vector<Target>::iterator  itr;
 
     uint8_t             oha_spwkup_flag = 0;
     uint8_t             ignore_xstop_flag = 0;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -677,7 +677,6 @@ fapi::ReturnCode proc_build_smp_quiesce_pb(
     fapi::ReturnCode rc;
     std::map<proc_fab_smp_node_id, proc_build_smp_node>::iterator n_iter;
     std::map<proc_fab_smp_chip_id, proc_build_smp_chip>::iterator p_iter;
-    std::vector<proc_build_smp_chip*>::iterator quiesce_iter;
     // ADU status/control information
     proc_adu_utils_fbc_op adu_ctl;
     proc_adu_utils_fbc_op_hp_ctl adu_hp_ctl;
