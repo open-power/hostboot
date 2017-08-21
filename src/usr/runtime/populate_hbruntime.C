@@ -599,18 +599,6 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
     do {
 
-#ifdef CONFIG_SECUREBOOT
-        // Securely Load PNOR section
-        l_elog = loadSecureSection(i_sec);
-        if (l_elog)
-        {
-            TRACFCOMP( g_trac_runtime,
-                    ERR_MRK"hbResvloadSecureSection() - Error from "
-                    "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
-            break;
-        }
-#endif
-
         l_elog = PNOR::getSectionInfo( i_sec, l_info );
         if(l_elog)
         {
@@ -620,9 +608,26 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
             break;
         }
 
+#ifdef CONFIG_SECUREBOOT
+        // Skip verification if a section does not have a Secureboot Header
+        if (l_info.secure)
+        {
+            // Securely Load PNOR section
+            l_elog = loadSecureSection(i_sec);
+            if (l_elog)
+            {
+                TRACFCOMP( g_trac_runtime,
+                           ERR_MRK"hbResvloadSecureSection() - Error from "
+                           "loadSecureSection(%s)", PNOR::SectionIdToString(i_sec));
+                break;
+            }
+        }
+#endif
+
         auto l_pnorVaddr = l_info.vaddr;
         auto l_imgSize = l_info.size;
-        // If section is signed, only the protected size was loaded into memory
+
+    // If section is signed, only the protected size was loaded into memory
 #ifdef CONFIG_SECUREBOOT
         if (l_info.secure)
         {
@@ -1167,6 +1172,8 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         //   -- OCC
         //   -- WOFDATA
         //   -- HCODE
+        // -- Non-verified Images
+        ///  -- RINGOVD
         // @TODO RTC:178164 add OCC PNOR support for fsp back
         if (!INITSERVICE::spBaseServicesEnabled())
         {
@@ -1185,6 +1192,13 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         }
         l_elog = hbResvLoadSecureSection(PNOR::HCODE, i_nodeId, l_prevDataAddr,
                                          l_prevDataSize);
+        if (l_elog)
+        {
+            break;
+        }
+        // Note: RINGOVD is not a securely signed section.
+        l_elog = hbResvLoadSecureSection(PNOR::RINGOVD, i_nodeId,
+                                         l_prevDataAddr, l_prevDataSize);
         if (l_elog)
         {
             break;
