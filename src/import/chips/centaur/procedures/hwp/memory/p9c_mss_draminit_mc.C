@@ -70,11 +70,6 @@ extern "C" {
         fapi2::buffer<uint64_t> l_mba01_ref0q_data_buffer_64;
         // Get associated MBA's on this centaur
         const auto l_mbaChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
-        FAPI_ASSERT(l_mbaChiplets.size() == MAX_MBA_PER_CEN,
-                    fapi2::CEN_MSS_SCOMINIT_NUM_MBA_ERROR().
-                    set_NUM_MBAS(l_mbaChiplets.size()).
-                    set_TARGET(i_target),
-                    "Not two MBAs configured on %s", mss::c_str(i_target));
 
         // Step One: Set IML COMPLETE
         FAPI_INF( "+++ Setting IML Complete +++");

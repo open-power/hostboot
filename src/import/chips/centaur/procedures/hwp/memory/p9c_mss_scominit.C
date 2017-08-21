@@ -59,13 +59,6 @@ extern "C" {
         const auto l_mba_targets = i_target.getChildren<fapi2::TARGET_TYPE_MBA>();
         const auto l_l4_targets = i_target.getChildren<fapi2::TARGET_TYPE_L4>(fapi2::TARGET_STATE_PRESENT);
 
-        FAPI_ASSERT_NOEXIT(l_mba_targets.size() == MAX_MBA_PER_CEN,
-                           fapi2::CEN_MSS_SCOMINIT_NUM_MBA_ERROR().
-                           set_MEMBUF(i_target).
-                           set_NUM_MBAS(l_mba_targets.size()),
-                           "getChildren returned %d functional MBAs, expected 2.",
-                           l_mba_targets.size());
-
         FAPI_ASSERT(l_l4_targets.size() > 0,
                     fapi2::CEN_MSS_SCOMINIT_NUM_L4_ERROR().
                     set_MEMBUF(i_target).
