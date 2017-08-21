@@ -38,6 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <devicefw/driverif.H>
+#include <console/consoleif.H>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -618,9 +619,17 @@ PnorDD::PnorDD( TARGETING::Target* i_target )
 
         if (iv_protocolVersion == 1)
         {
-            iv_blockShift = 12;
-            iv_readWindowSize = mbInfoMsg.get16(1) << iv_blockShift;
-            iv_writeWindowSize = mbInfoMsg.get16(3) << iv_blockShift;
+            CONSOLE::display("BMC MBOX daemon is out of date\n");
+            CONSOLE::display("Corruption will ocur if boot continues\n");
+            CONSOLE::display("Update your BMC / mboxd and try again\n");
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            PNOR::MOD_PNORMBOXDD_PNORD,
+                                            PNOR::RC_MBOX_BAD_VERSION,
+                                            0,
+                                            0);
+            l_err->collectTrace(PNOR_COMP_NAME);
+            ERRORLOG::errlCommit(l_err, PNOR_COMP_ID);
+            INITSERVICE::doShutdown( PNOR::RC_PNOR_INIT_FAILURE );
         }
         else
         {

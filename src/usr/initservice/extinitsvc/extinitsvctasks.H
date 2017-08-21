@@ -56,20 +56,6 @@ const TaskInfo g_exttaskinfolist[]   =   {
             }
         },
 
-        /**
-         * @brief console library
-         */
-#ifdef CONFIG_CONSOLE
-        {
-            "libconsole.so",                       // library name
-            NULL,                                  // no function to run
-            {
-                START_TASK,                        // task type
-                EXT_IMAGE,                         // extended image module
-            }
-        },
-#endif
-
 #ifdef CONFIG_SECUREBOOT
         /**
          *  @brief Secureboot extended

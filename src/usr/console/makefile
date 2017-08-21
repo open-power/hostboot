@@ -26,6 +26,7 @@
 ROOTPATH = ../../..
 MODULE = console
 
+OBJS += console.o
 OBJS += daemon.o
 OBJS += uart.o
 OBJS += uartconfig.o

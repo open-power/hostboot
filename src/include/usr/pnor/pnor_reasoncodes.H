@@ -111,6 +111,9 @@ namespace PNOR
 
         // ast_mboxdd.C
         MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
+
+        // pnor_mboxdd.C
+        MOD_PNORMBOXDD_PNORD            = 0xF0, /**< PnorDD::PnorDD */
     };
 
     enum PNORReasonCode
@@ -177,6 +180,7 @@ namespace PNOR
         RC_BAD_SECURE_MAGIC_NUM      = PNOR_COMP_ID | 0x31,
         RC_MBOX_BAD_SEQUENCE         = PNOR_COMP_ID | 0x32,
         RC_MBOX_ERROR_STATUS         = PNOR_COMP_ID | 0x33,
+        RC_MBOX_BAD_VERSION          = PNOR_COMP_ID | 0x34,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
