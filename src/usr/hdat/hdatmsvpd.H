@@ -184,7 +184,8 @@ struct hdatMsVpdRhbAddrRange_t
                                                   //        address+1
     uint32_t hdatRhbLabelSize;                    // 0x0014 Label size
     uint8_t hdatRhbLabelString[64];               // 0x0018 Label string Ptr
-    uint8_t reserved[8];                          // 0x0058 Reserved
+    hdatRhbPermType hdatRhbPermission;            // 0x0058 R/W Permissions
+    uint8_t reserved[7];                          // 0x0059 Reserved
 }  __attribute__ ((packed));
 
 /** @brief Reserved HB length
@@ -388,6 +389,7 @@ class HdatMsVpd : public HdatHdif
          * @param[in] i_end            - The end address of the range
          * @param[in] i_labelSize      - RHB Label Size
          * @param[in] i_labelStringPtr - RHB Label String
+         * @param[in] i_permission     - R/W permissions for RHB.
          *
          * @return A null error log handle if successful, else the return code
          * pointed to by o_errlHndl contains one of:
@@ -397,7 +399,9 @@ class HdatMsVpd : public HdatHdif
 
         errlHndl_t addRHBAddrRange( uint32_t i_dbob_id, hdatMsAddr_t &i_start,
                                     hdatMsAddr_t &i_end, uint32_t i_labelSize,
-                                    uint8_t* &i_labelStringPtr);
+                                    uint8_t* &i_labelStringPtr,
+                                    hdatRhbPermType i_permission =
+                                        HDAT::RHB_READ_WRITE);
 
         /**
          * @brief Update the mainstore VPD with Barrier Synchronization Register

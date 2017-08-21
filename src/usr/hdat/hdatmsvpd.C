@@ -278,7 +278,8 @@ errlHndl_t HdatMsVpd::addUEAddrRange(hdatMsAddr_t &i_addr)
 
 errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
                                       hdatMsAddr_t &i_end, uint32_t i_labelSize,
-                                      uint8_t* &i_labelStringPtr)
+                                      uint8_t* &i_labelStringPtr,
+                                      hdatRhbPermType i_permission)
 {
     errlHndl_t l_errlHndl = NULL;
     hdatMsVpdRhbAddrRange_t *l_addr;
@@ -318,6 +319,8 @@ errlHndl_t HdatMsVpd::addRHBAddrRange(uint32_t i_dbob_id, hdatMsAddr_t &i_start,
             HDAT_INF("hdatmsvpd:addRHBAddrRange "
                        "i_labelStringPtr is NULL");
         }
+        l_addr->hdatRhbPermission = i_permission;
+
         iv_RHBaddrRngArrayHdr.hdatArrayCnt++;
     }
     else
@@ -1367,7 +1370,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                                  l_pMcsTarget->getAttr<TARGETING::ATTR_HUID>());
                             break;
                         }
-                        
+
                         // Need to get i2c Master data correctly
                         std::vector<hdatI2cData_t> l_i2cDevEntries;
 
@@ -1519,7 +1522,7 @@ errlHndl_t  HdatMsVpd::hdatLoadMsData(uint32_t &o_size, uint32_t &o_count)
                         }
                         if(l_pProcTarget->getAttr<TARGETING::ATTR_MODEL>() == TARGETING::MODEL_NIMBUS)
                         {
-                            // Set the memory controller ID 
+                            // Set the memory controller ID
                             l_hdatMemcntrlID |= 1 << (31 - l_pMcbistTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>());
                             l_hdatMemcntrlID |= 1 << (31 - (l_pMcsTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>() + 4));
                             l_hdatMemcntrlID |= 1 << (31 - (l_pMcaTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>() + 8));
