@@ -52,7 +52,11 @@ fapi2::ReturnCode
 p9_cen_ref_clk_enable(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Start");
-    auto l_dmi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
+#ifndef __HOSTBOOT_MODULE
+    auto l_dmi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>(fapi2::TARGET_STATE_PRESENT);
+#else
+    auto l_dmi_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>(fapi2::TARGET_STATE_FUNCTIONAL);
+#endif
     uint8_t l_master;
     unsigned char l_cen_pos = 0;
     fapi2::buffer<uint64_t> l_clk_enable_bit = 0;
