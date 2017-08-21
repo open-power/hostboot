@@ -4653,6 +4653,24 @@
       </chip>
     </chipEcFeature>
   </attribute>
+  
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Program MCA ECC logic to support Cumulus DD1.1
+      asynchronus boundary crossing requirements
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
 
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW404176_ASSERT_SCAN_CLK</id>
