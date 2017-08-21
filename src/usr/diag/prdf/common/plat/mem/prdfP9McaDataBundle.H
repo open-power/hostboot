@@ -191,6 +191,15 @@ class McaDataBundle : public DataBundle
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 
     #endif
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /** Set to true if mainline NCEs and TCEs should be permanently masked. This
+     *  is checked at the end of targeted diagnostics before background
+     *  scrubbing is resumed. */
+    bool iv_maskMainlineNceTce = false;
+
+    #endif
 };
 
 /**
