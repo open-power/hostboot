@@ -86,6 +86,7 @@ include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
+include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training_adv.mk
 
 include ${ROOTPATH}/config.mk
 
