@@ -72,7 +72,7 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
     TargetHandle_t rxBusTgt = i_chip->getTrgt();
     TargetHandle_t txBusTgt = nullptr;
     TYPE busType = getTargetType(rxBusTgt);
-    bool thrExceeded = true;
+    bool thrExceeded;
     // Number of clock groups on this interface. (2 for xbus, 1 for all others)
     uint8_t clkGrps = (busType == TYPE_XBUS) ? 2 : 1;
     std::vector<uint8_t> rx_lanes[2];    // Failing lanes on clock group 0/1

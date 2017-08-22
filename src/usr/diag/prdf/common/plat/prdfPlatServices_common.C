@@ -220,6 +220,7 @@ int32_t setVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
                               uint8_t i_clkGrp)
 {
     int32_t o_rc = SUCCESS;
+    o_thrExceeded = false;
 
     #ifdef __HOSTBOOT_MODULE
     PRDF_ASSERT( nullptr != i_rxBusTgt);
