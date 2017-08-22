@@ -881,7 +881,7 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 if(l_errl)
                 {
                     TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: sync attributes"
-                             " failed see %x for details", l_errl->eid());
+                             " failed, see 0x%08X for details", l_errl->eid());
                     errlCommit(l_errl, INITSVC_COMP_ID);
                 }
             }
@@ -891,6 +891,21 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Istep failed, plid 0x%x",
                       err->plid());
+
+            // istep fails, sync attributes to FSP
+            if( INITSERVICE::spBaseServicesEnabled() )
+            {
+                TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep, Sync attributes to FSP");
+                errlHndl_t l_errl = TARGETING::syncAllAttributesToFsp();
+
+                if(l_errl)
+                {
+                    TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Attribute syncing"
+                         " failed see 0x%08X for details", l_errl->eid());
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit(l_errl, INITSVC_COMP_ID);
+                }
+            }
         }
 
         // Check for any attentions and invoke PRD for analysis
