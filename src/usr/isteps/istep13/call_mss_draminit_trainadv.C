@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
+#include    <p9_mss_draminit_training_adv.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -60,16 +61,14 @@ void* call_mss_draminit_trainadv (void *io_pArgs)
     {
         // Dump current run on target
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running p9_mss_draminit_trainingadv HWP on "
+                "Running p9_mss_draminit_training_adv HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_mcbist_target));
 
         const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>
           l_fapi_mbcbist_target( l_mcbist_target);
 
-        // PLACEHOLDER - HWP may not actually be required
-        //  call the HWP with each fapi::Target
-//         FAPI_INVOKE_HWP(l_err, mss_draminit_training_advanced,
-//                        l_fapi_mbcbist_target);
+         FAPI_INVOKE_HWP(l_err, p9_mss_draminit_training_adv,
+                        l_fapi_mbcbist_target);
 
         if (l_err)
         {
