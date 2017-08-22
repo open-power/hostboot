@@ -133,6 +133,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 
         if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
         {
+            // See if async FFDC bit is set in SBE register
+            if(l_sbeReg.asyncFFDC)
+            {
+                bool l_flowCtrl = sbe_get_ffdc_handler(l_cpu_target);
+
+                if(l_flowCtrl)
+                {
+                    continue;
+                }
+            }
+
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                        "SBE 0x%.8X never started, l_sbeReg=0x%.8X",
                        TARGETING::get_huid(l_cpu_target),l_sbeReg.reg );
@@ -165,7 +176,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
 #if 1 // get rid of this
             // Create IStep error log and cross reference to error
             l_stepError.addErrorDetails( l_errl );
-            
+
             // Commit error log
             errlCommit( l_errl, HWPF_COMP_ID );
 #else
