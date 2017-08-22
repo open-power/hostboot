@@ -143,31 +143,6 @@ namespace p9hcd
 {
 #endif
 
-//Enum form of CME FLAGs.
-enum PM_CME_CMEFLG_DEFS
-{
-    CME_STOP_READY                      = 0,
-    CME_PMCR_READY                      = 1,
-    CME_QMGR_READY                      = 2,
-    CME_QMGR_MASTER                     = 3,
-    CME_RCLK_OPERABLE                   = 4,
-    CME_IVRM_OPERABLE                   = 5,
-    CME_VDM_OPERABLE                    = 6,
-    CME_OCC_HB_SAFE_MODE                = 7,
-    CME_BLOCK_STOP_EXIT_ENABLED_C0      = 8,
-    CME_BLOCK_STOP_EXIT_ENABLED_C1      = 9,
-    CME_BLOCK_STOP_ENTRY_ENABLED_C0     = 10,
-    CME_BLOCK_STOP_ENTRY_ENABLED_C1     = 11,
-    // Reserve 12:24
-    CME_FREQ_UPDATE_DISABLE             = 25,
-    CME_EX_ID                           = 26,
-    CME_SIBLING_FUNCTIONAL              = 27,
-    CME_STOP_ENTRY_FIRST_C0             = 28,
-    CME_STOP_ENTRY_FIRST_C1             = 29,
-    CME_CORE0_GOOD                      = 30,
-    CME_CORE1_GOOD                      = 31
-};
-
 //Enum form of OCC FLAGs.
 enum PM_GPE_OCCFLG_DEFS
 {
@@ -181,7 +156,6 @@ enum PM_GPE_OCCFLG_DEFS
     SGPE_IGNORE_STOP_ACTION             = 10,
     SGPE_IGNORE_STOP_EXITS              = 11,
     SGPE_IGNORE_STOP_ENTRIES            = 12,
-    OCCFLG_CORE_QUIESCE_WORKARND_DIS    = 13,
     SGPE_24_7_ACTIVATE                  = 14,
     SGPE_24_7_ACTIVE                    = 15,
     PIB_I2C_MASTER_ENGINE_1_LOCK_BIT0   = 16, //BIT0 ored BIT1 gives the field
@@ -223,9 +197,11 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_IVRM_OPERABLE                 = 5,
     CME_FLAGS_VDM_OPERABLE                  = 6,
     CME_FLAGS_OCC_HB_SAFE_MODE              = 7,
-    CME_FLAGS_BLOCK_WKUP_C0                 = 8,
-    CME_FLAGS_BLOCK_WKUP_C1                 = 9,
-    CME_CORE_QUIESCE_WORKARND_DIS           = 23,
+    CME_FLAGS_STOP_BLOCK_EXIT_C0            = 8,
+    CME_FLAGS_STOP_BLOCK_EXIT_C1            = 9,
+    CME_FLAGS_STOP_BLOCK_ENTRY_C0           = 10,
+    CME_FLAGS_STOP_BLOCK_ENTRY_C1           = 11,
+    CME_FLAGS_CORE_QUIESCE_ACTIVE           = 12,
     CME_FLAGS_PSTATES_ENABLED               = 24,
     CME_FLAGS_FREQ_UPDT_DISABLE             = 25,
     CME_FLAGS_EX_ID                         = 26,
