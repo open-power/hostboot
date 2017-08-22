@@ -329,3 +329,4 @@ print "Creating XML: $filename\n";
 open($xml_fh, ">$filename") || die "Unable to create: $filename";
 print {$xml_fh} $mrw_parsed->toString();
 close($xml_fh);
+unlink($file_name);
