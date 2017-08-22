@@ -27,6 +27,6 @@
 -include 01common.mk
 
 PROCEDURE=cen_tp_chiplet_init2
-OBJS+=cen_common_funcs.o
+${PROCEDURE}_DEPLIBS+=cen_common_funcs
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

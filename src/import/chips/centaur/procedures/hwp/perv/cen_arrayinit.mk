@@ -28,5 +28,5 @@
 
 PROCEDURE=cen_arrayinit
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-OBJS+=cen_common_funcs.o
+${PROCEDURE}_DEPLIBS+=cen_common_funcs
 $(call BUILD_PROCEDURE)
