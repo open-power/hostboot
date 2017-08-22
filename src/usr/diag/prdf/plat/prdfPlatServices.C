@@ -205,19 +205,6 @@ void collectSBE_FFDC(TARGETING::TargetHandle_t i_procTarget)
 }
 */
 
-//------------------------------------------------------------------------------
-
-TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt )
-{
-    #define PRDF_FUNC "[PlatServices::getMasterCore] "
-
-    PRDF_ERR( PRDF_FUNC "MasterCore info not available in hostboot: PROC = "
-              "0x%08x ",getHuid( i_procTgt ) );
-    return NULL;
-
-    #undef PRDF_FUNC
-}
-
 //##############################################################################
 //##                        util functions
 //##############################################################################

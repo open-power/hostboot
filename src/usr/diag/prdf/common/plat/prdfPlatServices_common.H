@@ -316,15 +316,6 @@ int32_t getMemAddrRange( TARGETING::TargetHandle_t i_mba,
 */
 
 /**
- * @brief   Returns master core for the master proc
- * @param   i_procTgt proc target
- * @return  target for master core or NULL
- * @note    if given proc is not master, master proc is found and target for
- *          master core is returned.
- */
-TARGETING::TargetHandle_t getMasterCore( TARGETING::TargetHandle_t i_procTgt );
-
-/**
  * @brief   Get spare DRAM information on a DIMM.
  * @param   i_mba MBA target.
  * @param   i_rank Rank.
