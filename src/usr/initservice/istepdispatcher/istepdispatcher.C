@@ -605,10 +605,21 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             requestReboot();
 
                             #endif
+
                             #ifdef CONFIG_CONSOLE
+                            auto l_reconfigAttr =
+                              l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+                            bool l_deconfig = false;
+                            if( l_reconfigAttr ==
+                                TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
+                            {
+                                l_deconfig = true;
+                            }
+
                             CONSOLE::displayf(NULL,
-                               "System Shutting Down "
-                               "To Perform Reconfiguration");
+                              "System Shutting Down"
+                              "To Perform Reconfiguration After %s",
+                              l_deconfig ? "Deconfig" : "Recoverable Error" );
                             CONSOLE::flush();
                             #endif
                             #ifndef CONFIG_BMC_IPMI
@@ -2350,20 +2361,63 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
 {
     errlHndl_t err = NULL;
 
+    using namespace TARGETING;
+    TARGETING::Target* l_pTopLevel = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_pTopLevel);
+    assert( l_pTopLevel != nullptr );
+    auto l_reconfigAttr =
+      l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+    auto l_mnfgFlags =
+        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_FLAGS>();
+    bool l_mfgMode = (l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM);
+    TARGETING::TargetHandleList l_allFuncMca;
+    TARGETING::getAllChiplets(l_allFuncMca, TARGETING::TYPE_MCA, true );
+    uint8_t l_rcdLoops = 0;
+    for( auto mca : l_allFuncMca )
+    {
+        auto l_loops =
+          mca->getAttr<TARGETING::ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT>();
+        if( l_loops > l_rcdLoops )
+        {
+            l_rcdLoops = l_loops;
+        }
+    }
+    auto l_rcdThreshold =
+        l_pTopLevel->getAttr<TARGETING::ATTR_MNFG_TH_RCD_PARITY_ERRORS>();
+    auto l_rcdLoopsAllowed =
+        l_pTopLevel->getAttr<ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED>();
+
+
     /*@
      * @errortype
      * @reasoncode       ISTEP_FAILED_DUE_TO_DECONFIG
      * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
      * @moduleid         ISTEP_INITSVC_MOD_ID
-     * @userdata1[0:31]  Istep that failed
-     * @userdata1[32:63] SubStep that failed
-     * @userdata2[0:31]  Desired istep for reconfig loop.
-     * @userdata2[32:63] Desired substep for reconfig loop.
-     * @devdesc          Deconfigured occurred during an istep. The reconfig loop
-     *                   was not performed by Hostboot because either the Istep
-     *                   is outside the reconfig loop (desired steps 0), too
-     *                   many reconfig loops were attempted, in manufacturing
-     *                   mode or in istep mode.
+     * @userdata1[00:15] Istep that failed
+     * @userdata1[16:31] SubStep that failed
+     * @userdata1[32:47] Desired istep
+     * @userdata1[48:63] Desired substep
+     * @userdata2[00:07] Value of ATTR_RECONFIGURE_LOOP
+     *                   - 0x01 = DECONFIGURE
+     *                   - 0x02 = BAD_DQ_BIT_SET
+     *                   - 0x04 = RCD_PARITY_ERROR
+     * @userdata2[08:15] Manufacturing Mode (MNFG_FLAG_SRC_TERM)
+     * @userdata2[16:23] Largest number of RCD reboots
+     *                   (ATTR_RCD_PARITY_RECONFIG_LOOP_COUNT)
+     * @userdata2[24:31] Number of RCD reboots allowed
+     *                   (ATTR_RCD_PARITY_RECONFIG_LOOPS_ALLOWED)
+     * @userdata2[32:39] RCD parity error threshold
+     *                   (ATTR_MNFG_TH_RCD_PARITY_ERRORS)
+     * @userdata2[40:63] Unused
+     * @devdesc          Hostboot has requested a reconfig loop due to a
+     *                   hardware error.  Causes could be:
+     *                   - deconfiguration during an istep outside of the
+     *                     the reconfig loop
+     *                   - deconfiguration while running in istep mode
+     *                   - deconfiguration in mfg mode
+     *                   - exceeded the number of allowed reconfig attempts
+     *                   - recoverable hardware error that requires a
+     *                     reboot to clear out
      * @custdesc    A hardware error occurred during the IPL. See previous logs
      *              for details.
      */
@@ -2371,12 +2425,26 @@ errlHndl_t IStepDispatcher::failedDueToDeconfig(
             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
             ISTEP_INITSVC_MOD_ID,
             ISTEP_FAILED_DUE_TO_DECONFIG,
-            TWO_UINT32_TO_UINT64(i_step, i_substep),
-            TWO_UINT32_TO_UINT64(i_dStep, i_dSubstep));
+            FOUR_UINT16_TO_UINT64(i_step, i_substep,
+                                  i_dStep, i_dSubstep),
+            FOUR_UINT16_TO_UINT64(
+                TWO_UINT8_TO_UINT16(l_reconfigAttr,
+                                    l_mfgMode),
+                TWO_UINT8_TO_UINT16(l_rcdLoops,
+                                    l_rcdLoopsAllowed),
+                TWO_UINT8_TO_UINT16(l_rcdThreshold,
+                                    0),
+                                  0
+                                  ) );
     err->collectTrace("HWAS_I", 1024);
     err->collectTrace("INITSVC", 1024);
+    err->collectTrace("PRDF", 1024);
     err->addProcedureCallout(HWAS::EPUB_PRC_FIND_DECONFIGURED_PART,
                              HWAS::SRCI_PRIORITY_HIGH);
+
+
+    INITSERVICE::doShutdown(SHUTDOWN_DO_RECONFIG_LOOP, true);
+
     return err;
 }
 
