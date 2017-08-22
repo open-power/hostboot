@@ -56,14 +56,14 @@ my $generic = "";
 my $fapi_filename = "";
 my $targ_filename = "";
 my $attr_filename = "";
-my $tempDefault_filename = "";
+my $hbCustomize_filename = "";
 
 my $usage = 0;
 use Getopt::Long;
 GetOptions( "fapi:s"     => \$fapi_filename,
             "attr:s"     => \$attr_filename,
             "targ:s"     => \$targ_filename,
-            "default:s"  => \$tempDefault_filename,
+            "default:s"  => \$hbCustomize_filename,
             "help"       => \$usage, );
 
 if( ($fapi_filename eq "")
@@ -88,7 +88,7 @@ my $fapiXml = $xml->XMLin("$fapi_filename" ,
                           NoAttr => 1);
 
 #data from the temporary default xml
-my $tempDefaultXml = $xml->XMLin("$tempDefault_filename" ,
+my $hbCustomizeXml = $xml->XMLin("$hbCustomize_filename" ,
                                  forcearray => ['attribute'],
                                  NoAttr => 1);
 
@@ -114,17 +114,16 @@ foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
     #print "====" . $FapiAttr->{id} . "\n";
 
     #Check if there are any defaults values we need to add to fapi attrs before generating HB
-    foreach my $tempDefault(@{$tempDefaultXml->{attribute}})
+    foreach my $customizedAttr(@{$hbCustomizeXml->{attribute}})
     {
         #if we find a match, then add update the attribute w/ customized values
-        if ($tempDefault->{id} eq $FapiAttr->{id})
+        if ($customizedAttr->{id} eq $FapiAttr->{id})
         {
-            if(exists $tempDefault->{default})
+            if(exists $customizedAttr->{default})
             {
-                #print "Found match for ".$tempDefault->{id}." default val is ".$tempDefault->{default}."\n";
-                $FapiAttr->{default} = $tempDefault->{default};
+                #print "Found match for ".$customizedAttr->{id}." default val is ".$customizedAttr->{default}."\n";
+                $FapiAttr->{default} = $customizedAttr->{default};
             }
-            last;
         }
     }
 
@@ -134,21 +133,20 @@ foreach my $FapiAttr ( @{$fapiXml->{attribute}} )
     my $attr = createAttrFromFapi($FapiAttr);
 
     #Check if there are additional tags besides default we need to add to fapi attrs
-    foreach my $tempDefault(@{$tempDefaultXml->{attribute}})
+    foreach my $customizedAttr(@{$hbCustomizeXml->{attribute}})
     {
         #if we find a match, then add update the attribute w/ customized values
-        if ($tempDefault->{id} eq $attr->{hwpfToHbAttrMap}->{id})
+        if ($customizedAttr->{id} eq $attr->{hwpfToHbAttrMap}->{id})
         {
-            foreach my $tag (keys %$tempDefault)
+            foreach my $tag (keys %$customizedAttr)
             {
                 if($tag ne "default" && $tag ne "id" )
                 {
-                    #print "Found match for ".$tempDefault->{id}." $tag val is ".$tempDefault->{$tag}."\n";
-                    $attr->{$tag} = $tempDefault->{$tag};
+                    #print "Found match for ".$customizedAttr->{id}." $tag val is ".$customizedAttr->{$tag}."\n";
+                    $attr->{$tag} = $customizedAttr->{$tag};
                 }
             }
-
-            last;
+            #Do not exit loop yet, continue in case there are more than 1 attr customization tags
         }
     }
 
