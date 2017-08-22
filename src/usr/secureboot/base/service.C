@@ -83,7 +83,7 @@ struct SecureRegisterValues
  *     default to 0b1 and rely on SBE signing header to configure the final
  *     value.
  */
-uint8_t g_sbeSecurityMode = 0;
+uint8_t g_sbeSecurityMode = 1;
 
 /**
  *  @brief Retrieve values of Security Registers of the processors in the system
