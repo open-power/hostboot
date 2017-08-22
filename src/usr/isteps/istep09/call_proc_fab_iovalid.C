@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,10 @@
 // HWP
 #include <p9_fab_iovalid.H>
 
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+  #include <isteps/pm/occCheckstop.H>
+#endif
+
 namespace   ISTEP_09
 {
 
@@ -82,6 +86,25 @@ void*    call_proc_fab_iovalid( void    *io_pArgs )
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_fab_iovalid entry" );
+
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+    // Before all of the slave processors are enabled, update the FIRDATA inputs
+    // for OCC. It should include all PROCs and the master CORE.
+    TARGETING::TargetHandle_t masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+    l_errl = HBOCC::loadHostDataToSRAM(masterProc, PRDF::ALL_PROC_MASTER_CORE);
+    if ( nullptr != l_errl )
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "HBOCC::loadHostDataToSRAM(0x%08x,%d) failed",
+                  TARGETING::get_huid(masterProc), PRDF::ALL_PROC_MASTER_CORE);
+
+        ErrlUserDetailsTarget(masterProc).addToLog(l_errl);
+        l_StepError.addErrorDetails(l_errl);
+        errlCommit(l_errl, HWPF_COMP_ID);
+        l_errl = nullptr;
+    }
+#endif
 
     //
     //  get a list of all the procs in the system

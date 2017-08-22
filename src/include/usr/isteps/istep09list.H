@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -228,6 +228,7 @@ namespace   INITSERVICE
 const DepModInfo  g_istep09Dependancies = {
     {
         DEP_LIB(libistep09.so),
+        DEP_LIB(libpm.so),
         NULL
     }
 };
