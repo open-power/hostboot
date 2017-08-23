@@ -113,16 +113,6 @@ fapi2::ReturnCode p9_pm_firinit(
                      "ERROR: Failed to set firinit call status after init");
         }
     }
-    else if (i_mode == p9pm::PM_RESET)
-    {
-        if (l_pm_firinit_flag != 2)
-        {
-            l_pm_firinit_flag = 2;
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
-                                   i_target, l_pm_firinit_flag),
-                     "ERROR: Failed to set firinit call status after reset");
-        }
-    }
 
 fapi_try_exit:
     FAPI_INF("p9_pm_firinit end");
