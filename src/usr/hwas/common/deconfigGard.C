@@ -42,6 +42,9 @@
 
 #ifdef __HOSTBOOT_MODULE
 #include <config.h>
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+#include <console/consoleif.H>
+#endif
 #endif
 
 #ifdef CONFIG_BMC_IPMI
@@ -521,6 +524,11 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 }
             }
 
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
+                    get_huid(l_pTarget),
+                    l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+#endif
         } // for
 
         if (l_pErr)
@@ -724,6 +732,12 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                     break;
                 }
             }
+
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            CONSOLE::displayf("HWAS", "Deconfig HUID 0x%08X, %s",
+                    get_huid(l_pTarget),
+                    l_pTarget->getAttr<TARGETING::ATTR_PHYS_PATH>().toString());
+#endif
         } // for
         if(l_pErr)
         {
