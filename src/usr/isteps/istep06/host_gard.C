@@ -120,6 +120,48 @@ void* host_gard( void *io_pArgs )
             }
         }
 
+        // Put out some helpful messages that show which targets are usable
+        std::map<TARGETING::TYPE,uint64_t> l_funcData;
+        for (auto target : TARGETING::targetService())
+        {
+            if (!(target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+            {
+                continue;
+            }
+            TARGETING::TYPE l_type =target->getAttr<TARGETING::ATTR_TYPE>();
+            TARGETING::ATTR_FAPI_POS_type l_pos = 0;
+            if( target->tryGetAttr<TARGETING::ATTR_FAPI_POS>(l_pos) )
+            {
+                l_funcData[l_type] |= (0x8000000000000000 >> l_pos);
+            }
+        }
+        TARGETING::EntityPath l_epath;
+        for( auto l_data : l_funcData)
+        {
+            auto l_type = l_data.first;
+            uint64_t l_val = l_data.second;
+            //Only want to display procs, dimms, and cores
+            if((l_type != TARGETING::TYPE_DIMM) &&
+               (l_type != TARGETING::TYPE_PROC) &&
+               (l_type != TARGETING::TYPE_CORE))
+            {
+                continue;
+            }
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "FUNCTIONAL> %s[%.2X]=%.8X%.8X",
+                      l_epath.pathElementTypeAsString(l_type),
+                      l_type,
+                      l_val>>32, l_val&0xFFFFFFFF);
+
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+            CONSOLE::displayf("HWAS", "FUNCTIONAL> %s[%.2X]=%.8X%.8X",
+                              l_epath.pathElementTypeAsString(l_type),
+                              l_type,
+                              l_val>>32,
+                              l_val&0xFFFFFFFF );
+#endif
+            }
+
         //  check and see if we still have enough hardware to continue
         l_err = HWAS::checkMinimumHardware();
         if(l_err)
