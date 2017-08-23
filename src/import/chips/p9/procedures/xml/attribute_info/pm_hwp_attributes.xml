@@ -88,7 +88,7 @@
       <description>The attribute stores the Local FIR value of OCC taken
       during the reset phase.
       </description>
-      <valueType>uint32</valueType>
+      <valueType>uint64</valueType>
       <writeable/>
   </attribute>
   <!-- ********************************************************************* -->
@@ -98,7 +98,7 @@
       <description>The attribute stores the Local FIR value of PBA taken
       during the reset phase.
       </description>
-      <valueType>uint32</valueType>
+      <valueType>uint64</valueType>
       <writeable/>
   </attribute>
   <!-- ********************************************************************* -->

@@ -282,7 +282,6 @@ fapi2::ReturnCode pm_corequad_reset(
     uint8_t l_chpltNumber = 0;
     uint64_t l_address = 0;
     uint32_t l_errMask = 0;
-    uint32_t l_firMask = 0;
     uint32_t l_pollCount = 20;
     bool l_l2_is_scanable = false;
     bool l_l3_is_scanable = false;
@@ -373,23 +372,6 @@ fapi2::ReturnCode pm_corequad_reset(
                      "ERROR: Failed to get the position of the EX:0x%08X",
                      l_ex_chplt);
             FAPI_DBG("EX number = %d", l_chpltNumber);
-
-            // Store CME FIR MASK in an attribute
-            FAPI_INF("Store CME FIR MASK HWP attribute");
-            l_address = EX_CME_SCOM_LFIRMASK;
-            FAPI_TRY(fapi2::getScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to fetch the QUAD PPM Error Mask");
-            l_data64.extractToRight<uint32_t>(l_firMask, 0, 32);
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CME_LOCAL_FIRMASK, l_ex_chplt,
-                                   l_firMask),
-                     "ERROR: Failed to set CME FIR Mask");
-
-            // Write parameter provided value to CME FIR MASK
-            FAPI_INF(" Write Local CME FIR MASK ");
-            l_data64.flush<0>().insertFromRight<0, 32>(i_cmeFirMask);
-            l_address = EX_CME_SCOM_LFIRMASK;
-            FAPI_TRY(fapi2::putScom(l_ex_chplt, l_address, l_data64),
-                     "ERROR: Failed to clear the Local CME FIR Mask");
 
             // Program XCR to HALT CME 0 & 1 and verify by polling the XSR
             // Set the value of bits as follows:
