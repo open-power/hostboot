@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <limits.h>
+#include "generic_hbrt_fsp_message.H"
 
 /** Memory error types defined for memory_error() interface. */
 enum MemoryError_t
@@ -504,6 +505,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,
        HBRT_FW_MSG_HBRT_FSP = 4,
        HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
+       HBRT_FW_MSG_HBRT_FSP_RESP = 6,
     };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -546,9 +548,19 @@ typedef struct hostInterfaces
                                   // uint8_t *myData =
                                   // (uint8_t*)&l_req_fw_msg->error_log.i_data;
           } __attribute__ ((packed)) error_log;
-       };
-    };
 
+          // This struct is sent from HBRT with
+          // io_type set to HBRT_FW_MSG_HBRT_FSP
+          // This struct sends an MBox message to the FSP
+          struct GenericFspMboxMessage_t generic_message;
+
+          // This struct is sent from FSP with
+          // io_type set to HBRT_FW_MSG_HBRT_FSP_RESP
+          // This struct receives a message from the FSP
+          struct GenericFspRspMessage_t generic_message_resp;
+
+       }; // end union
+    };  // end struct hbrt_fw_msg
 
     // Created a static constexpr to return the base size of hbrt_fw_msg
     // Can't do #define - sizeof not allowed to be used in #defines

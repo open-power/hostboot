@@ -2063,12 +2063,6 @@ errlHndl_t IpVpdFacade::writeKeyword ( const char * i_keywordName,
                 break;
             }
 
-            // If we are writing both we don't have an FSP, skip the mbox msg
-            if ( iv_configInfo.vpdWriteHW )
-            {
-                break;
-            }
-
             VPD::VpdWriteMsg_t msgdata;
 
             // Quick double-check that our constants agree with the values
