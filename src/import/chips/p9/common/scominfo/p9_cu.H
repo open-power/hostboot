@@ -47,6 +47,7 @@ extern "C"
     {
         P9C_CHIP,            ///< Cumulus chip (included for future expansion)
         P9N_CHIP,            ///< Nimbus chip (included for future expansion)
+        P9A_CHIP,            ///< Axone chip (included for future expansion)
         PU_C_CHIPUNIT,       ///< Core
         PU_EQ_CHIPUNIT,      ///< Quad
         PU_EX_CHIPUNIT,      ///< EX
@@ -57,6 +58,7 @@ extern "C"
         PU_PHB_CHIPUNIT,     ///< PCIe (PHB)
         PU_MI_CHIPUNIT,      ///< MI (Cumulus only)
         PU_DMI_CHIPUNIT,     ///< DMI (Cumulus only)
+        PU_OMI_CHIPUNIT,     ///< OMI (Axone only)
         PU_MCS_CHIPUNIT,     ///< MCS (Nimbus only)
         PU_MCA_CHIPUNIT,     ///< MCA (Nimbus only)
         PU_MCBIST_CHIPUNIT,  ///< MCBIST (Nimbus only)
@@ -83,15 +85,16 @@ extern "C"
     };
 
     /// P9 PPE Chip Unit Instance Number enumeration
-    /// PPE name        Nimbus    Cumulus
-    /// SBE             0         0
-    /// GPE0..3         10..13    10..13
-    /// CME0            20..25    20..25
-    /// CME1            30..35    30..35
-    /// IO PPE (xbus)   40        40
-    /// IO PPE (obus)   41,42     41,42
-    /// IO PPE (dmi)    NA        43,44
-    /// Powerbus PPEs   50        50..52
+    /// PPE name        Nimbus    Cumulus   Axone
+    /// SBE             0         0         0
+    /// GPE0..3         10..13    10..13    10..13
+    /// CME0            20..25    20..25    20..25
+    /// CME1            30..35    30..35    30..35
+    /// IO PPE (xbus)   40        40        40
+    /// IO PPE (obus)   41,44     41..44    41,44
+    /// IO PPE (dmi)    NA        45,46     NA
+    /// Powerbus PPEs   50        50        50
+    /// IO PPE (omi)    NA        NA        56..61
     typedef enum
     {
         PPE_SBE_CHIPUNIT_NUM         =  0,
@@ -104,10 +107,14 @@ extern "C"
         PPE_IO_XBUS_CHIPUNIT_NUM     = 40,
         PPE_IO_OB0_CHIPUNIT_NUM      = 41,
         PPE_IO_OB1_CHIPUNIT_NUM      = 42,
-        PPE_IO1_DMI_CHIPUNIT_NUM     = 44,
+        PPE_IO_OB2_CHIPUNIT_NUM      = 43,
+        PPE_IO_OB3_CHIPUNIT_NUM      = 44,
+        PPE_IO_DMI0_CHIPUNIT_NUM     = 45,
+        PPE_IO_DMI1_CHIPUNIT_NUM     = 46,
         PPE_PB0_CHIPUNIT_NUM         = 50,
         PPE_PB2_CHIPUNIT_NUM         = 52,
-        PPE_LAST_CHIPUNIT_NUM        = PPE_PB2_CHIPUNIT_NUM,
+        PPE_OMI_CHIPUNIT_NUM         = 56,
+        PPE_LAST_CHIPUNIT_NUM        = PPE_OMI_CHIPUNIT_NUM,
     } p9_ppe_chip_unit_instance_num_t;
 
 } // extern "C"

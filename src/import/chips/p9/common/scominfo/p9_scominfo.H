@@ -50,6 +50,8 @@ extern "C"
     static const uint32_t P9N_DD2_SI_MODE = 0x2;
     static const uint32_t P9C_DD1_SI_MODE = 0x4;
     static const uint32_t P9C_DD2_SI_MODE = 0x8;
+    static const uint32_t P9A_DD1_SI_MODE = 0x10;
+    static const uint32_t P9A_DD2_SI_MODE = 0x20;
 
     typedef enum
     {
