@@ -29,6 +29,7 @@
 #include <p9_l3err_extract.H>
 #include <p9_l2err_extract.H>
 #include <p9_pm_callout.H>
+#include <prdfMemAddress.H>
 
 namespace PRDF
 {
@@ -47,20 +48,28 @@ namespace PlatServices
 void sendPageGardRequest( uint64_t i_systemAddress );
 
 /**
- * @brief Communicates an LMB gard request to the hypervisor.
- * @param i_systemAddress Any address in the target LMB.
- * @param i_isFetchUE     True if cause attention is a fetch UE. False if cause
- *                        attention is a scrub UE (only applicable to FSP code).
- */
-void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE );
-
-/**
  * @brief Communicates to the hypervisor a range of address to remove from the
  *        available memory space.
  * @param i_startAddr First address in the range.
  * @param i_endAddr   Last address in the range.
  */
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr );
+
+/**
+ * @brief  Returns the start and end maintenance address of the given rank. By
+ *         default, will return the address range of the master rank.
+ * @param  i_tgt       Target MBA/MCA.
+ * @param  i_rank      Target rank.
+ * @param  i_dimmSlct  Target dimm select.
+ * @param  o_startAddr The return start address.
+ * @param  o_endAddr   The return end address.
+ * @param  i_slaveOnly true = slave rank only, false = master rank (default).
+ * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
+ */
+int32_t getMemAddrRange( TARGETING::TargetHandle_t i_tgt, uint8_t i_mrank,
+                         uint8_t i_dimmSlct, MemAddr & o_startAddr,
+                         MemAddr & o_endAddr, uint8_t i_srank = 0,
+                         bool i_slaveOnly = false );
 
 //##############################################################################
 //##                  Nimbus/Centaur Maintenance Command wrappers
