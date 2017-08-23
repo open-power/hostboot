@@ -554,8 +554,8 @@ void* host_discover_targets( void *io_pArgs )
             continue;
         }
         TARGETING::TYPE l_type = target->getAttr<TARGETING::ATTR_TYPE>();
-        TARGETING::ATTR_POSITION_type l_pos = 0;
-        if( target->tryGetAttr<TARGETING::ATTR_POSITION>(l_pos) )
+        TARGETING::ATTR_FAPI_POS_type l_pos = 0;
+        if( target->tryGetAttr<TARGETING::ATTR_FAPI_POS>(l_pos) )
         {
             l_presData[l_type] |= (0x8000000000000000 >> l_pos);
         }
@@ -567,6 +567,13 @@ void* host_discover_targets( void *io_pArgs )
     {
         uint8_t l_type = itr->first;
         uint64_t l_val = itr->second;
+        //Only want to display procs, dimms, and cores
+        if((l_type != TARGETING::TYPE_DIMM) &&
+           (l_type != TARGETING::TYPE_PROC) &&
+           (l_type != TARGETING::TYPE_CORE))
+        {
+            continue;
+        }
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "PRESENT> %s[%.2X]=%.8X%.8X",
                 l_epath.pathElementTypeAsString(itr->first),
