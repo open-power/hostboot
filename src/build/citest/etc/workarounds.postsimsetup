@@ -33,4 +33,9 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 #pull in new actions in p9_memory.act RTC 171066
+#pull in SBE makefile change for DD2.1
+sbex -t 1032604
+cd $sb/sbei/sbfw/
+mk -a && mk install_all
+cd -
 

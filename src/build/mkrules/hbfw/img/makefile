@@ -176,10 +176,11 @@ CUMULUS_SBE_IMG = p9c.SbePartition.bin
 
 P9N_EC10_BIN = ${SBEI_OBJPATH:Fp9n_10.sbe_seeprom.hdr.bin}
 P9N_EC20_BIN = ${SBEI_OBJPATH:Fp9n_20.sbe_seeprom.hdr.bin}
+P9N_EC21_BIN = ${SBEI_OBJPATH:Fp9n_21.sbe_seeprom.hdr.bin}
 P9C_EC10_BIN = ${SBEI_OBJPATH:Fp9c_10.sbe_seeprom.hdr.bin}
 
 SBE_PART_INFO = \
-  ${NIMBUS_SBE_IMG}:10=${P9N_EC10_BIN},20=${P9N_EC20_BIN} \
+  ${NIMBUS_SBE_IMG}:10=${P9N_EC10_BIN},20=${P9N_EC20_BIN},21=${P9N_EC21_BIN} \
   ${CUMULUS_SBE_IMG}:10=${P9C_EC10_BIN}
 
 
