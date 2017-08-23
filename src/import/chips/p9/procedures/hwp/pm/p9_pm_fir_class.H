@@ -387,6 +387,7 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
         {
             FAPI_TRY(fapi2::getScom(iv_proc, iv_mask_address, iv_mask));
+            FAPI_INF("PROC Mask Address %08X, Mask value %16llx", iv_mask_address, iv_mask);
             iv_and_mask = iv_mask;
             iv_or_mask = iv_mask;
             iv_mask_write = false;
@@ -418,6 +419,7 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if(i_reg == REG_FIRMASK || i_reg == REG_ALL)
         {
             FAPI_TRY(fapi2::getScom(iv_ex, iv_mask_address, iv_mask));
+            FAPI_INF("EX Mask Address %08X, Mask value %16llx", iv_mask_address, iv_mask);
             iv_and_mask = iv_mask;
             iv_or_mask = iv_mask;
             iv_mask_write = false;
@@ -431,6 +433,7 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if (i_reg == REG_ERRMASK)
         {
             FAPI_TRY(fapi2::getScom(iv_eq, iv_mask_address, iv_mask));
+            FAPI_INF("EQ Mask Address %08X, Mask value %16llx", iv_mask_address, iv_mask);
             iv_and_mask = iv_mask;
             iv_or_mask = iv_mask;
             iv_mask_write = false;
@@ -444,6 +447,7 @@ fapi2::ReturnCode PMFir<Ftype>::get(const regType i_reg)
         if (i_reg == REG_ERRMASK)
         {
             FAPI_TRY(fapi2::getScom(iv_core, iv_mask_address, iv_mask));
+            FAPI_INF("CORE Mask Address %08X, Mask value %16llx", iv_mask_address, iv_mask);
             iv_and_mask = iv_mask;
             iv_or_mask = iv_mask;
             iv_mask_write = false;
@@ -769,8 +773,8 @@ fapi2::ReturnCode PMFir<Ftype>::saveMask()
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::saveMask()
 {
-    uint32_t l_mask;
-    iv_mask.extract<0, 32>(l_mask);
+    uint64_t l_mask;
+    iv_mask.extract<0, 64>(l_mask);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save OCC LFIR");
 
@@ -787,8 +791,8 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::saveMask()
 {
-    uint32_t l_mask;
-    iv_mask.extract<0, 32>(l_mask);
+    uint64_t l_mask;
+    iv_mask.extract<0, 64>(l_mask);
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to save PBA LFIR");
 fapi_try_exit:
@@ -860,14 +864,14 @@ fapi2::ReturnCode PMFir<Ftype>::restoreSavedMask()
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_OCC_LFIR>::restoreSavedMask()
 {
-    uint32_t l_mask;
-    uint32_t l_tempMask;
+    uint64_t l_mask;
+    uint64_t l_tempMask;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved OCC LFIR");
-    iv_mask.extract<0, 32>(l_tempMask);
+    iv_mask.extract<0, 64>(l_tempMask);
     l_mask |= l_tempMask;
-    iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_mask.insertFromRight<0, 64>(l_mask);
     iv_or_mask = iv_mask;
     iv_and_mask = iv_mask;
     iv_mask_write = true;
@@ -887,14 +891,14 @@ fapi_try_exit:
 template <> inline
 fapi2::ReturnCode PMFir<FIRTYPE_PBA_LFIR>::restoreSavedMask()
 {
-    uint32_t l_mask;
-    uint32_t l_tempMask;
+    uint64_t l_mask;
+    uint64_t l_tempMask;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PBA_LFIR, iv_proc, l_mask),
              "ERROR: Failed to retrieve saved PBA LFIR");
-    iv_mask.extract<0, 32>(l_tempMask);
+    iv_mask.extract<0, 64>(l_tempMask);
     l_mask |= l_tempMask;
-    iv_mask.insertFromRight<0, 32>(l_mask);
+    iv_mask.insertFromRight<0, 64>(l_mask);
     iv_or_mask = iv_mask;
     iv_and_mask = iv_mask;
     iv_mask_write = true;
