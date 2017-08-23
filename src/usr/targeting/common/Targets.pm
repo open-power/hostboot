@@ -50,6 +50,8 @@ use constant
     DIMMS_PER_DMI => 4, # 1 Centaur x 4 dimms per DDR port
     DIMMS_PER_MBAPORT => 2, # MAX Dimms Per MBA PORT is 2
     MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
+    MBA_PER_MEMBUF => 2,
+
 };
 
 my %maxInstance = (
@@ -65,7 +67,7 @@ my %maxInstance = (
     "MCA"           => 8,
     "PHB"           => 6, #PHB is same as PCIE
     "PEC"           => 3, #PEC is same as PBCQ
-    "MBA"           => 2,
+    "MBA"           => 16,
     "PPE"           => 51, #Only 21, but they are sparsely populated
     "PERV"          => 56, #Only 42, but they are sparsely populated
     "CAPP"          => 2,
@@ -78,6 +80,7 @@ my %maxInstance = (
     "OCC"           => 1,
     "NV"            => 6,
     "NX"            => 1,
+    "MEMBUF"        => 8,
 );
 sub new
 {
@@ -833,6 +836,7 @@ sub iterateOverChiplets
             {
                 my $unit_ptr        = $self->getTarget($child);
                 my $unit_type       = $self->getType($child);
+
                 #System XML has some sensor target as hidden children
                 #of targets. We don't care for sensors in this function
                 #So, we can avoid them with this conditional
@@ -995,8 +999,24 @@ sub getFapiName
         }
 
         $target = lc $target;
-        my $fapi_name = sprintf("pu.$target:k0:n%d:s0:p%02d:c%d",
-            $node, $chipPos, $chipletPos);
+
+        my $fapi_name;
+
+        if ($target eq "membuf")
+        {
+            $fapi_name = sprintf("$target:k0:n%d:s0:p%02d:c%d",
+                            $node, $chipPos, $chipletPos);
+        }
+        elsif ($target eq "mba" || $target eq "l4")
+        {
+          $fapi_name = sprintf("membuf.$target:k0:n%d:s0:p%02d:c%d",
+                            $node, $chipPos, $chipletPos);
+        }
+        else
+        {
+            $fapi_name = sprintf("pu.$target:k0:n%d:s0:p%02d:c%d",
+                            $node, $chipPos, $chipletPos);
+        }
         return $fapi_name;
     }
 }
@@ -1202,6 +1222,7 @@ sub processMc
        if($tgt_type eq "MC")
        {
             my $mc =  $proc_child;
+
             my $mc_num =  $self->getAttribute($mc, "CHIP_UNIT");
 
             foreach my $mi (@{ $self->getTargetChildren($mc) })
@@ -1215,7 +1236,6 @@ sub processMc
                     my $membufnum = $proc * $self->{MAX_DMI} + $dmi_num;
 
                     my $aff_path = $self->getAttribute($dmi, "AFFINITY_PATH");
-                    my $phys_path = $self->getAttribute($dmi, "PHYS_PATH");
 
                     ## Find connected membufs
                     my $membuf_dmi = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{DEST}[0];
@@ -1224,16 +1244,30 @@ sub processMc
                     {
                         ## found membuf connected
                         my $membuf = $self->{data}->{TARGETS}{$membuf_dmi}{PARENT};
-                        ## get parent of dmi unit which is membuf
-                        my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
                         $self->setAttribute($membuf, "POSITION",$membufnum);
                         $self->setAttribute($membuf, "AFFINITY_PATH",
                                             $aff_path . "/membuf-$membufnum");
 
-                        # For Zeppelin, the membufs are on riser cards, not directly on the node.
-                        # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                        my $membuf_type = $self->getType($membuf);
+
+                        my $memCardOffset = $proc * $maxInstance{"MC"} + $mc_num;
+
                         $self->setAttribute($membuf, "PHYS_PATH",
                             $node_phys . "/membuf-$membufnum");
+
+                        my $parent_physical = $self->getAttribute($membuf, "PHYS_PATH");
+
+                        $self->setAttribute($membuf,"FAPI_NAME",
+                                     $self->getFapiName($membuf_type, $node, $proc, $membufnum));
+
+                        $self->setAttribute($membuf, "FAPI_POS",  $membufnum);
+                        $self->setAttribute($membuf, "ORDINAL_ID", $membufnum);
+                        $self->setAttribute($membuf, "REL_POS", $membufnum);
+                        $self->setAttribute($membuf, "POSITION", $membufnum);
+                        $self->setAttribute($membuf, "VPD_REC_NUM", $membufnum);
+
+                        ## get the dmi bus
+                        my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
 
                         # copy DMI bus attributes to membuf
                         $self->setAttribute($dmi, "EI_BUS_TX_LANE_INVERT",
@@ -1274,6 +1308,10 @@ sub processMc
                         foreach my $membuf_child (@{ $self->{data}->{TARGETS}{$membuf}{CHILDREN} })
                         {
                             my $childType = $self->getType($membuf_child);
+                            my $membuf_physical = $self->getAttribute(
+                                                    $self->getTargetParent($membuf_child),"PHYS_PATH");
+                            my $membuf_aff = $self->getAttribute(
+                                                    $self->getTargetParent($membuf_child),"AFFINITY_PATH");
 
                             ## need to not hardcard the subunits
                             if ($childType eq "L4")
@@ -1281,27 +1319,47 @@ sub processMc
                                 $self->{targeting}
                                   ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
                                     {DMI}[$dmi]{MEMBUFS}[$membufnum]{L4S}[0] {KEY} = $membuf_child;
-                                # For Zeppelin, the membufs are on riser cards, not directly on the node.
-                                # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+
                                 $self->setAttribute($membuf_child, "AFFINITY_PATH",
-                                                    $aff_path . "/membuf-$membufnum/l4-0");
+                                                    $membuf_aff . "/l4-0");
                                 $self->setAttribute($membuf_child, "PHYS_PATH",
-                                    $node_phys . "/membuf-$membufnum/l4-0");
+                                    $membuf_physical . "/l4-0");
+
+                                $self->setAttribute($membuf_child, "FAPI_POS",  0);
+                                $self->setAttribute($membuf_child, "ORDINAL_ID", 0);
+                                $self->setAttribute($membuf_child, "REL_POS", 0);
+
                                 $self->setHuid($membuf_child, $sys, $node);
+
+                                $self->setAttribute($membuf_child,"FAPI_NAME",
+                                     $self->getFapiName($childType, $node, $proc, 0));
                             }
 
 
                             if ($childType eq "MBA")
                             {
                                 my $mba = $self->getAttribute($membuf_child,"MBA_NUM");
-                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
-                                              $aff_path . "/membuf-$membufnum/mba-$mba");
 
-                                # For Zeppelin, the membufs are on riser cards, not directly on the node.
-                                # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                                $self->setAttribute($membuf_child, "AFFINITY_PATH",
+                                              $membuf_aff . "/mba-$mba");
+
                                 $self->setAttribute($membuf_child, "PHYS_PATH",
-                                    $node_phys . "/membuf-$membufnum/mba-$mba");
+                                    $membuf_physical . "/mba-$mba");
+
+                                my $mba_offset = $proc * $maxInstance{"MBA"} +
+                                                 MBA_PER_MEMBUF * $membufnum +
+                                                 $mba ;
+
+                                $self->setAttribute($membuf_child, "FAPI_POS",  $mba_offset);
+                                $self->setAttribute($membuf_child, "ORDINAL_ID", $mba_offset);
+                                $self->setAttribute($membuf_child, "REL_POS", $mba_offset);
+                                $self->setAttribute($membuf_child, "POSITION", $mba_offset);
+
                                 $self->setHuid($membuf_child, $sys, $node);
+
+                                 $self->setAttribute($membuf_child,"FAPI_NAME",
+                                     $self->getFapiName($childType, $node, $proc, $mba_offset));
+
                                 $self->{targeting}
                                   ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
                                     {DMI}[$dmi]{MEMBUFS}[$membufnum]{MBAS}[$mba]{KEY} = $membuf_child;
@@ -1310,7 +1368,7 @@ sub processMc
                                 my $ddrs = $self->findConnections($membuf_child,"DDR4","");
                                 if ($ddrs ne "")
                                 {
-                                    my $affinitypos=0;
+                                    my $dimmPos=0;
                                     foreach my $dimms (@{$ddrs->{CONN}})
                                     {
                                         my $ddr = $dimms->{SOURCE};
@@ -1326,26 +1384,37 @@ sub processMc
                                                       $port_num;
 
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
-                                                  $aff_path . "/membuf-$membufnum/mba-$mba/dimm-$affinitypos"
-                                        );
-                                        # For Zeppelin, the membufs are on riser cards, not directly on the node.
-                                        # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
+                                                  $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
+
                                         $self->setAttribute($dimm, "PHYS_PATH",
-                                            $node_phys . "/dimm-" . $self->{dimm_tpos});
-                                        $self->setAttribute($dimm, "POSITION",
-                                            $aff_pos);
-                                        $self->setAttribute($dimm, "VPD_REC_NUM",
-                                            $aff_pos);
+                                             $node_phys  . "/dimm-" . $self->{dimm_tpos});
+
+                                        my $dimmType = $self->getType($dimm);
+
+                                        $self->setAttribute($dimm,"FAPI_NAME",
+                                            $self->getFapiName($dimmType, $node, $aff_pos));
+
+                                        $self->setAttribute($dimm,"FAPI_POS", $aff_pos);
+
+                                        $self->setAttribute($dimm, "ORDINAL_ID", $aff_pos);
+
+                                        $self->setAttribute($dimm, "POSITION", $aff_pos);
+
+                                        $self->setAttribute($dimm, "REL_POS", $aff_pos);
+
+                                        $self->setAttribute($dimm, "VPD_REC_NUM", $aff_pos);
+
                                         $self->setHuid($dimm, $sys, $node);
+
                                         $self->{targeting}
                                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
-                                          {MEMBUFS}[$membufnum]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
+                                          {MEMBUFS}[$membufnum]{MBAS}[$mba] {DIMMS}[$dimmPos]{KEY} =
                                           $dimm;
                                         $self->setAttribute($dimm, "ENTITY_INSTANCE",
                                              $self->{dimm_tpos});
                                         $self->{dimm_tpos}++;
 
-                                        $affinitypos++;
+                                        $dimmPos++;
                                     }
                                 }
                             }
