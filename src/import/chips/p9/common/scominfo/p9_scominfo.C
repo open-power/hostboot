@@ -470,8 +470,8 @@ extern "C"
                         l_scom.set_sat_id(PPE_CME_SAT_ID);
                     }
 
-                    // PPE IO (XBUS/OBUS/DMI)
-                    else if ( (i_chipUnitNum >= PPE_IO_XBUS_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_IO1_DMI_CHIPUNIT_NUM) )
+                    // PPE IO (XBUS/OBUS)
+                    else if ( (i_chipUnitNum >= PPE_IO_XBUS_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_IO_OB3_CHIPUNIT_NUM) )
                     {
                         l_scom.set_chiplet_id( XB_CHIPLET_ID +
                                                (i_chipUnitNum % PPE_IO_XBUS_CHIPUNIT_NUM) +
@@ -488,6 +488,15 @@ extern "C"
                         }
 
                         l_scom.set_sat_id(OB_PPE_SAT_ID); // Same SAT_ID value for XBUS
+                    }
+
+                    // PPE IO (DMI)
+                    else if ( (i_chipUnitNum >= PPE_IO_DMI0_CHIPUNIT_NUM) && (i_chipUnitNum <= PPE_IO_DMI1_CHIPUNIT_NUM))
+                    {
+                        l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum - PPE_IO_DMI0_CHIPUNIT_NUM));
+                        l_scom.set_ring(MC_IOM01_1_RING_ID);
+                        l_scom.set_port(UNIT_PORT_ID);
+                        l_scom.set_sat_id(P9C_MC_PPE_SAT_ID);
                     }
 
                     // PPE PB
@@ -723,9 +732,10 @@ extern "C"
                             ( (l_ring == P9C_MC_BIST_RING_ID) &&
                               (l_sat_id != P9C_SAT_ID_CHAN_MCBIST)
                             ) ||
-                            ( (l_ring == MC_PERV_RING_ID) || //Translate MC perv regs with MC
-                              (l_ring == XB_PSCM_RING_ID) ||
-                              (l_ring == MC_MCTRA_0_RING_ID)
+                            ( (l_ring == P9C_MC_PERV_RING_ID) || //Translate MC perv regs with MC
+                              (l_ring == P9C_MC_PSCM_RING_ID) ||
+                              (l_ring == P9C_MC_MCTRA_RING_ID) ||
+                              (l_ring == P9C_MC_PPE_RING_ID)
                             ) ||
                             ( (l_ring == P9C_MC_IO_RING_ID) &&
                               (l_sat_id == MC_IND_SAT_ID) &&
@@ -918,7 +928,15 @@ extern "C"
                         }
                     }
 
+                    //DMI PPE Registers
+                    if ( l_ring == P9C_MC_PPE_RING_ID )
+                    {
+                        o_chipUnitRelated = true;
+                        o_chipUnitPairing.push_back(p9_chipUnitPairing_t(PU_PPE_CHIPUNIT,
+                                                    (l_chiplet_id - MC01_CHIPLET_ID) + PPE_IO_DMI0_CHIPUNIT_NUM));
+                    }
                 }
+
 
             }
 
