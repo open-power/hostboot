@@ -90,12 +90,6 @@ void sendPageGardRequest( uint64_t i_systemAddress )
 
 //------------------------------------------------------------------------------
 
-void sendLmbGardRequest( uint64_t i_systemAddress, bool i_isFetchUE )
-{
-    //NO-OP for OPAL
-}
-//------------------------------------------------------------------------------
-
 void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
 {
     #define PRDF_FUNC "[PlatServices::sendDynMemDeallocRequest] "
@@ -119,6 +113,37 @@ void sendDynMemDeallocRequest( uint64_t i_startAddr, uint64_t i_endAddr )
     }while(0);
 
     #undef PRDF_FUNC
+}
+
+int32_t getMemAddrRange( TargetHandle_t i_tgt, uint8_t i_mrank,
+                         uint8_t i_dimmSlct, MemAddr & o_startAddr,
+                         MemAddr & o_endAddr, uint8_t i_srank,
+                         bool i_slaveOnly )
+{
+    ExtensibleChip * i_mcaChip = (ExtensibleChip *)systemPtr->GetChip( i_tgt );
+    uint32_t port = i_mcaChip->getPos() % MAX_MCA_PER_MCBIST;
+    mss::mcbist::address saddr, eaddr;
+
+    if ( i_slaveOnly )
+    {
+        mss::mcbist::address::get_srank_range( port,
+                                               i_dimmSlct,
+                                               i_mrank,
+                                               i_srank,
+                                               saddr, eaddr );
+    }
+    else
+    {
+        mss::mcbist::address::get_mrank_range( port,
+                                               i_dimmSlct,
+                                               i_mrank,
+                                               saddr, eaddr );
+    }
+
+    o_startAddr = MemAddr::fromMaintAddr<TYPE_MCBIST>( (uint64_t) saddr );
+    o_endAddr   = MemAddr::fromMaintAddr<TYPE_MCBIST>( (uint64_t) eaddr );
+
+    return SUCCESS;
 }
 
 //##############################################################################

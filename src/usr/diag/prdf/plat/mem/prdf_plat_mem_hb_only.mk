@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -72,6 +72,7 @@ ifeq (${HOSTBOOT_RUNTIME},1)
 prd_obj += prdfMemTdCtlr_rt.o
 prd_obj += prdfMemTps_rt.o
 prd_obj += prdfMemVcm_rt.o
+prd_obj += prdfMemDynDealloc.o
 
 endif
 

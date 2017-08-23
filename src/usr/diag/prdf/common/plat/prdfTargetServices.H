@@ -372,12 +372,13 @@ int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port );
 
 
 /**
- * @brief   Obtain the MBA Dimm select for the given Dimm.
+ * @brief   Obtain the Dimm select for the given Dimm.
  * @param   i_dimmTarget Dimm.
- * @param   o_dimm MBA Dimm select.
+ * @param   o_dimm Dimm select.
  * @return  Non-SUCCESS if internal functions fail, SUCCESS otherwise.
  */
-int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
+template<TARGETING::TYPE T>
+int32_t getDimmSlct( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm );
 
 /**
  * @brief   checks dram widh ( x4 ) for mba

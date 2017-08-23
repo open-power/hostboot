@@ -1261,9 +1261,21 @@ int32_t getMbaPort( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_port )
 
 //------------------------------------------------------------------------------
 
-int32_t getMbaDimm( TARGETING::TargetHandle_t i_dimmTarget, uint8_t & o_dimm )
+template<>
+int32_t getDimmSlct<TYPE_MBA>( TARGETING::TargetHandle_t i_dimmTarget,
+                               uint8_t & o_dimm )
 {
-    return i_dimmTarget->tryGetAttr<ATTR_MBA_DIMM>(o_dimm) ? SUCCESS : FAIL;
+    o_dimm = i_dimmTarget->getAttr<ATTR_MBA_DIMM>();
+    return SUCCESS;
+}
+
+template<>
+int32_t getDimmSlct<TYPE_MCA>( TARGETING::TargetHandle_t i_dimmTarget,
+                               uint8_t & o_dimm )
+{
+    o_dimm = i_dimmTarget->getAttr<TARGETING::ATTR_FAPI_POS>() %
+                                             MAX_DIMM_PER_PORT;
+    return SUCCESS;
 }
 
 //------------------------------------------------------------------------------
