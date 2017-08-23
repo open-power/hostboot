@@ -38,7 +38,7 @@
       TARGET_TYPE_MEMBUF_CHIP,
       TARGET_TYPE_MBA,
       TARGET_TYPE_DIMM,
-      TARGET_TYPE_L4
+      TARGET_TYPE_L4,TARGET_TYPE_MC
     </targetType>
     <description>
       1 if the target is functional, else 0.  Set by the platform.
@@ -73,7 +73,7 @@
       TARGET_TYPE_OBUS_BRICK,
       TARGET_TYPE_SBE, TARGET_TYPE_PPE, TARGET_TYPE_PERV,
       TARGET_TYPE_PEC, TARGET_TYPE_PHB, TARGET_TYPE_CAPP,
-      TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4
+      TARGET_TYPE_MBA, TARGET_TYPE_ABUS, TARGET_TYPE_L4, TARGET_TYPE_MC
     </targetType>
     <description>
       Logical position of target within a system. This is derived from the SMP location
