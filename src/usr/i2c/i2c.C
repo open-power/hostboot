@@ -52,6 +52,7 @@
 #include "errlud_i2c.H"
 #include "tpmdd.H"
 #include <secureboot/trustedbootif.H>
+#include <secureboot/service.H>
 #include <i2c/eepromif.H>
 #include <i2c/tpmddif.H>
 
@@ -2575,28 +2576,44 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
 
             if (l_type == TARGETING::TYPE_PROC)
             {
-                uint8_t l_disable_diag_mode =
-                        i_target->getAttr<
-                         TARGETING::ATTR_DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE>();
+                auto skipDiagMode = false;
 
                 // P9 engine 2 port 0 has a limitation where the diag mode
-                // cannot be used. -- skip it if the attribute state it
+                // cannot be used. -- skip it if the attribute states it
                 // should not be used
-                // This also applies to FSI mode for engine 0,1,2 ports 0..3
-                // as they directly map to FSI mode for engine 0, ports 0..3
-                // which have SBE security
-                if (l_disable_diag_mode)
+                const auto l_disable_diag_mode =
+                        i_target->getAttr<
+                         TARGETING::ATTR_DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE>();
+                if (  (l_disable_diag_mode)
+                    &&((0 == port) && (2 == i_args.engine))) // Host
                 {
-                    if(((0 == port) && (2 == i_args.engine)) || //host
-                     ((i_args.switches.useFsiI2C) && (port < 4))) //FSI (eng 0)
-                    {
-                        TRACFCOMP( g_trac_i2c,
-                                   "Not doing i2cForceResetAndUnlock() for"
-                                   "tgt=0x%X: e/p= %d/%d due to P9 diag mode"
-                                   "limitations", TARGETING::get_huid(i_target),
-                                   i_args.engine, port);
-                        continue;
-                    }
+                    skipDiagMode = true;
+                }
+                // The FSI accessible I2C master on non-master P9 processors
+                // does not allow diagnostic mode when Secure Boot is enabled.
+                // Note that because I2C is needed before presence detect, we
+                // cannot check the security state of the processor, so we use
+                // the master secure mode as a proxy.  The effectiveness of this
+                // approach assumes nobody enables Secure Boot in hardware but
+                // then loads code with without Secure Boot compiled in, and
+                // that the processors' secure access bits (SABs) all match.
+                else if(   (SECUREBOOT::enabled())
+                        && (i_args.switches.useFsiI2C)) // FSI engine 0
+                {
+                    skipDiagMode = true;
+                }
+
+                if(skipDiagMode)
+                {
+                    TRACFCOMP(g_trac_i2c,
+                              INFO_MRK "Not doing i2cForceResetAndUnlock() for "
+                              "target=0x%08X: e/p= %d/%d due to P9 diag mode "
+                              "limitations.  Disable diag mode on e2/p0 = %d, "
+                              "secure mode enabled = %d",
+                              TARGETING::get_huid(i_target),
+                              i_args.engine, port,l_disable_diag_mode,
+                              SECUREBOOT::enabled());
+                    continue;
                 }
             }
 
