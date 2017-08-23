@@ -38,6 +38,37 @@ extern const char* ringVariantName[];
 
 #define  TOR_VERSION  2
 
+//
+// TOR Magic values for top-level TOR image and TOR sub-images
+//
+enum TorMagicNum
+{
+    TOR_MAGIC       = (uint32_t)0x544F52  ,   // "TOR"
+    TOR_MAGIC_HW    = (uint32_t)0x544F5248,   // "TORH"
+    TOR_MAGIC_SBE   = (uint32_t)0x544F5242,   // "TORB"
+    TOR_MAGIC_SGPE  = (uint32_t)0x544F5247,   // "TORG"
+    TOR_MAGIC_CME   = (uint32_t)0x544F524D,   // "TORM"
+    TOR_MAGIC_OVRD  = (uint32_t)0x544F5252,   // "TORR"
+    TOR_MAGIC_OVLY  = (uint32_t)0x544F524C,   // "TORL"
+    TOR_MAGIC_CEN   = (uint32_t)0x544F524E,   // "TORN"
+};
+
+typedef uint8_t ChipType_t;
+
+//
+// TOR header field (appears in top of every HW, SBE, CEN, OVRD, etc ring section)
+//
+typedef struct
+{
+    uint32_t   magic;
+    uint8_t    version;
+    ChipType_t chipType;    // Value from ChipType enum
+    uint8_t    ddLevel;     // =0xff if MAGIC_HW, >0 all other MAGICs
+    uint8_t    numDdLevels; // >0 if MAGIC_HW, =1 all other MAGICs
+    uint32_t   size;        // Size of the TOR ringSection.
+} TorHeader_t;
+
+
 typedef struct
 {
     uint32_t TorNumDdLevels;
