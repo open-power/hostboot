@@ -70,10 +70,6 @@
         <default>affinity:sys-0</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
-    </attribute>
-    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -203,10 +199,6 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -2144,9 +2136,6 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E58000000000</default>
     </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-7</default>
@@ -2191,9 +2180,6 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E5A000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -2240,9 +2226,6 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E5C000000000</default>
     </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
-    </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
         <default>physical:sys-0/node-0/proc-0/perv-8</default>
@@ -2287,9 +2270,6 @@
     </attribute>
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <default>0x0003E5E000000000</default>
-    </attribute>
-    <attribute><id>EI_BUS_TX_MSBSWAP</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>PARENT_PERVASIVE</id>
@@ -3228,10 +3208,6 @@
 	<attribute>
 		<id>FAPI_NAME</id>
 		<default>NA</default>
-	</attribute>
-	<attribute>
-		<id>FAPI_POS</id>
-		<default>0</default>
 	</attribute>
 	<attribute>
 		<id>HUID</id>
@@ -5336,10 +5312,6 @@
         <default>affinity:sys-0/node-0/proc-0/occ-0</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
-    </attribute>
-    <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
     </attribute>
@@ -5363,10 +5335,6 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-0/nx-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -5762,10 +5730,6 @@
         <default>1</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
-    </attribute>
-    <attribute>
         <id>OCC_MASTER_CAPABLE</id>
         <default>0</default>
     </attribute>
@@ -5785,10 +5749,6 @@
     <attribute>
         <id>AFFINITY_PATH</id>
         <default>physical:sys-0/node-0/proc-1/nx-0</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0xFFFFFFFF</default>
     </attribute>
     <attribute>
         <id>ORDINAL_ID</id>
@@ -7609,10 +7569,6 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E10000000000</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
@@ -7662,10 +7618,6 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E12000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
@@ -7717,10 +7669,6 @@
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E14000000000</default>
     </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
-    </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
 
@@ -7770,10 +7718,6 @@
     <attribute><id>IBSCOM_MCS_BASE_ADDR</id>
         <!-- baseAddr = 0x0003E00000000000, 128GB per MCS -->
         <default>0x0003E16000000000</default>
-    </attribute>
-    <attribute>
-        <id>EI_BUS_TX_MSBSWAP</id>
-        <default>0</default>
     </attribute>
     <attribute><id>VPD_REC_NUM</id><default>0</default></attribute>
 </targetInstance>
@@ -8908,10 +8852,6 @@
 	<attribute>
 		<id>FAPI_NAME</id>
 		<default>NA</default>
-	</attribute>
-	<attribute>
-		<id>FAPI_POS</id>
-		<default>1</default>
 	</attribute>
 	<attribute>
 		<id>HUID</id>
