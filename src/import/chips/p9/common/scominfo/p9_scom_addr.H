@@ -305,10 +305,19 @@ extern "C"
     /// Cumulus mc rings
     typedef enum
     {
-        P9C_MC_CHAN_RING_ID = 0x2,
-        P9C_MC_IO_RING_ID   = 0x4,
-        P9C_MC_BIST_RING_ID = 0x8
+        P9C_MC_PSCM_RING_ID  = 0x0,
+        P9C_MC_PERV_RING_ID  = 0x1,
+        P9C_MC_CHAN_RING_ID  = 0x2,
+        P9C_MC_MCTRA_RING_ID = 0x3,
+        P9C_MC_IO_RING_ID    = 0x4,
+        P9C_MC_PPE_RING_ID   = 0x5,
+        P9C_MC_BIST_RING_ID  = 0x8
     } p9c_mc_ring_id_t;
+
+    typedef enum
+    {
+        P9C_MC_PPE_SAT_ID = 0x1
+    } p9c_mc_ppe_sat_id_t;
 
     typedef enum
     {
