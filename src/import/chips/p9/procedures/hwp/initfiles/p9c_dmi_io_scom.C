@@ -56,7 +56,7 @@ constexpr uint64_t literal_0b000110 = 0b000110;
 constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_0b000111 = 0b000111;
 constexpr uint64_t literal_0b1010 = 0b1010;
-constexpr uint64_t literal_0b11 = 0b11;
+constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b0010111 = 0b0010111;
 constexpr uint64_t literal_0b00010 = 0b00010;
 constexpr uint64_t literal_0b0001 = 0b0001;
@@ -71,7 +71,6 @@ constexpr uint64_t literal_0b00000000 = 0b00000000;
 constexpr uint64_t literal_0b10 = 0b10;
 constexpr uint64_t literal_0b1100 = 0b1100;
 constexpr uint64_t literal_0b00 = 0b00;
-constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b0010000 = 0b0010000;
 
 fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0,
@@ -4216,17 +4215,32 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             FAPI_TRY(fapi2::putScom(TGT0, 0x800840600701103full, l_scom_buffer));
         }
         {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8008b0600701103full, l_scom_buffer ));
+
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_EO_ENABLE_DFE_H2_H12_CAL_OFF = 0x0;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_EO_ENABLE_DFE_H2_H12_CAL_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8008b0600701103full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8008b8600701103full, l_scom_buffer ));
+
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_RC_ENABLE_DFE_H2_H12_CAL_OFF = 0x0;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_RC_ENABLE_DFE_H2_H12_CAL_OFF );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8008b8600701103full, l_scom_buffer));
+        }
+        {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8008c0600701103full, l_scom_buffer ));
 
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF = 0x0;
             l_scom_buffer.insert<55, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF = 0x0;
             l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF );
-            l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b11 );
+            l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b01 );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON = 0x1;
             l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON );
-            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON = 0x1;
-            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON );
+            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_OFF = 0x0;
+            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_OFF );
+            l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b01 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008c0600701103full, l_scom_buffer));
         }
         {
@@ -4257,8 +4271,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<57, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_FENCE_FENCED );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON = 0x1;
             l_scom_buffer.insert<58, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PDWN_LITE_DISABLE_ON );
-            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_SUSPEND_ON = 0x1;
-            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RECAL_SUSPEND_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800990600701103full, l_scom_buffer));
         }
         {
@@ -4301,8 +4313,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 = 0x5;
             l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR1_DURATION_TAP5 );
             l_scom_buffer.insert<61, 3, 61, uint64_t>(literal_0b101 );
-            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE_ON = 0x1;
-            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009c8600701103full, l_scom_buffer));
         }
         {
@@ -4311,8 +4321,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
             l_scom_buffer.insert<48, 7, 57, uint64_t>(literal_0b0111111 );
             constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 = 0x5;
             l_scom_buffer.insert<55, 4, 60, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_ERR_CNTR2_DURATION_TAP5 );
-            constexpr auto l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE2_ON = 0x1;
-            l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DYN_RPR_DISABLE2_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8009d0600701103full, l_scom_buffer));
         }
         {
@@ -4332,8 +4340,6 @@ fapi2::ReturnCode p9c_dmi_io_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& T
 
             constexpr auto l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_DESKEW_BUMP_AFTER_AFTER = 0x1;
             l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_DESKEW_BUMP_AFTER_AFTER );
-            constexpr auto l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_SLS_RCVY_DISABLE_ON = 0x1;
-            l_scom_buffer.insert<57, 1, 63, uint64_t>(l_IOMP_RX3_RXCTL_GLBSM_REGS_RX_SLS_RCVY_DISABLE_ON );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800a80600701103full, l_scom_buffer));
         }
         {
