@@ -724,7 +724,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                hostInterfaces::hbrt_fw_msg* l_resp_fw_msg =
                                 (hostInterfaces::hbrt_fw_msg*) o_resp;
 
-
                if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                              sizeof(l_resp_fw_msg->resp_generic)))
                {
@@ -742,7 +741,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                      break;
                   }
 
-                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                  TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request for HCODE SCOM update: "
                       "type:%d, chipId:0x%X, section:%d, "
                       "operation:%d, scomAddr:0x%X scomData:0x%X",
@@ -753,14 +752,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       l_req_fw_msg->req_hcode_update.i_scomAddr,
                       l_req_fw_msg->req_hcode_update.i_scomData);
 
-                      l_resp_fw_msg->io_type =
-                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
+                  l_resp_fw_msg->io_type =
+                          hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
 
-                      // dummy return value for testing
-                      l_resp_fw_msg->resp_generic.o_status = 264;
+                  // dummy return value for testing
+                  l_resp_fw_msg->resp_generic.o_status = 264;
 
-                      TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
-                      retVal = 1;  // just return 1 for testing
+                  retVal = 1;  // just return 1 for testing
                }
                else if (hostInterfaces::HBRT_FW_MSG_TYPE_ERROR_LOG
                                               == l_req_fw_msg->io_type)
@@ -781,7 +779,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                   }
 
 
-                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                  TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request for error log: "
                       "type:%d, plid:0x%08x, size:%d, data:0x%02x",
                       l_req_fw_msg->io_type,
@@ -789,22 +787,59 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       l_req_fw_msg->error_log.i_errlSize,
                       l_req_fw_msg->error_log.i_data);
 
-                      l_resp_fw_msg->io_type =
+                  l_resp_fw_msg->io_type =
                                  hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
 
-                      // dummy return value for testing
-                      l_resp_fw_msg->resp_generic.o_status = 20;
+                  // dummy return value for testing
+                  l_resp_fw_msg->resp_generic.o_status = 20;
 
-                      TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
-                      retVal = 0;  // just return 0 for testing
+                  retVal = 0;  // just return 0 for testing
+               }
+               else if (hostInterfaces::HBRT_FW_MSG_HBRT_FSP
+                                                   == l_req_fw_msg->io_type)
+               {
+                  if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                             sizeof(l_req_fw_msg->generic_message)))
+                  {
+                      retVal = -EINVAL;
+                      break;
+                  }
+
+                  TRACFCOMP(g_trac_hbrt,
+                      "rt_firmware_request for VPD Write Msg: "
+                      "type:0x%.8X, msgq:0x%.8X, VPD type:0x%.8X, data:0x%X",
+                      l_req_fw_msg->io_type,
+                      l_req_fw_msg->generic_message.msgq,
+                      l_req_fw_msg->generic_message.msgType,
+                      l_req_fw_msg->generic_message.data);
+
+                  l_resp_fw_msg->io_type =
+                          hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP;
+
+                  // random testing data
+                  l_resp_fw_msg->generic_message_resp.msgq = 0x800;
+                  l_resp_fw_msg->generic_message_resp.msgType = 0x900;
+                  l_resp_fw_msg->generic_message_resp.errPlid = 0xA00;
+                  retVal = 0;
+
+                  TRACFCOMP(g_trac_hbrt,
+                      "rt_firmware_request for VPD Write Msg response: "
+                      "type:0x%.8X, msgq:0x%.8X, msgType:0x%.8X,"
+                      " errPlid:0x%X, retVal=%d",
+                      l_resp_fw_msg->io_type,
+                      l_resp_fw_msg->generic_message_resp.msgq,
+                      l_resp_fw_msg->generic_message_resp.msgType,
+                      l_resp_fw_msg->generic_message_resp.errPlid,
+                      retVal);
                }
                else
                {
-                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                  TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request an unrecognized request: "
                       "type:%d", l_req_fw_msg->io_type);
                }
             } while (0) ;
+
             return retVal;
         }
 

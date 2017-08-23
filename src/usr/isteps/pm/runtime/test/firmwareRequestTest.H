@@ -162,4 +162,95 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                   "FirmwareRequestTest::testFirmwareRequestErrLogToFsp");
 
     }  // end testFirmwareRequestErrLogToFsp
+
+    /**
+     * @brief: testFirmwareRequestHbrtToFsp
+     *      test the firmware_request's HBRT to FSP call
+     */
+    void testFirmwareRequestHbrtToFsp (void)
+    {
+        TRACFCOMP(g_trac_pnor, ENTER_MRK
+                  "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
+
+        if (g_hostInterfaces == NULL ||
+            g_hostInterfaces->firmware_request == NULL)
+        {
+           TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                   "Hypervisor firmware_request interface not linked");
+        }
+        else
+        {
+            // Test HBRT to FSP
+            // populate the firmware_request structure with arbitrary data
+            hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+            l_req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP;
+            l_req_fw_msg.generic_message.msgq = 0x300;
+            l_req_fw_msg.generic_message.msgType = 0x400;
+            l_req_fw_msg.generic_message.data = 0xDEADBEEF;
+
+            TRACFCOMP(g_trac_pnor,
+                      "FirmwareRequestTest::testFirmwareRequestHbrtToFsp req: "
+                      "type:%d, msgq:0x%.8X, msgType:0x%.8X, data:0x%.8X",
+                      l_req_fw_msg.io_type,
+                      l_req_fw_msg.generic_message.msgq,
+                      l_req_fw_msg.generic_message.msgType,
+                      l_req_fw_msg.generic_message.data);
+
+            hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+            uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+            size_t rc = g_hostInterfaces->firmware_request(
+                                     sizeof(l_req_fw_msg), &l_req_fw_msg,
+                                     &l_resp_fw_msg_size, &l_resp_fw_msg);
+
+            TRACFCOMP(g_trac_pnor,
+                      "FirmwareRequestTest::testFirmwareRequestHbrtToFsp resp: "
+                      "type:0x%.8X, msgq:0x%.8X, msgType:0x%.8X,"
+                      " errPlid:0x%X, rc=%d",
+                      l_resp_fw_msg.io_type,
+                      l_resp_fw_msg.generic_message_resp.msgq,
+                      l_resp_fw_msg.generic_message_resp.msgType,
+                      l_resp_fw_msg.generic_message_resp.errPlid,
+                      rc);
+
+            if (rc != 0)
+            {
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                        "firmware_request - HBRT to FSP failed - "
+                        "returned wrong value");
+            }
+
+            if (l_resp_fw_msg.io_type !=
+                                hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP)
+            {
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                        "firmware_request - HBRT to FSP failed - "
+                        "received incorrect msg_type");
+            }
+
+            if (l_resp_fw_msg.generic_message_resp.msgq != 0x800)
+            {
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                        "firware_request - HBRT to FSP failed - "
+                        "received incorrect msgq");
+            }
+
+            if (l_resp_fw_msg.generic_message_resp.msgType != 0x900)
+            {
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                        "firware_request - HBRT to FSP failed - "
+                        "received incorrect msgType");
+            }
+
+            if (l_resp_fw_msg.generic_message_resp.errPlid != 0xA00)
+            {
+                TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
+                        "firware_request - HBRT to FSP failed - "
+                        "received incorrect errPlid");
+            }
+       }
+       TRACFCOMP(g_trac_pnor, EXIT_MRK
+                  "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
+
+    }  // end testFirmwareRequestHbrtToFsp
+
 };  // end class FirmwareRequestTest

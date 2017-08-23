@@ -33,6 +33,7 @@
 #include <runtime/interface.h>
 #include <targeting/common/util.H>
 #include <util/runtime/util_rt.H>
+#include <runtime/interface.h>
 #include "vpd.H"
 #include "mvpd.H"
 #include "cvpd.H"
@@ -387,8 +388,7 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
 }
 
 // ------------------------------------------------------------------
-// sendMboxWriteMsg - not supported at runtime
-// Treat the same way HB does if mbox is not available
+// sendMboxWriteMsg
 // ------------------------------------------------------------------
 errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               void * i_data,
@@ -396,7 +396,8 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                               VPD_MSG_TYPE i_type,
                               VpdWriteMsg_t& i_record )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t l_err = nullptr;
+
     TRACFCOMP( g_trac_vpd, INFO_MRK
                "sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, "
                "record %d, offset 0x%X",
@@ -404,31 +405,147 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                i_record.rec_num,
                i_record.offset );
 
-    // mimic the behavior of hostboot when mbox is not available.
-    TRACFCOMP( g_trac_vpd, ERR_MRK
-               "No SP Base Services available at runtime.");
+    do
+    {
+        if ((nullptr == g_hostInterfaces) ||
+            (nullptr == g_hostInterfaces->firmware_request))
+        {
+            /*@
+             * @errortype
+             * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
+             * @moduleid         VPD::VPD_SEND_MBOX_WRITE_MESSAGE
+             * @reasoncode       VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @userdata1        HUID of target
+             * @userdata2        VPD message type
+             * @devdesc          MBOX send not supported in HBRT
+             */
+             l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      VPD::VPD_SEND_MBOX_WRITE_MESSAGE,
+                                      VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR,
+                                      TARGETING::get_huid(i_target),
+                                      i_type);
+            break;
+        }
 
-    /*@
-     * @errortype
-     * @reasoncode       VPD::VPD_MBOX_NOT_SUPPORTED_RT
-     * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-     * @moduleid         VPD::VPD_SEND_MBOX_WRITE_MESSAGE
-     * @userdata1        VPD message type
-     * @userdata2        0
-     * @devdesc          MBOX send not supported in HBRT
-     */
-    err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  VPD::VPD_SEND_MBOX_WRITE_MESSAGE,
-                                  VPD::VPD_MBOX_NOT_SUPPORTED_RT,
-                                  i_type,
-                                  0);
+        // Get an accurate size of memory actually needed to transport the data
+        size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                 sizeof(hostInterfaces::hbrt_fw_msg::generic_message) +
+                 i_numBytes;
 
-    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                             HWAS::SRCI_PRIORITY_HIGH);
+        //create the firmware_request structure to carry the vpd write msg data
+        hostInterfaces::hbrt_fw_msg *l_req_fw_msg =
+                  (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size) ;
+        memset(l_req_fw_msg, 0, l_req_fw_msg_size);
 
-    err->collectTrace( "VPD", 256);
+        // populate the firmware_request structure with given data
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP;
+        l_req_fw_msg->generic_message.msgq = MBOX::FSP_VPD_MSGQ;
+        l_req_fw_msg->generic_message.msgType = i_type;
+        memcpy(&l_req_fw_msg->generic_message.data, i_data, i_numBytes);
 
-    return err;
+        // set up the response struct
+        hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+        uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+
+        // make the firmware request
+        size_t rc = g_hostInterfaces->firmware_request(l_req_fw_msg_size,
+                                                       l_req_fw_msg,
+                                                       &l_resp_fw_msg_size,
+                                                       &l_resp_fw_msg);
+        uint64_t l_userData1(0), l_userData2(0);
+
+        // Capture the err log id if any
+        // The return code (rc) may return OK, but there still may be an issue
+        // with the HWSV code on the FSP.
+        if ((l_resp_fw_msg_size >= (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                              sizeof(l_resp_fw_msg.generic_message_resp)))  &&
+           (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
+                                                  == l_resp_fw_msg.io_type) &&
+           (0 != l_resp_fw_msg.generic_message_resp.errPlid) )
+        {
+            l_userData2 = l_resp_fw_msg.generic_message_resp.errPlid;
+        }
+
+        // gather up the error data and create an err log out of it
+        if (rc || l_userData2)
+        {
+            TRACFCOMP(g_trac_vpd,
+                      ERR_MRK"firmware request: "
+                      "firmware request for FSP VPD write message rc 0x%X, "
+                      "target 0x%llX, VPD type %.8X, record %d, offset 0x%X",
+                       rc, get_huid(i_target), i_type, i_record.rec_num,
+                       i_record.offset );
+
+            /*@
+             * @errortype
+             * @moduleid         VPD::VPD_RT_FIRMWARE_REQUEST
+             * @reasoncode       VPD::VPD_RT_WRITE_MSG_ERR
+             * @userdata1[0:31]  Firmware Request return code (if any)
+             * @userdata1[32:63] HUID of target
+             * @userdata2        HWSV error log id (if any)
+             * @devdesc          Firmware Request for
+             *                   VPD Write Msg error
+             */
+
+            // Capture the return code (rc), if any
+            // this will indicate an issue with actually sending the msg
+            if (rc)
+            {
+               l_userData1 = TWO_UINT32_TO_UINT64(rc,
+                                 TARGETING::get_huid(i_target));
+            }
+            else
+            {
+               l_userData1 = TARGETING::get_huid(i_target);
+            }
+
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                            VPD::VPD_RT_FIRMWARE_REQUEST,
+                                            VPD::VPD_RT_WRITE_MSG_ERR,
+                                            l_userData1,
+                                            l_userData2);
+
+            if (l_resp_fw_msg_size > 0)
+            {
+                l_err->addFFDC( MBOX_COMP_ID,
+                                &l_resp_fw_msg,
+                                l_resp_fw_msg_size,
+                                0, 0, false );
+            }
+
+            if (sizeof(l_req_fw_msg) > 0)
+            {
+                l_err->addFFDC( MBOX_COMP_ID,
+                                &l_req_fw_msg,
+                                sizeof(l_req_fw_msg),
+                                0, 0, false );
+            }
+
+            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                       HWAS::SRCI_PRIORITY_HIGH);
+
+            if (l_userData2)
+            {
+                l_err->plid(l_userData2);
+            }
+
+            l_err->collectTrace( "VPD", 256);
+         }  // end  (rc || l_userData2)
+
+        // release the memory created
+        free(l_req_fw_msg);
+    }
+    while (0);
+
+    if (l_err)
+    {
+        // @fixme-RTC:180490 - Temporarily commit until FSP code is implemented
+        // Just commit the log for now until FSP code is implemented
+        l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit( l_err, VPD_COMP_ID );
+    }
+
+    return l_err;
 }
 
 
