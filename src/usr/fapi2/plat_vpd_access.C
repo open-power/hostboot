@@ -52,6 +52,8 @@ fapi2::ReturnCode platGetVPD(
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     errlHndl_t l_errl = nullptr;
     keywordInfo_t l_keywordInfo;
+    uint8_t* l_dvpd_vm = nullptr;
+    uint32_t* l_full_dvpdVM = nullptr;
 
     // Assume that all memory keywords (MR,MT,J0..JZ,X0...XZ) are all the
     // same size of 255. This avoids going through the decode and asking
@@ -218,8 +220,6 @@ fapi2::ReturnCode platGetVPD(
         l_errl = PNOR::getSectionInfo(PNOR::MEMD,l_memd_info);
         bool l_memd_found = false;
         MemdHeader_t l_header;
-        uint8_t* l_dvpd_vm = nullptr;
-        uint32_t* l_full_dvpdVM = nullptr;
 
         if( l_errl )
         {
@@ -279,6 +279,7 @@ fapi2::ReturnCode platGetVPD(
                                      l_buffSize,
                                      DEVICE_MEMD_VPD_ADDRESS(MEMD_VPD::MEMD,
                                          l_mapKeyword) + l_memd_offset_bytes );
+                    break;
                 }else
                 {
                     FAPI_INF("platGetVPD: Matching MEMD data was not found in "
@@ -289,6 +290,13 @@ fapi2::ReturnCode platGetVPD(
             }while(0);
 
         }
+        if(l_errl)
+        {
+            FAPI_ERR("find_memd_in_pnor: ERROR getting the PNOR MEMD information");
+            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            break;
+        }
+
         if( !(l_memd_found) )
         {
             FAPI_INF("platGetVPD: MEMD data was not found in the PNOR "
@@ -303,19 +311,12 @@ fapi2::ReturnCode platGetVPD(
             if (l_errl)
             {
                 delete l_pMapping;
-                free(l_dvpd_vm);
-                l_dvpd_vm = nullptr;
-                l_full_dvpdVM = nullptr;
                 l_pMapping = nullptr;
                 FAPI_ERR("platGetVPD: ERROR reading mapping keyword");
                 l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
                 break; //return with error
             }
         }
-        free(l_dvpd_vm);
-        l_dvpd_vm = nullptr;
-        l_full_dvpdVM = nullptr;
-
 
         // Find vpd keyword name based on VPDInfo
         FAPI_EXEC_HWP(l_rc,
@@ -439,6 +440,10 @@ fapi2::ReturnCode platGetVPD(
         }
     }
     while (0);
+
+    free(l_dvpd_vm);
+    l_dvpd_vm = nullptr;
+    l_full_dvpdVM = nullptr;
 
     FAPI_DBG("platGetVPD: exit");
 
