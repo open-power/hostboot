@@ -43,6 +43,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
+#include <initservice/initserviceif.H>
 #include <errl/errludtarget.H>
 #include <sys/time.h>
 #include <util/misc.H>
@@ -61,6 +62,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 
 using namespace ISTEP;
+using namespace ISTEP_ERROR;
 
 
 /* array and enum must be in sync */
@@ -532,9 +534,7 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
             }
 
             // Handle that SBE failed to boot in the allowed time
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "SBE 0x%.8X never started, l_sbeReg=0x%.8X",
-                       TARGETING::get_huid(i_target),l_sbeReg.reg );
+            sbe_boot_fail_handler(i_target,l_sbeReg);
         }
         else if (l_errl)
         {
@@ -740,16 +740,20 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         if (l_errl)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : call p9_get_sbe_msg_register, PLID=0x%x",
-                      l_errl->plid() );
+                      "ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
+                      "on loop %d",
+                      l_errl->plid(),
+                      l_loops );
             (*o_returnAction) = SBE_REG_RETURN::FUNCTION_ERROR;
             break;
         }
         else if ((*o_sbeReg).currState == SBE_STATE_RUNTIME)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SBE 0x%.8X booted and at runtime, o_sbeReg=0x%.8X",
-                      TARGETING::get_huid(i_target), (*o_sbeReg).reg);
+                      "SBE 0x%.8X booted and at runtime, o_sbeReg=0x%.8X, "
+                      "on loop %d",
+                      TARGETING::get_huid(i_target), (*o_sbeReg).reg,
+                      l_loops);
             (*o_returnAction) = SBE_REG_RETURN::SBE_AT_RUNTIME;
             break;
         }
@@ -775,6 +779,27 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
             nanosleep(0,SBE_WAIT_SLEEP);
         }
     }
+
+    if ((*o_sbeReg).currState != SBE_STATE_RUNTIME)
+    {
+        // Switch to using FSI SCOM
+        TARGETING::ScomSwitches l_switches =
+            i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+        TARGETING::ScomSwitches l_switches_before = l_switches;
+
+        // Turn off SBE SCOM and turn on FSI SCOM.
+        l_switches.useFsiScom = 1;
+        l_switches.useSbeScom = 0;
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "sbe_timeout_handler: changing SCOM switches from 0x%.2X "
+                  "to 0x%.2X for proc 0x%.8X",
+                  l_switches_before,
+                  l_switches,
+                  TARGETING::get_huid(i_target));
+        i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+    }
+
     return l_errl;
 }
 
@@ -933,6 +958,101 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
     l_pFifoResponse = nullptr;
 
     return l_flowCtrl;
+}
+
+void sbe_boot_fail_handler(TARGETING::Target * i_target,
+                           sbeMsgReg_t i_sbeReg,
+                           IStepError *io_stepError)
+{
+    errlHndl_t l_errl = nullptr;
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "SBE 0x%.8X never started, sbeReg=0x%.8X",
+               TARGETING::get_huid(i_target),i_sbeReg.reg );
+    /*@
+     * @errortype
+     * @reasoncode  RC_SBE_SLAVE_TIMEOUT
+     * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
+     * @moduleid    MOD_SBE_EXTRACT_RC_HANDLER
+     * @userdata1   HUID of proc which had SBE timeout
+     * @userdata2   SBE MSG Register
+     *
+     * @devdesc Slave SBE did not get to ready state within
+     *          allotted time
+     *
+     * @custdesc A processor in the system has failed to initialize
+     */
+    l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                     MOD_SBE_EXTRACT_RC_HANDLER,
+                                     RC_SBE_SLAVE_TIMEOUT,
+                                     TARGETING::get_huid(i_target),
+                                     i_sbeReg.reg);
+
+    l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
+
+    // Commit error and continue, this is not terminating since
+    // we can still at least boot with master proc
+    errlCommit(l_errl,ISTEP_COMP_ID);
+
+    // Setup for the HWP
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                        const_cast<TARGETING::Target*> (i_target));
+    P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
+            P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+    FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                    l_fapi2ProcTarget, l_rcAction);
+
+    if(l_errl)
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+               "ERROR : sbe_boot_fail_handler : "
+               "p9_extract_sbe_rc HWP returning errorlog "
+               "PLID=0x%x",l_errl->plid());
+
+        // capture the target data in the elog
+        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+        // Create IStep error log and cross reference to error
+        if(io_stepError)
+        {
+            io_stepError->addErrorDetails( l_errl );
+        }
+
+        // Commit error log
+        errlCommit( l_errl, HWPF_COMP_ID );
+
+    }
+    else if(l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
+    {
+
+        if(INITSERVICE::spBaseServicesEnabled())
+        {
+            // When we are on an FSP machine, we want to fail out of
+            // hostboot and give control back to the FSP. They have
+            // better diagnostics for this type of error.
+            INITSERVICE::doShutdownWithError(RC_HWSV_COLLECT_SBE_RC,
+                                TARGETING::get_huid(i_target));
+        }
+
+        // Save the current rc error
+        (i_target)->setAttr<TARGETING::ATTR_PREVIOUS_SBE_ERROR>(l_rcAction);
+#ifdef CONFIG_BMC_IPMI
+        // This could potentially take awhile, reset watchdog
+        l_errl = IPMIWATCHDOG::resetWatchDogTimer();
+        if(l_errl)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "sbe_boot_fail_handler "
+                      "Resetting watchdog before sbe_handler");
+            l_errl->collectTrace("ISTEPS_TRACE",KILOBYTE/4);
+            errlCommit(l_errl,ISTEP_COMP_ID);
+        }
+#endif
+        proc_extract_sbe_handler( i_target,
+                                  l_rcAction);
+    }
+
+    return;
 }
 
 errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)

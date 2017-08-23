@@ -25,6 +25,8 @@
 #ifndef __SBE_EXTRACT_RC_HANDLER_H
 #define __SBE_EXTRACT_RC_HANDLER_H
 
+#include <isteps/hwpisteperror.H>
+
 enum SBE_REG_RETURN
 {
     FUNCTION_ERROR      = 0, // Error returned from HWP
@@ -194,6 +196,20 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc( uint32_t i_rc);
  */
 
 bool sbe_get_ffdc_handler(TARGETING::Target * i_target);
+
+/**
+ * @brief  This function handles the SBE failed to boot error.
+ *
+ * @param[in]     i_target        - current proc target
+ * @param[in]     i_sbeReg        - sbe register
+ * @param[in/out] io_stepError    - istep error (optional)
+ *
+ * @return - NULL
+ */
+
+void sbe_boot_fail_handler(TARGETING::Target * i_target,
+                           sbeMsgReg_t i_sbeReg,
+                           ISTEP_ERROR::IStepError *io_stepError = nullptr);
 
 /**
  * @brief  This function deals with the mask needed to switch

@@ -3639,6 +3639,11 @@ sub generate_proc
     my $UseXscom   = $haveFSPs ? 0 : 1;
     my $UseFsiScom = $haveFSPs ? 0 : 1;
     my $UseSbeScom = $haveFSPs ? 1 : 0;
+    if($proc ne 0)
+    {
+        $UseFsiScom = 1;
+        $UseSbeScom = 0;
+    }
 
     my $fapi_name = sprintf("pu:k0:n%d:s0:p%02d", $node, $proc);
     print "
