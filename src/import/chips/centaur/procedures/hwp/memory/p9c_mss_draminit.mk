@@ -26,7 +26,7 @@
 
 PROCEDURE=p9c_mss_draminit
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
-OBJS+=p9c_mss_ddr4_funcs.o
-OBJS+=p9c_mss_funcs.o
-OBJS+=p9c_mss_unmask_errors.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 $(call BUILD_PROCEDURE)

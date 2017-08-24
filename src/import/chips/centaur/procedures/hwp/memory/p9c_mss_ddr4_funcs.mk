@@ -27,6 +27,6 @@
 -include 01common.mk
 
 PROCEDURE=p9c_mss_ddr4_funcs
-OBJS+=p9c_mss_funcs.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

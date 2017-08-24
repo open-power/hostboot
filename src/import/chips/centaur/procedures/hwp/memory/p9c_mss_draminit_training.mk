@@ -26,11 +26,11 @@
 # Include the macros and things for MSS procedures
 -include 01common.mk
 PROCEDURE=p9c_mss_draminit_training
-OBJS+=p9c_dimmBadDqBitmapFuncs.o
-OBJS+=p9c_mss_funcs.o
+lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
 OBJS+=p9c_mss_mrs6_DDR4.o
-OBJS+=p9c_mss_ddr4_funcs.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
 OBJS+=p9c_mss_access_delay_reg.o
-OBJS+=p9c_mss_unmask_errors.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

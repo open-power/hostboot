@@ -26,8 +26,8 @@
 # Include the macros and things for MSS procedures
 -include 01common.mk
 PROCEDURE=p9c_mss_ddr_phy_reset
-OBJS+=p9c_dimmBadDqBitmapFuncs.o
-OBJS+=p9c_mss_unmask_errors.o
+lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 OBJS+=p9c_mss_termination_control.o
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
