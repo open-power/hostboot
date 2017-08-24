@@ -58,6 +58,7 @@ prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
 prd_obj += prdfP9McbistDomain.o
 prd_obj += prdfMemIplCeStats.o
+prd_obj += prdfRestoreDramRepairs.o
 
 endif
 

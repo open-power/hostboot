@@ -73,16 +73,15 @@ bool rcdParityErrorReconfigLoop( TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Invokes the restore DRAM repairs hardware procedure.
- * @param  i_mbaTarget
+ * @param  i_target
  * @param  o_repairedRankMask An encoded bitmask of repaired ranks.
  * @param  o_badDimm An encoded bitmask of bad DIMMs.
  * @return Non-SUCCESS in internal function fails, SUCCESS otherwise.
  */
-/* TODO RTC 164707
-int32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_mbaTarget,
-                               uint8_t & o_repairedRankMask,
-                               uint8_t & o_badDimmMask );
-*/
+template<TARGETING::TYPE T>
+uint32_t mssRestoreDramRepairs( TARGETING::TargetHandle_t i_target,
+                                uint8_t & o_repairedRankMask,
+                                uint8_t & o_badDimmMask );
 
 /**
  * @brief  Invokes the mss_IPL_UE_isolation hardware procedure.
