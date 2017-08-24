@@ -185,6 +185,10 @@ extern "C"
                     (o_spd_data->mtb_dividend[i_port][i_dimm] * 1000) /
                     o_spd_data->mtb_divisor[i_port][i_dimm]);
 
+            // DDR4 RDIMM/LRDIMM Support
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM, i_target_dimm,
+                                   o_spd_data->addr_map_reg_to_dram[i_port][i_dimm]));
+
             // 3 trfc values, 1x, 2x, 4x
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_TRFC1MIN_DDR4, i_target_dimm,  o_spd_data->trfc1min[i_port][i_dimm]));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_SPD_TRFC2MIN_DDR4, i_target_dimm,  o_spd_data->trfc2min[i_port][i_dimm]));
@@ -1906,6 +1910,17 @@ extern "C"
                         }
                     }
 
+                    //Adding timer overrides for 1600 DDR4 TSV DIMMs
+                    //TSV tRCD Override when requiring 1600 freq override (i.e. using 2666 parts)
+                    if ((i_mss_eff_config_data->mss_freq == 1600)
+                        && (o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS))
+                    {
+                        o_atts->eff_dram_trcd = 0x0C;
+                        o_atts->eff_dram_trp = 0x0B;
+                        o_atts->eff_dram_tras_u32 = 0x0000001C;
+                        o_atts->eff_dram_trc_u32 = 0x00000027;
+                    }
+
                     // AST HERE: Needed SPD byte33[7,1:0], for expanded IBM_TYPE
                     if ( o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM )
                     {
@@ -1917,13 +1932,15 @@ extern "C"
                         {
                             o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_TYPE_1B;
                         }
-                        else if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
-                        {
-                            o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_TYPE_1D;
-                        }
-                        else if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8)
+                        else if ((o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
+                                 && (o_atts->eff_stack_type[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS))
                         {
                             o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_TYPE_3A;
+                        }
+                        else if ((o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8)
+                                 && (o_atts->eff_stack_type[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS))
+                        {
+                            o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi2::ENUM_ATTR_CEN_EFF_IBM_TYPE_TYPE_3B;
                         }
                         else
                         {
@@ -2022,36 +2039,92 @@ extern "C"
                                     "Currently unsupported DIMM_TYPE on %s!", mss::c_str(i_target_mba));
                     }
 
+                    if ( (o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM) &&
+                         (i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] ==
+                          fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR3) &&
+                         (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) )
+                    {
+                        o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
+                        [l_cur_mba_dimm] = 1;
+                    }
+                    else if ((i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4)
+                             && (i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] ==
+                                 fapi2::ENUM_ATTR_CEN_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK))
+                    {
+                        if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R1)
+                        {
+                            o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 1;
+                            o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0x80;
+                        }
+                        else if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R2)
+                        {
+                            o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 2;
+                            o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xC0;
+                        }
+                        else if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R4)
+                        {
+                            o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 4;
+                            o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xF0;
+                        }
+                    }
+                    else
+                    {
+                        // AST HERE: Needs SPD byte33[7,1:0],
+                        //  currently hard coded to no stacking
+                        o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] =
+                            o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm];
+                    }
+
                     // Support for new attribute ATTR_EFF_DRAM_ADDRESS_MIRRORING
+                    // Bit wise map bit4=RANK0_MIRRORED, bit5=RANK1_MIRRORED, bit6=RANK2_MIRRORED, bit7=RANK3_MIRRORED
                     if ( o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM )
                     {
                         if (o_atts->eff_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
                         {
                             // Assuming Byte136[7:0] right align based on dimm_spd_attributes.xml
                             // Mask for bit0 of Byte136 = 0x00000001
-                            if ((i_data->addr_map_reg_to_dram[l_cur_mba_port][l_cur_mba_dimm] & 0x00000001) != 0)
+                            if ((i_data->addr_map_reg_to_dram[l_cur_mba_port][l_cur_mba_dimm] & 0x01) != 0)
                             {
-                                if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
+
+                                if (o_atts->eff_stack_type[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
                                 {
-                                    o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
-                                }
-                                else if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2)
-                                {
-                                    o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
+                                    if (o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1)
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                                    }
+                                    else if (o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2)
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
+                                    }
+                                    else if (o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
+                                    }
+                                    else
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                                    }
                                 }
                                 else
                                 {
-                                    o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                                    if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
+                                    }
+                                    else if (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2)
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
+                                    }
+                                    else
+                                    {
+                                        o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
+                                    }
                                 }
                             }
                             else
                             {
                                 o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
                             }
-                        }
-                        else
-                        {
-                            o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
                         }
                     }
                     else if (( o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_UDIMM )
@@ -2135,45 +2208,6 @@ extern "C"
                 {
                     o_atts->eff_dimm_size[l_cur_mba_port]
                     [l_cur_mba_dimm] = 0;
-                }
-
-
-                if ( (o_atts->eff_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM) &&
-                     (i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] ==
-                      fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR3) &&
-                     (o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) )
-                {
-                    o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
-                    [l_cur_mba_dimm] = 1;
-                }
-                else if ((i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_DRAM_DEVICE_TYPE_DDR4)
-                         && (i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] ==
-                             fapi2::ENUM_ATTR_CEN_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK))
-                {
-                    if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R1)
-                    {
-                        o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 1;
-                        o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0x80;
-                    }
-                    else if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R2)
-                    {
-                        o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 2;
-                        o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xC0;
-                    }
-                    else if(i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi2::ENUM_ATTR_CEN_SPD_NUM_RANKS_R4)
-                    {
-                        o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 4;
-                        o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xF0;
-                    }
-                }
-                else
-                {
-                    // AST HERE: Needs SPD byte33[7,1:0],
-                    //  currently hard coded to no stacking
-                    o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
-                    [l_cur_mba_dimm] =
-                        o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
-                        [l_cur_mba_dimm];
                 }
 
                 o_atts->eff_dimm_rcd_cntl_word_0_15[l_cur_mba_port][l_cur_mba_dimm] = 0x0000000000000000LL;

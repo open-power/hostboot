@@ -604,6 +604,13 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
         FAPI_INF( "After rounding up ... CL: %d", l_cas_latency);
     }
 
+    //Setting Max CL = 13 for 1600 DDR4 TSV
+    if (l_freq_override == 1600 && l_cas_latency > 13)
+    {
+        FAPI_INF( "Setting CL to 13 from %d", l_cas_latency);
+        l_cas_latency = 13;
+    }
+
     l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
 
     // If the CL proposed is not supported or the TAA exceeds TAA max

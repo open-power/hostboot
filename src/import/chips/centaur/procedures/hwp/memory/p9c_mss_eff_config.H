@@ -120,7 +120,7 @@ struct mss_eff_config_spd_data
     uint32_t trfc4min[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     uint8_t twtrsmin[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     uint8_t twtrlmin[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
-    uint32_t addr_map_reg_to_dram[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; // Assuming right align based on dimm_spd_attributes.xml
+    uint8_t addr_map_reg_to_dram[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT]; // Assuming right align based on dimm_spd_attributes.xml
 
     // Not needed for GA1 CDIMM, will need to enable check for ISDIMM.
     uint8_t sdram_optional_features[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];

@@ -29,29 +29,30 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_0b000101 = 0b000101;
-constexpr uint64_t literal_0b000011 = 0b000011;
-constexpr uint64_t literal_0b000000 = 0b000000;
-constexpr uint64_t literal_3 = 3;
-constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_2 = 2;
-constexpr uint64_t literal_8 = 8;
-constexpr uint64_t literal_1333 = 1333;
-constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_1066 = 1066;
+constexpr uint64_t literal_3 = 3;
+constexpr uint64_t literal_6 = 6;
+constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_0b000000 = 0b000000;
+constexpr uint64_t literal_0b000101 = 0b000101;
+constexpr uint64_t literal_0b011000 = 0b011000;
+constexpr uint64_t literal_11 = 11;
+constexpr uint64_t literal_12 = 12;
+constexpr uint64_t literal_13 = 13;
+constexpr uint64_t literal_1600 = 1600;
 constexpr uint64_t literal_7 = 7;
+constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_0x0F = 0x0F;
+constexpr uint64_t literal_0x07 = 0x07;
+constexpr uint64_t literal_1333 = 1333;
+constexpr uint64_t literal_1066 = 1066;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b001110 = 0b001110;
 constexpr uint64_t literal_9 = 9;
-constexpr uint64_t literal_1600 = 1600;
-constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_1866 = 1866;
-constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_0b010100 = 0b010100;
 constexpr uint64_t literal_1400 = 1400;
-constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_0b011001 = 0b011001;
 constexpr uint64_t literal_0b001111 = 0b001111;
 constexpr uint64_t literal_0b011100 = 0b011100;
@@ -61,7 +62,6 @@ constexpr uint64_t literal_0b010000 = 0b010000;
 constexpr uint64_t literal_0b011101 = 0b011101;
 constexpr uint64_t literal_0b011010 = 0b011010;
 constexpr uint64_t literal_0b010010 = 0b010010;
-constexpr uint64_t literal_0b011000 = 0b011000;
 constexpr uint64_t literal_0b010111 = 0b010111;
 constexpr uint64_t literal_0b010110 = 0b010110;
 constexpr uint64_t literal_0b010001 = 0b010001;
@@ -69,30 +69,30 @@ constexpr uint64_t literal_0b001100 = 0b001100;
 constexpr uint64_t literal_0b010101 = 0b010101;
 constexpr uint64_t literal_0b010011 = 0b010011;
 constexpr uint64_t literal_0b011011 = 0b011011;
-constexpr uint64_t literal_0x0F = 0x0F;
-constexpr uint64_t literal_0x07 = 0x07;
+constexpr uint64_t literal_5 = 5;
+constexpr uint64_t literal_0b000011 = 0b000011;
 constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_0b00 = 0b00;
 constexpr uint64_t literal_0b00000 = 0b00000;
-constexpr uint64_t literal_2400 = 2400;
-constexpr uint64_t literal_0b1001 = 0b1001;
-constexpr uint64_t literal_0b0111 = 0b0111;
-constexpr uint64_t literal_2133 = 2133;
-constexpr uint64_t literal_0b1000 = 0b1000;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_0b0101 = 0b0101;
-constexpr uint64_t literal_0b011110 = 0b011110;
-constexpr uint64_t literal_0b100001 = 0b100001;
-constexpr uint64_t literal_0b100000 = 0b100000;
-constexpr uint64_t literal_0b011111 = 0b011111;
 constexpr uint64_t literal_0b1011 = 0b1011;
+constexpr uint64_t literal_0b1000 = 0b1000;
+constexpr uint64_t literal_0b0111 = 0b0111;
 constexpr uint64_t literal_0b1111 = 0b1111;
 constexpr uint64_t literal_0b1010 = 0b1010;
 constexpr uint64_t literal_0b1101 = 0b1101;
 constexpr uint64_t literal_0b1110 = 0b1110;
 constexpr uint64_t literal_0b0000 = 0b0000;
+constexpr uint64_t literal_0b1001 = 0b1001;
 constexpr uint64_t literal_0b1100 = 0b1100;
+constexpr uint64_t literal_0b011110 = 0b011110;
+constexpr uint64_t literal_0b100001 = 0b100001;
+constexpr uint64_t literal_0b100000 = 0b100000;
+constexpr uint64_t literal_0b011111 = 0b011111;
 constexpr uint64_t literal_0b0110 = 0b0110;
+constexpr uint64_t literal_2400 = 2400;
+constexpr uint64_t literal_2133 = 2133;
 constexpr uint64_t literal_0b0101011 = 0b0101011;
 constexpr uint64_t literal_0b0011011 = 0b0011011;
 constexpr uint64_t literal_0b0011010 = 0b0011010;
@@ -136,14 +136,14 @@ constexpr uint64_t literal_0b000000001 = 0b000000001;
 constexpr uint64_t literal_0b0011 = 0b0011;
 constexpr uint64_t literal_0b000000000000000000000000 = 0b000000000000000000000000;
 constexpr uint64_t literal_0b11111111 = 0b11111111;
-constexpr uint64_t literal_21 = 21;
+constexpr uint64_t literal_17 = 17;
+constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_23 = 23;
+constexpr uint64_t literal_22 = 22;
+constexpr uint64_t literal_21 = 21;
 constexpr uint64_t literal_0b111100 = 0b111100;
 constexpr uint64_t literal_0b110100 = 0b110100;
 constexpr uint64_t literal_0b111000 = 0b111000;
-constexpr uint64_t literal_15 = 15;
-constexpr uint64_t literal_22 = 22;
-constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_0b101110 = 0b101110;
 constexpr uint64_t literal_0b101000 = 0b101000;
 constexpr uint64_t literal_0b110110 = 0b110110;
@@ -244,13 +244,12 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT1, l_chip_ec));
         fapi2::ATTR_CEN_EFF_DIMM_TYPE_Type l_TGT0_ATTR_CEN_EFF_DIMM_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, TGT0, l_TGT0_ATTR_CEN_EFF_DIMM_TYPE));
-        uint64_t l_def_RDODT_duration = literal_5;
         fapi2::ATTR_CEN_EFF_DRAM_CWL_Type l_TGT0_ATTR_CEN_EFF_DRAM_CWL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_CWL, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_CWL));
         fapi2::ATTR_CEN_EFF_DRAM_CL_Type l_TGT0_ATTR_CEN_EFF_DRAM_CL;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_CL, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_CL));
-        uint64_t l_def_RDODT_start_lrdimm = ((l_TGT0_ATTR_CEN_EFF_DRAM_CL - l_TGT0_ATTR_CEN_EFF_DRAM_CWL) + literal_6);
         uint64_t l_def_RDODT_start_udimm = (l_TGT0_ATTR_CEN_EFF_DRAM_CL - l_TGT0_ATTR_CEN_EFF_DRAM_CWL);
+        uint64_t l_def_RDODT_start_lrdimm = ((l_TGT0_ATTR_CEN_EFF_DRAM_CL - l_TGT0_ATTR_CEN_EFF_DRAM_CWL) + literal_6);
         uint64_t l_def_RDODT_start_rdimm = (l_TGT0_ATTR_CEN_EFF_DRAM_CL - l_TGT0_ATTR_CEN_EFF_DRAM_CWL);
         fapi2::ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED_Type l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED, TGT0, l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED));
@@ -262,6 +261,19 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_FREQ, TGT1, l_TGT1_ATTR_CEN_MSS_FREQ));
         fapi2::ATTR_CEN_EFF_DRAM_GEN_Type l_TGT0_ATTR_CEN_EFF_DRAM_GEN;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_GEN));
+        uint64_t l_def_ddr4_1600_13_12_11_2N = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
+                                                && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
+                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
+                                                && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2));
+        uint64_t l_def_WL_AL_MINUS2 = (((l_TGT0_ATTR_CEN_EFF_DRAM_CWL + l_TGT0_ATTR_CEN_EFF_DRAM_CL) - literal_2) - literal_7);
+        fapi2::ATTR_CEN_EFF_DRAM_AL_Type l_TGT0_ATTR_CEN_EFF_DRAM_AL;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_AL, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_AL));
+        uint64_t l_def_WL_AL_MINUS1 = (((l_TGT0_ATTR_CEN_EFF_DRAM_CWL + l_TGT0_ATTR_CEN_EFF_DRAM_CL) - literal_1) - literal_7);
+        uint64_t l_def_WL_AL0 = (l_TGT0_ATTR_CEN_EFF_DRAM_CWL - literal_7);
+        fapi2::ATTR_CEN_VPD_WLO_Type l_TGT0_ATTR_CEN_VPD_WLO;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_WLO, TGT0, l_TGT0_ATTR_CEN_VPD_WLO));
+        uint64_t l_def_WLO = ((l_TGT0_ATTR_CEN_VPD_WLO[literal_0] & literal_0x07) - (((l_TGT0_ATTR_CEN_VPD_WLO[literal_0] &
+                              literal_0x0F) >> literal_3) * literal_8));
         uint64_t l_def_ddr3_1333_8_8_8_2N = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_1)
                                                 && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1333)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_8))
                                                 && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_8)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_8))
@@ -337,13 +349,9 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
                                                 && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_13)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_13))
                                                && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1));
-        uint64_t l_def_ddr4_1600_13_12_11R = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
-                                                && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
-                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
-                                               && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1));
-        uint64_t l_def_mba_dsm0q_cfg_rdtag_dly25 = (((((((l_def_ddr4_1600_13_12_11R || l_def_ddr4_1866_13_13_13R)
-                || l_def_ddr4_1600_12_12_12_L2) || l_def_ddr3_1866_12_12_12_L2) || l_def_ddr4_2400_14_14_14)
-                || l_def_ddr4_2133_13_13_13R) || l_def_ddr4_1866_12_12_12_L2) || l_def_ddr4_2133_12_12_12_L2);
+        uint64_t l_def_mba_dsm0q_cfg_rdtag_dly25 = ((((((l_def_ddr4_1866_13_13_13R || l_def_ddr4_1600_12_12_12_L2)
+                || l_def_ddr3_1866_12_12_12_L2) || l_def_ddr4_2400_14_14_14) || l_def_ddr4_2133_13_13_13R)
+                || l_def_ddr4_1866_12_12_12_L2) || l_def_ddr4_2133_12_12_12_L2);
         uint64_t l_def_ddr4_1600_9_9_9_2N = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
                                                 && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_9))
                                                 && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_9)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_9))
@@ -495,9 +503,14 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_13)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_13))
                                              && (((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
                                                      || ((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))));
-        uint64_t l_def_mba_dsm0q_cfg_rdtag_dly24 = (((((((l_def_ddr4_1866_13_13_13 || l_def_ddr3_1600_11_11_11_LR)
-                || l_def_ddr3_1866_11_11_11_LR) || l_def_ddr4_2133_13_13_13) || l_def_ddr4_2400_14_14_14_2N)
-                || l_def_ddr4_2400_13_13_13R) || l_def_ddr4_1600_11_11_11_LR) || l_def_ddr4_1866_11_11_11_LR);
+        uint64_t l_def_ddr4_1600_13_12_11R = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
+                                                && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
+                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
+                                               && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1));
+        uint64_t l_def_mba_dsm0q_cfg_rdtag_dly24 = ((((((((l_def_ddr4_1600_13_12_11R || l_def_ddr4_1866_13_13_13)
+                || l_def_ddr3_1600_11_11_11_LR) || l_def_ddr3_1866_11_11_11_LR) || l_def_ddr4_2133_13_13_13)
+                || l_def_ddr4_2400_14_14_14_2N) || l_def_ddr4_2400_13_13_13R) || l_def_ddr4_1600_11_11_11_LR)
+                || l_def_ddr4_1866_11_11_11_LR);
         uint64_t l_def_ddr4_1866_11_11_11_L2 = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
                                                 && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_11))
                                                 && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_11)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
@@ -536,8 +549,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         uint64_t l_def_ddr4_1600_13_12_11 = ((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
                                                 && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
-                                             && (((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
-                                                     || ((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))));
+                                             && ((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)));
         uint64_t l_def_mba_dsm0q_cfg_rdtag_dly23 = (((((((((((l_def_ddr4_1600_13_12_11 || l_def_ddr4_1866_13_13_13_2N)
                 || l_def_ddr4_1600_12_12_12R) || l_def_ddr3_1866_12_12_12R) || l_def_ddr3_1600_11_11_11_L2)
                 || l_def_ddr3_1866_11_11_11_L2) || l_def_ddr4_2400_13_13_13) || l_def_ddr4_2133_13_13_13_2N)
@@ -571,10 +583,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_12))
                                              && (((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_0) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
                                                      || ((l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))));
-        uint64_t l_def_ddr4_1600_13_12_11_2N = (((((((l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2)
-                                                && (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)) && (l_TGT0_ATTR_CEN_EFF_DRAM_CL == literal_13))
-                                                && (l_TGT0_ATTR_CEN_EFF_DRAM_TRCD == literal_12)) && (l_TGT0_ATTR_CEN_EFF_DRAM_TRP == literal_11))
-                                                && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2));
         uint64_t l_def_mba_dsm0q_cfg_rdtag_dly22 = ((((((((l_def_ddr4_1600_13_12_11_2N || l_def_ddr4_1600_12_12_12)
                 || l_def_ddr3_1866_12_12_12) || l_def_ddr3_1600_10_10_10_LR) || l_def_ddr4_1866_12_12_12) || l_def_ddr4_2133_12_12_12)
                 || l_def_ddr4_2400_13_13_13_2N) || l_def_ddr4_1600_10_10_10_LR) || l_def_ddr4_1600_11_11_11R);
@@ -697,72 +705,17 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 && (l_TGT0_ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
         uint64_t l_def_mba_dsm0q_cfg_rdtag_dly27 = (((l_def_ddr4_1600_13_12_11_L2 || l_def_ddr4_1866_13_13_13_L2)
                 || l_def_ddr4_2400_13_13_13_LR) || l_def_ddr4_2133_13_13_13_L2);
-        uint64_t l_def_WL_AL_MINUS2 = (((l_TGT0_ATTR_CEN_EFF_DRAM_CWL + l_TGT0_ATTR_CEN_EFF_DRAM_CL) - literal_2) - literal_7);
-        fapi2::ATTR_CEN_EFF_DRAM_AL_Type l_TGT0_ATTR_CEN_EFF_DRAM_AL;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_AL, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_AL));
-        uint64_t l_def_WL_AL_MINUS1 = (((l_TGT0_ATTR_CEN_EFF_DRAM_CWL + l_TGT0_ATTR_CEN_EFF_DRAM_CL) - literal_1) - literal_7);
-        uint64_t l_def_WL_AL0 = (l_TGT0_ATTR_CEN_EFF_DRAM_CWL - literal_7);
-        fapi2::ATTR_CEN_VPD_WLO_Type l_TGT0_ATTR_CEN_VPD_WLO;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_WLO, TGT0, l_TGT0_ATTR_CEN_VPD_WLO));
-        uint64_t l_def_WLO = ((l_TGT0_ATTR_CEN_VPD_WLO[literal_0] & literal_0x07) - (((l_TGT0_ATTR_CEN_VPD_WLO[literal_0] &
-                              literal_0x0F) >> literal_3) * literal_8));
+        uint64_t l_def_RDODT_duration = literal_5;
         uint64_t l_def_margin2 = literal_0;
-        fapi2::ATTR_CEN_EFF_DRAM_TRRD_Type l_TGT0_ATTR_CEN_EFF_DRAM_TRRD;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_TRRD, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_TRRD));
         fapi2::ATTR_CEN_EFF_STACK_TYPE_Type l_TGT0_ATTR_CEN_EFF_STACK_TYPE;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, TGT0, l_TGT0_ATTR_CEN_EFF_STACK_TYPE));
         fapi2::ATTR_CHIP_UNIT_POS_Type l_TGT0_ATTR_CHIP_UNIT_POS;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, TGT0, l_TGT0_ATTR_CHIP_UNIT_POS));
-        uint64_t l_def_mba_tmr0q_WRSM_dlys23 = ((((l_def_ddr3_1333_8_8_8 || l_def_ddr3_1333_8_8_8_2N)
-                                                || l_def_ddr3_1333_8_8_8R) || l_def_ddr3_1333_8_8_8_LR) || l_def_ddr3_1333_8_8_8_L2);
-        uint64_t l_def_ddr3_1066_8_8_8_group = ((((l_def_ddr3_1066_8_8_8 || l_def_ddr3_1066_8_8_8_2N)
-                                                || l_def_ddr3_1066_8_8_8R) || l_def_ddr3_1066_8_8_8_LR) || l_def_ddr3_1066_8_8_8_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys21 = l_def_ddr3_1066_8_8_8_group;
-        uint64_t l_def_mba_tmr0q_WRSM_dlys30 = ((((l_def_ddr4_2133_12_12_12 || l_def_ddr4_2133_12_12_12_2N)
-                                                || l_def_ddr4_2133_12_12_12R) || l_def_ddr4_2133_12_12_12_LR) || l_def_ddr4_2133_12_12_12_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys28 = ((((((((((((((l_def_ddr4_1600_12_12_12 || l_def_ddr4_1600_12_12_12_2N)
-                                                || l_def_ddr4_1600_12_12_12R) || l_def_ddr4_1600_12_12_12_LR) || l_def_ddr4_1600_12_12_12_L2)
-                                                || l_def_ddr3_1600_11_11_11) || l_def_ddr3_1600_11_11_11_2N) || l_def_ddr3_1600_11_11_11R)
-                                                || l_def_ddr3_1600_11_11_11_LR) || l_def_ddr3_1600_11_11_11_L2) || l_def_ddr4_1866_11_11_11)
-                                                || l_def_ddr4_1866_11_11_11_2N) || l_def_ddr4_1866_11_11_11R) || l_def_ddr4_1866_11_11_11_LR)
-                                                || l_def_ddr4_1866_11_11_11_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys29 = ((((l_def_ddr4_1866_12_12_12 || l_def_ddr4_1866_12_12_12_2N)
-                                                || l_def_ddr4_1866_12_12_12R) || l_def_ddr4_1866_12_12_12_LR) || l_def_ddr4_1866_12_12_12_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys33 = ((((l_def_ddr4_2400_14_14_14 || l_def_ddr4_2400_14_14_14_2N)
-                                                || l_def_ddr4_2400_14_14_14R) || l_def_ddr4_2400_14_14_14_LR) || l_def_ddr4_2400_14_14_14_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys27 = ((((l_def_ddr3_1600_10_10_10 || l_def_ddr3_1600_10_10_10_2N)
-                                                || l_def_ddr3_1600_10_10_10R) || l_def_ddr3_1600_10_10_10_LR) || l_def_ddr3_1600_10_10_10_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys15 = ((((((l_def_ddr4_1600_11_11_11 || l_def_ddr4_1600_11_11_11_2N)
-                                                || l_def_ddr4_1600_11_11_11R) || l_def_ddr4_1600_11_11_11_LR) || l_def_ddr4_1600_11_11_11_L2)
-                                                || l_def_ddr4_1600_13_12_11) || l_def_ddr4_1600_13_12_11_2N);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys32 = ((((((((((((((l_def_ddr4_1866_13_13_13 || l_def_ddr4_1866_13_13_13_2N)
-                                                || l_def_ddr4_1866_13_13_13R) || l_def_ddr4_1866_13_13_13_LR) || l_def_ddr4_1866_13_13_13_L2)
-                                                || l_def_ddr3_1866_12_12_12) || l_def_ddr3_1866_12_12_12_2N) || l_def_ddr3_1866_12_12_12R)
-                                                || l_def_ddr3_1866_12_12_12_LR) || l_def_ddr3_1866_12_12_12_L2) || l_def_ddr4_2400_13_13_13)
-                                                || l_def_ddr4_2400_13_13_13_2N) || l_def_ddr4_2400_13_13_13R) || l_def_ddr4_2400_13_13_13_LR)
-                                                || l_def_ddr4_2400_13_13_13_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys31 = (((((((((l_def_ddr3_1866_11_11_11 || l_def_ddr3_1866_11_11_11_2N)
-                                                || l_def_ddr3_1866_11_11_11R) || l_def_ddr3_1866_11_11_11_LR) || l_def_ddr3_1866_11_11_11_L2)
-                                                || l_def_ddr4_2133_13_13_13) || l_def_ddr4_2133_13_13_13_2N) || l_def_ddr4_2133_13_13_13R)
-                                                || l_def_ddr4_2133_13_13_13_LR) || l_def_ddr4_2133_13_13_13_L2);
-        uint64_t l_def_ddr3_1066_6_6_6_group = ((((l_def_ddr3_1066_6_6_6 || l_def_ddr3_1066_6_6_6_2N)
-                                                || l_def_ddr3_1066_6_6_6R) || l_def_ddr3_1066_6_6_6_LR) || l_def_ddr3_1066_6_6_6_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys19 = l_def_ddr3_1066_6_6_6_group;
-        uint64_t l_def_ddr3_1066_7_7_7_group = ((((l_def_ddr3_1066_7_7_7 || l_def_ddr3_1066_7_7_7_2N)
-                                                || l_def_ddr3_1066_7_7_7R) || l_def_ddr3_1066_7_7_7_LR) || l_def_ddr3_1066_7_7_7_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys20 = l_def_ddr3_1066_7_7_7_group;
-        uint64_t l_def_mba_tmr0q_WRSM_dlys25 = ((((l_def_ddr4_1600_9_9_9 || l_def_ddr4_1600_9_9_9_2N)
-                                                || l_def_ddr4_1600_9_9_9R) || l_def_ddr4_1600_9_9_9_LR) || l_def_ddr4_1600_9_9_9_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys26 = (((((((((l_def_ddr3_1600_9_9_9 || l_def_ddr3_1600_9_9_9_2N)
-                                                || l_def_ddr3_1600_9_9_9R) || l_def_ddr3_1600_9_9_9_LR) || l_def_ddr3_1600_9_9_9_L2) || l_def_ddr4_1600_10_10_10)
-                                                || l_def_ddr4_1600_10_10_10_2N) || l_def_ddr4_1600_10_10_10R) || l_def_ddr4_1600_10_10_10_LR)
-                                                || l_def_ddr4_1600_10_10_10_L2);
-        uint64_t l_def_mba_tmr0q_WRSM_dlys24 = ((((l_def_ddr3_1333_9_9_9 || l_def_ddr3_1333_9_9_9_2N)
-                                                || l_def_ddr3_1333_9_9_9R) || l_def_ddr3_1333_9_9_9_LR) || l_def_ddr3_1333_9_9_9_L2);
-        uint64_t l_def_mba_tmr0q_RW_dlys11 = (((((((((((((l_def_ddr4_1600_13_12_11 || l_def_ddr4_1866_13_13_13)
-                                                || l_def_ddr4_1866_13_13_13_2N) || l_def_ddr4_1866_13_13_13R) || l_def_ddr3_1066_6_6_6_L2) || l_def_ddr3_1066_6_6_6_LR)
-                                                || l_def_ddr3_1866_12_12_12) || l_def_ddr3_1866_12_12_12_2N) || l_def_ddr3_1866_12_12_12R) || l_def_ddr4_2400_14_14_14)
-                                                || l_def_ddr4_2400_14_14_14_2N) || l_def_ddr4_2400_14_14_14R) || l_def_ddr4_1600_9_9_9_LR) || l_def_ddr4_1600_9_9_9_L2);
+        uint64_t l_def_mba_tmr0q_RW_dlys11 = ((((((((((((((l_def_ddr4_1600_13_12_11 || l_def_ddr4_1600_13_12_11R)
+                                                || l_def_ddr4_1866_13_13_13) || l_def_ddr4_1866_13_13_13_2N) || l_def_ddr4_1866_13_13_13R) || l_def_ddr3_1066_6_6_6_L2)
+                                                || l_def_ddr3_1066_6_6_6_LR) || l_def_ddr3_1866_12_12_12) || l_def_ddr3_1866_12_12_12_2N) || l_def_ddr3_1866_12_12_12R)
+                                                || l_def_ddr4_2400_14_14_14) || l_def_ddr4_2400_14_14_14_2N) || l_def_ddr4_2400_14_14_14R) || l_def_ddr4_1600_9_9_9_LR)
+                                              || l_def_ddr4_1600_9_9_9_L2);
         uint64_t l_def_margin1 = literal_1;
         uint64_t l_def_mba_tmr0q_RW_dlys8 = (((((((((((l_def_ddr3_1066_7_7_7 || l_def_ddr3_1066_7_7_7_2N)
                                                 || l_def_ddr3_1066_7_7_7R) || l_def_ddr3_1333_8_8_8) || l_def_ddr3_1600_9_9_9) || l_def_ddr3_1333_8_8_8_2N)
@@ -796,10 +749,55 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_ddr4_1866_11_11_11) || l_def_ddr4_2133_12_12_12) || l_def_ddr4_1600_11_11_11_2N)
                                                 || l_def_ddr4_1866_11_11_11_2N) || l_def_ddr4_2133_12_12_12_2N) || l_def_ddr4_1600_11_11_11R)
                                               || l_def_ddr4_1866_11_11_11R) || l_def_ddr4_2133_12_12_12R);
-        uint64_t l_def_mba_tmr0q_RW_dlys12 = (((((((((l_def_ddr4_1600_13_12_11_2N || l_def_ddr4_1600_13_12_11R)
-                                                || l_def_ddr3_1066_7_7_7_L2) || l_def_ddr3_1066_7_7_7_LR) || l_def_ddr3_1333_8_8_8_LR) || l_def_ddr3_1600_9_9_9_LR)
-                                                || l_def_ddr3_1333_8_8_8_L2) || l_def_ddr3_1600_9_9_9_L2) || l_def_ddr4_1600_10_10_10_LR)
-                                              || l_def_ddr4_1600_10_10_10_L2);
+        uint64_t l_def_mba_tmr0q_RW_dlys12 = ((((((((l_def_ddr4_1600_13_12_11_2N || l_def_ddr3_1066_7_7_7_L2)
+                                                || l_def_ddr3_1066_7_7_7_LR) || l_def_ddr3_1333_8_8_8_LR) || l_def_ddr3_1600_9_9_9_LR) || l_def_ddr3_1333_8_8_8_L2)
+                                                || l_def_ddr3_1600_9_9_9_L2) || l_def_ddr4_1600_10_10_10_LR) || l_def_ddr4_1600_10_10_10_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys23 = ((((l_def_ddr3_1333_8_8_8 || l_def_ddr3_1333_8_8_8_2N)
+                                                || l_def_ddr3_1333_8_8_8R) || l_def_ddr3_1333_8_8_8_LR) || l_def_ddr3_1333_8_8_8_L2);
+        uint64_t l_def_ddr3_1066_8_8_8_group = ((((l_def_ddr3_1066_8_8_8 || l_def_ddr3_1066_8_8_8_2N)
+                                                || l_def_ddr3_1066_8_8_8R) || l_def_ddr3_1066_8_8_8_LR) || l_def_ddr3_1066_8_8_8_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys21 = l_def_ddr3_1066_8_8_8_group;
+        uint64_t l_def_mba_tmr0q_WRSM_dlys30 = ((((l_def_ddr4_2133_12_12_12 || l_def_ddr4_2133_12_12_12_2N)
+                                                || l_def_ddr4_2133_12_12_12R) || l_def_ddr4_2133_12_12_12_LR) || l_def_ddr4_2133_12_12_12_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys28 = ((((((((((((((l_def_ddr4_1600_12_12_12 || l_def_ddr4_1600_12_12_12_2N)
+                                                || l_def_ddr4_1600_12_12_12R) || l_def_ddr4_1600_12_12_12_LR) || l_def_ddr4_1600_12_12_12_L2)
+                                                || l_def_ddr3_1600_11_11_11) || l_def_ddr3_1600_11_11_11_2N) || l_def_ddr3_1600_11_11_11R)
+                                                || l_def_ddr3_1600_11_11_11_LR) || l_def_ddr3_1600_11_11_11_L2) || l_def_ddr4_1866_11_11_11)
+                                                || l_def_ddr4_1866_11_11_11_2N) || l_def_ddr4_1866_11_11_11R) || l_def_ddr4_1866_11_11_11_LR)
+                                                || l_def_ddr4_1866_11_11_11_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys29 = ((((l_def_ddr4_1866_12_12_12 || l_def_ddr4_1866_12_12_12_2N)
+                                                || l_def_ddr4_1866_12_12_12R) || l_def_ddr4_1866_12_12_12_LR) || l_def_ddr4_1866_12_12_12_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys33 = ((((l_def_ddr4_2400_14_14_14 || l_def_ddr4_2400_14_14_14_2N)
+                                                || l_def_ddr4_2400_14_14_14R) || l_def_ddr4_2400_14_14_14_LR) || l_def_ddr4_2400_14_14_14_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys27 = ((((l_def_ddr3_1600_10_10_10 || l_def_ddr3_1600_10_10_10_2N)
+                                                || l_def_ddr3_1600_10_10_10R) || l_def_ddr3_1600_10_10_10_LR) || l_def_ddr3_1600_10_10_10_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys15 = (((((((l_def_ddr4_1600_11_11_11 || l_def_ddr4_1600_11_11_11_2N)
+                                                || l_def_ddr4_1600_11_11_11R) || l_def_ddr4_1600_11_11_11_LR) || l_def_ddr4_1600_11_11_11_L2)
+                                                || l_def_ddr4_1600_13_12_11) || l_def_ddr4_1600_13_12_11_2N) || l_def_ddr4_1600_13_12_11R);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys32 = ((((((((((((((l_def_ddr4_1866_13_13_13 || l_def_ddr4_1866_13_13_13_2N)
+                                                || l_def_ddr4_1866_13_13_13R) || l_def_ddr4_1866_13_13_13_LR) || l_def_ddr4_1866_13_13_13_L2)
+                                                || l_def_ddr3_1866_12_12_12) || l_def_ddr3_1866_12_12_12_2N) || l_def_ddr3_1866_12_12_12R)
+                                                || l_def_ddr3_1866_12_12_12_LR) || l_def_ddr3_1866_12_12_12_L2) || l_def_ddr4_2400_13_13_13)
+                                                || l_def_ddr4_2400_13_13_13_2N) || l_def_ddr4_2400_13_13_13R) || l_def_ddr4_2400_13_13_13_LR)
+                                                || l_def_ddr4_2400_13_13_13_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys31 = (((((((((l_def_ddr3_1866_11_11_11 || l_def_ddr3_1866_11_11_11_2N)
+                                                || l_def_ddr3_1866_11_11_11R) || l_def_ddr3_1866_11_11_11_LR) || l_def_ddr3_1866_11_11_11_L2)
+                                                || l_def_ddr4_2133_13_13_13) || l_def_ddr4_2133_13_13_13_2N) || l_def_ddr4_2133_13_13_13R)
+                                                || l_def_ddr4_2133_13_13_13_LR) || l_def_ddr4_2133_13_13_13_L2);
+        uint64_t l_def_ddr3_1066_6_6_6_group = ((((l_def_ddr3_1066_6_6_6 || l_def_ddr3_1066_6_6_6_2N)
+                                                || l_def_ddr3_1066_6_6_6R) || l_def_ddr3_1066_6_6_6_LR) || l_def_ddr3_1066_6_6_6_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys19 = l_def_ddr3_1066_6_6_6_group;
+        uint64_t l_def_ddr3_1066_7_7_7_group = ((((l_def_ddr3_1066_7_7_7 || l_def_ddr3_1066_7_7_7_2N)
+                                                || l_def_ddr3_1066_7_7_7R) || l_def_ddr3_1066_7_7_7_LR) || l_def_ddr3_1066_7_7_7_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys20 = l_def_ddr3_1066_7_7_7_group;
+        uint64_t l_def_mba_tmr0q_WRSM_dlys25 = ((((l_def_ddr4_1600_9_9_9 || l_def_ddr4_1600_9_9_9_2N)
+                                                || l_def_ddr4_1600_9_9_9R) || l_def_ddr4_1600_9_9_9_LR) || l_def_ddr4_1600_9_9_9_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys26 = (((((((((l_def_ddr3_1600_9_9_9 || l_def_ddr3_1600_9_9_9_2N)
+                                                || l_def_ddr3_1600_9_9_9R) || l_def_ddr3_1600_9_9_9_LR) || l_def_ddr3_1600_9_9_9_L2) || l_def_ddr4_1600_10_10_10)
+                                                || l_def_ddr4_1600_10_10_10_2N) || l_def_ddr4_1600_10_10_10R) || l_def_ddr4_1600_10_10_10_LR)
+                                                || l_def_ddr4_1600_10_10_10_L2);
+        uint64_t l_def_mba_tmr0q_WRSM_dlys24 = ((((l_def_ddr3_1333_9_9_9 || l_def_ddr3_1333_9_9_9_2N)
+                                                || l_def_ddr3_1333_9_9_9R) || l_def_ddr3_1333_9_9_9_LR) || l_def_ddr3_1333_9_9_9_L2);
         uint64_t l_def_mba_tmr0q_WRDM_dlys7 = ((((((((((((((((((((l_def_ddr3_1066_6_6_6_group || l_def_ddr4_1600_9_9_9)
                                                 || l_def_ddr4_1866_11_11_11) || l_def_ddr4_2133_12_12_12) || l_def_ddr4_2400_14_14_14) || l_def_ddr4_1600_9_9_9_2N)
                                                 || l_def_ddr4_1866_11_11_11_2N) || l_def_ddr4_2133_12_12_12_2N) || l_def_ddr4_2400_14_14_14_2N)
@@ -834,6 +832,8 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_ddr4_1866_12_12_12R) || l_def_ddr4_2133_13_13_13R) || l_def_ddr4_1600_10_10_10_LR)
                                                 || l_def_ddr4_1866_12_12_12_LR) || l_def_ddr4_2133_13_13_13_LR) || l_def_ddr4_1600_10_10_10_L2)
                                                 || l_def_ddr4_1866_12_12_12_L2) || l_def_ddr4_2133_13_13_13_L2);
+        fapi2::ATTR_CEN_EFF_DRAM_TRRD_Type l_TGT0_ATTR_CEN_EFF_DRAM_TRRD;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_TRRD, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_TRRD));
         uint64_t l_def_mba_tmr1q_cfg_trap43 = ((((l_def_ddr4_1866_11_11_11 || l_def_ddr4_1866_11_11_11_2N)
                                                 || l_def_ddr4_1866_11_11_11R) || l_def_ddr4_1866_11_11_11_LR) || l_def_ddr4_1866_11_11_11_L2);
         uint64_t l_def_mba_tmr1q_cfg_trap27 = (((((l_def_ddr3_1066_7_7_7_group || l_def_ddr3_1333_8_8_8)
@@ -850,8 +850,9 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_ddr4_1600_10_10_10_LR) || l_def_ddr4_1600_10_10_10_L2);
         uint64_t l_def_mba_tmr1q_cfg_trap28 = (((((l_def_ddr3_1066_8_8_8_group || l_def_ddr3_1333_8_8_8)
                                                 || l_def_ddr3_1333_8_8_8_2N) || l_def_ddr3_1333_8_8_8R) || l_def_ddr3_1333_8_8_8_LR) || l_def_ddr3_1333_8_8_8_L2);
-        uint64_t l_def_mba_tmr1q_cfg_trap40 = ((((l_def_ddr3_1866_12_12_12 || l_def_ddr3_1866_12_12_12_2N)
-                                                || l_def_ddr3_1866_12_12_12R) || l_def_ddr3_1866_12_12_12_LR) || l_def_ddr3_1866_12_12_12_L2);
+        uint64_t l_def_mba_tmr1q_cfg_trap40 = (((((l_def_ddr4_1600_13_12_11R || l_def_ddr3_1866_12_12_12)
+                                                || l_def_ddr3_1866_12_12_12_2N) || l_def_ddr3_1866_12_12_12R) || l_def_ddr3_1866_12_12_12_LR)
+                                               || l_def_ddr3_1866_12_12_12_L2);
         uint64_t l_def_mba_tmr1q_cfg_trap37 = (((((((((l_def_ddr3_1600_9_9_9 || l_def_ddr3_1600_9_9_9_2N)
                                                 || l_def_ddr3_1600_9_9_9R) || l_def_ddr3_1600_9_9_9_LR) || l_def_ddr3_1600_9_9_9_L2) || l_def_ddr4_1600_9_9_9)
                                                 || l_def_ddr4_1600_9_9_9_2N) || l_def_ddr4_1600_9_9_9R) || l_def_ddr4_1600_9_9_9_LR) || l_def_ddr4_1600_9_9_9_L2);
@@ -902,9 +903,9 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_ddr3_1866_11_11_11_L2);
         uint64_t l_def_mba_tmr1q_WRSBG_dlys30 = ((((l_def_ddr4_1866_11_11_11 || l_def_ddr4_1866_11_11_11_2N)
                                                 || l_def_ddr4_1866_11_11_11R) || l_def_ddr4_1866_11_11_11_LR) || l_def_ddr4_1866_11_11_11_L2);
-        uint64_t l_def_mba_tmr1q_WRSBG_dlys19 = ((((((l_def_ddr4_1600_11_11_11 || l_def_ddr4_1600_11_11_11_2N)
+        uint64_t l_def_mba_tmr1q_WRSBG_dlys19 = (((((((l_def_ddr4_1600_11_11_11 || l_def_ddr4_1600_11_11_11_2N)
                                                 || l_def_ddr4_1600_11_11_11R) || l_def_ddr4_1600_11_11_11_LR) || l_def_ddr4_1600_11_11_11_L2)
-                                                || l_def_ddr4_1600_13_12_11) || l_def_ddr4_1600_13_12_11_2N);
+                                                || l_def_ddr4_1600_13_12_11) || l_def_ddr4_1600_13_12_11_2N) || l_def_ddr4_1600_13_12_11R);
         uint64_t l_def_mba_tmr1q_WRSBG_dlys31 = ((((l_def_ddr4_1866_12_12_12 || l_def_ddr4_1866_12_12_12_2N)
                                                 || l_def_ddr4_1866_12_12_12R) || l_def_ddr4_1866_12_12_12_LR) || l_def_ddr4_1866_12_12_12_L2);
         uint64_t l_def_mba_tmr1q_WRSBG_dlys29 = ((((l_def_ddr4_1600_12_12_12 || l_def_ddr4_1600_12_12_12_2N)
@@ -928,6 +929,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_ddr4_1866_13_13_13R) || l_def_ddr4_1866_13_13_13_LR) || l_def_ddr4_1866_13_13_13_L2);
         uint64_t l_def_mba_tmr1q_cfg_twap48 = ((((l_def_ddr4_1600_12_12_12 || l_def_ddr4_1600_12_12_12_2N)
                                                 || l_def_ddr4_1600_12_12_12R) || l_def_ddr4_1600_12_12_12_LR) || l_def_ddr4_1600_12_12_12_L2);
+        uint64_t l_def_mba_tmr1q_cfg_twap47 = l_def_ddr4_1600_13_12_11R;
         uint64_t l_def_mba_tmr1q_cfg_twap51 = (((((((((l_def_ddr3_1866_12_12_12 || l_def_ddr3_1866_12_12_12_2N)
                                                 || l_def_ddr3_1866_12_12_12R) || l_def_ddr3_1866_12_12_12_LR) || l_def_ddr3_1866_12_12_12_L2)
                                                 || l_def_ddr4_1866_12_12_12) || l_def_ddr4_1866_12_12_12_2N) || l_def_ddr4_1866_12_12_12R)
@@ -983,80 +985,15 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)))
                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1));
         uint64_t l_def_IS3A_IS3B = (((l_def_3b_1socket || l_def_3b_2socket) || l_def_3a_1socket) || l_def_3a_2socket);
-        uint64_t l_def_7a_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
+        uint64_t l_def_5d_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)))
                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_7a_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
+        uint64_t l_def_5d_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)))
                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_IS7a_C4a_C3a = (((l_def_3a_2socket || l_def_4a_cdimm) || l_def_7a_1socket) || l_def_7a_2socket);
-        uint64_t l_def_4a_ddr4_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                           && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_11)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                   && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)))
-                                         && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                 && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_3a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
-                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_4a_ddr4_cdimm);
-        uint64_t l_def_7a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
-                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_7a_1socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
-                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_3a_ddr4_cdimm = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                            && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                    && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
-                                          && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                  && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
-        uint64_t l_def_2a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_3a_ddr4_cdimm);
-        uint64_t l_def_2a_ddr4_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                           && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                   && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                         && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                                 && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2a_1socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_ddr4_cdimm);
-        uint64_t l_def_C4A_ddr4 = ((((((l_def_2a_1socket_ddr4 || l_def_2a_2socket_ddr4) || l_def_3a_ddr4_cdimm)
-                                      || l_def_7a_1socket_ddr4) || l_def_7a_2socket_ddr4) || l_def_3a_2socket_ddr4) || l_def_4a_ddr4_cdimm);
-        uint64_t l_def_7c_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
-                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_7c_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
-                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_IS7C = (l_def_7c_1socket || l_def_7c_2socket);
-        uint64_t l_def_3c_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)))
-                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2c_2socket = ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
-                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_2a_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2c_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
-                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_cdimm);
-        uint64_t l_def_C3c = ((l_def_2c_1socket || l_def_2c_2socket) || l_def_3c_cdimm);
+        uint64_t l_def_IS5D = (l_def_5d_1socket || l_def_5d_2socket);
         uint64_t l_def_5c_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
                                         && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_16)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_16)))
@@ -1113,6 +1050,63 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         uint64_t l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C = ((((((((((l_def_1a_1socket || l_def_1a_2socket)
                 || l_def_1b_1socket) || l_def_1b_2socket) || l_def_1c_cdimm) || l_def_1c_1socket_nodt) || l_def_1c_2socket_nodt)
                 || l_def_5b_1socket) || l_def_5b_2socket) || l_def_5c_1socket) || l_def_5c_2socket);
+        uint64_t l_def_3b_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)))
+                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_2b_2socket = ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
+                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
+        uint64_t l_def_2b_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
+                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_2b_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
+                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2b_cdimm);
+        uint64_t l_def_3a_cdimm = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
+                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                             && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_1));
+        uint64_t l_def_2c_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
+                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_2a_2socket = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                         && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_2c_cdimm) || l_def_3a_cdimm);
+        uint64_t l_def_2a_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_2a_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_cdimm);
+        uint64_t l_def_C3b = (((((l_def_2a_1socket || l_def_2a_2socket) || l_def_3a_cdimm) || l_def_2b_1socket)
+                               || l_def_2b_2socket) || l_def_3b_cdimm);
+        uint64_t l_def_3c_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_10)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_10)))
+                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_2c_2socket = ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
+                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
+        uint64_t l_def_2c_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
+                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_cdimm);
+        uint64_t l_def_C3c = ((l_def_2c_1socket || l_def_2c_2socket) || l_def_3c_cdimm);
         uint64_t l_def_7c_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
@@ -1151,6 +1145,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
                                            && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_3c_ddr4_cdimm);
+        uint64_t l_def_2a_ddr4_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                           && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                   && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                         && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
         uint64_t l_def_2c_1socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
@@ -1177,53 +1176,56 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                 || l_def_2c_1socket_ddr4) || l_def_2c_2socket_ddr4) || l_def_3c_ddr4_cdimm) || l_def_3c_1socket_ddr4)
                                             || l_def_3c_2socket_ddr4) || l_def_4c_ddr4_cdimm) || l_def_7b_1socket_ddr4) || l_def_7b_2socket_ddr4)
                                         || l_def_7c_1socket_ddr4) || l_def_7c_2socket_ddr4);
-        uint64_t l_def_5d_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)))
+        uint64_t l_def_7a_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_5d_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_17)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_17)))
+        uint64_t l_def_7a_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
-        uint64_t l_def_IS5D = (l_def_5d_1socket || l_def_5d_2socket);
-        uint64_t l_def_3b_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_9)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_9)))
-                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2b_2socket = ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
-                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2));
-        uint64_t l_def_2b_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
-                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2b_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_6)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_6)))
-                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2b_cdimm);
-        uint64_t l_def_3a_cdimm = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                       && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                               && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
-                                     && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                             && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_1));
-        uint64_t l_def_2c_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                      && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_7)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                              && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_7)))
-                                    && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
-                                            && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
-        uint64_t l_def_2a_2socket = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                         && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                       && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_2c_cdimm) || l_def_3a_cdimm);
-        uint64_t l_def_2a_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
-                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_cdimm);
-        uint64_t l_def_C3b = (((((l_def_2a_1socket || l_def_2a_2socket) || l_def_3a_cdimm) || l_def_2b_1socket)
-                               || l_def_2b_2socket) || l_def_3b_cdimm);
+        uint64_t l_def_IS7a_C4a_C3a = (((l_def_3a_2socket || l_def_4a_cdimm) || l_def_7a_1socket) || l_def_7a_2socket);
+        uint64_t l_def_4a_ddr4_cdimm = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                           && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_11)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                   && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_11)))
+                                         && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                 && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
+        uint64_t l_def_3a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
+                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_4a_ddr4_cdimm);
+        uint64_t l_def_7a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
+                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_7a_1socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_21)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_21)))
+                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_3a_ddr4_cdimm = ((((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                            && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_8)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                    && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_8)))
+                                          && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2)
+                                                  && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1))) && (l_TGT0_ATTR_CEN_EFF_DRAM_GEN == literal_2));
+        uint64_t l_def_2a_2socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) || l_def_3a_ddr4_cdimm);
+        uint64_t l_def_2a_1socket_ddr4 = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                             && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_5)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                     && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_5)))
+                                           && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) || l_def_2a_ddr4_cdimm);
+        uint64_t l_def_C4A_ddr4 = ((((((l_def_2a_1socket_ddr4 || l_def_2a_2socket_ddr4) || l_def_3a_ddr4_cdimm)
+                                      || l_def_7a_1socket_ddr4) || l_def_7a_2socket_ddr4) || l_def_3a_2socket_ddr4) || l_def_4a_ddr4_cdimm);
+        uint64_t l_def_7c_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
+                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_2)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_7c_1socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
+                                        && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_23)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
+                                                && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_23)))
+                                      && (l_TGT0_ATTR_CEN_EFF_NUM_DROPS_PER_PORT == literal_1)) && (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3));
+        uint64_t l_def_IS7C = (l_def_7c_1socket || l_def_7c_2socket);
         uint64_t l_def_7b_2socket = (((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
                                         && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_1][literal_0] == literal_22)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
                                                 && (l_TGT0_ATTR_CEN_EFF_IBM_TYPE[literal_0][literal_0] == literal_22)))
@@ -1239,6 +1241,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                                                  && (l_TGT0_ATTR_CEN_EFF_CUSTOM_DIMM == literal_1)));
         uint64_t l_def_IS3b_IS7b = ((((l_def_3b_1socket || l_def_3b_2socket) || l_def_4b_ddr4_cdimm) || l_def_7b_1socket)
                                     || l_def_7b_2socket);
+        uint64_t l_def_IS3B = (l_def_3b_1socket || l_def_3b_2socket);
         fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA_Type l_TGT0_ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA, TGT0,
                                l_TGT0_ATTR_CEN_MSS_MEM_THROTTLE_NUMERATOR_PER_MBA));
@@ -4036,120 +4039,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301040aull, l_scom_buffer ));
 
-            if (literal_1)
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b000101 );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<49, 6, 58, uint64_t>(literal_0b000011 );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b000000 );
-            }
-
-            if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>((l_def_RDODT_start_lrdimm + l_def_RDODT_duration) );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>((l_def_RDODT_start_udimm + l_def_RDODT_duration) );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>((l_def_RDODT_start_rdimm + l_def_RDODT_duration) );
-            }
-
-            if ((l_def_mba_dsm0q_cfg_rdtag_dly14 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b001110 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly20 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010100 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly25 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011001 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly15 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b001111 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly28 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011100 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly13 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b001101 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly16 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010000 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly29 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011101 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly26 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011010 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly18 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010010 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly24 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011000 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly23 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010111 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly22 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010110 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly17 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010001 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly12 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b001100 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly21 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010101 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly19 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b010011 + l_def_margin_rdtag) );
-            }
-            else if ((l_def_mba_dsm0q_cfg_rdtag_dly27 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>((literal_0b011011 + l_def_margin_rdtag) );
-            }
-
-            if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))
-            {
-                l_scom_buffer.insert<43, 6, 58, uint64_t>(((l_def_RDODT_start_rdimm + l_def_RDODT_duration) - literal_2) );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-            {
-                l_scom_buffer.insert<43, 6, 58, uint64_t>(((l_def_RDODT_start_lrdimm + l_def_RDODT_duration) - literal_2) );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
-            {
-                l_scom_buffer.insert<43, 6, 58, uint64_t>(((l_def_RDODT_start_udimm + l_def_RDODT_duration) - literal_2) );
-            }
-
             if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(l_def_RDODT_start_udimm );
@@ -4339,204 +4228,11 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<6, 6, 58, uint64_t>((l_def_RDODT_start_rdimm + l_def_RDODT_duration) );
             }
 
-            if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(l_def_RDODT_start_udimm );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(l_def_RDODT_start_lrdimm );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(l_def_RDODT_start_rdimm );
-            }
-
-            if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((l_def_WL_AL_MINUS2 - literal_1) );
-            }
-            else if (((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2) && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_2)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(l_def_WL_AL_MINUS2 );
-            }
-            else if (((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2) && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_1)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(l_def_WL_AL_MINUS1 );
-            }
-            else if (((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_2) && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_0)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(l_def_WL_AL0 );
-            }
-            else if ((((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1) || (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-                      && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_2)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((l_def_WL_AL_MINUS2 + l_def_WLO) );
-            }
-            else if ((((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1) || (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-                      && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_0)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((l_def_WL_AL0 + l_def_WLO) );
-            }
-            else if ((((l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_1) || (l_TGT0_ATTR_CEN_EFF_DIMM_TYPE == literal_3))
-                      && (l_TGT0_ATTR_CEN_EFF_DRAM_AL == literal_1)))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((l_def_WL_AL_MINUS1 + l_def_WLO) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b011000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x301040aull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x301040bull, l_scom_buffer ));
 
-            if ((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2400))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>((literal_0b1001 + l_def_margin2) );
-            }
-            else if ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1066) || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1333))
-                      || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>((literal_0b0111 + l_def_margin2) );
-            }
-            else if (((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866) || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_2133)))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>((literal_0b1000 + l_def_margin2) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<60, 4, 60, uint64_t>(l_TGT0_ATTR_CEN_EFF_DRAM_TRRD );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<0, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-            else if ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                       && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                               && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2))))
-            {
-                l_scom_buffer.insert<0, 4, 60, uint64_t>((literal_0b0101 + l_def_margin2) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<44, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-            else if ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                       && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                               && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2))))
-            {
-                l_scom_buffer.insert<44, 4, 60, uint64_t>((literal_0b0101 + l_def_margin2) );
-            }
-
-            if ((l_def_mba_tmr0q_WRSM_dlys23 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b010111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys21 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b010101 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys30 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011110 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys28 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011100 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys29 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011101 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys33 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b100001 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys27 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011011 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys15 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b001111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys32 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b100000 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys31 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys19 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b010011 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys20 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b010100 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys25 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011001 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys26 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011010 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys24 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>((literal_0b011000 + l_def_margin2) );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys11 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1011 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys8 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys7 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b0111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys15 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys10 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1010 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys13 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1101 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys14 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1110 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b0000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys9 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1001 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys12 == literal_1))
-            {
-                l_scom_buffer.insert<12, 4, 60, uint64_t>((literal_0b1100 + l_def_margin1) );
-            }
-
             if (literal_1)
             {
                 l_scom_buffer.insert<0, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
@@ -4876,204 +4572,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if (((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866) || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_2133)))
             {
                 l_scom_buffer.insert<8, 4, 60, uint64_t>((literal_0b1000 + l_def_margin2) );
-            }
-
-            if ((l_def_mba_tmr0q_WRSM_dlys23 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b010111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys30 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011110 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys28 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011100 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys29 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011101 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys33 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b100001 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys15 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b001111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys27 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011011 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys32 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b100000 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys31 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys25 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011001 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys26 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011010 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRSM_dlys24 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>((literal_0b011000 + l_def_margin2) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<52, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-
-            if ((l_TGT1_ATTR_CEN_MSS_FREQ == literal_2400))
-            {
-                l_scom_buffer.insert<8, 4, 60, uint64_t>((literal_0b1001 + l_def_margin2) );
-            }
-            else if ((((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1066) || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1333))
-                      || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_1600)))
-            {
-                l_scom_buffer.insert<8, 4, 60, uint64_t>((literal_0b0111 + l_def_margin2) );
-            }
-            else if (((l_TGT1_ATTR_CEN_MSS_FREQ == literal_1866) || (l_TGT1_ATTR_CEN_MSS_FREQ == literal_2133)))
-            {
-                l_scom_buffer.insert<8, 4, 60, uint64_t>((literal_0b1000 + l_def_margin2) );
-            }
-
-            if ((l_def_mba_tmr0q_WRDM_dlys7 == literal_1))
-            {
-                l_scom_buffer.insert<36, 4, 60, uint64_t>((literal_0b0111 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRDM_dlys8 == literal_1))
-            {
-                l_scom_buffer.insert<36, 4, 60, uint64_t>((literal_0b1000 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRDM_dlys4 == literal_1))
-            {
-                l_scom_buffer.insert<36, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRDM_dlys5 == literal_1))
-            {
-                l_scom_buffer.insert<36, 4, 60, uint64_t>((literal_0b0101 + l_def_margin2) );
-            }
-            else if ((l_def_mba_tmr0q_WRDM_dlys6 == literal_1))
-            {
-                l_scom_buffer.insert<36, 4, 60, uint64_t>((literal_0b0110 + l_def_margin2) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<4, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-            else if ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                       && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                               && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2))))
-            {
-                l_scom_buffer.insert<4, 4, 60, uint64_t>((literal_0b0101 + l_def_margin2) );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys11 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1011 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys8 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys7 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b0111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys15 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys10 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1010 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys13 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1101 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys14 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1110 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b0000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys9 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1001 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys12 == literal_1))
-            {
-                l_scom_buffer.insert<16, 4, 60, uint64_t>((literal_0b1100 + l_def_margin1) );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys11 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1011 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys8 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys7 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b0111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys15 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1111 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys10 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1010 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys13 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1101 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys14 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1110 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b0000 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys9 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1001 + l_def_margin1) );
-            }
-            else if ((l_def_mba_tmr0q_RW_dlys12 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>((literal_0b1100 + l_def_margin1) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<40, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
-            }
-            else if ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                       && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                               && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2))))
-            {
-                l_scom_buffer.insert<40, 4, 60, uint64_t>((literal_0b0101 + l_def_margin2) );
-            }
-
-            if (literal_1)
-            {
-                l_scom_buffer.insert<56, 4, 60, uint64_t>((literal_0b0100 + l_def_margin2) );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x301040bull, l_scom_buffer));
@@ -5215,7 +4713,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0110000 );
             }
-            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
+            else if (((l_def_mba_tmr1q_cfg_twap47 == literal_1) || (l_def_ddr4_1600_13_12_11 == literal_1)))
             {
                 l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101111 );
             }
@@ -5258,182 +4756,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if ((l_def_mba_tmr1q_cfg_twap44 == literal_1))
             {
                 l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101100 );
-            }
-
-            if (((l_def_mba_tmr1q_RRSBG_dlys5 == literal_1) || (((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                    && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                            && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2)))))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b0101 );
-            }
-            else if ((l_def_mba_tmr1q_RRSBG_dlys6 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b0110 );
-            }
-            else if ((l_def_mba_tmr1q_RRSBG_dlys0 == literal_1))
-            {
-                l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_0b0000 );
-            }
-
-            if ((l_def_mba_tmr1q_cfg_twap53 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0110101 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap48 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0110000 );
-            }
-            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101111 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap51 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0110011 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap46 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101110 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap42 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101010 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap34 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0100010 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap37 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0100101 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap49 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0110001 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap32 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0100000 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap30 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0011110 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap39 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0100111 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_twap44 == literal_1))
-            {
-                l_scom_buffer.insert<7, 7, 57, uint64_t>(literal_0b0101100 );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<50, 1, 63, uint64_t>(literal_0b0 );
-            }
-
-            if ((l_def_mba_tmr1q_WRSBG_dlys30 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b11110 );
-            }
-            else if ((((l_TGT0_ATTR_CHIP_UNIT_POS == literal_1)
-                       && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_1][literal_0] == literal_2)) || ((l_TGT0_ATTR_CHIP_UNIT_POS == literal_0)
-                               && (l_TGT0_ATTR_CEN_EFF_STACK_TYPE[literal_0][literal_0] == literal_2))))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b10011 );
-            }
-            else if ((l_def_mba_tmr1q_WRSBG_dlys31 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b11111 );
-            }
-            else if ((l_def_mba_tmr1q_WRSBG_dlys29 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b11101 );
-            }
-            else if ((l_def_mba_tmr1q_WRSBG_dlys0 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b00000 );
-            }
-            else if ((l_def_mba_tmr1q_WRSBG_dlys27 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b11011 );
-            }
-            else if ((l_def_mba_tmr1q_WRSBG_dlys26 == literal_1))
-            {
-                l_scom_buffer.insert<24, 5, 59, uint64_t>(literal_0b11010 );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<49, 1, 63, uint64_t>(literal_0b0 );
-            }
-
-            if ((l_TGT0_ATTR_CEN_EFF_DRAM_TFAW != literal_16))
-            {
-                l_scom_buffer.insert<14, 6, 58, uint64_t>(l_TGT0_ATTR_CEN_EFF_DRAM_TFAW );
-            }
-            else if ((l_TGT0_ATTR_CEN_EFF_DRAM_TFAW == literal_16))
-            {
-                l_scom_buffer.insert<14, 6, 58, uint64_t>(literal_0b0001111 );
-            }
-
-            if ((l_def_mba_tmr0q_RW_dlys16 == literal_1))
-            {
-                l_scom_buffer.insert<48, 1, 63, uint64_t>(literal_0b0 );
-            }
-
-            if ((l_def_mba_tmr1q_cfg_trap43 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0101011 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap27 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0011011 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap26 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0011010 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap46 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0101110 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap42 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0101010 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap38 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0100110 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap28 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0011100 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap40 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0101000 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap37 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0100101 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap32 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0100000 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap33 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0100001 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap44 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0101100 );
-            }
-            else if ((l_def_mba_tmr1q_cfg_trap39 == literal_1))
-            {
-                l_scom_buffer.insert<0, 7, 57, uint64_t>(literal_0b0100111 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x301040cull, l_scom_buffer));
@@ -6022,6 +5344,34 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
             }
+            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
+            }
+            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
+            }
+            else if ((l_def_IS5D == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_C3c == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
+            }
             else if ((l_def_IS7a_C4a_C3a == literal_1))
             {
                 l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
@@ -6051,6 +5401,38 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
             }
+            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
+            }
+            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
+            }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b110100 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
+            }
+            else if ((l_def_IS5D == literal_1))
+            {
+                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
+            }
 
             if ((l_def_IS3A_IS3B == literal_1))
             {
@@ -6065,6 +5447,38 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
                 l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111000 );
             }
             else if ((l_def_IS7C == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111000 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
+            }
+            else if ((l_def_IS5D == literal_1))
             {
                 l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
             }
@@ -6097,6 +5511,22 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b100000 );
             }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b010001 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
+            }
 
             if ((l_def_IS3A_IS3B == literal_1))
             {
@@ -6121,6 +5551,22 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if ((l_def_IS5D == literal_1))
             {
                 l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b101000 );
+            }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
             }
 
             if ((l_def_IS3A_IS3B == literal_1))
@@ -6147,6 +5593,22 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b010110 );
             }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
+            }
 
             if ((l_def_IS3A_IS3B == literal_1))
             {
@@ -6172,8 +5634,28 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b101100 );
             }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
+            }
 
-            if ((l_def_IS3A_IS3B == literal_1))
+            if ((l_def_IS3B == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1100 );
+            }
+            else if ((l_def_IS3A_IS3B == literal_1))
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1101 );
             }
@@ -6189,6 +5671,30 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1101 );
             }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1111 );
+            }
+            else if ((l_def_C3c == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1111 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1100 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1111 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1100 );
+            }
+            else if ((l_def_IS5D == literal_1))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1100 );
+            }
 
             if ((l_def_IS3A_IS3B == literal_1))
             {
@@ -6201,6 +5707,39 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if ((l_def_IS5D == literal_1))
             {
                 l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b1 );
+            }
+            else if ((l_def_C3b == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_C3c == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_C3c_C4C_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_C4A_ddr4 == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_IS3b_IS7b == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+            else if ((l_def_IS7C == literal_1))
+            {
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
+            }
+
+            if ((l_def_IS3A_IS3B == literal_1))
+            {
+                l_scom_buffer.insert<53, 1, 63, uint64_t>(literal_0b0 );
             }
 
             if ((l_def_IS3A_IS3B == literal_1))
@@ -6227,496 +5766,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101100 );
             }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b1 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<52, 1, 63, uint64_t>(literal_0b0 );
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b110100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b110100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111000 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111000 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b010000 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b011100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b011110 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b010001 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b110100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b100000 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b010010 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b101110 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b011001 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b101000 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b011010 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b110110 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b010101 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b100100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b010110 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111010 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b011101 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b011110 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
+            else if ((l_def_ddr4_1600_13_12_11 == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b011000 );
             }
@@ -6728,21 +5778,9 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101100 );
             }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101100 );
-            }
             else if ((l_def_C3c_C4C_ddr4 == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b011000 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b011100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111100 );
             }
             else if ((l_def_IS3b_IS7b == literal_1))
             {
@@ -6751,107 +5789,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if ((l_def_IS5D == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b011000 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b011000 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b110100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11111 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11111 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11001 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11011 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11111 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11001 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11001 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11001 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b11111 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x3010414ull, l_scom_buffer));
@@ -7185,606 +6122,6 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
             else if ((l_def_IS7a_C4a_C3a == literal_1))
             {
                 l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111000 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b100000 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b100100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b100000 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b100000 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<0, 6, 58, uint64_t>(literal_0b101100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101000 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101000 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b101000 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<6, 6, 58, uint64_t>(literal_0b111000 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b100100 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b100100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b100100 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<12, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b101100 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<18, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b100001 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111000 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b100010 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<24, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b101001 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b101010 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<30, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_ddr4_1600_13_12_11 == literal_1))
-            {
-            }
-            else if ((l_def_ddr4_1600_13_12_11_2N == literal_1))
-            {
-            }
-            else if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b100101 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b100110 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<36, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b101101 );
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b101110 );
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
-                l_scom_buffer.insert<42, 6, 58, uint64_t>(literal_0b111100 );
-            }
-
-            if ((l_def_C3b == literal_1))
-            {
-            }
-            else if ((l_def_C3c == literal_1))
-            {
-            }
-            else if ((l_def_C3c_C4C_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_C4A_ddr4 == literal_1))
-            {
-            }
-            else if ((l_def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == literal_1))
-            {
-            }
-            else if ((l_def_IS3b_IS7b == literal_1))
-            {
-            }
-            else if ((l_def_IS5D == literal_1))
-            {
-            }
-            else if ((l_def_IS7C == literal_1))
-            {
-            }
-            else if ((l_def_IS7a_C4a_C3a == literal_1))
-            {
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x3010415ull, l_scom_buffer));

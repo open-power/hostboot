@@ -120,34 +120,43 @@ extern "C" {
 
                 if((l_num_master_ranks[cur_port][0] != 0) && (dram_gen_u8 == 2) && (l_stack_type[cur_port][0] == 2))
                 {
-                    if(num_ranks_per_dimm_u8array[cur_port][0] == 2)
+                    //Single Drop; TSV; RDIMM; Configure primary rank groups
+                    if(l_num_master_ranks[cur_port][0] == 2)
                     {
                         primary_rank_group0_u8array[cur_port] = 0;
-                        primary_rank_group1_u8array[cur_port] = INVALID;
+                        primary_rank_group1_u8array[cur_port] = 1;
                         primary_rank_group2_u8array[cur_port] = INVALID;
                         primary_rank_group3_u8array[cur_port] = INVALID;
-                        secondary_rank_group0_u8array[cur_port] = 1;
+                        secondary_rank_group0_u8array[cur_port] = INVALID;
                         secondary_rank_group1_u8array[cur_port] = INVALID;
                         secondary_rank_group2_u8array[cur_port] = INVALID;
                         secondary_rank_group3_u8array[cur_port] = INVALID;
-                    }
-
-                    //if 4H
-                    else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
-                    {
-                        primary_rank_group0_u8array[cur_port] = 0;
-                        primary_rank_group1_u8array[cur_port] = INVALID;
-                        primary_rank_group2_u8array[cur_port] = INVALID;
-                        primary_rank_group3_u8array[cur_port] = INVALID;
-                        secondary_rank_group0_u8array[cur_port] = 1;
-                        secondary_rank_group1_u8array[cur_port] = INVALID;
-                        secondary_rank_group2_u8array[cur_port] = INVALID;
-                        secondary_rank_group3_u8array[cur_port] = INVALID;
-                        tertiary_rank_group0_u8array[cur_port] = 2;
+                        tertiary_rank_group0_u8array[cur_port] = INVALID;
                         tertiary_rank_group1_u8array[cur_port] = INVALID;
                         tertiary_rank_group2_u8array[cur_port] = INVALID;
                         tertiary_rank_group3_u8array[cur_port] = INVALID;
-                        quanternary_rank_group0_u8array[cur_port] = 3;
+                        quanternary_rank_group0_u8array[cur_port] = INVALID;
+                        quanternary_rank_group1_u8array[cur_port] = INVALID;
+                        quanternary_rank_group2_u8array[cur_port] = INVALID;
+                        quanternary_rank_group3_u8array[cur_port] = INVALID;
+                    }
+
+                    //if 4H
+                    else if(l_num_master_ranks[cur_port][0] == 4)
+                    {
+                        primary_rank_group0_u8array[cur_port] = 0;
+                        primary_rank_group1_u8array[cur_port] = 1;
+                        primary_rank_group2_u8array[cur_port] = 2;
+                        primary_rank_group3_u8array[cur_port] = 3;
+                        secondary_rank_group0_u8array[cur_port] = INVALID;
+                        secondary_rank_group1_u8array[cur_port] = INVALID;
+                        secondary_rank_group2_u8array[cur_port] = INVALID;
+                        secondary_rank_group3_u8array[cur_port] = INVALID;
+                        tertiary_rank_group0_u8array[cur_port] = INVALID;
+                        tertiary_rank_group1_u8array[cur_port] = INVALID;
+                        tertiary_rank_group2_u8array[cur_port] = INVALID;
+                        tertiary_rank_group3_u8array[cur_port] = INVALID;
+                        quanternary_rank_group0_u8array[cur_port] = INVALID;
                         quanternary_rank_group1_u8array[cur_port] = INVALID;
                         quanternary_rank_group2_u8array[cur_port] = INVALID;
                         quanternary_rank_group3_u8array[cur_port] = INVALID;
