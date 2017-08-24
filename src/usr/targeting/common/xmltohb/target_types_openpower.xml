@@ -73,6 +73,7 @@
     <attribute><id>OPEN_POWER_MEMCTRL_ERROR_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_N_BULK_POWER_LIMIT_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_N_MAX_MEM_POWER_WATTS</id></attribute>
+    <attribute><id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_DIMM_READ_TIMEOUT_SEC</id></attribute>
     <attribute><id>OPEN_POWER_PROC_ERROR_TEMP_DEG_C</id></attribute>
@@ -86,7 +87,13 @@
     <attribute><id>OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id></attribute>
     <attribute><id>OPEN_POWER_TURBO_MODE_SUPPORTED</id></attribute>
+    <attribute><id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id></attribute>
+    <attribute><id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id></attribute>
+    <attribute><id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id></attribute>
+    <attribute><id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id></attribute>
     <attribute><id>OPAL_MODEL</id></attribute>
+    <attribute><id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id></attribute>
+    <attribute><id>CALCULATED_PROC_MEMORY_POWER_DROP</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>

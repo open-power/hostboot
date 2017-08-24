@@ -178,6 +178,12 @@ namespace HTMGT
                                                             cmdDataLen );
                                 break;
 
+                            case OCC_CFGDATA_GPU_CONFIG:
+                                getGPUConfigMessageData(occ->getTarget(),
+                                                        cmdData,
+                                                        cmdDataLen);
+                                break;
+
                             default:
                                 TMGT_ERR("sendOccConfigData: Unsupported"
                                          " format type 0x%02X",
@@ -932,7 +938,8 @@ void getThermalControlMessageData(uint8_t* o_data,
     l_numSets++;
 
     // VRM
-    l_timeout = l_sys->getAttr<ATTR_OPEN_POWER_VRM_READ_TIMEOUT_SEC>();
+    if (!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_READ_TIMEOUT_SEC>(l_timeout))
+        l_timeout = 0;
     if (l_timeout != 0)
     {
         o_data[index++] = CFGDATA_FRU_TYPE_VRM;
@@ -943,6 +950,51 @@ void getThermalControlMessageData(uint8_t* o_data,
         o_data[index++] = l_timeout;
         l_numSets++;
     }
+
+    // GPU Cores
+    if (!l_sys->tryGetAttr<ATTR_OPEN_POWER_GPU_READ_TIMEOUT_SEC>(l_timeout))
+        l_timeout = 0xFF;
+    if (l_timeout == 0)
+    {
+        l_timeout = 0xFF;
+    }
+    if (!l_sys->
+        tryGetAttr<ATTR_OPEN_POWER_GPU_ERROR_TEMP_DEG_C>(l_ERR_temp))
+        l_ERR_temp = OCC_NOT_DEFINED;
+    if (l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_NOT_DEFINED;
+    }
+    o_data[index++] = CFGDATA_FRU_TYPE_GPU_CORE;
+    o_data[index++] = OCC_NOT_DEFINED;      //DVFS
+    o_data[index++] = l_ERR_temp;           //ERROR
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_DVFS
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_ERROR
+    o_data[index++] = l_timeout;
+    l_numSets++;
+
+    // GPU Memory
+    if (!l_sys->
+        tryGetAttr<ATTR_OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC>(l_timeout))
+        l_timeout = 0xFF;
+    if (l_timeout == 0)
+    {
+        l_timeout = 0xFF;
+    }
+    if (!l_sys->
+        tryGetAttr<ATTR_OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C>(l_ERR_temp))
+        l_ERR_temp = OCC_NOT_DEFINED;
+    if (l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_NOT_DEFINED;
+    }
+    o_data[index++] = CFGDATA_FRU_TYPE_GPU_MEMORY;
+    o_data[index++] = OCC_NOT_DEFINED;      //DVFS
+    o_data[index++] = l_ERR_temp;           //ERROR
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_DVFS
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_ERROR
+    o_data[index++] = l_timeout;
+    l_numSets++;
 
     o_data[l_numSetsOffset] = l_numSets;
     o_size = index;
@@ -975,7 +1027,116 @@ void getAVSBusConfigMessageData( const TargetHandle_t i_occ,
     o_data[index++] = 0xFF;                                     //reserved
     o_data[index++] = 0xFF;                                     //reserved
     o_size = index;
+
 }
+
+
+// Send config data required by OCC for GPU handling.
+// The OCC will determine which GPUs are present from the APSS GPIOs.
+void getGPUConfigMessageData(const TargetHandle_t i_occ,
+                             uint8_t * o_data,
+                             uint64_t & o_size)
+{
+    unsigned int index = 0;
+    assert(o_data != nullptr);
+
+    // Get system and proc target
+    Target* sys = nullptr;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+    ConstTargetHandle_t proc = getParentChip(i_occ);
+    assert(proc != nullptr);
+
+    // Populate the data
+    o_data[index++] = OCC_CFGDATA_GPU_CONFIG;
+    o_data[index++] = 0x01;             // GPU Config Version
+
+    uint16_t power = 0;
+    power = sys->getAttr<ATTR_CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS>();
+    //uint16_t miscpwr =
+    //    sys->getAttr<ATTR_MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS>();
+    UINT16_PUT(&o_data[index], power);   // Total non-GPU max power (W)
+    index += 2;
+
+    power = sys->getAttr<ATTR_CALCULATED_PROC_MEMORY_POWER_DROP>();
+    UINT16_PUT(&o_data[index], power);   // Total proc/mem power drop (W)
+    index += 2;
+    o_data[index++] = 0;                // reserved
+    o_data[index++] = 0;
+
+    uint32_t gpu_func_sensors[MAX_GPUS] = {0};
+    uint32_t gpu_temp_sensors[MAX_GPUS] = {0};
+    uint32_t gpu_memtemp_sensors[MAX_GPUS] = {0};
+    // Read GPU sensor numbers
+    uint8_t num_sensors = 0;
+    errlHndl_t err = nullptr;
+    err = SENSOR::getGpuSensors(const_cast<TARGETING::TargetHandle_t>(proc),
+                                HWAS::GPU_FUNC_SENSOR,
+                                num_sensors, gpu_func_sensors);
+    if (err)
+    {
+        TMGT_ERR("getGPUConfigMessageData: getGpuSensors(GPU_FUNC_SENSOR)"
+                 " failed with rc 0x%04X", err->reasonCode());
+        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        memset(gpu_func_sensors, 0, sizeof(gpu_func_sensors));
+    }
+    err = SENSOR::getGpuSensors(const_cast<TARGETING::TargetHandle_t>(proc),
+                                HWAS::GPU_TEMPERATURE_SENSOR,
+                                num_sensors, gpu_temp_sensors);
+    if (err)
+    {
+        TMGT_ERR("getGPUConfigMessageData: getGpuSensors(GPU_TEMP_SENSOR)"
+                 " failed with rc 0x%04X", err->reasonCode());
+        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        memset(gpu_temp_sensors, 0, sizeof(gpu_temp_sensors));
+    }
+    err = SENSOR::getGpuSensors(const_cast<TARGETING::TargetHandle_t>(proc),
+                                HWAS::GPU_MEMORY_TEMP_SENSOR,
+                                num_sensors, gpu_memtemp_sensors);
+    if (err)
+    {
+        TMGT_ERR("getGPUConfigMessageData: getGpuSensors(GPU_MEM_TEMP_SENSOR)"
+                 " failed with rc 0x%04X", err->reasonCode());
+        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
+        memset(gpu_memtemp_sensors, 0, sizeof(gpu_memtemp_sensors));
+    }
+    for (unsigned int index = 0; index < MAX_GPUS; ++index)
+    {
+        if (gpu_func_sensors[index] == TARGETING::UTIL::INVALID_IPMI_SENSOR)
+            gpu_func_sensors[index] = 0;
+        if (gpu_temp_sensors[index] == TARGETING::UTIL::INVALID_IPMI_SENSOR)
+            gpu_temp_sensors[index] = 0;
+        if (gpu_memtemp_sensors[index] == TARGETING::UTIL::INVALID_IPMI_SENSOR)
+            gpu_memtemp_sensors[index] = 0;
+    }
+
+    // GPU0
+    UINT32_PUT(&o_data[index], gpu_temp_sensors[0]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_memtemp_sensors[0]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_func_sensors[0]);
+    index += 4;
+
+    // GPU1
+    UINT32_PUT(&o_data[index], gpu_temp_sensors[1]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_memtemp_sensors[1]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_func_sensors[1]);
+    index += 4;
+
+    // GPU2
+    UINT32_PUT(&o_data[index], gpu_temp_sensors[2]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_memtemp_sensors[2]);
+    index += 4;
+    UINT32_PUT(&o_data[index], gpu_func_sensors[2]);
+    index += 4;
+
+    o_size = index;
+
+} // end getGPUConfigMessageData()
 
 
 

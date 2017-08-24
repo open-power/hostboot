@@ -369,6 +369,13 @@ namespace HTMGT
                 l_success = false;
             }
         }
+        else if (i_callout.type == OCC_CALLOUT_TYPE_GPU_SENSOR)
+        {
+            const uint32_t sensor = (uint32_t)i_callout.calloutValue;
+            io_errlHndl->addSensorCallout(sensor, HWAS::GPU_FUNC_SENSOR,
+                                          i_priority);
+            io_callout_num++;
+        }
         else
         {
             TMGT_ERR("elogAddCallout: Invalid callout type (type=%d)",

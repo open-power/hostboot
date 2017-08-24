@@ -339,6 +339,11 @@ namespace HTMGT
                                 const occErrlCallout_t     i_callout,
                                 uint8_t &                  io_callout_num);
 
+            /**
+             * @brief Update the GPU presence sensors in the system
+             */
+            void updateGpuPresence();
+
         protected:
             // Instance number of this OCC: 0 = first physical OCC
             uint8_t         iv_instance;
@@ -366,6 +371,8 @@ namespace HTMGT
             bool            iv_lastPollValid;
             // expected occsPresent byte in POLL response
             uint8_t         iv_occsPresent;
+            // GPU configuration from poll response data
+            uint8_t         iv_gpuCfg;
 
             occResetReason  iv_resetReason;
 

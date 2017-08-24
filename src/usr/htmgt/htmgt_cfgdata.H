@@ -28,6 +28,7 @@
 #include <targeting/common/target.H>
 #include "htmgt_occ.H"
 
+#define MAX_GPUS 3
 
 namespace HTMGT
 {
@@ -53,6 +54,7 @@ namespace HTMGT
         OCC_CFGDATA_MEM_THROTTLE   = 0x12,  // Memory Throttle Settings
         OCC_CFGDATA_TCT_CONFIG     = 0x13,  // Thermal Control Treshold
         OCC_CFGDATA_AVSBUS_CONFIG  = 0x14,  // AVSBus Config
+        OCC_CFGDATA_GPU_CONFIG     = 0x15,  // GPU Config
 
         OCC_CFGDATA_FORMAT_END,             // Marker to indicate last entry
         OCC_CFGDATA_CLEAR_ALL      = 0xFF,  // Clear All Active Config Data
@@ -68,10 +70,12 @@ namespace HTMGT
 
         CFGDATA_CORES = 24,
 
-        CFGDATA_FRU_TYPE_PROC   = 0x00,
-        CFGDATA_FRU_TYPE_MEMBUF = 0x01,
-        CFGDATA_FRU_TYPE_DIMM   = 0x02,
-        CFGDATA_FRU_TYPE_VRM    = 0x03,
+        CFGDATA_FRU_TYPE_PROC       = 0x00,
+        CFGDATA_FRU_TYPE_MEMBUF     = 0x01,
+        CFGDATA_FRU_TYPE_DIMM       = 0x02,
+        CFGDATA_FRU_TYPE_VRM        = 0x03,
+        CFGDATA_FRU_TYPE_GPU_CORE   = 0x04,
+        CFGDATA_FRU_TYPE_GPU_MEMORY = 0x05,
 
         CFDATA_DVFS_NOT_DEFINED = 0xFF,
     };
@@ -116,6 +120,7 @@ namespace HTMGT
         { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_TCT_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_AVSBUS_CONFIG,  TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        { OCC_CFGDATA_GPU_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
     };
     const size_t OCC_CONFIG_TABLE_SIZE = sizeof(occCfgDataTable) /
         sizeof(occCfgDataTable_t);
@@ -225,6 +230,18 @@ namespace HTMGT
      */
     void getAVSBusConfigMessageData(const TARGETING::TargetHandle_t i_occ,
                                     uint8_t* o_data, uint64_t & o_size);
+
+    /**
+     * Fills in the GPU Configuration Data message buffer
+     *
+     * @param[in]   i_occ - the OCC target
+     * @param[out]  o_data - preallocated buffer to fill in
+     * @param[out]  o_size - set to the message size
+     * @pre o_data is large enough.
+     */
+    void getGPUConfigMessageData(const TARGETING::TargetHandle_t i_occ,
+                                 uint8_t * o_data,
+                                 uint64_t & o_size);
 
     /**
      * Fill in the Frequency Point Configuration Data

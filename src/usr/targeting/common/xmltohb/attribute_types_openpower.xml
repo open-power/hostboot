@@ -498,6 +498,19 @@
 </attribute>
 
 <attribute>
+    <id>MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS</id>
+    <description>
+        Power used by components other than CPU, memory,
+        or GPUs in Watts
+    </description>
+    <simpleType>
+        <uint16_t></uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>OPEN_POWER_MEMCTRL_READ_TIMEOUT_SEC</id>
     <description>
         Memory controller read timeout in seconds
@@ -668,6 +681,54 @@
         If this system supports Turbo frequency mode.
             0x00 = no
             0x01 = yes
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_GPU_READ_TIMEOUT_SEC</id>
+    <description>
+        GPU core temperature read timeout in seconds
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_GPU_ERROR_TEMP_DEG_C</id>
+    <description>
+        GPU core temperature error threshold in degrees C
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_GPU_MEM_READ_TIMEOUT_SEC</id>
+    <description>
+        GPU memory temperature read timeout in seconds
+    </description>
+    <simpleType>
+        <uint8_t></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>OPEN_POWER_GPU_MEM_ERROR_TEMP_DEG_C</id>
+    <description>
+        GPU memory temperature error threshold in degrees C
     </description>
     <simpleType>
         <uint8_t></uint8_t>
@@ -1148,6 +1209,41 @@ ID for the sensor number returned with the elog. -->
         <array>2</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id>
+    <description>
+        HTMGT calculates the total non-GPU maximum power in W when the
+        CPUs are at max frequency and memory at max power (least throttled)
+        and then adds MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0000</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+</attribute>
+
+<attribute>
+    <id>CALCULATED_PROC_MEMORY_POWER_DROP</id>
+    <description>
+        HTMGT calculates the total processor/memory power drop in W when the
+        CPUs are at min frequency and memory at min power (most throttled).
+        This is the how much CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
+        can be reduced by.
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>0x0000</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>volatile</persistency>
     <readable/>
     <writeable/>
 </attribute>

@@ -63,6 +63,7 @@ namespace HTMGT
         iv_target(i_target),
         iv_lastPollValid(false),
         iv_occsPresent(1 << i_instance),
+        iv_gpuCfg(0),
         iv_resetReason(OCC_RESET_REASON_NONE),
         iv_exceptionLogged(0),
         iv_resetCount(0),
@@ -361,6 +362,31 @@ namespace HTMGT
         addOccTraceBuffer( io_errl,
                            iv_target,
                            OCC_TRACE_INF );
+    }
+
+    // Notify HostBoot which GPUs are present (after OCC goes active)
+    void Occ::updateGpuPresence()
+    {
+        TARGETING::ConstTargetHandle_t const_proc_target =
+            TARGETING::getParentChip(iv_target);
+        SENSOR::StatusSensor::statusEnum gpu_status[MAX_GPUS] =
+        {
+            SENSOR::StatusSensor::NOT_PRESENT,
+            SENSOR::StatusSensor::NOT_PRESENT,
+            SENSOR::StatusSensor::NOT_PRESENT
+        };
+        if (iv_gpuCfg & GPUCFG_GPU0_PRESENT)
+            gpu_status[0] = SENSOR::StatusSensor::PRESENT;
+        if (iv_gpuCfg & GPUCFG_GPU1_PRESENT)
+            gpu_status[1] = SENSOR::StatusSensor::PRESENT;
+        if (iv_gpuCfg & GPUCFG_GPU2_PRESENT)
+            gpu_status[2] = SENSOR::StatusSensor::PRESENT;
+
+        TMGT_INF("updateGpuPresence: OCC%d - GPU0:%d, GPU1:%d, GPU2:%d",
+                 iv_instance, gpu_status[0], gpu_status[1], gpu_status[2]);
+        SENSOR::updateGpuSensorStatus(const_cast<TARGETING::TargetHandle_t>
+                                      (const_proc_target),
+                                      gpu_status);
     }
 
 
@@ -752,7 +778,12 @@ namespace HTMGT
                     // Make sure all OCCs went to active state
                     for( const auto & occ : iv_occArray )
                     {
-                        if (requestedState != occ->getState())
+                        if (requestedState == occ->getState())
+                        {
+                            // Update GPU present status
+                            occ->updateGpuPresence();
+                        }
+                        else
                         {
                             TMGT_ERR("_setOccState: OCC%d is not in 0x%02X "
                                      "state",
@@ -797,7 +828,6 @@ namespace HTMGT
                                          "CHARACTERIZATION state");
                         }
                     }
-
                 }
             }
         }
