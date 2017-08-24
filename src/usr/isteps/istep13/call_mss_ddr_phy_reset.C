@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_mss_ddr_phy_reset.H>
+#include <p9c_mss_ddr_phy_reset.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -100,6 +101,74 @@ void* call_mss_ddr_phy_reset (void *io_pArgs)
         }
 
     } // end l_mcbist loop
+
+
+    if(l_stepError.getErrorHandle() == NULL)
+    {
+        // Get all Centaur targets
+        TARGETING::TargetHandleList l_membufTargetList;
+        getAllChips(l_membufTargetList, TYPE_MEMBUF);
+
+        for (TargetHandleList::const_iterator
+            l_membuf_iter = l_membufTargetList.begin();
+            l_membuf_iter != l_membufTargetList.end();
+            ++l_membuf_iter)
+        {
+            //  make a local copy of the target for ease of use
+            TARGETING::Target* l_pCentaur = *l_membuf_iter;
+
+            TARGETING::TargetHandleList l_mbaTargetList;
+            getChildChiplets(l_mbaTargetList,
+                        l_pCentaur,
+                        TYPE_MBA);
+
+            for (TargetHandleList::const_iterator
+                l_mba_iter = l_mbaTargetList.begin();
+                l_mba_iter != l_mbaTargetList.end();
+                ++l_mba_iter)
+            {
+                //  Make a local copy of the target for ease of use
+                TARGETING::Target*  l_mbaTarget = *l_mba_iter;
+
+                // Dump current run on target
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                    "Running p9c_mss_ddr_phy_reset HWP on "
+                    "target HUID %.8X", TARGETING::get_huid(l_mbaTarget));
+
+                //  call the HWP with each target
+                fapi2::Target <fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapi_mba_target(l_mbaTarget);
+
+                FAPI_INVOKE_HWP(l_err, p9c_mss_ddr_phy_reset, l_fapi_mba_target);
+
+                //  process return code.
+                if ( l_err )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "ERROR 0x%.8X: p9c_mss_ddr_phy_reset HWP returns error",
+                        l_err->reasonCode());
+
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_fapi_mba_target).addToLog( l_err );
+
+                    // Create IStep error log and cross reference to error that occurred
+                    l_stepError.addErrorDetails( l_err );
+
+                    // Commit Error
+                    errlCommit( l_err, HWPF_COMP_ID );
+ 
+                    break;
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS running p9c_mss_ddr_phy_reset HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_fapi_mba_target));
+                }
+
+            }
+ 
+        }
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_ddr_phy_reset exit" );

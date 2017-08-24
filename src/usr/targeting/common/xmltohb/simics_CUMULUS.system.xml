@@ -5487,12 +5487,11 @@
 
 
 
+
+
     <attribute>
-        <id>FAPI_NAME</id>
-        <default>membuf0</default>
+        <id>FAPI_NAME</id><default>memb:k0:n0:s0:p00</default>
     </attribute>
-
-
     <attribute>
         <id>FSI_MASTER_CHIP</id>
         <default>physical:sys-0/node-0/proc-0</default>
@@ -5608,6 +5607,9 @@
         <default>1</default>
     </attribute>
 
+    <attribute>
+        <id>FAPI_NAME</id><default>l4:k0:n0:s0:p00:c00</default>
+    </attribute>
 
     <attribute>
         <id>HUID</id>
@@ -5657,10 +5659,13 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-0/membuf-0/mba-0</default>
     </attribute>
-        <attribute>
-            <id>CHIP_UNIT</id>
-            <default>0</default>
-        </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>mba:k0:n0:s0:p00:c00</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0dimm0</id>
@@ -5753,6 +5758,9 @@
             <id>CHIP_UNIT</id>
             <default>0</default>
         </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>mba:k0:n0:s0:p00:c01</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0dimm4</id>
@@ -5876,11 +5884,10 @@
     </attribute>
 
 
-
     <attribute>
-        <id>FAPI_NAME</id>
-        <default>membuf1</default>
+        <id>FAPI_NAME</id><default>memb:k0:n0:s0:p01:c00</default>
     </attribute>
+
 
 
 
@@ -5998,6 +6005,9 @@
         <default>1</default>
     </attribute>
 
+    <attribute>
+        <id>FAPI_NAME</id><default>l4:k0:n0:s0:p01:c00</default>
+    </attribute>
 
     <attribute>
         <id>HUID</id>
@@ -6051,6 +6061,9 @@
             <id>CHIP_UNIT</id>
             <default>0</default>
         </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>mba:k0:n0:s0:p01:c00</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0dimm8</id>
@@ -6138,10 +6151,13 @@
         <id>AFFINITY_PATH</id>
         <default>affinity:sys-0/node-0/proc-0/mc-0/mi-0/dmi-1/membuf-1/mba-1</default>
     </attribute>
-        <attribute>
-            <id>CHIP_UNIT</id>
-            <default>0</default>
-        </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id><default>mba:k0:n0:s0:p01:c01</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0dimm12</id>
