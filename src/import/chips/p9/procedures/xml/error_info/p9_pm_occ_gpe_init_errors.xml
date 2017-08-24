@@ -43,49 +43,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_GPE0_IN_HALT_BEFORE_RESET</rc>
-    <description>Reset not attempted as GPE0 was already in a halt state </description>
-     <ffdc>CHIP</ffdc>
-     <ffdc>GPE0_STATUS</ffdc>
-     <ffdc>GPE0_MODE</ffdc>
-        
-     <collectRegisterFfdc>
-        <id>OCCGPE0_FFDC_REGISTERS</id>
-        <target>CHIP</target>
-        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-     </collectRegisterFfdc>
-
-    <collectFfdc>p9_collect_ppe_state, CHIP, GPE0_MODE, GPE0_BASE_ADDRESS</collectFfdc>
-
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <rc>RC_GPE1_IN_HALT_BEFORE_RESET</rc>
-    <description>Reset not attempted as GPE1 was already in a halt state </description>
-     <ffdc>CHIP</ffdc>
-     <ffdc>GPE1_STATUS</ffdc>
-     <ffdc>GPE1_MODE</ffdc>
-
-     <collectFfdc>p9_collect_ppe_state, CHIP, GPE1_MODE, GPE1_BASE_ADDRESS</collectFfdc>
-
-     <collectRegisterFfdc>
-        <id>OCCGPE1_FFDC_REGISTERS</id>
-        <target>CHIP</target>
-        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-     </collectRegisterFfdc>
-
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
       <rc>RC_PM_OCC_GPE0_RESET_TIMEOUT</rc>
       <description>Failed to halt OCC GPE0 during RESET operation.</description>
       <ffdc>CHIP</ffdc>
