@@ -36,6 +36,9 @@
 #include <targeting/common/utilFilter.H>
 #include <ipmi/ipmi_reasoncodes.H>
 #include <endian.h>
+#include <vpd/pvpdenums.H>
+#include <devicefw/userif.H>
+
 
 extern trace_desc_t * g_trac_ipmi;
 
@@ -218,7 +221,7 @@ namespace SENSOR
         else
         {
             TRACFCOMP(g_trac_ipmi,"We were not able to find a sensor number in"
-                      " the IPMI_SENSORS attribute for sensor_name=0x%x"
+                      " the IPMI_SENSORS attribute for sensor_name=0x%x "
                       "for target with huid=0x%x, skipping call to "
                       "sendSetSensorReading()",
                     iv_name, TARGETING::get_huid( iv_target ));
@@ -727,6 +730,32 @@ namespace SENSOR
         return l_err;
 
     };
+
+    //**************************************************************************
+    // GpuSensor constructor
+    //**************************************************************************
+    GpuSensor::GpuSensor(TARGETING::SENSOR_NAME i_name, uint16_t i_num,
+                     TARGETING::ConstTargetHandle_t i_target)
+             : StatusSensor(i_target)
+
+    {
+        /* Note: StatusSensor sets these for processor target */
+        //iv_functionalOffset  = PROC_DISABLED;
+        //iv_presentOffset     = PROC_PRESENCE_DETECTED;
+
+        // Override iv_name set by parent constructor
+        iv_name = i_name;
+
+        // 3 numbers possible (1 per GPU) for each name, so save which one
+        iv_sensorNumber = i_num;
+    };
+
+    //**************************************************************************
+    // GpuSensor destructor
+    //**************************************************************************
+    GpuSensor::~GpuSensor()
+    {
+    }
 
     //**************************************************************************
     // FaultSensor constructor
@@ -1251,4 +1280,288 @@ namespace SENSOR
         return TARGETING::UTIL::getSensorNumber(nodes[0],
                                         TARGETING::SENSOR_NAME_BACKPLANE_FAULT);
     }
+
+    /**
+     * @brief  All sensors returned cfgID bit
+     *         NV keyword = 0x02 --> 0b0100 -> 4
+     */
+    static const uint16_t NVCFG_ALL_SENSORS_RETURNED = 4;
+
+    /**
+     * @brief  Helper function to getGpuSensors()
+     *         NV keyword tells us what backplane is installed,
+     *         thus what GPUs are supported
+     *
+     * @param[out] returns NV keyword in bitwise format
+     *
+     * @return  Error log handle if a deviceRead fails
+     */
+    errlHndl_t getNVCfgIDBit(uint16_t & o_cfgID_bitwise)
+    {
+        static uint16_t L_NV_bits = 0;
+        errlHndl_t l_err = nullptr;
+
+        if (L_NV_bits == 0)
+        {
+            // grab system enclosure node
+            TARGETING::TargetHandle_t l_sys = NULL;
+            TARGETING::TargetHandleList l_nodeTargets;
+            TARGETING::targetService().getTopLevelTarget(l_sys);
+            assert(l_sys != NULL);
+            getChildAffinityTargets(l_nodeTargets, l_sys, TARGETING::CLASS_ENC,
+                                    TARGETING::TYPE_NODE);
+            assert(!l_nodeTargets.empty());
+
+            // get keyword size first
+            PVPD::pvpdRecord l_Record = PVPD::VNDR;
+            PVPD::pvpdKeyword l_KeyWord = PVPD::NV;
+            size_t l_nvKwdSize = 0;
+            l_err = deviceRead(l_nodeTargets[0],NULL,l_nvKwdSize,
+                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+            if (!l_err)
+            {
+                uint8_t l_kwd[l_nvKwdSize] = {0};
+                // now read the keyword
+                l_err = deviceRead(l_nodeTargets[0],l_kwd,l_nvKwdSize,
+                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+                if (!l_err)
+                {
+                    uint8_t cfgID = l_kwd[l_nvKwdSize-1];
+                    if (cfgID < 16) // maximum setting (bits 0-15)
+                    {
+                        L_NV_bits = 0x0001 << cfgID;
+                    }
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record data",l_err->eid());
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record size",l_err->eid());
+            }
+        }
+
+        o_cfgID_bitwise = L_NV_bits;
+
+        return l_err;
+    }
+
+    /**
+     *  @brief Grab the GPU sensor type IDs for a particular processor target
+     *
+     *   Will return all sensor ids that match the type for a given target.
+     *
+     *  @param[in] - i_proc  - processor target
+     *  @param[in] - i_type  - Functional/state, gpucoretemp, gpumemtemp
+     *  @param[out] - o_num_ids - number of valid IDs returned in o_ids
+     *  @param[out] - o_ids     - ordered list of sensor IDs
+     *
+     *  @return Errorlog handle
+     */
+    errlHndl_t getGpuSensors( TARGETING::Target* i_proc,
+                              HWAS::sensorTypeEnum i_type,
+                              uint8_t & o_num_ids,
+                              uint32_t o_ids[MAX_GPU_SENSORS_PER_PROCESSOR] )
+    {
+        static uint16_t L_obus_cfgID_bit = 0;
+        errlHndl_t l_errl = nullptr;
+
+        // default to no ids returned
+        o_num_ids = 0;
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_GPU_SENSORS>::Type
+                                                                 l_sensorArray;
+
+        bool foundSensors = i_proc->tryGetAttr<TARGETING::ATTR_GPU_SENSORS>
+                                                                (l_sensorArray);
+
+        // Verify we are getting non-default values
+        if (foundSensors && l_sensorArray[0][0] != 0)
+        {
+            // Figure out which backplane we have
+            // Only read NV keyword once (if possible)
+            if (L_obus_cfgID_bit == 0)
+            {
+                l_errl = getNVCfgIDBit(L_obus_cfgID_bit);
+                if (l_errl || (L_obus_cfgID_bit == 0))
+                {
+                    delete l_errl;
+                    // default to full list of GPU sensors
+                    L_obus_cfgID_bit = NVCFG_ALL_SENSORS_RETURNED;
+                }
+            }
+
+            uint32_t elementCount = (sizeof(l_sensorArray)/
+                                     sizeof(l_sensorArray[0]));
+            TRACFCOMP(g_trac_ipmi,"getGpuSensors() -> GPU_SENSORS array size = %d, cfgBit = 0x%x",
+                     elementCount, L_obus_cfgID_bit);
+
+            // verify array index won't exceed output array (o_ids)
+            assert(elementCount <= MAX_GPU_SENSORS_PER_PROCESSOR);
+
+            // now cycle through each GPU row
+            for (uint32_t index = 0; index < elementCount; index++)
+            {
+                uint16_t * row_ptr = &l_sensorArray[index][0];
+
+                TRACFCOMP(g_trac_ipmi,"getGpuSensors() -> ROW %d, 0x%04X, 0x%X, 0x%04X, 0x%X, 0x%04X, 0x%X, 0x%X",
+                        index, row_ptr[0], row_ptr[1], row_ptr[2],
+                        row_ptr[3], row_ptr[4], row_ptr[5], row_ptr[6]);
+
+                // Include Sensor if the GPU is present in the current OBUS_CFG
+                if ((L_obus_cfgID_bit &
+                    row_ptr[TARGETING::GPU_SENSOR_ARRAY_OBUS_CFG_OFFSET])
+                    == L_obus_cfgID_bit )
+                {
+                    switch(i_type)
+                    {
+                        case HWAS::GPU_FUNC_SENSOR:
+                            o_ids[index] =
+                            row_ptr[TARGETING::GPU_SENSOR_ARRAY_FUNC_ID_OFFSET];
+                            o_num_ids++;
+                        break;
+                        case HWAS::GPU_MEMORY_TEMP_SENSOR:
+                            o_ids[index] =
+                        row_ptr[TARGETING::GPU_SENSOR_ARRAY_MEM_TEMP_ID_OFFSET];
+                            o_num_ids++;
+                        break;
+                        case HWAS::GPU_TEMPERATURE_SENSOR:
+                            o_ids[index] =
+                            row_ptr[TARGETING::GPU_SENSOR_ARRAY_TEMP_ID_OFFSET];
+                            o_num_ids++;
+                        break;
+                        default:
+                            TRACFCOMP(g_trac_ipmi,"getGpuSensors() -> unknown sensor type 0x%02X", i_type);
+                            o_ids[index] = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+                    }
+                }
+                else
+                {
+                    o_ids[index] = TARGETING::UTIL::INVALID_IPMI_SENSOR;
+                }
+                TRACFCOMP(g_trac_ipmi,
+                    "getGpuSensors() -> o_id[%d] = 0x%X", index, o_ids[index]);
+            } // end of for loop
+        } // end of if check for non-default values
+
+        return NULL;
+    } // end getGpuSensors()
+
+
+    /**
+     * @brief   Helper function that sends GPU sensor status to BMC
+     *
+     * @param[in] sensor name (IPMI_SENSOR_TYPE with IPMI_ENTITY_ID)
+     * @param[in] sensor id number
+     * @param[in] processor target
+     * @param[in] status to send for the identified GPU sensor
+     */
+    void sendGpuSensorStatus(uint16_t i_sensor_name_value,
+                            uint16_t i_sensor_id,
+                            TARGETING::ConstTargetHandle_t i_target,
+                            StatusSensor::statusEnum & i_status)
+    {
+        TRACFCOMP(g_trac_ipmi, "sendGpuSensorStatus(0x%0X, 0x%X, Target 0x%X, status: %d)",
+            i_sensor_name_value, i_sensor_id,
+            TARGETING::get_huid(i_target), i_status);
+
+        TARGETING::SENSOR_NAME l_sensor_name;
+        switch(i_sensor_name_value)
+        {
+            case TARGETING::SENSOR_NAME_GPU_TEMP:
+                l_sensor_name = TARGETING::SENSOR_NAME_GPU_TEMP;
+                break;
+            case TARGETING::SENSOR_NAME_GPU_STATE:
+                l_sensor_name = TARGETING::SENSOR_NAME_GPU_STATE;
+                break;
+            case TARGETING::SENSOR_NAME_GPU_MEM_TEMP:
+                l_sensor_name = TARGETING::SENSOR_NAME_GPU_MEM_TEMP;
+                break;
+            default:
+                TRACFCOMP(g_trac_ipmi, "sendGpuSensorStatus(0x%0X, 0x%X) - unknown GPU sensor name",
+                    i_sensor_name_value, i_sensor_id);
+                l_sensor_name = TARGETING::SENSOR_NAME_FAULT;
+            break;
+        }
+
+        // Only update if we found a valid gpu sensor name
+        if (l_sensor_name != TARGETING::SENSOR_NAME_FAULT)
+        {
+            // create a GPU status sensor for our needs
+            GpuSensor l_sensor(l_sensor_name, i_sensor_id, i_target);
+
+            // send the status to the BMC
+            errlHndl_t l_err = l_sensor.setStatus( i_status );
+
+            // commit the error and move to the next target
+            if( l_err )
+            {
+               errlCommit( l_err, IPMI_COMP_ID );
+            }
+        }
+    }
+
+    /**
+     *  @brief  Updates GPU sensor status for GPUs on this
+     *          particular processor target
+     *
+     *  @param[in] - i_proc       - processor target
+     *  @param[in] - i_gpu_status - status of GPU0, GPU1 and GPU2
+     */
+    void updateGpuSensorStatus( TARGETING::Target* i_proc,
+                    StatusSensor::statusEnum i_gpu_status[MAX_PROCESSOR_GPUS] )
+    {
+        uint16_t obus_cfgID_bit = 0;
+
+        TARGETING::AttributeTraits<TARGETING::ATTR_GPU_SENSORS>::Type
+                                                                  l_sensorArray;
+
+        bool foundSensors = i_proc->tryGetAttr<TARGETING::ATTR_GPU_SENSORS>
+                                                                (l_sensorArray);
+
+        // Verify we are getting non-default values
+        if (foundSensors && (l_sensorArray[0][0] != 0))
+        {
+            // Figure out which backplane we have
+            // Only read NV keyword once (if possible)
+            errlHndl_t l_errl = getNVCfgIDBit(obus_cfgID_bit);
+            if (l_errl || (obus_cfgID_bit == 0))
+            {
+                // default to all sensors
+                obus_cfgID_bit = NVCFG_ALL_SENSORS_RETURNED;
+                delete l_errl;
+            }
+
+            uint32_t elementCount = (sizeof(l_sensorArray)/
+                                     sizeof(l_sensorArray[0]));
+            TRACDCOMP(g_trac_ipmi,"updateGpuSensorStatus() -> array size = %d, cfgBit = 0x%x",
+                     elementCount, obus_cfgID_bit);
+
+            // verify array index won't exceed output array (o_ids)
+            assert(elementCount <= MAX_PROCESSOR_GPUS);
+
+            // now cycle through each GPU row
+            for (uint8_t index = 0; index < MAX_PROCESSOR_GPUS; index++)
+            {
+                uint16_t * sensor_row_ptr = &l_sensorArray[index][0];
+                StatusSensor::statusEnum newStatus = i_gpu_status[index];
+
+                // Include Sensor if the GPU is present in the current OBUS_CFG
+                if ((obus_cfgID_bit &
+                    sensor_row_ptr[TARGETING::GPU_SENSOR_ARRAY_OBUS_CFG_OFFSET])
+                    == obus_cfgID_bit )
+                {
+                    // Only update the GPU status sensors, skip temperature ones
+                    // GPU core Status/Functional Sensor
+                    uint16_t sensor_name =
+                sensor_row_ptr[TARGETING::GPU_SENSOR_ARRAY_FUNC_OFFSET];
+                    uint16_t sensor_id =
+                sensor_row_ptr[TARGETING::GPU_SENSOR_ARRAY_FUNC_ID_OFFSET];
+                    sendGpuSensorStatus(sensor_name,sensor_id,i_proc,newStatus);
+                }
+            } // end of GPU loop
+        } // end of if check for non-default values
+    } // end of updateGpuSensorStatus()
 }; // end name space

@@ -139,7 +139,7 @@ namespace SENSOR
      *  @enum discrete09_Offsets
      *
      *      Offsets specific to IPMI sensor reading type 09
-     *      digital discrete senosrs. These offsets result in
+     *      digital discrete sensors. These offsets result in
      *      Device Enabled or Device Disabled events in the
      *      BMC event log.
      *
@@ -157,7 +157,7 @@ namespace SENSOR
      *  @enum discrete03_Offsets
      *
      *      Offsets specific to IPMI sensor reading type 03
-     *      digital discrete senosrs. These offsets result in generic
+     *      digital discrete sensors. These offsets result in generic
      *      State Asserted or State Deasserted events in the
      *      BMC event log.
      *
@@ -386,9 +386,9 @@ namespace SENSOR
                     setSensorReadingRequest * i_data);
 
             /**
-             * @brief helper function to get the sensor nubmer
+             * @brief helper function to get the sensor number
              */
-            inline uint32_t getSensorNumber( )
+            virtual uint32_t getSensorNumber( )
             {
                 return TARGETING::UTIL::getSensorNumber(iv_target, iv_name );
             };
@@ -688,15 +688,15 @@ namespace SENSOR
 
             errlHndl_t setStatus( statusEnum status );
 
-        private:
-            // disable the default constructor
-            StatusSensor();
-
+        protected:
             // internal offset data which is configured based on target type
             // used in construction.
             uint8_t iv_presentOffset;
             uint8_t iv_functionalOffset;
 
+        private:
+            // disable the default constructor
+            StatusSensor();
     };
 
     /**
@@ -789,6 +789,57 @@ namespace SENSOR
 
             // Disable copy constructor
             FaultSensor(const FaultSensor& i_rhs);
+    };
+
+
+    /**
+     *  @class GpuSensor
+     *
+     *  @brief Specialized class to handle GPU sensor status.
+     *
+     *  @par Detailed Description:
+     *      Provides the functionality needed to set the status of GPU sensors.
+     */
+    class GpuSensor : public StatusSensor
+    {
+
+        public:
+
+            /**
+             *  @brief Constructor for a gpu sensor
+             *
+             *  The status sensor is used for GPUs attached to Procs. Hostboot
+             *  will update the present and functional state for the status
+             *  sensor associated with each instance of these target types.
+             *
+             *  @param[in] - Sensor name enum
+             *  @param[in] - number identifying particular sensor
+             *  @param[in] - Processor target that contains the sensors
+             */
+            GpuSensor(TARGETING::SENSOR_NAME i_name, uint16_t i_num,
+                      TARGETING::ConstTargetHandle_t i_target );
+
+            /**
+             *  @brief return the unique number identifying this sensor
+             */
+            uint32_t getSensorNumber() override
+            {
+                return iv_sensorNumber;
+            };
+
+            /**
+             *  @brief Destructor for the GpuSensor
+             */
+            ~GpuSensor();
+
+        private:
+            /**
+             *  @brief unique number identifying this particular gpu sensor
+             */
+            uint16_t iv_sensorNumber;
+
+            // disable the default constructor
+            GpuSensor();
     };
 
     /**
@@ -949,6 +1000,43 @@ namespace SENSOR
      *  @return sensor number
      */
     uint8_t getBackPlaneFaultSensor();
+
+    /**
+     * @brief Maximum GPU sensors on a single processor
+     */
+    static const uint8_t MAX_GPU_SENSORS_PER_PROCESSOR = 3;
+
+    /**
+     *  @brief Grab the GPU sensor type IDs for a particular processor target
+     *
+     *   Will return all sensor ids that match the type for a given target.
+     *
+     *  @param[in] - i_proc  - processor target
+     *  @param[in] - i_type  - Functional/state, gpucoretemp, gpumemtemp
+     *  @param[out] - o_num_ids - number of valid IDs returned in o_ids
+     *  @param[out] - o_ids     - ordered list of sensor IDs
+     *
+     *  @return Errorlog handle
+     */
+    errlHndl_t getGpuSensors( TARGETING::Target* i_proc,
+                              HWAS::sensorTypeEnum i_type,
+                              uint8_t & o_num_ids,
+                              uint32_t o_ids[MAX_GPU_SENSORS_PER_PROCESSOR] );
+
+    /**
+     * @brief Maximum number of GPUs associated with a processor
+     */
+    static const uint8_t MAX_PROCESSOR_GPUS = 3;
+
+    /**
+     *  @brief  Updates GPU sensor status for GPUs on this
+     *          particular processor target
+     *
+     *  @param[in] - i_proc       - processor target
+     *  @param[in] - i_gpu_status - status of GPU0, GPU1 and GPU2
+     */
+    void updateGpuSensorStatus( TARGETING::Target* i_proc,
+                    StatusSensor::statusEnum i_gpu_status[MAX_PROCESSOR_GPUS] );
 
 
 }; // end namespace
