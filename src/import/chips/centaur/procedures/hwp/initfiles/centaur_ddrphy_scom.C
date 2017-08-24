@@ -833,31 +833,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800000050301143full, l_scom_buffer));
         }
         {
@@ -1541,31 +1516,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800001050301143full, l_scom_buffer ));
 
-            if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             if (literal_1)
             {
             }
@@ -1661,31 +1611,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800002050301143full, l_scom_buffer));
@@ -1942,43 +1867,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8480 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8500 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800004050301143full, l_scom_buffer));
@@ -2655,39 +2543,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8480 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8500 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800005050301143full, l_scom_buffer));
         }
         {
@@ -2730,43 +2585,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800006050301143full, l_scom_buffer ));
-
-            if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8480 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8500 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -2851,43 +2669,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800007050301143full, l_scom_buffer ));
-
-            if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8480 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8500 );
-            }
-            else if (((l_def_is_mba01 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -3064,27 +2845,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800008050301143full, l_scom_buffer));
@@ -3732,19 +3492,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800009050301143full, l_scom_buffer));
         }
         {
@@ -3805,27 +3552,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000a050301143full, l_scom_buffer));
         }
         {
@@ -3884,27 +3610,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000b050301143full, l_scom_buffer));
@@ -4049,31 +3754,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000c050301143full, l_scom_buffer));
@@ -4699,27 +4379,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000d050301143full, l_scom_buffer));
         }
         {
@@ -4788,31 +4447,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000e050301143full, l_scom_buffer));
         }
         {
@@ -4879,31 +4513,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x80000f050301143full, l_scom_buffer));
@@ -5052,35 +4661,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800010050301143full, l_scom_buffer ));
-
-            if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -5863,43 +5443,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800011050301143full, l_scom_buffer));
         }
         {
@@ -6068,35 +5611,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800013050301143full, l_scom_buffer ));
-
-            if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p0_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -13366,31 +12880,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800100050301143full, l_scom_buffer));
         }
         {
@@ -14006,31 +13495,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800101050301143full, l_scom_buffer ));
 
-            if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             if (literal_1)
             {
             }
@@ -14194,31 +13658,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800103050301143full, l_scom_buffer));
@@ -14415,47 +13854,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if (((l_def_is_mba01 && l_def_is_x4) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC000 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800104050301143full, l_scom_buffer));
@@ -14977,47 +14375,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if (((l_def_is_mba01 && l_def_is_x4) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC000 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800105050301143full, l_scom_buffer));
         }
         {
@@ -15156,39 +14513,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800107050301143full, l_scom_buffer ));
-
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC000 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (((l_def_is_mba23 && l_def_p1_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -16167,43 +15491,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
             }
 
-            if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             FAPI_TRY(fapi2::putScom(TGT0, 0x800109050301143full, l_scom_buffer));
         }
         {
@@ -16246,43 +15533,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x80010a050301143full, l_scom_buffer ));
-
-            if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0F00 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_no_spare) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0C00 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_upper) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8600 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_lower) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8440 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_full) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_has_spare_full) && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if (((l_def_is_mba01 && l_def_p1_no_spare) && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8400 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -17161,27 +16411,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x80010d050301143full, l_scom_buffer ));
 
-            if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             if (literal_1)
             {
             }
@@ -17317,31 +16546,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x80010f050301143full, l_scom_buffer ));
-
-            if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x4A40 );
-            }
-            else if (((l_def_is_mba01 && l_def_is_x8) && l_def_is_type1))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC0C0 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -17527,27 +16731,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800110050301143full, l_scom_buffer));
@@ -18234,27 +17417,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800111050301143full, l_scom_buffer ));
 
-            if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
-
             if (literal_1)
             {
             }
@@ -18314,27 +17476,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800112050301143full, l_scom_buffer ));
-
-            if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
-            }
 
             if (literal_1)
             {
@@ -18440,27 +17581,6 @@ fapi2::ReturnCode centaur_ddrphy_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else if (literal_1)
             {
                 l_scom_buffer.insert<48, 16, 48, uint64_t>(literal_0x0000 );
-            }
-
-            if ((l_def_is_mba23 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8640 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x4))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x8580 );
-            }
-            else if ((l_def_is_mba23 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0CC0 );
-            }
-            else if ((l_def_is_mba01 && l_def_is_x8))
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0xC300 );
-            }
-            else if (literal_1)
-            {
-                l_scom_buffer.insert<48, 1, 48, uint64_t>(literal_0x0000 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x800113050301143full, l_scom_buffer));
