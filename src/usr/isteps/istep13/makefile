@@ -26,6 +26,7 @@ ROOTPATH = ../../../..
 MODULE = istep13
 
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+CEN_PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
@@ -45,6 +46,14 @@ EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/perv
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/initfiles
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/
+EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory
+EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/
+EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
+EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
+EXTRAINCDIR += ${CEN_PROCEDURES_PATH}/hwp/initfiles
 
 
 # from src/usr/isteps/istep13
@@ -76,6 +85,7 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_mem_startclocks.mk
 #Scom init
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_scominit.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_throttle_sync.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_scominit.mk
 
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_ddrphy_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9n_mca_scom.mk
@@ -88,6 +98,24 @@ include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_mc.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_ddr_phy_reset.mk
 include ${PROCEDURES_PATH}/hwp/memory/p9_mss_draminit_training_adv.mk
 
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_mc.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_training.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr_phy_reset.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_draminit_training_advanced.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_mrs6_DDR4.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr4_pda.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_ddr4_funcs.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_termination_control.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_access_delay_reg.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_unmask_errors.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_dimmBadDqBitmapFuncs.mk
+include ${CEN_PROCEDURES_PATH}/hwp/memory/p9c_mss_funcs.mk
+include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mbs_scom.mk
+include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_mba_scom.mk
+include ${CEN_PROCEDURES_PATH}/hwp/initfiles/centaur_ddrphy_scom.mk
+
+
 include ${ROOTPATH}/config.mk
 
 VPATH    += ${PROCEDURES_PATH}/hwp/memory ${PROCEDURES_PATH}/hwp/nest ${PROCEDURES_PATH}/hwp/perv ${PROCEDURES_PATH}/hwp/initfiles/
@@ -95,3 +123,9 @@ VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/ccs/ ${PROCEDURES_PATH}/hwp/memory
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/mc/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/fir/
 VPATH    += ${PROCEDURES_PATH}/hwp/memory/lib/dimm/ddr4/
+VPATH    += ${CEN_PROCEDURES_PATH}
+VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/
+VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/
+VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/shared/
+VPATH    += ${CEN_PROCEDURES_PATH}/hwp/memory/lib/utils/
+VPATH    += ${CEN_PROCEDURES_PATH}/hwp/initfiles
