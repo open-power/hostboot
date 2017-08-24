@@ -156,7 +156,7 @@
 
     <attribute>
           <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
-          <default>0</default>
+          <default>0xD</default>
      </attribute>
 
     <attribute>

@@ -34,6 +34,7 @@ OBJS += call_mss_volt.o
 OBJS += call_mss_freq.o
 OBJS += call_mss_eff_config.o
 OBJS += call_mss_attr_update.o
+OBJS += host_mss_attr_cleanup.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
@@ -85,6 +86,8 @@ include $(HWP_PATH_2)/p9c_mss_eff_config.mk
 include $(HWP_PATH_2)/p9c_mss_eff_config_thermal.mk
 include $(HWP_PATH_2)/p9c_mss_bulk_pwr_throttles.mk
 include $(HWP_PATH_2)/p9c_mss_eff_mb_interleave.mk
+#host_mss_attr_cleanup : MSS ATTR Cleanup
+include $(HWP_PATH_2)/p9c_mss_attr_cleanup.mk
 
 #mss_attr_update : MSS ATTR Overrides
 include $(HWP_PATH_1)/p9_mss_attr_update.mk
