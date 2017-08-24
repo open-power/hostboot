@@ -116,6 +116,9 @@ include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 include ${PROCEDURES_PATH}/hwp/pm/p9_setup_evid.mk
 include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
 
+#p9_cen_ref_clk_enable : Centaur Ref Clock Enable
+include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
+
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10
 

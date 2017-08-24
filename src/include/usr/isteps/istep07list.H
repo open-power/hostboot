@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,18 @@
 
 namespace   ISTEP_07
 {
+
+/**
+ *  @brief   host_mss_attr_cleanup
+ *
+ *            Build the Attibute for the DIMMs to be consummed in later steps
+ *
+ *  param[in,out] io_pArgs  -   (normally) a pointer to a TaskArgs struct,
+ *                              or NULL.
+ *  return  any error logs to istep
+ *
+ */
+void*   host_mss_attr_cleanup( void * io_pArgs );
 
 /**
  *  @brief   mss_volt
@@ -120,9 +132,9 @@ namespace   INITSERVICE
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
         {
-                ISTEPNAME(07,01,""),
-                NULL,
-                { NONE, EXT_IMAGE, IPL_NOOP, false }
+                ISTEPNAME(07,01,"mss_attr_cleanup"),
+                ISTEP_07::host_mss_attr_cleanup,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
         },
         {
                 ISTEPNAME(07,02,"mss_volt"),
