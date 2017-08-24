@@ -41,6 +41,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <hwpf_fapi2_reasoncodes.H>
+#include <attributeenums.H>
 
 #if __HOSTBOOT_RUNTIME
   #include "handleSpecialWakeup.H"
@@ -834,83 +835,87 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
         // ReturnCode contains an error. Find out which component of the HWPF
         // created the error
         ReturnCode::returnCodeCreator l_creator = io_rc.getCreator();
+        l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
+
         if (l_creator == ReturnCode::CREATOR_PLAT)
         {
             // PLAT error, get the platform data from the return code
             FAPI_ERR("rcToErrl: PLAT error: 0x%08x", l_rcValue);
-            l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
         }
-        else if (l_creator == ReturnCode::CREATOR_HWP)
+        else if (NULL == l_pError)
         {
-            // HWP Error. Create an error log
-            FAPI_ERR("rcToErrl: HWP error: 0x%08x", l_rcValue);
-
-            /*@
-             * @errortype
-             * @moduleid     MOD_FAPI2_RC_TO_ERRL
-             * @reasoncode   RC_HWP_GENERATED_ERROR
-             * @userdata1    RC value from HWP
-             * @userdata2    <unused>
-             * @devdesc      HW Procedure generated error. See User Data.
-             * @custdesc     Error initializing processor/memory subsystem
-             *               during boot. See FRU list for repair actions
-             */
-            l_pError = new ERRORLOG::ErrlEntry(i_sev,
-                                               MOD_FAPI2_RC_TO_ERRL,
-                                               RC_HWP_GENERATED_ERROR,
-                                               l_rcValue);
-            // Note - If location of RC value changes, must update
-            //   ErrlEntry::getFapiRC accordingly
-
-            // Add the rcValue as FFDC. This will explain what the error was
-            l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue), 1,
-                    HWPF_FAPI2_UDT_HWP_RCVALUE);
-
-            // Get the Error Information Pointer
-            const ErrorInfo* l_pErrorInfo =  io_rc.getErrorInfo();
-            if (l_pErrorInfo)
+            if (l_creator == ReturnCode::CREATOR_HWP)
             {
-                // There is error information associated with the ReturnCode
-                processEIFfdcs(*l_pErrorInfo, l_pError);
-                processEIProcCallouts(*l_pErrorInfo, l_pError);
-                processEIBusCallouts(*l_pErrorInfo, l_pError);
-                processEICDGs(*l_pErrorInfo, l_pError);
-                processEIChildrenCDGs(*l_pErrorInfo, l_pError);
-                processEIHwCallouts(*l_pErrorInfo, l_pError);
+                // HWP Error. Create an error log
+                FAPI_ERR("rcToErrl: HWP error: 0x%08x", l_rcValue);
+
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_FAPI2_RC_TO_ERRL
+                 * @reasoncode   RC_HWP_GENERATED_ERROR
+                 * @userdata1    RC value from HWP
+                 * @userdata2    <unused>
+                 * @devdesc      HW Procedure generated error. See User Data.
+                 * @custdesc     Error initializing processor/memory subsystem
+                 *               during boot. See FRU list for repair actions
+                 */
+                l_pError = new ERRORLOG::ErrlEntry(i_sev,
+                                                   MOD_FAPI2_RC_TO_ERRL,
+                                                   RC_HWP_GENERATED_ERROR,
+                                                   l_rcValue);
+                // Note - If location of RC value changes, must update
+                //   ErrlEntry::getFapiRC accordingly
+
+                // Add the rcValue as FFDC. This will explain what the error was
+                l_pError->addFFDC(HWPF_COMP_ID, &l_rcValue, sizeof(l_rcValue),
+                                                1, HWPF_FAPI2_UDT_HWP_RCVALUE);
+
+                // Get the Error Information Pointer
+                const ErrorInfo* l_pErrorInfo =  io_rc.getErrorInfo();
+                if (l_pErrorInfo)
+                {
+                    // There is error information associated with the ReturnCode
+                    processEIFfdcs(*l_pErrorInfo, l_pError);
+                    processEIProcCallouts(*l_pErrorInfo, l_pError);
+                    processEIBusCallouts(*l_pErrorInfo, l_pError);
+                    processEICDGs(*l_pErrorInfo, l_pError);
+                    processEIChildrenCDGs(*l_pErrorInfo, l_pError);
+                    processEIHwCallouts(*l_pErrorInfo, l_pError);
+                }
+                else
+                {
+                    FAPI_ERR("rcToErrl: No Error Information");
+                }
             }
             else
             {
-                FAPI_ERR("rcToErrl: No Error Information");
+                // FAPI error. Create an error log
+                FAPI_ERR("rcToErrl: FAPI error: 0x%08x", l_rcValue);
+
+                // The errlog reason code is the HWPF compID and the rcValue LSB
+                uint16_t l_reasonCode = l_rcValue;
+                l_reasonCode &= 0xff;
+                l_reasonCode |= HWPF_COMP_ID;
+
+                // HostBoot errlog tags for FAPI errors are in hwpfReasonCodes.H
+                l_pError = new ERRORLOG::ErrlEntry(i_sev,
+                                                   MOD_FAPI2_RC_TO_ERRL,
+                                                   l_reasonCode);
+
+                // FAPI may have added Error Information.
+                // Get the Error Information Pointer
+                const ErrorInfo* l_pErrorInfo =  io_rc.getErrorInfo();
+                if (l_pErrorInfo)
+                {
+                    processEIFfdcs(*l_pErrorInfo, l_pError);
+                    processEIProcCallouts(*l_pErrorInfo, l_pError);
+                    processEIBusCallouts(*l_pErrorInfo, l_pError);
+                    processEICDGs(*l_pErrorInfo, l_pError);
+                    processEIChildrenCDGs(*l_pErrorInfo, l_pError);
+                    processEIHwCallouts(*l_pErrorInfo, l_pError);
+                }
             }
-        }
-        else
-        {
-            // FAPI error. Create an error log
-            FAPI_ERR("rcToErrl: FAPI error: 0x%08x", l_rcValue);
-
-            // The errlog reason code is the HWPF compID and the rcValue LSB
-            uint16_t l_reasonCode = l_rcValue;
-            l_reasonCode &= 0xff;
-            l_reasonCode |= HWPF_COMP_ID;
-
-            // HostBoot errlog tags for FAPI errors are in hwpfReasonCodes.H
-            l_pError = new ERRORLOG::ErrlEntry(i_sev,
-                                               MOD_FAPI2_RC_TO_ERRL,
-                                               l_reasonCode);
-
-            // FAPI may have added Error Information.
-            // Get the Error Information Pointer
-            const ErrorInfo* l_pErrorInfo =  io_rc.getErrorInfo();
-            if (l_pErrorInfo)
-            {
-                processEIFfdcs(*l_pErrorInfo, l_pError);
-                processEIProcCallouts(*l_pErrorInfo, l_pError);
-                processEIBusCallouts(*l_pErrorInfo, l_pError);
-                processEICDGs(*l_pErrorInfo, l_pError);
-                processEIChildrenCDGs(*l_pErrorInfo, l_pError);
-                processEIHwCallouts(*l_pErrorInfo, l_pError);
-            }
-        }
+        } // else if no elog yet
 
         // add the fapi traces to the elog
         l_pError->collectTrace(FAPI_TRACE_NAME, 256 );
@@ -995,6 +1000,44 @@ void logError(
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return;
 }
+
+///
+/// @brief Internal Function associates PRD and HW elogs
+/// Used by log_related_error
+///
+void set_log_id( const Target<TARGET_TYPE_ALL>& i_target,
+                 fapi2::ReturnCode& io_rc,
+                 fapi2::errlSeverity_t i_sev )
+{
+    // Create elog for FAPI error
+    createPlatLog( io_rc, i_sev );
+
+    // Get PLID for this elog
+    errlHndl_t l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
+    uint32_t plid = ERRL_GETPLID_SAFE(l_pError);
+
+    // Connect the PLID to PRD log
+    TARGETING::Target* l_target =
+        reinterpret_cast<TARGETING::Target*>(i_target.get());
+    l_target->setAttr<TARGETING::ATTR_PRD_HWP_PLID>( plid );
+
+} // end set_log_id
+
+///
+/// @brief Associate an error to PRD PLID.
+/// Used to connect HW error log to the PRD log.
+///
+void log_related_error(
+    const Target<TARGET_TYPE_ALL>& i_target,
+    fapi2::ReturnCode& io_rc,
+    const fapi2::errlSeverity_t i_sev,
+    const bool i_unitTestError )
+{
+    // This call will associate the FAPI and PRD logs
+    set_log_id( i_target, io_rc, i_sev );
+    // Commit the log
+    logError( io_rc, i_sev, i_unitTestError );
+} // end log_related_error
 
 ///
 /// @brief Delay this thread. Hostboot will use the nanoseconds parameter
