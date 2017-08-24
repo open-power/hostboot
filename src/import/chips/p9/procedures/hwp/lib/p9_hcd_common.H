@@ -93,9 +93,12 @@
 //-------------------------
 // Constants
 //-------------------------
-
+#ifndef __PPE_PLAT
+#ifdef __cplusplus
 namespace p9hcd
 {
+#endif
+#endif
 
 // Bit masks used by CME hcode
 enum P9_HCD_CME_CORE_MASKS
@@ -271,8 +274,11 @@ enum SICR_DEFS
     PCBMUX_REQ_C1 = 11
 };
 
+#ifndef __PPE_PLAT
+#ifdef __cplusplus
 } // END OF NAMESPACE p9hcd
-
+#endif
+#endif
 
 #define P9_HCD_SCAN_FUNC_REPEAT 1
 #define P9_HCD_SCAN_GPTR_REPEAT 1
