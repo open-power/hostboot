@@ -762,6 +762,14 @@
         <name>APSS</name>
         <value>0xD7</value>
     </enumerator>
+    <enumerator>
+        <name>GPU_CORE</name>
+        <value>0xD8</value>
+    </enumerator>
+    <enumerator>
+        <name>GPU_MEMORY</name>
+        <value>0xD9</value>
+    </enumerator>
 </enumerationType>
 
 
@@ -793,6 +801,10 @@
     <enumerator>
         <name>SYS_EVENT</name>
         <value>0x12</value>
+    </enumerator>
+    <enumerator>
+        <name>ADDIN_CARD</name>
+        <value>0x17</value>
     </enumerator>
     <enumerator>
         <name>OS_BOOT</name>

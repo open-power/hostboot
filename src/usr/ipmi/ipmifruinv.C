@@ -34,6 +34,7 @@
 #include <targeting/common/utilFilter.H>
 #include <errl/errlmanager.H>
 #include <ipmi/ipmifruinv.H>
+#include <ipmi/ipmisensor.H>
 #include "ipmifru.H"
 #include "ipmifruinvprvt.H"
 #include <stdio.h>
@@ -1683,6 +1684,60 @@ void IPMIFRUINV::setData(bool i_updateData)
                 if (it->second == true)
                 {
                     IPMIFRUINV::clearData(it->first);
+                }
+            }
+
+            // Only send GPU sensor PRESENT status one time (no update),
+            // then allow HTMGT to update
+
+            // Go through processors and send GPU sensor status
+            // Get all Proc targets
+            TARGETING::TargetHandleList l_procTargetList;
+            getAllChips(l_procTargetList, TARGETING::TYPE_PROC);
+
+            uint32_t gpu_sensors[SENSOR::MAX_GPU_SENSORS_PER_PROCESSOR];
+            uint8_t num_valid_sensors = 0;
+            for (const auto & l_procChip: l_procTargetList)
+            {
+                // report present GPU sensors
+                l_errl = SENSOR::getGpuSensors( l_procChip,
+                                                HWAS::GPU_FUNC_SENSOR,
+                                                num_valid_sensors,
+                                                gpu_sensors );
+                if (!l_errl)
+                {
+                    // build up present GPUs based on sensor data returned
+                    SENSOR::StatusSensor::statusEnum
+                                        gpu_status[SENSOR::MAX_PROCESSOR_GPUS];
+
+                    // initialize to NOT PRESENT
+                    for (uint8_t j = 0; j < SENSOR::MAX_PROCESSOR_GPUS; j++)
+                    {
+                        gpu_status[j] =
+                            SENSOR::StatusSensor::statusEnum::NOT_PRESENT;
+                    }
+
+                    // now change the PRESENT ones
+                    for (uint8_t i = 0;
+                            i < SENSOR::MAX_GPU_SENSORS_PER_PROCESSOR; i++)
+                    {
+                        if (i < SENSOR::MAX_PROCESSOR_GPUS)
+                        {
+                            if (gpu_sensors[i] !=
+                                TARGETING::UTIL::INVALID_IPMI_SENSOR)
+                            {
+                                gpu_status[i] =
+                                    SENSOR::StatusSensor::statusEnum::PRESENT;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    // Send the present/non-present GPU sensors
+                    SENSOR::updateGpuSensorStatus( l_procChip, gpu_status);
                 }
             }
         }
