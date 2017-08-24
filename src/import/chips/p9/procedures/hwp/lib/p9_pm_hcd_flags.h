@@ -181,6 +181,7 @@ enum PM_GPE_OCCFLG_DEFS
     SGPE_IGNORE_STOP_ACTION             = 10,
     SGPE_IGNORE_STOP_EXITS              = 11,
     SGPE_IGNORE_STOP_ENTRIES            = 12,
+    OCCFLG_CORE_QUIESCE_WORKARND_DIS    = 13,
     SGPE_24_7_ACTIVATE                  = 14,
     SGPE_24_7_ACTIVE                    = 15,
     PIB_I2C_MASTER_ENGINE_1_LOCK_BIT0   = 16, //BIT0 ored BIT1 gives the field
@@ -224,6 +225,7 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_OCC_HB_SAFE_MODE              = 7,
     CME_FLAGS_BLOCK_WKUP_C0                 = 8,
     CME_FLAGS_BLOCK_WKUP_C1                 = 9,
+    CME_CORE_QUIESCE_WORKARND_DIS           = 23,
     CME_FLAGS_PSTATES_ENABLED               = 24,
     CME_FLAGS_FREQ_UPDT_DISABLE             = 25,
     CME_FLAGS_EX_ID                         = 26,
