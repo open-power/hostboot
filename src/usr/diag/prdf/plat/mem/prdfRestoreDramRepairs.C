@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/pegasus/prdfDramRepairs.C $            */
+/* $Source: src/usr/diag/prdf/plat/mem/prdfRestoreDramRepairs.C $         */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,20 +26,20 @@
 /** @file prdfDramRepairs.C */
 
 #include <diag/prdf/prdfMain.H>
-#include <diag/prdf/common/prdf_service_codes.H>
+#include <prdf_service_codes.H>
 #include "common/iipconst.h"
+#include <iipSystem.h>
 #include <prdfGlobal.H>
 #include <prdfTrace.H>
 #include <prdfErrlUtil.H>
 #include "common/prdfEnums.H"
-#include "common/plat/pegasus/prdfCenMbaCaptureData.H"
-#include "common/plat/pegasus/prdfCalloutUtil.H"
-#include "common/plat/pegasus/prdfCenDqBitmap.H"
-#include "common/plat/pegasus/prdfCenMarkstore.H"
-#include "common/plat/pegasus/prdfCenMbaExtraSig.H"
-#include "common/plat/pegasus/prdfCenSymbol.H"
-#include "common/plat/pegasus/prdfMemoryMru.H"
-#include "framework/service/prdfPlatServices.H"
+#include "common/plat/mem/prdfMemCaptureData.H"
+#include "common/plat/mem/prdfMemDqBitmap.H"
+#include "common/plat/mem/prdfMemMark.H"
+#include "common/plat/mem/prdfP9McaExtraSig.H"
+#include "common/plat/mem/prdfMemSymbol.H"
+#include "common/plat/mem/prdfMemoryMru.H"
+#include <prdfPlatServices.H>
 
 using namespace HWAS;
 using namespace std;
@@ -54,10 +54,10 @@ namespace RDR // local utility functions to support PRDF::restoreDramRepairs()
 {
 
 // Creates and returns an error log.
-errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_mba,
+errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
                        uint32_t i_signature )
 {
-    uint64_t userdata12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_mba), 0 );
+    uint64_t userdata12 = PRDF_GET_UINT64_FROM_UINT32( getHuid(i_trgt), 0 );
     uint64_t userdata34 = PRDF_GET_UINT64_FROM_UINT32( i_signature,    0 );
 
     // Note that the error log tags are not needed because PRD uses its own
@@ -75,12 +75,13 @@ errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_mba,
 
 // If an error log is given, will add DRAM repairs FFDC and traces to error log,
 // then commit the error log.
-void commitErrl( errlHndl_t i_errl, TargetHandle_t i_mba )
+template<TARGETING::TYPE T>
+void commitErrl( errlHndl_t i_errl, TargetHandle_t i_trgt )
 {
     if ( NULL != i_errl )
     {
         // Add capture data
-        CenMbaCaptureData::addEccData( i_mba, i_errl );
+        MemCaptureData::addEccData<T>( i_trgt, i_errl );
 
         // Add traces
         i_errl->collectTrace( PRDF_COMP_NAME, 512 );
@@ -94,20 +95,27 @@ void commitErrl( errlHndl_t i_errl, TargetHandle_t i_mba )
 
 // If there were analysis errors, will create and commit an error log with 2nd
 // level support callout.
-void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_mba,
+template<TARGETING::TYPE T>
+void commitSoftError( uint32_t i_reasonCode, TargetHandle_t i_trgt,
                       uint32_t i_signature, bool i_analysisErrors )
 {
     if ( i_analysisErrors )
     {
-        errlHndl_t errl = createErrl( i_reasonCode, i_mba, i_signature );
-        errl->addProcedureCallout( LEVEL2_SUPPORT, MRU_HIGH);
-        commitErrl( errl, i_mba );
+        errlHndl_t errl = createErrl( i_reasonCode, i_trgt, i_signature );
+        errl->addProcedureCallout( HWAS::EPUB_PRC_LVL_SUPP,
+                                   HWAS::SRCI_PRIORITY_HIGH );
+        commitErrl<T>( errl, i_trgt );
     }
 }
 
 //------------------------------------------------------------------------------
 
-bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
+template<TARGETING::TYPE T>
+bool processRepairedRanks( TargetHandle_t i_trgt, uint8_t i_repairedRankMask );
+
+template<>
+bool processRepairedRanks<TYPE_MCA>( TargetHandle_t i_trgt,
+                                     uint8_t i_repairedRankMask )
 {
     #define PRDF_FUNC "[processRepairedRanks] "
 
@@ -115,6 +123,115 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     // hardware and compare against RAS policies.
 
     bool o_calloutMade  = false;
+    bool analysisErrors = false;
+
+    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
+
+    do
+    {
+        if ( (false == g_initialized) || (nullptr == systemPtr) )
+        {
+            errl = noLock_initialize();
+            if ( nullptr != errl )
+            {
+                PRDF_ERR( PRDF_FUNC "Failed to initialize PRD" );
+                break;
+            }
+        }
+
+        ExtensibleChip * mcaChip = (ExtensibleChip *)systemPtr->GetChip(i_trgt);
+
+        for ( uint8_t r = 0; r < MASTER_RANKS_PER_PORT; ++r )
+        {
+            if ( 0 == (i_repairedRankMask & (0x80 >> r)) )
+            {
+                continue; // this rank didn't have any repairs
+            }
+
+            MemRank rank ( r );
+
+            MemMark cm;
+            if ( SUCCESS != MarkStore::readChipMark<TYPE_MCA>( mcaChip, rank,
+                                                               cm ) )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MCA>(0x%08x,0x%02x) "
+                          "failed", mcaChip->getHuid(), rank.getKey() );
+                continue; // skip this rank
+            }
+
+            MemMark sm;
+            if ( SUCCESS != MarkStore::readSymbolMark<TYPE_MCA>( mcaChip, rank,
+                                                                 sm ) )
+            {
+                PRDF_ERR( PRDF_FUNC "readSymbolMark<TYPE_MCA>(0x%08x,0x%02x) "
+                          "failed", mcaChip->getHuid(), rank.getKey() );
+                continue; // skip this rank
+            }
+
+            if ( cm.isValid() && sm.isValid() ) // CM and SM used
+            {
+                // All repairs on the rank have been used. Callout all repairs.
+
+                if ( NULL == errl )
+                {
+                    errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_trgt,
+                                       PRDFSIG_RdrRepairsUsed );
+                }
+
+                std::vector<MemSymbol> symList;
+                symList.push_back( cm.getSymbol() );
+                symList.push_back( sm.getSymbol() );
+
+                for ( auto & sym : symList )
+                {
+                    if ( !sym.isValid() ) continue;
+
+                    MemoryMru mm( i_trgt, rank, sym );
+
+                    // Add all parts to the error log.
+                    for ( auto & part : mm.getCalloutList() )
+                    {
+                        errl->addHwCallout( part, HWAS::SRCI_PRIORITY_HIGH,
+                                            HWAS::DELAYED_DECONFIG,
+                                            HWAS::GARD_Predictive );
+                    }
+
+                    // Add the MemoryMru to the capture data.
+                    MemCaptureData::addExtMemMruData( mm, errl );
+                }
+
+                o_calloutMade = true;
+            }
+        }
+
+        // Commit the error log, if needed.
+        commitErrl<TYPE_MCA>( errl, i_trgt );
+
+        // Commit an additional error log indicating something failed in the
+        // analysis, if needed.
+        commitSoftError<TYPE_MCA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+            PRDFSIG_RdrInternalFail, analysisErrors );
+    }while(0);
+
+    return o_calloutMade;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+bool processRepairedRanks<TYPE_MBA>( TargetHandle_t i_trgt,
+                                     uint8_t i_repairedRankMask )
+{
+    #define PRDF_FUNC "[processRepairedRanks] "
+
+    // The bits in i_repairedRankMask represent ranks that have repairs. Query
+    // hardware and compare against RAS policies.
+
+    bool o_calloutMade  = false;
+
+    /* TODO RTC 178743
     bool analysisErrors = false;
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
@@ -212,6 +329,7 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
     // analysis, if needed.
     commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
                      PRDFSIG_RdrInternalFail, analysisErrors );
+    */
 
     return o_calloutMade;
 
@@ -220,7 +338,12 @@ bool processRepairedRanks( TargetHandle_t i_mba, uint8_t i_repairedRankMask )
 
 //------------------------------------------------------------------------------
 
-bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
+
+template<TARGETING::TYPE T>
+bool processBadDimms( TargetHandle_t i_trgt, uint8_t i_badDimmMask );
+
+template<>
+bool processBadDimms<TYPE_MCA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
 {
     #define PRDF_FUNC "[processBadDimms] "
 
@@ -228,6 +351,61 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
     // available repairs. Callout these DIMMs.
 
     bool o_calloutMade  = false;
+    bool analysisErrors = false;
+
+    errlHndl_t errl = NULL; // Initially NULL, will create if needed.
+
+    // Iterate the list of all DIMMs
+    TargetHandleList dimms = getConnected( i_trgt, TYPE_DIMM );
+    for ( auto & i : dimms )
+    {
+        uint8_t dimm = getTargetPosition( i ) % MAX_DIMM_PER_PORT;
+
+        // i_badDimmMask is defined as a 2-bit mask where a bit set means that
+        // DIMM had more bad bits than could be repaired.
+        uint8_t mask = 0x2 >> dimm;
+
+        if ( 0 != (i_badDimmMask & mask) )
+        {
+            if ( NULL == errl )
+            {
+                errl = createErrl( PRDF_DETECTED_FAIL_HARDWARE, i_trgt,
+                                   PRDFSIG_RdrRepairUnavail );
+            }
+
+            o_calloutMade = true;
+            errl->addHwCallout( i, HWAS::SRCI_PRIORITY_HIGH,
+                                HWAS::DELAYED_DECONFIG,
+                                HWAS::GARD_Predictive );
+        }
+    }
+
+    // Commit the error log, if needed.
+    commitErrl<TYPE_MCA>( errl, i_trgt );
+
+    // Commit an additional error log indicating something failed in the
+    // analysis, if needed.
+    commitSoftError<TYPE_MCA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                               PRDFSIG_RdrInternalFail, analysisErrors );
+
+    return o_calloutMade;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+bool processBadDimms<TYPE_MBA>( TargetHandle_t i_trgt, uint8_t i_badDimmMask )
+{
+    #define PRDF_FUNC "[processBadDimms] "
+
+    // The bits in i_badDimmMask represent DIMMs that have exceeded the
+    // available repairs. Callout these DIMMs.
+
+    bool o_calloutMade  = false;
+
+    /* TODO RTC 178743
     bool analysisErrors = false;
 
     errlHndl_t errl = NULL; // Initially NULL, will create if needed.
@@ -276,6 +454,7 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
     // analysis, if needed.
     commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
                      PRDFSIG_RdrInternalFail, analysisErrors );
+    */
 
     return o_calloutMade;
 
@@ -284,28 +463,28 @@ bool processBadDimms( TargetHandle_t i_mba, uint8_t i_badDimmMask )
 
 //------------------------------------------------------------------------------
 
-bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
+template<DIMMS_PER_RANK T>
+bool screenBadDqs( TargetHandle_t i_trgt, const std::vector<MemRank> & i_ranks )
 {
-    #define PRDF_FUNC "[screenBadDqs] "
+    #define PRDF_FUNC "[screenBadDqs<T>] "
 
     // Callout any attached DIMMs that have any bad DQs.
 
     bool o_calloutMade  = false;
     bool analysisErrors = false;
 
-    for ( std::vector<CenRank>::const_iterator rank = i_ranks.begin();
-          rank != i_ranks.end(); rank++ )
+    for ( auto & rank : i_ranks )
     {
         // The HW procedure to read the bad DQ attribute will callout the DIMM
         // if it has DRAM Repairs VPD and the DISABLE_DRAM_REPAIRS MNFG policy
         // flag is set. PRD will simply need to iterate through all the ranks
         // to ensure all DIMMs are screen and the procedure will do the rest.
 
-        CenDqBitmap bitmap;
-        if ( SUCCESS != getBadDqBitmap(i_mba, *rank, bitmap, true) )
+        MemDqBitmap<T> bitmap;
+        if ( SUCCESS != getBadDqBitmap<T>(i_trgt, rank, bitmap) )
         {
-            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: MBA=0x%08x rank=%d",
-                      getHuid(i_mba), rank->getMaster() );
+            PRDF_ERR( PRDF_FUNC "getBadDqBitmap() failed: TRGT=0x%08x "
+                      "rank=0x%02x", getHuid(i_trgt), rank.getKey() );
             analysisErrors = true;
             continue; // skip this rank
         }
@@ -313,8 +492,16 @@ bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
 
     // Commit an additional error log indicating something failed in the
     // analysis, if needed.
-    commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
-                     PRDFSIG_RdrInternalFail, analysisErrors );
+    if ( DIMMS_PER_RANK::MBA == T )
+    {
+        commitSoftError<TYPE_MBA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                                   PRDFSIG_RdrInternalFail, analysisErrors );
+    }
+    else
+    {
+        commitSoftError<TYPE_MCA>( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
+                                   PRDFSIG_RdrInternalFail, analysisErrors  );
+    }
 
     return o_calloutMade;
 
@@ -326,6 +513,7 @@ bool screenBadDqs( TargetHandle_t i_mba, const std::vector<CenRank> & i_ranks )
 void deployDramSpares( TargetHandle_t i_mba,
                        const std::vector<CenRank> & i_ranks )
 {
+    /* TODO RTC 178743
     bool x4 = isDramWidthX4(i_mba);
 
     bool cenDimm = false;
@@ -364,6 +552,7 @@ void deployDramSpares( TargetHandle_t i_mba,
             continue;
         }
     }
+    */
 }
 
 } // end namespace RDR
@@ -372,11 +561,15 @@ void deployDramSpares( TargetHandle_t i_mba,
 // External functions - declared in prdfMain.H
 //------------------------------------------------------------------------------
 
-int32_t restoreDramRepairs( TargetHandle_t i_mba )
-{
-    #define PRDF_FUNC "PRDF::restoreDramRepairs"
+template<TARGETING::TYPE T>
+uint32_t restoreDramRepairs( TargetHandle_t i_trgt );
 
-    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
+template<>
+uint32_t restoreDramRepairs<TYPE_MCA>( TargetHandle_t i_trgt )
+{
+    #define PRDF_FUNC "PRDF::restoreDramRepairs<TYPE_MCA>"
+
+    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
     // will unlock when going out of scope
     PRDF_SYSTEM_SCOPELOCK;
@@ -385,13 +578,88 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
 
     do
     {
+        std::vector<MemRank> ranks;
+        getMasterRanks<TYPE_MCA>( i_trgt, ranks );
+
+        if ( areDramRepairsDisabled() )
+        {
+            // DRAM Repairs are disabled in MNFG mode, so screen all DIMMs with
+            // VPD information.
+            if ( RDR::screenBadDqs<DIMMS_PER_RANK::MCA>(i_trgt, ranks) )
+                calloutMade = true;
+
+            // No need to continue because there will not be anything to
+            // restore.
+            break;
+        }
+
+        uint8_t rankMask = 0, dimmMask = 0;
+        if ( SUCCESS != mssRestoreDramRepairs<TYPE_MCA>(i_trgt, rankMask,
+                                                                dimmMask) )
+        {
+            // Can't check anything if this doesn't work.
+            PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
+            break;
+        }
+
+        // Callout DIMMs with too many bad bits and not enough repairs available
+        if ( RDR::processBadDimms<TYPE_MCA>(i_trgt, dimmMask) )
+        {
+            // Clear VPD after callout of ISDIMMs
+            uint8_t data[DIMMS_PER_RANK::MCA][DQ_BITMAP::BITMAP_SIZE];
+            memset( data, 0x00, sizeof(data) );
+            for ( auto & rank : ranks )
+            {
+                MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap( i_trgt, rank, data );
+                if ( SUCCESS != setBadDqBitmap<DIMMS_PER_RANK::MCA>( i_trgt,
+                    rank, dqBitmap ) )
+                {
+                    PRDF_ERR( PRDF_FUNC "setBadDqBitmap<DIMMS_PER_RANK::MCA>"
+                              "(0x%08x,0x%02x) failed.", getHuid(i_trgt),
+                              rank.getKey() );
+                    continue;
+                }
+            }
+            calloutMade = true;
+        }
+
+        // Check repaired ranks for RAS policy violations.
+        if ( RDR::processRepairedRanks<TYPE_MCA>(i_trgt, rankMask) )
+            calloutMade = true;
+
+    } while(0);
+
+    PRDF_EXIT( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
+
+    return calloutMade ? FAIL : SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t restoreDramRepairs<TYPE_MBA>( TargetHandle_t i_trgt )
+{
+    #define PRDF_FUNC "PRDF::restoreDramRepairs<TYPE_MBA>"
+
+    PRDF_ENTER( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
+
+    // will unlock when going out of scope
+    PRDF_SYSTEM_SCOPELOCK;
+
+    bool calloutMade = false;
+
+    /* TODO RTC 178743
+    do
+    {
         std::vector<CenRank> ranks;
-        int32_t l_rc = getMasterRanks( i_mba, ranks );
+        int32_t l_rc = getMasterRanks( i_trgt, ranks );
         if ( SUCCESS != l_rc )
         {
             PRDF_ERR( "[" PRDF_FUNC "] getMasterRanks() failed" );
 
-            RDR::commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_mba,
+            RDR::commitSoftError( PRDF_DETECTED_FAIL_SOFTWARE, i_trgt,
                                   PRDFSIG_RdrInternalFail, true );
 
             break; // Assume user meant to disable DRAM repairs.
@@ -402,14 +670,14 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
         if ( spareDramDeploy )
         {
             // Deploy all spares for MNFG corner tests.
-            RDR::deployDramSpares( i_mba, ranks );
+            RDR::deployDramSpares( i_trgt, ranks );
         }
 
         if ( areDramRepairsDisabled() )
         {
             // DRAM Repairs are disabled in MNFG mode, so screen all DIMMs with
             // VPD information.
-            if ( RDR::screenBadDqs(i_mba, ranks) ) calloutMade = true;
+            if ( RDR::screenBadDqs(i_trgt, ranks) ) calloutMade = true;
 
             // No need to continue because there will not be anything to
             // restore.
@@ -424,14 +692,14 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
             PRDF_ERR( "[" PRDF_FUNC "] MNFG spare deploy enabled, but DRAM "
                       "repairs are not disabled" );
 
-            RDR::commitSoftError( PRDF_INVALID_CONFIG, i_mba,
+            RDR::commitSoftError( PRDF_INVALID_CONFIG, i_trgt,
                                   PRDFSIG_RdrInvalidConfig, true );
 
             break; // Assume user meant to disable DRAM repairs.
         }
 
         uint8_t rankMask = 0, dimmMask = 0;
-        if ( SUCCESS != mssRestoreDramRepairs(i_mba, rankMask, dimmMask) )
+        if ( SUCCESS != mssRestoreDramRepairs(i_trgt, rankMask, dimmMask) )
         {
             // Can't check anything if this doesn't work.
             PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
@@ -439,19 +707,21 @@ int32_t restoreDramRepairs( TargetHandle_t i_mba )
         }
 
         // Callout DIMMs with too many bad bits and not enough repairs available
-        if ( RDR::processBadDimms(i_mba, dimmMask) ) calloutMade = true;
+        if ( RDR::processBadDimms(i_trgt, dimmMask) ) calloutMade = true;
 
         // Check repaired ranks for RAS policy violations.
-        if ( RDR::processRepairedRanks(i_mba, rankMask) ) calloutMade = true;
+        if ( RDR::processRepairedRanks(i_trgt, rankMask) ) calloutMade = true;
 
     } while(0);
+    */
 
-    PRDF_EXIT( PRDF_FUNC "(0x%08x)", getHuid(i_mba) );
+    PRDF_EXIT( PRDF_FUNC "(0x%08x)", getHuid(i_trgt) );
 
     return calloutMade ? FAIL : SUCCESS;
 
     #undef PRDF_FUNC
 }
+
 
 } // end namespace PRDF
 

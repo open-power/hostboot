@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,12 +41,19 @@ namespace PRDF
 {
 
 /**
+ * @brief Initialize PRD system model and data (No System Lock)
+ * @return Error log if error occurs
+ */
+extern errlHndl_t noLock_initialize();
+
+/**
  * @brief  Restores hardware DRAM repairs to reflect what is stored in VPD.
- * @param  i_mba An MBA target.
+ * @param  i_trgt An MBA or MCA target.
  * @return Non-SUCCESS if conditions are such that a callout had to be made,
  *         SUCCESS otherwise.
  */
-extern int32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_mba );
+template<TARGETING::TYPE T>
+extern uint32_t restoreDramRepairs( const TARGETING::TargetHandle_t i_trgt );
 
 /**
  * @brief  Analyzes IPL CE statistics during MNFG IPL

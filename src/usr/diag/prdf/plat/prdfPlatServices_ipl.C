@@ -37,7 +37,7 @@
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
-//#include <prdfCenDqBitmap.H> TODO RTC 164707
+#include <prdfMemDqBitmap.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMfgThresholdMgr.H>
 
@@ -154,31 +154,65 @@ bool rcdParityErrorReconfigLoop( TargetHandle_t i_trgt )
 
 //------------------------------------------------------------------------------
 
-/* TODO RTC 164707
-int32_t mssRestoreDramRepairs( TargetHandle_t i_mbaTarget,
-                               uint8_t & o_repairedRankMask,
-                               uint8_t & o_badDimmMask )
+template<>
+uint32_t mssRestoreDramRepairs<TYPE_MCA>( TargetHandle_t i_target,
+                                          uint8_t & o_repairedRankMask,
+                                          uint8_t & o_badDimmMask )
 {
-    int32_t o_rc = SUCCESS;
+    uint32_t o_rc = SUCCESS;
 
     errlHndl_t errl = NULL;
 
+
+    fapi2::buffer<uint8_t> tmpRepairedRankMask, tmpBadDimmMask;
+    FAPI_INVOKE_HWP( errl, mss::restore_repairs,
+                     fapi2::Target<fapi2::TARGET_TYPE_MCA>( i_target ),
+                     tmpRepairedRankMask, tmpBadDimmMask );
+
+    if ( NULL != errl )
+    {
+        PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
+                  "restore_repairs() failed. HUID: 0x%08x",
+                  getHuid(i_target) );
+        PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
+        o_rc = FAIL;
+    }
+
+    o_repairedRankMask = (uint8_t)tmpRepairedRankMask;
+    o_badDimmMask = (uint8_t)tmpBadDimmMask;
+
+    return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t mssRestoreDramRepairs<TYPE_MBA>( TargetHandle_t i_target,
+                                          uint8_t & o_repairedRankMask,
+                                          uint8_t & o_badDimmMask )
+{
+    uint32_t o_rc = SUCCESS;
+
+    /* TODO RTC 178743
+    errlHndl_t errl = NULL;
+
     FAPI_INVOKE_HWP( errl, mss_restore_DRAM_repairs,
-                     fapi::Target(fapi::TARGET_TYPE_MBA_CHIPLET, i_mbaTarget),
+                     fapi::Target(fapi::TARGET_TYPE_MCA_CHIPLET, i_target),
                      o_repairedRankMask, o_badDimmMask );
 
     if ( NULL != errl )
     {
         PRDF_ERR( "[PlatServices::mssRestoreDramRepairs] "
                   "mss_restore_dram_repairs() failed. HUID: 0x%08x",
-                  getHuid(i_mbaTarget) );
+                  getHuid(i_target) );
         PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
         o_rc = FAIL;
     }
+    */
 
     return o_rc;
 }
-*/
+
 
 //------------------------------------------------------------------------------
 
