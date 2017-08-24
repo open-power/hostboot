@@ -355,6 +355,14 @@ namespace HTMGT
                          iv_instance, state_string(iv_state));
             }
 
+            // Check GPU config
+            if (iv_gpuCfg != pollRsp->gpuCfg)
+            {
+                iv_gpuCfg = pollRsp->gpuCfg;
+                TMGT_INF("pollRspHandler: updating OCC%d GPU config to 0x%02X",
+                         iv_instance, iv_gpuCfg);
+            }
+
             // Copy rspData to lastPollResponse
             memcpy(iv_lastPollResponse, pollRsp, OCC_POLL_DATA_MIN_SIZE);
             iv_lastPollValid = true;

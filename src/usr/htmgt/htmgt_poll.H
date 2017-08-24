@@ -47,6 +47,14 @@ namespace HTMGT
     const uint8_t OCC_XSTATUS_MEM_THROT_OT  = 0x20;
     const uint8_t OCC_XSTATUS_N_POWER       = 0x10;
 
+    // GPU Config bits
+    enum gpuConfig_e
+    {
+        GPUCFG_GPU2_PRESENT = 0x04,
+        GPUCFG_GPU1_PRESENT = 0x02,
+        GPUCFG_GPU0_PRESENT = 0x01
+    };
+
     struct occPollRspStruct_t
     {
         uint8_t   status;
@@ -59,7 +67,8 @@ namespace HTMGT
         uint8_t   errorId;
         uint32_t  errorAddress;
         uint16_t  errorLength;
-        uint16_t  reserved[2];
+        uint8_t   reserved;
+        uint8_t   gpuCfg;
         uint8_t   codeLevel[16];
         uint8_t   sensor[6];
         uint8_t   numBlocks;

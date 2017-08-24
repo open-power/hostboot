@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@ namespace HTMGT
     {
         OCC_CALLOUT_TYPE_SENSOR        = 0x01,
         OCC_CALLOUT_TYPE_COMPONENT_ID  = 0x02,
+        OCC_CALLOUT_TYPE_GPU_SENSOR    = 0x03,
     };
 
     // TMGT-OCC Component Ids
