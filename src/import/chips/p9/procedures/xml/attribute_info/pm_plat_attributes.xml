@@ -901,6 +901,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_CORE_PERIODIC_QUIESCE_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Disable the Core Periodic Quiesce Hang Buster function
+
+    Producer: Lab tools
+
+    Consumer: p9_hcode_image_build.C -> SGPE Hcode -> CME Hcode
+
+    Platform default:  OFF
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_WOF_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Disables Work Load Optimized Frequency (WOF) algorithms to
@@ -1881,7 +1898,7 @@
      Consumer: p9_hcode_image_build.c ->
                   PGPE Header field
 
-     Platform default: ON 
+     Platform default: ON
      <!--
         @todo RTC 169662 at some point in the program, this default may be switched to
          the opposite setting.  However, coordination needs to occur with all CIs
