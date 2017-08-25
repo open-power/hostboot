@@ -121,11 +121,12 @@ foreach my $newTarget ( @{$filePlatform->{targetType}} )
     push @NewTargetType, [$targetId, $newTarget];
 }
 
-#Create a new file from the common target types xml, over which 
+#Create a new file from the common target types xml, over which
 #the new targets from platform target types xml will be merged,
 #then the extension targets will be merged over the existing one.
 
-my $file_name  = 'merged_target_types.xml'; # Temporary File created for merger
+# Temporary File created for merger
+my $file_name  = "merged_target_types_$$.xml";
 open (my $FILE, '>', $file_name );# To be updated by reading FH
 open (FH, "<$tgt_files[0]"); #To read out each line
 

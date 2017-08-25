@@ -78,6 +78,7 @@ my %maxInstance = (
     "DMI"           => 8,
     "OCC"           => 1,
     "NV"            => 6,
+    "NX"            => 1,
 );
 sub new
 {
