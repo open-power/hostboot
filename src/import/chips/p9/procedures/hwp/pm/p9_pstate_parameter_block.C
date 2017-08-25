@@ -222,6 +222,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     FAPI_DBG("> p9_pstate_parameter_block");
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ReturnCode l_rc         = 0;
+    io_size = 0;
 
     do
     {
@@ -721,7 +722,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             uint16_t l_vpd_vdn_mv = revle16(l_poundv_data.VdnPbVltg);
             FAPI_INF("l_vpd_vdn_mv %x", (l_vpd_vdn_mv));
 
-
             uint8_t l_nest_leakage_for_occ = 75;
             uint16_t l_iac_tdp_vdn = get_iac_vdn_value ( l_vpd_vdn_mv,
                                                          l_iddqt,
@@ -809,14 +809,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     while(0);
 
 fapi_try_exit:
-    FAPI_DBG("<< p9_pstate_parameter_block");
-
-    if (fapi2::current_err)
-    {
-        fapi2::logError(fapi2::current_err,fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
-
+    FAPI_DBG("< p9_pstate_parameter_block");
     return fapi2::current_err;
 }
 // END OF PSTATE PARAMETER BLOCK function
@@ -1491,10 +1484,29 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 
     FAPI_DBG(">> proc_chk_valid_poundv for %s values", (i_biased_state) ? "biased" : "non-biased" );
 
-    // check for non-zero freq, voltage, or current in valid operating points
-    for (i = 0; i <= NUM_OP_POINTS - 1; i++)
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE_Type  attr_poundv_validity_halt_disable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE,
+                           FAPI_SYSTEM,
+                           attr_poundv_validity_halt_disable));
+
+    fapi2::ATTR_CHIP_EC_FEATURE_POUNDV_VALIDATE_DISABLE_Type  attr_poundv_validate_ec_disable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_POUNDV_VALIDATE_DISABLE,
+                           i_target,
+                           attr_poundv_validate_ec_disable));
+
+    if (attr_poundv_validate_ec_disable)
     {
-        FAPI_INF("Checking for Zero valued %s data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
+         o_state->iv_pstates_enabled = false;
+         FAPI_INF("**** WARNING : #V zero value checking is not being performed on this chip EC level");
+         FAPI_INF("**** WARNING : Pstates are not enabled");
+    }
+    else
+    {
+        // check for non-zero freq, voltage, or current in valid operating points
+        for (i = 0; i <= NUM_OP_POINTS - 1; i++)
+        {
+            FAPI_INF("Checking for Zero valued %s data in each #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
                  (i_biased_state) ? "biased" : "non-biased",
                  pv_op_str[pv_op_order[i]],
                  i_chiplet_mvpd_data[pv_op_order[i]][0],
@@ -1503,85 +1515,119 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                  i_chiplet_mvpd_data[pv_op_order[i]][3],
                  i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
-        if (is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
-        {
-
-            if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
+            if (is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
             {
-
-                FAPI_INF("**** WARNING: WOF is enabled but zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                         i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
-                FAPI_INF("**** WARNING: Disabling WOF and continuing");
-                suspend_ut_check = true;
-
-                // Set ATTR_WOF_ENABLED so the caller can set header flags
+                if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
                 {
+                    FAPI_INF("**** WARNING: WOF is enabled but zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
+                             i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
+                    FAPI_INF("**** WARNING: Disabling WOF and continuing");
+                    suspend_ut_check = true;
+
+                    // Set ATTR_WOF_ENABLED so the caller can set header flags
                     o_state->iv_wof_enabled = false;
-                }
-                if (i_biased_state)
-                {
-                // Take out an informational error log and then keep going.
-                    FAPI_ASSERT_NOEXIT(false,
-                                       fapi2::PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                       .set_CHIP_TARGET(i_target)
-                                       .set_CHIPLET_NUMBER(i_chiplet_num)
-                                       .set_BUCKET(i_bucket_id)
-                                       .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
-                                       .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
-                                       .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
-                                       .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
-                                       .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
-                                       "Pstate Parameter Block WOF Biased #V UT error being logged");
-                }
-                else
-                {
+
                     // Take out an informational error log and then keep going.
-                    FAPI_ASSERT_NOEXIT(false,
-                                       fapi2::PSTATE_PB_POUNDV_WOF_UT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                       .set_CHIP_TARGET(i_target)
-                                       .set_CHIPLET_NUMBER(i_chiplet_num)
-                                       .set_BUCKET(i_bucket_id)
-                                       .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
-                                       .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
-                                       .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
-                                       .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
-                                       .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
-                                   "Pstate Parameter Block WOF #V UT error being logged");
+                    if (i_biased_state)
+                    {
+                        FAPI_ASSERT_NOEXIT(false,
+                            fapi2::PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            .set_CHIP_TARGET(i_target)
+                            .set_CHIPLET_NUMBER(i_chiplet_num)
+                            .set_BUCKET(i_bucket_id)
+                            .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                            .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                            .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                            .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                            .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                            "Pstate Parameter Block WOF Biased #V UT error being logged");
+                    }
+                    else
+                    {
+                        FAPI_ASSERT_NOEXIT(false,
+                            fapi2::PSTATE_PB_POUNDV_WOF_UT_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                            .set_CHIP_TARGET(i_target)
+                            .set_CHIPLET_NUMBER(i_chiplet_num)
+                            .set_BUCKET(i_bucket_id)
+                            .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                            .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                            .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                            .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                            .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                            "Pstate Parameter Block WOF #V UT error being logged");
+                    }
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 }
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
             }
-        }
-        else if ((!is_wof_enabled(o_state)) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
-        {
-            FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
-            suspend_ut_check = true;
-        }
-        else
-        {
-
-            if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
-                i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
+            else if ((!is_wof_enabled(o_state)) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
             {
-
-                FAPI_ERR("**** ERROR : Zero valued %s data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
-                         (i_biased_state) ? "biased" : "non-biased",
-                         i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
-
+                FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
+                suspend_ut_check = true;
+            }
+            else
+            {
+                if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][2] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][3] == 0 ||
+                    i_chiplet_mvpd_data[pv_op_order[i]][4] == 0   )
                 {
+
                     o_state->iv_pstates_enabled = false;
-                }
 
-                if (i_biased_state)
-                {
-                    // Error out has Pstate and all dependent functions are suspious.
-                    FAPI_ASSERT(false,
+                    if (attr_poundv_validity_halt_disable)
+                    {
+                        FAPI_IMP("**** WARNING : halt on #V validity checking has been disabled and errors were found");
+                        FAPI_IMP("**** WARNING : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
+                                 i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
+                        FAPI_IMP("**** WARNING : Pstates are not enabled but continuing on.");
+
+                        // Log errors based on biased inputs or not
+                        if (i_biased_state)
+                        {
+                            FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(i_target)
+                                .set_CHIPLET_NUMBER(i_chiplet_num)
+                                .set_BUCKET(i_bucket_id)
+                                .set_POINT(i)
+                                .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                                .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                                .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                                .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                                .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                                "Pstate Parameter Block Biased #V Zero contents error being logged");
+                        }
+                        else
+                        {
+                            FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_POUNDV_ZERO_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(i_target)
+                                .set_CHIPLET_NUMBER(i_chiplet_num)
+                                .set_BUCKET(i_bucket_id)
+                                .set_POINT(i)
+                                .set_FREQUENCY(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                                .set_VDD(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                                .set_IDD(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                                .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                                .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                                "Pstate Parameter Block #V Zero contents error being logged");
+                        }
+                        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    }
+                    else
+                    {
+                        FAPI_ERR("**** ERROR : Zero valued data found in #V (chiplet = %u  bucket id = %u  op point = %s)",
+                             i_chiplet_num, i_bucket_id, pv_op_str[pv_op_order[i]]);
+
+                        // Error out has Pstate and all dependent functions are suspious.
+                        if (i_biased_state)
+                        {
+                            FAPI_ASSERT(false,
                                 fapi2::PSTATE_PB_BIASED_POUNDV_ZERO_ERROR()
                                 .set_CHIP_TARGET(i_target)
                                 .set_CHIPLET_NUMBER(i_chiplet_num)
@@ -1593,12 +1639,10 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                                 .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
                                 .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
                                 "Pstate Parameter Block Biased #V Zero contents error being logged");
-                }
-                else
-
-                {
-                    // Error out has Pstate and all dependent functions are suspious.
-                    FAPI_ASSERT(false,
+                        }
+                        else
+                        {
+                            FAPI_ASSERT(false,
                                 fapi2::PSTATE_PB_POUNDV_ZERO_ERROR()
                                 .set_CHIP_TARGET(i_target)
                                 .set_CHIPLET_NUMBER(i_chiplet_num)
@@ -1610,11 +1654,12 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                                 .set_VCS(i_chiplet_mvpd_data[pv_op_order[i]][3])
                                 .set_ICS(i_chiplet_mvpd_data[pv_op_order[i]][4]),
                                 "Pstate Parameter Block #V Zero contents error being logged");
-                }
-
-            }
-        }
-    }
+                        }
+                    }  // Halt disable
+                }  // #V point zero check
+            }  // WOF and UT conditions
+        } // Operating poing loop
+    } // validate #V EC
 
     // Adjust the valid operating point based on UltraTurbo presence
     // and WOF enablement
@@ -1627,60 +1672,108 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
 
     FAPI_DBG("o_valid_pdv_points = %d", *o_valid_pdv_points);
 
-    // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
-    for (i = 1; i <= (*o_valid_pdv_points) - 1; i++)
-    {
-
-        FAPI_INF("Checking for relationship between #V operating point (%s <= %s) for %s values",
-                 pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]],
-                 (i_biased_state) ? "biased" : "non-biased");
-
-        // Only skip checkinug for WOF not enabled and UltraTurbo.
-        if (is_wof_enabled(o_state) ||
-            (!( !is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))))
-        {
-            if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
-                i_chiplet_mvpd_data[pv_op_order[i - 1]][1] > i_chiplet_mvpd_data[pv_op_order[i]][1]  ||
-                i_chiplet_mvpd_data[pv_op_order[i - 1]][2] > i_chiplet_mvpd_data[pv_op_order[i]][2]  ||
-                i_chiplet_mvpd_data[pv_op_order[i - 1]][3] > i_chiplet_mvpd_data[pv_op_order[i]][3]  ||
-                i_chiplet_mvpd_data[pv_op_order[i - 1]][4] > i_chiplet_mvpd_data[pv_op_order[i]][4]    )
-            {
-
-                FAPI_ERR("**** ERROR : Relationship error between #V operating point (%s > %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
-                         pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
-                         pv_op_order[i]);
 #define POUNDV_SLOPE_CHECK(x,y)   x > y ? " is GREATER (ERROR!) than " : " is less than "
-                FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
-                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][0], i_chiplet_mvpd_data[pv_op_order[i]][0]),
-                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][0]);
 
-                FAPI_INF("%s VDD voltage value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
-                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][1], i_chiplet_mvpd_data[pv_op_order[i]][1]),
-                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][1]);
+    if (attr_poundv_validate_ec_disable)
+    {
+        o_state->iv_pstates_enabled = false;
+        FAPI_INF("**** WARNING : #V relationship checking is not being performed on this chip EC level");
+        FAPI_INF("**** WARNING : Pstates are not enabled");
+    }
+    else
+    {
+        // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
+        for (i = 1; i <= (*o_valid_pdv_points) - 1; i++)
+        {
+            FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
+                     pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]]);
 
-                FAPI_INF("%s VDD current value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
-                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][2], i_chiplet_mvpd_data[pv_op_order[i]][2]),
-                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][2]);
-
-                FAPI_INF("%s VCS voltage value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
-                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][3], i_chiplet_mvpd_data[pv_op_order[i]][3]),
-                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][3]);
-
-                FAPI_INF("%s VCS current value %u is %s %s Frequency value %u",
-                       pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
-                       POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][4], i_chiplet_mvpd_data[pv_op_order[i]][4]),
-                       pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][4]);
-
-                o_state->iv_pstates_enabled = false;
-
-                if (i_biased_state)
+            // Only skip checkinug for WOF not enabled and UltraTurbo.
+            if ( is_wof_enabled(o_state) ||
+                (!( !is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0)))
+               )
+            {
+                if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
+                    i_chiplet_mvpd_data[pv_op_order[i - 1]][1] > i_chiplet_mvpd_data[pv_op_order[i]][1]  ||
+                    i_chiplet_mvpd_data[pv_op_order[i - 1]][2] > i_chiplet_mvpd_data[pv_op_order[i]][2]  ||
+                    i_chiplet_mvpd_data[pv_op_order[i - 1]][3] > i_chiplet_mvpd_data[pv_op_order[i]][3]  ||
+                    i_chiplet_mvpd_data[pv_op_order[i - 1]][4] > i_chiplet_mvpd_data[pv_op_order[i]][4]    )
                 {
-                    // Error out has Pstate and all dependent functions are suspious.
-                    FAPI_ASSERT(false,
+
+                    o_state->iv_pstates_enabled = false;
+
+                    if (attr_poundv_validity_halt_disable)
+                    {
+                        FAPI_IMP("**** WARNING : halt on #V validity checking has been disabled and relationship errors were found");
+                        FAPI_IMP("**** WARNING : Relationship error between #V operating point (%s > %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
+                            pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
+                            pv_op_order[i]);
+                        FAPI_IMP("**** WARNING : Pstates are not enabled but continuing on.");
+                    }
+                    else
+                    {
+                        FAPI_ERR("**** ERROR : Relation../../xml/attribute_info/pm_plat_attributes.xmlship error between #V operating point (%s > %s)(power save <= nominal <= turbo <= ultraturbo) (chiplet = %u  bucket id = %u  op point = %u)",
+                                 pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]], i_chiplet_num, i_bucket_id,
+                                 pv_op_order[i]);
+                    }
+
+                    FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
+                           pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][0],
+                           POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][0], i_chiplet_mvpd_data[pv_op_order[i]][0]),
+                           pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][0]);
+
+                    FAPI_INF("%s VDD voltage value %u is %s %s Frequency value %u",
+                           pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][1],
+                           POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][1], i_chiplet_mvpd_data[pv_op_order[i]][1]),
+                           pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][1]);
+
+                    FAPI_INF("%s VDD current value %u is %s %s Frequency value %u",
+                           pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][2],
+                           POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][2], i_chiplet_mvpd_data[pv_op_order[i]][2]),
+                           pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][2]);
+
+                    FAPI_INF("%s VCS voltage value %u is %s %s Frequency value %u",
+                           pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][3],
+                           POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][3], i_chiplet_mvpd_data[pv_op_order[i]][3]),
+                           pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][3]);
+
+                    FAPI_INF("%s VCS current value %u i../../xml/attribute_info/pm_plat_attributes.xmls %s %s Frequency value %u",
+                           pv_op_str[pv_op_order[i - 1]], i_chiplet_mvpd_data[pv_op_order[i - 1]][4],
+                           POUNDV_SLOPE_CHECK(i_chiplet_mvpd_data[pv_op_order[i - 1]][4], i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                           pv_op_str[pv_op_order[i]], i_chiplet_mvpd_data[pv_op_order[i]][4]);
+
+
+
+                    if (i_biased_state)
+                    {
+                        if (attr_poundv_validity_halt_disable)
+                        {
+                            // Log the error only.
+                            FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(i_target)
+                                .set_CHIPLET_NUMBER(i_chiplet_num)
+                                .set_BUCKET(i_bucket_id)
+                                .set_POINT(i)
+                                .set_FREQUENCY_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][0])
+                                .set_VDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][1])
+                                .set_IDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][2])
+                                .set_VCS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][3])
+                                .set_ICS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][4])
+                                .set_FREQUENCY_B(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                                .set_VDD_B(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                                .set_IDD_B(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                                .set_VCS_B(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                                .set_ICS_B(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                                "Pstate Parameter Block Biased #V disorder contents error being logged");
+
+                             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+                        }
+                        else
+                        {
+                            // Error out has Pstate and all dependent functions are suspious.
+                            FAPI_ASSERT(false,
                                 fapi2::PSTATE_PB_BIASED_POUNDV_SLOPE_ERROR()
                                 .set_CHIP_TARGET(i_target)
                                 .set_CHIPLET_NUMBER(i_chiplet_num)
@@ -1697,11 +1790,37 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                                 .set_VCS_B(i_chiplet_mvpd_data[pv_op_order[i]][3])
                                 .set_ICS_B(i_chiplet_mvpd_data[pv_op_order[i]][4]),
                                 "Pstate Parameter Block Biased #V disorder contents error being logged");
-                }
-                else
-                {
-                    // Error out has Pstate and all dependent functions are suspious.
-                    FAPI_ASSERT(false,
+                        }
+                    }
+                    else
+                    {
+                        if (attr_poundv_validity_halt_disable)
+                        {
+                            // Log the error only.
+                            FAPI_ASSERT_NOEXIT(false,
+                                fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                                .set_CHIP_TARGET(i_target)
+                                .set_CHIPLET_NUMBER(i_chiplet_num)
+                                .set_BUCKET(i_bucket_id)
+                                .set_POINT(i)
+                                .set_FREQUENCY_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][0])
+                                .set_VDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][1])
+                                .set_IDD_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][2])
+                                .set_VCS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][3])
+                                .set_ICS_A(i_chiplet_mvpd_data[pv_op_order[i - 1]][4])
+                                .set_FREQUENCY_B(i_chiplet_mvpd_data[pv_op_order[i]][0])
+                                .set_VDD_B(i_chiplet_mvpd_data[pv_op_order[i]][1])
+                                .set_IDD_B(i_chiplet_mvpd_data[pv_op_order[i]][2])
+                                .set_VCS_B(i_chiplet_mvpd_data[pv_op_order[i]][3])
+                                .set_ICS_B(i_chiplet_mvpd_data[pv_op_order[i]][4]),
+                                "Pstate Parameter Block #V disorder contents error being logged");
+
+                             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                        }
+                        else
+                        {
+                            // Error out has Pstate and all dependent functions are suspious.
+                            FAPI_ASSERT(false,
                                 fapi2::PSTATE_PB_POUNDV_SLOPE_ERROR()
                                 .set_CHIP_TARGET(i_target)
                                 .set_CHIPLET_NUMBER(i_chiplet_num)
@@ -1718,11 +1837,12 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                                 .set_VCS_B(i_chiplet_mvpd_data[pv_op_order[i]][3])
                                 .set_ICS_B(i_chiplet_mvpd_data[pv_op_order[i]][4]),
                                 "Pstate Parameter Block #V disorder contents error being logged");
-                }
-            }
-        }
-    }
-
+                        }
+                    }
+                }  // validity failed
+            }  // Skip UT check
+        } // point loop
+    }  // validity disabled
 fapi_try_exit:
     FAPI_DBG("<< proc_chk_valid_poundv");
     return fapi2::current_err;
