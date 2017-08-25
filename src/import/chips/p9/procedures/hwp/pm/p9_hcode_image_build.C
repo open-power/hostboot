@@ -4280,9 +4280,8 @@ fapi2::ReturnCode p9_hcode_image_build( CONST_FAPI2_PROC& i_procTgt,
     //customize magic word based on endianess
     customizeMagicWord( pChipHomer );
 
-    FAPI_IMP("<< p9_hcode_image_build" );
-
 fapi_try_exit:
+    FAPI_IMP("<< p9_hcode_image_build" );
     return fapi2::current_err;
 }
 
