@@ -82,7 +82,7 @@ COPY_FILES = \
     src/build/buildpnor/PnorUtils.pm:openpower \
     src/build/buildpnor/imprintHwKeyHash:openpower \
 	src/build/buildpnor/wof-tables-img:openpower \
-	src/build/buildpnor/memd_creation.pl:openpower \
+    src/build/buildpnor/memd_creation.pl:openpower \
     src/usr/targeting/common/processMrw.pl:openpower \
     src/usr/targeting/common/Targets.pm:openpower \
     src/usr/targeting/common/filter_out_unwanted_attributes.pl:openpower \
@@ -246,6 +246,7 @@ fsp.tar_CONTENTS = \
     obj/genfiles/hwp_id.html \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/buildpnor/wof-tables-img \
+    src/build/buildpnor/memd_creation.pl \
     src/build/buildpnor/buildSbePart.pl \
     src/build/buildpnor/buildpnor.pl \
     src/build/buildpnor/genfakeheader.pl \
