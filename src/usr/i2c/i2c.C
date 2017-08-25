@@ -2579,13 +2579,15 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                 auto skipDiagMode = false;
 
                 // P9 engine 2 port 0 has a limitation where the diag mode
-                // cannot be used. -- skip it if the attribute states it
-                // should not be used
+                // cannot be used. Since diag mode restrictions are enforced at
+                // the engine level, generalize this restriction to all ports on
+                // that engine, skipping the diagnostic reset based on the
+                // value of the attribute.
                 const auto l_disable_diag_mode =
                         i_target->getAttr<
                          TARGETING::ATTR_DISABLE_I2C_ENGINE2_PORT0_DIAG_MODE>();
-                if (  (l_disable_diag_mode)
-                    &&((0 == port) && (2 == i_args.engine))) // Host
+                if (   (l_disable_diag_mode)
+                    && (2 == i_args.engine)) // Host
                 {
                     skipDiagMode = true;
                 }
@@ -2608,7 +2610,7 @@ errlHndl_t i2cForceResetAndUnlock( TARGETING::Target * i_target,
                     TRACFCOMP(g_trac_i2c,
                               INFO_MRK "Not doing i2cForceResetAndUnlock() for "
                               "target=0x%08X: e/p= %d/%d due to P9 diag mode "
-                              "limitations.  Disable diag mode on e2/p0 = %d, "
+                              "limitations.  Disable diag mode on e2 = %d, "
                               "secure mode enabled = %d",
                               TARGETING::get_huid(i_target),
                               i_args.engine, port,l_disable_diag_mode,
