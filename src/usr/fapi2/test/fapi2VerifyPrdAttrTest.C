@@ -32,27 +32,6 @@
 #include "fapi2TestUtils.H"
 #include <utils.H>
 
-// NOTE: This testcase does run successfully
-//       when enabling fapi test library.
-//
-//       However, log_related_error(..) has to have
-//       a prototype defined for this to compile..
-//       That will eventually be true when
-//       the EKB changes show up in utils.H
-#if 1
-namespace fapi2
-{
-void log_related_error(
-    const Target<TARGET_TYPE_ALL>& i_target,
-    fapi2::ReturnCode& io_rc,
-    const fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,
-    const bool i_unitTestError = false );
-}
-#else
-#include <utils.H>
-#endif
-
-
 
 // Used to generate a FAPI RC -- don't care how or why
 fapi2::ReturnCode verifyPrd_get_fapi2_error(void)
