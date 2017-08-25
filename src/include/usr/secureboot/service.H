@@ -305,6 +305,25 @@ namespace SECUREBOOT
     /* Definition in securerommgr.H */
     bool secureRomValidPolicy();
 
+    /*
+     *  @brief Gets the current SBE security mode value from the secureboot
+     *         subsystem
+     *
+     *  @return uint8_t returns 0 if SBE should check for security disable
+     *                  requests, 1 if not
+     */
+    uint8_t getSbeSecurityMode();
+
+    /*
+     *  @brief Sets the current SBE security mode value in the secureboot
+     *         subsystem
+     *
+     *  @param[in] uint8_t The value to set the security mode to. Will accept a
+     *                     a value of 0 if SBE should check for security disable
+     *                     requests and 1 if not. All other values are not
+     *                     allowed and will be rejected via an assert.
+     */
+    void setSbeSecurityMode(uint8_t i_sbeSecurityMode);
 
 }
 

@@ -276,6 +276,25 @@ ReturnCode fapiAttrGetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ReturnCode fapiAttrSetBadDqBitmap( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                                    ATTR_BAD_DQ_BITMAP_Type (&i_data) );
 
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+/// the SECURITY_MODE attribute. It should not be called directly.
+///
+/// @param[out] o_securityMode   Provides the attribute contents to the caller
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
+///                              If a toplevel target cannot be found then
+///                              an assert triggers in the platform call
+///
+ReturnCode platGetSecurityMode(uint8_t & o_securityMode);
+
+/// @brief This function is called by the FAPI_ATTR_SET macro when setting
+/// the SECURITY_MODE attribute. It should not be called directly. There are no
+/// parameters. This is intentional as setting this attribute is not supported
+/// from FAPI or FAPI runtime code. A FAPI INFO trace will be printed explaining
+/// this.
+///
+/// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
+ReturnCode platSetSecurityMode();
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -380,5 +399,17 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::fapiAttrSetBadDqBitmap(TARGET, VAL)
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_SECURITY_MODE access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_SECURITY_MODE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetSecurityMode(VAL)
+#define ATTR_SECURITY_MODE_SETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platSetSecurityMode()
 
 #endif // ATTRIBUTESERVICE_H_

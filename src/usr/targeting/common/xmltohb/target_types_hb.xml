@@ -45,7 +45,6 @@
     <attribute><id>DRTM_PAYLOAD_ADDR_MB_HB</id></attribute>
     <attribute><id>FORCE_PRE_PAYLOAD_DRTM</id></attribute>
     <attribute><id>HB_RSV_MEM_NEXT_SECTION</id></attribute>
-    <attribute><id>HB_SECURITY_MODE</id></attribute>
     <attribute><id>ALLOW_ATTR_OVERRIDES_IN_SECURE_MODE</id></attribute>
     <attribute><id>HIDDEN_ERRLOGS_ENABLE</id></attribute>
 </targetTypeExtension>
