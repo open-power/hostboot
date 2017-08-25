@@ -99,6 +99,14 @@ const uint32_t TA_TRACE_BASE_SCOM      = 0x00010400;
 // Table of known trace arrays
 //------------------------------------------------------------------------------
 
+enum chip_type_and_ec
+{
+    NIMBUS   = 1,
+    CUMULUS  = 2,
+    OTHER    = 4,
+    ANY_CHIP = 0xFF,
+};
+
 struct ta_def
 {
     /* One entry per mux setting; value of 0 means N/A */
@@ -106,65 +114,69 @@ struct ta_def
     const uint8_t ex_odd_scom_offset: 2;
         const uint8_t chiplet: 6;
         const uint8_t base_multiplier;
+        const uint8_t chip_type_and_ec;
     };
 
     static const ta_def ta_defs[] =
 {
     /* PERV */
-    { { PROC_TB_PIB, PROC_TB_OCC, PROC_TB_TOD },                       0x00, 0x01, 0x00},
-    { { PROC_TB_SBE, PROC_TB_PIB_ALT },                                0x00, 0x01, 0x01},
+    { { PROC_TB_PIB, PROC_TB_OCC, PROC_TB_TOD },                       0x00, 0x01, 0x00, ANY_CHIP },
+    { { PROC_TB_SBE, PROC_TB_PIB_ALT },                                0x00, 0x01, 0x01, ANY_CHIP },
     /* N0 */
-    { { PROC_TB_PBIOE0 },                                              0x00, 0x02, 0x00},
-    { { PROC_TB_PBIOE1 },                                              0x00, 0x02, 0x01},
-    { { PROC_TB_CXA0, PROC_TB_NX },                                    0x00, 0x02, 0x02},
+    { { PROC_TB_PBIOE0 },                                              0x00, 0x02, 0x00, ANY_CHIP },
+    { { PROC_TB_PBIOE1 },                                              0x00, 0x02, 0x01, ANY_CHIP },
+    { { PROC_TB_CXA0, PROC_TB_NX },                                    0x00, 0x02, 0x02, ANY_CHIP },
     /* N1 */
-    { { PROC_TB_PB6    },                                              0x00, 0x03, 0x00},
-    { { PROC_TB_PB7    },                                              0x00, 0x03, 0x01},
-    { { PROC_TB_PB8    },                                              0x00, 0x03, 0x02},
-    { { PROC_TB_PB9    },                                              0x00, 0x03, 0x03},
-    { { PROC_TB_PB10   },                                              0x00, 0x03, 0x04},
-    { { PROC_TB_PB11   },                                              0x00, 0x03, 0x05},
-    { { PROC_TB_MCD0, PROC_TB_MCD1, PROC_TB_VAS },                     0x00, 0x03, 0x06},
-    { { PROC_TB_MCS2, PROC_TB_MCS3, PROC_TB_PB13 },                    0x00, 0x03, 0x07},
-    { { PROC_TB_PBIO0  },                                              0x00, 0x03, 0x08},
-    { { PROC_TB_PBIO1  },                                              0x00, 0x03, 0x09},
+    { { PROC_TB_PB6    },                                              0x00, 0x03, 0x00, ANY_CHIP },
+    { { PROC_TB_PB7    },                                              0x00, 0x03, 0x01, ANY_CHIP },
+    { { PROC_TB_PB8    },                                              0x00, 0x03, 0x02, ANY_CHIP },
+    { { PROC_TB_PB9    },                                              0x00, 0x03, 0x03, ANY_CHIP },
+    { { PROC_TB_PB10   },                                              0x00, 0x03, 0x04, ANY_CHIP },
+    { { PROC_TB_PB11   },                                              0x00, 0x03, 0x05, ANY_CHIP },
+    { { PROC_TB_MCD0, PROC_TB_MCD1, PROC_TB_VAS },                     0x00, 0x03, 0x06, ANY_CHIP },
+    { { PROC_TB_MCS2, PROC_TB_MCS3, PROC_TB_PB13 },                    0x00, 0x03, 0x07, ANY_CHIP },
+    { { PROC_TB_PBIO0  },                                              0x00, 0x03, 0x08, ANY_CHIP },
+    { { PROC_TB_PBIO1  },                                              0x00, 0x03, 0x09, ANY_CHIP },
     /* N2 */
-    { { PROC_TB_CXA1, PROC_TB_IOPSI },                                 0x00, 0x04, 0x00},
-    { { PROC_TB_PCIS0, PROC_TB_PCIS1, PROC_TB_PCIS2 },                 0x00, 0x04, 0x01},
+    { { PROC_TB_CXA1, PROC_TB_IOPSI },                                 0x00, 0x04, 0x00, ANY_CHIP },
+    { { PROC_TB_PCIS0, PROC_TB_PCIS1, PROC_TB_PCIS2 },                 0x00, 0x04, 0x01, ANY_CHIP },
     /* N3 */
-    { { PROC_TB_PB0    },                                              0x00, 0x05, 0x00},
-    { { PROC_TB_PB1    },                                              0x00, 0x05, 0x01},
-    { { PROC_TB_PB2    },                                              0x00, 0x05, 0x02},
-    { { PROC_TB_PB3    },                                              0x00, 0x05, 0x03},
-    { { PROC_TB_PB4    },                                              0x00, 0x05, 0x04},
-    { { PROC_TB_PB5    },                                              0x00, 0x05, 0x05},
-    { { PROC_TB_INT, PROC_TB_NPU1, PROC_TB_NMMU1 },                    0x00, 0x05, 0x06},
-    { { PROC_TB_MCS0, PROC_TB_MCS1, PROC_TB_PB12 },                    0x00, 0x05, 0x07},
-    { { PROC_TB_BRIDGE },                                              0x00, 0x05, 0x08},
-    { { PROC_TB_NPU0   },                                              0x00, 0x05, 0x0A},
-    { { PROC_TB_NMMU0  },                                              0x00, 0x05, 0x0B},
+    { { PROC_TB_PB0    },                                              0x00, 0x05, 0x00, ANY_CHIP },
+    { { PROC_TB_PB1    },                                              0x00, 0x05, 0x01, ANY_CHIP },
+    { { PROC_TB_PB2    },                                              0x00, 0x05, 0x02, ANY_CHIP },
+    { { PROC_TB_PB3    },                                              0x00, 0x05, 0x03, ANY_CHIP },
+    { { PROC_TB_PB4    },                                              0x00, 0x05, 0x04, ANY_CHIP },
+    { { PROC_TB_PB5    },                                              0x00, 0x05, 0x05, ANY_CHIP },
+    { { PROC_TB_INT, PROC_TB_NPU1, PROC_TB_NMMU1 },                    0x00, 0x05, 0x06, ANY_CHIP },
+    { { PROC_TB_MCS0, PROC_TB_MCS1, PROC_TB_PB12 },                    0x00, 0x05, 0x07, ANY_CHIP },
+    { { PROC_TB_BRIDGE },                                              0x00, 0x05, 0x08, ANY_CHIP },
+    { { PROC_TB_NPU0   },                                              0x00, 0x05, 0x0A, ANY_CHIP },
+    { { PROC_TB_NMMU0  },                                              0x00, 0x05, 0x0B, ANY_CHIP },
     /* XBUS */
-    { { PROC_TB_PBIOX0, PROC_TB_IOX0 },                                0x00, 0x06, 0x00},
-    { { PROC_TB_PBIOX1, PROC_TB_IOX1 },                                0x00, 0x06, 0x01},
-    { { PROC_TB_PBIOX2, PROC_TB_IOX2 },                                0x00, 0x06, 0x02},
+    { { PROC_TB_PBIOX0, PROC_TB_IOX0 },                                0x00, 0x06, 0x00, ANY_CHIP },
+    { { PROC_TB_PBIOX1, PROC_TB_IOX1 },                                0x00, 0x06, 0x01, ANY_CHIP },
+    { { PROC_TB_PBIOX2, PROC_TB_IOX2 },                                0x00, 0x06, 0x02, ANY_CHIP },
     /* PCIx */
-    { { PROC_TB_PCI0X, PROC_TB_PCI00 },                                0x00, 0x0D, 0x00},
-    { { PROC_TB_PCI1X, PROC_TB_PCI11, PROC_TB_PCI12 },                 0x00, 0x0E, 0x00},
-    { { PROC_TB_PCI2X, PROC_TB_PCI23, PROC_TB_PCI24, PROC_TB_PCI25 },  0x00, 0x0F, 0x00},
+    { { PROC_TB_PCI0X, PROC_TB_PCI00 },                                0x00, 0x0D, 0x00, ANY_CHIP },
+    { { PROC_TB_PCI1X, PROC_TB_PCI11, PROC_TB_PCI12 },                 0x00, 0x0E, 0x00, ANY_CHIP },
+    { { PROC_TB_PCI2X, PROC_TB_PCI23, PROC_TB_PCI24, PROC_TB_PCI25 },  0x00, 0x0F, 0x00, ANY_CHIP },
     /* OBUS */
-    { { PROC_TB_PBIOOA, PROC_TB_IOO },                                 0x00, 0x09, 0x00},
+    { { PROC_TB_PBIOOA, PROC_TB_IOO },                                 0x00, 0x09, 0x00, ANY_CHIP },
     /* MC */
-    { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x20},
-    { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x21},
-    { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x00},
+    { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x20, NIMBUS },
+    { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x21, NIMBUS },
+    { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x00, NIMBUS },
+    { { PROC_TB_MCA0   },                                              0x00, 0x07, 0x00, (uint8_t)~NIMBUS },
+    { { PROC_TB_MCA1   },                                              0x00, 0x07, 0x01, (uint8_t)~NIMBUS },
+    { { PROC_TB_IOMC0, PROC_TB_IOMC1, PROC_TB_IOMC2, PROC_TB_IOMC3  }, 0x00, 0x07, 0x02, (uint8_t)~NIMBUS },
     /* EX */
-    { { PROC_TB_L20, NO_TB, NO_TB, PROC_TB_SKIT10 },                   0x01, 0x10, 0x94},
-    { { PROC_TB_L21, NO_TB, NO_TB, PROC_TB_SKIT11 },                   0x01, 0x10, 0x95},
-    { { PROC_TB_L30, PROC_TB_NCU0, PROC_TB_CME, PROC_TB_EQPB },        0x02, 0x10, 0x00},
-    { { PROC_TB_L31, PROC_TB_NCU1, PROC_TB_IVRM, PROC_TB_SKEWADJ },    0x02, 0x10, 0x01},
+    { { PROC_TB_L20, NO_TB, NO_TB, PROC_TB_SKIT10 },                   0x01, 0x10, 0x94, ANY_CHIP },
+    { { PROC_TB_L21, NO_TB, NO_TB, PROC_TB_SKIT11 },                   0x01, 0x10, 0x95, ANY_CHIP },
+    { { PROC_TB_L30, PROC_TB_NCU0, PROC_TB_CME, PROC_TB_EQPB },        0x02, 0x10, 0x00, ANY_CHIP },
+    { { PROC_TB_L31, PROC_TB_NCU1, PROC_TB_IVRM, PROC_TB_SKEWADJ },    0x02, 0x10, 0x01, ANY_CHIP },
     /* CORE */
-    { { PROC_TB_CORE0  },                                              0x00, 0x20, 0x41},
-    { { PROC_TB_CORE1  },                                              0x00, 0x20, 0x42},
+    { { PROC_TB_CORE0  },                                              0x00, 0x20, 0x41, ANY_CHIP },
+    { { PROC_TB_CORE1  },                                              0x00, 0x20, 0x42, ANY_CHIP },
 };
 
 class TraceArrayFinder
@@ -176,7 +188,7 @@ class TraceArrayFinder
         uint32_t trace_scom_base;
         uint32_t ex_odd_scom_offset;
 
-        TraceArrayFinder(p9_tracearray_bus_id i_trace_bus) :
+        TraceArrayFinder(p9_tracearray_bus_id i_trace_bus, chip_type_and_ec i_chip_type_and_ec) :
             valid(false), mux_sel(0), debug_scom_base(0),
             trace_scom_base(0), ex_odd_scom_offset(0)
         {
@@ -184,7 +196,8 @@ class TraceArrayFinder
             {
                 for(size_t sel = 0; sel < TRACE_MUX_POSITIONS; sel++)
                 {
-                    if(l_ta_def.bus_ids[sel] == i_trace_bus)
+                    if((l_ta_def.bus_ids[sel] == i_trace_bus) &&
+                       ((l_ta_def.chip_type_and_ec & i_chip_type_and_ec) != 0))
                     {
                         uint32_t l_buffer = 0;
                         l_buffer |= l_ta_def.chiplet << 24;
@@ -326,6 +339,21 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+static chip_type_and_ec map_chip_type_and_ec(fapi2::ATTR_NAME_Type i_name, fapi2::ATTR_EC_Type i_ec)
+{
+    switch (i_name)
+    {
+        case fapi2::ENUM_ATTR_NAME_NIMBUS:
+            return NIMBUS;
+
+        case fapi2::ENUM_ATTR_NAME_CUMULUS:
+            return CUMULUS;
+
+        default:
+            return OTHER;
+    }
+}
+
 fapi2::ReturnCode p9_sbe_tracearray(
     const fapi2::Target<P9_SBE_TRACEARRAY_TARGET_TYPES>& i_target,
     const proc_gettracearray_args& i_args,
@@ -336,7 +364,20 @@ fapi2::ReturnCode p9_sbe_tracearray(
 {
     fapi2::Target < P9_SBE_TRACEARRAY_TARGET_TYPES | fapi2::TARGET_TYPE_EQ > target = i_target;
     FAPI_INF("Start");
-    const TraceArrayFinder l_ta_finder(i_args.trace_bus);
+
+    fapi2::ATTR_NAME_Type l_name;
+    fapi2::ATTR_EC_Type l_ec;
+    fapi2::ReturnCode l_rc = fapi2::queryChipEcAndName(i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(), l_name, l_ec);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        FAPI_ERR("Failed to query proc chip name and EC level");
+        return l_rc;
+    }
+
+    FAPI_INF("Chip type/EC: %d/0x%02x", l_name, l_ec);
+
+    const TraceArrayFinder l_ta_finder(i_args.trace_bus, map_chip_type_and_ec(l_name, l_ec));
 
     fapi2::TargetType arg_type = i_target.getType();
     fapi2::TargetType ta_type =
