@@ -973,6 +973,32 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_POUNDV_VALIDITY_HALT_DISABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Disables the validity checking of #V VPD content from causing
+    IPL failures.
+
+    OFF:            Will enable PStates given all validity checks pass.  If
+                    validity checks fail, the a failure is log and error reaction
+                    will occur (eg IPL failure)
+    ON:             Will disable #V validity checking of #V from causing IPL
+                    to halt.  Validity check failures will cause error logs and
+                    Pstates (including other dependent functions) will be
+                    disabled.
+
+    Producer: Override
+
+    Consumers: p9_pstate_parameter_block
+
+    </description>
+    <valueType>uint8</valueType>
+    <enum>OFF=0, ON=1</enum>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_SYSTEM_WOF_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Disables Work Load Optimized Frequency (WOF) algorithms to
@@ -1036,7 +1062,7 @@
     THIS IS NOT SUPPORTED AT PRESENT. GA1 SUPPORT IS TBD).
     </description>
     <valueType>uint8</valueType>
-    <enum>FIXED=0, STEPPED=1</enum>
+    <enum>FIXED=0, CALCULATED=1</enum>
     <platInit/>
     <initToZero/>
   </attribute>
