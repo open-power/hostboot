@@ -1382,21 +1382,21 @@ chip p9_nimbus
         scomaddr    0x05013C80;
         reset       (&, 0x05013C81);
         mask        (|, 0x05013C85);
-        capture     group default;
+        capture     group cNPU2FIR;
     };
 
     register NPU2FIR_MASK
     {
         name        "P9 chip NPU2FIR MASK";
         scomaddr    0x05013C83;
-        capture     group default;
+        capture     group cNPU2FIR;
     };
 
     register NPU2FIR_ACT0
     {
         name        "P9 chip NPU2FIR ACT0";
         scomaddr    0x05013C86;
-        capture     group default;
+        capture     group cNPU2FIR;
         capture     req nonzero("NPU2FIR");
     };
 
@@ -1404,7 +1404,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU2FIR ACT1";
         scomaddr    0x05013C87;
-        capture     group default;
+        capture     group cNPU2FIR;
         capture     req nonzero("NPU2FIR");
     };
 
@@ -4489,7 +4489,7 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[23]
      *  Attention from NPU2FIR
      */
-    (rN3_CHIPLET_FIR, bit(23)) ? analyze(gNPU2FIR);
+    (rN3_CHIPLET_FIR, bit(23)) ? analyzeNPU2FIR;
 
 };
 
@@ -4518,7 +4518,7 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
     /** N3_CHIPLET_UCS_FIR[6]
      *  Attention from NPU2FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(6)) ? analyze(gNPU2FIR);
+    (rN3_CHIPLET_UCS_FIR, bit(6)) ? analyzeNPU2FIR;
 
     /** N3_CHIPLET_UCS_FIR[7]
      *  Attention from NPU0FIR
@@ -8704,6 +8704,7 @@ actionclass aNPU0FIR_NDD10 {capture(cNPU0FIR_NDD10); analyze(gNPU0FIR_NDD10);};
 actionclass aNPU1FIR_NDD10 {capture(cNPU1FIR_NDD10); analyze(gNPU1FIR_NDD10);};
 actionclass aNPU0FIR       {capture(cNPU0FIR);       analyze(gNPU0FIR);      };
 actionclass aNPU1FIR       {capture(cNPU1FIR);       analyze(gNPU1FIR);      };
+actionclass analyzeNPU2FIR {capture(cNPU2FIR);       analyze(gNPU2FIR);      };
 
 actionclass analyzeNPU0FIR
 {
