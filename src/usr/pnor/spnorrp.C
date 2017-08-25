@@ -803,14 +803,11 @@ errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
 void SPnorRP::processLabOverride(
     const sb_flags_t& i_flags) const
 {
-    TARGETING::Target* pSys = nullptr;
-    TARGETING::targetService().getTopLevelTarget(pSys);
-    assert(pSys != nullptr,"System target was nullptr.");
-    // ATTR_HB_SECURITY_MODE attribute values are inverted with respect to the
+    // Secure boot sbe security mode values are inverted with respect to the
     // lab override flag for the same logical meaning
-    TARGETING::ATTR_HB_SECURITY_MODE_type securityMode =
+    uint8_t securityMode =
         !(i_flags.hw_lab_override);
-    pSys->setAttr<TARGETING::ATTR_HB_SECURITY_MODE>(securityMode);
+    SECUREBOOT::setSbeSecurityMode(securityMode);
     TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to %s.",
         securityMode ? "*NO* override" : "override if requested");
 }

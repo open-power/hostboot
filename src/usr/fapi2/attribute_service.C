@@ -62,6 +62,8 @@
 #include <targeting/common/util.H>
 #include <../memory/lib/shared/mss_const.H>
 
+#include <secureboot/service.H>
+
 //******************************************************************************
 // Implementation
 //******************************************************************************
@@ -1279,6 +1281,29 @@ ReturnCode fapiAttrSetBadDqBitmap(
     }while(0);
 
     return l_rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platGetSecurityMode function
+//******************************************************************************
+ReturnCode platGetSecurityMode(uint8_t & o_securityMode)
+{
+    #ifndef __HOSTBOOT_RUNTIME
+    o_securityMode = SECUREBOOT::getSbeSecurityMode();
+    #else
+    o_securityMode = 0xFF;
+    FAPI_INF("Get SECURITY_MODE not supported from hostboot runtime");
+    #endif
+    return fapi2::ReturnCode();
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::platSetSecurityMode function
+//******************************************************************************
+ReturnCode platSetSecurityMode()
+{
+    FAPI_INF("Set SECURITY_MODE ignored when called from FAPI code");
+    return fapi2::ReturnCode();
 }
 
 } // End platAttrSvc namespace
