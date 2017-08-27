@@ -1299,6 +1299,7 @@ fapi2::ReturnCode unmaskMCFIR(
 
     // Setup MC Fault Isolation Action1 register buffer
     l_mcfiraction.setBit<MCS_MCFIR_MC_INTERNAL_RECOVERABLE_ERROR>();
+    l_mcfiraction.setBit<MCS_MCFIR_COMMAND_LIST_TIMEOUT>();
 
     // Setup FIR bits in MC Fault Isolation Mask Register buffer
     l_mcfirmask_and.flush<1>();
