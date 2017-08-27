@@ -579,6 +579,18 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             i_chip_info.ranges.push_back(l_phy0_range);
             i_chip_info.ranges.back().print();
         }
+        else
+        {
+            for (uint8_t i = 0; i < NPU_NUM_BAR_SHADOWS; i++)
+            {
+                uint64_t l_addr = (l_use_ndd1_addresses) ?
+                                  (NPU_PHY0_BAR_REGS_NDD1[i]) :
+                                  (NPU_PHY0_BAR_REGS[i]);
+
+                FAPI_TRY(fapi2::putScom(i_target, l_addr, 0x0000000000000000),
+                         "Error from putScom (0x08X)", l_addr);
+            }
+        }
     }
 
     // PHY1
@@ -624,6 +636,18 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             i_chip_info.ranges.push_back(l_phy1_range);
             i_chip_info.ranges.back().print();
         }
+        else
+        {
+            for (uint8_t i = 0; i < NPU_NUM_BAR_SHADOWS; i++)
+            {
+                uint64_t l_addr = (l_use_ndd1_addresses) ?
+                                  (NPU_PHY1_BAR_REGS_NDD1[i]) :
+                                  (NPU_PHY1_BAR_REGS[i]);
+
+                FAPI_TRY(fapi2::putScom(i_target, l_addr, 0x0000000000000000),
+                         "Error from putScom (0x08X)", l_addr);
+            }
+        }
     }
 
     // MMIO
@@ -668,6 +692,18 @@ p9_setup_bars_npu(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
             l_mmio_range.enabled = true;
             i_chip_info.ranges.push_back(l_mmio_range);
             i_chip_info.ranges.back().print();
+        }
+        else
+        {
+            for (uint8_t i = 0; i < NPU_NUM_BAR_SHADOWS; i++)
+            {
+                uint64_t l_addr = (l_use_ndd1_addresses) ?
+                                  (NPU_MMIO_BAR_REGS_NDD1[i]) :
+                                  (NPU_MMIO_BAR_REGS[i]);
+
+                FAPI_TRY(fapi2::putScom(i_target, l_addr, 0x0000000000000000),
+                         "Error from putScom (0x08X)", l_addr);
+            }
         }
     }
 
