@@ -119,25 +119,6 @@ namespace HBOCC
 
         do {
             //  ************************************************************
-            //  Initialize Cores and Quads
-            //  ************************************************************
-            FAPI_DBG("Executing p9_pm_corequad_init to"
-                                                   " initialize cores & quads");
-            FAPI_INVOKE_HWP(l_errl, p9_pm_corequad_init,
-                          l_target,
-                          p9pm::PM_INIT,
-                          0,//CME FIR MASK for reset
-                          0,//Core Error Mask for reset
-                          0 //Quad Error Mask for reset
-                         );
-            if(l_errl)
-            {
-                TRACFCOMP(g_fapiTd,
-                                  "ERROR: Failed to initialize cores & quads");
-                break;
-            }
-
-            //  ************************************************************
             //  Issue init to OCB
             //  ************************************************************
             FAPI_DBG("Executing p9_pm_ocb_init to initialize OCB channels");

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,22 @@ void* host_start_stop_engine (void *io_pArgs)
     errlHndl_t l_errl = NULL;
 
     do {
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+        uint64_t l_writeData;
+        size_t l_writeSize = sizeof(l_writeData);
+
+        TARGETING::Target* l_proc = NULL;
+        TARGETING::targetService().masterProcChipTargetHandle(l_proc);
+
+        l_errl = deviceRead(l_proc, &l_writeData, l_writeSize,
+                            DEVICE_SCOM_ADDRESS(0x6C004));
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "host_start_stop_engine: failed to read OIMR0 interrupt mask");
+            break;
+        }
+#endif
         //Use targeting code to get a list of all processors
         TARGETING::TargetHandleList l_procChips;
         getAllChips( l_procChips, TARGETING::TYPE_PROC   );
@@ -82,6 +98,20 @@ void* host_start_stop_engine (void *io_pArgs)
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_start_stop_engine:: failed on proc with HUID : %d",TARGETING::get_huid(l_procChip)  );
             }
         }
+#ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
+        // Starting SGPE in istep15.4 causes OIMR0 register to be improperly
+        // reset, which breaks the xstop analysis flow during IPL. A hack
+        // is to write the original contents of that register back if
+        // the IPL checkstop flag is enabled.
+        l_errl = deviceWrite(l_proc, &l_writeData, l_writeSize,
+                             DEVICE_SCOM_ADDRESS(0x6C004));
+        if(l_errl)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "host_start_stop_engine: failed to reset OIMR0 interrupt mask");
+            break;
+        }
+#endif
       }while (0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_host_start_stop_engine exit" );
