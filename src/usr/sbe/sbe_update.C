@@ -1642,14 +1642,33 @@ namespace SBE
         TRACFCOMP( g_trac_sbe, ENTER_MRK"updateSbeBootSeeprom()" );
 
         errlHndl_t err = NULL;
-        fapi2::ReturnCode l_fapi_rc;
-        fapi2::buffer<uint32_t> l_read_reg;
         const uint32_t l_sbeBootSelectMask = SBE_BOOT_SELECT_MASK >> 32;
 
-        // cast OUR type of target to a FAPI type of target.
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiTarg(i_target);
+        size_t l_opSize = sizeof(uint32_t);
 
         do{
+            // Read PERV_SB_CS_FSI 0x2808 for target proc
+            uint32_t l_targetReg = 0;
+            err = DeviceFW::deviceOp(
+                         DeviceFW::READ,
+                         i_target,
+                         &l_targetReg,
+                         l_opSize,
+                         DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+            if( err )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateSbeBootSeeprom(): getCfamRegister, "
+                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
+                           "RC=0x%X, PLID=0x%lX",
+                           PERV_SB_CS_FSI, // 0x2808
+                           TARGETING::get_huid(i_target),
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
             // Read version from MVPD for target proc
             mvpdSbKeyword_t l_mvpdSbKeyword;
             err =  getSetMVPDVersion(i_target,
@@ -1666,28 +1685,6 @@ namespace SBE
                 break;
             }
 
-            // Read PERV_SB_CS_FSI 0x2808 for target proc
-            l_fapi_rc = fapi2::getCfamRegister(l_fapiTarg,
-                                               PERV_SB_CS_FSI,
-                                               l_read_reg);
-
-            if(!l_fapi_rc.isRC(0))
-            {
-                err = fapi2::rcToErrl(l_fapi_rc);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                err->collectTrace(FAPI_TRACE_NAME,384);
-
-                TRACFCOMP( g_trac_sbe,
-                           ERR_MRK"updateSbeBootSeeprom(): getCfamRegister, "
-                           "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
-                           "RC=0x%X, PLID=0x%lX",
-                           PERV_SB_CS_FSI, // 0x2808
-                           TARGETING::get_huid(i_target),
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                break;
-            }
-
             // Determine Boot Side from flags in MVPD
             bool l_bootSide0 = (isIplFromReIplRequest())
                 ? (REIPL_SEEPROM_0_VALUE ==
@@ -1695,39 +1692,61 @@ namespace SBE
                 : (SEEPROM_0_PERMANENT_VALUE ==
                     (l_mvpdSbKeyword.flags & PERMANENT_FLAG_MASK));
 
+#else
+
+            // The slave will use the same side setting as the master
+            sbeSeepromSide_t l_bootside = SBE_SEEPROM_INVALID;
+            TARGETING::Target * l_masterTarget = nullptr;
+            targetService().masterProcChipTargetHandle(l_masterTarget);
+            err = getSbeBootSeeprom( l_masterTarget, l_bootside );
+            if( err )
+            {
+                TRACFCOMP( g_trac_sbe,
+                           ERR_MRK"updateSbeBootSeeprom(): call to getSbeBootSeeprom(master) failed : PLID=%.8X",
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+            
+            bool l_bootSide0 = (l_bootside == SBE_SEEPROM0);
+
+            TRACFCOMP( g_trac_sbe,INFO_MRK"updateSbeBootSeeprom(): set SBE boot side %d for proc=%.8X",
+                       !l_bootSide0,
+                       TARGETING::get_huid(i_target) );
+
+#endif
+
             if(l_bootSide0)
             {
                 // Set Boot Side 0 by clearing bit for side 1
-                l_read_reg &= ~l_sbeBootSelectMask;
+                l_targetReg &= ~l_sbeBootSelectMask;
 
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
-                           "set SBE boot side 0 for proc=%.8X",
-                           l_read_reg,
+                           "set SBE boot side 0 for proc=%.8llX",
+                           l_targetReg,
                            TARGETING::get_huid(i_target) );
             }
             else
             {
                 // Set Boot Side 1 by setting bit for side 1
-                l_read_reg |= l_sbeBootSelectMask;
+                l_targetReg |= l_sbeBootSelectMask;
 
                 TRACFCOMP( g_trac_sbe,
                            INFO_MRK"updateSbeBootSeeprom(): l_read_reg=0x%.8X "
-                           "set SBE boot side 1 for proc=%.8X",
-                           l_read_reg,
+                           "set SBE boot side 1 for proc=%.8llX",
+                           l_targetReg,
                            TARGETING::get_huid(i_target) );
             }
 
-            l_fapi_rc = fapi2::putCfamRegister(l_fapiTarg,
-                                               PERV_SB_CS_FSI,
-                                               l_read_reg);
-
-            if(!l_fapi_rc.isRC(0))
+            // Write PERV_SB_CS_FSI 0x2808 back into target proc
+            err = DeviceFW::deviceOp(
+                         DeviceFW::WRITE,
+                         i_target,
+                         &l_targetReg,
+                         l_opSize,
+                         DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+            if( err )
             {
-                err = fapi2::rcToErrl(l_fapi_rc);
-                err->collectTrace(FAPI_IMP_TRACE_NAME,256);
-                err->collectTrace(FAPI_TRACE_NAME,384);
-
                 TRACFCOMP( g_trac_sbe,
                            ERR_MRK"updateSbeBootSeeprom(): putCfamRegister, "
                            "PERV_SB_CS_FSI (0x%.4X), proc target = %.8X, "
@@ -1738,6 +1757,7 @@ namespace SBE
                            ERRL_GETPLID_SAFE(err));
                 break;
             }
+
         }while(0);
 
         TRACFCOMP( g_trac_sbe, EXIT_MRK"updateSbeBootSeeprom()" );
