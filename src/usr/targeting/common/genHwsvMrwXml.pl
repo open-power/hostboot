@@ -363,6 +363,7 @@ push @systemAttr,
     "IVRM_STEP_DELAY_NS", $reqPol->{'ivrm_step_delay_ns'},
     "IVRM_STABILIZATION_DELAY_NS", $reqPol->{'ivrm_stabilization_delay_ns'},
     "SBE_UPDATE_DISABLE", 0,
+    "SYSTEM_WOF_DISABLE", $reqPol->{'system_wof_disable'},
 ];
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
@@ -458,23 +459,6 @@ else
 {
     push @systemAttr, ['PROC_FABRIC_X_BUS_WIDTH', '4_BYTE'];
 }
-
-#TODO: RTC 177909 / SW397632 -- re-enable once OOM is fixed
-# on ZZ
-#if( exists $reqPol->{'system_wof_disable'} )
-#{
-#    push @systemAttr, ['SYSTEM_WOF_DISABLE',
-#        $reqPol->{'system_wof_disable'}];
-#}
-#elsif ( exists $reqPol->{'system_wof_enabled'} )
-#{
-#    push @systemAttr, ['SYSTEM_WOF_DISABLE',
-#        !($reqPol->{'system_wof_enabled'})];
-#}
-#else
-#{
-    push @systemAttr, ['SYSTEM_WOF_DISABLE', 'ON' ];
-#}
 
 # Note - if below attribute is specified with im-id, it will not get
 #  set into the output

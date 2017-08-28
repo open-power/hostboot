@@ -252,7 +252,7 @@ Layout Description
     <section>
         <description>VFRT data for WOF (12MB)</description>
         <!-- We need 266KB per module sort, going to support
-             10 sorts by default, plus ECC  -->
+             40 tables by default, plus ECC  -->
         <eyeCatch>WOFDATA</eyeCatch>
         <physicalOffset>0x2CD8000</physicalOffset>
         <physicalRegionSize>0xC00000</physicalRegionSize>
