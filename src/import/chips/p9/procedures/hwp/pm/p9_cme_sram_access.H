@@ -23,16 +23,18 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
+
 /// @file  p9_cme_sram_access.H
 /// @brief Display data from the targetted CME's SRAM array.
 ///
 // *HWP HWP Owner       : Brian Vanderpool <vanderp@us.ibm.com>
 // *HWP Backup HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP FW Owner        : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : HS:CRO:SBE
 ///
+
 ///-----------------------------------------------------------------------------
 
 #ifndef _p9_cme_sram_access_H_
@@ -41,12 +43,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <fapi2.H>
-#include <p9_quad_scom_addresses.H>
-
-#include <p9_pm.H>
-
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_cme_sram_access_FP_t) (
@@ -57,7 +54,6 @@ typedef fapi2::ReturnCode (*p9_cme_sram_access_FP_t) (
     uint32_t& o_dwords_read);
 
 extern "C" {
-
 
 // -----------------------------------------------------------------------------
 //  Function prototype
@@ -81,7 +77,6 @@ extern "C" {
 /// @param [in]  i_length_dword       Length in dwords (# of accesses)
 /// @param [out] o_data               Output Data
 /// @param [out] o_dwords_read        Number of actual words in the output buffer.
-
 ///
 /// @retval FAPI2_RC_SUCCESS
 /// @retval RC_PROCPM_GPE_CODE_BAD_MODE
