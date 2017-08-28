@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <fsi/fsiif.H>
 #include <pnor/pnorif.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/namedtarget.H> // for getMasterCore()
 
 using namespace TARGETING;
 
@@ -51,61 +52,10 @@ using namespace PlatServices;
 // currently have a mix from HDCT, P8->P9 manual conversion
 // and some other chiplet attn regs
 
-
-// For creating chiplet exist bit masks
-typedef std::map<TrgtPos_t, uint32_t>            typeMaskMap_t;
-typedef std::map<TARGETING::TYPE, typeMaskMap_t> typeMaxMap_t;
-
 // For Creating list of registers
 typedef std::vector<uint64_t> AddrList_t;
 typedef std::map<RegType_t, AddrList_t> RegMap_t;
 typedef std::map<TrgtType_t, RegMap_t> TrgtMap_t;
-
-
-/**
- * @fn void initChipMasks( typeMaxMap_t & io_typeMap )
- *
- * @brief Fills in the SCOM addresses we need for all targets
- *          and for all register types.
- */
-void initChipMasks( typeMaxMap_t & io_typeMap,
-                    const HOMER_ChipType_t i_procType )
-{
-    // Creates and Inits the 'exist bit masks' we need
-    // for each chiplet type.  The mask is a bit sensitive
-    // field with each '1' bit indicating that chiplet
-    // is present.
-    io_typeMap[TYPE_CAPP][TrgtPos_t::MAX_CAPP_PER_PROC] = 0;
-    io_typeMap[TYPE_XBUS][TrgtPos_t::MAX_XBUS_PER_PROC] = 0;
-    io_typeMap[TYPE_OBUS][TrgtPos_t::MAX_OBUS_PER_PROC] = 0;
-    io_typeMap[TYPE_PEC][TrgtPos_t::MAX_PEC_PER_PROC] = 0;
-    io_typeMap[TYPE_PHB][TrgtPos_t::MAX_PHB_PER_PROC] = 0;
-    io_typeMap[TYPE_EQ][TrgtPos_t::MAX_EQ_PER_PROC] = 0;
-    io_typeMap[TYPE_EX][TrgtPos_t::MAX_EX_PER_PROC] = 0;
-    io_typeMap[TYPE_CORE][TrgtPos_t::MAX_EC_PER_PROC] = 0;
-
-
-    // A few types differ based on processor type
-    if (HOMER_CHIP_CUMULUS == i_procType)
-    {
-        // TODO RTC 173614: for CUMULUS
-        // Add when these targeting types are available
-        // io_typeMap[TYPE_MC][TrgtPos_t::MAX_MC_PER_PROC] = 0;
-        // io_typeMap[TYPE_MI][TrgtPos_t::MAX_MI_PER_PROC] = 0;
-        // io_typeMap[TYPE_DMI][TrgtPos_t::MAX_DMI_PER_PROC] = 0;
-    }
-    else
-    {
-        // NIMBUS processor
-        io_typeMap[TYPE_MCBIST][TrgtPos_t::MAX_MCBIST_PER_PROC] = 0;
-        io_typeMap[TYPE_MCS][TrgtPos_t::MAX_MCS_PER_PROC] = 0;
-        io_typeMap[TYPE_MCA][TrgtPos_t::MAX_MCA_PER_PROC] = 0;
-    } // else NIMBUS
-
-
-    return;
-} // end createChipMasks
-
 
 /**
  * @fn void getAddresses( TrgtMap_t & io_targMap )
@@ -721,205 +671,332 @@ typedef struct __attribute__((packed))
 
 //------------------------------------------------------------------------------
 
-errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> &io_chipInfVector,
+void __initChipInfo( TargetHandle_t i_chip, HOMER_ChipType_t i_chipModel,
+                     uint32_t i_maxChipsPerNode, HOMER_ChipInfo_t & o_chipInfo )
+{
+    // Determine the chip position.
+    uint32_t chipPos = getTargetPosition( i_chip );
+    PRDF_ASSERT( chipPos < i_maxChipsPerNode );
+
+    // Get the chip FSI address.
+    FSI::FsiLinkInfo_t fsiInfo;
+    FSI::getFsiLinkInfo( i_chip, fsiInfo );
+
+    // Fill in the HOMER chip info.
+    o_chipInfo.hChipType             = HOMER_getChip( i_chipModel );
+    o_chipInfo.hChipType.chipPos     = chipPos;
+    o_chipInfo.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
+    o_chipInfo.hChipType.chipEcLevel = i_chip->getAttr<ATTR_EC>();
+}
+
+// Returns a right justified config mask of the unit
+uint32_t __getUnitMask( TargetHandle_t i_chip, TARGETING::TYPE i_unitType,
+                        const HwInitialized_t i_curHw )
+{
+    #define FUNC "[PRDF::__getUnitMask] "
+
+    uint32_t o_mask = 0;
+
+    uint32_t maxPos = 0; // default invalid
+
+    if ( TYPE_PROC == getTargetType(i_chip) )
+    {
+        switch ( i_unitType )
+        {
+            case TYPE_CAPP:   maxPos = TrgtPos_t::MAX_CAPP_PER_PROC;   break;
+            case TYPE_XBUS:   maxPos = TrgtPos_t::MAX_XBUS_PER_PROC;   break;
+            case TYPE_OBUS:   maxPos = TrgtPos_t::MAX_OBUS_PER_PROC;   break;
+            case TYPE_PEC:    maxPos = TrgtPos_t::MAX_PEC_PER_PROC;    break;
+            case TYPE_PHB:    maxPos = TrgtPos_t::MAX_PHB_PER_PROC;    break;
+            case TYPE_EQ:     maxPos = TrgtPos_t::MAX_EQ_PER_PROC;     break;
+            case TYPE_EX:     maxPos = TrgtPos_t::MAX_EX_PER_PROC;     break;
+            case TYPE_CORE:   maxPos = TrgtPos_t::MAX_EC_PER_PROC;     break;
+            case TYPE_MCBIST: maxPos = TrgtPos_t::MAX_MCBIST_PER_PROC; break;
+            case TYPE_MCS:    maxPos = TrgtPos_t::MAX_MCS_PER_PROC;    break;
+            case TYPE_MCA:    maxPos = TrgtPos_t::MAX_MCA_PER_PROC;    break;
+            case TYPE_MC:     maxPos = TrgtPos_t::MAX_MC_PER_PROC;     break;
+            case TYPE_MI:     maxPos = TrgtPos_t::MAX_MI_PER_PROC;     break;
+            case TYPE_DMI:    maxPos = TrgtPos_t::MAX_DMI_PER_PROC;    break;
+            default: ;
+        }
+    }
+    else if ( TYPE_MEMBUF == getTargetType(i_chip) )
+    {
+        switch ( i_unitType )
+        {
+            case TYPE_MBA: maxPos = TrgtPos_t::MAX_MBA_PER_MEMBUF; break;
+            default: ;
+        }
+    }
+
+    // If maxPos is still zero, then this function was passed invalid parameters
+    if ( 0 == maxPos )
+    {
+        PRDF_ERR( FUNC "Unsupported chip 0x%08x or unit type %u",
+                  getHuid(i_chip), i_unitType );
+        PRDF_ASSERT( false );
+    }
+
+    // Get the unit list for this chip.
+    TargetHandleList unitList = getConnected( i_chip, i_unitType );
+
+    // Initially this variable will be null. It will only be set to a non-null
+    // value if the hardware config indicates we only want the master core.
+    ConstTargetHandle_t masterCore = nullptr;
+
+    // Special handling for specific configs.
+    switch ( i_unitType )
+    {
+        case TYPE_CORE:
+            if ( MASTER_PROC_CORE         == i_curHw ||
+                 ALL_PROC_MASTER_CORE     == i_curHw ||
+                 ALL_PROC_MEM_MASTER_CORE == i_curHw )
+            {
+                #ifndef __HOSTBOOT_RUNTIME // only supported during IPL
+                masterCore = TARGETING::getMasterCore();
+                #endif
+                PRDF_ASSERT( nullptr != masterCore );
+            }
+            break;
+
+        case TYPE_MCBIST:
+        case TYPE_MCS:
+        case TYPE_MCA:
+        case TYPE_MC:
+        case TYPE_MI:
+        case TYPE_DMI:
+            if ( ALL_PROC_MEM_MASTER_CORE != i_curHw &&
+                 ALL_HARDWARE             != i_curHw    )
+            {
+                // Clear out the list because we don't want any memory units.
+                unitList.clear();
+            }
+            break;
+
+        default: ;
+    }
+
+    // Get the config mask for all units of this type.
+    for ( auto & unit : unitList )
+    {
+        // Special handling for master-core-only configs.
+        if ( nullptr != masterCore && unit != masterCore )
+        {
+            // At this point, we only want the master core, but this is not it.
+            // So continue onto the next target.
+            continue;
+        }
+
+        uint32_t chipPos = getTargetPosition( unit );
+        PRDF_ASSERT( chipPos < maxPos );
+
+        o_mask |= (1 << (maxPos - chipPos - 1));
+    }
+
+    return o_mask;
+
+    #undef FUNC
+}
+
+//------------------------------------------------------------------------------
+
+errlHndl_t getHwConfig( std::vector<HOMER_ChipInfo_t> & o_chipInfVector,
                         const HwInitialized_t i_curHw )
 {
     #define FUNC "[PRDF::getHwConfig] "
 
-    errlHndl_t errl = NULL;
+    errlHndl_t errl = nullptr;
+
+    o_chipInfVector.clear();
 
     do
     {
-        //----------------------------------------------------------------------
-        // Get hardware config information.
-        //----------------------------------------------------------------------
+        // Get the master PROC. This is used in several locations.
+        TargetHandle_t masterProc = PlatServices::getMasterProc();
+        PRDF_ASSERT( nullptr != masterProc );
 
-        // Get the master PROC position.
-        TARGETING::TargetHandle_t  masterProc = getMasterProc();
-        PRDF_ASSERT( NULL != masterProc );
-
-        // Should be able to build up at least one chip structure
-        FSI::FsiLinkInfo_t  fsiInfo;
-        HOMER_ChipInfo_t    l_chipItem;
-        HOMER_ChipType_t    l_procModelType;
-
-        l_procModelType = (MODEL_CUMULUS == getChipModel(masterProc)) ?
-                           HOMER_CHIP_CUMULUS : HOMER_CHIP_NIMBUS;
+        // Get the complete PROC list.
+        TargetHandleList procList;
+        if ( MASTER_PROC_CORE == i_curHw )
+        {
+            // Get just the master PROC.
+            procList.push_back( masterProc );
+        }
+        else
+        {
+            // Get all configured PROCs.
+            procList = getFunctionalTargetList( TYPE_PROC );
+        }
 
         // Iterate the list of functional PROCs.
-        TargetHandleList procList = getFunctionalTargetList( TYPE_PROC );
-        for ( TargetHandleList::iterator procIt = procList.begin();
-              procIt != procList.end(); ++procIt )
+        for ( auto & proc : procList )
         {
-            // Init chiplet masks
-            memset( &(l_chipItem.hChipN), 0x00, sizeof(l_chipItem.hChipN) );
-
-            // Determine which processor
-            uint32_t procPos = getTargetPosition(*procIt);
-            PRDF_ASSERT( procPos < MAX_PROC_PER_NODE );
-
-            // Get the PROC FSI address.
-            FSI::getFsiLinkInfo( *procIt, fsiInfo );
-
-            // Fill in our HOMER chip info
-            l_chipItem.hChipType = HOMER_getChip(l_procModelType);
-            l_chipItem.hChipType.chipPos  = procPos;
-            l_chipItem.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
-
-            // save EC level for the chip
-            l_chipItem.hChipType.chipEcLevel = (*procIt)->getAttr<ATTR_EC>();
-
-            // is this the MASTER processor ?
-            l_chipItem.hChipN.isMaster = (*procIt == masterProc) ? 1 : 0;
-
-            std::map<TARGETING::TYPE, typeMaskMap_t>::const_iterator  typePosIt;
-            std::map<TrgtPos_t, uint32_t>::const_iterator    maskIt;
-
-            typeMaxMap_t  l_typeMaxMap;
-
-            // Init chiplet exist bit maps
-            initChipMasks(l_typeMaxMap, l_procModelType);
-
-            // Loop thru all chiplet types and fill in the
-            // exist bit maps.
-            for ( typePosIt=l_typeMaxMap.begin();
-                  (typePosIt  != l_typeMaxMap.end());
-                   typePosIt++ )
+            // Get the PROC model type.
+            HOMER_ChipType_t procModelType = HOMER_CHIP_INVALID;
+            switch ( getChipModel(proc) )
             {
-                for ( maskIt=typePosIt->second.begin();
-                      (maskIt != typePosIt->second.end());  maskIt++ )
-                {
-                    TargetHandleList chipletList = getConnected(*procIt,
-                                                           typePosIt->first);
+                case MODEL_NIMBUS:  procModelType = HOMER_CHIP_NIMBUS;  break;
+                case MODEL_CUMULUS: procModelType = HOMER_CHIP_CUMULUS; break;
+                default:
+                    PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
+                              procModelType, getHuid(proc) );
+                    PRDF_ASSERT( false );
+            }
 
-                    for ( TargetHandleList::iterator chipIt=chipletList.begin();
-                                      chipIt != chipletList.end(); ++chipIt )
-                    {
-                        uint32_t chipPos = getTargetPosition( *chipIt );
-                        PRDF_ASSERT( chipPos < maskIt->first );
+            // Init the chip info.
+            HOMER_ChipInfo_t ci;
+            __initChipInfo( proc, procModelType, MAX_PROC_PER_NODE, ci );
 
-                        // If right justified, it fits bit fields well
-                        l_typeMaxMap[typePosIt->first][ maskIt->first] |=
-                                   0x00000001 << (maskIt->first - chipPos - 1);
-
-                    } // end for on chiplet list
-
-                } // end for loop on mask
-
-            } // end for loop on type
-
-            // Need to move the 32 bit chiplet mask into the HOMER defined masks
-            // (take all the processor ones to start)
-            l_chipItem.hChipN.xbusMask =
-                        l_typeMaxMap[TYPE_XBUS][TrgtPos_t::MAX_XBUS_PER_PROC];
-            l_chipItem.hChipN.obusMask =
-                        l_typeMaxMap[TYPE_OBUS][TrgtPos_t::MAX_OBUS_PER_PROC];
-            l_chipItem.hChipN.ecMask   =
-                        l_typeMaxMap[TYPE_CORE][TrgtPos_t::MAX_EC_PER_PROC];
-            l_chipItem.hChipN.eqMask   =
-                        l_typeMaxMap[TYPE_EQ][TrgtPos_t::MAX_EQ_PER_PROC];
-            l_chipItem.hChipN.exMask   =
-                        l_typeMaxMap[TYPE_EX][TrgtPos_t::MAX_EX_PER_PROC];
-
-            l_chipItem.hChipN.cappMask =
-                        l_typeMaxMap[TYPE_CAPP][TrgtPos_t::MAX_CAPP_PER_PROC];
-            l_chipItem.hChipN.pecMask  =
-                        l_typeMaxMap[TYPE_PEC][TrgtPos_t::MAX_PEC_PER_PROC];
-            l_chipItem.hChipN.phbMask  =
-                        l_typeMaxMap[TYPE_PHB][TrgtPos_t::MAX_PHB_PER_PROC];
-
-            // Are we suppose to include memory ?
-            if (ALL_PROC_MEM_MASTER_CORE == i_curHw || ALL_HARDWARE == i_curHw)
+            // Set the chip specific data.
+            if ( HOMER_CHIP_NIMBUS == procModelType )
             {
-                // We already have the MCBIST, MCS and MCA masks
-                // so just save them now into HOMER defined masks..
+                // Init the chiplet masks
+                ci.hChipN = HOMER_initChipNimbus();
 
-                // Handle proc type
-                if (HOMER_CHIP_NIMBUS == l_procModelType)
-                {
-                    l_chipItem.hChipN.mcbistMask =
-                      l_typeMaxMap[TYPE_MCBIST][TrgtPos_t::MAX_MCBIST_PER_PROC];
-                    l_chipItem.hChipN.mcsMask  =
-                      l_typeMaxMap[TYPE_MCS][TrgtPos_t::MAX_MCS_PER_PROC];
-                    l_chipItem.hChipN.mcaMask  =
-                      l_typeMaxMap[TYPE_MCA][TrgtPos_t::MAX_MCA_PER_PROC];
-                } // end nimbus proc
-                else
-                {   // Assuming CUMULUS here
-                    // TODO RTC 173614: for CUMULUS
-                    // Add when these targeting types are available
-                    // l_chipItem.hChipC.mcMask  =
-                    //   l_typeMaxMap[TYPE_MC][TrgtPos_t::MAX_MC_PER_PROC];
-                    // l_chipItem.hChipC.miMask  =
-                    //   l_typeMaxMap[TYPE_MI][TrgtPos_t::MAX_MI_PER_PROC];
-                    // l_chipItem.hChipC.dmiMask =
-                    //   l_typeMaxMap[TYPE_DMI][TrgtPos_t::MAX_DMI_PER_PROC];
-                } // end cumulus proc
+                // Check for master processor
+                ci.hChipN.isMaster = (proc == masterProc) ? 1 : 0;
 
-            } // if all hw or memory included
+                // Set all of the unit masks.
+                ci.hChipN.cappMask   = __getUnitMask(proc, TYPE_CAPP,  i_curHw);
+                ci.hChipN.xbusMask   = __getUnitMask(proc, TYPE_XBUS,  i_curHw);
+                ci.hChipN.obusMask   = __getUnitMask(proc, TYPE_OBUS,  i_curHw);
+                ci.hChipN.pecMask    = __getUnitMask(proc, TYPE_PEC,   i_curHw);
+                ci.hChipN.phbMask    = __getUnitMask(proc, TYPE_PHB,   i_curHw);
+                ci.hChipN.eqMask     = __getUnitMask(proc, TYPE_EQ,    i_curHw);
+                ci.hChipN.exMask     = __getUnitMask(proc, TYPE_EX,    i_curHw);
+                ci.hChipN.ecMask     = __getUnitMask(proc, TYPE_CORE,  i_curHw);
+                ci.hChipN.mcbistMask = __getUnitMask(proc, TYPE_MCBIST,i_curHw);
+                ci.hChipN.mcsMask    = __getUnitMask(proc, TYPE_MCS,   i_curHw);
+                ci.hChipN.mcaMask    = __getUnitMask(proc, TYPE_MCA,   i_curHw);
+            }
+            else if ( HOMER_CHIP_CUMULUS == procModelType )
+            {
+                // Init the chiplet masks
+                ci.hChipC = HOMER_initChipCumulus();
 
-            // save the PROC info we collected
-            io_chipInfVector.push_back(l_chipItem);
+                // Check for master processor
+                ci.hChipC.isMaster = (proc == masterProc) ? 1 : 0;
 
-        } // for on processor chips
+                // Set all of the unit masks.
+                ci.hChipC.cappMask = __getUnitMask(proc, TYPE_CAPP, i_curHw);
+                ci.hChipC.xbusMask = __getUnitMask(proc, TYPE_XBUS, i_curHw);
+                ci.hChipC.obusMask = __getUnitMask(proc, TYPE_OBUS, i_curHw);
+                ci.hChipC.pecMask  = __getUnitMask(proc, TYPE_PEC,  i_curHw);
+                ci.hChipC.phbMask  = __getUnitMask(proc, TYPE_PHB,  i_curHw);
+                ci.hChipC.eqMask   = __getUnitMask(proc, TYPE_EQ,   i_curHw);
+                ci.hChipC.exMask   = __getUnitMask(proc, TYPE_EX,   i_curHw);
+                ci.hChipC.ecMask   = __getUnitMask(proc, TYPE_CORE, i_curHw);
+                ci.hChipC.mcMask   = __getUnitMask(proc, TYPE_MC,   i_curHw);
+                ci.hChipC.miMask   = __getUnitMask(proc, TYPE_MI,   i_curHw);
+                ci.hChipC.dmiMask  = __getUnitMask(proc, TYPE_DMI,  i_curHw);
+            }
 
+            // Save the chip info we collected.
+            o_chipInfVector.push_back( ci );
+        }
 
-        // Are we suppose to include memory  -- then check Centaurs
-        if (ALL_PROC_MEM_MASTER_CORE == i_curHw || ALL_HARDWARE == i_curHw)
+        // Only continue with the memory subsystem if the config allows.
+        if ( ALL_PROC_MEM_MASTER_CORE != i_curHw && ALL_HARDWARE != i_curHw )
+            break;
+
+        // Get the complete MEMBUF list.
+        TargetHandleList membList = getFunctionalTargetList( TYPE_MEMBUF );
+
+        // Iterate the connected MEMBUFs.
+        for ( auto & memb : membList )
         {
-            // Iterate the connected MEMBUFs.
-            TargetHandleList membList = getFunctionalTargetList( TYPE_MEMBUF );
-            for ( TargetHandleList::iterator membIt = membList.begin();
-                    membIt != membList.end(); ++membIt )
+            // Get the MEMBUF model type.
+            HOMER_ChipType_t membModelType = HOMER_CHIP_INVALID;
+            switch ( getChipModel(memb) )
             {
-                uint32_t membPos = getTargetPosition(*membIt);
-                PRDF_ASSERT( membPos < MAX_MEMBUF_PER_NODE );
+                case MODEL_CENTAUR: membModelType = HOMER_CHIP_CENTAUR; break;
+                default:
+                    PRDF_ERR( FUNC "Unsupported chip model %d on 0x%08x",
+                              membModelType, getHuid(memb) );
+                    PRDF_ASSERT( false );
+            }
 
-                // Get the MEMBUF FSI address.
-                getFsiLinkInfo( *membIt, fsiInfo );
+            // Init the chip info.
+            HOMER_ChipInfo_t ci;
+            __initChipInfo( memb, membModelType, MAX_MEMBUF_PER_NODE, ci );
 
-                // save EC level for the chip
-                l_chipItem.hChipType.chipEcLevel=(*membIt)->getAttr<ATTR_EC>();
+            // Set the chip specific data.
+            if ( HOMER_CHIP_CENTAUR == membModelType )
+            {
+                // Init the chiplet masks
+                ci.hChipM = HOMER_initChipCentaur();
 
-                // Fill in our HOMER chip info
-                l_chipItem.hChipType = HOMER_getChip(HOMER_CHIP_CENTAUR);
-                l_chipItem.hChipType.chipPos  = membPos;
-                l_chipItem.hChipType.fsiBaseAddr = fsiInfo.baseAddr;
+                // Set all of the unit masks.
+                ci.hChipM.mbaMask = __getUnitMask(memb, TYPE_MBA, i_curHw);
+            }
 
-                // Init MBA chiplet masks
-                uint32_t l_mbaMask = 0;
-                memset( &(l_chipItem.hChipM),
-                        0x00,
-                        sizeof(l_chipItem.hChipM) );
-
-                // Iterate the connected MBAs.
-                TargetHandleList mbaList = getConnected(*membIt, TYPE_MBA );
-                for ( TargetHandleList::iterator mbaIt = mbaList.begin();
-                        mbaIt != mbaList.end(); ++mbaIt )
-                {
-                    uint32_t mbaPos = getTargetPosition(*mbaIt);
-                    PRDF_ASSERT( mbaPos < MAX_MBA_PER_MEMBUF );
-
-                    l_mbaMask |= 0x00000001 << (MAX_MBA_PER_MEMBUF - mbaPos -1);
-                }
-
-                // save the MBA chiplets in HOMER format
-                l_chipItem.hChipM.mbaMask = l_mbaMask;
-
-                // save the Centaur chip in our structure
-                io_chipInfVector.push_back(l_chipItem);
-
-            } // for on MEMBUF
-
-        } // end if including memory -- centaur and mba
-
+            // Save the chip info we collected.
+            o_chipInfVector.push_back( ci );
+        }
 
     } while (0);
+
+#if 1
+    // TODO RTC 173623:  Remove when done with initial testing
+    // Traces the information built into the vector
+    PRDF_TRAC("HOMER: Number of elements:%d", o_chipInfVector.size() );
+    for ( auto & ci : o_chipInfVector )
+    {
+        PRDF_TRAC("HOMER: ChipPosition:%d", ci.hChipType.chipPos);
+        PRDF_TRAC("HOMER: EC Level:0x%02X", ci.hChipType.chipEcLevel);
+        PRDF_TRAC("HOMER: FSI Addr:0x%08X", ci.hChipType.fsiBaseAddr);
+
+        switch ( ci.hChipType.chipType )
+        {
+            case HOMER_CHIP_NIMBUS:
+                PRDF_TRAC("HOMER: NIMBUS chip");
+                PRDF_TRAC(" isMaster:   %d",     ci.hChipN.isMaster );
+                PRDF_TRAC(" xbusMask:   0x%06X", ci.hChipN.xbusMask );
+                PRDF_TRAC(" obusMask:   0x%06X", ci.hChipN.obusMask );
+                PRDF_TRAC(" ecMask:     0x%06X", ci.hChipN.ecMask );
+                PRDF_TRAC(" eqMask:     0x%06X", ci.hChipN.eqMask );
+                PRDF_TRAC(" exMask:     0x%06X", ci.hChipN.exMask );
+                PRDF_TRAC(" mcbistMask: 0x%06X", ci.hChipN.mcbistMask );
+                PRDF_TRAC(" mcsMask:    0x%06X", ci.hChipN.mcsMask );
+                PRDF_TRAC(" mcaMask:    0x%06X", ci.hChipN.mcaMask );
+                PRDF_TRAC(" cappMask:   0x%06X", ci.hChipN.cappMask );
+                PRDF_TRAC(" pecMask:    0x%06X", ci.hChipN.pecMask );
+                PRDF_TRAC(" phbMask:    0x%06X", ci.hChipN.phbMask );
+                break;
+
+            case HOMER_CHIP_CUMULUS:
+                PRDF_TRAC("HOMER: CUMULUS chip");
+                PRDF_TRAC(" isMaster: %d",     ci.hChipC.isMaster );
+                PRDF_TRAC(" xbusMask: 0x%06X", ci.hChipC.xbusMask );
+                PRDF_TRAC(" obusMask: 0x%06X", ci.hChipC.obusMask );
+                PRDF_TRAC(" ecMask:   0x%06X", ci.hChipC.ecMask );
+                PRDF_TRAC(" eqMask:   0x%06X", ci.hChipC.eqMask );
+                PRDF_TRAC(" exMask:   0x%06X", ci.hChipC.exMask );
+                PRDF_TRAC(" mcMask:   0x%06X", ci.hChipC.mcMask );
+                PRDF_TRAC(" miMask:   0x%06X", ci.hChipC.miMask );
+                PRDF_TRAC(" dmiMask:  0x%06X", ci.hChipC.dmiMask );
+                PRDF_TRAC(" cappMask: 0x%06X", ci.hChipC.cappMask );
+                PRDF_TRAC(" pecMask:  0x%06X", ci.hChipC.pecMask );
+                PRDF_TRAC(" phbMask:  0x%06X", ci.hChipC.phbMask );
+                break;
+
+            case HOMER_CHIP_CENTAUR:
+                PRDF_TRAC("HOMER: CENTAUR chip");
+                PRDF_TRAC(" mbaMask: 0x%X", ci.hChipM.mbaMask );
+                break;
+
+            default:
+                PRDF_TRAC("HOMER: Unknown Chip:%d",
+                          ci.hChipType.chipType );
+                break;
+        }
+    }
+#endif // 1 for temporary debug
 
     return errl;
 
     #undef FUNC
-} // end getHwConfig
+}
 
 //------------------------------------------------------------------------------
 
@@ -1230,78 +1307,6 @@ errlHndl_t writeData( uint8_t * i_hBuf, size_t i_hBufSize,
     #undef FUNC
 }
 
-#if 1
-// TODO RTC 173623:  Remove when done with initial testing
-// Traces the information built into the vector
-void dumpInfoVector( std::vector<HOMER_ChipInfo_t> &i_chipVector )
-{
-    PRDF_ERR("HOMER: Number of elements:%d", i_chipVector.size() );
-    std::vector<HOMER_ChipInfo_t>::iterator  l_chipItr;
-
-    for ( l_chipItr = i_chipVector.begin();
-          (l_chipItr < i_chipVector.end());
-          l_chipItr++ )
-    {
-        PRDF_ERR("HOMER: ChipPosition:%d", l_chipItr->hChipType.chipPos);
-        PRDF_ERR("HOMER: EC Level:%X", l_chipItr->hChipType.chipEcLevel);
-        PRDF_ERR("HOMER: FSI Addr:%X", l_chipItr->hChipType.fsiBaseAddr);
-
-        switch (l_chipItr->hChipType.chipType)
-        {
-            case HOMER_CHIP_NIMBUS:
-                PRDF_ERR("HOMER: NIMBUS chip");
-
-                PRDF_ERR(" isMaster:%X", l_chipItr->hChipN.isMaster );
-                PRDF_ERR(" xbusMask:%X", l_chipItr->hChipN.xbusMask );
-                PRDF_ERR(" obusMask:%X", l_chipItr->hChipN.obusMask );
-                PRDF_ERR(" ecMask:%X", l_chipItr->hChipN.ecMask );
-                PRDF_ERR(" eqMask:%X", l_chipItr->hChipN.eqMask );
-                PRDF_ERR(" exMask:%X", l_chipItr->hChipN.exMask );
-                PRDF_ERR(" mcbistMask:%X", l_chipItr->hChipN.mcbistMask );
-                PRDF_ERR(" mcsMask:%X", l_chipItr->hChipN.mcsMask );
-                PRDF_ERR(" mcaMask:%X", l_chipItr->hChipN.mcaMask );
-                PRDF_ERR(" cappMask:%X", l_chipItr->hChipN.cappMask );
-                PRDF_ERR(" pecMask:%X", l_chipItr->hChipN.pecMask );
-                PRDF_ERR(" phbMask:%X", l_chipItr->hChipN.phbMask );
-                break;
-
-            case HOMER_CHIP_CUMULUS:
-                PRDF_ERR("HOMER: CUMULUS chip");
-
-                PRDF_ERR(" isMaster:%X", l_chipItr->hChipC.isMaster );
-                PRDF_ERR(" xbusMask:%X", l_chipItr->hChipC.xbusMask );
-                PRDF_ERR(" obusMask:%X", l_chipItr->hChipC.obusMask );
-                PRDF_ERR(" ecMask:%X", l_chipItr->hChipC.ecMask );
-                PRDF_ERR(" eqMask:%X", l_chipItr->hChipC.eqMask );
-                PRDF_ERR(" exMask:%X", l_chipItr->hChipC.exMask );
-                PRDF_ERR(" mcMask:%X", l_chipItr->hChipC.mcMask );
-                PRDF_ERR(" miMask:%X", l_chipItr->hChipC.miMask );
-                PRDF_ERR(" dmiMask:%X", l_chipItr->hChipC.dmiMask );
-                PRDF_ERR(" cappMask:%X", l_chipItr->hChipC.cappMask );
-                PRDF_ERR(" pecMask:%X", l_chipItr->hChipC.pecMask );
-                PRDF_ERR(" phbMask:%X", l_chipItr->hChipC.phbMask );
-                break;
-
-            case HOMER_CHIP_CENTAUR:
-                PRDF_ERR("HOMER: CENTAUR chip");
-
-                PRDF_ERR(" mbaMask:%X", l_chipItr->hChipM.mbaMask );
-                break;
-
-            default:
-                PRDF_ERR("HOMER: Unknown Chip:%d",
-                          l_chipItr->hChipType.chipType );
-                break;
-
-        } // end switch
-
-    } // end for printing out things
-
-} // end dumpInfoVector
-#endif // 1 for temporary debug
-
-
-
 //------------------------------------------------------------------------------
 
 errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
@@ -1333,12 +1338,6 @@ errlHndl_t writeHomerFirData( uint8_t * i_hBuf, size_t i_hBufSize,
 
         // Get the hardware configuration
         errl = getHwConfig( l_chipInfVector, i_curHw );
-
-#if 1
-        // TODO RTC 173623:  Remove when done with initial testing
-        dumpInfoVector(l_chipInfVector);
-#endif
-
         if ( NULL != errl )
         {
             PRDF_ERR( FUNC "getHwConfig() failed" );
