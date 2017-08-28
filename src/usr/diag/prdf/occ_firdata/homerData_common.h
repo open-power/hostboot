@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -143,6 +143,8 @@ typedef enum
     HOMER_CHIP_NIMBUS,  /** P9 Nimbus processor chip */
     HOMER_CHIP_CUMULUS, /** P9 Cumulus processor chip */
     HOMER_CHIP_CENTAUR, /** Centaur memory buffer chip */
+
+    HOMER_CHIP_INVALID = 0xff, /** Invalid chip */
 
 } HOMER_ChipType_t;
 
