@@ -130,7 +130,8 @@ namespace HTMGT
                         {
                             case OCC_CFGDATA_FREQ_POINT:
                                 getFrequencyPointMessageData(cmdData,
-                                                             cmdDataLen);
+                                                         cmdDataLen,
+                                                         occ->wofResetCount());
                                 break;
 
                             case OCC_CFGDATA_OCC_ROLE:
@@ -1153,7 +1154,8 @@ void getGPUConfigMessageData(const TargetHandle_t i_occ,
 
 
 void getFrequencyPointMessageData(uint8_t* o_data,
-                                  uint64_t & o_size)
+                                  uint64_t & o_size,
+                                  uint8_t i_wofResetCount )
 {
     uint64_t index   = 0;
     uint16_t min     = 0;
@@ -1177,6 +1179,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
 
     uint8_t turboAllowed =
         sys->getAttr<ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>();
+
     if (turboAllowed)
     {
         turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
@@ -1185,31 +1188,61 @@ void getFrequencyPointMessageData(uint8_t* o_data,
         ATTR_SYSTEM_WOF_DISABLE_type wofSupported;
         if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_DISABLE>(wofSupported))
         {
+            ultra = WOF_SYSTEM_DISABLED;
             G_wofSupported = false;
         }
         else
         {
-            if( wofSupported != SYSTEM_WOF_DISABLE_ON )
+            uint16_t tempUt = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+            if( wofSupported == SYSTEM_WOF_DISABLE_ON )
             {
-                ultra = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+                TMGT_INF("System does not support WOF");
+                G_wofSupported = false;
+                ultra = WOF_SYSTEM_DISABLED;
+            }
+            else if( tempUt == 0 )
+            {
+                TMGT_INF("Missing Ultra Turbo VPD point. WOF disabled.");
+                G_wofSupported = false;
+                ultra = WOF_MISSING_ULTRA_TURBO;
+            }
+            else if( i_wofResetCount >= WOF_RESET_COUNT_THRESHOLD )
+            {
+                TMGT_INF("WOF reset count reached. WOF disabled.");
+                G_wofSupported = false;
+                ultra = WOF_RESET_COUNT_REACHED;
+            }
+            else if( turbo <= nominal )
+            {
+                TMGT_INF("Turbo is less than nominal. WOF disabled.");
+                G_wofSupported = false;
+                ultra = WOF_UNSUPPORTED_FREQ;
+            }
+            else if( tempUt <= turbo )
+            {
+                TMGT_INF("Ultra Turbo is less than Turbo. WOF disabled.");
+                G_wofSupported = false;
+                ultra = WOF_UNSUPPORTED_FREQ;
             }
             else
             {
-                G_wofSupported = false;
+                ultra = tempUt;
             }
+
         }
 
         if( !G_wofSupported )
         {
-            TMGT_INF("getFrequencyPoint: WOF not enabled");
+            TMGT_INF("getFrequencyPoint: WOF not enabled! RC = %x", ultra);
         }
     }
     else
     {
         // If turbo not supported, send nominal for turbo
-        // and 0 for ultra-turbo (no WOF support)
+        // and reason code for ultra-turbo (no WOF support)
         TMGT_INF("getFrequencyPoint: Turbo/WOF not supported");
         turbo = nominal;
+        ultra = WOF_UNSUPPORTED_FREQ;
         G_wofSupported = false;
     }
 
@@ -1342,5 +1375,4 @@ void getApssMessageData(uint8_t* o_data,
 }
 
 
-
-}
+}// namespace HTMGT

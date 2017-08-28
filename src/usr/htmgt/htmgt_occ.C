@@ -57,6 +57,8 @@ namespace HTMGT
         iv_state(OCC_STATE_UNKNOWN),
         iv_commEstablished(false),
         iv_needsReset(false),
+        iv_needsWofReset(false),
+        iv_wofResetCount(0),
         iv_failed(false),
         iv_seqNumber(0),
         iv_homer(i_homer),
@@ -202,9 +204,15 @@ namespace HTMGT
                 atThreshold = true;
             }
         }
+        else if( iv_needsWofReset ) //If WOF reset, increment count
+        {
+            iv_wofResetCount++;
+            TMGT_INF("resetPrep(): WOF reset requested. Reset Count = %d",
+                     iv_wofResetCount );
+        }
         else
         {
-            cmdData[1] = OCC_RESET_FAIL_OTHER_OCC;
+            cmdData[1] = OCC_RESET_FAIL_THIS_OCC;
         }
 
         if (iv_commEstablished)
@@ -239,6 +247,7 @@ namespace HTMGT
         iv_state = OCC_STATE_UNKNOWN;
         iv_commEstablished = false;
         iv_needsReset = false;
+        iv_needsWofReset = false;
         iv_failed = false;
         iv_lastPollValid = false;
         iv_resetReason = OCC_RESET_REASON_NONE;
@@ -401,7 +410,7 @@ namespace HTMGT
         :iv_occMaster(nullptr),
         iv_state(OCC_STATE_UNKNOWN),
         iv_targetState(OCC_STATE_ACTIVE),
-        iv_resetCount(0),
+        iv_sysResetCount(0),
         iv_normalPstateTables(true)
     {
     }
@@ -903,17 +912,23 @@ namespace HTMGT
                             atThreshold = true;
                         }
                     }
+                    // If we need a WOF reset, skip system count increment
+                    if( occ->needsWofReset() )
+                    {
+                        i_skipCountIncrement = true;
+                    }
+
                 }
 
                 if ((false == i_skipCountIncrement) && (false == _occFailed()))
                 {
                     // No OCC has been marked failed, increment sys reset count
-                    ++iv_resetCount;
+                    ++iv_sysResetCount;
 
                     TMGT_INF("_resetOCCs: Incrementing system OCC reset count"
-                             " to %d", iv_resetCount);
+                             " to %d", iv_sysResetCount);
 
-                    if(iv_resetCount > OCC_RESET_COUNT_THRESHOLD)
+                    if(iv_sysResetCount > OCC_RESET_COUNT_THRESHOLD)
                     {
                         atThreshold = true;
                     }
@@ -1225,7 +1240,7 @@ namespace HTMGT
 
         for( const auto & occ : iv_occArray )
         {
-            if (occ->needsReset())
+            if (occ->needsReset() || occ->needsWofReset())
             {
                 needsReset = true;
                 break;
@@ -1234,7 +1249,6 @@ namespace HTMGT
 
         return needsReset;
     }
-
 
     // Return true if any OCC has been marked as failed
     bool OccManager::_occFailed()
@@ -1290,7 +1304,7 @@ namespace HTMGT
         o_data[index++] = (nullptr!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
         o_data[index++] = iv_state;
         o_data[index++] = iv_targetState;
-        o_data[index++] = iv_resetCount;
+        o_data[index++] = iv_sysResetCount;
         o_data[index++] = iv_normalPstateTables ? 0 : 1;
         index += 1; // reserved for expansion
         o_data[index++] = safeMode;
@@ -1393,7 +1407,8 @@ namespace HTMGT
             {
                 TMGT_INF("_clearResetCounts: Clearing OCC%d reset count "
                          "(was %d)",
-                         occ->getInstance(), occ->iv_resetCount);
+                         occ->getInstance(),
+                         occ->iv_resetCount);
                 occ->iv_resetCount = 0;
                 if (safeMode)
                 {
@@ -1401,13 +1416,27 @@ namespace HTMGT
                     occ->postResetClear();
                 }
             }
+
+            if(occ->iv_wofResetCount != 0)
+            {
+                occ->iv_wofResetCount = 0;
+                TMGT_INF("_clearResetCounts: Clearing OCC%d WOF reset count "
+                         "( was %d)",
+                         occ->getInstance(),
+                         occ->iv_wofResetCount);
+                if(safeMode)
+                {
+                    // Clear OCC flags
+                    occ->postResetClear();
+                }
+            }
         }
 
-        if (iv_resetCount != 0)
+        if (iv_sysResetCount != 0)
         {
             TMGT_INF("_clearResetCounts: Clearing system reset count "
-                     "(was %d)", iv_resetCount);
-            iv_resetCount = 0;
+                     "(was %d)", iv_sysResetCount);
+            iv_sysResetCount = 0;
         }
     }
 

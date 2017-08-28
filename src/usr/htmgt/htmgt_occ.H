@@ -72,6 +72,7 @@ namespace HTMGT
     enum
     {
         OCC_RESET_COUNT_THRESHOLD   = 3,
+        WOF_RESET_COUNT_THRESHOLD   = 3,
     };
 
     enum occResetReason
@@ -83,6 +84,7 @@ namespace HTMGT
         OCC_RESET_REASON_POWER_FAULT       = 0x04,
         OCC_RESET_REASON_DIFF_OCC          = 0x05,
         OCC_RESET_REASON_OCC_REQUEST       = 0x06,
+        OCC_RESET_REASON_WOF_REQUEST       = 0x07,
     };
 
     // OCC Callout Structure
@@ -215,11 +217,13 @@ namespace HTMGT
              */
             occStateId getState() { return iv_state; };
 
+
             /**
              * @brief Prepare this OCC for reset
              * @return return true if at threshold otherwise false
              */
             bool resetPrep();
+
 
             /**
              * @brief Set IPMI OCC sensor state
@@ -256,6 +260,22 @@ namespace HTMGT
 
 
             /**
+             * @brief Determine if OCC needs to be reset due to WOF
+             *
+             * @return true if this OCC needs to be reset
+             */
+            bool needsWofReset() { return iv_needsWofReset; }
+
+
+            /**
+             * @brief Returns the number of times a WOF reset has occured
+             *
+             * @return Number of WOF resets for this OCC
+             */
+            uint8_t wofResetCount() { return iv_wofResetCount; }
+
+
+            /**
              * @brief Return OCCs present bits
              *
              * @return bitmask representing this OCC position
@@ -282,14 +302,13 @@ namespace HTMGT
              */
             void collectCheckpointScomData(errlHndl_t i_err);
 
+
             /**
              * @brief Add OCC trace buffers to given error log (ERR, IMP, INF)
              *
              * @param[in,out] - the error log handle to add user data for
              */
             void addOccTrace( errlHndl_t & io_errl );
-
-
 
 
         private:   // functions
@@ -303,6 +322,7 @@ namespace HTMGT
             void pollRspHandler(const uint8_t * i_pollResponse,
                                 const uint16_t i_pollResponseSize);
 
+
             /**
              * @brief Collect, Commit and Clear error log from the OCC
              *
@@ -314,6 +334,7 @@ namespace HTMGT
                                 const uint32_t i_address,
                                 const uint16_t i_length);
 
+
             /**
              * @brief Determine what actions are required for elog
              *
@@ -324,6 +345,7 @@ namespace HTMGT
             void elogProcessActions(const uint8_t i_actions,
                                     bool        & o_occReset,
                                     ERRORLOG::errlSeverity_t & o_errlSeverity);
+
 
             /**
              * @brief Add specified callout to the error log
@@ -339,10 +361,12 @@ namespace HTMGT
                                 const occErrlCallout_t     i_callout,
                                 uint8_t &                  io_callout_num);
 
+
             /**
              * @brief Update the GPU presence sensors in the system
              */
             void updateGpuPresence();
+
 
         protected:
             // Instance number of this OCC: 0 = first physical OCC
@@ -357,6 +381,10 @@ namespace HTMGT
             bool            iv_commEstablished;
             // true if OCC needs to be reset
             bool            iv_needsReset;
+            // true if OCC needs to be reset due to WOF
+            bool            iv_needsWofReset;
+            // WOF reset count
+            uint8_t         iv_wofResetCount;
             // true if OCC failed
             bool            iv_failed;
             // Sequence number of last/current OCC command
@@ -390,7 +418,6 @@ namespace HTMGT
             uint8_t         iv_resetCount;
             // Version of data stored (0 = not written)
             uint8_t         iv_version;
-
     };
 
 
@@ -565,7 +592,6 @@ namespace HTMGT
              */
             static bool occNeedsReset();
 
-
             /**
              * @brief Collect FFDC debug data for HTMGT and OCCs
              *
@@ -645,7 +671,7 @@ namespace HTMGT
             occList_t               iv_occArray;
             occStateId              iv_state;
             occStateId              iv_targetState;
-            uint8_t                 iv_resetCount;
+            uint8_t                 iv_sysResetCount;
             bool                    iv_normalPstateTables;
 
 

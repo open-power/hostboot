@@ -41,6 +41,7 @@ namespace HTMGT
     // Error Actions
     enum tmgtErrlActionsType
     {
+        TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED       = 0x20,
         TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED       = 0x40,
         TMGT_ERRL_ACTIONS_RESET_REQUIRED           = 0x80,
     };
