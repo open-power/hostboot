@@ -43,7 +43,7 @@
 #include <fapi2.H>
 #include <stdint.h>
 
-typedef fapi2::ReturnCode( *p9_check_idle_stop_done_FP_t )( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt );
+typedef fapi2::ReturnCode( *p9_check_idle_stop_done_FP_t )( const fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt );
 
 extern "C"
 {
@@ -55,7 +55,7 @@ extern "C"
 /// @param[in] i_exTgt     fapi2 target for a core
 /// @return fapi2 retuirn code.
 
-    fapi2::ReturnCode p9_check_idle_stop_done( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt );
+    fapi2::ReturnCode p9_check_idle_stop_done( const fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt );
 
     } //namespace p9_check_idle_stop ends
 

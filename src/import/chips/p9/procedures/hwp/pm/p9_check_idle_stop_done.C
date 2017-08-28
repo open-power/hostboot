@@ -610,7 +610,7 @@ class StopFfdcRules
         /**
          * @brief   constructor
          */
-        StopFfdcRules( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt ) :
+        StopFfdcRules( const fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt ) :
             iv_coreTgt( i_coreTgt )
         { }
 
@@ -1260,7 +1260,7 @@ fapi_try_exit:
 
 //----------------------------------------------------------------------------------------------
 
-fapi2::ReturnCode p9_check_idle_stop_done( fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt )
+fapi2::ReturnCode p9_check_idle_stop_done( const fapi2::Target< fapi2::TARGET_TYPE_CORE >& i_coreTgt )
 {
     FAPI_IMP( ">> p9_check_idle_stop_done ");
 
