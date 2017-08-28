@@ -46,10 +46,9 @@ use constant
     PERVASIVE_PARENT_MI_OFFSET => 7,
     PERVASIVE_PARENT_DMI_OFFSET => 7,
     NUM_PROCS_PER_GROUP => 4,
-    DIMMS_PER_PROC => 64, # 8 DMI x 8 DIMMS per Centaur
-    DIMMS_PER_DMI => 8, # 8 dimms per dmi
-    DIMMS_PER_MBA => 4, # 4 dimms per mba
-    DIMMS_PER_PORT => 2, # 2 dimms per port
+    DIMMS_PER_PROC => 32, # 2 memory riser cards per proc x 16 IS DIMMs (4 Centaurs x 4 DDR ports)
+    DIMMS_PER_DMI => 4, # 1 Centaur x 4 dimms per DDR port
+    DIMMS_PER_MBAPORT => 2, # MAX Dimms Per MBA PORT is 2
     MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
 };
 
@@ -103,6 +102,7 @@ sub new
         TOPOLOGY     => undef,
         report_log   => "",
         vpd_num      => 0,
+        dimm_tpos    => 0,
         MAX_MC       => 0,
         MAX_MI       => 0,
         MAX_DMI      => 0,
@@ -1265,7 +1265,7 @@ sub processMc
                         $self->setHuid($membuf, $sys, $node);
                         $self->{targeting}
                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                          {DMI}[$dmi] {MEMBUFS}[0]{KEY} = $membuf;
+                          {DMI}[$dmi] {MEMBUFS}[$membufnum]{KEY} = $membuf;
 
                         $self->setAttribute($membuf, "ENTITY_INSTANCE",
                                $self->{membuf_inst_num});
@@ -1280,7 +1280,7 @@ sub processMc
                             {
                                 $self->{targeting}
                                   ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                                    {DMI}[$dmi]{MEMBUFS}[0]{L4S}[0] {KEY} = $membuf_child;
+                                    {DMI}[$dmi]{MEMBUFS}[$membufnum]{L4S}[0] {KEY} = $membuf_child;
                                 # For Zeppelin, the membufs are on riser cards, not directly on the node.
                                 # TODO RTC:175877 - PHYS_PATH attribute updates for membuf
                                 $self->setAttribute($membuf_child, "AFFINITY_PATH",
@@ -1304,7 +1304,7 @@ sub processMc
                                 $self->setHuid($membuf_child, $sys, $node);
                                 $self->{targeting}
                                   ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
-                                    {DMI}[$dmi]{MEMBUFS}[0]{MBAS}[$mba]{KEY} = $membuf_child;
+                                    {DMI}[$dmi]{MEMBUFS}[$membufnum]{MBAS}[$mba]{KEY} = $membuf_child;
 
                                 ## Trace the DDR busses to find connected DIMM
                                 my $ddrs = $self->findConnections($membuf_child,"DDR4","");
@@ -1322,9 +1322,8 @@ sub processMc
 
                                         my $aff_pos = DIMMS_PER_PROC*$proc+
                                                       DIMMS_PER_DMI*$dmi_num+
-                                                      DIMMS_PER_MBA*$mba+
-                                                      DIMMS_PER_PORT*$port_num+
-                                                      $dimm_num;
+                                                      DIMMS_PER_MBAPORT*$mba+
+                                                      $port_num;
 
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
                                                   $aff_path . "/membuf-$membufnum/mba-$mba/dimm-$affinitypos"
@@ -1340,7 +1339,7 @@ sub processMc
                                         $self->setHuid($dimm, $sys, $node);
                                         $self->{targeting}
                                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
-                                          {MEMBUFS}[0]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
+                                          {MEMBUFS}[$membufnum]{MBAS}[$mba] {DIMMS}[$affinitypos]{KEY} =
                                           $dimm;
                                         $self->setAttribute($dimm, "ENTITY_INSTANCE",
                                              $self->{dimm_tpos});
