@@ -98,8 +98,16 @@ void ClearChipletParityError(ExtensibleChip * i_chip,
             return;
     }
 
-    ExtensibleChipList chpltList =
-        PlatServices::getConnected(i_chip, i_chpltType);
+    ExtensibleChipList chpltList;
+
+    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
+    {
+        chpltList.push_back(i_chip);
+    }
+    else
+    {
+        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+    }
 
     for ( auto chplt : chpltList )
     {
@@ -148,8 +156,16 @@ void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             return;
     }
 
-    ExtensibleChipList chpltList =
-        PlatServices::getConnected(i_chip, i_chpltType);
+    ExtensibleChipList chpltList;
+
+    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
+    {
+        chpltList.push_back(i_chip);
+    }
+    else
+    {
+        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+    }
 
     for ( auto chplt : chpltList )
     {
@@ -210,8 +226,16 @@ void MaskChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             return;
     }
 
-    ExtensibleChipList chpltList =
-        PlatServices::getConnected(i_chip, i_chpltType);
+    ExtensibleChipList chpltList;
+
+    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
+    {
+        chpltList.push_back(i_chip);
+    }
+    else
+    {
+        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+    }
 
     for ( auto chplt : chpltList )
     {
@@ -274,8 +298,16 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
             return false;
     }
 
-    ExtensibleChipList chpltList =
-        PlatServices::getConnected(i_chip, i_chpltType);
+    ExtensibleChipList chpltList;
+
+    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
+    {
+        chpltList.push_back(i_chip);
+    }
+    else
+    {
+        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+    }
 
     for ( auto chplt : chpltList )
     {

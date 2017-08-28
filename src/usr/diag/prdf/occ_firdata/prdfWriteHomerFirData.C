@@ -162,10 +162,6 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_XBUS][REG_REG] =
     {
-        // PLL registers
-        0x060F001E, // OBUS_CONFIG_REG
-        0x060F001F, // OBUS_ERROR_REG
-
         // c_err_rpt registers
         0x06011816, // PB ELL Link0 ErrStatus
         0x06011817, // PB ELL Link1 ErrStatus
@@ -394,6 +390,8 @@ void getAddresses( TrgtMap_t & io_targMap )
         // PLL registers
         0x010F001E, // TP_CONFIG_REG
         0x010F001F, // TP_ERROR_REG
+        0x060F001E, // XBUS_CONFIG_REG
+        0x060F001F, // XBUS_ERROR_REG
 
         // c_err_rpt registers
         0x0101080a, // OCC Error Report Reg

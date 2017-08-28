@@ -95,3 +95,17 @@
         capture     group PllFIRs;
     };
 
+    register XBUS_ERROR_REG
+    {
+        name        "XBUS PCB Slave error reg";
+        scomaddr    0x060F001F;
+        capture     group PllFIRs;
+    };
+
+    register XBUS_CONFIG_REG
+    {
+        name        "XBUS PCB Slave config reg";
+        scomaddr    0x060F001E;
+        capture     group PllFIRs;
+    };
+
