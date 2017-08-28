@@ -287,7 +287,6 @@ RUNTIME_MODULES += scom_rt
 RUNTIME_MODULES += vpd_rt
 RUNTIME_MODULES += i2c_rt
 RUNTIME_MODULES += $(if $(CONFIG_HTMGT),htmgt_rt)
-#RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),bus_training_rt)  @RTC 136120 runtime lane repair support
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),attn_rt)
 RUNTIME_MODULES += $(if $(CONFIG_HBRT_PRD),prdf_rt)
 RUNTIME_MODULES += $(if $(CONFIG_BMC_IPMI),ipmi_rt)
