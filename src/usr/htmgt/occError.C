@@ -89,7 +89,7 @@ namespace HTMGT
                              const uint32_t i_address,
                              const uint16_t i_length)
     {
-        errlHndl_t  l_errlHndl = NULL;
+        errlHndl_t  l_errlHndl = nullptr;
 
         // Read data from SRAM (length must be multiple of 8 bytes)
         const uint16_t l_length = (i_length) & 0xFFF8;
@@ -101,7 +101,7 @@ namespace HTMGT
                             reinterpret_cast<uint64_t*>(l_buffer.pointer()),
                             l_length );
 #endif
-        if (NULL == l_errlHndl)
+        if (nullptr == l_errlHndl)
         {
 
             const occErrlEntry_t * l_occElog= reinterpret_cast<occErrlEntry_t*>
@@ -129,6 +129,17 @@ namespace HTMGT
             // Process Actions
             bool l_occReset = false;
             elogProcessActions(l_occElog->actions, l_occReset, severity);
+
+            // Check if we need a WOF requested reset
+            if(iv_needsWofReset == true)
+            {
+                if( iv_wofResetCount < WOF_RESET_COUNT_THRESHOLD )
+                {
+                    // Not at WOF reset threshold yet. Set sev to INFO
+                    severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+                }
+            }
+
             if (l_occReset == true)
             {
                 iv_needsReset = true;
@@ -209,7 +220,7 @@ namespace HTMGT
             }
 
             // Any bad fru data found ?
-            errlHndl_t err2 = NULL;
+            errlHndl_t err2 = nullptr;
             if (l_bad_fru_data == true)
             {
                 TMGT_BIN("Callout Data", &l_occElog->callout[0],
@@ -286,7 +297,7 @@ namespace HTMGT
             OccCmd l_cmd(this, OCC_CMD_CLEAR_ERROR_LOG,
                          sizeof(l_cmdData), l_cmdData);
             l_errlHndl = l_cmd.sendOccCmd();
-            if (l_errlHndl != NULL)
+            if (l_errlHndl != nullptr)
             {
                 TMGT_ERR("occProcessElog: Failed to clear elog id %d to"
                          " OCC%d (rc=0x%04X)",
@@ -321,7 +332,7 @@ namespace HTMGT
             const uint32_t sensor = (uint32_t)i_callout.calloutValue;
             TARGETING::Target * target =
                 TARGETING::UTIL::getSensorTarget(sensor);
-            if (NULL != target)
+            if (nullptr != target)
             {
                 io_errlHndl->addHwCallout(target, i_priority,
                                           HWAS::NO_DECONFIG,
@@ -392,34 +403,42 @@ namespace HTMGT
                                  bool        & o_occReset,
                                  ERRORLOG::errlSeverity_t & o_errlSeverity)
     {
-        if (i_actions & TMGT_ERRL_ACTIONS_RESET_REQUIRED)
+        if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
             o_occReset = true;
-            iv_failed = true;
-            iv_resetReason = OCC_RESET_REASON_OCC_REQUEST;
+            iv_failed = false;
+            iv_needsWofReset = true;
+            iv_resetReason = OCC_RESET_REASON_WOF_REQUEST;
 
-            TMGT_INF("elogProcessActions: OCC%d requested reset",
-                             iv_instance);
-        }
-
-        if (i_actions & TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED)
-        {
-            o_occReset = true;
-            iv_failed = true;
-            iv_resetReason = OCC_RESET_REASON_CRIT_FAILURE;
-            iv_resetCount = OCC_RESET_COUNT_THRESHOLD;
-
-            TMGT_INF("elogProcessActions: OCC%d requested safe mode",
+            TMGT_INF("elogProcessActions: OCC%d requested a WOF reset",
                      iv_instance);
-            TMGT_CONSOLE("OCC%d requested system enter safe mode",
+        }
+        else
+        {
+            if (i_actions & TMGT_ERRL_ACTIONS_RESET_REQUIRED)
+            {
+                o_occReset = true;
+                iv_failed = true;
+                iv_resetReason = OCC_RESET_REASON_OCC_REQUEST;
+
+                TMGT_INF("elogProcessActions: OCC%d requested reset",
                              iv_instance);
+            }
+
+            if (i_actions & TMGT_ERRL_ACTIONS_SAFE_MODE_REQUIRED)
+            {
+                o_occReset = true;
+                iv_failed = true;
+                iv_resetReason = OCC_RESET_REASON_CRIT_FAILURE;
+                iv_resetCount = OCC_RESET_COUNT_THRESHOLD;
+
+                TMGT_INF("elogProcessActions: OCC%d requested safe mode",
+                         iv_instance);
+                TMGT_CONSOLE("OCC%d requested system enter safe mode",
+                                 iv_instance);
+            }
         }
 
     } // end Occ::elogProcessActions()
 
-
-
 } // end namespace
-
-
-

@@ -53,7 +53,7 @@ namespace HTMGT
 
         for( const auto & l_occ : iv_occArray )
         {
-            if(NULL == i_occTarget || l_occ->iv_target == i_occTarget)
+            if(nullptr == i_occTarget || l_occ->iv_target == i_occTarget)
             {
                 if ((l_occ->iv_commEstablished) ||
                     (onlyIfEstablished == false))
@@ -96,13 +96,13 @@ namespace HTMGT
 
     errlHndl_t Occ::pollForErrors(const bool i_flushAllErrors)
     {
-        errlHndl_t err = NULL;
-        uint8_t * poll_rsp = NULL;
+        errlHndl_t err = nullptr;
+        uint8_t * poll_rsp = nullptr;
 
         // Only send poll if OCC has not logged an exception
         if (0 == iv_exceptionLogged)
         {
-            TMGT_INF("sendOccPoll: Polling OCC%d", iv_instance);
+            TMGT_INF("pollForErrors: Polling OCC%d", iv_instance);
             bool continuePolling = false;
             size_t elogCount = 10;
 
@@ -117,10 +117,10 @@ namespace HTMGT
                            l_cmdData);
 
                 err = cmd.sendOccCmd();
-                if (err != NULL)
+                if (err != nullptr)
                 {
                     // Poll failed
-                    TMGT_ERR("sendOccPoll: OCC%d poll failed with rc=0x%04X",
+                    TMGT_ERR("pollForErrors: OCC%d poll failed with rc=0x%04X",
                              iv_instance,
                              err->reasonCode());
 
@@ -147,7 +147,7 @@ namespace HTMGT
                                 {
                                     // Limit number of elogs retrieved so
                                     // we do not get stuck in loop
-                                    TMGT_INF("sendOccPoll: OCC%d still has"
+                                    TMGT_INF("pollForErrors: OCC%d still has"
                                              "more errors to report.",
                                              iv_instance);
                                     continuePolling = false;
@@ -162,7 +162,7 @@ namespace HTMGT
                     }
                     else
                     {
-                        TMGT_ERR("sendOccPoll: OCC%d poll command response "
+                        TMGT_ERR("pollForErrors: OCC%d poll command response "
                                  "failed with invalid data length %d",
                                  iv_instance, poll_rsp_size);
                         /*@
@@ -268,8 +268,8 @@ namespace HTMGT
                         if (iv_state != pollRsp->state)
                         {
                             iv_state = (occStateId)pollRsp->state;
-                            TMGT_INF("pollRspHandler: updating OCC%d state"
-                                     " to %s",
+                            TMGT_INF("pollRspHandler: Need reset. "
+                                     "updating OCC%d state to %s",
                                      iv_instance, state_string(iv_state));
                         }
                         break;
@@ -281,7 +281,7 @@ namespace HTMGT
                 (OCC_STATE_OBSERVATION == pollRsp->state) ||
                 (OCC_STATE_CHARACTERIZATION == pollRsp->state))
             {
-                errlHndl_t l_err = NULL;
+                errlHndl_t l_err = nullptr;
 
                 // Check role status
                 if (((OCC_ROLE_SLAVE == iv_role) &&

@@ -107,8 +107,8 @@ namespace HTMGT
                                 if (OccManager::occNeedsReset())
                                 {
                                     // No need to continue if reset is required
-                                    TMGT_ERR("sendOccConfigData(): OCCs need "
-                                             "to be reset");
+                                    TMGT_ERR("processOccStartStatus(): "
+                                            "OCCs need to be reset");
                                     break;
                                 }
                                 else
@@ -305,6 +305,8 @@ namespace HTMGT
                 errlHndl_t err = OccManager::resetOccs(nullptr);
                 if(err)
                 {
+                    TMGT_ERR("processOccError(): Error when attempting"
+                             " to reset OCCs");
                     ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                 }
             }

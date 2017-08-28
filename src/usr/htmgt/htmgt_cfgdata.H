@@ -80,6 +80,13 @@ namespace HTMGT
         CFDATA_DVFS_NOT_DEFINED = 0xFF,
     };
 
+    enum // WOF disabled reasons
+    {
+        WOF_MISSING_ULTRA_TURBO     = 0x0000,
+        WOF_SYSTEM_DISABLED         = 0x0001,
+        WOF_RESET_COUNT_REACHED     = 0x0002,
+        WOF_UNSUPPORTED_FREQ        = 0x0003,
+    };
 
     enum cfgTargets
     {
@@ -249,10 +256,13 @@ namespace HTMGT
      *
      * @param[out] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
+     * @param[in]  i_wofResetCount - Number of times OCC requested a reset
+     *                               due to WOF
      * @pre o_data is large enough.
      */
     void getFrequencyPointMessageData(uint8_t* o_data,
-                                      uint64_t & o_size);
+                                      uint64_t & o_size,
+                                      uint8_t i_wofResetCount );
 
     /**
      * Generate the APSS configuration message
