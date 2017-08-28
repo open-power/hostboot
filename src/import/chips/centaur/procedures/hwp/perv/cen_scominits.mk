@@ -25,6 +25,6 @@
 -include 01common.mk
 
 PROCEDURE=cen_scominits
-${PROCEDURE}_DEPLIBS+=cen_common_funcs
+lib${PROCEDURE}_DEPLIBS+=cen_common_funcs
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
