@@ -105,6 +105,113 @@ my $str=sprintf(
     "----------");
 
 $targetObj->writeReport($str);
+
+########################
+## Used to setup GPU sensors on processors
+my %G_gpu_sensors;
+# key: obusslot target,
+# value: (GPU#, Function, Temp, MemTemp IPMI name/ids,
+
+my %G_slot_to_proc;
+# key: obusslot string
+# value: processor target string
+#########################
+
+# convert a number string into a bit-position number
+# example:  "0x02" -->  0b0100 = 4
+sub numToBitPositionNum
+{
+    my ($hexStr) = @_;
+
+    my $num = 0x0001;
+    my $newNum = $num << hex($hexStr);
+
+    return $newNum;
+}
+
+# Used to populate G_gpu_sensors hash of array references
+#
+# Each array reference will be composed of 3 sensors +
+# board cfg ID which together makes up a GPU.
+#  - each sensor has a sensor type & entity ID + a sensor ID
+#  - board cfg is known as OBUS_CONFIG in mrw
+#       (each GPU can belong to 1 or more cfgs)
+#
+sub addSensorToGpuSensors
+{
+    my ($name, $obusslot_str, $type, $entID, $sensorID) = @_;
+
+    my $GPU_SENSORS_FUNC_OFFSET = 0;
+    my $GPU_SENSORS_TEMP_OFFSET = 2;
+    my $GPU_SENSORS_MEM_TEMP_OFFSET = 4;
+
+    my $rSensorArray = $G_gpu_sensors{$obusslot_str};
+    unless ($rSensorArray) {
+        $rSensorArray = [ "0xFFFF","0xFF","0xFFFF","0xFF",
+                          "0xFFFF","0xFF","0x00" ];
+    }
+
+    if ($name =~ m/Func/)
+    {
+        $rSensorArray->[$GPU_SENSORS_FUNC_OFFSET] =
+            sprintf("0x%02X%02X", oct($type), oct($entID));
+        $rSensorArray->[$GPU_SENSORS_FUNC_OFFSET+1] = $sensorID;
+    }
+    elsif($name =~ m/Memory_Temp/)
+    {
+        $rSensorArray->[$GPU_SENSORS_MEM_TEMP_OFFSET] =
+            sprintf("0x%02X%02X", oct($type), oct($entID));
+        $rSensorArray->[$GPU_SENSORS_MEM_TEMP_OFFSET+1] = $sensorID;
+    }
+    elsif($name =~ m/Temp/)
+    {
+        $rSensorArray->[$GPU_SENSORS_TEMP_OFFSET] =
+            sprintf("0x%02X%02X", oct($type), oct($entID));
+        $rSensorArray->[$GPU_SENSORS_TEMP_OFFSET+1] = $sensorID;
+    }
+
+    $G_gpu_sensors{$obusslot_str} = $rSensorArray;
+}
+
+
+# Populates the G_slot_to_proc hash and updates the cfgID in G_gpu_sensors
+# This is how we map the obusslot to the GPU sensors
+sub addObusCfgToGpuSensors
+{
+    my ($obusslot_str, $proc_target, $cfg) = @_;
+    my $GPU_SENSORS_OBUS_CFG_OFFSET = 6;
+
+    my $foundSlot = 0;
+
+    $G_slot_to_proc{$obusslot_str} = $proc_target;
+
+    foreach my $obusslot (keys %G_gpu_sensors)
+    {
+        if ($obusslot =~ m/$obusslot_str/)
+        {
+            # Add in the cfg number
+            my $rSensorArray = $G_gpu_sensors{$obusslot_str};
+            $rSensorArray->[$GPU_SENSORS_OBUS_CFG_OFFSET] =
+                 sprintf("0x%02X",
+                        (oct($rSensorArray->[$GPU_SENSORS_OBUS_CFG_OFFSET]) |
+                        oct(numToBitPositionNum($cfg))) );
+            $foundSlot = 1;
+            last;
+        }
+    }
+    if (!$foundSlot)
+    {
+        print STDOUT sprintf("%s:%d ", __FILE__,__LINE__);
+        print STDOUT "Found obus slot ($obusslot_str - processor $proc_target)".
+                     " not in G_gpu_sensors hash\n";
+
+        my $cfg_bit_num = numToBitPositionNum($cfg);
+        $G_gpu_sensors{$obusslot_str} =
+            ["0xFFFF","0xFF","0xFFFF","0xFF","0xFFFF",
+             "0xFF", sprintf("0x02X",oct($cfg_bit_num))];
+    }
+}
+
 #--------------------------------------------------
 ## loop through all targets and do stuff
 foreach my $target (sort keys %{ $targetObj->getAllTargets() })
@@ -371,6 +478,12 @@ sub processIpmiSensors {
                 oct($sensor_evt), $sensor_id_str,$instance,$fru_id,
                 $huid,$target);
             $targetObj->writeReport($str);
+
+            if ($name =~ /^GPU\d$/)
+            {
+                addSensorToGpuSensors($sensor_name, $target, $sensor_type,
+                            $entity_id, $sensor_id_str);
+            }
         }
     }
     for (my $i=@sensors;$i<16;$i++)
@@ -731,6 +844,27 @@ sub processProcessor
             push(@label, @$i2cLabel);
 
         }
+    }
+
+    # Add GPU sensors to processor
+    my @aGpuSensors = ();
+    foreach my $obusslot (sort keys %G_gpu_sensors)
+    {
+        # find matching obusslot to processor
+        my $proc_target = $G_slot_to_proc{$obusslot};
+
+        # if a processor target is found and it is the same as this target
+        if ($proc_target && ($target =~ m/$proc_target/))
+        {
+            # Add this GPU's sensors to the processor's array of GPU sensors
+            push (@aGpuSensors, @{ $G_gpu_sensors{$obusslot} });
+        }
+    }
+    if (@aGpuSensors)
+    {
+        # add GPU_SENSORS to this processor target
+        $targetObj->setAttribute( $target, "GPU_SENSORS",
+                                 join(',', @aGpuSensors) );
     }
 
     # Add final I2C arrays to processor
@@ -1123,6 +1257,18 @@ sub processObus
             {
                  foreach my $obrick_conn (@{$obus->{CONN}})
                  {
+                    if ($targetObj->isBusAttributeDefined($obrick,
+                                        $obrick_conn->{BUS_NUM}, "OBUS_CONFIG"))
+                    {
+                        my $cfg = $targetObj->getBusAttribute($obrick,
+                                        $obrick_conn->{BUS_NUM}, "OBUS_CONFIG");
+                        my ($processor) =
+                            $obrick_conn->{SOURCE_PARENT} =~
+                                                        m#(^.*/proc_socket-\d)#;
+                        addObusCfgToGpuSensors($obrick_conn->{DEST_PARENT},
+                                            $processor, $cfg);
+                    }
+
                     $match = ($obrick_conn->{SOURCE} eq $obrick);
                     if ($match eq 1)
                     {
@@ -1143,7 +1289,7 @@ sub processObus
                     $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
 
                  }
-                 
+
                  my $enum_val = $targetObj->getAttribute($obrick,"OPTICS_CONFIG_MODE");
                  if ( $enum_val =~ /NVLINK/i)
                  {
