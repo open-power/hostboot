@@ -60,54 +60,72 @@ enum
     OSC_SW_MF_REF  = 37,
 };
 
+void getChpltList ( ExtensibleChip * i_chip,
+                    TARGETING::TYPE i_chpltType,
+                    const char * &o_errRegStr,
+                    const char * &o_cfgRegStr,
+                    ExtensibleChipList & o_chpltList )
+{
+    #define PRDF_FUNC "[Proc::getChpltList ]"
+    switch (i_chpltType)
+    {
+        case TYPE_PROC:
+            o_errRegStr = "TP_ERROR_REG";
+            o_cfgRegStr = "TP_CONFIG_REG";
+            break;
+        case TYPE_OBUS:
+            o_errRegStr = "OBUS_ERROR_REG";
+            o_cfgRegStr = "OBUS_CONFIG_REG";
+            break;
+        case TYPE_XBUS:
+            o_errRegStr = "XBUS_ERROR_REG";
+            o_cfgRegStr = "XBUS_CONFIG_REG";
+            break;
+        case TYPE_PEC:
+            o_errRegStr = "PCI_ERROR_REG";
+            o_cfgRegStr = "PCI_CONFIG_REG";
+            break;
+        case TYPE_MCBIST:
+            o_errRegStr = "MC_ERROR_REG";
+            o_cfgRegStr = "MC_CONFIG_REG";
+            break;
+        case TYPE_EQ:
+            o_errRegStr = "EQ_ERROR_REG";
+            o_cfgRegStr = "EQ_CONFIG_REG";
+            break;
+        case TYPE_CORE:
+            o_errRegStr = "EC_ERROR_REG";
+            o_cfgRegStr = "EC_CONFIG_REG";
+            break;
+        default:
+            PRDF_ERR(PRDF_FUNC "Unexpected chiplet type %x for for 0x%08x",
+                     i_chpltType, i_chip->getHuid());
+            PRDF_ASSERT(false);
+    }
+
+    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
+    {
+        o_chpltList.push_back(i_chip);
+    }
+    else
+    {
+        o_chpltList = PlatServices::getConnected(i_chip, i_chpltType);
+    }
+
+    #undef PRDF_FUNC
+}
+
 void ClearChipletParityError(ExtensibleChip * i_chip,
                              TARGETING::TYPE i_chpltType)
 {
     #define PRDF_FUNC "[Proc::ClearChipletParityError ]"
 
     int32_t rc = SUCCESS;
-    const char * errRegStr = NULL;
-
-    switch (i_chpltType)
-    {
-        case TYPE_PROC:
-            errRegStr = "TP_ERROR_REG";
-            break;
-        case TYPE_OBUS:
-            errRegStr = "OBUS_ERROR_REG";
-            break;
-        case TYPE_XBUS:
-            errRegStr = "XBUS_ERROR_REG";
-            break;
-        case TYPE_PEC:
-            errRegStr = "PCI_ERROR_REG";
-            break;
-        case TYPE_MCBIST:
-            errRegStr = "MC_ERROR_REG";
-            break;
-        case TYPE_EQ:
-            errRegStr = "EQ_ERROR_REG";
-            break;
-        case TYPE_CORE:
-            errRegStr = "EC_ERROR_REG";
-            break;
-        default:
-            // Unexpected chiplet type, just return
-            PRDF_ERR(PRDF_FUNC "Unexpected chiplet type %x for for 0x%08x",
-                     i_chpltType, i_chip->getHuid());
-            return;
-    }
-
+    const char * errRegStr = nullptr;
+    const char * cfgRegStr = nullptr;
     ExtensibleChipList chpltList;
 
-    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
-    {
-        chpltList.push_back(i_chip);
-    }
-    else
-    {
-        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
-    }
+    getChpltList( i_chip, i_chpltType, errRegStr, cfgRegStr, chpltList );
 
     for ( auto chplt : chpltList )
     {
@@ -130,42 +148,11 @@ void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
     #define PRDF_FUNC "[Proc::ClearChipletPll] "
 
     int32_t rc = SUCCESS;
-    const char * errRegStr = NULL;
-
-    switch (i_chpltType)
-    {
-        case TYPE_PROC:
-            errRegStr = "TP_ERROR_REG";
-            break;
-        case TYPE_OBUS:
-            errRegStr = "OBUS_ERROR_REG";
-            break;
-        case TYPE_XBUS:
-            errRegStr = "XBUS_ERROR_REG";
-            break;
-        case TYPE_PEC:
-            errRegStr = "PCI_ERROR_REG";
-            break;
-        case TYPE_MCBIST:
-            errRegStr = "MC_ERROR_REG";
-            break;
-        default:
-            // Unexpected chiplet type, just return
-            PRDF_ERR(PRDF_FUNC "Unexpected chiplet type %x for for 0x%08x",
-                     i_chpltType, i_chip->getHuid());
-            return;
-    }
-
+    const char * errRegStr = nullptr;
+    const char * cfgRegStr = nullptr;
     ExtensibleChipList chpltList;
 
-    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
-    {
-        chpltList.push_back(i_chip);
-    }
-    else
-    {
-        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
-    }
+    getChpltList( i_chip, i_chpltType, errRegStr, cfgRegStr, chpltList );
 
     for ( auto chplt : chpltList )
     {
@@ -189,7 +176,6 @@ void ClearChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
                 errRegStr, chplt->getHuid());
             continue;
         }
-
     }
 
     #undef PRDF_FUNC
@@ -200,42 +186,11 @@ void MaskChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
     #define PRDF_FUNC "[Proc::MaskChipletPll] "
 
     int32_t rc = SUCCESS;
-    const char * cfgRegStr = NULL;
-
-    switch (i_chpltType)
-    {
-        case TYPE_PROC:
-            cfgRegStr = "TP_CONFIG_REG";
-            break;
-        case TYPE_OBUS:
-            cfgRegStr = "OBUS_CONFIG_REG";
-            break;
-        case TYPE_XBUS:
-            cfgRegStr = "XBUS_CONFIG_REG";
-            break;
-        case TYPE_PEC:
-            cfgRegStr = "PCI_CONFIG_REG";
-            break;
-        case TYPE_MCBIST:
-            cfgRegStr = "MC_CONFIG_REG";
-            break;
-        default:
-            // Unexpected chiplet type, just return
-            PRDF_ERR(PRDF_FUNC "Unexpected chiplet type %x for for 0x%08x",
-                     i_chpltType, i_chip->getHuid());
-            return;
-    }
-
+    const char * errRegStr = nullptr;
+    const char * cfgRegStr = nullptr;
     ExtensibleChipList chpltList;
 
-    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
-    {
-        chpltList.push_back(i_chip);
-    }
-    else
-    {
-        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
-    }
+    getChpltList( i_chip, i_chpltType, errRegStr, cfgRegStr, chpltList );
 
     for ( auto chplt : chpltList )
     {
@@ -268,46 +223,9 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
     bool pllErrFound = false;
     const char * errRegStr = NULL;
     const char * cfgRegStr = NULL;
-
-    switch (i_chpltType)
-    {
-        case TYPE_PROC:
-            errRegStr = "TP_ERROR_REG";
-            cfgRegStr = "TP_CONFIG_REG";
-            break;
-        case TYPE_OBUS:
-            errRegStr = "OBUS_ERROR_REG";
-            cfgRegStr = "OBUS_CONFIG_REG";
-            break;
-        case TYPE_XBUS:
-            errRegStr = "XBUS_ERROR_REG";
-            cfgRegStr = "XBUS_CONFIG_REG";
-            break;
-        case TYPE_PEC:
-            errRegStr = "PCI_ERROR_REG";
-            cfgRegStr = "PCI_CONFIG_REG";
-            break;
-        case TYPE_MCBIST:
-            errRegStr = "MC_ERROR_REG";
-            cfgRegStr = "MC_CONFIG_REG";
-            break;
-        default:
-            // Unexpected chiplet type, just return false
-            PRDF_ERR(PRDF_FUNC "Unexpected chiplet type %x for for 0x%08x",
-                     i_chpltType, i_chip->getHuid());
-            return false;
-    }
-
     ExtensibleChipList chpltList;
 
-    if ( i_chpltType == TYPE_PROC || i_chpltType == TYPE_XBUS )
-    {
-        chpltList.push_back(i_chip);
-    }
-    else
-    {
-        chpltList = PlatServices::getConnected(i_chip, i_chpltType);
-    }
+    getChpltList( i_chip, i_chpltType, errRegStr, cfgRegStr, chpltList );
 
     for ( auto chplt : chpltList )
     {
@@ -346,7 +264,6 @@ bool CheckChipletPll(ExtensibleChip * i_chip, TARGETING::TYPE i_chpltType)
 int32_t CheckErrorType( ExtensibleChip * i_chip, uint32_t & o_errType )
 {
     #define PRDF_FUNC "[Proc::CheckErrorType] "
-
     int32_t rc = SUCCESS;
 
     SCAN_COMM_REGISTER_CLASS * TP_LFIR =
