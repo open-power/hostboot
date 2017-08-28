@@ -106,6 +106,7 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
     // Search if a lid id maps to pnor section
     auto l_secId = Util::getLidPnorSection(static_cast<Util::LidId>(i_lidId));
 
+    do {
     // LidToPnor will return INVALID_SECITON if no mapping found
     if (l_secId == PNOR::INVALID_SECTION)
     {
@@ -156,7 +157,17 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
             }
 #endif
 #endif
+            // @TODO CQ:SW400352 remove this check
+            if ((l_secId == PNOR::OCC) && PNOR::isSectionEmpty(l_secId))
+            {
+                UTIL_FT("UtilLidMgr::getLidPnorSection PNOR section %s is empty get data from LID transfer",
+                        PNOR::SectionIdToString(l_secId));
+                l_lidInPnor = false;
+                break;
+            }
         }
     }
+    } while(0);
+
     return l_lidInPnor;
 }

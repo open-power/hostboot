@@ -533,3 +533,36 @@ errlHndl_t PNOR::hasKnownHeader(
     return pError;
 }
 
+// @TODO CQ:SW400352 remove function
+bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)
+{
+    errlHndl_t l_errhdl = nullptr;
+    bool l_result = true;
+
+    PNOR::SectionInfo_t l_sectionInfo;
+    l_errhdl = PNOR::getSectionInfo( i_section, l_sectionInfo );
+    if (l_errhdl)
+    {
+        // If section is not in PNOR, just delete error and return false
+        delete l_errhdl;
+        l_errhdl = nullptr;
+    }
+    else
+    {
+        std::array<uint8_t,PAGESIZE> empty_buffer{};
+        // Empty ECC sections are filled with 0xFF's to ensure good ECC
+        if (l_sectionInfo.eccProtected)
+        {
+            empty_buffer.fill(0xFF);
+        }
+
+        l_result = memcmp(&empty_buffer,
+                          reinterpret_cast<uint8_t*>(l_sectionInfo.vaddr),
+                          sizeof(empty_buffer)) ==0;
+    }
+
+    TRACFCOMP(g_trac_pnor, "PNOR::isSectionEmpty: i_section=%s isSectionEmpty=%d",
+              PNOR::SectionIdToString(i_section), l_result);
+
+    return l_result;
+}
