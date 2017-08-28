@@ -43,5 +43,10 @@ cd -
 #@TODO RTC:178949
 echo "Applying SIMICS workaround to support Cumulus"
 sbex -t 1031560
+sbex -t 1032617
+sbex -t 1033442
 cd $sb/simu
 mk -a
+
+echo "Copying centaur and p9c action files"
+sbex -t 1032952

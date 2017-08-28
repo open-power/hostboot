@@ -5487,6 +5487,10 @@
 
 
 
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>membuf0</default>
+    </attribute>
 
 
     <attribute>
@@ -5559,6 +5563,16 @@
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>useSbeScom</id><value>0</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+        </default>
     </attribute>
 
 
@@ -5863,6 +5877,10 @@
 
 
 
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>membuf1</default>
+    </attribute>
 
 
 
@@ -5936,6 +5954,16 @@
     <attribute>
         <id>RESOURCE_IS_CRITICAL</id>
         <default>0</default>
+    </attribute>
+    <attribute>
+        <id>SCOM_SWITCHES</id>
+        <default>
+            <field><id>reserved</id><value>0</value></field>
+            <field><id>useFsiScom</id><value>1</value></field>
+            <field><id>useInbandScom</id><value>0</value></field>
+            <field><id>useSbeScom</id><value>0</value></field>
+            <field><id>useXscom</id><value>0</value></field>
+        </default>
     </attribute>
 
 

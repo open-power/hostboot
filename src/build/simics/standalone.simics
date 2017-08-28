@@ -43,6 +43,13 @@ foreach $cc in (get-object-list p9_proc) {
     @SIM_get_interface(SIM_get_object(mp),"signal").signal_raise()
 }
 
+#Power on cec-chip on centaurs if present
+foreach $cp in (get-object-list p9_centaur_cfam -recursive){
+    echo $cp
+    @cc="%s.membuf_chip"%simenv.cp
+    @ignore=SIM_get_interface(SIM_get_object(cc),"signal").signal_raise()
+}
+
 system_cmp0.cpu0_0_00_0.enable
 
 ###################################
