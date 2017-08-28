@@ -36,7 +36,8 @@
       NONE = 0x0,
       CENTAUR = 0x3,
       NIMBUS = 0x5,
-      CUMULUS = 0x6
+      CUMULUS = 0x6,
+      AXONE = 0x7
     </enum>
     <platInit/>
     <privileged/>
