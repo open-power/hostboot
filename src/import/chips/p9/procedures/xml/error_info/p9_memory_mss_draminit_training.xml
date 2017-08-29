@@ -573,6 +573,7 @@
   </description>
   <ffdc>REGISTER</ffdc>
   <ffdc>VALUE</ffdc>
+  <ffdc>DIMM_TARGET</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
     <target>MCA_TARGET</target>
@@ -665,6 +666,7 @@
   <ffdc>REGISTER</ffdc>
   <ffdc>VALUE</ffdc>
   <ffdc>MASK</ffdc>
+  <ffdc>DIMM_TARGET</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
     <target>MCA_TARGET</target>

@@ -123,7 +123,7 @@ fapi2::ReturnCode setup_dp16_sysclk( const fapi2::Target<fapi2::TARGET_TYPE_MCBI
 ///
 /// @brief check and process initial cal errors
 /// @tparam T the type of the target in question
-/// @param[in] i_target the port in question
+/// @param[in] i_target the dimm that's been trained
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff no error
 ///
 template< fapi2::TargetType T >

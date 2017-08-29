@@ -2794,35 +2794,35 @@ fapi_try_exit:
 
 ///
 /// @brief Process read vref calibration errors
-/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_target the fapi2 target of the DIMM
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
-fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     // We want the index as we want to grab the register for the error log too.
     size_t l_index = 0;
     std::vector<fapi2::buffer<uint64_t>> l_data;
 
     // Suck all the cal error bits out ...
-    FAPI_TRY( mss::scom_suckah(i_target, TT::RD_VREF_CAL_ERROR_REG, l_data) );
+    FAPI_TRY( mss::scom_suckah(l_mca, TT::RD_VREF_CAL_ERROR_REG, l_data) );
 
-    FAPI_INF("processing RD_VREF_CAL_ERROR");
+    FAPI_INF("%s Processing RD_VREF_CAL_ERROR", mss::c_str(i_target));
 
     for (const auto& v : l_data)
     {
-        // They should all be 0's. If they're not, we have a problem we should log.
-        // We don't need to fail out, as read centering will fail and we can process
-        // the errors and the disables there.
-        FAPI_ASSERT_NOEXIT(v == 0,
-                           fapi2::MSS_FAILED_RDVREF_CAL()
-                           .set_MCA_TARGET(i_target)
-                           .set_REGISTER(TT::RD_VREF_CAL_ERROR_REG[l_index])
-                           .set_VALUE(v),
-                           "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
-                           mss::c_str(i_target), TT::RD_VREF_CAL_ERROR_REG[l_index], v);
-        l_index += 1;
+        // They should all be 0's. If they're not, we have a problem.
+        FAPI_ASSERT(v == 0,
+                    fapi2::MSS_FAILED_RDVREF_CAL()
+                    .set_MCA_TARGET(l_mca)
+                    .set_DIMM_TARGET(i_target)
+                    .set_REGISTER(TT::RD_VREF_CAL_ERROR_REG[l_index])
+                    .set_VALUE(v),
+                    "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
+                    mss::c_str(l_mca), TT::RD_VREF_CAL_ERROR_REG[l_index], v);
+        ++l_index;
     }
 
     FAPI_INF("RD_VREF_CAL_ERROR complete");
@@ -2834,12 +2834,13 @@ fapi_try_exit:
 
 ///
 /// @brief Process write vref calibration errors
-/// @param[in] i_target the fapi2 target of the port
+/// @param[in] i_target the fapi2 target of the DIMM
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
-fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target )
 {
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     // All PHY registers are 16 bits and start at bit 48 bits 0-47 are filler
     constexpr uint64_t DATA_START = 48;
@@ -2851,8 +2852,8 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
     std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_mask;
 
     // Suck all the cal error bits out ...
-    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_ERROR_REG, l_data) );
-    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_ERROR_MASK_REG, l_mask) );
+    FAPI_TRY( mss::scom_suckah(l_mca, TT::WR_VREF_ERROR_REG, l_data) );
+    FAPI_TRY( mss::scom_suckah(l_mca, TT::WR_VREF_ERROR_MASK_REG, l_mask) );
 
     // Loop through both data and mask
     {
@@ -2861,15 +2862,23 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
         auto l_mask_it = l_mask.begin();
 
         for(;
-            l_data_it < l_data.end() && l_mask_it < l_mask.end();
+            (l_data_it < l_data.end()) && (l_mask_it < l_mask.end());
             ++l_mask_it, ++l_data_it, ++l_index)
         {
             // Not sure if there's value add to a function to do these, but it's 2x repetition, so not bad to maintain
-            // First print out the data to log all informational callouts
             // WR VREF can either escalate "error" bits as errors or informational, based upon a mask
-            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx", mss::c_str(i_target), l_index, 0, l_data_it->first,
+            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx",
+                     mss::c_str(i_target),
+                     l_index,
+                     0,
+                     l_data_it->first,
                      l_mask_it->first);
-            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx", mss::c_str(i_target), l_index, 1, l_data_it->second,
+
+            FAPI_INF("%s DP[%lu] WR VREF[%d] ERROR 0x%016lx MASK 0x%016lx",
+                     mss::c_str(i_target),
+                     l_index,
+                     1,
+                     l_data_it->second,
                      l_mask_it->second);
 
             // Inverts as a 1 bit indicates an informational error. we only want to log true errors
@@ -2877,27 +2886,36 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
             l_mask_compare.flipBit<DATA_START, DATA_LEN>();
 
             // Now does bitwise anding to determine what's an actual error w/ the masking
-            FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->first),
-                               fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_MCA_TARGET(i_target)
-                               .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].first)
-                               .set_VALUE(l_data_it->first)
-                               .set_MASK(l_mask_it->first),
-                               "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
-                               mss::c_str(i_target), TT::WR_VREF_ERROR_REG[l_index].first, l_data_it->first, l_mask_it->first);
-
+            // The ffdc will collect all of the registers, so if we fail out on the first register
+            // We'll know if we failed other ones via the register dump
+            FAPI_ASSERT(0 == (l_mask_compare & l_data_it->first),
+                        fapi2::MSS_FAILED_WRVREF_CAL()
+                        .set_MCA_TARGET(l_mca)
+                        .set_DIMM_TARGET(i_target)
+                        .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].first)
+                        .set_VALUE(l_data_it->first)
+                        .set_MASK(l_mask_it->first),
+                        "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
+                        mss::c_str(i_target),
+                        TT::WR_VREF_ERROR_REG[l_index].first,
+                        l_data_it->first,
+                        l_mask_it->first);
 
             l_mask_compare = l_mask_it->second;
             l_mask_compare.flipBit<DATA_START, DATA_LEN>();
 
-            FAPI_ASSERT_NOEXIT(0 == (l_mask_compare & l_data_it->second),
-                               fapi2::MSS_FAILED_WRVREF_CAL()
-                               .set_MCA_TARGET(i_target)
-                               .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].second)
-                               .set_VALUE(l_data_it->second)
-                               .set_MASK(l_mask_it->second),
-                               "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
-                               mss::c_str(i_target), TT::WR_VREF_ERROR_REG[l_index].second, l_data_it->second, l_mask_it->second);
+            FAPI_ASSERT(0 == (l_mask_compare & l_data_it->second),
+                        fapi2::MSS_FAILED_WRVREF_CAL()
+                        .set_MCA_TARGET(l_mca)
+                        .set_DIMM_TARGET(i_target)
+                        .set_REGISTER(TT::WR_VREF_ERROR_REG[l_index].second)
+                        .set_VALUE(l_data_it->second)
+                        .set_MASK(l_mask_it->second),
+                        "DP16 failed write vref calibration on %s. register 0x%016lx value 0x%016lx mask 0x%016lx",
+                        mss::c_str(i_target),
+                        TT::WR_VREF_ERROR_REG[l_index].second,
+                        l_data_it->second,
+                        l_mask_it->second);
         }
     }
 
