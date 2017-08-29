@@ -1922,9 +1922,9 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     FAPI_TRY(mss::freq(l_mcbist, l_freq));
 
     // Set the blue waterfall range according to the frequency value as follows:
-    // for 2400, 2133, 1866 set ext range to 1-4
-    // for 2666 set ext range to 2-5
-    l_value = (l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2666) ?
+    // for 2133, 1866 set ext range to 1-4
+    // for 2400, 2666 set ext range to 2-5
+    l_value = ((l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2666) || (l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2400)) ?
               blue_waterfall_range::TWO_TO_FIVE :
               blue_waterfall_range::ONE_TO_FOUR;
     FAPI_INF("%s Initializing RDCLK extended range to 0x%01x", c_str(i_target), l_value);
