@@ -191,6 +191,7 @@ enum ffdc_functions
     SET_RANK_FIELD = 6,
     RD_CTR_WORKAROUND_READ_DATA = 7,
     OVERRIDE_ODT_WR_CONFIG = 8,
+    RECORD_BAD_BITS_HELPER = 9,
 };
 // Static consts describing the bits used in the cal_step_enable attribute
 // These are bit positions. 0 is the left most bit.
