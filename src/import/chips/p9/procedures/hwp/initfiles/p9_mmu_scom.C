@@ -194,12 +194,6 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<52, 1, 63, uint64_t>(l_NMMU_MM_CFG_NMMU_CTL_TW_RDX_PWC_DIS_ON );
             }
 
-            if (((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6) && (l_chip_ec == 0x10)) )
-            {
-                constexpr auto l_NMMU_MM_CFG_NMMU_DD2_ISS734_FIX_MODE_OPT3_ENA_IGNORE_PWC_PTE_HIT = 0x3ffe;
-                l_scom_buffer.insert<52, 1, 50, uint64_t>(l_NMMU_MM_CFG_NMMU_DD2_ISS734_FIX_MODE_OPT3_ENA_IGNORE_PWC_PTE_HIT );
-            }
-
             if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x6)
                     && (l_chip_ec == 0x10)) )
             {
