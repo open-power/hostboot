@@ -150,7 +150,7 @@ typedef struct{
     uint8_t  version;   // Version of the structure = 0x01 start
     uint8_t  config;    // Configuration specifier : redbud=0x01,sequoia=0x02
     uint8_t  reserved[249];  // keyword is 255 bytes long
-}hdatNVKwdStruct_t;
+}__attribute__ ((packed)) hdatNVKwdStruct_t;
 
 enum hdatSMPLinkUsage
 {
