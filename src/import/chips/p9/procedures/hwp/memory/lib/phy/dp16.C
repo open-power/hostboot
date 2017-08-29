@@ -2617,7 +2617,7 @@ fapi_try_exit:
 /// @note Read the bad bits from the f/w attributes and stuff them in the
 /// appropriate registers.
 /// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no errors
 ///
 fapi2::ReturnCode reset_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
@@ -2637,8 +2637,8 @@ fapi_try_exit:
 /// @brief Reset the bad-bits masks for a port - helper for ease of testing
 /// @note Read the bad bits from the f/w attributes and stuff them in the
 /// appropriate registers.
-/// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @param[in] i_target the fapi2 target of the DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no errors on the scoms
 ///
 fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
         const uint8_t i_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT])
@@ -2656,7 +2656,8 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
         uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
         FAPI_TRY( mss::rank::get_pair_from_rank(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), r, l_rp) );
 
-        FAPI_INF("processing bad bits for DIMM%d rank %d (%d) rp %d", l_dimm_index, mss::index(r), r, l_rp);
+        FAPI_INF("%s processing bad bits for DIMM%d rank %d (%d) rp %d", mss::c_str(i_target), l_dimm_index, mss::index(r), r,
+                 l_rp);
 
         // We loop over the disable registers for this rank pair, and shift the bits from the attribute
         // array in to the disable registers
@@ -2675,11 +2676,10 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
             {
                 uint64_t l_register_value = (l_bad_bits[l_byte_index] << 8) | l_bad_bits[l_byte_index + 1];
 
-                FAPI_INF("writing %s 0x%0lX value 0x%0lX from 0x%X, 0x%X",
+                FAPI_INF("%s writing 0x%0lX value 0x%0lX from 0x%X, 0x%X",
                          mss::c_str(i_target), a.first, l_register_value,
                          l_bad_bits[l_byte_index], l_bad_bits[l_byte_index + 1]);
 
-                // TODO RTC: 163674 Only wriiting the DISABLE0 register - not sure what happened to the DQS?
                 FAPI_TRY( mss::putScom(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), a.first, l_register_value) );
                 l_byte_index += 2;
             }
@@ -2695,30 +2695,18 @@ fapi_try_exit:
 /// @note This is different than a register write as it writes attributes which
 /// cause firmware to act on the disabled bits.
 /// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if no error on the scoms or attribute sets
 ///
 fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
-    uint8_t l_value[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
-
-    // Process the bad bits into an array. We copy these in to their own array
-    // as it allows the compiler to check indexes where a passed pointer wouldn't
-    // otherwise do.
-    uint8_t l_data[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
-
     for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
+        uint8_t l_data[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
+
         FAPI_TRY( mss::dp16::record_bad_bits_helper(d, l_data) );
 
-        // Read the attribute
-        FAPI_TRY( mss::bad_dq_bitmap(d, &(l_value[0][0])) );
-
-        // Modify
-        memcpy( &(l_value[0][0]), &(l_data[0][0]),
-                MAX_RANK_PER_DIMM * 10 );
-
         // Write
-        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, d, l_value) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, d, l_data) );
     }
 
 fapi_try_exit:
@@ -2730,7 +2718,7 @@ fapi_try_exit:
 /// @note This is different than a register write as it writes attributes which
 /// cause firmware to act on the disabled bits.
 /// @param[in] i_target the fapi2 target of the port
-/// @param[out] o_bad_dq an array of [MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] containing the attribute information
+/// @param[out] o_bad_dq an array of [MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] containing the attribute information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
 ///
 fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -2749,7 +2737,20 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
         uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
         FAPI_TRY( mss::rank::get_pair_from_rank(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), r, l_rp) );
 
-        FAPI_INF("recording bad bits for DIMM%d rank %d (%d) rp %d", l_dimm_index, mss::index(r), r, l_rp);
+        FAPI_INF("%s recording bad bits for DIMM%d rank %d (%d) rp %d",
+                 mss::c_str(i_target),
+                 l_dimm_index,
+                 mss::index(r),
+                 r,
+                 l_rp);
+
+        FAPI_ASSERT( l_rp < MAX_RANK_PAIRS,
+                     fapi2::MSS_INVALID_RANK_PAIR()
+                     .set_RANK_PAIR(l_rp)
+                     .set_FUNCTION(RECORD_BAD_BITS_HELPER)
+                     .set_MCA_TARGET(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target)),
+                     "%s Invalid rank pair (%d) in record_bad_bits_helper",
+                     mss::c_str(i_target), l_rp);
 
         // We loop over the disable registers for this rank pair, and shift the bits from the attribute
         // array in to the disable registers
@@ -2761,7 +2762,8 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
             // our current rank pair.
             std::vector< std::pair< fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > l_register_value;
 
-            FAPI_TRY( mss::scom_suckah(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), TT::BIT_DISABLE_REG[l_rp],
+            FAPI_TRY( mss::scom_suckah(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target),
+                                       TT::BIT_DISABLE_REG[l_rp],
                                        l_register_value) );
 
             // Where in the array we are, incremented by two for every DP
@@ -2781,7 +2783,6 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
                          l_bad_bits[l_byte_index + 1],
                          v.first);
 
-                // TODO RTC: 163674 Only writing the DISABLE0 register - not sure what happened to the DQS?
                 l_byte_index += 2;
             }
         }
@@ -2982,3 +2983,4 @@ fapi_try_exit:
 
 } // close namespace dp16
 } // close namespace mss
+
