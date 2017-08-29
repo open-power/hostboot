@@ -93,7 +93,8 @@ namespace SENSOR
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SENSOR_NOT_SETTABLE
                     * @userdata1       BMC IPMI Completion code.
-                    * @userdata2       bytes [0-3]sensor number
+                    * @userdata2       bytes [0-1]sensor name
+                    *                  bytes [2-3]sensor number
                     *                  bytes [4-7]HUID of target.
                     * @devdesc         Set sensor reading command failed.
                     */
@@ -129,7 +130,8 @@ namespace SENSOR
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_INVALID_SENSOR_CMD
                     * @userdata1       BMC IPMI Completion code.
-                    * @userdata2       bytes [0-3]sensor number
+                    * @userdata2       bytes [0-1]sensor name
+                    *                  bytes [2-3]sensor number
                     *                  bytes [4-7]HUID of target.
                     * @devdesc         Command not valid for this sensor.
                     */
@@ -145,7 +147,8 @@ namespace SENSOR
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SENSOR_NOT_PRESENT
                     * @userdata1       BMC IPMI Completion code.
-                    * @userdata2       bytes [0-3]sensor number
+                    * @userdata2       bytes [0-1]sensor name
+                    *                  bytes [2-3]sensor number
                     *                  bytes [4-7]HUID of target.
                     * @devdesc         Requested sensor is not present.
                     */
@@ -163,7 +166,8 @@ namespace SENSOR
                     * @moduleid        IPMI::MOD_IPMISENSOR
                     * @reasoncode      IPMI::RC_SET_SENSOR_FAILURE
                     * @userdata1       BMC IPMI Completion code.
-                    * @userdata2       bytes [0-3]sensor number
+                    * @userdata2       bytes [0-1]sensor name
+                    *                  bytes [2-3]sensor number
                     *                  bytes [4-7]HUID of target.
                     * @devdesc         Set sensor reading command failed.
                     */
@@ -185,7 +189,10 @@ namespace SENSOR
                                 IPMI::MOD_IPMISENSOR,
                                 l_reasonCode,
                                 i_rc,
-                                TWO_UINT32_TO_UINT64( sensor_number, huid ),
+                                TWO_UINT32_TO_UINT64(
+                                       TWO_UINT16_TO_UINT32(iv_name,
+                                                            sensor_number),
+                                       huid ),
                                 true);
 
                 l_err->collectTrace(IPMI_COMP_NAME);
