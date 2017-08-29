@@ -279,7 +279,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
             FAPI_TRY(fapi2::putSpy(TGT0, "MC23.PBI23.LCBCNTL_BLK1.CLOCKGATE_DISABLE", l_MC23_PBI23_LCBCNTL_BLK1_CLOCKGATE_DISABLE));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC01_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC01_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -289,7 +290,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC01_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC01_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC01_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -299,7 +301,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC01_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC01_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC01_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -309,7 +312,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC01_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC01_PORT3_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC01_PORT3_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -319,7 +323,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC01_PORT3_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC23_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC23_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -329,7 +334,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC23_PORT0_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC23_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC23_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -339,7 +345,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC23_PORT1_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC23_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC23_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
@@ -349,7 +356,8 @@ fapi2::ReturnCode p9n_mc_scan(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                                    l_MC23_PORT2_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX));
         }
 
-        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) )
+        if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x21)) || ((l_chip_id == 0x5)
+                && (l_chip_ec == 0x22)) )
         {
             fapi2::variable_buffer l_MC23_PORT3_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX(1);
             constexpr auto l_MC23_PORT3_ATCL_CL_DISABLE_ERIC_DD2_10_HTM_TO_FIX_ON = 0x1;
