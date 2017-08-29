@@ -1950,17 +1950,17 @@ fapi2::ReturnCode record_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE
 
 ///
 /// @brief Process read vref calibration errors
-/// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @param[in] i_target the fapi2 target of the DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if there were no cal errors
 ///
-fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target );
 
 ///
 /// @brief Process write vref calibration errors
-/// @param[in] i_target the fapi2 target of the port
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if bad bits can be repaired
+/// @param[in] i_target the fapi2 target of the DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if there were no cal errors
 ///
-fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
+fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target );
 
 ///
 /// @brief Write FORCE_FIFO_CAPTURE
