@@ -746,7 +746,7 @@ fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE
 
         if (dp16::process_bad_bits(i_target, l_dimm, l_encoding) == fapi2::FAPI2_RC_SUCCESS)
         {
-            // If we're on a Nimbus, lab team requests we 'pass' training with 1 nibble + 1 bit
+            // If we're on a Nimbus, lab team requests we 'pass' training with 1 nibble + 1 bit or less
             if (mss::chip_ec_feature_mss_training_bad_bits(i_target))
             {
                 FAPI_INF("p9_mss_draminit_training: errors reported, but 1 nibble + 1 bit or less was marked.%s",
@@ -765,13 +765,8 @@ fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE
 
         // Let's update the attribute with the failing DQ bits since we had a training error
         // The only fail we get here is a scom error, so we should error out
-        // We only want to update the attribute for hostboot runs though
-        // Updating the attribute updates the DIMM's VPD and actually disabled those DQ bits for good
-        // Commenting out until PRD has the backside implementation complete
-#ifdef __HOSTBOOT_MODULE
-        // TODO RTC:178400 Come back and use the ATTR_BAD_BITS accessor functions from PRD when available
-        //FAPI_TRY( mss::dp16::record_bad_bits(i_target) );
-#endif
+        // Hostboot will write the info to SPD and Cronus will write it to the attribute
+        FAPI_TRY( mss::dp16::record_bad_bits(i_target) );
 
         // Let's add the error to our vector for later processing (if it didn't affect too many DQ bits)
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -875,10 +870,8 @@ fapi2::ReturnCode phy_scominit(const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
         // Section 5.2.4.4 DP16 Data Bit Disable 1 on page 289
         FAPI_TRY( mss::dp16::reset_data_bit_enable(p) );
 
-        // Not going to load bad bits from the attributes until after f/w bring up
-#ifdef LOAD_BAD_BITS_FROM_ATTR
+        // Load bad bits from the attribute
         FAPI_TRY( mss::dp16::reset_bad_bits(p) );
-#endif
 
         FAPI_TRY( mss::rank::get_rank_pairs(p, l_pairs) );
 
