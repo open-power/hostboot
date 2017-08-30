@@ -939,7 +939,7 @@ void AttrOverrideSync::dynAttrGet()
                                  VMM_DEBUG_COMM_SIZE);
 
         uint32_t * l_targInfo =
-          reinterpret_cast<uint32_t*>(VMM_VADDR_DEBUG_COMM);
+          reinterpret_cast<uint32_t*>(l_vaddr);
 
         FAPI_INF("init: processing dynamic ATTR get");
         triggerAttrSync(static_cast<fapi2::TargetType>(
