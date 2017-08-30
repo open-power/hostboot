@@ -46,6 +46,7 @@
 #include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/mss_math.H>
 
 using fapi2::TARGET_TYPE_MCA;
 using fapi2::TARGET_TYPE_MCS;
@@ -79,7 +80,7 @@ decoder_v1_0::decoder_v1_0(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_targe
 ///
 /// @brief Decodes number of used SPD bytes
 /// @param[out] o_value number of SPD bytes used
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note Decodes SPD Byte 0 bits(0~3)
 /// @note Item JC-45-2220.01x
 /// @note Page 14
@@ -127,7 +128,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes total number of SPD bytes
 /// @param[out] o_value number of total SPD bytes
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note Decodes SPD Byte 0 (bits 4~6)
 /// @note Item JC-45-2220.01x
 /// @note Page 14
@@ -174,7 +175,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM density from SPD
 /// @param[out] o_value SDRAM density in GBs
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 4 (bits 0~3)
 /// @note Item JC-45-2220.01x
 /// @note Page 18
@@ -224,7 +225,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes number of SDRAM bank_bits from SPD
 /// @param[out] o_value Number of SDRAM bank bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 4 (bits 5~4)
 /// @note Item JC-45-2220.01x
 /// @note Page 18
@@ -271,7 +272,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes number of SDRAM bank group bits from SPD
 /// @param[out] o_value Number of SDRAM bank group bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 4 (bits 6~7)
 /// @note Item JC-45-2220.01x
 /// @note Page 18
@@ -318,7 +319,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes number of SDRAM column address bits
 /// @param[out] o_value number of column address bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 5 (bits 2~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 18
@@ -366,7 +367,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes number of SDRAM row address bits
 /// @param[out] o_value number of row address bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 5 (bits 5~3)
 /// @note Item JC-45-2220.01x
 /// @note Page 18
@@ -418,7 +419,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Primary SDRAM signal loading
 /// @param[out] o_value enum representing signal loading type
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 6 (bits 1~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 19
@@ -465,7 +466,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Primary SDRAM die count
 /// @param[out] o_value die count
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 6 (bits 6~4)
 /// @note Item JC-45-2220.01x
 /// @note Page 19
@@ -517,7 +518,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Primary SDRAM package type
 /// @param[out] o_value enum representing package type
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 6 (bit 7)
 /// @note Item JC-45-2220.01x
 /// @note Page 19
@@ -564,7 +565,7 @@ fapi_try_exit:
 ///
 /// @brief Decode SDRAM Maximum activate count
 /// @param[out] o_value enum representing max activate count
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 7 (bits 3~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 20
@@ -616,7 +617,7 @@ fapi_try_exit:
 ///
 /// @brief Decode SDRAM Maximum activate window (multiplier), tREFI uknown at this point
 /// @param[out] o_value max activate window multiplier
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 7 (bits 3~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 20
@@ -710,7 +711,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Secondary SDRAM signal loading
 /// @param[out] o_value enum representing signal loading type
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 10 (bits 1~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 22
@@ -730,7 +731,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_signal_loading( uint8_t& o_value) cons
 ///
 /// @brief Decode Soft post package repair (soft PPR)
 /// @param[out] o_value enum representing if soft PPR is supported
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 9 (bit 5)
 /// @note Item JC-45-2220.01x
 /// @note Page 21
@@ -749,7 +750,7 @@ fapi2::ReturnCode decoder_v1_0::soft_post_package_repair( uint8_t& o_value) cons
 ///
 /// @brief Decodes Secondary DRAM Density Ratio
 /// @param[out] o_value raw bits from SPD
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 10 (bits 3~2)
 /// @note Item JC-45-2220.01x
 /// @note Page 22
@@ -769,7 +770,7 @@ fapi2::ReturnCode decoder_v1_0::sec_dram_density_ratio( uint8_t& o_value) const
 ///
 /// @brief Decodes Secondary SDRAM die count
 /// @param[out] o_value die count
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 10 (bits 6~4)
 /// @note Item JC-45-2220.01x
 /// @note Page 22
@@ -789,7 +790,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_die_count( uint8_t& o_value) const
 ///
 /// @brief Decodes Secondary SDRAM package type
 /// @param[out] o_value  enum representing package type
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 10 (bit 7)
 /// @note Item JC-45-2220.01x
 /// @note Page 22
@@ -809,7 +810,7 @@ fapi2::ReturnCode decoder_v1_0::sec_sdram_package_type( uint8_t& o_value) const
 ///
 /// @brief Decode Module Nominal Voltage, VDD
 /// @param[out] o_value enum representing if 1.2V is operable
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 11 (bit 0)
 /// @note Item JC-45-2220.01x
 /// @note Page 23
@@ -855,7 +856,7 @@ fapi_try_exit:
 ///
 /// @brief Decode Module Nominal Voltage, VDD
 /// @param[out] o_value enum representing if 1.2V is endurant
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 11 (bit 1)
 /// @note Item JC-45-2220.01x
 /// @note Page 23
@@ -902,7 +903,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM device width
 /// @param[out] o_value device width in bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 12 (bits 2~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 23
@@ -952,7 +953,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes number of package ranks per DIMM
 /// @param[out] o_value number of package ranks per DIMM
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 12 (bits 5~3)
 /// @note Item JC-45-2220.01x
 /// @note Page 23
@@ -1001,7 +1002,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Rank Mix
 /// @param[out] o_value rank mix value from SPD
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 12 (bit 6)
 /// @note Item JC-45-2220.01x
 /// @note Page 23
@@ -1021,7 +1022,7 @@ fapi2::ReturnCode decoder_v1_0::rank_mix( uint8_t& o_value) const
 ///
 /// @brief Decodes primary bus width
 /// @param[out] o_value primary bus width in bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 13 (bits 2~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 27
@@ -1070,7 +1071,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes bus width extension
 /// @param[out] o_value bus width extension in bits
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 13 (bits 2~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 28
@@ -1117,7 +1118,7 @@ fapi_try_exit:
 ///
 /// @brief Decode Module Thermal Sensor
 /// @param[out] o_value thermal sensor value from SPD
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 14 (bit 7)
 /// @note Item JC-45-2220.01x
 /// @note Page 28
@@ -1151,7 +1152,7 @@ fapi_try_exit:
 ///
 /// @brief Decode Extended Base Module Type
 /// @param[out] o_value raw data from SPD
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 15 (bits 3~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 28
@@ -1187,7 +1188,7 @@ fapi_try_exit:
 ///
 /// @brief Decode Fine Timebase
 /// @param[out] o_value fine_timebase from SPD in picoseconds
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 17 (bits 1~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 29
@@ -1234,7 +1235,7 @@ fapi_try_exit:
 ///
 /// @brief Decode Medium Timebase
 /// @param[out] o_value  medium timebase from SPD in picoseconds
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 17 (bits 3~2)
 /// @note Item JC-45-2220.01x
 /// @note Page 29
@@ -1282,7 +1283,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Cycle Time in MTB
 /// @param[out] o_value tCKmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 18
 /// @note Item JC-45-2220.01x
 /// @note Page 31-32
@@ -1329,7 +1330,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Maximum Cycle Time in MTB
 /// @param[out] o_value tCKmax in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 19
 /// @note Item JC-45-2220.01x
 /// @note Page 32
@@ -1377,7 +1378,7 @@ fapi_try_exit:
 ///
 /// @brief Decode CAS Latencies Supported
 /// @param[out] o_value bitmap of supported CAS latencies
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Bytes 20-23
 /// @note Item JC-45-2220.01x
 /// @note Page 33-34
@@ -1450,7 +1451,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum CAS Latency Time in MTB
 /// @param[out] o_value tAAmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 24
 /// @note Item JC-45-2220.01x
 /// @note Page 34
@@ -1497,7 +1498,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum RAS to CAS Delay Time in MTB
 /// @param[out] o_value tRCDmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 25
 /// @note Item JC-45-2220.01x
 /// @note Page 35
@@ -1544,7 +1545,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Row Precharge Delay Time in MTB
 /// @param[out] o_value tRPmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 26
 /// @note Item JC-45-2220.01x
 /// @note Page 36-37
@@ -1592,7 +1593,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Active to Precharge Delay Time in MTB
 /// @param[out] o_value tRASmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 27 (bits 3~0) & Byte 28 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 38
@@ -1651,7 +1652,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Active to Active/Refresh Delay Time in MTB
 /// @param[out] o_value tRCmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 27 (bits 7~4) & SPD Byte 29 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 38
@@ -1713,7 +1714,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 1
 /// @param[out] o_value tRFC1min in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 30 & Byte 31
 /// @note Item JC-45-2220.01x
 /// @note Page 39-40
@@ -1771,7 +1772,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 2
 /// @param[out] o_value tRFC2min in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 32 & Byte 33
 /// @note Item JC-45-2220.01x
 /// @note Page 40
@@ -1829,7 +1830,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Refresh Recovery Delay Time 4
 /// @param[out] o_value tRFC4min in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 34 & Byte 35
 /// @note Item JC-45-2220.01x
 /// @note Page 40
@@ -1887,7 +1888,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes SDRAM Minimum Four Activate Window Delay Time
 /// @param[out] o_value tFAWmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 36 (bits 3~0) & Byte 37 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 42
@@ -1945,7 +1946,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Minimum Activate to Activate Delay Time - Different Bank Group
 /// @param[out] o_value tRRD_Smin MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 38
 /// @note Item JC-45-2220.01x
 /// @note Page 43
@@ -1994,7 +1995,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Minimum Activate to Activate Delay Time - Same Bank Group
 /// @param[out] o_value tRRD_Lmin MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 39
 /// @note Item JC-45-2220.01x
 /// @note Page 43-44
@@ -2043,7 +2044,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Minimum CAS to CAS Delay Time - Same Bank Group
 /// @param[out] o_value tCCD_Lmin MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 40
 /// @note Item JC-45-2220.01x
 /// @note Page 44-45
@@ -2092,7 +2093,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Minimum Write Recovery Time
 /// @param[out] o_value tWRmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 41 (bits 3~0) & Byte 42 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 40
@@ -2114,7 +2115,7 @@ fapi2::ReturnCode decoder_v1_0::min_twr( int64_t& o_value) const
 ///
 /// @brief Decodes Minimum Write to Read Time - Different Bank Group
 /// @param[out] o_value tWRT_Smin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 43 (bits 3~0) & Byte 44 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 40
@@ -2135,7 +2136,7 @@ fapi2::ReturnCode decoder_v1_0::min_twtr_s( int64_t& o_value) const
 ///
 /// @brief Decodes Minimum Write to Read Time - Same Bank Group
 /// @param[out] o_value tWRT_Lmin in MTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 43 (bits 7~4) & Byte 45 (bits 7~0)
 /// @note Item JC-45-2220.01x
 /// @note Page 46
@@ -2155,9 +2156,35 @@ fapi2::ReturnCode decoder_v1_0::min_twtr_l( int64_t& o_value) const
 }
 
 ///
+/// @brief Decodes connector to SDRAM bit mapping
+/// @param[out] o_value vector of bit nibble maps for SPD bytes 60 - 77
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note SPD Byte 60 - 77
+/// @note JEDEC Standard No. 21-C
+/// @note Page 40
+/// @note DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode decoder_v1_0::connector_to_sdram( std::vector<uint8_t>& o_value ) const
+{
+    constexpr size_t BIT_MAPPING_START = 60;
+    constexpr size_t BIT_MAPPING_END = 77;
+
+    // Clear vector. Just.In.Case
+    o_value.clear();
+
+    for( size_t byte = BIT_MAPPING_START; byte <= BIT_MAPPING_END; ++byte )
+    {
+        o_value.push_back(iv_spd_data[byte]);
+    }
+
+    // SPD doesn't provide a range of invalid values to test against
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
 /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
 /// @param[out] o_value tCCD_Lmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 117
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2203,7 +2230,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Same Bank Group
 /// @param[out] o_value tRRD_Lmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 118
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2249,7 +2276,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for Minimum Activate to Activate Delay Time - Different Bank Group
 /// @param[out] o_value tRRD_Smin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 119
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2295,7 +2322,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for Minimum Active to Active/Refresh Delay Time
 /// @param[out] o_value tRCmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 120
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2341,7 +2368,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for Minimum Row Precharge Delay Time
 /// @param[out] o_value tRPmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 121
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2386,7 +2413,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum RAS to CAS Delay Time
 /// @param[out] o_value tRCDmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 122
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2432,7 +2459,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum CAS Latency Time
 /// @param[out] o_value tAAmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 123
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2478,7 +2505,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for SDRAM Maximum Cycle Time
 /// @param[out] o_value tCKmax offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 124
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2525,7 +2552,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Fine Offset for SDRAM Minimum Cycle Time
 /// @param[out] o_value tCKmin offset in FTB units
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 125
 /// @note Item JC-45-2220.01x
 /// @note Page 52
@@ -2572,7 +2599,7 @@ fapi_try_exit:
 ///
 /// @brief Decodes Cyclical Redundancy Code (CRC) for Base Configuration Section
 /// @param[out] o_value crc value from SPD
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 127 & Byte 126
 /// @note Item JC-45-2220.01x
 /// @note Page 53
@@ -2610,7 +2637,7 @@ fapi2::ReturnCode decoder_v1_0::cyclical_redundancy_code( uint16_t& o_value ) co
 ///
 /// @brief Decodes module manufacturer ID code
 /// @param[out] o_value module manufacturing id code
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 320 (bit 7~0), 321 (6~0)
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 3
@@ -2647,7 +2674,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturer_id_code( uint16_t& o_value )
 ///
 /// @brief Decodes Module Manufacturing Location
 /// @param[out] o_value uint8_t identifier for manufacturing location of memory module
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 322
 /// @note Item JC-45-2220.01x
 /// @note Page 55
@@ -2675,7 +2702,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_location( uint8_t& o_value)
 ///
 /// @brief Decodesmodule manufacturing date
 /// @param[out] o_value the 2 byte date of manufacturing in BCD format
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 323-324
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 2
@@ -2715,7 +2742,7 @@ fapi2::ReturnCode decoder_v1_0::module_manufacturing_date( uint16_t& o_value ) c
 ///
 /// @brief Decodes module's unique serial number
 /// @param[out] o_value
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 325-328
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 2
@@ -2765,7 +2792,7 @@ fapi2::ReturnCode decoder_v1_0::module_serial_number( uint32_t& o_value ) const
 ///
 /// @brief Decodes Module Revision Code
 /// @param[out] o_value uint8_t identifier for revision code
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 349
 /// @note Item JC-45-2220.01x
 /// @note Page 55
@@ -2793,7 +2820,7 @@ fapi2::ReturnCode decoder_v1_0::module_revision_code( uint8_t& o_value) const
 ///
 /// @brief Decodes DRAM Manufacturer ID code
 /// @param[out] o_value dram manufacturing id code
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 350 351
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 2
@@ -2829,7 +2856,7 @@ fapi2::ReturnCode decoder_v1_0::dram_manufacturer_id_code( uint16_t& o_value ) c
 ///
 /// @brief Decodes REGISTER Manufacturer ID code
 /// @param[out] o_value rcd manufacturing id code
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 133-134
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 2
@@ -2864,7 +2891,7 @@ fapi2::ReturnCode decoder_v1_0::reg_manufacturer_id_code( uint16_t& o_value ) co
 ///
 /// @brief Decodes Register Revision Number
 /// @param[out] o_value register revision number
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 135
 /// @note Item JEDEC Standard No. 21-C
 /// @note DDR4 SPD Document Release 2
@@ -2892,7 +2919,7 @@ fapi2::ReturnCode decoder_v1_0::register_rev_num( uint8_t& o_value ) const
 ///
 /// @brief Decodes DRAM Stepping
 /// @param[out] o_value uint8_t  DRAM Stepping val
-/// @return FAPI2_RC_SUCCESS if okay
+/// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 353
 /// @note Item JC-45-2220.01x
 /// @note Page 56
@@ -2920,7 +2947,7 @@ fapi2::ReturnCode decoder_v1_0::dram_stepping( uint8_t& o_value) const
 ///
 /// @brief Returns Logicalranks in Primary SDRAM type
 /// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode decoder_v1_0::prim_sdram_logical_ranks( uint8_t& o_logical_ranks ) const
 {
@@ -2954,7 +2981,7 @@ fapi_try_exit:
 /// @brief Returns Logical ranks per DIMM
 /// @param[in] i_pDecoder shared pointer to the SPD decoder
 /// @param[out] o_logical_ranks number of logical ranks
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @return fapi2::FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode decoder_v1_0::logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const
 {
