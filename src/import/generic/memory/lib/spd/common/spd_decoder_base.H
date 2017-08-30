@@ -674,6 +674,17 @@ class decoder
         }
 
         ///
+        /// @brief Decodes connector to SDRAM bit mapping
+        /// @param[out] o_value vector of bit nibble maps for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode connector_to_sdram( std::vector<uint8_t>& o_value ) const
+        {
+            o_value.clear();
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
         /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
         /// @param[out] o_value tCCD_Lmin offset in FTB units
         /// @return FAPI2_RC_SUCCESS if okay
