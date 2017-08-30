@@ -523,7 +523,7 @@ group gMCAECCFIR filter priority( 14, 17, 37 ), # ensure UEs handled before NCEs
     /** MCAECCFIR[41]
      *  SCOM_PARITY_CLASS_STATUS
      */
-    (rMCAECCFIR, bit(41)) ? threshold_and_mask;
+    (rMCAECCFIR, bit(41)) ? threshold_and_mask_self;
 
     /** MCAECCFIR[42]
      *  SCOM_PARITY_CLASS_RECOVERABLE

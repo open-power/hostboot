@@ -466,12 +466,12 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[6]
      *  link0 crc error
      */
-    (rIOOLFIR, bit(6)) ? threshold_and_mask;
+    (rIOOLFIR, bit(6)) ? threshold_and_mask_self;
 
     /** IOOLFIR[7]
      *  link1 crc error
      */
-    (rIOOLFIR, bit(7)) ? threshold_and_mask;
+    (rIOOLFIR, bit(7)) ? threshold_and_mask_self;
 
     /** IOOLFIR[8]
      *  link0 nak received
@@ -506,22 +506,22 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[14]
      *  link0 sl ecc correctable
      */
-    (rIOOLFIR, bit(14)) ? threshold_and_mask;
+    (rIOOLFIR, bit(14)) ? threshold_and_mask_self;
 
     /** IOOLFIR[15]
      *  link1 sl ecc correctable
      */
-    (rIOOLFIR, bit(15)) ? threshold_and_mask;
+    (rIOOLFIR, bit(15)) ? threshold_and_mask_self;
 
     /** IOOLFIR[16]
      *  link0 sl ecc ue
      */
-    (rIOOLFIR, bit(16)) ? threshold_and_mask;
+    (rIOOLFIR, bit(16)) ? threshold_and_mask_self;
 
     /** IOOLFIR[17]
      *  link1 sl ecc ue
      */
-    (rIOOLFIR, bit(17)) ? threshold_and_mask;
+    (rIOOLFIR, bit(17)) ? threshold_and_mask_self;
 
     /** IOOLFIR[18]
      *  link0 retrain threshold
@@ -626,12 +626,12 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[38]
      *  link0 prbs select error
      */
-    (rIOOLFIR, bit(38)) ? threshold_and_mask;
+    (rIOOLFIR, bit(38)) ? threshold_and_mask_self;
 
     /** IOOLFIR[39]
      *  link1 prbs select error
      */
-    (rIOOLFIR, bit(39)) ? threshold_and_mask;
+    (rIOOLFIR, bit(39)) ? threshold_and_mask_self;
 
     /** IOOLFIR[40]
      *  link0 tcomplete bad
@@ -671,22 +671,22 @@ group gIOOLFIR filter singlebit, cs_root_cause
     /** IOOLFIR[48]
      *  link0 npu error
      */
-    (rIOOLFIR, bit(48)) ? threshold_and_mask;
+    (rIOOLFIR, bit(48)) ? threshold_and_mask_self;
 
     /** IOOLFIR[49]
      *  link1 npu error
      */
-    (rIOOLFIR, bit(49)) ? threshold_and_mask;
+    (rIOOLFIR, bit(49)) ? threshold_and_mask_self;
 
     /** IOOLFIR[50]
      *  linkx npu error
      */
-    (rIOOLFIR, bit(50)) ? threshold_and_mask;
+    (rIOOLFIR, bit(50)) ? threshold_and_mask_self;
 
     /** IOOLFIR[51]
      *  osc switch
      */
-    (rIOOLFIR, bit(51)) ? threshold_and_mask;
+    (rIOOLFIR, bit(51)) ? threshold_and_mask_self;
 
     /** IOOLFIR[52]
      *  link0 correctable array error
@@ -837,7 +837,7 @@ group gOBPPEFIR filter singlebit, cs_root_cause
     /** OBPPEFIR[7]
      *  PPE Arb missed scrub tick.
      */
-    (rOBPPEFIR, bit(7)) ? threshold_and_mask;
+    (rOBPPEFIR, bit(7)) ? threshold_and_mask_self;
 
     /** OBPPEFIR[8]
      *  PPE  Arb ary ue error.
@@ -847,7 +847,7 @@ group gOBPPEFIR filter singlebit, cs_root_cause
     /** OBPPEFIR[9]
      *  PPE Arb ary ce error.
      */
-    (rOBPPEFIR, bit(9)) ? threshold_and_mask;
+    (rOBPPEFIR, bit(9)) ? threshold_and_mask_self;
 
     /** OBPPEFIR[10]
      *  spare

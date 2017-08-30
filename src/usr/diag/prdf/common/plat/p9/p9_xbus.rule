@@ -417,12 +417,12 @@ group gIOELFIR filter singlebit, cs_root_cause
     /** IOELFIR[6]
      *  link0 crc error
      */
-    (rIOELFIR, bit(6)) ? threshold_and_mask;
+    (rIOELFIR, bit(6)) ? threshold_and_mask_self;
 
     /** IOELFIR[7]
      *  link1 crc error
      */
-    (rIOELFIR, bit(7)) ? threshold_and_mask;
+    (rIOELFIR, bit(7)) ? threshold_and_mask_self;
 
     /** IOELFIR[8]
      *  link0 nak received
@@ -457,22 +457,22 @@ group gIOELFIR filter singlebit, cs_root_cause
     /** IOELFIR[14]
      *  link0 sl ecc correctable
      */
-    (rIOELFIR, bit(14)) ? threshold_and_mask;
+    (rIOELFIR, bit(14)) ? threshold_and_mask_self;
 
     /** IOELFIR[15]
      *  link1 sl ecc correctable
      */
-    (rIOELFIR, bit(15)) ? threshold_and_mask;
+    (rIOELFIR, bit(15)) ? threshold_and_mask_self;
 
     /** IOELFIR[16]
      *  link0 sl ecc ue
      */
-    (rIOELFIR, bit(16)) ? threshold_and_mask;
+    (rIOELFIR, bit(16)) ? threshold_and_mask_self;
 
     /** IOELFIR[17]
      *  link1 sl ecc ue
      */
-    (rIOELFIR, bit(17)) ? threshold_and_mask;
+    (rIOELFIR, bit(17)) ? threshold_and_mask_self;
 
     /** IOELFIR[18:39]
      *  spare

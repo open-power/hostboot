@@ -31,8 +31,9 @@ actionclass l3_cache_ce
     funccall("cacheCeWorkaround");
 };
 
-actionclass l3_cache_ue
+actionclass l3_cache_ue_UERE
 {
+    SueSource;
     self_th_1;
     funccall("L3UE");
 };
@@ -58,8 +59,9 @@ actionclass l2_cache_ce
     funccall("cacheCeWorkaround");
 };
 
-actionclass l2_cache_ue
+actionclass l2_cache_ue_UERE
 {
+    SueSource;
     self_th_1;
     funccall("L2UE");
 };
