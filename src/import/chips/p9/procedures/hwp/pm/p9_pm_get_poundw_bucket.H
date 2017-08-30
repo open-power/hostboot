@@ -28,6 +28,12 @@
 /// stored inside of this struct.
 /// Also define prototype for p9_pm_get_poundw_bucket
 ///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
+///
 
 #ifndef _P9_PM_GET_POUND_W_BUCKET_H_
 #define _P9_PM_GET_POUND_W_BUCKET_H_
@@ -66,8 +72,8 @@ typedef struct __attribute__((__packed__))  vdmData
 ///        bucket ID read off of parent proc chip. This function
 ///        will pass out a structured format of the #W data of correct
 ///        endianness.
-/// @param[in] i_target EQ chiplet target
-/// @param[in] o_data structured data describing the #w bucket used
+/// @param[in]  i_target EQ chiplet target
+/// @param[out] o_data structured data describing the #w bucket used
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_pm_get_poundw_bucket(

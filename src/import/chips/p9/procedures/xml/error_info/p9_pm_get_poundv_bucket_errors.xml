@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,25 +27,50 @@
   <hwpError>
     <rc>RC_BAD_VPD_READ</rc>
     <description>
-    Attempted to read #V data and got less data than we expected
+       Attempted to read #V data and got less data than we expected
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>EXPECTED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_INVALID_POUNDV_VERSION</rc>
     <description>
-    Read unknown version type from #V keyword in a LRP record
+       Read unknown version type from #V keyword in a LRP record
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>POUNDV_VERSION</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_INVALID_MATCHING_FREQ_NUMBER</rc>
     <description>
-    Found either zero or multiple buckets for the desired powerbus frequency
+       Found either zero or multiple buckets for the desired powerbus frequency
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>MATCHES_FOUND</ffdc>
     <ffdc>DESIRED_FREQPB</ffdc>
     <ffdc>LRPREC</ffdc>
@@ -60,15 +85,18 @@
       <priority>HIGH</priority>
     </callout>
     <callout>
-        <target>EQ</target>
-        <priority>LOW</priority>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_INVALID_EQ_CHIP_POS</rc>
     <description>
-    Encountered an invalid value for EQ chip position
+       Encountered an invalid value for EQ chip position
     </description>
     <ffdc>EQ_POSITION</ffdc>
     <callout>
@@ -80,19 +108,17 @@
   <hwpError>
     <rc>RC_INVALID_BUCKET_ID</rc>
     <description>
-    Encountered an invalid Bucket Id. Valid values are 1-6 inclusive.
+       Encountered an invalid Bucket Id. Valid values are 1-6 inclusive.
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>BUCKET_ID</ffdc>
     <callout>
-        <target>TARGET</target>
-        <priority>HIGH</priority>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-        <target>TARGET</target>
-    </deconfigure>
-    <gard>
-        <target>TARGET</target>
-    </gard>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

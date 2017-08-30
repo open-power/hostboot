@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,12 @@
 /// @brief Provide structure for voltageBucketData so that info from #V keyword
 /// can be stored inside of this struct.
 /// Also define prototype for p9_pm_get_poundv_bucket
+///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
 ///
 
 #ifndef _P9_PM_GET_POUND_V_BUCKET_H_
@@ -97,8 +103,8 @@ typedef struct __attribute__((__packed__))  voltageBucketData
 ///        bucket ID read off of parent proc chip. This function
 ///        will pass out a structured format of the #V data of correct
 ///        endianness.
-/// @param[in] i_target EQ chiplet target
-/// @param[in] o_data structured data describing the #v bucket used
+/// @param[in]  i_target EQ chiplet target
+/// @param[out] o_data structured data describing the #v bucket used
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
 fapi2::ReturnCode p9_pm_get_poundv_bucket(

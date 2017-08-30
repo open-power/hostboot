@@ -27,27 +27,59 @@
   <hwpError>
     <rc>RC_BAD_POUNDW_VPD_READ</rc>
     <description>
-    Attempted to read #W data and got less data than we expected
+       Attempted to read #W data and got less data than we expected
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>EXPECTED_SIZE</ffdc>
     <ffdc>ACTUAL_SIZE</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_INVALID_POUNDW_VERSION</rc>
     <description>
-    Read unknown version type from #W keyword in a CRP0 record
+       Read unknown version type from #W keyword in a CRP0 record
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>POUNDW_VERSION</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_INCORRECT_POUNDW_BUCKET_ID</rc>
     <description>
-    Bucket Id in #W data was not the expected Bucket Id.
+       Bucket Id in #W data was not the expected Bucket Id.
     </description>
+    <ffdc>EQ_TARGET</ffdc>
     <ffdc>BUCKET_ID</ffdc>
     <ffdc>EXP_BUCKET_ID</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>EQ_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

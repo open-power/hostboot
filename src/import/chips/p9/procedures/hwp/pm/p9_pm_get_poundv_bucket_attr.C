@@ -23,8 +23,15 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
+
 /// @file p9_pm_get_poundv_bucket_attr.C
 /// @brief Grab PM data from certain bucket in #V keyword in LRPX record
+///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
 ///
 
 // ----------------------------------------------------------------------
@@ -75,7 +82,6 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     //than the EQ chip unit pos. See mvpd_access_defs.H
     lrpRecord = static_cast<fapi2::MvpdRecord>(l_eqChipUnitPos +
                 fapi2::MVPD_RECORD_LRP0 );
-
 
     //check if bucket num has been overriden
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_NUM_OVERRIDE,
@@ -225,10 +231,12 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
             else
             {
 
-                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching nest freqs found for PBFreq=%d. Matches found = %d",
+                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching "
+                         "nest freqs found for PBFreq=%d. Matches found = %d",
                          l_sysNestFreq, l_numMatches );
                 FAPI_ASSERT(false,
                             fapi2::INVALID_MATCHING_FREQ_NUMBER().
+                            set_EQ_TARGET(i_target).
                             set_MATCHES_FOUND(l_numMatches).
                             set_DESIRED_FREQPB(l_sysNestFreq).
                             set_LRPREC(lrpRecord).
@@ -237,8 +245,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                             set_BUCKETC_FREQPB(l_bucketNestFreqs[2]).
                             set_BUCKETD_FREQPB(l_bucketNestFreqs[3]).
                             set_BUCKETE_FREQPB(l_bucketNestFreqs[4]).
-                            set_BUCKETF_FREQPB(l_bucketNestFreqs[5]).
-                            set_EQ(i_target),
+                            set_BUCKETF_FREQPB(l_bucketNestFreqs[5]),
                             "Matches found is NOT 1" );
             }
         }
@@ -246,6 +253,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         {
             FAPI_ASSERT( false,
                          fapi2::INVALID_POUNDV_VERSION()
+                         .set_EQ_TARGET(i_target)
                          .set_POUNDV_VERSION(*l_fullVpdData),
                          "p9_pm_get_poundv_bucket_attr::Invalid #V record version: 0x%x",
                          *l_fullVpdData);
@@ -254,7 +262,9 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
         // This assert ensures the size of the calculated data is correct
         FAPI_ASSERT(l_vpdSize - POUNDV_BUCKET_OFFSET - ((l_bucketId - 1) *
                     l_bucketSize) >= l_bucketSize,
-                    fapi2::BAD_VPD_READ().set_EXPECTED_SIZE(sizeof(l_bucketSize))
+                    fapi2::BAD_VPD_READ()
+                    .set_EQ_TARGET(i_target)
+                    .set_EXPECTED_SIZE(sizeof(l_bucketSize))
                     .set_ACTUAL_SIZE(l_vpdSize - POUNDV_BUCKET_OFFSET -
                                      ((l_bucketId - 1) * l_bucketSize)),
                     "#V data read was too small!" );
@@ -265,7 +275,7 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     // NOTE: Bucket IDs range from 1-6
     FAPI_ASSERT( (l_bucketId <= NUM_BUCKETS) && (l_bucketId != 0),
                  fapi2::INVALID_BUCKET_ID()
-                 .set_TARGET(i_target)
+                 .set_EQ_TARGET(i_target)
                  .set_BUCKET_ID(l_bucketId),
                  "Invalid Bucket Id = %d",
                  l_bucketId );
@@ -294,5 +304,3 @@ fapi_try_exit:
 
     return fapi2::current_err;
 }
-
-

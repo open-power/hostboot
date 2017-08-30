@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,11 +22,18 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 ///
-/// @file p9_pm_get_poundv_bucket.H
+/// @file p9_pm_get_poundv_bucket_attr.H
 /// @brief Provide structure for voltageBucketData so that info from #V keyword
 /// can be stored inside of this struct.
-/// Also define prototype for p9_pm_get_poundv_bucket
+/// Also define prototype for p9_pm_get_poundv_bucket_attr
+///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
 ///
 
 #ifndef _P9_PM_GET_POUND_V_BUCKET_ATTR_H_
