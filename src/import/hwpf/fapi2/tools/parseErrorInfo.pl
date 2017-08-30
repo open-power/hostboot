@@ -1801,7 +1801,7 @@ print SBFILE "  /* variable buffer needs size in uint32_t, and the resulting bit
 print SBFILE "   const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\\\n";
 print SBFILE "   fapi2::variable_buffer l_buffer((uint32_t*)FFDC_BUFFER, size_bytes/4, size_bytes*8);\\\n";
 print SBFILE "   fapi2::INVALID_SBE_FFDC_PACKET(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC).";
-print SBFILE "set_FFDC_BUFFER(l_buffer).execute();\\\n";
+print SBFILE "set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(ERRVAL).execute();\\\n";
 print SBFILE "}\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";

@@ -255,6 +255,7 @@
       <rc>RC_INVALID_SBE_FFDC_PACKET</rc>
       <description>Invalid data detected in the SBE FFDC buffer</description>
       <buffer>FFDC_BUFFER</buffer>
+      <ffdc>INVALID_ERRVAL</ffdc>
      </hwpError>
     <!-- ******************************************************************** -->
     <hwpError>
