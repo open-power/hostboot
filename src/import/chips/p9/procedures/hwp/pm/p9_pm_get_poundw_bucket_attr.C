@@ -26,6 +26,12 @@
 /// @file p9_pm_get_poundw_bucket_attr.C
 /// @brief Grab PM data from certain bucket in #W keyword in CRP0 record
 ///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
+///
 
 // ----------------------------------------------------------------------
 // Includes
@@ -36,6 +42,7 @@
 #include <mvpd_access_defs.H>
 #include <attribute_ids.H>
 
+// See doxygen in header file
 fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
     uint8_t* o_data)
@@ -106,6 +113,7 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     {
         FAPI_ASSERT( false,
                      fapi2::INVALID_POUNDW_VERSION()
+                     .set_EQ_TARGET(i_target)
                      .set_POUNDW_VERSION(*l_fullVpdData),
                      "p9_pm_get_poundw_bucket_attr::Invalid #W record "
                      "version: 0x%x",
@@ -119,6 +127,7 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     FAPI_ASSERT(l_vpdSize - POUNDW_VERSION_SIZE - ((l_bucketId - 1) *
                 l_bucketSize) >= l_bucketSize,
                 fapi2::BAD_POUNDW_VPD_READ()
+                .set_EQ_TARGET(i_target)
                 .set_EXPECTED_SIZE(l_bucketSize)
                 .set_ACTUAL_SIZE(l_vpdSize - POUNDW_VERSION_SIZE -
                                  ((l_bucketId - 1) * l_bucketSize)),
@@ -133,6 +142,7 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     // This assert ensures the output data bucket ID matches what we looked for
     FAPI_ASSERT( (l_bucketId == ((fapi2::vdmData_t*)o_data)->bucketId),
                  fapi2::INCORRECT_POUNDW_BUCKET_ID()
+                 .set_EQ_TARGET(i_target)
                  .set_BUCKET_ID(((fapi2::vdmData_t*)o_data)->bucketId)
                  .set_EXP_BUCKET_ID(l_bucketId),
                  "Incorrect Bucket Id = %d, expected %d",
