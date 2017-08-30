@@ -52,8 +52,15 @@
     <ffdc>CHIP</ffdc>
     <ffdc>PGPE_BASE_ADDRESS</ffdc>
     <ffdc>PGPE_STATE_MODE</ffdc>
+
     <collectRegisterFfdc>
       <id>PGPE_FFDC_REGISTERS</id>
+      <target>CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    </collectRegisterFfdc>
+
+    <collectRegisterFfdc>
+      <id>PBA_FFDC_BASIC_REGISTERS</id>
       <target>CHIP</target>
       <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
