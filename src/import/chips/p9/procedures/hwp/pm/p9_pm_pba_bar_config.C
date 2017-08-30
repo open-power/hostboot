@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,10 +27,10 @@
 ///
 /// @brief Initialize PAB and PAB_MSK of PBA
 ///
-// *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
+// *HWP FW Owner:  Prem Shanker Jha <premjha2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HS
 ///
 /// @verbatim
@@ -52,6 +52,8 @@
 // Includes
 // -----------------------------------------------------------------------------
 #include <p9_pm_pba_bar_config.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
 
 // -----------------------------------------------------------------------------
 // Constant & Structure definitions
@@ -82,22 +84,28 @@ const uint64_t PBA_BARMSKs[4] =
 // -----------------------------------------------------------------------------
 // Prototypes
 // -----------------------------------------------------------------------------
+///
+/// @brief Determine if a number is a power of two or not
+///
+/// @param [in] i_value        Input number
+/// @return True if value is a power of two
+///         False otherwise.
+///
+inline bool isPowerOfTwo (uint64_t i_value);
 
-///-----------------------------------------------------------------------------
-/// Determine if a number is a power of two or not
-///-----------------------------------------------------------------------------
-inline bool isPowerOfTwo (uint64_t value);
-
-///-----------------------------------------------------------------------------
-/// Round up to next higher power of 2 (return value if it's already a power of
-/// 2).
-///-----------------------------------------------------------------------------
+///
+/// @brief Round up to next higher power of 2
+///
+/// @param [in] i_value        Input value
+/// @return Next higher power of 2 of i_value.
+///         If i_value is already a power of 2, return i_value.
+///
 inline uint64_t PowerOf2Roundedup (uint64_t value);
-
 
 // -----------------------------------------------------------------------------
 // Function definitions
 // -----------------------------------------------------------------------------
+// See doxygen in header file
 fapi2::ReturnCode p9_pm_pba_bar_config (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const uint32_t i_index,
@@ -106,7 +114,7 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
     const p9pba::CMD_SCOPE i_pba_cmd_scope,
     const uint16_t i_vectorTarget)
 {
-    FAPI_IMP("Entering P9_PM_PBA_BAR_CONFIG...");
+    FAPI_DBG("Entering p9_pm_pba_bar_config...");
 
     fapi2::buffer<uint64_t> l_bar64;
     uint64_t                l_work_size;
@@ -119,8 +127,10 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
     // Check if PBA BAR address is within range,
     // High order bits checked to ensure a valid real address
     FAPI_ASSERT((BAR_ADDR_RANGECHECK_HIGH & i_pba_bar_addr) == 0x0ull,
-                fapi2::P9_PBA_ADDR_OUT_OF_RANGE().set_INDEX(i_index)
-                .set_BAR_ADDR(i_pba_bar_addr).set_BAR_SIZE(i_pba_bar_size)
+                fapi2::P9_PBA_ADDR_OUT_OF_RANGE()
+                .set_INDEX(i_index)
+                .set_BAR_ADDR(i_pba_bar_addr)
+                .set_BAR_SIZE(i_pba_bar_size)
                 .set_CMD_SCOPE(i_pba_cmd_scope)
                 .set_EXP_BAR_ADDR_RANGECHECK_HIGH(BAR_ADDR_RANGECHECK_HIGH),
                 "ERROR: Address out of Range : i_pba_bar_addr = 0x%016llX & "
@@ -129,8 +139,10 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
 
     // Low order bits checked for alignment
     FAPI_ASSERT((BAR_ADDR_RANGECHECK_LOW & i_pba_bar_addr) == 0x0ull,
-                fapi2::P9_PBA_ADDR_ALIGNMENT_ERROR().set_INDEX(i_index)
-                .set_BAR_ADDR(i_pba_bar_addr).set_BAR_SIZE(i_pba_bar_size)
+                fapi2::P9_PBA_ADDR_ALIGNMENT_ERROR()
+                .set_INDEX(i_index)
+                .set_BAR_ADDR(i_pba_bar_addr)
+                .set_BAR_SIZE(i_pba_bar_size)
                 .set_CMD_SCOPE(i_pba_cmd_scope)
                 .set_EXP_BAR_ADDR_RANGECHECK_LOW(BAR_ADDR_RANGECHECK_LOW),
                 "ERROR: Address must be on a 1MB boundary : i_pba_bar_addr="
@@ -139,10 +151,11 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
 
     // The combination of both the BAR size and addr being zero is legal.
     // But, if the BAR size is 0 and the BAR addr is not zero return error.
-
     FAPI_ASSERT(!((i_pba_bar_size == 0) && (i_pba_bar_addr != 0)),
-                fapi2::P9_PBA_BAR_SIZE_INVALID().set_INDEX(i_index)
-                .set_BAR_ADDR(i_pba_bar_addr).set_BAR_SIZE(i_pba_bar_size)
+                fapi2::P9_PBA_BAR_SIZE_INVALID()
+                .set_INDEX(i_index)
+                .set_BAR_ADDR(i_pba_bar_addr)
+                .set_BAR_SIZE(i_pba_bar_size)
                 .set_CMD_SCOPE(i_pba_cmd_scope),
                 "ERROR: Bar size must be >=1MB for PBABAR 0x%llX, but "
                 "i_pba_bar_size=0x%016llx", i_index, i_pba_bar_size);
@@ -167,13 +180,15 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
 
     // Write the BAR
     l_bar64.set(i_pba_bar_addr);
-    l_bar64.insertFromRight<0, 3>(i_pba_cmd_scope);
+    l_bar64.insertFromRight<PU_PBABAR0_CMD_SCOPE,
+                            PU_PBABAR0_CMD_SCOPE_LEN>(i_pba_cmd_scope);
 
     if (i_pba_cmd_scope == p9pba::VECTORED_GROUP)
     {
         FAPI_DBG("Setting the initial vectored group target for scope 0x%X",
                  i_pba_cmd_scope);
-        l_bar64.insertFromRight<48, 16>(i_vectorTarget);
+        l_bar64.insertFromRight<PU_PBABAR0_VTARGET,
+                                PU_PBABAR0_VTARGET_LEN>(i_vectorTarget);
     }
 
     FAPI_TRY(fapi2::putScom(i_target, PBA_BARs[i_index], l_bar64),
@@ -213,32 +228,32 @@ fapi2::ReturnCode p9_pm_pba_bar_config (
     FAPI_TRY(fapi2::putScom(i_target, PBA_BARMSKs[i_index], l_bar64),
              "PBA_MASK Putscom failed for channel 0x%llX", i_index);
 
-    FAPI_IMP("Exiting P9_PM_PBA_BAR_CONFIG...");
-
 fapi_try_exit:
+    FAPI_DBG("Exiting p9_pm_pba_bar_config...");
     return fapi2::current_err;
 }
 
-inline bool isPowerOfTwo(uint64_t value)
+// See doxygen in Prototypes section above
+inline bool isPowerOfTwo(uint64_t i_value)
 {
-    // if value ANDed with the value-1 is 0, then value is a power of 2.
-    // if value is 0, this is considered not a power of 2 and will return false.
-
-    return !(value & (value - 1));
+    // if i_value ANDed with the i_value-1 is 0, then i_value is a power of 2.
+    // if i_value is 0, this is considered not a power of 2 and will return false.
+    return !(i_value & (i_value - 1));
 }
 
-inline uint64_t PowerOf2Roundedup (uint64_t value)
+// See doxygen in Prototypes section above
+inline uint64_t PowerOf2Roundedup (uint64_t i_value)
 {
-    if (value < 0)
+    if (i_value < 0)
     {
         return 0;
     }
 
-    --value;
-    value |= value >> 1;
-    value |= value >> 2;
-    value |= value >> 4;
-    value |= value >> 8;
-    value |= value >> 16;
-    return value + 1;
+    --i_value;
+    i_value |= i_value >> 1;
+    i_value |= i_value >> 2;
+    i_value |= i_value >> 4;
+    i_value |= i_value >> 8;
+    i_value |= i_value >> 16;
+    return i_value + 1;
 }

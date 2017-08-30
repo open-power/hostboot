@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,9 +28,9 @@
 /// @brief Initialize PAB and PAB_MSK of PBA
 ///
 // *HWP HWP Owner: Greg Still <stillgs @us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
+// *HWP FW Owner:  Prem Shanker Jha <premjha2@in.ibm.com>
 // *HWP Team: PM
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HS
 //
 
@@ -42,10 +42,8 @@
 // -----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pm_pba_init.H>
-#include <p9_misc_scom_addresses.H>
 
-// function pointer typedef definition for HWP call support
-
+// Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_pba_bar_config_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
  const uint32_t,
@@ -64,7 +62,7 @@ extern "C"
 ///
 /// @brief Initialize PAB_BAR (cmd_scope & address) and PAB_BARMSK (mask/size)
 ///
-/// @param [in] i_target        Chip Target
+/// @param [in] i_target        Reference to Proc chip target
 /// @param [in] i_index         Identifies the set of BAR/BARMSK registers [0-3]
 /// @param [in] i_pba_bar_addr  PBA base address - 1MB granularity
 /// @param [in] i_pba_bar_size  PBA region size in MB; If not a power of two,
