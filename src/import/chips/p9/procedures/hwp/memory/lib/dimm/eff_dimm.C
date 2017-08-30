@@ -3374,6 +3374,96 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Determines & sets effective config for nibble
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::nibble_map()
+{
+    uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_DQ_NIBBLES] = {};
+
+    std::vector<uint8_t> l_nibble_bitmap;
+    FAPI_TRY( iv_pDecoder->nibble_map(l_nibble_bitmap) );
+
+    // Sanity check we retrieved a vector w/the right size
+    FAPI_ASSERT( l_nibble_bitmap.size() == MAX_DQ_NIBBLES,
+                 fapi2::MSS_UNEXPECTED_VALUE_SEEN().
+                 set_TARGET(iv_dimm).
+                 set_EXPECTED(MAX_DQ_NIBBLES).
+                 set_ACTUAL(l_nibble_bitmap.size()).
+                 set_FUNCTION(NIBBLE_MAP_FUNC),
+                 "Expected vector size %d, actual size %d for %s",
+                 MAX_DQ_NIBBLES, l_nibble_bitmap.size(), mss::c_str(iv_dimm) );
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_nibble_map(iv_mcs, &l_attr[0][0][0]) );
+
+    memcpy(&(l_attr[iv_port_index][iv_dimm_index][0]), l_nibble_bitmap.data(), MAX_DQ_NIBBLES);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_NIBBLE_MAP, iv_mcs, l_attr),
+              "Failed setting attribute ATTR_EFF_NIBBLE_MAP for %s", mss::c_str(iv_mcs));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the package rank map
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+fapi2::ReturnCode eff_dimm::package_rank_map()
+{
+    uint8_t l_attr[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_DQ_NIBBLES] = {};
+
+    std::vector<uint8_t> l_package_rank_map;
+    FAPI_TRY( iv_pDecoder->package_rank_map(l_package_rank_map) );
+
+    // Sanity check we retrieved a vector w/the right size
+    FAPI_ASSERT( l_package_rank_map.size() == MAX_DQ_NIBBLES,
+                 fapi2::MSS_UNEXPECTED_VALUE_SEEN().
+                 set_TARGET(iv_dimm).
+                 set_EXPECTED(MAX_DQ_NIBBLES).
+                 set_ACTUAL(l_package_rank_map.size()).
+                 set_FUNCTION(PACKAGE_RANK_MAP_FUNC),
+                 "Expected vector size %d, actual size %d for %s",
+                 MAX_DQ_NIBBLES, l_package_rank_map.size(), mss::c_str(iv_dimm) );
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_package_rank_map(iv_mcs, &l_attr[0][0][0]) );
+
+    memcpy(&(l_attr[iv_port_index][iv_dimm_index][0]), l_package_rank_map.data(), MAX_DQ_NIBBLES);
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_PACKAGE_RANK_MAP, iv_mcs, l_attr),
+              "Failed setting attribute ATTR_EFF_PACKAGE_RANK_MAP for %s", mss::c_str(iv_mcs));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Determines & sets effective config for the wr_crc
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @warning eff_package_rank_map must be set before calling this method
+///
+fapi2::ReturnCode eff_dimm::wr_crc()
+{
+    uint8_t l_attr[PORTS_PER_MCS] = {};
+
+    // Get & update MCS attribute
+    FAPI_TRY( eff_wr_crc(iv_mcs, &l_attr[0]) );
+
+    // By default write CRC will be disabled. For us to actually enable it in a product,
+    // we'd have to be taking more bit flips on the write data interface than scrub can keep up with,
+    // plus we'd have to take the performance hit of enabling it... so pretty high bar to enable it.
+    l_attr[iv_port_index] = fapi2::ENUM_ATTR_MSS_EFF_WR_CRC_DISABLE;
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EFF_WR_CRC, iv_mcs, l_attr),
+              "Failed setting attribute ATTR_MSS_EFF_WR_CRC for %s", mss::c_str(iv_mcs));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines & sets effective config for tRRD_S
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///

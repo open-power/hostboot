@@ -86,4 +86,17 @@
     </callout>
    </hwpError>
 
+  <hwpError>
+    <rc>RC_MSS_UNEXPECTED_VALUE_SEEN</rc>
+    <description> Invalid value seen versus the expected value wanted </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>EXPECTED</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>FUNCTION</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

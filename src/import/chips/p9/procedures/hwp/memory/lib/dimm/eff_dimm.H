@@ -692,6 +692,24 @@ class eff_dimm
         fapi2::ReturnCode dram_twtr_s();
 
         ///
+        /// @brief Determines & sets effective config for the nibble map
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode nibble_map();
+
+        ///
+        /// @brief Determines & sets effective config for the package rank map
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode package_rank_map();
+
+        ///
+        /// @brief Determines & sets effective config for the wr_crc
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        fapi2::ReturnCode wr_crc();
+
+        ///
         /// @brief Determines & sets effective config for tRRD_S (tRRD_S_slr)
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///

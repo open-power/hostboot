@@ -3251,6 +3251,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_EFF_WR_CRC</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Controls ENABLE/DISABLE of Write CRC
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <enum>DISABLE = 0, ENABLE = 1</enum>
+        <mssUnits> bool </mssUnits>
+        <array> 2 </array>
+        <mssAccessorName>eff_wr_crc</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_PHY_SEQ_REFRESH</id>
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>

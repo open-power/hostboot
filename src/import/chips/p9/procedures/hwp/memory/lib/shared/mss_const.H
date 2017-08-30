@@ -65,7 +65,7 @@ enum sizes
     MAX_NUM_IMP = 4,               ///< number of impedances valid per slew type
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
-    MAX_DQ_NIBBLES_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DQ nibbles for DQ 72 bits
+    MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
     MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x8's there are 9 DRAM for 72 bits
     MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x4's there are 18 DRAM for 72 bits
 
@@ -134,6 +134,10 @@ enum times
 ///
 enum ffdc_function_codes
 {
+    // Used in eff_dimm.C
+    NIBBLE_MAP_FUNC = 20,
+    PACKAGE_RANK_MAP_FUNC = 21,
+
     // Used in fw_mark_store.H for MSS_INVALID_RANK_PASSED
     FWMS_READ = 30,
     FWMS_WRITE = 31,
