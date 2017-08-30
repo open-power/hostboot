@@ -144,6 +144,23 @@ fapi2::ReturnCode pm_occ_gpe_reset(
 
     do
     {
+        if (i_engine == p9occgpe::GPE0)
+        {
+            l_controlReg    =   PU_GPE0_PPE_XIXCR;
+            l_statusReg     =   PU_GPE0_GPEXIXSR_SCOM;
+            l_instrAddrReg  =   PU_GPE0_PPE_XIDBGPRO;
+            l_intVecReg     =   PU_GPE0_GPEIVPR_SCOM;
+            l_gpeBaseAddress.push_back( GPE0_BASE_ADDRESS );
+        }
+        else if (i_engine == p9occgpe::GPE1)
+        {
+            l_controlReg = PU_GPE1_PPE_XIXCR;
+            l_statusReg = PU_GPE1_GPEXIXSR_SCOM;
+            l_instrAddrReg = PU_GPE1_PPE_XIDBGPRO;
+            l_intVecReg = PU_GPE1_GPEIVPR_SCOM;
+            l_gpeBaseAddress.push_back( GPE1_BASE_ADDRESS );
+        }
+
         // Halt the OCC GPE
         l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
         FAPI_TRY(putScom(i_target, l_controlReg, l_data64),
