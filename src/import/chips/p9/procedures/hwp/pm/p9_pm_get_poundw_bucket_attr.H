@@ -27,6 +27,12 @@
 /// @brief Define prototype for p9_pm_get_poundw_bucket_attr.  This function
 /// retrieves a vdmData structure with info from #W keyword.
 ///
+/// *HWP HW Owner    : N/A (This is a FW delivered function)
+/// *HWP FW Owner    : Thi Tran <thi@us.ibm.com>
+/// *HWP Team        : PM - Calling this function.
+/// *HWP Consumed by : FSP
+/// *HWP Level       : 3
+///
 
 #ifndef _P9_PM_GET_POUND_W_BUCKET_ATTR_H_
 #define _P9_PM_GET_POUND_W_BUCKET_ATTR_H_
