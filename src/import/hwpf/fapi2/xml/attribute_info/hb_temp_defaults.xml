@@ -303,6 +303,19 @@
         <id>ATTR_MSS_INTERLEAVE_GRANULARITY</id>
         <default>0x00</default>
     </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_NIBBLE_MAP</id>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_PACKAGE_RANK_MAP</id>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_EFF_WR_CRC</id>
+    </attribute>
+
     <attribute>
         <id>ATTR_IO_O_MFG_CHK</id>
         <default>0x00</default>
