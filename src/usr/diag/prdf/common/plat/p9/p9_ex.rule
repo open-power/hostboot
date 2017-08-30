@@ -314,7 +314,7 @@ rule rL2FIR
     L2FIR & ~L2FIR_MASK & ~L2FIR_ACT0 &  L2FIR_ACT1;
 };
 
-group gL2FIR filter singlebit, cs_root_cause
+group gL2FIR filter singlebit, cs_root_cause( 1, 17, 18, 20 )
 {
     /** L2FIR[0]
      *  L2 cache read CE
@@ -324,7 +324,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[1]
      *  L2 cache read UE
      */
-    (rL2FIR, bit(1)) ? l2_cache_ue;
+    (rL2FIR, bit(1)) ? l2_cache_ue_UERE;
 
     /** L2FIR[2]
      *  L2 cache read SUE
@@ -404,7 +404,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[17]
      *  (RC) load received pb cresp addr error
      */
-    (rL2FIR, bit(17)) ? level2_th_1;
+    (rL2FIR, bit(17)) ? level2_th_1_UERE;
 
     /** L2FIR[18]
      *  (RC) store received pb cresp addr error
@@ -419,7 +419,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[20]
      *  RC or NCU Pb data UE error
      */
-    (rL2FIR, bit(20)) ? self_th_1;
+    (rL2FIR, bit(20)) ? self_th_1_UERE;
 
     /** L2FIR[21]
      *  RC or NCU PB data SUE detected
@@ -474,7 +474,7 @@ group gL2FIR filter singlebit, cs_root_cause
     /** L2FIR[36]
      *  Cache CE and UE in short time period
      */
-    (rL2FIR, bit(36)) ? self_th_1;
+    (rL2FIR, bit(36)) ? threshold_and_mask_self;
 
     /** L2FIR[37:38]
      *  spare
@@ -560,7 +560,7 @@ group gNCUFIR filter singlebit, cs_root_cause( 8 )
     /** NCUFIR[9]
      *  store timed out on pb
      */
-    (rNCUFIR, bit(9)) ? threshold_and_mask;
+    (rNCUFIR, bit(9)) ? threshold_and_mask_self;
 
     /** NCUFIR[10]
      *  tlbie master timeout
@@ -651,7 +651,7 @@ rule rL3FIR
     L3FIR & ~L3FIR_MASK & ~L3FIR_ACT0 &  L3FIR_ACT1;
 };
 
-group gL3FIR filter singlebit, cs_root_cause
+group gL3FIR filter singlebit, cs_root_cause( 5, 8, 11, 17, 21 )
 {
     /** L3FIR[0]
      *  L3_RDDSP_SEGR_LCO_ALL_MEM_UNAVAIL_ERR
@@ -666,7 +666,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[3]
      *  L3 cache CE and UE within a short period
      */
-    (rL3FIR, bit(3)) ? self_th_1;
+    (rL3FIR, bit(3)) ? threshold_and_mask_self;
 
     /** L3FIR[4]
      *  CE detected on L3 cache read
@@ -676,7 +676,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[5]
      *  UE detected on L3 cache read
      */
-    (rL3FIR, bit(5)) ? l3_cache_ue;
+    (rL3FIR, bit(5)) ? l3_cache_ue_UERE;
 
     /** L3FIR[6]
      *  SUE detected on L3 cache read
@@ -691,7 +691,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[8]
      *  L3 cache write data UE from Power Bus
      */
-    (rL3FIR, bit(8)) ? self_th_1;
+    (rL3FIR, bit(8)) ? self_th_1_UERE;
 
     /** L3FIR[9]
      *  L3 cache write data sue from Power Bus
@@ -706,7 +706,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[11]
      *  L3 cache write data UE from L2
      */
-    (rL3FIR, bit(11)) ? l3_cache_ue;
+    (rL3FIR, bit(11)) ? l3_cache_ue_UERE;
 
     /** L3FIR[12]
      *  L3 cache write SUE from L2
@@ -756,7 +756,7 @@ group gL3FIR filter singlebit, cs_root_cause
     /** L3FIR[21]
      *  UE detected on PowerBus read for PPE
      */
-    (rL3FIR, bit(21)) ? self_th_1;
+    (rL3FIR, bit(21)) ? self_th_1_UERE;
 
     /** L3FIR[22]
      *  L3 PPE SUE
@@ -882,12 +882,12 @@ group gCMEFIR filter singlebit, cs_root_cause
     /** CMEFIR[8]
      *  SRAM Correctable Error
      */
-    (rCMEFIR, bit(8)) ? threshold_and_mask;
+    (rCMEFIR, bit(8)) ? threshold_and_mask_self;
 
     /** CMEFIR[9]
      *  Scrub timer tick, scrub still pending
      */
-    (rCMEFIR, bit(9)) ? threshold_and_mask;
+    (rCMEFIR, bit(9)) ? threshold_and_mask_self;
 
     /** CMEFIR[10]
      *  Block Copy Engine Error
@@ -902,37 +902,37 @@ group gCMEFIR filter singlebit, cs_root_cause
     /** CMEFIR[13]
      *  Dropout detected on Core0 Chiplet iVRM
      */
-    (rCMEFIR, bit(13)) ? threshold_and_mask;
+    (rCMEFIR, bit(13)) ? threshold_and_mask_self;
 
     /** CMEFIR[14]
      *  Dropout detected on Core1 Chiplet iVRM
      */
-    (rCMEFIR, bit(14)) ? threshold_and_mask;
+    (rCMEFIR, bit(14)) ? threshold_and_mask_self;
 
     /** CMEFIR[15]
      *  CME Dropout Cache Chiplet iVRM.
      */
-    (rCMEFIR, bit(15)) ? threshold_and_mask;
+    (rCMEFIR, bit(15)) ? threshold_and_mask_self;
 
     /** CMEFIR[16]
      *  CME Extreme Droop over time exceeded
      */
-    (rCMEFIR, bit(16)) ? threshold_and_mask;
+    (rCMEFIR, bit(16)) ? threshold_and_mask_self;
 
     /** CMEFIR[17]
      *  CME Large Droop exceeded
      */
-    (rCMEFIR, bit(17)) ? threshold_and_mask;
+    (rCMEFIR, bit(17)) ? threshold_and_mask_self;
 
     /** CMEFIR[18]
      *  CME Small Droop exceeded
      */
-    (rCMEFIR, bit(18)) ? threshold_and_mask;
+    (rCMEFIR, bit(18)) ? threshold_and_mask_self;
 
     /** CMEFIR[19]
      *  Detected non-thermometer code
      */
-    (rCMEFIR, bit(19)) ? threshold_and_mask;
+    (rCMEFIR, bit(19)) ? threshold_and_mask_self;
 
     /** CMEFIR[20]
      *  scom error

@@ -2549,7 +2549,7 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[3]
      *  STOP_RECOVERY_NOTIFY_PRD
      */
-    (rOCCFIR, bit(3)) ? threshold_and_mask;
+    (rOCCFIR, bit(3)) ? threshold_and_mask_self;
 
     /** OCCFIR[4]
      *  OCC_HB_ERROR
@@ -2579,12 +2579,12 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[9]
      *  GPE0 asserted an error condition
      */
-    (rOCCFIR, bit(9)) ? threshold_and_mask;
+    (rOCCFIR, bit(9)) ? threshold_and_mask_self;
 
     /** OCCFIR[10]
      *  GPE1 asserted an error condition
      */
-    (rOCCFIR, bit(10)) ? threshold_and_mask;
+    (rOCCFIR, bit(10)) ? threshold_and_mask_self;
 
     /** OCCFIR[11]
      *  GPE2 asserted an error condition
@@ -2609,37 +2609,37 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[15]
      *  SRAM CE
      */
-    (rOCCFIR, bit(15)) ? threshold_and_mask;
+    (rOCCFIR, bit(15)) ? threshold_and_mask_self;
 
     /** OCCFIR[16]
      *  SRAM Read Error
      */
-    (rOCCFIR, bit(16)) ? threshold_and_mask;
+    (rOCCFIR, bit(16)) ? threshold_and_mask_self;
 
     /** OCCFIR[17]
      *  SRAM Write error
      */
-    (rOCCFIR, bit(17)) ? threshold_and_mask;
+    (rOCCFIR, bit(17)) ? threshold_and_mask_self;
 
     /** OCCFIR[18]
      *  SRAM ctrl detected pe on tank read data
      */
-    (rOCCFIR, bit(18)) ? threshold_and_mask;
+    (rOCCFIR, bit(18)) ? threshold_and_mask_self;
 
     /** OCCFIR[19]
      *  SRAM cntrl  detected OCI write data pe
      */
-    (rOCCFIR, bit(19)) ? threshold_and_mask;
+    (rOCCFIR, bit(19)) ? threshold_and_mask_self;
 
     /** OCCFIR[20]
      *  SRAM cntrl detected OCI byte enable PE
      */
-    (rOCCFIR, bit(20)) ? threshold_and_mask;
+    (rOCCFIR, bit(20)) ? threshold_and_mask_self;
 
     /** OCCFIR[21]
      *  SRAM controller detected OCI address PE
      */
-    (rOCCFIR, bit(21)) ? threshold_and_mask;
+    (rOCCFIR, bit(21)) ? threshold_and_mask_self;
 
     /** OCCFIR[22]
      *  GPE0_HALTED:
@@ -2694,57 +2694,57 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[32]
      *  OCB_DB_OCI_TIMEOUT
      */
-    (rOCCFIR, bit(32)) ? threshold_and_mask;
+    (rOCCFIR, bit(32)) ? threshold_and_mask_self;
 
     /** OCCFIR[33]
      *  OCB_DB_OCI_READ_DATA_PARITY
      */
-    (rOCCFIR, bit(33)) ? threshold_and_mask;
+    (rOCCFIR, bit(33)) ? threshold_and_mask_self;
 
     /** OCCFIR[34]
      *  OCB_DB_OCI_SLAVE_ERROR
      */
-    (rOCCFIR, bit(34)) ? threshold_and_mask;
+    (rOCCFIR, bit(34)) ? threshold_and_mask_self;
 
     /** OCCFIR[35]
      *  OCB_PIB_ADDR_PARITY_ERR
      */
-    (rOCCFIR, bit(35)) ? threshold_and_mask;
+    (rOCCFIR, bit(35)) ? threshold_and_mask_self;
 
     /** OCCFIR[36]
      *  OCB_PIB_DATA_PARITY_ERR
      */
-    (rOCCFIR, bit(36)) ? threshold_and_mask;
+    (rOCCFIR, bit(36)) ? threshold_and_mask_self;
 
     /** OCCFIR[37]
      *  OCB_IDC0_ERROR
      */
-    (rOCCFIR, bit(37)) ? threshold_and_mask;
+    (rOCCFIR, bit(37)) ? threshold_and_mask_self;
 
     /** OCCFIR[38]
      *  OCB_IDC1_ERROR
      */
-    (rOCCFIR, bit(38)) ? threshold_and_mask;
+    (rOCCFIR, bit(38)) ? threshold_and_mask_self;
 
     /** OCCFIR[39]
      *  OCB_IDC2_ERROR
      */
-    (rOCCFIR, bit(39)) ? threshold_and_mask;
+    (rOCCFIR, bit(39)) ? threshold_and_mask_self;
 
     /** OCCFIR[40]
      *  OCB_IDC3_ERROR
      */
-    (rOCCFIR, bit(40)) ? threshold_and_mask;
+    (rOCCFIR, bit(40)) ? threshold_and_mask_self;
 
     /** OCCFIR[41]
      *  SRT_FSM_ERR
      */
-    (rOCCFIR, bit(41)) ? threshold_and_mask;
+    (rOCCFIR, bit(41)) ? threshold_and_mask_self;
 
     /** OCCFIR[42]
      *  JTAGACC_ERR
      */
-    (rOCCFIR, bit(42)) ? threshold_and_mask;
+    (rOCCFIR, bit(42)) ? threshold_and_mask_self;
 
     /** OCCFIR[43]
      *  spare
@@ -2754,7 +2754,7 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[44]
      *  C405_ECC_UE
      */
-    (rOCCFIR, bit(44)) ? threshold_and_mask;
+    (rOCCFIR, bit(44)) ? threshold_and_mask_self;
 
     /** OCCFIR[45]
      *  C405_ECC_CE
@@ -2764,67 +2764,67 @@ group gOCCFIR filter singlebit, cs_root_cause
     /** OCCFIR[46]
      *  C405_OCI_MACHINECHECK
      */
-    (rOCCFIR, bit(46)) ? threshold_and_mask;
+    (rOCCFIR, bit(46)) ? threshold_and_mask_self;
 
     /** OCCFIR[47]
      *  SRAM_SPARE_DIRECT_ERROR0
      */
-    (rOCCFIR, bit(47)) ? threshold_and_mask;
+    (rOCCFIR, bit(47)) ? threshold_and_mask_self;
 
     /** OCCFIR[48]
      *  SRAM_SPARE_DIRECT_ERROR1
      */
-    (rOCCFIR, bit(48)) ? threshold_and_mask;
+    (rOCCFIR, bit(48)) ? threshold_and_mask_self;
 
     /** OCCFIR[49]
      *  SRAM_SPARE_DIRECT_ERROR2
      */
-    (rOCCFIR, bit(49)) ? threshold_and_mask;
+    (rOCCFIR, bit(49)) ? threshold_and_mask_self;
 
     /** OCCFIR[50]
      *  SRAM_SPARE_DIRECT_ERROR3
      */
-    (rOCCFIR, bit(50)) ? threshold_and_mask;
+    (rOCCFIR, bit(50)) ? threshold_and_mask_self;
 
     /** OCCFIR[51]
      *  GPE0_OCISLV_ERR
      */
-    (rOCCFIR, bit(51)) ? threshold_and_mask;
+    (rOCCFIR, bit(51)) ? threshold_and_mask_self;
 
     /** OCCFIR[52]
      *  GPE1_OCISLV_ERR
      */
-    (rOCCFIR, bit(52)) ? threshold_and_mask;
+    (rOCCFIR, bit(52)) ? threshold_and_mask_self;
 
     /** OCCFIR[53]
      *  GPE2_OCISLV_ERR
      */
-    (rOCCFIR, bit(53)) ? threshold_and_mask;
+    (rOCCFIR, bit(53)) ? threshold_and_mask_self;
 
     /** OCCFIR[54]
      *  GPE3_OCISLV_ERR
      */
-    (rOCCFIR, bit(54)) ? threshold_and_mask;
+    (rOCCFIR, bit(54)) ? threshold_and_mask_self;
 
     /** OCCFIR[55]
      *  C405ICU_M_TIMEOUT
      */
-    (rOCCFIR, bit(55)) ? threshold_and_mask;
+    (rOCCFIR, bit(55)) ? defaultMaskedError;
 
     /** OCCFIR[56]
      *  C405DCU_M_TIMEOUT
      */
-    (rOCCFIR, bit(56)) ? threshold_and_mask;
+    (rOCCFIR, bit(56)) ? threshold_and_mask_self;
 
     /** OCCFIR[57]
      *  OCC_COMPLEX_FAULT
      */
-    (rOCCFIR, bit(57)) ? threshold_and_mask;
+    (rOCCFIR, bit(57)) ? threshold_and_mask_self;
 
     /** OCCFIR[58]
      *  OCC_COMPLEX_NOTIFY
      */
-    (rOCCFIR, bit(58)) ? threshold_and_mask;
+    (rOCCFIR, bit(58)) ? threshold_and_mask_self;
 
     /** OCCFIR[59:61]
      *  spare
@@ -5381,7 +5381,7 @@ group gPBCENTFIR filter singlebit, cs_root_cause
     /** PBCENTFIR[5]
      *  pb cresp addr error
      */
-    (rPBCENTFIR, bit(5)) ? threshold_and_mask;
+    (rPBCENTFIR, bit(5)) ? threshold_and_mask_self;
 
     /** PBCENTFIR[6]
      *  pb cresp error
@@ -5538,22 +5538,22 @@ group gPBPPEFIR filter singlebit, cs_root_cause
     /** PBPPEFIR[0]
      *  PPE asserted an internally detected err
      */
-    (rPBPPEFIR, bit(0)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(0)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[1]
      *  PPE err on ext interface to the Mem
      */
-    (rPBPPEFIR, bit(1)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(1)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[2]
      *  PPE halted due to lack of progress.
      */
-    (rPBPPEFIR, bit(2)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(2)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[3]
      *  PPE halted on breakpoint event.
      */
-    (rPBPPEFIR, bit(3)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(3)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[4]
      *  PPE watchdog expired
@@ -5573,17 +5573,17 @@ group gPBPPEFIR filter singlebit, cs_root_cause
     /** PBPPEFIR[7]
      *  SRAM uncorrectable error
      */
-    (rPBPPEFIR, bit(7)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(7)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[8]
      *  SRM correctable error
      */
-    (rPBPPEFIR, bit(8)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(8)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[9]
      *  Scrub timer tick while scrub pending
      */
-    (rPBPPEFIR, bit(9)) ? threshold_and_mask;
+    (rPBPPEFIR, bit(9)) ? threshold_and_mask_self;
 
     /** PBPPEFIR[10]
      *  reserved
@@ -5784,7 +5784,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[32]
      *  PBAXRCV Low data before High Data
      */
-    (rPBAFIR, bit(32)) ? self_th_1;
+    (rPBAFIR, bit(32)) ? defaultMaskedError;
 
     /** PBAFIR[33]
      *  PBAXRCV low data timeout
@@ -5799,7 +5799,7 @@ group gPBAFIR filter singlebit, cs_root_cause
     /** PBAFIR[35]
      *  Illegal PBAX Flow.
      */
-    (rPBAFIR, bit(35)) ? self_th_1;
+    (rPBAFIR, bit(35)) ? defaultMaskedError;
 
     /** PBAFIR[36]
      *  PBA engine retry threshold reached
@@ -6403,7 +6403,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[11]
      *  SLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(11)) ? level2_th_1;
+    (rNMMUFIR, bit(11)) ? threshold_and_mask_self;
 
     /** NMMUFIR[12]
      *  TLB directory parity error detected.
@@ -6423,7 +6423,7 @@ group gNMMUFIR filter singlebit, cs_root_cause
     /** NMMUFIR[15]
      *  TLB multi-hit error detected.
      */
-    (rNMMUFIR, bit(15)) ? level2_th_1;
+    (rNMMUFIR, bit(15)) ? threshold_and_mask_self;
 
     /** NMMUFIR[16]
      *  Segment fault detected .
@@ -6839,7 +6839,7 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[47]
      *  INT_CQ_FIR_PGM_DBG_ACCESS:
      */
-    (rINTCQFIR, bit(47)) ? threshold_and_mask;
+    (rINTCQFIR, bit(47)) ? threshold_and_mask_self;
 
     /** INTCQFIR[48]
      *  spare
@@ -8464,22 +8464,22 @@ group gXBPPEFIR filter singlebit, cs_root_cause
     /** XBPPEFIR[0]
      *  PPE general error.
      */
-    (rXBPPEFIR, bit(0)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(0)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[1]
      *  PPE general error.
      */
-    (rXBPPEFIR, bit(1)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(1)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[2]
      *  PPE general error.
      */
-    (rXBPPEFIR, bit(2)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(2)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[3]
      *  PPE general error.
      */
-    (rXBPPEFIR, bit(3)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(3)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[4]
      *  PPE halted.
@@ -8499,7 +8499,7 @@ group gXBPPEFIR filter singlebit, cs_root_cause
     /** XBPPEFIR[7]
      *  Arb missed scrub tick.
      */
-    (rXBPPEFIR, bit(7)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(7)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[8]
      *  Arb ary ue error.
@@ -8509,7 +8509,7 @@ group gXBPPEFIR filter singlebit, cs_root_cause
     /** XBPPEFIR[9]
      *  Arb ary ce error.
      */
-    (rXBPPEFIR, bit(9)) ? threshold_and_mask;
+    (rXBPPEFIR, bit(9)) ? threshold_and_mask_self;
 
     /** XBPPEFIR[10]
      *  spare

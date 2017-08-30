@@ -644,17 +644,17 @@ group gCOREFIR filter singlebit, cs_root_cause
     /** COREFIR[33]
      *  Special recovery error, tlb multi-hit
      */
-    (rCOREFIR, bit(33)) ? threshold_and_mask;
+    (rCOREFIR, bit(33)) ? threshold_and_mask_self;
 
     /** COREFIR[34]
      *  LSU SLB multihit error
      */
-    (rCOREFIR, bit(34)) ? threshold_and_mask;
+    (rCOREFIR, bit(34)) ? threshold_and_mask_self;
 
     /** COREFIR[35]
      *  LSU ERAT multihit error
      */
-    (rCOREFIR, bit(35)) ? threshold_and_mask;
+    (rCOREFIR, bit(35)) ? threshold_and_mask_self;
 
     /** COREFIR[36]
      *  Forward Progress Error

@@ -99,10 +99,12 @@ actionclass threshold5pday
  */
 actionclass threshold_and_mask
 {
-    calloutSelfMed;
     threshold32pday;
     funccall("ClearServiceCallFlag");
 };
+
+actionclass threshold_and_mask_self   { calloutSelfMed;   threshold_and_mask; };
+actionclass threshold_and_mask_level2 { callout2ndLvlMed; threshold_and_mask; };
 
 ################################################################################
 #                               Special Flags                                  #
@@ -211,9 +213,10 @@ actionclass level2_M_proc_L_th_1
 #                           Callouts with flags                                #
 ################################################################################
 
-actionclass level2_th_1_SUE { level2_th_1; SueSeen;   };
-actionclass self_th_1_SUE   { self_th_1;   SueSeen;   };
-actionclass self_th_1_UERE  { self_th_1;   SueSource; };
+actionclass level2_th_1_SUE  { level2_th_1; SueSeen;   };
+actionclass level2_th_1_UERE { level2_th_1; SueSource; };
+actionclass self_th_1_SUE    { self_th_1;   SueSeen;   };
+actionclass self_th_1_UERE   { self_th_1;   SueSource; };
 
 ################################################################################
 #                               Dump Types                                     #

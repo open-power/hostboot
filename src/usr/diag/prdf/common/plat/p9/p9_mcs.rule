@@ -234,7 +234,7 @@ group gMCFIR filter singlebit, cs_root_cause( 0, 6, 8, 9 )
     /** MCFIR[8]
      *  command list timeout
      */
-    (rMCFIR, bit(8)) ? level2_th_1;
+    (rMCFIR, bit(8)) ? threshold_and_mask_level2;
 
     /** MCFIR[9]
      *  channel 0 timeout
