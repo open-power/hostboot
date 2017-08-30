@@ -724,14 +724,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                hostInterfaces::hbrt_fw_msg* l_resp_fw_msg =
                                 (hostInterfaces::hbrt_fw_msg*) o_resp;
 
-               if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                             sizeof(l_req_fw_msg->req_hcode_update)))
-               {
-                  retVal = -EINVAL;
-                  break;
-               }
 
-                if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+               if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                              sizeof(l_resp_fw_msg->resp_generic)))
                {
                   retVal = -EINVAL;
@@ -741,6 +735,13 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                if (hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE
                                               == l_req_fw_msg->io_type)
                {
+                  if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                sizeof(l_req_fw_msg->req_hcode_update)))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
+
                   TRACFCOMP(g_trac_hbrt, ENTER_MRK
                       "rt_firmware_request for HCODE SCOM update: "
                       "type:%d, chipId:0x%X, section:%d, "
@@ -751,6 +752,51 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       l_req_fw_msg->req_hcode_update.i_operation,
                       l_req_fw_msg->req_hcode_update.i_scomAddr,
                       l_req_fw_msg->req_hcode_update.i_scomData);
+
+                      l_resp_fw_msg->io_type =
+                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
+
+                      // dummy return value for testing
+                      l_resp_fw_msg->resp_generic.o_status = 264;
+
+                      TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
+                      retVal = 1;  // just return 1 for testing
+               }
+               else if (hostInterfaces::HBRT_FW_MSG_TYPE_ERROR_LOG
+                                              == l_req_fw_msg->io_type)
+               {
+                  if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                sizeof(l_req_fw_msg->error_log)))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
+
+                  if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                sizeof(l_req_fw_msg->error_log) +
+                                l_req_fw_msg->error_log.i_errlSize - 1))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
+
+
+                  TRACFCOMP(g_trac_hbrt, ENTER_MRK
+                      "rt_firmware_request for error log: "
+                      "type:%d, plid:0x%08x, size:%d, data:0x%02x",
+                      l_req_fw_msg->io_type,
+                      l_req_fw_msg->error_log.i_plid,
+                      l_req_fw_msg->error_log.i_errlSize,
+                      l_req_fw_msg->error_log.i_data);
+
+                      l_resp_fw_msg->io_type =
+                                 hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
+
+                      // dummy return value for testing
+                      l_resp_fw_msg->resp_generic.o_status = 20;
+
+                      TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
+                      retVal = 0;  // just return 0 for testing
                }
                else
                {
@@ -758,15 +804,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                       "rt_firmware_request an unrecognized request: "
                       "type:%d", l_req_fw_msg->io_type);
                }
-
-               l_resp_fw_msg->io_type =
-                          hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC;
-               // dummy return value for testing
-               l_resp_fw_msg->resp_generic.o_status = 264;
-
-               TRACFCOMP(g_trac_hbrt, EXIT_MRK"rt_firmware_request");
-               retVal = 1;  // just return 1 for testing
-
             } while (0) ;
             return retVal;
         }

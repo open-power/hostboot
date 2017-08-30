@@ -502,6 +502,8 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_RESP_NOP = 1,
        HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,
        HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,
+       HBRT_FW_MSG_HBRT_FSP = 4,
+       HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
     };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -524,14 +526,26 @@ typedef struct hostInterfaces
           struct
           {
              uint64_t i_chipId;     // processor chip ID plus ID type,
-                                      // always proc (0x0)
+                                    // always proc (0x0)
              uint32_t i_section;    // runtime section to update
-                                      // (passthru to pore_gen_scom)
+                                    // (passthru to pore_gen_scom)
              uint32_t i_operation;  // type of operation to perform
-                                      // (passthru to pore_gen_scom)
+                                    // (passthru to pore_gen_scom)
              uint64_t i_scomAddr;   // fully qualified scom address
              uint64_t i_scomData;   // data for operation
           } req_hcode_update;
+
+          // This struct is sent from HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_ERR_LOG
+          // Send an error log to FSP
+          struct
+          {
+             uint32_t i_plid;     // platform log identifier
+             uint32_t i_errlSize; // data size in bytes
+             uint8_t  i_data;     // the error log data
+                                  // uint8_t *myData =
+                                  // (uint8_t*)&l_req_fw_msg->error_log.i_data;
+          } __attribute__ ((packed)) error_log;
        };
     };
 
