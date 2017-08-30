@@ -70,7 +70,7 @@ const uint64_t FBC_IOO_DL_FIR_ACTION1 = 0x0303C0000300FF0CULL;
 const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF00F3ULL;
 
 // link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
-const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF000FULL;
+const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF00FFULL;
 
 static const uint8_t OBRICK0_POS  = 0x0;
 static const uint8_t OBRICK1_POS  = 0x1;
