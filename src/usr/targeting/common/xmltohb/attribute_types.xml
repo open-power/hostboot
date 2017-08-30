@@ -156,7 +156,6 @@
     </nativeType>
     <persistency>non-volatile</persistency>
     <readable></readable>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -1063,7 +1062,6 @@
         <default>0</default>
       </uint16_t>
     </simpleType>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -1086,7 +1084,6 @@
       </uint8_t>
     </simpleType>
     <writeable></writeable>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -1109,7 +1106,6 @@
       </uint8_t>
     </simpleType>
     <writeable></writeable>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -3416,7 +3412,6 @@
             0,0,0,0,0,0,0,0,0,0,0,0,0</default>
       </uint16_t>
     </simpleType>
-    <no_export/>
   </attribute>
 
   <attribute>
@@ -5967,7 +5962,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <no_export/>
 </attribute>
 
 <attribute>
@@ -5980,7 +5974,6 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
-    <no_export/>
 </attribute>
 
 <attribute>
