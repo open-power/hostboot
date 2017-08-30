@@ -71,9 +71,9 @@
   <registerFfdc>
     <id>SGPE_FFDC_REGISTERS</id>
     <scomRegister>PU_OCB_OCI_OCCFLG_SCOM</scomRegister>
-    <scomRegister>PU_GPE3_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE3_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE3_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMEDR</scomRegister>
     <scomRegister>PU_GPE3_GPETSEL_SCOM</scomRegister>
     <scomRegister>PU_GPE3_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE3_GPESTR_SCOM</scomRegister>
@@ -85,9 +85,9 @@
   <!-- ******************************************************************** -->
   <registerFfdc>
     <id>OCCGPE0_FFDC_REGISTERS</id>
-    <scomRegister>PU_GPE0_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE0_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE0_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIRAMEDR</scomRegister>
     <scomRegister>PU_GPE0_GPETSEL_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE0_GPESTR_SCOM</scomRegister>
@@ -99,9 +99,9 @@
   <!-- ******************************************************************** -->
   <registerFfdc>
     <id>OCCGPE1_FFDC_REGISTERS</id>
-    <scomRegister>PU_GPE1_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE1_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE1_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIRAMEDR</scomRegister>
     <scomRegister>PU_GPE1_GPETSEL_SCOM</scomRegister>
     <scomRegister>PU_GPE1_GPEIVPR_SCOM</scomRegister>
     <scomRegister>PU_GPE1_GPESTR_SCOM</scomRegister>
@@ -114,9 +114,42 @@
   <registerFfdc>
     <id>PGPE_FFDC_REGISTERS</id>
     <scomRegister>PU_OCB_OCI_OCCS2_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIXSR_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIIAR_SCOM</scomRegister>
-    <scomRegister>PU_GPE2_GPEXIIR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE2_GPETSEL_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPESTR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEMACR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_MIB_XISGB</scomRegister>
+    <scomRegister>PU_GPE2_MIB_XIICAC</scomRegister>
+    <scomRegister>PU_GPE2_MIB_XIDCAC_SCOM</scomRegister>
+  </registerFfdc>
+  <!-- ******************************************************************** -->
+  <registerFfdc>
+    <id>PBA_FFDC_BASIC_REGISTERS</id>
+    <scomRegister>PU_PBASLVCTL0_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL1_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL2_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVCTL3_SCOM</scomRegister>
+    <scomRegister>PU_PBASLVRST_SCOM</scomRegister>
+    <scomRegister>PU_PBAMODE_SCOM</scomRegister>
+    <scomRegister>PU_PBAFIR</scomRegister>
+    <scomRegister>PU_PBAFIRACT0</scomRegister>
+    <scomRegister>PU_PBAFIRACT1</scomRegister>
+    <scomRegister>PU_PBAFIRMASK</scomRegister>
+    <scomRegister>PU_PBACFG</scomRegister>
+    <scomRegister>PU_PBAERRRPT0</scomRegister>
+    <scomRegister>PU_PBAERRRPT1</scomRegister>
+    <scomRegister>PU_PBAERRRPT2</scomRegister>
+    <scomRegister>PU_PBABAR0</scomRegister>
+    <scomRegister>PU_PBABAR1</scomRegister>
+    <scomRegister>PU_PBABAR2</scomRegister>
+    <scomRegister>PU_PBABAR3</scomRegister>
+    <scomRegister>PU_PBABARMSK0</scomRegister>
+    <scomRegister>PU_PBABARMSK1</scomRegister>
+    <scomRegister>PU_PBABARMSK2</scomRegister>
+    <scomRegister>PU_PBABARMSK3</scomRegister>
   </registerFfdc>
   <!-- ******************************************************************** -->
   <registerFfdc>
