@@ -215,6 +215,20 @@ int32_t RcdParityError( ExtensibleChip * i_mcaChip,
 
     #endif
 
+    if ( io_sc.service_data->queryServiceCall() )
+    {
+        // Mask both RCD parity error bits to prevent any flooding.
+        SCAN_COMM_REGISTER_CLASS * mask
+                                = i_mcaChip->getRegister( "MCACALFIR_MASK_OR" );
+        mask->SetBit( 4);
+        mask->SetBit(14);
+        if ( SUCCESS != mask->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on MCACALFIR_MASK_OR: "
+                      "i_mcaChip=0x%08x", i_mcaChip->getHuid() );
+        }
+    }
+
     return SUCCESS;
 
     #undef PRDF_FUNC
