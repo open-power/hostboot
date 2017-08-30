@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_stop_gpe_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
+lib$(PROCEDURE)_DEPLIBS+=p9_eq_clear_atomic_lock
 $(call BUILD_PROCEDURE)
