@@ -418,7 +418,7 @@ fapi2::ReturnCode restore_repairs_helper<fapi2::TARGET_TYPE_DIMM, MAX_RANK_PER_D
         repair_state_machine<fapi2::TARGET_TYPE_DIMM> l_machine;
 
         // loop through bytes
-        for (uint64_t l_byte = 0; l_byte < (MAX_DQ_NIBBLES_X4 / NIBBLES_PER_BYTE); ++l_byte)
+        for (uint64_t l_byte = 0; l_byte < (MAX_DQ_NIBBLES / NIBBLES_PER_BYTE); ++l_byte)
         {
             for (size_t l_nibble = 0; l_nibble < NIBBLES_PER_BYTE; ++l_nibble)
             {
