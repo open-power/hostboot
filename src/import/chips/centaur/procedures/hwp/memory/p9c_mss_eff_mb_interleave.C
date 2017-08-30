@@ -97,7 +97,7 @@ extern "C" {
         uint8_t l_mba = 0;
         uint8_t l_cur_mba_port = 0;
         uint8_t l_cur_mba_dimm = 0;
-        uint8_t l_side, l_port, l_slot = 0;
+        uint8_t l_side = 0, l_port = 0, l_slot = 0;
         uint8_t l_hadadeconfig[MAX_MBA_PER_CEN] = {0};
         uint8_t l_mss_derived_mba_cacheline_interleave_mode = 0;
         uint8_t l_mss_mba_addr_interleave_bit = 0;
@@ -126,30 +126,31 @@ extern "C" {
 
             const auto l_mba_chiplets = i_cen_target.getChildren<fapi2::TARGET_TYPE_MBA>();
 
+            for(const auto& mba_i : l_mba_chiplets)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, mba_i,  l_mba));
+                l_target_dimm_array[l_mba] = mba_i.getChildren<fapi2::TARGET_TYPE_DIMM>();
+
+                for (const auto& l_dimm : l_target_dimm_array[l_mba])
+                {
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, l_dimm, l_cur_mba_port));
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm, l_cur_mba_dimm));
+                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_SIZE, mba_i,  l_eff_dimm_size));
+
+                    FAPI_INF("Loading up information about dimm for mba %d port %d dimm %d", l_mba, l_cur_mba_port, l_cur_mba_dimm);
+                    FAPI_INF("DIMM size is eff_dimm_size[%d][%d] = %d", l_cur_mba_port, l_cur_mba_dimm,
+                             l_eff_dimm_size[l_cur_mba_port][l_cur_mba_dimm]);
+
+                    FAPI_TRY(l_dimm_array[l_mba][l_cur_mba_port][l_cur_mba_dimm].load(l_dimm,
+                             l_eff_dimm_size[l_cur_mba_port][l_cur_mba_dimm]));
+                } // Each DIMM off this MBA
+            } // Each MBA
+
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_STRICT_MBA_PLUG_RULE_CHECKING, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                    l_attr_mrw_strict_mba_plug_rule_checking));
 
             if(l_attr_mrw_strict_mba_plug_rule_checking == fapi2::ENUM_ATTR_CEN_MRW_STRICT_MBA_PLUG_RULE_CHECKING_TRUE)
             {
-                for(const auto& mba_i : l_mba_chiplets)
-                {
-                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, mba_i,  l_mba));
-                    l_target_dimm_array[l_mba] = mba_i.getChildren<fapi2::TARGET_TYPE_DIMM>();
-
-                    for (const auto& l_dimm : l_target_dimm_array[l_mba])
-                    {
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_PORT, l_dimm, l_cur_mba_port));
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MBA_DIMM, l_dimm, l_cur_mba_dimm));
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_SIZE, mba_i,  l_eff_dimm_size));
-
-                        FAPI_INF("Loading up information about dimm for mba %d port %d dimm %d", l_mba, l_cur_mba_port, l_cur_mba_dimm);
-                        FAPI_INF("DIMM size is eff_dimm_size[%d][%d] = %d", l_cur_mba_port, l_cur_mba_dimm,
-                                 l_eff_dimm_size[l_cur_mba_port][l_cur_mba_dimm]);
-
-                        FAPI_TRY(l_dimm_array[l_mba][l_cur_mba_port][l_cur_mba_dimm].load(l_dimm,
-                                 l_eff_dimm_size[l_cur_mba_port][l_cur_mba_dimm]));
-                    } // Each DIMM off this MBA
-                } // Each MBA
 
                 // - Logical DIMMs are considered to be identical if they have the following attributes in common: Module Type (RDIMM or LRDIMM),
                 //   Architecture (DDR3 vs DDR4), Device Density, Number of Ranks, Device Width, Module Width, and Thermal Sensor.
