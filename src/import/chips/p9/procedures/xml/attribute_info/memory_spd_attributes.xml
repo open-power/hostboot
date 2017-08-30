@@ -658,4 +658,35 @@
         <array>2 2</array>
         <mssAccessorName>eff_register_rev</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_PACKAGE_RANK_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Package Rank Map
+          Decodes SPD Byte 60 - 77 (Bits 7~6)
+          creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2 18</array>
+        <mssAccessorName>eff_package_rank_map</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_EFF_NIBBLE_MAP</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+          Nibble Map
+          Decodes SPD Byte 60 - 77 (Bits 5~0)
+          creator: mss_eff_cnfg
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <array>2 2 18</array>
+        <mssAccessorName>eff_nibble_map</mssAccessorName>
+    </attribute>
+
 </attributes>
