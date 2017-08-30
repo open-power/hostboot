@@ -69,13 +69,17 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     fapi2::ReturnCode l_rc;
     std::vector< std::shared_ptr<mss::spd::decoder> > l_factory_caches;
+
     // Caches
-    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches), "Error from p9_mss_eff_config");
+    FAPI_TRY( mss::spd::populate_decoder_caches(i_target, l_factory_caches),
+              "Failed populate_decoder_caches for %s", mss::c_str(i_target));
 
     // Need to check dead load before we get the VPD.
     // MR and MT VPD depends on DIMM ranks and freaks out if it receives 0 ranks from DIMM 0 and 1 or more ranks for DIMM 1
-    FAPI_TRY( mss::plug_rule::check_dead_load (i_target), "Error from p9_mss_eff_config" );
-    FAPI_TRY( mss::plug_rule::empty_slot_zero (i_target), "Error from p9_mss_eff_config" );
+    FAPI_TRY( mss::plug_rule::check_dead_load(i_target),
+              "Failed check_dead_load for %s", mss::c_str(i_target) );
+    FAPI_TRY( mss::plug_rule::empty_slot_zero(i_target),
+              "Failed empty_slot_zero for %s", mss::c_str(i_target));
 
     // We need to decode the VPD. We don't do this in the ctor as we need
     // the rank information and for that we need the SPD caches (which we get when we populate the cache.)
@@ -91,138 +95,267 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
 
     for( const auto& l_cache : l_factory_caches )
     {
+        const auto l_dimm = l_cache->iv_target;
+
         std::shared_ptr<mss::eff_dimm> l_eff_dimm;
+        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm),
+                  "Failed eff_dimm_factory for %s",  mss::c_str(l_dimm));
 
-        FAPI_TRY( mss::eff_dimm::eff_dimm_factory( l_cache, l_eff_dimm), "Error from p9_mss_eff_config");
-        FAPI_INF("%s Running eff_config", mss::c_str(l_cache->iv_target) );
+        FAPI_INF("Running eff_config on %s", mss::c_str(l_dimm) );
 
-        FAPI_TRY( l_eff_dimm->rcd_mfg_id(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->register_type(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->register_rev(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_mfg_id(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_width(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_density(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->ranks_per_dimm(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->prim_die_count(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->primary_stack_type(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_size(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trefi(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trfc(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trfc_dlr(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->rcd_mirror_mode(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_bank_bits(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_row_bits(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_dqs_time(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_tccd_l(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc00(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc01(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc02(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc03(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc04(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc05(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc06_07(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc08(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc09(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0a(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0b(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0c(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0d(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0e(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc0f(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc1x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc2x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc3x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc4x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc5x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc6x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc7x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc8x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rc9x(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rcax(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_rcbx(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_twr(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->read_burst_type(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_tm(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_cwl(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_lpasr(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dll_enable(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dll_reset(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->write_level_enable(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->output_buffer(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->vref_dq_train_value(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->vref_dq_train_range(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->vref_dq_train_enable(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->ca_parity_latency(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->ca_parity_error_status(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->ca_parity(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->crc_error_clear(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->odt_input_buffer(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->post_package_repair(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->read_preamble_train(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->read_preamble(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->write_preamble(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->self_refresh_abort(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->cs_to_cmd_addr_latency(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->internal_vref_monitor(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->max_powerdown_mode(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->mpr_read_format(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->temp_readout(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->crc_wr_latency(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->per_dram_addressability(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->geardown_mode(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->mpr_page(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->mpr_mode(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->write_crc(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->zqcal_interval(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->memcal_interval(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trp(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trcd(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trc(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_twtr_l(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_twtr_s(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trrd_s(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trrd_l(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trrd_dlr(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_tfaw(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_tfaw_dlr(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_tras(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_trtp(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->read_dbi(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->write_dbi(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->additive_latency(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->data_mask(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc00(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc01(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc02(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc03(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc04(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc05(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc07(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc08(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc09(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0a(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0b(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0c(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0d(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0e(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dimm_bc0f(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_rtt_nom (), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_rtt_wr  (), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->dram_rtt_park(), "Error from p9_mss_eff_config");
-        FAPI_TRY(  l_eff_dimm->phy_seq_refresh(), "Error from p9_mss_eff_config");
+        FAPI_TRY( l_eff_dimm->rcd_mfg_id(),
+                  "Failed rcd_mfg_id for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->register_type(),
+                  "Failed register_type for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->register_rev(),
+                  "Failed register_rev for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_mfg_id(),
+                  "Failed dram_mfg_id for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_width(),
+                  "Failed dram_width for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_density(),
+                  "Failed dram_density for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->ranks_per_dimm(),
+                  "Failed ranks_per_dimm for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->prim_die_count(),
+                  "Failed prim_die_count for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->primary_stack_type(),
+                  "Failed primary_stack_type for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_size(),
+                  "Failed dimm_size for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trefi(),
+                  "Failed dram_trefi for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trfc(),
+                  "Failed dram_trfc for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trfc_dlr(),
+                  "Failed dram_trfc_dlr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->rcd_mirror_mode(),
+                  "Failed rcd_mirror_mode for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_bank_bits(),
+                  "Failed dram_bank_bits for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_row_bits(),
+                  "Failed dram_row_bits for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_dqs_time(),
+                  "Failed dram_dqs_time for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_tccd_l(),
+                  "Failed dram_tccd_l for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc00(),
+                  "Failed dimm_rc00 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc01(),
+                  "Failed dimm_rc01 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc02(),
+                  "Failed dimm_rc02 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc03(),
+                  "Failed dimm_rc03 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc04(),
+                  "Failed dimm_rc04 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc05(),
+                  "Failed dimm_rc05 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc06_07(),
+                  "Failed dimm_rc06_07 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc08(),
+                  "Failed dimm_rc08 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc09(),
+                  "Failed dimm_rc09 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0a(),
+                  "Failed dimm_rc0a for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0b(),
+                  "Failed dimm_rc0b for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0c(),
+                  "Failed dimm_rc0c for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0d(),
+                  "Failed dimm_rc0d for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0e(),
+                  "Failed dimm_rc0e for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc0f(),
+                  "Failed dimm_rc0f for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc1x(),
+                  "Failed dimm_rc1x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc2x(),
+                  "Failed dimm_rc2x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc3x(),
+                  "Failed dimm_rc3x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc4x(),
+                  "Failed dimm_rc4x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc5x(),
+                  "Failed dimm_rc5x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc6x(),
+                  "Failed dimm_rc6x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc7x(),
+                  "Failed dimm_rc7x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc8x(),
+                  "Failed dimm_rc8x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rc9x(),
+                  "Failed dimm_rc9x for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rcax(),
+                  "Failed dimm_rcax for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_rcbx(),
+                  "Failed dimm_rcbx for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_twr(),
+                  "Failed dram_twr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->read_burst_type(),
+                  "Failed read_burst_type for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_tm(),
+                  "Failed dram_tm for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_cwl(),
+                  "Failed dram_cwl for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_lpasr(),
+                  "Failed dram_lpasr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dll_enable(),
+                  "Failed dll_enable for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dll_reset(),
+                  "Failed dll_reset for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->write_level_enable(),
+                  "Failed write_level_enable for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->output_buffer(),
+                  "Failed output_buffer for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_value(),
+                  "Failed vref_dq_train_value for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_range(),
+                  "Failed vref_dq_train_range for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_enable(),
+                  "Failed vref_dq_train_enable for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->ca_parity_latency(),
+                  "Failed ca_parity_latency for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->ca_parity_error_status(),
+                  "Failed ca_parity_error_status for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->ca_parity(),
+                  "Failed ca_parity for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->crc_error_clear(),
+                  "Failed crc_error_clear for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->odt_input_buffer(),
+                  "Failed odt_input_buffer for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->post_package_repair(),
+                  "Failed post_package_repair for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->read_preamble_train(),
+                  "Failed read_preamble_train for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->read_preamble(),
+                  "Failed read_preamble for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->write_preamble(),
+                  "Failed write_preamble for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->self_refresh_abort(),
+                  "Failed self_refresh_abort for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->cs_to_cmd_addr_latency(),
+                  "Failed cs_to_cmd_addr_latency for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->internal_vref_monitor(),
+                  "Failed internal_vref_monitor for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->max_powerdown_mode(),
+                  "Failed max_powerdown_mode for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->mpr_read_format(),
+                  "Failed mpr_read_format for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->temp_readout(),
+                  "Failed temp_readout for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->crc_wr_latency(),
+                  "Failed crc_wr_latency for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->per_dram_addressability(),
+                  "Failed per_dram_addressability for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->geardown_mode(),
+                  "Failed geardown_mode for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->mpr_page(),
+                  "Failed mpr_page for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->mpr_mode(),
+                  "Failed mpr_mode for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->write_crc(),
+                  "Failed write_crc for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->zqcal_interval(),
+                  "Failed zqcal_interval for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->memcal_interval(),
+                  "Failed memcal_interval for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trp(),
+                  "Failed dram_trp for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trcd(),
+                  "Failed dram_trcd for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trc(),
+                  "Failed dram_trc for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_twtr_l(),
+                  "Failed dram_twtr_l for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_twtr_s(),
+                  "Failed dram_twtr_s for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trrd_s(),
+                  "Failed dram_trrd_s for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trrd_l(),
+                  "Failed dram_trrd_l for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trrd_dlr(),
+                  "Failed dram_trrd_dlr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_tfaw(),
+                  "Failed dram_tfaw for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_tfaw_dlr(),
+                  "Failed dram_tfaw_dlr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_tras(),
+                  "Failed dram_tras for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_trtp(),
+                  "Failed dram_trtp for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->read_dbi(),
+                  "Failed read_dbi for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->write_dbi(),
+                  "Failed write_dbi for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->additive_latency(),
+                  "Failed additive_latency for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->data_mask(),
+                  "Failed data_mask for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc00(),
+                  "Failed dimm_bc00 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc01(),
+                  "Failed dimm_bc01 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc02(),
+                  "Failed dimm_bc02 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc03(),
+                  "Failed dimm_bc03 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc04(),
+                  "Failed dimm_bc04 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc05(),
+                  "Failed dimm_bc05 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc07(),
+                  "Failed dimm_bc07 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc08(),
+                  "Failed dimm_bc08 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc09(),
+                  "Failed dimm_bc09 for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0a(),
+                  "Failed dimm_bc0a for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0b(),
+                  "Failed dimm_bc0b for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0c(),
+                  "Failed dimm_bc0c for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0d(),
+                  "Failed dimm_bc0d for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0e(),
+                  "Failed dimm_bc0e for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dimm_bc0f(),
+                  "Failed dimm_bc0f for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_rtt_nom (),
+                  "Failed dram_rtt_nom for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_rtt_wr  (),
+                  "Failed dram_rtt_wr for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->dram_rtt_park(),
+                  "Failed dram_rtt_park for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->phy_seq_refresh(),
+                   "Failed phy_seq_refresh for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->package_rank_map(),
+                   "Failed package_rank_map for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->nibble_map(),
+                   "Failed nibble_map for %s", mss::c_str(l_dimm) );
+        FAPI_TRY(  l_eff_dimm->wr_crc(),
+                   "Failed wr_crc for %s", mss::c_str(l_dimm) );
 
         // Sets up the calibration steps
-        FAPI_TRY( l_eff_dimm->cal_step_enable(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->rdvref_enable_bit(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->training_adv_pattern(), "Error from p9_mss_eff_config");
-        FAPI_TRY( l_eff_dimm->training_adv_backup_pattern(), "Error from p9_mss_eff_config");
+        FAPI_TRY( l_eff_dimm->cal_step_enable(),
+                  "Failed cal_step_enable for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->rdvref_enable_bit(),
+                  "Failed rdvref_enable_bit for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->training_adv_pattern(),
+                  "Failed training_adv_pattern for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->training_adv_backup_pattern(),
+                  "Failed training_adv_backup_pattern for %s", mss::c_str(l_dimm) );
 
         //Let's do some checking
-        FAPI_TRY( mss::check::temp_refresh_mode(), "Error from p9_mss_eff_config");
+        FAPI_TRY( mss::check::temp_refresh_mode(),
+                  "Failed temp_refresh_mode for %s", mss::c_str(l_dimm) );
     }// dimm
 
     // Check plug rules. We check the MCS, and this will iterate down to children as needed.
-    FAPI_TRY( mss::plug_rule::enforce_plug_rules(i_target), "Error from p9_mss_eff_config");
+    FAPI_TRY( mss::plug_rule::enforce_plug_rules(i_target),
+              "Failed enforce_plug_rules for %s", mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
