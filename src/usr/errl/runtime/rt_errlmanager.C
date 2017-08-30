@@ -172,23 +172,76 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                   INFO_MRK"Send msg to FSP for errlogId [0x%08x]",
                   io_err->plid() );
 
-        uint32_t l_msgSize = io_err->flattenedSize();
-        uint8_t * temp_buff = new uint8_t [l_msgSize ];
-        io_err->flatten ( temp_buff, l_msgSize );
-
-        if(g_hostInterfaces && g_hostInterfaces->sendErrorLog)
+        if(g_hostInterfaces)
         {
-            int rc = g_hostInterfaces->sendErrorLog(io_err->plid(),
-                                                    l_msgSize,
-                                                    temp_buff);
+            uint32_t l_msgSize = io_err->flattenedSize();
+            if (g_hostInterfaces->sendErrorLog)
+            {
+                uint8_t * temp_buff = new uint8_t [l_msgSize ];
+                io_err->flatten ( temp_buff, l_msgSize );
 
-            if(rc)
+                size_t rc = g_hostInterfaces->sendErrorLog(io_err->plid(),
+                                                           l_msgSize,
+                                                           temp_buff);
+
+                if(rc)
+                {
+                    TRACFCOMP(g_trac_errl, ERR_MRK
+                              "Failed sending error log to FSP via "
+                              "sendErrorLog. rc: %d. plid: 0x%08x",
+                              rc,
+                              io_err->plid() );
+                }
+
+               delete [] temp_buff;
+            }
+            else if (g_hostInterfaces->firmware_request)
+            {
+                // Get an accurate size of memory actually
+                // needed to transport the data
+                size_t l_req_fw_msg_size =
+                              hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                              sizeof(hostInterfaces::hbrt_fw_msg::error_log) +
+                              l_msgSize;
+
+                // Create the firmware_request structure
+                // to carry the error log data
+                hostInterfaces::hbrt_fw_msg *l_req_fw_msg =
+                      (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
+
+                memset(l_req_fw_msg, 0, l_req_fw_msg_size);
+
+                // Populate the firmware_request structure with given data
+                l_req_fw_msg->io_type =
+                                hostInterfaces::HBRT_FW_MSG_TYPE_ERROR_LOG;
+                l_req_fw_msg->error_log.i_plid = io_err->plid();
+                l_req_fw_msg->error_log.i_errlSize = l_msgSize;
+                io_err->flatten (&(l_req_fw_msg->error_log.i_data), l_msgSize);
+
+                hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
+                uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+                size_t rc = g_hostInterfaces->
+                          firmware_request(l_req_fw_msg_size, l_req_fw_msg,
+                                          &l_resp_fw_msg_size, &l_resp_fw_msg);
+
+                if(rc)
+                {
+                    TRACFCOMP(g_trac_errl, ERR_MRK
+                              "Failed sending error log to FSP "
+                              "via firmware_request. rc: %d. plid: 0x%08x",
+                              rc,
+                              io_err->plid() );
+                }
+
+                free(l_req_fw_msg);
+            }
+            else
             {
                 TRACFCOMP(g_trac_errl, ERR_MRK
-                          "Failed sending error log to FSP. rc: %d. "
-                          "plid: 0x%08x",
-                          rc,
-                          io_err->plid() );
+                          "Host interfaces sendErrorLog and firmware_request "
+                          "not initialized, error log not sent. plid: 0x%08x",
+                          io_err->plid()
+                          );
             }
         }
         else
@@ -199,7 +252,6 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
                       io_err->plid()
                       );
         }
-        delete [] temp_buff;
 #endif
         delete io_err;
         io_err = NULL;
