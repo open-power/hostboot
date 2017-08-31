@@ -989,6 +989,16 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
 
             l_scom_buffer.insert<52, 5, 59, uint64_t>(literal_0b10000 );
             l_scom_buffer.insert<57, 5, 59, uint64_t>(literal_0b10000 );
+
+            if (l_TGT2_ATTR_CHIP_EC_FEATURE_OBUS_HW419305)
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000280409010c3full, l_scom_buffer));
         }
         {
@@ -2131,6 +2141,16 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
 
             l_scom_buffer.insert<52, 5, 59, uint64_t>(literal_0b10000 );
             l_scom_buffer.insert<57, 5, 59, uint64_t>(literal_0b10000 );
+
+            if (l_TGT2_ATTR_CHIP_EC_FEATURE_OBUS_HW419305)
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000980409010c3full, l_scom_buffer));
         }
         {
@@ -3273,6 +3293,16 @@ fapi2::ReturnCode p9_obus_scom(const fapi2::Target<fapi2::TARGET_TYPE_OBUS>& TGT
 
             l_scom_buffer.insert<52, 5, 59, uint64_t>(literal_0b10000 );
             l_scom_buffer.insert<57, 5, 59, uint64_t>(literal_0b10000 );
+
+            if (l_TGT2_ATTR_CHIP_EC_FEATURE_OBUS_HW419305)
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000c00409010c3full, l_scom_buffer));
         }
         {
