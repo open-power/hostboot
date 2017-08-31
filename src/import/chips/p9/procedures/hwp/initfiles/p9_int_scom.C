@@ -45,6 +45,7 @@ constexpr uint64_t literal_0x0008002000002002 = 0x0008002000002002;
 constexpr uint64_t literal_0xEF6417D2DE7DD3FD = 0xEF6417D2DE7DD3FD;
 constexpr uint64_t literal_0x0002000410000000 = 0x0002000410000000;
 constexpr uint64_t literal_0x7710CCC3E0000701 = 0x7710CCC3E0000701;
+constexpr uint64_t literal_0x6262220242160000 = 0x6262220242160000;
 constexpr uint64_t literal_0x5BBF = 0x5BBF;
 constexpr uint64_t literal_0x00001003000002 = 0x00001003000002;
 constexpr uint64_t literal_0xFFFFEFFCFFFFFC = 0xFFFFEFFCFFFFFC;
@@ -215,6 +216,12 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0x7710CCC3E0000701 );
                 FAPI_TRY(fapi2::putScom(TGT0, 0x5013179ull, l_scom_buffer));
             }
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x501320eull, l_scom_buffer ));
+
+            l_scom_buffer.insert<0, 48, 0, uint64_t>(literal_0x6262220242160000 );
+            FAPI_TRY(fapi2::putScom(TGT0, 0x501320eull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5013214ull, l_scom_buffer ));
