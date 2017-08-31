@@ -46,6 +46,7 @@
 #include <lib/phy/adr32s.H>
 #include <lib/phy/adr.H>
 #include <lib/phy/seq.H>
+#include <lib/fir/check.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
@@ -540,7 +541,11 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_DI
 
     if ((l_rank_pairs == 0) || (l_errors == 0))
     {
-        FAPI_INF("Initial cal - no errors reported %s", mss::c_str(l_mca));
+        // If we got here, we check the phy firs to see if the engine had a problem
+        // If there's no FIRs lit up, we return SUCCESS
+        // If there's a FIR, we return a general error that will trigger a BAD_DQ check by the calling function
+        FAPI_TRY( mss::check::during_draminit_training(i_target) );
+        FAPI_INF("Initial cal success %s", mss::c_str(l_mca));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -683,6 +688,10 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_DI
                );
 
 fapi_try_exit:
+    FAPI_INF("Initial cal - %s %s",
+             (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported"),
+             mss::c_str(l_mca));
+
     return fapi2::current_err;
 }
 
@@ -750,8 +759,9 @@ fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE
             }
         }
 
-        FAPI_ERR("Seeing calibration errors for p9_mss_draminit_training %s: Keep running? %s",
+        FAPI_ERR("Seeing calibration errors for p9_mss_draminit_training %s rp %d: Keep running? %s",
                  mss::c_str(l_dimm),
+                 i_rp,
                  (l_rc == fapi2::FAPI2_RC_SUCCESS) ? "Yes" : "no");
 
         // Let's update the attribute with the failing DQ bits since we had a training error
