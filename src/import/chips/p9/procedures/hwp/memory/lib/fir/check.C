@@ -181,6 +181,52 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Check FIR bits during draminit training
+/// @param[in] i_target the dimm that was trained
+/// @note We check for fir errors after training each rank
+/// to see if there was a problem with the engine.
+/// FFDC errors returned from this will be handled similar to other training errors:
+/// Logged as informational if it affects less than a nibble and a bit.
+/// Reported if it affects more than that
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    // Creating a mask to check for FIR errors.
+    // These are DP16 parity errors that would be triggered in case of a general PHY error
+    // During draminit_training, this would mean a training error dealing with the PHY
+    fapi2::buffer<uint64_t> l_phyfir_mask;
+    l_phyfir_mask.setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_0>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_1>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_3>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_4>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_5>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_6>()
+    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_7>();
+
+    fapi2::buffer<uint64_t> l_phyfir_data;
+    fapi2::buffer<uint64_t> l_phyfir_masked;
+
+    FAPI_TRY( mss::getScom(l_mca, MCA_IOM_PHY0_DDRPHY_FIR_REG, l_phyfir_data) );
+
+    l_phyfir_masked = l_phyfir_data & l_phyfir_mask;
+
+    FAPI_ASSERT( l_phyfir_masked == 0,
+                 fapi2::MSS_DRAMINIT_TRAINING_PORT_FIR()
+                 .set_PHY_FIR(l_phyfir_masked)
+                 .set_DIMM_TARGET(i_target)
+                 .set_MCA_TARGET(l_mca),
+                 "Initial CAL failed: Reporting FIR bits set for %s ( phy: 0x%016lx",
+                 mss::c_str(i_target), l_phyfir_masked);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 }
 }

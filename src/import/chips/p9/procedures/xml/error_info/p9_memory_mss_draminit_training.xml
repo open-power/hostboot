@@ -98,6 +98,46 @@
 </registerFfdc>
 
 <hwpError>
+  <rc>RC_MSS_DRAMINIT_TRAINING_PORT_FIR</rc>
+  <description>
+      A PHY fir was lit up due to draminit training.
+      There could be a problem with the training engine
+      Checking fir bits 1-7
+  </description>
+  <ffdc>PHY_FIR</ffdc>
+  <ffdc>DIMM_TARGET</ffdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_INFO</id>
+    <target>MCA_TARGET</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_FAILURE_DISABLE_REGS</id>
+    <target>MCA_TARGET</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <collectRegisterFfdc>
+    <id>REG_FFDC_MSS_DRAMINIT_TRAINING_ERROR_STATUS</id>
+    <target>MCA_TARGET</target>
+    <targetType>TARGET_TYPE_MCA</targetType>
+  </collectRegisterFfdc>
+  <callout>
+    <target>DIMM_TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+ <deconfigure>
+    <target>DIMM_TARGET</target>
+  </deconfigure>
+  <gard>
+    <target>DIMM_TARGET</target>
+  </gard>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>MEDIUM</priority>
+  </callout>
+</hwpError>
+
+<hwpError>
   <rc>RC_MSS_DRAMINIT_TRAINING_MULTIPLE_ERRORS</rc>
   <description>Multiple training steps failed for a given position within this calibration.</description>
   <ffdc>FAILED_STEPS</ffdc>

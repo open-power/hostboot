@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,19 @@ namespace check
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode during_phy_reset( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Check FIR bits during draminit training
+/// @param[in] i_target the dimm that was trained
+/// @note We check for fir errors after training each rank
+/// to see if there was a problem with the engine
+/// FFDC errors return from this will be handle similar to other training errors
+/// Logged if it affects less than a nibble and a bit.
+/// Reported if it affects more than that
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode during_draminit_training( const fapi2::Target<T>& i_target );
 
 }
 }
