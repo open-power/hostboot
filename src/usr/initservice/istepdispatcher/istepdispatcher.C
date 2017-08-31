@@ -289,7 +289,6 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         }
 #endif
 
-
         if(iv_istepMode)
         {
             // In IStep mode (receive messages to run individual steps)
@@ -341,6 +340,11 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
                 tid_t msgHndlrTaskTid = task_create(startMsgHndlrThread, this);
                 assert(msgHndlrTaskTid > 0);
             }
+
+            //Update Targeting in the Event Attribute Overrides apply to that logic
+            //    This will refresh cached values for attrs like
+            //    ATTR_HIDDEN_ERRLOGS_ENABLE
+            ERRORLOG::ErrlManager::errlResourceReady(ERRORLOG::TARG);
 
             err = executeAllISteps();
             if(err)

@@ -608,7 +608,6 @@ void ErrlManager::errlogMsgHndlr ()
                 // Default Message
                 TRACFCOMP( g_trac_errl, ERR_MRK "Unexpected message type 0x%08x",
                                                                   theMsg->type );
-
                 msg_free(theMsg);
                 break;
         } // switch
