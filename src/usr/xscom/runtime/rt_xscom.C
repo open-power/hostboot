@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <runtime/interface.h>
 #include <errl/errludtarget.H>
 #include <runtime/rt_targeting.H>
+#include <xscom/piberror.H>
 
 // Trace definition
 trace_desc_t* g_trac_xscom = NULL;
@@ -211,12 +212,58 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_ioType,
                                             rc,
                                             i_scomAddr);
 
-            // TODO - RTC 86782 need to know what kind of errors Sapphire can
-            // return - could effect callout.
-            l_err->addHwCallout(i_target,
-                                HWAS::SRCI_PRIORITY_LOW,
-                                HWAS::NO_DECONFIG,
-                                HWAS::GARD_NULL);
+            // translate the rc into a pib error when possible
+            uint32_t l_piberr = PIB::PIB_NO_ERROR;
+
+            if( TARGETING::is_sapphire_load() )
+            {
+                // values taken from opal-api.h
+                switch( rc )
+                {
+                    case(-12 /*OPAL_XSCOM_BUSY*/):
+                        l_piberr = PIB::PIB_RESOURCE_OCCUPIED;
+                        break;
+                    case(-14 /*OPAL_XSCOM_CHIPLET_OFF*/):
+                        l_piberr = PIB::PIB_CHIPLET_OFFLINE;
+                        break;
+                    case(-25 /*OPAL_XSCOM_PARTIAL_GOOD*/):
+                        l_piberr = PIB::PIB_PARTIAL_GOOD;
+                        break;
+                    case(-26 /*OPAL_XSCOM_ADDR_ERROR*/):
+                        l_piberr = PIB::PIB_INVALID_ADDRESS;
+                        break;
+                    case(-27 /*OPAL_XSCOM_CLOCK_ERROR*/):
+                        l_piberr = PIB::PIB_CLOCK_ERROR;
+                        break;
+                    case(-28 /*OPAL_XSCOM_PARITY_ERROR*/):
+                        l_piberr = PIB::PIB_PARITY_ERROR;
+                        break;
+                    case(-29 /*OPAL_XSCOM_TIMEOUT*/):
+                        l_piberr = PIB::PIB_TIMEOUT;
+                        break;
+                }
+            }
+            else if( TARGETING::is_phyp_load() )
+            {
+                //@todo-RTC:86782-Add PHYP support
+                // default to OFFLINE for now to trigger
+                // the multicast workaround in scom.C
+                l_piberr = PIB::PIB_CHIPLET_OFFLINE;
+            }
+            else
+            {
+                // our testcases respond back with the
+                //  pib error directly
+                if( rc > 0 )
+                {
+                    l_piberr = rc;
+                }
+            }
+
+            PIB::addFruCallouts(i_target,
+                                l_piberr,
+                                i_scomAddr,
+                                l_err);
 
             // Note: no trace buffer available at runtime
         }
