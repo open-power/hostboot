@@ -50,3 +50,4 @@ mk -a
 
 echo "Copying centaur and p9c action files"
 sbex -t 1032952
+sbex -t 1033805

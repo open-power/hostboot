@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,16 +22,31 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include    <errl/errlentry.H>
+#include    <stdint.h>
 
-#include    <initservice/isteps_trace.H>
+#include    <trace/interface.H>
+#include    <initservice/taskargs.H>
+#include    <errl/errlentry.H>
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
 
+#include    <initservice/isteps_trace.H>
+
+#include    <hwas/common/deconfigGard.H>
+
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
+
+//Fapi Support
+#include    <config.h>
+#include    <fapi2.H>
+#include    <fapi2/plat_hwp_invoker.H>
+#include    <util/utilmbox_scratch.H>
+
+//HWP
+#include    <p9c_mss_get_cen_ecid.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -44,8 +59,7 @@ namespace ISTEP_12
 void* call_mss_getecid (void *io_pArgs)
 {
     IStepError l_StepError;
-    /*
-    //@TODO RTC:144076-Centaur L1 HWP support
+
     errlHndl_t l_err = NULL;
     uint8_t    l_ddr_port_status = 0;
     uint8_t    l_cache_enable = 0;
@@ -73,24 +87,24 @@ void* call_mss_getecid (void *io_pArgs)
 
         // Dump current run on target
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "Running mss_get_cen_ecid HWP on "
+                "Running p9c_mss_get_cen_ecid HWP on "
                 "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
 
-        // Cast to a FAPI type of target.
-        const fapi::Target l_fapi_centaur( TARGET_TYPE_MEMBUF_CHIP,
-                (const_cast<TARGETING::Target*>(l_pCentaur)) );
+        //  call the HWP with each target
+        fapi2::Target <fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_centaur
+                (l_pCentaur);
 
-        //  call the HWP with each fapi::Target
+        //  call the HWP with each fapi2::Target
         //  Note:  This HWP does not actually return the entire ECID data.  It
         //  updates the attribute ATTR_MSS_ECID and returns the DDR port status
         //  which is a portion of the ECID data.
-        FAPI_INVOKE_HWP(l_err, mss_get_cen_ecid,
+        FAPI_INVOKE_HWP(l_err, p9c_mss_get_cen_ecid,
                         l_fapi_centaur, l_ddr_port_status,
                         l_cache_enable, l_centaur_sub_revision, l_ecidUser);
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR 0x%.8X: mss_get_cen_ecid HWP returns error",
+                      "ERROR 0x%.8X: p9c_mss_get_cen_ecid HWP returns error",
                       l_err->reasonCode());
 
             // capture the target data in the elog
@@ -167,56 +181,59 @@ void* call_mss_getecid (void *io_pArgs)
             }
 
             // mss_get_cen_ecid returns if the L4 cache is enabled. This can be
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_OFF
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_ON
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_A
-            // - fapi::ENUM_ATTR_MSS_CACHE_ENABLE_UNK_HALF_B
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_OFF
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_ON
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_HALF_A
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_HALF_B
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_UNK_OFF
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_UNK_ON
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_UNK_HALF_A
+            // - fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_UNK_HALF_B
             // The UNK values are for DD1.* Centaur chips where the fuses were
             // not blown correctly so the cache may not be in the correct state.
             //
             // Firmware does not normally support HALF enabled
-            // If ON then ATTR_MSS_CACHE_ENABLE is set to ON
-            // Else ATTR_MSS_CACHE_ENABLE is set to OFF and the L4 Target is
+            // If ON then ATTR_CEN_MSS_CACHE_ENABLE is set to ON
+            // Else ATTR_CEN_MSS_CACHE_ENABLE is set to OFF and the L4 Target is
             //   deconfigured
             //
-            // However, an engineer can override ATTR_MSS_CACHE_ENABLE. If they
+            // However, an engineer can override ATTR_CEN_MSS_CACHE_ENABLE. If they
             // override it to HALF_A or HALF_B then
-            // - ATTR_MSS_CACHE_ENABLE is set to HALF_X
+            // - ATTR_CEN_MSS_CACHE_ENABLE is set to HALF_X
             // - The L4 Target is not deconfigured
-            if (l_cache_enable != fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON)
+            if (l_cache_enable != fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_ON)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                     "call_mss_getecid: mss_get_cen_ecid returned L4 not-on (0x%02x)",
                     l_cache_enable);
-                l_cache_enable = fapi::ENUM_ATTR_MSS_CACHE_ENABLE_OFF;
+                l_cache_enable = fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_OFF;
             }
 
-            // Set the ATTR_MSS_CACHE_ENABLE attribute
-            l_pCentaur->setAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>(
-                l_cache_enable);
+            // ATTR_CEN_MSS_CACHE_ENABLE is not set as writeable in src/import/chips/centaur/procedures/xml/attribute_info/memory_attributes.xml
+            // Should we remove below code?
+            // Set the ATTR_CEN_MSS_CACHE_ENABLE attribute
+            //l_pCentaur->setAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>(
+            //    l_cache_enable);
 
-            // Read the ATTR_MSS_CACHE_ENABLE back to pick up any override
+            // Read the ATTR_CEN_MSS_CACHE_ENABLE back to pick up any override
             uint8_t l_cache_enable_attr =
-                l_pCentaur->getAttr<TARGETING::ATTR_MSS_CACHE_ENABLE>();
+                l_pCentaur->getAttr<TARGETING::ATTR_CEN_MSS_CACHE_ENABLE>();
 
             if (l_cache_enable != l_cache_enable_attr)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_mss_getecid: ATTR_MSS_CACHE_ENABLE override (0x%02x)",
+                    "call_mss_getecid: ATTR_CEN_MSS_CACHE_ENABLE override (0x%02x)",
                     l_cache_enable_attr);
             }
 
+
             // At this point HALF_A/HALF_B are only possible due to override
             if ((l_cache_enable_attr !=
-                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_ON) &&
+                 fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_ON) &&
                 (l_cache_enable_attr !=
-                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_A) &&
+                 fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_HALF_A) &&
                 (l_cache_enable_attr !=
-                 fapi::ENUM_ATTR_MSS_CACHE_ENABLE_HALF_B))
+                 fapi2::ENUM_ATTR_CEN_MSS_CACHE_ENABLE_HALF_B))
             {
                 // Deconfigure the L4 Cache Targets (there should be 1)
                 TargetHandleList l_list;
@@ -265,13 +282,8 @@ void* call_mss_getecid (void *io_pArgs)
                    "SUCCESS :  mss_get_cen_ecid HWP( )" );
     }
 
-    #ifdef CONFIG_BMC_IPMI
-        // Gather + Send the IPMI Fru Inventory data to the BMC
-        IPMIFRUINV::setData(true);
-    #endif
-
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_getecid exit" );
-*/
+
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }

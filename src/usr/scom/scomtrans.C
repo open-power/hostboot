@@ -69,6 +69,11 @@ bool g_wakeupInProgress = false;
 
 DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                     DeviceFW::SCOM,
+                    TARGETING::TYPE_MC,
+                    startScomProcess);
+
+DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
+                    DeviceFW::SCOM,
                     TARGETING::TYPE_EX,
                     startScomProcess);
 
@@ -910,6 +915,11 @@ bool getChipUnitP9 (TARGETING::TYPE i_type,
         case(TARGETING::TYPE_CAPP) :
         {
             o_chipUnit = PU_CAPP_CHIPUNIT;
+            break;
+        }
+	case(TARGETING::TYPE_MC) :
+        {
+            o_chipUnit = PU_MC_CHIPUNIT;
             break;
         }
         default:

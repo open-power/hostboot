@@ -755,8 +755,10 @@ inline std::vector<Target<K_CHILD, V> >
     // Cumulus Memory
     // valid children for MC
     // MC -> MI
+    // MC -> DMI
     static_assert(!((T_SELF == fapi2::TARGET_TYPE_MC) &&
-                    (K_CHILD != fapi2::TARGET_TYPE_MI)),
+                    (K_CHILD != fapi2::TARGET_TYPE_MI) &&
+                    (K_CHILD != fapi2::TARGET_TYPE_DMI)),
                   "improper child of fapi2::TARGET_TYPE_MC");
 
     // valid children for MI
