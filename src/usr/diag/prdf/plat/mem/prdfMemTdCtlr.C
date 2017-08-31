@@ -67,7 +67,17 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         #else // IPL only
 
-        PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+        // TODO: RTC 179251 asserting here doesn't give us enough FFDC to debug
+        //       why we got this erroneous attention. Eventually, we will want
+        //       to add the capture data to the assert error log. Until then
+        //       exit with a bad RC and make the error log predictive.
+        // PRDF_ASSERT( isInMdiaMode() ); // MDIA must be running.
+        if ( !isInMdiaMode() )
+        {
+            PRDF_ERR( PRDF_FUNC "IPL cmd complete attn outside of MDIA" );
+            o_rc = FAIL;
+            break;
+        }
 
         // Inform MDIA the command has completed and PRD is starting analysis.
         o_rc = mdiaSendEventMsg( iv_chip->getTrgt(), MDIA::RESET_TIMER );
@@ -137,11 +147,14 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
         #ifndef __HOSTBOOT_RUNTIME // IPL only
 
-        // Tell MDIA to skip further analysis on this target.
-        uint32_t l_rc = mdiaSendEventMsg( iv_chip->getTrgt(),
-                                          MDIA::STOP_TESTING );
-        if ( SUCCESS != l_rc )
-            PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
+        if ( isInMdiaMode() )
+        {
+            // Tell MDIA to skip further analysis on this target.
+            uint32_t l_rc = mdiaSendEventMsg( iv_chip->getTrgt(),
+                                              MDIA::STOP_TESTING );
+            if ( SUCCESS != l_rc )
+                PRDF_ERR( PRDF_FUNC "mdiaSendEventMsg(STOP_TESTING) failed" );
+        }
 
         #endif
     }
