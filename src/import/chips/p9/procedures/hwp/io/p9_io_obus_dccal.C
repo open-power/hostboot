@@ -545,6 +545,98 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+/**
+ * @brief A I/O Obus Procedure that powers up the unit
+ * on every instance of the OBUS.
+ * @param[in] i_tgt         FAPI2 Target
+ * @param[in] i_lave_vector Lanve Vector
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode obus_powerup( const OBUS_TGT i_tgt, const uint32_t i_lane_vector )
+{
+    FAPI_IMP( "obus_powerup: I/O Obus Entering" );
+
+    const uint8_t GRP0  = 0;
+    const uint8_t LANES = 24;
+
+    // Power up Per-Group Registers
+    FAPI_TRY( io::rmw( OPT_RX_CLKDIST_PDWN, i_tgt, GRP0, 0, 0 ) );
+    FAPI_TRY( io::rmw( OPT_TX_CLKDIST_PDWN, i_tgt, GRP0, 0, 0 ) );
+    FAPI_TRY( io::rmw( OPT_RX_IREF_PDWN_B, i_tgt, GRP0, 0, 1 ) );
+    FAPI_TRY( io::rmw( OPT_RX_CTL_DATASM_CLKDIST_PDWN, i_tgt, GRP0, 0, 0 ) );
+
+    // Power up Per-Lane Registers
+    for( uint8_t lane = 0; lane < LANES; ++lane )
+    {
+        if( ( (0x1 << lane) & i_lane_vector ) != 0 )
+        {
+            FAPI_TRY( io::rmw( OPT_RX_LANE_ANA_PDWN, i_tgt, GRP0, lane, 0 ) );
+            FAPI_TRY( io::rmw( OPT_RX_LANE_DIG_PDWN, i_tgt, GRP0, lane, 0 ) );
+            FAPI_TRY( io::rmw( OPT_TX_LANE_PDWN    , i_tgt, GRP0, lane, 0 ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "obus_powerup: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
+
+/**
+ * @brief A I/O Set Obus Flywheel
+ * on every instance of the OBUS.
+ * @param[in] i_tgt         FAPI2 Target
+ * @param[in] i_lave_vector Lanve Vector
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode set_obus_flywheel_off( const OBUS_TGT i_tgt, const uint32_t i_lane_vector, const uint8_t i_data )
+{
+    FAPI_IMP( "set_obus_flywheel_off: I/O Obus Entering" );
+    const uint8_t GRP0  = 0;
+    const uint8_t LANES = 24;
+
+    // Power up Per-Lane Registers
+    for( uint8_t lane = 0; lane < LANES; ++lane )
+    {
+        if( ( (0x1 << lane) & i_lane_vector ) != 0 )
+        {
+            FAPI_TRY( io::rmw( OPT_RX_PR_FW_OFF, i_tgt, GRP0, lane, i_data ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "set_obus_flywheel_off: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
+
+/**
+ * @brief A I/O Set Obus Flywheel
+ * on every instance of the OBUS.
+ * @param[in] i_tgt         FAPI2 Target
+ * @param[in] i_lave_vector Lanve Vector
+ * @retval ReturnCode
+ */
+fapi2::ReturnCode set_obus_pr_edge_track_cntl( const OBUS_TGT i_tgt, const uint32_t i_lane_vector,
+        const uint8_t i_data )
+{
+    FAPI_IMP( "set_obus_edge_track_cntl: I/O Obus Entering" );
+    const uint8_t GRP0  = 0;
+    const uint8_t LANES = 24;
+
+    // Power up Per-Lane Registers
+    for( uint8_t lane = 0; lane < LANES; ++lane )
+    {
+        if( ( (0x1 << lane) & i_lane_vector ) != 0 )
+        {
+            FAPI_TRY( io::rmw( OPT_RX_PR_EDGE_TRACK_CNTL, i_tgt, GRP0, lane, i_data ) );
+        }
+    }
+
+fapi_try_exit:
+    FAPI_IMP( "set_obus_pr_edge_track_cntl: I/O Obus Exiting" );
+    return fapi2::current_err;
+}
+
+
 
 /**
  * @brief A I/O Obus Procedure that runs Rx Dccal and Tx Z Impedance calibration
@@ -563,21 +655,25 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
 
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
 
-    if( ( dccal_flags & fapi2::ENUM_ATTR_IO_OBUS_DCCAL_FLAGS_TX ) == 0 )
-    {
-        FAPI_TRY( tx_run_zcal( i_tgt ), "I/O Obus Tx Run Z-Cal Failed" );
-        FAPI_DBG( "I/O Obus Tx Zcal State Machine Successful." );
-        dccal_flags |= fapi2::ENUM_ATTR_IO_OBUS_DCCAL_FLAGS_TX;
-        FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
-    }
-    else
-    {
-        FAPI_DBG( "I/O Obus Tx Zcal State Machine Previously Ran." );
-    }
+    // Power up Clock Distribution & Lanes
+    FAPI_TRY( obus_powerup( i_tgt, i_lane_vector ) );
 
+    // Run Tx Zcal State Machine
+    FAPI_TRY( tx_run_zcal( i_tgt ), "I/O Obus Tx Run Z-Cal Failed" );
+    FAPI_DBG( "I/O Obus Tx Zcal State Machine Successful." );
+
+    // Set that the state machine successfully finished.
+    dccal_flags |= fapi2::ENUM_ATTR_IO_OBUS_DCCAL_FLAGS_TX;
+    FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
+
+    // Apply Tx FFE Values
     FAPI_TRY( tx_set_zcal_ffe( i_tgt ), "I/O Obus Tx Set Z-Cal FFE Failed" );
     FAPI_DBG( "I/O Obus Tx Zcal Successful." );
 
+    // Turn Phase Rotator Fly Wheel Off
+    FAPI_TRY( set_obus_flywheel_off( i_tgt, i_lane_vector, 1 ) );
+
+    // Run Rx Dc Calibration
     FAPI_TRY( set_rx_run_dccal( i_tgt, i_lane_vector, 1 ), "Starting Rx Dccal Failed" );
     FAPI_TRY( rx_poll_dccal_done( i_tgt, i_lane_vector ), "I/O Obus Rx Dccal Poll Failed" );
     FAPI_TRY( set_rx_run_dccal( i_tgt, i_lane_vector, 0 ), "Stopping Rx Dccal Failed" );
@@ -585,6 +681,12 @@ fapi2::ReturnCode p9_io_obus_dccal( const OBUS_TGT i_tgt, const uint32_t i_lane_
     dccal_flags |= fapi2::ENUM_ATTR_IO_OBUS_DCCAL_FLAGS_RX;
     FAPI_TRY( FAPI_ATTR_SET( fapi2::ATTR_IO_OBUS_DCCAL_FLAGS, i_tgt, dccal_flags ) );
     FAPI_DBG( "I/O Obus Rx Dccal Successful." );
+
+    // Turn Phase Rotator Fly Wheel On
+    FAPI_TRY( set_obus_flywheel_off( i_tgt, i_lane_vector, 0 ) );
+    FAPI_TRY( set_obus_pr_edge_track_cntl( i_tgt, i_lane_vector, 0 ) );
+
+
 
 fapi_try_exit:
     FAPI_IMP( "p9_io_obus_dccal: I/O Obus Exiting" );
