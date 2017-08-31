@@ -65,7 +65,15 @@
 #define OPT_RX_DCCAL_DONE                                  0x800328000000003f, 49,  1 // on-die dc training complete on given lane
 #define OPT_RX_B_BANK_CONTROLS                             0x800008000000003f, 58,  6 // power down pins, 0=cml2cmos, 1=ctle, 2=dac, 3=deserializer, 4=integrator, 5=phase rotator
 #define OPT_IORESET_HARD_BUS0                              0x0000000000000020,  2,  1 // io hard reset per-bus and gcr reset
-
+#define OPT_RX_CLKDIST_PDWN                                0x800810000000003f, 48,  3
+#define OPT_TX_CLKDIST_PDWN                                0x800C14000000003f, 48,  3
+#define OPT_RX_IREF_PDWN_B                                 0x8008C0000000003f, 54, 1
+#define OPT_RX_CTL_DATASM_CLKDIST_PDWN                     0x800B80000000003f, 60, 1
+#define OPT_RX_LANE_ANA_PDWN                               0x800008000000003f, 54, 1
+#define OPT_RX_LANE_DIG_PDWN                               0x800220000000003f, 48, 1
+#define OPT_TX_LANE_PDWN                                   0x800404000000003f, 48, 1
+#define OPT_RX_PR_FW_OFF                                   0x800228000000003f, 56, 1
+#define OPT_RX_PR_EDGE_TRACK_CNTL                          0x800248000000003f, 48, 2
 
 #define EDIP_RX_FIR_RESET                                  0x800ab0000000003f, 63,  1 // fir reset\r\n\ttoggle this field 0->1->0 to reset all rx fir related latches including the isolation and parity error latches.
 #define EDIP_TX_ZCAL_REQ                                   0x800f04000000003f, 49,  1 // impedance calibration sequence enable\r\n\t rising edge initiates calibration seqeunce and clears all status. tx_zcal_done indicates completion and valid results available(default)\r\n\t0:(disabled) inactive. must be set prior to enable. \r\n\t1:(enabled) enable.
