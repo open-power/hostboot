@@ -2402,6 +2402,13 @@ namespace SBE
                    TARGETING::get_huid(io_sbeState.target),
                    io_sbeState.seeprom_side_to_update);
 
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(SBE_COMP_NAME,
+                          "System Performing SBE Update for PROC %d, side %d",
+                        io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
+                        io_sbeState.seeprom_side_to_update);
+#endif
+
         errlHndl_t err = NULL;
         int64_t rc = 0;
 
@@ -5142,7 +5149,7 @@ errlHndl_t sbeDoReboot( void )
         else
         {
             CONSOLE::displayf(SBE_COMP_NAME, "System Rebooting To "
-                              "Perform SBE Update\n");
+                              "Complete SBE Update Process");
             CONSOLE::flush();
         }
 #endif
