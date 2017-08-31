@@ -268,7 +268,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             if( addr == 0x11223344 ||
                 addr == 0x22334455 )
             {
-                rc = 1;
+                rc = 4; //invalid address pib code
             }
 
             return rc;
