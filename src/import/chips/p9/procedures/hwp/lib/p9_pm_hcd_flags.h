@@ -241,6 +241,16 @@ enum PM_PGPE_HEADER_FLAGS
     PGPE_HEADER_FLAGS_VRATIO_MODIFIER               = 12
 };
 
+//
+//Enum for of PPM Register Bits for FW Usage
+//
+enum PM_PPM_FW_FLAGS
+{
+    CPPM_CPMMR_DISABLE_PERIODIC_CORE_QUIESCE        = 2,
+    QPPM_QCCR_IGNORE_QUAD_STOP_EXITS                = 10,
+    QPPM_QCCR_IGNORE_QUAD_STOP_ENTRIES              = 11
+};
+
 #ifndef __PPE_PLAT
 } //End p9hcd namespace
 #endif
