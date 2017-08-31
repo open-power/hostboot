@@ -936,18 +936,6 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("Cache DC Adjust Disabled      :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_CORE_PERIODIC_QUIESCE_DISABLE,
-                           FAPI_SYSTEM,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_CORE_PERIODIC_QUIESCE_DISABLE");
-
-    if( attrVal )
-    {
-        sgpeFlag |= SGPE_CORE_PERIODIC_QUIESCE_DISABLE_POS;
-    }
-
-    FAPI_DBG("Core Periodic Quiesce Disabled:   %s", attrVal ? "TRUE" : "FALSE" );
-
     // Set PGPE Header Flags from Attributes
     FAPI_DBG(" -------------------- PGPE Flags -----------------");
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PGPE_HCODE_FUNCTION_ENABLE,
