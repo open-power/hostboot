@@ -107,14 +107,9 @@ namespace fapi2
 /// If there are ever attributes with more than 4 dimensions then this function
 /// will need to be updated.
 ///
-/// @tparam K template parameter, passed in target.
 /// @param[in]  i_id          AttributeID
 /// @param[in]  i_target      Reference to fapi2::Target (can be NULL for system)
 /// @param[out] o_val         Reference to uint64_t where attribute value is set
-/// @param[in]  i_arrayIndex1 If array attribute then index1
-/// @param[in]  i_arrayIndex2 If at least 2D array attribute then index2
-/// @param[in]  i_arrayIndex3 If at least 3D array attribute then index3
-/// @param[in]  i_arrayIndex4 If at least 4D array attribute then index4
 ///
 /// @return ReturnCode. Zero if success
 ///
