@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 ///
-/// @file fapi2_sub_executor.H
+/// @file fapi2_subroutine_executor.H
 ///
 /// @brief Defines the FAPI2 Subroutine Executor Macro.
 ///
