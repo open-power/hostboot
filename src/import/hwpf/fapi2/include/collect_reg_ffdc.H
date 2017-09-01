@@ -50,7 +50,7 @@ void getAddressData(const fapi2::HwpFfdcId i_ffdcId,
 ///
 /// @brief converts value to a type to enable overloading based on values
 ///
-/// @tparam[in]  v - value to create to a unique type
+/// @tparam  v - value to create to a unique type
 ///
 /// @return  v - value.
 ///
@@ -83,8 +83,6 @@ class TargetPosition
         /// @brief Return position of either a chip or chiplet target
         ///
         /// @param[out]  o_pos - position of chip/chiplet target
-        /// @param[in]   is_chiplet - converted to type for overloading
-        ///                           to correct function call.
         ///
         /// @return fapi2::ReturnCode. FAPI_RC_SUCCESS, or failure value.
         ///
@@ -350,9 +348,10 @@ class ScomReader<TARGET_TYPE_DIMM>
 ///
 ///  collect all the data from a list of registers and return it to the caller
 ///
-/// @tparam[in]  T register data size - uint32_t or uint64_t
-/// @tparam[in]  U - reader object for specific data type
+/// @tparam      T register data size - uint32_t or uint64_t
+/// @tparam      U - reader object for specific data type
 /// @param[in]   i_addresses - vector containing either cfam or scom addresses
+/// @param[in]   i_reader    - input reader object
 /// @param[in]   i_offset    - optional offset to add to the address values
 ///                            passed in the vector of addresses
 /// @param[out]  o_pData - pointer to the data destination
@@ -397,16 +396,17 @@ ReturnCode collectRegisterData(std::vector<T>& i_addresses, U& i_reader,
 
 
 ///
-/// @brief read registers
+/// @brief readRegisters
 ///
 ///  Template function to allow reading either scom and cfam data from registers
 ///  for a given target
 ///
-/// @tparam[in]  T - fapi2::TargetType
+/// @tparam      T - fapi2::TargetType
+/// @param[in]   i_target - fapi2::Target
 /// @param[out]  o_pData - pointer to a location to store register data
 /// @param[in]   i_cfamAddresses - vector of cfam addresses to read
 /// @param[in]   i_scomAddresses - vector of scom addresses to read
-/// @param[i/o]  input/output parm description
+/// @param[in]   i_childOffset - optional offset to address of child
 ///
 /// @return fapi2::ReturnCode. FAPI_RC_SUCCESS, or failure value.
 ///
@@ -451,15 +451,14 @@ void readRegisters(const fapi2::Target<T>& i_target,
 ///
 /// @brief Collect register data for child targets
 ///
-/// @tparam[in]  C - child target type
-/// @tparam[in]  T - parent target type
+/// @tparam      C - child target type
+/// @tparam      T - parent target type
 /// @param[in]   i_parent - fapi2::Target
 /// @param[in]   i_childState - fapi2::TargetState for child targets
 /// @param[in]   i_ffdcId - type of ffdc to be collected
-/// @param[out]  o_errorInfo - vector of shared pointers to fapi2::ErrorInfoFfdc type
+/// @param[out]  o_errorInfoFfdc - vector of shared pointers to fapi2::ErrorInfoFfdc type
 ///                            for returned register data
 /// @param[in]   i_childOffsetMult - child offset for register calculations
-/// @param[i/o]  input/output parm description
 ///
 ///
 template<fapi2::TargetType C, fapi2::TargetType T>
@@ -566,12 +565,12 @@ void collectRegFfdc(const fapi2::ffdc_t i_parent,
 ///
 /// @brief Collect register data for a single target
 ///
-/// @tparam[in]  T - target type
+/// @tparam      T - target type
 /// @param[in]   i_target - fapi2::Target
 /// @param[in]   i_ffdcId - type of ffdc to be collected
-/// @param[out]  o_errorInfo - shared pointer to fapi2::ErrorInfoFfdc type
+/// @param[out]  o_errorInfoFfdc - shared pointer to fapi2::ErrorInfoFfdc type
 ///                            for returned register data
-/// @param[in]   i_childOffsetMult - child offset for register calculations
+/// @param[in]   i_childOffset - child offset for register calculations
 ///
 template<fapi2::TargetType T>
 void collectRegFfdc(const fapi2::ffdc_t i_target,
