@@ -1283,9 +1283,8 @@ namespace SENSOR
 
     /**
      * @brief  All sensors returned cfgID bit
-     *         NV keyword = 0x02 --> 0b0100 -> 4
      */
-    static const uint16_t NVCFG_ALL_SENSORS_RETURNED = 4;
+    static const uint16_t NVCFG_ALL_SENSORS_RETURNED = 0xFFFF;
 
     /**
      * @brief  Helper function to getGpuSensors()
@@ -1411,9 +1410,10 @@ namespace SENSOR
                         row_ptr[3], row_ptr[4], row_ptr[5], row_ptr[6]);
 
                 // Include Sensor if the GPU is present in the current OBUS_CFG
-                if ((L_obus_cfgID_bit &
-                    row_ptr[TARGETING::GPU_SENSOR_ARRAY_OBUS_CFG_OFFSET])
-                    == L_obus_cfgID_bit )
+                if ( (L_obus_cfgID_bit == NVCFG_ALL_SENSORS_RETURNED) ||
+                    ((L_obus_cfgID_bit &
+                      row_ptr[TARGETING::GPU_SENSOR_ARRAY_OBUS_CFG_OFFSET])
+                    == L_obus_cfgID_bit) )
                 {
                     switch(i_type)
                     {
@@ -1549,9 +1549,10 @@ namespace SENSOR
                 StatusSensor::statusEnum newStatus = i_gpu_status[index];
 
                 // Include Sensor if the GPU is present in the current OBUS_CFG
-                if ((obus_cfgID_bit &
+                if ( (obus_cfgID_bit == NVCFG_ALL_SENSORS_RETURNED) ||
+                    ((obus_cfgID_bit &
                     sensor_row_ptr[TARGETING::GPU_SENSOR_ARRAY_OBUS_CFG_OFFSET])
-                    == obus_cfgID_bit )
+                    == obus_cfgID_bit) )
                 {
                     // Only update the GPU status sensors, skip temperature ones
                     // GPU core Status/Functional Sensor
