@@ -494,6 +494,7 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
     else
     {
+
         FAPI_INF("Incorrect response received - Computed CRC %X Received %X - Full Response %08X",
                  l_rsp_computed_crc, l_rsp_rcvd_crc, l_rsp_data);
 
@@ -501,41 +502,60 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         {
             FAPI_DBG("ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_ZERO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        fapi2::PM_AVSBUS_ZERO_RESP_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. All 0 response data received possibly due to AVSBus IO RI/DIs disabled.");
         }
         else if(l_rsp_data == 0xFFFFFFFF)
         {
             FAPI_DBG("ERROR: AVS command failed failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_NO_RESP_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        fapi2::PM_AVSBUS_NO_RESP_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. No response from VRM device, Check AVSBus interface connectivity to VRM in system.");
         }
         else if(l_rsp_rcvd_crc != l_rsp_computed_crc)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Bad CRC detected by P9 on AVSBus Slave Segement.");
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        fapi2::PM_AVSBUS_MASTER_BAD_CRC_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC detected by P9 on AVSBus Slave Segement.");
         }
         else if(l_data_status_code == 0x02)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        fapi2::PM_AVSBUS_SLAVE_BAD_CRC_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Bad CRC indicated by Slave VRM on AVSBus Master Segement.");
         }
         else if(l_data_status_code == 0x01)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Valid data sent but no action is taken due to unavailable resource.");
             FAPI_ASSERT((i_throw_assert != true),
-                        fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR().set_TARGET(i_target).set_BUS(i_avsBusNum).set_BRIDGE(i_o2sBridgeNum),
+                        fapi2::PM_AVSBUS_UNAVAILABLE_RESOURCE_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Valid data sent but no action is taken due to unavailable resource.");
         }
         else if(l_data_status_code == 0x03)
         {
             FAPI_DBG("ERROR: AVS command failed failed. Unknown resource, invalid data, incorrect data or incorrect action.");
-            FAPI_ASSERT((i_throw_assert != true), fapi2::PM_AVSBUS_INVALID_DATA_ERROR().set_TARGET(i_target),
+            FAPI_ASSERT((i_throw_assert != true),
+                        fapi2::PM_AVSBUS_INVALID_DATA_ERROR()
+                        .set_TARGET(i_target)
+                        .set_BUS(i_avsBusNum)
+                        .set_BRIDGE(i_o2sBridgeNum),
                         "ERROR: AVS command failed. Unknown resource, invalid data, incorrect data or incorrect action.");
         }
     }
