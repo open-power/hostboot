@@ -160,13 +160,6 @@ fapi2::ReturnCode set_str_reg(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_tar
             break;
     }
 
-    // MCA_MBASTR0Q_CFG_DIS_CLK_IN_STR:  Set to 1 for PD_AND_STR_CLK_STOP, otherwise clear the bit
-    // Only for DD2.0 and above, will not work for DD1.* HW
-    if( !chip_ec_feature_mss_dis_clk_in_str(i_target) )
-    {
-        l_data.writeBit<MCA_MBASTR0Q_CFG_DIS_CLK_IN_STR>(l_str_enable == PD_AND_STR_CLK_STOP);
-    }
-
     l_data.insertFromRight<TT::ENTER_STR_TIME_POS, TT::ENTER_STR_TIME_LEN>(ENTER_STR_TIME);
 
     FAPI_TRY(mss::putScom(i_target, MCA_MBASTR0Q, l_data), "Error in set_str_reg" );
