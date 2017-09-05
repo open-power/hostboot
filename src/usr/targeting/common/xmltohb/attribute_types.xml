@@ -1532,7 +1532,7 @@
   <attribute>
     <description>System XSCOM base address</description>
     <id>XSCOM_BASE_ADDRESS</id>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable></readable>
     <writeable></writeable>
     <simpleType>
@@ -3844,7 +3844,7 @@
   <attribute>
     <description>LPC Bus address - MMIO consumed by PHYP</description>
     <id>LPC_BUS_ADDR</id>
-    <persistency>non-volatile</persistency>
+    <persistency>volatile</persistency>
     <readable></readable>
     <writeable></writeable>
     <simpleType>
