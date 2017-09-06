@@ -30,10 +30,10 @@
 
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
-// *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
+// *HWP FW Owner           : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team               : PM
 // *HWP Consumed by        : HB:PERV
-// *HWP Level              : 2
+// *HWP Level              : 3
 
 //------------------------------------------------------------------------------
 // Includes
@@ -43,7 +43,8 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_hcd_common.H>
 #include <p9_common_clk_ctrl_state.H>
-#include "p9_hcd_l2_stopclocks.H"
+#include <p9_hcd_l2_stopclocks.H>
+#include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -104,7 +105,7 @@ p9_hcd_l2_stopclocks(
     FAPI_DBG("Check PM_RESET_STATE_INDICATOR via GPMMR[15]");
     FAPI_TRY(getScom(i_target, EQ_PPM_GPMMR_SCOM, l_data64));
 
-    if (!l_data64.getBit<15>())
+    if (!l_data64.getBit<EQ_PPM_GPMMR_RESET_STATE_INDICATOR>())
     {
         FAPI_DBG("Gracefully turn off power management, if fail, continue anyways");
         /// @todo RTC158181 suspend_pm()
@@ -125,7 +126,8 @@ p9_hcd_l2_stopclocks(
     FAPI_DBG("Check PERV fence status for access to CME via CPLT_CTRL1[4]");
     FAPI_TRY(getScom(i_target, EQ_CPLT_CTRL1, l_temp64));
 
-    if (l_data64.getBit<4>() == 0 && l_temp64.getBit<4>() == 0)
+    if (!l_data64.getBit<EQ_CLOCK_STAT_SL_STATUS_PERV>() &&
+        !l_temp64.getBit<EQ_CPLT_CTRL1_TC_PERV_REGION_FENCE>())
     {
         FAPI_DBG("Assert L2 pscom masks via RING_FENCE_MASK_LATCH_REG[2/3,10/11]");
         FAPI_TRY(putScom(i_target, EQ_RING_FENCE_MASK_LATCH_REG, l_l2mask_pscom));
@@ -154,17 +156,22 @@ p9_hcd_l2_stopclocks(
 
         FAPI_TRY(getScom(i_target, EQ_CPLT_STAT0, l_data64));
     }
-    while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
+    while((!l_data64.getBit<EQ_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>()) &&
+          ((--l_loops1ms) != 0));
 
     FAPI_ASSERT((l_loops1ms != 0),
-                fapi2::PMPROC_L2CLKSTOP_TIMEOUT().set_EQCPLTSTAT(l_data64),
+                fapi2::PMPROC_L2CLKSTOP_TIMEOUT()
+                .set_TARGET(i_target)
+                .set_EQCPLTSTAT(l_data64),
                 "L2 Clock Stop Timeout");
 
     FAPI_DBG("Check L2 clocks stopped");
     FAPI_TRY(getScom(i_target, EQ_CLOCK_STAT_SL, l_data64));
 
     FAPI_ASSERT((((~l_data64) & l_region_clock) == 0),
-                fapi2::PMPROC_L2CLKSTOP_FAILED().set_EQCLKSTAT(l_data64),
+                fapi2::PMPROC_L2CLKSTOP_FAILED()
+                .set_TARGET(i_target)
+                .set_EQCLKSTAT(l_data64),
                 "L2 Clock Stop Failed");
     FAPI_DBG("L2 clocks stopped now");
 
@@ -188,7 +195,9 @@ p9_hcd_l2_stopclocks(
     while(((l_data64 & l_l2sync_clock)) && ((--l_loops1ms) != 0));
 
     FAPI_ASSERT((l_loops1ms != 0),
-                fapi2::PMPROC_CACHECLKSYNCDROP_TIMEOUT().set_EQPPMQACSR(l_data64),
+                fapi2::PMPROC_L2CLKSYNCDROP_TIMEOUT()
+                .set_TARGET(i_target)
+                .set_EQPPMQACSR(l_data64),
                 "L2 Clock Sync Drop Timeout");
     FAPI_DBG("L2 clock sync dones dropped");
 
@@ -212,4 +221,3 @@ fapi_try_exit:
     FAPI_INF("<<p9_hcd_l2_stopclocks");
     return fapi2::current_err;
 }
-

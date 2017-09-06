@@ -30,26 +30,25 @@
 
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
-// *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
+// *HWP FW Owner           : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team               : PM
 // *HWP Consumed by        : HB:PERV
-// *HWP Level              : 2
+// *HWP Level              : 3
 
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-
 #include <p9_misc_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_hcd_common.H>
 #include <p9_common_clk_ctrl_state.H>
-#include "p9_hcd_l2_stopclocks.H"
-#include "p9_hcd_cache_stopclocks.H"
+#include <p9_hcd_l2_stopclocks.H>
+#include <p9_hcd_cache_stopclocks.H>
+#include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
 //------------------------------------------------------------------------------
-
 enum P9_HCD_CACHE_STOPCLOCKS_CONSTANTS
 {
     CACHE_CLK_STOP_POLLING_HW_NS_DELAY     = 10000,
@@ -62,7 +61,7 @@ enum P9_HCD_CACHE_STOPCLOCKS_CONSTANTS
 //------------------------------------------------------------------------------
 // Procedure: Quad Clock Stop
 //------------------------------------------------------------------------------
-
+// See doxygen in header file
 fapi2::ReturnCode
 p9_hcd_cache_stopclocks(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
@@ -99,7 +98,7 @@ p9_hcd_cache_stopclocks(
         // region including PBIEQ clock domain is being stopped, which
         // incidentally should always be the case for MPIPL
         l_data64.flush<0>();
-        l_data64.setBit<30>();
+        l_data64.setBit<EQ_QPPM_QCCR_PB_PURGE_REQ>();
         // Set bit 30 in EQ_QPPM_QCCR_SCOM2(100F01BF) Reg, Pulse to the
         // Powerbus logic in the Cache clock domain to request them to purge
         // their async buffers in preparation to power off the Quad
@@ -113,9 +112,8 @@ p9_hcd_cache_stopclocks(
             // Acknowledgement from Powerbus that the buffers are empty
             // and can safely be fenced & clocked off.
             FAPI_TRY(fapi2::getScom(i_target, EQ_QPPM_QCCR_SCOM, l_data64));
-            bool l_poll_data = l_data64.getBit<31>();
 
-            if(l_poll_data == 1)
+            if(l_data64.getBit<EQ_QPPM_QCCR_PB_PURGE_DONE_LVL>())
             {
                 break;
             }
@@ -131,10 +129,11 @@ p9_hcd_cache_stopclocks(
                     fapi2::QPPM_QCCR_PB_PURGE_DONE_LVL_TIMEOUT()
                     .set_TARGET(i_target)
                     .set_EQPPMQCCR(l_data64),
-                    "QPPM_QCCR_PB_PURGE_DONE_LVL Reg bit 31 not set.");
+                    "QPPM_QCCR_PB_PURGE_DONE_LVL Reg bit _QPPM_QCCR_PB_PURGE_DONE_LVL not set.");
 
+        // Clear purge request
         l_data64.flush<0>();
-        l_data64.setBit<30>();
+        l_data64.setBit<EQ_QPPM_QCCR_PB_PURGE_REQ>();
         FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QCCR_SCOM1, l_data64));
     }
 
@@ -142,7 +141,7 @@ p9_hcd_cache_stopclocks(
                            l_attr_vdm_enabled));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_perv,
                            l_attr_chip_unit_pos));
-//  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
+    //  l_attr_chip_unit_pos = l_attr_chip_unit_pos - p9hcd::PERV_TO_QUAD_POS_OFFSET;
     l_attr_chip_unit_pos = l_attr_chip_unit_pos - 0x10;
 
     if (i_select_regions & p9hcd::CLK_REGION_EX0_L3)
@@ -161,10 +160,9 @@ p9_hcd_cache_stopclocks(
     FAPI_DBG("Check PM_RESET_STATE_INDICATOR via GPMMR[15]");
     FAPI_TRY(getScom(i_target, EQ_PPM_GPMMR_SCOM, l_data64));
 
-    if (!l_data64.getBit<15>())
+    if (!l_data64.getBit<EQ_PPM_GPMMR_RESET_STATE_INDICATOR>())
     {
         FAPI_DBG("Gracefully turn off power management, if fail, continue anyways");
-        /// @todo RTC158181 suspend_pm()
     }
 
     FAPI_DBG("Check cache clock controller status");
@@ -182,15 +180,15 @@ p9_hcd_cache_stopclocks(
     FAPI_DBG("Check PERV fence status for access to CME via CPLT_CTRL1[4]");
     FAPI_TRY(getScom(i_target, EQ_CPLT_CTRL1, l_temp64));
 
-    if (l_data64.getBit<4>() == 0 && l_temp64.getBit<4>() == 0)
+    if (l_data64.getBit<EQ_CLOCK_STAT_SL_STATUS_PERV>() == 0 &&
+        l_temp64.getBit<EQ_CPLT_CTRL1_TC_PERV_REGION_FENCE>() == 0)
     {
-        /// @todo RTC158181 disable l2 snoop? disable lco? assert refresh quiesce?
         FAPI_DBG("Assert L3 pscom masks via RING_FENCE_MASK_LATCH_REG[4-9]");
         FAPI_TRY(putScom(i_target, EQ_RING_FENCE_MASK_LATCH_REG, l_l3mask_pscom));
     }
 
     FAPI_DBG("Assert chiplet fence via NET_CTRL0[18]");
-    FAPI_TRY(putScom(i_target, EQ_NET_CTRL0_WOR, MASK_SET(18)));
+    FAPI_TRY(putScom(i_target, EQ_NET_CTRL0_WOR, MASK_SET(EQ_NET_CTRL0_FENCE_EN)));
 
     // -------------------------------
     // Stop L2 clocks
@@ -247,17 +245,21 @@ p9_hcd_cache_stopclocks(
 
         FAPI_TRY(getScom(i_target, EQ_CPLT_STAT0, l_data64));
     }
-    while((l_data64.getBit<8>() != 1) && ((--l_loops1ms) != 0));
+    while((!l_data64.getBit<EQ_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>()) && ((--l_loops1ms) != 0));
 
     FAPI_ASSERT((l_loops1ms != 0),
-                fapi2::PMPROC_CACHECLKSTOP_TIMEOUT().set_EQCPLTSTAT(l_data64),
+                fapi2::PMPROC_CACHECLKSTOP_TIMEOUT()
+                .set_TARGET(i_target)
+                .set_EQCPLTSTAT(l_data64),
                 "Cache Clock Stop Timeout");
 
     FAPI_DBG("Check cache clocks stopped");
     FAPI_TRY(getScom(i_target, EQ_CLOCK_STAT_SL, l_data64));
 
     FAPI_ASSERT((((~l_data64) & l_region_clock) == 0),
-                fapi2::PMPROC_CACHECLKSTOP_FAILED().set_EQCLKSTAT(l_data64),
+                fapi2::PMPROC_CACHECLKSTOP_FAILED()
+                .set_TARGET(i_target)
+                .set_EQCLKSTAT(l_data64),
                 "Cache Clock Stop Failed");
     FAPI_DBG("Cache clocks stopped now");
 
@@ -266,7 +268,7 @@ p9_hcd_cache_stopclocks(
     // -------------------------------
 
     FAPI_DBG("Assert vital fence via CPLT_CTRL1[3]");
-    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, MASK_SET(3)));
+    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, MASK_SET(EQ_CPLT_CTRL1_TC_VITL_REGION_FENCE)));
 
     l_region_fence = l_region_clock;
 
@@ -356,4 +358,3 @@ fapi_try_exit:
     FAPI_INF("<<p9_hcd_cache_stopclocks");
     return fapi2::current_err;
 }
-
