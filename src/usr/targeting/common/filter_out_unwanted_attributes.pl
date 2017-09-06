@@ -233,6 +233,14 @@ foreach my $tgt
 {
     my $tgt_type = $tgt->findnodes('./type');
 
+    if(!defined $tgt_xmls->{'targetType'}->{$tgt_type})
+    {
+        print "Target of type: $tgt_type not found in the merged target XML!\n";
+        print "Removing target $tgt\n";
+        $tgt->unbindNode();
+        next;
+    }
+
     #foreach attribute defined in this target
     foreach my $attr ($tgt->findnodes('./attribute'))
     {
