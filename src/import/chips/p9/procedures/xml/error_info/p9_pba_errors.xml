@@ -90,64 +90,6 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_PBA_STATUS_ERR_ADDR_ERR</rc>
-    <description>
-      Procedure: p9_pba_coherent_utils
-      PBA Read Status, Write Status, or Reset Register indicated an error,
-      with an indication of a combined response address error.
-     </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>RDBUF2</ffdc>
-    <ffdc>RDBUF3</ffdc>
-    <ffdc>WRBUF0</ffdc>
-    <ffdc>WRBUF1</ffdc>
-    <ffdc>SLVRSTDATA</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PBA_REGISTERS</id>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      <target>TARGET</target>
-    </collectRegisterFfdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <target>TARGET</target>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_PBA_STATUS_ERR_NO_ADDR_ERR</rc>
-    <description>
-      Procedure: p9_pba_coherent_utils
-      PBA Read Status, Write Status, or Reset Register indicated an error,
-      with no indication of a combined response address error.
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>RDBUF2</ffdc>
-    <ffdc>RDBUF3</ffdc>
-    <ffdc>WRBUF0</ffdc>
-    <ffdc>WRBUF1</ffdc>
-    <ffdc>SLVRSTDATA</ffdc>
-    <collectRegisterFfdc>
-      <id>REG_FFDC_PBA_REGISTERS</id>
-      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-      <target>TARGET</target>
-    </collectRegisterFfdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <sbeError/>
     <rc>RC_P9_PBA_FBC_NOT_INITIALIZED_ERR</rc>
     <description>
       Procedure: p9_pba_coherent_utils
