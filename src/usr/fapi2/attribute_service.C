@@ -1185,15 +1185,18 @@ ReturnCode fapiAttrSetBadDqBitmap(
             l_reconfigAttr |= fapi2::ENUM_ATTR_RECONFIGURE_LOOP_BAD_DQ_BIT_SET;
 
             #ifndef CONFIG_VPD_GETMACRO_USE_EFF_ATTR
-            l_rc = FAPI_ATTR_SET( fapi2::ATTR_RECONFIGURE_LOOP,
-                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                                  l_reconfigAttr );
-            if ( l_rc )
-            {
-                FAPI_ERR( "fapiAttrSetBadDqBitmap: Error setting "
-                          "ATTR_RECONFIGURE_LOOP" );
-                break;
-            }
+            // TODO RTC 164707
+            // Restore DRAM Repairs not finished yet so commenting out the
+            // reconfig loop for now.
+            //l_rc = FAPI_ATTR_SET( fapi2::ATTR_RECONFIGURE_LOOP,
+            //                      fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+            //                      l_reconfigAttr );
+            //if ( l_rc )
+            //{
+            //    FAPI_ERR( "fapiAttrSetBadDqBitmap: Error setting "
+            //              "ATTR_RECONFIGURE_LOOP" );
+            //    break;
+            //}
             #endif
         }
 
