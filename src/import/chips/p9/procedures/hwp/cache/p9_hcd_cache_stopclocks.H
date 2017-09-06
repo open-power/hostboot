@@ -29,10 +29,10 @@
 
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
-// *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
+// *HWP FW Owner           : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team               : PM
 // *HWP Consumed by        : HB:PERV
-// *HWP Level              : 2
+// *HWP Level              : 3
 
 #ifndef __P9_HCD_CACHE_STOPCLOCKS_H__
 #define __P9_HCD_CACHE_STOPCLOCKS_H__
