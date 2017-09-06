@@ -178,58 +178,6 @@ void print_system_info(void)
 }
 #endif
 
-/**
-*  @brief  Walk through the cores and ensure special wakeup is disabled
-*          from all srcs.
-*
-*  @param[in/out] ISTEP_ERROR::IStepError
-*                 Pass in the istep error so we can add errors to it
-*
-*  @return     bool
-*              True if no errors were found
-*              False if at least 1 error was found
-*/
-bool deassertSpecialWakeupOnCores(ISTEP_ERROR::IStepError & io_istepError)
-{
-    errlHndl_t l_err = nullptr;
-    bool l_success = true;
-    // First disable special wakeup of all types for all cores
-    TARGETING::TargetHandleList l_coreTargetList;
-    TARGETING::getAllChiplets(l_coreTargetList, TARGETING::TYPE_CORE, true);
-
-    for(const auto & l_core : l_coreTargetList)
-    {
-        for(uint8_t l_src = 0; l_src < p9specialWakeup::SPW_ALL; l_src++)
-        {
-            FAPI_INVOKE_HWP(l_err, p9_cpu_special_wakeup_core, l_core,
-                            p9specialWakeup::SPCWKUP_DISABLE,
-                            p9specialWakeup::PROC_SPCWKUP_ENTITY(l_src));
-            if ( l_err )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "ERROR : returned from p9_cpu_special_wakeup_core for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
-                            l_success = false;
-                            break;
-            }
-            else
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "disabled special wakeup for core 0x%x for src 0x%x", TARGETING::get_huid(l_core), l_src  );
-            }
-        }
-        if(l_err)
-        {
-            // capture the target data in the elog
-            ERRORLOG::ErrlUserDetailsTarget(l_core).addToLog( l_err );
-            // add the err to the istep error
-            io_istepError.addErrorDetails(l_err);
-            //commit the error log (this will delete the err)
-            errlCommit(l_err, ISTEP_COMP_ID);
-        }
-    }
-
-    return l_success;
-}
 
 /**
 *  @brief  Walk through list of PROC chip targets and send a continueMPIPL
@@ -666,12 +614,6 @@ void* host_discover_targets( void *io_pArgs )
         {
             //If there is an error skip these steps .. something is wrong
             if (l_err)
-            {
-                break;
-            }
-
-            //Make sure that all special wakeups are disabled
-            if(!deassertSpecialWakeupOnCores(l_stepError))
             {
                 break;
             }
