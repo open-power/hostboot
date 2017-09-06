@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,7 @@ public:
         l_rc.forgetData();
 
 
+        l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
         l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
         createPlatLog(l_rc, l_sev);
         l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
@@ -76,13 +77,15 @@ public:
         l_rc.forgetData();
 
 
+        l_rc = fapi2::FAPI2_RC_INVALID_ATTR_GET;
         l_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE;
         createPlatLog(l_rc, l_sev);
+        l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
         if(l_errl->sev() != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
         {
             TS_FAIL("testCreatePlatLogCreatorFapi2: incorrect errl severity. "
                     "Expected: %x Actual: %x",
-                    ERRORLOG::ERRL_SEV_PREDICTIVE,
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                     l_errl->sev());
 
         }
@@ -123,7 +126,17 @@ public:
             TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat: ERRL_SEV_RECOVERED passed");
         }
 
+        l_rc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
         l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
+        // Allocate a fake error log since PLAT code path expects a non-null ptr
+        l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_FIRST_MODULE_ID,
+                                fapi2::RC_HWP_GENERATED_ERROR,
+                                ERRORLOG::ERRL_TEST_REASON_CODE);
+
+        l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+
         createPlatLog(l_rc, l_sev);
         l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
         if(l_errl->sev() != ERRORLOG::ERRL_SEV_PREDICTIVE)
@@ -138,7 +151,16 @@ public:
             TRACDCOMP(g_trac_runtime, "testCreatePlatLogCreatorPlat: ERRL_SEV_PREDICTIVE passed");
         }
 
+        l_rc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
         l_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE;
+        l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                ERRORLOG::ERRL_FIRST_MODULE_ID,
+                                fapi2::RC_HWP_GENERATED_ERROR,
+                                ERRORLOG::ERRL_TEST_REASON_CODE);
+
+        l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+
         createPlatLog(l_rc, l_sev);
         l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
         if(l_errl->sev() != ERRORLOG::ERRL_SEV_UNRECOVERABLE)
@@ -179,6 +201,7 @@ public:
         }
         l_rc.forgetData();
 
+        l_rc = 0x00000001; // Fake return code wit creator == HWP
         l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
         createPlatLog(l_rc, l_sev);
         l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
@@ -195,6 +218,7 @@ public:
         }
         l_rc.forgetData();
 
+        l_rc = 0x00000001; // Fake return code wit creator == HWP
         l_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE;
         createPlatLog(l_rc, l_sev);
         l_errl = reinterpret_cast<errlHndl_t>(l_rc.getPlatDataPtr());
