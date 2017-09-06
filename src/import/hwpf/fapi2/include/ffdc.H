@@ -142,7 +142,7 @@ class FirstFailureData
         inline void* releaseData(void)
         {
             void* l_pData = iv_info;
-            iv_info = NULL;
+            iv_info = nullptr;
             return l_pData;
         }
 
@@ -213,7 +213,11 @@ class FirstFailureData
         ///
         inline void* getPlatDataPtr()
         {
-            return iv_platDataPtr;
+            void* l_platDataPtr = iv_platDataPtr;
+
+            iv_platDataPtr = nullptr;
+
+            return l_platDataPtr;
         };
 
         ///
