@@ -268,7 +268,11 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
 
                 if (sizes[j] != 0)
                 {
-                    curNodeSize += (sizes[j] >> ONE_GIG);
+                    if (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_NORMAL)
+                    {
+                        curNodeSize += (sizes[j] >> ONE_GIG);
+                    }
+
 #ifdef _LP64
                     printf("  Base Address = 0x%016lx  Size = %ld (GB)\n", bases[j], sizes[j] >> ONE_GIG);
 #else
@@ -279,6 +283,11 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
 
                 if ((j < 4) && (mirror_sizes[j] != 0))
                 {
+                    if (mirror_policy == fapi2::ENUM_ATTR_MEM_MIRROR_PLACEMENT_POLICY_FLIPPED)
+                    {
+                        curNodeSize += (mirror_sizes[j] >> ONE_GIG);
+                    }
+
 #ifdef _LP64
                     printf("  Mirror Base Address = 0x%016lx  Size = %ld (GB)\n", mirror_bases[j], mirror_sizes[j] >> ONE_GIG);
 #else
