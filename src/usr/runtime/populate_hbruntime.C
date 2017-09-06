@@ -593,6 +593,15 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
     do {
 
+        // Check for inhibited sections
+        if(PNOR::isInhibitedSection(i_sec))
+        {
+            TRACFCOMP( g_trac_runtime, INFO_MRK"hbResvloadSecureSection() Skipping - Cannot load inhibited section %s",
+                      PNOR::SectionIdToString(i_sec));
+            break;
+        }
+
+
         l_elog = PNOR::getSectionInfo( i_sec, l_info );
         if(l_elog)
         {
