@@ -41,6 +41,7 @@
 #include <lib/fir/unmask.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/utils/count_dimm.H>
+#include <lib/workarounds/mca_workarounds.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -55,7 +56,7 @@ extern "C"
 ///
     fapi2::ReturnCode p9_mss_draminit_mc( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target )
     {
-        FAPI_INF("Start draminit MC");
+        FAPI_INF("%s Start draminit MC", mss::c_str(i_target));
 
         // No need to check to see if we have ports - this loop will just be skipped
         for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
@@ -77,10 +78,19 @@ extern "C"
 
             //Enable Power management based off of mrw_power_control_requested
             //Needs to be set near end of IPL
-            FAPI_INF("Enable Power min max domains");
+            FAPI_INF("%s Enable Power min max domains", mss::c_str(i_target));
             {
                 fapi2::buffer<uint64_t> l_data;
                 uint8_t  l_pwr_cntrl = 0;
+
+                // Before enabling power controls, run the parity disable workaround
+                for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+                {
+                    FAPI_TRY(mss::workarounds::str_non_tsv_parity(l_mca));
+                }
+
+                // TODO:RTC179508 - Cleanup draminit_mc
+                // Mostly add in and fix register API elements below and create helper functions as need be
                 FAPI_TRY(mss::getScom(p, MCA_MBARPC0Q, l_data));
                 FAPI_TRY(mss::mrw_power_control_requested(l_pwr_cntrl));
 
