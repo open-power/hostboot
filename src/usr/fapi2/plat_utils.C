@@ -1227,7 +1227,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
             // PLAT error, get the platform data from the return code
             FAPI_ERR("rcToErrl: PLAT error: 0x%08x", l_rcValue);
         }
-        else if (NULL == l_pError)
+        else if (nullptr == l_pError)
         {
             if (l_creator == ReturnCode::CREATOR_HWP)
             {
@@ -1389,6 +1389,14 @@ void logError(
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return;
 }
+///
+/// @brief Free platform log ptr - free a platform error from the
+///                                 passed in RC.
+///
+void deletePlatformDataPointer(fapi2::ReturnCode & io_rc)
+{
+    delete(reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr()));
+}
 
 ///
 /// @brief Internal Function associates PRD and HW elogs
@@ -1415,6 +1423,8 @@ void set_log_id( const Target<TARGET_TYPE_ALL>& i_fapiTrgt,
         // Get the PLID from this error log.
         errlHndl_t errl = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
         uint32_t plid = ERRL_GETPLID_SAFE(errl);
+
+        io_rc.setPlatDataPtr(reinterpret_cast<void*>(errl));
 
         // Set the PLID in this attribute.
         if ( ! attrTrgt->trySetAttr<TARGETING::ATTR_PRD_HWP_PLID>(plid) )

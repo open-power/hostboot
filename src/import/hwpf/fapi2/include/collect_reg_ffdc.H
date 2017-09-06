@@ -382,6 +382,12 @@ ReturnCode collectRegisterData(std::vector<T>& i_addresses, U& i_reader,
         if(l_rc)
         {
             l_data = 0xbaddbadd;
+
+#ifdef __DELETE_PLATFORMDATA_SUPPORTED
+            // delete the platform log if it exits
+            deletePlatformDataPointer(l_rc);
+#endif
+
         }
         else
         {
@@ -418,6 +424,10 @@ ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reade
         if(l_rc)
         {
             l_data = 0xbaddbadd;
+#ifdef __DELETE_PLATFORMDATA_SUPPORTED
+            // delete the platform data pointer if it exists
+            deletePlatformDataPointer(l_rc);
+#endif
         }
         else
         {

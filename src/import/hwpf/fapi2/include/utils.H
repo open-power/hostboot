@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,6 +128,12 @@ void createPlatLog(
     fapi2::ReturnCode& io_rc,
     fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE
 );
+
+///
+/// @brief delete platform data ptr - free platform data from the
+//                                    passed in RC.
+///
+void deletePlatformDataPointer(fapi2::ReturnCode& io_rc);
 
 ///
 /// @brief Associate an error to PRD PLID
