@@ -621,6 +621,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -638,6 +639,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -655,6 +657,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -672,6 +675,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -689,6 +693,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -706,6 +711,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -723,6 +729,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -741,6 +748,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -760,6 +768,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -779,6 +788,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -802,6 +812,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -825,6 +836,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -848,6 +860,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
     <!-- ********************************************************************* -->
   <attribute>
@@ -871,6 +884,7 @@
     <valueType>int8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -967,6 +981,7 @@
     <enum>OFF=0, ON=1</enum>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1132,6 +1147,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1144,6 +1160,7 @@
     <initToZero/>
     <valueType>uint8</valueType>
     <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1162,6 +1179,7 @@
       <initToZero/>
       <valueType>uint8</valueType>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1241,7 +1259,7 @@
       <description>
       Disables the enablement of Voltage Droop Monitors (VDM) in the system.
 
-      Producer:  Override
+      Producer:  MRW
 
       Consumers:
         p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
@@ -1251,6 +1269,7 @@
       <enum>OFF = 0x00, ON = 0x01</enum>
       <initToZero/>
       <platInit/>
+      <default>OFF</default>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1288,6 +1307,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1325,6 +1345,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1362,6 +1383,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1394,6 +1416,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1415,6 +1438,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1436,6 +1460,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1457,6 +1482,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1478,6 +1504,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1510,6 +1537,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1524,6 +1552,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1543,6 +1572,7 @@
       <array>5</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
       <!-- RTC 173957 Reduce to 4 entry array.  Remove Enable -->
   </attribute>
   <!-- ********************************************************************* -->
@@ -1564,6 +1594,7 @@
       <array>4</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1618,6 +1649,7 @@
       <valueType>uint8</valueType>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1638,6 +1670,7 @@
       <array>64</array>
       <platInit/>
       <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1656,6 +1689,7 @@
       <array>64</array>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1674,6 +1708,7 @@
       <valueType>uint16</valueType>
       <platInit/>
       <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1691,6 +1726,7 @@
       <valueType>uint16</valueType>
       <platInit/>
       <initToZero/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -1743,6 +1779,7 @@
       <enum>OFF = 0x00, ON = 0x01</enum>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2095,6 +2132,7 @@
       <enum>ON = 0x00, OFF = 0x01, AUTO = 0x02</enum>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2116,6 +2154,7 @@
       <valueType>uint32</valueType>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
@@ -2138,6 +2177,7 @@
       <valueType>uint32</valueType>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>
