@@ -247,7 +247,7 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
 
     // There is no reasonable check to validate if a voltage we're
     // reading is valid so it has to be assumed good for the cases below
-    if(domainProgram == MSS_PROGRAM_TYPE::STATIC)
+    if(domainProgram == MSS_PROGRAM_TYPE::STATIC_TYPE)
     {
         typename
         TARGETING::AttributeTraits< VOLTAGE_ATTR_STATIC >::Type
@@ -257,7 +257,7 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
         io_domains.push_back(entry);
     }
-    else if(domainProgram == MSS_PROGRAM_TYPE::DYNAMIC)
+    else if(domainProgram == MSS_PROGRAM_TYPE::DYNAMIC_TYPE)
     {
         typename
         TARGETING::AttributeTraits< VOLTAGE_ATTR_DYNAMIC >::Type
@@ -265,6 +265,12 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
                 = i_pMcbist->getAttr< VOLTAGE_ATTR_DYNAMIC >();
 
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
+        io_domains.push_back(entry);
+    }
+    else if(domainProgram == MSS_PROGRAM_TYPE::DEFAULT_TYPE)
+    {
+        entry.voltageMillivolts =
+            HBToHwsvVoltageMsg::VOLTAGE_SETTING_ALERT_DEFAULT;
         io_domains.push_back(entry);
     }
 }

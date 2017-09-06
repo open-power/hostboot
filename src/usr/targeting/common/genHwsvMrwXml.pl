@@ -31,7 +31,6 @@
 #        --system=systemname
 #              Specify which system MRW XML to be generated
 #        --systemnodes=systemnodesinbrazos
-
 #              Specify number of nodes for brazos system, by default it is 4
 #        --mrwdir=pathname
 #              Specify the complete dir pathname of the MRW. Colon-delimited
@@ -158,6 +157,10 @@ use constant
     # Domain needs to be programmed during host_enable_memvolt, and the
     # new dynamic vid values must be computed beyond what p9_mss_volt() did
     DYNAMIC_PROGRAM => 2,
+
+    # Domain needs to be programmed during host_enable_memvolt, and the
+    # new vid values will come from VRM xml system file consumed by POWR code
+    DEFAULT_PROGRAM => 3,
 };
 
 our $mrwdir = "";
@@ -522,6 +525,10 @@ for my $domain (keys %domainProgram)
     elsif ($domainProgram{$domain} eq "dynamic")
     {
         push @systemAttr, [$domain, DYNAMIC_PROGRAM];
+    }
+    elsif ($domainProgram{$domain} eq "default")
+    {
+        push @systemAttr, [$domain, DEFAULT_PROGRAM];
     }
     else
     {
