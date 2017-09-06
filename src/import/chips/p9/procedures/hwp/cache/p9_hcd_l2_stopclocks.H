@@ -29,10 +29,9 @@
 
 // *HWP HWP Owner          : David Du       <daviddu@us.ibm.com>
 // *HWP Backup HWP Owner   : Greg Still     <stillgs@us.ibm.com>
-// *HWP FW Owner           : Sangeetha T S  <sangeet2@in.ibm.com>
+// *HWP FW Owner           : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 // *HWP Team               : PM
 // *HWP Consumed by        : HB:PERV
-// *HWP Level              : 2
 
 #ifndef __P9_HCD_L2_STOPCLOCKS_H__
 #define __P9_HCD_L2_STOPCLOCKS_H__
@@ -49,7 +48,7 @@ extern "C"
 {
 
 /// @brief Quad Clock Stop
-/// @param [in] i_target TARGET_TYPE_EQ target
+/// @param[in]   i_target TARGET_TYPE_EQ target
 /// @return FAPI2_RC_SUCCESS if success, else error code
     fapi2::ReturnCode
     p9_hcd_l2_stopclocks(
