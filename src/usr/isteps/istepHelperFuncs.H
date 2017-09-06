@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,10 +53,20 @@ enum EFF_CONFIG_ATTRIBUTES_BASE
  */
 enum MSS_PROGRAM_TYPE
 {
-    POWERON = 0, // domain is programmed as part of regular power on sequence
-    STATIC  = 1, // domain needs to be programmed, no special computation needed
-    DYNAMIC = 2, // domain needs to be programmed, uses dynamic vid logic
+    // domain is programmed as part of regular power on sequence
+    POWERON_TYPE = 0,
+
+    // domain needs to be programmed, no special computation needed
+    STATIC_TYPE  = 1,
+
+    // domain needs to be programmed, uses dynamic vid logic
+    DYNAMIC_TYPE = 2,
+
+    // domain needs to be programmed,
+    // POWR responsible for vid values attained via sys vrm xml
+    DEFAULT_TYPE = 3,
 };
+
 
 //
 //  Helper function to set _EFF_CONFIG attributes for HWPs
@@ -128,7 +138,7 @@ errlHndl_t computeDynamicMemoryVoltage()
             pSysTarget->getAttr< OFFSET_DISABLEMENT_ATTR >();
 
 
-    if(domainProgram != MSS_PROGRAM_TYPE::DYNAMIC)
+    if(domainProgram != MSS_PROGRAM_TYPE::DYNAMIC_TYPE)
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "INFO: Dynamic offset voltage processing disabled for domain type 0x%08X.",

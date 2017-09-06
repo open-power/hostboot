@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,13 @@ public:
         VOLTAGE_DOMAIN_MIN_VALUE = VOLTAGE_DOMAIN_MEM_VDD,
         VOLTAGE_DOMAIN_MAX_VALUE = VOLTAGE_DOMAIN_NEST_VDDR,
     };
+
+    /**
+     * @brief Identifies hwsvPowrMemVoltDomainRequest_t as a DEFAULT voltage
+     *        request if voltageMillivolts is set to this constant
+     *
+     */
+    const uint32_t VOLTAGE_SETTING_ALERT_DEFAULT  = 0xFFFFFFFF;
 
     /**
      *  @struct hwsvPowrMemVoltDomainRequest_t
@@ -234,9 +241,10 @@ private:
      *  @tparam MSS_DOMAIN_PROGRAM
      *      ID of the attribute to read to determine how we program this domain.
      *      Value of the attribute should be one of these:
-     *      MSS_PROGRAM_TYPE::POWERON = no additional programming necessary,
-     *      MSS_PROGRAM_TYPE::STATIC  = use static value,
-     *      MSS_PROGRAM_TYPE::DYNAMIC = use dynamic value
+     *      MSS_PROGRAM_TYPE::POWERON_TYPE = no add'l programming necessary,
+     *      MSS_PROGRAM_TYPE::STATIC_TYPE  = use static value,
+     *      MSS_PROGRAM_TYPE::DYNAMIC_TYPE = use dynamic value,
+     *      MSS_PROGRAM_TYPE::DEFAULT_TYPE = send special alert value
      *
      *  @tparam VOLTAGE_ATTR_STATIC
      *      ID of the attribute which should be read to obtain the given memory

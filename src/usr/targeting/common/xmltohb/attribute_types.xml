@@ -2024,7 +2024,8 @@
     <description>VDDR memory programming type
     0 = POWERON  - domain is programmed as part of regular power on sequence,
     1 = STATIC   - domain needs to be programmed, no special computation needed,
-    2 = DYNAMIC  - domain needs to be programmed, uses dynamic vid logic
+    2 = DYNAMIC  - domain needs to be programmed, uses dynamic vid logic,
+    3 = DEFAULT  - domain needs to be programmed, pgm values in sys xml file
     </description>
     <hasStringConversion></hasStringConversion>
     <id>MSS_VDDR_PROGRAM</id>
