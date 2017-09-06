@@ -66,6 +66,13 @@ const uint32_t EPSILON_R_T2_HE[] = {  187,  189,  191,  194,  199,  223 };
 const uint32_t EPSILON_W_T0_HE[] = {   12,   13,   14,   16,   18,   30 };
 const uint32_t EPSILON_W_T1_HE[] = {   96,   97,   98,   99,  102,  114 };
 
+// HE epsilon (flat 4 Zeppelin)
+const uint32_t EPSILON_R_T0_F4[] = {    7,    7,    8,    8,   10,   22 };
+const uint32_t EPSILON_R_T1_F4[] = {    7,    7,    8,    8,   10,   22 };
+const uint32_t EPSILON_R_T2_F4[] = {   83,   84,   87,   90,   95,  119 };
+const uint32_t EPSILON_W_T0_F4[] = {    0,    0,    0,    0,    0,    5 };
+const uint32_t EPSILON_W_T1_F4[] = {   18,   19,   20,   22,   24,   36 };
+
 // HE epsilon (flat 8 configuration)
 const uint32_t EPSILON_R_T0_F8[] = {    7,    7,    8,    8,   10,   22 };
 const uint32_t EPSILON_R_T1_F8[] = {    7,    7,    8,    8,   10,   22 };
@@ -172,33 +179,40 @@ p9_fbc_eff_config_calc_epsilons(
     switch(l_eps_table_type)
     {
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE:
+
             if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
             {
                 l_eps_r[0] = EPSILON_R_T0_HE[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T1_HE[i_core_floor_ratio];
+                l_eps_r[2] = EPSILON_R_T2_HE[i_core_floor_ratio];
+
+                l_eps_w[0] = EPSILON_W_T0_HE[i_core_floor_ratio];
+                l_eps_w[1] = EPSILON_W_T1_HE[i_core_floor_ratio];
             }
             else
             {
-                l_eps_r[0] = EPSILON_R_T1_HE[i_core_floor_ratio];
+                l_eps_r[0] = EPSILON_R_T0_F4[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T1_F4[i_core_floor_ratio];
+                l_eps_r[2] = EPSILON_R_T2_F4[i_core_floor_ratio];
+
+                l_eps_w[0] = EPSILON_W_T0_F4[i_core_floor_ratio];
+                l_eps_w[1] = EPSILON_W_T1_F4[i_core_floor_ratio];
             }
 
-            l_eps_r[1] = EPSILON_R_T1_HE[i_core_floor_ratio];
-            l_eps_r[2] = EPSILON_R_T2_HE[i_core_floor_ratio];
-
-            l_eps_w[0] = EPSILON_W_T0_HE[i_core_floor_ratio];
-            l_eps_w[1] = EPSILON_W_T1_HE[i_core_floor_ratio];
             break;
 
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_HE_F8:
+            l_eps_r[0] = EPSILON_R_T0_F8[i_core_floor_ratio];
+
             if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
             {
-                l_eps_r[0] = EPSILON_R_T0_F8[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T1_F8[i_core_floor_ratio];
             }
             else
             {
-                l_eps_r[0] = EPSILON_R_T1_F8[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T0_F8[i_core_floor_ratio];
             }
 
-            l_eps_r[1] = EPSILON_R_T1_F8[i_core_floor_ratio];
             l_eps_r[2] = EPSILON_R_T2_F8[i_core_floor_ratio];
 
             l_eps_w[0] = EPSILON_W_T0_F8[i_core_floor_ratio];
@@ -206,16 +220,17 @@ p9_fbc_eff_config_calc_epsilons(
             break;
 
         case fapi2::ENUM_ATTR_PROC_EPS_TABLE_TYPE_EPS_TYPE_LE:
+            l_eps_r[0] = EPSILON_R_T0_LE[i_core_floor_ratio];
+
             if (l_pump_mode == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE)
             {
-                l_eps_r[0] = EPSILON_R_T0_LE[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T1_LE[i_core_floor_ratio];
             }
             else
             {
-                l_eps_r[0] = EPSILON_R_T1_LE[i_core_floor_ratio];
+                l_eps_r[1] = EPSILON_R_T0_LE[i_core_floor_ratio];
             }
 
-            l_eps_r[1] = EPSILON_R_T1_LE[i_core_floor_ratio];
             l_eps_r[2] = EPSILON_R_T2_LE[i_core_floor_ratio];
 
             l_eps_w[0] = EPSILON_W_T0_LE[i_core_floor_ratio];
