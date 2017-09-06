@@ -130,6 +130,12 @@ void createPlatLog(
 );
 
 ///
+/// @brief delete platform data ptr - free platform data from the
+//                                    passed in RC.
+///
+void deletePlatformDataPointer(fapi2::ReturnCode& io_rc);
+
+///
 /// @brief Associate an error to PRD PLID
 ///
 /// @param[in] i_target Reference to target
