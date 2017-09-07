@@ -80,6 +80,8 @@ enum    InitServiceReasonCode
     ISTEP_PROCESSING_DISABLED    =   INITSVC_COMP_ID | 0x12,
     //termination_rc
     SHUTDOWN_DO_RECONFIG_LOOP    =   INITSVC_COMP_ID | 0x13,
+    //termination_rc
+    SHUTDOWN_MFG_TERM            =   INITSVC_COMP_ID | 0x14,
 };
 
 enum InitServiceUserDetailDataSubSection

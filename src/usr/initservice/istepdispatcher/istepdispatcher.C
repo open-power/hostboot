@@ -668,8 +668,14 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 // Quiesce new isteps, including external requests
                 (void)setStopIpl();
 
+#ifdef CONFIG_HANG_ON_MFG_SRC_TERM
                 // Stop the IPL
                 stop();
+#else
+                // Shutdown with a TI
+                doShutdown( SHUTDOWN_MFG_TERM );
+#endif
+
             }
 #endif
 
