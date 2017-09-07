@@ -143,7 +143,7 @@ struct p9_dd_cont* p9_dd_create(void)
 {
     struct p9_dd_cont* cont;
 
-    cont = malloc(sizeof(struct p9_dd_cont));
+    cont = (struct p9_dd_cont*)malloc(sizeof(struct p9_dd_cont));
 
     if (!cont)
     {
@@ -210,7 +210,7 @@ int p9_dd_add(
     enlarged = p9_dd_size(cont) + sizeof(struct p9_dd_block) + i_buf_size;
 
     // re-allocate to enlarge container (content is retained and consistent)
-    cont = realloc(cont, enlarged);
+    cont = (struct p9_dd_cont*)realloc(cont, enlarged);
 
     if (!cont)
     {
