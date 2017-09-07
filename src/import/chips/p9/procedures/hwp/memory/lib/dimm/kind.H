@@ -112,6 +112,17 @@ class kind
         }
 
         ///
+        /// @brief operator!=() - are two kinds different?
+        /// @param[in] i_rhs the right hand side of the comparison statement
+        /// @return bool true iff the two kind are of different
+        /// @warning this does not compare the targets (iv_target,) just the values
+        ///
+        inline bool operator!=(const kind& i_rhs) const
+        {
+            return !(this->operator==(i_rhs));
+        }
+
+        ///
         /// @brief Construct a dimm::kind data structure - information about the kind of DIMM this is
         /// @param[in] i_target a DIMM target
         ///

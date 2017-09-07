@@ -49,6 +49,7 @@
 #include <lib/mcbist/patterns.H>
 #include <lib/mcbist/settings.H>
 #include <lib/mc/port.H>
+#include <lib/dimm/kind.H>
 
 namespace mss
 {
@@ -3089,6 +3090,75 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 {
     std::vector< fapi2::buffer<uint64_t> > l_temp;
     return read_rb_array(i_target, i_start_addr, i_num_entries, o_data, l_temp);
+}
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this target
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_target the target to effect
+/// @return o_capable - yes iff these vector of targets are broadcast capable
+///
+template< fapi2::TargetType T >
+const mss::states is_broadcast_capable(const fapi2::Target<T>& i_target);
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this vector of targets
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_targets the vector of targets to analyze
+/// @return o_capable - yes iff these vector of targets are broadcast capable
+///
+template< fapi2::TargetType T >
+const mss::states is_broadcast_capable(const std::vector<fapi2::Target<T>>& i_targets);
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this vector of targets
+/// @param[in] i_target the target to effect
+/// @return o_capable - yes iff these vector of targets are broadcast capable
+///
+const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds);
+
+///
+/// @brief Configures all of the ports for broadcast mode
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_target the target to effect
+/// @param[out] o_port_select - the configuration of the selected ports
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode setup_broadcast_port_select(const fapi2::Target<T>& i_target, uint64_t& o_port_select);
+
+///
+/// @brief Enables broadcast mode
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_target the target to effect
+/// @param[in,out] io_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode enable_broadcast_mode(const fapi2::Target<T>& i_target, mcbist::program<T>& io_program);
+
+///
+/// @brief Configures broadcast mode, if it is needed
+/// @tparam T, the fapi2::TargetType
+/// @param[in] i_target the target to effect
+/// @param[in,out] io_program the mcbist::program
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode configure_broadcast_mode(const fapi2::Target<T>& i_target, mcbist::program<T>& io_program)
+{
+    // If we're not capable to do broadcast mode on this target, exit out
+    const auto l_broadcast_capable = is_broadcast_capable(i_target);
+
+    if(l_broadcast_capable == mss::states::NO)
+    {
+        FAPI_INF("%s is not broadcast capable, skipping enablement of broadcast mode", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Enable broadcast mode
+    FAPI_INF("%s is broadcast capable, enabling broadcast mode", mss::c_str(i_target));
+    return enable_broadcast_mode(i_target, io_program);
 }
 
 } // namespace
