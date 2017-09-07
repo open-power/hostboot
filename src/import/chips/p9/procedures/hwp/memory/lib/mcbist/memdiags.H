@@ -145,6 +145,12 @@ class operation
         fapi2::ReturnCode base_init();
 
         ///
+        /// @brief Configures all subtests for a multiport init
+        /// @param[in] i_dimms a vector of DIMM targets
+        ///
+        void configure_multiport_subtests(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms);
+
+        ///
         /// @brief memdiags multi-port init helper
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructores more easily.
