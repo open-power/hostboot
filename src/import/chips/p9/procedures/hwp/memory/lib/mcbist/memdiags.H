@@ -38,6 +38,7 @@
 #define _MSS_MEMDIAGS_H_
 
 #include <fapi2.H>
+#include <lib/shared/mss_const.H>
 #include <lib/mcbist/mcbist.H>
 #include <lib/mcbist/address.H>
 #include <lib/mcbist/patterns.H>
@@ -176,6 +177,15 @@ class operation
             return iv_program;
         }
 
+        ///
+        /// @brief get the protected mcbist subtest_t - useful for testing
+        /// @return a reference to the iv_subtest member
+        ///
+        const mss::mcbist::subtest_t<T>& get_subtest() const
+        {
+            return iv_subtest;
+        }
+
     protected:
         fapi2::Target<T>          iv_target;
         mss::mcbist::subtest_t<T> iv_subtest;
@@ -203,6 +213,12 @@ struct sf_init_operation : public operation<T>
                        fapi2::ReturnCode& o_rc ):
         operation<T>(i_target, mss::mcbist::init_subtest<T>(), i_const)
     {
+        // If sf_init was passed the random data pattern, then modify the subtest to use the true random data
+        if(i_const.iv_pattern == PATTERN_RANDOM)
+        {
+            this->iv_subtest.change_data_mode(mss::mcbist::data_mode::RAND_FWD_MAINT);
+        }
+
         // We're a multi-port operation
         o_rc = this->multi_port_init();
     }
