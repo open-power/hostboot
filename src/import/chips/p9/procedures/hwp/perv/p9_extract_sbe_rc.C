@@ -155,7 +155,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         l_ppe_halt_state  = false;
         o_return_action = P9_EXTRACT_SBE_RC::RESTART_SBE;
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_RUNNING()
-                    .set_TARGET_CHIP(i_target_chip));
+                    .set_TARGET_CHIP(i_target_chip), "SBE is in running state");
     }
 
     if(l_ppe_halt_state)
@@ -769,7 +769,7 @@ fapi2::ReturnCode p9_extract_sbe_rc(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         FAPI_ERR("Halted due to unknown error at IAR location %08lX", l_data32_iar);
         o_return_action = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
         FAPI_ASSERT(FAIL, fapi2::EXTRACT_SBE_RC_UNKNOWN_ERROR()
-                    .set_TARGET_CHIP(i_target_chip));
+                    .set_TARGET_CHIP(i_target_chip), "SBE halted due to unknown error");
     }
 
     FAPI_INF("p9_extract_sbe_rc : Exiting ...");
