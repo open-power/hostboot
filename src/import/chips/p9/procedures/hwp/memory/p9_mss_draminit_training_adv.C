@@ -61,14 +61,19 @@ extern "C"
     {
         std::vector<fapi2::ReturnCode> l_fails;
         uint8_t l_cal_abort_on_error = i_abort_on_error;
+        uint8_t l_sim = 0;
+        FAPI_TRY( mss::is_simulation (l_sim) );
 
         FAPI_INF("Start draminit training advance %s", mss::c_str(i_target));
 
         // If there are no DIMMs installed, we don't need to bother. In fact, we can't as we didn't setup
         // attributes for the PHY, etc.
-        if (mss::count_dimm(i_target) == 0)
+        if (mss::count_dimm(i_target) == 0 || l_sim)
         {
-            FAPI_INF("... skipping draminit_training_adv %s - no DIMM ...", mss::c_str(i_target));
+            FAPI_INF("... skipping draminit_training_adv %s... %s Dimms. %s SIM.",
+                     mss::c_str(i_target),
+                     mss::count_dimm(i_target) == 0 ? "Has no" : "Has",
+                     l_sim ? "Is" : "Is not");
             return fapi2::FAPI2_RC_SUCCESS;
         }
 

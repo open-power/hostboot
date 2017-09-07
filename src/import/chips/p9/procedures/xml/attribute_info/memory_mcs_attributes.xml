@@ -1986,7 +1986,6 @@
         </description>
         <valueType>uint32</valueType>
         <initToZero></initToZero>
-        <default>0xEA0CA6C9</default>
         <enum>DEFAULT_PATTERN0 = 0xEA0C, DEFAULT_PATTERN1 = 0xA6C9</enum>
         <writeable/>
         <array>2</array>
@@ -2013,7 +2012,6 @@
         </description>
         <valueType>uint32</valueType>
         <initToZero></initToZero>
-        <default>0x13EC02FD</default>
         <enum>DEFAULT_PATTERN0 = 0x13EC, DEFAULT_PATTERN1 = 0x02FD</enum>
         <writeable/>
         <array>2</array>
