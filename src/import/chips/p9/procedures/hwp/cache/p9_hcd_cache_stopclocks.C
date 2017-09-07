@@ -76,6 +76,7 @@ p9_hcd_cache_stopclocks(
     fapi2::buffer<uint64_t>                        l_data64;
     fapi2::buffer<uint64_t>                        l_temp64;
     uint64_t                                       l_region_clock              = 0;
+    uint64_t                                       l_region_fence              = 0;
     uint64_t                                       l_l3mask_pscom              = 0;
     uint32_t                                       l_loops1ms                  = 0;
     uint32_t                                       l_scom_addr                 = 0;
@@ -267,8 +268,23 @@ p9_hcd_cache_stopclocks(
     FAPI_DBG("Assert vital fence via CPLT_CTRL1[3]");
     FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, MASK_SET(3)));
 
+    l_region_fence = l_region_clock;
+
+    if (!l_is_mpipl)
+    {
+        if (l_region_fence & p9hcd::CLK_REGION_EX0_L3)
+        {
+            l_region_fence |= p9hcd::CLK_REGION_EX0_REFR;
+        }
+
+        if (l_region_fence & p9hcd::CLK_REGION_EX1_L3)
+        {
+            l_region_fence |= p9hcd::CLK_REGION_EX1_REFR;
+        }
+    }
+
     FAPI_DBG("Assert regional fences via CPLT_CTRL1[4-14]");
-    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, l_region_clock));
+    FAPI_TRY(putScom(i_target, EQ_CPLT_CTRL1_OR, l_region_fence));
 
     // Gate the PCBMux request so scanning doesn't cause random requests
     for(auto& it : l_core_functional_vector)
