@@ -259,8 +259,6 @@ errlHndl_t powerDownSlaveQuads()
     const uint32_t OCC_SRAM_RING_STASH_BAR = 0xFFF3FC00;
     uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
     uint64_t CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK = 0x0C00000000000000;
-    uint64_t CPPM_CORE_POWMAN_MODE_REG = 0x200F0108;
-    uint64_t SET_WKUP_SELECT_MASK = 0x0004000000000000;
 
     bool l_isMasterEq = false;
     uint64_t l_ringData[8] = {0,0,0,0,0,0,0,0};
@@ -334,35 +332,6 @@ errlHndl_t powerDownSlaveQuads()
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                               "Error clearing bits 4 and 5 of CME_SCOM_SICR on ex %d", l_ex_child->getAttr<TARGETING::ATTR_CHIP_UNIT>());
                     break;
-                }
-            }
-
-            if(l_err)
-            {
-                //If there is an error break out of the EQ loop, something is wrong
-                break;
-            }
-
-            //TODO 171763 Core state setup for MPIPL should be done in a HWP
-            //Set WKUP_SELECT bit on slave cores
-            for(const auto & l_core_target : l_coreTargetList)
-            {
-                TARGETING::ATTR_CHIP_UNIT_type l_core_id = l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-                if(l_core_id != l_masterCoreId)
-                {
-
-                    //Set WKUP_SELECT bit on all slave cores on master EQ
-                    l_err = deviceWrite(l_core_target,
-                                        &SET_WKUP_SELECT_MASK,
-                                        MASK_SIZE,
-                                        DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
-                    if(l_err)
-                    {
-                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                                  "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_core_id);
-                        break;
-                    }
                 }
             }
 
@@ -517,22 +486,6 @@ errlHndl_t powerDownSlaveQuads()
                 {
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                             "Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
-                }
-            }
-
-            //TODO 171763 Core state setup for MPIPL should be done in a HWP
-            //set WKUP_SELECT bit for all slave cores
-            for(const auto & l_core_target : l_coreTargetList)
-            {
-                l_err = deviceWrite(l_core_target,
-                                    &SET_WKUP_SELECT_MASK,
-                                    MASK_SIZE,
-                                    DEVICE_SCOM_ADDRESS(CPPM_CORE_POWMAN_MODE_REG));
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error setting WKUP_SELECT bit of CPPM_CORE_REG on core %d", l_core_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
-                    break;
                 }
             }
 
