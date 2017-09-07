@@ -63,14 +63,21 @@ enum
  */
 enum
 {
-    MCS_POS         =   1,
-    MBA_POS         =   9,
-    MEM_BUF_POS     =   17,
-    XBUS_POS        =   25,
-    PHB_POS         =   30,
-    CAPP_POS        =   37,
-    OBUS_POS        =   41,
-    NVLINK_POS      =   45,
+    MCS_POS             =   1,
+    MBA_POS             =   9,
+    MEM_BUF_POS         =   17,
+    XBUS_POS            =   25,
+    PHB_POS             =   30,
+    CAPP_POS            =   37,
+    OBUS_POS            =   41,
+    NVLINK_POS          =   45,
+    OBUS_BRICK_0_POS    =   0,
+    OBUS_BRICK_1_POS    =   1,
+    OBUS_BRICK_2_POS    =   2,
+    OBUS_BRICK_9_POS    =   9,
+    OBUS_BRICK_10_POS   =   10,
+    OBUS_BRICK_11_POS   =   11,
+
 };
 
 /**
@@ -208,12 +215,43 @@ fapi2::ReturnCode checkObusChipletHierarchy( CONST_FAPI2_PROC& i_procTgt,
                     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_obusBrick, l_brickPos ),
                               "Error from FAPI_ATTR_GET(ATTR_CHIP_UNIT_POS)" );
 
-                    l_brickBitPos = l_brickPos + i_nvLinkPos;
+                    switch( l_brickPos )
+                    {
+                        case OBUS_BRICK_0_POS:
+                        case OBUS_BRICK_1_POS:
+                        case OBUS_BRICK_2_POS:
+
+                            l_brickBitPos   =   l_brickPos + i_nvLinkPos;
+
+                            break;
+
+                        case OBUS_BRICK_9_POS:
+                            l_brickBitPos   =   i_nvLinkPos + 3;
+                            break;
+
+                        case OBUS_BRICK_10_POS:
+                            l_brickBitPos   =   i_nvLinkPos + 4;
+                            break;
+
+                        case OBUS_BRICK_11_POS:
+                            l_brickBitPos   =   i_nvLinkPos + 5;
+                            break;
+
+                        default:
+
+                            FAPI_ASSERT_NOEXIT( ( false ),
+                                                fapi2::BAD_OBUS_BRICK_POSITION()
+                                                .set_TARGET( l_obusBrick )
+                                                .set_OBRICK_POS( l_brickPos ),
+                                                "Bad or unexpected Obus brick position" );
+
+                    }
+
                     io_configVector |=  l_tempVector >> l_brickBitPos;
 
 #ifndef __HOSTBOOT_MODULE
 
-                    FAPI_INF( "NV Link Pos %02d Bit Pos 0x%02x (%d) UAV 0x%016lx",
+                    FAPI_INF( "OBus Brick Pos %02d Bit Pos 0x%02x (%d) UAV 0x%016lx",
                               l_brickPos, l_brickBitPos, l_brickBitPos, io_configVector );
 
 #endif
