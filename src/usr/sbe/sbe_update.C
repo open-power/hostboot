@@ -2406,7 +2406,7 @@ namespace SBE
         CONSOLE::displayf(SBE_COMP_NAME,
                           "System Performing SBE Update for PROC %d, side %d",
                         io_sbeState.target->getAttr<TARGETING::ATTR_POSITION>(),
-                        io_sbeState.seeprom_side_to_update);
+                        io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ? SBE_SEEPROM0 : SBE_SEEPROM1);
 #endif
 
         errlHndl_t err = NULL;
