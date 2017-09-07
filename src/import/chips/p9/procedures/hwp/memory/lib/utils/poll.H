@@ -162,8 +162,8 @@ inline bool poll(const fapi2::Target<T>& i_target,
 {
     fapi2::buffer<uint64_t> l_reg;
 
-    FAPI_DBG("polling 0x%llx: initial delay %dns(%dsc) poll %dns(%dsc) %d iters",
-             i_addr, i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
+    FAPI_DBG("%s polling 0x%llx: initial delay %luns(%lusc) poll %luns(%lusc) %lu iters",
+             mss::c_str(i_target), i_addr, i_params.iv_initial_delay, i_params.iv_initial_sim_delay,
              i_params.iv_delay, i_params.iv_sim_delay, i_params.iv_poll_count);
 
     // We know to wait this long before polling
@@ -183,7 +183,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
 
         if (i_fn(l_poll_limit, l_reg) == true)
         {
-            FAPI_DBG("polling finished. %d iterations remaining", l_poll_limit);
+            FAPI_DBG("%s polling finished. %d iterations remaining" , mss::c_str(i_target), l_poll_limit);
             return true;
         }
 
@@ -191,7 +191,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     }
 
     // If we're here, we ran out of poll iterations
-    FAPI_INF("WARNING: Timeout on polling");
+    FAPI_INF("%s WARNING: Timeout on polling", mss::c_str(i_target));
     return false;
 
 fapi_try_exit:

@@ -679,6 +679,187 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this vector of targets
+/// @param[in] i_targets the vector of targets to analyze - specialization for MCA target type
+/// @return l_capable - yes iff these vector of targets are broadcast capable
+///
+template< >
+const mss::states is_broadcast_capable(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCA>>& i_targets)
+{
+    // If we don't have MCA's exit out
+    if(i_targets.size() == 0)
+    {
+        FAPI_INF("No MCA's found. Not broadcast capable, exiting...");
+        return mss::states::NO;
+    }
+
+    // Now the fun begins
+    // First, get the number of DIMM's on the 0th MCA
+    const uint64_t l_first_mca_num_dimm = mss::count_dimm(i_targets[0]);
+
+    // Now, find if we have any MCA's that have a different number of DIMM's
+    const auto l_mca_it = std::find_if(i_targets.begin(),
+                                       i_targets.end(),
+                                       [l_first_mca_num_dimm]( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_rhs) -> bool
+    {
+        // Count the number of DIMM and compare to the expected
+        const uint64_t l_num_dimm = mss::count_dimm(i_rhs);
+
+        // If they're different, we found the MCA that is different
+        return (l_first_mca_num_dimm != l_num_dimm);
+    });
+
+    // If no MCA was found that have a different number of DIMMs (aka a different drop), then we are broadcast capable
+    if(l_mca_it == i_targets.end())
+    {
+        const auto l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_targets[0]);
+        FAPI_INF("MCA vector from %s has the same number of DIMMs per port: %lu - is broadcast capable",
+                 mss::c_str(l_mcbist), l_first_mca_num_dimm);
+        return mss::states::YES;
+    }
+
+    // Otherwise, note the MCA that differs and return that this is not broadcast capable
+    FAPI_INF("MCA %s differs on the number of DIMMs per port: (number of DIMMs from i_targets[0] %lu, found %lu) - is NOT broadcast capable",
+             mss::c_str(*l_mca_it), l_first_mca_num_dimm, mss::count_dimm(*l_mca_it));
+    return mss::states::NO;
+}
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this target
+/// @param[in] i_target the target to effect - specialization for MCBIST target type
+/// @return l_capable - yes iff these vector of targets are broadcast capable
+///
+template< >
+const mss::states is_broadcast_capable(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
+{
+    // Steps to determine if this MCBIST is broadcastable
+    // 1) Check the number of DIMM's on each MCA - true only if they all match
+    // 2) Check that all of the DIMM kinds are equal - if the are, then we can do broadcast mode
+    // 3) if both 1 and 2 are true, then broadcast capable, otherwise false
+
+    // 1) Check the number of DIMM's on each MCA - if they don't match, then no
+    const auto l_mca_check = is_broadcast_capable(mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target));
+
+    // 2) Check that all of the DIMM kinds are equal - if the are, then we can do broadcast mode
+    const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+    const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
+    const auto l_dimm_kind_check = is_broadcast_capable(l_dimm_kinds);
+
+    // 3) if both 1/2 are true, then broadcastable, otherwise false
+    const auto l_capable = (l_mca_check == mss::states::YES && l_dimm_kind_check == mss::states::YES) ?
+                           mss::states::YES : mss::states::NO;
+
+    FAPI_INF("%s %s broadcast capable", mss::c_str(i_target), (l_capable == mss::states::YES) ? "is" : "is not");
+    return l_capable;
+}
+
+///
+/// @brief Checks if broadcast mode is capable of being enabled on this vector of targets
+/// @param[in] i_target the target to effect
+/// @return l_capable - yes iff these vector of targets are broadcast capable
+///
+const mss::states is_broadcast_capable(const std::vector<mss::dimm::kind>& i_kinds)
+{
+    // If we don't have any DIMM kinds exit out
+    if(i_kinds.size() == 0)
+    {
+        FAPI_INF("No DIMM kinds are located. Not broadcast capable, exiting...");
+        return mss::states::NO;
+    }
+
+    // Now the fun begins
+    // First, get the starting kind - the 0th kind in the vector
+    const auto l_expected_kind = i_kinds[0];
+
+    // Now, find if we have any kinds that differ from our first kind
+    const auto l_kind_it = std::find_if(i_kinds.begin(),
+                                        i_kinds.end(), [&l_expected_kind]( const mss::dimm::kind & i_rhs) -> bool
+    {
+        // If they're different, we found a DIMM that is differs
+        return (l_expected_kind != i_rhs);
+    });
+
+    // If no DIMM kind was found that differs, then we are broadcast capable
+    if(l_kind_it == i_kinds.end())
+    {
+        FAPI_INF("DIMM kinds vector starting with %s has the kinds for all DIMM's - is broadcast capable",
+                 mss::c_str(l_expected_kind.iv_target));
+        return mss::states::YES;
+    }
+
+    // Otherwise, note the MCA that differs and return that this is not broadcast capable
+    FAPI_INF("DIMM kinds vector differs with %s has the kinds for all DIMM's - is not broadcast capable",
+             mss::c_str(l_kind_it->iv_target));
+    return mss::states::NO;
+}
+
+///
+/// @brief Configures all of the ports for broadcast mode
+/// @param[in] i_target the target to effect - MCBIST specialization
+/// @param[out] o_port_select - the configuration of the selected ports
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode setup_broadcast_port_select(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+        uint64_t& o_port_select)
+{
+    // Starting location - the MCBIST type takes in ports as a right justified uint64_t value
+    // As we have 4 ports per-MCBIST, they occupy 60-63
+    // START contains the starting offset for each port
+    constexpr uint64_t START = 60;
+
+    // Loops through all the ports and adds them to the broadcast value
+    fapi2::buffer<uint64_t> l_port_select;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        // Configures each port individually
+        const uint64_t l_offset = mss::relative_pos<TARGET_TYPE_MCBIST>(l_mca);
+        FAPI_TRY(l_port_select.setBit(START +  l_offset),
+                 "%s setBit error for relative pos of %lu",
+                 mss::c_str(l_mca), l_offset);
+    }
+
+    // Assigns the returned value
+    o_port_select = l_port_select;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enables broadcast mode
+/// @param[in] i_target the target to effect - MCBIST specialization
+/// @param[in,out] io_program the mcbist::program - MCBIST specialization
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< >
+fapi2::ReturnCode enable_broadcast_mode(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target,
+                                        mcbist::program<fapi2::TARGET_TYPE_MCBIST>& io_program)
+{
+    // constexpr's for beautification
+    constexpr bool ENABLE = true;
+    constexpr auto BROADCAST_SYNC_ENABLE = mss::states::ON;
+    constexpr auto MAX_BROADCAST_SYNC_WAIT = mss::mcbist::broadcast_timebase::TB_COUNT_128;
+
+    // First, enable broadcast mode
+    io_program.change_maint_broadcast_mode(ENABLE);
+
+    // Second, configure broadcast mode on all enabled ports
+    uint64_t l_port_select = 0;
+    FAPI_TRY(setup_broadcast_port_select(i_target, l_port_select));
+    io_program.select_ports(l_port_select);
+
+    // Finally, enable broadcast sync mode and max out the wait to avoid timeout issues
+    io_program.broadcast_sync_enable(BROADCAST_SYNC_ENABLE);
+    io_program.change_broadcast_timebase(MAX_BROADCAST_SYNC_WAIT);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace MCBIST
 
 // Note: outside of the mcbist namespace

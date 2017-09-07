@@ -80,6 +80,7 @@ class posTraits<fapi2::TARGET_TYPE_DIMM>
             DIMMS_PER_PORT = 2,
             DIMMS_PER_MCS = PORTS_PER_MCS * DIMMS_PER_PORT,
             MCS_PER_PROC = MC_PER_MODULE * MCS_PER_MC,
+            DIMMS_PER_MCBIST = PORTS_PER_MCBIST * DIMMS_PER_PORT,
         };
 };
 
@@ -231,7 +232,7 @@ relative_pos<fapi2::TARGET_TYPE_MCS>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 }
 
 ///
-/// @brief Return a DIMM's relative position from an MCS
+/// @brief Return a DIMM's relative position from an MCA
 /// @param[in] i_target a target representing the target in question
 /// @return The position relative to chiplet R
 ///
@@ -241,6 +242,19 @@ relative_pos<fapi2::TARGET_TYPE_MCA>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 {
     typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
     return pos(i_target) % TT::DIMMS_PER_PORT;
+}
+
+///
+/// @brief Return a DIMM's relative position from an MCBIST
+/// @param[in] i_target a target representing the target in question
+/// @return The position relative to chiplet R
+///
+template<>
+inline posTraits<fapi2::TARGET_TYPE_DIMM>::pos_type
+relative_pos<fapi2::TARGET_TYPE_MCBIST>(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target)
+{
+    typedef posTraits<fapi2::TARGET_TYPE_DIMM> TT;
+    return pos(i_target) % TT::DIMMS_PER_MCBIST;
 }
 
 ///
