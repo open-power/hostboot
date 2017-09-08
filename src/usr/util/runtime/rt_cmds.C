@@ -513,6 +513,7 @@ void cmd_readpnor( char*& o_output,
         o_output = new char[100];
         sprintf( o_output, "Error from getSectionInfo()" );
         delete l_errhdl;
+        l_errhdl = nullptr;
         return;
     }
 

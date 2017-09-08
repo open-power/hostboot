@@ -1136,8 +1136,8 @@ errlHndl_t hdatService::findSpira( void )
         }
     } while(0);
 
-    if( errhdl_s ) { delete errhdl_s; }
-    if( errhdl_l ) { delete errhdl_l; }
+    if( errhdl_s ) { delete errhdl_s; errhdl_s = nullptr;}
+    if( errhdl_l ) { delete errhdl_l; errhdl_l = nullptr; }
 
     return errhdl;
 }

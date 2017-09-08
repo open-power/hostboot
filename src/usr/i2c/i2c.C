@@ -4143,6 +4143,7 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                 {
                     // Unable to get info, so we skip
                     delete l_err;
+                    l_err = nullptr;
                     continue;
                 }
                 // ignore the devices that aren't on the current target

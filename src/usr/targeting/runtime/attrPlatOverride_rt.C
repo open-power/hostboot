@@ -167,6 +167,7 @@ void applyTempOverrides()
             // if the new RHB is in use, this will always fail
             //  so just delete the error
             delete l_err;
+            l_err = nullptr;
         }
         else
         {

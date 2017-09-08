@@ -1394,6 +1394,7 @@ namespace SENSOR
                 if (l_errl || (L_obus_cfgID_bit == 0))
                 {
                     delete l_errl;
+                    l_errl = nullptr;
                     // default to full list of GPU sensors
                     L_obus_cfgID_bit = NVCFG_ALL_SENSORS_RETURNED;
                 }

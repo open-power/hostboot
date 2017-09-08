@@ -287,6 +287,7 @@ void VfsRp::_vfsWatcher()
             else // Crit error already generated
             {
                 delete err;
+                err = nullptr;
             }
 
             iv_msg->data[1] = -EIO;  /* I/O error */

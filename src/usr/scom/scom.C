@@ -814,6 +814,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         && (l_err->reasonCode() == IBSCOM::IBSCOM_RETRY_DUE_TO_ERROR) )
     {
         delete l_err;
+        l_err = nullptr;
         TRACFCOMP(g_trac_scom, "Forcing retry of Scom to %.16X on %.8X", i_addr,
             (TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target ?
                     0xFFFFFFFF : TARGETING::get_huid(i_target)));
@@ -927,6 +928,7 @@ void addScomFailFFDC( errlHndl_t i_err,
             if( l_ignored )
             {
                 delete l_ignored;
+                l_ignored = nullptr;
                 l_scomdata = 0;
             }
             else

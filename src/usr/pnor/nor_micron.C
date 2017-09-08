@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -51,7 +51,7 @@ errlHndl_t micronCheckForWorkarounds( SfcDD* i_sfc,
 
         // HW workaround - run this command before reading out chipid
         l_err = micronFlagStatus( i_sfc );
-        if(l_err) { delete l_err; }
+        if(l_err) { delete l_err; l_err = nullptr; }
 
         uint32_t outdata[4];
 
@@ -78,7 +78,7 @@ errlHndl_t micronCheckForWorkarounds( SfcDD* i_sfc,
 
         //Prove this works
         l_err = micronFlagStatus( i_sfc );
-        if(l_err) { delete l_err; }
+        if(l_err) { delete l_err; l_err = nullptr; }
 
     } while(0);
 
@@ -121,7 +121,7 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
                                        SfcDD::NO_ADDRESS,
                                        0, NULL,
                                        6, reinterpret_cast<uint8_t*>(outdata) );
-            if( l_err ) { delete l_err; }
+            if( l_err ) { delete l_err; l_err = nullptr; }
 
             /*@
              * @errortype
@@ -157,6 +157,7 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
             if( l_err )
             {
                 delete l_err;
+                l_err = nullptr;
             }
             else
             {

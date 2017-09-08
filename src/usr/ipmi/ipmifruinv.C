@@ -501,6 +501,7 @@ void IpmiFruInv::setMfgData(std::vector<uint8_t> &io_data,
          io_data.push_back(0);
          io_data.push_back(0);
          delete l_errl;
+         l_errl = nullptr;
     }
     else
     {
@@ -1668,6 +1669,7 @@ void IPMIFRUINV::setData(bool i_updateData)
                          l_fruId, l_curFru.size());
                 l_fru->sendFruData(l_fruId);
                 delete l_fru;
+                l_fru = nullptr;
             }
         }
 

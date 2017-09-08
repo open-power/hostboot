@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -559,6 +559,7 @@ void SfcAST2X00::addFFDC( errlHndl_t& io_errhdl )
     if( l_err )
     {
         delete l_err;
+        l_err = nullptr;
     }
     else
     {

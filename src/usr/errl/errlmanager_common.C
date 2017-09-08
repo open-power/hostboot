@@ -177,6 +177,7 @@ void ErrlManager::setupPnorInfo()
                             sendErrLogToBmc(err,
                                             false /* do not resend SELs */);
                             delete err;
+                            err = nullptr;
                         }
                         else
                         {
@@ -724,6 +725,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                         l_sensorType[j] = 0;
 
                         delete l_errl;
+                        l_errl = nullptr;
                     }
 
                     // this call will modify the sensor if any procedure

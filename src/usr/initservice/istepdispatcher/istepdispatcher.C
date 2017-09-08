@@ -484,6 +484,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             if (ISTEP::RC_FAILURE == err->reasonCode())
                             {
                                 delete err;
+                                err = nullptr;
                             }
                             else
                             {

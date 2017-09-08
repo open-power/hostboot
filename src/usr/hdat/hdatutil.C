@@ -970,6 +970,7 @@ errlHndl_t hdatGetAsciiKwdForMvpd(TARGETING::Target * i_target,
                 theRecord,theKeyword,theSize,curCmd);
 
                 delete err;
+                err = nullptr;
 
                 if ( NULL != theData )
                 {
@@ -1106,6 +1107,7 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
                 theRecord,theSize,curRec);
 
                 delete err;
+                err = nullptr;
 
                 if ( NULL != theData )
                 {
