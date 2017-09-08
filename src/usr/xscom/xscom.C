@@ -598,6 +598,7 @@ void resetScomEngine(TARGETING::Target* i_target,
         {
             // Delete thie errorlog as this is in the errorpath already.
             delete l_err;
+            l_err = nullptr;
 
             TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM RESET FAILED: XscomAddr = %.16llx, VAddr=%llx",XscomAddr[i], l_virtAddr );
         }
@@ -674,6 +675,7 @@ void collectXscomFFDC(TARGETING::Target* i_target,
         if (l_err)
         {
             delete l_err;
+            l_err = nullptr;
 
             TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM Collect FFDC FAILED: XscomAddr = %.16llx, VAddr=%llx",XscomAddr[i], l_virtAddr);
         }

@@ -168,6 +168,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
                 // memory leak. Let error below be the one committed.
                 TRACFCOMP( g_trac_pnor, "Error communicating with MBOX daemon");
                 delete l_err;
+                l_err = nullptr;
             }
 
             /*@

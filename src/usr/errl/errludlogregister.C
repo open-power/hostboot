@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,12 +184,13 @@ void ErrlUserDetailsLogRegister::readRegister(
                     &reg_data, reg_size,
                     (DeviceFW::AccessType) i_accessType, i_args);
 
-        if (unlikely(errl != NULL))
+        if (unlikely(errl != nullptr))
         {   // error!
             TRACFCOMP(g_trac_errl, "LogRegister: deviceOpValist type %d"
                         " threw errl! deleting errl.",
                         i_accessType);
             delete errl; // eat the error - just delete it
+            errl = nullptr;
 
             // nothing gets written out
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -861,6 +861,7 @@ errlHndl_t SfcIBM::checkForErrors( ResetLevels &o_resetLevel )
         {
             TRACFCOMP( g_trac_pnor, ERR_MRK"SfcIBM::checkForErrors> Deleting register read error. Returning error created for the found error");
             delete l_err;
+            l_err = nullptr;
         }
 
 

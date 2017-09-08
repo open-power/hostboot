@@ -278,6 +278,7 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
                                false );
                 }
                 delete l_ffdc_parser;
+                l_ffdc_parser = nullptr;
             }
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
@@ -529,6 +530,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                 {
                     l_respRegs[i] = 0;
                     delete l_errl;
+                    l_errl = nullptr;
                 }
 
                 l_respRegsFFDC.addData(DEVICE_XSCOM_ADDRESS(l_addr));
@@ -616,6 +618,7 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
                                      false );
                 }
                 delete l_ffdc_parser;
+                l_ffdc_parser = nullptr;
             }
 
             // save the mbox status regs as FFDC
