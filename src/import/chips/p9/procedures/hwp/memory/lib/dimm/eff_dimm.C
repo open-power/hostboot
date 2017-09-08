@@ -4653,6 +4653,11 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
     // blob to the decoder for each MCA, regardless of whether the port configurations are the same.
     for (const auto& p : find_targets<TARGET_TYPE_MCA>(i_target))
     {
+        if (mss::count_dimm(p) == 0)
+        {
+            continue;
+        }
+
         // Find our blob in the vector of blob pointers
         uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
         uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
