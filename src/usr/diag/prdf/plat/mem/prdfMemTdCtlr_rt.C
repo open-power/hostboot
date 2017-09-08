@@ -263,6 +263,8 @@ uint32_t MemTdCtlr<TYPE_MBA>::initialize()
                 break;
             }
 
+            if ( !chipMark.isValid() ) continue; // no chip mark present
+
             // Get the DQ Bitmap data.
             TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
             MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
@@ -333,6 +335,8 @@ uint32_t MemTdCtlr<TYPE_MCBIST>::initialize()
                         "failed", mcaChip->getHuid(), rank.getMaster() );
                 break;
             }
+
+            if ( !chipMark.isValid() ) continue; // no chip mark present
 
             // Get the DQ Bitmap data.
             TargetHandle_t mcaTrgt = mcaChip->GetChipHandle();
