@@ -9,9 +9,8 @@ config ENABLE_CHECKSTOP_ANALYSIS
         Enable collection of FIR data by OCC for checkstops and
         post-checkstop analysis by PRD on system reboot
 
-#TODO RTC:178806 Re-enable once simics defect is fixed
 config IPLTIME_CHECKSTOP_ANALYSIS
-    default n
+    default y
     help
         Enable collection of FIR data by the OCC for checkstops
         during the IPL.
