@@ -171,7 +171,7 @@ enum states
     NO = 0,
     YES_N = 0,
     NO_N = 1,
-    INVALID = 0xFF,
+    _INVALID_ = 0xFF,
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
 
