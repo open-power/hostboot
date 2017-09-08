@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -50,7 +50,7 @@ include ${ROOTPATH}/procedure.rules.mk
 
 # fabric_erepair
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pdwn_lanes.mk
+#Skipping p9_io_xbus_pdwn_lanes, already included by libprdf.so
 
 # fabric_io_dccal
 #p9_io_xbus_dccal.mk has includes we dont need so manually add the .o
@@ -63,7 +63,7 @@ include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_pre_trainadv.mk
 # fabric_io_run_training
 #p9_io_xbus_linktrain.mk has includes we dont need so manually add the .o
 OBJS+= p9_io_xbus_linktrain.o
-include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_clear_firs.mk
+#Skipping p9_io_xbus_clear_firs, already included by libprdf.so
 
 # fabric_post_trainadv
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_post_trainadv.mk
