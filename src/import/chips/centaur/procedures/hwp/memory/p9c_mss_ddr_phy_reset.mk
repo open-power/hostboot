@@ -28,6 +28,6 @@
 PROCEDURE=p9c_mss_ddr_phy_reset
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
-OBJS+=p9c_mss_termination_control.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_termination_control
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

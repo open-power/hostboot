@@ -28,9 +28,9 @@
 PROCEDURE=p9c_mss_draminit_training
 lib${PROCEDURE}_DEPLIBS+=p9c_dimmBadDqBitmapFuncs
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_funcs
-OBJS+=p9c_mss_mrs6_DDR4.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_mrs6_DDR4
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_ddr4_funcs
-OBJS+=p9c_mss_access_delay_reg.o
+lib${PROCEDURE}_DEPLIBS+=p9c_mss_access_delay_reg
 lib${PROCEDURE}_DEPLIBS+=p9c_mss_unmask_errors
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)
