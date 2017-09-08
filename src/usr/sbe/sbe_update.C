@@ -2684,11 +2684,6 @@ namespace SBE
             {
                 err = SBEIO::sendPsuQuiesceSbe(io_sbeState.target);
 
-                // @TODO RTC 178620 - Remove after confirming SBE fix
-                //   Give SBE more time as there was a race condition
-                //   in their quiesce path
-                nanosleep(1, 0); //Sleep for 1s
-
                 if(err)
                 {
                     TRACFCOMP( g_trac_sbe, ERR_MRK"updateSeepromSide() - Error "
