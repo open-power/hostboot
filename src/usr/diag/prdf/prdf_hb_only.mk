@@ -156,6 +156,8 @@ prd_obj_no_sim += p9_io_xbus_read_erepair.o
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_obj_no_sim += p9_proc_gettracearray.o
 prd_obj_no_sim += p9_sbe_tracearray.o
+prd_obj_no_sim += p9_io_xbus_clear_firs.o
+prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
@@ -168,8 +170,6 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/cache/
 # This is really the only file we need, but all of the other files below are
 # required because of dependencies.
 prd_obj_no_sim += memdiags.o
-prd_obj_no_sim += p9_io_xbus_clear_firs.o
-prd_obj_no_sim += p9_io_xbus_pdwn_lanes.o
 prd_obj_no_sim += p9_l2err_linedelete.o
 prd_obj_no_sim += p9_l2err_extract.o
 prd_obj_no_sim += p9_l3err_linedelete.o
