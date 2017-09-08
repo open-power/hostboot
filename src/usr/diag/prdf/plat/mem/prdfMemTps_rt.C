@@ -531,6 +531,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         break;
                     }
 
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymbolMark );
+
                     // Update VPD with the symbol mark.
                     o_rc = dqBitmap.setSymbol( i_badDqCount.symList[0].symbol );
                     if ( SUCCESS != o_rc )
@@ -550,6 +553,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymUeRisk );
 
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
@@ -599,6 +605,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         break;
                     }
 
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymbolMark );
+
                     // Update VPD with both symbols.
                     for ( auto sym : i_badDqCount.symList )
                     {
@@ -622,6 +631,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymUeRisk );
 
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
@@ -669,11 +681,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                                newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
                                   "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
 
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsChipMark );
                     // Update VPD with the chip mark.
                     o_rc = dqBitmap.setDram( i_badChipCount.symList[0].symbol );
                     if ( SUCCESS != o_rc )
@@ -693,6 +707,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsChipUeRisk );
 
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
@@ -738,10 +755,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                                                                newChipMark );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) "
+                        PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
                                   "failed", iv_chip->getHuid(), getKey() );
                         break;
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsChipMark );
 
                     // Update VPD with the chip mark.
                     o_rc = dqBitmap.setDram( i_badChipCount.symList[0].symbol );
@@ -765,6 +785,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsChipUeRisk );
+
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
 
@@ -792,6 +816,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         break;
                     }
 
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymbolMark );
+
                     // Update VPD with the symbol mark.
                     o_rc = dqBitmap.setSymbol( i_badDqCount.symList[0].symbol );
                     if ( SUCCESS != o_rc )
@@ -814,6 +841,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
+
+                    io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                                      PRDFSIG_TpsSymUeRisk );
+
                     // Make the error log predictive.
                     io_sc.service_data->setServiceCall();
 
@@ -834,6 +865,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
                           "_RANK::MCA>() failed." );
             }
+
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_TpsPotentialUe );
+
             // Make the error log predictive.
             io_sc.service_data->setServiceCall();
 
@@ -844,11 +879,17 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         // If analysis resulted in a false alarm.
         if ( tpsFalseAlarm )
         {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_TpsFalseAlarm );
+
             // Increase false alarm counter.
             // If false alarm counter threshold of 3 per day is reached.
             if ( __getTpsFalseAlarmCounter<TYPE_MCA>(iv_chip)->inc( iv_rank,
                                                                     io_sc) )
             {
+                io_sc.service_data->setSignature( iv_chip->getHuid(),
+                    PRDFSIG_TpsFalseAlarmTH );
+
                 // Permanently mask mainline NCEs and TCEs
                 getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
 
@@ -1019,6 +1060,9 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
         // abort this procedure.
         if ( areDramRepairsDisabled() )
         {
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_TpsDramDisabled );
+
             io_sc.service_data->setServiceCall();
             break;
         }

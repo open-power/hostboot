@@ -49,6 +49,15 @@ PRDR_ERROR_SIGNATURE(VcmFalseAlarm,   0xffff0021, "", "VCM: false alarm");
 PRDR_ERROR_SIGNATURE(VcmFalseAlarmTH, 0xffff0022, "", "VCM: false alarm threshold");
 PRDR_ERROR_SIGNATURE(AllDramRepairs,  0xffff002F, "", "all DRAM repairs used");
 
+PRDR_ERROR_SIGNATURE(TpsFalseAlarm,   0xffff0061, "", "TPS: false alarm");
+PRDR_ERROR_SIGNATURE(TpsFalseAlarmTH, 0xffff0062, "", "TPS: false alarm threshold");
+PRDR_ERROR_SIGNATURE(TpsSymbolMark,   0xffff0063, "", "TPS: symbol mark placed");
+PRDR_ERROR_SIGNATURE(TpsChipMark,     0xffff0064, "", "TPS: chip mark placed");
+PRDR_ERROR_SIGNATURE(TpsSymUeRisk,    0xffff0065, "", "TPS: placing symbol mark risks UE");
+PRDR_ERROR_SIGNATURE(TpsChipUeRisk,   0xffff0066, "", "TPS: placing chip mark risks UE");
+PRDR_ERROR_SIGNATURE(TpsPotentialUe,  0xffff0067, "", "TPS: potential UE");
+PRDR_ERROR_SIGNATURE(TpsDramDisabled, 0xffff0068, "", "TPS: DRAM repairs disabled");
+
 PRDR_ERROR_SIGNATURE(MnfgIplHardCE,  0xffff0051, "", "MNFG IPL hard CE");
 PRDR_ERROR_SIGNATURE(MnfgIplDramCTE, 0xffff0052, "", "MNFG IPL DRAM CTE");
 PRDR_ERROR_SIGNATURE(MnfgIplRankCTE, 0xffff0053, "", "MNFG IPL rank CTE");
