@@ -1786,7 +1786,7 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
     {
         FAPI_INF("phy control dll/zcal stat 0x%llx, remaining: %d", stat_reg, poll_remaining);
         l_status = stat_reg;
-        return mss::pc::get_dll_cal_status(l_status) != mss::INVALID;
+        return mss::pc::get_dll_cal_status(l_status) != mss::_INVALID_;
     });
 
     for (const auto& p : l_mca)

@@ -412,7 +412,7 @@ static mss::states dll_cal_status_helper( const bool l_good,
     // Full calibration is still going on in at least 1 DLL while all 3 signals are 0.
     if ((l_good == mss::LOW) && (l_error == mss::LOW) && (l_error_fine == mss::LOW))
     {
-        return mss::INVALID;
+        return mss::_INVALID_;
     }
 
     // Full calibration was successful in all DLLs if CAL_GOOD = 1 and both CAL_ERROR and CAL_ERROR_FINE are 0.
@@ -463,9 +463,9 @@ inline mss::states get_dll_cal_status( fapi2::buffer<uint64_t>& i_data )
     FAPI_INF("pc_dll_status: 0x%016llx", i_data);
 
 
-    if( l_dp_status == mss::INVALID || l_adr_status == mss::INVALID )
+    if( l_dp_status == mss::_INVALID_ || l_adr_status == mss::_INVALID_ )
     {
-        return mss::INVALID;
+        return mss::_INVALID_;
     }
 
     if( l_dp_status == mss::NO || l_adr_status == mss::NO )
