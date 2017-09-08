@@ -727,7 +727,7 @@ foreach my $argnum ( 0 .. $#ARGV )
                 @elements[$i] =~ s/^\s+|\s+$//g;
                 addFfdcMethod( \%methods, @elements[$i], $err->{rc}, $ffdc_type, $objNum );
 
-                $collectFfdc .= "@elements[$i]"
+                $collectFfdc .= "@elements[$i]";
 
             }
 
@@ -751,10 +751,12 @@ foreach my $argnum ( 0 .. $#ARGV )
 
             # assign the tempRc with newly added ffdc back to the passed in RC
             $collectFfdcStr .= "\tRC = tempRc; \\\n";
-
-            print EIFILE "\\\n{ \\\n$collectFfdcStr \\\n}";
-
         }    #end collectFfdc tag
+
+        if ( defined $collectFfdcStr )
+        {
+            print EIFILE "\\\n{ \\\n$collectFfdcStr}";
+        }
 
         print EIFILE "\n";
 
