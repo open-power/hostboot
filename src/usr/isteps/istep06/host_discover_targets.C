@@ -229,6 +229,7 @@ errlHndl_t clearInterruptReg()
 
     for(const auto & l_chip : l_procChips)
     {
+        //TODO 179645 Determine why we have to clear PERV_ATTN_INTERRUPT_REG during dump MPIPLs on DD2
         l_err = deviceWrite(l_chip,
                              &CLEAR_SCOM,
                              MASK_SIZE,
@@ -319,7 +320,7 @@ errlHndl_t powerDownSlaveQuads()
                                          TARGETING::TYPE_EX,
                                          true);
 
-            //TODO 171763 Core state setup for MPIPL should be done in a HWP
+            //TODO 171340 Need to rm clear of PM_EXIT bit in EX_0_CME_SCOM_SICR_SCOM1 reg during MPIPL
             for(const auto & l_ex_child : l_exChildren)
             {
                 // Clear bits 4 & 5 of CME_SCOM_SICR which sets PM_EXIT for C0 and C1 respectively
