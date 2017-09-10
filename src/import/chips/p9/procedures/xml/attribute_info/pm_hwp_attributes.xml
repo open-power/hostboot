@@ -418,6 +418,62 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SGPE_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enable debug halt function upon SGPE Phantom interrupts 
+
+    Consumers: p9_hcode_image_build ->
+                      SGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PGPE_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enable debug halt function upon PGPE Phantom interrupts 
+
+    Consumers: p9_hcode_image_build ->
+                      PGPE Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CME_STOP_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enable debug halt function upon CME Stop Phantom stop interrupts 
+
+    Consumers: p9_hcode_image_build ->
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CME_PSTATE_PHANTOM_HALT_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Enable debug halt function upon CME Pstate Phantom stop interrupts 
+
+    Consumers: p9_hcode_image_build ->
+                      CME Header
+    </description>
+    <valueType>uint8</valueType>
+    <enum>FALSE=0, TRUE=1</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CORE_INSIDE_SPECIAL_WAKEUP</id>
     <targetType>TARGET_TYPE_CORE</targetType>
     <description>Indicates that a special wakeup is in progress for a core.
