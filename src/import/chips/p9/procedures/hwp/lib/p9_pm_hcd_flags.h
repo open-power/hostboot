@@ -38,7 +38,6 @@
 #ifndef _P9_PM_HCDFLAGS_H_
 #define _P9_PM_HCDFLAGS_H_
 
-
 #ifndef __PPE_PLAT
 namespace p9hcd
 {

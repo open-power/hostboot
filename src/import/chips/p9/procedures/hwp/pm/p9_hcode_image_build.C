@@ -790,17 +790,21 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     PgpeHeader_t* pPgpeHdr = (PgpeHeader_t*)& i_pChipHomer->ppmrRegion.pgpeSramImage[PGPE_INT_VECTOR_SIZE];
     //Handling flags common to CME and SGPE
 
-    FAPI_DBG(" ==================== CME/SGPE Flags =================");
+    FAPI_DBG(" ==================== CME/SGPE Shared Header Flags =================");
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP4_DISABLE,
                            FAPI_SYSTEM,
                            attrVal),
              "Error from FAPI_ATTR_GET for attribute ATTR_STOP4_DISABLE");
+
     if( attrVal )
     {
         cmeFlag |= CME_STOP_4_TO_2_BIT_POS;
         sgpeFlag |= SGPE_STOP_4_TO_2_BIT_POS;
     }
     FAPI_DBG("STOP_4_to_2                   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP5_DISABLE,
                            FAPI_SYSTEM,
@@ -813,6 +817,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
     FAPI_DBG("STOP_5_to_4                   :   %s", attrVal ? "TRUE" : "FALSE");
 
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP8_DISABLE,
                            FAPI_SYSTEM,
                            attrVal),
@@ -823,6 +829,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
         sgpeFlag |= SGPE_STOP_8_TO_5_BIT_POS;
     }
     FAPI_DBG("STOP_8_to_5                   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_STOP11_DISABLE,
                            FAPI_SYSTEM,
@@ -837,94 +845,39 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("STOP_11_to_8                  :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_INSTRUCTION_TRACE_ENABLE,
-                           i_procTgt,
+    ///
+
+    FAPI_DBG(" ==================== CME Header Flags =================");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_STOP_PHANTOM_HALT_ENABLE,
+                           FAPI_SYSTEM,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_CME_INSTRUCTION_TRACE_ENABLE");
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_STOP_PHANTOM_HALT_ENABLE");
 
     if( attrVal )
     {
-        sgpeFlag |= SGPE_ENABLE_CME_TRACE_ARRAY_BIT_POS;
+        cmeFlag |= CME_STOP_PHANTOM_HALT_ENABLE_BIT_POS;
     }
 
-    FAPI_DBG("CME Instruction Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("CME_STOP_PHANTOM_HALT_ENABLE  :   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_ENABLE,
-                           i_procTgt,
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_PSTATE_PHANTOM_HALT_ENABLE,
+                           FAPI_SYSTEM,
                            attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_ENABLE");
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_PSTATE_PHANTOM_HALT_ENABLE");
 
     if( attrVal )
     {
-        sgpeFlag |= SGPE_ENABLE_CHTM_TRACE_CME_BIT_POS;
+        qmFlags |= CME_QM_FLAG_PSTATE_PHANTOM_HALT_EN;
     }
 
-    FAPI_DBG("CME CHTM Trace Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG("CME_PSTATE_PHANTOM_HALT_ENABLE:   %s", attrVal ? "TRUE" : "FALSE" );
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_MEMORY_CONFIG,
-                           i_procTgt,
-                           chtmVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_MEMORY_CONFIG" );
+    /// 
 
-    if( chtmVal )
-    {
-        pSgpeHdr->g_sgpe_chtm_mem_cfg = SWIZZLE_8_BYTE(chtmVal);
-    }
-
-    FAPI_DBG("CME CHTM Memory Config        :   %016llx", chtmVal);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RESCLK_ENABLED,
-                           i_procTgt,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_RESCLK_ENABLED" );
-
-    if( attrVal )
-    {
-        qmFlags  |= CME_QM_FLAG_RESCLK_ENABLE;
-        pgpeFlag |= PGPE_FLAG_RESCLK_ENABLE;
-    }
-
-    FAPI_DBG("Resonant Clock Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_ENABLED,
-                           i_procTgt,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_IVRM_ENABLED" );
-
-    if( attrVal )
-    {
-        qmFlags  |= CME_QM_FLAG_SYS_IVRM_ENABLE;
-        pgpeFlag |= PGPE_FLAG_IVRM_ENABLE;
-    }
-
-    FAPI_DBG("IVRM Enabled                  :   %s", attrVal ? "TRUE" : "FALSE" );
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED,
-                           i_procTgt,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLED" );
-
-    if( attrVal )
-    {
-        qmFlags  |= CME_QM_FLAG_SYS_VDM_ENABLE;
-        sgpeFlag |= SGPE_VDM_ENABLE_BIT_POS;
-        pgpeFlag |= PGPE_FLAG_VDM_ENABLE;
-    }
-
-    FAPI_DBG("VDM Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED,
-                           i_procTgt,
-                           attrVal),
-             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_ENABLED" );
-
-    if( attrVal )
-    {
-        qmFlags  |= CME_QM_FLAG_SYS_WOF_ENABLE;
-        pgpeFlag |= PGPE_FLAG_WOF_ENABLE;
-    }
-
-    FAPI_DBG("WOF Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
+    FAPI_DBG(" ==================== SGPE Header Flags =================");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
                            FAPI_SYSTEM,
@@ -941,6 +894,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     FAPI_DBG("Fabric Pump Mode              :   %s", (
     attrVal == fapi2::ENUM_ATTR_PROC_FABRIC_PUMP_MODE_CHIP_IS_NODE) ? "TRUE" : "FALSE" );
 
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_CORECACHE_SKEWADJ_DISABLE,
                            FAPI_SYSTEM,
                            attrVal),
@@ -952,6 +907,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("Cache Skew Adjust Disabled    :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_CORECACHE_DCADJ_DISABLE,
                            FAPI_SYSTEM,
@@ -965,8 +922,81 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("Cache DC Adjust Disabled      :   %s", attrVal ? "TRUE" : "FALSE" );
 
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_INSTRUCTION_TRACE_ENABLE,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_INSTRUCTION_TRACE_ENABLE");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_ENABLE_CME_TRACE_ARRAY_BIT_POS;
+    }
+
+    FAPI_DBG("CME Instruction Trace Enabled :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_ENABLE,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_ENABLE");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_ENABLE_CHTM_TRACE_CME_BIT_POS;
+    }
+
+    FAPI_DBG("CME CHTM Trace Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    /// 
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SGPE_PHANTOM_HALT_ENABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_SGPE_PHANTOM_HALT_ENABLE");
+
+    if( attrVal )
+    {
+         sgpeFlag |= SGPE_PHANTOM_HALT_ENABLE_BIT_POS;
+    }
+    FAPI_DBG("SGPE_PHANTOM_HALT_ENABLE      :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_DBG(" ==================== SGPE Header Fields =================");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_MEMORY_CONFIG,
+                           i_procTgt,
+                           chtmVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_CME_CHTM_TRACE_MEMORY_CONFIG" );
+
+    if( chtmVal )
+    {
+        pSgpeHdr->g_sgpe_chtm_mem_cfg = SWIZZLE_8_BYTE(chtmVal);
+    }
+
+    FAPI_DBG("CME CHTM Memory Config        :   %016llx", chtmVal);
+
     // Set PGPE Header Flags from Attributes
-    FAPI_DBG(" -------------------- PGPE Flags -----------------");
+
+    FAPI_DBG(" -------------------- PGPE Header Flags -----------------");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PGPE_PHANTOM_HALT_ENABLE,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_PGPE_PHANTOM_HALT_ENABLE");
+
+    if( attrVal )
+    {
+         pgpeFlag |= PGPE_FLAG_PHANTOM_HALT_ENABLE;;
+    }
+
+    FAPI_DBG("PGPE_PHANTOM_HALT_ENABLE      :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PGPE_HCODE_FUNCTION_ENABLE,
                            FAPI_SYSTEM,
                            attrVal),
@@ -980,6 +1010,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("PGPE Hcode Mode               :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
 
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_FRATIO,
                            FAPI_SYSTEM,
                            attrVal),
@@ -991,6 +1023,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("System Frequency Ratio Enable :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLE_VRATIO,
                            FAPI_SYSTEM,
@@ -1004,6 +1038,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG("System Voltage Ratio Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
 
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_VRATIO_SELECT,
                            FAPI_SYSTEM,
                            attrVal),
@@ -1015,6 +1051,69 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     }
 
     FAPI_DBG("System Voltage Ratio Select   :   %s", attrVal ? "FULL" : "ACTIVE CORES" );
+
+    ///
+
+    FAPI_DBG(" -------------------- CME/PGPE Shared Header Flags -----------------");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RESCLK_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_RESCLK_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags  |= CME_QM_FLAG_RESCLK_ENABLE;
+        pgpeFlag |= PGPE_FLAG_RESCLK_ENABLE;
+    }
+
+    FAPI_DBG("Resonant Clock Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDM_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_VDM_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags  |= CME_QM_FLAG_SYS_VDM_ENABLE;
+        sgpeFlag |= SGPE_VDM_ENABLE_BIT_POS;
+        pgpeFlag |= PGPE_FLAG_VDM_ENABLE;
+    }
+
+    FAPI_DBG("VDM Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IVRM_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_IVRM_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags  |= CME_QM_FLAG_SYS_IVRM_ENABLE;
+        pgpeFlag |= PGPE_FLAG_IVRM_ENABLE;
+    }
+
+    FAPI_DBG("IVRM Enabled                  :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED,
+                           i_procTgt,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_WOF_ENABLED" );
+
+    if( attrVal )
+    {
+        qmFlags  |= CME_QM_FLAG_SYS_WOF_ENABLE;
+        pgpeFlag |= PGPE_FLAG_WOF_ENABLE;
+    }
+
+    FAPI_DBG("WOF Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
 
 
 
