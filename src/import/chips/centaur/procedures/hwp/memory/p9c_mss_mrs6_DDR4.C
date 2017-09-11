@@ -118,6 +118,8 @@ extern "C"
         FAPI_INF("\n Running NO -OP command");
         fapi2::buffer<uint8_t> l_data_8;
         fapi2::buffer<uint16_t> l_data_16;
+        uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target_mba, l_dram_stack));
         //CCS Array 0 Setup
 
         //Buffer conversions from inputs
@@ -130,6 +132,14 @@ extern "C"
         FAPI_TRY(l_bank_3.insertFromRight((uint8_t)l_data_8, 0 , 3));
         l_csn_8.flush<1>();
         FAPI_TRY(l_csn_8.clearBit(i_rank), "add_activate_to_ccs: Error setting up buffers");
+
+        if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+        {
+            FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
+            FAPI_TRY(l_csn_8.clearBit(2, 2));
+            FAPI_TRY(l_csn_8.clearBit(6, 2));
+            FAPI_TRY(l_cke_4.clearBit(1));
+        }
 
         //Command structure setup
         l_cke_4.flush<1>();
@@ -389,9 +399,9 @@ extern "C"
                     if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
                     {
                         FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
-                        FAPI_TRY(l_csn_8.clearBit(2 + 4 * l_dimm_number, 2));
-                        // I'm leaving this commented out - I need to double check it with Luke Mulkey to see which CS's are wired to which CKE's
-                        // FAPI_TRY(l_cke_4.clearBit(1);
+                        FAPI_TRY(l_csn_8.clearBit(2, 2));
+                        FAPI_TRY(l_csn_8.clearBit(6, 2));
+                        FAPI_TRY(l_cke_4.clearBit(1));
                     }
 
                     // Propogate through the 4 MRS cmds
@@ -439,8 +449,6 @@ extern "C"
                              || l_dimm_type == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM) )
                     {
                         FAPI_INF( "Sending out MRS with Address Inversion to B-side DRAMs\n");
-
-
                         // Propogate through the 4 MRS cmds
                         // Copying the current MRS into address buffer matching the MRS_array order
                         // Setting the bank address

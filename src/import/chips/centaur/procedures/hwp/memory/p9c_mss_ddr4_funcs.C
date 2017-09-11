@@ -105,13 +105,6 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
 
         FAPI_INF( "Stack Type in mss_ddr4_invert_mpr_write : %d\n", l_dram_stack[0][0]);
 
-        if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
-        {
-            FAPI_INF( "=============  Got in the 3DS stack loop =====================\n");
-            FAPI_TRY(l_csn_8.clearBit(2, 2));
-            FAPI_TRY(l_csn_8.clearBit(6, 2));
-            // COMMENT IN LATER!!!!!! rc_num = rc_num | l_cke_4.clearBit(1));
-        }
 
         FAPI_TRY(mss_ccs_inst_arry_0( i_target_mba,
                                       l_ccs_inst_cnt,
@@ -162,6 +155,14 @@ fapi2::ReturnCode mss_ddr4_invert_mpr_write( const fapi2::Target<fapi2::TARGET_T
 
                     FAPI_TRY(l_csn_8.setBit(0, 8));
                     FAPI_TRY(l_csn_8.clearBit(l_rank_number + 4 * l_dimm));
+
+                    if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+                    {
+                        FAPI_INF( "=============  Got in the 3DS stack loop =====================\n");
+                        FAPI_TRY(l_csn_8.clearBit(2, 2)); // Clearing CKE caused issues here.
+                        FAPI_TRY(l_csn_8.clearBit(6, 2));
+                    }
+
                     FAPI_TRY(l_address_16.clearBit(0, 16));
 
                     // MRS CMD to CMD spacing = 12 cycles
@@ -526,14 +527,17 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                     if(l_stack_height == 8)
                     {
                         l_rcd_cntl_word_8_9 = 0x00;
+                        l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x00;
                     }
                     else if(l_stack_height == 4)
                     {
                         l_rcd_cntl_word_8_9 = 0x10;
+                        l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x04;
                     }
                     else if(l_stack_height == 2)
                     {
                         l_rcd_cntl_word_8_9 = 0x20;
+                        l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x06;
                     }
                     //weird, we shouldn't have 1H stacks
                     else
@@ -542,7 +546,6 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
                     }
                 }
             }
-
             //LR DIMM and 4 ranks
             else if(l_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_LRDIMM
                     && l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4)
@@ -553,6 +556,7 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             else
             {
                 l_rcd_cntl_word_8_9 = 0x30;
+                l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x07;
             }
 
             // RDIMM Operating Speed Control Word
@@ -618,14 +622,9 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             // DIMM Configuration Control words
             FAPI_TRY(l_data_buffer_8.clearBit(0, 8));
 
-            if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4 )
-            {
-                FAPI_TRY(l_data_buffer_8.setBit(3)); // Direct QuadCS mode
-            }
-
             if ( l_dimm_type_u8 == fapi2::ENUM_ATTR_CEN_EFF_DIMM_TYPE_RDIMM  )
             {
-                FAPI_TRY(l_data_buffer_8.setBit(1));
+                FAPI_TRY(l_data_buffer_8.setBit(1)); //DUALCS MODE
             }
 
             if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] > 1 )
@@ -716,17 +715,6 @@ fapi2::ReturnCode mss_create_rcd_ddr4(const fapi2::Target<fapi2::TARGET_TYPE_MBA
             // RCAx QxODT[1:0] Read Pattern CW
             l_rcd_cntl_word_Ax[l_port][l_dimm] = 0;
 
-            // RCBx IBT and MRS Snoop CW
-            if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4 )
-            {
-                l_rcd_cntl_word_Bx[l_port][l_dimm] = 4;
-            }
-            else
-            {
-                l_rcd_cntl_word_Bx[l_port][l_dimm] = 7;
-            }
-
-
             FAPI_TRY(l_data_buffer_64.insertFromRight(l_rcd_cntl_word_1x[l_port][l_dimm], 0 , 8));
             FAPI_TRY(l_data_buffer_64.insertFromRight(l_rcd_cntl_word_2x[l_port][l_dimm], 8 , 8));
             FAPI_TRY(l_data_buffer_64.insertFromRight(l_rcd_cntl_word_3x[l_port][l_dimm], 16, 8));
@@ -768,6 +756,7 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     uint32_t& io_ccs_inst_cnt
 )
 {
+    uint8_t l_dram_stack[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT];
     uint32_t l_dimm_number = 0;
     uint32_t l_rcd_number = 0;
     fapi2::variable_buffer l_rcd_cntl_wrd_4(8);
@@ -816,11 +805,9 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
     FAPI_TRY(l_odt_4.clearBit(0, 4));
 
 
-
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_STACK_TYPE, i_target, l_dram_stack));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_TYPE, i_target, l_dimm_type));
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM, i_target, l_num_ranks_array));
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DIMM_RCD_CNTL_WORD_0_15, i_target, l_rcd_array));
 
 
@@ -884,6 +871,14 @@ fapi2::ReturnCode mss_rcd_load_ddr4(
             // ALL active CS lines at a time.
             FAPI_TRY(l_csn_8.setBit(0, 8), "mss_rcd_load: Error setting up buffers");
             FAPI_TRY(l_csn_8.clearBit(0), "mss_rcd_load: Error setting up buffers"); //DCS0_n is LOW
+
+            if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+            {
+                FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
+                FAPI_TRY(l_csn_8.clearBit(2, 2));
+                FAPI_TRY(l_csn_8.clearBit(6, 2));
+                FAPI_TRY(l_cke_4.clearBit(1));
+            }
 
             // DBG1, DBG0, DBA1, DBA0 = 4`b0111
             FAPI_TRY(l_bank_3.setBit(0, 3), "mss_rcd_load: Error setting up buffers");
@@ -1229,7 +1224,7 @@ fapi2::ReturnCode mss_mrs_load_ddr4(
         FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
         FAPI_TRY(l_csn_8.clearBit(2, 2));
         FAPI_TRY(l_csn_8.clearBit(6, 2));
-        // COMMENT IN LATER!!!! FAPI_TRY(cke_4.clearBit(1);
+        FAPI_TRY(l_cke_4.clearBit(1));
     }
 
     //MRS0
@@ -2090,8 +2085,8 @@ fapi2::ReturnCode mss_mrs_load_ddr4(
                 if (l_dram_stack[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
                 {
                     FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
-                    FAPI_TRY(l_csn_8.clearBit(2 + 4 * l_dimm_number, 2));
-                    // COMMENT IN LATER!!!! FAPI_TRY(l_cke_4.clearBit(1);
+                    FAPI_TRY(l_csn_8.clearBit(2, 2)); // Clearing CKE caused issues here.
+                    FAPI_TRY(l_csn_8.clearBit(6, 2));
                 }
 
                 // Propogate through the 4 MRS cmds

@@ -969,6 +969,7 @@ fapi2::ReturnCode mss_execute_zq_cal(
         if(l_stack_type[i_port][l_dimm] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
         {
             l_rank_end = l_num_master_ranks_array[i_port][l_dimm];
+
         }
         else
         {
@@ -980,6 +981,14 @@ fapi2::ReturnCode mss_execute_zq_cal(
             FAPI_INF( "+++++++++++++++ Sending zqcal to port: %d rank: %d +++++++++++++++", i_port, l_current_rank);
             l_csn_buffer_8.flush<1>();
             FAPI_TRY(l_csn_buffer_8.clearBit(l_current_rank));
+
+            if(l_stack_type[0][0] == fapi2::ENUM_ATTR_CEN_EFF_STACK_TYPE_STACK_3DS)
+            {
+                FAPI_TRY(l_csn_buffer_8.clearBit(2, 2));
+                FAPI_TRY(l_csn_buffer_8.clearBit(6, 2));
+                FAPI_TRY(l_cke_buffer_4.clearBit(1));
+            }
+
             //Issue execute.
             FAPI_INF( "+++++++++++++++ Execute CCS array on port: %d +++++++++++++++", i_port);
             FAPI_TRY(mss_ccs_inst_arry_0(i_target, l_instruction_number, l_address_buffer_16, l_bank_buffer_3, l_activate_buffer_1,
