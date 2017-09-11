@@ -28,9 +28,9 @@
 ///
 //----------------------------------------------------------------------------
 // *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP FW Owner        : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : OCC:CME:FSP
 //----------------------------------------------------------------------------
 
@@ -41,8 +41,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
-#include <p9_quad_scom_addresses.H>
-#include <p9_pm_pfet_control.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
