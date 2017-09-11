@@ -108,6 +108,7 @@ enum HDATModuleId
   MOD_HDAT_IPMI_DTOR           = 0x31,
   MOD_TPMDATA_CONSTRUCTOR      = 0x32,
   MOD_TPMDATA_DESTRUCTOR       = 0x33,
+  MOD_UTIL_SMP_LINK_INFO       = 0x34,
 };
 
 
@@ -151,7 +152,11 @@ enum HDATReasonCode
     RC_NULL_PTR_PASSED                = HDAT_COMP_ID | 0x1a,
     RC_INVALID_NACA                   = HDAT_COMP_ID | 0x1b,
     RC_DEV_READ_VPD_FAIL              = HDAT_COMP_ID | 0x1c,
-    RC_NO_BMC_TARGET_FOUND            = HDAT_COMP_ID | 0x1d,  
+    RC_NO_BMC_TARGET_FOUND            = HDAT_COMP_ID | 0x1d,
+    RC_INVALID_OBUS_BRICKID           = HDAT_COMP_ID | 0x1e,
+    RC_INVALID_OBUS_FREQ_BUCKET       = HDAT_COMP_ID | 0x1f,
+    RC_UNDEFINED_PROC_MODEL_EC        = HDAT_COMP_ID | 0x20,
+    RC_INVALID_OBUS_PLL_FREQ          = HDAT_COMP_ID | 0x21,    
 };
 
 }  //namespace HDAT

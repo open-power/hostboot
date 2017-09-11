@@ -542,7 +542,7 @@ errlHndl_t HdatSpiraS::loadDataArea( const hdat5Tuple_t& i_spirasHostEntry,
 
                 if ( NULL == l_err )
                 {
-                    l_pcrd.hdatLoadPcrd(l_size,l_count);
+                    l_err = l_pcrd.hdatLoadPcrd(l_size,l_count);
                     HDAT_DBG("PCRD count=%d,size=%x",l_count,l_size);
                 }
                 else

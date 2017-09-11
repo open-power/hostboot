@@ -26,6 +26,7 @@
 #include "hdatutil.H"
 #include <i2c/eepromif.H>
 #include <stdio.h>
+#include <p9_frequency_buckets.H>
 
 #define UINT16_IN_LITTLE_ENDIAN(x) (((x) >> 8) | ((x) << 8))
 #define HDAT_VPD_RECORD_START_TAG 0x84
@@ -42,38 +43,38 @@ extern trace_desc_t *g_trac_hdat;
 
 // SEQUOIA
 const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc0_6gpucfg[] = {
- {0,0x01,0x00,0xF1E00000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {1,0x01,0x01,0x07187000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {2,0x01,0x02,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {3,0x01,0x09,0xF1E00000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {4,0x01,0x0A,0x07187000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {5,0x01,0x0B,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+ {0,0x01,0x00,0xF1E00000,11,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {2,0x01,0x01,0x07187000,11,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {4,0x01,0x02,0x00078F00,13,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0},
+ {6,0x01,0x09,0xF1E00000,15,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0},
+ {8,0x01,0x0A,0x07187000,15,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0},
+ {10,0x01,0x0B,0x00078F00,13,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0}
 };
 const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc1_6gpucfg[] = {
- {0,0x01,0x00,0xF1E00000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {1,0x01,0x01,0x07187000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {2,0x01,0x02,0x00078F00,12,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {3,0x01,0x09,0xF1E00000,27,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {4,0x01,0x0A,0x07187000,27,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {5,0x01,0x0B,0x00078F00,12,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+ {0,0x01,0x00,0xF1E00000,24,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {2,0x01,0x01,0x07187000,24,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {4,0x01,0x02,0x00078F00,26,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0},
+ {6,0x01,0x09,0xF1E00000,28,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0},
+ {8,0x01,0x0A,0x07187000,28,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0},
+ {10,0x01,0x0B,0x00078F00,26,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0}
 };
 
 // REDBUD
 const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc0_4gpucfg[] = {
- {0,0x01,0x00,0xF1E00000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {1,0x01,0x01,0x07187000,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {2,0x01,0x02,0x00078F00,21,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {3,0x01,0x09,0xF1E00000,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {4,0x01,0x0A,0x07187000,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {5,0x01,0x0B,0x00078F00,23,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+ {1,0x01,0x00,0xF1E00000,11,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {3,0x01,0x01,0x07187000,11,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {5,0x01,0x02,0x00078F00,11,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {7,0x01,0x09,0xF1E00000,13,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0},
+ {9,0x01,0x0A,0x07187000,13,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0},
+ {11,0x01,0x0B,0x00078F00,13,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,24,0}
 };
 const hdatSMPLinkInfo_t l_hdatSMPLinkInfoProc1_4gpucfg[] = {
- {0,0x01,0x00,0xF1E00000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {1,0x01,0x01,0x07187000,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {2,0x01,0x02,0x00078F00,25,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {3,0x01,0x09,0xF1E00000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {4,0x01,0x0A,0x07187000,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF},
- {5,0x01,0x0B,0x00078F00,10,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF}
+ {1,0x01,0x00,0xF1E00000,24,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {3,0x01,0x01,0x07187000,24,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {5,0x01,0x02,0x00078F00,24,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,22,0},
+ {7,0x01,0x09,0xF1E00000,26,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0},
+ {9,0x01,0x0A,0x07187000,26,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0},
+ {11,0x01,0x0B,0x00078F00,26,0xFFFF,0xFF,0x00,0xFF,0xFF,0xFF,2,23,0}
 };
 
 
@@ -1989,6 +1990,137 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
     HDAT_EXIT();
 }
 
+errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrPtr ,
+                                        hdatSMPLinkInfo_t * io_SMPInfoFullPcrdDataPtr,
+                                        TARGETING::Target* i_pProcTarget)
+{
+    errlHndl_t l_errl = NULL;
+    HDAT_ENTER();
+    std::vector<hdatSMPLinkInfo_t> l_SMPLinkInfoCntr(io_SMPInfoFullPcrdDataPtr,
+                           io_SMPInfoFullPcrdDataPtr + i_SMPInfoFullPcrdHdrPtr->hdatArrayCnt);
+    do{
+        for(auto & l_SMPInfoEle : l_SMPLinkInfoCntr)
+        {
+            uint8_t l_obusChipletPos = 
+                    (uint8_t) l_SMPInfoEle.hdatSMPLinkBrickID / NUM_BRICKS_PER_OBUS;
+            uint32_t l_obusPllFreqBucket = 0;
+            switch( l_obusChipletPos){
+                case 0: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB0_PLL_BUCKET>(); break;}
+                case 1: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB1_PLL_BUCKET>(); break;}
+                case 2: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB2_PLL_BUCKET>(); break;}
+                case 3: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB3_PLL_BUCKET>(); break;}
+                default :{
+                    HDAT_ERR(" Invalid obus Brick ID ");
 
+                    /*@
+                    * @errortype
+                    * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
+                    * @reasoncode       HDAT::RC_INVALID_OBUS_BRICKID
+                    * @devdesc          Invalid OBUS brick ID
+                    * @custdesc         Firmware encountered an internal
+                    *                   error while getting  obus brick ID
+                    */
+                    hdatBldErrLog(l_errl,
+                             MOD_UTIL_SMP_LINK_INFO,
+                            RC_INVALID_OBUS_BRICKID,
+                            0,0,0,0);
+                    break;
+                }
+            }
+            if(l_errl != NULL)
+            {
+                HDAT_ERR(" Error in getting the PLL Freq bucket");
+                break;
+            }
+            
+            if(l_obusPllFreqBucket >= OBUS_PLL_FREQ_BUCKETS)
+            {
+                    HDAT_ERR(" Invalid obus Freq bucket ");
+
+                    /*@
+                    * @errortype
+                    * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
+                    * @reasoncode       HDAT::RC_INVALID_OBUS_FREQ_BUCKET
+                    * @devdesc          Invalid OBUS Freq Bucket
+                    * @custdesc         Firmware encountered an internal
+                    *                   error while getting  obus frequency bucket
+                    */
+                    hdatBldErrLog(l_errl,
+                             MOD_UTIL_SMP_LINK_INFO,
+                            RC_INVALID_OBUS_FREQ_BUCKET,
+                            0,0,0,0);
+                    break;
+            }
+
+            uint32_t *l_freqList = NULL;
+            TARGETING::ATTR_MODEL_type l_chipModel = i_pProcTarget->getAttr<TARGETING::ATTR_MODEL>();
+            uint32_t l_chipECLevel = i_pProcTarget->getAttr<TARGETING::ATTR_HDAT_EC>();
+            if(l_chipModel == TARGETING::MODEL_NIMBUS)
+            {
+                switch (l_chipECLevel){
+                    case 0x10:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9N_10); break; }
+                    case 0x20:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9N_20); break; }
+                    case 0x21:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9N_21); break; }
+                    case 0x22:{l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9N_22); break; }
+                }
+            }
+            else if(l_chipModel == TARGETING::MODEL_CUMULUS)
+            {
+                if(l_chipECLevel == 0x10)
+                {   
+                    l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_10);
+                }
+            }
+            if(l_freqList == NULL)
+            {
+                HDAT_ERR("Invalid proc model and ec 0x%x, 0x%x", l_chipModel , l_chipECLevel);
+                    /*@
+                    * @errortype
+                    * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
+                    * @reasoncode       HDAT::RC_UNDEFINED_PROC_MODEL_EC
+                    * @devdesc          Undefined Proc model and ec
+                    * @custdesc         Firmware encountered an internal
+                    *                   error while finding proc model and ec
+                    */
+                    hdatBldErrLog(l_errl,
+                             MOD_UTIL_SMP_LINK_INFO,
+                            RC_UNDEFINED_PROC_MODEL_EC,
+                            0,0,0,0);
+                    break;
+            }
+            
+            uint32_t l_pllfreq = *(l_freqList+l_obusPllFreqBucket);
+            
+            switch( l_pllfreq ){
+                case 1250:{l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_20GBPS; break; };
+                case 1563:{l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_25GBPS; break; };
+                case 1611:{l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_25_78125GBPS; break; };
+                default:{
+                        HDAT_ERR("Invalid obus pll freq value for obus chiplet %d,"
+                                "of proc with HUID 0x%8X: 0x%d", l_obusChipletPos,
+                                i_pProcTarget->getAttr<ATTR_HUID>(), l_pllfreq);
+                        /*@
+                        * @errortype
+                        * @moduleid         HDAT::MOD_UTIL_SMP_LINK_INFO
+                        * @reasoncode       HDAT::RC_INVALID_OBUS_PLL_FREQ
+                        * @devdesc          Invalid OBUS PLL frequency value
+                        * @custdesc         Firmware encountered an internal
+                        *                   error while retrieving obus pll frequency values
+                        */
+                        hdatBldErrLog(l_errl,
+                                MOD_UTIL_SMP_LINK_INFO,
+                                RC_INVALID_OBUS_PLL_FREQ,
+                                0,0,0,0);
+                        break;
+                  }
+            }
+            if(l_errl != NULL){break;};
+        }
+    }while(0);
+    //Replace the updated data in the passed in pointer.
+    std::copy(l_SMPLinkInfoCntr.begin(), l_SMPLinkInfoCntr.end(),io_SMPInfoFullPcrdDataPtr);
+    HDAT_EXIT();
+    return l_errl;
+}
 
 } //namespace HDAT
