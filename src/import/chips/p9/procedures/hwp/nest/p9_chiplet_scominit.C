@@ -32,7 +32,7 @@
 // *HWP HW Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 2
+// *HWP Level : 3
 // *HWP Consumed by : HB
 //
 
@@ -43,19 +43,13 @@
 #include <p9_fbc_ioo_tl_scom.H>
 #include <p9_fbc_ioo_dl_scom.H>
 #include <p9n_mcs_scom.H>
-
-//TODO: RTC 176054
-#ifndef __HOSTBOOT_MODULE
-    #include <p9c_dmi_scom.H>
-    #include <p9c_mi_scom.H>
-    #include <p9c_mc_scom.H>
-#endif
-
+#include <p9c_dmi_scom.H>
+#include <p9c_mi_scom.H>
+#include <p9c_mc_scom.H>
 #include <p9_cxa_scom.H>
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
-
 #include <p9_xbus_scom_addresses.H>
 #include <p9_xbus_scom_addresses_fld.H>
 #include <p9_obus_scom_addresses.H>
@@ -103,12 +97,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcs_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MI>> l_mi_targets;
-
-//TODO: RTC 176054
-#ifndef __HOSTBOOT_MODULE
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MC>> l_mc_targets;
-#endif
-
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DMI>> l_dmi_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>> l_obrick_targets;
@@ -221,11 +210,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     l_mcs_targets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
     l_mi_targets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
     l_dmi_targets = i_target.getChildren<fapi2::TARGET_TYPE_DMI>();
-
-//TODO: RTC 176054
-#ifndef __HOSTBOOT_MODULE
     l_mc_targets = i_target.getChildren<fapi2::TARGET_TYPE_MC>();
-#endif
 
     if (l_mcs_targets.size())
     {
@@ -244,10 +229,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             }
         }
     }
-
-//TODO: RTC 176054
-#ifndef __HOSTBOOT_MODULE
-
     else if (l_mc_targets.size())
     {
         for (auto l_mc_target : l_mc_targets)
@@ -292,10 +273,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             }
         }
     }
-
-//TODO: RTC 176054
-#endif // __HOSTBOOT_MODULE
-
     else
     {
         FAPI_INF("No MCS/MI targets found! Do nothing!");
