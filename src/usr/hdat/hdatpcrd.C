@@ -597,7 +597,6 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
             l_SMPInfoFullPcrdHdrPtr->hdatActSize =
                     sizeof(hdatSMPLinkInfo_t);
 
-
             hdatSMPLinkInfo_t *l_SMPInfoFullPcrdDataPtr = NULL;
             l_SMPInfoFullPcrdDataPtr = reinterpret_cast<hdatSMPLinkInfo_t *>
                             ((uint8_t*)l_SMPInfoFullPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
@@ -607,12 +606,24 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 //copy data from vector to data ptr
                 std::copy(l_SMPInfoEntries.begin(),
                     l_SMPInfoEntries.end(), l_SMPInfoFullPcrdDataPtr);
+
+                // Update obus speed and other things which can't be pulled from mrw
+                // Since those are dynamically set by sbe.
+                l_errl = hdatUpdateSMPLinkInfoData(l_SMPInfoFullPcrdHdrPtr ,
+                                                      l_SMPInfoFullPcrdDataPtr,
+                                                      l_pProcTarget);
+                if(l_errl)
+                {
+                    HDAT_ERR(" Failed in hdatUpdateSMPLinkInfoData");
+                    break;
+                }
             }
             else
             {
                 HDAT_INF("Empty SMP Link info vector : Size=%d",
                     l_SMPInfoEntries.size());
             }
+
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_SMP].hdatOffset =
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_PNOR].hdatOffset +
                     sizeof(hdatPcrdPnor_t);

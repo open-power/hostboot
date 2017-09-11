@@ -98,7 +98,7 @@ const uint16_t HDAT_VERSION3 = 3;
 #define HDAT_ADD_PAD(x) x += (16 - ((uint64_t)x % 16))
 
 #define HDAT_NV_KWD_MAGIC_WRD  0x4E563030    // "NV00"
-
+#define NUM_BRICKS_PER_OBUS 3
 namespace HDAT
 {
 
@@ -141,6 +141,9 @@ struct hdatSMPLinkInfo_t
     uint32_t hdatSMPLinkI2cLinkId;
     uint32_t hdatSMPLinkI2cLinkIdPres;
     uint32_t hdatSMPLinkI2cLinkIdMicro;
+    uint8_t  hdatSMPLinkSpeed;
+    uint8_t  hdatSMPOccRegBitPos;
+    uint16_t hdatSMPGPUSlcaIdx;
 
 }__attribute__ ((packed));
 
@@ -166,6 +169,14 @@ enum hdatWitherspoonNVCnfg
     HDAT_SEQUOIA_NV_CNFG            = 2,
 };
 
+/** @enum NV Link speeds
+  */
+enum hdatNVLinkSpeed
+{
+    HDAT_OBUS_FREQ_20GBPS       = 0,
+    HDAT_OBUS_FREQ_25GBPS       = 1,
+    HDAT_OBUS_FREQ_25_78125GBPS = 2,
+};
 
 /** @brief Structure definition for an entry in the chip's engineering change
  *         level array
@@ -579,6 +590,17 @@ void hdatGetI2cDeviceInfo(TARGETING::Target* i_pTarget,
 void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
     std::vector<hdatSMPLinkInfo_t>&o_SMPLinkEntries);
 
+/******************************************************************************
+ * @brief         Updated the smp link info data got from hdat pnor partition
+ * @param[in]     i_SMPinfoFullPcrdHdrPtr : SMP info header pointer
+ * @param[in/out] io_SMPInfoFullPcrdDataPtr : SMP info data pointer
+ * @param[in]     i_pProcTarget : Proc target
+ * @return        A null error log handle if successfull, else the return code
+ * pointed by o_errlHndl
+*******************************************************************************/
+errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrPtr ,
+                                        hdatSMPLinkInfo_t * io_SMPInfoFullPcrdDataPtr,
+                                        TARGETING::Target* i_pProcTarget);
 
 
 };// end namespace

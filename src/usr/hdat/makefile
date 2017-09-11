@@ -28,7 +28,7 @@ MODULE = hdat
 
 EXTRAINCDIR += ../vpd
 EXTRAINCDIR += ../../include/usr/vpd
-EXTRAINCDIR +=
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
 OBJS += hdatutil.o
 OBJS += hdatpcia.o
