@@ -28,9 +28,33 @@
   <hwpError>
     <rc>RC_P9_PM_QUAD_POWEROFF_INCORRECT_EQ_SCAN64_VAL</rc>
     <description>
-        Data mis-match on EQ_SCAN64 
+        Data mis-match on EQ_SCAN64
     </description>
+    <ffdc>EQ</ffdc>
     <ffdc>EQ_SCAN64_VAL</ffdc>
+    <callout>
+      <target>EQ</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>EQ</target>
+    </deconfigure>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_P9_PM_QUAD_POWEROFF_CLKCNTL_TIMEOUT</rc>
+    <description>
+        Clock Controller timeout with OPCG Done.  Nimbus DD1 only
+    </description>
+    <ffdc>EQ</ffdc>
+    <ffdc>EQ_CPLT_STAT0_CC_CTRL</ffdc>
+    <callout>
+      <target>EQ</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>EQ</target>
+    </deconfigure>
   </hwpError>  
   <!-- ********************************************************************* -->
 </hwpErrors>

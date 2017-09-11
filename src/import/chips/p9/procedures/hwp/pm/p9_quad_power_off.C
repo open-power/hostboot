@@ -28,9 +28,9 @@
 ///
 //----------------------------------------------------------------------------
 // *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner        : Sumit Kumar <sumit_kumar@in.ibm.com>
+// *HWP FW Owner        : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : OCC:CME:FSP
 //----------------------------------------------------------------------------
 //
@@ -48,23 +48,15 @@
 // ----------------------------------------------------------------------
 #include <p9_quad_power_off.H>
 #include <p9_block_wakeup_intr.H>
-
+#include <p9_quad_scom_addresses.H>
+#include <p9_pm_pfet_control.H>
 
 // ----------------------------------------------------------------------
 // Function definitions
 // ----------------------------------------------------------------------
 
-//    {0,    0},
-//    {5039, 0xE000000000000000}, //3
-//    {5100, 0xC1E061FFED5F0000}, //29
-//    {5664, 0xE000000000000000}, //3
-//    {5725, 0xC1E061FFED5F0000}, //29
-//    {5973, 0xE000000000000000}, //3
-//    {6034, 0xC1E061FFED5F0000}, //29
-//    {6282, 0xE000000000000000}, //3
-//    {6343, 0xC1E061FFED5F0000}, //29
-//    {17871, 0}                  //128
-
+// Nimus DD1 ring offsets where a PBIEX buffer pointers are
+// Used only if ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL is set
 static const uint64_t RING_INDEX[10] =
 {
     0, 5039, 5100, 5664, 5725, 5973, 6034, 6282, 6343, 17871,
@@ -72,7 +64,7 @@ static const uint64_t RING_INDEX[10] =
 
 // Procedure p9_quad_power_off entry point, comments in header
 fapi2::ReturnCode p9_quad_power_off(
-    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    const fapi2::Target < fapi2::TARGET_TYPE_EQ>& i_target,
     uint64_t* o_ring_save_data)
 {
     fapi2::buffer<uint64_t> l_data64;
@@ -87,22 +79,25 @@ fapi2::ReturnCode p9_quad_power_off(
     uint8_t  l_isRingSaveMpipl = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_INF("p9_quad_power_off: Entering...");
+    FAPI_DBG("> p9_quad_power_off");
 
     // Print chiplet position
-    FAPI_INF("Quad power off chiplet no.%d", i_target.getChipletNumber());
+    FAPI_DBG("Quad power off chiplet no.%d", i_target.getChipletNumber());
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_isMpipl), "fapiGetAttribute of ATTR_IS_MPIPL failed!");
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_chip, l_isRingSaveMpipl),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, FAPI_SYSTEM, l_isMpipl),
+             "fapiGetAttribute of ATTR_IS_MPIPL failed!");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL,
+                           l_chip,
+                           l_isRingSaveMpipl),
              "fapiGetAttribute of ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL failed");
 
 
     if (l_isMpipl && l_isRingSaveMpipl)
     {
-        l_data64.setBit<4>();  //SCAN_REGION_PERV - scan clock region perv
-        l_data64.setBit<5>();  //SCAN_REGION_UNIT1 - scan clock region eqpb - pb
-        l_data64.setBit<11>(); //SCAN_REGION_UNIT7 - scan clock region pbieq - pb
-        l_data64.setBit<59>(); //SCAN_TYPE_INEX - scan chain idex (c14 asic)
+        l_data64.setBit<EQ_SCAN_REGION_TYPE_PERV>();
+        l_data64.setBit<EQ_SCAN_REGION_TYPE_UNIT1>();
+        l_data64.setBit<EQ_SCAN_REGION_TYPE_UNIT7>();
+        l_data64.setBit<EQ_SCAN_REGION_TYPE_INEX>();
 
         FAPI_TRY(fapi2::putScom(i_target,
                                 EQ_SCAN_REGION_TYPE,
@@ -113,6 +108,9 @@ fapi2::ReturnCode p9_quad_power_off(
         FAPI_TRY(fapi2::putScom(i_target,
                                 EQ_SCAN64,
                                 l_data64));
+
+
+        const uint32_t MAX_CLKCNTL_POLL_COUNT = 1000;
 
         for(uint32_t l_spin = 1; l_spin < 10; l_spin++)
         {
@@ -125,13 +123,23 @@ fapi2::ReturnCode p9_quad_power_off(
                                     l_data64));
             l_data64.flush<0>();
 
+            uint32_t l_pollcount = MAX_CLKCNTL_POLL_COUNT;
+
             do
             {
                 FAPI_TRY(fapi2::getScom(i_target,
                                         EQ_CPLT_STAT0,
                                         l_data64));
+                --l_pollcount;
             }
-            while (l_data64.getBit<8>() == 0);
+            while (l_data64.getBit<EQ_CPLT_STAT0_CC_CTRL_OPCG_DONE_DC>() == 0 &&
+                   l_pollcount != 0);
+
+            FAPI_ASSERT(l_pollcount,
+                        fapi2::P9_PM_QUAD_POWEROFF_CLKCNTL_TIMEOUT()
+                        .set_EQ(i_target)
+                        .set_EQ_CPLT_STAT0_CC_CTRL(l_data64),
+                        "Clock Controller timeout with OPCG Done");
 
             l_data64.flush<0>();
 
@@ -145,6 +153,7 @@ fapi2::ReturnCode p9_quad_power_off(
                 {
                     FAPI_ASSERT(false,
                                 fapi2::P9_PM_QUAD_POWEROFF_INCORRECT_EQ_SCAN64_VAL()
+                                .set_EQ(i_target)
                                 .set_EQ_SCAN64_VAL(l_data64),
                                 "Incorrect Value from EQ_SCAN64, Expected Value [0xa5a5a5a5a5a5a5a5]");
                 }
@@ -168,10 +177,10 @@ fapi2::ReturnCode p9_quad_power_off(
 
     FAPI_DBG("Disabling bits 20/22/24/26 in EQ_QPPM_QPMMR_CLEAR, to gain access"
              " to PFET controller, otherwise Quad Power off scom will fail");
-    l_data64.setBit<20>();
-    l_data64.setBit<22>();
-    l_data64.setBit<24>();
-    l_data64.setBit<26>();
+    l_data64.setBit<EQ_QPPM_QPMMR_CME_INTERPPM_IVRM_ENABLE>();
+    l_data64.setBit<EQ_QPPM_QPMMR_CME_INTERPPM_ACLK_ENABLE>();
+    l_data64.setBit<EQ_QPPM_QPMMR_CME_INTERPPM_VDATA_ENABLE>();
+    l_data64.setBit<EQ_QPPM_QPMMR_CME_INTERPPM_DPLL_ENABLE>();
     FAPI_TRY(fapi2::putScom(i_target, EQ_QPPM_QPMMR_CLEAR, l_data64));
 
     // QPPM_QUAD_CTRL_REG
@@ -200,6 +209,6 @@ fapi2::ReturnCode p9_quad_power_off(
     }
 
 fapi_try_exit:
-    FAPI_INF("p9_quad_power_off: ...Exiting");
+    FAPI_DBG("< p9_quad_power_off");
     return fapi2::current_err;
 }
