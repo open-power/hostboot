@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2013,2014              */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -23,6 +25,7 @@
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/attrrp.H>
+#include <util/misc.H>
 
 namespace TARGETING
 {
@@ -40,5 +43,8 @@ namespace TARGETING
 
         TargetService& l_targetService = targetService();
         (void)l_targetService.init();
+
+        // set global that TARG is ready
+        Util::setIsTargetingLoaded();
     }
 }
