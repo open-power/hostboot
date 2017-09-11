@@ -86,6 +86,9 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_cxa_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_mmu_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_int_scom.mk
 include ${PROCEDURES_PATH}/hwp/initfiles/p9_vas_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9c_dmi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mi_scom.mk
+include ${PROCEDURES_PATH}/hwp/initfiles/p9c_mc_scom.mk
 
 # proc_obus_scominit : Apply scom inits to Obus
 include ${PROCEDURES_PATH}/hwp/io/p9_io_obus_scominit.mk
