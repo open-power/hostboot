@@ -318,7 +318,7 @@ enum SB_FUNC_TYPES : sbFuncType_t
     SHA512 = 0x0000,
     ECDSA521 = 0x0001,
     MAX_TYPES,
-    INVALID = 0xFFFF
+    SB_FUNC_TYPES_INVALID = 0xFFFF
 };
 
 /**

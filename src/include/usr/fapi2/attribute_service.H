@@ -295,6 +295,141 @@ ReturnCode platGetSecurityMode(uint8_t & o_securityMode);
 /// @return ReturnCode           Always FAPI2_RC_SUCCESS, this cannot fail.
 ReturnCode platSetSecurityMode();
 
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_POWER_CONTROL_CAPABLE attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdPowerControlCapableVal   The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetControlCapableData(
+                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+        ATTR_CEN_VPD_POWER_CONTROL_CAPABLE_Type& o_vpdPowerControlCapableVal
+                                    );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_ISDIMMTOC4DQ attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdIsDimmTOC4DQVal  The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetDQAttrISDIMM(
+                           const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_ISDIMMTOC4DQ_Type &o_vpdIsDimmTOC4DQVal
+                              );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_ISDIMMTOC4DQS attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdIsDimmTOC4DQSVal The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetDQSAttrISDIMM(
+                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                      ATTR_CEN_VPD_ISDIMMTOC4DQS_Type &o_vpdIsDimmTOC4DQSVal
+                               );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the DRAM_2N_MODE_ENABLED attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_dram2NModeEnabled   The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdDram2NModeEnabled(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                    ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED_Type& o_dram2NModeEnabled
+                                        );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_VM_KEYWORD attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdVMKeywordVal       The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdMemoryDataVersion(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                ATTR_CEN_VPD_VM_KEYWORD_Type& o_vpdVMKeywordVal
+                                        );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_VD_KEYWORD attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdVDKeywordVal        The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdSPDXRecordVersion(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                ATTR_CEN_VPD_VD_KEYWORD_Type& o_vpdVDKeywordVal
+                                        );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_DIMM_SPARE attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdDimmSpare  The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdSpareDramData(
+                                  const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                 ATTR_CEN_VPD_DIMM_SPARE_Type &o_vpdDimmSpare
+                                    );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_VERSION attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdVersion The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdVersion(
+                                 const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                 ATTR_CEN_VPD_VERSION_Type& o_vpdVersion
+                               );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the VPD_DW_KEYWORD attribute. It should not be called directly.
+//
+//  @param[in] i_fapiTarget The target for the attribute operation.
+//  @param[out] o_vpdDWKeyword  The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdVoltageSettingData(
+                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                ATTR_CEN_VPD_DW_KEYWORD_Type& o_vpdDWKeyword
+                                         );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  a Memory Buffer vpd attribute. It should not be called directly.
+//
+// @param[in] i_fapiTarget The fapi target for the attribute get.
+// @param[in] i_attr The MBVpd attribute to fetch.
+// @param[out] o_pVal A pointer to a buffer in which to copy the
+//             attribute value.
+// @param[in] i_valSize The size of the buffer for the attribute value.
+ReturnCode platGetMBvpdAttr(
+                          const fapi2::Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                          const fapi2::AttributeId i_attr,
+                          void*   o_pVal,
+                          const size_t i_valSize
+                         );
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  a Memory Buffer vpd attribute. It should not be called directly.
+//
+// @param[in] i_attr The MBVpd attribute to fetch.
+// @param[in] i_fapiTarget The MBA target for the attribute get.
+// @param[out] o_MBvpdAttrVal A variable into which the attribute will
+//             be copied
+template<typename T>
+ReturnCode platGetMBvpdAttr(
+                            const fapi2::AttributeId i_attrId,
+                            const fapi2::Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                            T& o_MBvpdAttrVal
+                           )
+{
+    return platGetMBvpdAttr(i_fapiTarget,
+                            i_attrId,
+                            reinterpret_cast<void*>(&o_MBvpdAttrVal),
+                            sizeof(T));
+}
+
+
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
 // -----------------------------------------------------------------------------
@@ -325,8 +460,6 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 #define FAPI2_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
 platAttrSvc::setTargetingAttr(PTARGET, (const TARGETING::ATTRIBUTE_ID)\
 fapiToTargeting::ID, sizeof(VAL), &(VAL))
-
-
 
 //------------------------------------------------------------------------------
 // MACRO to route ATTR_NAME access to the correct Hostboot function
@@ -407,5 +540,888 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::platGetSecurityMode(VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_POWER_CONTROL_CAPABLE access to the correct
+// HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_POWER_CONTROL_CAPABLE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetControlCapableData(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_ISDIMMTOC4DQ access to the correct HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_ISDIMMTOC4DQ_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetDQAttrISDIMM(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_ISDIMMTOC4DQS access to the correct HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_ISDIMMTOC4DQS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetDQSAttrISDIMM(TARGET, VAL)
+
+//-----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED access to the correct
+// HB function
+//-----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdDram2NModeEnabled(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_VM_KEYWORD access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_VM_KEYWORD_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdMemoryDataVersion(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_VD_KEYWORD access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_VD_KEYWORD_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdSPDXRecordVersion(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DIMM_SPARE access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DIMM_SPARE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdSpareDramData(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_VERSION access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_VERSION_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdVersion(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DW_KEYWORD access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DW_KEYWORD_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::platGetMBvpdVoltageSettingData(TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_TSYS_ADR access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_TSYS_ADR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_TSYS_ADR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_TSYS_DP18 access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_TSYS_DP18_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_TSYS_DP18_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_RON access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_RON_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_RON_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_RTT_NOM access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_RTT_NOM_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_RTT_NOM_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_RTT_WR access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_RTT_WR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_RTT_WR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_ODT_RD access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_ODT_RD_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_ODT_RD_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_ODT_WR access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_ODT_WR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_ODT_WR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DIMM_RCD_IBT access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DIMM_RCD_IBT_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DIMM_RCD_IBT_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_RD_VREF access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_RD_VREF_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_RD_VREF_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_WR_VREF access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_WR_VREF_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_WR_VREF_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_WRDDR4_VREF access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_WRDDR4_VREF_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_WRDDR4_VREF_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_RCV_IMP_DQ_DQS access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_RCV_IMP_DQ_DQS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_RCV_IMP_DQ_DQS_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRV_IMP_DQ_DQS access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRV_IMP_DQ_DQS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRV_IMP_DQ_DQS_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRV_IMP_CNTL access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRV_IMP_CNTL_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRV_IMP_CNTL_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRV_IMP_ADDR access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRV_IMP_ADDR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRV_IMP_ADDR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRV_IMP_CLK access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRV_IMP_CLK_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRV_IMP_CLK_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRV_IMP_SPCKE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRV_IMP_SPCKE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRV_IMP_SPCKE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_SLEW_RATE_DQ_DQS access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_SLEW_RATE_DQ_DQS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_SLEW_RATE_DQ_DQS_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_SLEW_RATE_CNTL access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_SLEW_RATE_CNTL_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_SLEW_RATE_CNTL_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_SLEW_RATE_ADDR access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_SLEW_RATE_ADDR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_SLEW_RATE_ADDR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_SLEW_RATE_CLK access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_SLEW_RATE_CLK_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_SLEW_RATE_CLK_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_SLEW_RATE_SPCKE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_SLEW_RATE_SPCKE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_SLEW_RATE_SPCKE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_CKE_PRI_MAP access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_CKE_PRI_MAP_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_CKE_PRI_MAP_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_CKE_PWR_MAP access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_CKE_PWR_MAP_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_CKE_PWR_MAP_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_RLO access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_RLO_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_RLO_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_WLO access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_WLO_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_WLO_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_GPO access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_GPO_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_GPO_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CLK_P1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CLK_P1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A3 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A3_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A3_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A4 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A4_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A4_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A5 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A5_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A5_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A6 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A6_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A6_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A7 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A7_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A7_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A8 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A8_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A8_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A9 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A9_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A9_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A10 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A10_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A10_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A11 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A11_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A11_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A12 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A12_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A12_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A13 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A13_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A13_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A14 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A14_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A14_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_A15 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_A15_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_A15_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_BA2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_CASN access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_CASN_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_CASN_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_RASN access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_RASN_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_RASN_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_CMD_WEN access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_CMD_WEN_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_CMD_WEN_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_PAR access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_PAR_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_PAR_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M_ACTN access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M_ACTN_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M_ACTN_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE3 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE3_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CKE3_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN3 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN3_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_CSN3_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M0_CNTL_ODT1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE3 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE3_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CKE3_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN2 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN2_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN2_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN3 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN3_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_CSN3_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT0 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT0_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT0_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT1 access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT1_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PHASE_ROT_M1_CNTL_ODT1_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_PERIODIC_MEMCAL_MODE_OPTIONS access to the
+// correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_PERIODIC_MEMCAL_MODE_OPTIONS_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_PERIODIC_MEMCAL_MODE_OPTIONS_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_DRAM_RTT_PARK access to the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_DRAM_RTT_PARK_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_DRAM_RTT_PARK_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_RD_CTR_WINDAGE_OFFSET access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_RD_CTR_WINDAGE_OFFSET_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_RD_CTR_WINDAGE_OFFSET_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_MR_VERSION_BYTE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_MR_VERSION_BYTE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MR_VERSION_BYTE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_MR_DATA_CONTROL_BYTE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_MR_DATA_CONTROL_BYTE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MR_DATA_CONTROL_BYTE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_MT_VERSION_BYTE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_MT_VERSION_BYTE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MT_VERSION_BYTE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE_Type>(ID, TARGET, VAL)
 
 #endif // ATTRIBUTESERVICE_H_

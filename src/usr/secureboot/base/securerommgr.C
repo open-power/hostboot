@@ -546,7 +546,7 @@ const SecureRomManager::SecRomFuncTypeOffsetMap_t
 sbFuncVer_t SecureRomManager::getSecRomFuncVersion(const sbFuncType_t
                                                          i_funcType) const
 {
-    sbFuncVer_t l_funcVer = SB_FUNC_TYPES::INVALID;
+    sbFuncVer_t l_funcVer = SB_FUNC_TYPES::SB_FUNC_TYPES_INVALID;
 
     switch (i_funcType)
     {

@@ -60,6 +60,8 @@ namespace fapi2
         MOD_FAPI2_CVPD_ACCESS                       = 0x11,
         MOD_FAPI2_BAD_DQ_BITMAP                     = 0x12,
         MOD_FAPI2_GET_CHIP_CFAM_TARGET              = 0x13,
+        MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION          = 0x14,
+        MOD_FAPI2_GET_MB_VPD_ATTR                   = 0x15
     };
 
     /**
@@ -126,7 +128,12 @@ namespace fapi2
         RC_MM_SET_PERMISSION_FAILED    = FAPI2_COMP_ID | 0x31,
         RC_MM_REMOVE_PAGES_FAILED      = FAPI2_COMP_ID | 0x32,
         RC_MM_SET_PERMISSION2_FAILED   = FAPI2_COMP_ID | 0x33,
-        RC_INVALID_PARENT_TARGET_FOUND = FAPI2_COMP_ID | 0x34,
+        RC_NO_SINGLE_MBA               = FAPI2_COMP_ID | 0x34,
+        RC_NO_PARENT_MBA               = FAPI2_COMP_ID | 0x35,
+        RC_NO_CHILD_MBA                = FAPI2_COMP_ID | 0x36,
+        RC_INVALID_TARGET_TYPE         = FAPI2_COMP_ID | 0x37,
+        RC_NO_PARENT_MEMBUF            = FAPI2_COMP_ID | 0x38,
+        RC_INVALID_PARENT_TARGET_FOUND = FAPI2_COMP_ID | 0x39,
 
         // HWP generated errors
         RC_HWP_GENERATED_ERROR         = HWPF_COMP_ID | 0x0f,

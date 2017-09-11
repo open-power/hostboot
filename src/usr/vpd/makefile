@@ -25,6 +25,9 @@
 ROOTPATH = ../../..
 MODULE = vpd
 
+#include configuration defines
+include $(ROOTPATH)/obj/genfiles/config.mk
+
 #include common objects between hb and runtime
 include vpd.mk
 
@@ -51,9 +54,14 @@ BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
 BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:423208204c2f0e759610f4f39243362fd4b6d103
 
-
 #Update to Centaur DD2.0 for CCIN 31E8
+ifdef CONFIG_CDIMM_FORMAT_FOR_CVPD
+#download 4k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
+else
+#download 8k cvpd file
+BINARY_FILES += $(IMGDIR)/cvpd.dat:af41c35b5a10f309f2519a871204936a2129e5ea
+endif
 
 #Direct memory vpd
 BINARY_FILES += $(IMGDIR)/dvpd.dat:9292032f653710f92bbeb56b39582b2d0e5296b7

@@ -41,6 +41,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
+CENTAUR_PROC_PATH=${ROOTPATH}/src/import/chips/centaur/procedures
+EXTRAINCDIR += ${CENTAUR_PROC_PATH}/hwp/memory/lib/shared/
+
 # Procedures
 OBJS += p9_sample_procedure.o
 OBJS += p9_hwtests.o
