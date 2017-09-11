@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2016
+# Contributors Listed Below - COPYRIGHT 2015,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -31,6 +31,9 @@ MODULE = testfapi2
 
 include fapi2Test.mk
 
+ifdef TRACE_MB_VPD_ATTR_UNIT_TEST
+CXXFLAGS+=-DTRACE_MB_VPD_ATTR_UNIT_TEST
+endif
 
 include ${ROOTPATH}/config.mk
 

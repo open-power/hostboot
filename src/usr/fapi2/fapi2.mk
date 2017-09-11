@@ -52,6 +52,7 @@ EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/shared/
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/utils/
+EXTRAINCDIR += ${HWP_PATH_2}/vpd_accessors/
 
 include ${ROOTPATH}/src/build/mkrules/verbose.rules.mk
 define __CLEAN_TARGET
@@ -159,10 +160,27 @@ include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucke
 # provider is shutdown
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/initfiles/p9_int_scom.mk
 
+CENTAUR_VPD_PATH=${HWP_PATH_2}/vpd_accessors
+include ${CENTAUR_VPD_PATH}/getControlCapableData.mk
+include ${CENTAUR_VPD_PATH}/getDecompressedISDIMMAttrs.mk
+include ${CENTAUR_VPD_PATH}/getISDIMMTOC4DAttrs.mk
+include ${CENTAUR_VPD_PATH}/getDQAttrISDIMM.mk
+include ${CENTAUR_VPD_PATH}/getDQSAttrISDIMM.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdAddrMirrorData.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdAttr.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdDram2NModeEnabled.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdMemoryDataVersion.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdSlopeInterceptData.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdSpareDramData.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdSPDXRecordVersion.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdVersion.mk
+include ${CENTAUR_VPD_PATH}/getMBvpdVoltageSettingData.mk
+
 VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
+VPATH += ${CENTAUR_VPD_PATH}/
 VPATH += ${GENPATH}

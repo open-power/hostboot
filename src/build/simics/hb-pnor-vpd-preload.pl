@@ -351,6 +351,7 @@ sub createCVPDData
     my $sourceFile;
     my $sysMemVPDFile = "$outputPath/$sysMemVPD";
     my $sysMemVPDFileECC = $sysMemVPDFile . ".ecc";
+    my $numProcs = $maxProcs;
 
     if( -e $sysMemVPDFile )
     {
@@ -360,7 +361,11 @@ sub createCVPDData
 
     if( $procChipType eq "p9n")
     {
-        $maxProcs = 2;
+        $numProcs = 2;
+    }
+    elsif($procChipType eq "p9c")
+    {
+        $numProcs = 4;
     }
 
     #Centaurs are populated based on populated Processors and special
@@ -370,10 +375,18 @@ sub createCVPDData
     #For direct access memory, $mcsArray has which MCSs are present
 
     # Create empty Mem VPD data chunk
-    $cmd = " echo \"000FFF: 00\" \| xxd -r \> $emptyMemVPD";
+    if($procChipType eq "p9c")
+    {
+        $cmd = " echo \"001FFF: 00\" \| xxd -r \> $emptyMemVPD";
+    }
+    else
+    {
+        $cmd = " echo \"000FFF: 00\" \| xxd -r \> $emptyMemVPD";
+    }
+
     system( $cmd ) == 0 or die "Creating $emptyMemVPD failed!";
 
-    for( my $proc = 0; $proc < $maxProcs; $proc++ )
+    for( my $proc = 0; $proc < $numProcs; $proc++ )
     {
         for( my $mcs = 0; $mcs < $MAX_MCS; $mcs++ )
         {

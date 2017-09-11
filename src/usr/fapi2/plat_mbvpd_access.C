@@ -350,7 +350,7 @@ fapi2::ReturnCode setMBvpdField
                  const fapi2::MBvpdKeyword i_keyword,
                  const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> &i_target,
                  const uint8_t * const i_pBuffer,
-                 const uint32_t i_fieldSize)
+                 const size_t i_fieldSize)
 {
     fapi2::ReturnCode l_rc;
     uint8_t l_recIndex = MBVPD_INVALID_CHIP_UNIT;

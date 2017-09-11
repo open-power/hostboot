@@ -64,6 +64,20 @@
 
 #include <secureboot/service.H>
 
+#include<vpd_accessors/accessMBvpdL4BankDelete.H>
+#include<vpd_accessors/getControlCapableData.H>
+#include<vpd_accessors/getDQAttrISDIMM.H>
+#include<vpd_accessors/getDQSAttrISDIMM.H>
+#include<vpd_accessors/getISDIMMTOC4DAttrs.H>
+#include<vpd_accessors/getMBvpdDram2NModeEnabled.H>
+#include<vpd_accessors/getMBvpdMemoryDataVersion.H>
+#include<vpd_accessors/getMBvpdSPDXRecordVersion.H>
+#include<vpd_accessors/getMBvpdSensorMap.H>
+#include<vpd_accessors/getMBvpdSpareDramData.H>
+#include<vpd_accessors/getMBvpdVersion.H>
+#include<vpd_accessors/getMBvpdVoltageSettingData.H>
+#include<vpd_accessors/getMBvpdAttr.H>
+
 //******************************************************************************
 // Implementation
 //******************************************************************************
@@ -1307,6 +1321,488 @@ ReturnCode platSetSecurityMode()
 {
     FAPI_INF("Set SECURITY_MODE ignored when called from FAPI code");
     return fapi2::ReturnCode();
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetControlCapableData(
+                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+        ATTR_CEN_VPD_POWER_CONTROL_CAPABLE_Type& o_vpdPowerControlCapableVal
+                                    )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetControlCapableData: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getControlCapableData(l_fapiTarget, o_vpdPowerControlCapableVal);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetDQAttrISDIMM(
+                           const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_ISDIMMTOC4DQ_Type &o_vpdIsDimmTOC4DQVal
+                              )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetDQAttrISDIMM: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getDQAttrISDIMM(l_fapiTarget, o_vpdIsDimmTOC4DQVal);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetDQSAttrISDIMM(
+                    const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+          ATTR_CEN_VPD_ISDIMMTOC4DQS_Type& o_vpdIsDimmTOC4DQSVal
+                               )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetDQSAttrISDIMM: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getDQSAttrISDIMM(l_fapiTarget,o_vpdIsDimmTOC4DQSVal);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdDram2NModeEnabled(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                   ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED_Type& o_dram2NModeEnabled
+                                        )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdDram2NModeEnabled: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> l_fapiTarget(l_pTarget);
+        rc = getMBvpdDram2NModeEnabled(l_fapiTarget, o_dram2NModeEnabled);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdMemoryDataVersion(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                ATTR_CEN_VPD_VM_KEYWORD_Type& o_vpdVMKeywordVal
+                                        )
+{
+    ReturnCode rc;
+
+    do
+    {
+        // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+        // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+        // to enable a streamlined dump of the attributes, all plat code must
+        // use the generic TARGET_TYPE_ALL -- so convert back to the correct
+        // type manually
+        TARGETING::Target * l_pTarget = NULL;
+        errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+        if (l_errl)
+        {
+            FAPI_ERR("platGetMBvpdMemoryDataVersion: "
+                                           "Error from getTargetingTarget");
+
+            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+            break;
+        }
+        else
+        {
+            fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>
+                                                    l_fapiTarget(l_pTarget);
+
+            rc = getMBvpdMemoryDataVersion(l_fapiTarget, o_vpdVMKeywordVal);
+        }
+    }
+    while(0);
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdSPDXRecordVersion(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                ATTR_CEN_VPD_VD_KEYWORD_Type& o_vpdVDKeywordVal
+                                        )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdSPDXRecordVersion: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getMBvpdSPDXRecordVersion(l_fapiTarget, o_vpdVDKeywordVal);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdSpareDramData(
+                                  const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                 ATTR_CEN_VPD_DIMM_SPARE_Type& o_vpdDimmSpare
+                                    )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdSpareDramData: Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MBA> l_fapiTarget(l_pTarget);
+        rc = getMBvpdSpareDramData(l_fapiTarget, o_vpdDimmSpare);
+    }
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdVersion(
+                                 const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                 ATTR_CEN_VPD_VERSION_Type& o_vpdVersion
+                               )
+{
+    ReturnCode rc;
+
+    do
+    {
+        // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+        // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+        // to enable a streamlined dump of the attributes, all plat code must use
+        // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+        // manually
+        TARGETING::Target * l_pTarget = NULL;
+        errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+        if (l_errl)
+        {
+            FAPI_ERR("platGetMBvpdVersion: Error from getTargetingTarget");
+            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        }
+        else
+        {
+            TARGETING::TargetHandleList l_mbaList;
+
+            // Find MBA target from DIMM target
+            getParentAffinityTargets(l_mbaList,
+                                     l_pTarget,
+                                     TARGETING::CLASS_UNIT,
+                                     TARGETING::TYPE_MBA,
+                                     false);
+
+            const bool hbSwError = true;
+
+            if(l_mbaList.empty())
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION
+                 * @reasoncode   fapi2::RC_NO_PARENT_MBA
+                 * @userdata1    DIMM HUID
+                 * @userdata2    0
+                 * @devdesc      platGetMBvpdMemoryDataVersion could not find
+                 *               an mba parent target from the passed in
+                 *               dimm target.
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION,
+                                     fapi2::RC_NO_SINGLE_MBA,
+                                     TARGETING::get_huid(l_pTarget),
+                                     0,
+                                     hbSwError);
+
+                FAPI_ERR("platGetMBvpdVersion: "
+                                "Error could not find an MBA parent for DIMM");
+
+                rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+            else if(l_mbaList.size() != 1)
+            {
+                /*@
+                 * @errortype
+                 * @moduleid     fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION
+                 * @reasoncode   fapi2::RC_NO_SINGLE_MBA
+                 * @userdata1    Number of MBAs
+                 * @userdata2    DIMM HUID
+                 * @devdesc      platGetMBvpdMemoryDataVersion could not find
+                 *               the expected 1 mba from the passed dimm target
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                                     ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                     fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION,
+                                     fapi2::RC_NO_SINGLE_MBA,
+                                     l_mbaList.size(),
+                                     TARGETING::get_huid(l_pTarget),
+                                     hbSwError);
+
+                FAPI_ERR("platGetMBvpdVersion: "
+                         "Found multiple MBA chips while "
+                         "seeking parent for DIMM");
+
+                rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                break;
+            }
+
+            fapi2::Target<fapi2::TARGET_TYPE_MBA>
+                                            l_fapiTarget(l_mbaList.front());
+
+            rc = getMBvpdVersion(l_fapiTarget, o_vpdVersion);
+        }
+
+    }
+    while(0);
+
+    return rc;
+}
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdVoltageSettingData(
+                                const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                               ATTR_CEN_VPD_DW_KEYWORD_Type& o_vpdDWKeyword
+                                         )
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdVoltageSettingData: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getMBvpdVoltageSettingData(l_fapiTarget, o_vpdDWKeyword);
+    }
+
+    return rc;
+}
+
+//----------------------------------------------------------------------------
+ReturnCode platGetMBvpdAttr(
+                           const fapi2::Target<TARGET_TYPE_ALL>&  i_fapiTarget,
+                           const fapi2::AttributeId i_attr,
+                           void*   o_pVal,
+                           const size_t i_valSize
+                           )
+{
+    FAPI_INF("platGetMBvpdAttr: Enter");
+    FAPI_INF("platGetMBvpdAttr: Attr: 0x%08X", i_attr);
+
+    ReturnCode rc;
+    constexpr bool hbSwError{true};
+
+    do
+    {
+        // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+        // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+        // to enable a streamlined dump of the attributes, all plat code must
+        // use the generic TARGET_TYPE_ALL -- so convert back to the correct
+        // type manually
+        TARGETING::Target * l_pTarget = NULL;
+        errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+        if (l_errl)
+        {
+            FAPI_ERR("platGetMBvpdAttr: Error from getTargetingTarget");
+            rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        }
+        else
+        {
+            TARGETING::TYPE l_type =
+                                l_pTarget->getAttr<TARGETING::ATTR_TYPE>();
+
+            if(TARGETING::TYPE_MBA != l_type)
+            {
+                if(TARGETING::TYPE_MEMBUF != l_type)
+                {
+                    /*@
+                     * @errortype
+                     * @moduleid     fapi2::MOD_FAPI2_GET_MB_VPD_ATTR
+                     * @reasoncode   fapi2::RC_INVALID_TARGET_TYPE
+                     * @userdata1    Target Type
+                     * @userdata2    Target HUID
+                     * @devdesc      platGetMBvpdMemoryDataVersion requires
+                     *               a target of type TYPE_MBA or TYPE_MEMBUF
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION,
+                                      fapi2::RC_INVALID_TARGET_TYPE,
+                                      l_type,
+                                      TARGETING::get_huid(l_pTarget),
+                                      hbSwError);
+
+                    rc = ReturnCode(fapi2::RC_INVALID_TARGET_TYPE);
+                    rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                    FAPI_ERR("platGetMBvpdAttr: Invalid Target Type.");
+                    break;
+                }
+
+                TARGETING::TargetHandleList l_mbaList;
+                TARGETING::getChildAffinityTargets(l_mbaList,
+                                                   l_pTarget,
+                                                   TARGETING::CLASS_UNIT,
+                                                   TARGETING::TYPE_MBA,
+                                                   false);
+
+                if(l_mbaList.empty())
+                {
+                    /*@
+                     * @errortype
+                     * @moduleid     fapi2::MOD_FAPI2_GET_MB_VPD_ATTR
+                     * @reasoncode   fapi2::RC_NO_CHILD_MBA
+                     * @userdata1    Target Type
+                     * @userdata2    Target HUID
+                     * @devdesc      platGetMBvpdMemoryDataVersion could not
+                     *               find any child mba's from the passed in
+                     *               target of type TYPE_MEMBUF
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                      fapi2::MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION,
+                                      fapi2::RC_NO_CHILD_MBA,
+                                      l_type,
+                                      TARGETING::get_huid(l_pTarget),
+                                      hbSwError);
+
+                    rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+                    FAPI_ERR("platGetMBvpdAttr: Could not find a child mba "
+                             "for the passed in membuf target."
+                            );
+                    break;
+                }
+
+                //since we have to get the value from a child mba, try all
+                //child mba's until successful.
+                for(auto l_currentMba: l_mbaList)
+                {
+                    fapi2::Target<fapi2::TARGET_TYPE_MBA>
+                                                   l_fapiTarget(l_currentMba);
+
+                    rc = getMBvpdAttr(l_fapiTarget,
+                                      i_attr,
+                                      o_pVal,
+                                      i_valSize);
+
+                    if(rc == fapi2::FAPI2_RC_SUCCESS)
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+
+                fapi2::Target<fapi2::TARGET_TYPE_MBA> l_fapiTarget(l_pTarget);
+                rc = getMBvpdAttr(l_fapiTarget,
+                                  i_attr,
+                                  o_pVal,
+                                  i_valSize);
+            }
+        }
+    }
+    while(0);
+
+    return rc;
 }
 
 } // End platAttrSvc namespace
