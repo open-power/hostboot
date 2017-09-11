@@ -856,17 +856,25 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW379562</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CHIP_EC_FEATURE_HW379562_HW419742</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Nimbus DD1 only: HW379562 - Turn off store-forward to LQ
+      Nimbus DD2.0/DD2.1, Cumulus DD1.0: HW419742
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
+          <value>0x21</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -890,17 +898,25 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW371047</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CHIP_EC_FEATURE_HW371047_HW415528</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1 only: HW371047 - TMDIR disabled due to multi-threaded issue.
+      Nimbus DD1: HW371047 - TMDIR disabled due to multi-threaded issue.
+      Nimbus DD2.0 / Cumulus DD1.0: HW415528
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
+          <value>0x21</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
