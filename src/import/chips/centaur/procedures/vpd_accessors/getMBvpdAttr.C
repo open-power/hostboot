@@ -223,7 +223,7 @@ extern "C"
         {
             fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_mbTarget;
             uint8_t  l_pos = NUM_PORTS;     //initialize to out of range value (+1)
-            DimmType l_dimmType = ALL_DIMM;
+            DimmType l_dimmType = DimmType::ALL_DIMM;
             const MBvpdAttrDef* l_pAttrDef = NULL;
             VpdVersion l_version = INVALID_VER; // invalid vpd value
 
@@ -351,18 +351,18 @@ extern "C"
 
             if (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES)
             {
-                o_dimmType = CDIMM;
+                o_dimmType = DimmType::CDIMM;
                 FAPI_DBG("findDimmInfo: CDIMM TYPE!!!");
             }
             else
             {
-                o_dimmType = ISDIMM;
+                o_dimmType = DimmType::ISDIMM;
                 FAPI_DBG("findDimmInfo: ISDIMM TYPE!!!");
             }
         }
         else
         {
-            o_dimmType = ISDIMM;
+            o_dimmType = DimmType::ISDIMM;
             FAPI_DBG("findDimmInfo: ISDIMM TYPE (dimm array size = 0)");
         }
 
@@ -413,7 +413,7 @@ extern "C"
 
         // Couldn't  get the Version from attribute
         // So proceed to find the version and update the attrib
-        if (CDIMM == i_dimmType)
+        if (DimmType::CDIMM == i_dimmType)
         {
             l_record = fapi2::MBVPD_RECORD_VSPD;
         }
@@ -570,7 +570,7 @@ extern "C"
         for (; i < g_MBVPD_ATTR_DEF_array_size; i++)
         {
             if ( (g_MBVPD_ATTR_DEF_array[i].iv_attrId == i_attr) &&
-                 ((ALL_DIMM   == g_MBVPD_ATTR_DEF_array[i].iv_dimmType) ||
+                 ((DimmType::ALL_DIMM   == g_MBVPD_ATTR_DEF_array[i].iv_dimmType) ||
                   (i_dimmType == g_MBVPD_ATTR_DEF_array[i].iv_dimmType)) )
             {
 
@@ -642,7 +642,7 @@ extern "C"
 
         FAPI_DBG("readKeyword: Read keyword %d ", l_keyword);
 
-        if (CDIMM != i_dimmType)
+        if (DimmType::CDIMM != i_dimmType)
         {
             if (MBVPD_KEYWORD_MT == l_keyword)
             {

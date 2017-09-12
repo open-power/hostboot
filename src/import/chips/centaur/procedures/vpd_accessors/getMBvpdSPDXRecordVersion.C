@@ -61,7 +61,7 @@ extern "C"
         uint32_t&   o_val)
     {
         fapi2::ReturnCode l_fapi2rc;
-        DimmType l_dimmType = ISDIMM;
+        DimmType l_dimmType = DimmType::ISDIMM;
         fapi2::MBvpdRecord  l_record  = fapi2::MBVPD_RECORD_SPDX;
         uint16_t l_vpdSPDXRecordVersion = VD_KEYWORD_DEFAULT_VALUE;
         size_t l_bufSize = sizeof(l_vpdSPDXRecordVersion);
@@ -86,22 +86,22 @@ extern "C"
 
             if (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES)
             {
-                l_dimmType = CDIMM;
+                l_dimmType = DimmType::CDIMM;
                 FAPI_DBG("getMBvpdSPDXRecordVersion: CDIMM TYPE!!!");
             }
             else
             {
-                l_dimmType = ISDIMM;
+                l_dimmType = DimmType::ISDIMM;
                 FAPI_DBG("getMBvpdSPDXRecordVersion: ISDIMM TYPE!!!");
             }
         }
         else
         {
-            l_dimmType = ISDIMM;
+            l_dimmType = DimmType::ISDIMM;
             FAPI_DBG("getMBvpdSPDXRecordVersion: ISDIMM TYPE (dimm array size = 0)");
         }
 
-        if(l_dimmType == CDIMM)
+        if(l_dimmType == DimmType::CDIMM)
         {
             l_record = fapi2::MBVPD_RECORD_VSPD;
         }

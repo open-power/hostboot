@@ -145,7 +145,7 @@ const uint8_t NUM_DIMMS = 2;   //Each port has 2 DIMMs
 const uint8_t NUM_RANKS = 4;   //Number of ranks
 
 //  DIMM types
-enum DimmType
+enum class DimmType
 {
     ALL_DIMM = 0,        // Same for all Dimm types
     CDIMM    = 1,

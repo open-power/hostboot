@@ -60,7 +60,7 @@ extern "C"
     fapi2::ReturnCode getMBvpdVoltageSettingData(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>&   i_mbTarget,
             uint32_t& o_val)
     {
-        DimmType l_dimmType = ISDIMM;
+        DimmType l_dimmType = DimmType::ISDIMM;
         fapi2::MBvpdRecord  l_record  = fapi2::MBVPD_RECORD_SPDX;
         uint16_t l_vpdVoltageSettingData = DW_KEYWORD_DEFAULT_VALUE;
         size_t l_bufSize = sizeof(l_vpdVoltageSettingData);
@@ -85,23 +85,23 @@ extern "C"
 
             if (l_customDimm == fapi2::ENUM_ATTR_CEN_SPD_CUSTOM_YES)
             {
-                l_dimmType = CDIMM;
+                l_dimmType = DimmType::CDIMM;
                 FAPI_DBG("getMBvpdVoltageSettingData: CDIMM TYPE!!!");
             }
             else
             {
-                l_dimmType = ISDIMM;
+                l_dimmType = DimmType::ISDIMM;
                 FAPI_DBG("getMBvpdVoltageSettingData: ISDIMM TYPE!!!");
             }
         }
         else
         {
-            l_dimmType = ISDIMM;
+            l_dimmType = DimmType::ISDIMM;
             FAPI_DBG("getMBvpdVoltageSettingData: ISDIMM TYPE (dimm array size = 0)");
         }
 
 
-        if(l_dimmType == CDIMM)
+        if(l_dimmType == DimmType::CDIMM)
         {
             l_record = fapi2::MBVPD_RECORD_VSPD;
         }

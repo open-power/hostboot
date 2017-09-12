@@ -26,7 +26,8 @@
 # Include the macros and things for MSS procedures
 -include 01common.mk
 PROCEDURE=getDQAttrISDIMM
-OBJS+=getISDIMMTOC4DAttrs.o getDecompressedISDIMMAttrs.o
+lib$(PROCEDURE)_DEPLIBS+=getISDIMMTOC4DAttrs
+lib$(PROCEDURE)_DEPLIBS+=getDecompressedISDIMMAttrs
 $(PROCEDURE)_DEPLIBS+=mss_generic
 $(eval $(call ADD_MEMORY_INCDIRS,$(PROCEDURE)))
 $(call BUILD_PROCEDURE)

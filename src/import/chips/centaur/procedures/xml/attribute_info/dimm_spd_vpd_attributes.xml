@@ -651,7 +651,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <odmChangeable/>
     <array> 2 2</array>
     <platInit/>
-    <writeable/>
 </attribute>
 
 <!--
@@ -1348,7 +1347,6 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <enum>UNKNOWN = 0x3030, OLD_CDIMM = 0x3031, CURRENT = 0x3230</enum>
     <platInit/>
-    <writeable/>
 </attribute>
 
 <!--
@@ -1889,7 +1887,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1904,7 +1901,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1922,7 +1918,6 @@ This Attribute is to be interpreted as an Integer </description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1939,7 +1934,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1956,7 +1950,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1974,7 +1967,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2 4</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -1993,7 +1985,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2015,7 +2006,6 @@ Decode: (R for Range V for Value, blank for unused)
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2034,7 +2024,6 @@ OHM30_FFE480 = 0x48, OHM30_FFE240 = 0x38, OHM30_FFE160 = 0x28, OHM30_FFE120 = 0x
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2052,7 +2041,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2070,7 +2058,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2088,7 +2075,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2106,7 +2092,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2124,7 +2109,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2146,7 +2130,6 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2168,7 +2151,6 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2190,7 +2172,6 @@ SLEW_MAXV_NS = 7</enum>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2213,7 +2194,6 @@ SLEW_MAXV_NS = 7
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2236,7 +2216,6 @@ SLEW_MAXV_NS = 7
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2254,7 +2233,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2266,7 +2244,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2278,7 +2255,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2290,7 +2266,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2302,7 +2277,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2314,7 +2288,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2326,7 +2299,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2338,7 +2310,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2350,7 +2321,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2362,7 +2332,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2374,7 +2343,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2386,7 +2354,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2398,7 +2365,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2410,7 +2376,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2422,7 +2387,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2434,7 +2398,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2446,7 +2409,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2458,7 +2420,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2470,7 +2431,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2482,7 +2442,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2494,7 +2453,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2506,7 +2464,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2518,7 +2475,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2530,7 +2486,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2542,7 +2497,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2554,7 +2508,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2566,7 +2519,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2578,7 +2530,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2590,7 +2541,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2602,7 +2552,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2614,7 +2563,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2626,7 +2574,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2638,7 +2585,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2650,7 +2596,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2662,7 +2607,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2674,7 +2618,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2686,7 +2629,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2698,7 +2640,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2710,7 +2651,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2722,7 +2662,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2734,7 +2673,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2746,7 +2684,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2758,7 +2695,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2770,7 +2706,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2782,7 +2717,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2794,7 +2728,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2806,7 +2739,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2818,7 +2750,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2830,7 +2761,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2843,7 +2773,6 @@ This Attribute is to be interpreted as an Integer</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2854,7 +2783,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2864,7 +2792,6 @@ This Attribute is to be interpreted as an Integer</description>
     <valueType>uint64</valueType>
     <platInit/>
     <odmVisable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2875,7 +2802,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2886,7 +2812,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2897,7 +2822,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2908,7 +2832,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2919,7 +2842,6 @@ This Attribute is to be interpreted as an Integer</description>
     <platInit/>
     <odmVisable/>
     <array>2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2939,7 +2861,6 @@ Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
     <odmVisable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2959,7 +2880,6 @@ Comes from the VPD MW Keyword</description>
     <valueType>uint8</valueType>
     <platInit/>
     <odmVisable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2971,7 +2891,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <odmChangeable/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -3018,7 +2937,6 @@ Comes from the VPD MW Keyword</description>
     <writeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_L4_BANK_DELETE_VPD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3028,10 +2946,10 @@ Data will be pulled from CDIMM VPD if CDIMM present.
 Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <writeable/>
+    <platInit/>
+    <odmVisable/>
     <persistent/>
-    <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_VPD_MT_VERSION_BYTE</id>
@@ -3040,7 +2958,6 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
    <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
 
 <attribute>
@@ -3050,7 +2967,6 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
 
  <attribute>
@@ -3060,7 +2976,6 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
 
  <attribute>
@@ -3070,10 +2985,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint8</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
 
-<!--
  <attribute>
     <id>ATTR_CEN_VPD_VM_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3081,11 +2994,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
--->
 
-<!--
  <attribute>
     <id>ATTR_CEN_VPD_VD_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3093,11 +3003,8 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
--->
 
-<!--
  <attribute>
     <id>ATTR_CEN_VPD_DW_KEYWORD</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
@@ -3105,9 +3012,7 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
     <valueType>uint32</valueType>
     <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
--->
 
 
 <!--
@@ -3151,7 +3056,6 @@ Data will be pulled from backplane VPD if IS DIMMs present.</description>
      <enum>NONE = 0x00, SLOWEXIT_CAPABLE = 0x01, FASTEXIT_CAPABLE = 0x02, FASTSLOW_CAPABLE = 0x03</enum>
      <platInit/>
      <odmVisable/>
-     <writeable/>
 </attribute>
 
 
@@ -3167,7 +3071,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2 2</array>
-    <writeable/>
 </attribute>
 
 
@@ -3183,7 +3086,6 @@ firmware notes: none</description>
     <odmVisable/>
     <odmChangeable/>
     <array> 2</array>
-    <writeable/>
 </attribute>
 
 <attribute>
