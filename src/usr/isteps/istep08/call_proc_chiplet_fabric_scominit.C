@@ -117,42 +117,7 @@ void*    call_proc_chiplet_fabric_scominit( void    *io_pArgs )
             // after committing
             errlCommit(l_err, HWPF_COMP_ID);
         }
-
-        // @todo RTC 174563 Remove obus workaround
-        uint64_t l_orValue = 0xFF00000000000000;
-        uint64_t l_orSize = sizeof(l_orValue);
-        l_err = deviceWrite(l_cpu_target,
-                            &l_orValue,
-                            l_orSize,
-                            DEVICE_SCOM_ADDRESS(0x05013805));
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                      "Unable to set workaround address");
-            break;
-        }
     } // end of going through all processors
-
-    // @todo RTC 174563 Remove obus workaround
-    // Get all OBUS targets
-    TARGETING::TargetHandleList l_obusTargetList;
-    getAllChiplets(l_obusTargetList, TYPE_OBUS);
-    for (const auto & l_obusTarget: l_obusTargetList)
-    {
-        uint64_t l_orValue = 0xC000000000000000;
-        uint64_t l_orSize = sizeof(l_orValue);
-        l_err = deviceWrite(l_obusTarget
-        ,
-                            &l_orValue,
-                            l_orSize,
-                            DEVICE_SCOM_ADDRESS(0x09010805));
-        if(l_err)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                      "Unable to set workaround address");
-            break;
-        }
-    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                              "call_proc_chiplet_fabric_scominit exit" );
