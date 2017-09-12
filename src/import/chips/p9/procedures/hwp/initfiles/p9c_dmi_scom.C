@@ -29,23 +29,14 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_1167 = 1167;
-constexpr uint64_t literal_1000 = 1000;
-constexpr uint64_t literal_1273 = 1273;
-constexpr uint64_t literal_1200 = 1200;
-constexpr uint64_t literal_1400 = 1400;
-constexpr uint64_t literal_1500 = 1500;
-constexpr uint64_t literal_0b01 = 0b01;
-constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_7 = 7;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_12 = 12;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_28 = 28;
+constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_0x5 = 0x5;
@@ -57,6 +48,12 @@ constexpr uint64_t literal_0x26 = 0x26;
 constexpr uint64_t literal_0x33 = 0x33;
 constexpr uint64_t literal_0x40 = 0x40;
 constexpr uint64_t literal_3 = 3;
+constexpr uint64_t literal_1167 = 1167;
+constexpr uint64_t literal_1000 = 1000;
+constexpr uint64_t literal_1273 = 1273;
+constexpr uint64_t literal_1200 = 1200;
+constexpr uint64_t literal_1400 = 1400;
+constexpr uint64_t literal_1500 = 1500;
 constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_2 = 2;
 
@@ -68,18 +65,6 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT3, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT3, l_chip_ec));
-        fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC_Type l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC, TGT3,
-                               l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC));
-        fapi2::ATTR_MC_SYNC_MODE_Type l_TGT3_ATTR_MC_SYNC_MODE;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, TGT3, l_TGT3_ATTR_MC_SYNC_MODE));
-        fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
-        fapi2::ATTR_FREQ_MCA_MHZ_Type l_TGT1_ATTR_FREQ_MCA_MHZ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MCA_MHZ, TGT1, l_TGT1_ATTR_FREQ_MCA_MHZ));
-        uint64_t l_def_MCA_FREQ = l_TGT1_ATTR_FREQ_MCA_MHZ;
-        uint64_t l_def_MN_FREQ_RATIO = ((literal_1000 * l_def_MCA_FREQ) / l_TGT1_ATTR_FREQ_PB_MHZ);
-        uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
         uint64_t l_def_ENABLE_AMO_CLEAN_LINES = literal_1;
         uint64_t l_def_ENABLE_DYNAMIC_64_128B_READS = literal_0;
@@ -96,109 +81,20 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT1, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2));
         uint64_t l_def_MC_EPSILON_CFG_T2 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2 + literal_6) / literal_4);
         uint64_t l_def_ENABLE_MCBUSY = literal_1;
+        uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         uint64_t l_def_MCICFG_REPLAY_DELAY = literal_1;
+        fapi2::ATTR_MC_SYNC_MODE_Type l_TGT3_ATTR_MC_SYNC_MODE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MC_SYNC_MODE, TGT3, l_TGT3_ATTR_MC_SYNC_MODE));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC_Type l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC, TGT3,
+                               l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC));
+        fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
+        fapi2::ATTR_FREQ_MCA_MHZ_Type l_TGT1_ATTR_FREQ_MCA_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MCA_MHZ, TGT1, l_TGT1_ATTR_FREQ_MCA_MHZ));
+        uint64_t l_def_MCA_FREQ = l_TGT1_ATTR_FREQ_MCA_MHZ;
+        uint64_t l_def_MN_FREQ_RATIO = ((literal_1000 * l_def_MCA_FREQ) / l_TGT1_ATTR_FREQ_PB_MHZ);
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x5010811ull, l_scom_buffer ));
-
-            if (((l_TGT3_ATTR_MC_SYNC_MODE == literal_1) && (l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC == literal_0)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
-            }
-            else if (((l_TGT3_ATTR_MC_SYNC_MODE == literal_1) && (l_TGT3_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC == literal_1)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-            else if (((l_TGT3_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO < literal_1167)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-            else if ((((l_TGT3_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1200))
-                      && (l_def_MN_FREQ_RATIO < literal_1273)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-            else if ((((l_TGT3_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1167))
-                      && (l_def_MN_FREQ_RATIO < literal_1200)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-            else if ((((l_TGT3_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1273))
-                      && (l_def_MN_FREQ_RATIO < literal_1400)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-            else if ((((l_TGT3_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1400))
-                      && (l_def_MN_FREQ_RATIO < literal_1500)))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x5010811ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x501081bull, l_scom_buffer ));
-
-            constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_OFF = 0x0;
-            l_scom_buffer.insert<1, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_SELECT_LOCAL_HANG_PULSE_OFF );
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON = 0x1;
-                l_scom_buffer.insert<0, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_SELECT_PB_HANG_PULSE_ON );
-            }
-
-            l_scom_buffer.insert<2, 2, 62, uint64_t>(literal_0b01 );
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG_ON = 0x1;
-                l_scom_buffer.insert<36, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_DISABLE_HARDWARE_TRACE_MANAGER_HANG_ON );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON = 0x1;
-                l_scom_buffer.insert<32, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_NONMIRROR_HANG_ON );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_MIRROR_HANG_ON = 0x1;
-                l_scom_buffer.insert<33, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_MIRROR_HANG_ON );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON = 0x1;
-                l_scom_buffer.insert<34, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_APO_HANG_ON );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_CLIB_HANG_ON = 0x1;
-                l_scom_buffer.insert<35, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCTO_ENABLE_CLIB_HANG_ON );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                l_scom_buffer.insert<37, 3, 61, uint64_t>(literal_5 );
-            }
-
-            if ((l_def_ENABLE_MCU_TIMEOUTS == literal_1))
-            {
-                l_scom_buffer.insert<5, 3, 61, uint64_t>(literal_7 );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x501081bull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010823ull, l_scom_buffer ));
 
