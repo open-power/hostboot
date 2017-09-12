@@ -334,6 +334,9 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         // At this point, we are done with the procedure.
         o_done = true;
 
+        // Since TPS is complete, clear the CE table for this slave rank.
+        getMcaDataBundle(iv_chip)->iv_ceTable.deactivateRank( iv_rank );
+
     }while(0);
 
     return o_rc;
