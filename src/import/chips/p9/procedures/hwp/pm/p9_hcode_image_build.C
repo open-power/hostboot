@@ -781,9 +781,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     uint64_t     chtmVal   = 0;
     uint32_t     cmeFlag   = 0;
     uint32_t     sgpeFlag  = 0;
+    uint16_t     pgpeFlag  = 0;
     uint16_t     qmFlags   = 0;
-    pgpe_flags_t pgpeFlags;
-    pgpeFlags.value = 0;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
@@ -881,8 +880,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        qmFlags |= CME_QM_FLAG_RESCLK_ENABLE;
-        pgpeFlags.fields.resclk_enable = 1;
+        qmFlags  |= CME_QM_FLAG_RESCLK_ENABLE;
+        pgpeFlag |= PGPE_FLAG_RESCLK_ENABLE;
     }
 
     FAPI_DBG("Resonant Clock Enabled        :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -894,8 +893,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        qmFlags |= CME_QM_FLAG_SYS_IVRM_ENABLE;
-        pgpeFlags.fields.ivrm_enable = 1;
+        qmFlags  |= CME_QM_FLAG_SYS_IVRM_ENABLE;
+        pgpeFlag |= PGPE_FLAG_IVRM_ENABLE;
     }
 
     FAPI_DBG("IVRM Enabled                  :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -907,9 +906,9 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        qmFlags |= CME_QM_FLAG_SYS_VDM_ENABLE;
+        qmFlags  |= CME_QM_FLAG_SYS_VDM_ENABLE;
         sgpeFlag |= SGPE_VDM_ENABLE_BIT_POS;
-        pgpeFlags.fields.vdm_enable = 1;
+        pgpeFlag |= PGPE_FLAG_VDM_ENABLE;
     }
 
     FAPI_DBG("VDM Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -921,8 +920,8 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        qmFlags |= CME_QM_FLAG_SYS_WOF_ENABLE;
-        pgpeFlags.fields.wof_enable = 1;
+        qmFlags  |= CME_QM_FLAG_SYS_WOF_ENABLE;
+        pgpeFlag |= PGPE_FLAG_WOF_ENABLE;
     }
 
     FAPI_DBG("WOF Enabled                   :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -976,7 +975,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     // If 0 (Hcode disabled), then set the occ_opc_immed_response flag bit
     if( !attrVal )
     {
-        pgpeFlags.fields.occ_ipc_immed_response = 1;
+        pgpeFlag |= PGPE_FLAG_OCC_IPC_IMMEDIATE_MODE;
     }
 
     FAPI_DBG("PGPE Hcode Mode               :   %s", attrVal ? "PSTATES Enabled" : "OCC IPC Immediate Response Mode" );
@@ -988,7 +987,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        pgpeFlags.fields.enable_fratio = 1;
+        pgpeFlag |= PGPE_FLAG_ENABLE_FRATIO;
     }
 
     FAPI_DBG("System Frequency Ratio Enable :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -1000,7 +999,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        pgpeFlags.fields.enable_vratio = 1;
+        pgpeFlag |= PGPE_FLAG_ENABLE_VRATIO;
     }
 
     FAPI_DBG("System Voltage Ratio Enable   :   %s", attrVal ? "TRUE" : "FALSE" );
@@ -1012,7 +1011,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     if( attrVal )
     {
-        pgpeFlags.fields.vratio_modifier = 1;
+        pgpeFlag |= PGPE_FLAG_VRATIO_MODIFIER;
     }
 
     FAPI_DBG("System Voltage Ratio Select   :   %s", attrVal ? "FULL" : "ACTIVE CORES" );
@@ -1023,7 +1022,7 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
     pCmeHdr->g_cme_mode_flags       =   SWIZZLE_4_BYTE(cmeFlag);
     pCmeHdr->g_cme_qm_mode_flags    =   SWIZZLE_2_BYTE(qmFlags);
     pSgpeHdr->g_sgpe_reserve_flags  =   SWIZZLE_4_BYTE(sgpeFlag);
-    pPgpeHdr->g_pgpe_flags          =   SWIZZLE_2_BYTE(pgpeFlags.value);
+    pPgpeHdr->g_pgpe_flags          =   SWIZZLE_2_BYTE(pgpeFlag);
 
     FAPI_INF("CME Flag Value                : 0x%08x", SWIZZLE_4_BYTE(pCmeHdr->g_cme_mode_flags));
     FAPI_INF("CME QM Flag Value             : 0x%08x", SWIZZLE_2_BYTE(pCmeHdr->g_cme_qm_mode_flags));
