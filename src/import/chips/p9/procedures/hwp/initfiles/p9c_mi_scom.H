@@ -32,13 +32,13 @@
 
 
 typedef fapi2::ReturnCode (*p9c_mi_scom_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MI>&,
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&);
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>&, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 extern "C"
 {
 
     fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
-                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1);
+                                  const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& TGT1, const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& TGT2);
 
 }
 
