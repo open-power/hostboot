@@ -169,7 +169,7 @@ rcw_settings rdimm_rc_custom ( 0x02, // RC00
 rcw_settings rdimm_rc_nvdimm ( 0x00, // RC00
                                0x00, // RC01
                                0x0F, // RC06_07
-                               0x00, // RC09
+                               0x0C, // RC09
                                0x0E, // RC0B
                                0x00, // RC0C
                                0x00, // RC0F

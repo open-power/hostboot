@@ -1485,13 +1485,80 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc09()
 {
-    // TODO - RTC 160118: Clean up eff_config boiler plate that can moved into helper functions
+    // Sets up constant values
+    constexpr uint64_t CKE_POWER_DOWN_MODE_ENABLE = 4;
+    constexpr uint64_t CKE_POWER_DOWN_MODE_TOTAL_LEN = 1;
+    constexpr uint64_t ODT_POS_OFFSET = 4;
+    constexpr uint64_t ODT_ATTR_LEN = 2;
+    constexpr uint64_t IBT_OFF_POS = 5;
+    const auto l_num_dimms = mss::count_dimm(iv_mca);
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
+
+    fapi2::buffer<uint8_t> l_rc09(iv_pDecoder->iv_raw_card.iv_rc09);
     FAPI_TRY( eff_dimm_ddr4_rc09(iv_mcs, &l_attrs_dimm_rc09[0][0]) );
 
+    // If CKE power down mode is on and we're in dual drop mode, then we need to configure the IBT mode
+    if(l_rc09.getBit<CKE_POWER_DOWN_MODE_ENABLE, CKE_POWER_DOWN_MODE_TOTAL_LEN>() && l_num_dimms == 2)
+    {
+        FAPI_INF("%s Checking whether the DIMM needs IBT mode on or off", mss::c_str(iv_dimm));
+
+        // RCD's can be powered down to conserve power similar to DRAMs (by dropping CKE)
+        // This functionality is enabled by bit RC09 (bit 4 in our attribute)
+        // If CKE power down mode is enabled and the system has a dual drop on this MCA, then we need to reconfigure the attribute
+        // Currently, that is the case (check out the if above)
+        // The broadcast of ODT's to the DRAMs can be disabled if no ODT's are needed by the other DIMM for writes or reads
+        // So, we need to check that
+        // Steps to do so:
+        // 1) Gets the other DIMM
+        // 2) Gets the ODT values for the other DIMM
+        // 3) Checks whether this DIMM's ODTs are used for writes or reads that target the other DIMMs
+        // 4) Modify the value for IBT
+
+        // 1) Gets the other DIMM
+        const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_mca);
+        const auto l_this_dimm_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCA>(iv_dimm);
+        const auto l_other_dimm_pos = l_this_dimm_pos == 0 ? 1 : 0;
+        const auto l_other_dimm = l_dimms[l_other_dimm_pos];
+        bool l_ibt_off = true;
+
+        // 2) Gets the ODT values for the other DIMM
+        uint8_t l_wr_odt[MAX_RANK_PER_DIMM] = {};
+        uint8_t l_rd_odt[MAX_RANK_PER_DIMM] = {};
+        FAPI_TRY(vpd_mt_odt_rd(l_other_dimm, l_rd_odt));
+        FAPI_TRY(vpd_mt_odt_wr(l_other_dimm, l_wr_odt));
+
+        // 3) Checks whether this DIMM's ODTs are used for writes or reads that target the other DIMMs
+        for(uint8_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
+        {
+            // Temporary buffers to make the math a bit easier
+            const fapi2::buffer<uint8_t> l_temp_wr(l_wr_odt[l_rank]);
+            const fapi2::buffer<uint8_t> l_temp_rd(l_rd_odt[l_rank]);
+
+            // The ODT attribute consists of a bitmask as follows 0->7
+            // [DIMM0 ODT0][DIMM0 ODT1][N/A][N/A][DIMM1 ODT0][DIMM1 ODT1][N/A][N/A]
+            // As we need whether any ODT is enabled for this DIMM, compute the appropriate offset based upon the DIMM index value
+            const auto l_this_dimm_odt = l_this_dimm_pos * ODT_POS_OFFSET;
+
+            // Are either the writed or read ODT's enabled for this DIMM?
+            if(l_temp_wr.getBit(l_this_dimm_odt, ODT_ATTR_LEN) || l_temp_rd.getBit(l_this_dimm_odt, ODT_ATTR_LEN))
+            {
+                // Either write or read ODT is enabled - IBT off needs to be false
+                // Note: this is taken from JEDEC so we have a double negative
+                l_ibt_off = false;
+                break;
+            }
+        }
+
+        // 4) Modifies the value
+        l_rc09.writeBit<IBT_OFF_POS>(l_ibt_off);
+        FAPI_INF("%s has IBT value of %s giving a value of 0x%02x", mss::c_str(iv_dimm), l_ibt_off ? "OFF - 1" : "ON - 0",
+                 uint8_t(l_rc09));
+    }
+
     // Update MCS attribute
-    l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc09;
+    l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] = l_rc09;
 
     FAPI_INF( "%s: RC09 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC09, iv_mcs, l_attrs_dimm_rc09) );
