@@ -443,9 +443,13 @@ const Target * getParentChip( const Target * i_pChiplet )
     {
         l_pChip = l_chipList[0];
     }
+    else if (l_chipList.size() == 0)
+    {
+        TARG_ERR("Failed to find a parent chip target for huid=%.8X", TARGETING::get_huid(i_pChiplet));
+    }
     else
     {
-        TARG_ERR("Number of Parent chip is not 1, but %d | huid=%.8X",l_chipList.size(), TARGETING::get_huid(i_pChiplet));
+        TARG_ERR("Found %d parent chip targets for huid=%.8X, expected to only find 1",l_chipList.size(), TARGETING::get_huid(i_pChiplet));
     }
 
     return l_pChip;
@@ -470,9 +474,15 @@ const Target * getParent( const Target * i_unit , TARGETING::TYPE &i_pType)
     {
         l_parent = l_chipList[0];
     }
+    else if (l_chipList.size() == 0)
+    {
+        TARG_ERR("Failed to find a parent target for huid=%.8X", TARGETING::get_huid(i_unit));
+    }
     else
     {
-        TARG_ERR("Number of Parent chip is not 1, but %d",l_chipList.size());
+        TARG_ERR("Found %d parent targets for huid=%.8X, only expected to find 1",
+                 l_chipList.size(),
+                 TARGETING::get_huid(i_unit));
     }
 
     return l_parent;
