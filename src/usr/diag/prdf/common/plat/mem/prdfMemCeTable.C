@@ -174,7 +174,7 @@ void MemCeTable<T>::deactivateRank( const MemRank & i_rank )
     //       not active.
     for ( auto & entry : iv_table )
     {
-        if ( entry.addr.getRank() == i_rank )
+        if ( entry.addr.getRank().getSlave() == i_rank.getSlave() )
             entry.active = false;
     }
 }
