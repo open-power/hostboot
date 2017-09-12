@@ -212,11 +212,11 @@ enum PFCS_Bits { VDD_PFET_FORCE_STATE_BIT = 0,
                };
 
 
-enum { VDD_PFETS_ENABLED_SENSE_BIT = 0,
-       VDD_PFETS_DISABLED_SENSE_BIT = 1,
-       VCS_PFETS_ENABLED_SENSE_BIT = 2,
-       VCS_PFETS_DISABLED_SENSE_BIT = 3
-     };
+enum PFSNS_Bits { VDD_PFETS_ENABLED_SENSE_BIT = 0,
+                  VDD_PFETS_DISABLED_SENSE_BIT = 1,
+                  VCS_PFETS_ENABLED_SENSE_BIT = 2,
+                  VCS_PFETS_DISABLED_SENSE_BIT = 3
+                };
 
 enum { POWDN_DLY_BIT = 0,
        POWUP_DLY_BIT = 4,
@@ -264,9 +264,10 @@ p9_common_poweronoff(
     ///////////////////////////////////////////////////////////////////////////
     // lambda functions for poweronoff procedure
     ///////////////////////////////////////////////////////////////////////////
-    auto pollVddFSMIdle = [&] ()
+    auto pollVddFSMIdle = [&] (PFSNS_Bits pfsnsBit)
     {
-        //   Poll for PFETCNTLSTAT_REG[VDD_PG_STATE] for 0b1000 (FSM idle)
+        //   Poll for PFETSENSE_REG[VDD_PFETS_ENABLED_SENSE_BIT] or
+        //      [VDD_PFETS_DISABLED_SENSE_BIT] for PFET change done (FSM idle)
         //      – Timeout value = 1ms
         FAPI_DBG("Polling for power gate sequencer state: FSM idle");
         l_loopsPerMs = 1E6 / FSM_IDLE_POLLING_HW_NS_DELAY;
@@ -279,7 +280,7 @@ p9_common_poweronoff(
             FAPI_TRY(fapi2::getScom(i_target, PPM_PFSNS[l_type], l_data),
                      "getScom failed for address PPM_PFSNS"); // poll
         }
-        while ((l_data.getBit<0>() == 0 ) && (--l_loopsPerMs != 0));
+        while ((l_data.getBit(pfsnsBit, 1) == 0) && (--l_loopsPerMs != 0));
 
         if( l_type )
         {
@@ -305,9 +306,10 @@ p9_common_poweronoff(
         return fapi2::current_err;
     };
 
-    auto pollVcsFSMIdle = [&] ()
+    auto pollVcsFSMIdle = [&] (PFSNS_Bits pfsnsBit)
     {
-        //   Poll for PFETCNTLSTAT_REG[VCS_PG_STATE] for 0b1000 (FSM idle)
+        //   Poll for PFETSENSE_REG[VCS_PFETS_ENABLED_SENSE_BIT] or
+        //      [VCS_PFETS_DISABLED_SENSE_BIT] for PFET change done (FSM idle)
         //      – Timeout value = 1ms
         FAPI_DBG("Polling for power gate sequencer state: FSM idle");
         l_loopsPerMs = 1E6 / FSM_IDLE_POLLING_HW_NS_DELAY;
@@ -320,7 +322,7 @@ p9_common_poweronoff(
             FAPI_TRY(fapi2::getScom(i_target, PPM_PFSNS[l_type], l_data),
                      "getScom failed for address PPM_PFSNS");  // poll
         }
-        while ((l_data.getBit<2>() == 0 ) && (--l_loopsPerMs != 0));
+        while ((l_data.getBit(pfsnsBit, 1) == 0) && (--l_loopsPerMs != 0));
 
         if( l_type )
         {
@@ -373,7 +375,7 @@ p9_common_poweronoff(
 
         // Check for valid power on completion
         //     Polled Timeout:  100us
-        FAPI_TRY(pollVddFSMIdle());
+        FAPI_TRY(pollVddFSMIdle(VDD_PFETS_ENABLED_SENSE_BIT));
 
         //    Write PFETCNTLSTAT_REG_WCLEAR
         //      vdd_pfet_force_state = 00 (No Operation);
@@ -415,7 +417,7 @@ p9_common_poweronoff(
 
         // Check for valid power on completion
         //     Polled Timeout:  100us
-        FAPI_TRY(pollVcsFSMIdle());
+        FAPI_TRY(pollVcsFSMIdle(VCS_PFETS_ENABLED_SENSE_BIT));
 
         //   Write PFETCNTLSTAT_REG_WCLEAR
         //      vcs_pfet_force_state = 00 (No Operation);
@@ -456,7 +458,7 @@ p9_common_poweronoff(
 
         // Check for valid power off completion
         //     Polled Timeout:  100us
-        FAPI_TRY(pollVddFSMIdle());
+        FAPI_TRY(pollVddFSMIdle(VDD_PFETS_DISABLED_SENSE_BIT));
 
         //    Write PFETCNTLSTAT_REG_WCLEAR
         //      vdd_pfet_force_state = 00 (No Operation);
@@ -496,7 +498,7 @@ p9_common_poweronoff(
 
         // Check for valid power off completion
         //     Polled Timeout:  100us
-        FAPI_TRY(pollVcsFSMIdle());
+        FAPI_TRY(pollVcsFSMIdle(VCS_PFETS_DISABLED_SENSE_BIT));
 
         //   Write PFETCNTLSTAT_REG_WCLEAR
         //      vcs_pfet_force_state = 00 (No Operation);
