@@ -7669,30 +7669,4 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
   </hwpfToHbAttrMap>
 </attribute>
 
-<attribute>
-    <id>SYSTEM_VDM_DISABLE</id>
-    <description>
-      Disables the enablement of Voltage Droop Monitors (VDM) in the system.
-
-      Producer:  Override
-
-      Consumers:
-        p9_pstate_parameter_block to clear flag for CME QuadManager Hcode
-            reaction
-    </description>
-    <simpleType>
-    <uint8_t>
-        <default>0x01</default>
-    </uint8_t>
-    </simpleType>
-    <readable/>
-    <writeable/>
-    <persistency>volatile</persistency>
-    <hwpfToHbAttrMap>
-      <id>ATTR_SYSTEM_VDM_DISABLE</id>
-      <macro>DIRECT</macro>
-    </hwpfToHbAttrMap>
-</attribute>
-
-
 </attributes>
