@@ -66,7 +66,7 @@ COPY_FILES = \
     img/procmvpd.dat:vpo \
     img/cvpd.dat:vpo \
     img/dvpd.dat:vpo \
-    obj/genfiles/attrInfo.csv:vpo \
+    obj/genfiles/attrInfo.csv:vpo,openpower \
     obj/genfiles/attrEnumInfo.csv:vpo \
     obj/genfiles/targAttrInfo.csv:vpo \
     obj/genfiles/fapiattrs.xml:openpower \
