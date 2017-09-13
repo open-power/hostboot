@@ -94,8 +94,9 @@ errlHndl_t getSectionInfo( SectionId i_section,
  *      placing it in the address space.  Returns error if the requested
  *      section does not have secure space support.
  *
- *  @param[in] i_section PNOR section to load. Section must not already be
- *      loaded.
+ *  @param[in] i_section PNOR section to load. If the section is already loaded,
+ *                       the bulk of the load operation will not be repeated as
+ *                       a reference count is maintained for each section.
  *
  *  @return errlHndl_t Error log handle
  *  @retval NULL Successfully loaded PNOR section
@@ -104,14 +105,20 @@ errlHndl_t getSectionInfo( SectionId i_section,
 errlHndl_t loadSecureSection(SectionId i_section);
 
 /**
- *  @brief Flushes any applicable pending writes and unloads requested PNOR
- *      section from secure virtual address space
+ *  @brief Unloads requested PNOR section from secure virtual address space.
+ *         There are some restrictions about which sections can be unloaded.
+ *         1. You cannot unload HBB, HBI, or targeting sections. These are core
+ *            sections that need to be available as much as possible.
+ *         2. You can only unload sections for which the secure payload is
+ *            the entire payload. Sections with unsecured pages are not
+ *            supported.
  *
- *  @param[in] i_section PNOR section to unload.  No-op if already unloaded.
+ *  @param[in] i_section PNOR section to unload.
  *
  *  @return errlHndl_t Error log handle
  *  @retval NULL Successfully unloaded PNOR section
- *  @retval !NULL Failed to unload PNOR section
+ *  @retval !NULL Failed to unload PNOR section for the reasons listed above
+ *                or if the section is not currently loaded.
  */
 errlHndl_t unloadSecureSection(SectionId i_section);
 

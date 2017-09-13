@@ -773,8 +773,9 @@ errlHndl_t UtilLidMgr::cleanup()
 #ifdef CONFIG_SECUREBOOT
         // If in SECUREBOOT the lid could be securely signed in PNOR (like OCC)
         // If so, unload it securely
-        // NOTE:  It is safe to unload it even if it was unloaded before
-        if (iv_lidPnorInfo.secure)
+        bool l_doUnload = (iv_lidPnorInfo.size != 0);
+
+        if (iv_lidPnorInfo.secure && l_doUnload)
         {
             l_err = PNOR::unloadSecureSection(iv_lidPnorInfo.id);
 
@@ -784,6 +785,10 @@ errlHndl_t UtilLidMgr::cleanup()
                                "unloadSecureSection(0x%X): "
                                "unloading module : %s (id=0x%X)",
                                iv_lidPnorInfo.id, iv_lidFileName, iv_lidId);
+            }
+            else
+            {
+                iv_lidPnorInfo.size = 0;
             }
         }
 #endif

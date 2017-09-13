@@ -117,6 +117,8 @@ SPnorRP::~SPnorRP()
         ++i)
     {
         LoadRecord* l_rec = (*i).second;
+        TRACFCOMP(g_trac_pnor,
+            "Section 0x%X has %lu references.", (*i).first, l_rec->refCount);
         delete l_rec;
     }
 
@@ -195,6 +197,44 @@ errlHndl_t SPnorRP::setPermission(void* i_va, uint64_t i_size,
 }
 
 /**
+ * @brief  A wrapper for mm_remove_pages that adds error log creation.
+ */
+errlHndl_t SPnorRP::removePages(void* i_va, uint64_t i_size) const
+{
+    errlHndl_t l_errhdl = nullptr;
+    int l_rc = mm_remove_pages (RELEASE,
+            reinterpret_cast<void*>(i_va), i_size);
+    if (l_rc)
+    {
+        TRACFCOMP(g_trac_pnor, "SPnorRP::removePages: mm_remove_pages errored,"
+                " vaddr: 0x%llX, rc: %d, size:0x%llX", i_va, l_rc, i_size);
+        /*@
+         *  @errortype
+         *  @moduleid         PNOR::MOD_SPNORRP_REMOVE_PAGES
+         *  @reasoncode       PNOR::RC_EXTERNAL_ERROR
+         *  @userdata1        virtual address
+         *  @userdata2[00:31] rc from mm_remove_pages
+         *  @userdata2[32:63] The size of memory attempted to remove
+         *  @devdesc          mm_remove_pages failed
+         *  @custdesc         A problem occurred in the security subsystem
+         */
+        l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    PNOR::MOD_SPNORRP_REMOVE_PAGES,
+                                    PNOR::RC_EXTERNAL_ERROR,
+                                    reinterpret_cast<uint64_t>(i_va),
+                                    TWO_UINT32_TO_UINT64(
+                                        TO_UINT32(l_rc),
+                                        TO_UINT32(i_size)
+                                    ),
+                                    true); // Add HB SW Callout
+        l_errhdl->collectTrace(PNOR_COMP_NAME);
+        l_errhdl->collectTrace(SECURE_COMP_NAME);
+    }
+    return l_errhdl;
+}
+
+
+/**
  * @brief Initialize the daemon
  */
 void SPnorRP::initDaemon()
@@ -222,7 +262,7 @@ void SPnorRP::initDaemon()
 
         // set permissions for temp space
         l_errhdl = setPermission(reinterpret_cast<void*>(TEMP_VADDR),
-                                    PNOR_SIZE, WRITABLE | ALLOCATE_FROM_ZERO);
+                                                        PNOR_SIZE, NO_ACCESS);
         if ( l_errhdl )
         {
             break;
@@ -261,7 +301,9 @@ void SPnorRP::initDaemon()
 /**
  * @brief  Load secure sections into temporary address space and verify them
  */
-uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
+uint64_t SPnorRP::verifySections(SectionId i_id,
+                                 bool i_loadedPreviously,
+                                 LoadRecord* io_rec)
 {
     SectionInfo_t l_info;
     errlHndl_t l_errhdl = NULL;
@@ -348,6 +390,28 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections unsecured mem now: ",
                              l_unsecuredAddr, 128);
 
+        TRACDCOMP( g_trac_pnor,
+                    "SPnorRP::verifySections Doing setPermission for address "
+                              "0x%llX of length 0x%llX",
+                       l_tempAddr,
+                       l_info.secureProtectedPayloadSize + PAGESIZE);
+
+        l_errhdl = setPermission(l_tempAddr,
+                                 l_info.secureProtectedPayloadSize + PAGESIZE,
+                                 WRITABLE | ALLOCATE_FROM_ZERO);
+
+        if (l_errhdl)
+        {
+            TRACFCOMP( g_trac_pnor,
+                       ERR_MRK"SPnorRP::verifySections "
+                              "setPermission failed for address "
+                              "0x%llX of length 0x%llX",
+                       l_tempAddr,
+                       l_info.secureProtectedPayloadSize + PAGESIZE);
+            break;
+        }
+
+
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections about to do memcpy");
 
         // copy from unsecured PNOR space to temp PNOR space
@@ -380,10 +444,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
                              l_tempAddr, 128);
 
         // store secure space pointer in load record (Includes Header)
-        o_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        io_rec->secAddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
 
         TRACDCOMP(g_trac_pnor,"section start address in secure space is "
-                              "0x%.16llX",o_rec->secAddr);
+                              "0x%.16llX",io_rec->secAddr);
 
         // verify while in temp space
         if (SECUREBOOT::enabled())
@@ -420,29 +484,45 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // parse container header now that it is verified
         // store the payload text size in the section load record
         // Note: the text size we get back is now trusted
-        o_rec->textSize = l_conHdr.payloadTextSize();
-        assert(o_rec->textSize == l_info.secureProtectedPayloadSize);
+        io_rec->textSize = l_conHdr.payloadTextSize();
+        assert(io_rec->textSize == l_info.secureProtectedPayloadSize);
         // Size of data loaded into Secure PnorRP vaddr space (Includes Header)
-        size_t l_protectedSizeWithHdr = PAGESIZE + o_rec->textSize;
+        size_t l_protectedSizeWithHdr = PAGESIZE + io_rec->textSize;
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections Total Protected size with Header = 0x%.16llX",
                   l_protectedSizeWithHdr);
 
         l_totalContainerSize = l_conHdr.totalContainerSize();
         // keep track of info size in load record (Includes Header)
-        o_rec->infoSize = l_totalContainerSize;
+        io_rec->infoSize = l_totalContainerSize;
 
-        // pcr extension of PNOR hash
-        l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
+        // if not loaded previously or...
+        if (!i_loadedPreviously ||
+        // loading after a prior unload and...
+            (i_loadedPreviously &&
+            // the protected payload measurement doesn't match the old one
+            memcmp(&io_rec->payloadTextHash[0],
+                   l_conHdr.payloadTextHash(),
+                   SHA512_DIGEST_LENGTH)!=0
+            )
+           )
+        {
+            // pcr extension of PNOR hash
+            l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
                                         (l_tempAddr + PAGESIZE),
                                         i_id);
-        if(l_errhdl)
-        {
-            TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections extendPnorSectionHash failed");
-            break;
+            if(l_errhdl)
+            {
+                TRACFCOMP(g_trac_pnor,"SPnorRP::verifySections extendPnorSectionHash failed");
+                break;
+            }
+            // save off the payload text hash
+            memcpy(&io_rec->payloadTextHash[0],
+                   l_conHdr.payloadTextHash(),
+                   SHA512_DIGEST_LENGTH);
         }
 
         // set permissions on the secured pages to writable
-        l_errhdl = setPermission(o_rec->secAddr, l_protectedSizeWithHdr,
+        l_errhdl = setPermission(io_rec->secAddr, l_protectedSizeWithHdr,
                                  WRITABLE);
         if(l_errhdl)
         {
@@ -454,7 +534,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
         uint64_t unprotectedPayloadSize = l_totalContainerSize
-            - PAGESIZE - o_rec->textSize;
+            - PAGESIZE - io_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
             TRACDCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections "
@@ -464,13 +544,13 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 
             // Split the mod math out of the assert as the trace would not
             // display otherwise.
-            bool l_onPageBoundary = !(o_rec->textSize % PAGESIZE);
+            bool l_onPageBoundary = !(io_rec->textSize % PAGESIZE);
             assert( l_onPageBoundary, "For section %s, payloadTextSize does "
                     "not fall on a page boundary and there is an unprotected "
                     "payload",
                     l_info.name);
 
-            l_errhdl = setPermission(o_rec->secAddr + l_protectedSizeWithHdr,
+            l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
                                        unprotectedPayloadSize,
                                        WRITABLE | WRITE_TRACKED);
             if(l_errhdl)
@@ -482,7 +562,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id, LoadRecord* o_rec)
 
             // Register the write tracked memory range to be flushed on
             // shutdown.
-            INITSERVICE::registerBlock(o_rec->secAddr + l_protectedSizeWithHdr,
+            INITSERVICE::registerBlock(io_rec->secAddr + l_protectedSizeWithHdr,
                                         unprotectedPayloadSize, SPNOR_PRIORITY);
         }
         else
@@ -646,26 +726,246 @@ void SPnorRP::waitForMessage()
                                     static_cast<SectionId>(message->data[0]);
                         do
                         {
-                            if (iv_loadedSections[l_id] == NULL)
+                            LoadRecord* l_record = nullptr;
+                            bool l_loadedPreviously = false;
+                            uint64_t l_rc = 0;
+
+                            // if there is already a Load Record
+                            auto l_item = iv_loadedSections.find(l_id);
+                            if (l_item != iv_loadedSections.end())
                             {
-                                LoadRecord* l_record = new LoadRecord;
-                                uint64_t l_rc = verifySections(l_id, l_record);
+                                l_loadedPreviously = true;
+                                l_record = iv_loadedSections[l_id];
+                            }
+                            else
+                            {
+                                l_record = new LoadRecord;
+                            }
+
+                            TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage> MSG_LOAD_SECTION refCount is %i",l_record->refCount);
+                            if (l_record->refCount == 0)
+                            {
+                                l_rc = verifySections(l_id,
+                                                      l_loadedPreviously,
+                                                      l_record);
                                 if (l_rc)
                                 {
-                                    delete l_record;
-                                    l_record = NULL;
+                                    if(!l_loadedPreviously)
+                                    {
+                                        delete l_record;
+                                        l_record = nullptr;
+                                    }
                                     status_rc = -l_rc;
                                     break;
                                 }
-                                iv_loadedSections[l_id] = l_record;
-
-                                // cache the record to use fields later as hints
-                                l_rec = *l_record;
                             }
+
+                            if (!l_loadedPreviously)
+                            {
+                                iv_loadedSections[l_id] = l_record;
+                            }
+
+                            // increment refcount
+                            l_record->refCount++;
+
+                            // cache the record to use fields later as hints
+                            l_rec = *l_record;
+
                         } while (0);
                     }
                     break;
+                case( PNOR::MSG_UNLOAD_SECTION ):
+                    {
+                        SectionId l_id =
+                                      static_cast<SectionId>(message->data[0]);
 
+                        do {
+                            // Disallow unload of HBB, HBI and Targeting
+                            if (l_id == HB_BASE_CODE ||
+                                l_id == HB_EXT_CODE ||
+                                l_id == HB_DATA)
+                            {
+                                TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Secure unload of HBB, HBI, and targeting is not allowed secId=%d", l_id);
+                                /*@
+                                 * @errortype
+                                 * @moduleid   PNOR::MOD_SPNORRP_WAITFORMESSAGE
+                                 * @reasoncode PNOR::RC_SECURE_UNLOAD_DISALLOWED
+                                 * @userdata1  Section Id
+                                 * @devdesc    Secure unload of sections that
+                                 *             critical to hostboot operation
+                                 *             are not allowed.
+                                 * @custdesc   A problem occurred within the
+                                 *             security subsystem.
+                                 */
+                                l_errhdl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    PNOR::MOD_SPNORRP_WAITFORMESSAGE,
+                                    PNOR::RC_SECURE_UNLOAD_DISALLOWED,
+                                    TO_UINT64(l_id),
+                                    0,
+                                    true /*Add HB SW Callout*/);
+                                status_rc = -EFAULT;
+                                break;
+
+                            }
+
+                            // if we don't find a record
+                            // or refcount is zero then throw an error since
+                            // this is not currently a loaded section
+                            auto l_item = iv_loadedSections.find(l_id);
+                            if (l_item == iv_loadedSections.end() ||
+                                l_item->second->refCount == 0 )
+                            {
+                                TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload a section that is not a loaded section. refCount=%i",l_item->second->refCount);
+                                /*@
+                                 * @errortype
+                                 * @moduleid   PNOR::MOD_SPNORRP_WAITFORMESSAGE
+                                 * @reasoncode PNOR::RC_NOT_A_LOADED_SECTION
+                                 * @userdata1  Section attempted to unload
+                                 * @devdesc    Not a loaded section
+                                 * @custdesc   A problem occurred within the
+                                 *             security subsystem.
+                                 */
+                                l_errhdl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    PNOR::MOD_SPNORRP_WAITFORMESSAGE,
+                                    PNOR::RC_NOT_A_LOADED_SECTION,
+                                    TO_UINT64(l_id),
+                                    0,
+                                    true /*Add HB SW Callout*/);
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            auto l_rec = l_item->second;
+
+                            TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage> MSG_UNLOAD_SECTION refCount is %i",l_rec->refCount);
+
+                            size_t l_sizeWithHdr = PAGESIZE + l_rec->textSize;
+
+                            bool l_wasLoadedAsBestEffort = false;
+                            if (l_rec->textSize == 0 &&
+                                SECUREBOOT::bestEffortPolicy())
+                            {
+                                // indicate that this section had been loaded
+                                // as "best effort"
+                                l_wasLoadedAsBestEffort = true;
+                            }
+                            // if the section has an unsecured portion
+                            else if (l_sizeWithHdr != l_rec->infoSize)
+                            {
+                                TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload an unsupported section: 0x%X textsize+hdr: 0x%llX infosize: 0x%llX (the two sizes must be equal)", l_id, l_sizeWithHdr, l_rec->infoSize);
+                                /*@
+                                 * @errortype
+                                 * @moduleid   PNOR::MOD_SPNORRP_WAITFORMESSAGE
+                                 * @reasoncode PNOR::RC_NOT_A_SUPPORTED_SECTION
+                                 * @userdata1  Section attempted to unload
+                                 * @devdesc    Not a supported section
+                                 * @custdesc   A problem occurred within the
+                                 *             security subsystem.
+                                 */
+                                l_errhdl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    PNOR::MOD_SPNORRP_WAITFORMESSAGE,
+                                    PNOR::RC_NOT_A_SUPPORTED_SECTION,
+                                    TO_UINT64(l_id),
+                                    0,
+                                    true /*Add HB SW Callout*/);
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            if (l_rec->refCount > 1)
+                            {
+                                l_rec->refCount--;
+                                 // normal operation, no error
+                                 // no need to do anything if refcount is
+                                 // 2 or more
+                                break;
+                            }
+
+                            if (l_wasLoadedAsBestEffort)
+                            {
+                                l_rec->secAddr = nullptr;
+                                l_rec->textSize = 0;
+                                l_rec->infoSize = 0;
+                                l_rec->refCount = 0;
+                                break;
+                            }
+
+                            l_errhdl = removePages(l_rec->secAddr,
+                                                   l_sizeWithHdr);
+                            if (l_errhdl)
+                            {
+                                TRACFCOMP( g_trac_pnor,
+                                    ERR_MRK"SPnorRP::waitForMessage> "
+                                    "removePages failed for address "
+                                    "0x%llX of length 0x%llX", l_rec->secAddr,
+                                                               l_sizeWithHdr);
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            l_errhdl = setPermission(l_rec->secAddr,
+                                                      l_sizeWithHdr,
+                                                      NO_ACCESS);
+                            if (l_errhdl)
+                            {
+                                TRACFCOMP( g_trac_pnor,
+                                    ERR_MRK"SPnorRP::waitForMessage> "
+                                    "setPermission failed for address "
+                                    "0x%llX of length 0x%llX", l_rec->secAddr,
+                                                           l_sizeWithHdr);
+
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            // clear out temp space
+                            uint8_t* l_tempAddr = l_rec->secAddr -
+                                                    VMM_VADDR_SPNOR_DELTA;
+
+                            l_errhdl = removePages(l_tempAddr,
+                                                   l_sizeWithHdr);
+                            if (l_errhdl)
+                            {
+                                TRACFCOMP( g_trac_pnor,
+                                    ERR_MRK"SPnorRP::waitForMessage> "
+                                    "removePages failed for address "
+                                    "0x%llX of length 0x%llX", l_tempAddr,
+                                                               l_sizeWithHdr);
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            TRACDCOMP( g_trac_pnor,
+                                    "SPnorRP::waitForMessage> "
+                                    "Doing setPermission NO_ACCESS for address "
+                                    "0x%llX of length 0x%llX", l_tempAddr,
+                                                               l_sizeWithHdr);
+
+                            l_errhdl = setPermission(l_tempAddr,
+                                                      l_sizeWithHdr,
+                                                      NO_ACCESS);
+                            if (l_errhdl)
+                            {
+                                TRACFCOMP( g_trac_pnor,
+                                    ERR_MRK"SPnorRP::waitForMessage> "
+                                    "setPermission failed for address "
+                                    "0x%llX of length 0x%llX", l_tempAddr,
+                                                               l_sizeWithHdr);
+
+                                status_rc = -EFAULT;
+                                break;
+                            }
+
+                            l_rec->secAddr = nullptr;
+                            l_rec->textSize = 0;
+                            l_rec->infoSize = 0;
+                            l_rec->refCount = 0;
+                        } while (0);
+                    }
+                    break;
                 default:
                     TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> "
                     "Unrecognized message type : user_addr=%p, eff_addr=%p,"
@@ -699,6 +999,8 @@ void SPnorRP::waitForMessage()
             if( l_errhdl )
             {
                 errlCommit(l_errhdl,PNOR_COMP_ID);
+                TRACFCOMP(g_trac_pnor,
+                    ERR_MRK"SPnorRP::waitForMessage> status_rc=%d, ", status_rc );
             }
 
             /*  Expected Response:
@@ -725,10 +1027,15 @@ void SPnorRP::waitForMessage()
 }
 
 /**
- *  @brief Loads requested PNOR section to secure virtual address space
+ *  @brief Loads or unloads requested PNOR section to secure virtual address
+ *         space
  */
-errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
+errlHndl_t loadUnloadSecureSection(const SectionId i_section,
+                                   secure_msg_type i_loadUnload)
 {
+    assert( i_loadUnload == PNOR::MSG_LOAD_SECTION ||
+            i_loadUnload == PNOR::MSG_UNLOAD_SECTION, "Bug! You can only pass PNOR::MSG_LOAD_SECTION or PNOR::MSG_UNLOAD_SECTION into loadUnloadSecureSection()");
+
     // Send message to secure provider to load the section
     errlHndl_t err = NULL;
 
@@ -740,12 +1047,9 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
 
     assert(msg != NULL);
 
-    msg->type = PNOR::MSG_LOAD_SECTION;
+    msg->type = i_loadUnload;
     msg->data[0] = static_cast<uint64_t>(i_section);
     int rc = msg_sendrecv(spnorQ, msg);
-
-    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
-              i_section,PNOR::SectionIdToString(i_section));
 
     // TODO securebootp9 - Need to be able to receive an error from the
     // message handler. Also, message handler should police whether the request
@@ -755,16 +1059,18 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
     //    err = reinterpret_cast<errlHndl_t>(msg->data[1]);
     //}
     //else remove the if clause below at some point
+    TRACDCOMP(g_trac_pnor,"PNOR::loadUnloadSecureSection> rc=%d msg->data[1]=0x%X ", rc, msg->data[1] );
+
     if (rc != 0 || msg->data[1])
     {
         // Use rc if non-zero, msg data[1] otherwise.
         uint64_t l_rc = (rc) ? rc : msg->data[1];
 
-        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadSecureSection> Error from msg_sendrecv or msg->data[1] rc=0x%X",
+        TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadUnloadSecureSection> Error from msg_sendrecv or msg->data[1] rc=%d",
                   l_rc );
         /* @errorlog
          * @severity          ERRL_SEV_CRITICAL_SYS_TERM
-         * @moduleid          MOD_PNORRP_LOADSECURESECTION
+         * @moduleid          MOD_PNORRP_LOADUNLOADSECURESECTION
          * @reasoncode        RC_EXTERNAL_ERROR
          * @userdata1         returncode from msg_sendrecv() or msg->data[1]
          * @userdata2[0:31]   SPNOR message type [LOAD | UNLOAD]
@@ -775,10 +1081,10 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
          */
         err = new ERRORLOG::ErrlEntry(
                          ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                         MOD_PNORRP_LOADSECURESECTION,
+                         MOD_PNORRP_LOADUNLOADSECURESECTION,
                          RC_EXTERNAL_ERROR,
                          l_rc,
-                         TWO_UINT32_TO_UINT64(PNOR::MSG_LOAD_SECTION,
+                         TWO_UINT32_TO_UINT64(i_loadUnload,
                                               i_section),
                          true /* Add HB Software Callout */);
         err->collectTrace(PNOR_COMP_NAME);
@@ -789,15 +1095,25 @@ errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
 }
 
 /**
- *  @brief Flushes any applicable pending writes and unloads requested PNOR
- *         section from secure virtual address space
+ *  @brief Loads requested PNOR section to secure virtual address space
+ */
+errlHndl_t PNOR::loadSecureSection(const SectionId i_section)
+{
+    TRACFCOMP(g_trac_pnor, "loadSecureSection i_section = %i (%s)",
+              i_section,PNOR::SectionIdToString(i_section));
+
+    return loadUnloadSecureSection(i_section, PNOR::MSG_LOAD_SECTION);
+}
+
+/**
+ *  @brief Unloads requested PNOR section from secure virtual address space
  */
 errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
 {
-    // @TODO RTC 156118
-    // Replace with call to secure provider to unload the section
-    errlHndl_t pError=NULL;
-    return pError;
+    TRACFCOMP(g_trac_pnor, "unloadSecureSection i_section = %i (%s)",
+              i_section,PNOR::SectionIdToString(i_section));
+
+    return loadUnloadSecureSection(i_section, PNOR::MSG_UNLOAD_SECTION);
 }
 
 void SPnorRP::processLabOverride(
