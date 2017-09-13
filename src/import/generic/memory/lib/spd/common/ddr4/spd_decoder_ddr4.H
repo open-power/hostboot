@@ -51,10 +51,329 @@
 #include <generic/memory/lib/spd/lrdimm/ddr4/lrdimm_decoder_ddr4.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/spd/common/spd_decoder_base.H>
-
+#include <generic/memory/lib/spd/spd_checker.H>
 
 namespace mss
 {
+
+///
+/// @brief Connector to SDRAM Bit Mapping field positions
+/// @note Bytes 60 - 77 . Mapping to Package rank map and
+/// nibble map starting and length positions for SPD field extraction.
+///
+enum connector_to_sdram
+{
+    PACKAGE_RANK_MAP_START = 0,
+    PACKAGE_RANK_MAP_LEN = 2,
+
+    NIBBLE_MAP_START = 2,
+    NIBBLE_MAP_LEN = 6,
+};
+
+///
+/// @brief Connector to SDRAM Bit Mapping fields
+/// @note template selector for traits and function API
+///
+enum connector_field
+{
+    NIBBLE_MAP,
+    PKG_RANK_MAP,
+};
+
+///
+/// @brief Connector to SDRAM Bit Mapping connector bits
+/// @note template selYYector for traits and function API.
+/// DQ0_31 represnts DQ nibbles for DQ bits 0 - 31.
+/// DQ32_63 represnts DQ nibbles for DQ bits 32 - 63.
+/// CB0_7 represents DQ nibbles for DQ bits 64 - 71.
+///
+enum connector_bits
+{
+    DQ0_31,
+    DQ32_63,
+    CB0_7,
+};
+
+///
+/// @brief Helper function threshold check for nibble map
+/// @param[in] i_target the DIMM target
+/// @param[in] i_byte the SPD byte
+/// @param[in] i_bit_order the nibble bit order from SPD
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode nibble_map_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_byte,
+        const uint8_t i_bit_order )
+{
+    // SPD limits on what the value for the nibble map can be,
+    // taken from the SPD JEDEC spec.
+    constexpr uint64_t LOW_BIT_ORDER_MIN = 0x01;
+    constexpr uint64_t LOW_BIT_ORDER_MAX = 0x18;
+
+    constexpr uint64_t UP_BIT_ORDER_MIN = 0x21;
+    constexpr uint64_t UP_BIT_ORDER_MAX = 0x38;
+
+    // SPD JEDEC thresholds - protects against reserved values
+    const bool VALID_LOWER_NIBBLE = (i_bit_order >= LOW_BIT_ORDER_MIN) && (i_bit_order <= LOW_BIT_ORDER_MAX);
+    const bool VALID_UPPER_NIBBLE = (i_bit_order >= UP_BIT_ORDER_MIN) && (i_bit_order <= UP_BIT_ORDER_MAX);
+
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+             (VALID_LOWER_NIBBLE || VALID_UPPER_NIBBLE),
+             i_byte,
+             i_bit_order,
+             "Failed check on the NIBBLE_MAP field") );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function threshold check for package rank map
+/// @param[in] i_target the DIMM target
+/// @param[in] i_byte the SPD byte
+/// @param[in] i_pkg_rank_map pakcage rank map value
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+static fapi2::ReturnCode package_rank_map_helper( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_byte,
+        const uint8_t i_pkg_rank_map )
+{
+    // Taken from the SPD JEDEC spec, only valid encoding, the rest are reserved
+    constexpr uint64_t VALID_VALUE = 0;
+    FAPI_TRY(mss::check::spd::fail_for_invalid_value(i_target,
+             (i_pkg_rank_map == VALID_VALUE),
+             i_byte,
+             i_pkg_rank_map,
+             "Failed check on Package Rank Map") );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @tparam T the connector_bits representing the DQ bits
+/// @tparam OT the connector_field representing the SPD field
+///
+template< connector_bits T, connector_field OT >
+class connectorTraits;
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note DQ0_31, NIBBLE_MAP specialization
+///
+template< >
+class connectorTraits<DQ0_31, NIBBLE_MAP>
+{
+    public:
+        enum
+        {
+            START = 60,
+            END = 67,
+            EXTRACT_START = NIBBLE_MAP_START,
+            EXTRACT_LEN = NIBBLE_MAP_LEN,
+
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_bit_order the nibble bit order from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_bit_order )
+        {
+            FAPI_TRY(nibble_map_helper(i_target, i_byte, i_bit_order) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note DQ0_31, PKG_RANK_MAP specialization
+///
+template< >
+class connectorTraits<DQ0_31, PKG_RANK_MAP>
+{
+    public:
+        enum
+        {
+            START = 60,
+            END = 67,
+            EXTRACT_START = PACKAGE_RANK_MAP_START,
+            EXTRACT_LEN = PACKAGE_RANK_MAP_LEN,
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_pkg_rank_map pakcage rank map value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_pkg_rank_map )
+        {
+            FAPI_TRY( package_rank_map_helper(i_target, i_byte, i_pkg_rank_map) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note DQ32_63, NIBBLE_MAP specialization
+///
+template< >
+class connectorTraits<DQ32_63, NIBBLE_MAP>
+{
+    public:
+        enum
+        {
+            START = 70,
+            END = 77,
+            EXTRACT_START = NIBBLE_MAP_START,
+            EXTRACT_LEN = NIBBLE_MAP_LEN,
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_bit_order the nibble bit order from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_bit_order )
+        {
+            FAPI_TRY(nibble_map_helper(i_target, i_byte, i_bit_order) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note DQ32_63, PKG_RANK_MAP specialization
+///
+template< >
+class connectorTraits<DQ32_63, PKG_RANK_MAP>
+{
+    public:
+        enum
+        {
+            START = 70,
+            END = 77,
+            EXTRACT_START = PACKAGE_RANK_MAP_START,
+            EXTRACT_LEN = PACKAGE_RANK_MAP_LEN,
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_pkg_rank_map pakcage rank map value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_pkg_rank_map )
+        {
+            FAPI_TRY( package_rank_map_helper(i_target, i_byte, i_pkg_rank_map) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note CB0_7, NIBBLE_MAP specialization
+///
+template< >
+class connectorTraits<CB0_7, NIBBLE_MAP>
+{
+    public:
+        enum
+        {
+            START = 68,
+            END = 69,
+            EXTRACT_START = NIBBLE_MAP_START,
+            EXTRACT_LEN = NIBBLE_MAP_LEN,
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_bit_order the nibble bit order from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_bit_order )
+        {
+            FAPI_TRY(nibble_map_helper(i_target, i_byte, i_bit_order) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
+///
+/// @class connectorTraits
+/// @brief a collection of traits associated with the connector to SDRAM
+/// @note CB0_7, PKG_RANK_MAP specialization
+///
+template< >
+class connectorTraits<CB0_7, PKG_RANK_MAP>
+{
+    public:
+        enum
+        {
+            START = 68,
+            END = 69,
+            EXTRACT_START = PACKAGE_RANK_MAP_START,
+            EXTRACT_LEN = PACKAGE_RANK_MAP_LEN,
+        };
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[in] i_target the DIMM target
+        /// @param[in] i_byte the SPD byte
+        /// @param[in] i_pkg_rank_map pakcage rank map value
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        static fapi2::ReturnCode fail_check( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                             const uint8_t i_byte,
+                                             const uint8_t i_pkg_rank_map )
+        {
+            FAPI_TRY( package_rank_map_helper(i_target, i_byte, i_pkg_rank_map) );
+
+        fapi_try_exit:
+            return fapi2::current_err;
+
+        }
+};
+
 namespace spd
 {
 
@@ -302,8 +621,6 @@ class decoder_v1_0 : public decoder
             TWTRMIN_L_LSB_LEN = 8,
 
             // Bytes 46 - 59 - reserved
-
-            // Bytes 60 - 77 - Connector to SDRAM Bit Mapping ??
 
             // Bytes 78 - 116 - reserved
 
@@ -955,15 +1272,26 @@ class decoder_v1_0 : public decoder
         virtual fapi2::ReturnCode min_twtr_l( int64_t& o_value ) const override;
 
         ///
-        /// @brief Decodes connector to SDRAM bit mapping
-        /// @param[out] o_value vector of bit nibble maps for SPD bytes 60 - 77
+        /// @brief Decodes Package Rank Map
+        /// @param[out] o_value vector of package rank maps for SPD bytes 60 - 77
         /// @return FAPI2_RC_SUCCESS iff okay
         /// @note SPD Byte 60 - 77
         /// @note JEDEC Standard No. 21-C
-        /// @note Page 40
+        /// @note Page 45
         /// @note DDR4 SPD Document Release 3
         ///
-        virtual fapi2::ReturnCode connector_to_sdram( std::vector<uint8_t>& o_value ) const override;
+        virtual fapi2::ReturnCode package_rank_map( std::vector<uint8_t>& o_value ) const override;
+
+        ///
+        /// @brief Decodes Nibble Map
+        /// @param[out] o_value vector of nibble map encoding for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS iff okay
+        /// @note SPD Byte 60 - 77
+        /// @note JEDEC Standard No. 21-C
+        /// @note Page 45
+        /// @note DDR4 SPD Document Release 3
+        ///
+        virtual fapi2::ReturnCode nibble_map( std::vector<uint8_t>& o_value ) const override;
 
         ///
         /// @brief Decodes Fine Offset for Minimum CAS to CAS Delay Time - Same Bank Group
@@ -1182,6 +1510,35 @@ class decoder_v1_0 : public decoder
         /// @return fapi2::FAPI2_RC_SUCCESS iff okay
         ///
         virtual fapi2::ReturnCode logical_ranks_per_dimm( uint8_t& o_logical_rank_per_dimm ) const override;
+
+    private:
+
+        ///
+        /// @brief SPD byte field threshold check
+        /// @param[out] o_value list of connector_field values from SPD
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        template< mss::connector_bits T, mss::connector_field OT, typename TT = mss::connectorTraits<T, OT> >
+        fapi2::ReturnCode sdram_connector_helper( std::vector<uint8_t>& o_value ) const
+        {
+            for( size_t byte = TT::START; byte <= TT::END; ++byte )
+            {
+                uint8_t l_field = 0;
+
+                fapi2::buffer<uint8_t> l_buffer(iv_spd_data[byte]);
+                l_buffer.extractToRight<TT::EXTRACT_START, TT::EXTRACT_LEN>(l_field);
+
+                FAPI_DBG("%s SPD byte %d, data: %d, field value: %d, starting bit: %d, bit length: %d",
+                         mss::c_str(iv_target), byte, iv_spd_data[byte], l_field, TT::EXTRACT_START, TT::EXTRACT_LEN);
+
+                FAPI_TRY( TT::fail_check(iv_target, byte, l_field) );
+
+                o_value.push_back(l_field);
+            }
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
 
 };// decoder
 
