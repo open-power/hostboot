@@ -465,6 +465,8 @@
     <id>FRU_ID</id>
   </attribute>
   <attribute><id>REL_POS</id></attribute>
+  <attribute><id>MBA_PORT</id></attribute>
+  <attribute><id>MBA_DIMM</id></attribute>
 </targetType>
 
 <targetType>
