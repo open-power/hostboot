@@ -674,11 +674,22 @@ class decoder
         }
 
         ///
-        /// @brief Decodes connector to SDRAM bit mapping
-        /// @param[out] o_value vector of bit nibble maps for SPD bytes 60 - 77
-        /// @return FAPI2_RC_SUCCESS if okay
+        /// @brief Decodes Package Rank Map
+        /// @param[out] o_value vector of package rank maps for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS iff okay
         ///
-        virtual fapi2::ReturnCode connector_to_sdram( std::vector<uint8_t>& o_value ) const
+        virtual fapi2::ReturnCode package_rank_map( std::vector<uint8_t>& o_value ) const
+        {
+            o_value.clear();
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Decodes Nibble Map
+        /// @param[out] o_value vector of nibble map encoding for SPD bytes 60 - 77
+        /// @return FAPI2_RC_SUCCESS iff okay
+        ///
+        virtual fapi2::ReturnCode nibble_map( std::vector<uint8_t>& o_value ) const
         {
             o_value.clear();
             return fapi2::FAPI2_RC_SUCCESS;
