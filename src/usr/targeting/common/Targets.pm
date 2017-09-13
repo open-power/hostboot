@@ -1378,6 +1378,21 @@ sub processMc
                                         $self->setAttribute($dimm,"MBA_PORT",$port_num);
                                         $self->setAttribute($dimm,"MBA_DIMM",$dimm_num);
 
+                                        #Centaur/Membufs use CEN_MBA_PORT and not MBA_PORT
+                                        #For now, support both.
+                                        if (!$self->isBadAttribute($ddr, "CEN_MBA_PORT"))
+                                        {
+                                            $port_num = $self->getAttribute($ddr,"CEN_MBA_PORT");
+                                            $self->setAttribute($dimm,"CEN_MBA_PORT",$port_num);
+
+                                        }
+                                        if (!$self->isBadAttribute($ddr, "CEN_MBA_DIMM"))
+                                        {
+                                            $dimm_num = $self->getAttribute($ddr,"CEN_MBA_DIMM");
+                                            $self->setAttribute($dimm,"CEN_MBA_DIMM",$dimm_num);
+
+                                        }
+
                                         my $aff_pos = DIMMS_PER_PROC*$proc+
                                                       DIMMS_PER_DMI*$dmi_num+
                                                       DIMMS_PER_MBAPORT*$mba+

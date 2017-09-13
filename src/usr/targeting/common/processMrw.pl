@@ -291,12 +291,6 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
     {
         processMembuf($targetObj, $target);
     }
-    elsif ($type eq "DIMM")
-    {
-        #TODO RTC: 178351 Remove depricated Attribute from HB XML
-        $targetObj->deleteAttribute($target,"MBA_DIMM");
-        $targetObj->deleteAttribute($target,"MBA_PORT");
-    }
     elsif ($type eq "PHB")
     {
         #TODO RTC: 178351 Remove depricated Attribute from HB XML
