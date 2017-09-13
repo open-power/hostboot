@@ -101,9 +101,27 @@ print $fh $num_bin;
 #   Read in the MEMD binary, and concatenate to this file.
 foreach my $file (@memd_files)
 {
+    # Checking that first byte equals "84"
+    # The VPD spec has '84' as their first byte for a record, however it is
+    # not needed for the hostboot structure to add in into the VPD structure,
+    # so we remove it here before creating the MEMD binary
+    my $first_byte = `head -c 1 $file`;
+    die "System command failed: $?" if $?;
+
+    $first_byte =~ s/(.)/sprintf("%x",ord($1))/eg;
+    if(!($first_byte == 84))
+    {
+        die "Incorrect first byte, MEMD file is invalid";
+    }
+
+    # Removing the first byte of the MEMD binary
+    my $new_file = "edited_memd.dat";
+    run_command("tail -c +2 $file > $new_file");
+    run_command("mv $new_file $file");
+
     seek($fh, $offset, 0);
     print "Writing the file $file...\n";
-    open(my $in_file, '<', $file) or die "Cound not open file '$file' $!";
+    open(my $in_file, '<', $file) or die "Could not open file '$file' $!";
 
     while ( <$in_file> )
     {
