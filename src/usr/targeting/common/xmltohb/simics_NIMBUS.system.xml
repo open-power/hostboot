@@ -560,7 +560,7 @@
         <default>physical:sys-0/node-0/proc-0/perv-17</default>
     </attribute>
 <!--TODO RTC:144077  POUNDV ATTRs are temporarily set to 1 for testing
-	purposes if we have a way to do attr overrides during standalone simics
+    purposes if we have a way to do attr overrides during standalone simics
     then we can get rid of these poundv attributes for this EQ-->
     <attribute>
         <id>POUNDV_BUCKET_NUM</id>
@@ -3183,48 +3183,48 @@
 </targetInstance>
 
 <targetInstance>
-	<id>sys0node0proc0npu0</id>
-	<type>unit-npu-nimbus</type>
-	<attribute>
-		<id>AFFINITY_PATH</id>
-		<default>affinity:sys-0/node-0/proc-0/npu-0</default>
-	</attribute>
-	<attribute>
-		<id>CHIPLET_ID</id>
-		<default>0x05</default>
-	</attribute>
-	<attribute>
-		<id>CHIP_UNIT</id>
-		<default>0</default>
-	</attribute>
-	<attribute>
-		<id>CLASS</id>
-		<default>UNIT</default>
-	</attribute>
-	<attribute>
-		<id>FAPI_NAME</id>
-		<default>NA</default>
-	</attribute>
-	<attribute>
-		<id>HUID</id>
-		<default>0x00440000</default>
-	</attribute>
-	<attribute>
-		<id>ORDINAL_ID</id>
-		<default>0</default>
-	</attribute>
-	<attribute>
-		<id>PARENT_PERVASIVE</id>
-		<default>physical:sys-0/node-0/proc-0/perv-5</default>
-	</attribute>
-	<attribute>
-		<id>PHYS_PATH</id>
-		<default>physical:sys-0/node-0/proc-0/npu-0</default>
-	</attribute>
-	<attribute>
-		<id>TYPE</id>
-		<default>NPU</default>
-	</attribute>
+    <id>sys0node0proc0npu0</id>
+    <type>unit-npu-nimbus</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-0/npu-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00440000</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-0/perv-5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-0/npu-0</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NPU</default>
+    </attribute>
 </targetInstance>
 <!-- Nimbus n0p0 obus-brick units -->
 <targetInstance>
@@ -3245,10 +3245,6 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>0</default>
-    </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3284,10 +3280,6 @@
         <default>1</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>1</default>
     </attribute>
@@ -3319,10 +3311,6 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>2</default>
-    </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -3358,10 +3346,6 @@
         <default>9</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>9</default>
     </attribute>
@@ -3395,10 +3379,6 @@
         <default>10</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>10</default>
     </attribute>
@@ -3430,10 +3410,6 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>11</default>
-    </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8620,10 +8596,6 @@
         <default>12</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>12</default>
     </attribute>
@@ -8655,10 +8627,6 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>13</default>
-    </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8694,10 +8662,6 @@
         <default>14</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>14</default>
     </attribute>
@@ -8729,10 +8693,6 @@
     <attribute>
         <id>ORDINAL_ID</id>
         <default>15</default>
-    </attribute>
-    <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
@@ -8768,10 +8728,6 @@
         <default>16</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>16</default>
     </attribute>
@@ -8805,10 +8761,6 @@
         <default>17</default>
     </attribute>
     <attribute>
-        <id>OPTICS_CONFIG_MODE</id>
-        <default>NV</default>
-    </attribute>
-    <attribute>
         <id>CHIP_UNIT</id>
         <default>17</default>
     </attribute>
@@ -8823,48 +8775,48 @@
 </targetInstance>
 
 <targetInstance>
-	<id>sys0node0proc1npu0</id>
-	<type>unit-npu-nimbus</type>
-	<attribute>
-		<id>AFFINITY_PATH</id>
-		<default>affinity:sys-0/node-0/proc-1/npu-0</default>
-	</attribute>
-	<attribute>
-		<id>CHIPLET_ID</id>
-		<default>0x05</default>
-	</attribute>
-	<attribute>
-		<id>CHIP_UNIT</id>
-		<default>0</default>
-	</attribute>
-	<attribute>
-		<id>CLASS</id>
-		<default>UNIT</default>
-	</attribute>
-	<attribute>
-		<id>FAPI_NAME</id>
-		<default>NA</default>
-	</attribute>
-	<attribute>
-		<id>HUID</id>
-		<default>0x00440001</default>
-	</attribute>
-	<attribute>
-		<id>ORDINAL_ID</id>
-		<default>0</default>
-	</attribute>
-	<attribute>
-		<id>PARENT_PERVASIVE</id>
-		<default>physical:sys-0/node-0/proc-1/perv-5</default>
-	</attribute>
-	<attribute>
-		<id>PHYS_PATH</id>
-		<default>physical:sys-0/node-0/proc-1/npu-0</default>
-	</attribute>
-	<attribute>
-		<id>TYPE</id>
-		<default>NPU</default>
-	</attribute>
+    <id>sys0node0proc1npu0</id>
+    <type>unit-npu-nimbus</type>
+    <attribute>
+        <id>AFFINITY_PATH</id>
+        <default>affinity:sys-0/node-0/proc-1/npu-0</default>
+    </attribute>
+    <attribute>
+        <id>CHIPLET_ID</id>
+        <default>0x05</default>
+    </attribute>
+    <attribute>
+        <id>CHIP_UNIT</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>CLASS</id>
+        <default>UNIT</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>NA</default>
+    </attribute>
+    <attribute>
+        <id>HUID</id>
+        <default>0x00440001</default>
+    </attribute>
+    <attribute>
+        <id>ORDINAL_ID</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>PARENT_PERVASIVE</id>
+        <default>physical:sys-0/node-0/proc-1/perv-5</default>
+    </attribute>
+    <attribute>
+        <id>PHYS_PATH</id>
+        <default>physical:sys-0/node-0/proc-1/npu-0</default>
+    </attribute>
+    <attribute>
+        <id>TYPE</id>
+        <default>NPU</default>
+    </attribute>
 </targetInstance>
 <targetInstance>
     <id>sys0node0proc1ppe0</id>

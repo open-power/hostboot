@@ -1651,7 +1651,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 // and we're done, so break;
                 break;
             }
-            
+
             case TYPE_MI:
             {
                 // get parent MC
@@ -1685,7 +1685,7 @@ void DeconfigGard::_deconfigureByAssoc(
                 // and we're done, so break;
                 break;
             }
-            
+
             case TYPE_DMI:
             {
                 // get parent MI
@@ -1747,8 +1747,8 @@ void DeconfigGard::_deconfigureByAssoc(
                     _deconfigureByAssoc(const_cast<Target &> (*l_parentMembuf),
                         i_errlEid, i_deconfigRule);
                 }
-                
-                // and we're done, so break;                
+
+                // and we're done, so break;
                 break;
             } // TYPE_MBA
 
@@ -1959,27 +1959,24 @@ void DeconfigGard::_deconfigureByAssoc(
                 //Get the parent proc associated with this npu
                 auto l_proc = getParentChip(&i_target);
 
-                //Get all the obus brick children associated with this proc
-                PredicateCTM l_obrickFilter (CLASS_UNIT, TYPE_OBUS_BRICK);
-                PredicateHwas l_predPres;
-                l_predPres.present(true);
-                PredicatePostfixExpr l_presentObricks;
-                l_presentObricks.push(&l_obrickFilter).push(&l_predPres).And();
+                //Get all the obus children associated with this proc
+                TargetHandleList pChildObusList;
+                getChildAffinityTargetsByState(pChildObusList, l_proc,
+                        CLASS_UNIT, TYPE_OBUS, UTIL_FILTER_PRESENT);
 
-                TargetHandleList l_obrickList;
-                targetService().getAssociated(l_obrickList, l_proc,
-                                TargetService::CHILD_BY_AFFINITY,
-                                TargetService::ALL, &l_presentObricks);
-
-                for (auto l_obrick : l_obrickList)
+                for (auto l_obus : pChildObusList)
                 {
-                    //deconfigure each obrick that is non-smp
-                    if (l_obrick->getAttr<ATTR_OPTICS_CONFIG_MODE>() !=
+                    // NPU controls non-smp obus,
+                    // so need to mark the non-smp ones as not functional
+                    // when the NPU is bad
+
+                    //deconfigure each obus that is non-smp
+                    if (l_obus->getAttr<ATTR_OPTICS_CONFIG_MODE>() !=
                             OPTICS_CONFIG_MODE_SMP)
                     {
-                        _deconfigureTarget(*l_obrick,
+                        _deconfigureTarget(*l_obus,
                                            i_errlEid, NULL, i_deconfigRule);
-                        _deconfigureByAssoc(*l_obrick,
+                        _deconfigureByAssoc(*l_obus,
                                            i_errlEid,i_deconfigRule);
                     }
                 }

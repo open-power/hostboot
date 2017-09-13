@@ -1652,14 +1652,19 @@ public:
                      case TYPE_OBUS_BRICK:
                         {
                             //Two cases here:
-                            //OBRICK==SMP --> Target should be present regardless of PG
-                            //OBRICK!=SMP --> Target should follow PG
+                            //OBUS==SMP --> Target should be present regardless of PG
+                            //OBUS!=SMP --> Target should follow PG
                             //marking PG bad
                             pgData[VPD_CP00_PG_N3_INDEX] |=
                                 (uint16_t)VPD_CP00_PG_N3_NPU;
 
+                            // get parent OBUS and check OPTICS_CONFIG_MODE
+                            auto obusType = TARGETING::TYPE_OBUS;
+                            TARGETING::Target* l_obus_ptr =
+                                const_cast<TARGETING::Target*>(
+                                            getParent(pDesc, obusType));
                             ATTR_OPTICS_CONFIG_MODE_type config_mode =
-                                pDesc->getAttr<ATTR_OPTICS_CONFIG_MODE>();
+                                l_obus_ptr->getAttr<ATTR_OPTICS_CONFIG_MODE>();
 
                             if (OPTICS_CONFIG_MODE_SMP == config_mode)
                             {

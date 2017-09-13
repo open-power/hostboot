@@ -1692,7 +1692,7 @@
      Cumulus: 3 per OBUS -->
 <targetType>
     <id>unit-obus-brick-power9</id>
-    <parent>unit-obus-power9</parent>
+    <parent>unit</parent>
     <attribute>
         <id>TYPE</id>
         <default>OBUS_BRICK</default>
