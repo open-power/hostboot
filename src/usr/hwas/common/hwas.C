@@ -1066,8 +1066,13 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS_BRICK)
     {
-        //If NPU is bad and Bricks are non-SMP, then mark them bad
-        if ((i_desc->getAttr<ATTR_OPTICS_CONFIG_MODE>()
+        auto obusType = TARGETING::TYPE_OBUS;
+        TARGETING::Target* l_obus_ptr = const_cast<TARGETING::Target*>(
+                                            getParent(i_desc, obusType));
+
+        //If NPU is bad and OBUS is non-SMP, then mark them bad
+        // Bit does not matter unless not in SMP mode
+        if ((l_obus_ptr->getAttr<ATTR_OPTICS_CONFIG_MODE>()
                     != OPTICS_CONFIG_MODE_SMP) &&
             ((i_pgData[VPD_CP00_PG_N3_INDEX] & VPD_CP00_PG_N3_NPU) != 0))
         {
@@ -1079,7 +1084,6 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                  (i_pgData[VPD_CP00_PG_N3_INDEX] &
                   ~VPD_CP00_PG_N3_NPU));
             l_descFunctional = false;
-
         }
     }
     else

@@ -6666,10 +6666,7 @@
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c0</default>
     </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>0</default>
-    </attribute>
+
     <attribute>
         <id>HUID</id>
         <default>0x00420000</default>
@@ -6748,10 +6745,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c1</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -6833,10 +6826,6 @@
         <default>pu.obus_brick:k0:n0:s0:p00:c2</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>2</default>
-    </attribute>
-    <attribute>
         <id>HUID</id>
         <default>0x00420002</default>
     </attribute>
@@ -6914,10 +6903,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c3</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>3</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -6999,10 +6984,6 @@
         <default>pu.obus_brick:k0:n0:s0:p00:c4</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
         <id>HUID</id>
         <default>0x00420004</default>
     </attribute>
@@ -7080,10 +7061,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c5</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>5</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7165,10 +7142,6 @@
         <default>pu.obus_brick:k0:n0:s0:p00:c6</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
         <id>HUID</id>
         <default>0x00420006</default>
     </attribute>
@@ -7246,10 +7219,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c7</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>7</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7331,10 +7300,6 @@
         <default>pu.obus_brick:k0:n0:s0:p00:c8</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>8</default>
-    </attribute>
-    <attribute>
         <id>HUID</id>
         <default>0x00420008</default>
     </attribute>
@@ -7412,10 +7377,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c9</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>9</default>
     </attribute>
     <attribute>
         <id>HUID</id>
@@ -7497,10 +7458,6 @@
         <default>pu.obus_brick:k0:n0:s0:p00:c10</default>
     </attribute>
     <attribute>
-        <id>FAPI_POS</id>
-        <default>10</default>
-    </attribute>
-    <attribute>
         <id>HUID</id>
         <default>0x0042000A</default>
     </attribute>
@@ -7578,10 +7535,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus_brick:k0:n0:s0:p00:c11</default>
-    </attribute>
-    <attribute>
-        <id>FAPI_POS</id>
-        <default>11</default>
     </attribute>
     <attribute>
         <id>HUID</id>

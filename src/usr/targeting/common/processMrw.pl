@@ -1243,11 +1243,6 @@ sub processObus
             foreach my $obrick (@{ $targetObj->getTargetChildren($target) })
             {
                 $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
-                my $enum_val = $targetObj->getAttribute($obrick,"OPTICS_CONFIG_MODE");
-                if ( $enum_val =~ /NVLINK/i)
-                {
-                    $targetObj->setAttribute($obrick,"OPTICS_CONFIG_MODE","NV");
-                }
             }
         }
         else
@@ -1292,12 +1287,6 @@ sub processObus
                  {
                     $targetObj->setAttribute($obrick, "OBUS_SLOT_INDEX", -1);
 
-                 }
-
-                 my $enum_val = $targetObj->getAttribute($obrick,"OPTICS_CONFIG_MODE");
-                 if ( $enum_val =~ /NVLINK/i)
-                 {
-                    $targetObj->setAttribute($obrick,"OPTICS_CONFIG_MODE","NV");
                  }
             }
         }
