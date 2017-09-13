@@ -1706,7 +1706,7 @@ namespace SBE
                            ERRL_GETPLID_SAFE(err));
                 break;
             }
-            
+
             bool l_bootSide0 = (l_bootside == SBE_SEEPROM0);
 
             TRACFCOMP( g_trac_sbe,INFO_MRK"updateSbeBootSeeprom(): set SBE boot side %d for proc=%.8X",
@@ -4226,16 +4226,6 @@ namespace SBE
                 break;
             }
 
-#ifndef CONFIG_SECUREBOOT
-            // @TODO RTC 157475
-            // UnloadSecureSection is not fully implemented so we do not attempt
-            // to pull the SBE partition back in after the initial time.
-            // NOTE: PNOR::flush(PNOR::HB_BOOTLOADER) is another thing that
-            //       could be flushed. It's only 20K, but it would be 5 pages
-            //       freed up.
-            PNOR::flush( PNOR::SBE_IPL );
-#endif
-
             // Unload PNOR sections from secure memory
 #ifdef CONFIG_SECUREBOOT
             err = unloadSecureSection(PNOR::SBE_IPL);
@@ -4251,14 +4241,17 @@ namespace SBE
                 TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HB_BOOTLOADER)");
                 break;
             }
+
             err = unloadSecureSection(PNOR::HCODE);
             if (err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK,"cleanupSbeImageVmmSpace() - Error from unloadSecureSection(PNOR::HCODE)");
                 break;
             }
-
 #endif
+            PNOR::flush( PNOR::SBE_IPL );
+            PNOR::flush( PNOR::HB_BOOTLOADER );
+            PNOR::flush( PNOR::HCODE );
 
         }while(0);
 

@@ -118,8 +118,17 @@ errlHndl_t PNOR::flush( PNOR::SectionId i_section)
                     " secId: %d", (int)i_section);
             break;
         }
-        int l_rc = mm_remove_pages (RELEASE,
-                reinterpret_cast<void*>(l_info.vaddr), l_info.size);
+        uint8_t* l_vaddr = reinterpret_cast<uint8_t*>(l_info.vaddr);
+        #ifdef CONFIG_SECUREBOOT
+        if (l_info.secure)
+        {
+            // subtract 2 deltas to get the PNOR unsecured address
+            l_vaddr = l_vaddr
+               - VMM_VADDR_SPNOR_DELTA
+               - VMM_VADDR_SPNOR_DELTA;
+        }
+        #endif
+        int l_rc = mm_remove_pages (RELEASE, l_vaddr, l_info.size);
         if (l_rc)
         {
             TRACFCOMP(g_trac_pnor, "PNOR::flush: mm_remove_pages errored,"

@@ -105,9 +105,10 @@ namespace PNOR
         MOD_SPNORRP_WAITFORMESSAGE      = 0xD3, /**< SPnorRP::waitForMessage */
         MOD_SPNORRP_VERIFYSECTIONS      = 0xD4, /**< SPnorRP::verifySections */
         MOD_SPNORRP_SET_PERMISSION      = 0xD5, /**< SPnorRP::initDaemon */
-        MOD_PNORRP_LOADSECURESECTION    = 0xD6, /**< PnorRP::loadSecureSection */
+        MOD_PNORRP_LOADUNLOADSECURESECTION = 0xD6, /**< PnorRP::loadSecureSection */
         MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
         MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
+        MOD_SPNORRP_REMOVE_PAGES        = 0xD9,
 
         // ast_mboxdd.C
         MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
@@ -178,6 +179,9 @@ namespace PNOR
         RC_MBOX_BAD_SEQUENCE         = PNOR_COMP_ID | 0x32,
         RC_MBOX_ERROR_STATUS         = PNOR_COMP_ID | 0x33,
         RC_UNSIGNED_PNOR_SECTION     = PNOR_COMP_ID | 0x34,
+        RC_NOT_A_LOADED_SECTION      = PNOR_COMP_ID | 0x35,
+        RC_NOT_A_SUPPORTED_SECTION   = PNOR_COMP_ID | 0x36,
+        RC_SECURE_UNLOAD_DISALLOWED  = PNOR_COMP_ID | 0x37,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

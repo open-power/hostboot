@@ -62,10 +62,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             errlHndl_t l_errl = nullptr;
 
 #ifdef CONFIG_SECUREBOOT
-            // load secure section
-            // TODO RTC: 157475 Since this is a test case and unload is
-            // merely a stub function at this point in time, add a call
-            // to unload later when the aforementioned story is implemented.
             l_errl = loadSecureSection(PNOR::HB_RUNTIME);
             if(l_errl)
             {
@@ -178,6 +174,18 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             mm_set_permission(imageArea, imageSize, WRITABLE);
             free(imageArea);
+
+#ifdef CONFIG_SECUREBOOT
+            l_errl = unloadSecureSection(PNOR::HB_RUNTIME);
+            if(l_errl)
+            {
+                TS_FAIL("Could not securely load runtime section.");
+                delete l_errl;
+                l_errl = nullptr;
+                return;
+            }
+#endif
+
         }
 
     private:

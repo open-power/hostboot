@@ -116,6 +116,13 @@ class SPnorRP
         uint8_t* secAddr;
         size_t textSize;
         size_t infoSize;
+        size_t refCount;
+        SHA512_t payloadTextHash;
+        LoadRecord()
+        :secAddr(nullptr), textSize(0), infoSize(0), refCount(0)
+        {
+            memset(&payloadTextHash[0], 0, SHA512_DIGEST_LENGTH);
+        }
     };
     std::map<PNOR::SectionId, LoadRecord*> iv_loadedSections;
 
@@ -127,11 +134,22 @@ class SPnorRP
 
     /**
      * @brief Load secure sections into temporary address space and verify them
-     * @param[in]  i_secId - PNOR section id to verify
-     * @param[in]  o_rec - Load record to store section information in
+     * @note The Load record is not only used for output of the section info
+     *       from the verifySections, but is also used as input via the
+     *       payloadTextHash field, which is used (if i_loadedPreviously is
+     *       true) to help determine if the PCR extend should be recalculated.
+     *
+     * @param[in]     i_secId - PNOR section id to verify
+     * @param[in]     i_loadedPreviously - indicates section has been securely
+     *                loaded previously
+     * @param[in/out] io_rec - Load record to store section information in
+     *                io_rec->payloadTextHash is used for comparision if
+     *                i_loadedPreviusly is true.
      * @return  uint64_t - Return code to pass back to message handler
      */
-    uint64_t verifySections(PNOR::SectionId i_id, LoadRecord* o_rec);
+    uint64_t verifySections(PNOR::SectionId i_id,
+                            bool i_loadedPreviously,
+                            LoadRecord* io_rec);
 
     /**
      * @brief  Message receiver for secure space
@@ -159,6 +177,16 @@ class SPnorRP
      */
     errlHndl_t setPermission(void* va, uint64_t size,
                                        uint64_t accessType) const;
+
+    /**
+     * @brief  A wrapper for mm_remove_pages that encapsulates an error log
+     * @note   This is a special case of mm_remove_pages that makes use of
+     *         PAGE_REMOVAL_OPS "RELEASE" setting
+     *
+     * @param[in] i_va - virtual start address of pages to be removed
+     * @param[in] i_size - size of block to remove
+     */
+    errlHndl_t removePages(void* i_va, uint64_t i_size) const;
 
     /**
      * @brief  Handles any additional section specific verification checks.
