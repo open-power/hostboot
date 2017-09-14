@@ -33,11 +33,66 @@
 #include <lib/shared/mss_const.H>
 #include <lib/mss_utils.H>
 #include <lib/mss_attribute_accessors.H>
+#include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/index.H>
 
 namespace mss
 {
 namespace decoder
 {
+///
+/// @brief Helper function to select a valid MT blob
+/// @param[in] i_blobs a std::vector of pointers to VPD blobs for this MCS's MCAs
+/// @param[out] o_blob returns a valid blob of data for the MCS for MT decoding
+///
+inline void select_mt_blob(const std::vector<uint8_t*>& i_blobs, uint8_t** o_blob)
+{
+    constexpr uint64_t EQUAL_MEM_CONTENTS = 0;
+
+    if( i_blobs.size() != mss::PORTS_PER_MCS )
+    {
+        // Asserting out instead of collecting FFDC since this is a
+        // programming bug that shouldn't occur.
+        FAPI_ERR("Invalid blob size received %d, expected: %d",
+                 i_blobs.size(), mss::PORTS_PER_MCS);
+
+        fapi2::Assert(false);
+    }
+
+    // We are looking for cases where one of the blobs is filled with zeros,
+    // in this case we start with blob index 0, usually due to a deconfigured port.
+    // We want to select the non-zero blob so that our VPD "header" information is
+    // correct for version layout, signature hash, and version data.
+    constexpr uint8_t l_zero_array[mss::VPD_KEYWORD_MAX] = {};
+
+    if( memcmp(i_blobs[0], l_zero_array, mss::VPD_KEYWORD_MAX) == EQUAL_MEM_CONTENTS )
+    {
+        *o_blob = i_blobs[1];
+        return;
+    }
+
+    // If we are here than there are three possible reasons:
+    // 1)
+    // i_blobs[0] and i_blobs[1] are equivalent and
+    // the array contents of each index are 0, in which will give the VPD contents
+    // 0 values...which is OK. Or that the DIMMs are the same (they have the same
+    // rank config per port).
+    //
+    // 2)
+    // i_blobs[0] and i_blobs[1] are NOT equivalent but neither has a 0 filled blob
+    // and that they have rank config that differs per port.  But to set our version
+    // layout, signature hash, or version data correctly, any blob will do since
+    // this data doesn't change per port.
+    //
+    //  For the two cases above we just select to return an arbitrary blob,
+    //  in which i_blobs[0] will suffice.
+    //
+    // 3)
+    // i_blob[1] is filled with zeros so we end up selecting i_blob[0] which will
+    // be our non-zero filled VPD blob.
+    *o_blob = i_blobs[0];
+    return;
+}
 ///
 /// @brief ATTR_MSS_VPD_MT_0_VERSION_LAYOUT decode and set
 /// @param[in] i_target fapi2::Target<fapi2::TARGET_TYPE_MCS>
@@ -52,7 +107,9 @@ inline fapi2::ReturnCode vpd_mt_0_version_layout(const fapi2::Target<fapi2::TARG
     constexpr uint64_t l_num_bytes_to_copy = 1;
     constexpr uint64_t l_offset = 0;
 
-    memcpy(&l_value, i_blobs[0] + l_offset, l_num_bytes_to_copy);
+    uint8_t* l_blob = nullptr;
+    select_mt_blob(i_blobs, &l_blob);
+    memcpy(&l_value, l_blob + l_offset, l_num_bytes_to_copy);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_0_VERSION_LAYOUT, i_target, l_value),
               "Unable to decode and set ATTR_MSS_VPD_MT_0_VERSION_LAYOUT start: %d, len: %d for %s", l_offset, l_num_bytes_to_copy,
@@ -76,7 +133,9 @@ inline fapi2::ReturnCode vpd_mt_1_version_data(const fapi2::Target<fapi2::TARGET
     constexpr uint64_t l_num_bytes_to_copy = 1;
     constexpr uint64_t l_offset = 1;
 
-    memcpy(&l_value, i_blobs[0] + l_offset, l_num_bytes_to_copy);
+    uint8_t* l_blob = nullptr;
+    select_mt_blob(i_blobs, &l_blob);
+    memcpy(&l_value, l_blob + l_offset, l_num_bytes_to_copy);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_1_VERSION_DATA, i_target, l_value),
               "Unable to decode and set ATTR_MSS_VPD_MT_1_VERSION_DATA start: %d, len: %d for %s", l_offset, l_num_bytes_to_copy,
@@ -100,7 +159,9 @@ inline fapi2::ReturnCode vpd_mt_2_signature_hash(const fapi2::Target<fapi2::TARG
     constexpr uint64_t l_num_bytes_to_copy = 4;
     constexpr uint64_t l_offset = 2;
 
-    memcpy(&l_value, i_blobs[0] + l_offset, l_num_bytes_to_copy);
+    uint8_t* l_blob = nullptr;
+    select_mt_blob(i_blobs, &l_blob);
+    memcpy(&l_value, l_blob + l_offset, l_num_bytes_to_copy);
     l_value = be32toh(l_value);
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_VPD_MT_2_SIGNATURE_HASH, i_target, l_value),
@@ -133,8 +194,9 @@ inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_ca(const fapi2::Target<fapi2::TARGE
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -171,8 +233,9 @@ inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cke(const fapi2::Target<fapi2::TARG
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -209,8 +272,9 @@ inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_cs(const fapi2::Target<fapi2::TARGE
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -247,8 +311,9 @@ inline fapi2::ReturnCode vpd_mt_dimm_rcd_ibt_odt(const fapi2::Target<fapi2::TARG
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -285,8 +350,9 @@ inline fapi2::ReturnCode vpd_mt_dram_drv_imp_dq_dqs(const fapi2::Target<fapi2::T
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -323,8 +389,9 @@ inline fapi2::ReturnCode vpd_mt_dram_rtt_nom(const fapi2::Target<fapi2::TARGET_T
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -361,8 +428,9 @@ inline fapi2::ReturnCode vpd_mt_dram_rtt_park(const fapi2::Target<fapi2::TARGET_
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -399,8 +467,9 @@ inline fapi2::ReturnCode vpd_mt_dram_rtt_wr(const fapi2::Target<fapi2::TARGET_TY
 
     constexpr uint64_t l_num_bytes_to_copy = l_length / mss::PORTS_PER_MCS;
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         const uint8_t* l_blob = i_blobs[l_index];
         const uint64_t l_offset = l_start + (l_index * l_num_bytes_to_copy);
 
@@ -446,8 +515,9 @@ inline fapi2::ReturnCode vpd_mt_mc_bias_trim(const fapi2::Target<fapi2::TARGET_T
     uint8_t l_layer_version = 0;
     FAPI_TRY( mss::vpd_mt_0_version_layout(i_target, l_layer_version));
 
-    for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+    for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
     {
+        const auto l_index = mss::index(p);
         constexpr uint64_t l_offset = 86;
         constexpr uint64_t l_num_bytes_to_copy = 2;
         constexpr uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
@@ -528,8 +598,9 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_rd_up(const fapi2::Target<fapi2::T
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -605,8 +676,9 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_down(const fapi2::Target<fapi2:
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -682,8 +754,9 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_acboost_wr_up(const fapi2::Target<fapi2::T
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -757,8 +830,9 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_cap(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -832,8 +906,9 @@ inline fapi2::ReturnCode vpd_mt_mc_dq_ctle_res(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -899,8 +974,9 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_clk(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -961,8 +1037,9 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cmd_addr(const fapi2::Target<fapi2::T
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1023,8 +1100,9 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cntl(const fapi2::Target<fapi2::TARGE
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1085,8 +1163,9 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_cscid(const fapi2::Target<fapi2::TARG
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1147,8 +1226,9 @@ inline fapi2::ReturnCode vpd_mt_mc_drv_imp_dq_dqs(const fapi2::Target<fapi2::TAR
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -1209,8 +1289,9 @@ inline fapi2::ReturnCode vpd_mt_mc_rcv_imp_dq_dqs(const fapi2::Target<fapi2::TAR
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index][0]), l_blob + l_start, l_length);
@@ -1272,8 +1353,9 @@ inline fapi2::ReturnCode vpd_mt_odt_rd(const fapi2::Target<fapi2::TARGET_TYPE_MC
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -1335,8 +1417,9 @@ inline fapi2::ReturnCode vpd_mt_odt_wr(const fapi2::Target<fapi2::TARGET_TYPE_MC
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index][0][0]), l_blob + l_start, l_length);
@@ -1399,8 +1482,9 @@ inline fapi2::ReturnCode vpd_mt_preamble(const fapi2::Target<fapi2::TARGET_TYPE_
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1461,8 +1545,9 @@ inline fapi2::ReturnCode vpd_mt_vref_dram_wr(const fapi2::Target<fapi2::TARGET_T
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1523,8 +1608,9 @@ inline fapi2::ReturnCode vpd_mt_vref_mc_rd(const fapi2::Target<fapi2::TARGET_TYP
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
@@ -1591,8 +1677,9 @@ inline fapi2::ReturnCode vpd_mt_windage_rd_ctr(const fapi2::Target<fapi2::TARGET
     {
         const uint64_t l_length = l_num_bytes_to_copy / mss::PORTS_PER_MCS;
 
-        for (size_t l_index = 0; l_index < mss::PORTS_PER_MCS; ++l_index)
+        for (const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
         {
+            const auto l_index = mss::index(p);
             const uint8_t* l_blob = i_blobs[l_index];
             const uint64_t l_start = l_offset + (l_index * l_length);
             memcpy(&(l_value[l_index]), l_blob + l_start, l_length);
