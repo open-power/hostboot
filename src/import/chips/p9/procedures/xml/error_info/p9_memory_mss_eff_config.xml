@@ -502,4 +502,22 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
+    <description>
+      VPD keyword is too big for space allocated for it.
+    </description>
+    <ffdc>MAX</ffdc>
+    <ffdc>ACTUAL</ffdc>
+    <ffdc>KEYWORD</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>
