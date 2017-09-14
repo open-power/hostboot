@@ -58,6 +58,7 @@ class ContainerHeader
             iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
             memset(&iv_headerInfo, 0x00, sizeof(iv_headerInfo));
             memset(iv_hwKeyHash, 0, sizeof(SHA512_t));
+            memset(iv_componentId,0x00,sizeof(iv_componentId));
             parse_header(i_header);
         };
 
@@ -142,6 +143,14 @@ class ContainerHeader
          */
         bool isValid() const;
 
+        /**
+         *  @brief Returns the container's component ID as an invariant
+         *      character string, or an empty string if none provided.
+         *
+         *  @return const char* Component ID string
+         */
+        const char* componentId() const;
+
     private:
         /**
          * @brief Default Constructor in private to prevent being instantiated
@@ -160,6 +169,13 @@ class ContainerHeader
             ROM_sw_header_raw sw_hdr;
             ROM_sw_sig_raw sw_sig;
         };
+
+        /**
+         *  @brief Container's component ID (one byte larger than associated
+         *      container header field to allow for a NULL terminator)
+         */
+        char iv_componentId[  sizeof(ROM_sw_header_raw::component_id)
+                            + sizeof(uint8_t) ];
 
         // Entire cached container header content
         SecureHeaderInfo iv_headerInfo;

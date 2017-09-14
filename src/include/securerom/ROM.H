@@ -32,10 +32,38 @@
 #include <string.h>
 #include <array>
 
-#define CONTAINER_VERSION   1
-#define HEADER_VERSION      1
-#define HASH_ALG_SHA512     1
-#define SIG_ALG_ECDSA521    1
+/**
+ *  @brief Indicates container header section versions
+ */
+enum CONTAINER_SECTION_VERSION : uint16_t
+{
+    CONTAINER_VERSION = 0x0001,
+    HEADER_VERSION    = 0x0001,
+};
+
+/**
+ *  @brief Indicates sizes of container header fields
+ */
+enum CONTAINER_FIELD_SIZE : size_t
+{
+    SW_HDR_COMP_ID_SIZE_BYTES = 8,
+};
+
+/**
+ *  @brief Unique identifer for the hash algorithm to use
+ */
+enum ROM_HASH_ALGORITHM : uint8_t
+{
+    HASH_ALG_SHA512 = 0x01,
+};
+
+/**
+ *  @brief Unique identifier for the signature algorithm to use
+ */
+enum ROM_SIGNATURE_ALGORITHM : uint8_t
+{
+    SIG_ALG_ECDSA521 = 0x01,
+};
 
 typedef struct
 {
@@ -92,7 +120,7 @@ typedef struct
 {
   ROM_version_raw ver_alg;
   uint64_t        code_start_offset;
-  uint64_t        reserved;
+  char            component_id[SW_HDR_COMP_ID_SIZE_BYTES];
   uint32_t        flags;
   uint8_t         reserved_0;
   uint64_t        payload_size;

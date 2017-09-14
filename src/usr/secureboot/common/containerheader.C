@@ -69,6 +69,8 @@ void ContainerHeader::parse_header(const void* i_header)
     /*---- Parse ROM_sw_header_raw ----*/
     l_size = offsetof(ROM_sw_header_raw, ecid);
     safeMemCpyAndInc(&iv_headerInfo.sw_hdr, l_hdr, l_size);
+    strncpy(iv_componentId,iv_headerInfo.sw_hdr.component_id,
+        sizeof(iv_headerInfo.sw_hdr.component_id));
 
     // Get ECID array
     l_size = iv_headerInfo.sw_hdr.ecid_count * ECID_SIZE;
@@ -126,6 +128,7 @@ void ContainerHeader::print() const
     }
 
     /*---- Print ROM_sw_header_raw ----*/
+    TRACFCOMP(g_trac_secure,"component_id \"%s\"", componentId());
     TRACFCOMP(g_trac_secure,"payload_size 0x%X", iv_headerInfo.sw_hdr.payload_size );
     TRACFBIN(g_trac_secure,"payload_hash", iv_headerInfo.sw_hdr.payload_hash, SHA512_DIGEST_LENGTH);
 
@@ -228,6 +231,11 @@ void ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
 bool ContainerHeader::isValid() const
 {
     return iv_isValid;
+}
+
+const char* ContainerHeader::componentId() const
+{
+    return iv_componentId;
 }
 
 void ContainerHeader::parseFlags()
