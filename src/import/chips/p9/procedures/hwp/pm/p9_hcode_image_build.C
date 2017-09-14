@@ -316,6 +316,7 @@ uint32_t ImgSizeBank::isSizeGood( PlatId i_plat, uint8_t i_sec,
 
         if( rc )
         {
+
             FAPI_ERR( "Image Sectn not found i_plat 0x%08x i_sec 0x%08x",
                       (uint32_t) i_plat, i_sec );
             break;
@@ -490,6 +491,34 @@ uint32_t ExIdMap::getInstanceId( uint32_t i_eqId, uint32_t i_ringOrder )
 //-------------------------------------------------------------------------
 
 /**
+ * @brief   determine the Timebase value based on the nest frequency
+ * @param[out]  o_timebase_hz   Timebase value in Hz
+ * @return  fapi2 return code.
+ */
+fapi2::ReturnCode
+calcPPETimebase( uint32_t *o_timebase_hz )
+{
+    FAPI_DBG(">> calcPPETimebase" );
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_FREQ_PB_MHZ_Type l_nest_freq_mhz;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ,
+                            FAPI_SYSTEM,
+                            l_nest_freq_mhz),
+         "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_PB_MHZ");
+
+    *o_timebase_hz = (l_nest_freq_mhz * 1000 * 1000) / 64;
+    FAPI_DBG("  Nest Frequency MHZ = %d (%X); Timebase Hz =  = %d (%X)",
+                l_nest_freq_mhz,  l_nest_freq_mhz,
+                *o_timebase_hz,  *o_timebase_hz);
+
+fapi_try_exit:
+    FAPI_DBG("<< calcPPETimebase" );
+    return fapi2::current_err;
+}
+
+//-------------------------------------------------------------------------
+
+/**
  * @brief   verifies SRAM image size of SGPE/CME/PGPE .
  * @param[in]   i_pChipHomer    points to HOMER
  * @param[out]  o_sramImgSize   size of image
@@ -497,7 +526,7 @@ uint32_t ExIdMap::getInstanceId( uint32_t i_eqId, uint32_t i_ringOrder )
  */
 fapi2::ReturnCode validateSramImageSize( Homerlayout_t* i_pChipHomer, uint32_t& o_sramImgSize )
 {
-    FAPI_INF(">> validateSramImageSize" );
+    FAPI_INF(">> validateSramImageSize");
     uint32_t rc = IMG_BUILD_SUCCESS;
 
     ImgSizeBank sizebank;
@@ -1059,6 +1088,11 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     pCmeHdr->g_cme_scom_offset          =   SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset);
     pCmeHdr->g_cme_scom_length          =   SWIZZLE_4_BYTE(CORE_SCOM_RESTORE_SIZE_PER_CME);
 
+    // Timebase frequency
+    uint32_t l_ppe_timebase_hz;
+    calcPPETimebase(&l_ppe_timebase_hz);
+    pCmeHdr->g_cme_timebase_hz          =  SWIZZLE_4_BYTE(l_ppe_timebase_hz);
+
     FAPI_INF("========================= CME Header Start ==================================");
     FAPI_INF("  HC Offset       :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_offset));
     FAPI_INF("  HC Size         :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_hcode_length));
@@ -1072,6 +1106,8 @@ void updateCpmrCmeRegion( Homerlayout_t* i_pChipHomer )
     FAPI_INF("  SCOM Offset     :   0x%08X (Real offset / 32)",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_offset));
     FAPI_INF("  SCOM Area Len   :   0x%08X",  SWIZZLE_4_BYTE(pCmeHdr->g_cme_scom_length));
     FAPI_INF("  CPMR Phy Add    :   0x%016lx", SWIZZLE_8_BYTE(pCmeHdr->g_cme_cpmr_PhyAddr));
+    FAPI_INF("  Timebase (Hz)   :   0x%08X (%d)", SWIZZLE_4_BYTE(pCmeHdr->g_cme_timebase_hz),
+                                                  SWIZZLE_4_BYTE(pCmeHdr->g_cme_timebase_hz));
     FAPI_INF("========================= CME Header End ==================================");
 
     FAPI_INF("==========================CPMR Header===========================================");
@@ -1318,11 +1354,17 @@ fapi2::ReturnCode buildSgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
         pImgHdr->g_sgpe_spec_ring_occ_offset        =   0;
         pImgHdr->g_sgpe_scom_offset                 =   0;
 
+        uint32_t l_ppe_timebase_hz;
+        FAPI_TRY(calcPPETimebase(&l_ppe_timebase_hz));
+        pImgHdr->g_sgpe_timebase_hz                 =   SWIZZLE_4_BYTE(l_ppe_timebase_hz);
+
         FAPI_INF("SGPE Header");
         FAPI_INF("  Reset Addr      = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_reset_address));
         FAPI_INF("  IVPR Addr       = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_ivpr_address));
         FAPI_INF("  Build Date      = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_date));
         FAPI_INF("  Version         = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_build_ver));
+        FAPI_INF("  Timebase (Hz)   = 0x%08X (%d)", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_timebase_hz),
+                                                    SWIZZLE_4_BYTE(pImgHdr->g_sgpe_timebase_hz));
         FAPI_INF("  CR OCC Offset   = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_occ_offset));
         FAPI_INF("  CR Ovrd Offset  = 0x%08X", SWIZZLE_4_BYTE(pImgHdr->g_sgpe_cmn_ring_ovrd_occ_offset));
     }
@@ -1537,6 +1579,7 @@ fapi2::ReturnCode buildCmeImage( void* const i_pImageIn, Homerlayout_t* i_pChipH
         pImgHdr->g_cme_hcode_length         =  SWIZZLE_4_BYTE(pImgHdr->g_cme_hcode_length);
         pImgHdr->g_cme_scom_length          =  SWIZZLE_4_BYTE(pImgHdr->g_cme_scom_length);
         pImgHdr->g_cme_cpmr_PhyAddr         =  SWIZZLE_8_BYTE(pImgHdr->g_cme_cpmr_PhyAddr);
+
 
     }   //i_imgType.cmeHcodeBuild
 
@@ -1991,6 +2034,11 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     pPgpeHdr->g_wof_table_addr                    =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_offset);
     pPgpeHdr->g_wof_table_length                  =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_wof_table_length);
 
+    // Timebase frequency
+    uint32_t l_ppe_timebase_hz;
+    FAPI_TRY(calcPPETimebase(&l_ppe_timebase_hz));
+    pPgpeHdr->g_pgpe_timebase_hz                  =   SWIZZLE_4_BYTE(l_ppe_timebase_hz);
+
     //Finally handling the endianess
     pPgpeHdr->g_pgpe_gppb_sram_addr                 =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr);
     pPgpeHdr->g_pgpe_hcode_length                   =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_hcode_length);
@@ -2006,6 +2054,7 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     pPgpeHdr->g_wof_table_length                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length);
     pPgpeHdr->g_pgpe_core_throttle_assert_cnt       =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt);
     pPgpeHdr->g_pgpe_core_throttle_deassert_cnt     =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt);
+
 
     FAPI_DBG("================================PGPE Image Header==========================================")
     FAPI_DBG("IVPR Address              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_ivpr_addr));
@@ -2024,6 +2073,8 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     FAPI_DBG("Core Assert Count         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt));
     FAPI_DBG("Core De - Assert Count    :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt));
     FAPI_DBG("Auxiliary Control         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_aux_controls));
+    FAPI_DBG("Timebase (Hz)             :       0x%08X (%d)", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_timebase_hz),
+                                                              SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_timebase_hz));
 
     FAPI_DBG("==============================PGPE Image Header End========================================")
 
