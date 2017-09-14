@@ -4687,9 +4687,9 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_target)
 {
-    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {0};
-    uint8_t l_cke_blob[mss::VPD_KEYWORD_MAX] = {0};
-    uint8_t l_dq_blob[mss::VPD_KEYWORD_MAX] = {0};
+    uint8_t l_mr_blob[mss::VPD_KEYWORD_MAX] = {};
+    uint8_t l_cke_blob[mss::VPD_KEYWORD_MAX] = {};
+    uint8_t l_dq_blob[mss::VPD_KEYWORD_MAX] = {};
     uint64_t l_freq = 0;
 
     std::vector<uint8_t*> l_mt_blobs(PORTS_PER_MCS, nullptr);
@@ -4698,6 +4698,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
     // For sanity. Not sure this will break us, but we're certainly making assumptions below.
     static_assert(MAX_DIMM_PER_PORT == 2, "Max DIMM per port isn't 2");
     FAPI_TRY( mss::freq(find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_freq));
+
     // We need to set up all VPD info before calling getVPD, the API assumes this
     // For MR we need to tell the VPDInfo the frequency (err ... mt/s - why is this mhz?)
     l_vpd_info.iv_freq_mhz = l_freq;
@@ -4722,12 +4723,13 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
     {
         if (mss::count_dimm(p) == 0)
         {
+            FAPI_INF("No DIMMs found for %s... skipping", mss::c_str(i_target));
             continue;
         }
 
         // Find our blob in the vector of blob pointers
         uint8_t* l_mt_blob = l_mt_blobs[mss::index(p)];
-        uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {0};
+        uint64_t l_rank_count_dimm[MAX_DIMM_PER_PORT] = {};
 
         // If we don't have any DIMM, don't worry about it. This will just drop the blob full of 0's into our index.
         // This will fill the VPD attributes with 0's which is perfectly ok.
@@ -4739,6 +4741,7 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
         }
 
         // This value will, of course, be 0 if there is no DIMM in the port.
+        // Which shouldn't happen w/the DIMM check above.
         l_vpd_info.iv_rank_count_dimm_0 = l_rank_count_dimm[0];
         l_vpd_info.iv_rank_count_dimm_1 = l_rank_count_dimm[1];
 
@@ -4747,33 +4750,35 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
 
         // Get the MCS blob for this specific rank combination *only if* we have DIMM. Remember,
         // Cronus can give us functional MCA which have no DIMM - and we'd puke getting the VPD.
-        if ((l_vpd_info.iv_rank_count_dimm_0 != 0) || (l_vpd_info.iv_rank_count_dimm_1 != 0))
-        {
-            // If getVPD returns us an error, then we don't have VPD for the DIMM configuration.
-            // This is the root of our plug-rules: if you want a configuration of DIMM to be
-            // supported, it needs to have VPD defined. Likewise, if you don't want a configuration
-            // of DIMM supported be sure to leave it out of the VPD. Note that we don't return a specific
-            // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
-            l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MT;
+        // Which again, shouldn't happen w/the DIMM check above.
 
-            // Check the max for giggles. Programming bug so we should assert.
-            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
-                      "Failed to retrieve MT size from VPD");
+        // If getVPD returns us an error, then we don't have VPD for the DIMM configuration.
+        // This is the root of our plug-rules: if you want a configuration of DIMM to be
+        // supported, it needs to have VPD defined. Likewise, if you don't want a configuration
+        // of DIMM supported be sure to leave it out of the VPD. Note that we don't return a specific
+        // plug-rule error as f/w (Dan) suggested this would duplicate errors leading to confusion.
+        l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MT;
 
-            if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-            {
-                FAPI_ERR("VPD MT keyword is too big for our array");
-                fapi2::Assert(false);
-            }
+        // Check the max for giggles. Programming bug so we should assert.
+        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
+                  "Failed to retrieve MT size from VPD");
 
-            // Log any error code from getVPD separately in case the error code is meaningful
-            FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
-        }
+        FAPI_ASSERT( l_vpd_info.iv_size <= mss::VPD_KEYWORD_MAX,
+                     fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                     set_MAX(mss::VPD_KEYWORD_MAX).
+                     set_ACTUAL(l_vpd_info.iv_size).
+                     set_KEYWORD(fapi2::MemVpdData::MT).
+                     set_MCS_TARGET(i_target),
+                     "VPD MT keyword size retrieved: %d, is larger than max: %d for %s",
+                     l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
+
+        // Log any error code from getVPD separately in case the error code is meaningful
+        FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mt_blob[0])) );
 
         // Only get the MR blob if we have a freq. It's possible for Cronus to give us an MCS which
         // is connected to a controller which has 0 DIMM installed. In this case, we won't have
         // a frequency, and thus we'd fail getting the VPD. So we initiaized the VPD to 0's and if
-        // there's no freq, we us a 0 filled VPD.
+        // there's no freq, we use a 0 filled VPD.
         if (l_vpd_info.iv_freq_mhz != 0)
         {
             l_vpd_info.iv_vpd_type = fapi2::MemVpdData::MR;
@@ -4782,11 +4787,14 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
             FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
                       "Failed to retrieve MR size from VPD");
 
-            if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-            {
-                FAPI_ERR("VPD MR keyword is too big for our array");
-                fapi2::Assert(false);
-            }
+            FAPI_ASSERT( l_vpd_info.iv_size <= mss::VPD_KEYWORD_MAX,
+                         fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                         set_MAX(mss::VPD_KEYWORD_MAX).
+                         set_ACTUAL(l_vpd_info.iv_size).
+                         set_KEYWORD(fapi2::MemVpdData::MR).
+                         set_MCS_TARGET(i_target),
+                         "VPD MR keyword size retrieved: %d, is larger than max: %d for %s",
+                         l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
             // Log any error code from getVPD separately in case the error code is meaningful
             FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_mr_blob[0])) );
@@ -4800,11 +4808,14 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
     FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
               "Failed to retrieve CK size from VPD");
 
-    if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-    {
-        FAPI_ERR("VPD CK keyword is too big for our array");
-        fapi2::Assert(false);
-    }
+    FAPI_ASSERT( l_vpd_info.iv_size <= mss::VPD_KEYWORD_MAX,
+                 fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                 set_MAX(mss::VPD_KEYWORD_MAX).
+                 set_ACTUAL(l_vpd_info.iv_size).
+                 set_KEYWORD(fapi2::MemVpdData::CK).
+                 set_MCS_TARGET(i_target),
+                 "VPD CK keyword size retrieved: %d, is larger than max: %d for %s",
+                 l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
     FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_cke_blob[0])),
               "Failed to retrieve DQ VPD");
@@ -4816,11 +4827,14 @@ fapi2::ReturnCode eff_dimm::decode_vpd(const fapi2::Target<TARGET_TYPE_MCS>& i_t
     FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, nullptr),
               "Failed to retrieve DQ size from VPD");
 
-    if (l_vpd_info.iv_size > mss::VPD_KEYWORD_MAX)
-    {
-        FAPI_ERR("VPD DQ keyword is too big for our array");
-        fapi2::Assert(false);
-    }
+    FAPI_ASSERT( l_vpd_info.iv_size <= mss::VPD_KEYWORD_MAX,
+                 fapi2::MSS_INVALID_VPD_KEYWORD_MAX().
+                 set_MAX(mss::VPD_KEYWORD_MAX).
+                 set_ACTUAL(l_vpd_info.iv_size).
+                 set_KEYWORD(fapi2::MemVpdData::DQ).
+                 set_MCS_TARGET(i_target),
+                 "VPD DQ keyword size retrieved: %d, is larger than max: %d for %s",
+                 l_vpd_info.iv_size, mss::VPD_KEYWORD_MAX, mss::c_str(i_target));
 
     FAPI_TRY( fapi2::getVPD(i_target, l_vpd_info, &(l_dq_blob[0])),
               "Failed to retrieve DQ VPD");
