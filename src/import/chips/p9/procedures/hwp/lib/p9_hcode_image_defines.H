@@ -232,7 +232,7 @@ HCD_HDR_UINT64(g_sgpe_magic_number, SGPE_MAGIC_NUMBER);   //SGPE 1.0
 HCD_HDR_UINT32(g_sgpe_reset_address, 0);
 HCD_HDR_UINT32(g_sgpe_reserve1, 0);
 HCD_HDR_UINT32(g_sgpe_ivpr_address, 0);
-HCD_HDR_UINT32(g_sgpe_reserve2, 0);
+HCD_HDR_UINT32(g_sgpe_timebase_hz, 0);
 HCD_HDR_UINT32(g_sgpe_build_date, 0);
 HCD_HDR_UINT32(g_sgpe_build_ver, 0);
 HCD_HDR_UINT32(g_sgpe_reserve_flags, 0);
@@ -291,7 +291,7 @@ HCD_HDR_UINT32(g_cme_scom_length, 0);
 HCD_HDR_UINT32(g_cme_mode_flags, 0);
 HCD_HDR_UINT16(g_cme_location_id, 0);
 HCD_HDR_UINT16(g_cme_qm_mode_flags, 0);
-HCD_HDR_UINT32(g_cme_reserved2, 0); //Retain next field at 8B boundary
+HCD_HDR_UINT32(g_cme_timebase_hz, 0); //Retain next field at 8B boundary
 HCD_HDR_UINT64(g_cme_cpmr_PhyAddr, 0);
 HCD_HDR_PAD(IMG_HDR_ALIGN_SIZE);
 #ifdef __ASSEMBLER__
@@ -337,7 +337,7 @@ HCD_HDR_UINT32(g_pgpe_build_date,                 0 );      // Build date for PG
 HCD_HDR_UINT32(g_pgpe_build_ver,                  0 );      // Build Version
 HCD_HDR_UINT16(g_pgpe_flags,                      0 );      // PGPE Flags
 HCD_HDR_UINT16(g_pgpe_reserve1,                   0 );      // Reserve field
-HCD_HDR_UINT32(g_pgpe_reserve2,                   0 );      // Reserve field
+HCD_HDR_UINT32(g_pgpe_timebase_hz,                0 );      // Timebase (in Hz) - dependent on nest frequency
 HCD_HDR_UINT32(g_pgpe_gppb_sram_addr,             0 );      // Offset to Global P State Parameter Block
 HCD_HDR_UINT32(g_pgpe_hcode_length,               0 );      // Length of PGPE Hcode
 HCD_HDR_UINT32(g_pgpe_gppb_mem_offset,
