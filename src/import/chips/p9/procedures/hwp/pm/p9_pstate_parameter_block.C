@@ -3332,15 +3332,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             }
         }
 
-        // The rest of the processing here is all checking of the VDM content
-        // within #W.  If VDMs are not enabled (or supported), skip all of it
-        if (!is_vdm_enabled(o_state))
-        {
-            FAPI_INF("   proc_get_mvpd_poundw: VDM is disabled.  Skipping remaining checks");
-            o_state->iv_vdm_enabled = false;
-            break;
-        }
-
         uint8_t l_poundw_static_data = 0;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_W_STATIC_DATA_ENABLE,
