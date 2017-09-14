@@ -147,19 +147,16 @@
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SAFE_MODE_NOVDM_UPLIFT_MV</id>
-
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Safe mode voltage in mv
-      Consumer: p9_setup_evid.C
-
-      Overridden by p9_pstate_parameter_block
-
+    Attribute in place to allow override for boot mode voltage
+    Consumer: p9_setup_evid.C
     </description>
     <valueType>uint32</valueType>
     <platInit/>
     <initToZero/>
     <writeable/>
+    <overrideOnly/>
   </attribute>
 
 
@@ -170,13 +167,13 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Safe mode voltage in mv
-      Consumer: p9_setup_evid.C
+    This attribute is used within the hwp to update the 
+    VDM config register.
+    Consumer: p9_setup_evid.C
 
-      Overridden by p9_pstate_parameter_block
-
+    Modified in  p9_pstate_parameter_block
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
     <initToZero/>
     <writeable/>
   </attribute>
@@ -188,13 +185,13 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Safe mode frequency in MHZ
+      This attribute is used within the hwp to update QPPM DPLL
+      frequency register
       Consumer: p9_setup_evid.C
 
-      Overridden by p9_pstate_parameter_block
-
+      Modified by p9_pstate_parameter_block
     </description>
     <valueType>uint32</valueType>
-    <platInit/>
     <initToZero/>
     <writeable/>
   </attribute>
