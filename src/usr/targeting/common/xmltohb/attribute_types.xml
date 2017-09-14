@@ -4355,7 +4355,7 @@
     <readable></readable>
     <simpleType>
       <uint32_t>
-        <default>0x80000000</default>
+        <default>0xEC100000</default>
       </uint32_t>
     </simpleType>
   </attribute>
