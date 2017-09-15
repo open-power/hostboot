@@ -175,6 +175,9 @@ enum states
     NO = 0,
     YES_N = 0,
     NO_N = 1,
+    // Uses "_" in the name for INVALID as INVALID is defined as a macro in the
+    // FSP code. If we just use INVALID as an enum name, then the preprocessor
+    // compile phase changes it to be the macro.
     _INVALID_ = 0xFF,
     NO_CHIP_SELECT_ACTIVE = 0xFF,
 };
