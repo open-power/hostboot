@@ -234,7 +234,7 @@ class decoder
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
         /// @note populates iv_vddr_slope, iv_total_slope
         ///
-        fapi2::ReturnCode find_slope (const std::vector<fapi2::buffer<uint64_t>>& i_slope);
+        fapi2::ReturnCode find_slope (const std::vector<uint64_t>& i_slope);
 
         ///
         /// @brief Finds a value for power curve intercept attributes by matching the generated hashes
@@ -242,7 +242,7 @@ class decoder
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
         /// @note populates iv_vddr_intercept, iv_total_intercept
         ///
-        fapi2::ReturnCode find_intercept (const std::vector<fapi2::buffer<uint64_t>>& i_intercept);
+        fapi2::ReturnCode find_intercept (const std::vector<uint64_t>& i_intercept);
 
         ///
         /// @brief Finds a value from ATTR_MSS_MRW_THERMAL_MEMORY_POWER_LIMIT and stores in iv variable
@@ -250,7 +250,7 @@ class decoder
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
         /// @note populates iv_thermal_power_limit
         ///
-        fapi2::ReturnCode find_thermal_power_limit (const std::vector<fapi2::buffer<uint64_t>>& i_thermal_limits);
+        fapi2::ReturnCode find_thermal_power_limit (const std::vector<uint64_t>& i_thermal_limits);
 
 };
 
@@ -270,9 +270,9 @@ class decoder
 /// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
 ///
 fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_targets,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_slope,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_intercept,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_thermal_power_limit,
+                                   const std::vector< uint64_t >& i_slope,
+                                   const std::vector< uint64_t >& i_intercept,
+                                   const std::vector< uint64_t >& i_thermal_power_limit,
                                    uint16_t o_vddr_slope       [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint16_t o_vddr_int         [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint16_t o_total_slope      [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
