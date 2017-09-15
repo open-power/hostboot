@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -329,6 +329,25 @@ namespace AttributeTank
      */
     virtual void deserializeAttributes(
         const AttributeSerializedChunk & i_attributes);
+
+
+    /**
+     * @brief Deserialize a chunk of Attributes into the tank and
+     *        select whether to echo the attributes after they have been stored
+     *
+     * The use case is for receiving a chunk of serialized attributes from
+     * another AttributeTank on a another subsystem. The caller is responsible
+     * for freeing/deleting the memory in the chunk after calling this function.
+     *
+     * @param[in]  i_attributes Reference to AttributeSerializedChunk containing
+     *                          attributes.
+     *
+     * @param[in]  i_echoAttributes Select whether or not to echo the attributes
+     */
+    virtual void deserializeAttributes(
+        const AttributeSerializedChunk & i_attributes,
+        bool i_echoAttributes );
+
 
     /**
      * @brief Fast inline check if any attributes exist in the tank

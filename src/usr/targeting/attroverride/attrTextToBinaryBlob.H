@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,6 +136,43 @@ namespace AttrTextToBinaryBlob
     static bool attrFileIsTargLine(
         const std::string & i_line);
 
+    /**
+     * @brief Checks if a Target line in an Attribute text file is
+     *        encoded correctly
+     *
+     * @param[in] i_line Reference to string containing line
+     *
+     * @return true if the line is a correctly encoded target line
+     */
+    static bool validateTargLine(
+                                  const std::string & i_line );
+
+    /**
+     * @brief Checks if a valid System substring exists
+     *
+     * @param[in] i_line Reference to string containing line
+     *
+     * @return true if a valid System substring exists
+     */
+    enum TargetTypeRc
+    {
+        TargetTypeRcSystem,
+        TargetTypeRcChip,
+        TargetTypeRcError
+    };
+    static TargetTypeRc validateSysSubstr(
+                                           const std::string & i_line );
+
+    /**
+     * @brief Returns if the Binary translation is encoded correctly
+     *
+     * @param[in] i_buffer - The buffer containing the binary translation
+     * @param[in] i_bufSize - The size of the buffer.
+     *
+     * @return true if the binary is correctly encoded
+     */
+    static bool validateBinaryXlate( const uint8_t * i_buffer,
+                                     size_t  i_bufSize );
 
     /**
      * @brief Splits an attribute line from an Attribute text file into fields

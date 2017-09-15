@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,7 +417,8 @@ bool AttributeTank::attributeExists(const uint32_t i_attrId) const
 
 //******************************************************************************
 void AttributeTank::deserializeAttributes(
-        const AttributeSerializedChunk & i_attributes)
+        const AttributeSerializedChunk & i_attributes,
+        bool i_echoAttributes )
 {
     TARG_MUTEX_LOCK(iv_mutex);
 
@@ -461,9 +462,46 @@ void AttributeTank::deserializeAttributes(
         l_index += l_pAttrHdr->iv_valSize;
         iv_attributesExist = true;
         iv_attributes.push_back(l_pAttr);
+
+        if // attributes should be echo'd
+          ( i_echoAttributes == true )
+        {
+            // extract individual fields from attribute
+            uint32_t attrId = l_pAttr->iv_hdr.iv_attrId;
+            uint32_t targetType = l_pAttr->iv_hdr.iv_targetType;
+            uint16_t pos = l_pAttr->iv_hdr.iv_pos;
+            uint8_t unitPos = l_pAttr->iv_hdr.iv_unitPos;
+
+            const uint8_t * pNodeFlags = (&(l_pAttr->iv_hdr.iv_unitPos)) + 1;
+
+            uint8_t node = (*pNodeFlags) >> 4;  // isolate hi nibble
+            uint8_t flags = (*pNodeFlags) & 0x0F;  // isolate lo nibble
+
+            uint32_t valueLen = l_pAttr->iv_hdr.iv_valSize;
+
+            TRACFCOMP(g_trac_targeting,
+                      "deserializeAttributes: Attribute Hdr: "
+                      "ID = %.8X  Target Type = %.8X  Positon = %.4X  "
+                      "Unit Position = %.2X  node = %.1X  flags = %.1X  "
+                      "Parm Length = %.8X\n",
+                      attrId, targetType, pos, unitPos, node, flags, valueLen);
+
+            TRACFBIN(g_trac_targeting,
+                      "deserializeAttributes: Parm Value: ",
+                      l_pAttr->iv_pVal, valueLen);
+        } // end echo attributes
     }
 
     TARG_MUTEX_UNLOCK(iv_mutex);
+}
+
+//******************************************************************************
+void AttributeTank::deserializeAttributes(
+        const AttributeSerializedChunk & i_attributes)
+{
+    // deserialize without echo
+    deserializeAttributes( i_attributes,
+                           false );
 }
 
 //******************************************************************************
