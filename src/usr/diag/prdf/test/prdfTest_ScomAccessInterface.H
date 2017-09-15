@@ -67,9 +67,8 @@ public:
         //we will be using bit 61 of this address which is a spare bit in the
         //OCC fir, which shouldn't generate an attention
         uint64_t address = 0x01010800;
-        CPU_WORD l_cpuWord[(64)/(sizeof(CPU_WORD)*8)] = {0};
-        BitString exp(64, l_cpuWord);
-        BitString bs(64, l_cpuWord);
+        BitStringBuffer exp(64);
+        BitStringBuffer bs(64);
 
         TARGETING::TargetHandleList targetList =
             PRDF::PlatServices::getFunctionalTargetList(TARGETING::TYPE_PROC);
