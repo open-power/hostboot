@@ -185,6 +185,28 @@ const T* findAttribute(const T* array,
     return element;
 }
 
+const AttributeData * findAttributeForId( const AttributeData * array,
+                                          size_t arraySize,
+                                          uint32_t attrId )
+{
+    const AttributeData * pOutElement = NULL;
+    for // loop thru the attribute data table
+      ( int i = 0;
+        i < arraySize;
+        i++ )
+    {
+        if // element contains input Id
+          ( array[i].iv_attrId == attrId )
+        {
+            // element found
+            pOutElement = &array[i];
+            break;
+        }
+    }
+
+    return pOutElement;
+}
+
 //global to allow debug logs
 bool g_showDebugLogs = false;
 
@@ -571,6 +593,8 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
 
                 if (0 == l_line.find(TARGET_NODE_ALL_STR))
                 {
+                    // add a new target label node number
+                    o_targetLabels.push_back(l_label);
                     l_line = l_line.substr(strlen(TARGET_NODE_ALL_STR));
                 }
                 else
@@ -615,7 +639,7 @@ bool AttrTextToBinaryBlob::attrFileTargetLineToData(
                         l_line.clear();
                     }
                 }
-            }
+            } // end figure out target node
 
             if (0 == l_line.find(ATTR_FILE_TARGET_EXT_FOOTER_STR))
             {
@@ -1027,8 +1051,663 @@ void AttrTextToBinaryBlob::padToNextPage( uint8_t *& io_buffer,
     memset(&io_buffer[l_startPoint], 0xff, l_paddingSize);
     return;
 }
+//******************************************************************************
+bool AttrTextToBinaryBlob::validateTargLine( const std::string & i_line )
+{
+    // input line :
+    //  - has previously had leading white space stripped
+    //  - begins with string "target"
+    std::string l_line = i_line;
+
+    bool isValidLine = true;
+
+    // determine target type:
+    //  - system
+    //     target  <blank>
+    //     target = k0:n0:s0 <blank>
+    //     target = k0:n0:s0: <blank>
+    //
+    //  - chip
+    //     system || chip string
+    //
+    //        note : system string is of form kx:ny:sz
+    //        note : x may be 0-9
+    //        note : y may be :
+    //                - single digit 0-9
+    //                - comma separated list of digits 0-9
+    //                   -- 2 or more items in list
+    //                   -- no ordering dependencies
+    //                   e.g. 0,4
+    //                   e.g. 5,3,9
+    //                - all
+    //        note : z = 0
+    //
+
+    // remove "target" label from line
+    l_line = l_line.substr(6, l_line.size());
+
+    // strip leading white space
+    int l_nextTextPos = l_line.find_first_not_of(" \t");
+    l_line = l_line.substr(l_nextTextPos, l_line.size());
+
+    do
+    {
+        if // all white space
+          ( l_nextTextPos == std::string::npos )
+        {
+            // target is system target, encoded correctly
+            break;
+        }
+
+        else if // missing "=" but contains other garbage
+          ( (l_line.substr(0, 1)) != "=" )
+        {
+            // bad encoding
+            isValidLine = false;
+            printf("validateTargLine : Error : Missing = \n" );
+            break;
+        }
+
+        else
+        {
+            // strip the "="
+            l_line = l_line.substr(1, l_line.size());
+            l_nextTextPos = l_line.find_first_not_of(" \t");
+
+            if // no parms follow "="
+              (l_nextTextPos == std::string::npos)
+            {
+                // bad encoding
+                isValidLine = false;
+                printf("validateTargLine : Error : "
+                        "Missing Header String \n" );
+                break;
+            }
+            else
+            {
+                // strip proceeding white space
+                l_line = l_line.substr(l_nextTextPos, l_line.size());
+            }
+        }
+
+        // at this point the "target =" and
+        //  any preceeding white space has been stripped
+        // the header encoding needs to be validated for a System Target
+        TargetTypeRc tgtTypeRc = validateSysSubstr( l_line );
+
+        if // System target was found
+          ( tgtTypeRc == TargetTypeRcSystem )
+        {
+            // target is system target, encoded correctly
+            break;
+        }
+        else if // encoding error
+          ( tgtTypeRc == TargetTypeRcError )
+        {
+            // bad encoding (err msg already printed)
+            isValidLine = false;
+            break;
+        }
+        else
+        {
+            // (chip target - keep going)
+        }
+
+        //------------------------------
+        // check for terms without values
+        //------------------------------
+        int curColonPosn = l_line.find_first_of(":", 0);
+
+        for ( int nextColonPosn = 0;
+                curColonPosn != std::string::npos;
+                curColonPosn = nextColonPosn )
+        {
+            nextColonPosn = l_line.find_first_of(":", curColonPosn+1);
+
+            if // no colon found
+              ( nextColonPosn == std::string::npos)
+            {
+                if // last term was missing a value
+                ( (l_line.size() - curColonPosn) < 3 )
+                {
+                    // bad encoding
+                    isValidLine = false;
+                    printf("validateTargLine : Error : "
+                            "Parameter is missing a Value \n" );
+                    break;
+                }
+                else
+                {
+                    // (all done checking)
+                }
+            }
+
+            else if // term is too small to hold a value
+              ( (nextColonPosn - curColonPosn) < 3  )
+            {
+                // bad encoding
+                isValidLine = false;
+                printf("validateTargLine : Error : "
+                        "Parameter is missing a Value \n" );
+                break;
+            }
+            else if // blank follows the colon
+              (l_line.substr(nextColonPosn+1,1) == " ")
+            {
+                // bad encoding
+                isValidLine = false;
+                printf("validateTargLine : Error : "
+                        "Blank Parm follows : \n" );
+                break;
+            }
+            else
+            {
+                // keep looping
+            }
+        } // end loop thru string
+
+        if // validation failed
+        ( isValidLine == false )
+        {
+            // all done
+            break;
+        }
+        else
+        {
+            // (keep checking)
+        }
+
+        //------------------------------
+        // end check for terms without values
+        //------------------------------
 
 
+        //------------------------------
+        // check chip targets for nonsense parms
+        //------------------------------
+
+        for ( int i = 0;
+              i < ( sizeof(CHIP_TYPE_TARG_STR_TO_TYPE) /
+                    sizeof(CHIP_TYPE_TARG_STR_TO_TYPE[0]) );
+              i++ )
+        {
+            TargStrToType * pEntry = &CHIP_TYPE_TARG_STR_TO_TYPE[i];
+
+            if // entry is a processor or memory buffer
+              ( (pEntry->iv_targType == TARGETING::TYPE_PROC) ||
+                (pEntry->iv_targType == TARGETING::TYPE_MEMBUF) )
+            {
+                // prepend ":" to chip string to create search string
+                std::string l_searchString = ":";
+                l_searchString = l_searchString + pEntry->iv_pString;
+
+                int chipPosn = l_line.find( l_searchString );
+
+                // jump over the string
+                int skipChipPosn;
+                if  ( chipPosn == std::string::npos )
+                {
+                  skipChipPosn = l_line.size();
+                }
+                else
+                {
+                  skipChipPosn = chipPosn + l_searchString.size();
+                }
+
+                if // (chip string is in the target string) AND
+                   // (is not at the end of the target string) AND
+                   // (is not followed by ".")
+                  ( (chipPosn != std::string::npos) &&
+                    (skipChipPosn < l_line.size()) &&
+                    ((l_line.substr(skipChipPosn, 1)) != "." ) )
+                {
+                    std::string l_trlParmLine =
+                            l_line.substr(skipChipPosn, l_line.size());
+
+                    if // ":c" parm exists
+                      ( l_trlParmLine.find( ":c" ) != std::string::npos )
+                    {
+                        // bad encoding
+                        isValidLine = false;
+                        printf("validateTargLine : Error : "
+                                "Nonsense parm :c in processor or "
+                                "memory buffer target \n" );
+                        break;
+                    }
+                    else
+                    {
+                        // keep looking
+                    }
+                } // end chip string found
+                else
+                {
+                    // (keep looking)
+                }
+            } // end processor or memory buffer
+            else
+            {
+                // skip entry
+            }
+        } // end walk thru chip targets
+
+        // this next clause isn't really needed right now
+        // but is added for safety in case other checking is
+        // added below at a later time.
+
+        if // validation failed
+          ( isValidLine == false )
+        {
+            // all done
+            break;
+        }
+        else
+        {
+            // (keep checking)
+        }
+
+        //------------------------------
+        // end check chip targets for nonsense parms
+        //------------------------------
+
+
+    } while ( 0 );
+
+    return isValidLine;
+}
+
+//******************************************************************************
+AttrTextToBinaryBlob::TargetTypeRc
+   AttrTextToBinaryBlob::validateSysSubstr( const std::string & i_line )
+{
+    // input line :
+    //  - "target =" and any preceeding white space has been stripped
+    std::string l_line = i_line;
+
+    AttrTextToBinaryBlob::TargetTypeRc rc;
+
+    // determine target type:
+    //  - system
+    //     k0:n0:s0 <blank>
+    //     k0:n0:s0: <blank>
+    //
+    //  - chip
+    //     system || chip string
+    //
+    //        note : system string is of form kx:ny:sz
+    //        note : x may be 0-9
+    //        note : y may be :
+    //                - single digit 0-9
+    //                - comma separated list of digits 0-9
+    //                   -- 2 or more items in list
+    //                   -- no ordering dependencies
+    //                   e.g. 0,4
+    //                   e.g. 5,3,9
+    //                - all
+    //        note : z = 0
+    //
+
+    do
+    {
+        int l_lineSize = l_line.size();
+        size_t kPosn = (l_line.substr(0, 1) == "k") ?
+                0 : l_line.find( ":k", 0);
+        size_t nPosn = (l_line.substr(0, 1) == "n") ?
+                0 : l_line.find( ":n", 0);
+        size_t sPosn = (l_line.substr(0, 1) == "s") ?
+                0 : l_line.find( ":s", 0);
+
+        if // system string is too short
+          ( l_lineSize < 8 )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "System string is too short \n" );
+            break;
+        }
+
+        else if // missing k, n, or s term
+          ( (kPosn == std::string::npos) ||
+            (nPosn == std::string::npos) ||
+            (sPosn == std::string::npos) )        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "System Substring is missing k, n or s \n" );
+            break;
+        }
+
+        else if // system string does not begin with k
+          ( (l_line.substr(0, 1) != "k") )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "System Substring does not begin with"
+                    "k \n" );
+            break;
+        }
+
+        else if // terms are not in k/n/s order
+        ( (kPosn >= nPosn) ||
+          (kPosn >= sPosn) ||
+          (nPosn >= sPosn) )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "k / n / s terms are out of order \n" );
+            break;
+
+        }
+
+        else if // k, n, s parm values are not 0
+          ( (l_line.substr(1, 2) != "0:") ||
+            (l_line.substr(4, 2) != "0:") ||
+            (l_line.substr(7, 1) != "0") )
+        {
+            if // string is long enough to hold chip parms
+              ( l_lineSize > 9 )
+            {
+              // (target is a potential chip target)
+            }
+            else
+            {
+                // bad encoding
+                rc = TargetTypeRcError;
+                printf("validateSysSubstr : Error : "
+                        "System Target String k, n, s must be 0 \n" );
+                break;
+            }
+        }
+
+        else if // k0, n0, s0 and no more
+          ( l_lineSize == 8 )
+        {
+            // target is system target, encoded correctly
+            rc = TargetTypeRcSystem;
+            break;
+        }
+
+        else if // k0, n0, s0, : and no more
+          ( (l_lineSize == 9) &&
+            (l_line.substr(8, 1) == ":" ) )
+        {
+            // target is system target, encoded correctly
+            rc = TargetTypeRcSystem;
+            break;
+        }
+
+        else
+        {
+            // (potential chip target)
+        }
+
+
+        //  Only Potential Chip Targets get to this point
+        //        note : Kx/Ny/Sz terms may be in any order
+        //        note : x may be 0-9
+        //        note : y may be 0-9; 0-8, 1-9;  or all
+        //        note : z = 0
+
+        size_t kValStartPosn = (kPosn == 0) ? 1 : kPosn+2;
+        size_t kValEndPosn = l_line.find( ":", kValStartPosn ) - 1;
+
+        size_t nValStartPosn = (nPosn == 0) ? 1 : nPosn+2;
+        size_t nValEndPosn = l_line.find( ":", nValStartPosn ) - 1;
+
+        size_t sValStartPosn = (sPosn == 0) ? 1 : sPosn+2;
+        size_t sValEndPosn = l_line.find( ":", sValStartPosn ) - 1;
+
+        std::string kValString =
+                i_line.substr( kValStartPosn, (kValEndPosn-kValStartPosn)+1 );
+
+        std::string nValString =
+                i_line.substr( nValStartPosn, (nValEndPosn-nValStartPosn)+1 );
+
+        std::string sValString =
+                i_line.substr( sValStartPosn, (sValEndPosn-sValStartPosn)+1 );
+
+        if // s parameter value is not valid
+          ( (sValStartPosn != sValEndPosn) ||
+            (sValString != "0") )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "Invalid s value. s must be 0 \n" );
+            break;
+        }
+
+        else if // k parameter value is not valid
+          ( (kValStartPosn != kValEndPosn) ||
+            (kValString < "0") ||
+            (kValString > "9")         )
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "Invalid k value. k must be 0 - 9\n" );
+            break;
+        }
+
+        else if // n parameter value = all
+          (nValString == "all")
+        {
+            // valid chip target encoding
+            rc = TargetTypeRcChip;
+            break;
+        }
+
+        else if // n has a single character parameter value
+          ( nValStartPosn == nValEndPosn )
+        {
+            if // parameter value is between 0 and 9
+              ( (nValString >= "0") &&
+                (nValString <= "9") )
+            {
+                // valid chip target encoding
+                rc = TargetTypeRcChip;
+                break;
+            }
+            else
+            {
+                // bad encoding
+                rc = TargetTypeRcError;
+                printf("validateSysSubstr : Error : "
+                        "Invalid n value. n must be 0 - 9\n" );
+                break;
+            }
+        }
+
+        else if // no comma separated n values
+          (nValString.find(",", 0) == std::string::npos)
+        {
+            // bad encoding
+            rc = TargetTypeRcError;
+            printf("validateSysSubstr : Error : "
+                    "Invalid n value. n must be 0 - 9 or all\n" );
+            break;
+        }
+
+        else
+        {
+            // assume a valid chip encoding
+            rc = TargetTypeRcChip;
+
+            // (check for comma separated list)
+            size_t nValCurPosn = nValStartPosn;
+            size_t nValNextPosn = nValCurPosn;
+
+            for // loop thru the potential comma separated list
+              ( int i = nValStartPosn;
+                i <= nValEndPosn;
+                )
+            {
+                size_t commaPosn = nValString.find(",", i);
+                if // comma not found
+                  ( commaPosn != std::string::npos)
+                {
+                    // this is the last term
+                    i = nValEndPosn + 1;
+                    commaPosn =  nValEndPosn + 1;
+                }
+                else
+                {
+                    // end of intermediary term
+                    i = commaPosn + 1;
+                }
+
+                if // parameter value is not valid
+                  ( (nValString.substr(nValCurPosn, commaPosn) < "0") ||
+                    (nValString.substr(nValCurPosn, commaPosn) > "9") )
+                {
+                    // bad encoding
+                    rc = TargetTypeRcError;
+                    printf("validateSysSubstr : Error : "
+                            "Invalid n value. n list value must be 0 - 9\n" );
+                    break;
+                }
+                else
+                {
+                    // keep walking the list
+                    nValCurPosn = i;
+                }
+            } // end loop thru comma separated list
+        } // end check n is comma separated list
+
+    } while ( 0 );
+
+    return rc;
+}
+
+//******************************************************************************
+bool AttrTextToBinaryBlob::validateBinaryXlate( const uint8_t * i_buffer,
+                                                size_t  i_bufSize )
+{
+    bool isValid = true;
+
+    // strip out and display binary term by term
+    int hdrLen = 16;
+    int termHdrLen = sizeof(AttributeTank::AttributeHeader);
+    int valueLen = 0;
+
+    int maxOffset = i_bufSize - 1;
+
+    printf("\nvalidateBinaryXlate: Echo Output\n" );
+
+    for // walk thru the bfr
+      ( int curOffset = 0;
+        curOffset <= maxOffset;
+        curOffset+=(hdrLen + termHdrLen + valueLen) )
+    {
+        // hdr contents - Big Endian encoded
+        //  00-03 :  Tank
+        //  04-07 :  pad
+        //  08-0F : length of the proceeding attribute term
+        const uint8_t * pHdr = i_buffer + curOffset;
+        uint32_t tank = be32toh( *((const uint32_t *)(pHdr)) );
+        uint32_t pad = be32toh( *((const uint32_t *)(pHdr+4)) );
+        uint64_t termLen = be64toh( *((const uint64_t *)(pHdr+8)) );
+
+        // term contents - Big Endian encoded Attribute Header
+        //  00-03 : attribute ID
+        const AttributeTank::AttributeHeader * pTerm =
+                (const AttributeTank::AttributeHeader *)(pHdr + hdrLen);
+
+        uint32_t attrId = be32toh( pTerm->iv_attrId );
+        uint32_t targetType = be32toh( pTerm->iv_targetType );
+        uint16_t pos = be16toh( pTerm->iv_pos );
+        uint8_t unitPos = pTerm->iv_unitPos;
+
+        const uint8_t * pNodeFlags = (&(pTerm->iv_unitPos)) + 1;
+
+        uint8_t node = (*pNodeFlags) >> 4;  // isolate hi nibble
+        uint8_t flags = (*pNodeFlags) & 0x0F;  // isolate lo nibble
+
+        uint32_t valSize = be32toh( pTerm->iv_valSize );
+        valueLen = valSize;
+
+        const AttributeData * pAttrData =
+            findAttributeForId( g_TargAttrs,
+                                sizeof(g_TargAttrs)/sizeof(AttributeData),
+                                attrId);
+
+        if (NULL == pAttrData)
+        {
+            pAttrData =
+                findAttributeForId( g_FapiAttrs,
+                                    sizeof(g_FapiAttrs)/sizeof(AttributeData),
+                                    attrId );
+
+            if // no match for attribute ID
+              ( pAttrData == NULL )
+            {
+                // something went wrong
+                printf("validateBinaryXlate: unknown Attribute ID - %.8X\n",
+                        attrId);
+                isValid = false;
+                break;
+            }
+        }
+
+        std::string l_line = pAttrData->iv_name;
+
+        printf("\nvalidateBinaryXlate: Attribute Term =  %s\n",
+                l_line.c_str() );
+
+        printf("validateBinaryXlate: Term Hdr: "
+                "Tank = %.8X  Pad = %.8X  Attribute Length = %.16lX\n",
+                tank, pad, termLen );
+
+        printf("validateBinaryXlate: Attribute Hdr: "
+                "ID = %.8X  Target Type = %.8X  Positon = %.4X  "
+                "Unit Position = %.2X  node = %.1X  flags = %.1X  "
+                "Parm Length = %.8X\n",
+                attrId, targetType, pos, unitPos, node, flags, valSize);
+
+        if // parm value exists
+          ( valSize > 0 )
+        {
+            // value contents - Big Endian encoded
+            const uint8_t * pValue = ((const uint8_t *)pTerm) + termHdrLen;
+
+            if // 1 byte parm
+              (valSize == 1)
+            {
+                uint8_t value8 = *pValue;
+                printf("validateBinaryXlate: Parm Value: %.2X\n", value8 );
+            }
+
+            else if // 2 byte parm
+              (valSize == 2)
+            {
+                uint16_t value16 = be16toh( *((const uint16_t *)pValue) );
+                printf("validateBinaryXlate: Parm Value: %.4X\n", value16 );
+            }
+
+            else if // 4 byte parm
+              (valSize == 4)
+            {
+                uint32_t value32 = be32toh( *((const uint32_t *)pValue) );
+                printf("validateBinaryXlate: Parm Value: %.8X\n", value32 );
+            }
+
+            else if // 8 byte parm
+              (valSize == 8)
+            {
+                uint64_t value64 = be64toh( *((const uint64_t *)pValue) );
+                printf("validateBinaryXlate: Parm Value: %.16lX\n", value64 );
+            }
+            else
+            {
+                printf("validateBinaryXlate: WARNING : Parm to large to format\n" );
+            }
+        } // end parm value
+    } // end walk thru output buffer
+
+    return( isValid );
+}
 
 //******************************************************************************
 bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
@@ -1058,7 +1737,7 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
     AttributeTank::AttributeHeader l_attrData;
 
     uint8_t * l_buffer = NULL;
-    uint8_t * l_writeBuffer;
+    uint8_t * l_writeBuffer = NULL;
     size_t l_totalSize = 0;
     size_t l_newSize;
     size_t l_whitespacePos;
@@ -1068,6 +1747,9 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
     const char * l_blobName = "attrOverride.bin";
     FILE * l_attrBlob;
     l_attrBlob = fopen(l_blobName, "wb");
+
+    printf("attrTextToBinaryBlob:"
+           " Reading Attribute Override File\n");
 
     // Iterate over all lines in the file.
     do
@@ -1087,11 +1769,14 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
                 {
                     break;
                 }
-            }
 
-            //Remove any leading whitespace
-            l_whitespacePos = l_line.find_first_not_of(" \t");
-            l_line = l_line.substr(l_whitespacePos, l_line.size());
+                //Remove any leading whitespace
+                l_whitespacePos = l_line.find_first_not_of(" \t");
+                l_line = l_line.substr(l_whitespacePos, l_line.size());
+
+                printf("attrTextToBinaryBlob: Echo Input - %s\n",
+                        l_line.c_str() );
+            }
 
             // Process the line.  Could be:
             //    * Target line.
@@ -1157,6 +1842,22 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
                 break;
             }
 
+            // verify target line is encoded correctly
+            bool isTgtLineValid = validateTargLine( l_targetLine );
+
+            if // target line is good
+              (isTgtLineValid)
+            {
+                // (keep going)
+            }
+            else
+            {
+                // all done
+                l_pErr = true;
+                printf("attrTextToBinaryBlob:"
+                       " Target Line is incorrectly coded\n");
+                break;
+            }
 
             // Get the Target Data for this attribute
             l_pErr = attrFileTargetLineToData(l_targetLine,
@@ -1176,6 +1877,16 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
             if (l_const)
             {
                 l_flags = AttributeTank::ATTR_FLAG_CONST;
+            }
+
+            if // no output data was generated
+              ( l_targetLabels.size() == 0 )
+            {
+                // Silent Error
+                l_pErr = true;
+                printf("attrTextToBinaryBlob:"
+                       " Silent Error, no output generated\n");
+                break;
             }
 
             for (const auto & l_label : l_targetLabels)
@@ -1223,70 +1934,117 @@ bool AttrTextToBinaryBlob::attrTextToBinaryBlob( std::ifstream& i_file,
 
                 if( l_pErr )
                 {
-                    printf("An error occured in writeDataToBuffer\n");
+                    printf("attrTextToBinaryBlob:"
+                           " An error occured in writeDataToBuffer\n");
+                    break;
                 }
             }  // End of target labels
 
-            delete[] l_pVal;
-            l_pVal = NULL;
-        }
+            if // no errors occurred during parsing
+              (l_pErr == false)
+            {
+                if // parm value buffer exists
+                ( l_pVal != NULL )
+                {
+                    // delete it
+                    delete[] l_pVal;
+                    l_pVal = NULL;
+                }
+                else
+                {
+                    // (no buffer to delete)
+                }
+            }
+            else
+            {
+                // (all done)
+                break;
+            }
+        } // end attribute line found
     } while (!i_file.eof());
 
-    //The Attribute text file has been processed and written into a buffer
-
-    //pad the buffer up to the next multiple of 0x1000 (page size).
-    padToNextPage( l_buffer,
-                   l_totalSize );
-
-    //inject ECC protection bytes if desired
-    if( i_injectECC )
+    if // no errors occurred during parsing
+      (l_pErr == false )
     {
-        l_newSize = (l_totalSize/8)*9;
-        l_writeBuffer = (uint8_t *) malloc((l_newSize));
-        PNOR::ECC::injectECC( l_buffer, l_totalSize, l_writeBuffer );
-    }
+        //The Attribute text file has been processed and written into a buffer
+
+        // validate the text to binary translation
+        bool isBinaryValid = validateBinaryXlate( l_buffer,
+                                                  l_totalSize);
+
+        if // binary is good
+        (isBinaryValid)
+        {
+            //pad the buffer up to the next multiple of 0x1000 (page size).
+            padToNextPage( l_buffer,
+                           l_totalSize );
+
+            //inject ECC protection bytes if desired
+            if( i_injectECC )
+            {
+                l_newSize = (l_totalSize/8)*9;
+                l_writeBuffer = (uint8_t *) malloc((l_newSize));
+                PNOR::ECC::injectECC( l_buffer, l_totalSize, l_writeBuffer );
+            }
+            else
+            {
+                l_newSize = l_totalSize;
+                l_writeBuffer = l_buffer;
+            }
+
+            //write the overrides to the file
+            l_fwriteSuccess = fwrite(l_writeBuffer, 1, l_newSize, l_attrBlob);
+            if( l_fwriteSuccess != l_newSize )
+            {
+                printf("There was an error writing to the file!\n");
+            }
+        } // end valid binary
+        else
+        {
+            // error - terminate
+            l_pErr = true;
+            printf("attrTextToBinaryBlob:"
+                   " Error in encoded binary\n");
+        }
+    } // end no parsing errors
     else
     {
-        l_newSize = l_totalSize;
-        l_writeBuffer = l_buffer;
-    }
+    } // end parsing errors
 
-    //write the overrides to the file
-    l_fwriteSuccess = fwrite(l_writeBuffer, 1, l_newSize, l_attrBlob);
-    if( l_fwriteSuccess != l_newSize )
+    // deallocate temp bfrs as needed
+    if ( l_pVal != NULL )
     {
-        printf("There was an error writing to the file!\n");
+        delete[] l_pVal;
+        l_pVal = NULL;
     }
+    else
+    {}
 
-    if (!l_pErr)
+    if ( l_buffer != NULL )
     {
-        // Successfully processed the attribute file, close it
-        i_file.close();
-
-        // Close attribute blob file
-        int l_fclose = fclose(l_attrBlob);
-
-        if(l_fclose != 0 )
-        {
-            printf("attrTextToBinaryBlob: Error closing blob file\n");
-        }
-
-        // free allocated memory
         free(l_buffer);
+    }
+    else
+    {}
 
-        //free the ECC buffer if we used it.
-        if( i_injectECC )
-        {
-            free(l_writeBuffer);
-        }
+    if ( (l_writeBuffer != NULL) &&
+         (l_writeBuffer != l_buffer) )
+    {
+        free(l_writeBuffer);
+    }
+    else
+    {}
 
+    // Close attribute blob file
+    int l_fclose = fclose(l_attrBlob);
+
+    if(l_fclose != 0 )
+    {
+        printf("attrTextToBinaryBlob: Error closing blob file\n");
     }
 
     return l_pErr;
 }
-
-
-
 
 
 //******************************************************************************
@@ -1454,6 +2212,8 @@ int main(int argc, char *argv[])
 
         err = AttrTextToBinaryBlob::attrTextToBinaryBlob( l_attributeFile,
                                                           l_injectECC );
+
+        l_attributeFile.close();
 
         if( err )
         {

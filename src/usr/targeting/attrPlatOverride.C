@@ -236,7 +236,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                 l_chunk.iv_pAttributes = &l_pAttrOverSec->iv_chunk[0];
 
                 // Deserialize the data with the approriate AttributeTank
-                l_ptank->deserializeAttributes(l_chunk);
+                l_ptank->deserializeAttributes(l_chunk, true);
             }
             l_index += l_pAttrOverSec->iv_size;
         }
