@@ -112,7 +112,7 @@ class MemCeTable
                        bool i_isHard = false );
 
     /**
-     * @brief Deactivates all entries covered by a slave rank.
+     * @brief Deactivates all entries covered by a rank.
      * @param i_rank The target rank.
      */
     void deactivateRank( const MemRank & i_rank );
