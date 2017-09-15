@@ -87,7 +87,7 @@ typedef uint32_t CPU_WORD;
  * sufficient space in the buffer. For example, getNumCpuWords(48) returns 2.
  *
  * The bit positions are ordered 0 to n (left to right), where n is the bit
- * length minus one. Be default, position 0 will be the first bit of the
+ * length minus one. By default, position 0 will be the first bit of the
  * buffer's start address. The optional constructor allows users to input an
  * offset anywhere within the buffer, which is then used as position 0. This is
  * useful when the data within the buffer is a right-justified.

@@ -38,6 +38,8 @@
 #include <prdfMemoryMru.H>
 #include <prdfPlatServices.H>
 
+#include <prdfMemCaptureData.H>
+
 // For compression routines
 #define PRDF_COMPRESSBUFFER_COMPRESS_FUNCTIONS
 #include <prdfCompressBuffer.H>
@@ -611,15 +613,13 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
         // Operate only on MemoryMru callouts.
         if ( PRDcalloutData::TYPE_MEMMRU != it->callout.getType() ) continue;
 
-/* TODO RTC 136125
         // Only add single DIMM callouts. Otherwise, the parsed data is
         // redundant.
         MemoryMru memMru ( it->callout.flatten() );
         if ( !memMru.getSymbol().isValid() ) continue;
 
         // Add the MemoryMru to the capture data.
-        CenMbaCaptureData::addExtMemMruData( memMru, iv_errl );
-*/
+        MemCaptureData::addExtMemMruData( memMru, iv_errl );
     }
 
     //**************************************************************************
