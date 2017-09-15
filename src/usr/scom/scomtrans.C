@@ -987,6 +987,8 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
                     l_chipLevel = P9N_DD1_SI_MODE;
                     break;
                 case(0x20):
+                case(0x21):
+                case(0x22):
                     l_chipLevel = P9N_DD2_SI_MODE;
                     break;
 
@@ -1004,6 +1006,7 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
             switch(l_ec)
             {
                 case(0x10):
+                case(0x11):
                     l_chipLevel = P9C_DD1_SI_MODE;
                     break;
                 case(0x20):
