@@ -126,17 +126,17 @@ struct is_match
     ///@brief functor constructor
     ///@param[in] i_gen_key the class object's constructed hash for the installed dimm, to be compared with the attr array
     ///
-    is_match(const fapi2::buffer<uint32_t> i_gen_key) : iv_gen_key(i_gen_key) {}
+    is_match(const uint32_t i_gen_key) : iv_gen_key(i_gen_key) {}
     const fapi2::buffer<uint32_t> iv_gen_key;
 
     ///
     ///@brief Boolean compare used for find_if function
     ///
-    bool operator()(const fapi2::buffer<uint64_t> i_hash)
+    bool operator()(const uint64_t i_hash)
     {
-        uint32_t l_temp = 0;
-        i_hash.extractToRight<ENCODING_START, ENCODING_LENGTH>(l_temp);
-        return ((l_temp & iv_gen_key) == iv_gen_key);
+        // l_this_hash is the first half of the i_hash's bits
+        uint32_t l_this_hash = i_hash >> 32;
+        return ((l_this_hash & iv_gen_key) == iv_gen_key);
     }
 };
 
@@ -146,7 +146,7 @@ struct is_match
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_vddr_slope, iv_total_slop
 ///
-fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>>& i_slope)
+fapi2::ReturnCode decoder::find_slope (const std::vector<uint64_t>& i_slope)
 {
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_slope.begin(),
@@ -182,9 +182,11 @@ fapi2::ReturnCode decoder::find_slope (const std::vector<fapi2::buffer<uint64_t>
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    l_value_iterator->extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_slope);
-    l_value_iterator->extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_slope);
-
+    {
+        const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
+        l_temp.extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_slope);
+        l_temp.extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_slope);
+    }
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -195,13 +197,12 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates iv_vddr_intercept, iv_total_intercept
 ///
-fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint64_t>>& i_intercept)
+fapi2::ReturnCode decoder::find_intercept (const std::vector<uint64_t>& i_intercept)
 {
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_intercept.begin(),
                                     i_intercept.end(),
                                     is_match(iv_gen_key));
-
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
     FAPI_ASSERT(l_value_iterator != i_intercept.end(),
@@ -231,9 +232,11 @@ fapi2::ReturnCode decoder::find_intercept (const std::vector<fapi2::buffer<uint6
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    l_value_iterator->extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_intercept);
-    l_value_iterator->extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_intercept);
-
+    {
+        const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
+        l_temp.extractToRight<VDDR_START, VDDR_LENGTH>( iv_vddr_intercept);
+        l_temp.extractToRight<TOTAL_START, TOTAL_LENGTH>(iv_total_intercept);
+    }
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -244,12 +247,14 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff the encoding was successful
 /// @note populates thermal_power_limit
 ///
-fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::buffer<uint64_t>>& i_thermal_limits)
+fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<uint64_t>& i_thermal_limits)
 {
     // Find iterator to matching key (if it exists)
     const auto l_value_iterator  =  std::find_if(i_thermal_limits.begin(),
                                     i_thermal_limits.end(),
                                     is_match(iv_gen_key));
+
+    fapi2::buffer<uint64_t> l_temp;
 
     //Should have matched with the all default ATTR at least
     //The last value should always be the default value
@@ -280,8 +285,10 @@ fapi2::ReturnCode decoder::find_thermal_power_limit (const std::vector<fapi2::bu
                 iv_kind.iv_mfgid,
                 iv_dimms_per_port);
 
-    l_value_iterator->extractToRight<THERMAL_POWER_START, THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
-
+    {
+        const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
+        l_temp.extractToRight<THERMAL_POWER_START, THERMAL_POWER_LENGTH>( iv_thermal_power_limit);
+    }
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -301,12 +308,12 @@ fapi_try_exit:
 /// @note decodes the attribute "encoding" to get the vddr and vddr/vpp power curves for a dimm
 ///
 fapi2::ReturnCode get_power_attrs (const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_mcs,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_slope,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_intercept,
-                                   const std::vector< fapi2::buffer< uint64_t > >& i_thermal_power_limit,
+                                   const std::vector< uint64_t >& i_slope,
+                                   const std::vector< uint64_t >& i_intercept,
+                                   const std::vector< uint64_t >& i_thermal_power_limit,
                                    uint16_t o_vddr_slope [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint16_t o_vddr_int [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
-                                   uint16_t o_total_slope[PORTS_PER_MCS][MAX_DIMM_PER_PORT],
+                                   uint16_t o_total_slope [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint16_t o_total_int [PORTS_PER_MCS][MAX_DIMM_PER_PORT],
                                    uint32_t o_thermal_power [PORTS_PER_MCS][MAX_DIMM_PER_PORT])
 {
