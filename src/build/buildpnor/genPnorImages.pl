@@ -42,6 +42,8 @@ use constant BASE_IMAGE_TOTAL_CONTAINER_SIZE => 0x000000000007EF80;
 use constant BASE_IMAGE_TARGET_HRMOR => 0x0000000008000000;
 use constant BASE_IMAGE_INSTRUCTION_START_STACK_POINTER => 0x0000000008280000;
 
+use constant MAX_COMP_ID_LEN => 8;
+
 # Max HBBL content size is 20K
 my $MAX_HBBL_SIZE = 20480;
 
@@ -309,13 +311,19 @@ if ($signMode{$PRODUCTION})
 elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
 {
     $OPEN_SIGN_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+
+    # Since this request signs 4k of random data for SBKT, but is not a named
+    # section, we'll make up a component ID of "SBKTRAND"
+    my $sbktDataComponentIdArg = "--sign-project-FW-token SBKTRAND";
     if ($keyTransition{$IMPRINT})
     {
-        $OPEN_SIGN_KEY_TRANS_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+        $OPEN_SIGN_KEY_TRANS_REQUEST .=
+            "$OPEN_DEV_SIGN_PARAMS $sbktDataComponentIdArg";
     }
     elsif ($keyTransition{$PRODUCTION})
     {
-        $OPEN_SIGN_KEY_TRANS_REQUEST .= "$OPEN_PRD_SIGN_PARAMS --sign-project-FW-token SBKT";
+        $OPEN_SIGN_KEY_TRANS_REQUEST .=
+            "$OPEN_PRD_SIGN_PARAMS $sbktDataComponentIdArg";
     }
 }
 else
@@ -579,10 +587,8 @@ sub manipulateImages
         my $secureboot_hdr =  $header->{file};
 
         my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
-        if ($signMode{$PRODUCTION})
-        {
-            $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $eyeCatch ";
-        }
+        my $componentId = convertEyecatchToCompId($eyeCatch);
+        $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
 
         # Used for corrupting partitions. By default all protected offsets start
         # immediately after the container header which is size = PAGE_SIZE.
@@ -1177,7 +1183,8 @@ sub create_sb_key_transition_container
             . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
             . "--out $tempImages{PRD_KEY_FILE}");
         # Sign new production key container with imprint keys
-        run_command("$OPEN_SIGN_REQUEST ".OP_SIGNING_FLAG
+        my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
+        run_command("$OPEN_SIGN_REQUEST ".$sbktComponentIdArg.OP_SIGNING_FLAG
             . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
             . "--out $o_file");
     }
@@ -1195,6 +1202,26 @@ sub create_sb_key_transition_container
         system("rm -f $tempImages{$image}");
         die "Failed deleting $tempImages{$image}" if ($?);
     }
+}
+
+################################################################################
+# convertEyecatchToCompId
+#     Converts eyecatcher to component ID, truncating it to the lesser of its
+#     current size or MAX_COMP_ID_LEN bytes, in order to fit within the confines
+#     of the component ID field of the firmware header.
+################################################################################
+
+sub convertEyecatchToCompId
+{
+    my ($eyeCatcher) = @_;
+
+    my $maxLen = MAX_COMP_ID_LEN;
+    my $len = length($eyeCatcher);
+    die "BUG! Empty eyecatcher not allowed.\n" if !$len;
+    my $finalLen = ($maxLen > $len) ? $len : $maxLen;
+    my $componentId = substr($eyeCatcher,0,$finalLen);
+
+    return $componentId;
 }
 
 ################################################################################
