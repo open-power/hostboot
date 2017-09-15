@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.70 2016/04/01 17:06:39 asaetow Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
-//          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2011
-// *! All Rights Reserved -- Property of IBM
+// $Id: mss_eff_config.C,v 1.72 2017/09/14 18:06:36 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config
 // *! DESCRIPTION : see additional comments below
@@ -45,6 +40,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.72  | lwmulkey |13-SEP-17| Compile bug fix
+//   1.71  | lwmulkey |13-SEP-17| Enable TSV RDIMMs -- Fix mirroring conditional, hardcode certain timers
 //   1.70  | asaetow  |01-APR-16| Fixed DDR4 tCCD_L = 5ck @1600Mbps and ignore SPD completely per Warren Maule.
 //         |          |         | Note: This is to always be in sync with mba_def.initfile since it's not using attributes for tCCD.
 //         |          |         | Note: Currently mba_def.initfile v1.83 has DDR4 tCCD_S = 4ck and tCCD_L = 5ck @1600Mbps&1866Mbps, 6ck @2133Mbps&2400Mbps. If that ever changes mss_eff_config.C will also need to change to match.
@@ -554,7 +551,7 @@ struct mss_eff_config_atts
     // DDR4 attributes
     uint8_t eff_dram_trrdl;
     uint8_t eff_dram_tccdl;
-	//uint8_t eff_dram_tccds;
+    //uint8_t eff_dram_tccds;
     uint8_t eff_dram_twtrl;
     uint8_t eff_vref_dq_train_value[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
     uint8_t eff_vref_dq_train_range[PORT_SIZE][DIMM_SIZE][RANK_SIZE];
@@ -928,7 +925,7 @@ fapi::ReturnCode mss_eff_config_read_spd_data(fapi::Target i_target_dimm,
               rc = FAPI_ATTR_GET(ATTR_SPD_LR_DRAM_ODT_RTT_PARK_2400_3200, &i_target_dimm, p_o_spd_data->lr_dram_odt_rtt_park_2400_3200[i_port][i_dimm]);
               if(rc) break;
 
-		}
+        }
 
         } else {
            FAPI_ERR("Incompatable SPD DRAM generation on %s!", i_target_dimm.toEcmdString());
@@ -1549,8 +1546,8 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
     uint8_t mss_power_control_requested;
     rc = FAPI_ATTR_GET(ATTR_MRW_POWER_CONTROL_REQUESTED, NULL, mss_power_control_requested); 
     if(rc) return rc;
-	
-	if ( mss_power_control_requested == fapi::ENUM_ATTR_MRW_POWER_CONTROL_REQUESTED_FASTEXIT) {
+    
+    if ( mss_power_control_requested == fapi::ENUM_ATTR_MRW_POWER_CONTROL_REQUESTED_FASTEXIT) {
        p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_FASTEXIT;
     } else {
        p_o_atts->eff_dram_dll_ppd = fapi::ENUM_ATTR_EFF_DRAM_DLL_PPD_SLOWEXIT; // if "OFF" default to SLOWEXIT, FASTEXIT settings in mba_def.initfile are causing fails.  Workaround to use SLOWEXIT.
@@ -2028,7 +2025,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             for (int l_cur_mba_rank = 0; l_cur_mba_rank < RANK_SIZE; l_cur_mba_rank += 1) {
                p_o_atts->eff_vref_dq_train_enable[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] = fapi::ENUM_ATTR_EFF_VREF_DQ_TRAIN_ENABLE_DISABLE;
                //VREF DQ range is set to 1 -> range 2
-	       if (l_attr_vpd_dram_wrddr4_vref[l_cur_mba_port] & 0x40) {
+           if (l_attr_vpd_dram_wrddr4_vref[l_cur_mba_port] & 0x40) {
                   p_o_atts->eff_vref_dq_train_range[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] = fapi::ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2;
                } else {
                   p_o_atts->eff_vref_dq_train_range[l_cur_mba_port][l_cur_mba_dimm][l_cur_mba_rank] = fapi::ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1;
@@ -2044,12 +2041,12 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             p_o_atts->eff_geardown_mode = ENUM_ATTR_EFF_GEARDOWN_MODE_HALF;
             p_o_atts->eff_per_dram_access = ENUM_ATTR_EFF_PER_DRAM_ACCESS_DISABLE;
             p_o_atts->eff_temp_readout = ENUM_ATTR_EFF_TEMP_READOUT_DISABLE; 
-			//Preet   --- ISDIMM based System = 4X Refresh and CDIMMs - Normal as per warren
-			if((p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4))			
-				{ p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
-			else
-				{p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
-			
+            //Preet   --- ISDIMM based System = 4X Refresh and CDIMMs - Normal as per warren
+            if((p_o_atts->eff_custom_dimm == fapi::ENUM_ATTR_EFF_CUSTOM_DIMM_YES) && (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4))            
+                { p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
+            else
+                {p_o_atts->eff_fine_refresh_mode = ENUM_ATTR_EFF_FINE_REFRESH_MODE_NORMAL;}
+            
             p_o_atts->eff_mpr_rd_format = ENUM_ATTR_EFF_MPR_RD_FORMAT_SERIAL;
             p_o_atts->eff_max_powerdown_mode = ENUM_ATTR_EFF_MAX_POWERDOWN_MODE_DISABLE; 
             p_o_atts->eff_temp_ref_range = ENUM_ATTR_EFF_TEMP_REF_RANGE_NORMAL; 
@@ -2066,7 +2063,7 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             p_o_atts->eff_ca_parity = ENUM_ATTR_EFF_CA_PARITY_DISABLE;
             p_o_atts->eff_ca_parity_latency = ENUM_ATTR_EFF_CA_PARITY_LATENCY_DISABLE; 
             p_o_atts->eff_ca_parity_error_status = ENUM_ATTR_EFF_CA_PARITY_ERROR_STATUS_CLEAR; 
-			
+            
             p_o_atts->eff_write_crc = ENUM_ATTR_EFF_WRITE_CRC_DISABLE; 
             p_o_atts->eff_crc_wr_latency = ENUM_ATTR_EFF_CRC_WR_LATENCY_4NCK; 
             p_o_atts->eff_crc_error_clear = ENUM_ATTR_EFF_CRC_ERROR_CLEAR_CLEAR; 
@@ -2099,10 +2096,10 @@ fapi::ReturnCode mss_eff_config_setup_eff_atts(
             }
 
          }
-		 
-		 //Preet TCCD_S
-		 //p_o_atts->eff_dram_tccds = 4;
-		 
+         
+         //Preet TCCD_S
+         //p_o_atts->eff_dram_tccds = 4;
+         
 //------------------------------------------------------------------------------
             p_i_mss_eff_config_data->dram_trp = calc_timing_in_clk
                 (
@@ -2527,8 +2524,8 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
 
     p_o_atts->eff_vpd_version = 0xFFFFFF; // set VPD version to a large number, searching for smallest
     // the VPD version is 2 ASCI characters, so this is always later than that
-	uint8_t die_count = 1;
-	uint8_t ranks_3d_tsv = 0;
+    uint8_t die_count = 1;
+    uint8_t ranks_3d_tsv = 0;
     // Assigning dependent values to attributes
     for (int l_cur_mba_port = 0; l_cur_mba_port <
             PORT_SIZE; l_cur_mba_port += 1)
@@ -2540,54 +2537,54 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
               cur_dimm_spd_valid_u8array[l_cur_mba_port][l_cur_mba_dimm] == MSS_EFF_VALID)
           {
              
-			 //FAPI_INF("Preet - DIE Count = %d",p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]);
+             //FAPI_INF("Preet - DIE Count = %d",p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]);
 
             if ( p_i_data->sdram_device_type[l_cur_mba_port][l_cur_mba_dimm] == 
                  fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_NON_STANDARD) {
-					 //Preet - Added 3TSV Type here 
-					 if (p_i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK )
-					 {
-						p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS;  
-					 }
+                     //Preet - Added 3TSV Type here 
+                     if (p_i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK )
+                     {
+                        p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS;  
+                     }
                else
-						{
-							p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
-						}
+                        {
+                            p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_DDP_QDP;
+                        }
             } 
-			else {
+            else {
                p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_STACK_TYPE_NONE;
             }
-			 
-			if (p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
-			{
-				if (p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE2)
-					{die_count = 2;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE3)
-					{die_count = 3;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE4)
-					{die_count = 4;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE5)
-					{die_count = 5;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE6)
-					{die_count = 6;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE7)
-					{die_count = 7;}
-				else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE8)
-					{die_count = 8;}
-				
-				if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R1)
-				{ranks_3d_tsv = 1*die_count;}
-				else if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R2)
-				{ranks_3d_tsv = 2*die_count;}
-				else if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
-				{ranks_3d_tsv = 4*die_count;}
-			
-				p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = ranks_3d_tsv;
-			
-			}  //end of 3d TSV
-	else      //if Non-3D TSV
+             
+            if (p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+            {
+                if (p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE2)
+                    {die_count = 2;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE3)
+                    {die_count = 3;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE4)
+                    {die_count = 4;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE5)
+                    {die_count = 5;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE6)
+                    {die_count = 6;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE7)
+                    {die_count = 7;}
+                else if(p_i_data->sdram_die_count[l_cur_mba_port][l_cur_mba_dimm]== fapi::ENUM_ATTR_SPD_SDRAM_DIE_COUNT_DIE8)
+                    {die_count = 8;}
+                
+                if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R1)
+                {ranks_3d_tsv = 1*die_count;}
+                else if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R2)
+                {ranks_3d_tsv = 2*die_count;}
+                else if (p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
+                {ranks_3d_tsv = 4*die_count;}
+            
+                p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = ranks_3d_tsv;
+            
+            }  //end of 3d TSV
+    else      //if Non-3D TSV
         {
-			 if (p_i_data->num_ranks[l_cur_mba_port]
+             if (p_i_data->num_ranks[l_cur_mba_port]
                     [l_cur_mba_dimm] == 0x04)                 // for 8R LRDIMM  since no ENUM defined yet for SPD of 8R
 //                    [l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R8)
             {
@@ -2627,19 +2624,29 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                     [l_cur_mba_dimm] = 0x00;
             }
          }
-			//Preet
-			
-			uint8_t& UNSUPPORTED_VAL = p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm];
+            //Preet
+            if((p_i_mss_eff_config_data->mss_freq == 1600)
+               && (p_o_atts->eff_stack_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS))
+            {
+                p_o_atts->eff_dram_trcd = 0x0C;
+                p_o_atts->eff_dram_trp = 0x0B;
+                p_o_atts->eff_dram_tras_u32 = 0x0000001C;
+                p_o_atts->eff_dram_trc_u32 = 0x00000027;
+            }
+            
+            uint8_t& UNSUPPORTED_VAL = p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm];
             // AST HERE: Needed SPD byte33[7,1:0], for expanded IBM_TYPE
             if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
                if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 1) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1A;
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
-               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
-                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D;
-               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) {
+               } else if ((p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
+                          && (p_o_atts->eff_stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_3A;
+               } else if ((p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8)
+                          && (p_o_atts->eff_stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)) {
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_3B;
                } else {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_UNDEFINED;
                   FAPI_ERR("Currently unsupported IBM_TYPE on %s!", i_target_mba.toEcmdString());
@@ -2693,15 +2700,51 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_DIMM_UNSUPPORTED_TYPE); return rc;
             }
 
+            if ( (p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) &&
+                    (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] ==
+                                              fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) &&
+                       (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) )
+            {
+                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
+                        [l_cur_mba_dimm] = 1;
+            }
+        //Preet Add 3 TSV Type here     
+        else if ((p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) && (p_i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK))
+            {
+                //FAPI_INF("Preet +++ - %d num_ranks --- ",p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] );
+                if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R1)
+                {
+                        p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 1;
+                        p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0x80;
+                }
+            else if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R2)
+                {    p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 2;
+                    p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xC0;
+                }
+            else if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
+                {
+                    p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 4;
+                    p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xF0;
+                }
+            }
+            else 
+            {
+                // AST HERE: Needs SPD byte33[7,1:0],
+                //  currently hard coded to no stacking
+                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
+                    [l_cur_mba_dimm] =
+                    p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
+                    [l_cur_mba_dimm];
+            }
             // Support for new attribute ATTR_EFF_DRAM_ADDRESS_MIRRORING 
             if ( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) {
                if (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4) {
                   // Assuming Byte136[7:0] right align based on dimm_spd_attributes.xml
                   // Mask for bit0 of Byte136 = 0x00000001
                   if ((p_i_data->addr_map_reg_to_dram[l_cur_mba_port][l_cur_mba_dimm] & 0x00000001) != 0) {
-                     if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                     if (p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
                         p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x05;
-                     } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
+                     } else if (p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
                         p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x04;
                      } else {
                         p_o_atts->eff_dram_address_mirroring[l_cur_mba_port][l_cur_mba_dimm] = 0x00;
@@ -2797,42 +2840,6 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
             }
 
 
-            if ( (p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM) &&
-                    (p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] ==
-                                              fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR3) &&
-                       (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8) )
-            {
-                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
-                        [l_cur_mba_dimm] = 1;
-            }
-				//Preet Add 3 TSV Type here     
-			else if ((p_i_data->dram_device_type[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4) && (p_i_data->sdram_device_type_signal_loading[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_SDRAM_DEVICE_TYPE_SIGNAL_LOADING_SINGLE_LOAD_STACK))
-			{
-				//FAPI_INF("Preet +++ - %d num_ranks --- ",p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] );
-				if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R1)
-				{
-						p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 1;
-						p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0x80;
-				}
-			else if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R2)
-				{	p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 2;
-					p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xC0;
-				}
-			else if(p_i_data->num_ranks[l_cur_mba_port][l_cur_mba_dimm] == fapi::ENUM_ATTR_SPD_NUM_RANKS_R4)
-				{
-					p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] = 4;
-					p_o_atts->eff_dimm_ranks_configed[l_cur_mba_port][l_cur_mba_dimm] = 0xF0;
-				}
-			}
-			else 
-            {
-                // AST HERE: Needs SPD byte33[7,1:0],
-                //  currently hard coded to no stacking
-                p_o_atts->eff_num_master_ranks_per_dimm[l_cur_mba_port]
-                    [l_cur_mba_dimm] =
-                    p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port]
-                    [l_cur_mba_dimm];
-            }
 
             // Populate RCD_CNTL_WORD for RDIMM, add hardcode to RC0-DA4=0b0 RC9-DBA1-DBA0-DA4-DA3=0b00X0, merge in ATTR_VPD_DIMM_RCD_IBT ATTR_VPD_DIMM_RCD_OUTPUT_TIMING, and adjust in RC10 and RC11 for freq/voltage
             if (( p_o_atts->eff_dimm_type == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM ) && (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] != 0)) {
@@ -2864,7 +2871,7 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                   FAPI_SET_HWP_ERROR(rc, RC_MSS_EFF_CONFIG_INVALID_RDIMM_FREQ); return rc;
                }
                
-	       //1.5V DDR3 or 1.2V DDR4
+           //1.5V DDR3 or 1.2V DDR4
                if ( p_i_mss_eff_config_data->mss_volt >= 1420 || (p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR4 && p_i_mss_eff_config_data->mss_volt >= 1130 && p_i_mss_eff_config_data->mss_volt <= 1270)) {        // 1.5V
                   l_mss_volt_mask = 0x0000000000000000LL;
                } else if ( p_i_mss_eff_config_data->mss_volt >= 1270 && p_o_atts->eff_dram_gen == fapi::ENUM_ATTR_EFF_DRAM_GEN_DDR3) { // 1.35V and DDR3
@@ -3105,18 +3112,18 @@ fapi::ReturnCode mss_eff_config_write_eff_atts(
         if(rc) break;
         // DDR4 only
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TRRD_L, &i_target_mba, 
-			p_i_atts->eff_dram_trrdl);
+            p_i_atts->eff_dram_trrdl);
         if(rc) break;
         // DDR4 only
         rc = FAPI_ATTR_SET(ATTR_TCCD_L, &i_target_mba,
-			p_i_atts->eff_dram_tccdl);
+            p_i_atts->eff_dram_tccdl);
         if(rc) break;
 
         rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TCCD_L, &i_target_mba,
                 p_i_atts->eff_dram_tccdl);
         if(rc) break;
-		
-		//rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TCCD_S, &i_target_mba,
+        
+        //rc = FAPI_ATTR_SET(ATTR_EFF_DRAM_TCCD_S, &i_target_mba,
         //        p_i_atts->eff_dram_tccds);
         //if(rc) break;
 

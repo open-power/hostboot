@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_funcs.C,v 1.47 2016/02/15 18:36:59 sglancy Exp $
-/* File mss_funcs.C created by SLOAT JACOB D. (JAKE),2D3970 on Fri Apr 22 2011. */
-
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2007
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// $Id: mss_funcs.C,v 1.48 2017/09/14 16:37:36 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // *! TITLE : mss_funcs.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -45,6 +39,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.48   | lwmulkey |13-SEP-17| Fix CS state during CCS for TSV enablement -- parity
 //  1.46   | sglancy  |15-FEB-16| Fixed compile issue
 //  1.46   | sglancy  |12-FEB-16| Addresed FW comments
 //  1.45   | rwheeler |18-DEC-15| updated mss_ccs_inst_arry_0 function for 3ds support.
@@ -1083,6 +1078,13 @@ ReturnCode mss_execute_zq_cal(
             FAPI_INF( "+++++++++++++++ Sending zqcal to port: %d rank: %d +++++++++++++++", i_port, current_rank);
             rc_num = rc_num | csn_buffer_8.flushTo1();
             rc_num = rc_num | csn_buffer_8.clearBit(current_rank);
+            if(stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+            {
+                rc_num = rc_num | csn_buffer_8.clearBit(2, 2);
+                rc_num = rc_num | csn_buffer_8.clearBit(6, 2);
+                rc_num = rc_num | cke_buffer_8.clearBit(1);
+                rc_num = rc_num | cke_buffer_8.clearBit(3);
+            }
             if(rc_num)
             {
                 rc.setEcmdError(rc_num);

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,9 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_mrs6_DDR4.C,v 1.11 2016/03/07 22:29:48 lapietra Exp $
+// $Id: mss_mrs6_DDR4.C,v 1.12 2017/09/14 16:36:42 lwmulkey Exp $
 
 
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2007
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 
 
 //------------------------------------------------------------------------------
@@ -38,6 +34,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date: | Comment:
 //---------|----------|--------|-----------------------------------------------
+//  1.12   | 09-13-17 |lwmulkey| Fix CS/CKE State in CCS for tsv parity check
 //  1.11   | 03-07-16 |jneaton | Updated to run on master ranks only
 //  1.10   | 01-14-16 |sglancy | Fixed bug in parity code
 //  1.08   | 01-13-16 |sglancy | Added coverage for DDR4 parity bit
@@ -112,7 +109,9 @@ fapi::ReturnCode add_nop_to_ccs(fapi::Target& i_target_mba, ecmdDataBufferBase &
    fapi::ReturnCode l_rc = fapi::FAPI_RC_SUCCESS;
    fapi::ReturnCode l_rc_buff = fapi::FAPI_RC_SUCCESS;
    uint32_t l_ecmd_rc = 0;
-
+   uint8_t l_dram_stack[2][2];
+   l_rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target_mba, l_dram_stack);
+   if(l_rc) return l_rc;
    //CCS Array 0 buffers
    ecmdDataBufferBase bank_3(3);
    ecmdDataBufferBase ddr4_activate_1(1);
@@ -142,7 +141,14 @@ fapi::ReturnCode add_nop_to_ccs(fapi::Target& i_target_mba, ecmdDataBufferBase &
    l_ecmd_rc |= bank_3.reverse();  //Banks are 0:2
    l_ecmd_rc |= csn_8.flushTo1();
    l_ecmd_rc |= csn_8.clearBit(rank);
-
+   if (l_dram_stack[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+   {
+       FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
+       l_ecmd_rc |= csn_8.clearBit(2, 2);
+       l_ecmd_rc |= csn_8.clearBit(6, 2);
+       l_ecmd_rc |= cke_4.clearBit(1);
+       l_ecmd_rc |= cke_4.clearBit(3);
+   }
    //Command structure setup
    l_ecmd_rc |= cke_4.flushTo1();
    l_ecmd_rc |= rasn_1.setBit(0);
@@ -460,9 +466,10 @@ ReturnCode mss_mr6_loader( fapi::Target& i_target,uint32_t i_port_number,uint32_
                     if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
                     {
                        FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
-                       rc_num = rc_num | csn_8.clearBit(2+4*dimm_number,2);
-                       // I'm leaving this commented out - I need to double check it with Luke Mulkey to see which CS's are wired to which CKE's
-                       // rc_num = rc_num | cke_4.clearBit(1);
+                       rc_num = rc_num | csn_8.clearBit(2,2);
+                       rc_num = rc_num | csn_8.clearBit(6,2);
+                       rc_num = rc_num | cke_4.clearBit(1);
+                       rc_num = rc_num | cke_4.clearBit(3);
                     }
 
                     // Propogate through the 4 MRS cmds

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,11 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_funcs.C,v 1.27 2016/04/04 12:38:01 sglancy Exp $
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2013
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// $Id: mss_ddr4_funcs.C,v 1.30 2017/09/14 18:06:48 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // *! TITLE : mss_ddr4_funcs.C
 // *! DESCRIPTION : Tools for DDR4 DIMMs centaur procedures
@@ -42,7 +38,8 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
-//         |          |         |
+//  1.30   | 09/13/17 | lwmulkey| Compile bug fix
+//  1.29   | 09/13/17 | lwmulkey| Enable 64GB 2R2H -- edit cs_mode + cs state during CCS
 //  1.27   | 04/04/16 | sglancy | Addressed FW coments
 //  1.26   | 03/25/16 | sglancy | Fixed compile
 //  1.25   | 03/24/16 | sglancy | Fixed to use the proper attributes
@@ -171,13 +168,6 @@ ReturnCode mss_ddr4_invert_mpr_write( Target& i_target_mba) {
       rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 400, 0, 16);
 
        FAPI_INF( "Stack Type in mss_ddr4_invert_mpr_write : %d\n", dram_stack[0][0]);
-      if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
-      {
-         FAPI_INF( "=============  Got in the 3DS stack loop =====================\n");
-         rc_num = rc_num | csn_8.clearBit(2,2);
-         rc_num = rc_num | csn_8.clearBit(6,2);
-        // COMMENT IN LATER!!!!!! rc_num = rc_num | cke_4.clearBit(1);
-      }
 
       if(rc_num)
       {
@@ -231,6 +221,12 @@ ReturnCode mss_ddr4_invert_mpr_write( Target& i_target_mba) {
 
                 rc_num = rc_num | csn_8.setBit(0,8);
                 rc_num = rc_num | csn_8.clearBit(rank_number+4*l_dimm);
+                if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+                {
+                    FAPI_INF( "=============  Got in the 3DS stack loop =====================\n");
+                    rc_num = rc_num | csn_8.clearBit(2,2);
+                    rc_num = rc_num | csn_8.clearBit(6,2);
+                }
                 rc_num = rc_num | address_16.clearBit(0, 16);
 
                 // MRS CMD to CMD spacing = 12 cycles
@@ -637,16 +633,20 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
                FAPI_INF("3DS RCD set stack_height: %d",stack_height);
                if(stack_height == 8) {
                   l_rcd_cntl_word_8_9 = 0x00;
+                  l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x00;
                }
                else if(stack_height == 4) {
                   l_rcd_cntl_word_8_9 = 0x10;
+                  l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x04;
                }
                else if(stack_height == 2) {
                   l_rcd_cntl_word_8_9 = 0x20;
+                  l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x06;
                }
                //weird, we shouldn't have 1H stacks
                else {
                   l_rcd_cntl_word_8_9 = 0x30;
+                  l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x07;
                }
             }
          }
@@ -658,6 +658,7 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
          }
          else {
             l_rcd_cntl_word_8_9 = 0x30;
+            l_rcd_cntl_word_Bx[l_port][l_dimm] = 0x07;
          }
 
          // RDIMM Operating Speed Control Word
@@ -693,11 +694,8 @@ ReturnCode mss_create_rcd_ddr4(const Target& i_target_mba) {
 
          // DIMM Configuration Control words
          data_buffer_8.clearBit(0,8);
-         if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4 ) {
-            rc_num |= data_buffer_8.setBit(3); // Direct QuadCS mode
-         }
          if ( l_dimm_type_u8 == fapi::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM  ) {
-            rc_num |= data_buffer_8.setBit(1);
+            rc_num |= data_buffer_8.setBit(1); //Dual CS Mode for all supported RDIMMs
          }
          if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] > 1 ) {
             rc_num |= data_buffer_8.setBit(0); // Address mirroring for MRS commands
@@ -781,14 +779,6 @@ l_rcd_cntl_word_15 );
          // RCAx QxODT[1:0] Read Pattern CW
          l_rcd_cntl_word_Ax[l_port][l_dimm] = 0;
 
-         // RCBx IBT and MRS Snoop CW
-         if ( l_num_ranks_per_dimm_u8array[l_port][l_dimm] == 4 ) {
-            l_rcd_cntl_word_Bx[l_port][l_dimm] = 4;
-         } else {
-            l_rcd_cntl_word_Bx[l_port][l_dimm] = 7;
-         }
-
-
          rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_1x[l_port][l_dimm], 0 , 8);
          rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_2x[l_port][l_dimm], 8 , 8);
          rc_num |= data_buffer_64.insertFromRight(&l_rcd_cntl_word_3x[l_port][l_dimm], 16, 8);
@@ -839,12 +829,11 @@ ReturnCode mss_rcd_load_ddr4(
     uint32_t rc_num = 0;
     uint32_t dimm_number;
     uint32_t rcd_number;
-
+    uint8_t l_dram_stack[2][2];
     ecmdDataBufferBase rcd_cntl_wrd_4(8);
     ecmdDataBufferBase rcd_cntl_wrd_8(8);
     ecmdDataBufferBase rcd_cntl_wrd_64(64);
     uint16_t num_ranks;
-
     ecmdDataBufferBase address_16(16);
     ecmdDataBufferBase bank_3(3);
     ecmdDataBufferBase activate_1(1);
@@ -885,6 +874,8 @@ ReturnCode mss_rcd_load_ddr4(
     rc = FAPI_ATTR_GET(ATTR_EFF_NUM_RANKS_PER_DIMM, &i_target, num_ranks_array);
     if(rc) return rc;
     rc = FAPI_ATTR_GET(ATTR_EFF_DIMM_RCD_CNTL_WORD_0_15, &i_target, rcd_array);
+    if(rc) return rc;
+    rc = FAPI_ATTR_GET(ATTR_EFF_STACK_TYPE, &i_target, l_dram_stack);
     if(rc) return rc;
 
     uint32_t cntlx_offset[]= {1,2,3,7,8,9,10,11};
@@ -967,7 +958,15 @@ ReturnCode mss_rcd_load_ddr4(
 
             // ALL active CS lines at a time.
             rc_num = rc_num | csn_8.setBit(0,8);
-            rc_num = rc_num | csn_8.clearBit(0); //DCS0_n is LOW
+            rc_num = rc_num | csn_8.clearBit(4 * dimm_number); //DCS0_n is LOW for dimm_number = 0  DCS4_n is LOW for dimm_number = 1
+            if (l_dram_stack[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+            {
+                FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
+                rc_num = rc_num | csn_8.clearBit(2, 2);
+                rc_num = rc_num | csn_8.clearBit(6, 2);
+                rc_num = rc_num | cke_4.clearBit(1);
+                rc_num = rc_num | cke_4.clearBit(3);
+            }
 
             // DBG1, DBG0, DBA1, DBA0 = 4`b0111
             rc_num = rc_num | bank_3.setBit(0, 3);
@@ -1300,7 +1299,8 @@ ReturnCode mss_mrs_load_ddr4(
        FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!! =====================\n");
        rc_num = rc_num | csn_8.clearBit(2,2);
        rc_num = rc_num | csn_8.clearBit(6,2);
-       // COMMENT IN LATER!!!! rc_num = rc_num | cke_4.clearBit(1);
+       rc_num = rc_num | cke_4.clearBit(1);
+       rc_num = rc_num | cke_4.clearBit(3);
        if(rc_num) {
           rc.setEcmdError(rc_num);
           return rc;
@@ -2281,8 +2281,8 @@ ReturnCode mss_mrs_load_ddr4(
                     if (dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
                     {
                        FAPI_INF( "=============  Got in the 3DS stack loop CKE !!!!=====================\n");
-                       rc_num = rc_num | csn_8.clearBit(2+4*dimm_number,2);
-                       // COMMENT IN LATER!!!! rc_num = rc_num | cke_4.clearBit(1);
+                       rc_num = rc_num | csn_8.clearBit(2,2);
+                       rc_num = rc_num | csn_8.clearBit(6,2);
 		       if(rc_num) {
 		          rc.setEcmdError(rc_num);
                           return rc;

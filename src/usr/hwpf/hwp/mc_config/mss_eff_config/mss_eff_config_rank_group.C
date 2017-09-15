@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,12 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config_rank_group.C,v 1.14 2016/03/07 15:20:05 lapietra Exp $
-// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/centaur/working/procedures/ipl/fapi/mss_eff_config_rank_group.C,v $
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2011
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// $Id: mss_eff_config_rank_group.C,v 1.15 2017/09/14 16:37:03 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config_rank_group
 // *! DESCRIPTION : see additional comments below
@@ -48,6 +43,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.15  | lwmulkey |13-SEP-17| Fix TSV rank groupings
 //   1.14  | jneaton  |07-MAR-16| Removed secondary-quaternary rank grouping for 2H & 4H TSV dual drop DIMMs
 //   1.13  |          |         | 
 //   1.12  | asaetow  |31-MAR-13| Added FFDC error callout from Andrea's FW RAS review. 
@@ -270,13 +266,13 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 			{
 				//if((num_ranks_per_dimm_u8array[cur_port][0] / l_num_master_ranks[cur_port][0]) != 1)      //Check Stack 
 			//if 2H
-			if(num_ranks_per_dimm_u8array[cur_port][0] == 2)
+			if(l_num_master_ranks[cur_port][0] == 2)
 			{
 				primary_rank_group0_u8array[cur_port] = 0;
-				primary_rank_group1_u8array[cur_port] = INVALID;
+				primary_rank_group1_u8array[cur_port] = 1;
 				primary_rank_group2_u8array[cur_port] = INVALID;
 				primary_rank_group3_u8array[cur_port] = INVALID;
-				secondary_rank_group0_u8array[cur_port] = 1;
+				secondary_rank_group0_u8array[cur_port] = INVALID;
 				secondary_rank_group1_u8array[cur_port] = INVALID;
 				secondary_rank_group2_u8array[cur_port] = INVALID;
 				secondary_rank_group3_u8array[cur_port] = INVALID;
@@ -284,21 +280,21 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 			
 			//if 4H
 			
-			else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
+			else if(l_num_master_ranks[cur_port][0] == 4)
 			{
 				primary_rank_group0_u8array[cur_port] = 0;
-				primary_rank_group1_u8array[cur_port] = INVALID;
-				primary_rank_group2_u8array[cur_port] = INVALID;
-				primary_rank_group3_u8array[cur_port] = INVALID;
-				secondary_rank_group0_u8array[cur_port] = 1;
+				primary_rank_group1_u8array[cur_port] = 1;
+				primary_rank_group2_u8array[cur_port] = 2;
+				primary_rank_group3_u8array[cur_port] = 3;
+				secondary_rank_group0_u8array[cur_port] = INVALID;
 				secondary_rank_group1_u8array[cur_port] = INVALID;
 				secondary_rank_group2_u8array[cur_port] = INVALID;
 				secondary_rank_group3_u8array[cur_port] = INVALID;
-				tertiary_rank_group0_u8array[cur_port] = 2;
+				tertiary_rank_group0_u8array[cur_port] = INVALID;
 				tertiary_rank_group1_u8array[cur_port] = INVALID;
-			    tertiary_rank_group2_u8array[cur_port] = INVALID;
+			        tertiary_rank_group2_u8array[cur_port] = INVALID;
 				tertiary_rank_group3_u8array[cur_port] = INVALID;
-				quanternary_rank_group0_u8array[cur_port] = 3;
+				quanternary_rank_group0_u8array[cur_port] = INVALID;
 				quanternary_rank_group1_u8array[cur_port] = INVALID;
 				quanternary_rank_group2_u8array[cur_port] = INVALID;
 				quanternary_rank_group3_u8array[cur_port] = INVALID;
@@ -347,12 +343,12 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 			{
 				//if((num_ranks_per_dimm_u8array[cur_port][0] / l_num_master_ranks[cur_port][0]) != 1)      //Check Stack 
 			//if 2H
-			if(num_ranks_per_dimm_u8array[cur_port][0] == 2)
+			if(l_num_master_ranks[cur_port][0] == 2)
 			{
 				primary_rank_group0_u8array[cur_port] = 0;
-				primary_rank_group1_u8array[cur_port] = 4;
-				primary_rank_group2_u8array[cur_port] = INVALID;
-				primary_rank_group3_u8array[cur_port] = INVALID;
+				primary_rank_group1_u8array[cur_port] = 1;
+				primary_rank_group2_u8array[cur_port] = 4;
+				primary_rank_group3_u8array[cur_port] = 5;
 				secondary_rank_group0_u8array[cur_port] = INVALID;
 				secondary_rank_group1_u8array[cur_port] = INVALID;
 				secondary_rank_group2_u8array[cur_port] = INVALID;
@@ -361,8 +357,9 @@ fapi::ReturnCode mss_eff_config_rank_group(const fapi::Target i_target_mba) {
 			
 			//if 4H
 			
-			else if(num_ranks_per_dimm_u8array[cur_port][0] == 4)
+			else if(l_num_master_ranks[cur_port][0] == 4)
 			{
+                                FAPI_ERR("Dual Drop 8 Rank no support!");
 				primary_rank_group0_u8array[cur_port] = 0;
 				primary_rank_group1_u8array[cur_port] = 4;
 				primary_rank_group2_u8array[cur_port] = INVALID;

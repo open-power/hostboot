@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,11 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_ddr4_pda.C,v 1.51 2016/02/19 21:14:34 sglancy Exp $
-//------------------------------------------------------------------------------
-// *! (C) Copyright International Business Machines Corp. 2013
-// *! All Rights Reserved -- Property of IBM
-// *! ***  ***
+// $Id: mss_ddr4_pda.C,v 1.52 2017/09/19 19:51:30 lwmulkey Exp $
 //------------------------------------------------------------------------------
 // *! TITLE : mss_ddr4_pda.C
 // *! DESCRIPTION : Tools for DDR4 DIMMs centaur procedures
@@ -42,6 +38,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//  1.52   | 09/19/17 | lwmulkey| Fixed a ccs command causing parity errors on tsv
 //  1.16   | 02/19/16 | sglancy | Fixed B-side MRS inversion bug
 //  1.15   | 02/12/16 | sglancy | Addressed FW comments
 //  1.15   | 02/03/16 | sglancy | Fixed FW compile issues
@@ -525,11 +522,6 @@ ReturnCode mss_ddr4_setup_pda(
        // Raise CKE high with NOPS, waiting min Reset CKE exit time (tXPR) - 400 cycles
        rc_num = rc_num | cke_4.setBit(0,4);
        rc_num = rc_num | csn_8.setBit(0,8);
-       
-       if(dram_stack[0][0] == ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS) {
-          rc_num = rc_num | csn_8.clearBit(2,2); 
-          rc_num = rc_num | csn_8.clearBit(6,2); 
-       }
        rc_num = rc_num | address_16.clearBit(0, 16);
        rc_num = rc_num | odt_4.clearBit(0,4);
        rc_num = rc_num | num_idles_16.insertFromRight((uint32_t) 400, 0, 16);

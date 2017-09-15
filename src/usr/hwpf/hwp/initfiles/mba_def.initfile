@@ -1,8 +1,11 @@
-/#-- $Id: mba_def.initfile,v 1.85 2016/08/04 14:22:25 dcadiga Exp $
+/#-- $Id: mba_def.initfile,v 1.87 2017/09/14 16:43:34 lwmulkey Exp $
 #-- CHANGE HISTORY:
 #--------------------------------------------------------------------------------
 #-- Version:|Author: | Date:  | Comment:
 #-- --------|--------|--------|--------------------------------------------------
+#--     1.87|lwmulkey|09/13/17| Add CID bits to parity check for Type 3a/3b
+#--     1.87|jrneaton|07/11/17| Added def_IS3A_IS3B to correct IBM TYPE 3b 1socket CID mapping
+#--     1.86|jrneaton|05/23/17| Added def_IS3A_IS3B to correct IBM TYPE 3a 1socket CID mapping
 #--     1.85|dcadiga |08/01/16| Removed Al from W2R TIMERS TSV Hardware (13-12-11 DIMMs)
 #--     1.84|dcadiga |05/20/16| Removed Al from W2R TIMERS
 #--     1.83|sglancy |03/10/16| Fixed RCD parity bug
@@ -229,6 +232,7 @@ define def_3b_1socket        = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TY
 define def_3b_2socket        = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 9 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2));
 define def_3b_ddr4_cdimm     = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 9 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((ATTR_EFF_DIMM_TYPE == 2 ) && (ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg
 define def_3b_cdimm          = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 9 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2) && (((ATTR_EFF_DIMM_TYPE == 2 ) && (ATTR_EFF_CUSTOM_DIMM == 1))));     # same as type2B 2 socket DDR4 cfg   ??
+define def_3b_1socket_ddr4   = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 9 )) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 9 ))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 
 define def_3c_1socket_ddr4   = ((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 10)) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 10))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 1));
 define def_3c_2socket_ddr4   = (((((ATTR_CHIP_UNIT_POS == 1 ) && (ATTR_EFF_IBM_TYPE[1][0] == 10)) || ((ATTR_CHIP_UNIT_POS == 0 ) && (ATTR_EFF_IBM_TYPE[0][0] == 10))) && (ATTR_EFF_NUM_DROPS_PER_PORT == 2)) || (def_4c_ddr4_cdimm));
@@ -275,8 +279,9 @@ define def_IS7C                               = ((def_7c_1socket     )||(def_7c_
 define def_C3b                                = ((def_2a_1socket     )||(def_2a_2socket     )||(def_3a_cdimm       )||(def_2b_1socket     )||(def_2b_2socket     )||(def_3b_cdimm));
 define def_C3c                                = ((def_2c_1socket     )||(def_2c_2socket     )||(def_3c_cdimm));
 define def_C3c_C4C_ddr4                       = ((def_2b_1socket_ddr4)||(def_2b_2socket_ddr4)||(def_3b_ddr4_cdimm  )||(def_2c_1socket_ddr4)||(def_2c_2socket_ddr4)||(def_3c_ddr4_cdimm  )||(def_3c_1socket_ddr4)||(def_3c_2socket_ddr4)||(def_4c_ddr4_cdimm  )||(def_7b_1socket_ddr4)||(def_7b_2socket_ddr4)||(def_7c_1socket_ddr4)||(def_7c_2socket_ddr4));
-define def_C4A_ddr4                           = ((def_2a_1socket_ddr4)||(def_2a_2socket_ddr4)||(def_3a_ddr4_cdimm  )||(def_7a_1socket_ddr4)||(def_7a_2socket_ddr4)||(def_3a_1socket_ddr4)||(def_3a_2socket_ddr4)||(def_4a_ddr4_cdimm));
+define def_C4A_ddr4                           = ((def_2a_1socket_ddr4)||(def_2a_2socket_ddr4)||(def_3a_ddr4_cdimm  )||(def_7a_1socket_ddr4)||(def_7a_2socket_ddr4)||(def_3a_2socket_ddr4)||(def_4a_ddr4_cdimm));
 define def_IS5D                               = ((def_5d_1socket     )||(def_5d_2socket));
+define def_IS3A_IS3B                          = ((def_3b_1socket     )||(def_3b_2socket     )||(def_3a_1socket     )||(def_3a_2socket     ));
 
 # ODT Mappings
 define  def_odt_mapping_1a           = (def_1a_1socket);
@@ -1559,6 +1564,7 @@ scom 0x03010414     {
     bits    ,   scom_data   ,       ATTR_FUNCTIONAL,    expr;
     0:5     ,   0b010000,             1            ,      (def_ddr4_1600_13_12_11                 == 1);          # cfg_M0S1_cs
     0:5     ,   0b010000,             1            ,      (def_ddr4_1600_13_12_11_2N              == 1);          # cfg_M0S1_cs
+    0:5     ,   0b010000,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S0_cs
     0:5     ,   0b011100,             1            ,      (def_C3b                                == 1);          # cfg_M0S0_cs
     0:5     ,   0b011100,             1            ,      (def_C3c                                == 1);          # cfg_M0S0_cs
     0:5     ,   0b010000,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S0_cs
@@ -1570,6 +1576,7 @@ scom 0x03010414     {
     0:5     ,   0b011100,             1            ,      (def_IS7a_C4a_C3a                       == 1);          # cfg_M0S0_cs
     6:11    ,   0b011000,             1            ,      (def_ddr4_1600_13_12_11                 == 1);          # cfg_M0S1_cs
     6:11    ,   0b011000,             1            ,      (def_ddr4_1600_13_12_11_2N              == 1);          # cfg_M0S1_cs
+    6:11    ,   0b011000,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S1_cs
     6:11    ,   0b101100,             1            ,      (def_C3b                                == 1);          # cfg_M0S1_cs
     6:11    ,   0b101100,             1            ,      (def_C3c                                == 1);          # cfg_M0S1_cs
     6:11    ,   0b011000,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S1_cs
@@ -1584,6 +1591,7 @@ scom 0x03010414     {
     12:17   ,   0b110100,             1            ,      (def_C3b                                == 1);          # cfg_M0S2_cs
     12:17   ,   0b110100,             1            ,      (def_C3c                                == 1);          # cfg_M0S2_cs
     12:17   ,   0b010100,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S2_cs
+    12:17   ,   0b010100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S2_cs
     12:17   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S2_cs
     12:17   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S2_cs
     12:17   ,   0b010100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S2_cs
@@ -1595,6 +1603,7 @@ scom 0x03010414     {
     18:23   ,   0b111000,             1            ,      (def_C3b                                == 1);          # cfg_M0S3_cs
     18:23   ,   0b111000,             1            ,      (def_C3c                                == 1);          # cfg_M0S3_cs
     18:23   ,   0b011100,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S3_cs
+    18:23   ,   0b011100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S3_cs
     18:23   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S3_cs
     18:23   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S3_cs
     18:23   ,   0b011100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S3_cs
@@ -1604,6 +1613,7 @@ scom 0x03010414     {
     24:29   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M0S4_cs
     24:29   ,   0b011110,             1            ,      (def_C3c                                == 1);          # cfg_M0S4_cs
     24:29   ,   0b010001,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S4_cs
+    24:29   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S4_cs
     24:29   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S4_cs
     24:29   ,   0b110100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S4_cs
     24:29   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S4_cs
@@ -1613,6 +1623,7 @@ scom 0x03010414     {
     30:35   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M0S5_cs
     30:35   ,   0b101110,             1            ,      (def_C3c                                == 1);          # cfg_M0S5_cs
     30:35   ,   0b011001,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S5_cs
+    30:35   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S5_cs
     30:35   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S5_cs
     30:35   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S5_cs
     30:35   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S5_cs
@@ -1622,6 +1633,7 @@ scom 0x03010414     {
     36:41   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M0S6_cs
     36:41   ,   0b110110,             1            ,      (def_C3c                                == 1);          # cfg_M0S6_cs
     36:41   ,   0b010101,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S6_cs
+    36:41   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S6_cs
     36:41   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S6_cs
     36:41   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S6_cs
     36:41   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S6_cs
@@ -1631,6 +1643,7 @@ scom 0x03010414     {
     42:47   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M0S7_cs
     42:47   ,   0b111010,             1            ,      (def_C3c                                == 1);          # cfg_M0S7_cs
     42:47   ,   0b011101,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M0S7_cs
+    42:47   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M0S7_cs
     42:47   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M0S7_cs
     42:47   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M0S7_cs
     42:47   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M0S7_cs
@@ -1640,6 +1653,7 @@ scom 0x03010414     {
     48:51   ,   0b1111,               1            ,      (def_C3b                                == 1);          # cfg_cs_s0_mask
     48:51   ,   0b1111,               1            ,      (def_C3c                                == 1);          # cfg_cs_s0_mask
     48:51   ,   0b1100,               1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_cs_s0_mask
+    48:51   ,   0b1101,               1            ,      (def_IS3A_IS3B                            == 1);          # cfg_cs_s0_mask
     48:51   ,   0b1101,               1            ,      (def_C4A_ddr4                           == 1);          # cfg_cs_s0_mask
     48:51   ,   0b1111,               1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_cs_s0_mask
     48:51   ,   0b1100,               1            ,      (def_IS3b_IS7b                          == 1);          # cfg_cs_s0_mask
@@ -1649,12 +1663,14 @@ scom 0x03010414     {
     52      ,   0b0   ,               1            ,      (def_C3b                                == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_C3c                                == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_C3c_C4C_ddr4                       == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
+    52      ,   0b0   ,               1            ,      (def_IS3A_IS3B                            == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_C4A_ddr4                           == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_IS3b_IS7b                          == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b1   ,               1            ,      (def_IS5D                               == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_IS7C                               == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
     52      ,   0b0   ,               1            ,      (def_IS7a_C4a_C3a                       == 1);          # MBA_FARB1Q_CFG_S0_DIS_SMDR
+    53      ,   0b0   ,               1            ,      (def_IS3A_IS3B                            == 1);        # Include CID bits in parity calc
 }
 
 
@@ -1665,6 +1681,7 @@ scom 0x03010415     {
     0:5     ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S0_cs
     0:5     ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S0_cs
     0:5     ,   0b100000,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S0_cs
+    0:5     ,   0b100000,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S0_cs
     0:5     ,   0b100100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S0_cs
     0:5     ,   0b101100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S0_cs
     0:5     ,   0b100000,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S0_cs
@@ -1674,6 +1691,7 @@ scom 0x03010415     {
     6:11    ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S1_cs
     6:11    ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S1_cs
     6:11    ,   0b101000,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S1_cs
+    6:11    ,   0b101000,             1            ,      (def_IS3A_IS3B                             == 1);          # cfg_M1S1_cs
     6:11    ,   0b101100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S1_cs
     6:11    ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S1_cs
     6:11    ,   0b101000,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S1_cs
@@ -1683,6 +1701,7 @@ scom 0x03010415     {
     12:17   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S2_cs
     12:17   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S2_cs
     12:17   ,   0b100100,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S2_cs
+    12:17   ,   0b100100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S2_cs
     12:17   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S2_cs
     12:17   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S2_cs
     12:17   ,   0b100100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S2_cs
@@ -1692,6 +1711,7 @@ scom 0x03010415     {
     18:23   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S3_cs
     18:23   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S3_cs
     18:23   ,   0b101100,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S3_cs
+    18:23   ,   0b101100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S3_cs
     18:23   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S3_cs
     18:23   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S3_cs
     18:23   ,   0b101100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S3_cs
@@ -1701,6 +1721,7 @@ scom 0x03010415     {
     24:29   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S4_cs
     24:29   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S4_cs
     24:29   ,   0b100001,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S4_cs
+    24:29   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S4_cs
     24:29   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S4_cs
     24:29   ,   0b111000,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S4_cs
     24:29   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S4_cs
@@ -1710,6 +1731,7 @@ scom 0x03010415     {
     30:35   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S5_cs
     30:35   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S5_cs
     30:35   ,   0b101001,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S5_cs
+    30:35   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S5_cs
     30:35   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S5_cs
     30:35   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S5_cs
     30:35   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S5_cs
@@ -1719,6 +1741,7 @@ scom 0x03010415     {
     36:41   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S6_cs
     36:41   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S6_cs
     36:41   ,   0b100101,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S6_cs
+    36:41   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S6_cs
     36:41   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S6_cs
     36:41   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S6_cs
     36:41   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S6_cs
@@ -1728,6 +1751,7 @@ scom 0x03010415     {
     42:47   ,   0b111100,             1            ,      (def_C3b                                == 1);          # cfg_M1S7_cs
     42:47   ,   0b111100,             1            ,      (def_C3c                                == 1);          # cfg_M1S7_cs
     42:47   ,   0b101101,             1            ,      (def_C3c_C4C_ddr4                       == 1);          # cfg_M1S7_cs
+    42:47   ,   0b111100,             1            ,      (def_IS3A_IS3B                            == 1);          # cfg_M1S7_cs
     42:47   ,   0b111100,             1            ,      (def_C4A_ddr4                           == 1);          # cfg_M1S7_cs
     42:47   ,   0b111100,             1            ,      (def_IS1A_IS1B_IS1D_C1A_C1B_C1C_C1D_C5C == 1);          # cfg_M1S7_cs
     42:47   ,   0b111100,             1            ,      (def_IS3b_IS7b                          == 1);          # cfg_M1S7_cs
