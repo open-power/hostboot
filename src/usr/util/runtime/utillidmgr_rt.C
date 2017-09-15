@@ -327,6 +327,14 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 
 bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
 {
+    // @TODO CQ:SW400352 Remove this when fsp adds in PNOR support
+    // hostboot could not verify it from pnor, so it is not in hb resv meomory
+    if (iv_spBaseServicesEnabled &&
+        (i_lidId == Util::OCC_LIDID || i_lidId == Util::OCC_CONTAINER_LIDID))
+    {
+        return false;
+    }
+
     return i_lidId == Util::OCC_LIDID ||
            i_lidId == Util::OCC_CONTAINER_LIDID ||
            i_lidId == Util::WOF_LIDID ||

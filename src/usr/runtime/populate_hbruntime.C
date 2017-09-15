@@ -1178,11 +1178,15 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         //   -- HCODE
         // -- Non-verified Images
         ///  -- RINGOVD
-        l_elog = hbResvLoadSecureSection(PNOR::OCC, i_nodeId,
-                                         l_prevDataAddr, l_prevDataSize);
-        if (l_elog)
+        // @TODO CQ:SW400352 add OCC PNOR support for fsp back
+        if (!INITSERVICE::spBaseServicesEnabled())
         {
-            break;
+            l_elog = hbResvLoadSecureSection(PNOR::OCC, i_nodeId,
+                                             l_prevDataAddr, l_prevDataSize);
+            if (l_elog)
+            {
+                break;
+            }
         }
         l_elog = hbResvLoadSecureSection(PNOR::WOFDATA, i_nodeId,
                                          l_prevDataAddr, l_prevDataSize);
