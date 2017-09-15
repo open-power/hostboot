@@ -52,65 +52,25 @@ extern "C"
     /// @note sets ATTR_MSS_MEM_WATT_TARGET, ATTR_MSS_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT and _PER_SLOT, and ATTR_MSS_PORT_MAXPOWER
     fapi2::ReturnCode p9_mss_eff_config_thermal( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets )
     {
-
         FAPI_INF("Start effective config thermal");
+        fapi2::ReturnCode l_rc;
+
+        std::vector< uint64_t > l_slope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_intercept (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
+        std::vector< uint64_t > l_thermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR, 0);
 
         uint16_t l_vddr_slope     [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint16_t l_vddr_int       [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint16_t l_total_slope    [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint16_t l_total_int      [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
         uint32_t l_thermal_power  [mss::PORTS_PER_MCS][mss::MAX_DIMM_PER_PORT] = {};
-        fapi2::ReturnCode l_rc;
 
-        //Gotta convert into fapi2::buffers. Not very elegant
-        //Do it here or in the encode and decode functions
-        //Not that pretty :(
-        std::vector< uint64_t > l_tslope (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_tintercept (mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS, 0);
-        std::vector< uint64_t > l_tthermal_power_limit (mss::power_thermal::SIZE_OF_THERMAL_ATTR, 0);
+        FAPI_TRY( mss::mrw_pwr_slope (l_slope.data()), "Error in p9_mss_eff_config_thermal");
+        FAPI_TRY( mss::mrw_pwr_intercept (l_intercept.data()), "Error in p9_mss_eff_config_thermal" );
+        FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_thermal_power_limit.data()), "Error in p9_mss_eff_config_thermal" );
+        FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit (i_targets), "Error in p9_mss_eff_config_thermal");
 
-        std::vector<fapi2::buffer< uint64_t>> l_slope = {};
-        std::vector<fapi2::buffer< uint64_t>> l_intercept = {};
-        std::vector<fapi2::buffer< uint64_t>> l_thermal_power_limit = {};
-
-        //Get the vectors of power curves and thermal power limits to convert to buffers
-        FAPI_TRY( mss::mrw_pwr_slope (l_tslope.data()), "Error in p9_mss_eff_config_thermal");
-        FAPI_TRY( mss::mrw_pwr_intercept (l_tintercept.data()), "Error in p9_mss_eff_config_thermal" );
-        FAPI_TRY( mss::mrw_thermal_memory_power_limit (l_tthermal_power_limit.data()), "Error in p9_mss_eff_config_thermal" );
-        FAPI_TRY( mss::power_thermal::set_runtime_m_and_watt_limit(i_targets), "Error in p9_mss_eff_config_thermal");
-
-        for (size_t i = 0; i < mss::power_thermal::SIZE_OF_POWER_CURVES_ATTRS; ++i)
-        {
-            for (const auto l_cur : l_tslope)
-            {
-                fapi2::buffer<uint64_t> l_slope_buf = l_cur;
-
-                if (l_slope_buf != 0)
-                {
-                    l_slope.push_back(l_slope_buf);
-                }
-            }
-
-            for (auto l_cur : l_tintercept)
-            {
-                fapi2::buffer<uint64_t> l_intercept_buf = l_cur;
-
-                if (l_intercept_buf != 0)
-                {
-                    l_intercept.push_back(l_intercept_buf);
-                }
-            }
-
-            for (auto l_cur : l_tthermal_power_limit)
-            {
-                fapi2::buffer<uint64_t> l_tthermal_buf = l_cur;
-
-                if (l_tthermal_buf != 0)
-                {
-                    l_thermal_power_limit.push_back(l_tthermal_buf);
-                }
-            }
-        }
+        FAPI_INF("Size of vectors are %d %d %d", l_slope.size(), l_intercept.size(), l_thermal_power_limit.size());
 
         //Restore runtime_throttles from safemode setting
         //Decode and set power curve attributes at the same time
@@ -119,6 +79,7 @@ extern "C"
             //Not doing any work if there are no dimms installed
             if (mss::count_dimm(l_mcs) == 0)
             {
+                FAPI_INF("Skipping eff_config thermal because no dimms %s", mss::c_str(l_mcs));
                 continue;
             }
 
@@ -131,6 +92,7 @@ extern "C"
                       l_total_slope,
                       l_total_int,
                       l_thermal_power));
+
             //Sets throttles to max_databus_util value
             FAPI_INF("Restoring throttles");
             FAPI_TRY( mss::power_thermal::restore_runtime_throttles(l_mcs), "Error in p9_mss_eff_config_thermal");
@@ -168,6 +130,14 @@ extern "C"
             {
                 continue;
             }
+
+
+            //Zero out the arrays
+            memset(l_vddr_slope, 0, sizeof(l_vddr_slope));
+            memset(l_vddr_int, 0, sizeof(l_vddr_int));
+            memset(l_total_slope, 0, sizeof(l_total_slope));
+            memset(l_total_int, 0, sizeof(l_total_int));
+            memset(l_thermal_power, 0, sizeof(l_thermal_power));
 
             FAPI_TRY( mss::power_thermal::get_power_attrs(l_mcs,
                       l_slope,
