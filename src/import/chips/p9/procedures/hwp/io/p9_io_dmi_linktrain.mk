@@ -23,6 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_dmi_linktrain
-OBJS+=p9_io_common.o
-OBJS+=p9_io_dmi_clear_firs.o
+lib$(PROCEDURE)_DEPLIBS+=p9_io_common
+lib$(PROCEDURE)_DEPLIBS+=p9_io_dmi_clear_firs
 $(call BUILD_PROCEDURE)

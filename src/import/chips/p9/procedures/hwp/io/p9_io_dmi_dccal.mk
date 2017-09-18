@@ -23,5 +23,5 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_io_dmi_dccal
-OBJS+=p9_io_common.o
+lib$(PROCEDURE)_DEPLIBS+=p9_io_common
 $(call BUILD_PROCEDURE)
