@@ -220,7 +220,7 @@ extern "C"
                         {
                             l_scom.set_chiplet_id(MC01_CHIPLET_ID + (i_chipUnitNum / 4));
                             uint8_t l_sat_offset = l_scom.get_sat_offset();
-                            l_sat_offset = (l_sat_offset & 0xF) + ((i_chipUnitNum % 2) << 4);
+                            l_sat_offset = (l_sat_offset & 0xF) + ((i_chipUnitNum % 4) << 4);
                             l_scom.set_sat_offset(l_sat_offset);
                         }
 
