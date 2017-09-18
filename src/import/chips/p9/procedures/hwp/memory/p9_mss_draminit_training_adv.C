@@ -59,7 +59,6 @@ extern "C"
     fapi2::ReturnCode p9_mss_draminit_training_adv( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
             const uint8_t i_abort_on_error)
     {
-        std::vector<fapi2::ReturnCode> l_fails;
         uint8_t l_cal_abort_on_error = i_abort_on_error;
         uint8_t l_sim = 0;
         FAPI_TRY( mss::is_simulation (l_sim) );
@@ -134,17 +133,19 @@ extern "C"
             {
                 bool l_cal_fail = false;
 
-                // l_fails is used to see if we need to rerun training.
-                // The other vector, l_fails, will be used to store errors across all of the ports
-                std::vector<fapi2::ReturnCode> l_temp_fails;
+                // Save off registers in case adv training fails
+                mss::dp16::rd_ctr_settings<TARGET_TYPE_MCA> l_original_settings(p, rp);
+                FAPI_TRY( l_original_settings.save() );
 
+                std::vector<fapi2::ReturnCode> l_fails_on_rp;
                 FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
-                FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_temp_fails) );
+                FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails_on_rp) );
 
                 // If we got a fail, let's ignore the previous fails and run backup pattern
-                if (l_temp_fails.size() != 0)
+                if (l_fails_on_rp.size() != 0)
                 {
                     l_cal_fail = false;
+                    l_fails_on_rp.clear();
 
                     // Clear the disable bits from last run.
                     // This function restores bad_bits to how the attribute has them
@@ -164,27 +165,16 @@ extern "C"
 
                     // Rerun the training for this rp
                     FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
-                    FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails) );
+                    FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails_on_rp) );
 
-                    // Fail out for now.
-                    // TK should restore values here
-                    if (l_fails.size() != 0)
+                    // If we got fails from the backup pattern, restore the pre-adv training settings for this rank pair
+                    if (l_fails_on_rp.size() != 0)
                     {
-                        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+                        l_fails_on_rp.clear();
+                        FAPI_INF("%s rp%d draminit_training_adv failed. Restoring original settings", mss::c_str(p), rp);
 
-                        // Let's get the DIMM since we train per rank pair (primary rank pair)
-                        FAPI_TRY( mss::rank_pair_primary_to_dimm(p,
-                                  rp,
-                                  l_dimm),
-                                  "Failed getting the DIMM for %s rp %x", mss::c_str(p), rp);
-
-                        FAPI_ASSERT( l_cal_fail == false,
-                                     fapi2::MSS_DRAMINIT_TRAINING_CUSTOM_PATTERN_RD_ERROR()
-                                     .set_PORT_POSITION(mss::index(p))
-                                     .set_RANKGROUP_POSITION(rp)
-                                     .set_MCA_TARGET(p)
-                                     .set_DIMM_TARGET(l_dimm),
-                                     "%s rp%x Failed Draminit_training_adv", mss::c_str(p), rp);
+                        // Restore pre-training_adv settings
+                        FAPI_TRY( l_original_settings.restore() );
                     }
                 }
             }// rank pairs
@@ -192,13 +182,6 @@ extern "C"
             // Resetting current_err.
             // The error has either already been "logged" or we have exited and returned the error up the call stack.
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        // If we fail draminit_training_adv, we should exit out the ipl / reconfigure
-        // Shouldn't really get here but let's do it anyways
-        if (l_fails.size() != 0)
-        {
-            FAPI_TRY(l_fails[0]);
         }
 
         return fapi2::FAPI2_RC_SUCCESS;
