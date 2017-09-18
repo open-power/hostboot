@@ -236,18 +236,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PSTATE_PB_WOF_TABLE_ACCESS_FAIL</rc>
-    <description>Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute access failed
-    </description>
-    <ffdc>CHIP_TARGET</ffdc>
-    <ffdc>FAPI_RC</ffdc>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>HIGH</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
     <rc>RC_PSTATE_PB_IQ_VPD_ERROR</rc>
     <description>#IQ data payload header is invalid</description>
     <ffdc>CHIP_TARGET</ffdc>

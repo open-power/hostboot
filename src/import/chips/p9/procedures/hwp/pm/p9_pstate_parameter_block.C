@@ -892,12 +892,12 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
                                  (*l_wof_table_data));
             if (l_rc)
             {
+
+                FAPI_INF("Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute failed.  Disabling WOF");
                 o_state->iv_wof_enabled = false;
-                FAPI_ASSERT_NOEXIT(false,
-                                   fapi2::PSTATE_PB_WOF_TABLE_ACCESS_FAIL(fapi2::FAPI2_ERRL_SEV_RECOVERED)
-                                   .set_CHIP_TARGET(FAPI_SYSTEM)
-                                   .set_FAPI_RC(l_rc),
-                                   "Pstate Parameter Block ATTR_WOF_TABLE_DATA attribute failed");
+
+                // Write the returned error content to the error log
+                fapi2::logError(l_rc,fapi2::FAPI2_ERRL_SEV_RECOVERED);
                 break;
             }
         }
@@ -3287,7 +3287,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                     is_vdm_enabled(o_state), is_wof_enabled(o_state));
 
         // Exit if both VDM and WOF is disabled
-        if ((!is_vdm_enabled(o_state) && !is_wof_enabled(o_state)) && 
+        if ((!is_vdm_enabled(o_state) && !is_wof_enabled(o_state)) &&
             !i_skip_check)
         {
             FAPI_INF("   proc_get_mvpd_poundw: BOTH VDM and WOF are disabled.  Skipping remaining checks");
@@ -4293,13 +4293,13 @@ uint32_t large_jump_interpolate (const Pstate i_pstate,const uint32_t i_attr_mvp
                                                   operating_points[POWERSAVE].pstate,
                                                   operating_points[NOMINAL].pstate);
 
-    uint32_t l_vdm_jump_value = (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value * 
+    uint32_t l_vdm_jump_value = (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value *
                                 (i_ps_pstate - i_pstate)) >> THRESH_SLOPE_FP_SHIFT));
    return l_vdm_jump_value;
 }
 
 //pstate2voltage
-uint32_t pstate2voltage(const Pstate i_pstate, 
+uint32_t pstate2voltage(const Pstate i_pstate,
                         const uint32_t i_attr_mvpd_data[PV_D][PV_W],
                         const uint32_t i_step_frequency)
 {
@@ -4319,7 +4319,7 @@ uint32_t pstate2voltage(const Pstate i_pstate,
     FAPI_INF ("l_SlopeValue %x",l_SlopeValue);
 
 
-    uint32_t l_vdd = (( (l_SlopeValue * (-i_pstate + operating_points[POWERSAVE].pstate)) >> 
+    uint32_t l_vdd = (( (l_SlopeValue * (-i_pstate + operating_points[POWERSAVE].pstate)) >>
                       VID_SLOPE_FP_SHIFT_12) + revle32(operating_points[POWERSAVE].vdd_mv));
 
     FAPI_INF ("l_vdd %x",l_vdd);
