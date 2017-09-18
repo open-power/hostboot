@@ -112,3 +112,17 @@ const uint32_t OBUS_PLL_FREQ_LIST_P9A_10[OBUS_PLL_FREQ_BUCKETS] =
     1250,
     1611
 };
+
+const uint32_t OBUS_PLL_FREQ_LIST_P9C_11[OBUS_PLL_FREQ_BUCKETS] =
+{
+    1611,
+    1250,
+    1611
+};
+
+const uint32_t OBUS_PLL_FREQ_LIST_P9A_11[OBUS_PLL_FREQ_BUCKETS] =
+{
+    1611,
+    1250,
+    1611
+};
