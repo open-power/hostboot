@@ -564,11 +564,11 @@
     then we can get rid of these poundv attributes for this EQ-->
     <attribute>
         <id>POUNDV_BUCKET_NUM</id>
-        <default>2</default>
+        <default>0</default>
     </attribute>
     <attribute>
         <id>POUNDV_BUCKET_NUM_OVERRIDE</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
 </targetInstance>
 

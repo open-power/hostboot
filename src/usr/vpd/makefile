@@ -48,7 +48,7 @@ BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 # Copied from /afs/btv.ibm.com/u/sgrom/public/vpd_images/p9_dd10/module-p9-dd10-simics_v15_rs4v2.bin
 #   on 1/3/2017
 # Modified PG record to have proper XBUS data and only the first 4 cores
-BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:ca32d9418a7ff3781a2989b230c2f915e20d47af
+BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
 BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:423208204c2f0e759610f4f39243362fd4b6d103
 
 

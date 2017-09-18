@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,23 +91,38 @@ class Fapi2ChipEcTest : public CxxTest::TestSuite
                                                               l_chipList[0]);
 
         ATTR_CHIP_EC_FEATURE_TEST2_Type l_valChipEcTest2 = 0;
-       
+
         FAPI_TRY(FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_TEST2,
                                l_fapi2_procTarget, l_valChipEcTest2));
-        // Returns if a chip contains the TEST2 feature. True if:
-        //  Nimbus EC less than 2.0
-        if(l_valChipEcTest2)
-        {
-            FAPI_INF("Pass: This proc is Nimbus and less then DD2.0");
-        }
-        else if(TARGETING::MODEL_NIMBUS !=
+
+        // Tests if a chip contains the TEST2 feature.
+        // True if: Nimbus EC less than 2.0
+        if(TARGETING::MODEL_NIMBUS !=
                 l_chipList[0]->getAttr<TARGETING::ATTR_MODEL>())
         {
             FAPI_INF("Pass: This proc is not Nimbus so does not have TEST2 feature");
         }
+        else if(l_valChipEcTest2)
+        {
+            if(l_chipList[0]->getAttr<TARGETING::ATTR_EC>() < 0x20)
+            {
+                FAPI_INF("Pass: This Nimbus proc has TEST2 enabled and < DD2.0");
+            }
+            else
+            {
+                TS_FAIL("Fail: This Nimbus proc has TEST2 enabled but >= DD2.0");
+            }
+        }
         else
         {
-            TS_FAIL("Fail: this proc is a nimbus but has DD 2.0 or greater");
+            if(l_chipList[0]->getAttr<TARGETING::ATTR_EC>() >= 0x20)
+            {
+                FAPI_INF("Pass: This Nimbus proc has TEST2 disabled and >= DD2.0");
+            }
+            else
+            {
+                TS_FAIL("Fail: This Nimbus proc has TEST2 disabled but < DD 2.0");
+            }
         }
 
         fapi_try_exit:
