@@ -262,6 +262,29 @@ namespace SBEIO
      */
     errlHndl_t handleVitalAttn( TARGETING::Target* i_procTarg );
 
+    /**
+    * @brief Request the SBE to do a specific chip op
+    *
+    * @param[in] i_target       The target of which the HWP is intended to be called on,
+    *                           this must be the first param of the request HWP
+    *
+    * @param[in] i_dataPointer  Pointer to a blob of data that contains additional parameters
+    *                           for the requests HWP
+    *
+    * @param[in] i_dataSize     Size of blob of data that contains additional parameters
+    *                           for the requests HWP
+    *
+    * @param[in] i_hwpStringLen size of the hwp name string at beginning of data pointer
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendSecureHwpRequest(TARGETING::Target * i_target,
+                                    uint8_t * i_dataPointer,
+                                    uint64_t i_dataSize,
+                                    uint64_t i_hwpStringLen);
+
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

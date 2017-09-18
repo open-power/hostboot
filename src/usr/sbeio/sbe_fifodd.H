@@ -78,6 +78,7 @@ class SbeFifo
             SBE_FIFO_CLASS_INSTRUCTION_CONTROL = 0xA7,
             SBE_FIFO_CLASS_GENERIC_MESSAGE     = 0xA8,
             SBE_FIFO_CLASS_MPIPL_COMMANDS      = 0xA9,
+            SBE_FIFO_CLASS_SECURE_HWP          = 0xAA,
         };
 
         /**
@@ -100,6 +101,16 @@ class SbeFifo
         };
 
         /**
+        * @brief enums for FIFO SECURE HWP Messages
+        */
+        enum fifoSecureHwpMessage
+        {
+            //Replace this when we add real hwp support
+            SBE_FIFO_CMD_PLACEHOLDER_HWP     = 0x00,
+            SBE_FIFO_CMD_UNSUPPORTED_HWP     = 0xFF,
+        };
+
+        /**
         * @brief enums for FIFO MPIPL Messages
         */
         enum fifoMpiplMessage
@@ -108,6 +119,51 @@ class SbeFifo
             SBE_FIFO_CMD_CONTINUE_MPIPL      = 0x02,
             SBE_FIFO_CMD_STOP_CLOCKS         = 0x03,
         };
+
+        /**
+        * @brief enums used by secureHwp requests
+        */
+        enum secureHwpDefines
+        {
+            REQUEST_SIZE_WITHOUT_DATA = 19,
+            BYTES_PER_WORD   = 4,
+        };
+
+        /**
+        * @brief Struct for FIFO Secure Hwp request
+        *
+        */
+        struct fifoSecureHwpRequest
+        {
+            uint32_t wordCnt;
+            uint16_t reserved;
+            uint8_t  commandClass;
+            uint8_t  command;
+            uint16_t targetType;
+            uint8_t  chipletId;
+            uint8_t * dataPtr;
+            fifoSecureHwpRequest(uint64_t i_dataSizeBytes,
+                                 uint64_t i_hwpStringLen,
+                                 uint8_t * i_dataPtr) :
+            reserved(0), commandClass(SBE_FIFO_CLASS_SECURE_HWP), command(0), targetType(0), chipletId(0)
+            {
+                //Determine if we need to round up to next word
+                uint8_t needsRound = (REQUEST_SIZE_WITHOUT_DATA + i_dataSizeBytes) % BYTES_PER_WORD;
+                wordCnt = ( (REQUEST_SIZE_WITHOUT_DATA + i_dataSizeBytes) / BYTES_PER_WORD);
+                if(needsRound)
+                {
+                    wordCnt++;
+                }
+                dataPtr = reinterpret_cast<uint8_t *>(malloc(i_dataSizeBytes));
+                memcpy(dataPtr, i_dataPtr + i_hwpStringLen, i_dataSizeBytes);
+            }
+            ~fifoSecureHwpRequest(){ free(dataPtr);};
+
+            private:
+                fifoSecureHwpRequest(){};
+                fifoSecureHwpRequest(const fifoSecureHwpRequest&);
+                fifoSecureHwpRequest& operator=(const fifoSecureHwpRequest&);
+        } PACKED;
 
         /**
         * @brief Struct for FIFO Continue MPIPL request
@@ -237,6 +293,27 @@ class SbeFifo
             uint8_t   commandClass;
             uint8_t   command;
             uint32_t  returnCode;
+        } PACKED;
+
+        /**
+        * @brief Struct for a standardFIFO response
+        *
+        * The actual number of returned words varies based on whether there was
+        * an error.
+        */
+        struct fifoStandardResponse
+        {
+            statusHeader status;
+            struct       fapi2::ffdc_struct ffdc;  // ffdc data
+            uint32_t     status_distance; // distance to status
+            fifoStandardResponse() {}  // do nothing
+            ~fifoStandardResponse() {} // do nothing
+
+            private:
+                //Make copy ctor and assignment operator private to
+                //avoid misuse
+                fifoStandardResponse(const fifoStandardResponse&);
+                fifoStandardResponse& operator=(const fifoStandardResponse&);
         } PACKED;
 
         /**
