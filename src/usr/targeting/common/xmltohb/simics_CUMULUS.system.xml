@@ -140,10 +140,6 @@
         <id>CLASS</id>
         <default>SYS</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
 
     <attribute>
         <id>DMI_EREPAIR_THRESHOLD_FIELD</id>
@@ -658,10 +654,6 @@
         <default>ENC</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>EEPROM_VPD_PRIMARY_INFO</id>
         <default>
             <field><id>byteAddrOffset</id><value>0x02</value></field>
@@ -770,10 +762,6 @@
     <attribute>
         <id>DCACHE_LINE_SIZE</id>
         <default>128</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -1184,10 +1172,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.capp:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -1263,10 +1247,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.capp:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -1340,10 +1320,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -1425,10 +1401,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -1506,10 +1478,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -1591,10 +1559,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -1672,10 +1636,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -1757,10 +1717,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -1838,10 +1794,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -1923,10 +1875,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -2004,10 +1952,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2089,10 +2033,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c9</default>
     </attribute>
@@ -2170,10 +2110,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2255,10 +2191,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c11</default>
     </attribute>
@@ -2336,10 +2268,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2421,10 +2349,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c13</default>
     </attribute>
@@ -2502,10 +2426,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2587,10 +2507,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c15</default>
     </attribute>
@@ -2668,10 +2584,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2753,10 +2665,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c17</default>
     </attribute>
@@ -2834,10 +2742,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -2919,10 +2823,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c19</default>
     </attribute>
@@ -3000,10 +2900,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -3085,10 +2981,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c21</default>
     </attribute>
@@ -3166,10 +3058,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -3251,10 +3139,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p00:c23</default>
     </attribute>
@@ -3328,10 +3212,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -3408,10 +3288,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
 
@@ -3486,10 +3362,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -3566,10 +3438,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
 
@@ -3644,10 +3512,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -3724,10 +3588,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
 
@@ -3803,10 +3663,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
 
@@ -3881,10 +3737,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -3966,10 +3818,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.eq:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -4047,10 +3895,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.eq:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -4124,10 +3968,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4205,10 +4045,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.eq:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -4282,10 +4118,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4363,10 +4195,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.eq:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -4440,10 +4268,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4520,10 +4344,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -4596,10 +4416,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4676,10 +4492,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -4752,10 +4564,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4832,10 +4640,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -4908,10 +4712,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -4988,10 +4788,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -5064,10 +4860,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -5144,10 +4936,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c9</default>
     </attribute>
@@ -5220,10 +5008,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -5300,10 +5084,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ex:k0:n0:s0:p00:c11</default>
     </attribute>
@@ -5372,10 +5152,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -5471,10 +5247,6 @@
     <attribute>
         <id>CLASS</id>
         <default>CHIP</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -5601,10 +5373,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -5871,10 +5639,6 @@
         <id>CLASS</id>
         <default>CHIP</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
 
@@ -5999,10 +5763,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -6252,10 +6012,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.mc:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -6334,10 +6090,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.mi:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -6404,10 +6156,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -6478,10 +6226,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.mi:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -6548,10 +6292,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -6624,10 +6364,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -6704,10 +6440,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -6780,10 +6512,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -6860,10 +6588,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.obus:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -6936,10 +6660,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7024,10 +6744,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7110,10 +6826,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7198,10 +6910,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7284,10 +6992,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7372,10 +7076,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7458,10 +7158,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7546,10 +7242,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7632,10 +7324,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7720,10 +7408,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7806,10 +7490,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -7894,10 +7574,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -7976,10 +7652,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8078,10 +7750,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8205,10 +7873,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.pec:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -8330,10 +7994,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.pec:k0:n0:s0:p00:c2</default>
     </attribute>
@@ -8449,10 +8109,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c1</default>
     </attribute>
@@ -8515,10 +8171,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8585,10 +8237,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c3</default>
     </attribute>
@@ -8651,10 +8299,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8721,10 +8365,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c5</default>
     </attribute>
@@ -8787,10 +8427,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8857,10 +8493,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c7</default>
     </attribute>
@@ -8923,10 +8555,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -8993,10 +8621,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c9</default>
     </attribute>
@@ -9059,10 +8683,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9129,10 +8749,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c13</default>
     </attribute>
@@ -9195,10 +8811,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9265,10 +8877,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c15</default>
     </attribute>
@@ -9331,10 +8939,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9401,10 +9005,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c17</default>
     </attribute>
@@ -9467,10 +9067,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9537,10 +9133,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c19</default>
     </attribute>
@@ -9603,10 +9195,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9673,10 +9261,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c21</default>
     </attribute>
@@ -9739,10 +9323,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9809,10 +9389,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c33</default>
     </attribute>
@@ -9875,10 +9451,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -9945,10 +9517,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c35</default>
     </attribute>
@@ -10011,10 +9579,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10081,10 +9645,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c37</default>
     </attribute>
@@ -10147,10 +9707,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10217,10 +9773,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c39</default>
     </attribute>
@@ -10283,10 +9835,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10353,10 +9901,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c41</default>
     </attribute>
@@ -10419,10 +9963,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10489,10 +10029,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c43</default>
     </attribute>
@@ -10555,10 +10091,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10625,10 +10157,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c45</default>
     </attribute>
@@ -10691,10 +10219,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10761,10 +10285,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c47</default>
     </attribute>
@@ -10827,10 +10347,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -10897,10 +10413,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c49</default>
     </attribute>
@@ -10963,10 +10475,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -11033,10 +10541,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c51</default>
     </attribute>
@@ -11099,10 +10603,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -11169,10 +10669,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c53</default>
     </attribute>
@@ -11237,10 +10733,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.perv:k0:n0:s0:p00:c54</default>
     </attribute>
@@ -11303,10 +10795,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -11375,10 +10863,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -11467,10 +10951,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -11557,10 +11037,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -11649,10 +11125,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -11739,10 +11211,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
     <attribute>
@@ -11831,10 +11299,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
     <attribute>
         <id>FAPI_NAME</id>
@@ -11919,10 +11383,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c0</default>
     </attribute>
@@ -11985,10 +11445,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12055,10 +11511,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c11</default>
     </attribute>
@@ -12121,10 +11573,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12191,10 +11639,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c13</default>
     </attribute>
@@ -12257,10 +11701,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12327,10 +11767,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c21</default>
     </attribute>
@@ -12393,10 +11829,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12463,10 +11895,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c23</default>
     </attribute>
@@ -12529,10 +11957,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12599,10 +12023,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c25</default>
     </attribute>
@@ -12665,10 +12085,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12735,10 +12151,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c31</default>
     </attribute>
@@ -12801,10 +12213,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -12871,10 +12279,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c33</default>
     </attribute>
@@ -12937,10 +12341,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -13007,10 +12407,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c35</default>
     </attribute>
@@ -13073,10 +12469,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -13143,10 +12535,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c41</default>
     </attribute>
@@ -13209,10 +12597,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -13279,10 +12663,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c43</default>
     </attribute>
@@ -13345,10 +12725,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -13415,10 +12791,6 @@
         <default>UNIT</default>
     </attribute>
     <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>FAPI_NAME</id>
         <default>pu.ppe:k0:n0:s0:p00:c50</default>
     </attribute>
@@ -13481,10 +12853,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id>
@@ -13556,10 +12924,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
@@ -13647,10 +13011,6 @@
         <id>CLASS</id>
         <default>UNIT</default>
     </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
-    </attribute>
 
 
     <attribute>
@@ -13736,10 +13096,6 @@
     <attribute>
         <id>CLASS</id>
         <default>UNIT</default>
-    </attribute>
-    <attribute>
-        <id>DECONFIG_GARDABLE</id>
-        <default>1</default>
     </attribute>
 
 
