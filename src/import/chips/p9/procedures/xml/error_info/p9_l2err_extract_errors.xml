@@ -66,7 +66,7 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-  </hwpError> 
+  </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_P9_L2ERR_EXTRACT_SYNDROME_NOT_FOUND</rc>
@@ -85,24 +85,4 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
-    <hwpError>
-    <rc>RC_P9_L2ERR_LINE_DELETE_REG_BUSY</rc>
-    <description>
-      Procedure: p9_l2err_linedelete
-      Time out waiting for PRD L2 Purge engine busy bit.
-    </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>COUNT_THRESHOLD</ffdc>
-    <ffdc>PRD_PURGE_CMD_REG</ffdc>
-    <callout>
-      <target>TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-  </hwpError>
-  <!-- ******************************************************************** -->
 </hwpErrors>
-

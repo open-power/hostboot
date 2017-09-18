@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 ///
-/// @file p9_l2_flush.H
+/// @file p9_l2_flush.C
 /// @brief Flush the P9 L2 cache (FAPI)
 ///
 /// *HWP HWP Owner   : Benjamin Gass <bgass@us.ibm.com>
@@ -57,138 +57,133 @@ enum
 // Function definitions
 //------------------------------------------------------------------------------
 
-///-----------------------------------------------------------------------------
-/// @brief Utility subroutine to initiate L2 cache flush via purge engine.
-///
-/// @param[in]  i_target    EX target
-/// @param[in]  i_regAddr   The scom address to use
-/// @param[in]  i_purgeData Structure having values for MEM, CGC, BANK
-///                         passed by the user
-///
-/// @return  FAPI2_RC_SUCCESS if purge operation was started,
-///          RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING if a prior purge
-///          operation has not yet completed
-///          else FAPI getscom/putscom return code for failing operation
-///-----------------------------------------------------------------------------
-fapi2::ReturnCode l2_flush_start(
+/// See doxygen in header file
+fapi2::ReturnCode purgeCompleteCheck(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-    const uint32_t i_regAddr,
-    const p9core::purgeData_t& i_purgeData)
+    const uint64_t i_busyCount,
+    fapi2::buffer<uint64_t>& o_prdPurgeCmdReg)
 {
-    fapi2::buffer<uint64_t> l_cmdReg;
-    fapi2::buffer<uint64_t> l_purgeCmd;
+    FAPI_DBG("Entering purgeCompleteCheck");
+    uint64_t l_loopCount = 0;
 
-    FAPI_DBG("l2_flush_start: Enter");
+    do
+    {
+        FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, o_prdPurgeCmdReg),
+                 "Error from getScom EX_PRD_PURGE_CMD_REG");
 
-    // ensure that purge engine is idle before starting flush
-    // poll Purge Engine status
-    FAPI_DBG("Reading L2 Purge Engine Command Register to check status");
-    FAPI_TRY(fapi2::getScom(i_target, i_regAddr, l_cmdReg));
+        // Check state of PURGE_CMD_ERR
+        FAPI_ASSERT(!o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_ERR>(),
+                    fapi2::P9_PURGE_CMD_REG_ERR()
+                    .set_TARGET(i_target)
+                    .set_CMD_REG(o_prdPurgeCmdReg),
+                    "Purge failed. EX_PRD_PURGE_CMD_REG_ERR set");
 
-    // check to see if this reg is idle and ready to accept a new command
-    FAPI_ASSERT(!l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_BUSY>(),
-                fapi2::P9_L2_FLUSH_PURGE_REQ_OUTSTANDING()
-                .set_TARGET(i_target)
-                .set_CMD_REG(l_cmdReg)
-                .set_CMD_REG_ADDR(i_regAddr),
-                "Previous purge request has not completed for target");
+        // Check the EX_PRD_PURGE_CMD_REG_BUSY bit from scom register
+        if ( !o_prdPurgeCmdReg.getBit(EX_PRD_PURGE_CMD_REG_BUSY) )
+        {
+            // PURGE is done, get out
+            break;
+        }
+        else
+        {
+            l_loopCount++;
 
-    // write PURGE_CMD_TRIGGER bit in Purge Engine Command Register
+            if (l_loopCount > i_busyCount)
+            {
+                // Time out, exit loop
+                break;
+            }
+
+            // Delay 10ns for each loop
+            FAPI_TRY(fapi2::delay(P9_L2_FLUSH_HW_NS_DELAY,
+                                  P9_L2_FLUSH_SIM_CYCLE_DELAY),
+                     "Fapi Delay call failed.");
+        }
+    }
+    while (1);
+
+    // Error out if still busy
+    if (l_loopCount > i_busyCount)
+    {
+        // engine busy, dump status
+        FAPI_DBG("Purge engine busy (reg_busy = %d, busy_on_this = %d,"
+                 " sm_busy = %d)",
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_BUSY>(),
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY_ON_THIS>(),
+                 o_prdPurgeCmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY>());
+
+        FAPI_ASSERT(false, fapi2::P9_PURGE_COMPLETE_TIMEOUT()
+                    .set_TARGET(i_target)
+                    .set_COUNT_THRESHOLD(i_busyCount)
+                    .set_CMD_REG(o_prdPurgeCmdReg),
+                    "Previous purge request has not completed for target");
+    }
+
+fapi_try_exit:
+    FAPI_DBG("Exiting purgeCompleteCheck - Counter: %d; prdPurgeCmdReg: 0x%.16llX",
+             l_loopCount, o_prdPurgeCmdReg);
+    return fapi2::current_err;
+}
+
+/// See doxygen in header file
+fapi2::ReturnCode setupAndTriggerPrdPurge(
+    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+    const p9core::purgeData_t& i_purgeData,
+    fapi2::buffer<uint64_t>& i_prdPurgeCmdReg)
+{
+    FAPI_DBG("setupAndTriggerPrdPurge: Enter");
+
+    // Start with current CMD reg value
+    fapi2::buffer<uint64_t> l_cmdReg = i_prdPurgeCmdReg;
+
+    // Write PURGE_CMD_TRIGGER bit in Purge Engine Command Register
     // ensure PURGE_CMD_TYPE/MEM/CGC/BANK are clear to specify flush
     // of entire cache
     FAPI_DBG("Write L2 Purge Engine Command Register to initiate cache flush");
-    l_purgeCmd.insert<EX_PRD_PURGE_CMD_REG_TYPE,
-                      EX_PRD_PURGE_CMD_REG_TYPE_LEN>(i_purgeData.iv_cmdType);
+    l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_TYPE,
+                    EX_PRD_PURGE_CMD_REG_TYPE_LEN>(i_purgeData.iv_cmdType);
+    l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_MEM,
+                    EX_PRD_PURGE_CMD_REG_MEM_LEN>(i_purgeData.iv_cmdMem);
+    l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_BANK, 1>(i_purgeData.iv_cmdBank);
+    l_cmdReg.insert<EX_PRD_PURGE_CMD_REG_CGC,
+                    EQ_PRD_PURGE_CMD_REG_CGC_LEN>(i_purgeData.iv_cmdCGC);
+    l_cmdReg.setBit<EX_PRD_PURGE_CMD_REG_TRIGGER>();
 
-    l_purgeCmd.insert<EX_PRD_PURGE_CMD_REG_MEM,
-                      EX_PRD_PURGE_CMD_REG_MEM_LEN>(i_purgeData.iv_cmdMem);
-
-    l_purgeCmd.insert<EX_PRD_PURGE_CMD_REG_BANK, 1>(i_purgeData.iv_cmdBank);
-
-    l_purgeCmd.insert<EX_PRD_PURGE_CMD_REG_CGC,
-                      EQ_PRD_PURGE_CMD_REG_CGC_LEN>(i_purgeData.iv_cmdCGC);
-
-    l_purgeCmd.setBit<EX_PRD_PURGE_CMD_REG_TRIGGER>();
-
-    FAPI_TRY(fapi2::putScom(i_target, i_regAddr, l_purgeCmd));
+    FAPI_TRY(fapi2::putScom(i_target, EX_PRD_PURGE_CMD_REG, l_cmdReg),
+             "Error from putScom EX_PRD_PURGE_CMD_REG");
 
 fapi_try_exit:
-    FAPI_DBG("l2_flush_start: Exit");
+    FAPI_DBG("setupAndTriggerPrdPurge: Exit");
     return fapi2::current_err;
 }
 
 ///-----------------------------------------------------------------------------
-/// @brief Utility subroutine to poll L2 purge engine status, looking for
-///        clean idle state.
+/// @brief Utility subroutine to initiate L2 cache flush via purge engine.
 ///
-/// @param[in] i_target EX chiplet target
-/// @param[in] i_regAddr Purge engine register SCOM address
+/// @param[in]  i_target    EX target
+/// @param[in]  i_purgeData Structure having values for MEM, CGC, BANK
+///                         passed by the user
 ///
-/// @return FAPI2_RC_SUCCESS if engine status returns as idle (with no errors)
-///         before maximum number of polls has been reached
-///         RC_P9_L2_FLUSH_CMD_ERROR
-///              if purge command error reported,
-///         RC_P9_L2_FLUSH_CMD_TIMEOUT
-///              if purge operation did not complete prior to polling limit,
-///         else FAPI getscom/putscom return code for failing operation
+/// @return  FAPI2_RC_SUCCESS if purge operation was started,
+///          else error code.
 ///-----------------------------------------------------------------------------
-fapi2::ReturnCode l2_flush_check_status(
+fapi2::ReturnCode l2_flush_start(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-    const uint32_t i_regAddr)
+    const p9core::purgeData_t& i_purgeData)
 {
+    FAPI_DBG("l2_flush_start: Enter");
     fapi2::buffer<uint64_t> l_cmdReg;
-    uint32_t l_polls = 1;
 
-    FAPI_DBG("l2_flush_check_status: Enter");
+    // Ensure that purge engine is idle before starting flush
+    // poll Purge Engine status
+    FAPI_TRY(purgeCompleteCheck(i_target, 0, l_cmdReg), // 0 = no wait
+             "Error returned from purgeCompleteCheck call");
 
-    while(1)
-    {
-        // poll Purge Engine status
-        FAPI_DBG("Reading L2 Purge Engine Command Register to check status");
-        FAPI_TRY(fapi2::getScom(i_target, i_regAddr, l_cmdReg));
-
-        // check state of PURGE_CMD_ERR
-        FAPI_ASSERT(!l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_ERR>(),
-                    fapi2::P9_L2_FLUSH_CMD_ERROR()
-                    .set_TARGET(i_target)
-                    .set_CMD_REG(l_cmdReg)
-                    .set_CMD_REG_ADDR(i_regAddr),
-                    "Purge failed. EX_PRD_PURGE_CMD_REG_ERR set");
-
-        // check to see if this reg is idle and ready to accept a new command
-        if (!l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_BUSY>())
-        {
-            FAPI_DBG("Purge engine idle");
-            break;
-        }
-
-        // engine busy, dump status
-        FAPI_DBG("Purge engine busy (reg_busy = %d, busy_on_this = %d,"
-                 " sm_busy = %d)",
-                 l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_BUSY>(),
-                 l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY_ON_THIS>(),
-                 l_cmdReg.getBit<EX_PRD_PURGE_CMD_REG_PRGSM_BUSY>());
-
-        // check if loop count has expired
-        FAPI_ASSERT((l_polls < P9_L2_FLUSH_MAX_POLLS),
-                    fapi2::P9_L2_FLUSH_CMD_TIMEOUT()
-                    .set_TARGET(i_target)
-                    .set_CMD_REG(l_cmdReg)
-                    .set_CMD_REG_ADDR(i_regAddr)
-                    .set_NUMBER_OF_ATTEMPTS(l_polls),
-                    "Purge engine still busy after %d loops", l_polls);
-
-        // l_polls left, delay prior to next poll
-        FAPI_DBG("%d loops done, delaying before next poll", l_polls);
-
-        FAPI_TRY(fapi2::delay(P9_L2_FLUSH_HW_NS_DELAY,
-                              P9_L2_FLUSH_SIM_CYCLE_DELAY));
-
-        l_polls++;
-    }
+    FAPI_TRY(setupAndTriggerPrdPurge(i_target, i_purgeData, l_cmdReg),
+             "Error returned from setupAndTriggerPrdPurge");
 
 fapi_try_exit:
-    FAPI_DBG("l2_flush_check_status: Exit");
+    FAPI_DBG("l2_flush_start: Exit");
     return fapi2::current_err;
 }
 
@@ -200,22 +195,22 @@ fapi2::ReturnCode p9_l2_flush(
     const fapi2::Target <fapi2::TARGET_TYPE_EX>& i_target,
     const p9core::purgeData_t& i_purgeData)
 {
+    fapi2::buffer<uint64_t> l_cmdReg;
+
     FAPI_DBG("Entering p9_l2_flush: i_purgeData [iv_cmdType: 0x%x] "
              "[iv_cmdMem : 0x%x] [iv_cmdBank: 0x%x] [iv_cmdCGC : 0x%x]",
              i_purgeData.iv_cmdType, i_purgeData.iv_cmdMem,
              i_purgeData.iv_cmdBank, i_purgeData.iv_cmdCGC);
 
-    uint32_t l_regAddr = EX_PRD_PURGE_CMD_REG;
+    // Initiate flush
+    FAPI_TRY(l2_flush_start(i_target, i_purgeData),
+             "Error returned from l2_flush_start()");
 
-    // initiate flush
-    FAPI_TRY(l2_flush_start(i_target, l_regAddr, i_purgeData));
-
-    // check that flush completes and the purge engine is idle
-    // before exiting
-    FAPI_TRY(l2_flush_check_status(i_target, l_regAddr));
+    // Check for purge complete
+    FAPI_TRY(purgeCompleteCheck(i_target, P9_L2_FLUSH_MAX_POLLS, l_cmdReg),
+             "Error returned from purgeCompleteCheck call");
 
 fapi_try_exit:
     FAPI_DBG("p9_l2_flush: Exit");
     return fapi2::current_err;
 }
-

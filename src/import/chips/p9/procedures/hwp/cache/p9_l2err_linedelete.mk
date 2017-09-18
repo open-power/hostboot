@@ -23,5 +23,6 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_l2err_linedelete
+$(call ADD_MODULE_INCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/nest)
+lib$(PROCEDURE)_DEPLIBS+=p9_l2_flush
 $(call BUILD_PROCEDURE)
-

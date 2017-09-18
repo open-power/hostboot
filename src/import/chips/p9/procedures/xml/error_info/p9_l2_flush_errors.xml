@@ -28,8 +28,8 @@
   <hwpError>
     <rc>RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING</rc>
     <ffdc>TARGET</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
     <ffdc>CMD_REG</ffdc>
-    <ffdc>CMD_REG_ADDR</ffdc>
     <description>A previous L2 purge request has not finished</description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
@@ -47,13 +47,12 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_P9_L2_FLUSH_CMD_ERROR</rc>
+    <rc>RC_P9_PURGE_CMD_REG_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>CMD_REG</ffdc>
-    <ffdc>CMD_REG_ADDR</ffdc>
     <description>
       Procedure: p9_l2_flush
-      L2 flush operation failed, see L2 Purge Engine Command Register for error.
+      EX_PRD_PURGE_CMD_REG_ERR bit is set in Purge Engine Command Register.
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>
@@ -74,15 +73,14 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <rc>RC_P9_L2_FLUSH_CMD_TIMEOUT</rc>
+    <rc>RC_P9_PURGE_COMPLETE_TIMEOUT</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>CMD_REG</ffdc>
-    <ffdc>CMD_REG_ADDR</ffdc>
-    <ffdc>NUMBER_OF_ATTEMPTS</ffdc>
+    <ffdc>COUNT_THRESHOLD</ffdc>
     <description>
       Procedure: p9_l2_flush
-      L2 flush operation timed out waiting for purge busy indication to clear in
-      L2 Purge Engine Command Register.
+      Timed out waiting for purge busy indication to clear in L2 Purge Engine
+      Command Register.
     </description>
     <collectRegisterFfdc>
       <id>REG_FFDC_PROC_L2_REGISTERS</id>

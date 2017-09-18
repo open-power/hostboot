@@ -42,91 +42,26 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_l2err_linedelete.H>
+#include <p9_l2_flush.H>
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-const uint32_t BUSY_POLL_DELAY_IN_NS = 10000000; // 10ms
-const uint32_t BUSY_POLL_DELAY_IN_CYCLES = 20000000; // 10ms, assumming 2GHz
-
-//------------------------------------------------------------------------------
 // Function definitions
 //------------------------------------------------------------------------------
-///
-/// @brief  Utility function to check for a purge operation to be completed.
-///         This function polls the EX_PRD_PURGE_CMD_REG_BUSY bit of
-///         EX_PRD_PURGE_CMD_REG.
-///           - If this bit is clear before the input loop threshold is
-///             reached, it returns FAPi2_RC_SUCCESS.
-///           - Otherwise, it returns an error code.
-///
-/// @param[in]  i_target          => EX chiplet target
-/// @param[in]  i_busyCount       => Max busy count waiting for PURGE to complete.
-/// @param[out] o_prdPurgeCmdReg  => EX_PRD_PURGE_CMD_REG value.
-///
-fapi2::ReturnCode purgeCompleteCheck(
-    const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
-    const uint64_t i_busyCount,
-    fapi2::buffer<uint64_t>& o_prdPurgeCmdReg)
-{
-    FAPI_DBG("Entering purgeCompleteCheck");
-
-    // Wait EX_PRD_PURGE_CMD_REG_BUSY bit for a max input counter time
-    uint64_t l_loopCount = 0;
-
-    do
-    {
-        FAPI_TRY(fapi2::getScom(i_target, EX_PRD_PURGE_CMD_REG, o_prdPurgeCmdReg),
-                 "Error from getScom EX_PRD_PURGE_CMD_REG");
-
-        // Check the EX_PRD_PURGE_CMD_REG_BUSY bit from scom register
-        if ( !o_prdPurgeCmdReg.getBit(EX_PRD_PURGE_CMD_REG_BUSY) )
-        {
-            // PURGE is done, get out
-            break;
-        }
-        else
-        {
-            l_loopCount++;
-            // Delay for 10ms
-            FAPI_TRY(fapi2::delay(BUSY_POLL_DELAY_IN_NS,
-                                  BUSY_POLL_DELAY_IN_CYCLES),
-                     "Fapi Delay call failed.");
-        }
-    }
-    while (l_loopCount < i_busyCount);
-
-    // Error out if still busy
-    FAPI_ASSERT(l_loopCount < i_busyCount,
-                fapi2::P9_L2ERR_LINE_DELETE_REG_BUSY()
-                .set_TARGET(i_target)
-                .set_COUNT_THRESHOLD(i_busyCount)
-                .set_PRD_PURGE_CMD_REG(o_prdPurgeCmdReg),
-                "Error: PRD_PURGE_CMD_REG_BUSY exceeds limit count of %d.",
-                i_busyCount);
-
-fapi_try_exit:
-    FAPI_DBG("Exiting purgeCompleteCheck - Counter: %d; prdPurgeCmdReg: 0x%.16llX",
-             l_loopCount, o_prdPurgeCmdReg);
-    return fapi2::current_err;
-}
-
 
 //------------------------------------------------------------------------------
 // HWP entry point
 //------------------------------------------------------------------------------
 // See doxygen in header file
-// TODO: RTC 178071
-// See if with some small refactoring we could just call/share the p9_l2_flush
-// HWP code/errors to implement this routine?
 fapi2::ReturnCode p9_l2err_linedelete(
     const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
     const p9_l2err_extract_err_data& i_err_data,
     const uint64_t i_busyCount)
 {
-    fapi2::buffer<uint64_t> l_l2_l2cerrs_prd_purge_cmd_reg;
+    fapi2::ReturnCode l_rc;
+    fapi2::buffer<uint64_t> l_cmdReg;
+    p9core::purgeData_t l_purgeData;
 
     // mark function entry
     FAPI_DBG("Entering p9_l2err_linedelete. BusyCount %d", i_busyCount);
@@ -159,41 +94,22 @@ fapi2::ReturnCode p9_l2err_linedelete(
     // bits 20:27 is the cgc address
     // bit 28 is the bank
 
-    // Make sure there's no current purge is in progress
-    FAPI_TRY(purgeCompleteCheck(i_target, i_busyCount,
-                                l_l2_l2cerrs_prd_purge_cmd_reg),
-             "Error returned from purgeCompleteCheck()");
-    FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: 0x%.16llX",
-             l_l2_l2cerrs_prd_purge_cmd_reg);
+    // Ensure that purge engine is idle before starting line delete
+    FAPI_TRY(purgeCompleteCheck(i_target, i_busyCount, l_cmdReg),
+             "Error returned from purgeCompleteCheck call");
 
-    // write trigger, type, cgc address and bank into PRD Purge Engine Command Register
-    l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight
-    <EX_PRD_PURGE_CMD_REG_MEM, EX_PRD_PURGE_CMD_REG_MEM_LEN>
-    (i_err_data.member);
-    l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight
-    <EX_PRD_PURGE_CMD_REG_CGC, EX_PRD_PURGE_CMD_REG_CGC_LEN>
-    (i_err_data.address);
-    l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight
-    <EX_PRD_PURGE_CMD_REG_BANK, 1>(i_err_data.bank);
+    // Set PRD Purge Engine Command register values for line delete
+    l_purgeData.iv_cmdType = 0b0010; // L2 Dir Line_Delete
+    l_purgeData.iv_cmdMem = i_err_data.member;
+    l_purgeData.iv_cmdBank = i_err_data.bank;
+    l_purgeData.iv_cmdCGC = i_err_data.address;
 
-    l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight
-    <EX_PRD_PURGE_CMD_REG_TRIGGER, 1>(1);
-    l_l2_l2cerrs_prd_purge_cmd_reg.insertFromRight
-    <EX_PRD_PURGE_CMD_REG_TYPE, EX_PRD_PURGE_CMD_REG_TYPE_LEN>(0x2);
+    FAPI_TRY(setupAndTriggerPrdPurge(i_target, l_purgeData, l_cmdReg),
+             "Error returned from setupAndTriggerPrdPurge");
 
-    FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: %#lx",
-             l_l2_l2cerrs_prd_purge_cmd_reg);
-    FAPI_TRY(fapi2::putScom(i_target, EX_PRD_PURGE_CMD_REG,
-                            l_l2_l2cerrs_prd_purge_cmd_reg),
-             "Error from putScom EX_PRD_PURGE_CMD_REG");
-
-
-    // Verify purge operation is complete
-    FAPI_TRY(purgeCompleteCheck(i_target, i_busyCount,
-                                l_l2_l2cerrs_prd_purge_cmd_reg),
-             "Error returned from purgeCompleteCheck()");
-    FAPI_DBG("l_l2_l2cerrs_prd_purge_cmd_reg_data: 0x%.16llX",
-             l_l2_l2cerrs_prd_purge_cmd_reg);
+    // Verify purge/line delete complete
+    FAPI_TRY(purgeCompleteCheck(i_target, i_busyCount, l_cmdReg),
+             "Error returned from purgeCompleteCheck call");
 
 fapi_try_exit:
     FAPI_INF("Exiting p9_l2err_linedelete...");
