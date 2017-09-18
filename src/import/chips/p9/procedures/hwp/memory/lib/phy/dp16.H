@@ -223,6 +223,15 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT3,
         };
 
+        // READ_DELAY registers, indexed by rank_pair
+        static const std::vector< std::vector< uint64_t > > READ_DELAY_REG;
+
+        // READ_EYE_SIZE registers, indexed by rank_pair
+        static const std::vector< std::vector< uint64_t > > READ_EYE_SIZE_REG;
+
+        // RDCLK delay registers, indexed by rank_pair
+        static const std::vector< std::vector< uint64_t > > RDCLK_REG;
+
         enum
         {
             // Name changes for dd2 to P9N2_MCA_DDRPHY_DP16_RX_CONFIG0_P0_0
@@ -391,6 +400,48 @@ fapi2::ReturnCode rd_vref_bitfield_helper( const fapi2::Target<T>& i_target,
 
 namespace dp16
 {
+
+///
+/// @class rd_ctr_settings
+/// @brief Stores pre-training_adv RD_CTR PHY settings, so they can be restored if training_adv fails
+/// @tparam T target type representing a port
+///
+template< fapi2::TargetType T >
+class rd_ctr_settings
+{
+    public:
+        rd_ctr_settings() = delete;
+
+        ///
+        /// @brief rd_ctr_settings constructor
+        /// @param[in] i_target the port target
+        /// @param[in] i_rp the rank pair
+        ///
+        rd_ctr_settings( const fapi2::Target<T>& i_target, const uint64_t i_rp ):
+            iv_target(i_target), iv_rp(i_rp)
+        {
+        }
+
+        ///
+        /// @brief Save settings for a given rank pair
+        /// @return FAPI2_RC_SUCCES iff ok
+        ///
+        fapi2::ReturnCode save();
+
+        ///
+        /// @brief Restore settings for a given rank pair
+        /// @return FAPI2_RC_SUCCES iff ok
+        ///
+        fapi2::ReturnCode restore();
+
+    private:
+        const fapi2::Target<T> iv_target;
+        const uint64_t iv_rp;
+        std::vector<fapi2::buffer<uint64_t>> iv_read_delay;
+        std::vector<fapi2::buffer<uint64_t>> iv_rdclk_delay;
+        std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > iv_dq_disable;
+        std::vector<fapi2::buffer<uint64_t>> iv_read_eye_size;
+};
 
 ///
 /// @brief Read TSYS_DATA
