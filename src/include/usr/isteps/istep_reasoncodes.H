@@ -61,6 +61,7 @@ namespace ISTEP
         MOD_HANDLE_SBE_REG_VALUE                          = 0x19,
         MOD_SBE_PERFORM_UPDATE_CHECK                      = 0x1A,
         MOD_SBE_GET_FFDC_HANDLER                          = 0x1C,
+        MOD_SET_IPL_PARMS                                 = 0x1D,
     };
 
     /**
@@ -121,6 +122,7 @@ namespace ISTEP
         RC_SBE_UPDATE_IN_MPIPL                   = ISTEP_COMP_ID | 0x32,
         RC_NO_FFDC_RETURNED                      = ISTEP_COMP_ID | 0x33,
         RC_RETURNED_FFDC                         = ISTEP_COMP_ID | 0x34,
+        RC_P9N_DD1_NOT_SUPPORTED                 = ISTEP_COMP_ID | 0x35,
     };
 
 };

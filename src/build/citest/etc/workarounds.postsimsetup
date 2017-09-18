@@ -35,5 +35,6 @@
 
 
 
-
+echo "Switch to simulating P9N DD2.0 by default"
+sbex -t 1034628
 

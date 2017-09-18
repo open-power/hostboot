@@ -367,7 +367,7 @@ public:
               if(*l_bucketAttr != 2)
               {
                   numFails++;
-                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 1, not %d",l_huid, voltageData.bucketId);
+                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 2, not %d",l_huid, *l_bucketAttr);
               }
 
               if(l_rc)
@@ -379,17 +379,17 @@ public:
               continue;
           }
           numTests++;
-          if(voltageData.bucketId != 1)
+          if(voltageData.bucketId != 3)
           {
               numFails++;
-              TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 1, not %d",l_huid, voltageData.bucketId);
+              TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 3, not %d",l_huid, voltageData.bucketId);
               continue;
           }
           numTests++;
-          if(*l_bucketAttr != 1)
+          if(*l_bucketAttr != 3)
           {
               numFails++;
-              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 1, not %d",l_huid, voltageData.bucketId);
+              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 3, not %d",l_huid, *l_bucketAttr);
           }
 
           if(l_rc)
@@ -464,33 +464,33 @@ public:
               {
                   numFails++;
                   TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA "
-                          "EQ with HUID = 0x%X should have bucket ID 1, not %d",
+                          "EQ with HUID = 0x%X should have bucket ID 2, not %d",
                           l_huid,
-                          vdmData.bucketId);
+                          *l_bucketAttr);
               }
 
               continue;
           }
 
           numTests++;
-          if(vdmData.bucketId != 1)
+          if(vdmData.bucketId != 3)
           {
               numFails++;
               TS_FAIL("Error:p9_pm_get_poundw_bucket with EQ with HUID = "
-                      "0x%X should have returned bucket ID 1, not %d",
+                      "0x%X should have returned bucket ID 3, not %d",
                       l_huid,
                       vdmData.bucketId);
               continue;
           }
 
           numTests++;
-          if(*l_bucketAttr != 1)
+          if(*l_bucketAttr != 2)
           {
               numFails++;
-              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA "
-                      "EQ with HUID = 0x%X should have bucket ID 1, not %d",
+              TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA "
+                      "EQ with HUID = 0x%X should have bucket ID 2, not %d",
                       l_huid,
-                      vdmData.bucketId);
+                      *l_bucketAttr);
           }
 
           FAPI_INF("Bucket for HUID: 0x%X is = %d", l_huid, vdmData.bucketId);

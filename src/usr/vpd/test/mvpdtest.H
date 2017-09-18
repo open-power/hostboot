@@ -186,7 +186,6 @@ VPD::vpdRecord mvpdRecordData[] =
     MVPD::VWML,
     MVPD::VER0,
     MVPD::MER0,
-    MVPD::VMSC,
 };
 
 

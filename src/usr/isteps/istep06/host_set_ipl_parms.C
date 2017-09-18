@@ -31,7 +31,9 @@
 #include <initservice/isteps_trace.H>
 #include <util/utilsemipersist.H>
 #include <hwas/common/deconfigGard.H>
-
+#include <arch/pvrformat.H>
+#include <sys/mmio.h>
+#include <console/consoleif.H>
 
 namespace ISTEP_06
 {
@@ -75,6 +77,46 @@ void* host_set_ipl_parms( void *io_pArgs )
 
     //Write update data back out
     Util::writeSemiPersistData(l_semiData);
+
+
+    // Add a check to indicate that Nimbus DD1.0 is NOT supported
+    // and prevent a boot
+    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    if( l_pvr.isNimbusDD1() )
+    {
+#ifdef CONFIG_CONSOLE
+        CONSOLE::displayf(ISTEP_COMP_NAME,
+                          "P9N (Nimbus) DD1.0 is not supported in this driver");
+        CONSOLE::displayf(ISTEP_COMP_NAME,
+                          "Please update the system's processor modules");
+#endif
+
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "DD1.0 is NOT SUPPORTED anymore. "
+                   "Please upgrade proc modules");
+        /*@
+         * @errortype
+         * @moduleid     ISTEP::MOD_SET_IPL_PARMS
+         * @reasoncode   ISTEP::RC_P9N_DD1_NOT_SUPPORTED
+         * @userdata1    PVR of master proc
+         * @devdesc      P9N (Nimbus) DD1.x is not supported
+         *               in this firmware driver.  Please update
+         *               your module or use a different driver
+         * @custdesc     A problem occurred during the IPL
+         *               of the system.
+         */
+        uint64_t l_dummy = 0x0;
+        l_err = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        ISTEP::MOD_SET_IPL_PARMS,
+                                        ISTEP::RC_P9N_DD1_NOT_SUPPORTED,
+                                        l_pvr.word,
+                                        l_dummy);
+        // Create IStep error log and cross ref error that occurred
+        l_stepError.addErrorDetails( l_err );
+        errlCommit( l_err, ISTEP_COMP_ID );
+    }
 
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
