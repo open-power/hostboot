@@ -67,7 +67,7 @@ extern "C"
     /// @param[in] i_p9CU Enumeration of the chip unit type
     /// @param[in] i_chipUnitNum Instance number of the chip unit
     /// @param[in] i_scomAddr The input SCOM address associated with the chip unit type
-    /// @param[in] i_mode Used for special purposes, default to 0 = p9n dd1, 1 = ppe_mode, 2 = p9n dd2, 4 = p9c dd1, 8 = p9c dd2
+    /// @param[in] i_mode Used for special purposes, default to 0 = p9n dd1, 1 = ppe_mode, 2 = p9n dd2.X, 4 = p9c dd1.X, 8 = p9c dd2
     /// @retval uint64_t Actual SCOM address for the chip unit instance passed in
     uint64_t p9_scominfo_createChipUnitScomAddr(const p9ChipUnits_t i_p9CU, const uint8_t i_chipUnitNum,
             const uint64_t i_scomAddr, const uint32_t i_mode = 0);
