@@ -94,21 +94,58 @@ extern "C"
 {
 
 ///
+/// @brief  Utility function to check for a purge operation to be completed.
+///         This function polls the EX_PRD_PURGE_CMD_REG_BUSY bit of
+///         EX_PRD_PURGE_CMD_REG.
+///           - If this bit is clear before the input loop threshold is
+///             reached, it returns FAPi2_RC_SUCCESS.
+///           - Otherwise, it returns an error code.
+///
+/// @param[in]  i_target          => EX chiplet target
+/// @param[in]  i_busyCount       => Max busy count waiting for PURGE to complete.
+/// @param[out] o_prdPurgeCmdReg  => EX_PRD_PURGE_CMD_REG value.
+///
+/// @return FAPI2_RC_SUCCESS if engine status returns as idle (with no errors)
+///         before maximum number of polls has been reached
+///         else, return error.
+    fapi2::ReturnCode purgeCompleteCheck(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const uint64_t i_busyCount,
+        fapi2::buffer<uint64_t>& o_prdPurgeCmdReg);
+
+///-----------------------------------------------------------------------------
+/// @brief Utility subroutine to setup and trigger a PRD PURGE based
+///        on input purge data specification.
+///
+/// @param[in]  i_target          EX target
+/// @param[in]  i_purgeData       Structure having values for MEM, CGC, BANK
+///                               passed by the user
+/// @param[in]  i_prdPurgeCmdReg  EX_PRD_PURGE_CMD_REG value.
+///
+/// @return  FAPI2_RC_SUCCESS if purge operation was started,
+///          else error code.
+///-----------------------------------------------------------------------------
+    fapi2::ReturnCode setupAndTriggerPrdPurge(
+        const fapi2::Target<fapi2::TARGET_TYPE_EX>& i_target,
+        const p9core::purgeData_t& i_purgeData,
+        fapi2::buffer<uint64_t>& i_prdPurgeCmdReg);
+
+///
 /// @brief Flush entire content of L2 cache via purge engine
 /// @param[in] i_target EX target
 /// @param[in] i_purgeData Specifies a particular purge type
 /// @return: FAPI2_RC_SUCCESS if purge operation completes successfully,
-///          RC_P9_L2_FLUSH_PURGE_REQ_OUTSTANDING
+///          P9_L2_FLUSH_PURGE_REQ_OUTSTANDING
 ///              if called when existing L2 purge is in progress,
-///          RC_P9_L2_FLUSH_CMD_TIMEOUT
+///          RC_P9_PURGE_COMPLETE_TIMEOUT
 ///              if purge operation does not complete in expected time,
-///          RC_P9_L2_FLUSH_CMD_ERROR
+///          RC_P9_PURGE_CMD_REG_ERR
 ///              if purge operation reports error,
 ///          else FAPI getscom/putscom return code for failing operation
 ///
-    fapi2::ReturnCode p9_l2_flush(const fapi2::Target < fapi2::TARGET_TYPE_EX >
-                                  & i_target,
-                                  const p9core::purgeData_t& i_purgeData);
+    fapi2::ReturnCode p9_l2_flush(
+        const fapi2::Target < fapi2::TARGET_TYPE_EX >&   i_target,
+        const p9core::purgeData_t& i_purgeData);
 
 } // end of extern C
 
