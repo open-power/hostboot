@@ -50,6 +50,8 @@ class RtPnor
        *
        * @param[in] i_section   PNOR section
        * @param[out] o_info     Location and size information
+       *                        NOTE: vaddr is 0 if section is secure.
+       *                              It should be loaded from Hb resv memory
        *
        * @return errlHndl_t     Error log if request was invalid
        */

@@ -154,6 +154,9 @@ errlHndl_t UtilLidMgr::loadLid()
             {
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section found");
                 // If section is secure, adjust size and buffer pointer
+                // TODO: RTC:180063 if getSectionInfo is modified to not support
+                //                  secure sections, then need a different
+                //                  method.
                 if(iv_lidPnorInfo.secure)
                 {
                     UTIL_FT("UtilLidMgr::loadLid - resv mem section is secure");
