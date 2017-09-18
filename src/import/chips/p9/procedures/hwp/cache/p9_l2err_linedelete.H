@@ -56,10 +56,6 @@
 #include <fapi2.H>
 #include <p9_l2err_extract.H>
 
-//------------------------------------------------------------------------------
-// Structure definitions
-//------------------------------------------------------------------------------
-
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_l2err_linedelete_FP_t)
 (const fapi2::Target<fapi2::TARGET_TYPE_EX>&,
