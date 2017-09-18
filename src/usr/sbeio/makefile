@@ -34,6 +34,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
 
 OBJS += sbe_psudd.o
+OBJS += sbe_utils.o
 OBJS += sbe_coreStateControl.o
 OBJS += sbe_psuQuiesce.o
 OBJS += sbe_stashKeyAddr.o

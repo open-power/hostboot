@@ -37,6 +37,7 @@
 // ----------------------------------------------
 #include <errl/errlentry.H>
 #include <sbeio/sbe_psudd.H>
+#include <sbeio/sbe_utils.H>
 #include <p9_ring_id.h>
 #include <hw_access_def.H>
 
@@ -88,17 +89,6 @@ errlHndl_t scanDoPibScan( DeviceFW::OperationType i_opType,
                           uint64_t i_ring,
                           uint64_t i_ringlength,
                           uint64_t i_flags );
-
-/// @brief translates HB target types to SBE target type groups
-/// @param[in] i_hbTarget includes the HB target type
-/// @return SBEIO::SBE_TARGET_TYPES returns SBE_TARGET_TYPE_UNKNOWN in error
-SBEIO::SbePsu::SBE_TARGET_TYPES
-    translateToSBETargetType(TARGETING::Target * i_hbTarget);
-
-/// @brief returns a ChipletID for a give target
-/// @param[in] i_hbTarget includes the HB target type
-/// @return: ChipletID for i_hbTarget target
-uint8_t getChipletIDForSBE(TARGETING::Target * i_hbTarget);
 
 
 }; // end SCAN namespace

@@ -517,17 +517,6 @@ class SbePsu
          */
         static const uint64_t MAX_PSU_SHORT_TIMEOUT_NS=90*NS_PER_SEC; //=90sec
 
-
-        enum SBE_TARGET_TYPES {
-
-             SBE_TARGET_TYPE_PROC     = 0x00,
-             SBE_TARGET_TYPE_EX       = 0x01,
-             SBE_TARGET_TYPE_PERV     = 0x02,
-             SBE_TARGET_TYPE_MCS      = 0x03,
-             SBE_TARGET_TYPE_TOTAL          ,
-             SBE_TARGET_TYPE_UNKNOWN  = 0xFF
-        };
-
         /**
          * @brief get SBE FFDC buffer size
          *
