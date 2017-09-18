@@ -155,13 +155,15 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
     errlHndl_t l_err = nullptr;
     do
     {
+
+        // TODO: RTC:180063 change this to error out on secure sections as it
+        //                  did previously in HB commit cefc4c
+        // Check if Section is invalid or inhibited from loading at runtime.
         bool l_inhibited = false;
-        bool l_secure = false;
 #ifdef CONFIG_SECUREBOOT
         l_inhibited = PNOR::isInhibitedSection(i_section);
-        l_secure =  iv_TOC[i_section].secure;
 #endif
-        if (i_section == PNOR::INVALID_SECTION || l_inhibited || l_secure)
+        if (i_section == PNOR::INVALID_SECTION || l_inhibited)
         {
             TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo: Invalid Section %d",
                       static_cast<int>(i_section));
@@ -170,18 +172,13 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
             {
                 TRACFCOMP(g_trac_pnor, ERR_MRK"RtPnor::getSectionInfo: attribute overrides inhibited by secureboot");
             }
-            else if (l_secure)
-            {
-                TRACFCOMP(g_trac_pnor, ERR_MRK"RtPnor::getSectionInfo: secure sections should be loaded via Hostboot Reserved Memory");
-            }
 #endif
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
              * @reasoncode  PNOR::RC_RTPNOR_INVALID_SECTION
              * @userdata1   PNOR::SectionId
-             * @userdata2[0:31]   Inhibited by secureboot
-             * @userdata2[32:63]  Indication of a secure section
+             * @userdata2[0:63]   Inhibited by secureboot
              * @devdesc     invalid section passed to getSectionInfo  or
              *              section prohibited by secureboot
              */
@@ -189,8 +186,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
                                             PNOR::MOD_RTPNOR_GETSECTIONINFO,
                                             PNOR::RC_RTPNOR_INVALID_SECTION,
                                             i_section,
-                                            TWO_UINT32_TO_UINT64(l_inhibited,
-                                                                 l_secure),
+                                            l_inhibited,
                                             true);
             break;
         }
@@ -200,7 +196,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         if (l_sizeBytes == 0)
         {
             TRACFCOMP(g_trac_pnor,"RtPnor::getSectionInfo: Section %d"
-                    " size is 0", (int)i_section);
+                    " size is 0", static_cast<int>(i_section));
             /*@
              * @errortype
              * @moduleid    PNOR::MOD_RTPNOR_GETSECTIONINFO
@@ -219,44 +215,58 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
         bool l_ecc = (iv_TOC[i_section].integrity&FFS_INTEG_ECC_PROTECT) ?
                       true : false;
 
-        void* l_pWorking = nullptr;
-        void* l_pClean   = nullptr;
-
-        //find the section in the map first
-        if(iv_pnorMap.find(i_section) != iv_pnorMap.end())
+        // TODO: RTC:180063 change this to error out on secure sections as it
+        //                  did previously in HB commit cefc4c
+        // Only do mapping and read from device to set vaddr if not a secure
+        // section. Secure sections should load from HB resv memory and will set
+        // vaddr to 0
+        if (iv_TOC[i_section].secure)
         {
-            //get the addresses from the map
-            PnorAddrPair_t l_addrPair = iv_pnorMap[i_section];
-            l_pWorking = l_addrPair.first;
-            l_pClean   = l_addrPair.second;
+            TRACFCOMP(g_trac_pnor,"RtPnor::getSectionInfo: Warning> Section is secure, so must be loaded from Hb resv memory. vaddr will be set to 0");
+            o_info.vaddr = 0;
         }
         else
         {
-            //malloc twice -- one working copy and one clean copy
-            //So, we can diff and write only the dirty bytes
-            l_pWorking = malloc(l_sizeBytes);
-            l_pClean   = malloc(l_sizeBytes);
+            void* l_pWorking = nullptr;
+            void* l_pClean   = nullptr;
 
-            //offset = 0 : read the entire section
-            l_err = readFromDevice(iv_masterProcId, i_section, 0, l_sizeBytes,
-                                   l_ecc, l_pWorking);
-            if(l_err)
+            //find the section in the map first
+            if(iv_pnorMap.find(i_section) != iv_pnorMap.end())
             {
-                TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo:readFromDevice"
-                      " failed");
-                break;
+                //get the addresses from the map
+                PnorAddrPair_t l_addrPair = iv_pnorMap[i_section];
+                l_pWorking = l_addrPair.first;
+                l_pClean   = l_addrPair.second;
             }
+            else
+            {
+                //malloc twice -- one working copy and one clean copy
+                //So, we can diff and write only the dirty bytes
+                l_pWorking = malloc(l_sizeBytes);
+                l_pClean   = malloc(l_sizeBytes);
 
-            //copy data to another pointer to save a clean copy of data
-            memcpy(l_pClean, l_pWorking, l_sizeBytes);
+                //offset = 0 : read the entire section
+                l_err = readFromDevice(iv_masterProcId, i_section, 0, l_sizeBytes,
+                                       l_ecc, l_pWorking);
+                if(l_err)
+                {
+                    TRACFCOMP(g_trac_pnor, "RtPnor::getSectionInfo:readFromDevice"
+                          " failed");
+                    break;
+                }
 
-            //save it in the map
-            iv_pnorMap [i_section] = PnorAddrPair_t(l_pWorking, l_pClean);
+                //copy data to another pointer to save a clean copy of data
+                memcpy(l_pClean, l_pWorking, l_sizeBytes);
+
+                //save it in the map
+                iv_pnorMap [i_section] = PnorAddrPair_t(l_pWorking, l_pClean);
+            }
+            o_info.vaddr = reinterpret_cast<uint64_t>(l_pWorking);
         }
+
         //return the data in the struct
         o_info.id           = i_section;
         o_info.name         = SectionIdToString(i_section);
-        o_info.vaddr        = (uint64_t)l_pWorking;
         o_info.flashAddr    = iv_TOC[i_section].flashAddr;
         o_info.size         = l_sizeBytes;
         o_info.eccProtected = l_ecc;
@@ -264,6 +274,7 @@ errlHndl_t RtPnor::getSectionInfo(PNOR::SectionId i_section,
             (iv_TOC[i_section].version & FFS_VERS_SHA512) ? true : false;
         o_info.sha512perEC  =
            (iv_TOC[i_section].version & FFS_VERS_SHA512_PER_EC) ? true : false;
+        o_info.secure = iv_TOC[i_section].secure;
     } while (0);
 
     TRACFCOMP(g_trac_pnor, EXIT_MRK"RtPnor::getSectionInfo");
