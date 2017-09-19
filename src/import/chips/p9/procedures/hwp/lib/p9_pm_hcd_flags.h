@@ -83,8 +83,7 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     L3_CONTAINED_MODE                       = 11,
     PGPE_SAFE_MODE_ERROR                    = 12,
     PGPE_OP_TRACE_DISABLE                   = 24,
-    PGPE_OP_TRACE_MEM_MODE_START            = 25,
-    PGPE_OP_TRACE_MEM_MODE_LENGTH           = 2
+    PGPE_OP_TRACE_MEM_MODE                  = 25
 };
 
 //
