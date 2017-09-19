@@ -121,7 +121,10 @@ ThresholdResolution::ThresholdPolicy getImpeTh()
 {
     uint32_t th = MCA_IMPE_NON_MNFG_TH;
 
-    if ( mfgMode() )
+    // NOTE: We will only use the MNFG threshold if DRAM repairs is disabled.
+    //       This is for a Nimbus DD2.0.1 workaround, but the change will be
+    //       permanent for all P9 DD levels.
+    if ( areDramRepairsDisabled() )
     {
         th = MfgThresholdMgr::getInstance()->
                            getThreshold( ATTR_MNFG_TH_MEMORY_IMPES );

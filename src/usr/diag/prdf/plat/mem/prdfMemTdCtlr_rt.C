@@ -652,7 +652,10 @@ uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
             }
 
             // Any hard CEs in MNFG should be immediately reported.
-            if ( mfgMode() )
+            // NOTE: We will only use the MNFG thresholds if DRAM repairs is
+            //       disabled. This is for a Nimbus DD2.0.1 workaround, but the
+            //       change will be permanent for all P9 DD levels.
+            if ( areDramRepairsDisabled() )
             {
                 io_sc.service_data->setSignature( huid, PRDFSIG_MaintHARD_CTE );
                 io_sc.service_data->setServiceCall();
