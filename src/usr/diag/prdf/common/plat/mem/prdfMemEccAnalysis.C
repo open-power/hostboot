@@ -469,7 +469,10 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     uint32_t ceTableRc = db->iv_ceTable.addEntry( i_addr, i_symbol, i_isHard );
 
     // Check MNFG thresholds, if needed.
-    if ( mfgMode() )
+    // NOTE: We will only check the MNFG thresholds if DRAM repairs is disabled.
+    //       This is for a Nimbus DD2.0.1 workaround, but the change will be
+    //       permanent for all P9 DD levels.
+    if ( areDramRepairsDisabled() )
     {
         if ( 0 != (MemCeTable<T>::MNFG_TH_DRAM & ceTableRc) )
         {
