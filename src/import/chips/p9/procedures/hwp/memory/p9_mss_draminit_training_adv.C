@@ -134,12 +134,15 @@ extern "C"
             {
                 bool l_cal_fail = false;
 
+                // l_fails is used to see if we need to rerun training.
+                // The other vector, l_fails, will be used to store errors across all of the ports
                 std::vector<fapi2::ReturnCode> l_temp_fails;
+
                 FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
                 FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_temp_fails) );
 
                 // If we got a fail, let's ignore the previous fails and run backup pattern
-                if (l_cal_fail)
+                if (l_temp_fails.size() != 0)
                 {
                     l_cal_fail = false;
 
@@ -163,8 +166,9 @@ extern "C"
                     FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
                     FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails) );
 
-                    // If l_cal_fail == true here, error out
-                    if (l_cal_fail)
+                    // Fail out for now.
+                    // TK should restore values here
+                    if (l_fails.size() != 0)
                     {
                         fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
 
