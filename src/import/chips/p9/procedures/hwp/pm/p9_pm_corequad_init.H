@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,21 +27,19 @@
 /// @brief Establish safe settings for Core and Quad.
 ///
 // *HWP HWP Owner: Greg Still <stillgs@us.ibm.com>
-// *HWP FW Owner: Sangeetha T S <sangeet2@in.ibm.com>
-// *HWP Team: PM
-// *HWP Level: 2
+// *HWP FW Owner:  Prasad BG Ranganath <prasadbgr@in.ibm.com>
+// *HWP Team:      PM
+// *HWP Level:     3
 // *HWP Consumed by: HS
 
-#ifndef _P9_COREQ_IN_H_
-#define _P9_COREQ_IN_H_
+#ifndef _P9_COREQUAD_INIT_H_
+#define _P9_COREQUAD_INIT_H_
 
 // -----------------------------------------------------------------------------
 // Includes
 // -----------------------------------------------------------------------------
 #include <fapi2.H>
 #include <p9_pm.H>
-#include <p9_quad_scom_addresses.H>
-#include <p9_hcd_common.H>
 
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_pm_corequad_init_FP_t)
@@ -80,4 +78,4 @@ extern "C"
         const uint32_t i_qppmErrMask);
 } // extern "C"
 
-#endif // _P9_COREQ_IN_H_
+#endif // _P9_COREQUAD_INIT_H_

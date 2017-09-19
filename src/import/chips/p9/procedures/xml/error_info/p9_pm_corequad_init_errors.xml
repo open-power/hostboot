@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,17 +28,35 @@
     <rc>RC_PM_COREQUAD_BAD_MODE</rc>
     <description>Unknown mode passed to p9_pm_corequad_init.</description>
     <ffdc>BADMODE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- *********************************************************************** -->
   <hwpError>
-    <rc>RC_PM_CME_ACTIVE_ERROR</rc>
-    <description>The CME was not stopped during the reset of the cores quads
-    </description>
+    <rc>RC_PM_COREQUAD_CME_HALT_ERROR</rc>
+    <description>Failed to halt CME</description>
+    <ffdc>PROC_CHIP_TARGET</ffdc>
+    <ffdc>EX_TARGET</ffdc>
+    <ffdc>EQ_TARGET</ffdc>
+    <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
+    <collectFfdc>p9_collect_ppe_state, PROC_CHIP_TARGET, CME_STATE_MODE, CME_BASE_ADDRESS</collectFfdc>
     <collectRegisterFfdc>
       <id>CME_FFDC_REGISTERS</id>
-      <target>TARGET_CHIPLET</target>
+      <target>EX_TARGET</target>
       <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
+    <callout>
+      <target>EX_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>EX_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>EX_TARGET</target>
+    </gard>
   </hwpError>
   <!-- *********************************************************************** -->
 </hwpErrors>
