@@ -32,6 +32,8 @@
 #include <targeting/common/targetservice.H>
 #include <fapi2.H>
 #include <plat_hwp_invoker.H>
+#include "htmgt_cfgdata.H"
+
 
 // Hardware Procedures:
 #include <p9_mss_utils_to_throttle.H>
@@ -49,6 +51,8 @@ using namespace TARGETING;
 
 namespace HTMGT
 {
+    uint32_t G_mem_power_max_throttles = 0;
+    uint32_t G_mem_power_min_throttles = 0;
 
 /**
  * Run hardware procedure to determine throttle/numerator/number of commands
@@ -251,7 +255,7 @@ errlHndl_t memPowerThrottleRedPower(
                                   i_utilization);
     if (NULL == err)
     {
-        uint32_t nominal_mem_power = 0;
+        G_mem_power_min_throttles = 0;
         for(auto & mcs_fapi_target : i_fapi_target_list)
         {
             // Read HWP output parms:
@@ -264,7 +268,8 @@ errlHndl_t memPowerThrottleRedPower(
                           mcs_fapi_target, l_port);
             FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
                           mcs_fapi_target, l_power);
-            nominal_mem_power += l_power[0] + l_power[1];
+            // Calculate memory power at min throttles (in Watts)
+            G_mem_power_min_throttles += (l_power[0] + l_power[1])/100;
 
             // Update MCS data (to be sent to OCC)
             TARGETING::Target * mcs_target =
@@ -285,7 +290,7 @@ errlHndl_t memPowerThrottleRedPower(
                      l_port[0], l_port[1], l_power[0], l_power[1]);
         }
         TMGT_INF("memPowerThrottleRedPower: Total Redundant Memory Power: %dW",
-                 nominal_mem_power/100);
+                 G_mem_power_min_throttles);
     }
     else
     {
@@ -297,99 +302,6 @@ errlHndl_t memPowerThrottleRedPower(
     return err;
 
 } // end memPowerThrottleRedPower()
-
-
-
-/**
- * Calculate throttles for when system is oversubscribed (N mode)
- *
- * @param[in] i_fapi_target_list - list of FAPI MCS targets
- * @param[in] i_utilization - Minimum utilization value required
- * @param[in] i_efficiency - the regulator efficiency
- */
-errlHndl_t memPowerThrottleOverSub(
-         std::vector <fapi2::Target<fapi2::TARGET_TYPE_MCS>> i_fapi_target_list,
-                                   const uint8_t i_utilization,
-                                   const uint8_t i_efficiency)
-{
-    errlHndl_t err = NULL;
-    Target* sys = NULL;
-    uint32_t power = 0;
-    uint32_t wattTarget = 0;
-    targetService().getTopLevelTarget(sys);
-    assert(sys != NULL);
-
-    //Get the max power allocated to memory
-    power = sys->getAttr<ATTR_OPEN_POWER_N_MAX_MEM_POWER_WATTS>();
-    power *= 100; //centiWatts
-
-    //Account for the regulator efficiency (percentage), if supplied
-    if (i_efficiency != 0)
-    {
-        power = (power * i_efficiency) / 100;
-    }
-
-    //Find the Watt target for each MCS
-    if (i_fapi_target_list.size())
-    {
-        wattTarget = power / i_fapi_target_list.size();
-    }
-
-    TMGT_INF("memPowerThrottleOverSub: N power: %dW / %dcW per MCS",
-             power/100, wattTarget);
-
-    //Calculate the throttles
-    err = call_bulk_pwr_throttles(i_fapi_target_list,
-                                  wattTarget,
-                                  i_utilization);
-    if (NULL == err)
-    {
-        uint32_t oversub_mem_power = 0;
-        for(auto & mcs_fapi_target : i_fapi_target_list)
-        {
-            // Read HWP output parms:
-            ATTR_OVERSUB_N_PER_MBA_type l_slot = {0};
-            ATTR_OVERSUB_N_PER_CHIP_type l_port = {0};
-            ATTR_OVERSUB_MEM_POWER_type l_power = {0};
-            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_SLOT,
-                          mcs_fapi_target, l_slot);
-            FAPI_ATTR_GET(fapi2::ATTR_MSS_MEM_THROTTLED_N_COMMANDS_PER_PORT,
-                          mcs_fapi_target, l_port);
-            FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
-                          mcs_fapi_target, l_power);
-            oversub_mem_power += l_power[0] + l_power[1];
-
-            // Update MCS data (to be sent to OCC)
-            TARGETING::Target * mcs_target =
-                reinterpret_cast<TARGETING::Target *>(mcs_fapi_target.get());
-            ConstTargetHandle_t proc_target = getParentChip(mcs_target);
-            assert(proc_target != nullptr);
-            const uint8_t occ_instance =
-                proc_target->getAttr<TARGETING::ATTR_POSITION>();
-            uint8_t mcs_unit = 0xFF;
-            mcs_target->tryGetAttr<TARGETING::ATTR_CHIP_UNIT>(mcs_unit);
-            mcs_target->setAttr<ATTR_OVERSUB_N_PER_MBA>(l_slot);
-            mcs_target->setAttr<ATTR_OVERSUB_N_PER_CHIP>(l_port);
-            mcs_target->setAttr<ATTR_OVERSUB_MEM_POWER>(l_power);
-
-            TMGT_INF("memPowerThrottleOverSub: OVERSUB: OCC%d/MCS%d - "
-                     "N/slot: %d/%d, N/port: %d/%d, Power: %d/%dcW",
-                     occ_instance, mcs_unit, l_slot[0], l_slot[1],
-                     l_port[0], l_port[1], l_power[0], l_power[1]);
-        }
-        TMGT_INF("memPowerThrottleOverSub: Total Oversubscription Memory"
-                 " Power: %dW", oversub_mem_power/100);
-    }
-    else
-    {
-        TMGT_ERR("memPowerThrottleOverSub: Failed to calculate redundant "
-                 "power memory throttles, rc=0x%04X",
-                 err->reasonCode());
-    }
-
-    return err;
-
-} // end memPowerThrottleOverSub()
 
 
 
@@ -415,7 +327,7 @@ errlHndl_t memPowerThrottlePowercap(
     }
     if (NULL == err)
     {
-        uint32_t pcap_mem_power = 0;
+        G_mem_power_max_throttles = 0;
         for(auto & mcs_fapi_target : i_fapi_target_list)
         {
             TARGETING::Target * mcs_target =
@@ -484,7 +396,8 @@ errlHndl_t memPowerThrottlePowercap(
             mcs_target->setAttr<ATTR_POWERCAP_N_PER_MBA>(l_slot);
             mcs_target->setAttr<ATTR_POWERCAP_N_PER_CHIP>(l_port);
             mcs_target->setAttr<ATTR_POWERCAP_MEM_POWER>(l_power);
-            pcap_mem_power += l_power[0] + l_power[1];
+            // Calculate memory power at max throttles (in Watts)
+            G_mem_power_max_throttles += (l_power[0] + l_power[1]) / 100;
 
             // Trace Results
             TMGT_INF("memPowerThrottlePowercap: PCAP: OCC%d/MCS%d - "
@@ -493,7 +406,7 @@ errlHndl_t memPowerThrottlePowercap(
                      l_port[0], l_port[1], l_power[0], l_power[1]);
         }
         TMGT_INF("memPowerThrottlePowercap: Total PowerCap Memory"
-                 " Power: %dW", pcap_mem_power/100);
+                 " Power: %dW (@max throttles)", G_mem_power_max_throttles);
     }
     else
     {
@@ -506,6 +419,74 @@ errlHndl_t memPowerThrottlePowercap(
 
 } // end memPowerThrottlePowercap()
 
+
+void calculate_system_power()
+{
+    Target* sys = NULL;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != NULL);
+
+    TARGETING::TargetHandleList proc_list;
+    // Get all processor chips (do not have to be functional)
+    getAllChips(proc_list, TARGETING::TYPE_PROC, false);
+    const uint8_t num_procs = proc_list.size();
+
+    const uint16_t proc_socket_power =
+        sys->getAttr<ATTR_PROC_SOCKET_POWER_WATTS>();
+    TMGT_INF("calculate_system_power: proc socket power: %5dW (%d procs)",
+             proc_socket_power, num_procs);
+    const uint16_t misc_power =
+        sys->getAttr<ATTR_MISC_SYSTEM_COMPONENTS_MAX_POWER_WATTS>();
+    TMGT_INF("calculate_system_power: misc power: %5dW", misc_power);
+
+    // Calculate Total non-GPU maximum power (Watts):
+    //   Maximum system power excluding GPUs when CPUs are at maximum frequency
+    //   (ultra turbo) and memory at maximum power (least throttled) plus
+    //   everything else (fans...) excluding GPUs.
+    uint32_t power_max = proc_socket_power * num_procs;
+    TMGT_INF("calculate_system_power: power(max)  proc: %5dW, mem: %5dW",
+                 power_max, G_mem_power_min_throttles);
+    power_max += G_mem_power_min_throttles + misc_power;
+    TMGT_INF("calculate_system_power: max proc/mem/misc power (no GPUs): %5dW",
+             power_max);
+    sys->setAttr<ATTR_CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS>(power_max);
+
+    // Calculate Total Processor/Memory Power Drop (Watts):
+    //   The max non-GPU power can be reduced (with proc/mem)
+    //   calculates this as the CPU power at minimum frequency plus memory at
+    //   minimum power (most throttled)
+    const uint16_t freq_min = sys->getAttr<ATTR_MIN_FREQ_MHZ>();
+    uint16_t freq_turbo, freq_ultra;
+    check_wof_support(freq_turbo, freq_ultra);
+    if (freq_turbo == 0)
+    {
+        freq_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+        if (freq_turbo == 0)
+        {
+            // If no turbo point, then use nominal...
+            TMGT_ERR("calculate_system_power: No turbo frequency to calculate "
+                     "power drop.  Using nominal");
+            freq_turbo = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
+        }
+    }
+    const uint16_t mhz_per_watt = sys->getAttr<ATTR_PROC_MHZ_PER_WATT>();
+    // Drop always calculated from Turbo to Min (not ultra)
+    uint32_t proc_drop = ((freq_turbo - freq_min) / mhz_per_watt);
+    TMGT_INF("calculate_system_power: Processor Power Drop: %dMHz / %dMHz/W"
+             " = %dW / proc",
+             freq_turbo - freq_min, mhz_per_watt, proc_drop);
+    proc_drop *= num_procs;
+    const uint32_t memory_drop =
+        G_mem_power_min_throttles - G_mem_power_max_throttles;
+    TMGT_INF("calculate_system_power: Memory Power Drop: %d - %d = %dW",
+             G_mem_power_min_throttles, G_mem_power_max_throttles,
+             G_mem_power_min_throttles - G_mem_power_max_throttles);
+    const uint32_t power_drop = proc_drop + memory_drop;
+    TMGT_INF("calculate_system_power: Proc/Mem Power Drop: %d + %d = %dW",
+             proc_drop, memory_drop, power_drop);
+    sys->setAttr<ATTR_CALCULATED_PROC_MEMORY_POWER_DROP>(power_drop);
+
+} // end calculate_system_power()
 
 
 errlHndl_t calcMemThrottles()
@@ -579,11 +560,6 @@ errlHndl_t calcMemThrottles()
                                        min_utilization, efficiency);
         if (NULL != err) break;
 
-        //Calculate Throttle settings for Oversubscription
-        err = memPowerThrottleOverSub(l_fapi_target_list,
-                                      min_utilization, efficiency);
-        if (NULL != err) break;
-
         //Calculate Throttle settings for Power Capping
         uint8_t pcap_min_utilization;
         if (!sys->tryGetAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_POWER_CAP>
@@ -594,6 +570,8 @@ errlHndl_t calcMemThrottles()
         err = memPowerThrottlePowercap(l_fapi_target_list,pcap_min_utilization);
 
     } while(0);
+
+    calculate_system_power();
 
     if (err)
     {

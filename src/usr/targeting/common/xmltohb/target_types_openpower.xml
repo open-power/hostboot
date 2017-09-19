@@ -94,6 +94,8 @@
     <attribute><id>OPAL_MODEL</id></attribute>
     <attribute><id>CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS</id></attribute>
     <attribute><id>CALCULATED_PROC_MEMORY_POWER_DROP</id></attribute>
+    <attribute><id>PROC_SOCKET_POWER_WATTS</id></attribute>
+    <attribute><id>PROC_MHZ_PER_WATT</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
