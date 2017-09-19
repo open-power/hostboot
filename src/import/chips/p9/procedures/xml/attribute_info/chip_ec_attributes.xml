@@ -4602,6 +4602,24 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_MSS_RED_WATERFALL_ADJUST</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        In DD2.** Nimbus, We adjust the red waterfall to account for low VDN settings.
+        We move the waterfall forward by one
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_MSS_CHECK_DIABLE_RD_VREF_CAL_VREFSENSE</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -4860,7 +4878,7 @@
       </chip>
     </chipEcFeature>
   </attribute>
-  
+
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
