@@ -1843,6 +1843,10 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
         io_ppmrHdr.g_ppmr_aux_task_offset = io_ppmrHdr.g_ppmr_hcode_offset + PGPE_IMAGE_SIZE;
         io_ppmrHdr.g_ppmr_aux_task_length = ppeSection.iv_size;
 
+	//Used directly for memory access, bit 0 high for PBA access
+        io_ppmrHdr.g_ppmr_doptrace_offset = 0x80000000 + DOPTRACE_OFFSET;
+        io_ppmrHdr.g_ppmr_doptrace_length = DOPTRACE_LEN ;
+
         //Finally let us take care of endianess
         io_ppmrHdr.g_ppmr_bc_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bc_offset);
         io_ppmrHdr.g_ppmr_bl_offset    = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_bl_offset);
@@ -1851,6 +1855,8 @@ fapi2::ReturnCode buildPgpeImage( void* const i_pImageIn, Homerlayout_t* i_pChip
         io_ppmrHdr.g_ppmr_hcode_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_hcode_length);
         io_ppmrHdr.g_ppmr_aux_task_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_aux_task_offset);
         io_ppmrHdr.g_ppmr_aux_task_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_aux_task_length);
+        io_ppmrHdr.g_ppmr_doptrace_offset = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_doptrace_offset);
+        io_ppmrHdr.g_ppmr_doptrace_length = SWIZZLE_4_BYTE(io_ppmrHdr.g_ppmr_doptrace_length);
     }
 
 fapi_try_exit:
@@ -2167,6 +2173,10 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     FAPI_TRY(calcPPETimebase(&l_ppe_timebase_hz));
     pPgpeHdr->g_pgpe_timebase_hz                  =   SWIZZLE_4_BYTE(l_ppe_timebase_hz);
 
+    //Deep Operational Trace Constants
+    pPgpeHdr->g_pgpe_doptrace_offset              =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_doptrace_offset);
+    pPgpeHdr->g_pgpe_doptrace_length              =     SWIZZLE_4_BYTE(pPpmrHdr->g_ppmr_doptrace_length);
+
     //Finally handling the endianess
     pPgpeHdr->g_pgpe_gppb_sram_addr                 =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_gppb_sram_addr);
     pPgpeHdr->g_pgpe_hcode_length                   =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_hcode_length);
@@ -2182,7 +2192,8 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     pPgpeHdr->g_wof_table_length                    =   SWIZZLE_4_BYTE(pPgpeHdr->g_wof_table_length);
     pPgpeHdr->g_pgpe_core_throttle_assert_cnt       =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt);
     pPgpeHdr->g_pgpe_core_throttle_deassert_cnt     =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt);
-
+    pPgpeHdr->g_pgpe_doptrace_offset                =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_doptrace_offset);
+    pPgpeHdr->g_pgpe_doptrace_length                =   SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_doptrace_length);
 
     FAPI_DBG("================================PGPE Image Header==========================================")
     FAPI_DBG("IVPR Address              :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_ivpr_addr));
@@ -2201,6 +2212,8 @@ fapi2::ReturnCode updatePgpeHeader( void* const i_pHomer, CONST_FAPI2_PROC& i_pr
     FAPI_DBG("Core Assert Count         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_assert_cnt));
     FAPI_DBG("Core De - Assert Count    :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_core_throttle_deassert_cnt));
     FAPI_DBG("Auxiliary Control         :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_aux_controls));
+    FAPI_DBG("Deep OpTrace Offset       :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_doptrace_offset));
+    FAPI_DBG("Deep OpTrace Length       :       0x%08x", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_doptrace_length));
     FAPI_DBG("Timebase (Hz)             :       0x%08X (%d)", SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_timebase_hz),
                                                               SWIZZLE_4_BYTE(pPgpeHdr->g_pgpe_timebase_hz));
 
