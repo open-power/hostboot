@@ -127,6 +127,7 @@ namespace HTMGT
         { OCC_CFGDATA_MEM_THROTTLE,   TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_TCT_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
         { OCC_CFGDATA_AVSBUS_CONFIG,  TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
+        // GPU config packet MUST be sent after APSS config
         { OCC_CFGDATA_GPU_CONFIG,     TARGET_ALL,    TO_20SEC, CFGSTATE_ALL },
     };
     const size_t OCC_CONFIG_TABLE_SIZE = sizeof(occCfgDataTable) /
@@ -256,13 +257,10 @@ namespace HTMGT
      *
      * @param[out] o_data - preallocated buffer to fill in
      * @param[out] o_size - set to the message size
-     * @param[in]  i_wofResetCount - Number of times OCC requested a reset
-     *                               due to WOF
      * @pre o_data is large enough.
      */
     void getFrequencyPointMessageData(uint8_t* o_data,
-                                      uint64_t & o_size,
-                                      uint8_t i_wofResetCount );
+                                      uint64_t & o_size);
 
     /**
      * Generate the APSS configuration message
@@ -273,5 +271,11 @@ namespace HTMGT
     void getApssMessageData(uint8_t* o_data,
                             uint64_t & o_size);
 
+    /**
+     * Determine if WOF is supported and if so return frequencies
+     * @param[out] turbo   Turbo frequency in MHz (0 = no support)
+     * @param[out] ultra   Ultra Turbo frequency in MHz (0 = no support)
+     */
+    bool check_wof_support(uint16_t & turbo, uint16_t & ultra);
 };
 #endif

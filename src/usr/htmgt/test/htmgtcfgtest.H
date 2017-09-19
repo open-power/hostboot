@@ -432,12 +432,11 @@ public:
     {
         uint8_t data[4*KILOBYTE];
         uint64_t size = 0;
-        uint8_t wofResetCount = 0;
 
         TS_TRACE(ENTER_MRK"HTMGT: testThermalControlConfigData");
         memset(data, 0, 4*KILOBYTE);
 
-        getFrequencyPointMessageData(data, size, wofResetCount);
+        getFrequencyPointMessageData(data, size);
 
         if (data[0] != OCC_CFGDATA_FREQ_POINT)
         {

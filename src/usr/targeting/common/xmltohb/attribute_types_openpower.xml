@@ -1264,6 +1264,38 @@ ID for the sensor number returned with the elog. -->
     <readable/>
 </attribute>
 
+<attribute>
+    <id>PROC_SOCKET_POWER_WATTS</id>
+    <description>
+        The maximum power a single procesor socket can support (in watts)
+        This is used to populate CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>250</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>PROC_MHZ_PER_WATT</id>
+    <description>
+        Frequency (in MHz) for 1 Watt of processor power change.  Used by the
+        power capping algorithm to determine how much to change the frequency
+        based on power available.
+        This is used in populating CALCULATED_MAX_SYS_POWER_EXCLUDING_GPUS
+    </description>
+    <simpleType>
+        <uint16_t>
+            <default>28</default>
+        </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <!-- end HTMGT attributes -->
 
 <attribute>
