@@ -223,6 +223,14 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_RDCLK_SELECT3,
         };
 
+        constexpr static const uint64_t RED_WATERFALL_BIT_POS[NUM_QUAD_PER_DP16] =
+        {
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT0,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT1,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT2,
+            MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0_01_DQSCLK_SELECT3,
+        };
+
         // READ_DELAY registers, indexed by rank_pair
         static const std::vector< std::vector< uint64_t > > READ_DELAY_REG;
 
@@ -2071,6 +2079,24 @@ inline uint64_t get_blue_waterfall( const fapi2::buffer<uint64_t>& i_data )
 }
 
 ///
+/// @brief Get the red waterfall for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in] i_data the value of the register
+/// @return value of the red waterfall
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline uint64_t get_red_waterfall( const fapi2::buffer<uint64_t>& i_data )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "Inserted quad value is not less than the maximum value");
+    uint64_t l_waterfall = 0;
+    i_data.extractToRight<TT::RED_WATERFALL_BIT_POS[QUAD], TT::WATERFALL_LEN>(l_waterfall);
+    return l_waterfall;
+}
+
+///
 /// @brief Get the gate delay for the given quad
 /// @tparam uint64_t QUAD - which quad to access
 /// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
@@ -2102,6 +2128,22 @@ inline void set_blue_waterfall( fapi2::buffer<uint64_t>& io_data, const uint64_t
 
     static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "QUAD value is not less than the maximum value");
     io_data.insertFromRight<TT::BLUE_WATERFALL_BIT_POS[QUAD], TT::WATERFALL_LEN>(i_waterfall);
+}
+
+///
+/// @brief Set the red waterfall for the given quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @tparam T fapi2 Target Type - defaults to TARGET_TYPE_MCA
+/// @tparam TT traits type defaults to dp16Traits<T>
+/// @param[in,out] io_data the value of the register
+/// @param[in] value of the red waterfall
+///
+template< uint64_t QUAD, fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = dp16Traits<T> >
+inline void set_red_waterfall( fapi2::buffer<uint64_t>& io_data, const uint64_t i_waterfall )
+{
+
+    static_assert(QUAD < TT::NUM_QUAD_PER_DP16, "QUAD value is not less than the maximum value");
+    io_data.insertFromRight<TT::RED_WATERFALL_BIT_POS[QUAD], TT::WATERFALL_LEN>(i_waterfall);
 }
 
 ///
