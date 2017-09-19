@@ -262,7 +262,7 @@ fapi2::ReturnCode platGetVPD(
                     l_rc.setPlatDataPtr(reinterpret_cast<void *>( l_errl ));
                     break;
                 }
-                l_full_dvpdVM = reinterpret_cast<uint32_t*>(l_dvpd_vm);
+                l_full_dvpdVM = (reinterpret_cast<uint32_t*>(l_dvpd_vm));
 
                 l_memd_found = find_memd_in_pnor(l_dvpd_vm,
                                 l_header, l_pMcsTarget, theSize);
@@ -273,7 +273,7 @@ fapi2::ReturnCode platGetVPD(
                 {
                     FAPI_INF("platGetVPD: Matching MEMD data was found in the "
                              "PNOR section, VM value is %llx. Reading in at "
-                             "offset %llx",l_full_dvpdVM, l_memd_offset_bytes);
+                             "offset %llx",l_full_dvpdVM[0], l_memd_offset_bytes);
                     l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
                                      l_pMapping,
                                      l_buffSize,
@@ -284,7 +284,7 @@ fapi2::ReturnCode platGetVPD(
                 {
                     FAPI_INF("platGetVPD: Matching MEMD data was not found in "
                              "the PNOR section, DVPD VM value is %llx",
-                             l_full_dvpdVM);
+                             l_full_dvpdVM[0]);
                 }
 
             }while(0);
@@ -301,7 +301,7 @@ fapi2::ReturnCode platGetVPD(
         {
             FAPI_INF("platGetVPD: MEMD data was not found in the PNOR "
                      "section. Using EEPROM. VM value is: %llx",
-                     l_full_dvpdVM);
+                     l_full_dvpdVM[0]);
 
             l_errl = deviceRead((TARGETING::Target *)l_pMcsTarget,
                                 l_pMapping,
@@ -455,7 +455,7 @@ bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
 {
     errlHndl_t l_errl = nullptr;
 
-    static bool memdFoundInPnor = false;
+    bool memdFoundInPnor = false;
     bool l_valid_memd = ((i_header.eyecatch == MEMD_VALID_HEADER) &
                     (i_header.header_version == MEMD_VALID_HEADER_VERSION) &
                     (i_header.memd_version == MEMD_VALID_MEMD_VERSION) );
@@ -466,6 +466,7 @@ bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
 
     if(l_valid_memd && !memdFoundInPnor)
     {
+        FAPI_INF("find_memd_in_pnor: MEMD is valid!");
         // Reset memd offset before we start the first iteration
         i_target->setAttr<TARGETING::ATTR_MEMD_OFFSET>(0);
 
@@ -480,6 +481,7 @@ bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
             uint64_t l_memd_offset = i_target->getAttr<
                         TARGETING::ATTR_MEMD_OFFSET>();
 
+            FAPI_INF("find_memd_in_pnor: attempting to read MEMD VM keyword");
             l_errl = deviceRead( i_target, l_memd_vm, i_vm_size,
                             DEVICE_MEMD_VPD_ADDRESS(
                                 MEMD_VPD::MEMD, MEMD_VPD::VM));
@@ -499,8 +501,8 @@ bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
                 // VM's don't match, we need to keep looking
                 FAPI_INF("find_memd_in_pnor: DVPD and MEMD VM's last nibble"
                          " don't match: %llx and %llx",
-                         reinterpret_cast<uint32_t*>(i_eepromVM),
-                         reinterpret_cast<uint32_t*>(l_memd_vm) );
+                         (reinterpret_cast<uint32_t*>(i_eepromVM))[0],
+                         (reinterpret_cast<uint32_t*>(l_memd_vm))[0] );
                 i_target->setAttr<TARGETING::ATTR_MEMD_OFFSET
                         >(l_memd_offset +
                           (i_header.expected_size_kb * 1000));
@@ -509,8 +511,10 @@ bool find_memd_in_pnor(uint8_t* i_eepromVM, MemdHeader_t i_header,
             {
                 FAPI_INF("find_memd_in_pnor: Matching MEMD data was found in "
                          "the PNOR section.  VM value is: %llx. Offset "
-                         "is %llx", reinterpret_cast<uint32_t*>(l_memd_vm),
-                         l_memd_offset);
+                         "is %llx, DVPD VM is %llx",
+                         (reinterpret_cast<uint32_t*>(l_memd_vm))[0],
+                         l_memd_offset,
+                         (reinterpret_cast<uint32_t*>(i_eepromVM))[0]);
                 memdFoundInPnor = true;
                 l_retValue = true;
                 break;
