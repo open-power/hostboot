@@ -118,33 +118,32 @@ void* host_gard( void *io_pArgs )
                    "collectGard returned error; breaking out");
                 break;
             }
-
-            if (l_err == NULL)
-            {
-                //  check and see if we still have enough hardware to continue
-                l_err = HWAS::checkMinimumHardware();
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      ERR_MRK"host_gard: "
-                      "check minimum hardware returned error; breaking out");
-                    break;
-                }
-            }
-            // If targets are deconfigured as a result of host_gard, they are
-            // done so using the PLID as the reason for deconfiguration.  This
-            // triggers the reconfigure loop attribute to be set, which causes
-            // undesirable behavior, so we need to reset it here:
-
-            // Read current value
-            TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-                l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-            // Turn off deconfigure bit
-            l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
-            // Write back to attribute
-            l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>
-                    (l_reconfigAttr);
         }
+
+        //  check and see if we still have enough hardware to continue
+        l_err = HWAS::checkMinimumHardware();
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                ERR_MRK"host_gard: "
+                "check minimum hardware returned error; breaking out");
+            break;
+        }
+
+        // If targets are deconfigured as a result of host_gard, they are
+        // done so using the PLID as the reason for deconfiguration.  This
+        // triggers the reconfigure loop attribute to be set, which causes
+        // undesirable behavior, so we need to reset it here:
+
+        // Read current value
+        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+        // Turn off deconfigure bit
+        l_reconfigAttr &= ~TARGETING::RECONFIGURE_LOOP_DECONFIGURE;
+        // Write back to attribute
+        l_pTopLevel->setAttr<TARGETING::ATTR_RECONFIGURE_LOOP>
+                (l_reconfigAttr);
+
 
         // Send message to FSP with HUID of master core
         msg_t * core_msg = msg_allocate();
