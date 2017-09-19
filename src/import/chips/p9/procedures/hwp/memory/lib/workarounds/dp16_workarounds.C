@@ -298,6 +298,107 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Fixes red waterfall values in a port
+/// @param[in] i_target - the target to operate on
+/// @param[in] i_rp - the rank pair to change
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_red_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp)
+{
+    // Checks if the workaround needs to be run
+    const bool l_attr_value = mss::chip_ec_feature_red_waterfall_adjust(i_target);
+
+    if(!l_attr_value)
+    {
+        FAPI_DBG("Skipping running fix_red_waterfall_gate %s", mss::c_str(i_target) );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Loops through the first 4 DP's as the last DP is a DP08 so we only need to do 2 quads
+    const std::vector<std::vector<uint64_t>> l_dp16_registers =
+    {
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_3},
+        },
+        {
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_0},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_1},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2},
+            {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3},
+        }
+    };
+    const std::vector<uint64_t> l_dp08_registers =
+    {
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR0_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR1_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR2_P0_4},
+        {MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4},
+    };
+
+    // Gets the number of primary ranks to loop through
+    std::vector<uint64_t> l_rank_pairs;
+    FAPI_TRY(mss::rank::get_rank_pairs(i_target, l_rank_pairs));
+
+    FAPI_INF("Changing red waterfalls for %s", mss::c_str(i_target));
+
+    // Loops through all DP16s
+    for(const auto& l_reg : l_dp16_registers[i_rp])
+    {
+        fapi2::buffer<uint64_t> l_waterfall;
+
+        // Getscoms
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_waterfall), "%s Failed to getScom from 0x%016lx",
+                 mss::c_str(i_target), l_reg);
+
+        // Updates the data for all quads
+        update_red_waterfall_for_quad<0>(l_waterfall);
+        update_red_waterfall_for_quad<1>(l_waterfall);
+        update_red_waterfall_for_quad<2>(l_waterfall);
+        update_red_waterfall_for_quad<3>(l_waterfall);
+
+        // Putscoms
+        FAPI_TRY(mss::putScom(i_target, l_reg, l_waterfall), "%s Failed to putScom to 0x%016lx",
+                 mss::c_str(i_target), l_reg);
+    }
+
+    // Now for the odd man out - the DP08, as it only has two quads.
+    // Note: We are not modifying the non-existant quads, as changing values in the non-existant DP08 has caused FIRs
+    {
+        fapi2::buffer<uint64_t> l_waterfall;
+
+        // Getscoms
+        FAPI_TRY(mss::getScom(i_target, l_dp08_registers[i_rp], l_waterfall), "%s Failed to getScom from 0x%016lx",
+                 mss::c_str(i_target), l_dp08_registers[i_rp]);
+
+        // Updates the data for all quads
+        update_red_waterfall_for_quad<0>(l_waterfall);
+        update_red_waterfall_for_quad<1>(l_waterfall);
+
+        // Putscoms
+        FAPI_TRY(mss::putScom(i_target, l_dp08_registers[i_rp], l_waterfall), "%s Failed to putScom to 0x%016lx",
+                 mss::c_str(i_target), l_dp08_registers[i_rp]);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Fixes blue waterfall values in a port
 /// @param[in] i_target - the target to operate on
 /// @param[in] i_always_run - ignores the attribute and always run - default = false

@@ -1284,8 +1284,8 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
                  "%s Failed to run dqs align workaround on rp %d", mss::c_str(i_target), i_rp);
     }
 
-    // Run cal steps between RDCLK_ALIGN and RD_CTR if any are selected - note RDCLK_ALIGN takes place after WR_LEVEL
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::RDCLK_ALIGN, mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN>())
+    // Run cal step READ CLOCK ALIGN
+    if (i_cal_steps_enabled.getBit<mss::cal_steps::RDCLK_ALIGN>())
     {
         // Turn off refresh
         FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
@@ -1293,11 +1293,35 @@ fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_
         // Sets up the cal steps in the buffer
         fapi2::buffer<uint32_t> l_steps_to_execute;
 
-        i_cal_steps_enabled.extract<mss::cal_steps::RDCLK_ALIGN,
-                                    mss::cal_steps::RDCLK_ALIGN_TO_RD_CTR_LEN,
-                                    mss::cal_steps::RDCLK_ALIGN>(l_steps_to_execute);
+        l_steps_to_execute.setBit<mss::cal_steps::RDCLK_ALIGN>();
 
-        FAPI_INF("%s Running rd_clk align through read centering vref on RP%d 0x%08x", mss::c_str(i_target), i_rp,
+        FAPI_INF("%s Running rd_clk align on RP%d 0x%08x", mss::c_str(i_target), i_rp,
+                 l_steps_to_execute);
+
+        // Undertake the calibration steps
+        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
+
+        // Run the red_waterfall workaround for low VDN sensitivity
+        // Increments the waterfall forward by one
+        FAPI_TRY( mss::workarounds::dp16::fix_red_waterfall_gate( i_target, i_rp) );
+
+        // Turn refresh back on
+        FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(i_target) );
+    }
+
+    if(i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR_2D_VREF, mss::cal_steps::READ_VREF_TO_READ_CTR_LEN>())
+    {
+        // Turn off refresh
+        FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
+
+        // Sets up the cal steps in the buffer
+        fapi2::buffer<uint32_t> l_steps_to_execute;
+
+        l_steps_to_execute.writeBit<mss::cal_steps::READ_CTR_2D_VREF>
+        (i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR_2D_VREF>());
+        l_steps_to_execute.writeBit<mss::cal_steps::READ_CTR>(i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR>());
+
+        FAPI_INF("%s Running read centering vref through read centering on RP%d 0x%08x", mss::c_str(i_target), i_rp,
                  l_steps_to_execute);
 
         // Undertake the calibration steps

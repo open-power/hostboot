@@ -197,6 +197,51 @@ fapi2::ReturnCode fix_blue_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYP
         const bool i_always_run = false );
 
 ///
+/// @brief Fixes red waterfall values in a port
+/// @param[in] i_target - the target to operate on
+/// @param[in] i_rp, the rank pair that's being trained
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode fix_red_waterfall_gate( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp);
+
+
+///
+/// @brief Moves the red waterfall forward by one
+/// @param[in,out] io_red_waterfall - the red waterfall value
+///
+inline void update_red_waterfall(uint64_t& io_red_waterfall)
+{
+    constexpr uint64_t MAX_RED_WATERFALL_VALUE = 4;
+
+    if (++io_red_waterfall >= MAX_RED_WATERFALL_VALUE)
+    {
+        io_red_waterfall = 0;
+    }
+}
+
+///
+/// @brief Gets the red waterfall and gate delay values for a given DP quad
+/// @tparam uint64_t QUAD - which quad to access
+/// @param[in,out] io_waterfall_reg   - waterfall register data
+///
+template< uint64_t QUAD>
+void update_red_waterfall_for_quad(fapi2::buffer<uint64_t>& io_waterfall_reg)
+{
+    constexpr uint64_t NUM_QUAD = 4;
+    // Valid quad values are from 0-3, exit if the requested value is greater
+    static_assert(QUAD < NUM_QUAD, "Inserted quad value is greater than or equal to 4");
+
+    // Gets the data for this Quad
+    auto l_red_waterfall = mss::dp16::get_red_waterfall<QUAD>(io_waterfall_reg);
+
+    // Updates the waterfall and gate delay
+    update_red_waterfall(l_red_waterfall);
+
+    // Sets the data back into the register
+    mss::dp16::set_red_waterfall<QUAD>(io_waterfall_reg, l_red_waterfall);
+}
+
+///
 /// @brief Modifies HW calibration results based upon workarounds
 /// @param[in]  i_target - the target to operate on
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
