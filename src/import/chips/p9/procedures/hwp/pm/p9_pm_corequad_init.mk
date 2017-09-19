@@ -24,4 +24,5 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_corequad_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_utils
 $(call BUILD_PROCEDURE)
