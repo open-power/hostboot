@@ -37,7 +37,7 @@
 #include    <config.h>
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
-#include    <p9_mss_thermal_init.H>
+#include    <p9c_mss_thermal_init.H>
 #include    <p9_throttle_sync.H>
 
 
@@ -52,67 +52,62 @@ void* call_mss_thermal_init (void *io_pArgs)
 {
     IStepError  l_StepError;
     errlHndl_t  l_errl  =   nullptr;
-//@TODO RTC:144076 L1 HWPs for Centaur+Cumulus
-#if 0
+
     // -- Cumulus only ---
-        // Get all Centaur targets
-        TARGETING::TargetHandleList l_memBufTargetList;
-        getAllChiplets(l_memBufTargetList, TYPE_MCBIST );
+    // Get all Centaur targets
+    TARGETING::TargetHandleList l_memBufTargetList;
+    getAllChiplets(l_memBufTargetList, TYPE_MEMBUF );
 
-        //  --------------------------------------------------------------------
-        //  run mss_thermal_init on all Centaurs
-        //  --------------------------------------------------------------------
-        for (TargetHandleList::const_iterator
-                l_iter = l_memBufTargetList.begin();
-                l_iter != l_memBufTargetList.end();
-                ++l_iter)
+    //  --------------------------------------------------------------------
+    //  run mss_thermal_init on all Centaurs
+    //  --------------------------------------------------------------------
+    for (TargetHandleList::const_iterator
+         l_iter = l_memBufTargetList.begin();
+         l_iter != l_memBufTargetList.end();
+         ++l_iter)
+    {
+        //  make a local copy of the target for ease of use
+        TARGETING::Target*  l_pCentaur = *l_iter;
+
+        //  write HUID of target
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapi_pCentaur
+          (l_pCentaur);
+
+        // Current run on target
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   "Running call_mss_thermal_init HWP on "
+                   "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+
+        FAPI_INVOKE_HWP( l_errl, p9c_mss_thermal_init, l_fapi_pCentaur );
+
+        if ( l_errl )
         {
-            //  make a local copy of the target for ease of use
-            TARGETING::Target*  l_pCentaur = *l_iter;
-
-            //  write HUID of target
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+                      "ERROR 0x%.8X: mss_thermal_init HWP returns error",
+                      l_errl->reasonCode());
 
-            fapi2::Target<fapi2::TARGET_TYPE_MCBIST> l_fapi_pCentaur
-                (l_pCentaur);
+            // capture the target data in the elog
+            ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
 
-            // Current run on target
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "Running call_mss_thermal_init HWP on "
-                    "target HUID %.8X", TARGETING::get_huid(l_pCentaur));
+            // Create IStep error log and cross reference
+            // to error that occurred
+            l_StepError.addErrorDetails( l_errl );
 
-            FAPI_INVOKE_HWP( l_errl, p9_mss_thermal_init, l_fapi_pCentaur );
+            // Commit Error
+            errlCommit( l_errl, HWPF_COMP_ID );
 
-            if ( l_errl )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "ERROR 0x%.8X: mss_thermal_init HWP returns error",
-                        l_errl->reasonCode());
-
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_pCentaur).addToLog( l_errl );
-
-                // Create IStep error log and cross reference
-                // to error that occurred
-                l_StepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS : mss_thermal_init HWP( )" );
-            }
-        }
-        if (l_errl)
-        {
             break;
         }
-        #endif
+        else
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "SUCCESS : mss_thermal_init HWP( )" );
+        }
+    }
+
     do
     {
         // Run proc throttle sync
@@ -128,8 +123,8 @@ void* call_mss_thermal_init (void *io_pArgs)
             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2CpuTarget((l_procChip));
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_throttle_sync HWP on "
-                   "target HUID %.8X", TARGETING::get_huid(l_procChip));
+                       "Running p9_throttle_sync HWP on "
+                       "target HUID %.8X", TARGETING::get_huid(l_procChip));
 
             // Call p9_throttle_sync
             FAPI_INVOKE_HWP( l_errl, p9_throttle_sync, l_fapi2CpuTarget );
