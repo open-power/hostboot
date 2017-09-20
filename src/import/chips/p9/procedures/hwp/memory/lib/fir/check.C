@@ -197,17 +197,10 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
 
     // Creating a mask to check for FIR errors.
-    // These are DP16 parity errors that would be triggered in case of a general PHY error
+    // These are DP16 parity errors that would be triggered in case of an init cal error
     // During draminit_training, this would mean a training error dealing with the PHY
     fapi2::buffer<uint64_t> l_phyfir_mask;
-    l_phyfir_mask.setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_0>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_1>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_3>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_4>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_5>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_6>()
-    .setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_7>();
+    l_phyfir_mask.setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>();
 
     fapi2::buffer<uint64_t> l_phyfir_data;
     fapi2::buffer<uint64_t> l_phyfir_masked;
@@ -215,6 +208,10 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY( mss::getScom(l_mca, MCA_IOM_PHY0_DDRPHY_FIR_REG, l_phyfir_data) );
 
     l_phyfir_masked = l_phyfir_data & l_phyfir_mask;
+
+    // Clear the PHY FIR ERROR 2 bit so we don't keep failing training and training advance on this port
+    // We'll have the error log to know what fir bit triggered and when, so we should be fine clearing here
+    FAPI_TRY( mss::putScom(l_mca, MCA_IOM_PHY0_DDRPHY_FIR_REG_AND, l_phyfir_mask.invert()) );
 
     FAPI_ASSERT( l_phyfir_masked == 0,
                  fapi2::MSS_DRAMINIT_TRAINING_PORT_FIR()
