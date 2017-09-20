@@ -26,6 +26,7 @@ ROOTPATH = ../../../..
 MODULE = istep14
 
 PROCEDURE_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
+CEN_PROC_PATH = ${ROOTPATH}/src/import/chips/centaur/procedures
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
@@ -41,6 +42,9 @@ EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
 EXTRAINCDIR += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
+EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory
+EXTRAINCDIR += ${CEN_PROC_PATH}/hwp/memory/lib/shared/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/
 
 OBJS += call_mss_memdiag.o
 OBJS += call_mss_thermal_init.o
@@ -68,6 +72,11 @@ OBJS += p9_setup_bars.o
 OBJS += p9_fbc_utils.o
 OBJS += p9_fbc_smp_utils.o
 OBJS += p9_mpipl_chip_cleanup.o
+OBJS += p9c_mss_thermal_init.o
+OBJS += p9c_mss_unmask_errors.o
+OBJS += p9c_mss_power_cleanup.o
+OBJS += p9c_cen_stopclocks.o
+OBJS += p9c_mss_maint_cmds.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
@@ -76,6 +85,8 @@ OBJS += p9_mpipl_chip_cleanup.o
 
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_memdiag.mk
 # include ${PROCEDURE_PATH}/hwp/memory/p9_mss_thermal_init.mk
+# include ${CEN_PROC_PATH}/hwp/memory/p9c_mss_thermal_init.mk
+# include ${CEN_PROC_PATH}/hwp/memory/p9c_mss_unmask_errors.mk
 include ${PROCEDURE_PATH}/hwp/nest/p9_throttle_sync.mk
 include ${PROCEDURE_PATH}/hwp/memory/p9_mss_power_cleanup.mk
 include ${ROOTPATH}/config.mk
@@ -85,3 +96,4 @@ VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/eff_config/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/utils/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/mcbist/
 VPATH    += ${PROCEDURE_PATH}/hwp/memory/lib/dimm/
+VPATH    += ${CEN_PROC_PATH}/hwp/memory/

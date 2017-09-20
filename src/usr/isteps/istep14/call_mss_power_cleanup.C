@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include    <fapi2.H>
 #include    <fapi2/plat_hwp_invoker.H>
 #include    <p9_mss_power_cleanup.H>
+#include    <p9c_mss_power_cleanup.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -94,8 +95,6 @@ void* call_mss_power_cleanup (void *io_pArgs)
         }
     }
 
-//@TODO RTC:144076 L1 HWPs for Centaur+Cumulus
-#if 0
     // -- Cumulus only
     // Get a list of all present Centaurs
     TargetHandleList l_presCentaurs;
@@ -144,18 +143,14 @@ void* call_mss_power_cleanup (void *io_pArgs)
                         l_currMBA0Huid, l_currMBA1Huid);
 
         // Create FAPI Targets.
-        // @TODO RTC:155020
-        /*const fapi::Target l_fapiCentaurTarget(TARGET_TYPE_MEMBUF_CHIP,
-                (const_cast<TARGETING::Target*>(l_pCentaur)));
-        const fapi::Target l_fapiMba0Target(TARGET_TYPE_MBA_CHIPLET,
-                (const_cast<TARGETING::Target*>(l_presMbas[0])));
-        const fapi::Target l_fapiMba1Target(TARGET_TYPE_MBA_CHIPLET,
-                (const_cast<TARGETING::Target*>(l_presMbas[1])));
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiCentaurTarget( l_pCentaur );
+        fapi2::Target<fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapiMba0Target( l_presMbas[0] );
+        fapi2::Target<fapi2::TARGET_TYPE_MBA_CHIPLET> l_fapiMba1Target( l_presMbas[1] );
 
         //  Call the HWP with each fapi::Target
-        FAPI_INVOKE_HWP(l_err, mss_power_cleanup, l_fapiCentaurTarget,
+        FAPI_INVOKE_HWP(l_err, p9c_mss_power_cleanup, l_fapiCentaurTarget,
                         l_fapiMba0Target, l_fapiMba1Target);
-        */
+
         if (l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
@@ -179,7 +174,6 @@ void* call_mss_power_cleanup (void *io_pArgs)
                            l_currMBA0Huid, l_currMBA1Huid);
         }
     }
-#endif
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_mss_power_cleanup exit" );
 
