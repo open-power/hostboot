@@ -43,7 +43,6 @@
 #include <generic/memory/lib/spd/common/ddr4/spd_decoder_ddr4.H>
 #include <generic/memory/lib/spd/rdimm/ddr4/rdimm_decoder_ddr4.H>
 #include <generic/memory/lib/spd/common/rcw_settings.H>
-#include <generic/memory/lib/spd/spd_checker.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_math.H>
@@ -2156,29 +2155,55 @@ fapi2::ReturnCode decoder_v1_0::min_twtr_l( int64_t& o_value) const
 }
 
 ///
-/// @brief Decodes connector to SDRAM bit mapping
-/// @param[out] o_value vector of bit nibble maps for SPD bytes 60 - 77
+/// @brief Decodes Package Rank Map
+/// @param[out] o_value vector of package rank maps for SPD bytes 60 - 77
 /// @return FAPI2_RC_SUCCESS iff okay
 /// @note SPD Byte 60 - 77
 /// @note JEDEC Standard No. 21-C
-/// @note Page 40
+/// @note Page 45
 /// @note DDR4 SPD Document Release 3
 ///
-fapi2::ReturnCode decoder_v1_0::connector_to_sdram( std::vector<uint8_t>& o_value ) const
+fapi2::ReturnCode decoder_v1_0::package_rank_map( std::vector<uint8_t>& o_value ) const
 {
-    constexpr size_t BIT_MAPPING_START = 60;
-    constexpr size_t BIT_MAPPING_END = 77;
-
-    // Clear vector. Just.In.Case
     o_value.clear();
 
-    for( size_t byte = BIT_MAPPING_START; byte <= BIT_MAPPING_END; ++byte )
-    {
-        o_value.push_back(iv_spd_data[byte]);
-    }
+    FAPI_TRY( (sdram_connector_helper<DQ0_31, PKG_RANK_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for DQ0_31, PKG_RANK_MAP", mss::c_str(iv_target) );
 
-    // SPD doesn't provide a range of invalid values to test against
-    return fapi2::FAPI2_RC_SUCCESS;
+    FAPI_TRY( (sdram_connector_helper<DQ32_63, PKG_RANK_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for DQ32_63, PKG_RANK_MAP", mss::c_str(iv_target) );
+
+    FAPI_TRY( (sdram_connector_helper<CB0_7, PKG_RANK_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for CB0_7, PKG_RANK_MAP", mss::c_str(iv_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Decodes Nibble map
+/// @param[out] o_value vector of bit order encoding for SPD bytes 60 - 77
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note SPD Byte 60 - 77
+/// @note JEDEC Standard No. 21-C
+/// @note Page 45
+/// @note DDR4 SPD Document Release 3
+///
+fapi2::ReturnCode decoder_v1_0::nibble_map( std::vector<uint8_t>& o_value ) const
+{
+    o_value.clear();
+
+    FAPI_TRY( (sdram_connector_helper<DQ0_31, NIBBLE_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for DQ0_31, NIBBLE_MAP", mss::c_str(iv_target) );
+
+    FAPI_TRY( (sdram_connector_helper<DQ32_63, NIBBLE_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for DQ32_63, NIBBLE_MAP", mss::c_str(iv_target) );
+
+    FAPI_TRY( (sdram_connector_helper<CB0_7, NIBBLE_MAP>(o_value)),
+              "%s Failed to sdram_connector_helper for CB0_7, NIBBLE_MAP", mss::c_str(iv_target) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
