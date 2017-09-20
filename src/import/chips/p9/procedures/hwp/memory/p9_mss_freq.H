@@ -37,7 +37,6 @@
 #define MSS_FREQ_H_
 #include <utility>
 #include <fapi2.H>
-#include <lib/freq/cas_latency.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/conversions.H>
 
