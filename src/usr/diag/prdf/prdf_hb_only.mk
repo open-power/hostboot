@@ -56,6 +56,9 @@ prd_incpath += ${ROOTPATH}/src/include/usr/fapi2
 prd_incpath += ${ROOTPATH}/src/include/usr/ibscom
 prd_incpath += ${ROOTPATH}/src/include/usr/util
 prd_incpath += ${ROOTPATH}/src/include/usr/isteps/pm/
+prd_incpath += ${ROOTPATH}/src/import/chips/centaur/common/include
+prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
+prd_incpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/shared
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/common/include/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 prd_incpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/
@@ -174,6 +177,9 @@ prd_obj_no_sim += p9_l2err_linedelete.o
 prd_obj_no_sim += p9_l2err_extract.o
 prd_obj_no_sim += p9_l3err_linedelete.o
 prd_obj_no_sim += p9_l3err_extract.o
+
+prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
+prd_obj_no_sim += p9c_mss_maint_cmds.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
