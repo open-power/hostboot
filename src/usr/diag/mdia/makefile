@@ -42,6 +42,12 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/targeting/common
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+##########################################################
+# Following is needed to include p9c_mss_maint_cmds.H
+##########################################################
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory/lib/shared
 
 MODULE = mdia
 

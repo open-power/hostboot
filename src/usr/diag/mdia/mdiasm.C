@@ -46,6 +46,7 @@
 #include <config.h>
 #include <initservice/initserviceif.H>
 #include <sys/time.h>
+#include <p9c_mss_maint_cmds.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -565,29 +566,25 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                 //target type is MBA
                 if ( TYPE_MBA == trgtType )
                 {
-                    //TODO RTC 155857
-                    //no longer have the mss_MaintCmd class at the moment
-                    //will need to update once we have Cumulus support
+                    fapi2::ReturnCode fapirc =
+                        static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd();
+                    err = fapi2::rcToErrl(fapirc);
 
-                    //fapi2::ReturnCode fapirc =
-                    //    static_cast<mss_MaintCmd *>((*wit)->data)->stopCmd();
-                    //err = fapi2::rcToErrl(fapirc);
+                    if( nullptr != err )
+                    {
+                        MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
 
-                    //if( nullptr != err )
-                    //{
-                    //    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-                    //    errlCommit(err, MDIA_COMP_ID);
-                    //}
+                    fapirc =
+                        static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd();
+                    err = fapi2::rcToErrl(fapirc);
 
-                    //fapirc =
-                    //    static_cast<mss_MaintCmd *>((*wit)->data)->cleanupCmd();
-                    //err = fapi2::rcToErrl(fapirc);
-
-                    //if( nullptr != err )
-                    //{
-                    //    MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-                    //    errlCommit(err, MDIA_COMP_ID);
-                    //}
+                    if( nullptr != err )
+                    {
+                        MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+                        errlCommit(err, MDIA_COMP_ID);
+                    }
                 }
                 //target type is MCBIST
                 else
@@ -1018,9 +1015,7 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         //target type is MBA
         if (TYPE_MBA == trgtType)
         {
-            /*TODO RTC 155857
-
-            uint64_t stopCondition =
+            uint32_t stopCondition =
                 mss_MaintCmd::STOP_END_OF_RANK                  |
                 mss_MaintCmd::STOP_ON_MPE                       |
                 mss_MaintCmd::STOP_ON_UE                        |
@@ -1034,8 +1029,8 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 stopCondition |= mss_MaintCmd::STOP_ON_HARD_NCE_ETE;
             }
 
-            ecmdDataBufferBase startAddr(64), endAddr(64);
-            mss_MaintCmd * cmd = NULL;
+            fapi2::buffer<uint64_t> startAddr, endAddr;
+            mss_MaintCmd * cmd = nullptr;
             cmd = static_cast<mss_MaintCmd *>(i_wfp.data);
             fapi2::Target<fapi2::TARGET_TYPE_MBA> fapiMba(target);
 
@@ -1049,12 +1044,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 break;
             }
 
-            fapirc = mss_get_address_range(
+            fapi2::ReturnCode fapirc = mss_get_address_range(
                     fapiMba,
                     MSS_ALL_RANKS,
                     startAddr,
                     endAddr);
-            err = fapiRcToErrl(fapirc);
+            err = fapi2::rcToErrl(fapirc);
 
             if(err)
             {
@@ -1062,33 +1057,45 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 break;
             }
 
+            ConstTargetHandle_t parent = getParentChip(target);
+
             // new command...use the full range
 
             switch(workItem)
             {
                 case START_RANDOM_PATTERN:
-                    cmd = new mss_SuperFastRandomInit(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            mss_MaintCmd::PATTERN_RANDOM,
-                            stopCondition,
-                            false);
+                    // TODO RTC 180118
+                    // For Cumulus PON we will only support init to 0
+                    if ( MODEL_CUMULUS != parent->getAttr<ATTR_MODEL>() )
+                    {
+                        cmd = new mss_SuperFastRandomInit(
+                                fapiMba,
+                                startAddr,
+                                endAddr,
+                                mss_MaintCmd::PATTERN_RANDOM,
+                                stopCondition,
+                                false);
 
-                    MDIA_FAST("sm: random init %p on: %x", cmd,
-                            get_huid(target));
+                        MDIA_FAST("sm: random init %p on: %x", cmd,
+                                  get_huid(target));
+                    }
                     break;
 
                 case START_SCRUB:
-                    cmd = new mss_SuperFastRead(
-                            fapiMba,
-                            startAddr,
-                            endAddr,
-                            stopCondition,
-                            false);
+                    // TODO RTC 180118
+                    // For Cumulus PON we will only support init to 0
+                    if ( MODEL_CUMULUS != parent->getAttr<ATTR_MODEL>() )
+                    {
+                        cmd = new mss_SuperFastRead(
+                                fapiMba,
+                                startAddr,
+                                endAddr,
+                                stopCondition,
+                                false);
 
-                    MDIA_FAST("sm: scrub %p on: %x", cmd,
-                            get_huid(target));
+                        MDIA_FAST("sm: scrub %p on: %x", cmd,
+                                  get_huid(target));
+                    }
                     break;
                 case START_PATTERN_0:
                 case START_PATTERN_1:
@@ -1144,7 +1151,6 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
                 }
             }
 
-            */
         }
         //target type is MCBIST
         else
@@ -1376,41 +1382,40 @@ bool StateMachine::processMaintCommandEvent(const MaintCommandEvent & i_event)
         //target type is MBA
         if(TYPE_MBA == trgtType)
         {
-            //TODO RTC 155857
-            //mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
-            //
-            //if(cmd && (flags & STOP_CMD))
-            //{
-            //    MDIA_FAST("sm: stopping command: %p", target);
+            mss_MaintCmd * cmd = static_cast<mss_MaintCmd *>(wfp.data);
 
-            //    fapi2::ReturnCode fapirc = cmd->stopCmd();
-            //    err = fapi2::rcToErrl(fapirc);
+            if(cmd && (flags & STOP_CMD))
+            {
+                MDIA_FAST("sm: stopping command: %p", target);
 
-            //    if (nullptr != err)
-            //    {
-            //        MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
-            //        errlCommit(err, MDIA_COMP_ID);
-            //    }
-            //}
+                fapi2::ReturnCode fapirc = cmd->stopCmd();
+                err = fapi2::rcToErrl(fapirc);
 
-            //if(cmd && (flags & CLEANUP_CMD))
-            //{
-            //    // restore any init settings that
-            //    // may have been changed by the command
+                if (nullptr != err)
+                {
+                    MDIA_ERR("sm: mss_MaintCmd::stopCmd failed");
+                    errlCommit(err, MDIA_COMP_ID);
+                }
+            }
 
-            //    fapi2::ReturnCode fapirc = cmd->cleanupCmd();
-            //    err = fapi2::rcToErrl(fapirc);
-            //    if(nullptr != err)
-            //    {
-            //        MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
-            //        errlCommit(err, MDIA_COMP_ID);
-            //    }
-            //}
+            if(cmd && (flags & CLEANUP_CMD))
+            {
+                // restore any init settings that
+                // may have been changed by the command
 
-            //if(cmd && (flags & DELETE_CMD))
-            //{
-            //    delete cmd;
-            //}
+                fapi2::ReturnCode fapirc = cmd->cleanupCmd();
+                err = fapi2::rcToErrl(fapirc);
+                if(nullptr != err)
+                {
+                    MDIA_ERR("sm: mss_MaintCmd::cleanupCmd failed");
+                    errlCommit(err, MDIA_COMP_ID);
+                }
+            }
+
+            if(cmd && (flags & DELETE_CMD))
+            {
+                delete cmd;
+            }
         }
         //target type is MCBIST
         else

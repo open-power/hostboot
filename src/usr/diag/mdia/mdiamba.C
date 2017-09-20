@@ -141,6 +141,14 @@ errlHndl_t getDiagnosticMode(
             o_mode = FOUR_PATTERNS;
         }
 
+        // TODO RTC 180118
+        // For Cumulus PON we will only support init to 0
+        ConstTargetHandle_t parent = getParentChip( i_trgt );
+        if ( MODEL_CUMULUS == parent->getAttr<ATTR_MODEL>() )
+        {
+            o_mode = ONE_PATTERN;
+        }
+
     } while(0);
 
     MDIA_FAST("getDiagnosticMode: trgt: %x, o_mode: 0x%x, "
