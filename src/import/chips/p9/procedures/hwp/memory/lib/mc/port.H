@@ -385,9 +385,9 @@ fapi2::ReturnCode setup_read_pointer_delay (const fapi2::Target<T>& i_target)
     FAPI_TRY( mss::read_recr_register(i_target, l_data ), "%s: Failed read_recr_register", mss::c_str(i_target));
     mss::set_read_pointer_delay(l_data, mss::ON);
 
-    // Check for manufacturing threshold and disable TCE correction
+    // Check for manufacturing disable dram repair flag to disable TCE correction
     FAPI_TRY( mss::mnfg_flags(mnfg_flag), "%s: Failed mnfg_flags check", mss::c_str(i_target) );
-    l_state = (mnfg_flag == fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_THRESHOLDS) ? mss::OFF : mss::ON;
+    l_state = (mnfg_flag == fapi2::ENUM_ATTR_MNFG_FLAGS_MNFG_DISABLE_DRAM_REPAIRS ) ? mss::OFF : mss::ON;
     mss::set_tce_correction(l_data, l_state);
 
     FAPI_TRY( mss::write_recr_register(i_target, l_data), "%s: Failed write_recr_register", mss::c_str(i_target));
