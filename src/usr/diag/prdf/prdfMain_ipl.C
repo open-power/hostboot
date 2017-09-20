@@ -40,7 +40,7 @@
 
 // Platform includes
 //#include <prdfCenMbaDataBundle.H> TODO RTC 166802
-//#include <prdfMbaDomain.H> TODO RTC 155857
+//#include <prdfMbaDomain.H> TODO RTC 157888
 #include <prdfPlatServices.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McbistDomain.H>
@@ -157,7 +157,7 @@ errlHndl_t startScrub()
         //master proc is CUMULUS, use MBA
         if ( MODEL_CUMULUS == getChipModel( getMasterProc() ) )
         {
-            //TODO RTC 155857
+            //TODO RTC 157888
             // Start scrubbing on all MBAs.
             //MbaDomain * domain = (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
             //if ( nullptr == domain )
