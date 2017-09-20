@@ -96,7 +96,6 @@ enum
     MCBIST_FIR_ACT0         = 0x07012306,
     MCBIST_FIR_ACT1         = 0x07012307,
 
-    //TODO RTC 155857
     // mcs unit regs
     MCI_FIR                 = 0x02011840,
     MCI_FIR_MASK            = 0x02011843,
