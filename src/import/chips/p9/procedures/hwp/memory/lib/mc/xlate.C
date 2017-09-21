@@ -936,7 +936,7 @@ fapi2::ReturnCode xlate_dimm_2R2T8Gbx4( const dimm::kind& i_kind,
 
     // We're basically a 2R 4Gbx4 with an extra row. So lets setup like we're one of those,
     // add row 16 and shift the D bit as needed.
-    xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2);
+    FAPI_TRY(xlate_dimm_2R2T4Gbx4(i_kind, i_offset, i_largest, io_xlate0, io_xlate1, io_xlate2));
 
     // Tell the MC which of the row bits are valid, and map the DIMM selector
     // We're a 17 row DIMM, so ROW16 is valid.
@@ -1941,7 +1941,7 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds
                      set_DIMM_TYPE(k.iv_dimm_type).
                      set_ROWS(k.iv_rows).
                      set_SIZE(k.iv_size),
-                     "no address translation funtion for DIMM %s %dMR (%d total ranks) %dGbx%d (%dGB) %d rows in slot %d",
+                     "no address translation function for DIMM %s %dMR (%d total ranks) %dGbx%d (%dGB) %d rows in slot %d",
                      mss::c_str(k.iv_target),
                      k.iv_master_ranks,
                      k.iv_total_ranks,
