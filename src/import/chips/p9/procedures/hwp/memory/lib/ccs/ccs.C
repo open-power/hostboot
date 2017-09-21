@@ -37,6 +37,7 @@
 
 #include <mss.H>
 #include <lib/ccs/ccs.H>
+#include <lib/fir/check.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -83,6 +84,7 @@ fapi2::ReturnCode fail_type( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                              const uint64_t& i_type,
                              const fapi2::Target<TARGET_TYPE_MCA>& i_mca )
 {
+    fapi2::ReturnCode l_failing_rc(fapi2::FAPI2_RC_SUCCESS);
     // Including the MCA_TARGET here and below at CAL_TIMEOUT since these problems likely lie at the MCA level
     // So we disable the PORT and hopefully that's it
     // If the problem lies with the MCBIST, it'll just have to loop
@@ -112,7 +114,10 @@ fapi2::ReturnCode fail_type( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
                 fapi2::MSS_CCS_HUNG().set_MCBIST_TARGET(i_target),
                 "%s CCS appears hung", mss::c_str(i_target));
 fapi_try_exit:
-    return fapi2::current_err;
+    // Due to the PRD update, we need to check for FIR's
+    // If any FIR's have lit up, this CCS fail could have been caused by the FIR
+    // So, let PRD retrigger this step to see if we can resolve the issue
+    return mss::check::fir_or_pll_fail(i_target, fapi2::current_err);
 }
 
 ///
