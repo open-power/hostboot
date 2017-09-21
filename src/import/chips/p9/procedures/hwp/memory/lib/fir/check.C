@@ -36,6 +36,8 @@
 #include <fapi2.H>
 #include <p9_mc_scom_addresses.H>
 #include <p9_mc_scom_addresses_fld.H>
+#include <p9_perv_scom_addresses.H>
+#include <p9_perv_scom_addresses_fld.H>
 
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/fir/fir.H>
@@ -205,6 +207,9 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
     fapi2::buffer<uint64_t> l_phyfir_data;
     fapi2::buffer<uint64_t> l_phyfir_masked;
 
+    // If we have a FIR that is lit up, we want to see if it could have been caused by a more drastic FIR
+    bool l_check_fir = false;
+
     FAPI_TRY( mss::getScom(l_mca, MCA_IOM_PHY0_DDRPHY_FIR_REG, l_phyfir_data) );
 
     l_phyfir_masked = l_phyfir_data & l_phyfir_mask;
@@ -213,6 +218,8 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
     // We'll have the error log to know what fir bit triggered and when, so we should be fine clearing here
     FAPI_TRY( mss::putScom(l_mca, MCA_IOM_PHY0_DDRPHY_FIR_REG_AND, l_phyfir_mask.invert()) );
 
+    // Check the FIR here
+    l_check_fir = true;
     FAPI_ASSERT( l_phyfir_masked == 0,
                  fapi2::MSS_DRAMINIT_TRAINING_PORT_FIR()
                  .set_PHY_FIR(l_phyfir_masked)
@@ -222,7 +229,202 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
                  mss::c_str(i_target), l_phyfir_masked);
 
 fapi_try_exit:
+
+    // Handle any fails seen above accordingly
+    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_check_fir);
+}
+
+// Declares FIR registers that are re-used between multiple functions
+// Vectors of FIR and mask registers to read through
+// As check_fir can be called in multiple places, we don't know what the mask may hold
+// In order to tell if a FIR is legit or not, we read the FIR and check it against the mask reg
+// Note: using a vector here in case we need to expand
+static const std::vector<std::pair<uint64_t, uint64_t>> MCBIST_FIR_REGS =
+{
+    // MCBIST FIR
+    {MCBIST_MCBISTFIRQ, MCBIST_MCBISTFIRMASK},
+};
+
+static const std::vector<std::pair<uint64_t, uint64_t>> MCA_FIR_REGS =
+{
+    // MCA ECC FIR
+    {MCA_FIR, MCA_MASK},
+    // MCA CAL FIR
+    {MCA_MBACALFIRQ, MCA_MBACALFIR_MASK},
+    // DDRPHY FIR
+    {MCA_IOM_PHY0_DDRPHY_FIR_REG, MCA_IOM_PHY0_DDRPHY_FIR_MASK_REG},
+};
+
+///
+/// @brief Checks whether any of the PLL unlock values are set
+/// @param[in] i_local_fir - the overall FIR register
+/// @param[in] i_perv_fir - the pervasive PLL FIR
+/// @param[in] i_mc_fir - the memory controller FIR
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+bool pll_unlock( const fapi2::buffer<uint64_t>& i_local_fir,
+                 const fapi2::buffer<uint64_t>& i_perv_fir,
+                 const fapi2::buffer<uint64_t>& i_mc_fir )
+{
+    // Note: the following registers did not have the scom fields defined, so we're constexpr'ing them here
+    constexpr uint64_t PERV_TP_ERROR_START = 25;
+    constexpr uint64_t PERV_TP_ERROR_LEN = 4;
+    constexpr uint64_t PERV_MC_ERROR_START = 25;
+
+    // No overall FIR (bit 21) was set, so just exit
+    if(!i_local_fir.getBit<PERV_1_LOCAL_FIR_IN21>())
+    {
+        FAPI_INF("Did not have the PERV_LOCAL_FIR bit set. No PLL error, exiting");
+        return false;
+    }
+
+    // Now, identify whether a PLL unlock caused the FIR bit to fail
+    FAPI_INF("PERV_TP_ERROR_REG %s PERV_MC01_ERROR_REG %s",
+             i_perv_fir.getBit<PERV_TP_ERROR_START, PERV_TP_ERROR_LEN>() ? "PLL lock fail" : "PLL ok",
+             i_mc_fir.getBit<PERV_MC_ERROR_START>() ? "PLL lock fail" : "PLL ok");
+
+    // We have a PLL unlock if the MC PLL unlock FIR bit is on or any of the TP PLL unlock bits are on
+    return (i_mc_fir.getBit<PERV_MC_ERROR_START>()) || (i_perv_fir.getBit<PERV_TP_ERROR_START, PERV_TP_ERROR_LEN>());
+}
+
+///
+/// @brief Checks whether any PLL FIRs have been set on a target
+/// @param[in] i_target - the target on which to operate
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode pll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, bool& o_fir_error )
+{
+    // Sets o_fir_error to false to begin with, just in case we have scom issues
+    o_fir_error = false;
+
+    // Gets the processor target
+    const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+
+    // Gets the register data
+    fapi2::buffer<uint64_t> l_local_fir;
+    fapi2::buffer<uint64_t> l_perv_fir;
+    fapi2::buffer<uint64_t> l_mc_fir;
+
+    FAPI_TRY(mss::getScom(l_proc, PERV_TP_LOCAL_FIR, l_local_fir), "%s failed to get 0x%016llx", mss::c_str(i_target),
+             PERV_TP_LOCAL_FIR);
+    FAPI_TRY(mss::getScom(l_proc, PERV_TP_ERROR_REG, l_perv_fir), "%s failed to get 0x%016llx", mss::c_str(i_target),
+             PERV_TP_ERROR_REG);
+    FAPI_TRY(mss::getScom(i_target, PERV_MC01_ERROR_REG, l_mc_fir), "%s failed to get 0x%016llx", mss::c_str(i_target),
+             PERV_MC01_ERROR_REG);
+
+    // Checks the data
+    o_fir_error = pll_unlock(l_local_fir, l_perv_fir, l_mc_fir);
+
+fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Checks whether any FIR have lit up
+/// @param[in] i_target - the target on which to operate - MCBIST specialization
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< >
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target, bool& o_fir_error )
+{
+    // Start by assuming we do not have a FIR
+    o_fir_error = false;
+
+    // Loop, check the scoms, and check the FIR
+    // Note: we return out if any FIR is bad
+    for(const auto& l_fir_reg : MCBIST_FIR_REGS)
+    {
+        FAPI_TRY(fir_with_mask(i_target, l_fir_reg, o_fir_error));
+
+        // Exit if we found a FIR
+        if(o_fir_error)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
+    // Loop through all MCA's and all MCA FIR's
+    for(const auto& l_mca : mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target))
+    {
+        for(const auto& l_fir_reg : MCA_FIR_REGS)
+        {
+            FAPI_TRY(fir_with_mask(l_mca, l_fir_reg, o_fir_error));
+
+            // Exit if we found a FIR
+            if(o_fir_error)
+            {
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+    }
+
+    // Lastly, check for PLL unlocks
+    FAPI_TRY(pll_fir(i_target, o_fir_error));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Checks whether any FIR have lit up
+/// @param[in] i_target - the target on which to operate - MCA specialization
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< >
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, bool& o_fir_error )
+{
+    const auto& l_mcbist = mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target);
+    // Start by assuming we do not have a FIR
+    o_fir_error = false;
+
+    // Loop, check the scoms, and check the FIR
+    // Note: we return out if any FIR is bad
+    for(const auto& l_fir_reg : MCBIST_FIR_REGS)
+    {
+        FAPI_TRY(fir_with_mask(l_mcbist, l_fir_reg, o_fir_error));
+
+        // Exit if we found a FIR
+        if(o_fir_error)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
+    // Loop through all MCA FIR's
+    for(const auto& l_fir_reg : MCA_FIR_REGS)
+    {
+        FAPI_TRY(fir_with_mask(i_target, l_fir_reg, o_fir_error));
+
+        // Exit if we found a FIR
+        if(o_fir_error)
+        {
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
+    // Lastly, check for PLL unlocks
+    FAPI_TRY(pll_fir(l_mcbist, o_fir_error));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Checks whether any FIR have lit up
+/// @param[in] i_target - the target on which to operate - DIMM specialization
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< >
+fapi2::ReturnCode bad_fir_bits( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_fir_error )
+{
+    const auto l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+    return bad_fir_bits(l_mca, o_fir_error);
 }
 
 }
