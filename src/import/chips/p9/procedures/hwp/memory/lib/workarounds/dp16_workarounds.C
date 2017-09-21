@@ -47,6 +47,7 @@
 #include <lib/phy/phy_cntrl.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/bit_count.H>
+#include <lib/fir/check.H>
 
 namespace mss
 {
@@ -547,9 +548,12 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
     // If we can't, exit with success
     if (! chip_ec_feature_mss_dqs_workaround(i_target) )
     {
-        FAPI_DBG("Skipping DQS workaround because of ec feature attribute");
+        FAPI_DBG("%s Skipping DQS workaround because of ec feature attribute", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    // Boolean to keep track of if a fail was calibration related, or scom related
+    bool l_cal_fail = false;
 
     FAPI_TRY( eff_dram_width( i_target, l_dram_width) );
 
@@ -603,6 +607,8 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
     // Clear all disable bits - this will cause calibration to re-run everything that failed, including WR LVL fails
     FAPI_TRY(mss::workarounds::dp16::dqs_align::reset_disables(i_target, i_rp));
 
+    // Next, we're checking for CAL fails, so make sure to check the FIR's below
+    l_cal_fail = true;
 
     // If the loop timed out, bomb out
     // If this is firmware, they'll log it as info and run to memdiags
@@ -617,11 +623,16 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
                  "%s i_rp %lu DQS workaround failed! 10 loops reached without everything passing",
                  mss::c_str(i_target), i_rp);
 
+    // Below, the errors are scom related, no need to check the FIR's
+    l_cal_fail = false;
+
     // Now plop the delays back in to the registers
     FAPI_TRY(mss::workarounds::dp16::dqs_align::set_passing_values( i_target, i_rp, l_passing_values));
 
 fapi_try_exit:
-    return fapi2::current_err;
+
+    // If the FIR's are cal fails, then check to see if FIR's or PLL's could be the cause
+    return mss::check::fir_or_pll_fail(i_target, fapi2::current_err, l_cal_fail);
 }
 
 ///
@@ -777,7 +788,8 @@ fapi_try_exit:
 /// @param[in,out] io_passing_values - the passing values, a map from the DQS number to the value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
 ///
-fapi2::ReturnCode record_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target, const uint64_t i_rp,
+fapi2::ReturnCode record_passing_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
         std::map<uint64_t, uint64_t>& io_passing_values)
 {
     // Traits declaration
