@@ -53,9 +53,9 @@ extern "C"
     {
         FAPI_INF("Start thermal_init");
 
-        //TODO:RTC 164009
-        //Set runtime throttles to safemode values once OCC is working
-#if 0
+        // Prior to starting OCC, we go into "safemode" throttling
+        // After OCC is started, they can change throttles however they want
+#ifdef __HOSTBOOT_MODULE
 
         for (const auto& l_mca : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
