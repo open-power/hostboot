@@ -452,6 +452,22 @@ namespace SBE
                 }
 #endif
 
+                /**********************************************/
+                /*   Lock the SBE flash after the update      */
+                /**********************************************/
+#ifdef CONFIG_SBE_UPDATE_LOCK
+                const std::vector<SECUREBOOT::ProcSecurity> SUL {
+                    SECUREBOOT::ProcSecurity::SULBit,
+                };
+                err = SECUREBOOT::setSecuritySwitchBits(SUL, sbeState.target);
+                if ( err  != NULL ) {
+                    TRACFCOMP( g_trac_sbe,
+                               ERR_MRK"updateProcessorSbeSeeproms(): "
+                              "Failed to lock SBE" );
+                    errlCommit( err, SBE_COMP_ID );
+                }
+#endif
+
                 // Push this sbeState onto the vector
                 sbeStates_vector.push_back(sbeState);
 
