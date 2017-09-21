@@ -892,9 +892,6 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
                 // Permanently mask mainline NCEs and TCEs
                 getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
-
-                // Make the error log predictive
-                io_sc.service_data->setServiceCall();
             }
         }
 
