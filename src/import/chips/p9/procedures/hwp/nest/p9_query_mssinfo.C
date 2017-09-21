@@ -203,20 +203,21 @@ fapi2::ReturnCode p9_query_mssinfo(const std::vector<fapi2::Target<fapi2::TARGET
 
         FAPI_DBG("p9_query_mssinfo: Current l_mirrorEnabled=%u!\n", l_mirrorEnabled);
 
+        // retrieve mirroring placement policy attribute
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,
+                               i_vect_pu_targets[i].getParent<fapi2::TARGET_TYPE_SYSTEM>(), mirror_policy),
+                 "Error reading ATTR_MEM_MIRROR_PLACEMENT_POLICY, l_rc 0x%.8X",
+                 (uint64_t)fapi2::current_err);
+
+        FAPI_DBG("p9_query_mssinfo: Current mirror_policy=%u!\n", mirror_policy);
+
+
         if (l_mirrorEnabled == 1)
         {
             // ATTR_PROC_MIRROR_SIZES
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_SIZES, i_vect_pu_targets[i], mirror_sizes),
                      "Error reading ATTR_PROC_MIRROR_SIZES, l_rc 0x%.8X",
                      (uint64_t)fapi2::current_err);
-
-            // retrieve mirroring placement policy attribute
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,
-                                   i_vect_pu_targets[i].getParent<fapi2::TARGET_TYPE_SYSTEM>(), mirror_policy),
-                     "Error reading ATTR_MEM_MIRROR_PLACEMENT_POLICY, l_rc 0x%.8X",
-                     (uint64_t)fapi2::current_err);
-
-            FAPI_DBG("p9_query_mssinfo: Current mirror_policy=%u!\n", mirror_policy);
 
             // ATTR_PROC_MIRROR_BASES
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_BASES, i_vect_pu_targets[i], mirror_bases),
