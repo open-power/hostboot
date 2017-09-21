@@ -521,6 +521,11 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_DI
     uint64_t l_rank_pairs = 0;
     uint8_t cal_abort_on_error = 0;
 
+    // This boolean tells the code whether we took a training fail or a scom fail reading the status registers
+    // It starts as false, given that we need to read out the registers
+    // When we start checking all of the values of the status registers, it gets set to true
+    bool l_check_firs = false;
+
     const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
     fapi2::buffer<uint64_t> l_err_data;
 
@@ -550,6 +555,9 @@ fapi2::ReturnCode process_initial_cal_errors( const fapi2::Target<TARGET_TYPE_DI
     }
 
     // Error information from other registers is gathered in the FFDC from the XML
+    // From here on out, check the FIRs
+    // Using this boolean to avoid having to check the FIR's after each assert below
+    l_check_firs = true;
 
     // So we can do a few things here. If we're aborting on the first calibration error,
     // we only expect to have one error bit set. If we ran all the calibrations, we can
@@ -692,7 +700,8 @@ fapi_try_exit:
              (fapi2::current_err == fapi2::FAPI2_RC_SUCCESS ? "success" : "errors reported"),
              mss::c_str(l_mca));
 
-    return fapi2::current_err;
+    // Checks the FIR's, if need be
+    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_check_firs);
 }
 
 ///

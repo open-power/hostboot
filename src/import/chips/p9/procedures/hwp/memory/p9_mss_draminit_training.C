@@ -68,7 +68,7 @@ extern "C"
 
         std::vector<fapi2::ReturnCode> l_fails;
 
-        FAPI_INF("Start draminit training");
+        FAPI_INF("%s Start draminit training", mss::c_str(i_target));
 
         // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
         // attributes for the PHY, etc.

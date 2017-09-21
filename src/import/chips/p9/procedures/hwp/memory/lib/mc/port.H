@@ -964,7 +964,7 @@ fapi2::ReturnCode reset_zqcal_config( const fapi2::Target<T>& i_target )
 
     for (const auto r : l_ranks)
     {
-        l_phy_zqcal_config.setBit(TT::PER_ZCAL_ENA_RANK + rank::map_rank_ordinal_to_phy(i_target, r));
+        FAPI_TRY(l_phy_zqcal_config.setBit(TT::PER_ZCAL_ENA_RANK + rank::map_rank_ordinal_to_phy(i_target, r)));
     }
 
     // Write the ZQCAL periodic config

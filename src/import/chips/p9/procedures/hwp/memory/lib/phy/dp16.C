@@ -52,6 +52,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 
 #include <lib/workarounds/dp16_workarounds.H>
+#include <lib/fir/check.H>
 #include <generic/memory/lib/utils/mss_math.H>
 
 using fapi2::TARGET_TYPE_MCS;
@@ -3260,6 +3261,22 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode record_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
+    // If we have a FIR set that could have caused our training fail, then skip checking bad bits in FW
+    // PRD will handle the FIR and retrigger the procedure
+#ifdef __HOSTBOOT_MODULE
+    bool l_fir_error = false;
+    FAPI_TRY(mss::check::bad_fir_bits(i_target, l_fir_error), "%s took an error while checking FIR's",
+             mss::c_str(i_target));
+
+    // Exit if we took a FIR error - PRD will handle bad bits
+    if(l_fir_error)
+    {
+        FAPI_INF("%s has FIR's set, exiting to let PRD handle it", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+#endif
+
     for( const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
     {
         uint8_t l_data[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
@@ -3367,10 +3384,16 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
     size_t l_index = 0;
     std::vector<fapi2::buffer<uint64_t>> l_data;
 
+    // Boolean to keep track of if a fail was calibration related, or scom related
+    bool l_cal_fail = false;
+
     // Suck all the cal error bits out ...
     FAPI_TRY( mss::scom_suckah(l_mca, TT::RD_VREF_CAL_ERROR_REG, l_data) );
 
     FAPI_INF("%s Processing RD_VREF_CAL_ERROR", mss::c_str(i_target));
+
+    // From here on out, the FIR's are all cal fails
+    l_cal_fail = true;
 
     for (const auto& v : l_data)
     {
@@ -3383,14 +3406,17 @@ fapi2::ReturnCode process_rdvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
                     .set_VALUE(v),
                     "DP16 failed read vref calibration on %s. register 0x%016lx value 0x%016lx",
                     mss::c_str(l_mca), TT::RD_VREF_CAL_ERROR_REG[l_index], v);
+
         ++l_index;
     }
 
-    FAPI_INF("RD_VREF_CAL_ERROR complete");
+    FAPI_INF("%s RD_VREF_CAL_ERROR complete", mss::c_str(i_target));
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    return fapi2::current_err;
+
+    // If the FIR's are cal fails, then check to see if FIRs or PLL fails were the cause
+    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_cal_fail);
 }
 
 ///
@@ -3412,9 +3438,15 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
     std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_data;
     std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t>>> l_mask;
 
+    // Boolean to keep track of if a fail was calibration related, or scom related
+    bool l_cal_fail = false;
+
     // Suck all the cal error bits out ...
     FAPI_TRY( mss::scom_suckah(l_mca, TT::WR_VREF_ERROR_REG, l_data) );
     FAPI_TRY( mss::scom_suckah(l_mca, TT::WR_VREF_ERROR_MASK_REG, l_mask) );
+
+    // From here on out, the FIR's are all cal fails
+    l_cal_fail = true;
 
     // Loop through both data and mask
     {
@@ -3480,11 +3512,13 @@ fapi2::ReturnCode process_wrvref_cal_errors( const fapi2::Target<fapi2::TARGET_T
         }
     }
 
-    FAPI_INF("WRVREF_CAL_ERROR complete");
+    FAPI_INF("%s WRVREF_CAL_ERROR complete", mss::c_str(i_target));
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    return fapi2::current_err;
+
+    // If the FIR's are cal fails, then check to see if FIR's were the cause
+    return mss::check::fir_or_pll_fail( i_target, fapi2::current_err, l_cal_fail);
 }
 
 ///
