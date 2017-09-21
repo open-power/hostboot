@@ -64,7 +64,7 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
                               const uint64_t i_rank,
                               std::vector< ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST> >& io_inst )
 {
-    FAPI_TRY( mrs_engine(i_target,  i_data, i_rank, i_data.iv_delay, io_inst) );
+    FAPI_TRY( mrs_engine(i_target, i_data, i_rank, i_data.iv_delay, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
