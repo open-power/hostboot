@@ -394,7 +394,8 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HCODE ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
-               i_section == MEMD;
+               i_section == MEMD ||
+               i_section == CAPP;
     #endif
 #else
     return false;
