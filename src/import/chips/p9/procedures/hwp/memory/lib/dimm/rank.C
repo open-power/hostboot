@@ -233,7 +233,6 @@ fapi_try_exit:
 
 ///
 /// @brief Return a vector of rank numbers which represent the primary rank pairs for this port
-/// @tparam T the target type
 /// @param[in] i_target  TARGET_TYPE_MCA
 /// @param[out] o_rps a vector of rank_pairs
 /// @return FAPI2_RC_SUCCESS iff all is ok
@@ -251,7 +250,7 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         FAPI_TRY( mss::eff_num_master_ranks_per_dimm(d, l_rank_count[mss::index(d)]) );
     }
 
-    FAPI_DBG("ranks: %d, %d", l_rank_count[0], l_rank_count[1]);
+    FAPI_DBG("%s ranks: %d, %d", mss::c_str(i_target), l_rank_count[0], l_rank_count[1]);
 
     // Walk through rank pair table and skip empty pairs
     o_rps.clear();
@@ -264,13 +263,15 @@ fapi2::ReturnCode primary_ranks( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         }
     }
 
+    // Returning success in case no DIMM's are configured
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
 /// @brief Return a vector of rank numbers which represent the primary rank pairs for this dimm
-/// @tparam T the target type
 /// @param[in] i_target TARGET_TYPE_DIMM
 /// @param[out] o_rps a vector of rank_pairs
 /// @return FAPI2_RC_SUCCESS iff all is ok
@@ -344,7 +345,6 @@ fapi_try_exit:
 
 ///
 /// @brief Given a target, get the rank pair assignments, based on DIMMs
-/// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)
 /// @param[out] o_registers the regiter settings for the appropriate rank pairs
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -382,8 +382,7 @@ fapi_try_exit:
 
 ///
 /// @brief Setup the rank information in the port
-/// @tparam T the fapi2::TargetType
-/// @param[in] i_target the target (MCA or MBA?)
+/// @param[in] i_target the target (MCA)
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template<>
@@ -485,7 +484,6 @@ fapi_try_exit:
 ///
 /// @brief Get a vector of configured rank pairs.
 /// Returns a vector of ordinal values of the configured rank pairs. e.g., for a 2R DIMM, {0, 1}
-/// @tparam T the fapi2::TargetType
 /// @param[in]i_target  the target (MCA or MBA?)
 /// @param[out] o_pairs std::vector of rank pairs configured
 /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -565,7 +563,6 @@ fapi_try_exit:
 ///
 /// @brief Get a rank-pair id from a physical rank
 /// Returns a number representing which rank-pair this rank is a part of
-/// @tparam T the fapi2::TargetType
 /// @param[in] i_target  the target (MCA or MBA?)
 /// @param[in] i_rank the physical rank number
 /// @param[out] o_pairs the rank pair
@@ -573,7 +570,8 @@ fapi_try_exit:
 ///
 template<>
 fapi2::ReturnCode get_pair_from_rank(const fapi2::Target<TARGET_TYPE_MCA>& i_target,
-                                     uint64_t i_rank, uint64_t& o_pair)
+                                     uint64_t i_rank,
+                                     uint64_t& o_pair)
 {
     // Sort of brute-force, but no real good other way to do it. Given the
     // rank-pair configuration we walk the config looking for our rank, and
