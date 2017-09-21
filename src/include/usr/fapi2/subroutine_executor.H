@@ -37,8 +37,50 @@
 #define SUBROUTINEEXECUTOR_H_
 
 #include <fapi2_subroutine_executor.H>
-
+#include <errl/errlmanager.H>
+#include <string.h>
+#include <stdarg.h>
+#include <sbeio/sbeioif.H>
 #include <plat_trace.H>
+#include <secureboot/service.H>
+#include <plat_hw_access.H>
+
+/**
+* @brief Given a hwp name, and its parameters, serialize the parmeters and pass the serialized
+*        data to the SBE via a FIFO chipop
+* @param[in]  i_hwpName  String representing the name of the hwp to be called
+* @param[in]  i_Target   TARGETING::Target which op is being called on
+* @param[in]  types      Any variable length of arguments, which along with target should get passed
+*                        in as parameters to the given HWP
+* @return errlHndl_t Error log handle on failure.
+*/
+template<class... Types>
+errlHndl_t requestHwpViaSbe(const char * i_hwpName, TARGETING::Target * i_target, Types... types)
+{
+    errlHndl_t l_errl = nullptr;
+
+    //Determine argument byte size
+    size_t l_sizeOfArgInBytes =0;
+    using expander = int[];
+    (void) expander{ 0, (l_sizeOfArgInBytes+=sizeof(types), 0)... };
+
+    //Set up the buffer which will be passed to chip op send function
+    uint8_t l_buffer[l_sizeOfArgInBytes];
+    uint8_t* l_bufferPtr = &l_buffer[0];
+    memset(l_bufferPtr, 0, l_sizeOfArgInBytes);
+
+    // Serialize the arguments into the buffer
+    (void) expander{ 0, ((memcpy(l_bufferPtr,&types,sizeof(types)),l_bufferPtr+=sizeof(types)), 0)... };
+
+    //Call the chip op send function to request the SBE to call the HWP
+    l_errl = SBEIO::sendSecureHwpRequest(i_target, l_bufferPtr, l_sizeOfArgInBytes, i_hwpName);
+
+    return l_errl;
+}
+
+
+//Macros that return the 1st argument
+#define _GET_1ST_ARG(N, ...) N
 
 /**
  * @brief Subroutine Executor macro example code - Platforms will need to
@@ -48,11 +90,49 @@
  * execute the Subroutine (e.g. dlopening a shared library)
  */
 #define FAPI_PLAT_CALL_SUBROUTINE(RC, FUNC, _args...) \
+{ \
+    do \
     { \
-        FAPI_DBG("executing FAPI_PLAT_CALL_SUBROUTINE macro"); \
-        RC = FUNC(_args); \
-    }
-
-//@todo - RTC:179062 - Add real chipop support
+        errlHndl_t l_errl = nullptr; \
+        /* Read the FUNC as a string and pass it to the conversion method \
+        to determine what hwp we need to request */ \
+        const char* l_function = #FUNC; \
+        /*Read the target argument, which is the first argument in the list */ \
+        TARGETING::Target* l_target = \
+        reinterpret_cast<TARGETING::Target*>(_GET_1ST_ARG(_args).get()); \
+        /*Check if secureboot is enabled and if the target exists on the master proc*/ \
+        bool isSecure = SECUREBOOT::enabled(); \
+        bool isMaster = false; \
+        l_errl = isOnMasterProc(l_target, isMaster); \
+        if(l_errl) \
+        { \
+            FAPI_INF("subroutine_executor: Failed trying to determine is target was on master chip"); \
+            RC.setPlatDataPtr(reinterpret_cast<void *> (l_errl)); \
+            break; \
+        } \
+        /*Run hwp on host if targ is on master, we are not in securemode*/ \
+        if(isMaster || !isSecure) \
+        { \
+            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s on host", \
+                      isSecure, isMaster, l_function); \
+            RC = FUNC(_args); \
+        } \
+        /*Otherwise request the HWP via chipop to the SBE*/ \
+        else \
+        { \
+            FAPI_INF("subroutine_executor: isSecure = %d   isMaster = %d .. executing hwp %s on host", \
+                    isSecure, isMaster, l_function); \
+            l_errl =  requestHwpViaSbe(l_function, l_target, _args); \
+            /*For now until SBE support comes fallback to running on host if chipop fails*/ \
+            if(l_errl) \
+            { \
+                /*Commit the error as informational and attempt hwp */ \
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL); \
+                errlCommit(l_errl, SBEIO_COMP_ID); \
+                RC = FUNC(_args);\
+            } \
+        } \
+    } while(0); \
+}
 
 #endif

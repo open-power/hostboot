@@ -362,7 +362,7 @@ void checkPibMask(errlHndl_t& io_errLog )
 errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
                              TARGETING::Target*& o_chipTarget)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // Default to input target
     o_chipTarget = const_cast<TARGETING::Target*>(i_target);
@@ -389,6 +389,22 @@ errlHndl_t getCfamChipTarget(const TARGETING::Target* i_target,
         {
             // Something is wrong here, can't have more than one parent chip
             FAPI_ERR("getCfamChipTarget: Invalid number of parent chip for this target chiplet - # parent chips %d", l_list.size());
+            /*@
+            * @errortype
+            * @moduleid     fapi2::MOD_FAPI2_GET_CHIP_CFAM_TARGET
+            * @reasoncode   fapi2::RC_INVALID_PARENT_TARGET_FOUND
+            * @userdata1    Number of parent proc chips found
+            * @userdata2    HUID of input target
+            * @devdesc      Detecting more than 1 parent proc targets
+            * @custdesc     Internal firmware error
+            */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            fapi2::MOD_FAPI2_GET_CHIP_CFAM_TARGET,
+                                            fapi2::RC_INVALID_PARENT_TARGET_FOUND,
+                                            l_list.size(),
+                                            TARGETING::get_huid(i_target),
+                                            true /*SW error*/);
+            l_err->collectTrace(FAPI_TRACE_NAME);
         }
     }
     return l_err;
@@ -1039,6 +1055,32 @@ uint8_t platGetPIBErrorMask(void)
 // No spy access interface as HB doesn't allow spy access.
 // --------------------------------------------------------------------------
 
+/**
+* @brief Determine if a given target is on the master proc chip
+* @param[in]  i_Target   TARGETING::Target which op is being called on
+* @param[out] i_isMaster True if on master proc chip, false if not
+* @return errlHndl_t
+*/
+errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
+{
+    errlHndl_t l_errl = nullptr;
+    assert(i_target != nullptr, "isOnMasterProc:: Cannot pass nullptr target to isOnMasterProc");
+    TARGETING::Target* l_pMasterProcChip = nullptr;
+    TARGETING::Target* l_pParentProcChip = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle( l_pMasterProcChip );
+    assert(l_pMasterProcChip != nullptr, "isOnMasterProc:: Unable to find the system's master proc chip target handle");
+    o_isMaster = false;
+    l_errl = getCfamChipTarget(i_target, l_pMasterProcChip);
+
+    if(l_errl == nullptr)
+    {
+        if(l_pMasterProcChip == l_pParentProcChip)
+        {
+            o_isMaster = true;
+        }
+    }
+    return l_errl;
+}
 
 } // End namespace
 

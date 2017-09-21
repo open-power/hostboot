@@ -143,7 +143,6 @@ class SbeFifo
             uint8_t  chipletId;
             uint8_t * dataPtr;
             fifoSecureHwpRequest(uint64_t i_dataSizeBytes,
-                                 uint64_t i_hwpStringLen,
                                  uint8_t * i_dataPtr) :
             reserved(0), commandClass(SBE_FIFO_CLASS_SECURE_HWP), command(0), targetType(0), chipletId(0)
             {
@@ -155,7 +154,7 @@ class SbeFifo
                     wordCnt++;
                 }
                 dataPtr = reinterpret_cast<uint8_t *>(malloc(i_dataSizeBytes));
-                memcpy(dataPtr, i_dataPtr + i_hwpStringLen, i_dataSizeBytes);
+                memcpy(dataPtr, i_dataPtr, i_dataSizeBytes);
             }
             ~fifoSecureHwpRequest(){ free(dataPtr);};
 
