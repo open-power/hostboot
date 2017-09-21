@@ -528,6 +528,17 @@ p9_common_poweronoff(
     FAPI_DBG("Assert vital thold via NET_CTRL0[16]");
     FAPI_TRY(putScom(i_target, NET_CTRL0_WOR[l_type], MASK_SET(16)));
 
+    if (l_type == 1)
+    {
+        // upon power off cache, dpll is about to be unlocked
+        // to prevent pcb fir fires, need to mask the bit for the time being
+        // the error will be cleared and unmasked when dpll is locked again
+        FAPI_DBG("Mask DPLL unlock error in FIR via SLAVE_CONFIG[12]");
+        FAPI_TRY(getScom(i_target, EQ_SLAVE_CONFIG_REG, l_data64));
+        l_data64.setBit<12>();
+        FAPI_TRY(putScom(i_target, EQ_SLAVE_CONFIG_REG, l_data64));//
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Procedure code
     ///////////////////////////////////////////////////////////////////////////
