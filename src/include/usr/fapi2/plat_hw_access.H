@@ -220,6 +220,14 @@ void checkPibMask(errlHndl_t& io_errLog );
 // No spy access interface as HB doesn't allow spy access.
 // --------------------------------------------------------------------------
 
+/**
+* @brief Determine if a given target is on the master proc chip
+* @param[in]  i_Target   TARGETING::Target which op is being called on
+* @param[out] i_isMaster True if on master proc chip, false if not
+* @return errlHndl_t
+*/
+errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster);
+
 
 } // End namespace
 

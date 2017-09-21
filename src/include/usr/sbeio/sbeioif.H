@@ -274,7 +274,7 @@ namespace SBEIO
     * @param[in] i_dataSize     Size of blob of data that contains additional parameters
     *                           for the requests HWP
     *
-    * @param[in] i_hwpStringLen size of the hwp name string at beginning of data pointer
+    * @param[in] i_hwpName      Pointer to string of chars representing hwp name
     *
     * @return errlHndl_t Error log handle on failure.
     *
@@ -282,7 +282,7 @@ namespace SBEIO
     errlHndl_t sendSecureHwpRequest(TARGETING::Target * i_target,
                                     uint8_t * i_dataPointer,
                                     uint64_t i_dataSize,
-                                    uint64_t i_hwpStringLen);
+                                    const char * i_hwpName);
 
 
 } //end namespace SBEIO

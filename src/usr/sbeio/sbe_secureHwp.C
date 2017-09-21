@@ -49,7 +49,7 @@ namespace SBEIO
 {
     //List out name of valid hwps that have chipop equivalents
     //these static variable will be used by
-    static const char* test_hwp = "p9_pm_ocb_indir_access"; // SBE_FIFO_CMD_PLACEHOLDER_HWP
+    static const char* test_hwp = "test_hwp"; // SBE_FIFO_CMD_PLACEHOLDER_HWP
 
     /**
     * @brief Convert a hwp name passed in as a string to a chipOp code
@@ -57,7 +57,7 @@ namespace SBEIO
     * @return fifoSecureHwpMessage  returns a chipOp representing the HWP, if found
     *                               otherwise returns UNSUPPORTED_HWP enum
     */
-    SbeFifo::fifoSecureHwpMessage convertHwpStringToOpCode(char* i_hwpName)
+    SbeFifo::fifoSecureHwpMessage convertHwpStringToOpCode(const char* i_hwpName)
     {
         //Default to undefined HWP
         SbeFifo::fifoSecureHwpMessage l_hwpOpCode = SbeFifo::fifoSecureHwpMessage::SBE_FIFO_CMD_UNSUPPORTED_HWP;
@@ -82,7 +82,7 @@ namespace SBEIO
     * @param[in] i_dataSize     Size of blob of data that contains additional parameters
     *                           for the requests HWP
     *
-    * @param[in] i_hwpStringLen size of the hwp name string at beginning of data pointer
+    * @param[in] i_hwpName      Pointer to string of chars representing hwp name
     *
     * @return errlHndl_t Error log handle on failure.
     *
@@ -90,19 +90,16 @@ namespace SBEIO
     errlHndl_t sendSecureHwpRequest(TARGETING::Target * i_target,
                                     uint8_t * i_dataPointer,
                                     uint64_t i_dataSize,
-                                    uint64_t i_hwpStringLen)
+                                    const char * i_hwpName)
     {
         errlHndl_t errl = nullptr;
         do
         {
             SBE_TRACD(ENTER_MRK "sendSecureHwpRequest");
+            //First we need to figure out if this is a proc, if it isn't
+            //then we need to find its parent proccessor chip
             auto l_targType =  i_target->getAttr<TARGETING::ATTR_TYPE>();
             TARGETING::Target * l_proc;
-
-            //Copy out the hwp name string into a local buffer
-            char l_hwpName[i_hwpStringLen];
-            memcpy(l_hwpName, i_dataPointer, i_hwpStringLen);
-
             if(l_targType == TARGETING::TYPE_PROC)
             {
                 l_proc = i_target;
@@ -112,11 +109,11 @@ namespace SBEIO
                 l_proc = const_cast<TARGETING::Target *>(getParentChip(i_target));
             }
 
-            SbeFifo::fifoSecureHwpRequest       l_fifoRequest(i_dataSize, i_hwpStringLen, i_dataPointer);
+            SbeFifo::fifoSecureHwpRequest       l_fifoRequest(i_dataSize, i_dataPointer);
             SbeFifo::fifoStandardResponse       l_fifoResponse;
 
             //Command is computed by converting hwp string to function
-            l_fifoRequest.command      = convertHwpStringToOpCode(l_hwpName);
+            l_fifoRequest.command      = convertHwpStringToOpCode(i_hwpName);
             l_fifoRequest.targetType   = translateToSBETargetType(i_target);
             l_fifoRequest.chipletId    = getChipletIDForSBE(i_target);
 
