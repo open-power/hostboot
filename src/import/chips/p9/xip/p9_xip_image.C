@@ -44,9 +44,9 @@
 #else
     #include <stdint.h>
     #include <endian.h>
-    #ifndef __PPE__
-        #include "p9_dd_container.h"
-    #endif
+#endif
+#ifndef __PPE__
+    #include "p9_dd_container.h"
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -2025,7 +2025,7 @@ p9_xip_image_size(void* io_image, uint32_t* o_size)
 }
 
 
-#if defined(__PPE__) || defined(WIN32)
+#if defined(__PPE__)
 int
 p9_xip_get_section(const void* i_image,
                    const int i_sectionId,
@@ -2091,15 +2091,15 @@ p9_xip_get_section(const void* i_image,
         {
             switch (rc)
             {
-                case P9_DD_FAILURE_NOT_FOUND:
+                case DDCO_DDLEVEL_NOT_FOUND:
                     rc = P9_XIP_DDLEVEL_NOT_FOUND;
                     break;
 
-                case P9_DD_FAILURE_DOES_NOT_EXIST:
+                case DDCO_DDCO_DOES_NOT_EXIST:
                     rc = P9_XIP_NULL_BUFFER;
                     break;
 
-                case P9_DD_FAILURE_BROKEN:
+                case DDCO_FAILURE_MAGIC_NOT_FOUND:
                     rc = P9_XIP_NO_DDLEVEL_SUPPORT;
                     break;
 
@@ -3257,7 +3257,7 @@ p9_xip_map_toc(void* io_image,
 }
 
 
-#if !defined(__PPE__) && !defined(WIN32)
+#if !defined(__PPE__)
 //
 // Inform caller if specified sectionId has DD support
 //
@@ -3272,7 +3272,16 @@ int p9_xip_dd_section_support(const void* i_image,
 
     if (!rc)
     {
-        o_bDdSupport = (bool)section.iv_ddSupport;
+        if (section.iv_ddSupport == 0 || section.iv_ddSupport == 1)
+        {
+            o_bDdSupport = (bool)section.iv_ddSupport;
+        }
+        else
+        {
+            // iv_ddSupport is uninitialized or corrupted
+            o_bDdSupport = false;
+            rc = P9_XIP_IMAGE_ERROR;
+        }
     }
 
     return rc;
