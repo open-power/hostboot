@@ -59,4 +59,73 @@
     </gard>
   </hwpError>
   <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_COREQUAD_RESCLK_CACCR_DATA_NOT_MATCHED</rc>
+    <description>Failed to match core CACCR with resclk vector table</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CACCR</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>CORE_TARGET</target>
+    </gard>
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_COREQUAD_RESCLK_QACCR_DATA_NOT_MATCHED</rc>
+    <description>Failed to match quad QACCR with resclk vector table</description>
+    <ffdc>EQ_TARGET</ffdc>
+    <ffdc>QACCR</ffdc>
+    <callout>
+      <target>EQ_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>EQ_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>EQ_TARGET</target>
+    </gard>
+
+  </hwpError>
+  <!-- *********************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_COREQUAD_RESCLK_CACCR_DATA_IS_INVALID</rc>
+    <description>Core CACCR is not same as QUACCR when resclk is disabled</description>
+    <ffdc>CORE_TARGET</ffdc>
+    <ffdc>CACCR</ffdc>
+    <ffdc>QACCR</ffdc>
+    <callout>
+      <target>CORE_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>CORE_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>CORE_TARGET</target>
+    </gard>
+
+  </hwpError>
+  <!-- *********************************************************************** -->
+
+
+
 </hwpErrors>
