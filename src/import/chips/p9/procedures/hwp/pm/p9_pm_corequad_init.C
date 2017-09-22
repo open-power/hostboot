@@ -89,6 +89,9 @@
 #include <p9_hcd_common.H>
 #include <p9_ppe_utils.H>
 #include <p9_ppe_defs.H>
+#include <p9_resclk_defines.H>
+#include <p9_pstates_cmeqm.h>
+#include <p9_pm_utils.H>
 
 // -----------------------------------------------------------------------------
 // Constant definitions
@@ -135,6 +138,15 @@ fapi2::ReturnCode pm_corequad_reset(
 ///
 fapi2::ReturnCode pm_corequad_init(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+///
+/// @brief Disable resonance clock
+///
+/// @param[in] i_target      EQ target
+///
+/// @return FAPI2_RC_SUCCESS on success or error return code
+///
+fapi2::ReturnCode pm_disable_resclk(
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target);
 
 // ----------------------------------------------------------------------
 // Function definitions
@@ -534,10 +546,273 @@ fapi2::ReturnCode pm_corequad_reset(
         }
     }
 
-    //TODO: RTC 149078: Disable Resonant Clocks
-    //TODO: RTC 149079: Disable IVRM
+    //Procedure to Disable resonance clk
+    // For each functional EQ chiplet
+    FAPI_INF ("Procedure to Disable resonance clk");
+
+    for (auto l_quad_chplt : l_eqChiplets)
+    {
+        fapi2::buffer<uint64_t> l_quad_data64;
+        fapi2::buffer<uint64_t> l_core_data64;
+        uint16_t l_qaccr_value = 0;
+        uint16_t l_caccr_value = 0;
+        l_address = EQ_QPPM_QACCR;
+        FAPI_TRY(fapi2::getScom(l_quad_chplt, l_address, l_quad_data64),
+                 "ERROR: Failed to read EQ_QPPM_QACCR");
+
+        //extract 0:11 bits data
+        l_quad_data64.extract<EQ_QPPM_QACCR_COMMON_CLK_SB_STRENGTH,
+                              EQ_QPPM_QACCR_COMMON_CLK_SW_SPARE>(l_qaccr_value);
+
+
+        FAPI_INF ("EQ_QPPM_QACCR data %16llx, QACCR[0:12] value %04X",
+                  l_quad_data64, l_qaccr_value);
+
+        //If QACCR is 0 then resonant clocks are disabled..
+        //then verify the core CACCR register is also 0
+        if (!l_qaccr_value)
+        {
+            auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
+                                (fapi2::TARGET_STATE_FUNCTIONAL);
+
+            for (auto l_ex_chplt : l_exChiplets)
+            {
+                auto l_coreChiplets =
+                    l_ex_chplt.getChildren<fapi2::TARGET_TYPE_CORE>
+                    (fapi2::TARGET_STATE_FUNCTIONAL);
+
+                for (auto l_core_chplt : l_coreChiplets)
+                {
+                    l_address = C_CPPM_CACCR;
+                    FAPI_TRY(fapi2::getScom(l_core_chplt, l_address, l_core_data64),
+                             "ERROR: Failed to read C_CPPM_CACCR");
+
+                    //extract 0:11 bits data
+                    l_core_data64.extract<C_CPPM_CACCR_CLK_SB_STRENGTH,
+                                          C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
+
+                    FAPI_INF ("C_CPPM_CACCR data %16llx, QACCR[0:12] valus %04X",
+                              l_core_data64, l_caccr_value);
+
+                    if (l_caccr_value)
+                    {
+                        FAPI_ASSERT(false,
+                                    fapi2::PM_COREQUAD_RESCLK_CACCR_DATA_IS_INVALID()
+                                    .set_CORE_TARGET(l_core_chplt)
+                                    .set_CACCR(l_caccr_value)
+                                    .set_QACCR(l_qaccr_value),
+                                    "CACCR value %04x is not sync with QACCR value %04X", l_caccr_value,
+                                    l_qaccr_value);
+                    }
+
+                }
+            }
+        }
+        else //Resonance clocks are still enabled
+        {
+            FAPI_TRY(pm_disable_resclk(l_quad_chplt), "p9_pm_disable_resclk failed");
+        }
+    } //end of quad
 
 fapi_try_exit:
     FAPI_DBG("<< pm_corequad_reset...");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode pm_disable_resclk(
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target)
+{
+    FAPI_DBG(">> pm_disable_resclk...");
+    fapi2::buffer<uint64_t> l_quad_data64;
+    fapi2::buffer<uint64_t> l_core_data64;
+    fapi2::buffer<uint64_t> l_data64;
+    uint64_t l_address = 0;
+    uint16_t l_qaccr_value = 0;
+    uint16_t l_caccr_value = 0;
+    bool l_match = true;
+    uint8_t l_step = 0;
+    fapi2::buffer<uint64_t> l_fmult;
+    uint8_t i = RESCLK_FREQ_REGIONS;
+    uint8_t l_poweroff_index = 0;
+    uint8_t l_expected_quad_index = 0;
+    uint8_t l_quad_index = 0;
+    uint8_t l_core_index = 0;
+    uint16_t l_quad_table_value;
+    uint8_t l_caccr_bit_13_14_value = 0;
+
+    uint32_t attr_freq_proc_refclock_khz = 0;
+    uint32_t attr_proc_dpll_divider = 8;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
+                        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, attr_freq_proc_refclock_khz)
+             , "Attribute read failed");
+    //Read the frequency of the quad
+    l_address = EQ_QPPM_DPLL_FREQ;
+    FAPI_TRY(fapi2::getScom(i_target, l_address, l_data64),
+             "ERROR: Failed to read EQ_QPPM_DPLL_FREQ");
+
+    l_data64.extractToRight<EQ_QPPM_DPLL_FREQ_FMULT,
+                            EQ_QPPM_DPLL_FREQ_FMULT_LEN>(l_fmult);
+
+    FAPI_INF("EQ_QPPM_DPLL_FREQ_FMULT %04x, attr_freq_proc_refclock_khz %08x, attr_proc_dpll_divider %x",
+             l_fmult, attr_freq_proc_refclock_khz, attr_proc_dpll_divider);
+
+    l_fmult =  ((l_fmult * attr_freq_proc_refclock_khz ) / attr_proc_dpll_divider) / 1000;
+
+    FAPI_INF("EQ_QPPM_DPLL_FREQ FMULT value %08x", l_fmult);
+
+    //Match the freq read from dpll register with the
+    //resonance index vector table
+    while (l_fmult < p9_resclk_defines::RESCLK_INDEX_VEC.at(--i).freq && (i > 0)) {}
+
+    l_expected_quad_index = p9_resclk_defines::RESCLK_INDEX_VEC.at(i).idx;
+
+    FAPI_INF("FMULT quad index value %u from RESCLK_INDEX_VEC table", l_expected_quad_index);
+
+    l_quad_table_value = p9_resclk_defines::RESCLK_TABLE_VEC.at(l_expected_quad_index);
+
+    if (l_quad_table_value == l_qaccr_value)
+    {
+        l_quad_index = l_expected_quad_index;
+    }
+    else
+    {
+        FAPI_INF ("QACCR value %04X didn't match with resclk value %04X in the table",
+                  l_qaccr_value, l_quad_table_value);
+
+        i = RESCLK_STEPS;
+        l_match = false;
+
+        //search in resclk table vector
+        while (--i > 0 && !l_match)
+        {
+            if (l_qaccr_value == p9_resclk_defines::RESCLK_TABLE_VEC.at(i))
+            {
+                l_match = true;
+            }
+        }
+
+        if (l_match)
+        {
+            l_quad_index = i;
+        }
+        else
+        {
+            FAPI_ASSERT(false,
+                        fapi2::PM_COREQUAD_RESCLK_QACCR_DATA_NOT_MATCHED()
+                        .set_EQ_TARGET(i_target)
+                        .set_QACCR(l_qaccr_value),
+                        "QACCR value %04x didn't match with vector table", l_qaccr_value);
+        }
+
+        FAPI_INF ("Walking quad index value %u", l_quad_index);
+
+    }
+
+
+    for (auto l_ex_chplt : l_exChiplets)
+    {
+        auto l_coreChiplets = l_ex_chplt.getChildren<fapi2::TARGET_TYPE_CORE>
+                              (fapi2::TARGET_STATE_FUNCTIONAL);
+
+        for (auto l_core_chplt : l_coreChiplets)
+        {
+            l_address = C_CPPM_CACCR;
+            FAPI_TRY(fapi2::getScom(l_core_chplt, l_address, l_core_data64),
+                     "ERROR: Failed to read C_CPPM_CACCR");
+            //extract 0:11 bits
+            l_core_data64.extract<C_CPPM_CACCR_CLK_SB_STRENGTH,
+                                  C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
+
+            //extract 13:14 bits
+            l_core_data64.extractToRight<C_CPPM_CACCR_QUAD_CLK_SB_OVERRIDE, 2>(l_caccr_bit_13_14_value);
+
+            FAPI_INF("CACCR[0:12] value %04x and CACCR[13:14] %02x",
+                     l_caccr_value, l_caccr_bit_13_14_value);
+
+
+            //Compare qaccr and caccr value
+            if ((l_caccr_value != l_qaccr_value) && (!l_caccr_bit_13_14_value))
+            {
+                FAPI_INF("CME isn't in the middle of things and yet the \
+                         CACCR and QACCR don't match");
+                continue;
+            }
+            else if(l_caccr_bit_13_14_value)
+            {
+                FAPI_INF ("CACCR value %04X", l_caccr_value);
+
+                i = RESCLK_STEPS;
+                l_match = false;
+
+                //search in resclk table vector
+                while (--i > 0 && !l_match)
+                {
+                    if (l_caccr_value == p9_resclk_defines::RESCLK_TABLE_VEC.at(i))
+                    {
+                        l_match = true;
+                    }
+                }
+
+                if (l_match)
+                {
+                    l_core_index = i;
+                }
+                else
+                {
+                    FAPI_ASSERT(false,
+                                fapi2::PM_COREQUAD_RESCLK_CACCR_DATA_NOT_MATCHED()
+                                .set_CORE_TARGET(l_core_chplt)
+                                .set_CACCR(l_caccr_value),
+                                "CACCR value %04x didn't match with vector table", l_caccr_value);
+                }
+
+                FAPI_INF ("Walking core index value %u", l_core_index);
+
+                l_step = l_core_index < l_quad_index ? 1 : -1;
+
+                while (l_core_index != l_quad_index)
+                {
+                    l_core_index += l_step;
+                    l_caccr_value = p9_resclk_defines::RESCLK_TABLE_VEC.at(l_core_index);
+                }
+
+                FAPI_INF("Updated CACCR value %04x", l_caccr_value);
+
+                // Update CACCR (0:11) data
+                l_core_data64.insert<C_CPPM_CACCR_CLK_SB_STRENGTH,
+                                     C_CPPM_CACCR_CLK_SW_SPARE>(l_caccr_value);
+                l_address = C_CPPM_CACCR;
+                FAPI_TRY(fapi2::putScom(l_core_chplt, l_address, l_core_data64),
+                         "ERROR: Failed to write C_CPPM_CACCR");
+            }
+        } //end of core list
+    } // end of ex list
+
+    //Get power off index value
+    l_poweroff_index = p9_resclk_defines::RESCLK_INDEX_VEC.at(0).idx;
+
+    l_step = l_quad_index < l_poweroff_index ? 1 : -1;
+
+    while (l_poweroff_index != l_quad_index)
+    {
+        l_quad_index += l_step;
+        l_qaccr_value = p9_resclk_defines::RESCLK_TABLE_VEC.at(l_quad_index);
+    }
+
+    FAPI_INF("Updated QACCR value %04x", l_qaccr_value);
+    // Update QACCR (0:11) data
+    l_address = EQ_QPPM_QACCR;
+    l_quad_data64.insert<EQ_QPPM_QACCR_COMMON_CLK_SB_STRENGTH,
+                         EQ_QPPM_QACCR_COMMON_CLK_SW_SPARE>(l_qaccr_value);
+    FAPI_TRY(fapi2::putScom(i_target, l_address, l_quad_data64),
+             "ERROR: Failed to write C_CPPM_CACCR");
+
+fapi_try_exit:
+
+    FAPI_DBG("<< pm_disable_resclk...");
     return fapi2::current_err;
 }
