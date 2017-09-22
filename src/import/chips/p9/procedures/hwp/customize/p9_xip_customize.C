@@ -1070,17 +1070,18 @@ fapi2::ReturnCode resolve_gptr_overlays(
     // Stage 1 & 2 (shared section)
     //------------------------------
     // Determine if there is GPTR support through MVPD which there will NOT be if
-    // - Nimbus DD1, and
-    // - XIP DD section does not support overlays
+    // - Nimbus DD1, or
+    // - Overlays XIP ring section does not have DD support (This is a little confusing
+    //   but it tells us, indirectly, that there's no Gptr support through Mvpd.)
 
     // First determine if we're on Nimbus < DD20. If we are, continue, else err out.
     FAPI_TRY( FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NO_GPTR_SUPPORT_VIA_MVPD,
                             i_procTarget,
                             l_nimbusDd1),
-              "FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_HAS_GPTR_SUPPORT_VIA_MVPD) failed w/rc=0x%08x",
+              "FAPI_ATTR_GET(ATTR_CHIP_EC_FEATURE_NO_GPTR_SUPPORT_VIA_MVPD) failed w/rc=0x%08x",
               (uint64_t)current_err );
 
-    // Second determine if there's no overlays support. If no, continue, else err out.
+    // Second determine if there's overlays support in HW image. If no, continue, else err out.
     l_rc = p9_xip_dd_section_support(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, l_bDdSupport);
 
     FAPI_ASSERT( l_rc == INFRASTRUCT_RC_SUCCESS,
@@ -1091,12 +1092,12 @@ fapi2::ReturnCode resolve_gptr_overlays(
                  "xip_dd_section_support() failed w/rc=0x%08x.\n",
                  (uint32_t)l_rc );
 
-    // Now do the checks of the above return vars, l_nimbusDd1, l_bDdSupport and l_rc.
+    // Now do the checks of the above return vars, l_nimbusDd1 and l_bDdSupport.
     if ( l_nimbusDd1 )
     {
         *o_overlaysSection = NULL;
         o_bGptrMvpdSupport = false;
-        FAPI_DBG("There's no Mvpd-GPTR support in Nimbus DD1.");
+        FAPI_DBG("There's no Mvpd-GPTR support on this system. (Probably a Nimbus DD1 system)");
     }
     else if ( !l_bDdSupport )
     {
