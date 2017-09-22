@@ -37,6 +37,8 @@
 #include <util/utillidmgr.H>
 #include <p9_pstates_common.h>
 #include <initservice/initserviceif.H>
+#include <sys/mm.h>
+#include <errl/errlmanager.H>
 
 namespace fapi2
 {
@@ -49,6 +51,12 @@ const uint32_t WOF_TABLES_MAGIC_VALUE = 0x57465448; // WFTH
 const uint32_t RES_VERSION_MASK = 0xFF;
 const uint32_t WOF_IMAGE_VERSION = 1;
 const uint32_t WOF_TABLES_VERSION = 1;
+
+#ifndef __HOSTBOOT_RUNTIME
+// Remember that we have already allocated the VMM space for
+//  the WOFDATA lid
+static void* g_wofdataVMM = nullptr;
+#endif
 
 
 /*
@@ -170,8 +178,83 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             break;
         }
 
-        // Allocate space, remember to free it later
+        FAPI_INF("WOFDATA lid is %d bytes", l_lidImageSize);
+
+#ifdef __HOSTBOOT_RUNTIME
+        // Locally allocate space for the lid
         l_pWofImage = static_cast<void*>(malloc(l_lidImageSize));
+
+#else
+        // Use a special VMM block to avoid the requirement for
+        //  contiguous memory
+        int l_mm_rc = 0;
+        if( !g_wofdataVMM )
+        {
+            l_mm_rc = mm_alloc_block( nullptr,
+                          reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID),
+                          VMM_SIZE_WOFDATA_LID );
+            if(l_mm_rc != 0)
+            {
+                FAPI_INF("Fail from mm_alloc_block for WOFDATA, rc=%d", l_mm_rc);
+                /*@
+                 * @errortype
+                 * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+                 * @reasoncode        fapi2::RC_MM_ALLOC_BLOCK_FAILED
+                 * @userdata1         Address being allocated
+                 * @userdata2[00:31]  Size of block allocation
+                 * @userdata2[32:63]  rc from mm_alloc_block
+                 * @devdesc           Error calling mm_alloc_block for WOFDATA
+                 * @custdesc          Firmware Error
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                               fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                               fapi2::RC_MM_ALLOC_BLOCK_FAILED,
+                               VMM_VADDR_WOFDATA_LID,
+                               TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                    l_mm_rc),
+                               true); //software callout
+                l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+                break;
+            }
+
+            g_wofdataVMM = reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID);
+        }
+
+        l_mm_rc = mm_set_permission(
+                         reinterpret_cast<void*>(VMM_VADDR_WOFDATA_LID),
+                         l_lidImageSize,
+                         WRITABLE | ALLOCATE_FROM_ZERO );
+        if(l_mm_rc != 0)
+        {
+            FAPI_INF("Fail from mm_set_permission for WOFDATA, rc=%d", l_mm_rc);
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+             * @reasoncode        fapi2::RC_MM_SET_PERMISSION_FAILED
+             * @userdata1         Address being changed
+             * @userdata2[00:31]  Size of change
+             * @userdata2[32:63]  rc from mm_set_permission
+             * @devdesc           Error calling mm_set_permission for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                               fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                               fapi2::RC_MM_SET_PERMISSION_FAILED,
+                               VMM_VADDR_WOFDATA_LID,
+                               TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                    l_mm_rc),
+                               true); //software callout
+            l_rc.setPlatDataPtr(reinterpret_cast<void *>(l_errl));
+            break;
+        }
+
+        // Point my local pointer at the VMM space we allocated
+        l_pWofImage = g_wofdataVMM;
+
+#endif
+
 
         // Get the tables from pnor or lid
         l_errl = l_wofLidMgr.getLid(l_pWofImage, l_lidImageSize);
@@ -427,7 +510,68 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     // Free the wof tables memory
     if(l_pWofImage != nullptr)
     {
+#ifdef __HOSTBOOT_RUNTIME
         free(l_pWofImage);
+        l_pWofImage = nullptr;
+
+#else
+        errlHndl_t l_tmpErr = nullptr;
+        // Release the memory we may still have allocated and set the
+        //  permissions to prevent further access to it
+        int l_mm_rc = mm_remove_pages(RELEASE,
+                                      l_pWofImage,
+                                      VMM_SIZE_WOFDATA_LID);
+        if( l_mm_rc )
+        {
+            FAPI_INF("Fail from mm_remove_pages for WOFDATA, rc=%d", l_mm_rc);
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+             * @reasoncode        fapi2::RC_MM_REMOVE_PAGES_FAILED
+             * @userdata1         Address being removed
+             * @userdata2[00:31]  Size of removal
+             * @userdata2[32:63]  rc from mm_remove_pages
+             * @devdesc           Error calling mm_remove_pages for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_tmpErr = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                   fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                   fapi2::RC_MM_REMOVE_PAGES_FAILED,
+                                   reinterpret_cast<uint64_t>(l_pWofImage),
+                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                        l_mm_rc),
+                                   true); //software callout
+            errlCommit(l_tmpErr,FAPI2_COMP_ID);
+        }
+        l_mm_rc = mm_set_permission(l_pWofImage,
+                                    VMM_SIZE_WOFDATA_LID,
+                                    NO_ACCESS | ALLOCATE_FROM_ZERO );
+        if( l_mm_rc )
+        {
+            FAPI_INF("Fail from mm_set_permission reset for WOFDATA, rc=%d", l_mm_rc);
+            /*@
+             * @errortype
+             * @moduleid          fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES
+             * @reasoncode        fapi2::RC_MM_SET_PERMISSION2_FAILED
+             * @userdata1         Address being changed
+             * @userdata2[00:31]  Size of change
+             * @userdata2[32:63]  rc from mm_set_permission
+             * @devdesc           Error calling mm_set_permission for WOFDATA
+             * @custdesc          Firmware Error
+             */
+            l_tmpErr = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                   fapi2::MOD_FAPI2_PLAT_PARSE_WOF_TABLES,
+                                   fapi2::RC_MM_SET_PERMISSION2_FAILED,
+                                   reinterpret_cast<uint64_t>(l_pWofImage),
+                                   TWO_UINT32_TO_UINT64(VMM_SIZE_WOFDATA_LID,
+                                                        l_mm_rc),
+                                   true); //software callout
+            errlCommit(l_tmpErr,FAPI2_COMP_ID);
+        }
+#endif
+
     }
 
     FAPI_DBG("Exiting platParseWOFTables ....");
