@@ -32,19 +32,6 @@
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-
-
-#changes needed for Cumulus
-#@TODO RTC:178949
-echo "Applying SIMICS workaround to support Cumulus"
-sbex -t 1031560
-cd $sb/simu
-mk -a
-
-echo "Copying centaur and p9c action files"
-sbex -t 1032952
-sbex -t 1033805
-
 #pull in href tor
 sbex -t 1035576
 #pull in hwsv tor
