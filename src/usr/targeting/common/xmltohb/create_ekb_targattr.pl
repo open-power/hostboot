@@ -42,10 +42,6 @@ use strict;
 use XML::Simple;
 use Data::Dumper;
 
-#add the fapi_utils path to include paths
-#this is useful for debugging
-push (@INC, "../../xmltohb");
-
 require "fapi_utils.pl";
 
 $XML::Simple::PREFERRED_PARSER = 'XML::Parser';
