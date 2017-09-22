@@ -47,32 +47,36 @@ namespace Util
         UTIL_TCE_DISABLE_TCES   = 0x0D,       // Util::UTIL_TCE_DISABLE_TCES
         UTIL_TCE_MAP_PSIHB      = 0x0E,       // UtilTceMgr::mapPsiHostBridge
         UTIL_TCE_UNMAP_PSIHB    = 0x0F,       // UtilTceMgr::unmapPsiHostBridge
+        UTIL_MCL_INIT_MEM       = 0x10,       // MasterContainerLidMgr::initMem
+        UTIL_MCL_REL_MEM        = 0x11,       // MasterContainerLidMgr::releaseMem
 
     };
 
     enum ReasonCode
     {
-        UTIL_ERC_NONE                = UTIL_COMP_ID | 0x01,
-        UTIL_ERC_BAD_PTR             = UTIL_COMP_ID | 0x02,
-        UTIL_ERC_EOF                 = UTIL_COMP_ID | 0x03,
-        UTIL_LIDMGR_RC_FAIL          = UTIL_COMP_ID | 0x04,
-        UTIL_LIDMGR_INVAL_DATA       = UTIL_COMP_ID | 0x05,
-        UTIL_LIDMGR_INVAL_SIZE       = UTIL_COMP_ID | 0x06,
-        UTIL_LIDMGR_UNSUP_MSG        = UTIL_COMP_ID | 0x07,
-        UTIL_LIDMGR_INVAL_SIZE_PNOR  = UTIL_COMP_ID | 0x08,
-        UTIL_LIDMGR_UNLOAD_RC_FAIL   = UTIL_COMP_ID | 0x09,
-        UTIL_LIDMGR_NOT_FOUND        = UTIL_COMP_ID | 0x0A,
-        UTIL_LIDMGR_MM_FAIL          = UTIL_COMP_ID | 0x0B,
-        UTIL_TCE_INVALID_SIZE        = UTIL_COMP_ID | 0x0C,
-        UTIL_TCE_ADDR_NOT_ALIGNED    = UTIL_COMP_ID | 0x0D,
-        UTIL_TCE_DEV_MAP_FAIL        = UTIL_COMP_ID | 0x0E,
-        UTIL_TCE_DEV_UNMAP_FAIL      = UTIL_COMP_ID | 0x0F,
+        UTIL_ERC_NONE                    = UTIL_COMP_ID | 0x01,
+        UTIL_ERC_BAD_PTR                 = UTIL_COMP_ID | 0x02,
+        UTIL_ERC_EOF                     = UTIL_COMP_ID | 0x03,
+        UTIL_LIDMGR_RC_FAIL              = UTIL_COMP_ID | 0x04,
+        UTIL_LIDMGR_INVAL_DATA           = UTIL_COMP_ID | 0x05,
+        UTIL_LIDMGR_INVAL_SIZE           = UTIL_COMP_ID | 0x06,
+        UTIL_LIDMGR_UNSUP_MSG            = UTIL_COMP_ID | 0x07,
+        UTIL_LIDMGR_INVAL_SIZE_PNOR      = UTIL_COMP_ID | 0x08,
+        UTIL_LIDMGR_UNLOAD_RC_FAIL       = UTIL_COMP_ID | 0x09,
+        UTIL_LIDMGR_NOT_FOUND            = UTIL_COMP_ID | 0x0A,
+        UTIL_LIDMGR_MM_FAIL              = UTIL_COMP_ID | 0x0B,
+        UTIL_TCE_INVALID_SIZE            = UTIL_COMP_ID | 0x0C,
+        UTIL_TCE_ADDR_NOT_ALIGNED        = UTIL_COMP_ID | 0x0D,
+        UTIL_TCE_DEV_MAP_FAIL            = UTIL_COMP_ID | 0x0E,
+        UTIL_TCE_DEV_UNMAP_FAIL          = UTIL_COMP_ID | 0x0F,
         UTIL_TCE_NOT_ENOUGH_FREE_ENTRIES = UTIL_COMP_ID | 0x10,
         UTIL_TCE_ENTRY_NOT_CONTIGUOUS    = UTIL_COMP_ID | 0x11,
         UTIL_TCE_PREVIOUSLY_ALLOCATED    = UTIL_COMP_ID | 0x12,
-        UTIL_TCE_INVALID_COUNT       = UTIL_COMP_ID | 0x13,
-        UTIL_TCE_ALLOC_BLOCK_FAIL    = UTIL_COMP_ID | 0x14,
-        UTIL_TCE_BLOCK_UNMAP_FAIL    = UTIL_COMP_ID | 0x15,
+        UTIL_TCE_INVALID_COUNT           = UTIL_COMP_ID | 0x13,
+        UTIL_TCE_ALLOC_BLOCK_FAIL        = UTIL_COMP_ID | 0x14,
+        UTIL_TCE_BLOCK_UNMAP_FAIL        = UTIL_COMP_ID | 0x15,
+        UTIL_MM_BLOCK_MAP_FAILED         = UTIL_COMP_ID | 0x16,
+        UTIL_MM_BLOCK_UNMAP_FAILED       = UTIL_COMP_ID | 0x17,
 
     };
 };

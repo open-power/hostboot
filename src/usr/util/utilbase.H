@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,6 +35,7 @@ namespace Util
 
 #define UTIL_DT(...)    TRACDCOMP( Util::g_util_trace, __VA_ARGS__ )
 #define UTIL_FT(...)    TRACFCOMP( Util::g_util_trace, __VA_ARGS__ )
+#define UTIL_FBIN(...)  TRACFBIN( Util::g_util_trace, __VA_ARGS__ )
 
 #define UTIL_BOOL_ALPHA(x) ((x) ? "TRUE" : "FALSE")
 
