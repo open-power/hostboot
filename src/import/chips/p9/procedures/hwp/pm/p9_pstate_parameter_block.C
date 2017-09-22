@@ -188,11 +188,18 @@ char const* prt_region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
 /// @return true or false
 ///--------------------------------------
 bool
-is_wof_enabled(PSTATE_attribute_state* i_state)
+is_wof_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+               PSTATE_attribute_state* i_state)
 {
+    uint8_t attr_dd_wof_not_supported;
+    uint8_t attr_system_wof_disable;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_WOF_DISABLE, FAPI_SYSTEM, attr_system_wof_disable);
+    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_WOF_NOT_SUPPORTED, i_target, attr_dd_wof_not_supported);
+
     return
-        (!(attr.attr_system_wof_disable) &&
-         !(attr.attr_dd_wof_not_supported) &&
+        (!(attr_system_wof_disable) &&
+         !(attr_dd_wof_not_supported) &&
          i_state->iv_wof_enabled)
         ? true : false;
 }
@@ -203,11 +210,19 @@ is_wof_enabled(PSTATE_attribute_state* i_state)
 /// @return true or false
 ///--------------------------------------
 bool
-is_vdm_enabled(PSTATE_attribute_state* i_state)
+is_vdm_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+               PSTATE_attribute_state* i_state)
 {
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t attr_dd_vdm_not_supported;
+    uint8_t attr_system_vdm_disable;
+
+    FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_VDM_DISABLE, FAPI_SYSTEM, attr_system_vdm_disable);
+    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_VDM_NOT_SUPPORTED, i_target, attr_dd_vdm_not_supported);
+
     return
-        (!(attr.attr_system_vdm_disable) &&
-         !(attr.attr_dd_vdm_not_supported) &&
+        (!(attr_system_vdm_disable) &&
+         !(attr_dd_vdm_not_supported) &&
          i_state->iv_vdm_enabled)
          ? true : false;
 }
@@ -409,7 +424,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_vdn_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vdn_uv);
 
         //if wof is disabled.. don't call IQ function
-        if (is_wof_enabled(&l_state))
+        if (is_wof_enabled(i_target,&l_state))
         {
             // ----------------
             // get IQ (IDDQ) data
@@ -699,7 +714,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         uint16_t l_vpd_idn_100ma = revle16(l_poundv_data.IdnPbCurr);
         FAPI_INF("l_vpd_idn_100ma %x", (l_vpd_idn_100ma));
 
-        if (is_wof_enabled(&l_state))
+        if (is_wof_enabled(i_target,&l_state))
         {
             // Iddq Table
             l_occppb.iddq = l_iddqt;
@@ -774,7 +789,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         //Check WOF is enabled or not
         io_size = 0;
-        if (is_wof_enabled(&l_state))
+        if (is_wof_enabled(i_target,&l_state))
         {
             p9_pstate_wof_initialization(&l_globalppb,
                                          o_buf,
@@ -1023,10 +1038,10 @@ proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     // ----------------------------
     // attributes currently defined
     // ----------------------------
+
 #define DATABLOCK_GET_ATTR(attr_name, target, attr_assign) \
 FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, io_attr->attr_assign),"Attribute read failed"); \
 FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_assign);
-
     // Frequency Bias attributes
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS_ULTRATURBO, i_target, attr_freq_bias_ultraturbo);
     DATABLOCK_GET_ATTR(ATTR_FREQ_BIAS_TURBO, i_target, attr_freq_bias_turbo);
@@ -1515,7 +1530,7 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                  i_chiplet_mvpd_data[pv_op_order[i]][3],
                  i_chiplet_mvpd_data[pv_op_order[i]][4]);
 
-            if (is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+            if (is_wof_enabled(i_target,o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
             {
                 if (i_chiplet_mvpd_data[pv_op_order[i]][0] == 0 ||
                     i_chiplet_mvpd_data[pv_op_order[i]][1] == 0 ||
@@ -1563,7 +1578,7 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 }
             }
-            else if ((!is_wof_enabled(o_state)) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
+            else if ((!is_wof_enabled(i_target,o_state)) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0))
             {
                 FAPI_INF("**** NOTE: WOF is disabled so the UltraTurbo VPD is not being checked");
                 suspend_ut_check = true;
@@ -1689,8 +1704,8 @@ proc_chk_valid_poundv(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                      pv_op_str[pv_op_order[i - 1]], pv_op_str[pv_op_order[i]]);
 
             // Only skip checkinug for WOF not enabled and UltraTurbo.
-            if ( is_wof_enabled(o_state) ||
-                (!( !is_wof_enabled(o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0)))
+            if ( is_wof_enabled(i_target,o_state) ||
+                (!( !is_wof_enabled(i_target,o_state) && (strcmp(pv_op_str[pv_op_order[i]], "UltraTurbo") == 0)))
                )
             {
                 if (i_chiplet_mvpd_data[pv_op_order[i - 1]][0] > i_chiplet_mvpd_data[pv_op_order[i]][0]  ||
@@ -3293,8 +3308,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_data,
                      fapi2::voltageBucketData_t i_poundv_data,
-                     PSTATE_attribute_state* o_state,
-                     bool i_skip_check)
+                     PSTATE_attribute_state* o_state)
 {
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_EQ>> l_eqChiplets;
     fapi2::vdmData_t l_vdmBuf;
@@ -3310,11 +3324,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     do
     {
          FAPI_DBG("proc_get_mvpd_poundw: VDM enable = %d, WOF enable %d",
-                    is_vdm_enabled(o_state), is_wof_enabled(o_state));
+                    is_vdm_enabled(i_target,o_state), is_wof_enabled(i_target,o_state));
 
         // Exit if both VDM and WOF is disabled
-        if ((!is_vdm_enabled(o_state) && !is_wof_enabled(o_state)) &&
-            !i_skip_check)
+        if ((!is_vdm_enabled(i_target,o_state) && !is_wof_enabled(i_target,o_state)))
         {
             FAPI_INF("   proc_get_mvpd_poundw: BOTH VDM and WOF are disabled.  Skipping remaining checks");
             o_state->iv_vdm_enabled = false;
@@ -3396,7 +3409,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                 sizeof(poundw_entry_t));
 
         // Validate the WOF content is non-zero if WOF is enabled
-        if (is_wof_enabled(o_state))
+        if (is_wof_enabled(i_target,o_state))
         {
             bool b_tdp_ac = true;
             bool b_tdp_dc = true;
@@ -3451,7 +3464,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         // The rest of the processing here is all checking of the VDM content
         // within #W.  If VDMs are not enabled (or supported), skip all of it
-        if (!is_vdm_enabled(o_state))
+        if (!is_vdm_enabled(i_target,o_state))
         {
             FAPI_INF("   proc_get_mvpd_poundw: VDM is disabled.  Skipping remaining checks");
             o_state->iv_vdm_enabled = false;
@@ -3825,10 +3838,13 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
 
             o_vfrt_data->vfrt_data[l_index_0][l_index_1] = l_ps;
 
-            sprintf(l_buffer_str, "[%2d][%2d] %2d %4d; ",
-                    l_index_0, l_index_1,
-                    l_ps,  l_freq_khz / 1000);
-            strcat(l_line_str, l_buffer_str);
+            if (b_first_vratio_set)
+            {
+               sprintf(l_buffer_str, "[%2d][%2d] %2d %4d; ",
+                       l_index_0, l_index_1,
+                       l_ps,  l_freq_khz / 1000);
+               strcat(l_line_str, l_buffer_str);
+            }
 
             // Trace the first 8 values of the 24 for debug. As this is
             // in a loop that is processing over 1000 tables, the first
@@ -4388,6 +4404,20 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_safe_mode_mv;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ, FAPI_SYSTEM, l_safe_mode_values.safe_op_freq_mhz));
+
+    // Core floor frequency should be less than ultra turbo freq..
+    // if not log an error
+    if ((l_safe_mode_values.safe_op_freq_mhz*1000) > i_reference_freq)
+    {
+        FAPI_ERR("Core floor frequency value %08x is greater than ultra turbo freq %08x",
+                  (l_safe_mode_values.safe_op_freq_mhz*1000), i_reference_freq);
+        FAPI_ASSERT(false,
+                    fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_UT_FREQ()
+                    .set_CHIP_TARGET(i_target)
+                    .set_CORE_FLOOR_FREQ(l_safe_mode_values.safe_op_freq_mhz*1000)
+                    .set_UT_FREQ(i_reference_freq),
+                    "Core floor freq is greater than UT freq");
+    }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_safe_mode_freq));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_mv));

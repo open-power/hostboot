@@ -219,7 +219,7 @@ avsInitAttributes(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 l_pstate = ((attr_mvpd_data[ULTRA][VPD_PV_CORE_FREQ_MHZ] -
                              attr_mvpd_data[POWERSAVE][VPD_PV_CORE_FREQ_MHZ]) * 1000) /
                            l_frequency_step_khz;
-                l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state, true);
+                l_rc = proc_get_mvpd_poundw(i_target, l_poundv_bucketId, &l_lp_vdmpb, &l_poundw_data, l_poundv_data, &l_state);
 
                 if (l_rc)
                 {

@@ -48,6 +48,7 @@ extern "C" {
 #define MAX_ACTIVE_CORES 24
 
 #define HOMER_WOF_TABLE_SIZE 258176
+
 /// An internal operating point
 ///
 /// Internal operating points include characterization (both the original,
@@ -350,8 +351,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                      LP_VDMParmBlock* o_vdmpb,
                      PoundW_data* o_poundw_data,
                      fapi2::voltageBucketData_t i_poundv_data,
-                     PSTATE_attribute_state* o_state,
-                     bool i_skip_check = false
+                     PSTATE_attribute_state* o_state
                     );
 /// -----------------------------------------------------------------------
 /// @brief Get needed attributes
