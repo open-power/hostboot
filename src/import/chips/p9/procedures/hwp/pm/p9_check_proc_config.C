@@ -195,7 +195,6 @@ fapi2::ReturnCode checkObusChipletHierarchy( CONST_FAPI2_PROC& i_procTgt,
 
         if( itv.isFunctional() )
         {
-            uint8_t l_configPos = i_oBusStartPos + l_oBusPos;
             uint8_t l_configMode = 0;
             auto l_oBusBrickList = itv.getChildren<fapi2::TARGET_TYPE_OBUS_BRICK>( fapi2::TARGET_STATE_FUNCTIONAL );
 
@@ -244,6 +243,7 @@ fapi2::ReturnCode checkObusChipletHierarchy( CONST_FAPI2_PROC& i_procTgt,
                                                 .set_TARGET( l_obusBrick )
                                                 .set_OBRICK_POS( l_brickPos ),
                                                 "Bad or unexpected Obus brick position" );
+                            break;
 
                     }
 
@@ -257,11 +257,6 @@ fapi2::ReturnCode checkObusChipletHierarchy( CONST_FAPI2_PROC& i_procTgt,
 #endif
                 }
             }
-
-            io_configVector |= (l_tempVector >> l_configPos);
-
-            FAPI_INF( "Obus Pos 0x%08x Bit Pos 0x%02x UAV 0x%016lx",
-                      l_oBusPos, l_configPos, io_configVector );
         }
     }
 
@@ -280,9 +275,10 @@ fapi2::ReturnCode p9_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_pH
     uint64_t l_configVectVal = INIT_CONFIG_VALUE;
     uint8_t* pHomer = (uint8_t*)i_pHomerImage + QPMR_HOMER_OFFSET +
                       QPMR_PROC_CONFIG_POS;
-
+    uint8_t l_chipName = 0;
 #ifndef __HOSTBOOT_MODULE
     g_targetTypeMap[fapi2::TARGET_TYPE_MCS]         =   "MCS";
+    g_targetTypeMap[fapi2::TARGET_TYPE_MCA]         =   "MCA";
     g_targetTypeMap[fapi2::TARGET_TYPE_XBUS]        =   "XBUS";
     g_targetTypeMap[fapi2::TARGET_TYPE_OBUS]        =   "OBUS";
     g_targetTypeMap[fapi2::TARGET_TYPE_CAPP]        =   "CAPP";
@@ -314,8 +310,21 @@ fapi2::ReturnCode p9_check_proc_config ( CONST_FAPI2_PROC& i_procTgt, void* i_pH
     FAPI_TRY(  checkObusChipletHierarchy ( i_procTgt, l_configVectVal, OBUS_POS, NVLINK_POS ),
                "Failed to get OBUS Hierarchy configuration" );
 
-    FAPI_TRY( checkMemConfig( i_procTgt, l_configVectVal ),
-              "Failed to get Memory  configuration" );
+    FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, i_procTgt, l_chipName );
+
+    if( fapi2::ENUM_ATTR_NAME_CUMULUS == l_chipName )
+    {
+        FAPI_TRY( checkMemConfig( i_procTgt, l_configVectVal ),
+                  "Failed to get Memory  configuration" );
+    }
+    else
+    {
+        //FIXME: RTC 180154 Needs Review for Axone
+
+        FAPI_TRY( checkChiplet< fapi2::TARGET_TYPE_MCA >
+                  ( i_procTgt, fapi2::TARGET_TYPE_MCA, l_configVectVal, MBA_POS ),
+                  "Failed to get MCA Position" );
+    }
 
     FAPI_INF( "Updating Vector in HOMER" );
     *(uint64_t*)pHomer  = htobe64( l_configVectVal );
