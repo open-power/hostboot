@@ -26,16 +26,20 @@
 #ifndef _P9_DD_CONTAINER_H_
 #define _P9_DD_CONTAINER_H_
 
-#include <stdint.h>
+#ifdef WIN32
+    #include "win32_stdint.h"
+#else
+    #include <stdint.h>
+#endif
 
-#define P9_DD_CONTAINER_MAGIC 0x4444434F // "DDCO"
+#define DD_CONTAINER_MAGIC 0x4444434F // "DDCO"
 
-#define P9_DD_SUCCESS                0
-#define P9_DD_FAILURE_BROKEN         1
-#define P9_DD_FAILURE_NOMEM          2
-#define P9_DD_FAILURE_NOT_FOUND      3
-#define P9_DD_FAILURE_DOES_NOT_EXIST 4
-#define P9_DD_FAILURE_DUPLICATE      5
+#define DDCO_SUCCESS                   0
+#define DDCO_FAILURE_MAGIC_NOT_FOUND   1
+#define DDCO_FAILURE_NOMEM             2
+#define DDCO_DDLEVEL_NOT_FOUND         3
+#define DDCO_DDCO_DOES_NOT_EXIST       4
+#define DDCO_DUPLICATE_DDLEVEL         5
 
 // header for each dd level block inside container
 struct p9_dd_block
@@ -61,9 +65,6 @@ struct p9_dd_iter
     struct p9_dd_cont* iv_cont;
     uint8_t            iv_idx;
 };
-
-// initialisation of iterator
-#define P9_DD_ITER_INIT(dd_cont) { .iv_cont = (dd_cont), .iv_idx  = 0 }
 
 #ifdef __cplusplus
 extern "C" {
