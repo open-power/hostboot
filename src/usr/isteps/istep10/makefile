@@ -115,8 +115,10 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 # HWP not ready - p9_trigger_rng_bist.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 
-# p9_setup_evid : apply voltage settings
-include ${PROCEDURES_PATH}/hwp/pm/p9_setup_evid.mk
+#add objects from p9_setup_evid.mk directly to avoid duplicates
+OBJS+=p9_avsbus_lib.o
+OBJS+=p9_pstate_parameter_block.o
+OBJS+=p9_setup_evid.o
 include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
 
 #p9_cen_ref_clk_enable : Centaur Ref Clock Enable
