@@ -23,10 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#include <stdint.h>
+#ifdef WIN32
+    #include "endian.h"
+#else
+    #include <endian.h>
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
-#include <endian.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -36,17 +40,17 @@ int p9_dd_validate(struct p9_dd_cont* i_cont)
 {
     if (!i_cont)
     {
-        return P9_DD_FAILURE_DOES_NOT_EXIST;
+        return DDCO_DDCO_DOES_NOT_EXIST;
     }
 
-    if (be32toh(i_cont->iv_magic) != P9_DD_CONTAINER_MAGIC)
+    if (be32toh(i_cont->iv_magic) != DD_CONTAINER_MAGIC)
     {
-        return P9_DD_FAILURE_BROKEN;
+        return DDCO_FAILURE_MAGIC_NOT_FOUND;
     }
 
     // may want to check here for holes or overlap as to stored blocks
 
-    return P9_DD_SUCCESS;
+    return DDCO_SUCCESS;
 }
 
 // iterates through all dd level blocks
@@ -84,14 +88,14 @@ void p9_dd_betoh(struct p9_dd_block* i_block_be,
 int p9_dd_get(uint8_t* i_cont, uint8_t i_dd, uint8_t** o_buf, uint32_t* o_size)
 {
     struct p9_dd_cont*  cont = (struct p9_dd_cont*)i_cont;
-    struct p9_dd_iter   iter = P9_DD_ITER_INIT(cont);
+    struct p9_dd_iter   iter = {cont, 0};
     struct p9_dd_block* block;
     struct p9_dd_block  block_he;
     int rc;
 
     rc = p9_dd_validate(cont);
 
-    if (rc != P9_DD_SUCCESS)
+    if (rc != DDCO_SUCCESS)
     {
         return rc;
     }
@@ -103,11 +107,11 @@ int p9_dd_get(uint8_t* i_cont, uint8_t i_dd, uint8_t** o_buf, uint32_t* o_size)
             p9_dd_betoh(block, &block_he);
             *o_buf  = p9_dd_addr(cont, block_he.iv_offset);
             *o_size = block_he.iv_size;
-            return P9_DD_SUCCESS;
+            return DDCO_SUCCESS;
         }
     }
 
-    return P9_DD_FAILURE_NOT_FOUND;
+    return DDCO_DDLEVEL_NOT_FOUND;
 }
 
 uint32_t p9_dd_size_meta(struct p9_dd_cont* i_cont)
@@ -150,7 +154,7 @@ struct p9_dd_cont* p9_dd_create(void)
         return cont;
     }
 
-    cont->iv_magic = htobe32(P9_DD_CONTAINER_MAGIC);
+    cont->iv_magic = htobe32(DD_CONTAINER_MAGIC);
     cont->iv_num   = 0;
 
     return cont;
@@ -179,28 +183,28 @@ int p9_dd_add(
     uint32_t            this_offs;
     struct p9_dd_block* this_block;
 
-    struct p9_dd_iter   iter = P9_DD_ITER_INIT(NULL);
+    struct p9_dd_iter   iter = {NULL, 0};
 
     // handle duplicates and initial setup of empty container
     rc = p9_dd_get(*io_cont, i_dd, &dupl_buf, &dupl_size);
 
     switch (rc)
     {
-        case P9_DD_FAILURE_NOT_FOUND :
+        case DDCO_DDLEVEL_NOT_FOUND :
             break;
 
-        case P9_DD_FAILURE_DOES_NOT_EXIST :
+        case DDCO_DDCO_DOES_NOT_EXIST :
             cont = p9_dd_create();
 
             if (!cont)
             {
-                return P9_DD_FAILURE_NOMEM;
+                return DDCO_FAILURE_NOMEM;
             }
 
             break;
 
-        case P9_DD_SUCCESS :
-            return P9_DD_FAILURE_DUPLICATE;
+        case DDCO_SUCCESS :
+            return DDCO_DUPLICATE_DDLEVEL;
 
         default :
             return rc;
@@ -214,7 +218,7 @@ int p9_dd_add(
 
     if (!cont)
     {
-        return P9_DD_FAILURE_NOMEM;
+        return DDCO_FAILURE_NOMEM;
     }
 
     // offsets and size of existing bufs
@@ -258,5 +262,5 @@ int p9_dd_add(
     *io_cont = (uint8_t*)cont;
     *o_cont_size = enlarged;
 
-    return P9_DD_SUCCESS;
+    return DDCO_SUCCESS;
 }
