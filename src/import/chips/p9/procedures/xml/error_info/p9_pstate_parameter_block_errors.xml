@@ -400,6 +400,19 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_PSTATE_PB_CORE_FLOOR_FREQ_GT_UT_FREQ</rc>
+    <description>The core floor frequency is greater than ultra turbo freq.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>CORE_FLOOR_FREQ</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_PSTATE_PB_FREQ2PS_LT_PSTATE_MIN_ERROR</rc>
     <description>The calculated Pstate is less than the allowed minimum..
     </description>
