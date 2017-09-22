@@ -208,7 +208,6 @@ enum BlockPriority
  */
 #define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (96 * MEGABYTE)
 
-
 /**
  * Test Constants
  */
@@ -236,8 +235,20 @@ enum BlockPriority
 
 #define UNSECURE_MEM_REGION_SIZE_TEST (1*KILOBYTE)
 
+/** Two memory locations for MCL processing **/
+// Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
+// Location for the MCL itself to sit in.
+#define MCL_ADDR (20*MEGABYTE)
+#define MCL_SIZE (16*KILOBYTE)
+// Location for PHYP to be loaded into and reused for all Master Container Lids
+// Verification is done in the temp space and then loaded into mainstore memory
+#define MCL_TMP_ADDR (MCL_ADDR + MCL_SIZE)
+#define MCL_TMP_SIZE ( (64 * MEGABYTE) + PAGESIZE )
+
 /** PreVerifiedLidMgr test space */
-#define PREVERLIDMGR_TEST_ADDR  (364*MEGABYTE)
+#define PREVERLIDMGR_TEST_ADDR  (512*MEGABYTE)
 #define PREVERLIDMGR_TEST_SIZE  (64*MEGABYTE)
+
+
 
 #endif /* _VMMCONST_H */
