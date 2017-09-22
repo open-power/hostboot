@@ -72,11 +72,16 @@ include $(NEST_HWP_PATH)/p9_revert_sbe_mcs_setup.mk
 #TODO RTC: 164237
 # Take another look at PM lib
 include $(PM_HWP_PATH)/p9_pm_utils.mk
-include $(PM_HWP_PATH)/p9_setup_evid.mk
+
 include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 include $(PM_HWP_PATH)/p9_quad_power_off.mk
 include $(LIB_HWP_PATH)/p9_avsbus_lib.mk
+
+#add objects from p9_setup_evid.mk directly to avoid duplicates
+OBJS+=p9_avsbus_lib.o
+OBJS+=p9_pstate_parameter_block.o
+OBJS+=p9_setup_evid.o
 
 
 OBJS+=p9_hcd_core_stopclocks.o
