@@ -149,7 +149,7 @@ void setCheckstopData(uint64_t i_xstopAddr, uint64_t i_xstopData)
     g_xstopRegPtr = reinterpret_cast<uint64_t*>(i_xstopAddr
                                                 |VmmManager::FORCE_PHYS_ADDR);
     g_xstopRegValue = i_xstopData;
-    printk( "Set MchChk Xstop: %p=%.16lX\n", g_xstopRegPtr, g_xstopRegValue );
+    printk( "Arm MchChk Xstop: %p=%.16lX\n", g_xstopRegPtr, g_xstopRegValue );
 
     // Now that the machine check handler can do the xscom we
     //  can set MSR[ME]=1 to enable the regular machine check

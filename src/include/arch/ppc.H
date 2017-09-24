@@ -434,10 +434,11 @@ ALWAYS_INLINE
 inline void MAGIC_INSTRUCTION(int _n)
 {
     register int n = _n;
+    isync();
     asm volatile("rlwimi %0,%0,0,%1,%2"       \
         :: "i" (((n) >> 8) & 0x1f),           \
         "i" (((n) >> 4) & 0xf),               \
-        "i" ((((n) >> 0) & 0xf) | 16));
+        "i" ((((n) >> 0) & 0xf) | 16));       \
 }
 
 // Arguments to MAGIC_INSTRUCTION().
