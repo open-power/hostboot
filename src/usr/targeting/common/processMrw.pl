@@ -328,12 +328,6 @@ foreach my $n (keys %{$targetObj->{TOPOLOGY}}) {
     }
 }
 ## check for errors
-if ($targetObj->getMasterProc() eq "")
-{
-    print "ERROR: Master Processor not defined.  Please instaitant a BMC
- and connect LPC bus\n";
-    $targetObj->myExit(3);
-}
 foreach my $target (keys %{ $targetObj->getAllTargets() })
 {
     errorCheck($targetObj, $target);
@@ -741,15 +735,6 @@ sub processProcessor
         }
     }
 
-    # Both for FSP and BMC based systems, it's good  enough
-    # to look for processor with active LPC bus connected
-    $targetObj->log($target,"Finding master proc (looking for LPC Bus)");
-    my $lpcs=$targetObj->findConnections($target,"LPC","");
-    if ($lpcs ne "")
-    {
-       $targetObj->log ($target, "Setting master proc to $target");
-       $targetObj->setMasterProc($target);
-    }
 
     # I2C arrays
     my @engine = ();
@@ -916,7 +901,9 @@ sub processProcessor
     ## initialize master processor FSI's
     $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "0");
 
-    if ($target eq $targetObj->getMasterProc())
+    my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
+
+    if ($proc_type eq "ACTING_MASTER" )
     {
         $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "reserved",
             "0");
@@ -926,7 +913,6 @@ sub processProcessor
         $targetObj->setAttribute($target, "ALTFSI_MASTER_PORT", "0xFF");
         $targetObj->setAttribute($target, "FSI_MASTER_TYPE",    "NO_MASTER");
         $targetObj->setAttribute($target, "FSI_SLAVE_CASCADE",  "0");
-        $targetObj->setAttribute($target, "PROC_MASTER_TYPE", "ACTING_MASTER");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
             "1");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
@@ -934,8 +920,6 @@ sub processProcessor
     }
     else
     {
-        $targetObj->setAttribute($target, "PROC_MASTER_TYPE",
-            "NOT_MASTER");
         $targetObj->setAttribute($target, "ALTFSI_MASTER_CHIP", "physical:sys-0");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useSbeScom",
             "0");
@@ -1716,7 +1700,10 @@ sub processOcc
     my $target       = shift;
     my $parentTarget = shift;
     my $master_capable=0;
-    if ($parentTarget eq $targetObj->getMasterProc())
+
+    my $proc_type = $targetObj->getAttribute($parentTarget, "PROC_MASTER_TYPE");
+
+    if ($proc_type eq "ACTING_MASTER" )
     {
         $master_capable=1;
     }
@@ -2326,13 +2313,16 @@ sub errorCheck
         ## this checks if at least 1 abus is connected
         my $found_abus = 0;
         my $abus_error = "";
+        
         foreach my $child (@{ $targetObj->getTargetChildren($target) })
         {
             my $child_type = $targetObj->getBusType($child);
             if ($child_type eq "ABUS" || $child_type eq "XBUS")
             {
-                if ($targetObj->getMasterProc() ne $target)
-                {
+              my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
+
+              if ($proc_type eq "NOT_MASTER" ) 
+              {
                     if (!$targetObj->isBadAttribute($child, "PEER_TARGET"))
                     {
                         $found_abus = 1;
@@ -2342,7 +2332,7 @@ sub errorCheck
                         $abus_error = sprintf(
 "proc not connected to proc via Abus or Xbus (Target=%s)",$child);
                     }
-                }
+              }
             }
         }
         if ($found_abus)

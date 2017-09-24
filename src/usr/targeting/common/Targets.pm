@@ -92,7 +92,6 @@ sub new
         enumerations => undef,
         MAX_MCS      => 0,
         UNIT_COUNTS  => undef,
-        master_proc  => undef,
         huid_idx     => undef,
         mru_idx      => undef,
         force        => 0,
@@ -761,6 +760,22 @@ sub buildAffinity
                  NUM_PROCS_PER_GROUP +
                  $self->getAttribute($socket,"FABRIC_CHIP_ID"));
 
+            # Both for FSP and BMC based systems, it's good  enough
+            # to look for processor with active LPC bus connected
+            $self->log($target,"Finding master proc (looking for LPC Bus)");
+            my $lpcs=$self->findConnections($target,"LPC","");
+            if ($lpcs ne "")
+            {
+                $self->log ($target, "Setting $target as ACTING_MASTER");
+                $self->setAttribute($target, "PROC_MASTER_TYPE",
+                                  "ACTING_MASTER");
+            }
+            else
+            {
+               $self->setAttribute($target, "PROC_MASTER_TYPE",
+                               "NOT_MASTER");
+            }
+
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
 
             $self->processMc($target, $sys_pos, $node, $proc, $parent_affinity,
@@ -1323,8 +1338,12 @@ sub processMc
                         my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
                         $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
                         $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$fsi_port);
-                        my $dmi_swizzle =
+                        my $dmi_swizzle = "";
+                        if( $self->isBusAttributeDefined($dmi,0,"DMI_REFCLOCK_SWIZZLE"))
+                        {
+                           $dmi_swizzle =
                              $self->getBusAttribute($dmi,0,"DMI_REFCLOCK_SWIZZLE");
+                        }
                         if ($dmi_swizzle ne "")
                         {
                             $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$dmi_swizzle);
@@ -2225,19 +2244,6 @@ sub setMruid
     my $mruid = sprintf("%s%04x", $mru_prefix_id, $index);
     $self->setAttribute($target, "MRU_ID", $mruid);
     $self->{mru_idx}->{$node}->{$type}++;
-}
-
-sub getMasterProc
-{
-    my $self = shift;
-    return $self->{master_proc};
-}
-
-sub setMasterProc
-{
-    my $self = shift;
-    my $target = shift;
-    $self->{master_proc}=$target;
 }
 
 sub getSystemName
