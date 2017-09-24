@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,7 +178,7 @@ namespace KernelMisc
      */
     void populate_cache_lines(uint64_t* i_start, uint64_t* i_end);
 
-    /** @fn set
+    /** @fn set scratch reg
      *
      *  @brief Update value of scratch register to specified data.
      *
@@ -194,6 +194,18 @@ namespace KernelMisc
      *  @param[in] uint64_t - Data
      */
     void updateScratchReg(MMIO_Scratch_Register scratch_addr, uint64_t data);
+
+    /** @fn Log backtrace to printk
+     *
+     *  @brief Collect the backtrace for the given task and print an
+     *         abbreviated version to the printk buffer.
+     *
+     *  This can be used in task-crash paths for FFDC
+     *
+     *  @param[in] task_t i_task - Task to operate against,
+     *             if i_task==nullptr then call will use user-space interfaces
+     */
+    void printkBacktrace(task_t* i_task);
 
 };
 #endif

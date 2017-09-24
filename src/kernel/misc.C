@@ -585,6 +585,51 @@ namespace KernelMisc
         writeScratchReg(l_scratch_addr, data);
     };
 
+    /**
+     *  @brief Collect the backtrace for the given task and print an
+     */
+    void printkBacktrace(task_t* i_task)
+    {
+        uint64_t* l_frame = nullptr;
+        uint32_t l_tid = 0;
+        bool l_kernelSpace = true;
+        if( i_task == nullptr ) //user-space
+        {
+            l_kernelSpace = false;
+            printk("U:");
+            l_frame = static_cast<uint64_t*>(framePointer());
+            l_tid = task_gettid();
+        }
+        else //kernel-space
+        {
+            printk("K:");
+            l_frame = reinterpret_cast<uint64_t*>( i_task->context.gprs[1] );
+            l_tid = i_task->tid;
+        }
+
+        printk("Backtrace for %d:\n  ", l_tid );
+        printkd("frame=%p\n",l_frame);isync();
+        while (l_frame != NULL)
+        {
+            printkd("\nf=%p\n",l_frame); isync();
+            if( l_kernelSpace )
+            {
+                uint64_t* frame_p = reinterpret_cast<uint64_t*>
+                  (VmmManager::findPhysicalAddress( reinterpret_cast<uint64_t>
+                                                    (l_frame) ));
+                printkd("frame_p=%p\n",frame_p); isync();
+                l_frame = frame_p;
+            }
+            if( (0 != *l_frame) && (0 != l_frame[2]) )
+            {
+                printk( "<-0x%lX", l_frame[2] );
+            }
+
+            l_frame = reinterpret_cast<uint64_t*>(*l_frame);
+        }
+        printk("\n");
+    }
+
 
 };
 

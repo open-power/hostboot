@@ -37,6 +37,7 @@
 #include <assert.h>
 #include <kernel/memstate.H>
 #include <kernel/bltohbdatamgr.H>
+#include <kernel/misc.H>
 
 
 size_t PageManager::cv_coalesce_count = 0;
@@ -155,7 +156,7 @@ void* PageManager::allocatePage(size_t n, bool userspace)
     // In non-kernel mode, make a system-call to allocate in kernel-mode.
     if (!KernelMisc::in_kernel_mode())
     {
-        size_t attempts = 0;
+        size_t l_attempts = 0;
         while (NULL == page)
         {
             page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
@@ -165,11 +166,14 @@ void* PageManager::allocatePage(size_t n, bool userspace)
             // will eventually free up (ex. VMM flushes).
             if (NULL == page)
             {
-                attempts++;
-                if( attempts == 10000 ) //arbitrarily huge number
+                l_attempts++;
+                if( l_attempts == 10000 )
                 {
-                    printk("Cannot allocate %ld pages\n", n);
+                    printk( "Cannot allocate %ld pages to %d!\n",
+                            n, task_gettid() );
                     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+                    KernelMisc::printkBacktrace(nullptr);
+                    task_crash();
                 }
                 task_yield();
             }

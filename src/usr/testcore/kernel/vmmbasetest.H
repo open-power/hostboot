@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -44,7 +46,7 @@ class VmmBaseTest : public CxxTest::TestSuite
         {
             int status;
 
-            printk("Test case: Expect to see uncaught exception! ");
+            printk("testNullAccess1: Expect to see uncaught exception! ");
             tid_t child = task_create(readFromNULL, NULL);
 
             if ((child != task_wait_tid(child, &status, NULL)) ||
@@ -53,7 +55,7 @@ class VmmBaseTest : public CxxTest::TestSuite
                 TS_FAIL("Write to NULL not caught.");
             }
 
-            printk("Test case: Expect to see uncaught exception! ");
+            printk("testNullAccess2: Expect to see uncaught exception! ");
             child = task_create(writeToNULL, NULL);
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
@@ -66,7 +68,7 @@ class VmmBaseTest : public CxxTest::TestSuite
         {
             int status;
 
-            printk("Test case: Expect to see uncaught exception! ");
+            printk("testWriteToKernelCode: Expect to see uncaught exception! ");
             tid_t child = task_create(writeToKernelCode, NULL);
             if ((child != task_wait_tid(child, &status, NULL)) ||
                 (status != TASK_STATUS_CRASHED))
@@ -134,6 +136,21 @@ class VmmBaseTest : public CxxTest::TestSuite
             }
         }
 
+        void testHugeMalloc()
+        {
+            int status;
+
+            printk("testHugeMalloc: Expect to see uncaught exception! ");isync();
+
+            tid_t child = task_create(bigMalloc, NULL);
+
+            if ((child != task_wait_tid(child, &status, NULL)) ||
+                (status != TASK_STATUS_CRASHED))
+            {
+                TS_FAIL("testHugeMalloc> Giant malloc didn't crash.");
+            }
+        }
+
     private:
 
         static void* readFromNULL(void* unused)
@@ -176,6 +193,16 @@ class VmmBaseTest : public CxxTest::TestSuite
                     message->data[1] = 0;
                     msg_respond(iv_mq, message);
                 }
+            }
+            return NULL;
+        }
+
+        static void* bigMalloc(void* unused)
+        {
+            uint8_t* ptr = (uint8_t*)malloc(VMM_MEMORY_SIZE);
+            for( size_t x=0; x<(VMM_MEMORY_SIZE); x+=MEGABYTE )
+            {
+                ptr[x] = x;
             }
             return NULL;
         }
