@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -168,7 +170,7 @@ class TaskWaitTest : public CxxTest::TestSuite
 
         static void* TaskThatCrashes(void* unused)
         {
-            printk("Test case: Expect to see uncaught exception! ");
+            printk("TaskThatCrashes: Expect to see uncaught exception! ");
             *(int64_t*)(0) = 0xDEADC0DE;
             return NULL;
         }

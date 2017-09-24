@@ -37,6 +37,7 @@
 #include <kernel/terminate.H>
 #include <kernel/hbterminatetypes.H>
 #include <kernel/kernel_reasoncodes.H>
+#include <kernel/misc.H>
 
 
 namespace ExceptionHandles
@@ -62,7 +63,8 @@ void kernel_execute_prog_ex()
     }
     if (!handled)
     {
-        printk("Program exception, killing task %d\n", t->tid);
+        printk( "Program exception, killing task %d, SRR0=0x%lX, SRR1=0x%lX\n",
+                t->tid, getSRR0(), getSRR1() );
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
@@ -107,7 +109,7 @@ void kernel_execute_data_storage()
                "Exception Type: %lx\n"
                "Instruction where it occurred: %p\n",
                t->tid, getDAR(), getDSISR(), t->context.nip);
-        MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+        KernelMisc::printkBacktrace(t);
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
