@@ -23,5 +23,8 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_firinit
-#libp9_pm_firinit_DEPLIBS += p9_pm_occ_firinit p9_pm_pba_firinit p9_pm_ppm_firinit p9_pm_cme_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_pba_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_ppm_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_cme_firinit
 $(call BUILD_PROCEDURE)
