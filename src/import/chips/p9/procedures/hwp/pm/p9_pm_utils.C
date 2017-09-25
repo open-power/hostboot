@@ -40,6 +40,7 @@
 #include <p9_pm.H>
 #include <p9_pm_utils.H>
 #include <p9_const_common.H>
+#include <p9_perv_scom_addresses.H>
 
 /// Byte-reverse a 16-bit integer if on a little-endian machine
 
@@ -114,32 +115,26 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const char* i_msg)
 {
-    FAPI_INF("p9_pm_glob_fir_trace Enter");
+    FAPI_DBG(">> p9_pm_glob_fir_trace");
 
-#if 0 // The CONST_UINT64_T definition in P9 const_common.H takes 4 arguments -
-    // CONST_UINT64_T(name, expr, unit, meth). Need to figure out the values
-    // for "unit" and "meth" for the below declarations.
-    CONST_UINT64_T( GLOB_XSTOP_FIR_0x01040000, ULL(0x01040000) );
-    CONST_UINT64_T( GLOB_RECOV_FIR_0x01040001, ULL(0x01040001) );
-    CONST_UINT64_T( TP_LFIR_0x0104000A, ULL(0x0104000A) );
-#endif
+    // Multicast read addresses
+    const uint64_t READ_GLOB_XSTOP_FIR_MC =  RULL(0x570F001C);
+    const uint64_t READ_GLOB_RECOV_FIR_MC =  RULL(0x570F001B);
 
     //  Note: i_msg is put on on each record to allow for trace "greps"
     //  so as to see the "big picture" across when
-
     uint8_t l_traceEnFlag = false;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::buffer<uint64_t> l_data64;
 
-#if 0 // Uncomment when attribute ATTR_PM_GLOBAL_FIR_TRACE_EN is ready
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_GLOBAL_FIR_TRACE_EN,
                            FAPI_SYSTEM,
                            l_traceEnFlag),
              "FAPI_ATTR_GET for attribute ATTR_PM_GLOBAL_FIR_TRACE_EN");
-#endif
 
     // Continue if trace is enabled.
-    if (false == l_traceEnFlag)
+    if (!l_traceEnFlag)
     {
         goto fapi_try_exit;
     }
@@ -148,11 +143,9 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     //  Check for xstops and recoverables and put in the trace
     //  ******************************************************************
     {
-#if 0 // Uncomment when the scom address is defined
         FAPI_TRY(fapi2::getScom(i_target,
-                                READ_GLOBAL_XSTOP_FIR_0x570F001B,
+                                READ_GLOB_XSTOP_FIR_MC,
                                 l_data64));
-#endif
 
         if(l_data64)
         {
@@ -161,11 +154,9 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     }
 
     {
-#if 0 // Uncomment when the scom address is defined
         FAPI_TRY(fapi2::getScom(i_target,
-                                READ_GLOBAL_RECOV_FIR_0x570F001C,
+                                READ_GLOB_RECOV_FIR_MC,
                                 l_data64));
-#endif
 
         if(l_data64)
         {
@@ -174,11 +165,9 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     }
 
     {
-#if 0 // Uncomment when the scom address is defined
         FAPI_TRY(fapi2::getScom(i_target,
-                                GLOB_XSTOP_FIR_0x01040000,
+                                PERV_TP_XFIR,
                                 l_data64));
-#endif
 
         if(l_data64)
         {
@@ -187,11 +176,9 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     }
 
     {
-#if 0 // Uncomment when the scom address is defined
         FAPI_TRY(fapi2::getScom(i_target,
-                                GLOB_RECOV_FIR_0x01040001,
+                                PERV_TP_RFIR,
                                 l_data64));
-#endif
 
         if(l_data64)
         {
@@ -200,11 +187,9 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     }
 
     {
-#if 0 // Uncomment when the scom address is defined
         FAPI_TRY(fapi2::getScom(i_target,
-                                TP_LFIR_0x0104000A,
+                                PERV_TP_LOCAL_FIR,
                                 l_data64));
-#endif
 
         if(l_data64)
         {
@@ -213,6 +198,7 @@ fapi2::ReturnCode p9_pm_glob_fir_trace(
     }
 
 fapi_try_exit:
+    FAPI_DBG("<< p9_pm_glob_fir_trace");
     return fapi2::current_err;
 }
 
@@ -220,7 +206,7 @@ fapi2::ReturnCode special_wakeup_all(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_enable)
 {
-    FAPI_INF("special_wakeup_all Enter");
+    FAPI_DBG(">> special_wakeup_all");
 
     fapi2::ReturnCode l_rc;
     auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
@@ -229,11 +215,16 @@ fapi2::ReturnCode special_wakeup_all(
     // For each EX target
     for (auto l_ex_chplt : l_exChiplets)
     {
-        FAPI_DBG("Running special wakeup on ex chiplet 0x%08X ", l_ex_chplt);
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_ex_num;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_ex_chplt,
+                                l_ex_num));
+        FAPI_DBG("Running special wakeup on ex chiplet 0x%08X ", l_ex_num);
 
         FAPI_TRY( fapi2::specialWakeup( l_ex_chplt, i_enable ) );
     }
 
 fapi_try_exit:
+    FAPI_DBG("<< special_wakeup_all");
     return fapi2::current_err;
 }
