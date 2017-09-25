@@ -49,6 +49,7 @@ namespace mss
 {
 namespace power_thermal
 {
+
 ///
 /// @brief Constructor
 /// @param[in] i_target MCS target to call power thermal stuff on
@@ -458,8 +459,13 @@ void throttle::calc_util_usage(const uint32_t i_slope,
     //Cast to uint32 for edge case where it has decimals
     o_util = (static_cast<uint32_t>(o_util) < iv_databus_port_max) ? static_cast<uint32_t>(o_util) : iv_databus_port_max;
 
-    //Can't have zero
-    o_util = (o_util == 0) ? MIN_UTIL : o_util;
+    // Check for the minimum threshnold and update if need be
+    if(o_util < MIN_UTIL)
+    {
+        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value", o_util,
+                 MIN_UTIL);
+        o_util = MIN_UTIL;
+    }
 }
 
 ///
@@ -721,7 +727,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode set_runtime_m_and_watt_limit( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MCS> >& i_targets )
 {
-    uint32_t l_m_clocks;
+    uint32_t l_m_clocks = 0;
     uint32_t l_vmem_power_limit_dimm = 0;
     uint8_t l_max_dimms = 0;
 
