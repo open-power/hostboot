@@ -243,8 +243,7 @@ TESTCASE_MODULES += testscom
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 
-#@TODO RTC: 137561 Enable this test case when interupt story is complete
-#TESTCASE_MODULES += testintr
+TESTCASE_MODULES += testintr
 
 # @thi - Disable to isolate  libtestfapi2.so crash
 #TESTCASE_MODULES += testfapi2
