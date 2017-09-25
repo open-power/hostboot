@@ -48,7 +48,6 @@ OBJS += fapi2TestUtils.o
 OBJS += getVpdTest.o
 OBJS += p9_pm_get_poundv_bucket.o
 
-TESTS += ${ROOTPATH}/src/usr/fapi2/test/*Test.H
-TESTS += ${ROOTPATH}/src/usr/fapi2/test/*TestCxx.H
+TESTS += ${shell find ${ROOTPATH}/src/usr/fapi2/test/ | sort | grep -e "Test.H" -e "TestCxx.H" | xargs}
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/

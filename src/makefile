@@ -304,9 +304,7 @@ RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_BMC_IPMI),testipmi_rt)
 RUNTIME_TESTCASE_MODULES += testpnor_rt
-
-# @thi - Disable to isolate  libtestfapi2.so crash
-#RUNTIME_TESTCASE_MODULES += testfapi2_rt
+RUNTIME_TESTCASE_MODULES += testfapi2_rt
 
 RUNTIME_TESTCASE_MODULES += testsecureboot_rt
 RUNTIME_TESTCASE_MODULES += testtargeting_rt
