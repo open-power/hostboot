@@ -22,11 +22,18 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-
 PROCEDURE=p9_pm_reset
-libp9_pm_reset_DEPLIBS += p9_pm_utils p9_pm_occ_firinit p9_pm_firinit p9_pm_occ_control
-libp9_pm_reset_DEPLIBS += p9_pm_pstate_gpe_init p9_pm_stop_gpe_init p9_pm_occ_gpe_init
-libp9_pm_reset_DEPLIBS += p9_pm_corequad_init p9_pm_occ_sram_init p9_pm_ocb_init p9_pm_pss_init
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_utils
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_firinit
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_control
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_gpe_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_pstate_gpe_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_stop_gpe_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_corequad_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_sram_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_ocb_init
+lib$(PROCEDURE)_EXTRALIBS+=p9_pm_pss_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)
