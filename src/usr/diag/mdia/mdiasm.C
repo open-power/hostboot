@@ -470,13 +470,13 @@ void StateMachine::processCommandTimeout(const MonitorIDs & i_monitorIDs)
                     firData &= bitMask;
                 }
 
-                // TODO RTC 168088
                 if ( 0 != firData )
                 {
                     err = deviceRead( target, &mskData, sz_uint64,
                                       DEVICE_SCOM_ADDRESS(mskAddr) );
                     if ( nullptr != err )
                     {
+                        mskData = 0;
                         MDIA_FAST("sm: deviceRead on 0x%08X failed "
                                   "HUID:0x%08X",
                                   mskAddr, get_huid(target));
