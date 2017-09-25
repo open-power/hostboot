@@ -207,10 +207,10 @@ fapi2::ReturnCode pm_init(
     // ************************************************************************
     // Switch off OCC initiated special wakeup on EX to allowSTOP functionality
     // ************************************************************************
-    FAPI_DBG("Clear off the wakeup");
+    FAPI_DBG("Clearing OCC special wake-up to be sure");
     FAPI_TRY(clear_occ_special_wakeups(i_target),
              "ERROR: Failed to clear off the wakeup");
-    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "EX targets off special wakeup"));
+    FAPI_TRY(p9_pm_glob_fir_trace(i_target, "EX targets OCC clear special wakeup"));
 
     //  ************************************************************************
     //  Take all EX chiplets out of special wakeup
@@ -242,7 +242,7 @@ fapi_try_exit:
 fapi2::ReturnCode clear_occ_special_wakeups(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_INF("Entering clear_occ_special_wakeups...");
+    FAPI_DBG(">> clear_occ_special_wakeups...");
     fapi2::buffer<uint64_t> l_data64;
 
     auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
@@ -253,15 +253,21 @@ fapi2::ReturnCode clear_occ_special_wakeups(
     // Iterate through the EX chiplets
     for (auto l_ex_chplt : l_exChiplets)
     {
-        FAPI_DBG("Clear OCC special wakeup on ex chiplet 0x%08X", l_ex_chplt);
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_ex_num;
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
+                                l_ex_chplt,
+                                l_ex_num));
+
+        FAPI_DBG("Clear OCC special wakeup on ex chiplet 0x%08X", l_ex_num);
         FAPI_TRY(fapi2::getScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
-                 "ERROR: Failed to read OCC Spl wkup on EX 0x%08X", l_ex_chplt);
+                 "ERROR: Failed to read OCC Spl wkup on EX 0x%08X", l_ex_num);
         l_data64.clearBit<0>();
         FAPI_TRY(fapi2::putScom(i_target, EX_PPM_SPWKUP_OCC, l_data64),
-                 "ERROR: Failed to clear OCC Spl wkup on EX 0x%08X", l_ex_chplt);
+                 "ERROR: Failed to clear OCC Spl wkup on EX 0x%08X", l_ex_num);
     }
 
 fapi_try_exit:
+    FAPI_DBG("<< clear_occ_special_wakeups...");
     return fapi2::current_err;
 }
 
