@@ -473,6 +473,34 @@ namespace std
                 equal_range( const key_type& k) const
                     { return submap::equal_range(k); }
     };
+
+    /**
+     *  @brief  Map equality comparison.
+     *  @param  lhs  A map.
+     *  @param  rhs  A map of the same type as lhs.
+     *  @return  True iff the size and elements of the maps are equal.
+     *
+     *  This is an equivalence relation.  It is linear in the size of the
+     *  maps.  Maps are considered equivalent if their sizes are equal,
+     *  and if corresponding elements compare equal.
+    */
+    template <typename _K, typename _T, typename _C>
+    inline bool operator==(const map<_K,_T,_C>& lhs,
+                           const map<_K,_T,_C>& rhs)
+    {
+        return (lhs.size() == rhs.size()) &&
+               (std::equal(lhs.begin(), lhs.end(), rhs.begin()));
+    }
+
+    /**
+     *  @brief  Map inequality comparison. See operator==
+     */
+    template <typename _K, typename _T, typename _C>
+    inline bool operator!=(const map<_K,_T,_C>& lhs,
+                           const map<_K,_T,_C>& rhs)
+    {
+        return !(lhs == rhs);
+    }
 };
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -728,6 +728,12 @@ namespace std
         }
 
         return true;
+    }
+
+    template <class T, class U>
+    bool operator!=(const vector<T>& l, const vector<U>& r)
+    {
+        return !(l == r);
     }
 
 }; // end namespace std
