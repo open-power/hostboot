@@ -249,7 +249,7 @@ TESTCASE_MODULES += testintr
 
 TESTCASE_MODULES += testi2c
 
-#TESTCASE_MODULES += testsbe   @fixme RTC:173733
+TESTCASE_MODULES += testsbe
 TESTCASE_MODULES += testsbeio
 
 # @TODO DefecT: 1035550 Figure out why testattn is failing sometimes

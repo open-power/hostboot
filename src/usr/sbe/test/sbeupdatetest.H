@@ -681,182 +681,185 @@ class SBEUpdateTest: public CxxTest::TestSuite
      *        SBE information on a single target, determine if that target
      *        needs to be updated, and perform the update.
      */
-    void testSbeUpdateTarget ( void )
-    {
-
-        errlHndl_t err = NULL;
-
-        uint64_t fails = 0x0;
-        uint64_t total = 0x0;
-        sbeTargetState_t sbeState;
-
-        do{
-
-            /****************************************************/
-            /* Get Functional Target and Create VMM Space       */
-            /****************************************************/
-            TARGETING::Target * theTarget =
-                                getFunctionalTarget(TARGETING::TYPE_PROC);
-            if(theTarget == NULL)
-            {
-                total++;
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - No Functional Targets found!");
-                break;
-            }
-
-            TRACFCOMP( g_trac_sbe,
-                       ENTER_MRK"testSbeUpdateTarget()" );
-
-            uint8_t local_ec = theTarget->getAttr<TARGETING::ATTR_EC>();
-
-            /****************************************************/
-            /* Get SBE Info State                               */
-            /****************************************************/
-            // Clear struct
-            memset(&sbeState, 0, sizeof(sbeState));
-
-            // Must set struct's target field
-            sbeState.target = theTarget;
-
-            // set bad ec just for comparison to local_ec later
-            sbeState.ec = 0xFF;
-
-            total++;
-            err = getSbeInfoState(sbeState);
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - call getSbeInfoState() failed.");
-                break;
-            }
-
-
-            /****************************************************/
-            /* Compare/Display SBE Version Information          */
-            /****************************************************/
-
-            // Quick EC check
-            if (local_ec != sbeState.ec)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - Bad ec check: local=0x%X, other=0x%X", local_ec, sbeState);
-                break;
-            }
-
-            // Display sbeState
-            TRACUCOMP( g_trac_sbe,
-                       "testSbeUpdateTarget() Info For Target 0x%X ec=0x%X "
-                       "cur=0x%X alt=0x%X, ECC_fail 0/1=%d/%d, isMaster=%d "
-                       "Custom Image Size=0x%X, CRC=0x%X",
-                       TARGETING::get_huid(sbeState.target), sbeState.ec,
-                       sbeState.cur_seeprom_side, sbeState.alt_seeprom_side,
-                       sbeState.seeprom_0_ver_ECC_fail,
-                       sbeState.seeprom_1_ver_ECC_fail,
-                       sbeState.target_is_master,
-                       sbeState.customizedImage_size,
-                       sbeState.customizedImage_crc);
-
-            TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-pnorVersion",
-                      &sbeState.pnorVersion, sizeof(sbe_image_version_t));
-            TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-mvpdSbKeyword",
-                      &sbeState.mvpdSbKeyword, sizeof(mvpdSbKeyword_t));
-            TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-seeprom_0_ver",
-                      &sbeState.seeprom_0_ver,
-                      sizeof(sbeSeepromVersionInfo_t));
-            TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-seeprom_1_ver",
-                      &sbeState.seeprom_1_ver,
-                      sizeof(sbeSeepromVersionInfo_t));
-
-
-
-            /****************************************************/
-            /* Get Target Update Actions                        */
-            /****************************************************/
-
-            total++;
-            err = getTargetUpdateActions(sbeState);
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - getTargetUpdateActions() failed");
-                break;
-            }
-
-
-            /****************************************************/
-            /* Update SBE Backup                                */
-            /****************************************************/
-            // force backup to SEEPROM 1 just in case
-            if ( !(sbeState.update_actions & DO_UPDATE ) )
-            {
-                sbeState.update_actions =
-                    static_cast<sbeUpdateActions_t>
-                         (DO_UPDATE|UPDATE_MVPD|UPDATE_SBE),
-
-                sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
-
-                sbeState.new_readBack_check = true;
-            }
-            total++;
-
-            err = performUpdateActions(sbeState);
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - performUpdateActions() failed.");
-                break;
-            }
-
-            // Make sure MVPD and SBE were updated
-            if ( ! ( ( sbeState.update_actions & MVPD_UPDATE_COMPLETE ) &&
-                     ( sbeState.update_actions & SBE_UPDATE_COMPLETE  ) ) )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
-                           "'COMPLETE' actions were not found: 0x%.8X",
-                           sbeState.update_actions);
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - performUpdateActions() did not complete actions");
-                break;
-            }
-
-            total++;
-            SHA512_t hash = {0};
-            err = getHwKeyHashFromSbeImage(sbeState.target,
-                                           EEPROM::SBE_BACKUP,
-                                           hash);
-
-            if(err)
-            {
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() failed.");
-                break;
-            }
-
-            // Make sure that the HW Key Hash returned is the system hash
-            SHA512_t sys_hash = {0};
-            SECUREBOOT::getHwKeyHash(sys_hash);
-            if ( memcmp(hash, sys_hash, sizeof(SHA512_t)) != 0 )
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
-                           "HW Key Hashes do not match!");
-                fails++;
-                TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() did not return system hash");
-
-                TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() hash",
-                          hash, sizeof(SHA512_t));
-                TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() sys_hash",
-                          sys_hash, sizeof(SHA512_t));
-
-                break;
-            }
-
-        }while(0);
-
-        TRACFCOMP( g_trac_sbe,
-                   EXIT_MRK"testSbeUpdateTarget() - %d/%d fails",
-                   fails, total );
-    }
+//
+//     TODO: RTC: 180742 Re-enable testSbeUpdateTarget once i2c collsions w/ SBE is resolved
+//
+//     void testSbeUpdateTarget ( void )
+//     {
+//
+//         errlHndl_t err = NULL;
+//
+//         uint64_t fails = 0x0;
+//         uint64_t total = 0x0;
+//         sbeTargetState_t sbeState;
+//
+//         do{
+//
+//             /****************************************************/
+//             /* Get Functional Target and Create VMM Space       */
+//             /****************************************************/
+//             TARGETING::Target * theTarget =
+//                                 getFunctionalTarget(TARGETING::TYPE_PROC);
+//             if(theTarget == NULL)
+//             {
+//                 total++;
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - No Functional Targets found!");
+//                 break;
+//             }
+//
+//             TRACFCOMP( g_trac_sbe,
+//                        ENTER_MRK"testSbeUpdateTarget()" );
+//
+//             uint8_t local_ec = theTarget->getAttr<TARGETING::ATTR_EC>();
+//
+//             /****************************************************/
+//             /* Get SBE Info State                               */
+//             /****************************************************/
+//             // Clear struct
+//             memset(&sbeState, 0, sizeof(sbeState));
+//
+//             // Must set struct's target field
+//             sbeState.target = theTarget;
+//
+//             // set bad ec just for comparison to local_ec later
+//             sbeState.ec = 0xFF;
+//
+//             total++;
+//             err = getSbeInfoState(sbeState);
+//             if(err)
+//             {
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - call getSbeInfoState() failed.");
+//                 break;
+//             }
+//
+//
+//             /****************************************************/
+//             /* Compare/Display SBE Version Information          */
+//             /****************************************************/
+//
+//             // Quick EC check
+//             if (local_ec != sbeState.ec)
+//             {
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - Bad ec check: local=0x%X, other=0x%X", local_ec, sbeState);
+//                 break;
+//             }
+//
+//             // Display sbeState
+//             TRACUCOMP( g_trac_sbe,
+//                        "testSbeUpdateTarget() Info For Target 0x%X ec=0x%X "
+//                        "cur=0x%X alt=0x%X, ECC_fail 0/1=%d/%d, isMaster=%d "
+//                        "Custom Image Size=0x%X, CRC=0x%X",
+//                        TARGETING::get_huid(sbeState.target), sbeState.ec,
+//                        sbeState.cur_seeprom_side, sbeState.alt_seeprom_side,
+//                        sbeState.seeprom_0_ver_ECC_fail,
+//                        sbeState.seeprom_1_ver_ECC_fail,
+//                        sbeState.target_is_master,
+//                        sbeState.customizedImage_size,
+//                        sbeState.customizedImage_crc);
+//
+//             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-pnorVersion",
+//                       &sbeState.pnorVersion, sizeof(sbe_image_version_t));
+//             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-mvpdSbKeyword",
+//                       &sbeState.mvpdSbKeyword, sizeof(mvpdSbKeyword_t));
+//             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-seeprom_0_ver",
+//                       &sbeState.seeprom_0_ver,
+//                       sizeof(sbeSeepromVersionInfo_t));
+//             TRACDBIN( g_trac_sbe, "testSbeUpdateTarget()-seeprom_1_ver",
+//                       &sbeState.seeprom_1_ver,
+//                       sizeof(sbeSeepromVersionInfo_t));
+//
+//
+//
+//             /****************************************************/
+//             /* Get Target Update Actions                        */
+//             /****************************************************/
+//
+//             total++;
+//             err = getTargetUpdateActions(sbeState);
+//             if(err)
+//             {
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - getTargetUpdateActions() failed");
+//                 break;
+//             }
+//
+//
+//             /****************************************************/
+//             /* Update SBE Backup                                */
+//             /****************************************************/
+//             // force backup to SEEPROM 1 just in case
+//             if ( !(sbeState.update_actions & DO_UPDATE ) )
+//             {
+//                 sbeState.update_actions =
+//                     static_cast<sbeUpdateActions_t>
+//                          (DO_UPDATE|UPDATE_MVPD|UPDATE_SBE),
+//
+//                 sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+//
+//                 sbeState.new_readBack_check = true;
+//             }
+//             total++;
+//
+//             err = performUpdateActions(sbeState);
+//             if(err)
+//             {
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - performUpdateActions() failed.");
+//                 break;
+//             }
+//
+//             // Make sure MVPD and SBE were updated
+//             if ( ! ( ( sbeState.update_actions & MVPD_UPDATE_COMPLETE ) &&
+//                      ( sbeState.update_actions & SBE_UPDATE_COMPLETE  ) ) )
+//             {
+//                 TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
+//                            "'COMPLETE' actions were not found: 0x%.8X",
+//                            sbeState.update_actions);
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - performUpdateActions() did not complete actions");
+//                 break;
+//             }
+//
+//             total++;
+//             SHA512_t hash = {0};
+//             err = getHwKeyHashFromSbeImage(sbeState.target,
+//                                            EEPROM::SBE_BACKUP,
+//                                            hash);
+//
+//             if(err)
+//             {
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() failed.");
+//                 break;
+//             }
+//
+//             // Make sure that the HW Key Hash returned is the system hash
+//             SHA512_t sys_hash = {0};
+//             SECUREBOOT::getHwKeyHash(sys_hash);
+//             if ( memcmp(hash, sys_hash, sizeof(SHA512_t)) != 0 )
+//             {
+//                 TRACFCOMP( g_trac_sbe, ERR_MRK"testSbeUpdateTarget(): "
+//                            "HW Key Hashes do not match!");
+//                 fails++;
+//                 TS_FAIL("testSbeUpdateTarget() - getHwKeyHashFromSbeImage() did not return system hash");
+//
+//                 TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() hash",
+//                           hash, sizeof(SHA512_t));
+//                 TRACFBIN( g_trac_sbe, "testSbeUpdateTarget() sys_hash",
+//                           sys_hash, sizeof(SHA512_t));
+//
+//                 break;
+//             }
+//
+//         }while(0);
+//
+//         TRACFCOMP( g_trac_sbe,
+//                    EXIT_MRK"testSbeUpdateTarget() - %d/%d fails",
+//                    fails, total );
+//     }
 
 
 
@@ -988,7 +991,7 @@ class SBEUpdateTest: public CxxTest::TestSuite
             {
                 total++;
                 fails++;
-                TS_FAIL("testSbeUpdateTarget() - No Functional Targets found!");
+                TS_FAIL("testSbeDecisionTree() - No Functional Targets found!");
                 break;
             }
             sbeState.target = theTarget;
