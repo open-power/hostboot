@@ -79,3 +79,44 @@ actionclass nx_th_1
 /** Callout connected NX, threshold 1, SUE originated from somewhere else */
 actionclass nx_th_1_SUE { nx_th_1; SueSeen; };
 
+actionclass analyzePciChipletFir0
+{
+    capture(PciChipletFir0);
+    analyze(gPCI0_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir1
+{
+    capture(PciChipletFir1);
+    analyze(gPCI1_CHIPLET_FIR);
+};
+
+actionclass analyzePciChipletFir2
+{
+    capture(PciChipletFir2);
+    analyze(gPCI2_CHIPLET_FIR);
+};
+
+actionclass aNPU0FIR_NDD10 {capture(cNPU0FIR_NDD10); analyze(gNPU0FIR_NDD10);};
+actionclass aNPU1FIR_NDD10 {capture(cNPU1FIR_NDD10); analyze(gNPU1FIR_NDD10);};
+actionclass aNPU0FIR       {capture(cNPU0FIR);       analyze(gNPU0FIR);      };
+actionclass aNPU1FIR       {capture(cNPU1FIR);       analyze(gNPU1FIR);      };
+actionclass analyzeNPU2FIR {capture(cNPU2FIR);       analyze(gNPU2FIR);      };
+
+actionclass analyzeNPU0FIR
+{
+    try( funccall("checkNimbusDD10"   ), aNPU0FIR_NDD10 );
+    try( funccall("checkNotNimbusDD10"), aNPU0FIR       );
+};
+
+actionclass analyzeNPU1FIR
+{
+    try( funccall("checkNimbusDD10"   ), aNPU1FIR_NDD10 );
+    try( funccall("checkNotNimbusDD10"), aNPU1FIR       );
+};
+
+actionclass deadmanTimer
+{
+    funccall("handleDeadmanTimer");
+};
+

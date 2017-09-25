@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_obus_regs.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_phb_regs.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,35 +23,14 @@
 #
 # IBM_PROLOG_END_TAG
 
-    register OBUS_ERROR_REG
-    {
-        name        "OBUS PCB Slave error reg";
-        scomaddr    0x090F001F;
-        capture     group PllFIRs;
-    };
-
-    register OBUS_CONFIG_REG
-    {
-        name        "OBUS PCB Slave config reg";
-        scomaddr    0x090F001E;
-        capture     group PllFIRs;
-    };
-
     ############################################################################
-    # P9 OBUS target  HDCT additions (open power chkstop analysis)
+    # P9 PHB target CERR Report Hold Reg
     ############################################################################
 
-    register PBOLL_LINK0_ERRSTAT
+    register PBAIB_CERR
     {
-        name        "P9 OBUS target PB OLL Link0 ErrStatus";
-        scomaddr    0x09010816;
-        capture     group default;
-    };
-
-    register PBOLL_LINK1_ERRSTAT
-    {
-        name        "P9 OBUS target PB OLL Link1 ErrStatus";
-        scomaddr    0x09010817;
+        name        "P9 PHB target PBAIB CERR Report Reg";
+        scomaddr    0x0d01084b;
         capture     group default;
     };
 
