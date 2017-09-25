@@ -528,12 +528,6 @@
      </attribute>
 
     <attribute>
-          <id>ATTR_SYSTEM_RESCLK_DISABLE</id>
-          <default>0x00</default>
-          <writeable/>
-    </attribute>
-
-    <attribute>
           <id>ATTR_BACKUP_SEEPROM_SELECT</id>
           <writeable/>
     </attribute>
