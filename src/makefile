@@ -255,12 +255,8 @@ TESTCASE_MODULES += testsbeio
 # @TODO DefecT: 1035550 Figure out why testattn is failing sometimes
 #TESTCASE_MODULES += testattn
 
+TESTCASE_MODULES += testmbox
 
-#*******************************************************
-#These modules do not work and are not tracked by any stories
-#*******************************************************
-#might need to enable isteps that turn mailboxes on
-#TESTCASE_MODULES += testmbox
 
 TESTCASE_MODULES += testrtloader
 
