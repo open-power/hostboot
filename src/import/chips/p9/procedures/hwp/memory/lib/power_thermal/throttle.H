@@ -57,7 +57,7 @@ enum throttle_const : size_t
     PERCENT_CONVERSION = 100,
 
     /// MIN_UTIL is  in c%
-    MIN_UTIL = 100,
+    MIN_UTIL = 2500,
 
     /// IDLE_UTIL is  in c%
     IDLE_UTIL = 0,
@@ -264,6 +264,7 @@ inline uint32_t throttled_cmds(const uint32_t i_databus_util, const uint32_t i_n
 
 ///
 /// @brief Calculate the port databus utilization based off of N throttles and M dram clocks
+/// @tparam T output type
 /// @param[in] i_n_throttles N (address operations) allowed within a window of M DRAM clocks
 /// @param[in] i_num_dram_clocks window of M DRAM clocks
 /// @param[out] o_calc_util
@@ -296,7 +297,13 @@ fapi2::ReturnCode calc_util_from_throttles(const uint16_t i_n_throttles,
                  l_multiplier,
                  i_num_dram_clocks);
 
-    o_calc_util = ( (o_calc_util == 0) ? MIN_UTIL : o_calc_util);
+    // Check for the minimum
+    if(o_calc_util < MIN_UTIL)
+    {
+        FAPI_INF("Calculated utilization (%lu) is less than the minimum utilization: %lu. Setting to minimum value",
+                 o_calc_util, MIN_UTIL);
+        o_calc_util = MIN_UTIL;
+    }
 
     FAPI_INF("In calc_util_from_throttles, calculated %d for output utilization", o_calc_util);
     return fapi2::FAPI2_RC_SUCCESS;
