@@ -49,6 +49,7 @@ OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
+OBJS += sbe_attn.o
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 include ${ROOTPATH}/procedure.rules.mk

@@ -33,6 +33,8 @@ MODULE = sbeio_rt
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
+OBJS += sbe_attn.o
+#@todo - RTC:180241 - Add in error handlers by creating common mk
 
 SUBDIRS += test.d
 

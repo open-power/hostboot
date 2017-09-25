@@ -111,7 +111,7 @@ namespace SBEIO
     /**
      * @brief Get SCOM via SBE FIFO
      *
-     * @param[in]  i_target  Target to access
+     * @param[in]  i_target  Processor Target to access
      * @param[in]  i_addr    Requested register address
      * @param[out] o_data    Returned data
      *
@@ -124,7 +124,7 @@ namespace SBEIO
     /**
      * @brief Put SCOM via SBE FIFO
      *
-     * @param[in]  i_target  Target to access
+     * @param[in]  i_target  Processor Target to access
      * @param[in]  i_addr    Requested register address
      * @param[in]  i_data    Data to write
      *
@@ -138,7 +138,7 @@ namespace SBEIO
     /**
      * @brief Put SCOM under mask via SBE FIFO
      *
-     * @param[in]  i_target  Target to access
+     * @param[in]  i_target  Processor Target to access
      * @param[in]  i_addr    Requested register address
      * @param[in]  i_data    Data to write
      * @param[in]  i_mask    SCOM mask
@@ -160,7 +160,7 @@ namespace SBEIO
      *        with a running SBE
      *
      *
-     * @param[in]  i_target  Target to access
+     * @param[in]  i_target  Processor Target to access
      *
      * @return errlHndl_t Error log handle on failure.
      *
@@ -213,7 +213,7 @@ namespace SBEIO
      *                          or Read-Write: If false then Read-Only Region
      *                                         If true then Read-Write Region
      *
-     * @param[in] i_target      Target associated with SBE command
+     * @param[in] i_target      Processor Target associated with SBE command
      *                          If nullptr, default to Master Processor
      *
      * @return errlHndl_t Error log handle on failure.
@@ -234,7 +234,7 @@ namespace SBEIO
      * @param[in] i_start_addr  Starting Physical Memory Address of the
      *                          Unsecure Memory Region to Close
      *
-     * @param[in] i_target      Target associated with SBE command
+     * @param[in] i_target      Processor Target associated with SBE command
      *                          If nullptr, default to Master Processor
      *
      * @return errlHndl_t Error log handle on failure.
@@ -252,6 +252,15 @@ namespace SBEIO
      * @note  Function is not thread-safe.
      */
     errlHndl_t closeAllUnsecureMemRegions();
+
+    /**
+     * @brief Gathers FFDC and recovers from SBE errors
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     * @param[in] i_target  Processor Target associated with SBE attention
+     */
+    errlHndl_t handleVitalAttn( TARGETING::Target* i_procTarg );
 
 } //end namespace SBEIO
 
