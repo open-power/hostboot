@@ -242,10 +242,7 @@ TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testscom
-
-#Requires main store memory @TODO RTC: 132577
-#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
-
+TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 
 #@TODO RTC: 137561 Enable this test case when interupt story is complete
