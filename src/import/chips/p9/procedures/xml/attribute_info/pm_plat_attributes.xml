@@ -158,8 +158,6 @@
     <writeable/>
     <overrideOnly/>
   </attribute>
-
-
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SAFE_MODE_VOLTAGE_MV</id>
@@ -167,7 +165,7 @@
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       Safe mode voltage in mv
-    This attribute is used within the hwp to update the 
+    This attribute is used within the hwp to update the
     VDM config register.
     Consumer: p9_setup_evid.C
 
@@ -2177,6 +2175,19 @@
       <valueType>uint32</valueType>
       <initToZero/>
       <platInit/>
+    <overrideOnly/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PM_GLOBAL_FIR_TRACE_EN</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable Global FIR tracing through PM Complex Reset/Initialization
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <writeable/>
     <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
