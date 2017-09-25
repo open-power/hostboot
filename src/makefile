@@ -226,9 +226,7 @@ TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
 TESTCASE_MODULES += testprdf
-#TODO RTC: 174141
-# Investigate why attn tests are taking forever sometimes
-# TESTCASE_MODULES += testattn
+TESTCASE_MODULES += testattn
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 TESTCASE_MODULES += testpirformat
 
