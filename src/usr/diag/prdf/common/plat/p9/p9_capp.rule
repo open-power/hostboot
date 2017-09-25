@@ -79,43 +79,6 @@ chip p9_capp
         capture     req nonzero("CXAFIR");
     };
 
-    ############################################################################
-    # P9 CAPP target  HDCT additions (open power chkstop analysis)
-    ############################################################################
-    register SNOOP_ERR_RPT
-    {
-        name        "P9 CAPP target Snoop Error Report";
-        scomaddr    0x0201080a;
-        capture     group default;
-    };
-
-    register APC_CERR
-    {
-        name        "P9 CAPP target APC CERR";
-        scomaddr    0x0201080b;
-        capture     group default;
-    };
-
-    register XPT_ERR_RPT
-    {
-        name        "P9 CAPP target XPT Error Report";
-        scomaddr    0x0201080c;
-        capture     group default;
-    };
-
-    register TLBI_ERR_RPT
-    {
-        name        "P9 CAPP target TLBI Error Report";
-        scomaddr    0x0201080d;
-        capture     group default;
-    };
-
-    register CAPP_ERRSTAT_CTRL_REG
-    {
-        name        "P9 CAPP target ErrorStatus and Ctrl Reg";
-        scomaddr    0x0201080e;
-        capture     group default;
-    };
 
 # Include registers not defined by the xml
 .include "p9_capp_regs.rule";

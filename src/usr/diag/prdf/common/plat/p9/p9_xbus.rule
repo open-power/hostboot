@@ -118,24 +118,6 @@ chip p9_xbus
         capture     req nonzero("IOELFIR");
     };
 
-    ############################################################################
-    # P9 XBUS target HDCT additions (open power chkstop analysis)
-    ############################################################################
-    register PBELL_LINK0_ERRSTAT
-    {
-        name        "P9 XBUS target PB ELL Link0 ErrStatus";
-        scomaddr    0x06011816;
-        capture     group default;
-    };
-
-    register PBELL_LINK1_ERRSTAT
-    {
-        name        "P9 XBUS target PB ELL Link1 ErrStatus";
-        scomaddr    0x06011817;
-        capture     group default;
-    };
-
-
 # Include registers not defined by the xml
 .include "p9_xbus_regs.rule";
 
