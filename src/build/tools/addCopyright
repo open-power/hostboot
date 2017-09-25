@@ -572,16 +572,24 @@ sub filetype
     if ( -f $filename )
     {
         my $type = `grep "\\\$Filetype:.*\\\$" $filename`;
-        if ( $type =~ m/\$Filetype:([^\$]*)\$/ )
+        if ($type ne "")
         {
-            $type = $1;
+            if ( $type =~ m/\$Filetype:([^\$]*)\$/ )
+            {
+                $type = $1;
+            }
+            $type =~ s/^\s*//;
+            $type =~ s/\s*$//;
+            my @knownTypes = qw/ Assembly Automake Autoconf C CVS EmxFile
+                                 LinkerScript Makefile MofFile Perl PrdRuleFile
+                                 PrdTestCaseFile Python RPC Shellscript Tcl /;
+            return $type if ( grep(/^$type$/, @knownTypes) );
         }
-        $type =~ s/^\s*//;
-        $type =~ s/\s*$//;
-        my @knownTypes = qw/ Assembly Automake Autoconf C CVS EmxFile
-                             LinkerScript Makefile MofFile Perl PrdRuleFile
-                             PrdTestCaseFile Python RPC Shellscript Tcl /;
-        return $type if ( grep(/^$type$/, @knownTypes) );
+        # Search for files that have the comment /* vim: set filetype=cpp : */
+        elsif (`grep \"set filetype=cpp\" $filename`)
+        {
+            return "C";
+        }
     }
     { # Other random files containing non-printable characters.
         my $file = `cat $filename`;

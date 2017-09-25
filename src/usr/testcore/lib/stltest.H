@@ -233,6 +233,30 @@ class STLTest : public CxxTest::TestSuite
             }
 
 
+            // Test map comparison with non-integral key,value pairs
+            std::map<std::array<int,3>, std::vector<int> > m1 = {
+                { {1,2,3},    {100, 101, 102} },
+                { {4,5,6},    {103, 104, 105} },
+                { {7,8,9},    {106, 107, 108} },
+                { {10,11,12}, {109, 110, 111} },
+            };
+            std::map<std::array<int,3>, std::vector<int> > m2 = {
+                { {10,11,12}, {109, 110, 111} },
+                { {7,8,9},    {106, 107, 108} },
+                { {4,5,6},    {103, 104, 105} },
+                { {1,2,3},    {100, 101, 102} },
+            };
+
+            if (m1 != m2)
+            {
+                TS_FAIL("std::map operator!= is true on equal maps");
+            }
+            m2.at({1,2,3}).at(0) = 99;
+            if (m1 == m2)
+            {
+                TS_FAIL("std::map operator== is true on unequal maps");
+            }
+
         }
 
 
