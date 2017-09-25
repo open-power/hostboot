@@ -213,36 +213,6 @@ errlHndl_t sendContinueMpiplChipOp()
 return l_err;
 }
 
-/**
-*  @brief  loop through procs and clear out interrupt registers that
-           tells us if we have xstop, recoverabale, or an attn
-*  @return     errlHndl_t
-*/
-errlHndl_t clearInterruptReg()
-{
-    errlHndl_t l_err = nullptr;
-
-    TARGETING::TargetHandleList l_procChips;
-    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
-    uint64_t CLEAR_SCOM = 0x0000000000000000;
-    size_t MASK_SIZE= sizeof(CLEAR_SCOM);
-
-    for(const auto & l_chip : l_procChips)
-    {
-        //TODO 179645 Determine why we have to clear PERV_ATTN_INTERRUPT_REG during dump MPIPLs on DD2
-        l_err = deviceWrite(l_chip,
-                             &CLEAR_SCOM,
-                             MASK_SIZE,
-                             DEVICE_SCOM_ADDRESS(PERV_ATTN_INTERRUPT_REG));
-        if(l_err)
-        {
-            break;
-        }
-    }
-
-return l_err;
-}
-
 
 /**
 *  @brief  loop through slave quads, make sure clocks are stopped
@@ -540,13 +510,6 @@ void* host_discover_targets( void *io_pArgs )
 
             //Send continue mpipl op to slave procs
             l_err = sendContinueMpiplChipOp();
-            if (l_err)
-            {
-                break;
-            }
-
-            //Clear out interrupt reg for dump path
-            l_err = clearInterruptReg();
             if (l_err)
             {
                 break;
