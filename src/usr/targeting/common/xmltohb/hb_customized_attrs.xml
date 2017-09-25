@@ -588,6 +588,11 @@
           <no_export/>
     </attribute>
 
+    <attribute>
+          <id>ATTR_EI_BUS_TX_MSBSWAP</id>
+          <global/>
+    </attribute>
+
     <attribute><id>ATTR_CEN_MSS_ALLOW_SINGLE_PORT</id><default>FALSE</default></attribute>
     <attribute><id>ATTR_CEN_VPD_DIMM_RCD_OUTPUT_TIMING</id><default>0x01,0x00,0x01,0x00</default></attribute>
 
