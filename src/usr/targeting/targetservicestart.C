@@ -452,7 +452,8 @@ static void adjustMemoryMap( TargetService& i_targetService )
     // Grab the value of the BARs that SBE booted with
     uint64_t l_curXscomBAR = g_BlToHbDataManager.getXscomBAR();
     uint64_t l_curLpcBAR = g_BlToHbDataManager.getLpcBAR();
-    TARG_INF( "adjustMemoryMap> xscom=%X, lpc=%X", l_curXscomBAR, l_curLpcBAR );
+    TARG_INF( "adjustMemoryMap> xscom=%llX, lpc=%llX",
+              l_curXscomBAR, l_curLpcBAR );
 
     // Get the master proc
     Target* l_pMasterProcChip = nullptr;

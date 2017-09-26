@@ -159,6 +159,19 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
             l_proc0 = i;
         }
 
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "check_proc0_memory_config: Initial settings for "
+                  "Proc %.8X\n"
+                  "  groupIdDflt = %d, groupIdEff = %d, groupId = %d\n"
+                  "  chipIdDflt = %d, chipIdEff = %d, chipId = %d",
+                  get_huid(l_procIds[i].proc),
+                  l_procIds[i].groupIdDflt,
+                  l_procIds[i].groupIdEff,
+                  l_procIds[i].groupId,
+                  l_procIds[i].chipIdDflt,
+                  l_procIds[i].chipIdEff,
+                  l_procIds[i].chipId);
+
         // Increment index
         i++;
     }
@@ -300,6 +313,17 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
     // Loop through all procs detecting that IDs are set correctly
     for (i = 0; i < l_procsList.size(); i++)
     {
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "check_proc0_memory_config: Compare settings for "
+                  "Proc %.8X\n"
+                  "  groupIdEff = %d, groupId = %d\n"
+                  "  chipIdEff = %d, chipId = %d",
+                  get_huid(l_procIds[i].proc),
+                  l_procIds[i].groupIdEff,
+                  l_procIds[i].groupId,
+                  l_procIds[i].chipIdEff,
+                  l_procIds[i].chipId);
+
         if((l_procIds[i].groupId != l_procIds[i].groupIdEff) ||
            (l_procIds[i].chipId != l_procIds[i].chipIdEff) )
         {
@@ -311,6 +335,21 @@ errlHndl_t check_proc0_memory_config(IStepError & io_istepErr)
 
             l_updateNeeded = true;
         }
+
+        TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "check_proc0_memory_config: Current attribute "
+                  "settings for Proc %.8X\n"
+                  "  ATTR_PROC_EFF_FABRIC_GROUP_ID = %d\n"
+                  "  ATTR_FABRIC_GROUP_ID = %d\n"
+                  "  ATTR_PROC_EFF_FABRIC_CHIP_ID = %d\n"
+                  "  ATTR_FABRIC_CHIP_ID = %d",
+                  get_huid(l_procIds[i].proc),
+                  (l_procIds[i].proc)->
+                      getAttr<ATTR_PROC_EFF_FABRIC_GROUP_ID>(),
+                  (l_procIds[i].proc)->getAttr<ATTR_FABRIC_GROUP_ID>(),
+                  (l_procIds[i].proc)->
+                      getAttr<ATTR_PROC_EFF_FABRIC_CHIP_ID>(),
+                  (l_procIds[i].proc)->getAttr<ATTR_FABRIC_CHIP_ID>());
     }
 
     if(l_updateNeeded)
