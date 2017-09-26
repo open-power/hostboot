@@ -24,13 +24,13 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- -->
-<!-- @file memory_mss_eff_config.xml -->
-<!-- @brief Error xml for timing.H -->
+<!-- @file p9_memory_mss_eff_config.xml -->
+<!-- @brief Error xml for eff_config -->
 <!-- -->
 <!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
-<!-- *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com> -->
+<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
 <!-- *HWP Team: Memory -->
-<!-- *HWP Level: 2 -->
+<!-- *HWP Level: 3 -->
 <!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
