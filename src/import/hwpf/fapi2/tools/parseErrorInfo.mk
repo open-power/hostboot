@@ -35,6 +35,7 @@ TARGETS += hwp_return_codes.H
 TARGETS += hwp_error_info.H
 TARGETS += hwp_ffdc_classes.H
 TARGETS += set_sbe_error.H
+TARGETS += set_sbe_error_funcs.H
 TARGETS += collect_reg_ffdc_regs.C
 
 CLEAN_TARGETS += $(GENPATH)/hwp_return_codes.H
