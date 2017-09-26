@@ -86,6 +86,8 @@ my $cfgBiosXmlFile = undef;
 my $cfgBiosSchemaFile = undef;
 my $cfgBiosOutputFile = undef;
 
+my $MAX_4_BYTE_VALUE = 0xFFFFFFFF;
+
 GetOptions("hb-xml-file:s" => \$cfgHbXmlFile,
            "src-output-dir:s" =>  \$cfgSrcOutputDir,
            "img-output-dir:s" =>  \$cfgImgOutputDir,
@@ -2090,11 +2092,12 @@ sub writeEnumFileAttrEnums {
 
     my $enumName = "";
     my $enumHex = "";
+    my $enumHexValue = 0;
 
     # Format below intentionally > 80 chars for clarity
 
     format ENUMFORMAT =
-    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<<<<<<<<<
+    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< = @<<<<<<<<<<<<<<<<<<<<<
     $enumName,                                                       $enumHex .","
 .
     select($outFile);
@@ -2106,12 +2109,24 @@ sub writeEnumFileAttrEnums {
         print $outFile wrapBrief( $enumerationType->{description} );
         print $outFile " */\n";
         print $outFile "enum ", $enumerationType->{id}, "\n";
+
         print $outFile "{\n";
 
         foreach my $enumerator (@{$enumerationType->{enumerator}})
         {
-            $enumHex = sprintf "0x%08X",
-                enumNameToValue($enumerationType,$enumerator->{name});
+            $enumHexValue =
+                          enumNameToValue($enumerationType,$enumerator->{name});
+
+            #If the enum is bigger than 0xFFFFFFFF, then we need to append 'ULL'
+            #to it to prevent compiler errors.
+            if($enumHexValue > $MAX_4_BYTE_VALUE)
+            {
+                $enumHex = sprintf "0x%08XULL", $enumHexValue;
+            }
+            else
+            {
+                $enumHex = sprintf "0x%08X", $enumHexValue;
+            }
             $enumName = $enumerationType->{id} . "_" . $enumerator->{name};
             write;
         }
