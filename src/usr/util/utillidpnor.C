@@ -158,7 +158,15 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
 #endif
 #endif
             // @TODO CQ:SW400352 remove this check
-            if ((l_secId == PNOR::OCC) && PNOR::isSectionEmpty(l_secId))
+            if ((l_secId == PNOR::OCC)
+#ifndef __HOSTBOOT_RUNTIME
+                && PNOR::isSectionEmpty(l_secId)
+#else
+                //use this check for HBRT due to secure lid load setting vaddr
+                //to zero -- which causes isSectionEmpty to segfault
+                && !o_lidPnorInfo.vaddr
+#endif
+               )
             {
                 UTIL_FT("UtilLidMgr::getLidPnorSection PNOR section %s is empty get data from LID transfer",
                         PNOR::SectionIdToString(l_secId));
