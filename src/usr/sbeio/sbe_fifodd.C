@@ -44,6 +44,7 @@
 #include <initservice/initserviceif.H>
 #include <kernel/pagemgr.H>
 #include <fapi2.H>
+#include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
 #include <xscom/piberror.H>
 
