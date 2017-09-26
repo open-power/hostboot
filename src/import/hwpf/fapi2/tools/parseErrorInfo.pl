@@ -303,7 +303,7 @@ sub addFfdcMethod
             $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
             $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
+                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -336,7 +336,7 @@ sub addFfdcMethod
         $method_body .= "    }\n\n";
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$buffer_ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
+            "$buffer_ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
     }
 
@@ -373,7 +373,7 @@ sub addFfdcMethod
 
         $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
         $methods->{$objectNumber}{localvar} =
-            "$ffdc_type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
+            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
         $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc=$ffdc_uc;";
     }
     elsif ( $type eq $scom_addr_type )
@@ -394,7 +394,7 @@ sub addFfdcMethod
             $method_body .= " return *this;}\n\n";
             $methods->{$key}{member} = "$type $ffdc_uc;";
             $methods->{$objectNumber}{localvar} =
-                "$type $ffdc_uc = getFfdcData(FFDC_BUFFER[$objectNumber],invalid_data);";
+                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],invalid_data);";
             $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
         }
         else
@@ -447,6 +447,11 @@ $sbFile .= "/";
 $sbFile .= "set_sbe_error.H";
 open( SBFILE, ">", $sbFile );
 
+my $sbFuncFile = $arg_output_dir;
+$sbFuncFile .= "/";
+$sbFuncFile .= "set_sbe_error_funcs.H";
+open( SBFUNFILE, ">", $sbFuncFile );
+
 #------------------------------------------------------------------------------
 # Print start of file information to hwp_error_info.H
 #------------------------------------------------------------------------------
@@ -458,7 +463,6 @@ print EIFILE "#include <target.H>\n";
 print EIFILE "#include <plat_trace.H>\n";
 print EIFILE "#include <hwp_return_codes.H>\n";
 print EIFILE "#include <hwp_executor.H>\n";
-print EIFILE "#include <set_sbe_error.H>\n";
 print EIFILE "/**\n";
 print EIFILE " * \@brief Error Information macros and HwpFfdcId enumeration\n";
 print EIFILE " *\/\n";
@@ -551,11 +555,25 @@ print SBFILE "// must take a parameter for the generic chip ID in the error\n";
 print SBFILE "// XML.\n\n";
 print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
 print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
+print SBFILE "#include <set_sbe_error_funcs.H>\n\n";
 print SBFILE "#define FAPI_SET_SBE_ERROR(RC,ERRVAL,FFDC_BUFFER,SBE_INSTANCE)\\\n";
 print SBFILE "{\\\n";
 print SBFILE "bool invalid_data = false;\\\n";
 print SBFILE "switch (ERRVAL)\\\n";
 print SBFILE "{\\\n";
+
+print SBFUNFILE "#ifndef FAPI2_SETSBEERRORFUNCS_H_\n";
+print SBFUNFILE "#define FAPI2_SETSBEERRORFUNCS_H_\n\n";
+print SBFUNFILE "#include <hwp_return_codes.H>\n\n";
+print SBFUNFILE "#include <hwp_ffdc_classes.H>\n\n";
+print SBFUNFILE "#include <hwp_error_info.H>\n\n";
+
+#print SBFUNFILE "namespace fapi2 {\n\n";
+# used to convert each HwpReturnCode into a unique tupe
+print SBFUNFILE "template<fapi2::HwpReturnCode T>\n";
+print SBFUNFILE "struct hwpRcToType {\n";
+print SBFUNFILE "   enum { value = T };\n";
+print SBFUNFILE "};\n";
 
 #------------------------------------------------------------------------------
 # For each XML file
@@ -1400,14 +1418,14 @@ foreach my $argnum ( 0 .. $#ARGV )
 
                     if ( ( exists $methods{$objCount}{object} ) )
                     {
-                        $objectStr .= "        $methods{$objCount}{object} \\\n";
+                        $objectStr .= "        $methods{$objCount}{object}\n";
 
                     }
 
                     if ( ( exists $methods{$objCount}{localvar} ) )
                     {
-                        $objectStr .= "        $methods{$objCount}{localvar} \\\n";
-                        $objectStr .= "        $methods{$objCount}{assignment_string} \\\n";
+                        $objectStr .= "        $methods{$objCount}{localvar}\n";
+                        $objectStr .= "        $methods{$objCount}{assignment_string}\n";
                     }
                 }
             }
@@ -1427,10 +1445,10 @@ foreach my $argnum ( 0 .. $#ARGV )
         if ( exists $errors->{sbeTarget} && ( $arg_local_ffdc eq undef ) )
         {
             $objectStr .= "        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>$errors->{sbeTarget}"
-                . " = fapi2::getTarget<fapi2::TARGET_TYPE_PROC_CHIP>(SBE_INSTANCE); \\\n";
-            $objectStr .= "        l_obj.$errors->{sbeTarget}.ptr() = &$errors->{sbeTarget}; \\\n";
+                . " = fapi2::getTarget<fapi2::TARGET_TYPE_PROC_CHIP>(proc_instance); \n";
+            $objectStr .= "        l_obj.$errors->{sbeTarget}.ptr() = &$errors->{sbeTarget};\n";
             $objectStr .=
-                "        l_obj.$errors->{sbeTarget}.size() = fapi2::getErrorInfoFfdcSize($errors->{sbeTarget}); \\\n";
+                "        l_obj.$errors->{sbeTarget}.size() = fapi2::getErrorInfoFfdcSize($errors->{sbeTarget});\n";
         }
 
         $eiObjectStr .= "};";
@@ -1609,18 +1627,31 @@ foreach my $argnum ( 0 .. $#ARGV )
         if ( exists $err->{sbeError} )
         {
             print SBFILE "    case fapi2::$err->{rc}: \\\n";
-            print SBFILE "    { \\\n        fapi2::$class_name l_obj(";
-            print SBFILE "fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC);\\\n";
+            print SBFILE "    { \\\n";
+            print SBFILE "       invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\\\n";
+            print SBFILE "                      RC,FFDC_BUFFER,SBE_INSTANCE);\\\n";
+
+            print SBFILE "       break;\\\n    }\\\n";
+
+            # update the sbe set error functions file with the new template function
+            # create a unique overloaded function for the return code value
+            print SBFUNFILE "inline bool setSbeError(hwpRcToType<fapi2::$err->{rc}>,fapi2::ReturnCode&i_rc,\n";
+            print SBFUNFILE "                         fapi2::sbeFfdc_t* i_ebuf,uint8_t proc_instance)\n";
+            print SBFUNFILE "    {\n    bool invalid_data = false;\n";
+            print SBFUNFILE "       fapi2::$class_name l_obj(";
+            print SBFUNFILE "fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,i_rc);\n";
 
             if ( !( $objectStr eq undef ) )
             {
-                print SBFILE "$objectStr";
+                print SBFUNFILE "$objectStr";
             }
-            print SBFILE "        if(!invalid_data) \\\n";
-            print SBFILE "        { \\\n";
-            print SBFILE "          l_obj.execute(); \\\n";
-            print SBFILE "        } \\\n";
-            print SBFILE "        break; \\\n    } \\\n";
+            print SBFUNFILE "        if(!invalid_data)\n";
+            print SBFUNFILE "        {\n";
+            print SBFUNFILE "          l_obj.execute();\n";
+            print SBFUNFILE "        }\n";
+            print SBFUNFILE "        return invalid_data;\n";
+            print SBFUNFILE "   }\n";
+
         }
 
     }    #for each hwpError tag
@@ -1775,6 +1806,9 @@ print SBFILE "}\\\n";
 print SBFILE "}\n\n";
 print SBFILE "#endif\n";
 
+#print SBFUNFILE "}\n";
+print SBFUNFILE "#endif\n";
+
 #------------------------------------------------------------------------------
 # Close output files
 #------------------------------------------------------------------------------
@@ -1783,3 +1817,4 @@ close(EIFILE);
 close(ECFILE);
 close(CRFILE);
 close(SBFILE);
+close(SBFUNFILE);
