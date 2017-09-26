@@ -24,14 +24,14 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 
 <!-- -->
-<!-- @file memory_mss_ddr_phy_reset.xml -->
+<!-- @file p9_memory_mss_ddr_phy_reset.xml -->
 <!-- @brief Error xml for ddr_phy_reset -->
 <!-- -->
-<!-- *HWP HWP Owner: Name <email address> -->
-<!-- *HWP FW Owner: Name <email address> -->
-<!-- *HWP Team: Team Name -->
-<!-- *HWP Level: 1 -->
-<!-- *HWP Consumed by: XX:XX -->
+<!-- *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com> -->
+<!-- *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 3 -->
+<!-- *HWP Consumed by: HB:FSP -->
 <!-- -->
 
 <hwpErrors>
