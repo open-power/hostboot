@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@ namespace PRDF
 {
     // P9 Chip
     const char * p9_nimbus  = "p9_nimbus";
+    const char * p9_cumulus = "p9_cumulus";
     const char * p9_eq      = "p9_eq";
     const char * p9_ex      = "p9_ex";
     const char * p9_ec      = "p9_ec";
@@ -46,6 +47,9 @@ namespace PRDF
     const char * p9_mcbist  = "p9_mcbist";
     const char * p9_mcs     = "p9_mcs";
     const char * p9_mca     = "p9_mca";
+    const char * p9_mc      = "p9_mc";
+    const char * p9_mi      = "p9_mi";
+    const char * p9_dmi     = "p9_dmi";
 
     // Pegasus Centaur Chip
 //    const char * Membuf     = "Membuf";

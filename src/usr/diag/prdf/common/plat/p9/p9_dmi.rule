@@ -1,0 +1,453 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_dmi.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2017
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip p9_dmi
+{
+    name        "P9 MCA chiplet";
+    targettype  TYPE_DMI;
+    sigoff      0x9200;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # P9 DMI target CHIFIR
+    ############################################################################
+
+    register CHIFIR
+    {
+        name        "P9 DMI target CHIFIR";
+        scomaddr    0x07010900;
+        reset       (&, 0x07010901);
+        mask        (|, 0x07010905);
+        capture     group default;
+    };
+
+    register CHIFIR_MASK
+    {
+        name        "P9 DMI target CHIFIR MASK";
+        scomaddr    0x07010903;
+        capture     group default;
+    };
+
+    register CHIFIR_ACT0
+    {
+        name        "P9 DMI target CHIFIR ACT0";
+        scomaddr    0x07010906;
+        capture     group default;
+        capture     req nonzero("CHIFIR");
+    };
+
+    register CHIFIR_ACT1
+    {
+        name        "P9 DMI target CHIFIR ACT1";
+        scomaddr    0x07010907;
+        capture     group default;
+        capture     req nonzero("CHIFIR");
+    };
+
+# Include registers not defined by the xml
+.include "p9_dmi_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# P9 DMI target CHIFIR
+################################################################################
+
+rule rCHIFIR
+{
+  CHECK_STOP:
+    CHIFIR & ~CHIFIR_MASK & ~CHIFIR_ACT0 & ~CHIFIR_ACT1;
+  RECOVERABLE:
+    CHIFIR & ~CHIFIR_MASK & ~CHIFIR_ACT0 &  CHIFIR_ACT1;
+  HOST_ATTN:
+    CHIFIR & ~CHIFIR_MASK &  CHIFIR_ACT0 & ~CHIFIR_ACT1;
+  UNIT_CS:
+    CHIFIR & ~CHIFIR_MASK &  CHIFIR_ACT0 &  CHIFIR_ACT1;
+};
+
+group gCHIFIR filter singlebit, cs_root_cause
+{
+    /** CHIFIR[0]
+     *  
+     */
+    (rCHIFIR, bit(0)) ? defaultMaskedError;
+
+    /** CHIFIR[1]
+     *  
+     */
+    (rCHIFIR, bit(1)) ? defaultMaskedError;
+
+    /** CHIFIR[2]
+     *  
+     */
+    (rCHIFIR, bit(2)) ? defaultMaskedError;
+
+    /** CHIFIR[3]
+     *  
+     */
+    (rCHIFIR, bit(3)) ? defaultMaskedError;
+
+    /** CHIFIR[4]
+     *  
+     */
+    (rCHIFIR, bit(4)) ? defaultMaskedError;
+
+    /** CHIFIR[5]
+     *  
+     */
+    (rCHIFIR, bit(5)) ? defaultMaskedError;
+
+    /** CHIFIR[6]
+     *  
+     */
+    (rCHIFIR, bit(6)) ? defaultMaskedError;
+
+    /** CHIFIR[7]
+     *  
+     */
+    (rCHIFIR, bit(7)) ? defaultMaskedError;
+
+    /** CHIFIR[8]
+     *  
+     */
+    (rCHIFIR, bit(8)) ? defaultMaskedError;
+
+    /** CHIFIR[9]
+     *  
+     */
+    (rCHIFIR, bit(9)) ? defaultMaskedError;
+
+    /** CHIFIR[10]
+     *  
+     */
+    (rCHIFIR, bit(10)) ? defaultMaskedError;
+
+    /** CHIFIR[11]
+     *  
+     */
+    (rCHIFIR, bit(11)) ? defaultMaskedError;
+
+    /** CHIFIR[12]
+     *  
+     */
+    (rCHIFIR, bit(12)) ? defaultMaskedError;
+
+    /** CHIFIR[13]
+     *  
+     */
+    (rCHIFIR, bit(13)) ? defaultMaskedError;
+
+    /** CHIFIR[14]
+     *  
+     */
+    (rCHIFIR, bit(14)) ? defaultMaskedError;
+
+    /** CHIFIR[15]
+     *  
+     */
+    (rCHIFIR, bit(15)) ? defaultMaskedError;
+
+    /** CHIFIR[16]
+     *  
+     */
+    (rCHIFIR, bit(16)) ? defaultMaskedError;
+
+    /** CHIFIR[17]
+     *  
+     */
+    (rCHIFIR, bit(17)) ? defaultMaskedError;
+
+    /** CHIFIR[18]
+     *  
+     */
+    (rCHIFIR, bit(18)) ? defaultMaskedError;
+
+    /** CHIFIR[19]
+     *  
+     */
+    (rCHIFIR, bit(19)) ? defaultMaskedError;
+
+    /** CHIFIR[20]
+     *  
+     */
+    (rCHIFIR, bit(20)) ? defaultMaskedError;
+
+    /** CHIFIR[21]
+     *  
+     */
+    (rCHIFIR, bit(21)) ? defaultMaskedError;
+
+    /** CHIFIR[22]
+     *  
+     */
+    (rCHIFIR, bit(22)) ? defaultMaskedError;
+
+    /** CHIFIR[23]
+     *  
+     */
+    (rCHIFIR, bit(23)) ? defaultMaskedError;
+
+    /** CHIFIR[24]
+     *  
+     */
+    (rCHIFIR, bit(24)) ? defaultMaskedError;
+
+    /** CHIFIR[25]
+     *  
+     */
+    (rCHIFIR, bit(25)) ? defaultMaskedError;
+
+    /** CHIFIR[26]
+     *  
+     */
+    (rCHIFIR, bit(26)) ? defaultMaskedError;
+
+    /** CHIFIR[27]
+     *  
+     */
+    (rCHIFIR, bit(27)) ? defaultMaskedError;
+
+    /** CHIFIR[28]
+     *  
+     */
+    (rCHIFIR, bit(28)) ? defaultMaskedError;
+
+    /** CHIFIR[29]
+     *  
+     */
+    (rCHIFIR, bit(29)) ? defaultMaskedError;
+
+    /** CHIFIR[30]
+     *  
+     */
+    (rCHIFIR, bit(30)) ? defaultMaskedError;
+
+    /** CHIFIR[31]
+     *  
+     */
+    (rCHIFIR, bit(31)) ? defaultMaskedError;
+
+    /** CHIFIR[32]
+     *  
+     */
+    (rCHIFIR, bit(32)) ? defaultMaskedError;
+
+    /** CHIFIR[33]
+     *  
+     */
+    (rCHIFIR, bit(33)) ? defaultMaskedError;
+
+    /** CHIFIR[34]
+     *  
+     */
+    (rCHIFIR, bit(34)) ? defaultMaskedError;
+
+    /** CHIFIR[35]
+     *  
+     */
+    (rCHIFIR, bit(35)) ? defaultMaskedError;
+
+    /** CHIFIR[36]
+     *  
+     */
+    (rCHIFIR, bit(36)) ? defaultMaskedError;
+
+    /** CHIFIR[37]
+     *  
+     */
+    (rCHIFIR, bit(37)) ? defaultMaskedError;
+
+    /** CHIFIR[38]
+     *  
+     */
+    (rCHIFIR, bit(38)) ? defaultMaskedError;
+
+    /** CHIFIR[39]
+     *  
+     */
+    (rCHIFIR, bit(39)) ? defaultMaskedError;
+
+    /** CHIFIR[40]
+     *  
+     */
+    (rCHIFIR, bit(40)) ? defaultMaskedError;
+
+    /** CHIFIR[41]
+     *  
+     */
+    (rCHIFIR, bit(41)) ? defaultMaskedError;
+
+    /** CHIFIR[42]
+     *  
+     */
+    (rCHIFIR, bit(42)) ? defaultMaskedError;
+
+    /** CHIFIR[43]
+     *  
+     */
+    (rCHIFIR, bit(43)) ? defaultMaskedError;
+
+    /** CHIFIR[44]
+     *  
+     */
+    (rCHIFIR, bit(44)) ? defaultMaskedError;
+
+    /** CHIFIR[45]
+     *  
+     */
+    (rCHIFIR, bit(45)) ? defaultMaskedError;
+
+    /** CHIFIR[46]
+     *  
+     */
+    (rCHIFIR, bit(46)) ? defaultMaskedError;
+
+    /** CHIFIR[47]
+     *  
+     */
+    (rCHIFIR, bit(47)) ? defaultMaskedError;
+
+    /** CHIFIR[48]
+     *  
+     */
+    (rCHIFIR, bit(48)) ? defaultMaskedError;
+
+    /** CHIFIR[49]
+     *  
+     */
+    (rCHIFIR, bit(49)) ? defaultMaskedError;
+
+    /** CHIFIR[50]
+     *  
+     */
+    (rCHIFIR, bit(50)) ? defaultMaskedError;
+
+    /** CHIFIR[51]
+     *  
+     */
+    (rCHIFIR, bit(51)) ? defaultMaskedError;
+
+    /** CHIFIR[52]
+     *  
+     */
+    (rCHIFIR, bit(52)) ? defaultMaskedError;
+
+    /** CHIFIR[53]
+     *  
+     */
+    (rCHIFIR, bit(53)) ? defaultMaskedError;
+
+    /** CHIFIR[54]
+     *  
+     */
+    (rCHIFIR, bit(54)) ? defaultMaskedError;
+
+    /** CHIFIR[55]
+     *  
+     */
+    (rCHIFIR, bit(55)) ? defaultMaskedError;
+
+    /** CHIFIR[56]
+     *  
+     */
+    (rCHIFIR, bit(56)) ? defaultMaskedError;
+
+    /** CHIFIR[57]
+     *  
+     */
+    (rCHIFIR, bit(57)) ? defaultMaskedError;
+
+    /** CHIFIR[58]
+     *  
+     */
+    (rCHIFIR, bit(58)) ? defaultMaskedError;
+
+    /** CHIFIR[59]
+     *  
+     */
+    (rCHIFIR, bit(59)) ? defaultMaskedError;
+
+    /** CHIFIR[60]
+     *  
+     */
+    (rCHIFIR, bit(60)) ? defaultMaskedError;
+
+    /** CHIFIR[61]
+     *  
+     */
+    (rCHIFIR, bit(61)) ? defaultMaskedError;
+
+    /** CHIFIR[62]
+     *  
+     */
+    (rCHIFIR, bit(62)) ? defaultMaskedError;
+
+    /** CHIFIR[63]
+     *  
+     */
+    (rCHIFIR, bit(63)) ? defaultMaskedError;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "p9_common_actions.rule";
+# Include the chip-specific action set.
+.include "p9_dmi_actions.rule";
+

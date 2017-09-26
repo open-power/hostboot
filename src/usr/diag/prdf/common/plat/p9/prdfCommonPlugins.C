@@ -64,18 +64,22 @@ int32_t ClearServiceCallFlag( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_xbus, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_obus, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_ex, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_ec, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_eq, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_pec, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_mcbist, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_mca, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_capp, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_phb, CommonPlugins, ClearServiceCallFlag );
-PRDF_PLUGIN_DEFINE_NS( p9_mcs, CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_xbus,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_obus,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_ex,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_ec,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_eq,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_pec,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_mcbist,  CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_mca,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_capp,    CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_phb,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_mcs,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_mc,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_mi,      CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( p9_dmi,     CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding
@@ -94,8 +98,8 @@ int32_t ClearServiceCallFlag_mnfgInfo( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS(p9_nimbus, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
-
+PRDF_PLUGIN_DEFINE_NS(p9_nimbus,  CommonPlugins, ClearServiceCallFlag_mnfgInfo);
+PRDF_PLUGIN_DEFINE_NS(p9_cumulus, CommonPlugins, ClearServiceCallFlag_mnfgInfo);
 
 /**
  * @brief   PRD will perform error isolation for certain errors that may cause
@@ -131,8 +135,9 @@ int32_t HwpErrorIsolation( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS(p9_nimbus, CommonPlugins, HwpErrorIsolation);
-PRDF_PLUGIN_DEFINE_NS(p9_mca, CommonPlugins, HwpErrorIsolation);
+PRDF_PLUGIN_DEFINE_NS(p9_nimbus,  CommonPlugins, HwpErrorIsolation);
+PRDF_PLUGIN_DEFINE_NS(p9_cumulus, CommonPlugins, HwpErrorIsolation);
+PRDF_PLUGIN_DEFINE_NS(p9_mca,     CommonPlugins, HwpErrorIsolation);
 
 } // namespace CommonPlugins ends
 

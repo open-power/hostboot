@@ -25,6 +25,7 @@
 
 # Add Rule tables here:
 PRDR_RULE_TABLES += p9_nimbus.prf
+PRDR_RULE_TABLES += p9_cumulus.prf
 PRDR_RULE_TABLES += p9_eq.prf
 PRDR_RULE_TABLES += p9_ex.prf
 PRDR_RULE_TABLES += p9_ec.prf
@@ -36,6 +37,9 @@ PRDR_RULE_TABLES += p9_xbus.prf
 PRDR_RULE_TABLES += p9_mcbist.prf
 PRDR_RULE_TABLES += p9_mcs.prf
 PRDR_RULE_TABLES += p9_mca.prf
+PRDR_RULE_TABLES += p9_mc.prf
+PRDR_RULE_TABLES += p9_mi.prf
+PRDR_RULE_TABLES += p9_dmi.prf
 
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}

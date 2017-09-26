@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_nimbus.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_cumulus.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,11 +23,11 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_nimbus
+chip p9_cumulus
 {
-    name        "P9 Nimbus chip";
+    name        "P9 Cumulus chip";
     targettype  TYPE_PROC;
-    sigoff      0x9000;
+    sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
 
@@ -754,78 +754,6 @@ chip p9_nimbus
     };
 
     ############################################################################
-    # P9 chip NPU0FIR for Nimbus DD1.0 only
-    ############################################################################
-
-    register NPU0FIR_NDD10
-    {
-        name        "P9 chip NPU0FIR for Nimbus DD1.0";
-        scomaddr    0x05011400;
-        reset       (&, 0x05011401);
-        mask        (|, 0x05011405);
-        capture     group cNPU0FIR_NDD10;
-    };
-
-    register NPU0FIR_MASK_NDD10
-    {
-        name        "P9 chip NPU0FIR MASK for Nimbus DD1.0";
-        scomaddr    0x05011403;
-        capture     group cNPU0FIR_NDD10;
-    };
-
-    register NPU0FIR_ACT0_NDD10
-    {
-        name        "P9 chip NPU0FIR ACT0 for Nimbus DD1.0";
-        scomaddr    0x05011406;
-        capture     group cNPU0FIR_NDD10;
-        capture     req nonzero("NPU0FIR_NDD10");
-    };
-
-    register NPU0FIR_ACT1_NDD10
-    {
-        name        "P9 chip NPU0FIR ACT1 for Nimbus DD1.0";
-        scomaddr    0x05011407;
-        capture     group cNPU0FIR_NDD10;
-        capture     req nonzero("NPU0FIR_NDD10");
-    };
-
-    ############################################################################
-    # P9 chip NPU1FIR for Nimbus DD1.0 only
-    ############################################################################
-
-    register NPU1FIR_NDD10
-    {
-        name        "P9 chip NPU1FIR for Nimbus DD1.0";
-        scomaddr    0x05011440;
-        reset       (&, 0x05011441);
-        mask        (|, 0x05011445);
-        capture     group cNPU1FIR_NDD10;
-    };
-
-    register NPU1FIR_MASK_NDD10
-    {
-        name        "P9 chip NPU1FIR MASK for Nimbus DD1.0";
-        scomaddr    0x05011443;
-        capture     group cNPU1FIR_NDD10;
-    };
-
-    register NPU1FIR_ACT0_NDD10
-    {
-        name        "P9 chip NPU1FIR ACT0 for Nimbus DD1.0";
-        scomaddr    0x05011446;
-        capture     group cNPU1FIR_NDD10;
-        capture     req nonzero("NPU1FIR_NDD10");
-    };
-
-    register NPU1FIR_ACT1_NDD10
-    {
-        name        "P9 chip NPU1FIR ACT1 for Nimbus DD1.0";
-        scomaddr    0x05011447;
-        capture     group cNPU1FIR_NDD10;
-        capture     req nonzero("NPU1FIR_NDD10");
-    };
-
-    ############################################################################
     # P9 chip PBWESTFIR
     ############################################################################
 
@@ -1078,13 +1006,6 @@ chip p9_nimbus
     };
 
     ############################################################################
-    # P9 chip EHHCAFIR
-    ############################################################################
-
-    # Only existed on DD1.0 and was completely masked. So this FIR has been
-    # completely removed for all DD levels.
-
-    ############################################################################
     # P9 chip PBAMFIR
     ############################################################################
 
@@ -1310,21 +1231,21 @@ chip p9_nimbus
         scomaddr    0x05013C00;
         reset       (&, 0x05013C01);
         mask        (|, 0x05013C05);
-        capture     group cNPU0FIR;
+        capture     group default;
     };
 
     register NPU0FIR_MASK
     {
         name        "P9 chip NPU0FIR MASK";
         scomaddr    0x05013C03;
-        capture     group cNPU0FIR;
+        capture     group default;
     };
 
     register NPU0FIR_ACT0
     {
         name        "P9 chip NPU0FIR ACT0";
         scomaddr    0x05013C06;
-        capture     group cNPU0FIR;
+        capture     group default;
         capture     req nonzero("NPU0FIR");
     };
 
@@ -1332,7 +1253,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU0FIR ACT1";
         scomaddr    0x05013C07;
-        capture     group cNPU0FIR;
+        capture     group default;
         capture     req nonzero("NPU0FIR");
     };
 
@@ -1346,21 +1267,21 @@ chip p9_nimbus
         scomaddr    0x05013C40;
         reset       (&, 0x05013C41);
         mask        (|, 0x05013C45);
-        capture     group cNPU1FIR;
+        capture     group default;
     };
 
     register NPU1FIR_MASK
     {
         name        "P9 chip NPU1FIR MASK";
         scomaddr    0x05013C43;
-        capture     group cNPU1FIR;
+        capture     group default;
     };
 
     register NPU1FIR_ACT0
     {
         name        "P9 chip NPU1FIR ACT0";
         scomaddr    0x05013C46;
-        capture     group cNPU1FIR;
+        capture     group default;
         capture     req nonzero("NPU1FIR");
     };
 
@@ -1368,7 +1289,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU1FIR ACT1";
         scomaddr    0x05013C47;
-        capture     group cNPU1FIR;
+        capture     group default;
         capture     req nonzero("NPU1FIR");
     };
 
@@ -1382,21 +1303,21 @@ chip p9_nimbus
         scomaddr    0x05013C80;
         reset       (&, 0x05013C81);
         mask        (|, 0x05013C85);
-        capture     group cNPU2FIR;
+        capture     group default;
     };
 
     register NPU2FIR_MASK
     {
         name        "P9 chip NPU2FIR MASK";
         scomaddr    0x05013C83;
-        capture     group cNPU2FIR;
+        capture     group default;
     };
 
     register NPU2FIR_ACT0
     {
         name        "P9 chip NPU2FIR ACT0";
         scomaddr    0x05013C86;
-        capture     group cNPU2FIR;
+        capture     group default;
         capture     req nonzero("NPU2FIR");
     };
 
@@ -1404,7 +1325,7 @@ chip p9_nimbus
     {
         name        "P9 chip NPU2FIR ACT1";
         scomaddr    0x05013C87;
-        capture     group cNPU2FIR;
+        capture     group default;
         capture     req nonzero("NPU2FIR");
     };
 
@@ -1599,7 +1520,7 @@ chip p9_nimbus
     };
 
 # Include registers not defined by the xml
-.include "p9_nimbus_regs.rule";
+.include "p9_cumulus_regs.rule";
 
 };
 
@@ -1661,17 +1582,27 @@ group gGLOBAL_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     /** GLOBAL_FIR[7]
      *  Attention from MC 0 chiplet
      */
-    (rGLOBAL_FIR, bit(7)) ? analyzeConnectedMCBIST0;
+    (rGLOBAL_FIR, bit(7)) ? analyzeConnectedMC0;
 
     /** GLOBAL_FIR[8]
      *  Attention from MC 1 chiplet
      */
-    (rGLOBAL_FIR, bit(8)) ? analyzeConnectedMCBIST1;
+    (rGLOBAL_FIR, bit(8)) ? analyzeConnectedMC1;
 
     /** GLOBAL_FIR[9]
      *  Attention from OB 0 chiplet
      */
     (rGLOBAL_FIR, bit(9)) ? analyzeConnectedOBUS0;
+
+    /** GLOBAL_FIR[10]
+     *  Attention from OB 1 chiplet
+     */
+    (rGLOBAL_FIR, bit(10)) ? analyzeConnectedOBUS1;
+
+    /** GLOBAL_FIR[11]
+     *  Attention from OB 2 chiplet
+     */
+    (rGLOBAL_FIR, bit(11)) ? analyzeConnectedOBUS2;
 
     /** GLOBAL_FIR[12]
      *  Attention from OB 3 chiplet
@@ -1885,17 +1816,27 @@ group gGLOBAL_UCS_FIR attntype UNIT_CS filter singlebit
     /** GLOBAL_UCS_FIR[7]
      *  Attention from MC 0 chiplet
      */
-    (rGLOBAL_UCS_FIR, bit(7)) ? analyzeConnectedMCBIST0;
+    (rGLOBAL_UCS_FIR, bit(7)) ? analyzeConnectedMC0;
 
     /** GLOBAL_UCS_FIR[8]
      *  Attention from MC 1 chiplet
      */
-    (rGLOBAL_UCS_FIR, bit(8)) ? analyzeConnectedMCBIST1;
+    (rGLOBAL_UCS_FIR, bit(8)) ? analyzeConnectedMC1;
 
     /** GLOBAL_UCS_FIR[9]
      *  Attention from OB 0 chiplet
      */
     (rGLOBAL_UCS_FIR, bit(9)) ? analyzeConnectedOBUS0;
+
+    /** GLOBAL_UCS_FIR[10]
+     *  Attention from OB 1 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(10)) ? analyzeConnectedOBUS1;
+
+    /** GLOBAL_UCS_FIR[11]
+     *  Attention from OB 2 chiplet
+     */
+    (rGLOBAL_UCS_FIR, bit(11)) ? analyzeConnectedOBUS2;
 
     /** GLOBAL_UCS_FIR[12]
      *  Attention from OB 3 chiplet
@@ -2049,12 +1990,12 @@ group gGLOBAL_HA_FIR attntype HOST_ATTN filter singlebit
     /** GLOBAL_HA_FIR[7]
      *  Attention from MC 0 chiplet
      */
-    (rGLOBAL_HA_FIR, bit(7)) ? analyzeConnectedMCBIST0;
+    (rGLOBAL_HA_FIR, bit(7)) ? analyzeConnectedMC0;
 
     /** GLOBAL_HA_FIR[8]
      *  Attention from MC 1 chiplet
      */
-    (rGLOBAL_HA_FIR, bit(8)) ? analyzeConnectedMCBIST1;
+    (rGLOBAL_HA_FIR, bit(8)) ? analyzeConnectedMC1;
 
 };
 
@@ -3285,12 +3226,12 @@ group gN1_CHIPLET_FIR filter singlebit
     /** N1_CHIPLET_FIR[4]
      *  Attention from MCFIR 2
      */
-    (rN1_CHIPLET_FIR, bit(4)) ? analyzeConnectedMCS2;
+    (rN1_CHIPLET_FIR, bit(4)) ? analyzeConnectedMI2;
 
     /** N1_CHIPLET_FIR[5]
      *  Attention from MCFIR 3
      */
-    (rN1_CHIPLET_FIR, bit(5)) ? analyzeConnectedMCS3;
+    (rN1_CHIPLET_FIR, bit(5)) ? analyzeConnectedMI3;
 
     /** N1_CHIPLET_FIR[6]
      *  Attention from MCDFIR
@@ -3324,12 +3265,12 @@ group gN1_CHIPLET_UCS_FIR filter singlebit
     /** N1_CHIPLET_UCS_FIR[1]
      *  Attention from MCFIR 2
      */
-    (rN1_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCS2;
+    (rN1_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMI2;
 
     /** N1_CHIPLET_UCS_FIR[2]
      *  Attention from MCFIR 3
      */
-    (rN1_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCS3;
+    (rN1_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMI3;
 
     /** N1_CHIPLET_UCS_FIR[5]
      *  Attention from VASFIR
@@ -3353,12 +3294,12 @@ group gN1_CHIPLET_HA_FIR filter singlebit
     /** N1_CHIPLET_HA_FIR[1]
      *  Attention from MCFIR 2
      */
-    (rN1_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCS2;
+    (rN1_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMI2;
 
     /** N1_CHIPLET_HA_FIR[2]
      *  Attention from MCFIR 3
      */
-    (rN1_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCS3;
+    (rN1_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMI3;
 
 };
 
@@ -4192,12 +4133,12 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[4]
      *  Attention from MCFIR 0
      */
-    (rN3_CHIPLET_FIR, bit(4)) ? analyzeConnectedMCS0;
+    (rN3_CHIPLET_FIR, bit(4)) ? analyzeConnectedMI0;
 
     /** N3_CHIPLET_FIR[5]
      *  Attention from MCFIR 1
      */
-    (rN3_CHIPLET_FIR, bit(5)) ? analyzeConnectedMCS1;
+    (rN3_CHIPLET_FIR, bit(5)) ? analyzeConnectedMI1;
 
     /** N3_CHIPLET_FIR[6]
      *  Attention from PBWESTFIR
@@ -4214,20 +4155,15 @@ group gN3_CHIPLET_FIR filter singlebit
      */
     (rN3_CHIPLET_FIR, bit(8)) ? analyze(gPBEASTFIR);
 
-    /** N3_CHIPLET_FIR[9]
-     *  Attention from ENHCAFIR
-     */
-    (rN3_CHIPLET_FIR, bit(9)) ? analyze(gENHCAFIR); # DD1.0 only
-
     /** N3_CHIPLET_FIR[10]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_FIR, bit(10)) ? analyzeNPU0FIR;
+    (rN3_CHIPLET_FIR, bit(10)) ? analyze(gNPU0FIR);
 
     /** N3_CHIPLET_FIR[11]
      *  Attention from NPU1FIR
      */
-    (rN3_CHIPLET_FIR, bit(11)) ? analyzeNPU1FIR;
+    (rN3_CHIPLET_FIR, bit(11)) ? analyze(gNPU1FIR);
 
     /** N3_CHIPLET_FIR[12]
      *  Attention from NMMUCQFIR
@@ -4277,12 +4213,12 @@ group gN3_CHIPLET_FIR filter singlebit
     /** N3_CHIPLET_FIR[22]
      *  Attention from ENHCAFIR
      */
-    (rN3_CHIPLET_FIR, bit(22)) ? analyze(gENHCAFIR); # DD2.0+
+    (rN3_CHIPLET_FIR, bit(22)) ? analyze(gENHCAFIR);
 
     /** N3_CHIPLET_FIR[23]
      *  Attention from NPU2FIR
      */
-    (rN3_CHIPLET_FIR, bit(23)) ? analyzeNPU2FIR;
+    (rN3_CHIPLET_FIR, bit(23)) ? analyze(gNPU2FIR);
 
 };
 
@@ -4301,27 +4237,27 @@ group gN3_CHIPLET_UCS_FIR filter singlebit
     /** N3_CHIPLET_UCS_FIR[1]
      *  Attention from MCFIR 0
      */
-    (rN3_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCS0;
+    (rN3_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMI0;
 
     /** N3_CHIPLET_UCS_FIR[2]
      *  Attention from MCFIR 1
      */
-    (rN3_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCS1;
+    (rN3_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMI1;
 
     /** N3_CHIPLET_UCS_FIR[6]
      *  Attention from NPU2FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(6)) ? analyzeNPU2FIR;
+    (rN3_CHIPLET_UCS_FIR, bit(6)) ? analyze(gNPU2FIR);
 
     /** N3_CHIPLET_UCS_FIR[7]
      *  Attention from NPU0FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyzeNPU0FIR;
+    (rN3_CHIPLET_UCS_FIR, bit(7)) ? analyze(gNPU0FIR);
 
     /** N3_CHIPLET_UCS_FIR[8]
      *  Attention from NPU1FIR
      */
-    (rN3_CHIPLET_UCS_FIR, bit(8)) ? analyzeNPU1FIR;
+    (rN3_CHIPLET_UCS_FIR, bit(8)) ? analyze(gNPU1FIR);
 
     /** N3_CHIPLET_UCS_FIR[9]
      *  Attention from NMMUCQFIR
@@ -4350,12 +4286,12 @@ group gN3_CHIPLET_HA_FIR filter singlebit
     /** N3_CHIPLET_HA_FIR[1]
      *  Attention from MCFIR 0
      */
-    (rN3_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCS0;
+    (rN3_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMI0;
 
     /** N3_CHIPLET_HA_FIR[2]
      *  Attention from MCFIR 1
      */
-    (rN3_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCS1;
+    (rN3_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMI1;
 
 };
 
@@ -4532,492 +4468,6 @@ group gN3_LFIR filter singlebit, cs_root_cause
      *  Malfunction Alert broadcast via OOB
      */
     (rN3_LFIR, bit(41)) ? defaultMaskedError;
-
-};
-
-################################################################################
-# P9 chip NPU0FIR
-################################################################################
-
-rule rNPU0FIR_NDD10
-{
-  CHECK_STOP:
-    NPU0FIR_NDD10 & ~NPU0FIR_MASK_NDD10 & ~NPU0FIR_ACT0_NDD10 & ~NPU0FIR_ACT1_NDD10;
-  RECOVERABLE:
-    NPU0FIR_NDD10 & ~NPU0FIR_MASK_NDD10 & ~NPU0FIR_ACT0_NDD10 &  NPU0FIR_ACT1_NDD10;
-  UNIT_CS:
-    NPU0FIR_NDD10 & ~NPU0FIR_MASK_NDD10 &  NPU0FIR_ACT0_NDD10 &  NPU0FIR_ACT1_NDD10;
-};
-
-group gNPU0FIR_NDD10 filter singlebit, cs_root_cause
-{
-    /** NPU0FIR[0]
-     *  NTL array CE
-     */
-    (rNPU0FIR_NDD10, bit(0)) ? self_th_32perDay;
-
-    /** NPU0FIR[1]
-     *  NTL header array UE
-     */
-    (rNPU0FIR_NDD10, bit(1)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[2]
-     *  NTL Data Array UE
-     */
-    (rNPU0FIR_NDD10, bit(2)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[3]
-     *  NTL NVLInk Control/Header/AE PE
-     */
-    (rNPU0FIR_NDD10, bit(3)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[4]
-     *  NTL NVLink Data Parity error
-     */
-    (rNPU0FIR_NDD10, bit(4)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[5]
-     *  NTL NVLink Malformed Packet
-     */
-    (rNPU0FIR_NDD10, bit(5)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[6]
-     *  NTL NVLink Unsupported Packet
-     */
-    (rNPU0FIR_NDD10, bit(6)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[7]
-     *  NTL NVLink Config errors
-     */
-    (rNPU0FIR_NDD10, bit(7)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[8]
-     *  NTL NVLink CRC errors or LMD=Stomp
-     */
-    (rNPU0FIR_NDD10, bit(8)) ? defaultMaskedError;
-
-    /** NPU0FIR[9]
-     *  NTL PRI errors
-     */
-    (rNPU0FIR_NDD10, bit(9)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[10]
-     *  NTL logic error
-     */
-    (rNPU0FIR_NDD10, bit(10)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[11]
-     *  NTL LMD=Data Posion
-     */
-    (rNPU0FIR_NDD10, bit(11)) ? defaultMaskedError;
-
-    /** NPU0FIR[12]
-     *  NTL data array SUE
-     */
-    (rNPU0FIR_NDD10, bit(12)) ? defaultMaskedError;
-
-    /** NPU0FIR[13]
-     *  CQ CTL/SM ASBE Array single-bit CE
-     */
-    (rNPU0FIR_NDD10, bit(13)) ? self_th_32perDay;
-
-    /** NPU0FIR[14]
-     *  CQ CTL/SM PBR PowerBus Recoverable err
-     */
-    (rNPU0FIR_NDD10, bit(14)) ? defaultMaskedError;
-
-    /** NPU0FIR[15]
-     *  CQ CTL/SM REG Register ring error
-     */
-    (rNPU0FIR_NDD10, bit(15)) ? self_th_32perDay;
-
-    /** NPU0FIR[16]
-     *  Data UE for MMIO store data
-     */
-    (rNPU0FIR_NDD10, bit(16)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[17]
-     *  spare
-     */
-    (rNPU0FIR_NDD10, bit(17)) ? defaultMaskedError;
-
-    /** NPU0FIR[18]
-     *  CQ CTL/SM NCF NVLink config error
-     */
-    (rNPU0FIR_NDD10, bit(18)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[19]
-     *  CQ CTL/SM NVF NVLink fatal error
-     */
-    (rNPU0FIR_NDD10, bit(19)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[20]
-     *  spare
-     */
-    (rNPU0FIR_NDD10, bit(20)) ? defaultMaskedError;
-
-    /** NPU0FIR[21]
-     *  CQ CTL/SM AUE Array UE
-     */
-    (rNPU0FIR_NDD10, bit(21)) ? self_th_1;
-
-    /** NPU0FIR[22]
-     *  CQ CTL/SM PBP PowerBus parity error
-     */
-    (rNPU0FIR_NDD10, bit(22)) ? self_th_1;
-
-    /** NPU0FIR[23]
-     *  CQ CTL/SM PBF PowerBus Fatal Error
-     */
-    (rNPU0FIR_NDD10, bit(23)) ? level2_M_self_L_th_1;
-
-    /** NPU0FIR[24]
-     *  PowerBus configuration error
-     */
-    (rNPU0FIR_NDD10, bit(24)) ? level2_M_self_L_th_1;
-
-    /** NPU0FIR[25]
-     *  CQ CTL/SM FWD Forward-Progress error
-     */
-    (rNPU0FIR_NDD10, bit(25)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[26]
-     *  CQ CTL/SM NLG NPU Logic error
-     */
-    (rNPU0FIR_NDD10, bit(26)) ? self_th_1;
-
-    /** NPU0FIR[27]
-     *  CQ CTL/SM  UT=1 to frozen PE error
-     */
-    (rNPU0FIR_NDD10, bit(27)) ? defaultMaskedError;
-
-    /** NPU0FIR[28]
-     *  spare
-     */
-    (rNPU0FIR_NDD10, bit(28)) ? defaultMaskedError;
-
-    /** NPU0FIR[29]
-     *  CQ DAT ECC UE/SUE on data/BE arrays
-     */
-    (rNPU0FIR_NDD10, bit(29)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[30]
-     *  CQ DAT ECC CE on data/BE arrays
-     */
-    (rNPU0FIR_NDD10, bit(30)) ? self_M_level2_L_th_32perDay;
-
-    /** NPU0FIR[31]
-     *  CQ DAT parity error on data/BE latches
-     */
-    (rNPU0FIR_NDD10, bit(31)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[32]
-     *  CQ DAT parity errs on config regs
-     */
-    (rNPU0FIR_NDD10, bit(32)) ? self_th_1;
-
-    /** NPU0FIR[33]
-     *  CQ DAT parity errs/PowerBus rtag
-     */
-    (rNPU0FIR_NDD10, bit(33)) ? self_th_1;
-
-    /** NPU0FIR[34]
-     *  CQ DAT parity errs nternal state latches
-     */
-    (rNPU0FIR_NDD10, bit(34)) ? self_th_1;
-
-    /** NPU0FIR[35]
-     *  CQ DAT logic error
-     */
-    (rNPU0FIR_NDD10, bit(35)) ? self_th_1;
-
-    /** NPU0FIR[36]
-     *  Future SUE
-     */
-    (rNPU0FIR_NDD10, bit(36)) ? defaultMaskedError;
-
-    /** NPU0FIR[37]
-     *  ECC SUE on PB received data
-     */
-    (rNPU0FIR_NDD10, bit(37)) ? defaultMaskedError;
-
-    /** NPU0FIR[38:39]
-     *  spare
-     */
-    (rNPU0FIR_NDD10, bit(38|39)) ? defaultMaskedError;
-
-    /** NPU0FIR[40]
-     *  XTS internal logic error
-     */
-    (rNPU0FIR_NDD10, bit(40)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[41]
-     *  XTS correctable errs in XTS SRAM
-     */
-    (rNPU0FIR_NDD10, bit(41)) ? self_M_level2_L_th_32perDay;
-
-    /** NPU0FIR[42]
-     *  XTS Ues in XTS internal SRAM
-     */
-    (rNPU0FIR_NDD10, bit(42)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[43]
-     *  XTS CE on incoming stack transactions
-     */
-    (rNPU0FIR_NDD10, bit(43)) ? self_M_level2_L_th_32perDay;
-
-    /** NPU0FIR[44]
-     *  XTS  errs incoming stack transaction
-     */
-    (rNPU0FIR_NDD10, bit(44)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[45]
-     *  XTS errs on incoming PBUS transaction
-     */
-    (rNPU0FIR_NDD10, bit(45)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[46]
-     *  XTS Translate Request Fail
-     */
-    (rNPU0FIR_NDD10, bit(46)) ? self_th_1; # NIMBUS_10
-
-    /** NPU0FIR[47:59]
-     *  spare
-     */
-    (rNPU0FIR_NDD10, bit(47|48|49|50|51|52|53|54|55|56|57|58|59)) ? defaultMaskedError;
-
-    /** NPU0FIR[60]
-     *  MISC Pervasive SCOM satellite err
-     */
-    (rNPU0FIR_NDD10, bit(60)) ? defaultMaskedError;
-
-    /** NPU0FIR[61]
-     *  MISC Pervasive SCOM satellite err
-     */
-    (rNPU0FIR_NDD10, bit(61)) ? defaultMaskedError;
-
-    /** NPU0FIR[62]
-     *  Local FIR Parity Error RAS duplicate
-     */
-    (rNPU0FIR_NDD10, bit(62)) ? defaultMaskedError;
-
-    /** NPU0FIR[63]
-     *  Local FIR Parity Err
-     */
-    (rNPU0FIR_NDD10, bit(63)) ? defaultMaskedError;
-
-};
-
-################################################################################
-# P9 chip NPU1FIR
-################################################################################
-
-rule rNPU1FIR_NDD10
-{
-  CHECK_STOP:
-    NPU1FIR_NDD10 & ~NPU1FIR_MASK_NDD10 & ~NPU1FIR_ACT0_NDD10 & ~NPU1FIR_ACT1_NDD10;
-  RECOVERABLE:
-    NPU1FIR_NDD10 & ~NPU1FIR_MASK_NDD10 & ~NPU1FIR_ACT0_NDD10 &  NPU1FIR_ACT1_NDD10;
-  UNIT_CS:
-    NPU1FIR_NDD10 & ~NPU1FIR_MASK_NDD10 &  NPU1FIR_ACT0_NDD10 &  NPU1FIR_ACT1_NDD10;
-};
-
-group gNPU1FIR_NDD10 filter singlebit, cs_root_cause
-{
-    /** NPU1FIR[0]
-     *  NDL Brick0 stall
-     */
-    (rNPU1FIR_NDD10, bit(0)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[1]
-     *  NDL Brick0 nostall
-     */
-    (rNPU1FIR_NDD10, bit(1)) ? defaultMaskedError;
-
-    /** NPU1FIR[2]
-     *  NDL Brick1 stall
-     */
-    (rNPU1FIR_NDD10, bit(2)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[3]
-     *  NDL Brick1 nostall
-     */
-    (rNPU1FIR_NDD10, bit(3)) ? defaultMaskedError;
-
-    /** NPU1FIR[4]
-     *  NDL Brick2 stall
-     */
-    (rNPU1FIR_NDD10, bit(4)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[5]
-     *  NDL Brick2 nostall
-     */
-    (rNPU1FIR_NDD10, bit(5)) ? defaultMaskedError;
-
-    /** NPU1FIR[6]
-     *  NDL Brick3 stall
-     */
-    (rNPU1FIR_NDD10, bit(6)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[7]
-     *  NDL Brick3 nostall
-     */
-    (rNPU1FIR_NDD10, bit(7)) ? defaultMaskedError;
-
-    /** NPU1FIR[8]
-     *  NDL Brick4 stall
-     */
-    (rNPU1FIR_NDD10, bit(8)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[9]
-     *  NDL Brick4 nostall
-     */
-    (rNPU1FIR_NDD10, bit(9)) ? defaultMaskedError;
-
-    /** NPU1FIR[10]
-     *  NDL Brick5 stall
-     */
-    (rNPU1FIR_NDD10, bit(10)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[11]
-     *  NDL Brick5 nostall
-     */
-    (rNPU1FIR_NDD10, bit(11)) ? defaultMaskedError;
-
-    /** NPU1FIR[12]
-     *  MISC Register ring error (ie noack)
-     */
-    (rNPU1FIR_NDD10, bit(12)) ? self_th_32perDay;
-
-    /** NPU1FIR[13]
-     *  MISC Parity error from ibr addr regi
-     */
-    (rNPU1FIR_NDD10, bit(13)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[14]
-     *  MISC Parity error on SCOM D/A addr reg
-     */
-    (rNPU1FIR_NDD10, bit(14)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[15]
-     *  MISC Parity error on MISC Cntrl reg
-     */
-    (rNPU1FIR_NDD10, bit(15)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[16]
-     *  MISC NMMU signaled Local Checkstop
-     */
-    (rNPU1FIR_NDD10, bit(16)) ? defaultMaskedError;
-
-    /** NPU1FIR[17]
-     *  ATS Invalid TVT entry
-     */
-    (rNPU1FIR_NDD10, bit(17)) ? defaultMaskedError;
-
-    /** NPU1FIR[18]
-     *  ATS TVT Address range error
-     */
-    (rNPU1FIR_NDD10, bit(18)) ? defaultMaskedError;
-
-    /** NPU1FIR[19]
-     *  ATS TCE Page access error
-     */
-    (rNPU1FIR_NDD10, bit(19)) ? defaultMaskedError;
-
-    /** NPU1FIR[20]
-     *  ATS Effective Address hit multiple TCE
-     */
-    (rNPU1FIR_NDD10, bit(20)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[21]
-     *  ATS TCE Page access error
-     */
-    (rNPU1FIR_NDD10, bit(21)) ? defaultMaskedError;
-
-    /** NPU1FIR[22]
-     *  ATS Timeout on TCE tree walk
-     */
-    (rNPU1FIR_NDD10, bit(22)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[23]
-     *  ATS Parity error on TCE cache dir array
-     */
-    (rNPU1FIR_NDD10, bit(23)) ? self_th_32perDay;
-
-    /** NPU1FIR[24]
-     *  ATS Parity error on TCE cache data array
-     */
-    (rNPU1FIR_NDD10, bit(24)) ? self_th_32perDay;
-
-    /** NPU1FIR[25]
-     *  ATS ECC UE on Effective Address array
-     */
-    (rNPU1FIR_NDD10, bit(25)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[26]
-     *  ATS ECC CE on Effective Address array
-     */
-    (rNPU1FIR_NDD10, bit(26)) ? self_th_32perDay;
-
-    /** NPU1FIR[27]
-     *  ATS ECC UE on TDRmem array
-     */
-    (rNPU1FIR_NDD10, bit(27)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[28]
-     *  ATS ECC CE on TDRmem array
-     */
-    (rNPU1FIR_NDD10, bit(28)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[29]
-     *  ATS ECC UE on CQ CTL DMA Read
-     */
-    (rNPU1FIR_NDD10, bit(29)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[30]
-     *  ATS ECC CE on CQ CTL DMA Read
-     */
-    (rNPU1FIR_NDD10, bit(30)) ? self_th_32perDay;
-
-    /** NPU1FIR[31]
-     *  ATS Parity error on TVT entry
-     */
-    (rNPU1FIR_NDD10, bit(31)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[32]
-     *  ATS Parity err on IODA Address Reg
-     */
-    (rNPU1FIR_NDD10, bit(32)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[33]
-     *  ATS Parity error on ATS Control Register
-     */
-    (rNPU1FIR_NDD10, bit(33)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[34]
-     *  ATS Parity error on ATS reg
-     */
-    (rNPU1FIR_NDD10, bit(34)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[35]
-     *  ATS Invalid IODA Table Select entry
-     */
-    (rNPU1FIR_NDD10, bit(35)) ? self_th_1; # NIMBUS_10
-
-    /** NPU1FIR[36:61]
-     *  Reserved
-     */
-    (rNPU1FIR_NDD10, bit(36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61)) ? defaultMaskedError;
-
-    /** NPU1FIR[62]
-     *  scom error
-     */
-    (rNPU1FIR_NDD10, bit(62)) ? defaultMaskedError;
-
-    /** NPU1FIR[63]
-     *  scom error
-     */
-    (rNPU1FIR_NDD10, bit(63)) ? defaultMaskedError;
 
 };
 
@@ -8066,6 +7516,11 @@ group gXB_CHIPLET_FIR filter singlebit
      */
     (rXB_CHIPLET_FIR, bit(3)) ? analyze(gXB_LFIR);
 
+    /** XB_CHIPLET_FIR[4]
+     *  Attention from IOELFIR 0
+     */
+    (rXB_CHIPLET_FIR, bit(4)) ? analyzeConnectedXBUS0;
+
     /** XB_CHIPLET_FIR[5]
      *  Attention from IOELFIR 1
      */
@@ -8075,6 +7530,11 @@ group gXB_CHIPLET_FIR filter singlebit
      *  Attention from IOELFIR 2
      */
     (rXB_CHIPLET_FIR, bit(6)) ? analyzeConnectedXBUS2;
+
+    /** XB_CHIPLET_FIR[8]
+     *  Attention from IOXBFIR 0
+     */
+    (rXB_CHIPLET_FIR, bit(8)) ? analyzeConnectedXBUS0;
 
     /** XB_CHIPLET_FIR[9]
      *  Attention from IOXBFIR 1
@@ -8105,6 +7565,11 @@ rule rXB_CHIPLET_UCS_FIR
 
 group gXB_CHIPLET_UCS_FIR filter singlebit
 {
+    /** XB_CHIPLET_UCS_FIR[1]
+     *  Attention from IOELFIR 0
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedXBUS0;
+
     /** XB_CHIPLET_UCS_FIR[2]
      *  Attention from IOELFIR 1
      */
@@ -8114,6 +7579,11 @@ group gXB_CHIPLET_UCS_FIR filter singlebit
      *  Attention from IOELFIR 2
      */
     (rXB_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedXBUS2;
+
+    /** XB_CHIPLET_UCS_FIR[5]
+     *  Attention from IOXBFIR 0
+     */
+    (rXB_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedXBUS0;
 
     /** XB_CHIPLET_UCS_FIR[6]
      *  Attention from IOXBFIR 1
@@ -8474,7 +7944,7 @@ group gPCI2_CHIPLET_FIR filter singlebit
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
 .include "p9_proc_common_actions.rule";
-.include "p9_nimbus_actions.rule";
+.include "p9_cumulus_actions.rule";
 
 actionclass analyzeConnectedEQ0     { analyze(connected(TYPE_EQ,      0)); };
 actionclass analyzeConnectedEQ1     { analyze(connected(TYPE_EQ,      1)); };
@@ -8509,7 +7979,10 @@ actionclass analyzeConnectedEC23    { analyze(connected(TYPE_CORE,   23)); };
 actionclass analyzeConnectedCAPP0   { analyze(connected(TYPE_CAPP,    0)); };
 actionclass analyzeConnectedCAPP1   { analyze(connected(TYPE_CAPP,    1)); };
 actionclass analyzeConnectedOBUS0   { analyze(connected(TYPE_OBUS,    0)); };
+actionclass analyzeConnectedOBUS1   { analyze(connected(TYPE_OBUS,    1)); };
+actionclass analyzeConnectedOBUS2   { analyze(connected(TYPE_OBUS,    2)); };
 actionclass analyzeConnectedOBUS3   { analyze(connected(TYPE_OBUS,    3)); };
+actionclass analyzeConnectedXBUS0   { analyze(connected(TYPE_XBUS,    0)); };
 actionclass analyzeConnectedXBUS1   { analyze(connected(TYPE_XBUS,    1)); };
 actionclass analyzeConnectedXBUS2   { analyze(connected(TYPE_XBUS,    2)); };
 actionclass analyzeConnectedPEC0    { analyze(connected(TYPE_PEC,     0)); };
@@ -8521,9 +7994,9 @@ actionclass analyzeConnectedPHB2    { analyze(connected(TYPE_PHB,     2)); };
 actionclass analyzeConnectedPHB3    { analyze(connected(TYPE_PHB,     3)); };
 actionclass analyzeConnectedPHB4    { analyze(connected(TYPE_PHB,     4)); };
 actionclass analyzeConnectedPHB5    { analyze(connected(TYPE_PHB,     5)); };
-actionclass analyzeConnectedMCBIST0 { analyze(connected(TYPE_MCBIST,  0)); };
-actionclass analyzeConnectedMCBIST1 { analyze(connected(TYPE_MCBIST,  1)); };
-actionclass analyzeConnectedMCS0    { analyze(connected(TYPE_MCS,     0)); };
-actionclass analyzeConnectedMCS1    { analyze(connected(TYPE_MCS,     1)); };
-actionclass analyzeConnectedMCS2    { analyze(connected(TYPE_MCS,     2)); };
-actionclass analyzeConnectedMCS3    { analyze(connected(TYPE_MCS,     3)); };
+actionclass analyzeConnectedMC0     { analyze(connected(TYPE_MC,      0)); };
+actionclass analyzeConnectedMC1     { analyze(connected(TYPE_MC,      1)); };
+actionclass analyzeConnectedMI0     { analyze(connected(TYPE_MI,      0)); };
+actionclass analyzeConnectedMI1     { analyze(connected(TYPE_MI,      1)); };
+actionclass analyzeConnectedMI2     { analyze(connected(TYPE_MI,      2)); };
+actionclass analyzeConnectedMI3     { analyze(connected(TYPE_MI,      3)); };

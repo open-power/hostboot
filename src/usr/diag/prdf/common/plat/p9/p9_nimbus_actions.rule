@@ -22,80 +22,6 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-actionclass level2_M_self_L_th_32perDay
-{
-    callout2ndLvlMed;
-    calloutSelfLow;
-    threshold32pday;
-};
-
-/** PLL Threshold of 2 per 5 mins */
-actionclass thresholdPll
-{
-    threshold( field(2 / 5 min) );
-};
-
-# This action is for the case where TP_LFIR[21] comes on
-# but PLL code does not isolate to any PLL errors.  The
-# threshold is the same as PLL one 2 per 5 mins with
-# callout/gard the chip at threshold along with PLL scom
-# data captured.
-/** PCB Slave Internal parity error action */
-actionclass pcb_slave_internal_parity
-{
-    capture(PllFIRs);
-    calloutSelfHigh;
-    thresholdPll;
-    funccall("capturePllFfdc");
-    funccall("clearParityError");
-};
-
-/**
- * Threshold 32/day (field) and 1 (mnfg). Do not predictively callout on
- * threshold, instead just mask.
- */
-actionclass pb_cent_hang_recovery_gte
-{
-    capture(PbCentMode);
-    calloutSelfMed;
-    threshold32pday;
-    funccall("ClearServiceCallFlag_mnfgInfo");
-};
-
-/** Callout connected NX, threshold 32/day */
-actionclass nx_th_32perDay
-{
-    callout(connected(TYPE_NX,0), MRU_MED);
-    threshold32pday;
-};
-
-/** Callout connected NX, threshold 1 */
-actionclass nx_th_1
-{
-    callout(connected(TYPE_NX,0), MRU_MED);
-    threshold1;
-};
-
-/** Callout connected NX, threshold 1, SUE originated from somewhere else */
-actionclass nx_th_1_SUE { nx_th_1; SueSeen; };
-
-actionclass analyzePciChipletFir0
-{
-    capture(PciChipletFir0);
-    analyze(gPCI0_CHIPLET_FIR);
-};
-
-actionclass analyzePciChipletFir1
-{
-    capture(PciChipletFir1);
-    analyze(gPCI1_CHIPLET_FIR);
-};
-
-actionclass analyzePciChipletFir2
-{
-    capture(PciChipletFir2);
-    analyze(gPCI2_CHIPLET_FIR);
-};
 
 actionclass aNPU0FIR_NDD10 {capture(cNPU0FIR_NDD10); analyze(gNPU0FIR_NDD10);};
 actionclass aNPU1FIR_NDD10 {capture(cNPU1FIR_NDD10); analyze(gNPU1FIR_NDD10);};
@@ -113,10 +39,5 @@ actionclass analyzeNPU1FIR
 {
     try( funccall("checkNimbusDD10"   ), aNPU1FIR_NDD10 );
     try( funccall("checkNotNimbusDD10"), aNPU1FIR       );
-};
-
-actionclass deadmanTimer
-{
-    funccall("handleDeadmanTimer");
 };
 
