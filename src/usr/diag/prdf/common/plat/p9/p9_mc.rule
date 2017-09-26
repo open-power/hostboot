@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/diag/prdf/common/plat/p9/p9_mcbist.rule $
+# $Source: src/usr/diag/prdf/common/plat/p9/p9_mc.rule $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,15 +23,13 @@
 #
 # IBM_PROLOG_END_TAG
 
-chip p9_mcbist
+chip p9_mc
 {
-    name        "P9 MCBIST chiplet";
-    targettype  TYPE_MCBIST;
-    sigoff      0x9000;
+    name        "P9 MC chiplet";
+    targettype  TYPE_MC;
+    sigoff      0x9200;
     dump        DUMP_CONTENT_HW;
     scomlen     64;
-
-.include "prdfP9McbistExtraSig.H";
 
  #############################################################################
  #                                                                           #
@@ -143,29 +141,100 @@ chip p9_mcbist
     };
 
     ############################################################################
-    # P9 MCBIST target MCBISTFIR
+    # P9 MC target IOMCFIR
+    ############################################################################
+
+    register IOMCFIR
+    {
+        name        "P9 MC target IOMCFIR";
+        scomaddr    0x07011000;
+        reset       (&, 0x07011001);
+        mask        (|, 0x07011005);
+        capture     group default;
+    };
+
+    register IOMCFIR_MASK
+    {
+        name        "P9 MC target IOMCFIR MASK";
+        scomaddr    0x07011003;
+        capture     group default;
+    };
+
+    register IOMCFIR_ACT0
+    {
+        name        "P9 MC target IOMCFIR ACT0";
+        scomaddr    0x07011006;
+        capture     group default;
+        capture     req nonzero("IOMCFIR");
+    };
+
+    register IOMCFIR_ACT1
+    {
+        name        "P9 MC target IOMCFIR ACT1";
+        scomaddr    0x07011007;
+        capture     group default;
+        capture     req nonzero("IOMCFIR");
+    };
+
+    ############################################################################
+    # P9 MC target MCPPEFIR
+    ############################################################################
+
+    register MCPPEFIR
+    {
+        name        "P9 MC target MCPPEFIR";
+        scomaddr    0x07011440;
+        reset       (&, 0x07011441);
+        mask        (|, 0x07011445);
+        capture     group default;
+    };
+
+    register MCPPEFIR_MASK
+    {
+        name        "P9 MC target MCPPEFIR MASK";
+        scomaddr    0x07011443;
+        capture     group default;
+    };
+
+    register MCPPEFIR_ACT0
+    {
+        name        "P9 MC target MCPPEFIR ACT0";
+        scomaddr    0x07011446;
+        capture     group default;
+        capture     req nonzero("MCPPEFIR");
+    };
+
+    register MCPPEFIR_ACT1
+    {
+        name        "P9 MC target MCPPEFIR ACT1";
+        scomaddr    0x07011447;
+        capture     group default;
+        capture     req nonzero("MCPPEFIR");
+    };
+
+    ############################################################################
+    # P9 MC target MCBISTFIR
     ############################################################################
 
     register MCBISTFIR
     {
-        name        "P9 MCBIST target MCBISTFIR";
+        name        "P9 MC target MCBISTFIR";
         scomaddr    0x07012300;
         reset       (&, 0x07012301);
         mask        (|, 0x07012305);
         capture     group default;
-        capture     group MaintCmdRegs_mcb;
     };
 
     register MCBISTFIR_MASK
     {
-        name        "P9 MCBIST target MCBISTFIR MASK";
+        name        "P9 MC target MCBISTFIR MASK";
         scomaddr    0x07012303;
         capture     group default;
     };
 
     register MCBISTFIR_ACT0
     {
-        name        "P9 MCBIST target MCBISTFIR ACT0";
+        name        "P9 MC target MCBISTFIR ACT0";
         scomaddr    0x07012306;
         capture     group default;
         capture     req nonzero("MCBISTFIR");
@@ -173,14 +242,14 @@ chip p9_mcbist
 
     register MCBISTFIR_ACT1
     {
-        name        "P9 MCBIST target MCBISTFIR ACT1";
+        name        "P9 MC target MCBISTFIR ACT1";
         scomaddr    0x07012307;
         capture     group default;
         capture     req nonzero("MCBISTFIR");
     };
 
 # Include registers not defined by the xml
-.include "p9_mcbist_regs.rule";
+.include "p9_mc_regs.rule";
 
 };
 
@@ -215,69 +284,39 @@ group gMC_CHIPLET_FIR attntype CHECK_STOP, RECOVERABLE filter singlebit
     (rMC_CHIPLET_FIR, bit(3)) ? analyze(gMC_LFIR);
 
     /** MC_CHIPLET_FIR[4]
-     *  Attention from MCACALFIR 0
+     *  Attention from CHIFIR 0
      */
-    (rMC_CHIPLET_FIR, bit(4)) ? analyzeConnectedMCA0;
-
-    /** MC_CHIPLET_FIR[5]
-     *  Attention from MCAECCFIR 0
-     */
-    (rMC_CHIPLET_FIR, bit(5)) ? analyzeConnectedMCA0;
+    (rMC_CHIPLET_FIR, bit(4)) ? analyzeConnectedDMI0;
 
     /** MC_CHIPLET_FIR[6]
-     *  Attention from MCACALFIR 1
+     *  Attention from CHIFIR 1
      */
-    (rMC_CHIPLET_FIR, bit(6)) ? analyzeConnectedMCA1;
-
-    /** MC_CHIPLET_FIR[7]
-     *  Attention from MCAECCFIR 1
-     */
-    (rMC_CHIPLET_FIR, bit(7)) ? analyzeConnectedMCA1;
+    (rMC_CHIPLET_FIR, bit(6)) ? analyzeConnectedDMI1;
 
     /** MC_CHIPLET_FIR[8]
-     *  Attention from MCACALFIR 2
+     *  Attention from CHIFIR 2
      */
-    (rMC_CHIPLET_FIR, bit(8)) ? analyzeConnectedMCA2;
-
-    /** MC_CHIPLET_FIR[9]
-     *  Attention from MCAECCFIR 2
-     */
-    (rMC_CHIPLET_FIR, bit(9)) ? analyzeConnectedMCA2;
+    (rMC_CHIPLET_FIR, bit(8)) ? analyzeConnectedDMI2;
 
     /** MC_CHIPLET_FIR[10]
-     *  Attention from MCACALFIR 3
+     *  Attention from CHIFIR 3
      */
-    (rMC_CHIPLET_FIR, bit(10)) ? analyzeConnectedMCA3;
-
-    /** MC_CHIPLET_FIR[11]
-     *  Attention from MCAECCFIR 3
-     */
-    (rMC_CHIPLET_FIR, bit(11)) ? analyzeConnectedMCA3;
+    (rMC_CHIPLET_FIR, bit(10)) ? analyzeConnectedDMI3;
 
     /** MC_CHIPLET_FIR[12]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_FIR, bit(12)) ? analyzeMcbistfir;
+    (rMC_CHIPLET_FIR, bit(12)) ? analyze(gMCBISTFIR);
 
     /** MC_CHIPLET_FIR[13]
-     *  Attention from DDRPHYFIR 1
+     *  Attention from IOMCFIR
      */
-    (rMC_CHIPLET_FIR, bit(13)) ? analyzeConnectedMCA1;
+    (rMC_CHIPLET_FIR, bit(13)) ? analyze(gIOMCFIR);
 
     /** MC_CHIPLET_FIR[14]
-     *  Attention from DDRPHYFIR 3
+     *  Attention from MCPPEFIR
      */
-    (rMC_CHIPLET_FIR, bit(14)) ? analyzeConnectedMCA3;
-
-    /** MC_CHIPLET_FIR[15]
-     *  Attention from DDRPHYFIR 0
-     */
-    (rMC_CHIPLET_FIR, bit(15)) ? analyzeConnectedMCA0;
-
-    /** MC_CHIPLET_FIR[16]
-     *  Attention from DDRPHYFIR 2
-     */
-    (rMC_CHIPLET_FIR, bit(16)) ? analyzeConnectedMCA2;
+    (rMC_CHIPLET_FIR, bit(14)) ? analyze(gMCPPEFIR);
 
 };
 
@@ -294,49 +333,39 @@ rule rMC_CHIPLET_UCS_FIR
 group gMC_CHIPLET_UCS_FIR attntype UNIT_CS filter singlebit
 {
     /** MC_CHIPLET_UCS_FIR[1]
-     *  Attention from MCAECCFIR 0
+     *  Attention from CHIFIR 0
      */
-    (rMC_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedMCA0;
-
-    /** MC_CHIPLET_UCS_FIR[2]
-     *  Attention from MCACALFIR 0
-     */
-    (rMC_CHIPLET_UCS_FIR, bit(2)) ? analyzeConnectedMCA0;
+    (rMC_CHIPLET_UCS_FIR, bit(1)) ? analyzeConnectedDMI0;
 
     /** MC_CHIPLET_UCS_FIR[3]
-     *  Attention from MCAECCFIR 1
+     *  Attention from CHIFIR 1
      */
-    (rMC_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedMCA1;
-
-    /** MC_CHIPLET_UCS_FIR[4]
-     *  Attention from MCACALFIR 1
-     */
-    (rMC_CHIPLET_UCS_FIR, bit(4)) ? analyzeConnectedMCA1;
+    (rMC_CHIPLET_UCS_FIR, bit(3)) ? analyzeConnectedDMI1;
 
     /** MC_CHIPLET_UCS_FIR[5]
-     *  Attention from MCAECCFIR 2
+     *  Attention from CHIFIR 2
      */
-    (rMC_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedMCA2;
-
-    /** MC_CHIPLET_UCS_FIR[6]
-     *  Attention from MCACALFIR 2
-     */
-    (rMC_CHIPLET_UCS_FIR, bit(6)) ? analyzeConnectedMCA2;
+    (rMC_CHIPLET_UCS_FIR, bit(5)) ? analyzeConnectedDMI2;
 
     /** MC_CHIPLET_UCS_FIR[7]
-     *  Attention from MCAECCFIR 3
+     *  Attention from CHIFIR 3
      */
-    (rMC_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedMCA3;
+    (rMC_CHIPLET_UCS_FIR, bit(7)) ? analyzeConnectedDMI3;
 
     /** MC_CHIPLET_UCS_FIR[8]
-     *  Attention from MCACALFIR 3
+     *  Attention from MCPPEFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(8)) ? analyzeConnectedMCA3;
+    (rMC_CHIPLET_UCS_FIR, bit(8)) ? analyze(gMCPPEFIR);
 
     /** MC_CHIPLET_UCS_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyzeMcbistfir;
+    (rMC_CHIPLET_UCS_FIR, bit(9)) ? analyze(gMCBISTFIR);
+
+    /** MC_CHIPLET_UCS_FIR[10]
+     *  Attention from IOMCFIR
+     */
+    (rMC_CHIPLET_UCS_FIR, bit(10)) ? analyze(gIOMCFIR);
 
 };
 
@@ -353,49 +382,29 @@ rule rMC_CHIPLET_HA_FIR
 group gMC_CHIPLET_HA_FIR attntype HOST_ATTN filter singlebit
 {
     /** MC_CHIPLET_HA_FIR[1]
-     *  Attention from MCAECCFIR 0
+     *  Attention from CHIFIR 0
      */
-    (rMC_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedMCA0;
-
-    /** MC_CHIPLET_HA_FIR[2]
-     *  Attention from MCACALFIR 0
-     */
-    (rMC_CHIPLET_HA_FIR, bit(2)) ? analyzeConnectedMCA0;
+    (rMC_CHIPLET_HA_FIR, bit(1)) ? analyzeConnectedDMI0;
 
     /** MC_CHIPLET_HA_FIR[3]
-     *  Attention from MCAECCFIR 1
+     *  Attention from CHIFIR 1
      */
-    (rMC_CHIPLET_HA_FIR, bit(3)) ? analyzeConnectedMCA1;
-
-    /** MC_CHIPLET_HA_FIR[4]
-     *  Attention from MCACALFIR 1
-     */
-    (rMC_CHIPLET_HA_FIR, bit(4)) ? analyzeConnectedMCA1;
+    (rMC_CHIPLET_HA_FIR, bit(3)) ? analyzeConnectedDMI1;
 
     /** MC_CHIPLET_HA_FIR[5]
-     *  Attention from MCAECCFIR 2
+     *  Attention from CHIFIR 2
      */
-    (rMC_CHIPLET_HA_FIR, bit(5)) ? analyzeConnectedMCA2;
-
-    /** MC_CHIPLET_HA_FIR[6]
-     *  Attention from MCACALFIR 2
-     */
-    (rMC_CHIPLET_HA_FIR, bit(6)) ? analyzeConnectedMCA2;
+    (rMC_CHIPLET_HA_FIR, bit(5)) ? analyzeConnectedDMI2;
 
     /** MC_CHIPLET_HA_FIR[7]
-     *  Attention from MCAECCFIR 3
+     *  Attention from CHIFIR 3
      */
-    (rMC_CHIPLET_HA_FIR, bit(7)) ? analyzeConnectedMCA3;
-
-    /** MC_CHIPLET_HA_FIR[8]
-     *  Attention from MCACALFIR 3
-     */
-    (rMC_CHIPLET_HA_FIR, bit(8)) ? analyzeConnectedMCA3;
+    (rMC_CHIPLET_HA_FIR, bit(7)) ? analyzeConnectedDMI3;
 
     /** MC_CHIPLET_HA_FIR[9]
      *  Attention from MCBISTFIR
      */
-    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyzeMcbistfir;
+    (rMC_CHIPLET_HA_FIR, bit(9)) ? analyze(gMCBISTFIR);
 
 };
 
@@ -506,7 +515,267 @@ group gMC_LFIR filter singlebit, cs_root_cause
 };
 
 ################################################################################
-# P9 MCBIST target MCBISTFIR
+# P9 MC target IOMCFIR
+################################################################################
+
+rule rIOMCFIR
+{
+  CHECK_STOP:
+    IOMCFIR & ~IOMCFIR_MASK & ~IOMCFIR_ACT0 & ~IOMCFIR_ACT1;
+  RECOVERABLE:
+    IOMCFIR & ~IOMCFIR_MASK & ~IOMCFIR_ACT0 &  IOMCFIR_ACT1;
+  HOST_ATTN:
+    IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 & ~IOMCFIR_ACT1;
+  UNIT_CS:
+    IOMCFIR & ~IOMCFIR_MASK &  IOMCFIR_ACT0 &  IOMCFIR_ACT1;
+};
+
+group gIOMCFIR filter singlebit, cs_root_cause
+{
+    /** IOMCFIR[0]
+     *  RX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (rIOMCFIR, bit(0)) ? defaultMaskedError;
+
+    /** IOMCFIR[1]
+     *  TX_INVALID_STATE_OR_PARITY_ERROR
+     */
+    (rIOMCFIR, bit(1)) ? defaultMaskedError;
+
+    /** IOMCFIR[2]
+     *  
+     */
+    (rIOMCFIR, bit(2)) ? defaultMaskedError;
+
+    /** IOMCFIR[3:7]
+     *  spare
+     */
+    (rIOMCFIR, bit(3|4|5|6|7)) ? defaultMaskedError;
+
+    /** IOMCFIR[8]
+     *  RX BUS 0 Training Error
+     */
+    (rIOMCFIR, bit(8)) ? defaultMaskedError;
+
+    /** IOMCFIR[9]
+     *  RX BUS 0 Spare Deployed
+     */
+    (rIOMCFIR, bit(9)) ? spareDeployed_dmi0;
+
+    /** IOMCFIR[10]
+     *  RX BUS 0 Max Spares Exceeded
+     */
+    (rIOMCFIR, bit(10)) ? maxSparesExceeded_dmi0;
+
+    /** IOMCFIR[11]
+     *  RX BUS 0 Recal or dynamic repair error
+     */
+    (rIOMCFIR, bit(11)) ? defaultMaskedError;
+
+    /** IOMCFIR[12]
+     *  RX BUS 0 Too Many Bus Errors
+     */
+    (rIOMCFIR, bit(12)) ? tooManyBusErrors_dmi0;
+
+    /** IOMCFIR[13:15]
+     *  spare
+     */
+    (rIOMCFIR, bit(13|14|15)) ? defaultMaskedError;
+
+    /** IOMCFIR[16]
+     *  RX BUS 1 Training Error
+     */
+    (rIOMCFIR, bit(16)) ? defaultMaskedError;
+
+    /** IOMCFIR[17]
+     *  RX BUS 1 Spare Deployed
+     */
+    (rIOMCFIR, bit(17)) ? spareDeployed_dmi1;
+
+    /** IOMCFIR[18]
+     *  RX BUS 1 Max Spares Exceeded
+     */
+    (rIOMCFIR, bit(18)) ? maxSparesExceeded_dmi1;
+
+    /** IOMCFIR[19]
+     *  RX BUS 1 Recal or dynamic repair error
+     */
+    (rIOMCFIR, bit(19)) ? defaultMaskedError;
+
+    /** IOMCFIR[20]
+     *  RX BUS 1 Too Many Bus Errors
+     */
+    (rIOMCFIR, bit(20)) ? tooManyBusErrors_dmi1;
+
+    /** IOMCFIR[21:23]
+     *  spare
+     */
+    (rIOMCFIR, bit(21|22|23)) ? defaultMaskedError;
+
+    /** IOMCFIR[24]
+     *  RX BUS 2 Training Error
+     */
+    (rIOMCFIR, bit(24)) ? defaultMaskedError;
+
+    /** IOMCFIR[25]
+     *  RX BUS 2 Spare Deployed
+     */
+    (rIOMCFIR, bit(25)) ? spareDeployed_dmi2;
+
+    /** IOMCFIR[26]
+     *  RX BUS 2 Max Spares Exceeded
+     */
+    (rIOMCFIR, bit(26)) ? maxSparesExceeded_dmi2;
+
+    /** IOMCFIR[27]
+     *  RX BUS 2 Recal or dynamic repair error
+     */
+    (rIOMCFIR, bit(27)) ? defaultMaskedError;
+
+    /** IOMCFIR[28]
+     *  RX BUS 2 Too Many Bus Errors
+     */
+    (rIOMCFIR, bit(28)) ? tooManyBusErrors_dmi2;
+
+    /** IOMCFIR[29:31]
+     *  spare
+     */
+    (rIOMCFIR, bit(29|30|31)) ? defaultMaskedError;
+
+    /** IOMCFIR[32]
+     *  RX BUS 3 Training Error
+     */
+    (rIOMCFIR, bit(32)) ? defaultMaskedError;
+
+    /** IOMCFIR[33]
+     *  RX BUS 3 Spare Deployed
+     */
+    (rIOMCFIR, bit(33)) ? spareDeployed_dmi3;
+
+    /** IOMCFIR[34]
+     *  RX BUS 3 Max Spares Exceeded
+     */
+    (rIOMCFIR, bit(34)) ? maxSparesExceeded_dmi3;
+
+    /** IOMCFIR[35]
+     *  RX BUS 3 Recal or dynamic repair error
+     */
+    (rIOMCFIR, bit(35)) ? defaultMaskedError;
+
+    /** IOMCFIR[36]
+     *  RX BUS 3 Too Many Bus Errors
+     */
+    (rIOMCFIR, bit(36)) ? tooManyBusErrors_dmi3;
+
+    /** IOMCFIR[37:39]
+     *  spare
+     */
+    (rIOMCFIR, bit(37|38|39)) ? defaultMaskedError;
+
+    /** IOMCFIR[40:47]
+     *  reserved
+     */
+    (rIOMCFIR, bit(40|41|42|43|44|45|46|47)) ? defaultMaskedError;
+
+    /** IOMCFIR[48]
+     *  SCOM error
+     */
+    (rIOMCFIR, bit(48)) ? defaultMaskedError;
+
+    /** IOMCFIR[49]
+     *  SCOM error clone
+     */
+    (rIOMCFIR, bit(49)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 MC target MCPPEFIR
+################################################################################
+
+rule rMCPPEFIR
+{
+  CHECK_STOP:
+    MCPPEFIR & ~MCPPEFIR_MASK & ~MCPPEFIR_ACT0 & ~MCPPEFIR_ACT1;
+  RECOVERABLE:
+    MCPPEFIR & ~MCPPEFIR_MASK & ~MCPPEFIR_ACT0 &  MCPPEFIR_ACT1;
+  HOST_ATTN:
+    MCPPEFIR & ~MCPPEFIR_MASK &  MCPPEFIR_ACT0 & ~MCPPEFIR_ACT1;
+  UNIT_CS:
+    MCPPEFIR & ~MCPPEFIR_MASK &  MCPPEFIR_ACT0 &  MCPPEFIR_ACT1;
+};
+
+group gMCPPEFIR filter singlebit, cs_root_cause
+{
+    /** MCPPEFIR[0]
+     *  
+     */
+    (rMCPPEFIR, bit(0)) ? defaultMaskedError;
+
+    /** MCPPEFIR[1]
+     *  
+     */
+    (rMCPPEFIR, bit(1)) ? defaultMaskedError;
+
+    /** MCPPEFIR[2]
+     *  
+     */
+    (rMCPPEFIR, bit(2)) ? defaultMaskedError;
+
+    /** MCPPEFIR[3]
+     *  
+     */
+    (rMCPPEFIR, bit(3)) ? defaultMaskedError;
+
+    /** MCPPEFIR[4]
+     *  
+     */
+    (rMCPPEFIR, bit(4)) ? defaultMaskedError;
+
+    /** MCPPEFIR[5]
+     *  
+     */
+    (rMCPPEFIR, bit(5)) ? defaultMaskedError;
+
+    /** MCPPEFIR[6]
+     *  
+     */
+    (rMCPPEFIR, bit(6)) ? defaultMaskedError;
+
+    /** MCPPEFIR[7]
+     *  
+     */
+    (rMCPPEFIR, bit(7)) ? defaultMaskedError;
+
+    /** MCPPEFIR[8]
+     *  
+     */
+    (rMCPPEFIR, bit(8)) ? defaultMaskedError;
+
+    /** MCPPEFIR[9]
+     *  
+     */
+    (rMCPPEFIR, bit(9)) ? defaultMaskedError;
+
+    /** MCPPEFIR[10]
+     *  
+     */
+    (rMCPPEFIR, bit(10)) ? defaultMaskedError;
+
+    /** MCPPEFIR[11]
+     *  SCOM error
+     */
+    (rMCPPEFIR, bit(11)) ? defaultMaskedError;
+
+    /** MCPPEFIR[12]
+     *  SCOM error clone
+     */
+    (rMCPPEFIR, bit(12)) ? defaultMaskedError;
+
+};
+
+################################################################################
+# P9 MC target MCBISTFIR
 ################################################################################
 
 rule rMCBISTFIR
@@ -524,104 +793,34 @@ rule rMCBISTFIR
 group gMCBISTFIR filter singlebit, cs_root_cause
 {
     /** MCBISTFIR[0]
-     *  INVALID_MAINT_ADDRESS
+     *  WAT_DEBUG_ATTN
      */
     (rMCBISTFIR, bit(0)) ? defaultMaskedError;
 
     /** MCBISTFIR[1]
-     *  COMMAND_ADDRESS_TIMEOUT
+     *  WAT_DEBUG_REG_PE
      */
-    (rMCBISTFIR, bit(1)) ? command_addr_timeout;
+    (rMCBISTFIR, bit(1)) ? defaultMaskedError;
 
     /** MCBISTFIR[2]
-     *  INTERNAL_FSM_ERROR
+     *  SCOM_RECOVERABLE_REG_PE
      */
     (rMCBISTFIR, bit(2)) ? self_th_1;
 
     /** MCBISTFIR[3]
-     *  MCBIST_BRODCAST_OUT_OF_SYNC
+     *  spare
      */
-    (rMCBISTFIR, bit(3)) ? self_th_1;
+    (rMCBISTFIR, bit(3)) ? defaultMaskedError;
 
     /** MCBISTFIR[4]
-     *  MCBIST_DATA_ERROR
+     *  INTERNAL_SCOM_ERROR
      */
     (rMCBISTFIR, bit(4)) ? defaultMaskedError;
 
     /** MCBISTFIR[5]
-     *  Maintenance hard NCE ETE
-     */
-    (rMCBISTFIR, bit(5)) ? defaultMaskedError;
-
-    /** MCBISTFIR[6]
-     *  Maintenance soft NCE ETE
-     */
-    (rMCBISTFIR, bit(6)) ? defaultMaskedError;
-
-    /** MCBISTFIR[7]
-     *  Maintenance intermittent NCE ETE
-     */
-    (rMCBISTFIR, bit(7)) ? defaultMaskedError;
-
-    /** MCBISTFIR[8]
-     *  Maintenance RCE ETE
-     */
-    (rMCBISTFIR, bit(8)) ? defaultMaskedError;
-
-    /** MCBISTFIR[9]
-     *  Maintenance IMPE ETE
-     */
-    (rMCBISTFIR, bit(9)) ? defaultMaskedError;
-
-    /** MCBISTFIR[10]
-     *  MCBIST program complete
-     */
-    (rMCBISTFIR, bit(10)) ? mcbist_program_complete;
-
-    /** MCBISTFIR[11]
-     *  MCBIST_CCS_SUBTEST_DONE
-     */
-    (rMCBISTFIR, bit(11)) ? defaultMaskedError;
-
-    /** MCBISTFIR[12]
-     *  MCBIST program complete - WAT workaround
-     */
-    (rMCBISTFIR, bit(12)) ? mcbist_program_complete_workaround; # NIMBUS_10
-
-    /** MCBISTFIR[10,12]
-     *  MCBIST Command Complete
-     */
-    (rMCBISTFIR, bit(10,12)) ? mcbist_program_complete;
-
-    /** MCBISTFIR[13]
-     *  SCOM_RECOVERABLE_REG_PE
-     */
-    (rMCBISTFIR, bit(13)) ? self_th_1;
-
-    /** MCBISTFIR[14]
-     *  SCOM_FATAL_REG_PE
-     */
-    (rMCBISTFIR, bit(14)) ? self_th_1;
-
-    /** MCBISTFIR[15]
-     *  WAT_DEBUG_REG_PE
-     */
-    (rMCBISTFIR, bit(15)) ? defaultMaskedError;
-
-    /** MCBISTFIR[16:17]
-     *  spare
-     */
-    (rMCBISTFIR, bit(16|17)) ? defaultMaskedError;
-
-    /** MCBISTFIR[18]
-     *  INTERNAL_SCOM_ERROR
-     */
-    (rMCBISTFIR, bit(18)) ? defaultMaskedError;
-
-    /** MCBISTFIR[19]
      *  INTERNAL_SCOM_ERROR_CLONE
      */
-    (rMCBISTFIR, bit(19)) ? defaultMaskedError;
+    (rMCBISTFIR, bit(5)) ? defaultMaskedError;
 
 };
 
@@ -639,9 +838,9 @@ group gMCBISTFIR filter singlebit, cs_root_cause
 # Include the common action set.
 .include "p9_common_actions.rule";
 # Include the chip-specific action set.
-.include "p9_mcbist_actions.rule";
+.include "p9_mc_actions.rule";
 
-actionclass analyzeConnectedMCA0 { analyze(connected(TYPE_MCA, 0)); };
-actionclass analyzeConnectedMCA1 { analyze(connected(TYPE_MCA, 1)); };
-actionclass analyzeConnectedMCA2 { analyze(connected(TYPE_MCA, 2)); };
-actionclass analyzeConnectedMCA3 { analyze(connected(TYPE_MCA, 3)); };
+actionclass analyzeConnectedDMI0 { analyze(connected(TYPE_DMI, 0)); };
+actionclass analyzeConnectedDMI1 { analyze(connected(TYPE_DMI, 1)); };
+actionclass analyzeConnectedDMI2 { analyze(connected(TYPE_DMI, 2)); };
+actionclass analyzeConnectedDMI3 { analyze(connected(TYPE_DMI, 3)); };

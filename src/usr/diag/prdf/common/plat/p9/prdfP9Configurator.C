@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -234,7 +234,21 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         const char * fileName = "";
         switch ( i_type )
         {
-            case TYPE_PROC:   fileName = p9_nimbus; break;
+            case TYPE_PROC:
+            {
+                // Get the PROC model. We don't support mixed PROC models so
+                // should be able to use the first PROC in the list.
+                TARGETING::MODEL model = getChipModel( trgtList[0] );
+
+                if (      MODEL_NIMBUS  == model ) fileName = p9_nimbus;
+                else if ( MODEL_CUMULUS == model ) fileName = p9_cumulus;
+                else
+                    // Print a trace statement, but do not fail the build.
+                    PRDF_ERR( "[addDomainChips] Unsupported PROC model: %d",
+                              model );
+                break;
+            }
+
             case TYPE_EQ:     fileName = p9_eq;     break;
             case TYPE_EX:     fileName = p9_ex;     break;
             case TYPE_CORE:   fileName = p9_ec;     break;
@@ -246,6 +260,9 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
             case TYPE_MCBIST: fileName = p9_mcbist; break;
             case TYPE_MCS:    fileName = p9_mcs;    break;
             case TYPE_MCA:    fileName = p9_mca;    break;
+            case TYPE_MC:     fileName = p9_mc;     break;
+            case TYPE_MI:     fileName = p9_mi;     break;
+            case TYPE_DMI:    fileName = p9_dmi;    break;
 
             default:
                 // Print a trace statement, but do not fail the build.

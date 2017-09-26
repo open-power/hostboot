@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@ namespace PRDF
 
     // P9 Chip
     extern const char * p9_nimbus;
+    extern const char * p9_cumulus;
     extern const char * p9_eq;
     extern const char * p9_ex;
     extern const char * p9_ec;
@@ -47,6 +48,9 @@ namespace PRDF
     extern const char * p9_mcbist;
     extern const char * p9_mcs;
     extern const char * p9_mca;
+    extern const char * p9_mc;
+    extern const char * p9_mi;
+    extern const char * p9_dmi;
 
     // Centaur Chip
 //    extern const char * Membuf;

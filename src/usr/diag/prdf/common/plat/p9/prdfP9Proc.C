@@ -85,7 +85,8 @@ int32_t CheckForRecovered( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForRecovered );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForRecovered );
 
 //------------------------------------------------------------------------------
 /**
@@ -165,7 +166,8 @@ int32_t CheckForRecoveredSev(ExtensibleChip * i_chip, uint32_t & o_sev)
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForRecoveredSev );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForRecoveredSev );
 
 /** @func GetCheckstopInfo
  *  To be called from the fabric domain to gather Checkstop information.  This
@@ -261,7 +263,8 @@ int32_t GetCheckstopInfo( ExtensibleChip * i_chip,
     return SUCCESS;
 
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, GetCheckstopInfo );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, GetCheckstopInfo );
 
 //------------------------------------------------------------------------------
 
@@ -312,7 +315,8 @@ int32_t isHostAttnFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, isHostAttnFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, isHostAttnFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -326,7 +330,8 @@ int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, isUcsFirAccessible );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, isUcsFirAccessible );
 
 //------------------------------------------------------------------------------
 
@@ -343,9 +348,10 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 
     return SUCCESS;
 }
-PRDF_PLUGIN_DEFINE_NS( p9_nimbus, Proc, handleDeadmanTimer );
-//------------------------------------------------------------------------------
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleDeadmanTimer );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleDeadmanTimer );
 
+//------------------------------------------------------------------------------
 
 } // end namespace Proc
 
