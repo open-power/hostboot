@@ -156,8 +156,8 @@ fapi2::ReturnCode writeMboxRegs (
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_GROUP_ID,     i_procTarget,   i_image);
     MBOX_ATTR_CLEAR (ATTR_PROC_FABRIC_CHIP_ID,      i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_DD1_SLOW_PCI_REF_CLOCK,   FAPI_SYSTEM,    i_image);
-    MBOX_ATTR_CLEAR (ATTR_PROC_EFF_FABRIC_GROUP_ID, i_procTarget,   i_image);
-    MBOX_ATTR_CLEAR (ATTR_PROC_EFF_FABRIC_CHIP_ID,  i_procTarget,   i_image);
+    MBOX_ATTR_WRITE (ATTR_PROC_EFF_FABRIC_GROUP_ID, i_procTarget,   i_image);
+    MBOX_ATTR_WRITE (ATTR_PROC_EFF_FABRIC_CHIP_ID,  i_procTarget,   i_image);
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T0,  FAPI_SYSTEM,    i_image);
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T1,  FAPI_SYSTEM,    i_image);
     MBOX_ATTR_WRITE (ATTR_PROC_EPS_READ_CYCLES_T2,  FAPI_SYSTEM,    i_image);
