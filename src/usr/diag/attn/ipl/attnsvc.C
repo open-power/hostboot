@@ -249,7 +249,7 @@ errlHndl_t Service::processCheckstop()
     while(tit != list.end())
     {
         // query the proc resolver for active attentions
-
+        // (we also handle mem bufs in this routine)
         err = procOps.resolve( *tit, 0, attentions);
 
         if(err)
@@ -259,16 +259,6 @@ errlHndl_t Service::processCheckstop()
             break;
         }
 
-        // query the mem resolver for active attentions
-
-        err = memOps.resolve(*tit, attentions);
-
-        if(err)
-        {
-            ATTN_ERR("memOps.resolve() returned error.HUID:0X%08X ",
-                      get_huid( *tit ));
-            break;
-        }
         ++tit;
     }
 

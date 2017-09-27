@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,7 +79,7 @@ class ProcOps : public AttentionOps
          * @retval[0] No error.
          * @retval[!0] Unexpected error occurred.
          */
-        errlHndl_t query(const PRDF::AttnData & i_data, bool & o_active);
+        errlHndl_t query(PRDF::AttnData & i_data, bool & o_active);
 
         /**
          * @brief resolveIpoll Find attentions of the supplied type on the
