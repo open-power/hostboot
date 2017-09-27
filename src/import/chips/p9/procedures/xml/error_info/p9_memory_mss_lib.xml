@@ -242,7 +242,7 @@
       <target>MCBIST_TARGET</target>
       <targetType>TARGET_TYPE_MCBIST</targetType>
     </collectRegisterFfdc>
-    <callout>
+   <callout>
       <target>MCBIST_TARGET</target>
       <priority>HIGH</priority>
     </callout>
@@ -252,6 +252,10 @@
     <gard>
         <target>MCBIST_TARGET</target>
     </gard>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
 
   <hwpError>
