@@ -200,6 +200,9 @@ namespace INTR
                 XIVE_IC_LSI_EOI_OFFSET =
                                         XIVE_IC_ESB_EOI_OFFSET/sizeof(uint64_t),
                 XIVE_IC_VPC_PULL_ERR = 0x0000000200000000,
+                XIVE_IC_PC_VSD_TABLE_ADDR_OFFSET = 0x488 / sizeof(uint64_t),
+                XIVE_IC_PC_VSD_TABLE_DATA_OFFSET = 0x490 / sizeof(uint64_t),
+                XIVE_IC_PC_VPD_BLOCK_MODE_OFFSET = 0x4A8 / sizeof(uint64_t),
 
                 //XIVE IVPE (Presentation Engine) Constants
                 XIVE_IVPE_TM_BAR1_SCOM_ADDR = 0x05013012,
@@ -400,6 +403,12 @@ namespace INTR
              * interrupt to Hostboot
              */
             void enableLsiInterrupts();
+
+            /**
+             * Clear INT_PC registers that didn't get cleared by the HW reset
+             * during the SBE steps of the MPIPL
+             */
+            void clearIntPcRegs();
 
             /**
              * Clear bit 3 of the PSIHB Control/Status register to disable

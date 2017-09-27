@@ -127,6 +127,10 @@ errlHndl_t IntrRp::resetIntpForMpipl()
             break;
         }
 
+        // Clear out the PC registers that did not get properly cleared during
+        // the SBE steps of MPIPL
+        clearIntPcRegs();
+
         //Reset PSIHB Interrupt Space
         TRACFCOMP(g_trac_intr, "Reset PSIHB Interrupt Space");
 
@@ -392,6 +396,35 @@ void IntrRp::enableLsiInterrupts()
     TRACDCOMP(g_trac_intr, "IntrRp:: enableLsiInterrupts() exit");
 }
 
+/**
+ * Clear INT_PC registers that didn't get cleared by the HW reset
+ * during the SBE steps of the MPIPL
+ */
+void IntrRp::clearIntPcRegs()
+{
+    TRACDCOMP(g_trac_intr, "IntrRp:: clearIntPcRegs() enter");
+    //The XIVE HW is expecting these MMIO accesses to come from the
+    // core/thread they were setup (master core, thread 0)
+    // These functions will ensure this code executes there
+    task_affinity_pin();
+    task_affinity_migrate_to_master();
+
+    uint64_t * l_vsdTableAddr =
+        iv_masterHdlr->xiveIcBarAddr + XIVE_IC_PC_VSD_TABLE_ADDR_OFFSET;
+    *l_vsdTableAddr = 0x0000000000000000;
+
+    uint64_t * l_vsdTableData =
+        iv_masterHdlr->xiveIcBarAddr + XIVE_IC_PC_VSD_TABLE_DATA_OFFSET;
+    *l_vsdTableData = 0x0000000000000000;
+
+    uint64_t * l_blockModeAddr =
+        iv_masterHdlr->xiveIcBarAddr + XIVE_IC_PC_VPD_BLOCK_MODE_OFFSET;
+    *l_blockModeAddr = 0x0000000000000000;
+
+    //MMIO Complete, rest of code can run on any thread
+    task_affinity_unpin();
+    TRACDCOMP(g_trac_intr, "IntrRp:: clearIntPcRegs() exit");
+}
 
 
 void IntrRp::acknowledgeInterrupt()
@@ -1853,7 +1886,6 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl comp already shutdown. Log error and continue
-        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error masking all interrupt sources.");
     }
 
@@ -1874,7 +1906,6 @@ void IntrRp::shutDown(uint64_t i_status)
             if (l_err)
             {
                 delete l_err;
-                l_err = nullptr;
                 TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
             }
             //Disable common interrupt BARs
@@ -1883,7 +1914,6 @@ void IntrRp::shutDown(uint64_t i_status)
             if (l_err)
             {
                 delete l_err; //errl cmp already shutdown. Log error + continue
-                l_err = nullptr;
                 TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common Interrupt BARs");
             }
         }
@@ -1902,7 +1932,6 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err;
-        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
     }
 
@@ -1911,7 +1940,6 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl cmp already shutdown. Log error + continue
-        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common"
                                " Interrupt BARs for master proc");
     }
@@ -1922,7 +1950,6 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl cmp already shutdown. Log error + continue
-        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Master Interrupt BARs");
     }
 
