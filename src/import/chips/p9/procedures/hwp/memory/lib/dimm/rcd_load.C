@@ -61,10 +61,13 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
     // A vector of CCS instructions. We'll ask the targets to fill it, and then we'll execute it
     ccs::program<TARGET_TYPE_MCBIST> l_program;
 
+    uint8_t l_sim = 0;
     // Clear the initial delays. This will force the CCS engine to recompute the delay based on the
     // instructions in the CCS instruction vector
     l_program.iv_poll.iv_initial_delay = 0;
     l_program.iv_poll.iv_initial_sim_delay = 0;
+
+    FAPI_TRY(mss::is_simulation(l_sim));
 
     for ( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target) )
     {
@@ -72,7 +75,10 @@ fapi2::ReturnCode rcd_load<TARGET_TYPE_MCBIST>( const fapi2::Target<TARGET_TYPE_
         {
             // CKE needs to be LOW before running the RCW sequence
             // So we use the power down entry command to achieve this
-            l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
+            if(!l_sim)
+            {
+                l_program.iv_instructions.push_back( ccs::pde_command<TARGET_TYPE_MCBIST>() );
+            }
 
             FAPI_DBG("rcd load for %s", mss::c_str(d));
             FAPI_TRY( perform_rcd_load(d, l_program.iv_instructions),
