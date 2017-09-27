@@ -31,15 +31,22 @@
 #include <util/utilmclmgr.H>
 #include "../utilbase.H"
 #include <usr/vmmconst.h>
+#include <runtime/preverifiedlidmgr.H>
 
 namespace MCL
 {
 
-// Defines to simplify list initialzer syntax
-#define COMP_TEST1 {0x54,0x45,0x53,0x54,0x31}
-#define COMP_TEST2 {0x54,0x45,0x53,0x54,0x32}
-#define COMP_TEST3 {0x54,0x45,0x53,0x54,0x33}
-#define COMP_TEST4 {0x54,0x45,0x53,0x54,0x34}
+// Constants to simplify code
+const ComponentID COMP_TEST1 {"TEST1"};
+const ComponentID COMP_TEST2 {"TEST2"};
+const ComponentID COMP_TEST3 {"TEST3"};
+// Component ids are not null terminated. So test a 16 byte comp ID
+// NOTE: You cannot use a CHAR initializer list equal to the size of the array
+//       as the compiler expects a space for the null terminator.
+//       So setting the hex values directly.
+// ASCII: TESTMAXSIZEOFSTR
+const ComponentID COMP_TEST4 {0x54,0x45,0x53,0x54,0x4d,0x41,0x58,0x53,
+                              0x49,0x5a,0x45,0x4f,0x46,0x53,0x54,0x52};
 
 // Define deault vectors to simplify syntax
 const std::vector<uint32_t> defaultLids {0xA1234567, 0x89ABCDEF, 0x13579246};
@@ -92,7 +99,7 @@ public:
             initMcl();
         }
 
-        TestMcl(std::vector<uint32_t>& i_lids)
+        TestMcl(const std::vector<uint32_t>& i_lids)
         : iv_size(0),iv_bufferCur(nullptr),iv_bufferStart(nullptr),
           iv_pHeader(nullptr), iv_compInfoCache{}, iv_testLids{i_lids},
           iv_testComps{defaultComps}
@@ -100,8 +107,8 @@ public:
             initMcl();
         }
 
-        TestMcl(std::vector<uint32_t>& i_lids,
-                std::vector<std::pair<ComponentID,bool> >& i_comps)
+        TestMcl(const std::vector<uint32_t>& i_lids,
+                const std::vector<std::pair<ComponentID,bool> >& i_comps)
         : iv_size(0),iv_bufferCur(nullptr),iv_bufferStart(nullptr),
           iv_pHeader(nullptr), iv_compInfoCache{}, iv_testLids{i_lids},
           iv_testComps{i_comps}
@@ -234,6 +241,88 @@ public:
         }
 
         UTIL_FT(EXIT_MRK"testMCLparser complete");
+    }
+
+    void testProcessMclComponents()
+    {
+        UTIL_FT(ENTER_MRK"testProcessMclComponents start" );
+
+        errlHndl_t l_errl = nullptr;
+
+        // Generate test MCL with test lids
+        TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
+                            {{COMP_TEST1,false}}
+                          };
+
+        // Pass test MCL to MCL manager
+        MasterContainerLidMgr l_mcl(l_TestMcl.iv_bufferStart,
+                                    l_TestMcl.iv_size);
+
+        // Ensure the Comp Info Caches match
+        if (l_TestMcl.iv_compInfoCache != l_mcl.iv_compInfoCache)
+        {
+            TS_FAIL("testProcessMclComponents> Comp Info Caches do not match");
+        }
+
+        PreVerifiedLidMgr::initLock(PREVERLIDMGR_TEST_ADDR);
+
+        // Get Instance of Pre-Verified lid manager
+        auto l_preVerLidMgr = PreVerifiedLidMgr::getInstance();
+
+        // Clear lids loaded cache as other test cases fill it in.
+        l_preVerLidMgr.cv_lidsLoaded.clear();
+
+        l_errl = l_mcl.processComponents();
+        if(l_errl)
+        {
+            errlCommit(l_errl,UTIL_COMP_ID);
+            TS_FAIL("testProcessMclComponents> processComponents failed");
+        }
+
+        PreVerifiedLidMgr::unlock();
+
+        UTIL_FT(EXIT_MRK"testProcessMclComponents complete");
+    }
+
+    void testProcessSecureMclComponents()
+    {
+        UTIL_FT(ENTER_MRK"testProcessSecureMclComponents start" );
+
+        errlHndl_t l_errl = nullptr;
+
+        // Generate test MCL with Secure Lids
+        TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
+                            {{COMP_TEST2,true}}
+                          };
+
+        // Pass test MCL to MCL manager
+        MasterContainerLidMgr l_mcl(l_TestMcl.iv_bufferStart,
+                                    l_TestMcl.iv_size);
+
+        // Ensure the Comp Info Caches match
+        if (l_TestMcl.iv_compInfoCache != l_mcl.iv_compInfoCache)
+        {
+            TS_FAIL("testProcessSecureMclComponents> Comp Info Caches do not match");
+        }
+
+        PreVerifiedLidMgr::initLock(PREVERLIDMGR_TEST_ADDR);
+
+        // Get Instance of Pre-Verified lid manager
+        auto l_preVerLidMgr = PreVerifiedLidMgr::getInstance();
+
+        // Clear lids loaded cache as other test cases fill it in.
+        l_preVerLidMgr.cv_lidsLoaded.clear();
+
+        l_errl = l_mcl.processComponents();
+        if(l_errl)
+        {
+            errlCommit(l_errl,UTIL_COMP_ID);
+            TS_FAIL("testProcessSecureMclComponents> processComponents failed");
+        }
+
+        PreVerifiedLidMgr::unlock();
+
+        UTIL_FT(EXIT_MRK"testProcessSecureMclComponents complete");
     }
 };
 

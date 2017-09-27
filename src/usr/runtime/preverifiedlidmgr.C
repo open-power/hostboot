@@ -34,13 +34,14 @@
 #include <util/singleton.H>
 #include <stdio.h>
 #include <arch/ppc.H>
+#include <targeting/common/target.H>
+#include <targeting/common/attributes.H>
 
 extern trace_desc_t *g_trac_runtime;
 
 // Set static variables
 TARGETING::PAYLOAD_KIND PreVerifiedLidMgr::cv_payloadKind = TARGETING::PAYLOAD_KIND_NONE;
 std::map<uint64_t,bool> PreVerifiedLidMgr::cv_lidsLoaded {};
-bool PreVerifiedLidMgr::cv_phypLidSeen = false;
 PreVerifiedLidMgr::ResvMemInfo* PreVerifiedLidMgr::cv_pResvMemInfo = nullptr;
 PreVerifiedLidMgr::ResvMemInfo PreVerifiedLidMgr::cv_resvMemInfo {};
 PreVerifiedLidMgr::ResvMemInfo PreVerifiedLidMgr::cv_phypResvMemInfo {};
@@ -75,6 +76,19 @@ errlHndl_t PreVerifiedLidMgr::loadFromPnor(const PNOR::SectionId i_sec,
                                                                   i_size);
 }
 
+errlHndl_t PreVerifiedLidMgr::loadFromMCL(const uint32_t i_lidId,
+                                          const uint64_t i_addr,
+                                          const size_t i_size,
+                                          const bool i_isPhypComp,
+                                          uint64_t &o_resvMemAddr)
+{
+    return Singleton<PreVerifiedLidMgr>::instance()._loadFromMCL(i_lidId,
+                                                                  i_addr,
+                                                                  i_size,
+                                                                  i_isPhypComp,
+                                                                  o_resvMemAddr);
+}
+
 /********************
  Private Implementations of Static Public Methods
  ********************/
@@ -86,12 +100,11 @@ void PreVerifiedLidMgr::_initLock(const uint64_t i_prevAddr,
     mutex_lock(&cv_mutex);
 
     cv_payloadKind = TARGETING::PAYLOAD_KIND_NONE;
-    cv_phypLidSeen = false;
 
     // Default Reserved Memory Information
     cv_resvMemInfo.rangeId = i_rangeId;
-    cv_resvMemInfo.curAddr = i_prevAddr;
-    cv_resvMemInfo.prevSize = i_prevSize;
+    cv_resvMemInfo.curAddr = ALIGN_PAGE(i_prevAddr);
+    cv_resvMemInfo.prevSize = ALIGN_PAGE(i_prevSize);
 
     // PHYP Reserved Memory Information
     cv_phypResvMemInfo.rangeId = i_rangeId;
@@ -131,7 +144,6 @@ void PreVerifiedLidMgr::_initLock(const uint64_t i_prevAddr,
 
 void PreVerifiedLidMgr::_unlock()
 {
-    TRACFCOMP(g_trac_runtime, "PreVerifiedLidMgr::_unlock");
     mutex_unlock(&cv_mutex);
 }
 
@@ -162,16 +174,14 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
         break;
     }
 
-    // Get next available HB resverved memory address
+    // Get next available HB reserved memory address
     cv_pResvMemInfo->curAddr = getNextAddress(i_size);
 
-    // @TODO RTC:178163 remove need for l_loadImage
     bool l_loadImage = false;
     if(cv_payloadKind == TARGETING::PAYLOAD_KIND_PHYP)
     {
-        // @TODO RTC:178163 enable when we can Load ALL pre-verfied lids
-        // There are checks in phyp for ANY hdat entry marked "RHB_TYPE_VERIFIED_LIDS"
-        // If there are any missing phyp will fail to boot.
+        // @TODO RTC:178163 enable when PHYP changes necessary for pre-verified
+        //       lids are in a fips release
 /*
         l_loadImage = true;
         // Verified Lid - Header Only
@@ -184,7 +194,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
             l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
                                                    cv_pResvMemInfo->rangeId,
                                                    cv_pResvMemInfo->curAddr,
-                                                   getAlignedSize(PAGE_SIZE),
+                                                   PAGE_SIZE,
                                                    l_containerLidStr);
             if(l_errl)
             {
@@ -202,7 +212,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
             l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
                                                    cv_pResvMemInfo->rangeId,
                                                    cv_pResvMemInfo->curAddr+PAGE_SIZE,
-                                                   getAlignedSize(i_size),
+                                                   i_size,
                                                    l_lidStr);
             if(l_errl)
             {
@@ -254,6 +264,83 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     return l_errl;
 }
 
+errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
+                                           const uint64_t i_addr,
+                                           const size_t i_size,
+                                           const bool i_isPhypComp,
+                                           uint64_t &o_resvMemAddr)
+{
+    mutex_lock(&cv_loadImageMutex);
+
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::_loadFromMCL lid = 0x%X",
+              i_lidId);
+
+    errlHndl_t l_errl = nullptr;
+
+    // Switch to Different Memory Info for PHYP component
+    if (i_isPhypComp)
+    {
+        cv_pResvMemInfo = &cv_phypResvMemInfo;
+        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromMCL - Loading Special Component PHYP");
+    }
+
+    do {
+
+    // Only load if not previously done.
+    if( isLidLoaded(i_lidId) )
+    {
+        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromMCL - lid 0x%08X already loaded",
+                   i_lidId);
+        continue;
+    }
+
+    // Get next available HB reserved memory address
+    cv_pResvMemInfo->curAddr = getNextAddress(i_size);
+
+    // Return the address the lid was loaded to the caller
+    o_resvMemAddr = cv_pResvMemInfo->curAddr;
+
+    if(cv_payloadKind == TARGETING::PAYLOAD_KIND_PHYP)
+    {
+        // Verified Lid
+        char l_lidStr[Util::lidIdStrLength] {};
+        snprintf (l_lidStr, Util::lidIdStrLength, "%08X",i_lidId);
+        l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
+                                               cv_pResvMemInfo->rangeId,
+                                               cv_pResvMemInfo->curAddr,
+                                               i_size,
+                                               l_lidStr);
+        if(l_errl)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - setNextHbRsvMemEntry Lid content failed");
+            break;
+        }
+
+        // Load image into HB reserved memory
+        l_errl = loadImage(i_addr, i_size);
+        if(l_errl)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
+            break;
+        }
+
+        // Indicate the lid has been loaded
+        cv_lidsLoaded.insert(std::make_pair(i_lidId, true));
+    }
+
+    } while (0);
+
+    // Force switch back to default reserved memory info
+    cv_pResvMemInfo = &cv_resvMemInfo;
+
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromMCL lid = 0x%X",
+              i_lidId);
+
+    mutex_unlock(&cv_loadImageMutex);
+
+    return l_errl;
+}
+
 /********************
  Private/Protected Methods
  ********************/
@@ -293,22 +380,29 @@ bool PreVerifiedLidMgr::isLidLoaded(uint32_t i_lidId)
 errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
                                         const size_t i_imgSize)
 {
-    TRACFCOMP( g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::loadImage");
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::loadImage addr = 0x%X, size = 0x%X",
+               i_imgAddr, i_imgSize);
 
     errlHndl_t l_errl = nullptr;
 
     do {
 
     uint64_t l_tmpVaddr = 0;
+    size_t l_alignedSize = ALIGN_PAGE(i_imgSize);
+
     // Load the Verified image into HB resv memory
-    l_errl = RUNTIME::mapPhysAddr(cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr);
+    l_errl = RUNTIME::mapPhysAddr(cv_pResvMemInfo->curAddr, l_alignedSize, l_tmpVaddr);
     if(l_errl)
     {
         TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::loadImage - mapPhysAddr failed");
         break;
     }
 
+    TRACFCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X",
+              cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr);
+
     // Include Header page from pnor image.
+    // NOTE: Do not use aligned size for memcpy
     memcpy(reinterpret_cast<void*>(l_tmpVaddr),
            reinterpret_cast<void*>(i_imgAddr),
            i_imgSize);
@@ -320,9 +414,18 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
         break;
     }
 
-    // Update previous size using aligned size for OPAL alignment even if that
-    // means there is some wasted space.
-    cv_pResvMemInfo->prevSize = getAlignedSize(i_imgSize);
+    if(cv_payloadKind == TARGETING::PAYLOAD_KIND_SAPPHIRE)
+    {
+        // Update previous size using aligned size for OPAL alignment even if
+        // that means there is some wasted space.
+        cv_pResvMemInfo->prevSize = getAlignedSize(i_imgSize);
+    }
+    else
+    {
+        // align previous size to page size to ensure starting addresses are
+        // page aligned.
+        cv_pResvMemInfo->prevSize = l_alignedSize;
+    }
 
     } while(0);
 

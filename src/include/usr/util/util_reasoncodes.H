@@ -49,7 +49,8 @@ namespace Util
         UTIL_TCE_UNMAP_PSIHB    = 0x0F,       // UtilTceMgr::unmapPsiHostBridge
         UTIL_MCL_INIT_MEM       = 0x10,       // MasterContainerLidMgr::initMem
         UTIL_MCL_REL_MEM        = 0x11,       // MasterContainerLidMgr::releaseMem
-
+        UTIL_MCL_PROCESS_COMP   = 0x12,       // MasterContainerLidMgr::processComponent
+        UTIL_MCL_VERIFY_EXT     = 0x13,       // MasterContainerLidMgr::verifyExtend
     };
 
     enum ReasonCode
@@ -77,7 +78,8 @@ namespace Util
         UTIL_TCE_BLOCK_UNMAP_FAIL        = UTIL_COMP_ID | 0x15,
         UTIL_MM_BLOCK_MAP_FAILED         = UTIL_COMP_ID | 0x16,
         UTIL_MM_BLOCK_UNMAP_FAILED       = UTIL_COMP_ID | 0x17,
-
+        UTIL_MCL_SIZE_MISMATCH           = UTIL_COMP_ID | 0x18,
+        UTIL_MCL_COMPID_MISMATCH         = UTIL_COMP_ID | 0x19,
     };
 };
 
