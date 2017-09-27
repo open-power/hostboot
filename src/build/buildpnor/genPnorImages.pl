@@ -564,6 +564,7 @@ sub manipulateImages
         $isNormalSecure ||= ($eyeCatch eq "HCODE");
         $isNormalSecure ||= ($eyeCatch eq "WOFDATA");
         $isNormalSecure ||= ($eyeCatch eq "IMA_CATALOG");
+        $isNormalSecure ||= ($eyeCatch eq "TESTRO");
 
         my $isSpecialSecure = ($eyeCatch eq "HBB");
         $isSpecialSecure ||= ($eyeCatch eq "HBD");
@@ -837,25 +838,31 @@ sub manipulateImages
         # fill the partition.
         elsif (!-e $bin_file)
         {
-            # Test partitions have random data
-            if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
-            {
-                run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
-            }
-            elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
+
+            if ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
                 $callerHwHdrFields{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
             }
-            # Other partitions fill with FF's if no empty bin file provided
             else
             {
-                run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+                # Test partitions have random data
+                if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
+                {
+                    run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
+                }
+                # Other partitions fill with FF's if no empty bin file provided
+                else
+                {
+                    run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+                }
 
                 # Add secure container header
-                if(   ($sectionHash{$layoutKey}{sha512Version} eq "yes")
-                   && ($eyeCatch ne "SBKT"))
+                # Force TESTRO section to have a header
+                if( ($eyeCatch eq "TESTRO") ||
+                    (($sectionHash{$layoutKey}{sha512Version} eq "yes")
+                    && ($eyeCatch ne "SBKT")))
                 {
                     # Remove PAGE_SIZE bytes from generated dummy content of
                     # file to make room for the secure header
