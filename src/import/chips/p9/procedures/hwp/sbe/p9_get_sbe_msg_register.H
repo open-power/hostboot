@@ -30,7 +30,7 @@
 // *HWP HW Owner        : Santosh Puranik <santosh.puranik@in.ibm.com>
 // *HWP FW Owner        : Dhruvaraj Subhash Chandran <dhruvaraj@in.ibm.com>
 // *HWP Team            : SBE
-// *HWP Level           : 2
+// *HWP Level           : 3
 // *HWP Consumed by     : SE, Hostboot, Cronus
 //------------------------------------------------------------------------------
 
