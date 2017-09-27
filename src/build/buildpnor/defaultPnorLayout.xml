@@ -195,7 +195,9 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Special PNOR Test Space (36K)</description>
+        <!-- Note there is no <sha512Version/> tag on purpose to avoid hostboot
+             from skipping header. Signing is forced in build pnor phase -->
+        <description>Special PNOR Test Space with Header (36K)</description>
         <eyeCatch>TESTRO</eyeCatch>
         <physicalOffset>0x2C76000</physicalOffset>
         <physicalRegionSize>0x9000</physicalRegionSize>
