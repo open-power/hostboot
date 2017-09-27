@@ -1101,7 +1101,7 @@ fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>&
     }
 
     FAPI_INF("cal_config for %s: 0x%04lx (steps: 0x%08x)",
-             mss::c_str(i_target), uint16_t(l_cal_config), uint32_t(i_cal_steps_enabled));
+             mss::c_str(i_target), uint16_t(l_cal_config), i_cal_steps_enabled);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
 
     // Sets up the workarounds
@@ -1157,7 +1157,11 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TY
         fapi2::Assert(false);
     }
 
-    FAPI_DBG("executing training CCS instruction: 0x%llx, 0x%llx", l_cal_inst.arr0, l_cal_inst.arr1);
+    FAPI_DBG("%s executing training CCS instruction: 0x%llx, 0x%llx for cal steps 0x%08x",
+             mss::c_str(i_target),
+             l_cal_inst.arr0,
+             l_cal_inst.arr1,
+             i_cal_steps_enabled);
 
     // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
     // and we're supposed to poll for the done or timeout bit. But we don't want
@@ -1182,8 +1186,8 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TY
 
     // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
     // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
-    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "%s failed to execute CCS program for cal steps 0x%04lx",
-              mss::c_str(i_target), uint16_t(i_cal_steps_enabled) );
+    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "%s failed to execute CCS program for cal steps 0x%08x",
+              mss::c_str(i_target), i_cal_steps_enabled );
 
 fapi_try_exit:
     return fapi2::current_err;
