@@ -72,6 +72,7 @@
 #include <stdio.h>
 #include <runtime/populate_hbruntime.H>
 #include <runtime/preverifiedlidmgr.H>
+#include <util/utilmclmgr.H>
 
 
 namespace RUNTIME
@@ -646,6 +647,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 {
     TRACFCOMP( g_trac_runtime, ENTER_MRK"populate_HbRsvMem> i_nodeId=%d", i_nodeId );
     errlHndl_t l_elog = nullptr;
+    bool l_preVerLidMgrLock = false;
 
     do {
         // Wipe out our cache of the NACA/SPIRA pointers
@@ -1074,6 +1076,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
 
         // Initialize Pre-Verified Lid manager
         PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize, i_nodeId);
+        l_preVerLidMgrLock = true;
 
         // Handle all Pre verified PNOR sections
         for (const auto secId : preVerifiedPnorSections)
@@ -1084,13 +1087,32 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
         }
-        PreVerifiedLidMgr::unlock();
         if (l_elog)
         {
             break;
         }
 
+        // @TODO RTC:125304 enable when PHYP changes necessary for pre-verified
+        //       lids are in a fips release
+/*
+        // Load lids from Master Container Lid Container provided by FSP
+        if (INITSERVICE::spBaseServicesEnabled())
+        {
+            MCL::MasterContainerLidMgr l_mcl;
+            l_elog = l_mcl.processComponents();
+            if(l_elog)
+            {
+                break;
+            }
+        }
+*/
     } while(0);
+
+    // If lock obtained, always unlock Pre verified lid manager
+    if (l_preVerLidMgrLock)
+    {
+        PreVerifiedLidMgr::unlock();
+    }
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
     return(l_elog);

@@ -40,7 +40,11 @@ namespace MCL
 // Component ID(name) within MCL
 typedef std::array<uint8_t,16> ComponentID;
 
-// Defines to simplify syntax when checking for the MCL and POWERVM comp ids
+// Component ID in string form
+// NOTE: ComponentID in the MCL does not include NULL terminator so include room
+typedef char CompIdString[17];
+
+// Constants to simplify checking for the MCL and POWERVM comp ids
 extern const ComponentID g_MclCompId;
 extern const ComponentID g_PowervmCompId;
 
@@ -194,8 +198,46 @@ struct CompInfo
     void print() const;
 };
 
+// Comparator to ensure PHYP is always the first component to be processed
+struct CompOrderCompare {
+    bool operator() (const ComponentID& lhs, const ComponentID& rhs) const
+    {
+        if((lhs == g_PowervmCompId))
+        {
+            return true;
+        }
+        else if ((rhs == g_PowervmCompId))
+        {
+            return false;
+        }
+
+        return lhs<rhs;
+    }
+};
+
 // Structure for Comp Info cache
-typedef std::map<ComponentID, CompInfo> CompInfoMap;
+typedef std::map<ComponentID, CompInfo, CompOrderCompare> CompInfoMap;
+
+/**
+ * @brief Convert Component ID to a char*
+ *        Helpful for trace
+ *
+ * @param[in] i_compId - Component ID to convert
+ * @param[out] o_compIdStr - Component ID String
+ *
+ * @return N/A
+ */
+void compIdToString(const ComponentID i_compId, CompIdString o_compIdStr);
+
+/**
+ * @brief Convert/truncate Component ID to a uint64_t
+ *        Helpful for FFDC
+ *
+ * @param[in] i_compId - Component ID to convert
+ *
+ * @return uint64_t - truncated Component ID
+ */
+uint64_t compIdToInt(const ComponentID i_compId);
 
 // @brief Class to manager the Master Container Lid provided by the FSP
 class MasterContainerLidMgr
@@ -213,6 +255,12 @@ class MasterContainerLidMgr
      * @brief Destructor. Cleans up memory allocated for class
      */
     ~MasterContainerLidMgr();
+
+    /**
+     * @brief Process each component in the MCL.
+     *        See: processComponent for more info
+     */
+    errlHndl_t processComponents();
 
     protected:
 
@@ -280,6 +328,52 @@ class MasterContainerLidMgr
      */
     void printCompInfoCache();
 
+    /**
+     * @brief Process single component in the MCL.
+     *        Loads, verifies, tpm extends lids and loads into hb resv memory
+     *
+     * @param[in] i_compId - Component Id
+     * @param[in] io_compInfo - Component info of component to process
+     *
+     * @return Error handle if error
+     */
+    errlHndl_t processComponent(const ComponentID& i_compId,
+                                CompInfo& io_compInfo);
+
+    /**
+     * @brief Load all lids associated with a Component into contiguous memory
+     *        NOTE: updates the lid sizes in CompInfo
+     *
+     * @param[in] io_compInfo - Component info of component to verify
+     * @param[out] o_totalSize - Size of all lids reported by the FSP
+     *
+     * @return Error handle if error
+     */
+    errlHndl_t loadLids(CompInfo& io_compInfo, size_t& o_totalSize);
+
+    /**
+     * @brief Verify and Extend Component
+     *
+     * @param[in] i_compId - Component Id
+     * @param[in] io_compInfo - Component info of component to verify
+     *
+     * @return Error handle if error
+     *         Note: Will not return on Secure Verification Error
+     */
+    errlHndl_t verifyExtend(const ComponentID& i_compId,
+                            CompInfo& io_compInfo);
+
+    /**
+     * @brief TPM extend information for secure components
+     *
+     * @param[in] i_compId - Component Id
+     * @param[in] i_conHdr - Container header with information to extend
+     *
+     * @return Error handle if error
+     */
+    errlHndl_t tpmExtend(const ComponentID& i_compId,
+                         const SECUREBOOT::ContainerHeader& i_conHdr) const;
+
     // Physical addresses reserved for the MCL itself
     uint64_t iv_mclAddr;
 
@@ -292,14 +386,26 @@ class MasterContainerLidMgr
     // Maximum size of memory for temp MCL mgr workspace
     size_t iv_tmpSize;
 
+    // Maximum size based on MCL or temp components
+    size_t iv_maxSize;
+
     // Pointer to MCL virtual address space
     void* iv_pMclVaddr;
 
     // Pointer to MCL temp virtual address space
     void* iv_pTempVaddr;
 
+    // Pointer to either MCL or TMP virtual address spaces
+    void* iv_pVaddr;
+
     // Cache Components and their corresponding lids
     CompInfoMap iv_compInfoCache;
+
+    // Indicates that Master Container Lid has a header
+    bool iv_hasHeader;
+
+    // Cache current comp id string for easy tracing
+    CompIdString iv_curCompIdStr;
 
     // Allow test cases to call custom constructors and have direct access
     friend class ::MasterContainerLidMgrTest;

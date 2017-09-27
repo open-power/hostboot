@@ -830,7 +830,7 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
     //different extension.
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
     iv_isLidInPnor = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
-    UTIL_FT(INFO_MRK "UtilLidMgr: LID 0x%.8X in pnor: %d",
+    UTIL_DT(INFO_MRK "UtilLidMgr: LID 0x%.8X in pnor: %d",
               iv_lidId ,iv_isLidInPnor);
     iv_isLidInVFS = VFS::module_exists(iv_lidFileName);
 

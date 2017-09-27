@@ -44,6 +44,9 @@
 
 namespace TRUSTEDBOOT
 {
+    // Const string to append to PCR extension messages
+    extern const char* const FW_KEY_HASH_EXT;
+
     struct _TpmLogMgr;
 
     // Hostboot code just maps the TpmTarget type, which shared APIs use, as a

@@ -62,9 +62,10 @@ TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
 namespace TRUSTEDBOOT
 {
 
-#ifdef CONFIG_TPMDD
 // Const string to append to PCR extension messages
 const char* const FW_KEY_HASH_EXT = " FW KEY HASH";
+
+#ifdef CONFIG_TPMDD
 
 /// Global object to store system trusted boot data
 SystemData systemData;

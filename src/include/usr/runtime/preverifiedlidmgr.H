@@ -66,6 +66,24 @@ class PreVerifiedLidMgr
                                    const uint64_t i_addr,
                                    const size_t i_size);
 
+    /**
+     * @brief Load PNOR section into HB reserved memory
+     *
+     * @param[in] i_sec - PNOR section ID
+     * @param[in] i_addr - Virtual Address of PNOR section
+     * @param[in] i_size - Size of PNOR section
+     * @param[in] i_isPhypComp - Indicates if PHYP lids
+     *                           NOTE: PHYP lids go to address HRMOR - 4K
+     * @param[out] o_resvMemAddr - Mainstore address Lid was put in
+     *
+     * @return Error handle if error
+     */
+    static errlHndl_t loadFromMCL(const uint32_t i_lidId,
+                                  const uint64_t i_addr,
+                                  const size_t i_size,
+                                  const bool i_isPhypComp,
+                                  uint64_t &o_resvMemAddr);
+
   protected:
 
     /**
@@ -106,13 +124,19 @@ class PreVerifiedLidMgr
                              const uint64_t i_addr,
                              const size_t i_size);
 
+    /**
+     * @brief Internal implementation of loadFromMCL function.
+     */
+    errlHndl_t _loadFromMCL(const uint32_t i_lidId,
+                            const uint64_t i_addr,
+                            const size_t i_size,
+                            const bool i_isPhypComp,
+                            uint64_t &o_resvMemAddr);
+
     // Private Members/Variables
 
     // Cache the payload type
     static TARGETING::PAYLOAD_KIND cv_payloadKind;
-
-    // Bool to check if the first PHYP lid has been loaded or not.
-    static bool cv_phypLidSeen;
 
     // Collection of data needed for Hostboot Reserved Memory
     struct ResvMemInfo
@@ -131,7 +155,7 @@ class PreVerifiedLidMgr
     // Collection of data needed for Hostboot Reserved Memory
     static ResvMemInfo cv_resvMemInfo;
 
-    // Location for PHYP lids to go.
+    // Collection of data needed for PHYP's placement into HB reserved memory
     static ResvMemInfo cv_phypResvMemInfo;
 
     // Map of what lids have been loaded already.
@@ -197,6 +221,7 @@ class PreVerifiedLidMgr
 
     // Allow test cases to have direct access
     friend class PreVerifiedLidMgrTest;
+    friend class MasterContainerLidMgrTest;
 };
 
 
