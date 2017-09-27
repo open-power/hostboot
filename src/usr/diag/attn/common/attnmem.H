@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014                             */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,15 +47,15 @@ class MemOps : public AttentionOps
         /**
          * @brief resolve Find membuf attentions behind the supplied proc.
          *
-         * @param[in] i_proc The proc on which to look for attentions.
-         * @param[out] o_attentions Where to put attentions when found.
+         * @param[in] i_AttnData Where to put membuf target and attn type
+         * @param[out] i_mcNumber  MC unit to examine (0 or 1)
          *
-         * @retval[0] No error.
-         * @retval[!0] Unexpected error occurred.
+         * @retval true  if i_AttnData was set to valid values
+         * @retval false if i_AttnData is invalid (no memory attns)
          */
-        errlHndl_t resolve(
-                TARGETING::TargetHandle_t i_proc,
-                AttentionList & o_attentions);
+        bool resolve(
+                PRDF::AttnData &  i_AttnData,
+                const uint32_t  i_mcNumber );
 
         /**
          * @brief dtor

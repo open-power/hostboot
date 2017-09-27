@@ -185,6 +185,18 @@ bool getCheckbits(
 }
 }
 
+namespace MC
+{
+// First MC chiplet in broadcast read
+const uint64_t firstChiplet = 0x0100000000000000ull;
+
+// Number of MC chiplets
+const uint64_t numChiplets  = 2;
+}
+
+
+// @TODO RTC: 180469
+// Remove MCI  address space and then update all the CXX testing
 namespace MCI
 {
 // Not valid / used for now on P9
@@ -229,8 +241,12 @@ void forEach(
 
     forEach(first, last, i_scomData, i_data, i_func);
 }
-}
+} // end MCI space
 
+
+
+// @TODO RTC: 180469
+// Remove MCI  address space and then update all the CXX testing
 namespace GP1
 {
 // Not valid / used for now on P9
@@ -280,5 +296,7 @@ void forEach(
 
     forEach(first, last, i_scomData, i_data, i_func);
 }
-}
+}  // end GP1 space
+
+
 }

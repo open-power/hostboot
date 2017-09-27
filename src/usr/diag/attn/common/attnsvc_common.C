@@ -107,11 +107,6 @@ errlHndl_t ServiceCommon::configureInterrupts(
 
     while(it != procs.end())
     {
-        // enable/disable MCSes
-        //@TODO: RTC:150944  Do we need to enable/disable MCS ? Doubt it
-        //       Seems to be related strictly to that GPIO P8 workaround
-
-
         #ifndef __HOSTBOOT_RUNTIME
         uint64_t  mask = 0;
         // enable attentions in ipoll mask
@@ -181,7 +176,6 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
     // this should be the opposite of what we used for masking in preAck
     uint64_t  restoreMask = ~(HostMask::host() | HostMask::nonHost());
 
-    MemOps & memOps = getMemOps();
     ProcOps & procOps = getProcOps();
 
     do {
@@ -197,15 +191,6 @@ void ServiceCommon::processAttentions(const TargetHandleList & i_procs)
         {
             // enumerate proc local attentions (xstp,spcl,rec).
             err = procOps.resolveIpoll(*pit, attentions);
-
-            if(err)
-            {
-                errlCommit(err, ATTN_COMP_ID);
-            }
-
-            // enumerate host attentions and convert
-            // to centaur targets  (NOOP for now on P9)
-            err = memOps.resolve(*pit, attentions);
 
             if(err)
             {
@@ -276,7 +261,6 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
     errlHndl_t err = NULL;
     AttentionList attentions;
 
-    MemOps & memOps = getMemOps();
     ProcOps & procOps = getProcOps();
 
     do {
@@ -289,17 +273,6 @@ errlHndl_t ServiceCommon::handleAttentions(const TargetHandle_t i_proc)
        if(err)
        {
            ATTN_ERR("procOps.resolve() returned error.HUID:0X%08X ",
-                     get_huid( i_proc ));
-           break;
-       }
-
-       // query the mem resolver for active attentions
-
-       err = memOps.resolve(i_proc, attentions);
-
-       if(err)
-       {
-           ATTN_ERR("memOps.resolve() returned error.HUID:0X%08X ",
                      get_huid( i_proc ));
            break;
        }

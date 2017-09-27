@@ -100,6 +100,23 @@ bool getCheckbits(
         uint64_t & o_bits);
 }
 
+namespace MC
+{
+/**
+ * @brief First MC chiplet bits in broadcast read
+ */
+extern const uint64_t firstChiplet;
+
+/**
+ * @brief Total Number of MC chiplets
+ */
+extern const uint64_t numChiplets;
+}
+
+
+
+// @TODO RTC: 180469
+// Remove MCI address space and then update all the CXX testing
 namespace MCI
 {
 
@@ -135,6 +152,9 @@ void forEach(
         void (*i_func)(uint64_t, void *));
 }
 
+
+// @TODO RTC: 180469
+// Remove GP1  address space and then update all the CXX testing
 namespace GP1
 {
 
@@ -171,14 +191,12 @@ bool getCheckbits(
         uint64_t & o_bits);
 }
 
+
 /**
  * @brief Interrupt config related constants
  */
 enum
 {
-    // This was for MCS usage, but not needed right now
-    GP2_REG                          = 0x02000002,
-
     // PIB interrupt register (spec/recov/chkstop)
     PIB_INTR_TYPE_REG                = 0x000F001A,
 
