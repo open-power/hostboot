@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2017
+# Contributors Listed Below - COPYRIGHT 2014,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -29,7 +29,12 @@ if [ -z $PROJECT_ROOT ]; then
 fi
 
 source "$PROJECT_ROOT/src/build/citest/setup-env"
-
+echo "#--------------------------------"
+echo "SANDBOXROOT=$SANDBOXROOT"
+echo "SANDBOXNAME=$SANDBOXNAME"
+echo "CHIP=$CHIP"
+echo "PNOR=$PNOR"
+echo "#--------------------------------"
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
 # Force simics into Secure Mode
@@ -43,12 +48,19 @@ COPYRIGHT_PID=$!
 create-sandbox > create-sandbox.log 2>&1 &
 CREATESANDBOX_PID=$!
 
+my_date=$(date)
 # Build Hostboot.
+echo "#--------------------------------"
+printf "\n\n$(date): Starting \"make -j32\"\n\n"
+echo "#--------------------------------"
 make -j32 || exit -1
-
+echo "#--------------------------------"
+printf "\n\nrc=$?: $(date): FINISHED running (\"make -j32\" was started at $my_date)\n\n"
+echo "#--------------------------------"
 # Check copyright completion.
 wait $COPYRIGHT_PID
 if [ $? -eq 0 ]; then
+    echo "----Copyright check succeeded."
     cat copyright.log
 else
     echo "----Copyright check failed."
@@ -59,6 +71,7 @@ fi
 # Check sandbox create completion.
 wait $CREATESANDBOX_PID
 if [ $? -eq 0 ]; then
+    echo "----Sandbox creation succeeded, here is the log."
     cat create-sandbox.log
 else
     echo "----Sandbox creation failed."
@@ -67,7 +80,14 @@ else
 fi
 
 # Add Hostboot files to simics sandbox.
+my_date=$(date)
+echo "#--------------------------------"
+printf "\n\n$(date): Now running populate-sandbox....\n\n"
+echo "#--------------------------------"
 populate-sandbox || exit -1
+echo "#--------------------------------"
+printf "\n\nrc=$?: $(date): FINISHED running (\"populate-sandbox\" was started at $my_date)\n\n"
+echo "#--------------------------------"
 
 #@fixme - Temp disable, RTC:170635
 # Start errl parser building.
@@ -75,7 +95,14 @@ populate-sandbox || exit -1
 #ERRLPARSERS_PID=$!
 
 # Start CxxTest Simics execution.
+my_date=$(date)
+echo "#--------------------------------"
+printf "\n\n$(date): Now running cxxtest-start.sh....\n\n"
+echo "#--------------------------------"
 cxxtest-start.sh || exit -1
+echo "#--------------------------------"
+printf "\n\nrc=$?: $(date): FINISHED running (\"cxxtest-start.sh\" was started at $my_date)\n\n"
+echo "#--------------------------------"
 
 #@fixme - Temp disable, RTC:170635
 # Check errl parser completion.

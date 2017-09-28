@@ -30,7 +30,16 @@ export PATH=${CITESTPATH}:${PATH}
 # Determine backing build.
 export BACKING_BUILD=`cat ${CITESTPATH}/etc/bbuild`
 # Limit pnor image to be built to murano for standalone simics
-export PNOR=nimbus.pnor
+
+export MACHINE=$CHIP
+
+if [ "$CHIP" == "NIMBUS" ];
+then
+    export PNOR=nimbus.pnor
+elif [ "$CHIP" == "CUMULUS" ];
+then
+    export PNOR=cumulus.pnor
+fi
 
 # If we are running under Jenkins we need to pick a random-ish sandbox name
 # so that the autoipl tools do not have a /tmp name collision.
