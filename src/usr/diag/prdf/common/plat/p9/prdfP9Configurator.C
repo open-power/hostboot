@@ -264,6 +264,22 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
             case TYPE_MI:     fileName = p9_mi;     break;
             case TYPE_DMI:    fileName = p9_dmi;    break;
 
+            case TYPE_MEMBUF:
+            {
+                // Get the MEMBUF model. We don't support mixed MEMBUF models so
+                // should be able to use the first MEMBUF in the list.
+                TARGETING::MODEL model = getChipModel( trgtList[0] );
+
+                if ( MODEL_CENTAUR == model ) fileName = cen_centaur;
+                else
+                    // Print a trace statement, but do not fail the build.
+                    PRDF_ERR( "[addDomainChips] Unsupported MEMBUF model: %d",
+                              model );
+                break;
+            }
+
+            case TYPE_MBA:    fileName = cen_mba;   break;
+
             default:
                 // Print a trace statement, but do not fail the build.
                 PRDF_ERR( "[addDomainChips] Unsupported target type: %d",

@@ -51,9 +51,9 @@ namespace PRDF
     const char * p9_mi      = "p9_mi";
     const char * p9_dmi     = "p9_dmi";
 
-    // Pegasus Centaur Chip
-//    const char * Membuf     = "Membuf";
-//    const char * Mba        = "Mba";
+    // P9 Centaur Chip
+    const char * cen_centaur = "cen_centaur";
+    const char * cen_mba     = "cen_mba";
 
 } // end namespace PRDF
 

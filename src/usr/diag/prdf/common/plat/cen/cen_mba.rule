@@ -1,0 +1,661 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/cen/cen_mba.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2012,2017
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+chip cen_mba
+{
+    name        "Centaur MBA chiplet";
+    targettype  TYPE_MBA;
+    sigoff      0x9000;
+    dump        DUMP_CONTENT_HW;
+    scomlen     64;
+
+ #############################################################################
+ #                                                                           #
+ #  ######                                                                   #
+ #  #     #  ######   ####     ###    ####    #####  ######  #####    ####   #
+ #  #     #  #       #    #     #    #          #    #       #    #  #       #
+ #  ######   #####   #          #     ####      #    #####   #    #   ####   #
+ #  #   #    #       #  ###     #         #     #    #       #####        #  #
+ #  #    #   #       #    #     #    #    #     #    #       #   #   #    #  #
+ #  #     #  ######   ####     ###    ####      #    ######  #    #   ####   #
+ #                                                                           #
+ #############################################################################
+
+    ############################################################################
+    # Memory Buffer MBA CAL FIR
+    ############################################################################
+
+    register MBACALFIR
+    {
+        name        "Memory Buffer MBA CAL FIR";
+        scomaddr    0x03010400;
+        reset       (&, 0x03010401);
+        mask        (|, 0x03010405);
+        capture     group default;
+    };
+
+    register MBACALFIR_MASK
+    {
+        name        "Memory Buffer MBA CAL FIR MASK";
+        scomaddr    0x03010403;
+        capture     group default;
+    };
+
+    register MBACALFIR_ACT0
+    {
+        name        "Memory Buffer MBA CAL FIR ACT0";
+        scomaddr    0x03010406;
+        capture     group default;
+        capture     req nonzero("MBACALFIR");
+    };
+
+    register MBACALFIR_ACT1
+    {
+        name        "Memory Buffer MBA CAL FIR ACT1";
+        scomaddr    0x03010407;
+        capture     group default;
+        capture     req nonzero("MBACALFIR");
+    };
+
+    ############################################################################
+    # Memory Buffer MBA SECURE FIR
+    ############################################################################
+
+    # This register is hardwired to channel failure (checkstop) and we cannot
+    # mask or change the state of the action registers.
+    register MBASECUREFIR
+    {
+        name        "Memory Buffer MBA SECURE FIR";
+        scomaddr    0x0301041b;
+        reset       (&, 0x0301041c);
+        capture     group default;
+    };
+
+    ############################################################################
+    # Memory Buffer MBA FIR
+    ############################################################################
+
+    register MBAFIR
+    {
+        name        "Memory Buffer MBA FIR";
+        scomaddr    0x03010600;
+        reset       (&, 0x03010601);
+        mask        (|, 0x03010605);
+        capture     group default;
+    };
+
+    register MBAFIR_MASK
+    {
+        name        "Memory Buffer MBA FIR MASK";
+        scomaddr    0x03010603;
+        capture     group default;
+    };
+
+    register MBAFIR_ACT0
+    {
+        name        "Memory Buffer MBA FIR ACT0";
+        scomaddr    0x03010606;
+        capture     group default;
+        capture     req nonzero("MBAFIR");
+    };
+
+    register MBAFIR_ACT1
+    {
+        name        "Memory Buffer MBA FIR ACT1";
+        scomaddr    0x03010607;
+        capture     group default;
+        capture     req nonzero("MBAFIR");
+    };
+
+    ############################################################################
+    # Memory Buffer MBA SPA register
+    ############################################################################
+
+    register MBASPA
+    {
+        name        "Memory Buffer MBA SPA register";
+        scomaddr    0x03010611;
+        reset       (&, 0x03010612);
+        mask        (|, 0x03010614);
+        capture     group default;
+    };
+
+    register MBASPA_MASK
+    {
+        name        "Memory Buffer MBA SPA register MASK";
+        scomaddr    0x03010614;
+        capture     group default;
+    };
+
+    ############################################################################
+    # Memory Buffer MBA DDR PHY FIR
+    ############################################################################
+
+    register MBADDRPHYFIR
+    {
+        name        "Memory Buffer MBA DDR PHY FIR";
+        scomaddr    0x800200900301143F;
+        reset       (&, 0x800200910301143F);
+        mask        (|, 0x800200950301143F);
+        capture     group default;
+    };
+
+    register MBADDRPHYFIR_MASK
+    {
+        name        "Memory Buffer MBA DDR PHY FIR MASK";
+        scomaddr    0x800200930301143F;
+        capture     group default;
+    };
+
+    register MBADDRPHYFIR_ACT0
+    {
+        name        "Memory Buffer MBA DDR PHY FIR ACT0";
+        scomaddr    0x800200960301143F;
+        capture     group default;
+        capture     req nonzero("MBADDRPHYFIR");
+    };
+
+    register MBADDRPHYFIR_ACT1
+    {
+        name        "Memory Buffer MBA DDR PHY FIR ACT1";
+        scomaddr    0x800200970301143F;
+        capture     group default;
+        capture     req nonzero("MBADDRPHYFIR");
+    };
+
+# Include registers not defined by the xml
+.include "cen_mba_regs.rule";
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ # ####                                 #                                     #
+ # #   # #   # #    #####  ###      #  # #    ##  ##### ###  ###  #   #  ###  #
+ # #   # #   # #    #     #        #  #   #  #  #   #    #  #   # ##  # #     #
+ # ####  #   # #    ####   ###    #  ####### #      #    #  #   # # # #  ###  #
+ # #  #  #   # #    #         #  #   #     # #  #   #    #  #   # #  ##     # #
+ # #   #  ###  #### #####  ###  #    #     #  ##    #   ###  ###  #   #  ###  #
+ #                                                                            #
+ ##############################################################################
+
+################################################################################
+# Summary for MBA
+################################################################################
+
+rule rMBA
+{
+  UNIT_CS:
+    summary( 0, rMBACALFIR ) |
+    summary( 1, rMBASECUREFIR ) |
+    summary( 2, rMBAFIR ) |
+    summary( 3, rMBADDRPHYFIR );
+
+  RECOVERABLE:
+    summary( 0, rMBACALFIR ) |
+    summary( 1, rMBASECUREFIR ) |
+    summary( 2, rMBAFIR ) |
+    summary( 3, rMBADDRPHYFIR );
+
+  HOST_ATTN:
+    summary( 4, rMBASPA );
+};
+
+group gMBA attntype UNIT_CS, RECOVERABLE, HOST_ATTN filter singlebit
+{
+    (rMBA, bit(0)) ? analyze(gMBACALFIR);
+    (rMBA, bit(1)) ? analyze(gMBASECUREFIR);
+    (rMBA, bit(2)) ? analyze(gMBAFIR);
+    (rMBA, bit(3)) ? analyze(gMBADDRPHYFIR);
+    (rMBA, bit(4)) ? analyze(gMBASPA);
+};
+
+################################################################################
+# Memory Buffer MBA CAL FIR
+################################################################################
+
+rule rMBACALFIR
+{
+  UNIT_CS:
+    MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 & ~MBACALFIR_ACT1;
+  RECOVERABLE:
+    MBACALFIR & ~MBACALFIR_MASK & ~MBACALFIR_ACT0 &  MBACALFIR_ACT1;
+};
+
+group gMBACALFIR filter singlebit
+{
+    /** MBACALFIR[0]
+     *  MBA_RECOVERABLE_ERROR
+     */
+    (rMBACALFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[1]
+     *  MBA_NONRECOVERABLE_ERROR
+     */
+    (rMBACALFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[2]
+     *  REFRESH_OVERRUN
+     */
+    (rMBACALFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[3]
+     *  WAT_ERROR
+     */
+    (rMBACALFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[4]
+     *  RCD parity error on port 0
+     */
+    (rMBACALFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[5]
+     *  DDR0_CAL_TIMEOUT_ERR
+     */
+    (rMBACALFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[6]
+     *  DDR1_CAL_TIMEOUT_ERR
+     */
+    (rMBACALFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[7]
+     *  RCD parity error on port 1
+     */
+    (rMBACALFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[8]
+     *  MBX_TO_MBA_PAR_ERROR
+     */
+    (rMBACALFIR, bit(8)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[9]
+     *  MBA_WRD_UE
+     */
+    (rMBACALFIR, bit(9)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[10]
+     *  MBA_WRD_CE
+     */
+    (rMBACALFIR, bit(10)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[11]
+     *  MBA_MAINT_UE
+     */
+    (rMBACALFIR, bit(11)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[12]
+     *  MBA_MAINT_CE
+     */
+    (rMBACALFIR, bit(12)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[13]
+     *  DDR_CAL_RESET_TIMEOUT
+     */
+    (rMBACALFIR, bit(13)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[14]
+     *  WRQ_DATA_CE
+     */
+    (rMBACALFIR, bit(14)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[15]
+     *  WRQ_DATA_UE
+     */
+    (rMBACALFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[16]
+     *  WRQ_DATA_SUE
+     */
+    (rMBACALFIR, bit(16)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[17]
+     *  WRQ_RRQ_HANG_ERR
+     */
+    (rMBACALFIR, bit(17)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[18]
+     *  SM_1HOT_ERR
+     */
+    (rMBACALFIR, bit(18)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[19]
+     *  WRD_SCOM_ERROR
+     */
+    (rMBACALFIR, bit(19)) ? TBDDefaultCallout;
+
+    /** MBACALFIR[20]
+     *  SCOM FIR error
+     */
+    (rMBACALFIR, bit(20)) ? TBDDefaultCallout; # DD1 action, masked for DD2+
+
+    /** MBACALFIR[21]
+     *  SCOM FIR error clone
+     */
+    (rMBACALFIR, bit(21)) ? TBDDefaultCallout; # DD1 action, masked for DD2+
+
+    /** MBACALFIR[22]
+     *  RHMR_SEC_ALREADY_FULL
+     */
+    (rMBACALFIR, bit(22)) ? TBDDefaultCallout; # DD2+ only
+
+    /** MBACALFIR[23]
+     *  Reserved
+     */
+    (rMBACALFIR, bit(23)) ? TBDDefaultCallout; # DD2+ only
+
+    /** MBACALFIR[24]
+     *  SCOM FIR error
+     */
+    (rMBACALFIR, bit(24)) ? TBDDefaultCallout; # DD2+ only
+
+    /** MBACALFIR[25]
+     *  SCOM FIR error clone
+     */
+    (rMBACALFIR, bit(25)) ? TBDDefaultCallout; # DD2+ only
+
+};
+
+################################################################################
+# Memory Buffer MBA SECURE FIR
+################################################################################
+
+rule rMBASECUREFIR
+{
+  UNIT_CS:
+    MBASECUREFIR;
+};
+
+group gMBASECUREFIR filter singlebit
+{
+    /** MBASECUREFIR[0]
+     *  INVALID_MBA_CAL0Q_ACCESS
+     */
+    (rMBASECUREFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[1]
+     *  INVALID_MBA_CAL1Q_ACCESS
+     */
+    (rMBASECUREFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[2]
+     *  INVALID_MBA_CAL2Q_ACCESS
+     */
+    (rMBASECUREFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[3]
+     *  INVALID_MBA_CAL3Q_ACCESS
+     */
+    (rMBASECUREFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[4]
+     *  INVALID_DDR_CONFIG_REG_ACCESS
+     */
+    (rMBASECUREFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** MBASECUREFIR[5]
+     *  INVALID_SIR_MASK_OR_ACTION_REGISTER_ACCESS
+     */
+    (rMBASECUREFIR, bit(5)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# Memory Buffer MBA FIR
+################################################################################
+
+rule rMBAFIR
+{
+  UNIT_CS:
+    MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 & ~MBAFIR_ACT1;
+  RECOVERABLE:
+    MBAFIR & ~MBAFIR_MASK & ~MBAFIR_ACT0 &  MBAFIR_ACT1;
+};
+
+group gMBAFIR filter singlebit
+{
+    /** MBAFIR[0]
+     *  Invalid Maintenance Command
+     */
+    (rMBAFIR, bit(0)) ? TBDDefaultCallout;
+
+    /** MBAFIR[1]
+     *  Invalid Maintenance Address
+     */
+    (rMBAFIR, bit(1)) ? TBDDefaultCallout;
+
+    /** MBAFIR[2]
+     *  Multi-address Maintenance Cmd Timeout
+     */
+    (rMBAFIR, bit(2)) ? TBDDefaultCallout;
+
+    /** MBAFIR[3]
+     *  Internal FSM parity error
+     */
+    (rMBAFIR, bit(3)) ? TBDDefaultCallout;
+
+    /** MBAFIR[4]
+     *  MCBIST error
+     */
+    (rMBAFIR, bit(4)) ? TBDDefaultCallout;
+
+    /** MBAFIR[5]
+     *  SCOM command register parity error
+     */
+    (rMBAFIR, bit(5)) ? TBDDefaultCallout;
+
+    /** MBAFIR[6]
+     *  Unrecoverable channel error
+     */
+    (rMBAFIR, bit(6)) ? TBDDefaultCallout;
+
+    /** MBAFIR[7]
+     *  UE or CE Error in WRD caw2 data latches
+     */
+    (rMBAFIR, bit(7)) ? TBDDefaultCallout;
+
+    /** MBAFIR[8]
+     *  An illegal state transition in maintenance state machine
+     */
+    (rMBAFIR, bit(8)) ? TBDDefaultCallout; # DD2+ only
+
+    /** MBAFIR[9:14]
+     *  Reserved
+     */
+    (rMBAFIR, bit(9|10|11|12|13|14)) ? TBDDefaultCallout;
+
+    /** MBAFIR[15]
+     *  SCOM FIR error
+     */
+    (rMBAFIR, bit(15)) ? TBDDefaultCallout;
+
+    /** MBAFIR[16]
+     *  SCOM FIR error clone
+     */
+    (rMBAFIR, bit(16)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# Memory Buffer MBA SPA register
+################################################################################
+
+rule rMBASPA
+{
+  HOST_ATTN:
+    MBASPA & ~MBASPA_MASK;
+};
+
+group gMBASPA filter singlebit
+{
+    /** MBASPA[0]
+     *  Maintenance command complete
+     */
+    (rMBASPA, bit(0)) ? TBDDefaultCallout;
+
+    /** MBASPA[1]
+     *  Hard NCE ETE
+     */
+    (rMBASPA, bit(1)) ? TBDDefaultCallout;
+
+    /** MBASPA[2]
+     *  Soft NCE ETE
+     */
+    (rMBASPA, bit(2)) ? TBDDefaultCallout;
+
+    /** MBASPA[3]
+     *  Intermittent NCE ETE
+     */
+    (rMBASPA, bit(3)) ? TBDDefaultCallout;
+
+    /** MBASPA[4]
+     *  Retry CE ETE
+     */
+    (rMBASPA, bit(4)) ? TBDDefaultCallout;
+
+    /** MBASPA[5]
+     *  Emergency throttle attention
+     */
+    (rMBASPA, bit(5)) ? TBDDefaultCallout;
+
+    /** MBASPA[6]
+     *  Firmware generated attention 0
+     */
+    (rMBASPA, bit(6)) ? TBDDefaultCallout;
+
+    /** MBASPA[7]
+     *  Firmware generated attention 1
+     */
+    (rMBASPA, bit(7)) ? TBDDefaultCallout;
+
+    /** MBASPA[8]
+     *  Maintenance command complete
+     */
+    (rMBASPA, bit(8)) ? TBDDefaultCallout;
+
+    /** MBASPA[9]
+     *  Spare
+     */
+    (rMBASPA, bit(9)) ? TBDDefaultCallout;
+
+    /** MBASPA[10]
+     *  MCBIST done
+     */
+    (rMBASPA, bit(10)) ? TBDDefaultCallout;
+
+};
+
+################################################################################
+# Memory Buffer MBA DDR PHY FIR
+################################################################################
+
+rule rMBADDRPHYFIR
+{
+  UNIT_CS:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 & ~MBADDRPHYFIR_ACT1;
+  RECOVERABLE:
+    MBADDRPHYFIR & ~MBADDRPHYFIR_MASK & ~MBADDRPHYFIR_ACT0 &  MBADDRPHYFIR_ACT1;
+};
+
+group gMBADDRPHYFIR filter singlebit
+{
+    /** MBADDRPHYFIR[48]
+     *  FSM Error Checkstop
+     */
+    (rMBADDRPHYFIR, bit(48)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[49]
+     *  Parity Error Checkstop
+     */
+    (rMBADDRPHYFIR, bit(49)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[50]
+     *  Calibration Error RE
+     */
+    (rMBADDRPHYFIR, bit(50)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[51]
+     *  FSM Recoverable Error
+     */
+    (rMBADDRPHYFIR, bit(51)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[52]
+     *  Parity Recoverable Error
+     */
+    (rMBADDRPHYFIR, bit(52)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[53]
+     *  Parity Recoverable Error
+     */
+    (rMBADDRPHYFIR, bit(53)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[54:55]
+     *  Reserved
+     */
+    (rMBADDRPHYFIR, bit(54|55)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[56]
+     *  FSM Error Checkstop
+     */
+    (rMBADDRPHYFIR, bit(56)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[57]
+     *  Parity Error Checkstop
+     */
+    (rMBADDRPHYFIR, bit(57)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[58]
+     *  Calibration Error RE
+     */
+    (rMBADDRPHYFIR, bit(58)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[59]
+     *  FSM Recoverable Error
+     */
+    (rMBADDRPHYFIR, bit(59)) ? TBDDefaultCallout;
+
+    /** MBADDRPHYFIR[60]
+     *  Parity Recoverable Error
+     */
+    (rMBADDRPHYFIR, bit(60)) ? TBDDefaultCallout;
+
+};
+
+ ##############################################################################
+ #                                                                            #
+ #    #                                  ###                                  #
+ #   # #    ##  ##### ###  ###  #   #   #   # #     #    ###   ###  ###  ###  #
+ #  #   #  #  #   #    #  #   # ##  #   #     #    # #  #     #     #   #     #
+ # ####### #      #    #  #   # # # #   #     #   #####  ###   ###  ##   ###  #
+ # #     # #  #   #    #  #   # #  ##   #   # #   #   #     #     # #       # #
+ # #     #  ##    #   ###  ###  #   #    ###  ### #   #  ###   ###  ###  ###  #
+ #                                                                            #
+ ##############################################################################
+
+# Include the common action set.
+.include "cen_common_actions.rule";
+# Include the chip-specific action set.
+.include "cen_mba_actions.rule";
+
