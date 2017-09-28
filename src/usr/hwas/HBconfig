@@ -10,7 +10,7 @@ config RECALL_DECONFIG_ON_RECONFIG
         Normally only garded parts are remembered.
 
 config HOST_HCDB_SUPPORT
-   default n
+   default y if MEMVPD_READ_FROM_HW || MVPD_READ_FROM_HW || DJVPD_READ_FROM_HW
    depends on MEMVPD_READ_FROM_HW || MVPD_READ_FROM_HW || DJVPD_READ_FROM_HW
    help
        Hostboot will detect hardware changes
