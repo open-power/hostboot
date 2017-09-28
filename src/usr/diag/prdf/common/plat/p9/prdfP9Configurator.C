@@ -40,17 +40,23 @@
 #include <prdrLoadChipCache.H>  // To flush chip-file cache.
 
 #include <prdfP9CappDomain.H>
+#include <prdfP9DmiDomain.H>
 #include <prdfP9EcDomain.H>
 #include <prdfP9EqDomain.H>
 #include <prdfP9ExDomain.H>
+#include <prdfP9McDomain.H>
 #include <prdfP9McaDomain.H>
 #include <prdfP9McbistDomain.H>
 #include <prdfP9McsDomain.H>
+#include <prdfP9MiDomain.H>
 #include <prdfP9ObusDomain.H>
 #include <prdfP9PecDomain.H>
 #include <prdfP9PhbDomain.H>
 #include <prdfP9ProcDomain.H>
 #include <prdfP9XbusDomain.H>
+
+#include <prdfCenMbaDomain.H>
+#include <prdfCenMembufDomain.H>
 
 using namespace TARGETING;
 
@@ -88,6 +94,12 @@ errlHndl_t PlatConfigurator::build()
     McbistDomain * mcbistDomain = new McbistDomain( MCBIST_DOMAIN );
     McsDomain    * mcsDomain    = new McsDomain(    MCS_DOMAIN    );
     McaDomain    * mcaDomain    = new McaDomain(    MCA_DOMAIN    );
+    McDomain     * mcDomain     = new McDomain(     MC_DOMAIN     );
+    MiDomain     * miDomain     = new MiDomain(     MI_DOMAIN     );
+    DmiDomain    * dmiDomain    = new DmiDomain(    DMI_DOMAIN    );
+
+    MembufDomain * membufDomain = new MembufDomain( MEMBUF_DOMAIN );
+    MbaDomain    * mbaDomain    = new MbaDomain(    MBA_DOMAIN    );
 
     PllDomainMapList pllDmnMapLst;
 
@@ -135,6 +147,21 @@ errlHndl_t PlatConfigurator::build()
         errl = addDomainChips( TYPE_MCA,    mcaDomain,    pllDmnMapLst );
         if ( NULL != errl ) break;
 
+        errl = addDomainChips( TYPE_MC,     mcDomain,     pllDmnMapLst );
+        if ( NULL != errl ) break;
+
+        errl = addDomainChips( TYPE_MI,     miDomain,     pllDmnMapLst );
+        if ( NULL != errl ) break;
+
+        errl = addDomainChips( TYPE_DMI,    dmiDomain,    pllDmnMapLst );
+        if ( NULL != errl ) break;
+
+        errl = addDomainChips( TYPE_MEMBUF, membufDomain, pllDmnMapLst );
+        if ( NULL != errl ) break;
+
+        errl = addDomainChips( TYPE_MBA,    mbaDomain,    pllDmnMapLst );
+        if ( NULL != errl ) break;
+
     } while (0);
 
     // Now, add the domains to system.
@@ -150,7 +177,7 @@ errlHndl_t PlatConfigurator::build()
     addPllDomainsToSystem( pllDmnMapLst );
 
     // Memory chip domains are always second.
-    // TODO: RTC 144056 Cumulus/Centaur systems.
+    sysDmnLst.push_back( membufDomain );
 
     // Processor chip domains are always third.
     sysDmnLst.push_back( procDomain );
@@ -170,6 +197,10 @@ errlHndl_t PlatConfigurator::build()
     sysDmnLst.push_back( mcbistDomain );
     sysDmnLst.push_back( mcsDomain    );
     sysDmnLst.push_back( mcaDomain    );
+    sysDmnLst.push_back( mcDomain     );
+    sysDmnLst.push_back( miDomain     );
+    sysDmnLst.push_back( dmiDomain    );
+    sysDmnLst.push_back( mbaDomain    );
 
     // Add chips to the system.
     Configurator::chipList & chips = getChipList();
