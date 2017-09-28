@@ -52,9 +52,9 @@ namespace PRDF
     extern const char * p9_mi;
     extern const char * p9_dmi;
 
-    // Centaur Chip
-//    extern const char * Membuf;
-//    extern const char * Mba;
+    // P9 Centaur Chip
+    extern const char * cen_centaur;
+    extern const char * cen_mba;
 
 } // end namespace PRDF
 

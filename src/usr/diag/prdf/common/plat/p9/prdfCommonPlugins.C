@@ -80,6 +80,8 @@ PRDF_PLUGIN_DEFINE_NS( p9_cumulus, CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_mc,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_mi,      CommonPlugins, ClearServiceCallFlag );
 PRDF_PLUGIN_DEFINE_NS( p9_dmi,     CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cen_centaur,CommonPlugins, ClearServiceCallFlag );
+PRDF_PLUGIN_DEFINE_NS( cen_mba,    CommonPlugins, ClearServiceCallFlag );
 
 /**
  * @brief   Clear the service call flag (field and MNFG) so that thresholding

@@ -40,6 +40,8 @@ PRDR_RULE_TABLES += p9_mca.prf
 PRDR_RULE_TABLES += p9_mc.prf
 PRDR_RULE_TABLES += p9_mi.prf
 PRDR_RULE_TABLES += p9_dmi.prf
+PRDR_RULE_TABLES += cen_centaur.prf
+PRDR_RULE_TABLES += cen_mba.prf
 
 prd_rule_prf_targets  = ${PRDR_RULE_TABLES}
 prd_rule_err_targets  = ${PRDR_RULE_TABLES:.prf=.prf.err.C}
