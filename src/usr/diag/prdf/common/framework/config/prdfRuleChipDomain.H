@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,10 @@ class RuleChipDomain : public DomainContainer<RuleChip>
         MCBIST_DOMAIN_SIZE = PROC_DOMAIN_SIZE * 2,
         MCS_DOMAIN_SIZE    = MCBIST_DOMAIN_SIZE * 2,
         MCA_DOMAIN_SIZE    = MCS_DOMAIN_SIZE * 2,
+        MC_DOMAIN_SIZE     = PROC_DOMAIN_SIZE * 2,
+        MI_DOMAIN_SIZE     = MC_DOMAIN_SIZE * 2,
+        DMI_DOMAIN_SIZE    = MI_DOMAIN_SIZE * 2,
+
 
         MEMBUF_DOMAIN_SIZE = MCS_DOMAIN_SIZE,
         MBA_DOMAIN_SIZE    = MEMBUF_DOMAIN_SIZE * 2,

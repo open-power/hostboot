@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,9 @@ enum DOMAIN_ID
     MCBIST_DOMAIN = 0x7A,
     MCS_DOMAIN    = 0x7B,
     MCA_DOMAIN    = 0x7C,
+    MC_DOMAIN     = 0x7D,
+    MI_DOMAIN     = 0x7E,
+    DMI_DOMAIN    = 0x7F,
 
     MEMBUF_DOMAIN = 0x80,
     MBA_DOMAIN    = 0x81,
