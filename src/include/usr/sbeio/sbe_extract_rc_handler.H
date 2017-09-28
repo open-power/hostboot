@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/sbe_extract_rc_handler.H $             */
+/* $Source: src/include/usr/sbeio/sbe_extract_rc_handler.H $              */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -26,6 +26,8 @@
 #define __SBE_EXTRACT_RC_HANDLER_H
 
 #include <isteps/hwpisteperror.H>
+#include <p9_extract_sbe_rc.H>
+#include <p9_get_sbe_msg_register.H>
 
 enum SBE_REG_RETURN
 {
@@ -202,14 +204,12 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target);
  *
  * @param[in]     i_target        - current proc target
  * @param[in]     i_sbeReg        - sbe register
- * @param[in/out] io_stepError    - istep error (optional)
  *
  * @return - NULL
  */
 
 void sbe_boot_fail_handler(TARGETING::Target * i_target,
-                           sbeMsgReg_t i_sbeReg,
-                           ISTEP_ERROR::IStepError *io_stepError = nullptr);
+                           sbeMsgReg_t i_sbeReg);
 
 /**
  * @brief  This function deals with the mask needed to switch

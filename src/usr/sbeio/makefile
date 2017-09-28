@@ -23,7 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
-
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 MODULE = sbeio
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
@@ -32,6 +32,8 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
+
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 
 OBJS += sbe_psudd.o
 OBJS += sbe_utils.o
@@ -50,6 +52,7 @@ OBJS += sbe_memRegionMgr.o
 OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_attn.o
+OBJS += sbe_extract_rc_handler.o
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 include ${ROOTPATH}/procedure.rules.mk

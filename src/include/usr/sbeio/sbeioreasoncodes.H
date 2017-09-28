@@ -51,6 +51,10 @@ enum sbeioModuleId
     SBEIO_MEM_REGION                    = 0x06,
     SBEIO_RUNTIME_ATTR_OVERRIDE         = 0x07,
     SBEIO_FIFO_GET_SBE_FFDC             = 0x08,
+    SBEIO_THRESHOLD_FSM                 = 0x09,
+    SBEIO_EXTRACT_RC_HANDLER            = 0x0A,
+    SBEIO_HANDLE_SBE_REG_VALUE          = 0x0B,
+    SBEIO_GET_FFDC_HANDLER              = 0x0C,
 };
 
 /**
@@ -106,6 +110,15 @@ enum sbeioReasonCode
     // SBE Unsecure Memory Region error codes
     SBEIO_MEM_REGION_DOES_NOT_EXIST    = SBEIO_COMP_ID | 0x50,
     SBEIO_EXCEEDS_MAXIMUM_MEM_REGIONS  = SBEIO_COMP_ID | 0x51,
+
+    SBEIO_BOOTED_UNEXPECTED_SIDE_BKP   = SBEIO_COMP_ID | 0x52,
+    SBEIO_NO_RECOVERY_ACTION           = SBEIO_COMP_ID | 0x53,
+    SBEIO_EXTRACT_RC_ERROR             = SBEIO_COMP_ID | 0x54,
+    SBEIO_BOOT_FROM_BKP_SEEPROM        = SBEIO_COMP_ID | 0x55,
+    SBEIO_BOOTED_UNEXPECTED_SIDE_UPD   = SBEIO_COMP_ID | 0x56,
+    SBEIO_INCORRECT_FCN_CALL           = SBEIO_COMP_ID | 0x57,
+    SBEIO_RETURNED_FFDC                = SBEIO_COMP_ID | 0x58,
+    SBEIO_SLAVE_TIMEOUT                = SBEIO_COMP_ID | 0x59,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
