@@ -51,9 +51,9 @@ fapi2::ReturnCode centaur_nest_pll_scan(const fapi2::Target<fapi2::TARGET_TYPE_M
         fapi2::ATTR_IS_SIMULATION_Type l_TGT1_ATTR_IS_SIMULATION;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT1, l_TGT1_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_SIM = (l_TGT1_ATTR_IS_SIMULATION == literal_1);
-        fapi2::ATTR_FREQ_PB_MHZ_Type l_TGT1_ATTR_FREQ_PB_MHZ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ, TGT1, l_TGT1_ATTR_FREQ_PB_MHZ));
-        uint64_t l_def_NEST_FREQ = l_TGT1_ATTR_FREQ_PB_MHZ;
+        fapi2::ATTR_FREQ_MCA_MHZ_Type l_TGT1_ATTR_FREQ_MCA_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MCA_MHZ, TGT1, l_TGT1_ATTR_FREQ_MCA_MHZ));
+        uint64_t l_def_NEST_FREQ = l_TGT1_ATTR_FREQ_MCA_MHZ;
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         bool l_DMI_DMIPLL_CWRAP_PLL_CNTRL0_update = false;
         fapi2::variable_buffer l_DMI_DMIPLL_CWRAP_PLL_CNTRL0(64);
