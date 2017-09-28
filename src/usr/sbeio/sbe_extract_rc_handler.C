@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep08/sbe_extract_rc_handler.C $             */
+/* $Source: src/usr/sbeio/sbe_extract_rc_handler.C $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -41,7 +41,6 @@
 
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
-#include <isteps/istep_reasoncodes.H>
 #include <initservice/isteps_trace.H>
 #include <initservice/initserviceif.H>
 #include <errl/errludtarget.H>
@@ -52,7 +51,7 @@
 #include <p9_start_cbs.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_perv_scom_addresses.H>
-#include "sbe_extract_rc_handler.H"
+#include <sbeio/sbe_extract_rc_handler.H>
 #include <sbe/sbe_update.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_sp_intf.H>
@@ -61,9 +60,19 @@
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbeioreasoncodes.H>
 
-using namespace ISTEP;
-using namespace ISTEP_ERROR;
+extern trace_desc_t* g_trac_sbeio;
 
+#define SBE_TRACF(printf_string,args...) \
+    TRACFCOMP(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+#define SBE_TRACD(printf_string,args...) \
+    TRACDCOMP(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+#define SBE_TRACU(args...)
+#define SBE_TRACFBIN(printf_string,args...) \
+    TRACFBIN(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+#define SBE_TRACDBIN(printf_string,args...) \
+    TRACDBIN(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+
+using namespace SBEIO;
 
 /* array and enum must be in sync */
 P9_EXTRACT_SBE_RC::RETURN_ACTION (* sbe_handler_state[])(
@@ -127,8 +136,7 @@ void sbe_threshold_handler( bool i_procSide,
         errlHndl_t l_errl = IPMIWATCHDOG::resetWatchDogTimer();
         if(l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Inside sbe_extract_rc_handler FSM, "
+            SBE_TRACF("Inside sbe_extract_rc_handler FSM, "
                       "Resetting watchdog");
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl,ISTEP_COMP_ID);
@@ -157,8 +165,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
                             TARGETING::Target * i_target,
                             uint8_t i_orig_error)
 {
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Running p9_start_cbs HWP on processor target %.8X",
+    SBE_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                TARGETING::get_huid(i_target));
 
     // We don't actually need an accurate p9_extract_sbe_rc value if
@@ -171,8 +178,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
                          TARGETING::Target * i_target,
                          uint8_t i_orig_error)
 {
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Running p9_start_cbs HWP on processor target %.8X",
+    SBE_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                TARGETING::get_huid(i_target));
 
     errlHndl_t l_errl = NULL;
@@ -198,16 +204,16 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
         // Information log
         /*@
          * @errortype
-         * @moduleid    MOD_SBE_THRESHOLD_FSM
-         * @reasoncode  RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP
+         * @moduleid    SBEIO_THRESHOLD_FSM
+         * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE_BKP
          * @userdata1   SBE status reg
          * @userdata2   HUID
          * @devdesc     The SBE has booted on an unexpected side
          */
         l_errl = new ERRORLOG::ErrlEntry(
                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                MOD_SBE_THRESHOLD_FSM,
-                RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP,
+                SBEIO_THRESHOLD_FSM,
+                SBEIO_BOOTED_UNEXPECTED_SIDE_BKP,
                 l_ret,
                 get_huid(i_target));
 
@@ -244,8 +250,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
         l_errl = IPMIWATCHDOG::resetWatchDogTimer();
         if(l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Inside sbe_extract_rc_handler FSM, before sbe_handler "
+            SBE_TRACF("Inside sbe_extract_rc_handler FSM, before sbe_handler "
                       "Resetting watchdog");
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl,ISTEP_COMP_ID);
@@ -260,8 +265,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
         // There is no action possible. Gard and Callout the proc
         /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
-         * @moduleid   MOD_SBE_THRESHOLD_FSM
-         * @reasoncode RC_NO_RECOVERY_ACTION
+         * @moduleid   SBEIO_THRESHOLD_FSM
+         * @reasoncode SBEIO_NO_RECOVERY_ACTION
          * @userdata1  SBE current error
          * @userdata2  HUID of proc
          * @devdesc    There is no recovery action on the SBE.
@@ -269,8 +274,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
              */
         l_errl = new ERRORLOG::ErrlEntry(
                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                        MOD_SBE_THRESHOLD_FSM,
-                        RC_NO_RECOVERY_ACTION,
+                        SBEIO_THRESHOLD_FSM,
+                        SBEIO_NO_RECOVERY_ACTION,
                         i_orig_error,
                         TARGETING::get_huid(i_target));
         l_errl->collectTrace( "ISTEPS_TRACE", 256);
@@ -290,16 +295,16 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
 void proc_extract_sbe_handler( TARGETING::Target * i_target,
                                uint8_t i_current_error)
 {
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK
-              "proc_extract_sbe_handler error: %llx",i_current_error);
+    SBE_TRACF(ENTER_MRK "proc_extract_sbe_handler error: %x",
+                    i_current_error);
 
     errlHndl_t l_errl = NULL;
 
     /*@
      * @errortype
      * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
-     * @moduleid   MOD_SBE_EXTRACT_RC_HANDLER
-     * @reasoncode RC_SBE_EXTRACT_RC_ERROR
+     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+     * @reasoncode SBEIO_EXTRACT_RC_ERROR
      * @userdata1  HUID of proc that had the SBE timeout
      * @userdata2  SBE failing code
      *
@@ -310,8 +315,8 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
      */
     l_errl = new ERRORLOG::ErrlEntry(
             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            MOD_SBE_EXTRACT_RC_HANDLER,
-            RC_SBE_EXTRACT_RC_ERROR,
+            SBEIO_EXTRACT_RC_HANDLER,
+            SBEIO_EXTRACT_RC_ERROR,
             TARGETING::get_huid(i_target),
             i_current_error);
 
@@ -328,8 +333,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             // Note: These two are only going to have the same handling until
             //       we have runtime handling in place.
 
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Running p9_start_cbs HWP on processor target %.8X",
+            SBE_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                        TARGETING::get_huid(i_target));
             handle_sbe_restart(i_target, false,
                             P9_EXTRACT_SBE_RC::RESTART_SBE);
@@ -340,16 +344,16 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             // Log additional error on proc.
             /*@
              * @errortype  ERRL_SEV_INFORMATIONAL
-             * @moduleid   MOD_SBE_EXTRACT_RC_HANDLER
-             * @reasoncode RC_BOOT_FROM_BKP_SEEPROM
+             * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+             * @reasoncode SBEIO_BOOT_FROM_BKP_SEEPROM
              * @userdata1  SBE return code
              * @userdata2  HUID current side
              * @devdesc    Attempting to boot from backup SEEPROM
              */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            MOD_SBE_EXTRACT_RC_HANDLER,
-                            RC_BOOT_FROM_BKP_SEEPROM,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_BOOT_FROM_BKP_SEEPROM,
                             i_current_error,
                             get_huid(i_target));
             l_errl->collectTrace("ISTEPS_TRACE",256);
@@ -370,8 +374,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                 // if it passes make a note that we booted from
                 //    an unexpected side
                 // if it fails, call the threshold handler
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_start_cbs HWP on processor target %.8X",
+            SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
                    TARGETING::get_huid(i_target));
 
             handle_sbe_restart(i_target, false,
@@ -382,16 +385,16 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                 // Make a note that we booted from an unexpected side
                 /*@
                  * @errortype   ERRL_SEV_INFORMATIONAL
-                 * @moduleid    MOD_SBE_EXTRACT_RC_HANDLER
-                 * @reasoncode  RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP
+                 * @moduleid    SBEIO_EXTRACT_RC_HANDLER
+                 * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE_BKP
                  * @userdata1   0
                  * @userdata2   HUID of working proc
                  * @devdesc     SBE booted from unexpected side.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            MOD_SBE_EXTRACT_RC_HANDLER,
-                            RC_SBE_BOOTED_UNEXPECTED_SIDE_BKP,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_BOOTED_UNEXPECTED_SIDE_BKP,
                             0,TARGETING::get_huid(i_target));
                 l_errl->collectTrace("ISTEPS_TRACE",256);
                 errlCommit(l_errl, ISTEP_COMP_ID);
@@ -416,8 +419,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                 //   unexpected side
                 // if it fails, escalate to RE_IPL_SEEPROM and call
                 //   this function again.
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_start_cbs HWP on processor target %.8X",
+            SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
                    TARGETING::get_huid(i_target));
 
             handle_sbe_restart(i_target, false,
@@ -428,16 +430,16 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
                 // Make a note that we booted from an unexpected side
                 /*@
                  * @errortype   ERRL_SEV_INFORMATIONAL
-                 * @moduleid    MOD_SBE_EXTRACT_RC_HANDLER
-                 * @reasoncode  RC_SBE_BOOTED_UNEXPECTED_SIDE_UPD
+                 * @moduleid    SBEIO_EXTRACT_RC_HANDLER
+                 * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE_UPD
                  * @userdata1   0
                  * @userdata2   HUID of proc
                  * @devdesc     SBE booted from unexpected side.
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            MOD_SBE_EXTRACT_RC_HANDLER,
-                            RC_SBE_BOOTED_UNEXPECTED_SIDE_UPD,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_BOOTED_UNEXPECTED_SIDE_UPD,
                             0,TARGETING::get_huid(i_target));
                 l_errl->collectTrace("ISTEPS_TRACE",256);
                 errlCommit(l_errl, ISTEP_COMP_ID);
@@ -450,8 +452,8 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             // There is no action possible. Gard and Callout the proc
             /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   MOD_SBE_EXTRACT_RC_HANDLER
-             * @reasoncode RC_NO_RECOVERY_ACTION
+             * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+             * @reasoncode SBEIO_NO_RECOVERY_ACTION
              * @userdata1  SBE current error
              * @userdata2  HUID of proc
              * @devdesc    There is no recovery action on the SBE.
@@ -459,8 +461,8 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
              */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            MOD_SBE_EXTRACT_RC_HANDLER,
-                            RC_NO_RECOVERY_ACTION,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_NO_RECOVERY_ACTION,
                             P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
                             TARGETING::get_huid(i_target));
             l_errl->collectTrace( "ISTEPS_TRACE", 256);
@@ -477,8 +479,8 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             //Error out, unexpected enum value returned.
             /*@
              * @errortype   ERRL_SEV_INFORMATIONAL
-             * @moduleid    MOD_SBE_EXTRACT_RC_HANDLER
-             * @reasoncode  RC_INCORRECT_FCN_CALL
+             * @moduleid    SBEIO_EXTRACT_RC_HANDLER
+             * @reasoncode  SBEIO_INCORRECT_FCN_CALL
              * @userdata1   SBE current error
              * @userdata2   HUID of proc
              * @devdesc     This function was called incorrectly or
@@ -486,8 +488,8 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
              */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            MOD_SBE_EXTRACT_RC_HANDLER,
-                            RC_INCORRECT_FCN_CALL,
+                            SBEIO_EXTRACT_RC_HANDLER,
+                            SBEIO_INCORRECT_FCN_CALL,
                             i_current_error,
                             TARGETING::get_huid(i_target));
             l_errl->collectTrace( "ISTEPS_TRACE",256);
@@ -497,16 +499,14 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
         }
     }
 
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, EXIT_MRK
-              "proc_extract_sbe_handler");
+    SBE_TRACF(EXIT_MRK "proc_extract_sbe_handler");
 
     return;
 }
 
 SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
 {
-    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK
-              "check_sbe_reg");
+    SBE_TRACF(ENTER_MRK "check_sbe_reg");
 
     errlHndl_t l_errl = nullptr;
     SBE_REG_RETURN l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
@@ -538,8 +538,7 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
         }
         else if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR: call check_sbe_reg, PLID=0x%x", l_errl->plid() );
+            SBE_TRACF("ERROR: call check_sbe_reg, PLID=0x%x", l_errl->plid() );
 
             // capture the target data in the elog
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
@@ -553,8 +552,7 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
             // Set attribute indicating that SBE is started
             i_target->setAttr<TARGETING::ATTR_SBE_IS_STARTED>(1);
 
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SUCCESS: check_sbe_reg completed okay for proc 0x%.8X",
+            SBE_TRACF("SUCCESS: check_sbe_reg completed okay for proc 0x%.8X",
                       TARGETING::get_huid(i_target));
         }
         //@TODO-RTC:100963 - this should match the logic in
@@ -599,8 +597,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
                 l_errl = IPMIWATCHDOG::resetWatchDogTimer();
                 if(l_errl)
                 {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Inside handle_sbe_reg_value before sbe_handler "
+                    SBE_TRACF("Inside handle_sbe_reg_value before sbe_handler "
                               "Resetting watchdog");
                     l_errl->collectTrace("ISTEPS_TRACE",256);
                     errlCommit(l_errl,ISTEP_COMP_ID);
@@ -621,8 +618,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
 
             if(l_errl)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR : p9_extract_sbe_rc HWP returning errorlog "
+                SBE_TRACF("ERROR : p9_extract_sbe_rc HWP returning errorlog "
                           "PLID-0x%x", l_errl->plid());
 
                 // capture the target data in the elog
@@ -661,8 +657,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
             //return P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             /*@
              * @errortype   ERRL_SEV_INFORMATIONAL
-             * @moduleid    MOD_HANDLE_SBE_REG_VALUE
-             * @reasoncode  RC_INCORRECT_FCN_CALL
+             * @moduleid    SBEIO_HANDLE_SBE_REG_VALUE
+             * @reasoncode  SBEIO_INCORRECT_FCN_CALL
              * @userdata1   HUID of target
              * @userdata2   check_sbe_reg return value
              * @devdesc     This function was called incorrectly or
@@ -670,8 +666,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
              */
             l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            MOD_HANDLE_SBE_REG_VALUE,
-                            RC_INCORRECT_FCN_CALL,
+                            SBEIO_HANDLE_SBE_REG_VALUE,
+                            SBEIO_INCORRECT_FCN_CALL,
                             get_huid(i_target),i_sbe_reg);
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl, ISTEP_COMP_ID);
@@ -693,8 +689,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION handle_sbe_restart(
     FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
     if(l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                 "ERROR: call p9_start_cbs, "
+        SBE_TRACF("ERROR: call p9_start_cbs, "
                  "PLID=0x%x", l_errl->plid() );
         l_errl->collectTrace( "ISTEPS_TRACE", 256);
 
@@ -728,8 +723,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
     const uint64_t SBE_NUM_LOOPS = 100;
     const uint64_t SBE_WAIT_SLEEP = (SBE_TIMEOUT_NSEC/SBE_NUM_LOOPS);
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "Running p9_get_sbe_msg_register HWP on proc target %.8X",
+    SBE_TRACF("Running p9_get_sbe_msg_register HWP on proc target %.8X",
                TARGETING::get_huid(i_target));
 
     for( uint64_t l_loops = 0; l_loops < SBE_NUM_LOOPS; l_loops++ )
@@ -739,8 +733,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                         l_fapi2_proc_target, (*o_sbeReg));
         if (l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
+            SBE_TRACF("ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
                       "on loop %d",
                       l_errl->plid(),
                       l_loops );
@@ -749,8 +742,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         }
         else if ((*o_sbeReg).currState == SBE_STATE_RUNTIME)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SBE 0x%.8X booted and at runtime, o_sbeReg=0x%.8X, "
+            SBE_TRACF("SBE 0x%.8X booted and at runtime, o_sbeReg=0x%.8X, "
                       "on loop %d",
                       TARGETING::get_huid(i_target), (*o_sbeReg).reg,
                       l_loops);
@@ -759,8 +751,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         }
         else if ((*o_sbeReg).asyncFFDC)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "SBE 0x%.8X has async FFDC bit set, o_sbeReg=0x%.8X",
+            SBE_TRACF("SBE 0x%.8X has async FFDC bit set, o_sbeReg=0x%.8X",
                       TARGETING::get_huid(i_target), (*o_sbeReg).reg);
             // Async FFDC is indicator that SBE is failing to boot, and if
             // in DUMP state, that SBE is done dumping, so leave loop
@@ -770,8 +761,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         {
             if( !(l_loops % 10) )
             {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "%d> SBE 0x%.8X NOT booted yet, o_sbeReg=0x%.8X",
+                SBE_TRACF("%d> SBE 0x%.8X NOT booted yet, o_sbeReg=0x%.8X",
                            l_loops, TARGETING::get_huid(i_target),
                            (*o_sbeReg).reg);
             }
@@ -791,8 +781,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         l_switches.useFsiScom = 1;
         l_switches.useSbeScom = 0;
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "sbe_timeout_handler: changing SCOM switches from 0x%.2X "
+        SBE_TRACF("sbe_timeout_handler: changing SCOM switches from 0x%.2X "
                   "to 0x%.2X for proc 0x%.8X",
                   l_switches_before,
                   l_switches,
@@ -865,11 +854,11 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
 {
     bool l_flowCtrl = false;
     errlHndl_t l_errl = nullptr;
-    uint32_t l_responseSize = SBEIO::SbeFifoRespBuffer::MSG_BUFFER_SIZE;
+    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
     uint32_t *l_pFifoResponse =
         reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 
-    l_errl = SBEIO::getFifoSBEFFDC(i_target,
+    l_errl = getFifoSBEFFDC(i_target,
                                    l_pFifoResponse,
                                    l_responseSize);
 
@@ -877,8 +866,7 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
     if(l_errl)
     {
         // Trace but otherwise silently ignore error
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "sbe_get_ffdc_handler: ignoring error PLID=0x%x from "
+        SBE_TRACF("sbe_get_ffdc_handler: ignoring error PLID=0x%x from "
                   "get SBE FFDC FIFO request to proc 0x%.8X",
                   l_errl->plid(),
                   TARGETING::get_huid(i_target));
@@ -888,8 +876,8 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
     else
     {
         // Parse the FFDC package(s) in the response
-        SBEIO::SbeFFDCParser * l_ffdc_parser =
-            new SBEIO::SbeFFDCParser();
+        SbeFFDCParser * l_ffdc_parser =
+            new SbeFFDCParser();
         l_ffdc_parser->parseFFDCData(reinterpret_cast<void *>(l_pFifoResponse));
 
         uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
@@ -900,16 +888,16 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
         {
             /*@
              * @errortype
-             * @moduleid     MOD_SBE_GET_FFDC_HANDLER
-             * @reasoncode   RC_RETURNED_FFDC
+             * @moduleid     SBEIO_GET_FFDC_HANDLER
+             * @reasoncode   SBEIO_RETURNED_FFDC
              * @userdata1    Processor Target
              * @userdata2    Number of FFDC packages
              * @devdesc      FFDC returned by SBE after failing to reach runtime
              * @custdesc     FFDC associated with boot device failing to boot
              */
             l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             MOD_SBE_GET_FFDC_HANDLER,
-                                             RC_RETURNED_FFDC,
+                                             SBEIO_GET_FFDC_HANDLER,
+                                             SBEIO_RETURNED_FFDC,
                                              TARGETING::get_huid(i_target),
                                              l_pkgs);
 
@@ -925,7 +913,7 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
                              l_ffdc_parser->getFFDCPackage(i),
                              l_ffdc_parser->getPackageLength(i),
                              0,
-                             SBEIO::SBEIO_UDT_PARAMETERS,
+                             SBEIO_UDT_PARAMETERS,
                              false );
 
             // Get the RC from the FFDC package
@@ -961,19 +949,17 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
 }
 
 void sbe_boot_fail_handler(TARGETING::Target * i_target,
-                           sbeMsgReg_t i_sbeReg,
-                           IStepError *io_stepError)
+                           sbeMsgReg_t i_sbeReg)
 {
     errlHndl_t l_errl = nullptr;
 
-    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-               "SBE 0x%.8X never started, sbeReg=0x%.8X",
+    SBE_TRACF("SBE 0x%.8X never started, sbeReg=0x%.8X",
                TARGETING::get_huid(i_target),i_sbeReg.reg );
     /*@
      * @errortype
-     * @reasoncode  RC_SBE_SLAVE_TIMEOUT
+     * @reasoncode  SBEIO_SLAVE_TIMEOUT
      * @severity    ERRORLOG::ERRL_SEV_INFORMATIONAL
-     * @moduleid    MOD_SBE_EXTRACT_RC_HANDLER
+     * @moduleid    SBEIO_EXTRACT_RC_HANDLER
      * @userdata1   HUID of proc which had SBE timeout
      * @userdata2   SBE MSG Register
      *
@@ -983,8 +969,8 @@ void sbe_boot_fail_handler(TARGETING::Target * i_target,
      * @custdesc A processor in the system has failed to initialize
      */
     l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                     MOD_SBE_EXTRACT_RC_HANDLER,
-                                     RC_SBE_SLAVE_TIMEOUT,
+                                     SBEIO_EXTRACT_RC_HANDLER,
+                                     SBEIO_SLAVE_TIMEOUT,
                                      TARGETING::get_huid(i_target),
                                      i_sbeReg.reg);
 
@@ -1004,19 +990,12 @@ void sbe_boot_fail_handler(TARGETING::Target * i_target,
 
     if(l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-               "ERROR : sbe_boot_fail_handler : "
+        SBE_TRACF("ERROR : sbe_boot_fail_handler : "
                "p9_extract_sbe_rc HWP returning errorlog "
                "PLID=0x%x",l_errl->plid());
 
         // capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
-
-        // Create IStep error log and cross reference to error
-        if(io_stepError)
-        {
-            io_stepError->addErrorDetails( l_errl );
-        }
 
         // Commit error log
         errlCommit( l_errl, HWPF_COMP_ID );
@@ -1030,7 +1009,7 @@ void sbe_boot_fail_handler(TARGETING::Target * i_target,
             // When we are on an FSP machine, we want to fail out of
             // hostboot and give control back to the FSP. They have
             // better diagnostics for this type of error.
-            INITSERVICE::doShutdownWithError(RC_HWSV_COLLECT_SBE_RC,
+            INITSERVICE::doShutdownWithError(SBEIO_HWSV_COLLECT_SBE_RC,
                                 TARGETING::get_huid(i_target));
         }
 
@@ -1041,8 +1020,7 @@ void sbe_boot_fail_handler(TARGETING::Target * i_target,
         l_errl = IPMIWATCHDOG::resetWatchDogTimer();
         if(l_errl)
         {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "sbe_boot_fail_handler "
+            SBE_TRACF("sbe_boot_fail_handler "
                       "Resetting watchdog before sbe_handler");
             l_errl->collectTrace("ISTEPS_TRACE",KILOBYTE/4);
             errlCommit(l_errl,ISTEP_COMP_ID);
@@ -1070,8 +1048,7 @@ errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
                     l_mvpdSbKeyword);
     if(l_errl)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                  "Failure to getSetMVPDVersion");
+        SBE_TRACF("Failure to getSetMVPDVersion");
         return l_errl;
     }
 
@@ -1084,8 +1061,7 @@ errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
         l_errl->collectTrace(FAPI_TRACE_NAME,384);
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Failure to getCfamRegister");
+        SBE_TRACF("Failure to getCfamRegister");
         return l_errl;
     }
 
@@ -1114,8 +1090,7 @@ errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
         l_errl->collectTrace(FAPI_TRACE_NAME,384);
 
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-            "Failure to putCfamRegister");
+        SBE_TRACF("Failure to putCfamRegister");
         return l_errl;
     }
 

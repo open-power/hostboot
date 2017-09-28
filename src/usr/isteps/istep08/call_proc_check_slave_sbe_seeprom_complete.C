@@ -64,7 +64,7 @@
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_getecid.H>
-#include "sbe_extract_rc_handler.H"
+#include <sbeio/sbe_extract_rc_handler.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -145,7 +145,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             }
 
             // Handle that SBE failed to boot in the allowed time
-            sbe_boot_fail_handler(l_cpu_target,l_sbeReg,&l_stepError);
+            sbe_boot_fail_handler(l_cpu_target,l_sbeReg);
         }
         else if (l_errl)
         {
