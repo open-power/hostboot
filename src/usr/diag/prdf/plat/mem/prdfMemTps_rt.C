@@ -512,9 +512,11 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the symbol mark is available.
             if ( !symMark.isValid() )
             {
-                // If the non-zero sum nibble count is <= 1 or the single
-                // symbol nibble count is <= 2.
-                if (i_nonZeroSumCount.count <= 1 || i_singleSymCount.count <= 2)
+                // If the non-zero sum nibble count is <= 1 or non-zero sum
+                // nibble count == 2 and single sym nibble count == 2
+                if ( (i_nonZeroSumCount.count <= 1) ||
+                     (i_nonZeroSumCount.count == 2 &&
+                      i_singleSymCount.count == 2) )
                 {
                     // This means we have a potential future chip kill or
                     // TCE. Both are still correctable after a symbol mark
@@ -580,9 +582,11 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the symbol mark is available.
             if ( !symMark.isValid() )
             {
-                // If the non-zero sum nibble count is <= 1 and the single
-                // symbol nibble count is <= 1.
-                if (i_nonZeroSumCount.count <= 1 && i_singleSymCount.count <= 1)
+                // If the non-zero sum nibble count is = 0 or non-zero sum
+                // nibble count = 1 and single sym nibble count = 1
+                if ( (i_nonZeroSumCount.count == 0) ||
+                     (i_nonZeroSumCount.count == 1 &&
+                      i_singleSymCount.count == 1) )
                 {
                     // This means we have only one more potential bad DQ, which
                     // is correctable after a symbol mark is placed.
@@ -668,9 +672,11 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the chip mark is available.
             if ( !chipMark.isValid() )
             {
-                // If the non-zero sum nibble count is <= 1 and the single
-                // symbol nibble count is <= 1.
-                if (i_nonZeroSumCount.count <= 1 && i_singleSymCount.count <= 1)
+                // If the non-zero sum nibble count is = 0 or the non-zero sum
+                // nibble count = 1 and the single sym nibble count = 1
+                if ( (i_nonZeroSumCount.count == 0) ||
+                     (i_nonZeroSumCount.count == 1 &&
+                      i_singleSymCount.count == 1) )
                 {
                     // This means we have only one more potential bad DQ, which
                     // is still correctable after a chip mark is placed.
