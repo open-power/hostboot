@@ -719,6 +719,7 @@ extern "C"
         uint8_t l_mss_power_control_requested = 0;
         uint32_t l_rdimm_rcd_ibt[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint8_t l_rdimm_rcd_output_timing[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
+        uint8_t l_refresh_rate = 0;
         uint8_t l_die_count = 1;
         uint8_t l_ranks_3d_tsv = 0;
         uint8_t l_allow_port_size = 1;
@@ -726,6 +727,9 @@ extern "C"
         uint32_t l_max_delay = 0;             // in ps
         uint8_t l_speed_idx = 0;
         uint8_t l_width_idx = 0;
+        constexpr double TEN_PERCENT_FASTER = 0.90;
+        constexpr double ONE_PERCENT_FASTER = 0.99;
+        constexpr uint64_t TRFI_BASE = 7800;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_ADDRESS_MIRRORING, i_target_mba,  l_vpd_dram_address_mirroring));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_VPD_DRAM_2N_MODE_ENABLED, i_target_mba,  l_mss_dram_2n_mode_enable));
         // DDR4 Vref
@@ -1782,11 +1786,51 @@ extern "C"
 
         o_atts->eff_memcal_interval = (62500 *
                                        i_mss_eff_config_data->mss_freq) / 2;
-        // Calculate tRFI
-        o_atts->eff_dram_trfi = (3900 *
-                                 i_mss_eff_config_data->mss_freq) / 2000;
-        // Added 10% margin to TRFI per defect HW248225
-        o_atts->eff_dram_trfi = (o_atts->eff_dram_trfi * 9) / 10;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_refresh_rate));
+
+        //  Calculate tRFI
+        switch(l_refresh_rate)
+        {
+            case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE:
+                o_atts->eff_dram_trfi = ((TRFI_BASE / 2) *
+                                         i_mss_eff_config_data->mss_freq) / 2000;
+                // Added 1% margin to TRFI
+                o_atts->eff_dram_trfi = o_atts->eff_dram_trfi * ONE_PERCENT_FASTER;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE_10_PERCENT_FASTER:
+                o_atts->eff_dram_trfi = ((TRFI_BASE / 2) *
+                                         i_mss_eff_config_data->mss_freq) / 2000;
+                // Added 10% margin to TRFI
+                o_atts->eff_dram_trfi = o_atts->eff_dram_trfi * TEN_PERCENT_FASTER;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE:
+                o_atts->eff_dram_trfi = (TRFI_BASE *
+                                         i_mss_eff_config_data->mss_freq) / 2000;
+                // Added 1% margin to TRFI
+                o_atts->eff_dram_trfi = o_atts->eff_dram_trfi * ONE_PERCENT_FASTER;
+                break;
+
+            case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE_10_PERCENT_FASTER:
+                o_atts->eff_dram_trfi = (TRFI_BASE *
+                                         i_mss_eff_config_data->mss_freq) / 2000;
+                // Added 10% margin to TRFI
+                o_atts->eff_dram_trfi = o_atts->eff_dram_trfi * TEN_PERCENT_FASTER;
+                break;
+
+            default:
+                FAPI_ERR("Unknown value in MRW attribute ATTR_MSS_MRW_REFRESH_RATE_REQUEST, setting TRFI to double plus 10 percent on %s",
+                         mss::c_str(i_target_mba));
+                o_atts->eff_dram_trfi = ((TRFI_BASE / 2) *
+                                         i_mss_eff_config_data->mss_freq) / 2000;
+                // Added 10% margin to TRFI
+                o_atts->eff_dram_trfi = o_atts->eff_dram_trfi * TEN_PERCENT_FASTER;
+                break;
+        }
+
+        FAPI_INF("Set eff_dram_trfi = %d", o_atts->eff_dram_trfi);
 
         o_atts->eff_vpd_version = 0xFFFFFF; // set VPD version to a large number, searching for smallest
 
