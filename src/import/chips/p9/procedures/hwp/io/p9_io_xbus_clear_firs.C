@@ -30,7 +30,7 @@
 /// *HWP HWP Backup Owner : Gary Peterson <garyp@us.ibm.com>
 /// *HWP FW Owner         : Jamie Knight <rjknight@us.ibm.com>
 /// *HWP Team             : IO
-/// *HWP Level            : 2
+/// *HWP Level            : 3
 /// *HWP Consumed by      : FSP:HB
 ///-----------------------------------------------------------------------------
 ///
