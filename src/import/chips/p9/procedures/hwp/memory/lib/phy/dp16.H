@@ -1008,6 +1008,16 @@ fapi2::ReturnCode reset_bad_bits_helper(const fapi2::Target<fapi2::TARGET_TYPE_D
                                         const uint8_t i_bad_dq[MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT]);
 
 ///
+/// @brief Configures the DQS_DISABLE register based upon the bad DQ information for x4 DRAM
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[in] i_dq_disable - the DQ disable information
+/// @param[in] i_reg - the DQS disable bit register to update
+///
+fapi2::ReturnCode reset_dqs_disable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const fapi2::buffer<uint64_t>& i_dq_disable,
+                                    const uint64_t i_reg);
+
+///
 /// @brief Configure the DP16 io_tx config0 registers
 /// @tparam T the fapi2::TargetType
 /// @tparam TT the target traits

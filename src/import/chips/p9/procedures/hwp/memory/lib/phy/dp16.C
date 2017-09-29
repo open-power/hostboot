@@ -3196,6 +3196,67 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Configures the DQS_DISABLE register based upon the bad DQ information for x4 DRAM
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[in] i_dq_disable - the DQ disable information
+/// @param[in] i_reg - the DQS disable bit register to update
+///
+fapi2::ReturnCode reset_dqs_disable(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                    const fapi2::buffer<uint64_t>& i_dq_disable,
+                                    const uint64_t i_reg)
+{
+    // Declaring the mappings from bad DQ to bad DQS
+    constexpr uint64_t BAD_DQ      = MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15;
+    constexpr uint64_t BAD_DQ_LEN  = BITS_PER_NIBBLE;
+    constexpr uint64_t BAD_DQS     = MCA_DDRPHY_DP16_DATA_BIT_DISABLE1_RP0_P0_0_01_DISABLE_16_23;
+    constexpr uint64_t BAD_DQS_LEN = 2;
+
+    // An entire nibble is bad if all of it's bits are set, so 0xf
+    constexpr uint64_t ALL_BAD = 0xf;
+
+    // Declares variables
+    fapi2::buffer<uint64_t> l_dqs_disable;
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    // Checks if this DIMM is a x8 DIMM first, if so, skip it as a chip kill here is beyond our corrective capabilities
+    uint8_t l_width = 0;
+    FAPI_TRY(mss::eff_dram_width(i_target, l_width));
+
+    // Skip if the DIMIM is a x8
+    if(l_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8)
+    {
+        FAPI_INF("%s is a x8 DIMM, clearing DQS register 0x%016lx", mss::c_str(i_target), i_reg);
+        return mss::putScom(l_mca, i_reg, l_dqs_disable);
+    }
+
+    // Due to plug rules check, we should be a x4 now, so let's reset some DQS bits
+    for(uint64_t l_nibble = 0; l_nibble < NIBBLES_PER_DP; ++l_nibble)
+    {
+        // If we have a whole nibble bad, set the bad DQS bits
+        const auto DQ_START = BAD_DQ + (l_nibble * BAD_DQ_LEN);
+        const auto DQS_START = BAD_DQS + (l_nibble * BAD_DQS_LEN);
+
+        uint64_t l_nibble_disable = 0;
+
+        FAPI_TRY(i_dq_disable.extractToRight(l_nibble_disable, DQ_START, BAD_DQ_LEN));
+
+        if(l_nibble_disable == ALL_BAD)
+        {
+            FAPI_INF("%s found that nibble %lu was all bad on DQS reg 0x%016llx",
+                     mss::c_str(i_target), l_nibble, i_reg);
+            FAPI_TRY(l_dqs_disable.setBit(DQS_START, BAD_DQS_LEN));
+        }
+    }
+
+    // Sets up the DQS register
+    FAPI_INF("%s setting DQS disable register 0x%016llx to 0x%016llx", mss::c_str(i_target), i_reg, l_dqs_disable);
+    FAPI_TRY(mss::putScom(l_mca, i_reg, l_dqs_disable), "%s failed to set 0x%016llx", mss::c_str(l_mca), i_reg);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Reset the bad-bits masks for a port - helper for ease of testing
 /// @note Read the bad bits from the f/w attributes and stuff them in the
 /// appropriate registers.
@@ -3215,7 +3276,7 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
     for (const auto& r : l_ranks)
     {
         uint64_t l_rp = 0;
-        uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
+        const uint64_t l_dimm_index = rank::get_dimm_from_rank(r);
         FAPI_TRY( mss::rank::get_pair_from_rank(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), r, l_rp) );
 
         FAPI_INF("%s processing bad bits for DIMM%d rank %d (%d) rp %d", mss::c_str(i_target), l_dimm_index, mss::index(r), r,
@@ -3236,13 +3297,15 @@ fapi2::ReturnCode reset_bad_bits_helper( const fapi2::Target<fapi2::TARGET_TYPE_
 
             for (const auto& a : l_addrs)
             {
-                uint64_t l_register_value = (l_bad_bits[l_byte_index] << 8) | l_bad_bits[l_byte_index + 1];
+                const uint64_t l_register_value = (l_bad_bits[l_byte_index] << 8) | l_bad_bits[l_byte_index + 1];
 
-                FAPI_INF("%s writing 0x%0lX value 0x%0lX from 0x%X, 0x%X",
+                FAPI_INF("%s writing 0x%016lX value 0x%016lX from 0x02%X, 0x%02X",
                          mss::c_str(i_target), a.first, l_register_value,
                          l_bad_bits[l_byte_index], l_bad_bits[l_byte_index + 1]);
 
                 FAPI_TRY( mss::putScom(mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target), a.first, l_register_value) );
+
+                FAPI_TRY(reset_dqs_disable(i_target, l_register_value, a.second));
                 l_byte_index += 2;
             }
         }
