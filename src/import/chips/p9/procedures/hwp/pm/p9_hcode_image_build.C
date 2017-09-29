@@ -965,6 +965,20 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     ///
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_IS_SIMULATION");
+
+    if( attrVal )
+    {
+        sgpeFlag |= SGPE_IS_SIMULATION_BIT_POS;
+    }
+    FAPI_DBG("SGPE_IS_SIMULATION            :   %s", attrVal ? "TRUE" : "FALSE" );
+
+    ///
+
+
     FAPI_DBG(" ==================== SGPE Header Fields =================");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CME_CHTM_TRACE_MEMORY_CONFIG,
