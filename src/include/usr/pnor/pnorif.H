@@ -263,7 +263,6 @@ errlHndl_t readHeaderMagic(
           size_t               i_size,
           void*                o_pData);
 
-// @TODO CQ:SW400352 remove function
 /**
  * @brief  Determine if a PNOR section is empty by checking if first PAGE
  *         is all 0xFF's or 0x00's depending on ECC or not.

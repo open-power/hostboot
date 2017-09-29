@@ -34,6 +34,7 @@
 #include <secureboot/containerheader.H>
 #include <trace/interface.H>
 #include "../utilbase.H"
+#include <util/utillidpnor.H>
 
 UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isLidInPnor(false), iv_lidBuffer(nullptr), iv_lidSize(0),
@@ -131,6 +132,7 @@ errlHndl_t UtilLidMgr::releaseLidImage(void)
 errlHndl_t UtilLidMgr::loadLid()
 {
     if (nullptr != iv_lidBuffer) return nullptr;
+    UTIL_FT("UtilLidMgr::loadLid");
 
     const char* l_addr = nullptr;
     size_t l_size = 0;
@@ -140,8 +142,13 @@ errlHndl_t UtilLidMgr::loadLid()
     {
         if(iv_isLidInHbResvMem)
         {
+            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInHbResvMem=true");
             iv_lidBuffer = reinterpret_cast<void*>(g_hostInterfaces->
-                get_reserved_mem(PNOR::SectionIdToString(iv_lidPnorInfo.id),0));
+                get_reserved_mem(
+                   PNOR::SectionIdToString(
+                      Util::getLidPnorSection(
+                          static_cast<Util::LidId>(iv_lidId))),
+                                 0));
 
             // If nullptr returned, set size to 0 to indicate we could not find
             // the lid in HB resv memory
@@ -172,6 +179,7 @@ errlHndl_t UtilLidMgr::loadLid()
                 {
                     // If no secure header, just use PNOR size
                     iv_lidSize = iv_lidPnorInfo.size;
+                    UTIL_FT("UtilLidMgr::loadLid - iv_lidSize=%d", iv_lidSize );
 
                     // Need to increment past header if one exists
                     if (iv_lidPnorInfo.sha512Version)
@@ -181,12 +189,15 @@ errlHndl_t UtilLidMgr::loadLid()
                         iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
                                        PAGESIZE;
                         iv_lidSize -= PAGESIZE;
+                        UTIL_FT("UtilLidMgr::loadLid - iv_lidSize=%d",
+                                iv_lidSize );
                     }
                 }
             }
         }
         else if(iv_isLidInVFS)
         {
+            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInVFS=true");
             l_errl = VFS::module_address(iv_lidFileName, l_addr, l_size);
             if (l_errl)
             {
@@ -198,12 +209,14 @@ errlHndl_t UtilLidMgr::loadLid()
         }
         else if (iv_isLidInPnor)
         {
+            UTIL_FT("UtilLidMgr::loadLid> iv_isLidInPnor=true");
             iv_lidSize = iv_lidPnorInfo.size;
             iv_lidBuffer = reinterpret_cast<char *>(iv_lidPnorInfo.vaddr);
         }
         else if( g_hostInterfaces->lid_load
                  && iv_spBaseServicesEnabled  )
         {
+            UTIL_FT("UtilLidMgr::loadLid> Calling lid_load(0x%.8X)", iv_lidId);
             int rc = g_hostInterfaces->lid_load(iv_lidId, &iv_lidBuffer,
                     &iv_lidSize);
             if (0 != rc)
@@ -284,6 +297,7 @@ errlHndl_t UtilLidMgr::cleanup()
 
 void UtilLidMgr::updateLid(uint32_t i_lidId)
 {
+    UTIL_FT("UtilLidMgr::updateLid - i_lidId=0x%.8X", i_lidId);
     iv_lidId = i_lidId;
 
     // First check if lid is already in hostboot reserved memory
@@ -330,14 +344,6 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
 
 bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
 {
-    // @TODO CQ:SW400352 Remove this when fsp adds in PNOR support
-    // hostboot could not verify it from pnor, so it is not in hb resv meomory
-    if (iv_spBaseServicesEnabled &&
-        (i_lidId == Util::OCC_LIDID || i_lidId == Util::OCC_CONTAINER_LIDID))
-    {
-        return false;
-    }
-
     return i_lidId == Util::OCC_LIDID ||
            i_lidId == Util::OCC_CONTAINER_LIDID ||
            i_lidId == Util::WOF_LIDID ||

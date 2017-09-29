@@ -533,7 +533,6 @@ errlHndl_t PNOR::hasKnownHeader(
     return pError;
 }
 
-// @TODO CQ:SW400352 remove function
 bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)
 {
     errlHndl_t l_errhdl = nullptr;
