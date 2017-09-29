@@ -111,7 +111,6 @@ namespace IPMI
         NETFUN_STORAGE  = (0x0a << 2),
         NETFUN_TRANPORT = (0x0c << 2),
         NETFUN_GRPEXT   = (0x2c << 2),
-        NETFUN_AMI =      (0x32 << 2),
         NETFUN_IBM =      (0x3a << 2),
 
         // Overload the OEM netfun for a "none" netfun. We use this as a
@@ -261,9 +260,8 @@ namespace IPMI
     inline const command_t add_sel(void)
     { return std::make_pair(NETFUN_STORAGE, 0x44); }
 
-    //AMI-specific storage messages
     inline const command_t partial_add_esel(void)
-    { return std::make_pair(NETFUN_AMI, 0xf0); }
+    { return std::make_pair(NETFUN_IBM, 0xf0); }
 
     // event messages
     inline const command_t platform_event(void)
