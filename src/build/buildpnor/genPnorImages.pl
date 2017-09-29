@@ -120,7 +120,6 @@ my $key_transition = "";
 my $help = 0;
 my %partitionsToCorrupt = ();
 my $sign_mode = $DEVELOPMENT;
-my $sb_signing_config_file = "";
 my $hwKeyHashFile = "";
 my $hb_standalone="";
 
@@ -140,7 +139,6 @@ GetOptions("binDir:s" => \$bin_dir,
            "key-transition:s" => \$key_transition,
            "corrupt:s" => \%partitionsToCorrupt,
            "sign-mode:s" => \$sign_mode,
-           "sb-signing-config-file:s" => \$sb_signing_config_file,
            "hwKeyHashFile:s" => \$hwKeyHashFile,
            "hb-standalone" => \$hb_standalone,
            "lab-security-override!" => \$labSecurityOverride,
@@ -170,12 +168,6 @@ elsif ($sign_mode =~ m/^$PRODUCTION/i)
 else
 {
     die "Invalid signing mode = $sign_mode";
-}
-
-# Secure boot signing config file only required in production mode.
-if ($signMode{$PRODUCTION})
-{
-    die "SB signing config file path not provided" if ($sb_signing_config_file eq "");
 }
 
 # Put key transition input into a hash and ensure a valid key transition mode
@@ -280,13 +272,12 @@ if ($keyTransition{enabled})
 
 ### Open POWER signing
 my $OPEN_SIGN_REQUEST=
-    "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir";
+    "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
 # By default key transition container is unused
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
 # Production signing parameters
-my $OPEN_PRD_SIGN_PARAMS = "--mode production "
-    . " --sign-project-config $sb_signing_config_file";
+my $OPEN_PRD_SIGN_PARAMS = "--mode production ";
 
 # Imprint key signing parameters.  In a non-secure compile, omit the keys to
 # generate a secure header without signatures
@@ -1292,7 +1283,6 @@ print <<"ENDUSAGE";
     --key-transition <imprint|production>   Indicates a key transition is needed and creates a secureboot key transition container.
                                             Note: "--sign-mode production" is not allowed with "--key-transition imprint"
                                             With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys.
-    --sb-signing-config-file    Path to ini-formatted config file for production signing
     --lab-security-override       If signing SBE image, set bit in signing
                                       header which turns on security override
                                       checking in the SBE the next time it is
