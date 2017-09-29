@@ -442,15 +442,13 @@ elsif ($reqPol->{'required_synch_mode'} eq 'undetermined')
     push @systemAttr, ['REQUIRED_SYNCH_MODE', 0];
 }
 
-#@fixme - Disabling VDM on ZZ
 # Handle the new name when/if it shows up in the xml
 #  otherwise we'll just rely on the default value
-#if ( exists $reqPol->{'system_vdm_disable'} )
-#{
-#    push @systemAttr, ['SYSTEM_VDM_DISABLE',
-#        $reqPol->{'system_vdm_disable'}];
-#}
-push @systemAttr, ['SYSTEM_VDM_DISABLE', 1];
+if ( exists $reqPol->{'system_vdm_disable'} )
+{
+    push @systemAttr, ['SYSTEM_VDM_DISABLE',
+        $reqPol->{'system_vdm_disable'}];
+}
 
 
 if ( exists $reqPol->{'dpll_vdm_response'} )
