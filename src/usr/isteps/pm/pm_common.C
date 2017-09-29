@@ -601,6 +601,9 @@ namespace HBPM
             void* l_occVirt = reinterpret_cast<void *>(i_occImgVaddr);
 
             // copy LID to Homer
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Copying %p to %p for %d bytes",
+                       l_occVirt, l_pLidImage, l_lidImageSize );
             memcpy(l_occVirt, l_pLidImage, l_lidImageSize);
         }while(0);
 

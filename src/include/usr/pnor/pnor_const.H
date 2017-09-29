@@ -94,7 +94,21 @@ enum PnorMode_t {
     // Size and layout of this structure must be maintained for debug framework.
 struct SectionInfo_t
 {
-    SectionInfo_t(): id(INVALID_SECTION), secure(false) {}
+    SectionInfo_t():
+      id(INVALID_SECTION),
+      name("INVALID_SECTION"),
+      vaddr(0),
+      flashAddr(0),
+      size(0),
+      eccProtected(false),
+      sha512Version(false),
+      sha512perEC(false),
+      readOnly(false),
+      reprovision(false),
+      Volatile(false),
+      secure(false),
+      clearOnEccErr(false)
+      {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
     uint64_t vaddr;     /**< Virtual address of the start of the section */
