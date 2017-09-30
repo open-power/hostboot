@@ -32,7 +32,7 @@
 // *HWP HWP Owner: Ben Gass <bgass@us.ibm.com>
 // *HWP FW Owner: ? <?>
 // *HWP Team: SAO
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB:HS:OCC:SBE:CME:SGPE:PGPE:FPPE:IPPE
 
 #include <p9_const_common.H>
