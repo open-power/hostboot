@@ -32,7 +32,7 @@
 // *HWP HW Owner : Joe McGill <jmcgill@us.ibm.com>
 // *HWP FW Owner : Thi N. Tran <thi@us.ibm.com>
 // *HWP Team : Nest
-// *HWP Level : 2
+// *HWP Level : 3
 // *HWP Consumed by : HB
 //
 
@@ -47,8 +47,8 @@
 //------------------------------------------------------------------------------
 // Structure definitions
 //------------------------------------------------------------------------------
-
-typedef fapi2::ReturnCode (*p9_sys_chiplet_scominit_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+typedef fapi2::ReturnCode (*p9_sys_chiplet_scominit_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -61,7 +61,8 @@ extern "C"
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-    fapi2::ReturnCode p9_sys_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9_sys_chiplet_scominit(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } // extern "C"
 
