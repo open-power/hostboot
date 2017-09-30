@@ -33,7 +33,7 @@
 // *HWP HWP Owner: Yang Fan Liu shliuyf@cn.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _P9C_SET_INBAND_ADDR_H_
@@ -45,20 +45,19 @@
 //-----------------------------------------------------------------------------------
 #include <fapi2.H>
 
-
 //-----------------------------------------------------------------------------------
 // Structure definitions
 //-----------------------------------------------------------------------------------
 
 // function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9c_set_inband_addr_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
-
-
-extern "C" {
+typedef fapi2::ReturnCode (*p9c_set_inband_addr_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
 //-----------------------------------------------------------------------------------
 // Function prototype
 //-----------------------------------------------------------------------------------
+
+extern "C" {
 
 ///
 /// @brief configure Cumulus inband address
@@ -67,7 +66,8 @@ extern "C" {
 ///
 /// @return FAPI_RC_SUCCESS if the setup completes successfully, else error
 //
-    fapi2::ReturnCode p9c_set_inband_addr(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+    fapi2::ReturnCode p9c_set_inband_addr(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 } //extern"C"
 

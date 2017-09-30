@@ -32,7 +32,7 @@
 // *HWP HWP Owner: Ben Gass <bgass@us.ibm.com>
 // *HWP FW Owner: Thi Tran <thi@us.ibm.com>
 // *HWP Team: Infrastructure
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB:HS:OCC:SBE:CME:SGPE:PGPE:FPPE:IPPE
 
 #ifndef __P9_MISC_SCOM_ADDRESSES_FIXES_H

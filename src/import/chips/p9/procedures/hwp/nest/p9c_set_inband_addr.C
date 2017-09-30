@@ -33,7 +33,7 @@
 // *HWP HWP Owner: Yang Fan Liu shliuyf@cn.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 //-----------------------------------------------------------------------------------
@@ -46,14 +46,9 @@
 //-----------------------------------------------------------------------------------
 // Function definitions
 //-----------------------------------------------------------------------------------
-///
-/// @brief configure Cumulus inband address
-///
-/// @param[in] i_target => Processor chip target
-///
-/// @return FAPI_RC_SUCCESS if the setup completes successfully, else error
-//
-fapi2::ReturnCode p9c_set_inband_addr(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+
+fapi2::ReturnCode p9c_set_inband_addr(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     uint64_t l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m, l_base_addr_mmio;
 
@@ -72,7 +67,9 @@ fapi2::ReturnCode p9c_set_inband_addr(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         fapi2::ATTR_DMI_INBAND_BAR_ENABLE_Type l_bar_enable;
 
         // retrieve inband BAR enable
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DMI_INBAND_BAR_ENABLE, l_dmi, l_bar_enable),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DMI_INBAND_BAR_ENABLE,
+                               l_dmi,
+                               l_bar_enable),
                  "Error from FAPI_ATTR_GET (ATTR_DMI_INBAND_BAR_ENABLE)");
 
         if (l_bar_enable == fapi2::ENUM_ATTR_DMI_INBAND_BAR_ENABLE_ENABLE)
@@ -83,7 +80,9 @@ fapi2::ReturnCode p9c_set_inband_addr(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             uint8_t l_dmi_pos;
 
             // retrieve inband BAR offset
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET, l_dmi, l_bar_offset),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET,
+                                   l_dmi,
+                                   l_bar_offset),
                      "Error from FAPI_ATTR_GET (ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET)");
 
             // form SCOM register format
@@ -95,22 +94,27 @@ fapi2::ReturnCode p9c_set_inband_addr(const fapi2::Target<fapi2::TARGET_TYPE_PRO
             l_scom_data.setBit<0>();
 
             // get MI target to configure MCFGPR
-            fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi = l_dmi.getParent<fapi2::TARGET_TYPE_MI>();
+            fapi2::Target<fapi2::TARGET_TYPE_MI> l_mi =
+                l_dmi.getParent<fapi2::TARGET_TYPE_MI>();
             // retrieve DMI pos
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_dmi, l_dmi_pos),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_dmi,
+                                   l_dmi_pos),
                      "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
 
             // configure inband channel 0 MCFGPR0
             if(l_dmi_pos % 2 == 0)
             {
                 FAPI_TRY(fapi2::putScom(l_mi, MCS_MCRSVDE, l_scom_data),
-                         "Error from putScom MCFGPR0 for DMI id: %d", l_dmi_pos);
+                         "Error from putScom MCFGPR0 for DMI id: %d",
+                         l_dmi_pos);
             }
             // configure inband channel 1 MCFGPR1
             else
             {
                 FAPI_TRY(fapi2::putScom(l_mi, MCS_MCRSVDF, l_scom_data),
-                         "Error from putScom MCFGPR1 for DMI id: %d", l_dmi_pos);
+                         "Error from putScom MCFGPR1 for DMI id: %d",
+                         l_dmi_pos);
             }
         }
     }
@@ -156,5 +160,3 @@ fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
 }
-
-
