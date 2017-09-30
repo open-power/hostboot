@@ -22,58 +22,61 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
-// *!
+//------------------------------------------------------------------------------
+
+///
 /// @file p9_phb_hv_access.H
 /// @brief Code to support PHB HV Indirect access procedures (FAPI)
 ///
+/// @author ricmata@us.ibm.com
+///
+
 // *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 
 #ifndef _P9_PHB_HV_ACCESS_H_
 #define _P9_PHB_HV_ACCESS_H_
 
-
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <fapi2.H>
 
 //------------------------------------------------------------------------------
-// Constant definitions
+// Structure definitions
 //------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------------
-// Structure definitions
-//-----------------------------------------------------------------------------------
-
 //function pointer typedef definition for HWP call support
-typedef fapi2::ReturnCode (*p9_phb_hv_access_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_PHB>&, const uint32_t,
-        bool const, bool const, uint64_t&);
+typedef fapi2::ReturnCode (*p9_phb_hv_access_FP_t) (
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>&,
+    const uint32_t,
+    bool const,
+    bool const,
+    uint64_t&);
 
-//-----------------------------------------------------------------------------------
-// Constant definitions
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
 
 extern "C" {
 
-//-----------------------------------------------------------------------------------
-// Function prototypes
-//-----------------------------------------------------------------------------------
-
-/// @briefF perform read/write to PHB HV register space
-/// @param[in] i_target     => phb target
-/// @param[in] i_address        => PHB HV register offset between 0x0000 - 0x1FFF
-/// @param[in] i_rnw        => 1 for read, 0 for write.
-/// @param[in] i_size       => 1 for 8B op to access PHB HV. 0 for 4B op for config ops.
-/// @param[in, out] io_data => input data for writes. output data for reads.
+/// @brief perform read/write to PHB HV register space
+/// @param[in] i_target PHB target
+/// @param[in] i_address PHB HV register offset between 0x0000 - 0x1FFF
+/// @param[in] i_rnw 1 for read, 0 for write
+/// @param[in] i_size 1 for 8B op to access PHB HV. 0 for 4B op for config ops
+/// @param[inout] io_data Input data for writes / output data for reads
 ///
 /// @return FAPI_RC_SUCCESS if the read/write completes successfully.
-    fapi2::ReturnCode p9_phb_hv_access(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                       bool const i_rnw, bool const i_size, uint64_t& io_data);
+    fapi2::ReturnCode p9_phb_hv_access(
+        const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+        const uint32_t i_address,
+        bool const i_rnw,
+        bool const i_size,
+        uint64_t& io_data);
 
 } // extern "C"
 

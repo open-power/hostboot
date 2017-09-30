@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 /// @file p9_phb_hv_access.C
 /// @brief Perform read/write to PHB HV register space. (FAPI)
@@ -30,85 +30,72 @@
 // *HWP HWP Owner: Ricardo Mata Jr. ricmata@us.ibm.com
 // *HWP FW Owner: Thi Tran thi@us.ibm.com
 // *HWP Team: Nest
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB
 //
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Includes
-//-----------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 #include <p9_phb_hv_access.H>
 #include <p9_phb_hv_utils.H>
 
-extern "C"
+//------------------------------------------------------------------------------
+// Function definitions
+//------------------------------------------------------------------------------
+
+fapi2::ReturnCode p9_phb_hv_access(
+    const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target,
+    const uint32_t i_address,
+    bool const i_rnw,
+    bool const i_size,
+    uint64_t& io_data)
 {
-    //---------------------------------------------------------------------------------
-    // Function definitions
-    //---------------------------------------------------------------------------------
 
-    //------------------------------------------------------------------------------
-    // name: p9_phb_hv_access
-    //------------------------------------------------------------------------------
-    // purpose:
-    // Performs read/write to PHB HV register space.
-    //
-    // parameters:
-    // 'i_target' is reference to phb target.
-    // 'i_address' is the PHB HV register offset between 0x0000 - 0x1FFF
-    // 'i_rnw' is flag to specify read (1) or write (0).
-    // 'i_size' is flag to specify 4B op (1) or 8B op (0).
-    // 'io_data' input data for writes or output data for reads.
-    //
-    // returns:
-    // FAPI_RC_SUCCESS (success)
-    //
-    // getscom/putscom fapi errors
-    // fapi error assigned from eCMD function failure
-    //
-    //------------------------------------------------------------------------------
-    fapi2::ReturnCode p9_phb_hv_access(const fapi2::Target<fapi2::TARGET_TYPE_PHB>& i_target, const uint32_t i_address,
-                                       bool const i_rnw, bool const i_size, uint64_t& io_data)
+    uint8_t l_phb_id = 0;
+
+    //Get the PHB id
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_phb_id));
+
+    FAPI_DBG("PHB%i: Start PHB HV read/write access", l_phb_id);
+
+    //Check ETU state
+    FAPI_TRY(p9_phb_hv_check_etu_state(i_target),
+             "Error from p9_phb_hv_check_etu_state");
+
+    //Check arguments
+    FAPI_TRY(p9_phb_hv_check_args(i_target, i_address, i_size),
+             "Error from p9_phb_hv_check_args");
+
+    //Clear contents of PHB HV Indirect Address Register
+    FAPI_TRY(p9_phb_hv_clear(i_target),
+             "Error from p9_phb_hv_clear");
+
+    //setup the PHB HV registers for the read/write
+    FAPI_TRY(p9_phb_hv_setup(i_target, i_address, i_size),
+             "Error from p9_phb_hv_setup");
+
+    if (i_rnw)
     {
-
-        uint8_t l_phb_id = 0;
-
-        //Get the PHB id
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_phb_id));
-
-        FAPI_DBG("PHB%i: Start PHB HV read/write access", l_phb_id);
-
-        //Check ETU state
-        FAPI_TRY(p9_phb_hv_check_etu_state(i_target), "  Error from p9_phb_hv_check_etu_state");
-
-        //Check arguments
-        FAPI_TRY(p9_phb_hv_check_args(i_target, i_address, i_size), "  Error from p9_phb_hv_check_args");
-
-        //Clear contents of PHB HV Indirect Address Register
-        FAPI_TRY(p9_phb_hv_clear(i_target), "  Error from p9_phb_hv_clear");
-
-        //setup the PHB HV registers for the read/write
-        FAPI_TRY(p9_phb_hv_setup(i_target, i_address, i_size), "  Error from p9_phb_hv_setup");
-
-        if (i_rnw)
-        {
-            //Setup PHB HV Indirect for read access
-            FAPI_TRY(p9_phb_hv_read(i_target, i_address, i_size, io_data), "  Error from p9_phb_hv_read");
-        }
-        else
-        {
-            //Setup PHB HV Indirect for write access
-            FAPI_TRY(p9_phb_hv_write(i_target, i_address, i_size, io_data), "  Error from p9_phb_hv_write");
-        }
-
-        //Clear contents of PHB HV Indirect Address Register
-        FAPI_TRY(p9_phb_hv_clear(i_target), "  Error from p9_phb_hv_clear");
-
-
-    fapi_try_exit:
-        FAPI_DBG("PHB%i: End PHB HV read/write Procedure", l_phb_id);
-        return fapi2::current_err;
-
+        //Setup PHB HV Indirect for read access
+        FAPI_TRY(p9_phb_hv_read(i_target, i_address, i_size, io_data),
+                 "Error from p9_phb_hv_read");
+    }
+    else
+    {
+        //Setup PHB HV Indirect for write access
+        FAPI_TRY(p9_phb_hv_write(i_target, i_address, i_size, io_data),
+                 "Error from p9_phb_hv_write");
     }
 
-} // extern "C
+    //Clear contents of PHB HV Indirect Address Register
+    FAPI_TRY(p9_phb_hv_clear(i_target),
+             "Error from p9_phb_hv_clear");
+
+
+fapi_try_exit:
+    FAPI_DBG("PHB%i: End PHB HV read/write Procedure", l_phb_id);
+    return fapi2::current_err;
+
+}
