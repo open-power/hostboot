@@ -269,10 +269,10 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>Memory Data (24K)</description>
+        <description>Memory Data (128K)</description>
         <eyeCatch>MEMD</eyeCatch>
         <physicalOffset>0x39BB000</physicalOffset>
-        <physicalRegionSize>0x6000</physicalRegionSize>
+        <physicalRegionSize>0x20000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <ecc/>
