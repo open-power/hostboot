@@ -27,11 +27,19 @@
 #include <kernel/vmmmgr.H>
 #include <sys/mmio.h>
 #include <arch/memorymap.H>
+#include <arch/ppc.H>
 
 namespace Kernel
 {
 namespace MachineCheck
 {
+
+//Keep track of the MMIO address that we can use to force a checkstop
+static uint64_t* g_xstopRegPtr = nullptr;
+
+//Keep track of the data to write into the xstop reg
+static uint64_t g_xstopRegValue = 0;
+
 
 bool handleLoadUE(task_t* t)
 {
@@ -131,6 +139,43 @@ bool handleSLB(task_t* t)
     return true;
 }
 
+
+/**
+ *  @brief Tells the kernel how to force a checkstop for unrecoverable
+ *         machine checks
+ */
+void setCheckstopData(uint64_t i_xstopAddr, uint64_t i_xstopData)
+{
+    g_xstopRegPtr = reinterpret_cast<uint64_t*>(i_xstopAddr
+                                                |VmmManager::FORCE_PHYS_ADDR);
+    g_xstopRegValue = i_xstopData;
+    printk( "Set MchChk Xstop: %p=%.16lX\n", g_xstopRegPtr, g_xstopRegValue );
+
+    // Now that the machine check handler can do the xscom we
+    //  can set MSR[ME]=1 to enable the regular machine check
+    //  handling
+    uint64_t l_msr = getMSR();
+    l_msr |= 0x0000000000001000; //set bit 51
+    setMSR(l_msr);
+}
+
+/**
+ *  @brief Force a checkstop if we know how in order to get better
+ *         error isolation for cache/memory UEs
+ */
+void forceCheckstop()
+{
+    if( g_xstopRegPtr != nullptr )
+    {
+        printk( "Forcing a xstop with %p = %.16lX\n",
+                g_xstopRegPtr, g_xstopRegValue );
+        *g_xstopRegPtr = g_xstopRegValue;
+    }
+    else
+    {
+        printk( "Unable to force checkstop, No xstop reg set\n" );
+    }
+}
 
 }
 }

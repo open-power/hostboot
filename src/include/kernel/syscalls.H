@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -122,6 +122,9 @@ namespace Systemcalls
 
             /** critassert() */
         MISC_CRITASSERT,
+
+            /** set_mchk_data() */
+        MISC_SETMCHKDATA,
 
 	SYSCALL_MAX
     };

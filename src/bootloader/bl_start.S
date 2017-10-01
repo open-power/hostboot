@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -74,11 +74,10 @@ _start:
     ;// Set thread priority high.
     or 2,2,2
 
-    ;// Clear MSR[TA] (bit 1) and enable MSR[ME] (bit 51).
+    ;// Clear MSR[TA] (bit 1)
     mfmsr r2
     rldicl r2,r2,1,1    ;// Clear bit 1 - result [1-63,0]
     rotrdi r2,r2,1      ;// Rotate right 1 - result [0,63]
-    ori r2,r2,4096      ;// Set bit 51
     ;// Set up SRR0 / SRR1 to enable new MSR.
     mtsrr1 r2
     li r2, _start_postmsr@l

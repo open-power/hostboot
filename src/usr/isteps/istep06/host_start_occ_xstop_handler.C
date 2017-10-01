@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,7 +39,10 @@
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmisensor.H>
 #endif
-
+#include <sys/misc.h>
+#include <xscom/xscomif.H>
+#include <initservice/initserviceif.H>
+#include <kernel/machchk.H>
 
 namespace ISTEP_06
 {
@@ -47,12 +50,19 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 {
     ISTEP_ERROR::IStepError l_stepError;
 
+    errlHndl_t l_err = nullptr;
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_start_occ_xstop_handler entry" );
 
+    TARGETING::Target* masterproc = NULL;
+    TARGETING::targetService().masterProcChipTargetHandle(masterproc);
+
     do
     {
-//         if ( Util::isSimicsRunning() ) break; //Skip if running in Simics
+        // If we have nothing external (FSP or OCC) to handle checkstops we are
+        //  better off just crashing and having a chance to pull the HB
+        //  traces off the system live
 
         TARGETING::Target * l_sys = nullptr;
         TARGETING::targetService().getTopLevelTarget( l_sys );
@@ -68,7 +78,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
         if ((l_mnfgFlags & TARGETING::MNFG_FLAG_SRC_TERM) &&
             !(l_mnfgFlags & TARGETING::MNFG_FLAG_IMMEDIATE_HALT))
         {
-            errlHndl_t l_err = nullptr;
+            l_err = nullptr;
 
             //If HB_VOLATILE MFG_TERM_REBOOT_ENABLE flag is set at this point
             //Create errorlog to terminate the boot.
@@ -91,7 +101,6 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
                    0,
                    true /*HB SW error*/ );
                 l_stepError.addErrorDetails(l_err);
-                ERRORLOG::errlCommit(l_err, ISTEP_COMP_ID);
                 break;
             }
 
@@ -111,7 +120,6 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "Failed to enable BMC auto reboots....");
                 l_stepError.addErrorDetails(l_err);
-                ERRORLOG::errlCommit(l_err, HWPF_COMP_ID);
                 break;
             }
         }
@@ -119,11 +127,6 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
 
 
 #ifdef CONFIG_IPLTIME_CHECKSTOP_ANALYSIS
-        errlHndl_t l_errl = NULL;
-
-        TARGETING::Target* masterproc = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(masterproc);
-
         void* l_homerVirtAddrBase = reinterpret_cast<void*>
           (VmmManager::INITIAL_MEM_SIZE);
         uint64_t l_homerPhysAddrBase = mm_virt_to_phys(l_homerVirtAddrBase);
@@ -133,32 +136,48 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
                   " l_homerPhysAddrBase=0x%x, l_commonPhysAddr=0x%x",
                   l_homerPhysAddrBase, l_commonPhysAddr);
 
-        l_errl = HBPM::loadPMComplex(masterproc,
+        // Load the OCC directly into SRAM and start it in a special mode
+        //  that only handles checkstops
+        l_err  = HBPM::loadPMComplex(masterproc,
                                      l_homerPhysAddrBase,
                                      l_commonPhysAddr,
                                      HBPM::PM_LOAD,
                                      true);
-        if(l_errl)
+        if(l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                                                         "loadPMComplex failed");
-            l_stepError.addErrorDetails(l_errl);
-            ERRORLOG::errlCommit(l_errl, HWPF_COMP_ID);
+            l_stepError.addErrorDetails(l_err);
             break;
         }
 
-        l_errl = HBOCC::startOCCFromSRAM(masterproc);
-        if(l_errl)
+        l_err = HBOCC::startOCCFromSRAM(masterproc);
+        if(l_err)
         {
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                                                      "startOCCFromSRAM failed");
-            l_stepError.addErrorDetails(l_errl);
-            ERRORLOG::errlCommit(l_errl, HWPF_COMP_ID);
+            l_stepError.addErrorDetails(l_err);
             break;
         }
 #endif
 
     }while(0);
+
+    if(l_err)
+    {
+        ERRORLOG::errlCommit(l_err, HWPF_COMP_ID);
+    }
+
+    // Now that the checkstop handler is running (or we don't have one),
+    //  setup the machine check code to trigger a checkstop for UE
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "Enabling machine check handler to generate checkstops" );
+
+    uint64_t l_xstopXscom = XSCOM::generate_mmio_addr( masterproc,
+                       Kernel::MachineCheck::MCHK_XSTOP_FIR_SCOM_ADDR );
+
+    set_mchk_data( l_xstopXscom,
+                   Kernel::MachineCheck::MCHK_XSTOP_FIR_VALUE );
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "host_start_occ_xstop_handler exit" );

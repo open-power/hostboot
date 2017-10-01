@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,15 @@ namespace XSCOM
  */
 uint64_t get_master_bar( void );
 
+/**
+ * @brief Generate a fully-qualified MMIO address for a physical scom
+ *        address, relative to the given processor target
+ *  @param[in] i_proc - Processor
+ *  @param[in] i_scomAddr - Physical scom address to convert
+ *  @return uint64_t - MMIO address
+ */
+uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
+                             uint64_t i_scomAddr );
 
 };  // namespace XSCOM
 
