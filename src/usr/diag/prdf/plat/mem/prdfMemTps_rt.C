@@ -169,20 +169,30 @@ bool __badChipCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-void __nonZeroSumCount( MemUtils::MaintSymbols i_nibbleStats,
-                        CeCount & io_nonZeroSumCount );
+void __sumAboveOneCount( MemUtils::MaintSymbols i_nibbleStats,
+                         CeCount & io_sumAboveOneCount );
 
 template<>
-void __nonZeroSumCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
-                                  CeCount & io_nonZeroSumCount )
+void __sumAboveOneCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
+                                   CeCount & io_sumAboveOneCount )
 {
+    uint8_t sum = 0;
+    MemUtils::MaintSymbols symList;
     for ( auto symData : i_nibbleStats )
     {
-        // If there is a non-zero sum.
-        if ( symData.count != 0 )
+        if ( symData.count > 0 )
         {
-            io_nonZeroSumCount.count++;
-            break;
+            sum += symData.count;
+            symList.push_back(symData);
+        }
+    }
+    // If the sum is greater than 1
+    if ( sum > 1 )
+    {
+        io_sumAboveOneCount.count++;
+        for ( auto sym : symList )
+        {
+            io_sumAboveOneCount.symList.push_back(sym);
         }
     }
 }
@@ -197,17 +207,25 @@ template<>
 void __singleSymbolCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
                                     CeCount & io_singleSymCount )
 {
-    // Count to keep track of the number of symbols whose CE count was > 1
     uint8_t count = 0;
+    bool multNonZeroSyms = false;
 
     for ( auto symData : i_nibbleStats )
     {
-        if ( symData.count > 1 )
-            count++;
+        if ( symData.count > 0 )
+        {
+            if ( 0 != count )
+            {
+                // There are more than one symbol counts that are non-zero
+                multNonZeroSyms = true;
+                break;
+            }
+            count = symData.count;
+        }
     }
 
-    // If there was only 1 symbol whose CE count was > 1.
-    if ( 1 == count )
+    // If there is only one symbol with a non-zero count and that count > 1
+    if ( count > 1 && !multNonZeroSyms )
         io_singleSymCount.count++;
 }
 
@@ -216,7 +234,7 @@ void __singleSymbolCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
 template<TARGETING::TYPE T>
 void __analyzeNibbleSyms( MemUtils::MaintSymbols i_nibbleStats,
     CeCount & io_badDqCount, CeCount & io_badChipCount,
-    CeCount & io_nonZeroSumCount, CeCount & io_singleSymCount )
+    CeCount & io_sumAboveOneCount, CeCount & io_singleSymCount )
 {
 
     do
@@ -229,11 +247,11 @@ void __analyzeNibbleSyms( MemUtils::MaintSymbols i_nibbleStats,
         if ( __badChipCount<T>( i_nibbleStats, io_badChipCount ) )
             break;
 
-        // Check if this nibble is under threshold with a non-zero sum.
-        __nonZeroSumCount<T>( i_nibbleStats, io_nonZeroSumCount );
+        // Check if this nibble is under threshold with a sum greater than 1.
+        __sumAboveOneCount<T>( i_nibbleStats, io_sumAboveOneCount );
 
-        // Check if this nibble is under threshold with a single symbol count
-        // greater than 1.
+        // Check if this nibble is under threshold with only a single symbol
+        // with a non-zero count, and that count is > 1.
         __singleSymbolCount<T>( i_nibbleStats, io_singleSymCount );
 
     }while(0);
@@ -242,29 +260,26 @@ void __analyzeNibbleSyms( MemUtils::MaintSymbols i_nibbleStats,
 //------------------------------------------------------------------------------
 
 template<DIMMS_PER_RANK T>
-uint32_t __updateVpdCountAboveOne( MemUtils::MaintSymbols i_symList,
-                                   MemDqBitmap<T> & io_dqBitmap )
+uint32_t __updateVpdSumAboveOne( CeCount i_sumAboveOneCount,
+                                 MemDqBitmap<T> & io_dqBitmap )
 {
 
-    #define PRDF_FUNC "[__updateVpdCountAboveOne<T>] "
+    #define PRDF_FUNC "[__updateVpdSumAboveOne<T>] "
 
     uint32_t o_rc = SUCCESS;
 
     do
     {
-        // Update VPD with all symbols that have a count greater than 1. This is
-        // so if we do TPS again, we'll callout again even if the symbol
-        // counters change.
-        for ( auto sym : i_symList )
+        // For nibbles under threshold with a sum greater than 1, update VPD
+        // with it's non-zero symbols. This is so if we do TPS again, we'll
+        // callout again even if the symbol counters change.
+        for ( auto sym : i_sumAboveOneCount.symList )
         {
-            if ( sym.count > 1 )
+            o_rc = io_dqBitmap.setSymbol( sym.symbol );
+            if ( SUCCESS != o_rc )
             {
-                o_rc = io_dqBitmap.setSymbol( sym.symbol );
-                if ( SUCCESS != o_rc )
-                {
-                    PRDF_ERR( PRDF_FUNC "io_dqBitmap.setSymbol failed." );
-                    break;
-                }
+                PRDF_ERR( PRDF_FUNC "io_dqBitmap.setSymbol failed." );
+                break;
             }
         }
     }while(0);
@@ -452,9 +467,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeEcc( const uint32_t & i_eccAttns,
 
 template<>
 uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
-    CeCount i_badChipCount, CeCount i_nonZeroSumCount,
-    CeCount i_singleSymCount, MemUtils::MaintSymbols i_symList,
-    STEP_CODE_DATA_STRUCT & io_sc )
+    CeCount i_badChipCount, CeCount i_sumAboveOneCount,
+    CeCount i_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc )
 {
 
     #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts] "
@@ -512,10 +526,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the symbol mark is available.
             if ( !symMark.isValid() )
             {
-                // If the non-zero sum nibble count is <= 1 or non-zero sum
+                // If the sum above one nibble count is <= 1 or sum above one
                 // nibble count == 2 and single sym nibble count == 2
-                if ( (i_nonZeroSumCount.count <= 1) ||
-                     (i_nonZeroSumCount.count == 2 &&
+                if ( (i_sumAboveOneCount.count <= 1) ||
+                     (i_sumAboveOneCount.count == 2 &&
                       i_singleSymCount.count == 2) )
                 {
                     // This means we have a potential future chip kill or
@@ -547,12 +561,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Placing a symbol mark risks a UE.
-                    // Update VPD with all symbols that have a count > 1.
-                    o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_symList, dqBitmap );
+                    // For nibbles under threshold with a sum greater than 1,
+                    // update VPD with it's non-zero symbols.
+                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                        i_sumAboveOneCount, dqBitmap );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
 
@@ -582,10 +597,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the symbol mark is available.
             if ( !symMark.isValid() )
             {
-                // If the non-zero sum nibble count is = 0 or non-zero sum
+                // If the sum above one nibble count is = 0 or sum above one
                 // nibble count = 1 and single sym nibble count = 1
-                if ( (i_nonZeroSumCount.count == 0) ||
-                     (i_nonZeroSumCount.count == 1 &&
+                if ( (i_sumAboveOneCount.count == 0) ||
+                     (i_sumAboveOneCount.count == 1 &&
                       i_singleSymCount.count == 1) )
                 {
                     // This means we have only one more potential bad DQ, which
@@ -627,12 +642,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Placing a symbol mark risks a UE.
-                    // Update VPD with all symbols that have a count > 1.
-                    o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_symList, dqBitmap );
+                    // For nibbles under threshold with a sum greater than 1,
+                    // update VPD with it's non-zero symbols.
+                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                        i_sumAboveOneCount, dqBitmap );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
 
@@ -672,10 +688,10 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the chip mark is available.
             if ( !chipMark.isValid() )
             {
-                // If the non-zero sum nibble count is = 0 or the non-zero sum
+                // If the sum above one nibble count is = 0 or the sum above one
                 // nibble count = 1 and the single sym nibble count = 1
-                if ( (i_nonZeroSumCount.count == 0) ||
-                     (i_nonZeroSumCount.count == 1 &&
+                if ( (i_sumAboveOneCount.count == 0) ||
+                     (i_sumAboveOneCount.count == 1 &&
                       i_singleSymCount.count == 1) )
                 {
                     // This means we have only one more potential bad DQ, which
@@ -705,12 +721,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Placing a mark risks a UE.
-                    // Update VPD with all symbols that have a count > 1.
-                    o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_symList, dqBitmap );
+                    // For nibbles under threshold with a sum greater than 1,
+                    // update VPD with it's non-zero symbols.
+                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                        i_sumAboveOneCount, dqBitmap );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
 
@@ -749,8 +766,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the chip mark is available.
             if ( !chipMark.isValid() )
             {
-                // If the non-zero sum nibble count is 0
-                if ( 0 == i_nonZeroSumCount.count )
+                // If the sum above one nibble count is 0
+                if ( 0 == i_sumAboveOneCount.count )
                 {
                     // This means we have no more potential bad DQ or bad chips
                     // since we can't correct those after chip mark is placed.
@@ -783,12 +800,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Placing a chip mark risks a UE.
-                    // Update VPD with all symbols that have a count > 1.
-                    o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_symList, dqBitmap );
+                    // For nibbles under threshold with a sum greater than 1,
+                    // update VPD with it's non-zero symbols.
+                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                        i_sumAboveOneCount, dqBitmap );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
 
@@ -805,8 +823,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             // If the symbol mark is available.
             if ( !symMark.isValid() )
             {
-                // If the non-zero sum nibble count is 0
-                if ( 0 == i_nonZeroSumCount.count )
+                // If the sum above one nibble count is 0
+                if ( 0 == i_sumAboveOneCount.count )
                 {
                     // This means we have no more potential bad DQ or bad chips
                     // since we can't correct those after symbol mark is placed.
@@ -839,12 +857,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Placing the symbol mark risks a UE.
-                    // Update VPD with all symbols that have a count > 1.
-                    o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                        i_symList, dqBitmap );
+                    // For nibbles under threshold with a sum greater than 1,
+                    // update VPD with it's non-zero symbols.
+                    o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                        i_sumAboveOneCount, dqBitmap );
                     if ( SUCCESS != o_rc )
                     {
-                        PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                        PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                                   "_RANK::MCA>() failed." );
                     }
 
@@ -863,12 +882,13 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
         else
         {
             // There are enough errors that this could be a potential UE.
-            // Update VPD with all symbols that have a count > 1.
-            o_rc = __updateVpdCountAboveOne<DIMMS_PER_RANK::MCA>(
-                i_symList, dqBitmap );
+            // For nibbles under threshold with a sum greater than 1,
+            // update VPD with it's non-zero symbols.
+            o_rc = __updateVpdSumAboveOne<DIMMS_PER_RANK::MCA>(
+                i_sumAboveOneCount, dqBitmap );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "__updateVpdCountAboveOne<DIMMS_PER"
+                PRDF_ERR( PRDF_FUNC "__updateVpdSumAboveOne<DIMMS_PER"
                           "_RANK::MCA>() failed." );
             }
 
@@ -931,9 +951,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
 template<>
 uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
-    CeCount & io_badChipCount, CeCount & io_nonZeroSumCount,
-    CeCount & io_singleSymCount, MemUtils::MaintSymbols & o_symList,
-    STEP_CODE_DATA_STRUCT & io_sc )
+    CeCount & io_badChipCount, CeCount & io_sumAboveOneCount,
+    CeCount & io_singleSymCount, STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[TpsEvent<TYPE_MCA>::getSymbolCeCounts] "
 
@@ -1003,8 +1022,6 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
                         symData.count = reg->GetBitFieldJustified(((i+n)*8), 8);
 
                     nibbleStats.push_back( symData );
-                    if ( symData.count > 0 )
-                        o_symList.push_back( symData );
 
                     // Add all symbols with non-zero counts to the callout list.
                     if ( symData.count != 0 )
@@ -1017,7 +1034,7 @@ uint32_t TpsEvent<TYPE_MCA>::getSymbolCeCounts( CeCount & io_badDqCount,
 
                 // Analyze the nibble of symbols.
                 __analyzeNibbleSyms<TYPE_MCA>( nibbleStats, io_badDqCount,
-                    io_badChipCount, io_nonZeroSumCount, io_singleSymCount );
+                    io_badChipCount, io_sumAboveOneCount, io_singleSymCount );
 
             }
             if ( SUCCESS != o_rc ) break;
@@ -1045,14 +1062,14 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
         // The symbol CE counts will be summarized in the following buckets:
         // Number of nibbles with a bad DQ
         // Number of nibbles with a bad chip
-        // Number of nibbles under threshold with a non-zero sum
-        // Number of nibbles under threshold with a single symbol count > 1
-        CeCount badDqCount, badChipCount, nonZeroSumCount, singleSymCount;
-        MemUtils::MaintSymbols symList;
+        // Number of nibbles under threshold with a sum greater than 1
+        // Number of nibbles under threshold with only a single symbol with a
+        // non-zero count, and that count is > 1
+        CeCount badDqCount, badChipCount, sumAboveOneCount, singleSymCount;
 
         // Get the symbol CE counts.
-        o_rc = getSymbolCeCounts( badDqCount, badChipCount, nonZeroSumCount,
-                                  singleSymCount, symList, io_sc );
+        o_rc = getSymbolCeCounts( badDqCount, badChipCount, sumAboveOneCount,
+                                  singleSymCount, io_sc );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getSymbolCeCounts failed." );
@@ -1071,8 +1088,8 @@ uint32_t TpsEvent<TYPE_MCA>::analyzeCe( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Analyze the symbol CE counts.
-        o_rc = analyzeCeSymbolCounts( badDqCount, badChipCount, nonZeroSumCount,
-                                      singleSymCount, symList, io_sc );
+        o_rc = analyzeCeSymbolCounts(badDqCount, badChipCount, sumAboveOneCount,
+                                     singleSymCount, io_sc);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "analyzeCeSymbolCounts failed." );
