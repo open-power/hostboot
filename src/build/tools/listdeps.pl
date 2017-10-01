@@ -223,6 +223,7 @@ my $resident_modules = {
     "libsecureboot_trusted.so"  => '1',
     "libsecureboot_base.so"     => '1',
     "libscom.so"                => '1',
+    "libxscom.so"               => '1',
 };
 
 # A list of the dependent libraries in each istep.

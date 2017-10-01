@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -328,6 +328,7 @@ void kernel_execute_machine_check()
                t->tid, getPIR(),
                getSRR0(), getSRR1(), getDSISR(), getDAR());
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+        Kernel::MachineCheck::forceCheckstop();
         kassert(false);
     }
 
@@ -388,6 +389,7 @@ void kernel_execute_machine_check()
                 t->tid, getPIR(),
                 getSRR0(), getSRR1(), getDSISR(), getDAR());
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+        Kernel::MachineCheck::forceCheckstop();
         TaskManager::endTask(t, NULL, TASK_STATUS_CRASHED);
     }
 }
@@ -425,3 +427,4 @@ void kernel_execute_unhandled_exception()
     termWriteSRC(TI_UNHANDLED_EX, KERNEL::RC_UNHANDLED_EX, exception);
     terminateExecuteTI();
 }
+

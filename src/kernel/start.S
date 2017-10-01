@@ -33,11 +33,10 @@ _start:
     ;// Set thread priority high.
     or 2,2,2
 
-    ;// Clear MSR[TA] (bit 1) and enable MSR[ME] (bit 51).
+    ;// Clear MSR[TA] (bit 1)
     mfmsr r2
     rldicl r2,r2,1,1    ;// Clear bit 1 - result [1-63,0]
     rotrdi r2,r2,1      ;// Rotate right 1 - result [0,63]
-    ori r2,r2,4096      ;// Set bit 51
     ;// Set up SRR0 / SRR1 to enable new MSR.
     mtsrr1 r2
     li r2, _start_postmsr@l
@@ -473,7 +472,7 @@ kernel_dispatch_task:
     stdcx. r0, TASK_CPUPTR, r1  ;// the CPU pointer in the task.
 
     mfmsr r2            ;// Get current MSR
-    ori r2,r2, 0xD030   ;// Enable MSR[EE,ME,PR,IR,DR].
+    ori r2,r2, 0xC030   ;// Enable MSR[EE,PR,IR,DR].
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
     ld r3, TASK_MSR_MASK(r1) ;// Load MSR mask.

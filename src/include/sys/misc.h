@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -247,6 +247,16 @@ int cpu_all_winkle();
  *  @return none
  */
 void cpu_crit_assert(uint64_t i_failAddr);
+
+/** @fn set_mchk_data
+ *  @brief Tells the kernel how to force a checkstop for unrecoverable
+ *         machine checks
+ *  @param[in] i_xstopAddr - XSCOM MMIO address of FIR to write
+ *  @param[in] i_xstopData - Data to write into FIR to trigger xstop
+ *
+ *  @return none
+ */
+void set_mchk_data(uint64_t i_xstopAddr, uint64_t i_xstopData);
 
 #ifdef __cplusplus
 }

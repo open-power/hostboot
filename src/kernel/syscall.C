@@ -45,6 +45,7 @@
 #include <kernel/doorbell.H>
 #include <sys/sync.h>
 #include <errno.h>
+#include <kernel/machchk.H>
 
 namespace KernelIpc
 {
@@ -142,6 +143,7 @@ namespace Systemcalls
     void MmExtend(task_t *t);
     void MmLinearMap(task_t *t);
     void CritAssert(task_t *t);
+    void SetMchkData(task_t *t);
 
 
     syscall syscalls[] =
@@ -185,6 +187,7 @@ namespace Systemcalls
         &MmExtend,        // MM_EXTEND
         &MmLinearMap,     // MM_LINEAR_MAP
         &CritAssert,  // MISC_CRITASSERT
+        &SetMchkData,  // MISC_SETMCHKDATA
 
         };
 };
@@ -988,6 +991,18 @@ namespace Systemcalls
         CpuManager::critAssert(i_failAddr);
     }
 
+    /**
+     *  @brief Tells the kernel how to force a checkstop for unrecoverable
+     *         machine checks
+     * @param[in] t: the task calling the critical assert
+     */
+    void SetMchkData(task_t* t)
+    {
+        uint64_t i_xstopAddr = (uint64_t)(TASK_GETARG0(t));
+        uint64_t i_xstopData = (uint64_t)(TASK_GETARG1(t));
+
+        Kernel::MachineCheck::setCheckstopData(i_xstopAddr,i_xstopData);
+    }
 
 };
 

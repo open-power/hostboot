@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,6 @@ printk("Version=%lX\n",i_data.version);
     //       were set correctly, instead use BLTOHB_SECURE_OVERRIDES version.
     if( iv_data.version >= Bootloader::BLTOHB_SECURE_OVERRIDES )
     {
-printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
         kassert(i_data.lpcBAR>0);
         kassert(i_data.xscomBAR>0);
         iv_data.lpcBAR = i_data.lpcBAR;
@@ -158,9 +157,10 @@ printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
         iv_data.xscomBAR = MMIO_GROUP0_CHIP0_XSCOM_BASE_ADDR;
 
     }
+    printk("lpc=%lX, xscom=%lX\n", i_data.lpcBAR, i_data.xscomBAR );
 
-printk("lpc=%lX, xscom=%lX, iv_data=%p\n", iv_data.lpcBAR, iv_data.xscomBAR,
-       static_cast<void *>(&iv_data) );
+    printk("iv_lpc=%lX, iv_xscom=%lX, iv_data=%p\n",
+            iv_data.lpcBAR, iv_data.xscomBAR, static_cast<void *>(&iv_data) );
 
     // Check if bootloader advertised the size of the structure it saw;
     // otherwise use the default padded size

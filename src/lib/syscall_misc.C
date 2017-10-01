@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -136,4 +136,12 @@ int cpu_all_winkle()
 void cpu_crit_assert(uint64_t i_failAddr)
 {
    _syscall1(MISC_CRITASSERT, reinterpret_cast<void*>(i_failAddr));
+}
+
+
+void set_mchk_data(uint64_t i_xstopAddr, uint64_t i_xstopData)
+{
+    _syscall2(MISC_SETMCHKDATA,
+              reinterpret_cast<void*>(i_xstopAddr),
+              reinterpret_cast<void*>(i_xstopData));
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -866,5 +866,29 @@ uint64_t get_master_bar( void )
     return mm_virt_to_phys(g_masterProcVirtAddr);
 }
 
+/**
+ * @brief Generate a fully-qualified MMIO address for a physical scom
+ *        address, relative to the given processor target
+ */
+uint64_t generate_mmio_addr( TARGETING::Target* i_proc,
+                             uint64_t i_scomAddr )
+{
+    uint64_t l_returnAddr = 0;
+
+    // Get the target chip's physical mmio address
+    uint64_t l_XSComBaseAddr =
+      i_proc->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+
+    // Build the XSCom address (relative to group 0, chip 0)
+    XSComP9Address l_mmioAddr(i_scomAddr);
+
+    // Get the offset
+    uint64_t l_offset = l_mmioAddr.offset();
+
+    // Compute value relative to target chip
+    l_returnAddr = l_XSComBaseAddr + l_offset;
+
+    return l_returnAddr;
+}
 
 } // end namespace
