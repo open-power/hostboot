@@ -28,7 +28,7 @@
 /// @brief Sets synchronous mode
 ///
 // *HWP HWP Owner: Andre A. Marin <aamarin@us.ibm.com>
-// *HWP FW  Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP FW  Owner: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: FSP:HB
