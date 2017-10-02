@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -53,6 +53,8 @@
        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
 
+    <buffer>SGPE_GLOBAL_VARS</buffer>
+
   </hwpError>
 
   <!-- *********************************************************************** -->
@@ -87,6 +89,7 @@
        <target>CHIP</target>
        <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     </collectRegisterFfdc>
+    <buffer>SGPE_GLOBAL_VARS</buffer>
 
   </hwpError>
 
@@ -178,6 +181,8 @@
        <target>EX</target>
        <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
+    <buffer>CME_GLOBAL_VARS</buffer>
+    <buffer>SGPE_GLOBAL_VARS</buffer>
   </hwpError>
 
   <!-- *********************************************************************** -->
@@ -223,13 +228,8 @@
        <target>EX</target>
        <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
-  </hwpError>
-
-  <!-- *********************************************************************** -->
-
-  <hwpError>
-    <rc>RC_CORE_POWERED_AND_RUNNING</rc>
-    <description> Core is powered up and not in any STOP state, therefore active</description>
+    <buffer>CME_GLOBAL_VARS</buffer>
+    <buffer>SGPE_GLOBAL_VARS</buffer>
   </hwpError>
 
   <!-- *********************************************************************** -->
@@ -267,6 +267,9 @@
        <target>EX</target>
        <targetType>TARGET_TYPE_EX</targetType>
     </collectRegisterFfdc>
+
+    <buffer>CME_GLOBAL_VARS</buffer>
+    <buffer>SGPE_GLOBAL_VARS</buffer>
 
   </hwpError>
   <!-- *********************************************************************** -->

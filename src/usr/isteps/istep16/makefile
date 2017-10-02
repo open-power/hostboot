@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -57,6 +57,12 @@ include  ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase2.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_image_build.mk
 include  ${PROCEDURES_PATH}/hwp/io/p9_io_obus_image_build.mk
 include  ${PROCEDURES_PATH}/hwp/pm/p9_check_idle_stop_done.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_cme_sram_access.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_ocb_indir_setup_linear.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_ocb_indir_access.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_base.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_sgpe.mk
+include  ${PROCEDURES_PATH}/hwp/pm/p9_pm_recovery_ffdc_cme.mk
 include ${ROOTPATH}/config.mk
 
 

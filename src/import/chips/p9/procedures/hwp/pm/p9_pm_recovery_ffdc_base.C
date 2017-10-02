@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -475,6 +475,23 @@ namespace p9_stop_recov_ffdc
 
     //---------------------------------------------------------------------------------------------
 
+    fapi2::ReturnCode PlatPmComplex::collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                          fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt,
+                                          uint32_t & o_ffdcLength )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatPmComplex::collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                          uint32_t & o_ffdcLength )
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 extern "C"
 {
     fapi2::ReturnCode p9_pm_recovery_ffdc_base (
@@ -520,4 +537,5 @@ extern "C"
 }
 
 
-} //namespace p9_stop_recov_ffdc ends
+
+}//namespace p9_stop_recov_ffdc ends

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -165,6 +165,56 @@
 
     //-----------------------------------------------------------------------
 
+    fapi2::ReturnCode PlatSgpe::collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                                    uint32_t & o_ffdcLength )
+    {
+        FAPI_DBG(">> PlatSgpe::collectPartialFfdc");
+        fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+        uint32_t l_maxSize = o_ffdcLength;
+        FAPI_DBG("Max buf size %d", o_ffdcLength );
+
+        switch( i_dataType )
+        {
+            case IMAGE_HEADER:
+                o_ffdcLength = FFDC_PPE_IMG_HDR_SIZE;
+                break;
+            case DASH_BOARD_VAR:
+                o_ffdcLength = OCC_SRAM_SGPE_DASHBOARD_SIZE;
+                break;
+            case TRACES:
+                o_ffdcLength = FFDC_PPE_TRACES_SIZE;
+                break;
+            default:
+                FAPI_ERR("Bad FFDC Data type. Skipping 0x%d", (uint32_t)i_dataType );
+                goto fapi_try_exit;
+                break;
+        }
+
+        if( !i_pBuf )
+        {
+            FAPI_ERR("Bad Buffer Ptr" );
+            goto fapi_try_exit;
+        }
+
+        if( o_ffdcLength > l_maxSize )
+        {
+            o_ffdcLength = l_maxSize;
+        }
+
+        FAPI_TRY( PlatPmComplex::collectSramInfo( PlatPmComplex::getProcChip(),
+                                                  (uint8_t*)i_pBuf,
+                                                  i_dataType,
+                                                  o_ffdcLength ),
+                  "Failed To Collect SGPE SRAM FFDC" );
+
+
+        fapi_try_exit:
+        FAPI_DBG("<< PlatSgpe::collectPartialFfdc");
+        return fapi2::current_err;
+    }
+
+    //-----------------------------------------------------------------------
+
     fapi2::ReturnCode PlatSgpe::collectTrace( uint8_t * i_pTraceBuf )
     {
         FAPI_DBG(">> PlatSgpe::collectTrace" );
@@ -189,6 +239,7 @@
     fapi2::ReturnCode  PlatSgpe::collectGlobals( uint8_t * i_pSgpeGlobals )
     {
         FAPI_DBG(">> PlatSgpe::collectGlobals" );
+
         PpeFfdcLayout * l_pSgpeFfdc = ( PpeFfdcLayout *) ( i_pSgpeGlobals );
         uint8_t * l_pTraceLoc = &l_pSgpeFfdc->iv_ppeGlobals[0];
 
@@ -201,6 +252,7 @@
 
 
         fapi_try_exit:
+
         FAPI_DBG("<< PlatSgpe::collectGlobals" );
         return fapi2::current_err;
     }

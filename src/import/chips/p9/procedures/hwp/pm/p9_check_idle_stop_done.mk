@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -26,5 +26,11 @@ PROCEDURE = p9_check_idle_stop_done
 HWP_INC = $(ROOTPATH)/chips/p9/common/pmlib/include/registers/
 HWP_INC += $(ROOTPATH)/chips/p9/procedures/hwp/lib
 lib$(PROCEDURE)_DEPLIBS += p9_eq_clear_atomic_lock
+lib$(PROCEDURE)_DEPLIBS += p9_cme_sram_access
+lib$(PROCEDURE)_DEPLIBS += p9_pm_ocb_indir_setup_linear
+lib$(PROCEDURE)_DEPLIBS += p9_pm_ocb_indir_access
+lib$(PROCEDURE)_DEPLIBS += p9_pm_recovery_ffdc_base
+lib$(PROCEDURE)_DEPLIBS += p9_pm_recovery_ffdc_sgpe
+lib$(PROCEDURE)_DEPLIBS += p9_pm_recovery_ffdc_cme
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(HWP_INC))
 $(call BUILD_PROCEDURE)

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -120,3 +120,11 @@ include ${HWP_PM_PATH}/p9_pstate_parameter_block.mk
 include ${HWP_PM_PATH}/p9_pm_get_poundv_bucket.mk
 include ${HWP_PM_PATH}/p9_pm_pstate_gpe_init.mk
 include ${HWP_PM_PATH}/p9_check_proc_config.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_base.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_cme.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_sgpe.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_pgpe.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_cppm.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_qppm.mk
+include ${HWP_PM_PATH}/p9_pm_recovery_ffdc_occ.mk
+include ${HWP_PM_PATH}/p9_cme_sram_access.mk

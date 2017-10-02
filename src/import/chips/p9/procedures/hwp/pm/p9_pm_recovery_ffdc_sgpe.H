@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,9 @@ namespace p9_stop_recov_ffdc
             /// @return     fapi2 return code.
             fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
                                            uint8_t i_ffdcType = ALL );
+
+            virtual fapi2::ReturnCode collectPartialFfdc( void * i_pHomerBuf, FfdcDataType i_ffdcType ,
+                                                          uint32_t & o_ffdcLength );
 
         private:
             /// @brief      collects trace info from SGPE's SRAM buffer.

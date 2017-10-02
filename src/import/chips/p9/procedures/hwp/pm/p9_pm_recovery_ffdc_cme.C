@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -222,6 +222,56 @@
 
     fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectFfdc");
+        return fapi2::current_err;
+    }
+
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatCme::collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                                    fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt,
+                                                    uint32_t & o_ffdcLength )
+    {
+        FAPI_DBG(">> PlatSgpe::collectPartialFfdc");
+        fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+        uint32_t l_maxSize = o_ffdcLength;
+        FAPI_DBG("Max buf size %d", o_ffdcLength );
+
+        switch( i_dataType )
+        {
+            case IMAGE_HEADER:
+                o_ffdcLength = FFDC_PPE_IMG_HDR_SIZE;
+                break;
+            case DASH_BOARD_VAR:
+                o_ffdcLength = FFDC_PPE_SCORE_BOARD_SIZE;
+                break;
+            case TRACES:
+                o_ffdcLength = FFDC_PPE_TRACES_SIZE;
+                break;
+            default:
+                FAPI_ERR("Bad FFDC Data type. Skipping 0x%d", (uint32_t)i_dataType );
+                goto fapi_try_exit;
+                break;
+        }
+
+        if( !i_pBuf )
+        {
+            FAPI_ERR("Bad FFDC Buffer" );
+            goto fapi_try_exit;
+        }
+
+        if( o_ffdcLength > l_maxSize )
+        {
+            o_ffdcLength = l_maxSize;
+        }
+
+        FAPI_TRY( PlatPmComplex::collectSramInfo( i_exTgt,
+                                                  (uint8_t*)i_pBuf,
+                                                  i_dataType,
+                                                  o_ffdcLength ),
+                  "Failed To Collect CME SRAM FFDC" );
+
+        fapi_try_exit:
+        FAPI_DBG("<< PlatSgpe::collectPartialFfdc");
         return fapi2::current_err;
     }
 

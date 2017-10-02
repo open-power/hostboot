@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,18 @@ namespace p9_stop_recov_ffdc
             //  @return     fapi2 return code.
             fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
                                            uint8_t i_ffdcType = ALL );
+
+            /// @brief      collects FFDC pertaining to a given CME target.
+            /// @param[in]  i_pBuf          points to base of FFDC buffer.
+            /// @param[in]  i_dataType      indicates the content type to collect
+            /// @param[in]  i_exTgt         ex target
+            /// @param[in]  o_ffdcLength    length of FFDC in bytes
+            /// @return     fapi2 return code.
+            /// @note       function intends to copy FFDC pertaining to CME and SGPE to
+            ///             an error log.
+            fapi2::ReturnCode collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                                  fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt,
+                                                  uint32_t & o_ffdcLength );
 
         private:
             /// @brief      collects trace info from a given CME SRAM buffer.

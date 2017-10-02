@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,28 @@ namespace p9_stop_recov_ffdc
 
             /// @brief returns proc chip target associated with platform
             fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > getProcChip() const { return iv_procChip; }
+
+            /// @brief      collects FFDC pertaining to a given target.
+            /// @param[in]  i_pBuf          points to base of FFDC buffer.
+            /// @param[in]  i_dataType      indicates the content type to collect
+            /// @param[in]  i_exTgt         ex target
+            /// @param[in]  o_ffdcLength    length of FFDC in bytes
+            /// @return     fapi2 return code.
+            /// @note       function intends to copy FFDC pertaining to CME and SGPE to
+            ///             an error log.
+            virtual fapi2::ReturnCode collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                                          fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt,
+                                                          uint32_t & o_ffdcLength );
+
+            /// @brief      collects FFDC pertaining to a given target.
+            /// @param[in]  i_pBuf          points to base of FFDC buffer.
+            /// @param[in]  i_dataType      indicates the content type to collect
+            /// @param[in]  o_ffdcLength    length of FFDC in bytes
+            /// @return     fapi2 return code.
+            /// @note       function intends to copy FFDC pertaining to CME and SGPE to
+            ///             an error log.
+            virtual fapi2::ReturnCode collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
+                                                          uint32_t & o_ffdcLength );
 
             /// @brief  sets start address of platform's trace buffer.
             void setTraceBufAddr (uint32_t i_addr)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,10 @@
 #include <p9_ppe_defs.H>
 #include <p9_ppe_utils.H>
 #include <p9_eq_clear_atomic_lock.H>
+#include <p9_pm_recovery_ffdc_sgpe.H>
+#include <p9_pm_recovery_ffdc_cme.H>
 
+using namespace p9_stop_recov_ffdc;
 namespace p9_check_idle_stop
 {
 
@@ -179,6 +182,15 @@ class CmeState
         {
             return iv_xsrRegValue;
         }
+
+        /**
+         * @brief collects the FFDC from SRAM of CME
+         * @param[in]   i_procChipTgt   fapi2 target for proc chip
+         * @param[in]   i_ffdcVarBuf    variable buffer
+         * @return FAPI2_RC_SUCCESS for success, error code otherwise.
+         */
+        fapi2::ReturnCode collectSramFfdc( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procChipTgt,
+                                           fapi2::variable_buffer& i_ffdcVarBuf );
 
     private:
         uint8_t     iv_cmePos;          // CME Position
@@ -418,6 +430,36 @@ void CmeState::dumpCmeState()
 
 //----------------------------------------------------------------------------------------------
 
+fapi2::ReturnCode CmeState::collectSramFfdc( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procChipTgt,
+        fapi2::variable_buffer& i_ffdcVarBuf )
+{
+    FAPI_DBG(">> CmeState::collectSramFfdc");
+    uint32_t l_ffdcLength = i_ffdcVarBuf.template getLength<uint8_t>();
+    uint8_t l_exPos = 0;
+    PlatCme l_cmeFfdc( i_procChipTgt );
+
+    auto l_exList = i_procChipTgt.getChildren< fapi2::TARGET_TYPE_EX > ();
+
+    for ( auto ex : l_exList )
+    {
+        FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, ex, l_exPos ),
+                  "FAPI_ATTR_GET Failed To Read EX Position" );
+
+        if( l_exPos == getCmePosition() )
+        {
+            l_cmeFfdc.collectPartialFfdc( (uint8_t*)i_ffdcVarBuf.pointer(), DASH_BOARD_VAR, ex, l_ffdcLength );
+            FAPI_DBG("CME Globals Size %d", l_ffdcLength );
+            break;
+        }
+    }
+
+fapi_try_exit:
+    FAPI_DBG("<< CmeState::collectSramFfdc");
+    return fapi2::current_err;
+}
+
+//----------------------------------------------------------------------------------------------
+
 /**
  * @brief   Models SGPE State
  * @note    Collect hardware state of SGPE by reading some SPRs and status register.
@@ -460,6 +502,8 @@ class SgpeState
          * @return  fapi2 RC
          */
         fapi2::ReturnCode init( fapi2::Target< fapi2::TARGET_TYPE_EX >& i_exTgt );
+        fapi2::ReturnCode collectSramFfdc( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procChipTgt,
+                                           fapi2::variable_buffer& i_ffdcVarBuf );
 
         /**
          * @brief dumps state of SGPE
@@ -601,6 +645,22 @@ void SgpeState::dumpSgpeState( )
 
 #endif
 }
+
+//----------------------------------------------------------------------------------------------
+
+fapi2::ReturnCode SgpeState::collectSramFfdc( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP >& i_procChipTgt,
+        fapi2::variable_buffer& i_ffdcVarBuf )
+{
+    FAPI_DBG(">> SgpeState::collectSramFfdc");
+    uint32_t l_ffdcLength = i_ffdcVarBuf.template getLength<uint8_t>();
+    PlatSgpe l_sgpeFfdc( i_procChipTgt );
+
+    l_sgpeFfdc.collectPartialFfdc( (uint8_t*)i_ffdcVarBuf.pointer(), DASH_BOARD_VAR, l_ffdcLength );
+    FAPI_DBG("SGPE Globals Size %d", l_ffdcLength );
+    FAPI_DBG("<< SgpeState::collectSramFfdc");
+    return fapi2::current_err;
+}
+
 //----------------------------------------------------------------------------------------------
 
 class StopFfdcRules
@@ -693,8 +753,8 @@ class StopFfdcRules
 
     private:
 
-        SgpeState       iv_SgpeState;   // Summarizes state of SGPE
-        CmeState        iv_CmeState;    // Summarizes state of CME
+        SgpeState       iv_sgpeState;   // Summarizes state of SGPE
+        CmeState        iv_cmeState;    // Summarizes state of CME
         fapi2::Target   < fapi2::TARGET_TYPE_CORE > iv_coreTgt; // fapi2 core target
         fapi2::Target   < fapi2::TARGET_TYPE_EX > iv_exTgt; // fapi2 ex target
         fapi2::Target   < fapi2::TARGET_TYPE_EQ > iv_eqTgt; // fapi2 eq target
@@ -712,10 +772,10 @@ fapi2::ReturnCode StopFfdcRules::init()
     iv_eqTgt    =   iv_exTgt.getParent<fapi2::TARGET_TYPE_EQ>();
     iv_procTgt  =   iv_exTgt.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    FAPI_TRY( iv_SgpeState.init( iv_exTgt ),
+    FAPI_TRY( iv_sgpeState.init( iv_exTgt ),
               "SGPE Init Failed" );
 
-    if( !iv_CmeState.checkCmeStatus( iv_exTgt ) && iv_SgpeState.isSgpeRunning() )
+    if( !iv_cmeState.checkCmeStatus( iv_exTgt ) && iv_sgpeState.isSgpeRunning() )
     {
         //SGPE is running but CME is not accessible. It might be because of
         //atomic lock taken by SGPE. So, halt SGPE and drop atomic lock to make
@@ -728,16 +788,18 @@ fapi2::ReturnCode StopFfdcRules::init()
                   "Failed To Clear Atomic Lock" );
     }
 
-    FAPI_TRY( iv_CmeState.init( iv_coreTgt ),
+    FAPI_TRY( iv_cmeState.init( iv_coreTgt ),
               "Failure In Getting CME State" );
 
-    iv_SgpeState.dumpSgpeState();
-    iv_CmeState.dumpCmeState();
+    iv_sgpeState.dumpSgpeState();
+    iv_cmeState.dumpCmeState();
 
 fapi_try_exit:
     FAPI_DBG("<< StopFfdcRules::init");
     return fapi2::current_err;
 }
+
+//----------------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------------
 
@@ -800,13 +862,13 @@ fapi2::ReturnCode StopFfdcRules::analyze( )
     //-------------------------------------------------------------------------
     //*************************************************************************
 
-    if( !iv_SgpeState.isSgpeRunning() )
+    if( !iv_sgpeState.isSgpeRunning() )
     {
-        if( iv_SgpeState.isSgpeHcodeHalted() )
+        if( iv_sgpeState.isSgpeHcodeHalted() )
         {
             l_retCode = assertSgpeHcodeHalted();
         }
-        else if( iv_SgpeState.isSgpeHalted() )
+        else if( iv_sgpeState.isSgpeHalted() )
         {
             l_retCode = assertSgpeHardwareHalted();
         }
@@ -816,23 +878,23 @@ fapi2::ReturnCode StopFfdcRules::analyze( )
         }
     }
 
-    else if( !iv_CmeState.isCmeOnLine() )
+    else if( !iv_cmeState.isCmeOnLine() )
     {
         l_retCode = assertCmeNotAccessible();
     }
-    else if( iv_CmeState.isCoreReportingSpecialAttn() )
+    else if( iv_cmeState.isCoreReportingSpecialAttn() )
     {
         l_retCode = assertCoreAttention();
     }
-    else if( iv_CmeState.isCmeHcodeHalted() )
+    else if( iv_cmeState.isCmeHcodeHalted() )
     {
         l_retCode = assertCmeHcodeHalt();
     }
-    else if ( iv_CmeState.isCmeHalted() )
+    else if ( iv_cmeState.isCmeHalted() )
     {
         l_retCode = assertCmeHalted();
     }
-    else if( !iv_CmeState.isPmActive()  && !iv_CmeState.isStopGated() )
+    else if( !iv_cmeState.isPmActive()  && !iv_cmeState.isStopGated() )
     {
         l_retCode = assertCoreRunning();
     }
@@ -863,6 +925,8 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHardwareHalted()
     std::vector<uint64_t> l_sgpeBaseAddress;
     fapi2::buffer<uint64_t> l_occLfirBuf;
     fapi2::buffer<uint64_t> l_sshCore[MAX_CORE_PER_QUAD];
+    fapi2::variable_buffer l_sgpeFfdc( HALF_KB * 8 );
+
 
     //Since we need to assert RC anyway, we will ignore getScom
     //error and procced all the way till end.
@@ -897,6 +961,7 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHardwareHalted()
     }
 
     l_sgpeBaseAddress.push_back( SGPE_BASE_ADDRESS );
+    iv_sgpeState.collectSramFfdc( iv_procTgt, l_sgpeFfdc );
 
     FAPI_ASSERT( false,
                  fapi2::SGPE_HW_HALTED()
@@ -905,11 +970,12 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHardwareHalted()
                  .set_PPE_STATE_MODE( HALT )
                  .set_PPE_BASE_ADDRESS_LIST( l_sgpeBaseAddress )
                  .set_OCC_LFIR( l_occLfirBuf )
-                 .set_EDR( iv_SgpeState.getEdrValue() )
+                 .set_EDR( iv_sgpeState.getEdrValue() )
                  .set_SSH_CORE_0( l_sshCore[0] )
                  .set_SSH_CORE_1( l_sshCore[1] )
                  .set_SSH_CORE_2( l_sshCore[2] )
-                 .set_SSH_CORE_3( l_sshCore[3] ),
+                 .set_SSH_CORE_3( l_sshCore[3] )
+                 .set_SGPE_GLOBAL_VARS( l_sgpeFfdc ),
                  "SGPE Is Halted Due To HW Error" );
 
 fapi_try_exit:
@@ -933,6 +999,7 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHcodeHalted( )
     fapi2::buffer<uint64_t> l_occLfirBuf;
     std::vector<uint64_t> l_sgpeBaseAddress;
     fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::variable_buffer l_sgpeFfdc( HALF_KB * 8 );
 
     //Since we need to assert RC anyway, we will ignore getScom
     //error and procced all the way till end.
@@ -944,6 +1011,7 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHcodeHalted( )
     }
 
     l_sgpeBaseAddress.push_back( SGPE_BASE_ADDRESS );
+    iv_sgpeState.collectSramFfdc( iv_procTgt, l_sgpeFfdc );
 
 
     FAPI_ASSERT( false,
@@ -952,7 +1020,8 @@ fapi2::ReturnCode StopFfdcRules::assertSgpeHcodeHalted( )
                  .set_CHIP( iv_procTgt )
                  .set_PPE_STATE_MODE( HALT )
                  .set_PPE_BASE_ADDRESS_LIST( l_sgpeBaseAddress )
-                 .set_OCC_LFIR( l_occLfirBuf ),
+                 .set_OCC_LFIR( l_occLfirBuf )
+                 .set_SGPE_GLOBAL_VARS( l_sgpeFfdc ),
                  "SGPE Hcode Is Halted" );
 
 fapi_try_exit:
@@ -981,7 +1050,7 @@ fapi2::ReturnCode StopFfdcRules::assertCoreAttention()
     FAPI_ASSERT( false,
                  fapi2::CORE_ATTENTION()
                  .set_CORE( iv_coreTgt )
-                 .set_XSR_VALUE( iv_CmeState.getXsrRegValue() )
+                 .set_XSR_VALUE( iv_cmeState.getXsrRegValue() )
                  .set_SISR_VALUE( l_sisrRegVal ),
                  "Core Reporting Special Attention" );
 
@@ -1008,9 +1077,11 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHcodeHalt()
     fapi2::buffer<uint64_t> l_sshCore[MAX_CORE_PER_EX];
     fapi2::buffer<uint64_t> l_occLfirBuf;
     fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::variable_buffer l_sgpeFfdc( HALF_KB * 8 );
+    fapi2::variable_buffer l_cmeFfdc( HALF_KB * 8 );
     uint8_t l_coreId = 0;
     std::vector<uint64_t> l_cmeBaseAddress;
-    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_CmeState.getCmePosition() ) );
+    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_cmeState.getCmePosition() ) );
 
     auto l_coreList = iv_exTgt.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_PRESENT );
     //Since we need to assert RC anyway, we will ignore getScom
@@ -1039,6 +1110,9 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHcodeHalt()
         l_coreId++;
     }
 
+    iv_sgpeState.collectSramFfdc( iv_procTgt, l_sgpeFfdc );
+    iv_cmeState.collectSramFfdc( iv_procTgt, l_cmeFfdc );
+
     FAPI_ASSERT( false,
                  fapi2::CME_HCODE_HALTED()
                  .set_EQ_TARGET( iv_eqTgt )
@@ -1048,7 +1122,9 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHcodeHalt()
                  .set_OCC_LFIR( l_occLfirBuf )
                  .set_SSH_CORE_0( l_sshCore[0] )
                  .set_SSH_CORE_1( l_sshCore[1] )
-                 .set_EX( iv_exTgt ),
+                 .set_EX( iv_exTgt )
+                 .set_CME_GLOBAL_VARS( l_cmeFfdc )
+                 .set_SGPE_GLOBAL_VARS( l_sgpeFfdc ),
                  "CME Hcode Invoking Halt" );
 
 fapi_try_exit:
@@ -1077,9 +1153,11 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHalted()
     fapi2::buffer<uint64_t> l_netCtrl[MAX_CORE_PER_EX];
     fapi2::buffer<uint64_t> l_occLfirBuf;
     fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::variable_buffer l_sgpeFfdc( HALF_KB * 8 );
+    fapi2::variable_buffer l_cmeFfdc( HALF_KB * 8 );
     uint8_t l_coreId = 0;
     std::vector<uint64_t> l_cmeBaseAddress;
-    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_CmeState.getCmePosition() ) );
+    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_cmeState.getCmePosition() ) );
 
     //Since we need to assert RC anyway, we will ignore getScom
     //error and procced all the way till end.
@@ -1111,6 +1189,9 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHalted()
         l_coreId++;
     }
 
+    iv_sgpeState.collectSramFfdc( iv_procTgt, l_sgpeFfdc );
+    iv_cmeState.collectSramFfdc( iv_procTgt, l_cmeFfdc );
+
     FAPI_ASSERT( false,
                  fapi2::CME_ERROR_HALT()
                  .set_EQ_TARGET( iv_eqTgt )
@@ -1126,7 +1207,9 @@ fapi2::ReturnCode StopFfdcRules::assertCmeHalted()
                  .set_GPMMR_0( l_gpmmr[0] )
                  .set_GPMMR_1( l_gpmmr[1] )
                  .set_SSH_CORE_0( l_sshCore[0] )
-                 .set_SSH_CORE_1( l_sshCore[1] ),
+                 .set_SSH_CORE_1( l_sshCore[1] )
+                 .set_CME_GLOBAL_VARS( l_cmeFfdc )
+                 .set_SGPE_GLOBAL_VARS( l_sgpeFfdc ),
                  "CME Halted Due To HW Error" );
 
 fapi_try_exit:
@@ -1170,14 +1253,11 @@ fapi_try_exit:
 fapi2::ReturnCode StopFfdcRules::assertCoreRunning()
 {
     FAPI_DBG( ">> StopFfdcRules::assertCoreRunning" );
-
-    FAPI_ASSERT( false,
-                 fapi2::CORE_POWERED_AND_RUNNING(),
-                 "Core(s) Is Not In Any STOP State And Running" );
-
-fapi_try_exit:
+    //PM Complex is healthy and Cores are powered up
+    //and accessible. Hence, simply return SUCCESS
     FAPI_DBG( "<< StopFfdcRules::assertCoreRunning" );
-    return fapi2::current_err;
+    return fapi2::FAPI2_RC_SUCCESS;
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1201,10 +1281,12 @@ fapi2::ReturnCode StopFfdcRules::assertPmUnknown()
     fapi2::buffer<uint64_t> l_netCtrl[MAX_CORE_PER_EX];
     fapi2::buffer<uint64_t> l_occLfirBuf;
     fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::variable_buffer l_sgpeFfdc( HALF_KB * 8 );
+    fapi2::variable_buffer l_cmeFfdc( HALF_KB * 8 );
 
     uint8_t l_coreId = 0;
     std::vector<uint64_t> l_cmeBaseAddress;
-    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_CmeState.getCmePosition() ) );
+    l_cmeBaseAddress.push_back( getCmeBaseAddress( iv_cmeState.getCmePosition() ) );
 
     auto l_coreList = iv_exTgt.getChildren<fapi2::TARGET_TYPE_CORE>( fapi2::TARGET_STATE_PRESENT );
     //Since we need to assert RC anyway, we will ignore getScom
@@ -1235,8 +1317,11 @@ fapi2::ReturnCode StopFfdcRules::assertPmUnknown()
         l_coreId++;
     }
 
+    iv_sgpeState.collectSramFfdc( iv_procTgt, l_sgpeFfdc );
+    iv_cmeState.collectSramFfdc( iv_procTgt, l_cmeFfdc );
+
     FAPI_ASSERT( false,
-                 fapi2::CME_ERROR_HALT()
+                 fapi2::UNKNOWN_PM_STATE()
                  .set_EQ_TARGET( iv_eqTgt )
                  .set_CHIP( iv_procTgt )
                  .set_EX( iv_exTgt )
@@ -1250,7 +1335,9 @@ fapi2::ReturnCode StopFfdcRules::assertPmUnknown()
                  .set_GPMMR_0( l_gpmmr[0] )
                  .set_GPMMR_1( l_gpmmr[1] )
                  .set_SSH_CORE_0( l_sshCore[0] )
-                 .set_SSH_CORE_1( l_sshCore[1] ),
+                 .set_SSH_CORE_1( l_sshCore[1] )
+                 .set_CME_GLOBAL_VARS( l_cmeFfdc )
+                 .set_SGPE_GLOBAL_VARS( l_sgpeFfdc ),
                  "An Unknown Problem In PM Complex" );
 
 fapi_try_exit:
