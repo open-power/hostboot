@@ -27,7 +27,7 @@
 /// @file p9_mss_ddr_phy_reset.C
 /// @brief Reset the DDR PHY
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
