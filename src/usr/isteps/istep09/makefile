@@ -51,6 +51,9 @@ include ${ROOTPATH}/procedure.rules.mk
 
 # fabric_erepair
 include ${PROCEDURES_PATH}/hwp/io/p9_io_xbus_restore_erepair.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_erepairAccessorHwpFuncs.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_erepairGetFailedLanesHwp.mk
+include ${PROCEDURES_PATH}/hwp/io/p9_io_erepairSetFailedLanesHwp.mk
 #Skipping p9_io_xbus_pdwn_lanes, already included by libprdf.so
 
 # fabric_io_dccal
