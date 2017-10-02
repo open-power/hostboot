@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,9 +54,17 @@
 #include <p9_io_dmi_scominit.H>
 #include <p9c_dmi_io_scom.H>
 
+
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
+const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
+const uint64_t FIR_ACTION1 = 0x0068686868000000ULL;
+const uint64_t FIR_MASK    = 0xFF97979797FFC000ULL;
+
+const uint64_t DMI_FIR_ACTION0_REG = 0x07011006;
+const uint64_t DMI_FIR_ACTION1_REG = 0x07011007;
+const uint64_t DMI_FIR_MASK_REG    = 0x07011003;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -126,6 +134,25 @@ fapi2::ReturnCode p9_io_dmi_scominit(const DMI_TGT& i_tgt)
     {
         FAPI_ERR("P9 I/O DMI Scominit Failed");
         fapi2::current_err = rc;
+    }
+
+    // configure FIR
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_MC> l_mc_tgt =
+            i_tgt.getParent<fapi2::TARGET_TYPE_MC>();
+
+        FAPI_TRY(fapi2::putScom(l_mc_tgt,
+                                DMI_FIR_ACTION0_REG,
+                                FIR_ACTION0),
+                 "Error from putScom (DMI_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(l_mc_tgt,
+                                DMI_FIR_ACTION1_REG,
+                                FIR_ACTION1),
+                 "Error from putScom (DMI_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(l_mc_tgt,
+                                DMI_FIR_MASK_REG,
+                                FIR_MASK),
+                 "Error from putScom (DMI_FIR_MASK_REG)");
     }
 
     // mark HWP exit

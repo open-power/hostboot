@@ -52,6 +52,7 @@
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
 #include <p9_fbc_smp_utils.H>
+#include <p9_mc_scom_addresses.H>
 #include <p9_xbus_scom_addresses.H>
 #include <p9_xbus_scom_addresses_fld.H>
 #include <p9_obus_scom_addresses.H>
@@ -75,6 +76,11 @@ const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF00F3ULL;
 const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF00FFULL;
 
 static const uint8_t N3_PG_NPU_REGION_BIT = 7;
+
+// MCBIST FIR (Cumulus)
+static const uint64_t MCBIST_FIR_ACTION0 = 0x0000000000000000ULL;
+static const uint64_t MCBIST_FIR_ACTION1 = 0x2000000000000000ULL;
+static const uint64_t MCBIST_FIR_MASK    = 0xDC00000000000000ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -181,6 +187,13 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                 fapi2::current_err = l_rc;
                 goto fapi_try_exit;
             }
+
+            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT0, MCBIST_FIR_ACTION0),
+                     "Error from putScom (MCBIST_MCBISTFIRACT0)");
+            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRACT1, MCBIST_FIR_ACTION1),
+                     "Error from putScom (MCBIST_MCBISTFIRACT1)");
+            FAPI_TRY(fapi2::putScom(l_mc_target, MCBIST_MCBISTFIRMASK, MCBIST_FIR_MASK),
+                     "Error from putScom (MCBIST_MCBISTFIRMASK)");
         }
 
         for (auto l_mi_target : l_mi_targets)
