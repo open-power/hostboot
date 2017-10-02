@@ -24,30 +24,6 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- @brief Error definitions for p9_thread_control procedure               -->
 <hwpErrors>
-
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_THREAD_CONTROL_SRESET_FAIL</rc>
-    <description>SReset command failed: Not all threads are running after sreset command.</description>
-    <ffdc>CORE_TARGET</ffdc>
-    <ffdc>THREAD</ffdc>
-    <ffdc>C_RAS_STATUS_REG</ffdc>
-    <callout>
-      <target>CORE_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CORE_TARGET</target>
-    </deconfigure>
-    <gard>
-      <target>CORE_TARGET</target>
-    </gard>
-  </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
     <sbeError/>
@@ -60,29 +36,6 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
-  </hwpError>
-  <!-- ********************************************************************* -->
-  <hwpError>
-    <sbeError/>
-    <rc>RC_P9_THREAD_CONTROL_START_FAIL</rc>
-    <description>Start command failed: RAS STAT instruction completed bit was not set after start command.</description>
-    <ffdc>CORE_TARGET</ffdc>
-    <ffdc>THREAD</ffdc>
-    <ffdc>C_RAS_STATUS_REG</ffdc>
-    <callout>
-      <target>CORE_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <callout>
-      <procedure>CODE</procedure>
-      <priority>LOW</priority>
-    </callout>
-    <deconfigure>
-      <target>CORE_TARGET</target>
-    </deconfigure>
-    <gard>
-      <target>CORE_TARGET</target>
-    </gard>
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>

@@ -107,35 +107,6 @@ fapi2::ReturnCode p9_thread_control_query(
     uint64_t& o_state);
 
 //--------------------------------------------------------------------------
-/// @brief threads_running : static funtion to encapsulate the running state
-/// @param[in] i_target core target
-/// @param[in] i_threads normal core thread bitset (0b0000..0b1111)
-/// @param[out] o_rasStatusReg  Complete RAS status reg 64-bit buffer.
-/// @param[out] o_ok true if the threads are running
-/// @return FAPI2_RC_SUCCESS if the underlying hw operations succeeded
-//--------------------------------------------------------------------------
-static inline fapi2::ReturnCode threads_running(
-    const fapi2::Target<TARGET_TYPE_CORE>& i_target,
-    const uint8_t i_threads,
-    fapi2::buffer<uint64_t>& o_rasStatusReg,
-    bool& o_ok)
-{
-    // Running is defined as not in maint mode and not quiesced.
-    uint64_t l_trys = g_poll_for_running;
-    uint64_t l_state = 0;
-
-    for (o_ok = false; !o_ok && l_trys > 0; l_trys--)
-    {
-        FAPI_TRY(p9_thread_control_query(i_target, i_threads, o_rasStatusReg, l_state),
-                 "threads_running(): p9_thread_control_query() returns an error.");
-        o_ok = (l_state & THREAD_STATE_RUNNING);
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-//--------------------------------------------------------------------------
 /// @brief threads_in_maint : static funtion to encapsulate the maint state
 /// @param[in] i_target core target
 /// @param[in] i_threads normal core thread bitset (0b0000..0b1111)
@@ -440,24 +411,6 @@ fapi2::ReturnCode p9_thread_control_sreset(
                  "sp_sreset for threads 0x%x", i_threads);
     }
 
-    // Post-conditions check
-    {
-        bool l_running = false;
-        FAPI_TRY(threads_running(i_target, i_threads, o_rasStatusReg, l_running),
-                 "p9_thread_control_sreset: unable to determine if threads "
-                 "are running. threads: 0x%x", i_threads);
-        PTC_ASSERT_WARN(l_running == true,
-                        i_warncheck,
-                        fapi2::P9_THREAD_CONTROL_SRESET_FAIL()
-                        .set_CORE_TARGET(i_target)
-                        .set_THREAD(i_threads)
-                        .set_C_RAS_STATUS_REG(o_rasStatusReg),
-                        "p9_thread_control_sreset: ERROR: Thread SRESET issued, "
-                        "but the threads aren't running. SReset might have "
-                        "failed for threads 0x%x, C_RAS_STATUS reg 0x%.16llX",
-                        i_threads, o_rasStatusReg);
-    }
-
     FAPI_INF("p9_thread_control_sreset : sreset command issued for threads 0x%x",
              i_threads);
 
@@ -524,25 +477,6 @@ fapi2::ReturnCode p9_thread_control_start(
         FAPI_TRY(fapi2::putScom(i_target, C_DIRECT_CONTROLS, l_scom_data),
                  "p9_thread_control_start: putScom error when issuing sp_start "
                  "for threads 0x%x", i_threads);
-    }
-
-    // Post-conditions check
-    {
-        bool l_running = false;
-        FAPI_TRY(threads_running(i_target, i_threads, o_rasStatusReg, l_running),
-                 "p9_thread_control_start: unable to determine if threads are "
-                 "running. threads: 0x%x", i_threads);
-
-        PTC_ASSERT_WARN(l_running == true,
-                        i_warncheck,
-                        fapi2::P9_THREAD_CONTROL_START_FAIL()
-                        .set_CORE_TARGET(i_target)
-                        .set_THREAD(i_threads)
-                        .set_C_RAS_STATUS_REG(o_rasStatusReg),
-                        "p9_thread_control_start: ERROR: Thread Start issued, "
-                        "but the threads aren't running. Start might have "
-                        "failed for threads 0x%x, C_RAS_STATUS reg 0x%.16llX",
-                        i_threads, o_rasStatusReg);
     }
 
     FAPI_INF("p9_thread_control_start : start command issued for threads 0x%x",
