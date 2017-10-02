@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PM_RECOVERY_FFDC_BASE_
-#define __PM_RECOVERY_FFDC_BASE_
+#ifndef __PM_RECOVERY_FFDC_CME_
+#define __PM_RECOVERY_FFDC_CME_
 
 ///
 /// @file   p9_pm_recovery_ffdc_cme.H
@@ -76,8 +76,10 @@ namespace p9_stop_recov_ffdc
             /// @brief      collects internal register info for a given CME
             /// @param[in]  i_pHomerBuf     points to location of HOMER meant for CME's internal register.
             /// @param[in]  i_exTgt         fapi2 target for ex
+            /// @param[in]  i_exPos         EX target position
             fapi2::ReturnCode  collectInternalReg( uint8_t * i_pHomerBuf,
-                                                   const fapi2::Target< fapi2::TARGET_TYPE_EX > &  i_exTgt );
+                                                   const fapi2::Target< fapi2::TARGET_TYPE_EX > &  i_exTgt ,
+                                                   const uint8_t i_exPos);
 
             /// @brief      collects CME Image Header info from CME SRAM buffer.
             /// @param[in]  i_pHomerBuf     points to location of HOMER meant for CME's header.
@@ -106,4 +108,4 @@ extern "C"
 
 } //namespace p9_stop_recov_ffdc ends
 
-#endif //__PM_RECOVERY_FFDC_BASE_
+#endif //__PM_RECOVERY_FFDC_CME_
