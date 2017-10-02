@@ -55,6 +55,157 @@ namespace mss
 namespace plug_rule
 {
 
+namespace code
+{
+
+///
+/// @brief Checks for invalid LRDIMM plug combinations
+/// @param[in] i_kinds a vector of DIMM (sorted while procesing)
+/// @return fapi2::FAPI2_RC_SUCCESS if no LRDIMM, otherwise a MSS_PLUG_RULE error code
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds )
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // If we have 0 DIMMs on the port, we don't care
+    for(const auto& l_kind : i_kinds)
+    {
+        FAPI_ASSERT( l_kind.iv_dimm_type != fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
+                     fapi2::MSS_PLUG_RULES_LRDIMM_UNSUPPORTED()
+                     .set_DIMM_TARGET(l_kind.iv_target),
+                     "%s has an LRDIMM plugged and is currently unsupported",
+                     mss::c_str(l_kind.iv_target) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // code
+
+///
+/// @brief Enforce DRAM width checks
+/// @note DIMM0's width needs to equal DIMM1's width
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Only do this check if we have the maximum number DIMM kinds
+    if(i_kinds.size() == MAX_DIMM_PER_PORT)
+    {
+        FAPI_ASSERT( i_kinds[0].iv_dram_width == i_kinds[1].iv_dram_width,
+                     fapi2::MSS_PLUG_RULES_INVALID_DRAM_WIDTH_MIX()
+                     .set_DIMM_SLOT_ZERO(i_kinds[0].iv_dram_width)
+                     .set_DIMM_SLOT_ONE(i_kinds[1].iv_dram_width)
+                     .set_MCA_TARGET(i_target),
+                     "%s has DIMM's with two different DRAM widths installed of type %d and of type %d. Cannot mix DIMM of different widths on a single port",
+                     mss::c_str(i_target), i_kinds[0].iv_dram_width, i_kinds[1].iv_dram_width );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce hybrid DIMM checks
+/// @note No hybrid/non-hybrid and no different hybrid types
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const std::vector<dimm::kind>& i_kinds)
+{
+    // Make sure we don't get a stale error
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Skip the below checks if we have less than the maximum number of DIMM's
+    if(i_kinds.size() < MAX_DIMM_PER_PORT)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Assert that we do not have an error
+    FAPI_ASSERT( i_kinds[0].iv_hybrid == i_kinds[1].iv_hybrid,
+                 fapi2::MSS_PLUG_RULES_INVALID_HYBRID_MIX()
+                 .set_DIMM_SLOT_ZERO(i_kinds[0].iv_hybrid)
+                 .set_DIMM_SLOT_ONE(i_kinds[1].iv_hybrid)
+                 .set_MCA_TARGET(i_target),
+                 "%s has DIMM's with two different hybrid types installed (type %d and type %d). Cannot mix DIMM of different hybrid types on a single port",
+                 mss::c_str(i_target), i_kinds[0].iv_hybrid, i_kinds[1].iv_hybrid );
+
+    // Only do the below check if the DIMM's are hybrid DIMM's
+    if(i_kinds[0].iv_hybrid == fapi2::ENUM_ATTR_EFF_HYBRID_IS_HYBRID)
+    {
+        // Assert that we do not have an error
+        FAPI_ASSERT( i_kinds[0].iv_hybrid_memory_type == i_kinds[1].iv_hybrid_memory_type,
+                     fapi2::MSS_PLUG_RULES_INVALID_HYBRID_MEMORY_TYPE_MIX()
+                     .set_DIMM_SLOT_ZERO(i_kinds[0].iv_hybrid_memory_type)
+                     .set_DIMM_SLOT_ONE(i_kinds[1].iv_hybrid_memory_type)
+                     .set_MCA_TARGET(i_target),
+                     "%s has DIMM's with two different hybrid memory types installed (type %d and type %d). Cannot mix DIMM of different hybrid memory types on a single port",
+                     mss::c_str(i_target), i_kinds[0].iv_hybrid_memory_type, i_kinds[1].iv_hybrid_memory_type );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce DRAM stack type checks
+/// @note No 3DS and non-3DS DIMM's can mix
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Only do this check if we have the maximum number DIMM kinds
+    if(i_kinds.size() == MAX_DIMM_PER_PORT)
+    {
+        // Only do the assert if we have any 3DS DIMM, as the chip bug is for mixed config between DIMM that use and do not use CID
+        // Note: we should be able to mix SDP and DDP ok, as both DIMM's do not use CID
+        const bool l_has_3ds = (i_kinds[0].iv_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS) ||
+                               (i_kinds[1].iv_stack_type == fapi2::ENUM_ATTR_EFF_PRIM_STACK_TYPE_3DS);
+
+        // We have an error if we have the below scenario of 3DS and the stack types not being equal
+        const auto l_error = l_has_3ds && i_kinds[0].iv_stack_type != i_kinds[1].iv_stack_type;
+
+        FAPI_DBG("%s %s 3DS. Stack types are %s (%u,%u). configuration %s ok.",
+                 mss::c_str(i_target),
+                 l_has_3ds ? "has" : "does not have",
+                 (i_kinds[0].iv_stack_type != i_kinds[1].iv_stack_type) ? "not equal" : "equal",
+                 i_kinds[0].iv_stack_type,
+                 i_kinds[1].iv_stack_type,
+                 l_error ? "isn't" : "is"
+                );
+
+        // Assert that we do not have an error
+        FAPI_ASSERT( !l_error,
+                     fapi2::MSS_PLUG_RULES_INVALID_STACK_TYPE_MIX()
+                     .set_DIMM_SLOT_ZERO(i_kinds[0].iv_stack_type)
+                     .set_DIMM_SLOT_ONE(i_kinds[1].iv_stack_type)
+                     .set_MCA_TARGET(i_target),
+                     "%s has DIMM's with two different stack types installed (type %d and type %d). Cannot mix DIMM of different stack types on a single port",
+                     mss::c_str(i_target), i_kinds[0].iv_stack_type, i_kinds[1].iv_stack_type );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Helper to evaluate the unsupported rank config override attribute
 /// @param[in] i_dimm0_ranks count of the ranks on DIMM in slot 0
@@ -63,7 +214,8 @@ namespace plug_rule
 /// @return true iff this rank config is supported according to the unsupported attribute
 /// @note not to be used to enforce populated/unpopulated - e.g., 0 ranks in both slots is ignored
 ///
-bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm1_ranks,
+bool unsupported_rank_helper(const uint64_t i_dimm0_ranks,
+                             const uint64_t i_dimm1_ranks,
                              const fapi2::buffer<uint64_t>& i_attr)
 {
     // Quick - if the attribute is 0 (typically is) then we're out.
@@ -496,6 +648,18 @@ fapi2::ReturnCode plug_rule::enforce_plug_rules(const fapi2::Target<fapi2::TARGE
     // meaning that if the VPD decoded the config then there's only a few rank related issues we need
     // to check here.
     FAPI_TRY( plug_rule::check_rank_config(i_target, l_dimm_kinds, l_ranks_override) );
+
+    // Ensures that the port has a valid combination of DRAM widths
+    FAPI_TRY( plug_rule::check_dram_width(i_target, l_dimm_kinds) );
+
+    // Ensures that the port has a valid combination of stack types
+    FAPI_TRY( plug_rule::check_stack_type(i_target, l_dimm_kinds) );
+
+    // Ensures that the port has a valid combination of hybrid DIMM
+    FAPI_TRY( plug_rule::check_hybrid(i_target, l_dimm_kinds) );
+
+    // Checks to see if any DIMM are LRDIMM
+    FAPI_TRY( plug_rule::code::check_lrdimm(l_dimm_kinds) );
 
 fapi_try_exit:
     return fapi2::current_err;
