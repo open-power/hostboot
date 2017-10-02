@@ -226,7 +226,6 @@ TESTCASE_MODULES += testkernel
 TESTCASE_MODULES += testtargeting
 TESTCASE_MODULES += testmemoize
 TESTCASE_MODULES += testprdf
-TESTCASE_MODULES += testattn
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 TESTCASE_MODULES += testpirformat
 
@@ -252,6 +251,9 @@ TESTCASE_MODULES += testi2c
 
 #TESTCASE_MODULES += testsbe   @fixme RTC:173733
 TESTCASE_MODULES += testsbeio
+
+# @TODO DefecT: 1035550 Figure out why testattn is failing sometimes
+#TESTCASE_MODULES += testattn
 
 
 #*******************************************************
