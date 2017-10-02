@@ -175,6 +175,9 @@ int32_t handleLaneRepairEvent( ExtensibleChip * i_chip,
             {
                 for (uint8_t i=0; i<clkGrps; ++i)
                 {
+                    if (rx_lanes[i].size() == 0)
+                        continue;
+
                     // Call Erepair to update VPD
                     l_rc = setVpdFailedLanesXbus(rxBusTgt, txBusTgt,
                                                  rx_lanes[i], thrExceeded, i);

@@ -155,6 +155,9 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 # Hardware procedure files needed for both IPL and RT
 ################################################################################
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/io/
+prd_obj_no_sim += p9_io_erepairAccessorHwpFuncs.o
+prd_obj_no_sim += p9_io_erepairGetFailedLanesHwp.o
+prd_obj_no_sim += p9_io_erepairSetFailedLanesHwp.o
 prd_obj_no_sim += p9_io_xbus_read_erepair.o
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 prd_obj_no_sim += p9_proc_gettracearray.o
