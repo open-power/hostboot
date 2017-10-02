@@ -28,9 +28,9 @@
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: Cronus
 
 #include <fapi2.H>
