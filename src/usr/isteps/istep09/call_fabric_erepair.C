@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,7 @@
 
 // HWP procedure
 #include <p9_io_xbus_restore_erepair.H>
+#include <p9_io_erepairAccessorHwpFuncs.H>
 
 namespace   ISTEP_09
 {
@@ -85,6 +86,7 @@ using   namespace   HWAS;
  *  power down the bad lanes.
  *
  *  @param[in]  i_target       XBUS target endpoint
+ *  @param[in]  i_grp          Clock group 0/1
  *  @param[in]  i_rx_bad_lanes Vector of Rx Bad Lanes
  *  @param[in]  i_tx_bad_lanes Vector of Tx Bad Lanes
  *  @param[out] o_step_error   Failing error logs added to this
@@ -96,6 +98,7 @@ using   namespace   HWAS;
  *  @retval 4 Means all attempts to restore/erepair failed
  */
 uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
+                         uint8_t i_grp,
                          const std::vector< uint8_t >& i_rx_bad_lanes,
                          const std::vector< uint8_t >& i_tx_bad_lanes,
                          ISTEP_ERROR::IStepError& o_step_error);
@@ -157,131 +160,147 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "===== " );
 
-            // Get the repair lanes from the VPD
-            fapi2::ReturnCode l_rc;
-            l_endp1_txFaillanes.clear();
-            l_endp1_rxFaillanes.clear();
-            l_endp2_txFaillanes.clear();
-            l_endp2_rxFaillanes.clear();
-/* TODO-RTC:156849 - Enable this section
-            l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
-                                          l_endp1_txFaillanes,
-                                          l_endp1_rxFaillanes,
-                                          l_fapi_endp2_target,
-                                          l_endp2_txFaillanes,
-                                          l_endp2_rxFaillanes);
-
-            if(l_rc)
+            // clock group is either 0 or 1
+            uint8_t l_group_loop = 0;
+            for (l_group_loop = 0; l_group_loop < 2; l_group_loop++)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Unable to"
+
+                // Get the repair lanes from the VPD
+                fapi2::ReturnCode l_rc;
+                l_endp1_txFaillanes.clear();
+                l_endp1_rxFaillanes.clear();
+                l_endp2_txFaillanes.clear();
+                l_endp2_rxFaillanes.clear();
+
+                l_rc = erepairGetRestoreLanes(l_fapi_endp1_target,
+                                              l_fapi_endp2_target,
+                                              l_group_loop,
+                                              l_endp1_txFaillanes,
+                                              l_endp1_rxFaillanes,
+                                              l_endp2_txFaillanes,
+                                              l_endp2_rxFaillanes);
+
+                if(l_rc)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Unable to"
                           " retrieve fabric eRepair data from the VPD");
 
-                // convert the FAPI return code to an err handle
-                l_errl = fapiRcToErrl(l_rc);
+                    // convert the FAPI return code to an err handle
+                    l_errl = rcToErrl(l_rc);
 
-                // capture the target data in the elog
-                ErrlUserDetailsTarget(l_thisPbusTarget).addToLog( l_errl );
-                ErrlUserDetailsTarget(l_connectedPbusTarget).addToLog( l_errl );
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_thisPbusTarget).addToLog( l_errl );
+                    ErrlUserDetailsTarget(l_connectedPbusTarget).addToLog(
+                                                                      l_errl );
 
-                // Create IStep error log and cross ref error that occurred
-                l_StepError.addErrorDetails( l_errl);
+                    // Create IStep error log and cross ref error that occurred
+                    l_StepError.addErrorDetails( l_errl);
 
-                // Commit Error
-                errlCommit(l_errl, HWPF_COMP_ID);
-                break;
-            }
-*/
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                   "===== Call io_restore_erepair HWP"
-                   "%cbus connection ", (i ? 'X' : 'O') );
+                    // Commit Error
+                    errlCommit(l_errl, HWPF_COMP_ID);
+                    break;
+                }
 
-            if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
-            {
-                // call the io_xbus_restore_erepair HWP to restore eRepair
-                // lanes of endp1
-                l_restore_failures = restore_endpoint(l_fapi_endp1_target,
-                                                      l_endp1_rxFaillanes,
-                                                      l_endp1_txFaillanes,
-                                                      l_StepError);
-            }
-
-            fapi2::toString(l_fapi_endp1_target,
-                            l_target_name,
-                            sizeof(l_target_name));
-
-            if (l_restore_failures)
-            {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "%d restore endpoint attempts to endpoint1 %s failed.",
-                    l_restore_failures, l_target_name);
-            }
-            else
-            {
-                l_tgtType = l_fapi_endp1_target.getType();
+                       "===== Call io_restore_erepair HWP"
+                       "%cbus connection ", (i ? 'X' : 'O') );
 
-                for(l_count = 0; l_count < l_endp1_txFaillanes.size();l_count++)
+                if(l_endp1_txFaillanes.size() || l_endp1_rxFaillanes.size())
                 {
-                    fapi2::toString(l_fapi_endp1_target,
-                                    l_target_name,
-                                    sizeof(l_target_name));
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
-                        " restored Tx lane %d, of %s, of endpoint %s",
-                        l_endp1_txFaillanes[l_count],
-                        l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus":
-                        "O-Bus", l_target_name);
+                    // call the io_xbus_restore_erepair HWP to restore eRepair
+                    // lanes of endp1
+                    l_restore_failures = restore_endpoint(l_fapi_endp1_target,
+                                                          l_group_loop,
+                                                          l_endp1_rxFaillanes,
+                                                          l_endp1_txFaillanes,
+                                                          l_StepError);
                 }
 
-                for(l_count = 0; l_count < l_endp1_rxFaillanes.size();l_count++)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "Successfully"
-                        " restored Rx lane %d, of %s, of endpoint %s",
-                        l_endp1_rxFaillanes[l_count],
-                        l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus":
-                        "O-Bus", l_target_name);
-                }
-            }
-
-            if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
-            {
-                // call the io_xbus_restore_erepair HWP to restore eRepair
-                // lanes of endp2
-                l_restore_failures = restore_endpoint(l_fapi_endp2_target,
-                                                      l_endp2_rxFaillanes,
-                                                      l_endp2_txFaillanes,
-                                                      l_StepError);
-            }
-
-            fapi2::toString(l_fapi_endp2_target,
+                fapi2::toString(l_fapi_endp1_target,
                                 l_target_name,
                                 sizeof(l_target_name));
 
-            if ( l_restore_failures )
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "%d restore endpoint attempts to endpoint2 %s failed.",
-                    l_restore_failures, l_target_name);
+                if (l_restore_failures)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "%d restore endpoint attempts to endpoint1 %s failed.",
+                        l_restore_failures, l_target_name);
+                }
+                else
+                {
+                    l_tgtType = l_fapi_endp1_target.getType();
 
-                continue;
-            }
+                    for(l_count = 0; l_count < l_endp1_txFaillanes.size();
+                        l_count++)
+                    {
+                        fapi2::toString(l_fapi_endp1_target,
+                                        l_target_name,
+                                        sizeof(l_target_name));
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Successfully"
+                            " restored Tx lane %d, of %s, of endpoint %s",
+                            l_endp1_txFaillanes[l_count],
+                            l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ?
+                               "X-Bus":"O-Bus", l_target_name);
+                    }
 
-            l_tgtType = l_fapi_endp2_target.getType();
-            for(l_count = 0; l_count < l_endp2_txFaillanes.size(); l_count++)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                    for(l_count = 0; l_count < l_endp1_rxFaillanes.size()
+                       ;l_count++)
+                    {
+                        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "Successfully"
+                            " restored Rx lane %d, of %s, of endpoint %s",
+                            l_endp1_rxFaillanes[l_count],
+                            l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ?
+                                "X-Bus":"O-Bus", l_target_name);
+                    }
+                }
+
+                if(l_endp2_txFaillanes.size() || l_endp2_rxFaillanes.size())
+                {
+                    // call the io_xbus_restore_erepair HWP to restore eRepair
+                    // lanes of endp2
+                    l_restore_failures = restore_endpoint(l_fapi_endp2_target,
+                                                      l_group_loop,
+                                                      l_endp2_rxFaillanes,
+                                                      l_endp2_txFaillanes,
+                                                      l_StepError);
+                }
+
+                fapi2::toString(l_fapi_endp2_target,
+                                l_target_name,
+                                sizeof(l_target_name));
+
+                if ( l_restore_failures )
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "%d restore endpoint attempts to endpoint2 %s failed.",
+                        l_restore_failures, l_target_name);
+
+                    continue;
+                }
+
+                l_tgtType = l_fapi_endp2_target.getType();
+                for(l_count = 0; l_count < l_endp2_txFaillanes.size();
+                    l_count++)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                       " restored Tx lane %d, of %s, of endpoint %s",
                       l_endp2_txFaillanes[l_count],
                       l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                       "O-Bus", l_target_name);
-            }
+                }
 
-            for(l_count = 0; l_count < l_endp2_rxFaillanes.size(); l_count++)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
+                for(l_count = 0; l_count < l_endp2_rxFaillanes.size();
+                    l_count++)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Successfully"
                       " restored Rx lane %d, of %s, of endpoint %s",
                       l_endp2_rxFaillanes[l_count],
                       l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT ? "X-Bus" :
                       "O-Bus", l_target_name);
-            }
+                }
+            } // end for l_group_loop
         } // end for l_PbusConnections
     } // end for MaxBusSet
 
@@ -294,6 +313,7 @@ void*    call_fabric_erepair( void    *io_pArgs )
 
 
 uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
+                         uint8_t i_grp,
                          const std::vector< uint8_t >& i_rx_bad_lanes,
                          const std::vector< uint8_t >& i_tx_bad_lanes,
                          ISTEP_ERROR::IStepError & o_step_error)
@@ -304,51 +324,42 @@ uint8_t restore_endpoint(const fapi2::Target<fapi2::TARGET_TYPE_XBUS> &i_target,
     fapi2::TargetType l_tgtType = fapi2::TARGET_TYPE_NONE;
     l_tgtType = i_target.getType();
 
-    // clock group is either 0 or 1
-    // need to train both groups and allow for them to differ
-    uint8_t l_group_loop = 0;
-    for (l_group_loop = 0; l_group_loop < 2; l_group_loop++)
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+             "Running p9_io_xbus_restore_erepair HWP on "
+             "this %C-BUS target %.8X (group %d)",
+             (l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT) ? 'X':'O',
+             TARGETING::get_huid(i_target), i_grp );
+
+    /*
+     * A HWP that runs Restore eRepair.
+     * This procedure should update the
+     * bad lane vector and power down the bad lanes.
+     */
+    FAPI_INVOKE_HWP(l_errl,
+                    p9_io_xbus_restore_erepair,
+                    i_target,
+                    i_grp,
+                    i_rx_bad_lanes,
+                    i_tx_bad_lanes);
+
+    if (l_errl)
     {
+        o_failures++;
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+          "ERROR 0x%.8X :  io_xbus_restore_erepair HWP "
+          "xbus connection.", l_errl->reasonCode() );
 
+        // capture the target data in the elog
+        ErrlUserDetailsTarget(i_target).addToLog( l_errl );
 
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                 "Running p9_io_xbus_restore_erepair HWP on "
-                 "this %C-BUS target %.8X (group %d)",
-                 (l_tgtType == fapi2::TARGET_TYPE_XBUS_ENDPOINT) ? 'X':'O',
-                 TARGETING::get_huid(i_target),
-                 l_group_loop );
+        // Create IStep error log and cross ref error that occurred
+        o_step_error.addErrorDetails( l_errl);
 
-        /*
-         * A HWP that runs Restore eRepair.
-         * This procedure should update the
-         * bad lane vector and power down the bad lanes.
-         */
-// TODO-RTC:156849 - Enable this section
-//        FAPI_INVOKE_HWP(l_errl,
-//                        p9_io_xbus_restore_erepair,
-//                        i_target,
-//                        l_group_loop,
-//                        i_rx_bad_lanes,
-//                        i_tx_bad_lanes);
-
-        if (l_errl)
-        {
-            o_failures++;
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-              "ERROR 0x%.8X :  io_xbus_restore_erepair HWP "
-              "xbus connection.", l_errl->reasonCode() );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(i_target).addToLog( l_errl );
-
-            // Create IStep error log and cross ref error that occurred
-            o_step_error.addErrorDetails( l_errl);
-
-            // Commit Error
-            errlCommit(l_errl, HWPF_COMP_ID);
-            l_errl = NULL;
-        }
+        // Commit Error
+        errlCommit(l_errl, HWPF_COMP_ID);
+        l_errl = NULL;
     }
+
     return o_failures;
 }
 
