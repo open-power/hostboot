@@ -27,10 +27,10 @@
 /// @file p9_mss_scrub.H
 /// @brief Begin background scrub
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP FW Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef __P9_MSS_SCRUB__
