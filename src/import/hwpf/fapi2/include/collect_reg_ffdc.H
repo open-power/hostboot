@@ -35,6 +35,7 @@
 #include <return_code.H>
 #include <fapi2_attribute_service.H>
 #include <plat_trace.H>
+#include <endian.h>
 
 
 namespace fapi2
@@ -393,7 +394,47 @@ ReturnCode collectRegisterData(std::vector<T>& i_addresses, U& i_reader,
 
     return l_rc;
 }
+template< typename T, class U>
+ReturnCode collectRegisterAndAddressData(std::vector<T>& i_addresses, U& i_reader,
+        uint32_t i_offset, uint8_t*& o_pData)
+{
+    FAPI_DBG("collectRegisterAndAddressData -> address count: 0x%lx", i_addresses.size());
 
+    T l_data = 0;
+
+    ReturnCode l_rc = FAPI2_RC_SUCCESS;
+
+    for( auto address : i_addresses )
+    {
+        fapi2::buffer<T> l_buf;
+
+        T l_address = address + i_offset;
+
+        l_rc = i_reader.read_register(l_address, l_buf);
+
+        if(l_rc)
+        {
+            l_data = 0xbaddbadd;
+        }
+        else
+        {
+            l_data = l_buf();
+        }
+
+        l_address = htobe32(l_address);
+        l_data = htobe64(l_data);
+
+        memcpy(o_pData, &l_address, sizeof(uint32_t));
+        o_pData += sizeof(uint32_t);
+
+        memcpy(o_pData, &l_data, sizeof(T));
+
+        o_pData += sizeof(T);
+
+    }
+
+    return l_rc;
+}
 
 ///
 /// @brief readRegisters

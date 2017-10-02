@@ -130,7 +130,8 @@ struct __attribute__((packed)) QuadFfdcHeader
     uint16_t iv_offsetCme0;
     uint16_t iv_offsetCme1;
     uint16_t iv_offsetQppm;
-    uint8_t  iv_reserve[2];
+    uint8_t  iv_ffdcValid;
+    uint8_t  iv_reserve;
 };
 
 
@@ -158,6 +159,19 @@ enum OccFfdcValidStatus
                                        OCC_FFDC_REGISTERS_VALID )
 };
 
+
+/**
+ * @brief models C_Q_PPM FFDC header.
+ */
+struct __attribute__((packed)) PpmFfdcHeader
+{
+    uint32_t iv_ppmMagicWord;
+    uint8_t  iv_Instance;
+    uint8_t  iv_ppmHeaderSize;
+    uint16_t iv_sectionSize;
+    uint8_t  iv_ffdcValid;
+    uint8_t iv_reserved[7];
+};
 
 /**
  *  * @brief models OCC Region FFDC header.
@@ -217,7 +231,7 @@ struct  __attribute__((packed)) PpeFfdcLayout
 struct __attribute__((packed)) HomerQuadFfdcRegion
 {
     uint8_t iv_quadFfdcHeader[FFDC_QUAD_HDR_SIZE];
-    uint8_t iv_quadCppmRegion[FFDC_CPPM_REGISTERS_SIZE];
+    uint8_t iv_quadCppmRegion[MAX_CORES_PER_QUAD][FFDC_CPPM_REGISTERS_SIZE];
     uint8_t iv_quadCmeBlock[MAX_CMES_PER_QUAD][FFDC_PPE_BLOCK_SIZE];
     uint8_t iv_quadQppmRegion[FFDC_QPPM_REGISTERS_SIZE];
 };

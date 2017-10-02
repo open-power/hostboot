@@ -42,6 +42,7 @@
 
 #include <p9_pm_recovery_ffdc_cme.H>
 #include <p9_hcd_memmap_cme_sram.H>
+#include <collect_reg_ffdc.H>
 #include <p9_ppe_defs.H>
 #include <stddef.h>
 #include <endian.h>
@@ -83,6 +84,7 @@
             if( !ex.isFunctional() )
             {
                 //Marking CME FFDC region as Invalid
+                l_ffdcValdityVect = PPE_FFDC_INVALID;
                 FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect, l_haltState ),
                           "Failed To Update CME FFDC Header for CME 0x%0d", l_cmePos );
                 continue;
@@ -126,6 +128,7 @@
             {
                 FAPI_ERR("Error in collecting CME Globals, CME Pos 0x%08x", l_cmePos );
                 l_ffdcValdityVect &= ~PPE_DASHBOARD_VALID;
+
             }
 
             l_retCode = collectImageHeader( l_pFfdcLoc, ex );
@@ -136,8 +139,19 @@
                 l_ffdcValdityVect &= ~PPE_IMAGE_HEADER_VALID;
             }
 
+            l_retCode = collectInternalReg( l_pFfdcLoc, ex , l_cmePos);
+
+            if( l_retCode )
+            {
+               FAPI_ERR("Error in collecting CME Internal Regs, CME Pos 0x%08x", l_cmePos );
+                l_ffdcValdityVect &= ~PPE_INT_REG_VALID;
+            }
+
+
+
             FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect, l_haltState ),
                       "Failed To Update CME FFDC Header for CME 0x%0d", l_cmePos );
+
         }
 
         fapi_try_exit:
@@ -191,8 +205,24 @@
     //-----------------------------------------------------------------------
 
     fapi2::ReturnCode PlatCme::collectInternalReg( uint8_t * i_pCmeIntReg,
-                                                   const fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt )
+                                                   const fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt ,
+                                                   const uint8_t i_exPos)
     {
+        FAPI_DBG(">> PlatCme::collectInternalReg" );
+
+        PpeFfdcLayout * l_pCmeFfdc = ( PpeFfdcLayout *) ( i_pCmeIntReg);
+        uint8_t * l_pIntRegs = &l_pCmeFfdc->iv_ppeInternalReg[0];
+
+        FAPI_INF("CME Internal FFDC Pos %d ", i_exPos);
+
+        FAPI_TRY(collectRegisterData<fapi2::TARGET_TYPE_EX> (i_exTgt,
+                                     l_pIntRegs,
+                                     static_cast<fapi2::HwpFfdcId>(fapi2::CME_INTERNAL_FFDC_REGISTERS)),
+                      "Failed to collect register data for CME instance %u",i_exPos);
+
+
+        fapi_try_exit:
+        FAPI_DBG("<< PlatCme::collectInternalReg" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

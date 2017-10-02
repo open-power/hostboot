@@ -41,6 +41,7 @@
 // Includes
 //--------------------------------------------------------------------------
 #include <fapi2.H>
+#include <collect_reg_ffdc.H>
 #include <stdint.h>
 #include <p9_hcd_memmap_cme_sram.H>
 #include <p9_hcd_memmap_occ_sram.H>
@@ -119,6 +120,19 @@ namespace p9_stop_recov_ffdc
                                                FfdcDataType i_dataType,
                                                uint32_t i_sramLength );
 
+            ///@brief  Collects register data
+            ///param[in]    i_chipletTarget Chip/chilpet target
+            ///param[out]   o_pHomerBuf     Homer base address to fill register
+            //                              data
+            // param[in]    i_ffdcId        Hwp ffdc id to know register
+            //                              collection type
+            ///@return  fapi2 return code
+            template<fapi2::TargetType T>
+            fapi2::ReturnCode collectRegisterData( const fapi2::Target<T>& i_chipletTarget,
+                                                   uint8_t* o_pHomerBuf,
+                                                   fapi2::HwpFfdcId i_ffdcId);
+
+
             ///@brief  updates parts of PPE FFDC Header common for all platforms.
             ///param[in]    i_pFfdcHdr      points to the PPE FFDC header
             ///param[in]    i_ffdcValid     bit vector summarizing FFDC validity
@@ -142,6 +156,29 @@ namespace p9_stop_recov_ffdc
             PmComplexPlatId iv_plat;
     };
 
+    template<fapi2::TargetType T>
+    fapi2::ReturnCode PlatPmComplex::collectRegisterData(const fapi2::Target<T>& i_chipletTarget,
+                                           uint8_t *o_pHomerBuf,
+                                           fapi2::HwpFfdcId i_ffdcId)
+    {
+        FAPI_DBG(">> collectRegisterData");
+        std::vector<uint32_t> l_cfamAddresses;
+        std::vector<uint64_t> l_scomAddresses;
+        uint32_t l_ffdcRegReadSize = 0;
+        uint32_t l_offset = 0;
+        fapi2::ScomReader<T> l_scomReader(i_chipletTarget);
+
+        fapi2::getAddressData(i_ffdcId, l_scomAddresses, l_cfamAddresses, l_ffdcRegReadSize);
+
+        FAPI_TRY((fapi2::collectRegisterAndAddressData<uint64_t,
+                    fapi2::ScomReader<T> >(l_scomAddresses, l_scomReader,
+                                        l_offset, o_pHomerBuf)), 
+                   "Failed in collectRegisterAndAddressData");
+
+        fapi_try_exit:
+        FAPI_DBG("<< collectRegisterData");
+        return fapi2::current_err;
+    }
 
 } //namespace p9_stop_recov_ffdc ends
 
