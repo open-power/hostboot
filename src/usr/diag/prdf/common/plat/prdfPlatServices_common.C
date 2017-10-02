@@ -48,7 +48,7 @@
 #include <p9_io_xbus_read_erepair.H>
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
-//#include <erepairAccessorHwpFuncs.H> TODO RTC 174013
+#include <p9_io_erepairAccessorHwpFuncs.H>
 #include <config.h>
 #endif
 
@@ -191,13 +191,12 @@ int32_t getVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
 
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTrgt (i_rxBusTgt);
 
-// TODO RTC 174013
-//    FAPI_INVOKE_HWP(err,
-//                    erepairGetFailedLanes,
-//                    fapiTrgt,
-//                    o_txFailLanes,
-//                    o_rxFailLanes,
-//                    i_clkGrp);
+    FAPI_INVOKE_HWP(err,
+                    erepairGetFailedLanes,
+                    fapiTrgt,
+                    i_clkGrp,
+                    o_txFailLanes,
+                    o_rxFailLanes);
 
     if(nullptr != err)
     {
@@ -233,13 +232,13 @@ int32_t setVpdFailedLanesXbus(TargetHandle_t i_rxBusTgt,
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiRxTrgt (i_rxBusTgt);
     fapi2::Target<fapi2::TARGET_TYPE_XBUS> fapiTxTrgt (i_rxBusTgt);
 
-// TODO RTC 174013
-//    FAPI_INVOKE_HWP(err,
-//                    erepairSetFailedLanes,
-//                    fapiTxTrgt,
-//                    fapiRxTrgt,
-//                    i_rxFailLanes,
-//                    o_thrExceeded);
+    FAPI_INVOKE_HWP(err,
+                    erepairSetFailedLanes,
+                    fapiTxTrgt,
+                    fapiRxTrgt,
+                    i_clkGrp,
+                    i_rxFailLanes,
+                    o_thrExceeded);
 
     if(nullptr != err)
     {
