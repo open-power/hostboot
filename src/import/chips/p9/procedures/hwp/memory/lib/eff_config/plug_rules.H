@@ -69,7 +69,8 @@ fapi2::ReturnCode enforce_plug_rules(const fapi2::Target<fapi2::TARGET_TYPE_MCA>
 /// @return true iff this rank config is supported according to the unsupported attribute
 /// @note not to be used to enforce populated/unpopulated - e.g., 0 ranks in both slots is ignored
 ///
-bool unsupported_rank_helper(const uint64_t i_dimm0_ranks, const uint64_t i_dimm1_ranks,
+bool unsupported_rank_helper(const uint64_t i_dimm0_ranks,
+                             const uint64_t i_dimm1_ranks,
                              const fapi2::buffer<uint64_t>& i_attr);
 ///
 /// @brief Enforces the DEAD LOAD rules
@@ -147,6 +148,53 @@ fapi2::ReturnCode dimm_type_mixing(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 fapi2::ReturnCode check_rank_config(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                     const std::vector<dimm::kind>& i_kinds,
                                     const uint64_t i_ranks_override);
+
+///
+/// @brief Enforce DRAM width checks
+/// @note DIMM0's width needs to equal DIMM1's width
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_dram_width(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds);
+
+///
+/// @brief Enforce DRAM stack type checks
+/// @note No 3DS and non-3DS DIMM's can mix
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_stack_type(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const std::vector<dimm::kind>& i_kinds);
+
+///
+/// @brief Enforce hybrid DIMM checks
+/// @note No hybrid/non-hybrid and no different hybrid types
+/// @param[in] i_target the port
+/// @param[in] i_kinds a vector of DIMM (sorted while processing)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Expects the kind array to represent the DIMM on the port.
+///
+fapi2::ReturnCode check_hybrid(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const std::vector<dimm::kind>& i_kinds);
+
+// Adding in code based plug rules - as supporting code gets added, the following checks can be deleted
+namespace code
+{
+
+///
+/// @brief Checks for invalid LRDIMM plug combinations
+/// @param[in] i_kinds a vector of DIMM (sorted while procesing)
+/// @return fapi2::FAPI2_RC_SUCCESS if no LRDIMM, otherwise a MSS_PLUG_RULE error code
+/// @note This function will commit error logs representing the mixing failure
+///
+fapi2::ReturnCode check_lrdimm( const std::vector<dimm::kind>& i_kinds );
+
+} // code
 
 } // plug_rule
 } // mss
