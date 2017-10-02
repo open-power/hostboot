@@ -59,6 +59,131 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_DRAM_WIDTH_MIX</rc>
+    <description>
+      Two different widths of DIMMs are installed on port
+    </description>
+    <ffdc>DIMM_SLOT_ZERO</ffdc>
+    <ffdc>DIMM_SLOT_ONE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_STACK_TYPE_MIX</rc>
+    <description>
+      Two DIMMs with incompatable stack types are installed on port
+    </description>
+    <ffdc>DIMM_SLOT_ZERO</ffdc>
+    <ffdc>DIMM_SLOT_ONE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_HYBRID_MIX</rc>
+    <description>
+      Two DIMMs with incompatable hybrid types are plugged
+    </description>
+    <ffdc>DIMM_SLOT_ZERO</ffdc>
+    <ffdc>DIMM_SLOT_ONE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_INVALID_HYBRID_MEMORY_TYPE_MIX</rc>
+    <description>
+      Two DIMMs with incompatable hybrid memory types
+    </description>
+    <ffdc>DIMM_SLOT_ZERO</ffdc>
+    <ffdc>DIMM_SLOT_ONE</ffdc>
+    <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+       <childTargets>
+          <parent>MCA_TARGET</parent>
+          <childType>TARGET_TYPE_DIMM</childType>
+      </childTargets>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_PLUG_RULES_LRDIMM_UNSUPPORTED</rc>
+    <description>
+      The DIMM is an LRDIMM and that is currently not supported
+    </description>
+   <callout>
+        <procedure>MEMORY_PLUGGING_ERROR</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>DIMM_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_MSS_DEAD_LOAD_ON_PORT</rc>
     <description>
         A DIMM is deconfigured on a dual-drop port that has two DIMMS installed
