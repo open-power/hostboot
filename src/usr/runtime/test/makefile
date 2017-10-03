@@ -25,6 +25,7 @@
 ROOTPATH = ../../../..
 
 MODULE = testruntime
+TESTS += testpreverifiedlidmgr.H
 #@TODO RTC 132750
 #TESTS += hdatservicetest.H
 #@TODO RTC:178802

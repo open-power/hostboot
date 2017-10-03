@@ -236,4 +236,8 @@ enum BlockPriority
 
 #define UNSECURE_MEM_REGION_SIZE_TEST (1*KILOBYTE)
 
+/** PreVerifiedLidMgr test space */
+#define PREVERLIDMGR_TEST_ADDR  (364*MEGABYTE)
+#define PREVERLIDMGR_TEST_SIZE  (64*MEGABYTE)
+
 #endif /* _VMMCONST_H */
