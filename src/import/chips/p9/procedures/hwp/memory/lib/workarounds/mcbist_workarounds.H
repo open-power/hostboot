@@ -26,7 +26,7 @@
 ///
 /// @file mcbist_workarounds.H
 /// @brief Workarounds for the MCBISt engine
-/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// Workarounds are very device specific, so there is no attempt to generalize
 /// this code in any way.
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
