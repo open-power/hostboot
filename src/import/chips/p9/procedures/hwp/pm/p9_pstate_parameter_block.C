@@ -3193,7 +3193,7 @@ iddq_print(IddqTable* i_iddqt)
 
     FAPI_INF("%s", l_line_str);
 
-    // get average temperatur}e measurements with all cores and caches OFF
+    // get average temperature measurements with all cores and caches OFF
     IDDQ_TRACE ("  Average temp all cores OFF, caches OFF:", IDDQ_DESC_SIZE);
 
     for (i = 0; i < IDDQ_MEASUREMENTS; i++)
@@ -3818,13 +3818,14 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
 
     bool b_fratio_set = true;
 
+    bool b_first_vratio_set = true;
+
     //Initialize VFRT data part
     for (l_index_0 = 0; l_index_0 < VFRT_FRATIO_SIZE; ++l_index_0)
     {
         strcpy(l_buffer_str, "");
         strcpy(l_line_str, "    ");
 
-        bool b_first_vratio_set = true;
 
         for (l_index_1 = 0; l_index_1 < VFRT_VRATIO_SIZE; ++l_index_1)
         {
@@ -3852,7 +3853,7 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
             // is correct without overfilling the HB trace buffer.
             if (!((l_index_1 + 1) % 8) && b_first_vratio_set && b_fratio_set)
             {
-                FAPI_INF("%s", l_line_str);
+                FAPI_DBG("%s ", l_line_str);
                 strcpy(l_buffer_str, "");
                 strcpy(l_line_str, "    ");
                 b_first_vratio_set = false;
@@ -3863,7 +3864,15 @@ void p9_pstate_update_vfrt(const GlobalPstateParmBlock* i_gppb,
 
         // If fratio is not enabled, don't trace the remaining, duplicate entries.
         if (!l_enable_fratio)
+        {
             b_fratio_set = false;
+            b_first_vratio_set = false;
+        }
+        else
+        {
+            b_fratio_set = true;
+            b_first_vratio_set = true;
+        }
 
     }
 
