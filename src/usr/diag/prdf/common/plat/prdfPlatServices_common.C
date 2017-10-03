@@ -43,9 +43,8 @@
 //#include <prdfCenDqBitmap.H> TODO RTC 157888
 //#include <prdfCenMarkstore.H> TODO RTC 157888
 
-//#include <dimmBadDqBitmapFuncs.H> // for dimm[S|G]etBadDqBitmap() TODO RTC 164707
-
 #ifdef __HOSTBOOT_MODULE
+#include <dimmBadDqBitmapFuncs.H>
 #include <p9_io_xbus_read_erepair.H>
 #include <p9_io_xbus_pdwn_lanes.H>
 #include <p9_io_xbus_clear_firs.H>
@@ -341,6 +340,8 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
+    #ifdef __HOSTBOOT_MODULE
+
     // Don't proceed unless the DIMM exists
     PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
                                               i_rank.getDimmSlct()) );
@@ -356,10 +357,9 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
         fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
 
-        // TODO RTC 164707
-        //FAPI_INVOKE_HWP( errl, dimmGetBadDqBitmap, l_fapiTrgt,
-        //                 i_rank.getDimmSlct(), i_rank.getRankSlct(),
-        //                 data[ps], ps );
+        FAPI_INVOKE_HWP( errl, dimmGetBadDqBitmap, l_fapiTrgt,
+                         i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                         data[ps], ps );
 
         if ( nullptr != errl )
         {
@@ -375,6 +375,8 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
     {
         o_bitmap = MemDqBitmap<T>( i_trgt, i_rank, data );
     }
+
+    #endif // __HOSTBOOT_MODULE
 
     return o_rc;
 
@@ -401,13 +403,15 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
     int32_t o_rc = SUCCESS;
 
+    #ifdef __HOSTBOOT_MODULE
+
     // Don't proceed unless the DIMM exists
     PRDF_ASSERT( nullptr != getConnectedChild(i_trgt, TYPE_DIMM,
                                               i_rank.getDimmSlct()) );
 
     if ( !areDramRepairsDisabled() )
     {
-        //const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
+        const uint8_t (&data)[T][DQ_BITMAP::BITMAP_SIZE] = i_bitmap.getData();
 
         for ( int32_t ps = 0; ps < T; ps++ )
         {
@@ -419,10 +423,9 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
             fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
 
-            // TODO RTC 164707
-            //FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, l_fapiTrgt,
-            //                 i_rank.getDimmSlct(), i_rank.getRankSlct(),
-            //                 data[ps], ps );
+            FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, l_fapiTrgt,
+                             i_rank.getDimmSlct(), i_rank.getRankSlct(),
+                             data[ps], ps );
 
             if ( nullptr != errl )
             {
@@ -434,6 +437,8 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
             }
         }
     }
+
+    #endif // __HOSTBOOT_MODULE
 
     return o_rc;
 
