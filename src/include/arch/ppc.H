@@ -461,6 +461,7 @@ enum
                                        //  env var HB_BREAK_ON_ERROR
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces
     MAGIC_PRINT_ISTEP         =  7020, // Print istep to simics console
+    MAGIC_PRINT_TWO_REGS      =  7021, // Print 2 numbers passed in
 
     MAGIC_CONTINUOUS_TRACE    =  7055, // extract mixed trace buffer
 };
@@ -485,5 +486,14 @@ enum
                  "r" (_major), "r" (_minor) : "4", "5"); \
     MAGIC_INSTRUCTION(MAGIC_PRINT_ISTEP); \
 
+/**
+ * @brief Display 2 numbers on the simics console
+ * @param[in]  First number (uint64_t)
+ * @param[in]  Second number (uint64_t)
+ */
+#define MAGIC_INST_PRINT_2_REGS(_first, _second) \
+    asm volatile("mr 4, %0; mr 5, %1" :: \
+                 "r" (_first), "r" (_second) : "4", "5"); \
+    MAGIC_INSTRUCTION(MAGIC_PRINT_TWO_REGS); \
 
 #endif

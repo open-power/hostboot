@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,20 +167,28 @@ namespace TRACE
             friend class TRACEDAEMON::Daemon;
 
         private:
-#ifndef __HOSTBOOT_RUNTIME
                 /** Front-size buffers */
             Buffer* iv_buffers[BUFFER_COUNT]; // slow / fast buffers.
-                /** Interface to signal daemon. */
-            DaemonIf* iv_daemon;
+
+                /** Copy the current time into the timestamp. */
+            void _createTimeStamp(trace_entry_stamp_t* o_entry);
+
+                /** Get the singleton instance. */
+
+            static Service* getGlobalInstance();
+
                 /** List of component descriptors. */
             ComponentList* iv_compList;
 
-                /** Get the singleton instance. */
-            static Service* getGlobalInstance();
-                /** Copy the current time into the timestamp. */
-            void _createTimeStamp(trace_entry_stamp_t* o_entry);
+#ifndef __HOSTBOOT_RUNTIME
+                /** Interface to signal daemon. */
+            DaemonIf* iv_daemon;
+
                 /** tracelite enabled **/
             uint8_t iv_traceLite;
+#else
+                /** Runtime daemon **/
+            TRACEDAEMON::Daemon * iv_daemon;
 #endif
     };
 }

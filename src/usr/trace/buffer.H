@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,16 +31,20 @@
 
 #include <trace/interface.H>
 #include <sys/sync.h>
+#include "daemon/daemon.H"
 
+#ifndef __HOSTBOOT_RUNTIME
 namespace TRACEDAEMON { class Daemon; } // Forward declaration.
+#endif
 
 namespace TRACE
 {
         // Forward declarations.
     class BufferPage;
     class Entry;
+#ifndef __HOSTBOOT_RUNTIME
     class DaemonIf;
-
+#endif
     /** @class Buffer
      *  @brief Class to manage the front-side (client) buffers
      *
@@ -62,6 +66,7 @@ namespace TRACE
                 UNLIMITED = UINT32_MAX
             };
 
+#ifndef __HOSTBOOT_RUNTIME
             /** Constructor.
              *
              *  @param[in] i_daemon - Daemon interface for this buffer.
@@ -69,7 +74,15 @@ namespace TRACE
              *                          before 'claimEntry' blocks.
              */
             Buffer(DaemonIf* i_daemon, size_t i_maxPages = 4);
-
+#else
+            /** Constructor.
+             *
+             *  @param[in] i_daemon   - Runtime "daemon" for this buffer.
+             *  @param[in] i_maxPages - Maximum number of pages to consume
+             *                          before 'claimEntry' blocks.
+             */
+            Buffer(TRACEDAEMON::Daemon * i_daemon, size_t i_maxPages = 4);
+#endif
             /** @brief Claim an entry from the buffer to write data to.
              *
              *  @param[in] i_comp - Component which will own entry.
@@ -104,6 +117,7 @@ namespace TRACE
 
             BufferPage* volatile iv_firstPage; //< Most recent page.
 
+#ifndef __HOSTBOOT_RUNTIME
             /** @union locklessCounter
              *
              *  This class is mostly lockless in that multiple trace entries
@@ -141,6 +155,13 @@ namespace TRACE
 
             DaemonIf* iv_daemon; //< Daemon interface.
 
+            void _producerEnter();      //< Enter client section.
+            void _producerExit();       //< Exit client section.
+            void _consumerEnter();      //< Enter daemon section.
+            void _consumerExit();       //< Exit daemon section.
+#else
+            TRACEDAEMON::Daemon * iv_daemon;  // Daemon
+#endif
             /** @brief Claim front-side buffer pages to be merged into the
              *         common buffer.
              *
@@ -186,13 +207,11 @@ namespace TRACE
                                 Entry* i_condActVal = NULL,
                             Entry** i_addr = NULL, Entry* i_val = NULL);
 
-            void _producerEnter();      //< Enter client section.
-            void _producerExit();       //< Exit client section.
-            void _consumerEnter();      //< Enter daemon section.
-            void _consumerExit();       //< Exit daemon section.
 
             friend class BufferTest;
+
             friend class TRACEDAEMON::Daemon;
+
     };
 }
 

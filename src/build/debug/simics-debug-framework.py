@@ -595,6 +595,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
         dateCommand = "shell \" date +'%s > ISTEP %d.%d' \""%(percent_s,major_istep,minor_istep)
         SIM_run_alone(run_command, dateCommand )
 
+    if arg == 7021:  # MAGIC_PRINT_TWO_REGS
+        first_num = cpu.r4
+        second_num = cpu.r5
+        percent_s = "%s"
+        dateCommand = "shell \" date +'%s > TRACE REGS: %d %d' \""%(percent_s,first_num,second_num)
+        SIM_run_alone(run_command, dateCommand )
+
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
         hb_tracBinaryBuffer = cpu.r4
         hb_tracBinaryBufferSz = cpu.r5
