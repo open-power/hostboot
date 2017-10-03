@@ -712,6 +712,15 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
                 iv_msg_to_send.msg_payload.data[1] = 0;
                 iv_msg_to_send.msg_payload.extra_data = NULL;
                 iv_msg_to_send.msg_payload.__reserved__async = 1;
+
+                TRACFCOMP(g_trac_mbox,
+                          INFO_MRK
+                          "MailboxSp::send_msg - "
+                          "Send Reclaim Msg to FSP");
+
+                // track the msg until completion
+                //  actual msg send happens below
+                iv_reclaim_sent_cnt++;
             }
             else
             {
@@ -1169,6 +1178,11 @@ void MailboxSp::handle_hbmbox_msg(mbox_msg_t & i_mbox_msg)
 
 void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
 {
+    TRACFCOMP(g_trac_mbox,
+              INFO_MRK
+              "MailboxSp::handle_hbmbox_resp - "
+              "Reclaim Msg response from FSP");
+
     //Response for more DMA buffers
     iv_dmaBuffer.addBuffers
         (i_mbox_msg.msg_payload.data[0]);
