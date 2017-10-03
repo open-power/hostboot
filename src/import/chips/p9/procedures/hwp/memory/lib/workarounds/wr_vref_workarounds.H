@@ -26,7 +26,7 @@
 ///
 /// @file wr_vref_workarounds.H
 /// @brief Workarounds for the WR VREF calibration logic
-/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// Workarounds are very device specific, so there is no attempt to generalize
 /// this code in any way.
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
@@ -53,7 +53,7 @@ namespace wr_vref
 /// @brief Executes WR VREF workarounds
 /// @param[in] i_target the fapi2 target of the port
 /// @param[in] i_rp - the rank pair to execute the override on
-/// @param[in] i_cal_steps_enabled - cal steps to exectue, used to see if WR VREF needs to be exectued
+/// @param[in] i_wr_vref_enabled - true if WR VREF is enabled
 /// @param[out] o_vrefdq_train_range - training range value
 /// @param[out] o_vrefdq_train_value - training value value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -61,7 +61,7 @@ namespace wr_vref
 // TODO RTC:166422 update training code to set cal step enable and consume it everywhere locally
 fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                            const uint64_t i_rp,
-                           const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
+                           const bool i_wr_vref_enabled,
                            uint8_t& o_vrefdq_train_range,
                            uint8_t& o_vrefdq_train_value );
 
