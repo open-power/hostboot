@@ -26,7 +26,7 @@
 ///
 /// @file workarounds/dp16.C
 /// @brief Workarounds for the DP16 logic blocks
-/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// Workarounds are very device specific, so there is no attempt to generalize
 /// this code in any way.
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
@@ -45,6 +45,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/phy_cntrl.H>
+#include <lib/phy/mss_training.H>
 #include <lib/dimm/rank.H>
 #include <lib/utils/bit_count.H>
 #include <lib/fir/check.H>
@@ -190,7 +191,6 @@ fapi2::ReturnCode post_training_workarounds( const fapi2::Target<fapi2::TARGET_T
         i_cal_steps_enabled.getBit<mss::cal_steps::COARSE_WR>())
     {
         FAPI_TRY( mss::workarounds::dp16::modify_calibration_results( i_target ) );
-        FAPI_TRY( mss::workarounds::dp16::rd_vref_vref_sense_cleanup( i_target ) );
     }
 
     // Returns success, as we might not have run these workarounds, depending upon cal step enable
@@ -555,6 +555,9 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
     // Boolean to keep track of if a fail was calibration related, or scom related
     bool l_cal_fail = false;
 
+    // Create a DQS align calibration step, as it might need to be used in the loop below
+    const auto l_dqs_align_step = mss::training::dqs_align();
+
     FAPI_TRY( eff_dram_width( i_target, l_dram_width) );
 
     l_is_x8 = ((l_dram_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ||
@@ -590,11 +593,7 @@ fapi2::ReturnCode dqs_align_workaround(const fapi2::Target<fapi2::TARGET_TYPE_MC
         FAPI_TRY(mss::workarounds::dp16::dqs_align::reset_disables(i_target, i_rp));
 
         // Hit calibration one more time
-        {
-            const auto l_dqs_align_cal = fapi2::buffer<uint32_t>().setBit<mss::cal_steps::DQS_ALIGN>();
-
-            FAPI_TRY(mss::execute_cal_steps_helper( i_target, i_rp, l_dqs_align_cal, i_abort_on_error));
-        }
+        FAPI_TRY(l_dqs_align_step.execute(i_target, i_rp, i_abort_on_error));
 
         // Get the current passing states
         // We override any states that were passing previously and are still passing

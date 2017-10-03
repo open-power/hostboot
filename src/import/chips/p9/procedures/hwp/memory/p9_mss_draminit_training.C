@@ -42,6 +42,7 @@
 #include <lib/shared/mss_const.H>
 #include <lib/workarounds/dp16_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
+#include <lib/phy/mss_training.H>
 #include <lib/fir/unmask.H>
 #include <lib/dimm/ddr4/zqcal.H>
 
@@ -61,6 +62,7 @@ extern "C"
             const uint32_t i_special_training,
             const uint8_t i_abort_on_error)
     {
+
         // Keep track of the last error seen by a port
         fapi2::ReturnCode l_port_error ( fapi2::FAPI2_RC_SUCCESS );
 
@@ -177,7 +179,11 @@ extern "C"
                 bool l_cal_fail = false;
                 FAPI_INF("Execute cal on rp %d %s", rp, mss::c_str(p));
 
-                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
+                for(const auto& l_step : mss::training::steps_factory(l_cal_steps_enabled))
+                {
+                    FAPI_TRY( l_step->execute( p, rp, l_cal_abort_on_error) );
+                }
+
                 FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails) );
 
             }// rank pairs

@@ -22,3 +22,680 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+///
+/// @file workarounds/mss_training_workarounds.H
+/// @brief High level workarounds for training
+/// Workarounds are very device specific, so there is no attempt to generalize
+/// this code in any way.
+///
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP Team: Memory
+// *HWP Level: 2
+// *HWP Consumed by: FSP:HB
+
+#ifndef MSS_WORKAROUNDS_TRAINING_H
+#define MSS_WORKAROUNDS_TRAINING_H
+
+#include <fapi2.H>
+#include <lib/eff_config/timing.H>
+#include <lib/phy/read_cntrl.H>
+#include <lib/dimm/ddr4/latch_wr_vref.H>
+
+namespace mss
+{
+
+namespace training
+{
+
+///
+/// @brief Training step class - contains all information to run a calibration step
+/// @note step is an abstract class
+///
+class step
+{
+    public:
+        // Delete base constructor
+        step() = delete;
+
+        ///
+        /// @brief Default virtual destructor
+        ///
+        virtual ~step() = default;
+
+        ///
+        /// @brief Constructor for step class
+        /// @param[in] i_name - calibration step name
+        ///
+        step( const char* i_name) :
+            iv_name(i_name)
+        {}
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        virtual fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                const uint64_t i_rp,
+                const uint8_t i_abort_on_error ) const
+        {
+            FAPI_INF("%s RP%d cal step '%s' has no pre-cal step workaround.", mss::c_str(i_target), i_rp, iv_name);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        virtual fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       const uint64_t i_rp,
+                                       const uint8_t i_abort_on_error ) const = 0;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        virtual fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                const uint64_t i_rp,
+                const uint8_t i_abort_on_error ) const
+        {
+            FAPI_INF("%s RP%d cal step '%s' has no post-cal step workaround.", mss::c_str(i_target), i_rp, iv_name);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+
+        ///
+        /// @brief Executes a cal step with workarounds
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode execute( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                   const uint64_t i_rp,
+                                   const uint8_t i_abort_on_error ) const;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        virtual uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const = 0;
+
+        ///
+        /// @brief Gets the name of this calibration step
+        /// @return name of this calibration step
+        ///
+        const char* get_name() const
+        {
+            return iv_name;
+        }
+
+    private:
+        // Contains the human readable name for this calibration step
+        const char* iv_name;
+};
+
+///
+/// @brief Latches the WR VREF data into the hardware
+///
+class wr_vref_latch : public step
+{
+    public:
+        // Delete base constructor
+        wr_vref_latch() = delete;
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~wr_vref_latch() override = default;
+
+        ///
+        /// @brief Constructor for step class
+        /// @param[in] i_wr_vref - true if WR VREF will be run during the calibration
+        ///
+        wr_vref_latch( const bool i_wr_vref ) :
+            step("WR_VREF_LATCH"),
+            iv_wr_vref(i_wr_vref),
+            iv_vrefdq_train_range_override(mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS),
+            iv_vrefdq_train_value_override(mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS)
+        {}
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+
+        ///
+        /// @brief Getter for WR VREF
+        /// @return bool iv_wr_vref
+        ///
+        bool get_wr_vref() const
+        {
+            return iv_wr_vref;
+        }
+
+        ///
+        /// @brief Getter for WR VREF
+        /// @return uint64_t iv_vrefdq_train_range_override
+        ///
+        uint64_t get_vrefdq_range() const
+        {
+            return iv_vrefdq_train_range_override;
+        }
+
+        ///
+        /// @brief Getter for WR VREF
+        /// @return uint64_t iv_vrefdq_train_value_override
+        ///
+        uint64_t get_vrefdq_value() const
+        {
+            return iv_vrefdq_train_value_override;
+        }
+
+    private:
+        // Notes whether the WR VREF calibration workaround needs to be run or not
+        bool iv_wr_vref;
+
+        // WR VREF values to latch
+        // Note: these are mutable as they might need to be modified for a workaround related to Nimbus DD1 WR VREF HW calibration
+        mutable uint8_t iv_vrefdq_train_range_override;
+        mutable uint8_t iv_vrefdq_train_value_override;
+};
+
+///
+/// @brief A PHY hardware accelerated calibration step
+/// @note phy_step is an abstract class
+///
+class phy_step : public step
+{
+    public:
+        // Delete base constructor
+        phy_step() = delete;
+
+        ///
+        /// @brief Default destructor
+        ///
+        virtual ~phy_step() = default;
+
+        ///
+        /// @brief Constructor for step class
+        /// @param[in] i_init_cal_config - calibration step name
+        /// @param[in] i_name - calibration step name
+        ///
+        phy_step( const fapi2::buffer<uint64_t> i_init_cal_config, const char* i_name) :
+            step(i_name),
+            iv_init_cal_config(i_init_cal_config)
+        {}
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        virtual fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                       const uint64_t i_rp,
+                                       const uint8_t i_abort_on_error ) const;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        virtual uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const = 0;
+
+        ///
+        /// @brief Gets the init cal config register's starting
+        /// @return fapi2::buffer<uint64_t> iv_init_cal_config - init cal config's starting value
+        ///
+        const fapi2::buffer<uint64_t> get_init_cal_config() const
+        {
+            return iv_init_cal_config;
+        }
+
+    private:
+        // Contains all of the base information for the init cal configuration register
+        fapi2::buffer<uint64_t> iv_init_cal_config;
+};
+
+///
+/// @brief Write leveling calibration step class
+///
+class wr_lvl : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        wr_lvl() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(), "WR_LVL")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~wr_lvl() override = default;
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const;
+};
+
+///
+/// @brief Initial pattern write
+///
+class initial_pattern_write : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        initial_pattern_write() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>(),
+                      "INITIAL_PATTERN_WRITE")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~initial_pattern_write() override = default;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief DQS align
+///
+class dqs_align : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        dqs_align() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>(),
+                      "DQS_ALIGN")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~dqs_align() override = default;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief Read clock align
+///
+class rdclk_align : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        rdclk_align() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>(),
+                      "RDCLK_ALIGN")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~rdclk_align() override = default;
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief Read centering (and potentially RD VREF)
+///
+class read_ctr : public phy_step
+{
+    public:
+        // No default constructor
+        read_ctr() = delete;
+
+        ///
+        /// @brief Base constructor
+        /// @param[in] i_rd_vref - true IFF RD VREF is enabled
+        /// @param[in] i_rd_ctr - true IFF RD CTR is enabled
+        ///
+        read_ctr(const bool i_rd_vref, const bool i_rd_ctr) :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>(),
+                      "READ_CTR"),
+            iv_rd_vref(i_rd_vref),
+            iv_rd_ctr(i_rd_ctr)
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~read_ctr() override = default;
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+
+        ///
+        /// @brief Getter for RD VREF
+        /// @return bool iv_rd_vref
+        ///
+        bool get_rd_vref() const
+        {
+            return iv_rd_vref;
+        }
+
+        ///
+        /// @brief Getter for RD centering
+        /// @return bool iv_rd_ctr
+        ///
+        bool get_rd_ctr() const
+        {
+            return iv_rd_ctr;
+        }
+
+    private:
+        bool iv_rd_vref;
+        bool iv_rd_ctr;
+};
+
+///
+/// @brief Write centering (and potentially WR VREF)
+///
+class write_ctr : public phy_step
+{
+    public:
+        // No default constructor
+        write_ctr() = delete;
+
+        ///
+        /// @brief Base constructor
+        /// @param[in] i_wr_vref - true IFF WR VREF is enabled
+        ///
+        write_ctr(const bool i_wr_vref) :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>(),
+                      "write_ctr"),
+            iv_wr_vref(i_wr_vref)
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~write_ctr() override = default;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+
+        ///
+        /// @brief Getter for WR VREF
+        /// @return bool iv_wr_vref
+        ///
+        bool get_wr_vref() const
+        {
+            return iv_wr_vref;
+        }
+
+    private:
+        bool iv_wr_vref;
+};
+
+///
+/// @brief Coarse WR/RD calibration
+///
+class coarse_wr_rd : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        static constexpr uint64_t COARSE_WR_RD_LEN = 2;
+        coarse_wr_rd() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR, COARSE_WR_RD_LEN>(),
+                      "COARSE_WR/RD")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~coarse_wr_rd() override = default;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief Custom read centering - can include initial pattern write
+///
+class custom_read_ctr : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        custom_read_ctr() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_RD>(),
+                      "CUSTOM_READ_CTR")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~custom_read_ctr() override = default;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief Creates the vector of training steps to loop over
+/// @param[in] i_cal_steps - the bit mask of calibration steps
+/// @return a vector of the calibration steps to run
+///
+std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps);
+
+} // ns training
+
+} // ns mss
+
+#endif

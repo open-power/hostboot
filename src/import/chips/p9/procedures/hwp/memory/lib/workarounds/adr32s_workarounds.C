@@ -26,7 +26,7 @@
 ///
 /// @file workarounds/adr32s_workarounds.C
 /// @brief Workarounds for the ADR32s logic blocks
-/// Workarounds are very deivce specific, so there is no attempt to generalize
+/// Workarounds are very device specific, so there is no attempt to generalize
 /// this code in any way.
 ///
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>

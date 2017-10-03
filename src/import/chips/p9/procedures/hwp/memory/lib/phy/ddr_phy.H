@@ -37,7 +37,6 @@
 #define _MSS_DDR_PHY_H_
 
 #include <fapi2.H>
-#include <lib/mss_attribute_accessors.H>
 #include <lib/ccs/ccs.H>
 
 namespace mss
@@ -107,11 +106,13 @@ fapi2::ReturnCode check_bang_bang_lock( const fapi2::Target<fapi2::TARGET_TYPE_M
 ///
 /// @brief Write the READ_VREF register to enable and or to skip the read centering cal
 /// @param[in] i_target the MCA target associated with this cal setup
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] i_rd_ctr - run RD CTR if set to true
+/// @param[in] i_rd_vref - run RD VREF is set to true
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
+        const bool i_rd_ctr,
+        const bool i_rd_vref);
 
 ///
 /// @brief Configure the DP16 sysclk
@@ -140,58 +141,34 @@ fapi2::ReturnCode clear_initial_cal_errors( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Setup all the cal config register
-/// @tparam T, the target type of the MCA/MBA
 /// @param[in] i_target the target associated with this cal setup
-/// @param[in] i_rank_pairs the vector of currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint32_t> representing the cal steps to enable
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode setup_cal_config( const fapi2::Target<T>& i_target,
-                                    const std::vector<uint64_t>& i_rank_pairs,
-                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
-
-///
-/// @brief Setup all the cal config register
-/// @param[in] i_target the target associated with this cal setup
-/// @param[in] i_rank one currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
+/// @param[in] i_rank_pair the rank pair to calibrate
+/// @param[in] i_cal_config the calibration config register
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const uint64_t i_rank,
-                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled);
+                                    const uint64_t i_rank_pair,
+                                    const fapi2::buffer<uint64_t>& i_cal_config,
+                                    const uint8_t i_abort_on_error);
 
 ///
 /// @brief Execute a set of PHY cal steps
 /// @tparam T the target type associated with this cal
 /// @param[in] i_target the target associated with this cal
 /// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
+/// @param[in] i_cal_config fapi2::buffer representing the calibration configuration register
 /// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @param[in] i_total_cycles how long the calibration will take in cycles
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 /// @note This is a helper function. Library users are required to call setup_and_execute_cal
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<T>& i_target,
         const uint64_t i_rp,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
-        const uint8_t i_abort_on_error);
-
-///
-/// @brief Perform necessary termination setup and execute a set of PHY cal steps
-/// @tparam T, the target type of the MCA/MBA
-/// @param[in] i_target the target associated with this cal
-/// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
-/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template< fapi2::TargetType T >
-fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<T>& i_target,
-        const uint64_t i_rp,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
-        const uint8_t i_abort_on_error);
+        const fapi2::buffer<uint64_t>& i_cal_config,
+        const uint8_t i_abort_on_error,
+        const uint64_t i_total_cycles);
 
 // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
 // TODO RTC:157753 tparams P and R can be pulled from an MCA trait once we have it

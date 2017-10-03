@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 #include <mss.H>
+#include <lib/mss_attribute_accessors.H>
 
 #include <lib/phy/ddr_phy.H>
 #include <lib/phy/read_cntrl.H>
@@ -52,6 +53,7 @@
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/workarounds/seq_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
+#include <lib/phy/mss_training.H>
 
 #include <lib/utils/bit_count.H>
 #include <generic/memory/lib/utils/find.H>
@@ -937,11 +939,13 @@ fapi_try_exit:
 ///
 /// @brief Write the READ_VREF register to enable and or to skip the read centering cal
 /// @param[in] i_target the MCA target associated with this cal setup
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] i_rd_ctr - run RD CTR if set to true
+/// @param[in] i_rd_vref - run RD VREF is set to true
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
 fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
+        const bool i_rd_ctr,
+        const bool i_rd_vref)
 {
     fapi2::buffer<uint64_t> l_data;
     typedef rcTraits<fapi2::TARGET_TYPE_MCA> TT;
@@ -951,16 +955,15 @@ fapi2::ReturnCode setup_read_vref_config1( const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY( mss::rc::read_vref_config1(i_target, l_data), "%s Failed read_vref_config1", mss::c_str(i_target) );
 
     // Enable is based off of the RDVREF attribute
-    l_data.writeBit<TT::RDVREF_CALIBRATION_ENABLE>( i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() );
+    l_data.writeBit<TT::RDVREF_CALIBRATION_ENABLE>( i_rd_vref );
 
     // Check to see if READ_CENTERING is disabled, if so, set the bit
-    l_data.writeBit<TT::SKIP_RDCENTERING>( !(i_cal_steps_enabled.getBit<READ_CTR>()
-                                           || i_cal_steps_enabled.getBit<TRAINING_ADV>()) );
+    l_data.writeBit<TT::SKIP_RDCENTERING>( !i_rd_ctr );
 
     FAPI_INF("%s %s read VREF cal, read centering is %s",
              mss::c_str(i_target),
-             i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>() ? "Enabling" : "Disabling",
-             i_cal_steps_enabled.getBit<READ_CTR>() ? "yup" : "nope");
+             i_rd_vref ? "Enabling" : "Disabling",
+             i_rd_ctr ? "yup" : "nope");
 
     FAPI_TRY( mss::rc::write_vref_config1(i_target, l_data), "%s Failed write_vref_config1", mss::c_str(i_target) );
 fapi_try_exit:
@@ -969,199 +972,61 @@ fapi_try_exit:
 
 ///
 /// @brief Setup all the cal config register
-/// @param[in] i_target the MCA target associated with this cal setup
-/// @param[in] i_rank_pairs the vector of currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer<uint8_t> representing the cal steps to enable
+/// @param[in] i_target the target associated with this cal setup
+/// @param[in] i_rank_pair the rank pair to calibrate
+/// @param[in] i_cal_config the calibration config register
+/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 ///
-template<>
 fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const std::vector<uint64_t>& i_rank_pairs,
-                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
+                                    const uint64_t i_rank_pair,
+                                    const fapi2::buffer<uint64_t>& i_cal_config,
+                                    const uint8_t i_abort_on_error)
 {
-    fapi2::buffer<uint64_t> l_cal_config;
-    uint8_t l_sim = 0;
-    uint8_t l_cal_abort_on_error = 0;
+    auto l_cal_config = i_cal_config;
 
-    FAPI_TRY( mss::cal_abort_on_error(l_cal_abort_on_error) );
-    FAPI_TRY( mss::is_simulation(l_sim) );
-
-    // This is the buffer which will be written to CAL_CONFIG0. It starts
-    // life assuming no cal sequences, no rank pairs
-
-
-    // Sadly, the bits in the register don't align directly with the bits in the attribute.
-    // So, arrange the bits accordingly and write the config register.
-    {
-        // Skip DRAM_ZQCAL as it's not in the config register - we do it outside.
-        // Loop (unrolled because static) over the remaining bits.
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(
-            i_cal_steps_enabled.getBit<WR_LEVEL>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_DQS_ALIGN>(
-            i_cal_steps_enabled.getBit<DQS_ALIGN>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RDCLK_ALIGN>(
-            i_cal_steps_enabled.getBit<RDCLK_ALIGN>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_READ_CTR>(
-            i_cal_steps_enabled.getBit<READ_CTR>() || i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>(
-            i_cal_steps_enabled.getBit<WRITE_CTR>() || i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_COARSE_WR>(
-            i_cal_steps_enabled.getBit<COARSE_WR>());
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_COARSE_RD>(
-            i_cal_steps_enabled.getBit<COARSE_RD>());
-
-        // Turn on initial pattern write only in h/w, never for sim (makes the DIMM behavioral lose it's mind)
-        if (!l_sim)
-        {
-            // If we are running training advance, none of the steps above can be enabled.
-            // If they are, we have a code bug and should fapi2:Assert.
-            // This isn't dependent on system or attributes but code structure
-            if ( l_cal_config != 0 && i_cal_steps_enabled.getBit<TRAINING_ADV>())
-            {
-                FAPI_ERR("Error setting up draminit training advance. Set CUSTOM_RD with other cal steps");
-                fapi2::Assert( false );
-            }
-
-            // Enable CUSTOM_RD for training ADV. If this bit is set, only TRAINING_ADV and INIT_PAT_WR can be set
-            // We assert this above.
-            l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_RD>(
-                i_cal_steps_enabled.getBit<TRAINING_ADV>());
-
-            l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_INITIAL_PAT_WR>(
-                i_cal_steps_enabled.getBit<INITIAL_PAT_WR>());
-        }
-
-        // Moved this down here so we can make the training advance check above
-        l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(l_cal_abort_on_error);
-    }
-
-    // Blast the VREF config with the proper setting for these cal bits if there were any enable bits set
-    if (i_cal_steps_enabled.getBit<READ_CTR_2D_VREF>())
-    {
-        uint16_t l_vref_cal_enable = 0;
-
-        // Blast the VREF_CAL_ENABLE to the registers that control which dp16's to use for rdvref
-        FAPI_TRY( mss::rdvref_cal_enable(i_target, l_vref_cal_enable) );
-        FAPI_TRY( mss::scom_blastah(i_target, dp16Traits<TARGET_TYPE_MCA>::RD_VREF_CAL_ENABLE_REG, l_vref_cal_enable) );
-    }
-
-    // Now lets set the actual read_vref_config. We want to write/ clear this every time we run so seperate function
-    FAPI_TRY( setup_read_vref_config1(i_target, i_cal_steps_enabled),
-              "%s Failed setting the read_vref_config1", mss::c_str(i_target) );
-
-    {
-        typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
-        std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
-        FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
-
-        // Loops and sets or clears the 2D VREF bit on all DPs
-        for(auto& l_data : l_wr_vref_config)
-        {
-            // 0: Run only the VREF (2D) write centering algorithm
-            // 1: Run only the 1D
-            l_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!i_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
-        }
-
-        FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
-    }
-
-    // loops through all RP's running workarounds and latching the VREF's as need be
-    for(const auto& l_rp : i_rank_pairs)
-    {
-        // Latches in the WR VREF values
-        // Overrides will be set by mss::workarounds::wr_vref::execute.
-        // If the execute code is skipped, then it will read from the attributes
-        uint8_t l_vrefdq_train_range_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
-        uint8_t l_vrefdq_train_value_override = mss::ddr4::USE_DEFAULT_WR_VREF_SETTINGS;
-
-        // Runs WR VREF workarounds if needed
-        // it will check and see if it needs to run, if not it will return success
-        FAPI_TRY( mss::workarounds::wr_vref::execute(i_target,
-                  l_rp,
-                  i_cal_steps_enabled,
-                  l_vrefdq_train_range_override,
-                  l_vrefdq_train_value_override) );
-
-        // Latches the VREF's, if and only if the latching bit is set
-        if(i_cal_steps_enabled.getBit<WR_VREF_LATCH>())
-        {
-            FAPI_TRY( mss::ddr4::latch_wr_vref_commands_by_rank_pair(i_target,
-                      l_rp,
-                      l_vrefdq_train_range_override,
-                      l_vrefdq_train_value_override) );
-        }
-    }
+    // Sets up abort on error
+    l_cal_config.writeBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ABORT_ON_ERROR>(i_abort_on_error);
 
     // Note: This rank encoding isn't used if the cal is initiated from the CCS engine
-    // as they use the recal inteface.
+    // as they use the recal interface.
     // Configure the rank pairs
-    for (const auto& rp : i_rank_pairs)
-    {
-        FAPI_TRY( l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + rp) );
-    }
+    FAPI_TRY( l_cal_config.setBit(MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_RANK_PAIR + i_rank_pair) );
 
-    FAPI_INF("cal_config for %s: 0x%04lx (steps: 0x%08x)",
-             mss::c_str(i_target), uint16_t(l_cal_config), i_cal_steps_enabled);
+    FAPI_INF("cal_config for %s: 0x%016lx", mss::c_str(i_target), l_cal_config);
     FAPI_TRY( mss::putScom(i_target, MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0, l_cal_config) );
-
-    // Sets up the workarounds
-    FAPI_TRY( mss::workarounds::dp16::rd_vref_vref_sense_setup(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
 ///
-/// @brief Setup all the cal config register
-/// @param[in] i_target the target associated with this cal setup
-/// @param[in] i_rank one currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-fapi2::ReturnCode setup_cal_config( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-                                    const uint64_t i_rank,
-                                    const fapi2::buffer<uint32_t>& i_cal_steps_enabled)
-{
-    std::vector< uint64_t > l_ranks({i_rank});
-    return setup_cal_config(i_target, l_ranks, i_cal_steps_enabled);
-}
-
-///
 /// @brief Execute a set of PHY cal steps
-/// Specializaton for TARGET_TYPE_MCA
-/// @param[in] i_target the target associated with this cal
+/// @param[in] i_target the target associated with this cal - MCA specialization
 /// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
+/// @param[in] i_cal_config fapi2::buffer representing the calibration configuration register
 /// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
+/// @param[in] i_total_cycles how long the calibration will take in cycles
 /// @return FAPI2_RC_SUCCESS iff setup was successful
 /// @note This is a helper function. Library users are required to call setup_and_execute_cal
 ///
-template<>
-fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+template< >
+fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rp,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
-        const uint8_t i_abort_on_error)
+        const fapi2::buffer<uint64_t>& i_cal_config,
+        const uint8_t i_abort_on_error,
+        const uint64_t i_total_cycles)
 {
     const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
     auto l_cal_inst = mss::ccs::initial_cal_command<TARGET_TYPE_MCBIST>(i_rp);
 
     mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
 
-    // Sanity check due to WR_LEVEL termination requirement
-    if ((i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>()) &&
-        (mss::bit_count(uint32_t(i_cal_steps_enabled)) != 1))
-    {
-        FAPI_ERR("WR_LEVEL cal step requires special terminations, so must be run separately from other cal steps (0x%08llx)",
-                 i_cal_steps_enabled );
-
-        fapi2::Assert(false);
-    }
-
-    FAPI_DBG("%s executing training CCS instruction: 0x%llx, 0x%llx for cal steps 0x%08x",
+    FAPI_DBG("%s executing training CCS instruction: 0x%016llx, 0x%016llx for cal config 0x%16x",
              mss::c_str(i_target),
              l_cal_inst.arr0,
              l_cal_inst.arr1,
-             i_cal_steps_enabled);
+             i_cal_config);
 
     // Delays in the CCS instruction ARR1 for training are supposed to be 0xFFFF,
     // and we're supposed to poll for the done or timeout bit. But we don't want
@@ -1176,195 +1041,22 @@ fapi2::ReturnCode execute_cal_steps_helper( const fapi2::Target<fapi2::TARGET_TY
 
     // We need to figure out how long to wait before we start polling. Each cal step has an expected
     // duration, so for each cal step which was enabled, we update the CCS program.
-    FAPI_TRY( mss::cal_timer_setup(i_target, l_program.iv_poll, i_cal_steps_enabled) );
-    FAPI_TRY( mss::setup_cal_config(i_target, i_rp, i_cal_steps_enabled) );
+    FAPI_TRY( mss::cal_timer_setup(i_target, i_total_cycles, l_program.iv_poll) );
+    FAPI_TRY( mss::setup_cal_config( i_target, i_rp, i_cal_config, i_abort_on_error) );
 
-    // In the event of an init cal hang, CCS_STATQ(2) will assert and CCS_STATQ(3:5) = “001” to indicate a
+    // In the event of an init cal hang, CCS_STATQ(2) will assert and CCS_STATQ(3:5) = "001" to indicate a
     // timeout. Otherwise, if calibration completes, FW should inspect DDRPHY_FIR_REG bits (50) and (58)
     // for signs of a calibration error. If either bit is on, then the DDRPHY_PC_INIT_CAL_ERROR register
     // should be polled to determine which calibration step failed.
 
     // If we got a cal timeout, or another CCS error just leave now. If we got success, check the error
     // bits for a cal failure. We'll return the proper ReturnCode so all we need to do is FAPI_TRY.
-    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "%s failed to execute CCS program for cal steps 0x%08x",
-              mss::c_str(i_target), i_cal_steps_enabled );
+    FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target), "%s failed to execute CCS program for calibration",
+              mss::c_str(i_target) );
 
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-///
-/// @brief Perform necessary termination setup and execute a set of PHY cal steps
-/// Specializaton for TARGET_TYPE_MCA
-/// @param[in] i_target the target associated with this cal
-/// @param[in] i_rp one of the currently configured rank pairs
-/// @param[in] i_cal_steps_enabled fapi2::buffer representing the cal steps to enable
-/// @param[in] i_abort_on_error CAL_ABORT_ON_ERROR override
-/// @return FAPI2_RC_SUCCESS iff setup was successful
-///
-template<>
-fapi2::ReturnCode setup_and_execute_cal( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
-        const uint64_t i_rp,
-        const fapi2::buffer<uint32_t>& i_cal_steps_enabled,
-        const uint8_t i_abort_on_error)
-{
-    const auto& l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
-    FAPI_INF("ABORT_ON_ERROR is %d", i_abort_on_error);
-
-    // We run the cal steps in three chunks: pre-write-leveling, write-leveling, post-wirte-leveling.
-    // This is because write-leveling requires a special set of termination values.
-
-    // Run WR_LEVEL step (with overridden termination values) if selected
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::WR_LEVEL>())
-    {
-        mss::ccs::program<TARGET_TYPE_MCBIST, TARGET_TYPE_MCA> l_program;
-        std::vector< ccs::instruction_t<TARGET_TYPE_MCBIST> > l_rtt_inst;
-
-        FAPI_DBG("%s Running WR_LEVEL step on RP%d", mss::c_str(i_target), i_rp);
-        fapi2::buffer<uint32_t> l_steps_to_execute;
-        l_steps_to_execute.setBit<mss::cal_steps::WR_LEVEL>();
-
-        // Setup WR_LEVEL specific terminations
-        // JEDEC spec requires disabling RTT_WR during WR_LEVEL, and enabling equivalent terminations
-        FAPI_TRY( setup_wr_level_terminations(i_target, i_rp, l_rtt_inst) );
-
-        if (!l_rtt_inst.empty())
-        {
-            l_program.iv_instructions.insert(l_program.iv_instructions.end(), l_rtt_inst.begin(), l_rtt_inst.end() );
-            FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
-            l_program.iv_instructions.clear();
-        }
-
-        // Execute WR_LEVEL
-        FAPI_TRY( execute_cal_steps_helper(i_target,
-                                           i_rp,
-                                           l_steps_to_execute,
-                                           i_abort_on_error) );
-
-        // Restore normal terminations
-        l_rtt_inst.clear();
-        FAPI_TRY( restore_mainline_terminations(i_target, i_rp, l_rtt_inst) );
-
-        if (!l_rtt_inst.empty())
-        {
-            l_program.iv_instructions.insert(l_program.iv_instructions.end(),
-                                             l_rtt_inst.begin(),
-                                             l_rtt_inst.end() );
-            FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
-        }
-    }
-
-    // run Initial Pattern Write and custom read centering if enabled
-    if(i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>())
-    {
-        // Sets up the cal steps in the buffer
-        fapi2::buffer<uint32_t> l_steps_to_execute;
-        l_steps_to_execute.writeBit<mss::cal_steps::INITIAL_PAT_WR>
-        (i_cal_steps_enabled.getBit<mss::cal_steps::INITIAL_PAT_WR>());
-        l_steps_to_execute.writeBit<mss::cal_steps::TRAINING_ADV>
-        (i_cal_steps_enabled.getBit<mss::cal_steps::TRAINING_ADV>());
-
-        FAPI_INF("%s Running Initial Pattern Write and TRAINING_ADV(%s) on RP%d 0x%08x",
-                 mss::c_str(i_target),
-                 (i_cal_steps_enabled.getBit<mss::cal_steps::TRAINING_ADV>() ? "yes" : "no"),
-                 i_rp,
-                 l_steps_to_execute);
-
-        // Undertake the calibration steps
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
-    }
-
-    // Lets run DQS
-    if(i_cal_steps_enabled.getBit<mss::cal_steps::DQS_ALIGN>())
-    {
-        // Sets up the cal steps in the buffer
-        fapi2::buffer<uint32_t> l_steps_to_execute;
-        l_steps_to_execute.setBit<mss::cal_steps::DQS_ALIGN>();
-
-        FAPI_INF("%s Running DQS align on RP%d 0x%08x",
-                 mss::c_str(i_target), i_rp, l_steps_to_execute);
-
-        // Undertake the calibration steps
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
-
-        // Now run the DQS align workaround
-        FAPI_TRY(mss::workarounds::dp16::dqs_align::dqs_align_workaround(i_target, i_rp, i_abort_on_error),
-                 "%s Failed to run dqs align workaround on rp %d", mss::c_str(i_target), i_rp);
-    }
-
-    // Run cal step READ CLOCK ALIGN
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::RDCLK_ALIGN>())
-    {
-        // Turn off refresh
-        FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
-
-        // Sets up the cal steps in the buffer
-        fapi2::buffer<uint32_t> l_steps_to_execute;
-
-        l_steps_to_execute.setBit<mss::cal_steps::RDCLK_ALIGN>();
-
-        FAPI_INF("%s Running rd_clk align on RP%d 0x%08x", mss::c_str(i_target), i_rp,
-                 l_steps_to_execute);
-
-        // Undertake the calibration steps
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
-
-        // Run the red_waterfall workaround for low VDN sensitivity
-        // Increments the waterfall forward by one
-        FAPI_TRY( mss::workarounds::dp16::fix_red_waterfall_gate( i_target, i_rp) );
-
-        // Turn refresh back on
-        FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(i_target) );
-    }
-
-    if(i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR_2D_VREF, mss::cal_steps::READ_VREF_TO_READ_CTR_LEN>())
-    {
-        // Turn off refresh
-        FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
-
-        // Sets up the cal steps in the buffer
-        fapi2::buffer<uint32_t> l_steps_to_execute;
-
-        l_steps_to_execute.writeBit<mss::cal_steps::READ_CTR_2D_VREF>
-        (i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR_2D_VREF>());
-        l_steps_to_execute.writeBit<mss::cal_steps::READ_CTR>(i_cal_steps_enabled.getBit<mss::cal_steps::READ_CTR>());
-
-        FAPI_INF("%s Running read centering vref through read centering on RP%d 0x%08x", mss::c_str(i_target), i_rp,
-                 l_steps_to_execute);
-
-        // Undertake the calibration steps
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
-
-        // Now run the read centering workaround
-        if(l_steps_to_execute.getBit<READ_CTR>())
-        {
-            FAPI_TRY(mss::workarounds::dp16::rd_dq::fix_delay_values(i_target, i_rp),
-                     "%s Failed to run read centering workaround on rp %d", mss::c_str(i_target), i_rp);
-        }
-
-        // Turn refresh back on
-        FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(i_target) );
-    }
-
-    // Run cal steps after RD_CTR if any are selected - note: WRITE_CTR takes place after RD_CTR
-    if (i_cal_steps_enabled.getBit<mss::cal_steps::WRITE_CTR_2D_VREF, mss::cal_steps::WR_VREF_TO_COARSE_RD_LEN>())
-    {
-        fapi2::buffer<uint32_t> l_steps_to_execute( i_cal_steps_enabled );
-        l_steps_to_execute.clearBit<mss::cal_steps::DRAM_ZQCAL, mss::cal_steps::DRAM_ZQCAL_UP_TO_WRITE_CTR_2D_VREF>();
-
-        // Setting the WR_VREF_LATCH bit to run the WR_VREF workaround after wr_vref runs
-        // Gets set iff the bit is set in i_steps_to_execute
-        l_steps_to_execute.writeBit<WR_VREF_LATCH>( i_cal_steps_enabled.getBit<WR_VREF_LATCH>() );
-
-        FAPI_DBG("%s Running remaining cal steps on RP%d 0x%08x", mss::c_str(i_target), i_rp, l_steps_to_execute);
-
-        FAPI_TRY( execute_cal_steps_helper(i_target, i_rp, l_steps_to_execute, i_abort_on_error) );
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
 
 // TODO RTC:167929 Can ODT VPD processing be shared between RD and WR?
 ///
