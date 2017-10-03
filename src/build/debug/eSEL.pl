@@ -70,7 +70,7 @@ my %options_table = (
 sub printUsage
 {
     print "All directory paths passed as arguments to the tool MUST be Fully qualified path names.\n";
-    print "Usage:  eSEL_ami.pl [-h] -t <BMC Name / IP> [-U <userid>] [-P <password>]\n";
+    print "Usage:  eSEL.pl [-h] -t <BMC Name / IP> [-U <userid>] [-P <password>]\n";
     print "                    [-o <output dir>] # default: $output_path\n";
     print "                    [-e <errl dir>] # default: $errl_path(*) \n";
     print "                    [-f <fsp-trace dir>] # default $fspt_path(*)\n";
@@ -365,6 +365,50 @@ sub FilterACKedLogs
     push @filesToDelete, $esel_file;
 }
 
+# ProcessEselString takes as input any string and determines if it contains hb
+# PEL data. The function also does some processing of the input string to
+# convert it to format acceptable by the errl parser. It returns a string with
+# PEL data (without the eSEL header) or an empty string if the input does not
+# contain PEL data (does not contain 'df' or '20 00 04').
+#
+# Ex input 1: "ESEL=00 00 df 00 00 00 00 20 00 04 0c b8 07 aa 00 00 50 48 00 30
+# 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>",
+# Ex output 1: 50 48 00 30 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
+#
+# Ex input 2: ESEL=00 00 df 00 00 00 00 20 00 04 0c b8 07 aa 00 00 50 48 00 30
+# 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
+# Ex output 2: 50 48 00 30 01 00 09 00 00 00 00 09 e6 43 1c b9 <more data>
+#
+# Ex input 3: "Message": "org.open_power.Host.Event.Error.Event",
+# Ex output 3: <empty string>
+sub ProcessEselString
+{
+    my $inputString = shift;
+
+    if($inputString =~ /ESEL=/)
+    {
+        $inputString =~ s/ESEL=//g; # strip ESEL=
+        ($debug) && print "ESEL data = $inputString\n";
+    }
+    # If the SEL entry contains the "df" key, AND it has '040020' it's our eSEL
+    if(!($inputString =~ /df/) or !($inputString =~ /20 00 04/))
+    {
+        ($debug) &&
+               print " \'df\' or \'20 00 04\' was not found in $inputString.\n";
+        return "";
+    }
+
+    $inputString =~ s/"//g; # strip quotation marks
+    $inputString =~ s/,//g; # strip commas
+
+    my @line_parts = split / /, $inputString; # get hex byte array
+    # Chop off the eSEL header (16 bytes). The rest is PEL data.
+    my $pel_data = join(' ', @line_parts[ESEL_HEADER_LENGTH..$#line_parts]);
+    ($debug) && print " PEL Data: $pel_data\n";
+
+    return $pel_data;
+}
+
 sub RemoveEccFromFile
 {
     my $fileExtension = (split(/\./, basename($esel_file)))[-1];
@@ -442,6 +486,7 @@ sub DecodeObmcEselData
     my $pel_data = "";
     my $line_size = 0;
     my $line = "";
+    my $pelString = "";
 
     ($debug) && print "out_file_bin = $out_file_bin.\n";
 
@@ -452,24 +497,15 @@ sub DecodeObmcEselData
     {
         $line = $_;
         chomp($line);
-        if($line =~ /ESEL=/)
+        $pelString = ProcessEselString($line);
+
+        if($pelString eq "") # string didn't contain PEL data, skip it
         {
-            $line =~ s/ESEL=//g; # strip ESEL=
-            ($debug) && print " $line";
-        }
-        # If the SEL entry contains the "df" key, AND it has '040020' it's our eSEL
-        if(!$line =~ /df/ or !$line =~ /20 00 04/)
-        {
-            ($debug) && print " \'df\' or \'20 00 04\' was not found in $line.\n";
             next;
         }
 
-        my @line_parts = split / /, $line; # get hex byte array
-        # Chop off the eSEL header (16 bytes). The rest is PEL data.
-        $pel_data = join(' ', @line_parts[ESEL_HEADER_LENGTH..$#line_parts]);
-        ($debug) && print " PEL Data: $pel_data\n";
-        $line_size = split / /, $pel_data;
-        print OUT_FILE HexPack($pel_data, $line_size);
+        $line_size = split / /, $pelString;
+        print OUT_FILE HexPack($pelString, $line_size);
     }
     close OUT_FILE;
     close LOG_FILE;
