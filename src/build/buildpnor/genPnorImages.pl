@@ -277,7 +277,11 @@ my $OPEN_SIGN_REQUEST=
 my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
 
 # Production signing parameters
-my $OPEN_PRD_SIGN_PARAMS = "--mode production ";
+my $OPEN_PRD_SIGN_PARAMS = "--mode production "
+    . "--hwPrivKeyA __get "
+    . "--hwPrivKeyB __get "
+    . "--hwPrivKeyC __get "
+    . "--swPrivKeyP __get ";
 
 # Imprint key signing parameters.  In a non-secure compile, omit the keys to
 # generate a secure header without signatures
