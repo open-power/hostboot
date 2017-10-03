@@ -42,6 +42,7 @@ prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
 
 # plat/mem/ (rule plugin related)
+prd_rule_plugin += prdfCenMba.o
 prd_rule_plugin += prdfP9Mca.o
 prd_rule_plugin += prdfP9Mcbist.o
 

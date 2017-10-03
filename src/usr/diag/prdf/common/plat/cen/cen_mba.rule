@@ -513,7 +513,7 @@ group gMBASPA filter singlebit
     /** MBASPA[0]
      *  Maintenance command complete
      */
-    (rMBASPA, bit(0)) ? TBDDefaultCallout;
+    (rMBASPA, bit(0)) ? maintenance_command_complete; # DD2+ only
 
     /** MBASPA[1]
      *  Hard NCE ETE
@@ -553,7 +553,12 @@ group gMBASPA filter singlebit
     /** MBASPA[8]
      *  Maintenance command complete
      */
-    (rMBASPA, bit(8)) ? TBDDefaultCallout;
+    # WORKAROUND: HW217608
+    # For Centaur DD1.0, the hardware team will utilize the WAT logic to look
+    # for a command complete and trigger this bit. Note that the HW will still
+    # trigger MBASPA[0], however, that bit should be masked for this
+    # workaround.
+    (rMBASPA, bit(8)) ? maintenance_command_complete; # DD1 only
 
     /** MBASPA[9]
      *  Spare

@@ -1,0 +1,80 @@
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/usr/diag/prdf/common/plat/cen/cen_mba_regs.rule $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2017
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+    ############################################################################
+    # Maintenance Command Registers
+    ############################################################################
+
+    register MBMCT
+    {
+        name        "MBA Maintenance Command Type Register";
+        scomaddr    0x0301060A;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
+    # NOTE: PRD doesn't use MBMCC directly and the bits are cleared by HW so I
+    #       see no reason to add it here.
+
+    register MBMSR
+    {
+        name        "MBA Maintenance Command Status Register";
+        scomaddr    0x0301060C;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
+    register MBMACA
+    {
+        name        "MBA Maintenance Command Start Address Register";
+        scomaddr    0x0301060D;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
+    register MBMEA
+    {
+        name        "MBA Maintenance Command End Address Register";
+        scomaddr    0x0301060E;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
+    register MBASCTL
+    {
+        name        "MBA Memory Scrub/Read Control Register";
+        scomaddr    0x0301060F;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
+    register MBAECTL
+    {
+        name        "MBA Error Control Register";
+        scomaddr    0x03010610;
+        capture     group default;
+        capture     group MaintCmdRegs;
+    };
+
