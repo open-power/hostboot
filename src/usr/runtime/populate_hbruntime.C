@@ -70,10 +70,25 @@
 #include <util/utilrsvdmem.H>
 #include <util/utillidpnor.H>
 #include <stdio.h>
+#include <runtime/populate_hbruntime.H>
+#include <runtime/preverifiedlidmgr.H>
 
 
 namespace RUNTIME
 {
+
+// -- Verified Images
+//   -- OCC
+//   -- WOFDATA
+//   -- HCODE
+// -- Non-verified Images
+///  -- RINGOVD
+const std::vector<PNOR::SectionId> preVerifiedPnorSections {
+    PNOR::OCC,
+    PNOR::WOFDATA,
+    PNOR::HCODE,
+    PNOR::RINGOVD,
+};
 
 mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 
@@ -138,16 +153,8 @@ errlHndl_t getNextRhbAddrRange(hdatMsVpdRhbAddrRange_t* & o_rngPtr)
     return(l_elog);
 }
 
-
-/**
- *  @brief Map physical address to virtual
- *  @param[in]  i_addr Physical address
- *  @param[in]  i_size Size of block to be mapped
- *  @param[out] o_addr Virtual address
- *  @return Error handle if error
- */
 errlHndl_t mapPhysAddr(uint64_t i_addr,
-                       uint64_t i_size,
+                       size_t i_size,
                        uint64_t& o_addr)
 {
     errlHndl_t l_elog = nullptr;
@@ -184,12 +191,6 @@ errlHndl_t mapPhysAddr(uint64_t i_addr,
     return l_elog;
 }
 
-
-/**
- *  @brief Unmap virtual address block
- *  @param[in]  i_addr Virtual address
- *  @return Error handle if error
- */
 errlHndl_t unmapVirtAddr(uint64_t i_addr)
 {
     errlHndl_t l_elog = nullptr;
@@ -236,25 +237,12 @@ void traceHbRsvMemRange(hdatMsVpdRhbAddrRange_t* & i_rngPtr )
               i_rngPtr->hdatRhbPermission);
 }
 
-/**
- *  @brief Get the next Reserved HB memory range and set all member variables
- *         of struct. Additionally trace out relevant parts of the struct
- * @param[in] i_type, Range type
- * @param[in] i_rangeId, Range ID
- * @param[in] i_startAddr, Range Starting Address
- * @param[in] i_size, Size of address space to reserve
- * @param[in] i_label, Label String Ptr
- *
- * @return errlHndl_t, nullptr on success; otherwise errlog
- */
 errlHndl_t setNextHbRsvMemEntry(const HDAT::hdatMsVpdRhbAddrRangeType i_type,
                                 const uint16_t i_rangeId,
                                 const uint64_t i_startAddr,
                                 const uint64_t i_size,
                                 const char* i_label,
-                                const HDAT::hdatRhbPermType i_permission =
-                                                            HDAT::RHB_READ_WRITE
-                                )
+                                const HDAT::hdatRhbPermType i_permission)
 {
     errlHndl_t l_elog = nullptr;
 
@@ -579,17 +567,12 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     return l_elog;
 }
 
-errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
-                                    const uint64_t i_rangeId,
-                                    uint64_t& io_prevAddr,
-                                    uint64_t& io_prevSize)
+errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec)
 {
     TRACFCOMP( g_trac_runtime,ENTER_MRK"hbResvloadSecureSection() sec %s",
               PNOR::SectionIdToString(i_sec));
 
     errlHndl_t l_elog = nullptr;
-    PNOR::SectionInfo_t l_info;
-    uint64_t l_tmpVaddr = 0;
 
     do {
 
@@ -601,7 +584,7 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
             break;
         }
 
-
+        PNOR::SectionInfo_t l_info;
         l_elog = PNOR::getSectionInfo( i_sec, l_info );
         if(l_elog)
         {
@@ -641,95 +624,13 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         }
 #endif
 
-        // Align size for OPAL
-        size_t l_imgSizeAligned = ALIGN_X(l_imgSize, HBRT_RSVD_MEM_OPAL_ALIGN);
-
-        //  For PHYP we build up starting at the end of the  previously allocated
-        //  areas, for OPAL we build downwards from the top of memory
-        uint64_t l_imgAdd = 0x0;
-        if(TARGETING::is_phyp_load())
-        {
-            l_imgAdd = io_prevAddr + io_prevSize;
-        }
-        else if(TARGETING::is_sapphire_load())
-        {
-            l_imgAdd = io_prevAddr - l_imgSizeAligned;
-        }
-
-        auto l_lids = Util::getPnorSecLidIds(i_sec);
-        TRACFCOMP(g_trac_runtime, "hbResvloadSecureSection() getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
-                l_lids.lid, l_lids.containerLid);
-        assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
-
-    // @TODO RTC:178163 enabled when HDAT support is complete for extra HB resv mem entries
-    // PHYP will use these 2 entries in the future
-    /*
-        // Verified Lid - Header Only
-        char l_containerLidStr [Util::lidIdStrLength];
-        snprintf (l_containerLidStr, Util::lidIdStrLength, "%X",
-                l_lids.containerLid);
-        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
-                                    i_rangeId,
-                                    l_imgAdd,
-                                    l_imgSizeAligned,
-                                    l_containerLidStr);
+        // Load Pnor section into HB reserved memory
+        l_elog = PreVerifiedLidMgr::loadFromPnor(i_sec, l_pnorVaddr, l_imgSize);
         if(l_elog)
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid header failed");
             break;
         }
 
-        // Verified Lid - Content Only
-        char l_lidStr[Util::lidIdStrLength];
-        snprintf (l_lidStr, Util::lidIdStrLength, "%X",l_lids.lid);
-        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
-                                    i_rangeId,
-                                    l_imgAdd+PAGE_SIZE,
-                                    l_imgSizeAligned,
-                                    l_lidStr);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry Lid content failed");
-            break;
-        }
-    */
-        // Verified PNOR - Header + Content
-        l_elog = setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_PNOR,
-                                    i_rangeId,
-                                    l_imgAdd,
-                                    l_imgSizeAligned,
-                                    PNOR::SectionIdToString(i_sec),
-                                    HDAT::RHB_READ_ONLY);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() setNextHbRsvMemEntry PNOR content failed");
-            break;
-        }
-
-        io_prevAddr = l_imgAdd;
-        // Use aligned size for OPAL alignment even if that means there is some
-        // wasted space.
-        io_prevSize = l_imgSizeAligned;
-
-        // Load the Verified image into HB resv memory
-        l_elog = mapPhysAddr(l_imgAdd, l_imgSize, l_tmpVaddr);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() mapPhysAddr failed");
-            break;
-        }
-
-        // Include Header page from pnor image.
-        memcpy(reinterpret_cast<void*>(l_tmpVaddr),
-            reinterpret_cast<void*>(l_pnorVaddr),
-            l_imgSize);
-
-        l_elog = unmapVirtAddr(l_tmpVaddr);
-        if(l_elog)
-        {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"hbResvloadSecureSection() unmapVirtAddr failed");
-            break;
-        }
     } while(0);
 
     return l_elog;
@@ -1171,38 +1072,24 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             }
         }
 
-        ///////////////////////////////////////////////////
-        // -- Verified Images
-        //   -- OCC
-        //   -- WOFDATA
-        //   -- HCODE
-        // -- Non-verified Images
-        ///  -- RINGOVD
-        l_elog = hbResvLoadSecureSection(PNOR::OCC, i_nodeId,
-                                         l_prevDataAddr, l_prevDataSize);
+        // Initialize Pre-Verified Lid manager
+        PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize, i_nodeId);
+
+        // Handle all Pre verified PNOR sections
+        for (const auto secId : preVerifiedPnorSections)
+        {
+            l_elog = hbResvLoadSecureSection(secId);
+            if (l_elog)
+            {
+                break;
+            }
+        }
+        PreVerifiedLidMgr::unlock();
         if (l_elog)
         {
             break;
         }
-        l_elog = hbResvLoadSecureSection(PNOR::WOFDATA, i_nodeId,
-                                         l_prevDataAddr, l_prevDataSize);
-        if (l_elog)
-        {
-            break;
-        }
-        l_elog = hbResvLoadSecureSection(PNOR::HCODE, i_nodeId, l_prevDataAddr,
-                                         l_prevDataSize);
-        if (l_elog)
-        {
-            break;
-        }
-        // Note: RINGOVD is not a securely signed section.
-        l_elog = hbResvLoadSecureSection(PNOR::RINGOVD, i_nodeId,
-                                         l_prevDataAddr, l_prevDataSize);
-        if (l_elog)
-        {
-            break;
-        }
+
     } while(0);
 
     TRACFCOMP( g_trac_runtime, EXIT_MRK"populate_HbRsvMem> l_elog=%.8X", ERRL_GETRC_SAFE(l_elog) );
@@ -1664,7 +1551,7 @@ errlHndl_t populate_TpmInfoByNode()
 
                 SECUREBOOT::handleSecurebootFailure(err);
 
-                assert(true,"Bug! handleSecurebootFailure shouldn't return!");
+                assert(false,"Bug! handleSecurebootFailure shouldn't return!");
             }
             else
             {

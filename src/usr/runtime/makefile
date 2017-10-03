@@ -40,6 +40,7 @@ OBJS += fakepayload.o
 OBJS += errlud_hdat.o
 OBJS += customize_attrs_for_payload.o
 OBJS += hdatcommonutil.o
+OBJS += preverifiedlidmgr.o
 
 SUBDIRS += test.d
 
