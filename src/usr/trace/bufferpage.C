@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -25,7 +27,11 @@
 
 #include <limits.h>
 #include <stdlib.h>
+#include <string.h>
+
+#ifndef __HOSTBOOT_RUNTIME
 #include <kernel/pagemgr.H>
+#endif
 
 namespace TRACE
 {
@@ -60,7 +66,11 @@ namespace TRACE
     {
         BufferPage* page = NULL;
 
+#ifndef __HOSTBOOT_RUNTIME
         page = reinterpret_cast<BufferPage*>(PageManager::allocatePage());
+#else
+        page = reinterpret_cast<BufferPage*>(malloc(PAGESIZE));
+#endif
         memset(page, '\0', PAGESIZE);
 
         if (i_common)
@@ -73,7 +83,15 @@ namespace TRACE
 
     void BufferPage::deallocate(BufferPage* i_page)
     {
+#ifndef __HOSTBOOT_RUNTIME
         PageManager::freePage(i_page);
+#else
+        if (i_page != nullptr)
+        {
+           free(i_page);
+           i_page = nullptr;
+        }
+#endif
     }
 
 }

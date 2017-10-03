@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,10 @@ namespace TRACEDAEMON
              *  Thread entry-point for daemon.  Calls 'execute'.
              */
             static void* start(void*);
+
+       #ifdef __HOSTBOOT_RUNTIME
+            void signal_trace_daemon(void);
+       #endif
 
         private:
 

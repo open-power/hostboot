@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +29,14 @@ MODULE = trace_rt
 OBJS += interface.o
 OBJS += assert.o
 OBJS += compdesc.o
+OBJS += complist.o
 OBJS += rt_service.o
+OBJS += bufferpage.o
+OBJS += rt_daemon.o
+OBJS += rt_buffer.o
+
 
 VPATH += ..
+VPATH += ../daemon
+
 include $(ROOTPATH)/config.mk

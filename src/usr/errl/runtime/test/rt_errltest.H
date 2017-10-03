@@ -137,8 +137,13 @@ public:
             l_err->appendToFFDC( pffdc, pch, strlen(pch) );
 
             // Collect trace
-            // NOTE Trace buffers are not currently kept in Runtime
-            //    - tests deleted
+
+            // Collect runtime trace and append to error log
+            if( !l_err->collectTrace("DEVFW") )
+            {
+                TS_FAIL( "collectTrace(DEVFW) rets false." );
+                break;
+            }
 
             // Add null data.
             pffdc = l_err->addFFDC( ERRL_COMP_ID, NULL, 0,  9, 10 );

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,10 @@ namespace TRACE
             i_size = KILOBYTE;
         }
 
+#ifdef __HOSTBOOT_RUNTIME
+        // Run all Runtime traces to same buffer
+        i_bufferType = BUFFER_FAST;
+#endif
         (*o_td) =
             Singleton<ComponentList>::instance().getDescriptor(i_comp,
                                                                i_size,
