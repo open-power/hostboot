@@ -42,6 +42,7 @@
 #include <lib/phy/dp16.H>
 #include <lib/phy/seq.H>
 #include <lib/phy/ddr_phy.H>
+#include <lib/phy/mss_training.H>
 
 using fapi2::TARGET_TYPE_MCBIST;
 using fapi2::TARGET_TYPE_MCA;
@@ -88,6 +89,7 @@ extern "C"
         for( const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
         {
             fapi2::buffer<uint32_t> l_cal_steps_enabled;
+            std::vector<std::shared_ptr<mss::training::step>> l_steps;
             FAPI_TRY( mss::cal_step_enable(p, l_cal_steps_enabled), "Error in p9_mss_draminit_training %s", mss::c_str(i_target) );
 
             if (!l_cal_steps_enabled.getBit<mss::TRAINING_ADV>())
@@ -102,6 +104,9 @@ extern "C"
             // TRAINING_ADV == CUSTOM_RD_PATTERN
             l_cal_steps_enabled = 0;
             l_cal_steps_enabled.setBit<mss::INITIAL_PAT_WR>().setBit<mss::TRAINING_ADV>();
+
+            // Gets the training steps to calibrate
+            l_steps = mss::training::steps_factory(l_cal_steps_enabled);
 
             // Keep track of the last error seen by a rank pair
             fapi2::ReturnCode l_rank_pair_error(fapi2::FAPI2_RC_SUCCESS);
@@ -138,7 +143,13 @@ extern "C"
                 FAPI_TRY( l_original_settings.save() );
 
                 std::vector<fapi2::ReturnCode> l_fails_on_rp;
-                FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
+
+                // Loop through all of the steps (should just be initial pattern write and custom read centering)
+                for(const auto l_step : l_steps)
+                {
+                    FAPI_TRY( l_step->execute(p, rp, l_cal_abort_on_error) );
+                }
+
                 FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails_on_rp) );
 
                 // If we got a fail, let's ignore the previous fails and run backup pattern
@@ -164,7 +175,12 @@ extern "C"
                     FAPI_TRY( mss::seq::setup_rd_wr_data( p, l_backup) );
 
                     // Rerun the training for this rp
-                    FAPI_TRY( mss::setup_and_execute_cal(p, rp, l_cal_steps_enabled, l_cal_abort_on_error) );
+                    // Loop through all of the steps (should just be initial pattern write and custom read centering)
+                    for(const auto l_step : l_steps)
+                    {
+                        FAPI_TRY( l_step->execute(p, rp, l_cal_abort_on_error) );
+                    }
+
                     FAPI_TRY( mss::find_and_log_cal_errors(p, rp, l_cal_abort_on_error, l_cal_fail, l_fails_on_rp) );
 
                     // If we got fails from the backup pattern, restore the pre-adv training settings for this rank pair
