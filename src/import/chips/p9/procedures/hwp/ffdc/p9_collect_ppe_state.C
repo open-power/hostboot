@@ -53,6 +53,7 @@ extern "C"
 
         fapi2::ffdc_t PPE_REG_NR;
         fapi2::ffdc_t PPE_REG_VAL;
+        fapi2::ATTR_INITIATED_PM_RESET_Type l_pm_reset_active;
 
         fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_proc_chip =
             *(reinterpret_cast<const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> *>
@@ -62,7 +63,19 @@ extern "C"
             *(reinterpret_cast<const std::vector<uint64_t>*>
               (i_v_ppe_addresses.ptr()));
 
-        const PPE_DUMP_MODE l_mode = *(reinterpret_cast<const PPE_DUMP_MODE*>(i_mode.ptr()));
+        PPE_DUMP_MODE l_mode = *(reinterpret_cast<const PPE_DUMP_MODE*>(i_mode.ptr()));
+
+        // if call to this HWP is in PM Reset flow then just collect XIRs.
+        // Full PPE state will be collected as a part of PM Recovery in
+        // later part of PM reset flow.
+        FAPI_ATTR_GET(fapi2::ATTR_INITIATED_PM_RESET,
+                      l_proc_chip,
+                      l_pm_reset_active);
+
+        if( fapi2::ENUM_ATTR_INITIATED_PM_RESET_ACTIVE == l_pm_reset_active )
+        {
+            l_mode = XIRS;
+        }
 
         std::vector<PPERegValue_t> l_v_sprs;
         std::vector<PPERegValue_t> l_v_xirs;
