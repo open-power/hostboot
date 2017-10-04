@@ -76,7 +76,7 @@ namespace HTMGT
         CFGDATA_FRU_TYPE_VRM        = 0x03,
         CFGDATA_FRU_TYPE_GPU_CORE   = 0x04,
         CFGDATA_FRU_TYPE_GPU_MEMORY = 0x05,
-
+        CFGDATA_FRU_TYPE_VRM_VDD    = 0x06,
         CFDATA_DVFS_NOT_DEFINED = 0xFF,
     };
 

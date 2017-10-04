@@ -1263,6 +1263,46 @@ ID for the sensor number returned with the elog. -->
     <persistency>non-volatile</persistency>
     <readable/>
 </attribute>
+<attribute>
+    <id>OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C</id>
+    <description>
+        VRM Vdd Temperature in degrees C to invoke DVFS (clip max Pstate)
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+<attribute>
+    <id>OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C</id>
+    <description>
+        VRM Vdd Temperature in degrees C that an overtemp error will be logged
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+<attribute>
+    <id>OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC</id>
+    <description>
+         Maximum time in seconds allowed without having a new VRM Vdd
+         temperature before DVFS will occur
+    </description>
+    <simpleType>
+        <uint8_t>
+            <default>0xFF</default>
+        </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
 
 <attribute>
     <id>PROC_SOCKET_POWER_WATTS</id>

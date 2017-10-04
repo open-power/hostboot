@@ -469,6 +469,10 @@
         <value>0x01D9</value>
     </enumerator>
     <enumerator>
+        <name>VRM_VDD_TEMP</name>
+        <value>0x01DA</value>
+    </enumerator>
+    <enumerator>
         <name>GPU_STATE</name>
         <value>0x17D8</value>
     </enumerator>
@@ -547,6 +551,11 @@
     <enumerator>
         <name>APSS_FAULT</name>
         <value>0xC7D7</value>
+    </enumerator>
+    <!-- default callout set to BackPlane  -->
+    <enumerator>
+        <name>VRM_VDD_FAULT</name>
+        <value>0xC707</value>
     </enumerator>
     <enumerator>
         <name>DERATING_FACTOR</name>

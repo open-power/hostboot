@@ -246,7 +246,7 @@ enum occCfgDataVersion
     OCC_CFGDATA_FREQ_POINT_VERSION    = 0x20,
     OCC_CFGDATA_APSS_VERSION          = 0x20,
     OCC_CFGDATA_PCAP_CONFIG_VERSION   = 0x20,
-    OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x20,
+    OCC_CFGDATA_SYS_CONFIG_VERSION    = 0x21,
     OCC_CFGDATA_TCT_CONFIG_VERSION    = 0x20,
     OCC_CFGDATA_AVSBUS_CONFIG_VERSION = 0X01,
 };
@@ -759,8 +759,9 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
                                 uint64_t & o_size)
 {
     uint64_t index = 0;
-    uint16_t sensor = 0;
-    assert(o_data != nullptr);
+    uint32_t SensorID1 = 0;
+    uint32_t SensorID2 = 0;
+        assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG;
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
@@ -768,43 +769,41 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     //System Type
     o_data[index++] = G_opalMode;
 
-    //processor sensor ID
+    //processor Callout Sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);
-    sensor = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
-    memcpy(&o_data[index], &sensor, 4);
+    SensorID1 = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
     //Next 12*4 bytes are for core sensors.
     //If a new processor with more cores comes along,
     //this command will have to change.
     TargetHandleList cores;
-    TargetHandleList::iterator coreIt;
     getChildChiplets(cores, proc, TYPE_CORE, false);
 
-    uint32_t tempSensor = 0;
-    uint32_t freqSensor = 0;
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
-        tempSensor = 0;
-        freqSensor = 0;
+        SensorID1 = 0;
+        SensorID2 = 0;
 
         if ( core < cores.size() )
         {
-            tempSensor = UTIL::getSensorNumber(cores[core],
+            SensorID1 = UTIL::getSensorNumber(cores[core],     //Temp Sensor
                                                SENSOR_NAME_CORE_TEMP);
 
-            freqSensor = UTIL::getSensorNumber(cores[core],
+            SensorID2 = UTIL::getSensorNumber(cores[core],     //Freq Sensor
                                                SENSOR_NAME_CORE_FREQ);
         }
 
         //Core Temp Sensor ID
-        memcpy(&o_data[index], &tempSensor, 4);
+        memcpy(&o_data[index], &SensorID1, 4);
         index += 4;
 
         //Core Frequency Sensor ID
-        memcpy(&o_data[index], &freqSensor, 4);
+        memcpy(&o_data[index], &SensorID2, 4);
         index += 4;
     }
+
 
     TargetHandle_t sys = nullptr;
     TargetHandleList nodes;
@@ -815,14 +814,24 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     TargetHandle_t node = nodes[0];
 
 
-    //Backplane sensor ID
-    sensor = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
-    memcpy(&o_data[index], &sensor, 4);
+    //Backplane Callout Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
-    //APSS sensor ID
-    sensor = UTIL::getSensorNumber(sys, SENSOR_NAME_APSS_FAULT);
-    memcpy(&o_data[index], &sensor, 4);
+    //APSS Callout Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_APSS_FAULT);
+    memcpy(&o_data[index], &SensorID1, 4);
+    index += 4;
+
+    //Format 21 - VRM VDD Callout Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_VRM_VDD_FAULT);
+    memcpy(&o_data[index], &SensorID1, 4);
+    index += 4;
+
+    //Format 21 - VRM VDD Temperature Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_VRM_VDD_TEMP);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
     o_size = index;
@@ -996,9 +1005,36 @@ void getThermalControlMessageData(uint8_t* o_data,
     o_data[index++] = l_timeout;
     l_numSets++;
 
+    // VRM Vdd
+    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_DVFS_TEMP_DEG_C>(l_DVFS_temp))
+        l_DVFS_temp = OCC_NOT_DEFINED;
+    if (l_DVFS_temp == 0)
+    {
+        l_DVFS_temp = OCC_NOT_DEFINED;
+    }
+    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_ERROR_TEMP_DEG_C>(l_ERR_temp))
+        l_ERR_temp = OCC_NOT_DEFINED;
+    if (l_ERR_temp == 0)
+    {
+        l_ERR_temp = OCC_NOT_DEFINED;
+    }
+    if(!l_sys->tryGetAttr<ATTR_OPEN_POWER_VRM_VDD_READ_TIMEOUT_SEC>(l_timeout))
+        l_timeout = OCC_NOT_DEFINED;
+    if(l_timeout == 0)
+    {
+        l_timeout = OCC_NOT_DEFINED;
+    }
+    o_data[index++] = CFGDATA_FRU_TYPE_VRM_VDD;
+    o_data[index++] = l_DVFS_temp;          //DVFS
+    o_data[index++] = l_ERR_temp;           //ERROR
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_DVFS
+    o_data[index++] = OCC_NOT_DEFINED;      //PM_ERROR
+    o_data[index++] = l_timeout;
+    l_numSets++;
+
+
     o_data[l_numSetsOffset] = l_numSets;
     o_size = index;
-
 
 }
 
