@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 //
 
