@@ -182,11 +182,16 @@ extern "C"
 
             }// rank pairs
 
+            // Let's update the attribute with the new DQ disable bits
+            // The only fail we get here is a scom error, so we should error out
+            // Hostboot will write the info to SPD and Cronus will write it to the attribute
+            // Hostboot will only do the reconfig loop/ write if it finds new bits
+            FAPI_TRY( mss::dp16::record_bad_bits(p) );
+
             {
                 // Conducts workarounds after training if needed
                 // if we get fails here,it's due to scom errors
                 FAPI_TRY( mss::workarounds::dp16::post_training_workarounds( p, l_cal_steps_enabled ));
-
             }
         }
 
