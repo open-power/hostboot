@@ -239,6 +239,27 @@ void getTargetInfo( HUID i_chipId, TARGETING::TYPE & o_targetType,
                       l_node, l_chip, l_chiplet );
             break;
 
+        case TYPE_MC:
+            l_chip    = l_chip / MAX_MC_PER_PROC;
+            l_chiplet = l_chiplet % MAX_MC_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "mc(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_MI:
+            l_chip    = l_chip / MAX_MI_PER_PROC;
+            l_chiplet = l_chiplet % MAX_MI_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "mi(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
+        case TYPE_DMI:
+            l_chip    = l_chip / MAX_DMI_PER_PROC;
+            l_chiplet = l_chiplet % MAX_DMI_PER_PROC;
+            snprintf( o_chipName, i_sz_chipName, "dmi(n%dp%dc%d)",
+                      l_node, l_chip, l_chiplet );
+            break;
+
         case TYPE_MEMBUF:
             snprintf( o_chipName, i_sz_chipName, "mb(n%dp%d)",
                       l_node, l_chip );

@@ -96,6 +96,31 @@ chip p9_dmi
  ##############################################################################
 
 ################################################################################
+# Summary for DMI
+################################################################################
+
+rule rDMI
+{
+  CHECK_STOP:
+    summary( 0, rCHIFIR );
+
+  RECOVERABLE:
+    summary( 0, rCHIFIR );
+
+  UNIT_CS:
+    summary( 0, rCHIFIR );
+
+  HOST_ATTN:
+    summary( 0, rCHIFIR );
+
+};
+
+group gDMI attntype CHECK_STOP, RECOVERABLE, UNIT_CS, HOST_ATTN filter singlebit
+{
+    (rDMI, bit(0)) ? analyze(gCHIFIR);
+};
+
+################################################################################
 # P9 DMI target CHIFIR
 ################################################################################
 
