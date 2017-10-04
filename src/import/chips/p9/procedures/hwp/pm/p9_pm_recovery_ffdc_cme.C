@@ -42,6 +42,7 @@
 
 #include <p9_pm_recovery_ffdc_cme.H>
 #include <p9_hcd_memmap_cme_sram.H>
+#include <p9_ppe_defs.H>
 #include <stddef.h>
 #include <endian.h>
 
@@ -67,7 +68,7 @@
         uint8_t l_exPos   = 0;
         uint8_t l_cmePos  = 0;
         uint8_t l_ffdcValdityVect = PPE_FFDC_ALL_VALID;
-        uint8_t l_haltState = 0; //FIXME Needs update when PPE State gets handled
+        uint8_t l_haltState = PPE_HALT_COND_UNKNOWN;
         uint8_t *l_pFfdcLoc = NULL;
         HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
@@ -95,6 +96,22 @@
 
             //In case of error , invalidate FFDC in header.
 
+            // @TODO this is still after reset, which would have already
+            // halted the ppe. We need a wa to record this before reset
+            // and pass it down, or have a spl r-m-w update per member
+            // of the PPE Header?
+            // l_retCode = getPpeHaltState (
+            //             getCmeBaseAddress (l_cmePos),
+            //             l_haltState);
+
+            l_retCode = collectPpeState ( getCmeBaseAddress (l_cmePos),
+                                          l_pFfdcLoc );
+            if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+            {
+                FAPI_ERR ( "Error collecting CME State, CME Pos 0x08x",
+                           l_cmePos );
+                l_ffdcValdityVect &= ~PPE_STATE_VALID;
+            }
             l_retCode = collectTrace( l_pFfdcLoc, ex );
 
             if( l_retCode )
@@ -169,14 +186,6 @@
         fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectGlobals" );
         return fapi2::current_err;
-    }
-
-    //-----------------------------------------------------------------------
-
-    fapi2::ReturnCode  PlatCme::collectCmeState( uint8_t * i_pCmeState,
-                                                 const fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt )
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
     }
 
     //-----------------------------------------------------------------------
