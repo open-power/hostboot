@@ -42,6 +42,7 @@
 
 #include <p9_pm_recovery_ffdc_sgpe.H>
 #include <p9_hcd_memmap_occ_sram.H>
+#include <p9_ppe_defs.H>
 #include <stddef.h>
 #include <endian.h>
 
@@ -63,7 +64,7 @@
         fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
         uint8_t l_ffdcValdityVect = PPE_FFDC_ALL_VALID;
 
-        uint8_t l_haltState = 0; //FIXME Needs update when PPE State gets handled
+        uint8_t l_haltState = PPE_HALT_COND_UNKNOWN;
         uint8_t *l_pFfdcLoc = NULL;
 
         HomerFfdcRegion * l_pHomerFfdc =
@@ -72,6 +73,14 @@
         l_pFfdcLoc = (uint8_t *)(&l_pHomerFfdc->iv_sgpeFfdcRegion);
 
         //In case of error , invalidate FFDC in header.
+        l_retCode = collectPpeState ( SGPE_BASE_ADDRESS, l_pFfdcLoc );
+        if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+        {
+            FAPI_ERR ( "Error collecting SGPE State" );
+            // PPE State Data is bad & continue SRAM FFDC collection
+            l_ffdcValdityVect &= ~PPE_STATE_VALID;
+        }
+
         l_retCode = collectTrace( l_pFfdcLoc );
 
         if( l_retCode )
@@ -145,13 +154,6 @@
         fapi_try_exit:
         FAPI_DBG("<< PlatSgpe::collectGlobals" );
         return fapi2::current_err;
-    }
-
-    //-----------------------------------------------------------------------
-
-    fapi2::ReturnCode  PlatSgpe::collectSgpeState( uint8_t * i_pSgpeState )
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
     }
 
     //-----------------------------------------------------------------------
