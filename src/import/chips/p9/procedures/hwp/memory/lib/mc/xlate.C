@@ -1926,7 +1926,7 @@ fapi2::ReturnCode setup_xlate_map_helper( std::vector<dimm::kind>& io_dimm_kinds
         // Find the proper set function based on this DIMM kind.
         const auto l_setup = std::find_if( xlate_map.begin(), xlate_map.end(), [k](const xlate_setup & x) -> bool
         {
-            return x.iv_kind == k;
+            return x.iv_kind.equal_config(k);
         } );
 
         // If we didn't find it, raise a stink.

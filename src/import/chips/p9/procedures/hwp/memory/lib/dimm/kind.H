@@ -228,6 +228,24 @@ class kind
         uint8_t iv_stack_type;
         uint8_t iv_hybrid;
         uint8_t iv_hybrid_memory_type;
+
+        ///
+        /// @brief equal_config
+        /// @param[in] i_input_compare the i_kind to compare against
+        /// @return bool true iff the two kind are of the same kind for xlate purposes
+        /// @warning this does not compare the targets (iv_target,), mfgid, prim_stack_type nor hybrid type
+        ///
+        inline bool equal_config(const kind& i_input_compare) const
+        {
+            return ((iv_master_ranks == i_input_compare.iv_master_ranks) &&
+                    (iv_total_ranks == i_input_compare.iv_total_ranks) &&
+                    (iv_dram_density == i_input_compare.iv_dram_density) &&
+                    (iv_dram_width == i_input_compare.iv_dram_width) &&
+                    (iv_dram_generation == i_input_compare.iv_dram_generation) &&
+                    (iv_dimm_type == i_input_compare.iv_dimm_type) &&
+                    (iv_rows == i_input_compare.iv_rows) &&
+                    (iv_size == i_input_compare.iv_size));
+        }
 };
 
 }
