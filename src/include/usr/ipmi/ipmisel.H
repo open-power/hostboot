@@ -312,6 +312,12 @@ namespace IPMISEL
     void send_esel(IPMISEL::eselInitData * i_data,
           errlHndl_t &o_err, IPMI::completion_code &o_cc);
 
+    /**
+     * @brief read the SEL time
+     * @return    time from unix epoch or 0 on error
+     */
+    uint32_t get_sel_time();
+
 } // namespace IPMISEL
 
 #ifndef __HOSTBOOT_RUNTIME
