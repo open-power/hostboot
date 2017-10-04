@@ -1065,6 +1065,35 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Set MCFGPA MEMORY HOLE UPPER_ADDRESS_AT_END_OF_RANGE bit
+///
+/// @param[in]      i_target        MC target (MCS or MI)
+/// @param[in/out]  io_data         Data buffer
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+///
+template<fapi2::TargetType T>
+void setUpperAddrEndOfRangeBit(const fapi2::Target<T>& i_target,
+                               fapi2::buffer<uint64_t>& io_scomData);
+
+/// MC = MCS (Nimbus)
+template<>
+void setUpperAddrEndOfRangeBit(const fapi2::Target<fapi2::TARGET_TYPE_MCS>& i_target,
+                               fapi2::buffer<uint64_t>& io_scomData)
+{
+    // This bit is not used in Nimbus
+    return;
+}
+
+/// MC = MI (Cumulus)
+template<>
+void setUpperAddrEndOfRangeBit(const fapi2::Target<fapi2::TARGET_TYPE_MI>& i_target,
+                               fapi2::buffer<uint64_t>& io_scomData)
+{
+    io_scomData.setBit<MCS_MCFGPA_RESERVED_1>();
+    return;
+}
 
 ///
 /// @brief Write BAR data to a memory controller
@@ -1201,6 +1230,9 @@ fapi2::ReturnCode writeMCBarData(
             // MCFGPA HOLE0 valid (bit 0)
             l_scomData.setBit<MCS_MCFGPA_HOLE0_VALID>();
 
+            // MCFGPA_HOLE0_UPPER_ADDRESS_AT_END_OF_RANGE
+            setUpperAddrEndOfRangeBit(l_target, l_scomData);
+
             // Hole 0 lower addr
             // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPA_HOLE0_LOWER_ADDRESS,
@@ -1218,6 +1250,9 @@ fapi2::ReturnCode writeMCBarData(
         {
             // MCFGPA HOLE1 valid (bit 0)
             l_scomData.setBit<MCS_MCFGPA_HOLE0_VALID>();
+
+            // MCFGPA_HOLE1_UPPER_ADDRESS_AT_END_OF_RANGE
+            setUpperAddrEndOfRangeBit(l_target, l_scomData);
 
             // Hole 1 lower addr
             // 0b0000000001 = 4GB
@@ -1246,6 +1281,9 @@ fapi2::ReturnCode writeMCBarData(
             // MCFGPMA HOLE0 valid (bit 0)
             l_scomData.setBit<MCS_MCFGPMA_HOLE0_VALID>();
 
+            // MCFGPA_HOLE0_UPPER_ADDRESS_AT_END_OF_RANGE
+            setUpperAddrEndOfRangeBit(l_target, l_scomData);
+
             // Hole 0 lower addr
             // 0b0000000001 = 4GB
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE0_LOWER_ADDRESS,
@@ -1264,6 +1302,9 @@ fapi2::ReturnCode writeMCBarData(
             // MCFGPMA HOLE1 valid (bit 0)
             // 0b0000000001 = 4GB
             l_scomData.setBit<MCS_MCFGPMA_HOLE1_VALID>();
+
+            // MCFGPA_HOLE1_UPPER_ADDRESS_AT_END_OF_RANGE
+            setUpperAddrEndOfRangeBit(l_target, l_scomData);
 
             // Hole 1 lower addr
             l_scomData.insertFromRight<MCS_MCFGPMA_HOLE1_LOWER_ADDRESS,
