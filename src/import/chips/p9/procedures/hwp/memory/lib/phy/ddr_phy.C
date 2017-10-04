@@ -773,11 +773,6 @@ fapi2::ReturnCode find_and_log_cal_errors(const fapi2::Target<fapi2::TARGET_TYPE
                  i_rp,
                  (l_rc == fapi2::FAPI2_RC_SUCCESS) ? "Yes" : "no");
 
-        // Let's update the attribute with the failing DQ bits since we had a training error
-        // The only fail we get here is a scom error, so we should error out
-        // Hostboot will write the info to SPD and Cronus will write it to the attribute
-        FAPI_TRY( mss::dp16::record_bad_bits(i_target) );
-
         // Let's add the error to our vector for later processing (if it didn't affect too many DQ bits)
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
