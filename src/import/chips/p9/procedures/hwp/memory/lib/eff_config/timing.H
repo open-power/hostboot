@@ -27,7 +27,7 @@
 /// @brief Determine effective config for mss settings
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP FW Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP FW Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP

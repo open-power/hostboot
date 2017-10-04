@@ -28,7 +28,7 @@
 /// @brief CAS latency class implementation
 ///
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP

@@ -27,7 +27,7 @@
 /// @file plug_rules.H
 /// @brief Enforcement of rules for plugging in DIMM
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

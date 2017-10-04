@@ -27,9 +27,9 @@
 /// @brief Decoder for ATTR_MSS_MRW_PWR_CURVE_SLOPE and _INTERCEPT and THERMAL_POWER_LIMIT
 ///
 // *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_POWER_DECODER__

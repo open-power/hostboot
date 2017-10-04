@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,10 +29,10 @@
 /// Workarounds are very deivce specific, so there is no attempt to generalize
 /// this code in any way.
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #ifndef _MSS_WORKAROUNDS_MCBIST_H_
