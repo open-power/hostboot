@@ -32,11 +32,12 @@
 
   <!-- ********************************************************************* -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW416934</id>
+    <id>ATTR_CHIP_EC_FEATURE_HW416934_HW419818</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1, DD2.0, DD2.1, Cumulus DD1 only:
+      Nimbus DD1, DD2.0, DD2.1, Cumulus DD1 only; Combined into a single WAT solution
       HW416934 - Cache Inhibited (I=1) lxvd2x load sends 8 byte load to NCU instead of 16 byte
+      HW419818 - stcx bug in the S2QA / S2Q drain stall
     </description>
     <chipEcFeature>
       <chip>
@@ -3251,6 +3252,30 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW421831</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW421831 - ltptr hang issue
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x21</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW421426</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -3308,8 +3333,8 @@
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>EQUAL</test>
+          <value>0x21</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
@@ -3327,30 +3352,6 @@
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
       HW420948 - SRQ/S2Q issue
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x21</value>
-          <test>LESS_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-      <chip>
-        <name>ENUM_ATTR_NAME_CUMULUS</name>
-        <ec>
-          <value>0x10</value>
-          <test>EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW419818</id>
-    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      HW419818 - SRQ/S2Q issue
     </description>
     <chipEcFeature>
       <chip>
