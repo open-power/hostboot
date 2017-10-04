@@ -71,11 +71,6 @@ namespace p9_stop_recov_ffdc
             /// @return     fapi2 return code.
             fapi2::ReturnCode  collectGlobals( uint8_t * i_pHomerBuf );
 
-            /// @brief      collects SGPE state
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE's state.
-            /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectSgpeState( uint8_t * i_pHomerBuf );
-
             /// @brief      collects internal register info for a SGPE
             /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE internal register.
             /// @return     fapi2 return code.
