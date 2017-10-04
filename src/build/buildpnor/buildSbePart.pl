@@ -6,7 +6,10 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2017
+# [+] Google Inc.
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -187,7 +190,7 @@ sub genOutputImage
     print $FILEHANDLE pack('N', 1);
 
     #Insert header data for each EC provided
-    for $key ( keys %{$i_ecImgs})
+    for $key (sort { $a <=> $b} keys %{$i_ecImgs})
     {
         trace(2, "$this_func: Inserting header for EC=$key");
         my $filesize = -s $$i_ecImgs{$key};
@@ -221,7 +224,7 @@ sub genOutputImage
     close $FILEHANDLE;
 
     #Insert actual image for each EC provided
-    for $key ( keys %{$i_ecImgs})
+    for $key (sort { $a <=> $b} keys %{$i_ecImgs})
     {
         trace(2, "$this_func: Inserting data for EC=$key, offset=$ecOffsets{$key}");
 
