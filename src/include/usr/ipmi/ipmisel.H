@@ -5,7 +5,8 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -311,6 +312,12 @@ namespace IPMISEL
      */
     void send_esel(IPMISEL::eselInitData * i_data,
           errlHndl_t &o_err, IPMI::completion_code &o_cc);
+
+    /**
+     * @brief read the SEL time
+     * @return    time from unix epoch or 0 on error
+     */
+    uint32_t get_sel_time();
 
 } // namespace IPMISEL
 
