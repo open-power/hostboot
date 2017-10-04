@@ -412,10 +412,13 @@ struct conn_t
             case TYPE_MCBIST:       order = 14; break;
             case TYPE_MCS:          order = 15; break;
             case TYPE_MCA:          order = 16; break;
-            case TYPE_MEMBUF:       order = 17; break;
-            case TYPE_L4:           order = 18; break;
-            case TYPE_MBA:          order = 19; break;
-            case TYPE_DIMM:         order = 20; break;
+            case TYPE_MC:           order = 17; break;
+            case TYPE_MI:           order = 18; break;
+            case TYPE_DMI:          order = 19; break;
+            case TYPE_MEMBUF:       order = 20; break;
+            case TYPE_L4:           order = 21; break;
+            case TYPE_MBA:          order = 22; break;
+            case TYPE_DIMM:         order = 23; break;
             default: ;
         }
 
@@ -466,6 +469,9 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_PROC,   TYPE_MCBIST,     TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCS,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MC,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_PROC,   TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
         { TYPE_PROC,   TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_EQ,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
@@ -504,16 +510,28 @@ TargetService::ASSOCIATION_TYPE getAssociationType( TargetHandle_t i_target,
         { TYPE_MCS,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCS,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCS,    TYPE_MCA,        TargetService::CHILD_BY_AFFINITY  },
-        { TYPE_MCS,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
 
         { TYPE_MCA,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_MCBIST,     TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MCA,    TYPE_DIMM,       TargetService::CHILD_BY_AFFINITY  },
 
+        { TYPE_MC,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MC,     TYPE_MI,         TargetService::CHILD_BY_AFFINITY  },
+        { TYPE_MC,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_MI,     TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MI,     TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MI,     TYPE_DMI,        TargetService::CHILD_BY_AFFINITY  },
+
+        { TYPE_DMI,    TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DMI,    TYPE_MC,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DMI,    TYPE_MI,         TargetService::PARENT_BY_AFFINITY },
+        { TYPE_DMI,    TYPE_MEMBUF,     TargetService::CHILD_BY_AFFINITY  },
+
         { TYPE_MEMBUF, TYPE_NODE,       TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_PROC,       TargetService::PARENT_BY_AFFINITY },
-        { TYPE_MEMBUF, TYPE_MCS,        TargetService::PARENT_BY_AFFINITY },
+        { TYPE_MEMBUF, TYPE_DMI,        TargetService::PARENT_BY_AFFINITY },
         { TYPE_MEMBUF, TYPE_L4,         TargetService::CHILD_BY_AFFINITY  },
         { TYPE_MEMBUF, TYPE_MBA,        TargetService::CHILD_BY_AFFINITY  },
 
@@ -746,19 +764,6 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
                                (i_connPos == (mcaPos % MAX_MCA_PER_MCS));
                     } );
         }
-        else if ( TYPE_MCS == trgtType && TYPE_MEMBUF == i_connType )
-        {
-            // The MEMBUF position number is relative to the PROC, not the MCS.
-            // This means the MEMBUF position number is the same as the position
-            // number of the attached MCS. In many cases, we want to get the
-            // MEMBUF connected to the MCS, but don't have knowledge of the
-            // MCS's position number (especially in the rule code. So the
-            // following will change the desired position number to the MCS
-            // position number for MCS->MEMBUF connections only.
-            itr = std::find_if( list.begin(), list.end(),
-                                [&](const TargetHandle_t & t)
-                                { return trgtPos == getMemChnl(t); } );
-        }
         else if ( TYPE_MCA == trgtType && TYPE_DIMM == i_connType )
         {
             // i_connPos is the DIMM select (0-1). Note that we don't use
@@ -774,6 +779,53 @@ TargetHandle_t getConnectedChild( TargetHandle_t i_target, TYPE i_connType,
             itr = std::find_if( list.begin(), list.end(),
                     [&](const TargetHandle_t & t)
                     { return ( i_connPos == t->getAttr<ATTR_REL_POS>() ); } );
+        }
+        else if ( TYPE_MC == trgtType && TYPE_MI == i_connType )
+        {
+            // i_connPos is position relative to MC (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mcPos = getTargetPosition(t);
+                        return (trgtPos   == (mcPos / MAX_MI_PER_MC)) &&
+                               (i_connPos == (mcPos % MAX_MI_PER_MC));
+                    } );
+        }
+        else if ( TYPE_MC == trgtType && TYPE_DMI == i_connType )
+        {
+            // i_connPos is position relative to MC (0-3)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t mcPos = getTargetPosition(t);
+                        return (trgtPos   == (mcPos / MAX_DMI_PER_MC)) &&
+                               (i_connPos == (mcPos % MAX_DMI_PER_MC));
+                    } );
+        }
+        else if ( TYPE_MI == trgtType && TYPE_DMI == i_connType )
+        {
+            // i_connPos is position relative to MI (0-1)
+            itr = std::find_if( list.begin(), list.end(),
+                    [&](const TargetHandle_t & t)
+                    {
+                        uint32_t miPos = getTargetPosition(t);
+                        return (trgtPos   == (miPos / MAX_DMI_PER_MI)) &&
+                               (i_connPos == (miPos % MAX_DMI_PER_MI));
+                    } );
+        }
+        else if ( TYPE_DMI == trgtType && TYPE_MEMBUF == i_connType )
+        {
+            // There is only one MEMBUF per DMI in the list.
+            PRDF_ASSERT( 1 == list.size() ); // just in case
+            itr = list.begin();
+        }
+        else if ( TYPE_MBA == trgtType && TYPE_DIMM == i_connType )
+        {
+            // TODO: RTC180690 This really wasn't supported in P8 because there
+            //       are two ports and two DIMM selects per port and there
+            //       wasn't a clean way to get the correct DIMM. MCA doesn't
+            //       have this issue, but it would be nice to get a clean
+            //       interface for both MCA and MBA.
         }
         else
         {
@@ -1121,9 +1173,9 @@ uint32_t getMemChnl( TargetHandle_t i_trgt )
 {
     PRDF_ASSERT( nullptr != i_trgt );
 
-    TargetHandle_t mcsTrgt = getConnectedParent( i_trgt, TYPE_MCS );
+    TargetHandle_t dmiTrgt = getConnectedParent( i_trgt, TYPE_DMI );
 
-    return getTargetPosition( mcsTrgt );
+    return getTargetPosition( dmiTrgt );
 }
 
 //------------------------------------------------------------------------------
