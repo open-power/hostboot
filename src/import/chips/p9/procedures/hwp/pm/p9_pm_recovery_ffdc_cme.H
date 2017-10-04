@@ -73,12 +73,6 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode  collectGlobals( uint8_t * i_pHomerBuf,
                                                const fapi2::Target< fapi2::TARGET_TYPE_EX > & i_exTgt );
 
-            /// @brief      collects CME state for a given CME.
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for CME's state.
-            /// @param[in]  i_exTgt         fapi2 target for ex
-            fapi2::ReturnCode  collectCmeState( uint8_t * i_pHomerBuf ,
-                                                const fapi2::Target< fapi2::TARGET_TYPE_EX > & i_exTgt);
-
             /// @brief      collects internal register info for a given CME
             /// @param[in]  i_pHomerBuf     points to location of HOMER meant for CME's internal register.
             /// @param[in]  i_exTgt         fapi2 target for ex
