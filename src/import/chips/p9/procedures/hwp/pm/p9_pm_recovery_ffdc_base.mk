@@ -26,5 +26,6 @@ PROCEDURE = p9_pm_recovery_ffdc_base
 FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_setup_linear
 lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_state
 $(call ADD_MODULE_INCDIR,$(FFDC_INC))
 $(call BUILD_PROCEDURE)
