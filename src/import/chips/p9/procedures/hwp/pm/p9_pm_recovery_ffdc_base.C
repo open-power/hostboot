@@ -26,6 +26,7 @@
 
 #include <p9_pm_recovery_ffdc_base.H>
 #include <p9_pm_recovery_ffdc_defines.H>
+#include <p9_ppe_state.H>
 #include <endian.h>
 #include <stddef.h>
 
@@ -45,7 +46,7 @@
 
     fapi2::ReturnCode PlatPmComplex::collectFfdc( void * i_pHomerBuf )
     {
-        FAPI_DBG("<< PlatPmComplex::collectFfdc");
+        FAPI_DBG(">> PlatPmComplex::collectFfdc");
 
         FAPI_DBG("<< PlatPmComplex::collectFfdc");
         return fapi2::FAPI2_RC_SUCCESS;;
@@ -107,8 +108,107 @@
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    //---------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+    // @TODO May need to port this away, based on discussion
+    fapi2::ReturnCode PlatPmComplex::readPpeHaltState (
+                      const uint64_t i_xirBaseAddress,
+                      uint8_t&       o_ppeHaltState )
+    {
+        FAPI_DBG ( ">> PlatPmComplex::getPpeHaltState XIR Base: 0x%08llX",
+                   i_xirBaseAddress );
 
+        fapi2::ReturnCode l_rc;
+        fapi2::buffer<uint64_t> l_data64;
+
+        o_ppeHaltState = PPE_HALT_COND_UNKNOWN;
+
+        // Read the PPE XIR pair for XSR+SPRG0
+        l_rc = getScom ( iv_procChip,
+                         (i_xirBaseAddress + PPE_XIRAMDBG),
+                         l_data64 );
+
+        if ( l_rc == fapi2::FAPI2_RC_SUCCESS )
+        {   // PU_PPE_XIRAMDBG_XSR_HS
+            if ( l_data64.getBit (0, 1) )
+            {   // Halt exists, get all bits 0:3
+                l_data64.getBit (PU_PPE_XIRAMDBG_XSR_HS, 4);
+                o_ppeHaltState = static_cast<uint8_t> (l_data64());
+            }
+            else
+            {   // PPE is not halted
+                o_ppeHaltState = PPE_HALT_COND_NONE;
+            }
+        }
+        else
+        {
+            FAPI_ERR ("::readPpeHaltState: Error reading PPE XIRAMDBG");
+        }
+
+        FAPI_DBG ( "<< PlatPmComplex::getPpeHaltState: 0x%02X",
+                   o_ppeHaltState );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+//------------------------------------------------------------------------------
+    // @TODO Ideally, the reset flow should have already halted the PPE.
+    // Should the default mode here be FORCE_HALT? Is that safe?
+    fapi2::ReturnCode PlatPmComplex::collectPpeState (
+                      const uint64_t i_xirBaseAddress,
+                      const uint8_t* i_pHomerOffset,
+                      const PPE_DUMP_MODE i_mode )
+    {
+        FAPI_DBG (">> PlatPmComplex:collectPpeState");
+        PpeFfdcLayout* l_pPpeFfdc = (PpeFfdcLayout*) (i_pHomerOffset);
+        PPERegValue_t* l_pPpeRegVal = NULL;
+
+        std::vector<PPERegValue_t> l_vSprs;
+        std::vector<PPERegValue_t> l_vGprs;
+        std::vector<PPERegValue_t> l_vXirs;
+
+        // @TODO Update the ppe_halt HWP to avoid halting the PPE again
+        // if it is already halted. Can potentially change the XSR?
+        FAPI_TRY ( p9_ppe_state (
+                   iv_procChip,
+                   i_xirBaseAddress,
+                   i_mode,
+                   l_vSprs,
+                   l_vXirs,
+                   l_vGprs) );
+
+        // @TODO any faster way, e.g. use data() method and memcpy?
+        l_pPpeRegVal = (PPERegValue_t*) &l_pPpeFfdc->iv_ppeXirReg[0];
+        for ( auto& it : l_vXirs )
+        {
+            l_pPpeRegVal->number = it.number;
+            l_pPpeRegVal->value = it.value;
+            ++l_pPpeRegVal;
+        }
+
+        l_pPpeRegVal = (PPERegValue_t*) &l_pPpeFfdc->iv_ppeSpr[0];
+        for ( auto& it : l_vSprs )
+        {
+            l_pPpeRegVal->number = it.number;
+            l_pPpeRegVal->value = it.value;
+            ++l_pPpeRegVal;
+        }
+
+        l_pPpeRegVal = (PPERegValue_t*) &l_pPpeFfdc->iv_ppeGprs[0];
+        for ( auto& it : l_vGprs )
+        {
+            l_pPpeRegVal->number = it.number;
+            l_pPpeRegVal->value = it.value;
+            ++l_pPpeRegVal;
+        }
+
+    fapi_try_exit:
+        FAPI_DBG ( "<< PlatPmComplex::collectPpeState XIRs:%d SPRs:%d GPRs:%d",
+                   l_vXirs.size(), l_vSprs.size(), l_vGprs.size() );
+
+       return fapi2::current_err;
+    }
+
+
+    //---------------------------------------------------------------------------------------------
     fapi2::ReturnCode PlatPmComplex::collectSramInfo( const fapi2::Target< fapi2::TARGET_TYPE_EX > & i_exTgt,
                                                       uint8_t * i_pSramData,
                                                       FfdcDataType i_dataType,
