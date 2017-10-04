@@ -72,10 +72,27 @@ enum PpeFfdcValidStatus
     PPE_DASHBOARD_VALID     =   0x01,  // PPE globals are valid
     PPE_IMAGE_HEADER_VALID  =   0x02,  // PPE image header is valid
     PPE_TRACE_VALID         =   0x04,  // PPE Traces are valid
-    PPE_SPR_VALID           =   0x08,  // PPE SPRs are valid
+    PPE_STATE_VALID         =   0x08,  // PPE XIRS, GPES and SPRs are valid
     PPE_INT_REG_VALID       =   0x10,  // PPE Int Regs are valid
-    PPE_STATE_VALID         =   0x20,  // PPE State Info is valid
+    PPE_HALT_STATE_VALID    =   0x20,  // PPE Halt State Info is valid
     PPE_FFDC_ALL_VALID      =   0x3F,  // Entire PPE FFDC is valid
+};
+
+/**
+ * @brief enumerates PPE's HALT conditions as inteprreted from XSR[0:3]
+ */
+enum PpeHaltCondition
+{
+    PPE_HALT_COND_NONE    = 0x00, // Not halted
+    PPE_HALT_COND_BAD     = 0x08, // Halted, but cannot map source
+    PPE_HALT_COND_XCR     = 0x09, // Halted via XCR
+    PPE_HALT_COND_WDT     = 0x0A, // Halted via Watch Dog
+    PPE_HALT_COND_NMI     = 0x0B, // Halted via unmaskable intr
+    PPE_HALT_COND_DBG     = 0x0C, // Debug halt
+    PPE_HALT_COND_DBCR    = 0x0D, // Halt via Debug Control Reg
+    PPE_HALT_COND_EXT_HLT = 0x0E, // Ext halt_req input active
+    PPE_HALT_COND_HW      = 0x0F, // Halted with a HW failure
+    PPE_HALT_COND_UNKNOWN = 0xFF  // Could not read or interpret XSR
 };
 
 /**
@@ -116,13 +133,67 @@ struct __attribute__((packed)) QuadFfdcHeader
     uint8_t  iv_reserve[2];
 };
 
+
 /**
- * @brief   a union modelling CME FFDC region's header area.
+ * @brief enumerates bit position used as validity mark of OCC FFDC sub-section.
+ */
+enum OccFfdcValidStatus
+{
+    OCC_FFDC_INVALID             =   0x00,  // None of the FFDC section is valid
+    OCC_FFDC_TRACE_ERR_VALID     =   0x01,  // OCC ERR traces section valid
+    OCC_FFDC_TRACE_IMP_VALID     =   0x02,  // OCC IMP traces section valid
+    OCC_FFDC_TRACE_INF_VALID     =   0x04,  // OCC INF traces section valid
+    OCC_FFDC_TRACE_SSX_VALID     =   0x08,  // OCC SSX trace section valid
+    OCC_FFDC_TRACE_GPE0_VALID    =   0x10,  // OCC GPE0 Trace Section valid
+    OCC_FFDC_TRACE_GPE1_VALID    =   0x20,  // OCC GPE1 Trace Section Valid
+    OCC_FFDC_SHARED_REGION_VALID =   0x40,  // OCC Shared Region Section valid
+    OCC_FFDC_REGISTERS_VALID     =   0x80,  // OCC Register Section valid
+    OCC_FFDC_VALID_ALL           =   ( OCC_FFDC_TRACE_ERR_VALID |
+                                       OCC_FFDC_TRACE_IMP_VALID |
+                                       OCC_FFDC_TRACE_INF_VALID |
+                                       OCC_FFDC_TRACE_SSX_VALID |
+                                       OCC_FFDC_TRACE_GPE0_VALID |
+                                       OCC_FFDC_TRACE_GPE1_VALID |
+                                       OCC_FFDC_SHARED_REGION_VALID |
+                                       OCC_FFDC_REGISTERS_VALID )
+};
+
+
+/**
+ *  * @brief models OCC Region FFDC header.
+ *   */
+struct __attribute__((packed)) OccFfdcHeader
+{
+    uint32_t iv_magicWord;
+    uint8_t  iv_ffdcValid;
+    uint8_t  iv_headerSize;
+    uint16_t iv_sectionSize;
+    uint16_t iv_offsetErrTrace;
+    uint16_t iv_offsetImpTrace;
+    uint16_t iv_offsetInfTrace;
+    uint16_t iv_offsetSsxTrace;
+    uint16_t iv_offsetGpe0Trace;
+    uint16_t iv_offsetGpe1Trace;
+    uint16_t iv_offsetSharedSram;
+    uint16_t iv_offsetOccRegs;
+};
+
+/**
+ * @brief   a union modelling PPE FFDC region's header area.
  */
 union PpeFfdcHdrRegion
 {
     uint8_t iv_ppeFfdcHdrArea[FFDC_PPE_HDR_SIZE];
     PpeFfdcHeader iv_ppeFfdcHdr;
+};
+
+/**
+ *  * @brief   a union modelling OCC FFDC region's header area.
+ *   */
+union OccFfdcHdrRegion
+{
+    uint8_t iv_ppeFfdcHdrArea[FFDC_OCC_REGION_HDR_SIZE];
+    OccFfdcHeader iv_occFfdcHdr;
 };
 
 /**
@@ -134,8 +205,7 @@ struct  __attribute__((packed)) PpeFfdcLayout
     uint8_t iv_ppeGlobals[FFDC_PPE_SCORE_BOARD_SIZE];
     uint8_t iv_ppeImageHeader[FFDC_PPE_IMG_HDR_SIZE];
     uint8_t iv_ppeXirReg[FFDC_PPE_XIR_SIZE];
-    uint8_t iv_ppeMajSpr[FFDC_PPE_MAJOR_SPR_SIZE];
-    uint8_t iv_ppeMinSpr[FFDC_PPE_MINOR_SPR_SIZE];
+    uint8_t iv_ppeSpr[FFDC_PPE_SPR_SIZE];
     uint8_t iv_ppeGprs[FFDC_PPE_GPR_SIZE];
     uint8_t iv_ppeInternalReg[FFDC_PPE_INTERNAL_REG_SIZE];
     uint8_t iv_ppeTraces[FFDC_PPE_TRACES_SIZE];
@@ -155,16 +225,17 @@ struct __attribute__((packed)) HomerQuadFfdcRegion
 /**
  * @brief   models OCC FFDC region of HOMER.
  */
-struct __attribute__((packed)) HomerOccFfdcRegion
+struct __attribute__((packed)) OccFfdcRegion
 {
     uint8_t iv_occFfdcHeader[FFDC_OCC_REGION_HDR_SIZE];
-    uint8_t iv_occTraceErrSize[FFDC_TRACE_ERR_SIZE];
-    uint8_t iv_occTraceImpSize[FFDC_TRACE_IMP_SIZE];
-    uint8_t iv_occTraceInfSize[FFDC_TRACE_INF_SIZE];
-    uint8_t iv_occSsxSize[FFDC_TRACE_SSX_SIZE];
-    uint8_t iv_occTraceGpe0Size[FFDC_TRACE_GPE0_SIZE];
-    uint8_t iv_occTraceGpe1Size[FFDC_TRACE_GPE1_SIZE];
-    uint8_t iv_occSharedSramSize[FFDC_SHARED_SRAM_SIZE];
+    uint8_t iv_occTraceErr[FFDC_TRACE_ERR_SIZE];
+    uint8_t iv_occTraceImp[FFDC_TRACE_IMP_SIZE];
+    uint8_t iv_occTraceInf[FFDC_TRACE_INF_SIZE];
+    uint8_t iv_occTraceSsx[FFDC_TRACE_SSX_SIZE];
+    uint8_t iv_occTraceGpe0[FFDC_TRACE_GPE0_SIZE];
+    uint8_t iv_occTraceGpe1[FFDC_TRACE_GPE1_SIZE];
+    uint8_t iv_occSharedSram[FFDC_SHARED_SRAM_SIZE];
+    uint8_t iv_occRegs[FFDC_OCC_REGS_SIZE];
 };
 
 /**
@@ -176,7 +247,7 @@ struct  __attribute__((packed)) HomerFfdcRegion
     HomerQuadFfdcRegion iv_quadFfdc[MAX_QUADS_PER_CHIP];
     PpeFfdcLayout       iv_sgpeFfdcRegion;
     PpeFfdcLayout       iv_pgpeFfdcRegion;
-    HomerOccFfdcRegion  iv_occFfdcRegion;
+    OccFfdcRegion       iv_occFfdcRegion;
 };
 
 }   //namespace p9_stop_recov_ffdc ends

@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_base.mk $
+# $Source: src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_occ.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,10 +22,11 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-PROCEDURE = p9_pm_recovery_ffdc_base
-FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
+PROCEDURE=p9_pm_recovery_ffdc_occ
+PM_FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/pm/
+PM_FFDC_INC+=$(ROOTPATH)/chips/p9/procedures/hwp/lib
+lib$(PROCEDURE)_DEPLIBS +=p9_pm_recovery_ffdc_base
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_access
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_setup_linear
-lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access
-lib$(PROCEDURE)_DEPLIBS+=p9_ppe_state
-$(call ADD_MODULE_INCDIR,$(FFDC_INC))
+$(call ADD_MODULE_INCDIR,$(PM_FFDC_INC))
 $(call BUILD_PROCEDURE)

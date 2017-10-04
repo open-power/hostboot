@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_sgpe.H $ */
+/* $Source: src/import/chips/p9/procedures/hwp/pm/p9_pm_recovery_ffdc_occ.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,15 +22,15 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __PM_RECOVERY_FFDC_SGPE_
-#define __PM_RECOVERY_FFDC_SGPE_
+#ifndef __PM_RECOVERY_FFDC_OCC_
+#define __PM_RECOVERY_FFDC_OCC_
 
 ///
-/// @file   p9_pm_recovery_ffdc_sgpe.H
-/// @brief  Models SGPE platform for the FFDC collection of PM complex
+/// @file   p9_pm_recovery_ffdc_occ.H
+/// @brief  Models OCC platform for the FFDC collection of PM complex
 ///
 /// *HWP HWP Owner:      Greg Still <stillgs@us.ibm.com>
-/// *HWP FW Owner:       Prem S Jha <premjha2@in.ibm.com>
+/// *HWP FW Owner:       Amit Tendolkar <amit.tendolkar@in.ibm.com>
 /// *HWP Team:           PM
 /// *HWP Level:          2
 /// *HWP Consumed by:    Hostboot
@@ -46,65 +46,46 @@
 namespace p9_stop_recov_ffdc
 {
 
-    class PlatSgpe : public PlatPmComplex
+    class PlatOcc : public PlatPmComplex
     {
             public:
             /// @brief  constructor
-            PlatSgpe( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt );
+            PlatOcc ( const fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP>
+                      i_procChipTgt );
 
             /// @brief  destructor
-            virtual ~PlatSgpe() { };
+            virtual ~PlatOcc() { };
 
-            /// @brief      collects FFDC pertaining to all functional SGPEs in the chip.
+            /// @brief      collects FFDC of the OCC 405, GPE0 and GPE1.
             /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
             /// @return     fapi2 return code.
             fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
 
         private:
-            /// @brief      collects trace info from SGPE's SRAM buffer.
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE Trace info.
+            /// @brief      collects trace info from OCC SRAM buffer.
+            /// @param[in]  i_pHomerBuf     location in HOMER to write at
+            /// @param[in]  i_sramAddress   location in OCC SRAM to read from
             /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectTrace( uint8_t * i_pHomerBuf );
+            fapi2::ReturnCode  collectTrace( uint8_t * i_pHomerBuf,
+                                             uint32_t  i_sramAddress );
 
-            /// @brief      collects  global variables from SGPE's's SRAM.
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE's global variable
-            /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectGlobals( uint8_t * i_pHomerBuf );
-
-            /// @brief      collects internal register info for a SGPE
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE internal register.
-            /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectInternalReg( uint8_t * i_pHomerBuf );
-
-            /// @brief      collects SGPE Image Header info from SGPE SRAM buffer.
-            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for SGPE's header.
-            /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectImageHeader( uint8_t * i_pHomerBuf );
-
-            /// @brief updates the SGPE FFDC Header
-            ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for SGPE FFDC Header
-            ///param[in]    i_ffdcValid     bit vector summarizing FFDC validity
-            ///@param[in]   i_haltCondition hlat state of SGPE
+            /// @brief updates the OCC FFDC Header
+            /// @param[in]   i_pHomerBuf points to a location in HOMER meant for
+            ///                          OCC FFDC Header
+            ///@param[in]   i_ffdcValid  Indicates what fields in OCC FFDC are
+            ///                          valid. See OccFfdcValidStatus
             ///@return      fapi2 return code.
-            ///@note        refer to PPE Spec for details on halt state.
-
-            fapi2::ReturnCode updateSgpeFfdcHeader( uint8_t * i_pHomerBuf,
-                                                    uint8_t i_ffdcValid, uint8_t i_haltCondition );
-
-            ///@brief returns type of platform
-            PmComplexPlatId getPlatType() { return iv_plat; }
-
-        private:
-            PmComplexPlatId iv_plat;
+            fapi2::ReturnCode updateOccFfdcHeader ( uint8_t* i_pHomerBuf,
+                                                    uint8_t  i_ffdcValid );
     };
 
 extern "C"
 {
-    typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_sgpe_FP_t )
-            ( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > & i_procChipTgt,
-              void * i_sgpeFfdcBuf );
+    typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_occ_FP_t )
+            ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> & i_procChipTgt,
+              void* i_occFfdcBuf );
 }
 
 } //namespace p9_stop_recov_ffdc ends
 
-#endif //__PM_RECOVERY_FFDC_SGPE_
+#endif //__PM_RECOVERY_FFDC_OCC_
