@@ -48,6 +48,7 @@
 #include <p9_pm_ocb_indir_access.H>
 #include <p9_cme_sram_access.H>
 #include <p9_pm_ocb_indir_setup_linear.H>
+#include <p9_ppe_utils.H>
 
 namespace p9_stop_recov_ffdc
 {
@@ -73,19 +74,40 @@ namespace p9_stop_recov_ffdc
             //  @return     fapi2 return code.
             virtual fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
 
+            /// @brief  sets start address of platform's trace buffer.
+            void setTraceBufAddr (uint32_t i_addr)
+            { iv_traceBufBaseAddress = i_addr; }
+
             ///@brief returns instance id.
             PmComplexPlatId getPlatId() { return iv_plat ; }
 
             /// @brief returns proc chip target associated with platform
             fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > getProcChip() const { return iv_procChip; }
 
-            protected:
+        protected:
+            ///@brief reads the PPE Halt State from XSR, w/o halting the PPE
+            ///@param[in]  i_xirBaseAddress XCR SCOM Address of the PPE
+            ///@param[out] o_haltCondition  p9_stop_recov_ffdc::PpeHaltCondition
+            ///@return  fapi2 return code
+            fapi2::ReturnCode readPpeHaltState (
+                      const uint64_t i_xirBaseAddress,
+                      uint8_t&       o_haltCondition );
+
+            ///@brief collects PPE State (XIRs, SPRs, GPRs) to a loc in HOMER
+            ///@param[in] i_xirBaseAddress XCR SCOM Address of the PPE
+            ///@param[in] i_pHomerOffset   PPE section base address in HOMER
+            ///@param[in] i_mode           PPE_DUMP_MODE, defaults to HALT
+            ///@return  fapi2 return code
+            fapi2::ReturnCode collectPpeState (
+                   const uint64_t i_xirBaseAddress,
+                   const uint8_t* i_pHomerOffset,
+                   const PPE_DUMP_MODE i_mode = HALT );
 
             ///@brief collects FFDC from CME/OCC SRAM
             ///@param[in]   i_chipletTarget     fapi2 target for EX or Proc
             ///@param[in]   i_pSramData         points to HOMER location containing SRAM contents
             ///@param[in]   i_dataType          type of FFDC data
-            ///@param[in]   i_sramLength        length of SRAM FFDC
+            ///@param[in]   i_sramLength        length of SRAM FFDC in bytes
             ///@return  fapi2 return code
             fapi2::ReturnCode collectSramInfo( const fapi2::Target< fapi2::TARGET_TYPE_EX >& i_exTgt,
                                                uint8_t * i_pSramData,
