@@ -518,4 +518,18 @@
     <initToZero/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_INITIATED_PM_RESET</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Attribute is set by platform before initiating PM reset.
+    It act as a signal for FFDC collection utility to behave
+    differently during PM reset flow.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>INACTIVE = 0x00, ACTIVE = 0x01</enum>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
