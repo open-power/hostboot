@@ -27,10 +27,10 @@
 /// @file mss.H
 /// @brief Main include file for the Memory Subsystem
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_H_
