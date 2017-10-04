@@ -194,9 +194,9 @@ group gCHIFIR filter singlebit, cs_root_cause
     (rCHIFIR, bit(15)) ? defaultMaskedError;
 
     /** CHIFIR[16]
-     *  
+     *  Checkstop attention from Centaur
      */
-    (rCHIFIR, bit(16)) ? defaultMaskedError;
+    (rCHIFIR, bit(16)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[17]
      *  
@@ -209,14 +209,14 @@ group gCHIFIR filter singlebit, cs_root_cause
     (rCHIFIR, bit(18)) ? defaultMaskedError;
 
     /** CHIFIR[19]
-     *  
+     *  Recoverable attention from Centaur
      */
-    (rCHIFIR, bit(19)) ? defaultMaskedError;
+    (rCHIFIR, bit(19)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[20]
-     *  
+     *  Special attention from Centaur
      */
-    (rCHIFIR, bit(20)) ? defaultMaskedError;
+    (rCHIFIR, bit(20)) ? analyzeConnectedCentaur;
 
     /** CHIFIR[21]
      *  
