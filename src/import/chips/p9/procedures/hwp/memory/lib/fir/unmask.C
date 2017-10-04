@@ -27,7 +27,7 @@
 /// @file unmask.C
 /// @brief Subroutines for unmasking and setting up MSS FIR
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Marc Gollub <gollub@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
