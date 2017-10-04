@@ -27,7 +27,7 @@
 /// @file count_dimm.H
 /// @brief Count the DIMM attached to a target
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3

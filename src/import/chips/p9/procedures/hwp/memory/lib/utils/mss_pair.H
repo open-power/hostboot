@@ -27,10 +27,10 @@
 /// @file mss_pair.H
 /// @brief Creates a pair class that has a constexpr constructor
 ///
-// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
-// *HWP HWP Backup: Brian Silver <bsilver@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 

@@ -29,10 +29,10 @@
 /// Workarounds are very deivce specific, so there is no attempt to generalize
 /// this code in any way.
 ///
-// *HWP HWP Owner: Brian Silver <bsilver@us.ibm.com>
-// *HWP HWP Backup: Steven Glancy <sglancy@usi.ibm.com>
+// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
+// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>
@@ -170,4 +170,3 @@ fapi_try_exit:
 } // close namespace mcbist
 } // close namespace workarounds
 } // close namespace mss
-

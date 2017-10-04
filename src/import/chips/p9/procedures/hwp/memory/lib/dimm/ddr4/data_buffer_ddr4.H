@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
 // *HWP HWP Backup: Jacob Harvey <jlharvey@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #ifndef _MSS_DATA_BUFFER_DDR4_H_
