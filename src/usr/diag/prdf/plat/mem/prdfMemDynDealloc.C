@@ -490,6 +490,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
     return o_rc;
     #undef PRDF_FUNC
 }
+template int32_t page<TYPE_MCA>( ExtensibleChip * i_chip, MemAddr i_addr );
 
 template<TYPE T>
 int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
@@ -531,6 +532,7 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank )
     return o_rc;
     #undef PRDF_FUNC
 }
+template int32_t rank<TYPE_MCA>( ExtensibleChip * i_chip, MemRank i_rank );
 
 template<TYPE T>
 int32_t port( ExtensibleChip * i_chip )
@@ -593,6 +595,7 @@ int32_t port( ExtensibleChip * i_chip )
     return o_rc;
     #undef PRDF_FUNC
 }
+template int32_t port<TYPE_MCA>( ExtensibleChip * i_chip );
 
 template <TYPE T>
 int32_t dimmSlct( TargetHandle_t  i_dimm )

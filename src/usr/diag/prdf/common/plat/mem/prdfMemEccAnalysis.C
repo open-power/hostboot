@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,10 @@
 #include <prdfMemDqBitmap.H>
 #include <prdfP9McaDataBundle.H>
 #include <prdfP9McaExtraSig.H>
+
+#ifdef __HOSTBOOT_RUNTIME
+    #include <prdfMemDynDealloc.H>
+#endif
 
 using namespace TARGETING;
 
@@ -67,7 +71,6 @@ uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
     #ifdef __HOSTBOOT_RUNTIME
 
-    /* TODO RTC 136129
     // Dynamically deallocate the rank.
     o_rc = MemDealloc::rank<T>( i_chip, rank );
     if ( SUCCESS != o_rc )
@@ -75,7 +78,6 @@ uint32_t __handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         PRDF_ERR( PRDF_FUNC "MemDealloc::rank<T>(0x%08x,m%ds%d) failed",
                   i_chip->getHuid(), rank.getMaster(), rank.getSlave() );
     }
-    */
 
     #endif
 
@@ -200,7 +202,6 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
 
         #ifdef __HOSTBOOT_RUNTIME
 
-        /* TODO RTC 136129
         // Dynamically deallocate the port.
         o_rc = MemDealloc::port<TYPE_MCA>( i_chip );
         if ( SUCCESS != o_rc )
@@ -208,7 +209,6 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
             PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_MCA>(0x%08x) failed",
                       i_chip->getHuid() );
         }
-        */
 
         #endif
 
@@ -600,7 +600,6 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 
     #ifdef __HOSTBOOT_RUNTIME
 
-    /* TODO RTC 136129
     if ( i_isHard )
     {
         // Dynamically deallocate the page.
@@ -611,7 +610,6 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       i_chip->getHuid() );
         }
     }
-    */
 
     #endif
 
