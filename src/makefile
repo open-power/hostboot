@@ -239,7 +239,7 @@ TESTCASE_MODULES += testhwas
 TESTCASE_MODULES += testvpd
 TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testscom
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)
+#TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)  @fixme-RTC:180751
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 
 TESTCASE_MODULES += testintr
