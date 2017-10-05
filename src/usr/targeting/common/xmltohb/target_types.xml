@@ -907,6 +907,9 @@
   <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
   <attribute><id>MAX_DMI_PER_PROC</id></attribute>
   <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
+  <attribute><id>USE_TCES_FOR_DMAS</id></attribute>
+  <attribute><id>TCE_START_TOKEN_FOR_PAYLOAD</id></attribute>
+  <attribute><id>TCE_START_TOKEN_FOR_HDAT</id></attribute>
   <!--fsp requirement-->
   <attribute>
     <id>BOOT_FREQ_MHZ</id>

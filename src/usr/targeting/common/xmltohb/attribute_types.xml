@@ -7586,4 +7586,58 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
   </hwpfToHbAttrMap>
 </attribute>
 
+<attribute>
+  <id>USE_TCES_FOR_DMAS</id>
+  <description>
+<!-- @TODO RTC 168745 Remove This Attribute -->
+      Specifies whether or not the FSP is ready for Hostboot to enable TCEs
+      for DMAs for the given IPL.  This is a temporary attribute which will
+      be used to phase-in TCE support.
+      If 0, DO NOT use TCEs;
+      If 1, use TCEs
+  </description>
+  <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+  </simpleType>
+  <persistency>non-volatile</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>TCE_START_TOKEN_FOR_PAYLOAD</id>
+  <description>
+      Specifies which TCE Token the FSP should start with to transfer the
+      PAYLOAD into system memory.
+      If 0xFFFFFFFF, then invalid; otherwise, valid.
+  </description>
+  <simpleType>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+<attribute>
+  <id>TCE_START_TOKEN_FOR_HDAT</id>
+  <description>
+      Specifies which TCE Token the FSP should start with to transfer the
+      HDAT section into system memory.
+      If 0xFFFFFFFF, then invalid; otherwise, valid.
+  </description>
+  <simpleType>
+      <uint32_t>
+        <default>0xFFFFFFFF</default>
+      </uint32_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
 </attributes>

@@ -47,6 +47,7 @@
 #include <pnor/pnorif.H>
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
+#include <initservice/initserviceif.H>
 
 trace_desc_t* g_trac_tce = nullptr;
 TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
@@ -127,38 +128,12 @@ errlHndl_t getPayloadAddrAndSize(uint64_t& o_addr, size_t& o_size)
 {
     errlHndl_t errl = nullptr;
 
-    o_addr=0x0;
-    o_size=0x0;
-
-    do{
-
-    // Get Target Service and the system target to get ATTR_PAYLOAD_BASE
-    TARGETING::TargetService& tS = TARGETING::targetService();
-    TARGETING::Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "getPayloadAddrAndSize() system target is NULL");
-
-    o_addr = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>()
-             * MEGABYTE; // Attribute value in MB
-
-    assert((o_addr % PAGESIZE) == 0, "getPayloadAddrAndSize(): o_addr=0x%.16llX not on page boundary", o_addr);
-
-    // Get PAYLOAD PNOR section info from PNOR RP
-    PNOR::SectionInfo_t payloadInfo;
-    errl = getSectionInfo( PNOR::PAYLOAD, //pnorSectionId,
-                           payloadInfo );
-
-    if(errl)
-    {
-        TRACFCOMP( g_trac_tce, ERR_MRK"getPayloadAddrAndSize() Error calling getSectionInfo() rc=0x%.4X", errl->reasonCode() );
-        break;
-    }
-
-    o_size = TCE_PAYLOAD_SIZE;
-
-    } while(0);
+    // Move PAYLOAD to Preverification Location
+    o_addr = MCL_TMP_ADDR;
+    o_size = MCL_TMP_SIZE;
 
     TRACFCOMP( g_trac_tce,EXIT_MRK"getPayloadAddrAndSize(): o_addr=0x%.16llX, o_size=0x%.16llX", o_addr, o_size);
+
     return errl;
 }
 
@@ -180,12 +155,23 @@ errlHndl_t utilSetupPayloadTces(void)
         break;
     }
 
+    // @TODO RTC 168745 - Update Interface to Return Table Position/aka Token
+    uint32_t token = 0;
     errl = utilAllocateTces(addr, size);
     if (errl)
     {
         TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() using addr=0x%.16llX, size=0x%llX", addr, size);
         break;
     }
+
+    // Set attribute to tell FSP that Payload has been setup at the start of the TCE Table
+    // Get Target Service and the system target to set TCE_START_TOKEN_FOR_PAYLOAD
+    TARGETING::TargetService& tS = TARGETING::targetService();
+    TARGETING::Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys, "utilSetupPayloadTces() system target is NULL");
+
+    sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
 
     } while(0);
 
@@ -991,7 +977,7 @@ errlHndl_t UtilTceMgr::disableTces(void)
 
     // If the HW was initialized to use TCEs then disable those settings
     // it needs to be released here
-    if (iv_isTceHwInitDone)
+    if (iv_isTceHwInitDone==true)
     {
         // Loop through the processors and clear the TCE-related registers
         // in the PSI Host Bridge
@@ -1056,7 +1042,7 @@ errlHndl_t UtilTceMgr::disableTces(void)
     }
     else
     {
-        TRACUCOMP(g_trac_tce,"UtilTceMgr::disableTces: No Need To Uninitialize HW: iv_isTceHwInitDone=%d", iv_isTceHwInitDone);
+        TRACFCOMP(g_trac_tce,"UtilTceMgr::disableTces: No Need To Uninitialize HW: iv_isTceHwInitDone=%d", iv_isTceHwInitDone);
     }
 
     // Cleanup TCE Table In Memory
@@ -1213,6 +1199,7 @@ errlHndl_t UtilTceMgr::mapPsiHostBridge(const TARGETING::Target * i_tgt,
 
         errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
     }
+
     o_psihb_ptr = l_ptr;
 
     TRACUCOMP(g_trac_tce,EXIT_MRK"UtilTceMgr::mapPsiHostBridge: o_psihb_ptr=0x%.16llX, Psi Bridge Addr = 0x%.16llX, huid = 0x%.8X", o_psihb_ptr, PsiBridgeAddr, TARGETING::get_huid(i_tgt));
@@ -1270,6 +1257,57 @@ errlHndl_t UtilTceMgr::unmapPsiHostBridge(void *& io_psihb_ptr) const
     }
 
     return errl;
+}
+
+
+/******************************************************/
+/* Miscellaneous Functions                            */
+/******************************************************/
+bool utilUseTcesForDmas(void)
+{
+    bool retVal = false;
+
+    if (INITSERVICE::spBaseServicesEnabled())
+    {
+        // @TODO RTC 168745 - Eventually this will default to true in all cases
+        // where was have a FSP
+
+        // Get Target Service and the system target to get ATTR_USE_TCES_FOR_DMA
+        TARGETING::TargetService& tS = TARGETING::targetService();
+        TARGETING::Target* sys = nullptr;
+        (void) tS.getTopLevelTarget( sys );
+        assert(sys, "utilUseTcesForDmas() system target is NULL");
+
+        retVal = sys->getAttr<TARGETING::ATTR_USE_TCES_FOR_DMAS>();
+    }
+
+    TRACFCOMP(g_trac_tce,INFO_MRK"utilUseTcesForDmas: %s",
+              retVal ? "TRUE" : "FALSE");
+
+    return retVal;
+}
+
+errlHndl_t utilEnableTcesWithoutTceTable(void)
+{
+    errlHndl_t errl = nullptr;
+
+    // Create local UtilTceMgr with default TCE table address but with a size
+    // of zero so that all entries are invalid
+    // NOTE: memory at TCE Table Address is initialized to 0 as part of IPL and
+    //       all zero creates an invalid TCE entry
+    UtilTceMgr tceMgr(TCE_TABLE_ADDR, 0);
+
+    // Call initTceInHdw
+    errl = tceMgr.initTceInHdw();
+
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,"utilEnableTcesWithoutTceTable(): initTceInHdw() "
+                  "failed with rc=0x%X", ERRL_GETRC_SAFE(errl));
+    }
+
+    return errl;
+
 }
 
 }; // namespace TCE

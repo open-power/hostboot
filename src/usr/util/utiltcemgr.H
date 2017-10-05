@@ -148,15 +148,6 @@ class UtilTceMgr
 
 
     /**
-     * @brief Responsible for setting up the Processors to point to the TCE
-     *         Table
-     *
-     * @return errlHndl_t - Return error log if unsuccessful
-     *
-     */
-    errlHndl_t initTceInHdw();
-
-    /**
      * @brief Helper function to Memory Map PSI Host Bridge
      *
      * @param[in]  i_tgt       Pointer to Processor Target that is associated
@@ -274,6 +265,15 @@ class UtilTceMgr
      *
      */
     errlHndl_t disableTces(void);
+
+    /**
+     * @brief Responsible for setting up the Processors to point to the TCE
+     *         Table
+     *
+     * @return errlHndl_t - Return error log if unsuccessful
+     *
+     */
+    errlHndl_t initTceInHdw();
 
 }; // class UtilTceMgr
 

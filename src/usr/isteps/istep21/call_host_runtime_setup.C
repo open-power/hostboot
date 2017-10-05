@@ -70,6 +70,31 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     do
     {
+        // Close PAYLOAD TCEs
+        // @TODO RTC 168745 - also close HDAT TCEs
+        if (TCE::utilUseTcesForDmas())
+        {
+
+            l_err = TCE::utilClosePayloadTces();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed TCE::utilClosePayloadTces" );
+                // break from do loop if error occurred
+                break;
+            }
+
+            // Disable all TCEs
+            l_err = TCE::utilDisableTces();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed TCE::utilDisableTces" );
+                // break from do loop if error occurred
+                break;
+            }
+        }
+
         //Need to send System Configuration down to SBE
         //Use targeting code to get a list of all processors
         TARGETING::TargetHandleList l_procChips;
@@ -339,32 +364,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 #endif
-
-        // Close PAYLOAD TCEs
-/*      @TODO RTC 168745 - make this call when FSP is ready for TCE Support
- *                         and add check that we're on a FSP system
- *      NOTE:  move this call to the start of this function
- *      NOTE:  add check to do this only on FSP-based systems
- *        l_err = TCE::utilClosePayloadTces();
- *       if ( l_err )
- *       {
- *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
- *                      "Failed TCE::utilClosePayloadTces" );
- *           // break from do loop if error occured
- *           break;
- *       }
- *
- *
- *       // Disable all TCEs
- *       l_err = TCE::utilDisableTces();
- *       if ( l_err )
- *       {
- *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
- *                      "Failed TCE::utilDisableTces" );
- *           // break from do loop if error occured
- *           break;
- *       }
- */
 
     } while(0);
 

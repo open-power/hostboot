@@ -63,6 +63,9 @@
 #include <p9_chiplet_scominit.H>
 #include <p9_psi_scominit.H>
 
+// Util TCE Support
+#include <util/utiltce.H>
+
 namespace   ISTEP_10
 {
 
@@ -140,6 +143,30 @@ void*    call_proc_chiplet_scominit( void    *io_pArgs )
             errlCommit(l_err, HWPF_COMP_ID);
         }
     } // end of going through all processors
+
+    // Enable TCEs with an empty TCE Table, if necessary
+    // This will prevent the FSP from DMAing to system memory without
+    // hostboot's knowledge
+    if ( TCE::utilUseTcesForDmas() )
+    {
+        l_err = TCE::utilEnableTcesWithoutTceTable();
+
+        if (l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+             "call_proc_chiplet_scominit: utilEnableTcesWithoutTceTable "
+             "returned ERROR 0x%.4X",
+             l_err->reasonCode());
+
+            // Create IStep error log and cross ref to error that occurred
+            l_StepError.addErrorDetails( l_err );
+
+            // Commit the error log and move on
+            // Note: Error log should already be deleted and set to NULL
+            // after committing
+            errlCommit(l_err, HWPF_COMP_ID);
+        }
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                              "call_proc_chiplet_scominit exit" );
