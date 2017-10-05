@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@
   #include <errludstring.H>
 
   #ifdef __HOSTBOOT_RUNTIME
-//    #include <prdfCenMbaDynMemDealloc_rt.H> TODO: RTC 136129
+    #include <prdfMemDynDealloc.H>
   #else // Hostboot only
     #ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
       #include <prdfPnorFirDataReader.H>
@@ -69,7 +69,6 @@
   #include <evenmgt.H>
   #include <rmgrBaseClientLib.H>  //for rmgrSyncFile
   #include <prdfSdcFileControl.H>
-//  #include <prdfCenMbaDynMemDealloc_rt.H> TODO: RTC 136129
 #endif
 
 using namespace TARGETING;
@@ -867,14 +866,15 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 {
     #define PRDF_FUNC "[ErrDataService::deallocateDimms] "
 
-/* TODO: RTC 136129
-    #if !defined(__HOSTBOOT_MODULE) || defined(__HOSTBOOT_RUNTIME) // RT only
+    #if defined(__HOSTBOOT_RUNTIME) // RT only
 
     do
     {
         // First check if Dynamic Memory Deallocation is supported. Then check
         // if it is enabled for predictive callouts.
-        if ( !DEALLOC::isEnabled() || !isPredDynDeallocEnabled() ) break;
+        // For now, this is defaulted to enabled for Phyp systems.
+        // RTC 184585 will address whether we need to support disabling
+        if ( !MemDealloc::isEnabled() || !isHyprConfigPhyp() ) break;
 
         TargetHandleList dimmList;
         for ( SDC_MRU_LIST::const_iterator it = i_mruList.begin();
@@ -894,7 +894,8 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 
                 if ( (TYPE_MEMBUF == tgtType) ||
                      (TYPE_MBA    == tgtType) ||
-                     (TYPE_MCS    == tgtType) )
+                     (TYPE_MCS    == tgtType) ||
+                     (TYPE_MCA    == tgtType) )
                 {
                     TargetHandleList dimms = getConnected( calloutTgt,
                                                            TYPE_DIMM );
@@ -922,17 +923,16 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
 
         if( 0 == dimmList.size() ) break;
 
-        int32_t rc = DEALLOC::dimmListGard( dimmList );
+        int32_t rc = MemDealloc::dimmList( dimmList );
         if ( SUCCESS != rc )
         {
-            PRDF_ERR( PRDF_FUNC "dimmListGard failed" );
+            PRDF_ERR( PRDF_FUNC "dimmList failed" );
             break;
         }
 
     } while(0);
 
     #endif
-*/
 
     #undef PRDF_FUNC
 }
