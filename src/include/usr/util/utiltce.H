@@ -106,6 +106,28 @@ errlHndl_t utilSetupPayloadTces(void);
  */
 errlHndl_t utilClosePayloadTces(void);
 
+/******************************************************/
+/* Miscellaneous Functions                            */
+/******************************************************/
+
+/**
+ * @brief Indicates if TCEs should be used for DMA path on the system
+ *
+ * @return bool - TRUE if TCEs should be used; False, if not
+ *
+ */
+bool utilUseTcesForDmas(void);
+
+/**
+ * @brief Enables the System to use TCEs without setting up a TCE Table.
+ *        This prevents the FSP from using unsecure DMAs during the IPL until
+ *        Hostboot sets up the TCE Table with proper TCEs.
+ *
+ * @return errlHndl_t - Return Error Handle if failed
+ *
+ */
+errlHndl_t utilEnableTcesWithoutTceTable(void);
+
 };
 
 #endif

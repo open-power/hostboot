@@ -33,6 +33,7 @@
 #include <secureboot/trustedbootif.H>
 #include <runtime/preverifiedlidmgr.H>
 #include <limits.h>
+#include <util/utiltce.H>
 
 namespace MCL
 {
@@ -364,17 +365,27 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
 
     do {
 
-    // @TODO RTC:125304 Provide support for a preloaded PHYP
-    // Check if Component is POWERVM
+    // Check if Component is POWERVM (aka PHYP)
     bool isPhypComp = (i_compId == g_PowervmCompId) ? true : false;
-    // Still skip PHYP if (!isTCEmode)
-    if (isPhypComp)
+
+    // @TODO RTC:125304 Provide support for a preloaded PHYP
+    // Check if Component is POWERVM (PHYP) and still skip if (!isTCEmode)
+    if ( isPhypComp )
     {
-        // Skip Lid loading if PHYP component and in TCEmode
-        l_skipLoad = true;
-        // Only Skip PHYP if not in TCEmode
-        UTIL_FT("MasterContainerLidMgr::processComponent skipping POWERVM compoenent");
-        break;
+        if (TCE::utilUseTcesForDmas())
+        {
+            // Skip loading, but still process POWERVM (PHYP) component
+            l_skipLoad = true;
+            UTIL_FT("MasterContainerLidMgr::processComponent skip load but processing POWERVM component");
+        }
+        else
+        {
+            // Skip Lid loading and processing of POWERVM (PHYP) component
+            // if NOT in TCEmode
+            l_skipLoad = true;
+            UTIL_FT("MasterContainerLidMgr::processComponent skipping POWERVM component completely");
+            break;  // break from do-while to skip processing
+        }
     }
 
     // Only process compoenents if they are marked PRE_VERIFY

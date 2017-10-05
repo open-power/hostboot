@@ -86,20 +86,19 @@ void* call_host_ipl_complete (void *io_pArgs)
         }
 
 
-
         // Setup the TCEs needed for the FSP to DMA the PAYLOAD
-/*      @TODO RTC 168745 - make this call when FSP is ready for TCE Support
- *                         and add check that we're on a FSP system
- *      NOTE:  add check to do this only on FSP-based systems
- *        l_err = TCE::utilSetupPayloadTces();
- *
- *       if( l_err )
- *       {
- *           TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
- *                      ERR_MRK"TCE::utilSetupPayloadTces failed");
- *           break;
- *       }
- */
+        if (TCE::utilUseTcesForDmas())
+        {
+            l_err = TCE::utilSetupPayloadTces();
+
+            if( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"TCE::utilSetupPayloadTces failed");
+                // Don't continue with the rest of this istep
+                break;
+            }
+        }
 
         // Initialize the RUNTIME DATA attributes
         // that HDAT needs to allocate memory for us.
