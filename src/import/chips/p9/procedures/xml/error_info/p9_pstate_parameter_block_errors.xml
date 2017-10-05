@@ -346,6 +346,20 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_POUND_W_VERY_INVALID_VDM_DATA</rc>
+    <description>For VDM enablement, the Turbo Large Turbo threshold in #W is
+    found to less than -32mV which is an indicator of bad (or old) VPD.  VDMs
+    are being disabled but otherwise pressing on.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>TURBO_LARGE_THRESHOLD</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_PSTATE_PB_POUND_W_ACCESS_FAIL</rc>
