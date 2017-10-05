@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,13 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.31 2015/09/16 15:27:04 sglancy Exp $
+// $Id: mss_freq.C,v 1.32 2017/10/02 15:07:18 lwmulkey Exp $
 /* File mss_freq.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
 // *! (C) Copyright International Business Machines Corp. 2007
 // *! All Rights Reserved -- Property of IBM
-// *! ***  ***
 //------------------------------------------------------------------------------
 // *! TITLE : mss_freq.C
 // *! DESCRIPTION : Tools for centaur procedures
@@ -73,6 +72,7 @@
 //  1.29   | jdsloat  | 12/10/14 | Fixed 1333 speed limitation for config/ Habenero
 //  1.30   | jdsloat  | 01/29/14 | Fixed 1600 speed limitation for DDR4
 //  1.31   | sglancy  | 09/16/15 | Changed DMI capable values to allow for 8.0GBits/s or 9.6GBits/s if not specifically needing 8.0GBits/s
+//  1.32   | lwmulkey | 10/02/17 | Limit 1600 parts to CL = 13 for 2666 TSV dimms
 
 // Add continues to logerrors to lines 650, 560.  IN order to avoid possible future problems.
 //
@@ -819,6 +819,12 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
                 FAPI_INF( "After rounding up ... CL: %d", l_cas_latency);
             }
 
+            //Setting Max CL = 13 for 1600 DDR4 TSV
+            if (l_freq_override == 1600 && l_cas_latency > 13)
+            {
+                FAPI_INF( "Setting CL to 13 from %d", l_cas_latency);
+                l_cas_latency = 13;
+            }
             l_cl_mult_tck = l_cas_latency * l_spd_min_tck_max;
 
             // If the CL proposed is not supported or the TAA exceeds TAA max

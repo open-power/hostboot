@@ -22,7 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_eff_config.C,v 1.72 2017/09/14 18:06:36 lwmulkey Exp $
+// $Id: mss_eff_config.C,v 1.73 2017/09/22 20:47:39 lwmulkey Exp $
+// $Source: /afs/awd/projects/eclipz/KnowledgeBase/.cvsroot/eclipz/chips/
+//          centaur/working/procedures/ipl/fapi/mss_eff_config.C,v $
+//------------------------------------------------------------------------------
+// *! (C) Copyright International Business Machines Corp. 2011
+// *! All Rights Reserved -- Property of IBM
 //------------------------------------------------------------------------------
 // *! TITLE       : mss_eff_config
 // *! DESCRIPTION : see additional comments below
@@ -40,6 +45,7 @@
 //------------------------------------------------------------------------------
 // Version:|  Author: |  Date:  | Comment:
 //---------|----------|---------|-----------------------------------------------
+//   1.73  | lwmulkey |21-SEP-17| Fix IBM_TYPE bug
 //   1.72  | lwmulkey |13-SEP-17| Compile bug fix
 //   1.71  | lwmulkey |13-SEP-17| Enable TSV RDIMMs -- Fix mirroring conditional, hardcode certain timers
 //   1.70  | asaetow  |01-APR-16| Fixed DDR4 tCCD_L = 5ck @1600Mbps and ignore SPD completely per Warren Maule.
@@ -2642,8 +2648,11 @@ FAPI_DBG("DDR4 Check:  SPD=0x%x, p_i_tFAWmin (nCK) = %i",
                } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 2) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1B;
                } else if ((p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4)
-                          && (p_o_atts->eff_stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)) {
+                          && (p_o_atts->eff_stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)
+                          && (p_i_data->dram_device_type[0][0] == fapi::ENUM_ATTR_SPD_DRAM_DEVICE_TYPE_DDR4)) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_3A;
+               } else if (p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 4) {
+                  p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_1D; 
                } else if ((p_o_atts->eff_num_ranks_per_dimm[l_cur_mba_port][l_cur_mba_dimm] == 8)
                           && (p_o_atts->eff_stack_type[0][0] == fapi::ENUM_ATTR_EFF_STACK_TYPE_STACK_3DS)) {
                   p_o_atts->eff_ibm_type[l_cur_mba_port][l_cur_mba_dimm] = fapi::ENUM_ATTR_EFF_IBM_TYPE_TYPE_3B;
