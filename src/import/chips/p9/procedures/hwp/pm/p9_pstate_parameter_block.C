@@ -53,23 +53,29 @@
 //the value in this table are in Index format
 uint8_t g_GreyCodeIndexMapping [] =
 {
-/*    0x00*/ 0,
-/*    0x01*/ 1,
-/*    0x02*/ 3,
-/*    0x03*/ 2,
-/*    0x04*/ 7,
-/*    0x05*/ 6,
-/*    0x06*/ 4,
-/*    0x07*/ 5,
-/*    0x08*/ 12,
-/*    0x09*/ 12,
-/*    0x0a*/ 12,
-/*    0x0b*/ 12,
-/*    0x0c*/ 8,
-/*    0x0d*/ 9,
-/*    0x0e*/ 11,
-/*    0x0f*/ 10
+/*   0mV  0x00*/ 0,
+/* - 8mV  0x01*/ 1,
+/* -24mV  0x02*/ 3,
+/* -16mV  0x03*/ 2,
+/* -56mV  0x04*/ 7,
+/* -48mV  0x05*/ 6,
+/* -32mV  0x06*/ 4,
+/* -40mV  0x07*/ 5,
+/* -96mV  0x08*/ 12,
+/* -96mV  0x09*/ 12,
+/* -96mV  0x0a*/ 12,
+/* -96mV  0x0b*/ 12,
+/* -64mV  0x0c*/ 8,
+/* -72mV  0x0d*/ 9,
+/* -88mV  0x0e*/ 11,
+/* -80mV  0x0f*/ 10
 };
+
+// from above mapping
+const uint8_t GREYCODE_INDEX_M32MV = 4;
+
+// #W version number where no special checks are needed.
+const uint32_t FULLY_VALID_POUNDW_VERSION = 3;
 
 fapi2::vdmData_t g_vpdData = {1,
                               2,
@@ -1932,7 +1938,7 @@ proc_get_vdm_parms (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     }
     else
     {
-        FAPI_DBG("   VDM is diabled.  Skipping VDM attribute accesses");
+        FAPI_DBG("   VDM is disabled.  Skipping VDM attribute accesses");
     }
 
 fapi_try_exit:
@@ -2087,7 +2093,7 @@ proc_get_ivrm_parms ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
     }
     else
     {
-        FAPI_DBG("   IVRM is diabled.  Skipping IVRM attribute accesses");
+        FAPI_DBG("   IVRM is disabled.  Skipping IVRM attribute accesses");
         o_state->iv_ivrm_enabled = false;
     }
 
@@ -3314,6 +3320,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
     fapi2::vdmData_t l_vdmBuf;
     uint8_t    j                = 0;
     uint8_t    bucket_id        = 0;
+    uint8_t    version_id       = 0;
     const uint16_t VDM_VOLTAGE_IN_MV = 512;
     const uint16_t VDM_GRANULARITY = 4;
 
@@ -3361,8 +3368,9 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             FAPI_TRY(p9_pm_get_poundw_bucket(l_eqChiplets[j], l_vdmBuf));
 
             bucket_id = l_vdmBuf.bucketId;
+            version_id = l_vdmBuf.version;
 
-            FAPI_INF("#W chiplet = %u bucket id = %u", l_chipNum, bucket_id);
+            FAPI_INF("#W chiplet = %u bucket id = %u", l_chipNum, bucket_id, version_id);
 
             //if we match with the bucket id, then we don't need to continue
             if (i_poundv_bucketId == bucket_id)
@@ -3407,6 +3415,45 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         memcpy (&(o_data->poundw[VPD_PV_POWERSAVE]),
                 &l_tmp_data,
                 sizeof(poundw_entry_t));
+
+        // If the #W version is less than 3, validate Turbo VDM large threshold
+        // not larger than -32mV. This filters out parts that have bad VPD.  If
+        // this check fails, log a recovered error, mark the VDMs disabled and
+        // break out of the reset of the checks.
+        uint32_t turbo_vdm_large_threshhold =
+            (o_data->poundw[TURBO].vdm_large_extreme_thresholds >> 4) & 0x0F;
+        FAPI_DBG("o_data->poundw[TURBO].vdm_large_thresholds 0x%X; grey code index %d; max grey code index %d",
+            turbo_vdm_large_threshhold,
+            g_GreyCodeIndexMapping[turbo_vdm_large_threshhold],
+            GREYCODE_INDEX_M32MV);
+
+        if (version_id < FULLY_VALID_POUNDW_VERSION &&
+            g_GreyCodeIndexMapping[turbo_vdm_large_threshhold] > GREYCODE_INDEX_M32MV)
+        {
+            o_state->iv_vdm_enabled = false;
+
+            fapi2::ATTR_CHIP_EC_FEATURE_VDM_POUNDW_SUPPRESS_ERROR_Type l_suppress_pdw_error;
+            FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_VDM_POUNDW_SUPPRESS_ERROR,
+                          i_target,
+                          l_suppress_pdw_error);
+
+            if (l_suppress_pdw_error)
+            {
+                FAPI_INF("VDM #W ERROR: Turbo Large Threshold less than -32mV. Indicates bad VPD so VDMs being disabled and pressing on");
+            }
+            else
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                   fapi2::PSTATE_PB_POUND_W_VERY_INVALID_VDM_DATA(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                   .set_CHIP_TARGET(i_target)
+                   .set_TURBO_LARGE_THRESHOLD(o_data->poundw[TURBO].vdm_large_extreme_thresholds),
+                   "VDM #W ERROR: Turbo Large Threshold less than -32mV. Indicates bad VPD so VDMs being disabled and pressing on");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            break;
+
+        }
 
         // Validate the WOF content is non-zero if WOF is enabled
         if (is_wof_enabled(i_target,o_state))
@@ -3475,6 +3522,7 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
         FAPI_INF("TURBO.vdm_vid_compare_ivid %d",o_data->poundw[TURBO].vdm_vid_compare_ivid);
         FAPI_INF("ULTRA_TURBO.vdm_vid_compare_ivid %d",o_data->poundw[ULTRA].vdm_vid_compare_ivid);
+
         //Validation of VPD Data
         //
         //If all VID compares are zero then use #V VDD voltage to populate local
@@ -3546,10 +3594,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
 
         for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
         {
-            FAPI_INF("o_data->poundw[%d].vdm_overvolt_thresholds %d",p,(o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_small_thresholds %d",p,(o_data->poundw[p].vdm_overvolt_small_thresholds ) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_large_thresholds %d",p,(o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_extreme_thresholds %d",p,(o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_overvolt_thresholds 0x%X",p,(o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_small_thresholds 0x%X",p,(o_data->poundw[p].vdm_overvolt_small_thresholds ) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_large_thresholds 0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_extreme_thresholds 0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F);
             VALIDATE_THRESHOLD_VALUES(((o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F), // overvolt
                                       ((o_data->poundw[p].vdm_overvolt_small_thresholds) & 0x0F), //small
                                       ((o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F), //large
