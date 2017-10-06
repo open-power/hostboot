@@ -2924,7 +2924,17 @@ fapi2::ReturnCode p9_mss_eff_grouping(
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_6)
     {
-        grouping_group6PortsPerGroup(l_memInfo, l_groupData);
+        // HW423110 - If mirror (i.e. Cumulus and mirror is enabled)
+        // then do not allow Group of 6
+        if ( (l_memInfo.iv_nimbusProc == false) &&
+             (l_sysAttrs.iv_hwMirrorEnabled) )
+        {
+            FAPI_INF("Group of 6 is not allowed on Cumulus with Mirror enabled");
+        }
+        else
+        {
+            grouping_group6PortsPerGroup(l_memInfo, l_groupData);
+        }
     }
 
     if (l_sysAttrs.iv_groupsAllowed & GROUP_4)
