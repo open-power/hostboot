@@ -937,6 +937,7 @@ sub setCommonAttrForChiplet
 
     #This is a static variable. Persists over time
     #everything that is a grand_children of proc
+
     state %grand_children;
     if (not %grand_children)
     {
@@ -944,6 +945,9 @@ sub setCommonAttrForChiplet
         $grand_children{"CORE"}  = 1;
         $grand_children{"MCS"}   = 1;
         $grand_children{"MCA"}   = 1;
+        $grand_children{"MC"}    = 1;
+        $grand_children{"MI"}    = 1;
+        $grand_children{"DMI"}   = 1;
     }
 
     my $pos             = $self->getAttribute($target, "CHIP_UNIT");
