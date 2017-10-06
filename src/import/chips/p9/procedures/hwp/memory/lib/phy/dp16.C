@@ -2467,10 +2467,16 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
 {
     // traits definition
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
+    uint8_t l_sim = 0;
 
     fapi2::buffer<uint64_t> l_data;
     uint64_t l_freq = 0;
+
     blue_waterfall_range l_value = blue_waterfall_range::ONE_TO_FOUR;
+
+    const auto l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
+
+    FAPI_TRY( mss::is_simulation( l_sim) );
 
     if (mss::chip_ec_nimbus_lt_2_0(i_target))
     {
@@ -2480,7 +2486,6 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     }
 
     // Get the frequency attribute
-    const auto l_mcbist = mss::find_target<TARGET_TYPE_MCBIST>(i_target);
     FAPI_TRY(mss::freq(l_mcbist, l_freq));
 
     // Set the blue waterfall range according to the frequency value as follows:
@@ -2489,6 +2494,10 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     l_value = ((l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2666) || (l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2400)) ?
               blue_waterfall_range::TWO_TO_FIVE :
               blue_waterfall_range::ONE_TO_FOUR;
+
+    //From John Bialas : the value is good for hardware, but not so much in sim, in sim they should be 0s - bgass - 10/6/2017
+    l_value = (l_sim == 1) ? blue_waterfall_range::ZERO_TO_THREE : l_value;
+
     FAPI_INF("%s Initializing RDCLK extended range to 0x%01x", c_str(i_target), l_value);
 
     // Loops through all DP's and sets the register values
