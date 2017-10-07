@@ -106,32 +106,72 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             }
             else if (((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO < literal_1167)))
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
             }
             else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1200))
                       && (l_def_MN_FREQ_RATIO < literal_1273)))
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
             }
             else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1167))
                       && (l_def_MN_FREQ_RATIO < literal_1200)))
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
             }
             else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1273))
                       && (l_def_MN_FREQ_RATIO < literal_1400)))
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
             }
             else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1400))
                       && (l_def_MN_FREQ_RATIO < literal_1500)))
             {
-                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF = 0x0;
-                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_OFF );
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_ASYNC_MODE_ON );
+            }
+
+            if (((l_TGT2_ATTR_MC_SYNC_MODE == literal_1) && (l_TGT2_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC == literal_0)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
+            }
+            else if (((l_TGT2_ATTR_MC_SYNC_MODE == literal_1) && (l_TGT2_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC == literal_1)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_ON = 0x1;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_ON );
+            }
+            else if (((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO < literal_1167)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
+            }
+            else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1200))
+                      && (l_def_MN_FREQ_RATIO < literal_1273)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
+            }
+            else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1167))
+                      && (l_def_MN_FREQ_RATIO < literal_1200)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
+            }
+            else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1273))
+                      && (l_def_MN_FREQ_RATIO < literal_1400)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
+            }
+            else if ((((l_TGT2_ATTR_MC_SYNC_MODE == literal_0) && (l_def_MN_FREQ_RATIO >= literal_1400))
+                      && (l_def_MN_FREQ_RATIO < literal_1500)))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF = 0x0;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE0_SYNC_MODE_OFF );
             }
 
             constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE0_DISABLE_MC_SYNC_ON = 0x1;
