@@ -133,13 +133,22 @@ open (FH, "<$tgt_files[0]"); #To read out each line
 my $check = 0;
 my $id = "";
 my $endOfLine = 0;
+my $attrId = 0;
 while (my $line = <FH>)
 {
     if ( $line =~ /^\s*<targetType>.*/)
     {
         $check = 1;
     }
-    elsif ($check == 1 && $line =~ /^\s*<id>/)
+    elsif ($line =~ /^\s*<attribute>.*/)
+    {
+        $attrId = 1;
+    }
+    elsif ($line =~ /^\s*<\/attribute>.*/)
+    {
+        $attrId = 0;
+    }
+    elsif ($check == 1 &&  $attrId == 0 && $line =~ /^\s*<id>/)
     {
         $check = 0;
         $id = $line;
