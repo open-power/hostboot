@@ -115,7 +115,7 @@ foreach my $file (@memd_files)
     }
 
     # Removing the first byte of the MEMD binary
-    my $new_file = "edited_memd.dat";
+    my $new_file = "$memd_dir/edited_memd.dat";
     run_command("tail -c +2 $file > $new_file");
     run_command("mv $new_file $file");
 
