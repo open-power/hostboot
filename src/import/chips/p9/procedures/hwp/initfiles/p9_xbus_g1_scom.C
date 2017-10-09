@@ -2966,13 +2966,13 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
 
             if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297 == literal_0))
             {
-                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_ON = 0x1;
-                l_scom_buffer.insert<48, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_ON );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_1_ON = 0x1;
+                l_scom_buffer.insert<49, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_1_ON );
             }
             else if (( true ))
             {
-                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_OFF = 0x0;
-                l_scom_buffer.insert<48, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_0_OFF );
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_1_OFF = 0x0;
+                l_scom_buffer.insert<49, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PG_SPARE_MODE_1_OFF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008002006010c3full, l_scom_buffer));
