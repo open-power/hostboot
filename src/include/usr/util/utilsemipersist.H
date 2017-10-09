@@ -51,12 +51,14 @@ namespace Util
     enum
     {
         PERSIST_MAGIC           =       0x48425f56, // HB_V
+        MFG_TERM_REBOOT_ENABLE  =       0x4d464754, // MFGT
     };
 
     struct semiPersistData_t
     {
-        uint32_t magic;         //HB_V
-        uint32_t reboot_cnt;    // Number of reboots with valid data
+        uint32_t magic;              //HB_V
+        uint32_t reboot_cnt;         // Number of reboots with valid data
+        uint32_t mfg_term_reboot;    // Manufacturing Terminate set for reboot
         semiPersistData_t(): magic(0), reboot_cnt(0) {};
     } PACKED;
 

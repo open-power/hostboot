@@ -623,6 +623,88 @@ namespace SENSOR
     }
 
     //
+    // RebootControlSensor constructor - uses system target
+    //
+    RebootControlSensor::RebootControlSensor()
+        :SensorBase(TARGETING::SENSOR_NAME_HOST_AUTO_REBOOT_CONTROL, NULL)
+    {
+        // message buffer created and initialized in base object.
+
+    }
+
+    //
+    // RebootCountSensor destructor
+    //
+    RebootControlSensor::~RebootControlSensor(){};
+
+    //
+    // setRebootControl - turn reboots on or off to the BMC
+    //
+    errlHndl_t RebootControlSensor::setRebootControl(
+                                                autoRebootSetting i_setting )
+    {
+        // adjust the operation to overwrite the sensor reading
+        // to the value we send.
+        iv_msg->iv_operation = SET_SENSOR_VALUE_OPERATION;
+
+        // the Reboot Control Sensor is defined as a discrete sensor
+        // but the assertion bytes are being used to transfer the state
+        iv_msg->iv_assertion_mask = le16toh(i_setting);
+
+        TRACFCOMP(g_trac_ipmi,"RebootControlSensor::setRebootControl(%d)",
+                    i_setting);
+
+        return writeSensorData();
+    }
+
+    //
+    // getRebootCount - get the reboot setting from the BMC
+    //
+    errlHndl_t RebootControlSensor::getRebootControl(
+                                                autoRebootSetting &o_setting )
+    {
+        // the Reboot control sensor is defined as a discrete sensor
+        // DISABLE_REBOOT - keep current state (no reboot)
+        // ENABLE_REBOOT  - Allow analysis of FIRDATA on XSTOP
+        getSensorReadingData l_data;
+
+        errlHndl_t l_err = readSensorData( l_data );
+
+        if( l_err == NULL )
+        {
+            // this value is already byteswapped
+            if (l_data.event_status <= ENABLE_REBOOTS)
+            {
+                o_setting = static_cast<autoRebootSetting>(l_data.event_status);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_ipmi,"Unknown reboot control setting: %d",
+                    l_data.event_status);
+
+                /*@
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     IPMI::MOD_IPMISENSOR_REBOOTCNTRL
+                 * @reasoncode   IPMI::RC_INVALID_SENSOR_SETTING
+                 * @userdata1    Invalid reboot control setting
+                 * @userdata2    <unused>
+                 * @devdesc      The sensor returned an invalid setting
+                 * @custdesc     Unable to find a valid sensor setting.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            IPMI::MOD_IPMISENSOR_REBOOTCNTRL,
+                                            IPMI::RC_INVALID_SENSOR_SETTING,
+                                            l_data.event_status,
+                                            0,
+                                            false);
+            }
+        }
+        return l_err;
+    }
+
+
+    //
     // StatusSensor constructor - uses system DIMM/CORE/PROC target
     //
     StatusSensor::StatusSensor( TARGETING::ConstTargetHandle_t i_target )

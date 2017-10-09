@@ -485,6 +485,10 @@
         <value>0x07D0</value>
     </enumerator>
     <enumerator>
+        <name>HOST_AUTO_REBOOT_CONTROL</name>
+        <value>0x0921</value>
+    </enumerator>
+    <enumerator>
         <name>DIMM_STATE</name>
         <value>0x0C20</value>
     </enumerator>
@@ -574,6 +578,7 @@
         <value>0xCC03</value>
     </enumerator>
 </enumerationType>
+
 <attribute>
     <id>SBE_FFDC_ADDR</id>
     <description>
