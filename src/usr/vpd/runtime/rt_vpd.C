@@ -34,6 +34,8 @@
 #include <targeting/common/util.H>
 #include <util/runtime/util_rt.H>
 #include <runtime/interface.h>
+#include <initservice/initserviceif.H>
+
 #include "vpd.H"
 #include "mvpd.H"
 #include "cvpd.H"
@@ -407,6 +409,14 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     do
     {
+        if(!INITSERVICE::spBaseServicesEnabled())
+        {
+            // No SP Base Services available at runtime then simply return
+            TRACFCOMP( g_trac_vpd, ERR_MRK
+                       "No SP Base Services available at runtime.")
+            break;
+        }
+
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
         {
