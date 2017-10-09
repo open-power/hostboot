@@ -159,6 +159,7 @@ sub loadXML
     $self->storeEnumerations();
     $self->storeGroups();
     $self->buildHierarchy();
+    $self->prune();
     $self->buildAffinity();
     $self->{report_filename}=$filename.".rpt";
     $self->{report_filename}=~s/\.xml//g;
@@ -495,12 +496,20 @@ sub buildHierarchy
 
             my $dest_target = $key . "/" . $b->{dest_path} . $b->{dest_target};
             my $bus_type    = $b->{bus_type};
+
             push(
                 @{
                     $self->{data}->{TARGETS}->{$source_target}->{CONNECTION}
                       ->{DEST}
                   },
                 $dest_target
+            );
+            push(
+                @{
+                    $self->{data}->{TARGETS}->{$dest_target}->{CONNECTION}
+                      ->{SOURCE}
+                  },
+                $source_target
             );
             push(
                 @{
@@ -533,6 +542,31 @@ sub buildHierarchy
     }
     $self->{data}->{INSTANCE_PATH} = $old_path;
 
+}
+
+##########################################################
+## prunes targets that do not have a valid XML data attached to them.
+## Extraneous targets may get added during building heirarchy if the
+## source/destination targets in the bus are not valid target instances.
+
+sub prune
+{
+    my $self = shift;
+
+    # TODO RTC 181162: This is just a temporary solution/workaround to the wrong
+    # APSS location in witherspoon XML. Need to take a call on either making
+    # this an error or get rid of this function altogether when we have fixed
+    # the witherspoon XML.
+    foreach my $target (sort keys %{ $self->{data}->{TARGETS} })
+    {
+        if(not defined $self->{data}->{TARGETS}->{$target}->{TARGET})
+        {
+            printf("WARNING: Target instance for %s not found, deleting. ",
+                    $target);
+            printf("This probably indicates a bug in the source XML\n");
+            delete $self->{data}->{TARGETS}->{$target};
+        }
+    }
 }
 
 ##########################################################
@@ -1534,6 +1568,20 @@ sub getNumConnections
     return scalar(@{ $target_ptr->{CONNECTION}->{DEST} });
 }
 
+## returns the number of connections associated with target where the target is
+## the destination
+sub getNumDestConnections
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $target_ptr = $self->getTarget($target);
+    if (!defined($target_ptr->{CONNECTION}->{SOURCE}))
+    {
+        return 0;
+    }
+    return scalar(@{ $target_ptr->{CONNECTION}->{SOURCE} });
+}
+
 ## returns destination target name of first connection
 ## useful for point to point busses with only 1 endpoint
 sub getFirstConnectionDestination
@@ -1560,6 +1608,16 @@ sub getConnectionDestination
     my $i          = shift;
     my $target_ptr = $self->getTarget($target);
     return $target_ptr->{CONNECTION}->{DEST}->[$i];
+}
+
+## returns target name of $i source connection
+sub getConnectionSource
+{
+    my $self       = shift;
+    my $target     = shift;
+    my $i          = shift;
+    my $target_ptr = $self->getTarget($target);
+    return $target_ptr->{CONNECTION}->{SOURCE}->[$i];
 }
 
 sub getConnectionBus
@@ -1602,12 +1660,41 @@ sub findFirstEndpoint
     }
     return "";
 }
+
+# Find connections _from_ $target (and it's children)
 sub findConnections
 {
     my $self     = shift;
     my $target   = shift;
     my $bus_type = shift;
     my $end_type = shift;
+
+    return $self->findConnectionsByDirection($target, $bus_type,
+                                             $end_type, 0);
+}
+
+# Find connections _to_ $target (and it's children)
+sub findDestConnections
+{
+    my $self     = shift;
+    my $target   = shift;
+    my $bus_type = shift;
+    my $source_type = shift;
+
+    return $self->findConnectionsByDirection($target, $bus_type,
+                                             $source_type, 1);
+
+}
+
+# Find connections from/to $target (and it's children)
+# $to_this_target indicates the direction to find.
+sub findConnectionsByDirection
+{
+    my $self     = shift;
+    my $target   = shift;
+    my $bus_type = shift;
+    my $other_end_type = shift;
+    my $to_this_target = shift;
 
     my %connections;
     my $num=0;
@@ -1619,16 +1706,39 @@ sub findConnections
 
     foreach my $child ($self->getAllTargetChildren($target))
     {
-        my $child_bus_type = $self->getBusType($child);
+        my $child_bus_type = "";
+        if (!$self->isBadAttribute($child, "BUS_TYPE"))
+        {
+            $child_bus_type = $self->getBusType($child);
+        }
+
         if ($child_bus_type eq $bus_type)
         {
-            for (my $i = 0; $i < $self->getNumConnections($child); $i++)
+            my $numOfConnections = 0;
+            if($to_this_target)
             {
-                my $dest_target = $self->getConnectionDestination($child, $i);
-                my $dest_parent = $self->getTargetParent($dest_target);
-                my $type        = $self->getMrwType($dest_parent);
-                my $dest_type   = $self->getType($dest_parent);
-                my $dest_class  = $self->getAttribute($dest_parent,"CLASS");
+                $numOfConnections = $self->getNumDestConnections($child);
+            }
+            else
+            {
+                $numOfConnections = $self->getNumConnections($child);
+            }
+            for (my $i = 0; $i < $numOfConnections; $i++)
+            {
+                my $other_end_target = undef;
+                if($to_this_target)
+                {
+                    $other_end_target = $self->getConnectionSource($child, $i);
+                }
+                else
+                {
+                    $other_end_target = $self->getConnectionDestination($child,
+                                                                        $i);
+                }
+                my $other_end_parent = $self->getTargetParent($other_end_target);
+                my $type        = $self->getMrwType($other_end_parent);
+                my $dest_type   = $self->getType($other_end_parent);
+                my $dest_class  = $self->getAttribute($other_end_parent,"CLASS");
                 if ($type eq "NA")
                 {
                     $type = $dest_type;
@@ -1637,34 +1747,45 @@ sub findConnections
                     $type = $dest_class;
                 }
 
-                if ($end_type ne "") {
-                    #Look for an end_type match on any ancestor, as
+                if ($other_end_type ne "") {
+                    #Look for an other_end_type match on any ancestor, as
                     #connections may have a destination unit with a hierarchy
                     #like unit->pingroup->muxgroup->chip where the chip has
                     #the interesting type.
-                    while ($type ne $end_type) {
+                    while ($type ne $other_end_type) {
 
-                        $dest_parent = $self->getTargetParent($dest_parent);
-                        if ($dest_parent eq "") {
+                        $other_end_parent = $self->getTargetParent($other_end_parent);
+                        if ($other_end_parent eq "") {
                             last;
                         }
 
-                        $type = $self->getMrwType($dest_parent);
+                        $type = $self->getMrwType($other_end_parent);
                         if ($type eq "NA") {
-                            $type = $self->getType($dest_parent);
+                            $type = $self->getType($other_end_parent);
                         }
                         if ($type eq "NA") {
-                            $type = $self->getAttribute($dest_parent, "CLASS");
+                            $type = $self->getAttribute($other_end_parent, "CLASS");
                         }
                     }
                 }
 
-                if ($type eq $end_type || $end_type eq "")
+                if ($type eq $other_end_type || $other_end_type eq "")
                 {
-                    $connections{CONN}[$num]{SOURCE}=$child;
-                    $connections{CONN}[$num]{SOURCE_PARENT}=$target;
-                    $connections{CONN}[$num]{DEST}=$dest_target;
-                    $connections{CONN}[$num]{DEST_PARENT}=$dest_parent;
+                    if($to_this_target)
+                    {
+                        $connections{CONN}[$num]{SOURCE}=$other_end_target;
+                        $connections{CONN}[$num]{SOURCE_PARENT}=
+                                                $other_end_parent;
+                        $connections{CONN}[$num]{DEST}=$child;
+                        $connections{CONN}[$num]{DEST_PARENT}=$target;
+                    }
+                    else
+                    {
+                        $connections{CONN}[$num]{SOURCE}=$child;
+                        $connections{CONN}[$num]{SOURCE_PARENT}=$target;
+                        $connections{CONN}[$num]{DEST}=$other_end_target;
+                        $connections{CONN}[$num]{DEST_PARENT}=$other_end_parent;
+                    }
                     $connections{CONN}[$num]{BUS_NUM}=$i;
                     $num++;
                 }
@@ -1674,7 +1795,6 @@ sub findConnections
     if ($num==0) { return ""; }
     return \%connections;
 }
-
 
 ## returns BUS_TYPE attribute of target
 sub getBusType
@@ -1800,7 +1920,6 @@ sub getAttribute
     {
         printf("ERROR: getAttribute(%s,%s) | Attribute not defined\n",
             $target, $attribute);
-
         $self->myExit(4);
     }
     if (ref($target_ptr->{ATTRIBUTES}->{$attribute}->{default}) eq "HASH")
