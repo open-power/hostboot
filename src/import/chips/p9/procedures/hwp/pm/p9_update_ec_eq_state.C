@@ -280,7 +280,7 @@ static fapi2::ReturnCode update_ec_config(
 
     // Write the recalculated OCC Core Configuration Status Register
     FAPI_INF("  Writing OCC CCSR");
-    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_CCSR_SCOM2, l_core_config),
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_CCSR_SCOM, l_core_config),
              "Error writing to CCSR");
 
 
