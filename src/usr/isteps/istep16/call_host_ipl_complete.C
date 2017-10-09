@@ -70,8 +70,11 @@ void* call_host_ipl_complete (void *io_pArgs)
         //No more reconfig loops are supported from this point
         //forward.  Clean up the semi persistent area
         //   1) clear magic number (so next boot thinks it is cold)
+        //      a) DON'T clear mfg term setting (so read-modify)
         //   2) clear any reconfig specific gard records
         Util::semiPersistData_t l_semiData;  //inits to 0s
+        Util::readSemiPersistData(l_semiData);
+        l_semiData.magic = 0x0;
         Util::writeSemiPersistData(l_semiData);
 
         l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);

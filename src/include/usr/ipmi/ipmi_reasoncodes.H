@@ -42,6 +42,7 @@ namespace IPMI
         MOD_IPMISENSOR_TYPE         = 0x08, // IPMI::getSensorType
         MOD_IPMISENSOR_ENTITY_ID    = 0x09, // IPMI::getSensorEntityId
         MOD_IPMISENSOR_NAME         = 0x0A, // IPMI::getSensorName
+        MOD_IPMISENSOR_REBOOTCNTRL  = 0x0B, // IPMI::SENSOR getRebootControl
     };
 
     enum IPMIReasonCode
@@ -61,6 +62,7 @@ namespace IPMI
         RC_SENSOR_NOT_FOUND             = IPMI_COMP_ID | 0x0d,
         RC_INVALID_VPD_DATA             = IPMI_COMP_ID | 0x0e,
         RC_INVALID_SENSOR_NUMBER        = IPMI_COMP_ID | 0x0f,
+        RC_INVALID_SENSOR_SETTING       = IPMI_COMP_ID | 0x10,
     };
 };
 

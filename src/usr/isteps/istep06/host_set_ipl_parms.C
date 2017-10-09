@@ -60,8 +60,9 @@ void* host_set_ipl_parms( void *io_pArgs )
     //          2) clear all gard records of type GARD_Reconfig
     else
     {
-        memset(&l_semiData, 0x0, sizeof(Util::semiPersistData_t));
         l_semiData.magic = Util::PERSIST_MAGIC;
+        l_semiData.reboot_cnt = 0;
+        //Intentionally don't change mfg_term_reboot
 
         l_err = HWAS::clearGardByType(HWAS::GARD_Reconfig);
         if (l_err)

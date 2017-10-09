@@ -5092,6 +5092,11 @@
         <name>UPDATE_BOTH_SIDES_OF_SBE</name>
         <value>0x00040000</value>
     </enumerator>
+    <enumerator>
+        <!-- Update both sides of SBE Image if update is needed -->
+        <name>IMMEDIATE_HALT</name>
+        <value>0x00080000</value>
+    </enumerator>
 </enumerationType>
 
   <enumerationType>

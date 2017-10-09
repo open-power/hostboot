@@ -635,6 +635,72 @@ namespace SENSOR
     };
 
     /**
+     *  @class RebootControlSensor
+     *
+     *  @brief Specialized class for the system reboot control
+     *
+     *  @par Detailed Description:
+     *      Provides the functionality needed to enable/disable auto reboot
+     *      control controlled by the BMC.
+     *
+     *   Usage:
+     *      RebootControlSensor l_rbotCtl;
+     *      l_rbotCtl.setRebootControl( autoRebootSetting::ENABLE_REBOOTS );
+     *      l_rbotCtl.setRebootControl( autoRebootSetting::DISABLE_REBOOTS );
+     *
+     */
+    class RebootControlSensor : public SensorBase
+    {
+
+        public:
+            /**
+             * @enum autoRebootSetting
+             *      enum to define the contr
+             */
+            enum autoRebootSetting
+            {
+                DISABLE_REBOOTS = 0x00, // keep current state
+                ENABLE_REBOOTS  = 0x01, // allow reboot for FIRDATA analysis
+            };
+
+            /**
+             *  @brief Constructor for the RebootControlSensor
+             *
+             *  The system target holds the IPMI sensor number for this sensor.
+             *
+             */
+            RebootControlSensor();
+
+            /**
+             *  @brief Destructor for the RebootControlSensor
+             *
+             */
+            ~RebootControlSensor();
+
+            /**
+             * @brief Set reboots to enabled or disabled
+             *
+             * @param[in] i_setting - enable/disable
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t setRebootControl( autoRebootSetting i_setting );
+
+            /**
+             * @brief get the value of the reboot control from the BMC.
+             *
+             * @param[o] i_setting - reboot control value
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t getRebootControl( autoRebootSetting& o_setting );
+
+    };
+
+
+    /**
      *  @class StatusSensor
      *
      *  @brief Specialized class to handle DIMM, PROC and Core status.

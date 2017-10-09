@@ -743,6 +743,24 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 // Stop the IPL
                 stop();
 #else
+                //Disable reboots so system really halts
+                SENSOR::RebootControlSensor l_rbotCtl;
+                err_ipmi = l_rbotCtl.setRebootControl(
+                 SENSOR::RebootControlSensor::autoRebootSetting::DISABLE_REBOOTS
+                    );
+
+                if(err_ipmi)
+                {
+                    #ifdef CONFIG_CONSOLE
+                    CONSOLE::displayf(NULL, "Failed to disable BMC auto reboots....");
+                    CONSOLE::flush();
+                    #endif
+                    TRACFCOMP(g_trac_initsvc,
+                              "Failed to disable BMC auto reboots....");
+                    err_ipmi->collectTrace("INITSVC");
+                    errlCommit(err_ipmi, INITSVC_COMP_ID );
+                }
+
                 // Shutdown with a TI
                 doShutdown( SHUTDOWN_MFG_TERM );
 #endif

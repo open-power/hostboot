@@ -788,6 +788,10 @@
         <value>0x20</value>
     </enumerator>
     <enumerator>
+        <name>SYS_MGMT_SOFTWARE</name>
+        <value>0x21</value>
+    </enumerator>
+    <enumerator>
         <name>BIOS</name>
         <value>0x22</value>
     </enumerator>
@@ -850,6 +854,10 @@
     <enumerator>
         <name>PROCESSOR</name>
         <value>0x07</value>
+    </enumerator>
+    <enumerator>
+        <name>POWER_UNIT</name>
+        <value>0x09</value>
     </enumerator>
     <enumerator>
         <name>MEMORY</name>
