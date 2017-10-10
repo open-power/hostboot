@@ -37,7 +37,7 @@
  */
 
 /** Current interface version.
- *  0x9001:  9=P9, 002=Version 2
+ *  0x9002:  9=P9, 002=Version 2
  */
 #define HOSTBOOT_RUNTIME_INTERFACE_VERSION 0x9002
 
@@ -866,10 +866,22 @@ typedef struct runtimeInterfaces
     void (*firmware_notify)( uint64_t len,
                              void *data );
 
+    /**
+     *  @brief Prepare for HBRT concurrent code update
+     *
+     *  @details  This call allows the Host to inform HBRT that a concurrent
+     *  code update has been initiated.  HBRT then prepares updated targeting
+     *  data for use by the updated HBRT code.
+     *
+     *  @return        0 on success else return code
+     *  @platform FSP
+     */
+    int (*prepare_hbrt_update)( void );
+
     // Reserve some space for future growth.
-    // do NOT ever change this number, even if you add functions.
+    // Currently are decrementing this number as we add functions.
     //
-    // The value of 32 was somewhat arbitrarily chosen.
+    // The initial value of 32 was somewhat arbitrarily chosen.
     //
     // If either side modifies the interface.h file we're suppose to be able to
     // tolerate the other side not supporting the function yet.  The function
@@ -883,7 +895,7 @@ typedef struct runtimeInterfaces
     // allocated with sufficient space and populated with NULL function
     // pointers.  32 is big enough that we should not likely add that many
     // functions from either direction in between any two levels of support.
-    void (*reserved[22])(void);
+    void (*reserved[21])(void);
 
 } runtimeInterfaces_t;
 
