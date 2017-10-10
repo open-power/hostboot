@@ -2938,20 +2938,6 @@ Comes from the VPD MW Keyword</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_CEN_L4_BANK_DELETE_VPD</id>
-    <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
-    <description>L4 Bank Delete settings in VPD.
-Denotes what banks have been deleted from the L4.
-Data will be pulled from CDIMM VPD if CDIMM present.
-Data will be pulled from backplane VPD if IS DIMMs present.</description>
-    <valueType>uint32</valueType>
-    <writeable/>
-    <platInit/>
-    <odmVisable/>
-    <persistent/>
-</attribute>
-
-<attribute>
     <id>ATTR_CEN_VPD_MT_VERSION_BYTE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Describes the Version of MT Keyword</description>

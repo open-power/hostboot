@@ -1261,9 +1261,8 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
         l_TGT2_ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP, TGT2,
                                l_TGT2_ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP));
-        fapi2::ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR_Type l_TGT2_ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR, TGT2,
-                               l_TGT2_ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR));
+        fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS_Type l_TGT2_ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, TGT2, l_TGT2_ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS));
         fapi2::ATTR_CEN_EFF_DRAM_TRFC_Type l_TGT0_ATTR_CEN_EFF_DRAM_TRFC;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_TRFC, TGT0, l_TGT0_ATTR_CEN_EFF_DRAM_TRFC));
         fapi2::ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_Type l_TGT0_ATTR_CEN_EFF_NUM_RANKS_PER_DIMM;
@@ -6276,7 +6275,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<42, 14, 50, uint64_t>(l_TGT2_ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR );
+                l_scom_buffer.insert<42, 14, 50, uint64_t>(l_TGT2_ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS );
             }
 
             if (literal_1)
@@ -6286,7 +6285,7 @@ fapi2::ReturnCode centaur_mba_scom(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& 
 
             if (literal_1)
             {
-                l_scom_buffer.insert<42, 14, 50, uint64_t>(l_TGT2_ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR );
+                l_scom_buffer.insert<42, 14, 50, uint64_t>(l_TGT2_ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS );
             }
 
             if (literal_1)

@@ -336,7 +336,7 @@ extern "C" {
                 case fapi2::ENUM_ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL_REQUIRED:
                     if(l_size[0] != l_size[1])
                     {
-                        FAPI_ERR("ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL is REQUIRED, but size on l_side 0 does not match size on l_side 1 sizes %d %d",
+                        FAPI_ERR("ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL is REQUIRED, but size on l_side 0 does not match size on l_side 1 sizes %d %d",
                                  l_size[0], l_size[1]);
                         l_mss_derived_mba_cacheline_interleave_mode = fapi2::ENUM_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE_OFF;
                         l_mss_mba_addr_interleave_bit = 0;
@@ -379,7 +379,7 @@ extern "C" {
                     break;
 
                 default:
-                    FAPI_ERR("Internal Error: ATTR_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL is not a known value");
+                    FAPI_ERR("Internal Error: ATTR_CEN_MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL is not a known value");
                     l_mss_derived_mba_cacheline_interleave_mode = fapi2::ENUM_ATTR_CEN_MSS_DERIVED_MBA_CACHELINE_INTERLEAVE_MODE_OFF;
                     l_mss_mba_addr_interleave_bit = 0;
                     break;

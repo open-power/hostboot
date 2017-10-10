@@ -139,8 +139,8 @@ extern "C" {
         else
         {
             // sensor cache address map for non custom dimm temperature sensors (which i2c bus and i2c address they are)
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MEM_SENSOR_CACHE_ADDR_MAP, i_target,  l_dimm_sensor_cache_addr_map),
-                     "Failed to get attr ATTR_CEN_MRW_MEM_SENSOR_CACHE_ADDR_MAP on %s", mss::c_str(i_target));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP, i_target,  l_dimm_sensor_cache_addr_map),
+                     "Failed to get attr ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP on %s", mss::c_str(i_target));
         }
 
         // Configure Centaur Thermal Cache
@@ -411,7 +411,7 @@ extern "C" {
                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                    l_safemode_throttle_n_per_chip));
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR,
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS,
                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                    l_throttle_d));
 

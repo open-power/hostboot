@@ -2101,15 +2101,6 @@ firmware notes: none</description>
     <persistRuntime/>
 </attribute>
 
-<attribute>
-    <id>ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <odmVisable/>
-</attribute>
-
 <!--
 <attribute>
     <id>ATTR_CEN_MSS_INTERLEAVE_ENABLE</id>
@@ -3045,35 +3036,6 @@ Will be set at an MBA level with one policy to be used</description>
 -->
 
 <attribute>
-    <id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook DIMM power curve percent uplift for this system at max utilization.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook DIMM power curve percent uplift for this system at idle utilization.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook throttle value for denominator cfg_nm_m</description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
-</attribute>
-<attribute>
     <id>ATTR_CEN_MSS_INIT_STATE</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>How far into the ipl istep the centaur has been brought up</description>
@@ -3082,16 +3044,6 @@ Will be set at an MBA level with one policy to be used</description>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook value for maximum dram data bus utilization in centi percent (c%).  Used to determine memory throttle values.</description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <odmVisable/>
-    <persistRuntime/>
 </attribute>
 
 <attribute>
@@ -3172,6 +3124,25 @@ Will be set at an MBA level with one policy to be used</description>
     <description>Used for Custom DIMMs to not enable the reading of the dimm temperature sensor on the spare i2c bus</description>
     <valueType>uint8</valueType>
     <enum>OFF = 0, ON = 1</enum>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Machine Readable Workbook Thermal Memory Power Limit</description>
+    <valueType>uint32</valueType>
+    <platInit/>
+    <odmVisable/>
+</attribute>
+
+<attribute>
+    <id>ATTR_CEN_MRW_POWER_CONTROL_REQUESTED</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Capable power control settings. In MRW.</description>
+    <valueType>uint8</valueType>
+    <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
     <platInit/>
     <odmVisable/>
 </attribute>
@@ -3433,16 +3404,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 -->
 
-<attribute>
-    <id>ATTR_CEN_MRW_POWER_CONTROL_REQUESTED</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Capable power control settings. In MRW.</description>
-    <valueType>uint8</valueType>
-    <enum>OFF = 0x00, SLOWEXIT = 0x01, FASTEXIT = 0x02</enum>
-    <platInit/>
-    <odmVisable/>
-</attribute>
-
 <!--
 <attribute>
     <id>ATTR_CEN_MSS_AVDD_OFFSET</id>
@@ -3568,7 +3529,7 @@ Will be set at an MBA level with one policy to be used</description>
 -->
 
 <attribute>
-    <id>ATTR_CEN_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
+    <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
     <targetType>TARGET_TYPE_MEMBUF_CHIP</targetType>
     <description>Machine Readable Workbook value detailing the wiring of the 8 dimm temperature sensors for non custom dimms, in DIMM A0,A1,B0,B1,C0,C1,D0,D1 order. One nibble per sensor where bit0 (MSB) is the i2c bus the sensor is attached to (0 for master, 1 for spare) and bits 1:3 are for A2,A1,A0 of the sensor i2c address (where A2 is MSB)</description>
     <valueType>uint32</valueType>
@@ -3584,42 +3545,6 @@ Will be set at an MBA level with one policy to be used</description>
     <writeable/>
     <odmVisable/>
     <odmChangeable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook enablement of the HWP code to adjust the VMEM regulator power limit based on number of installed DIMMs.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <enum>FALSE = 0, TRUE = 1</enum>
-    <odmVisable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook value for the maximum possible number of dimms that can be installed under any of the VMEM regulators.</description>
-    <valueType>uint8</valueType>
-    <platInit/>
-    <odmVisable/>
-</attribute>
-
-<attribute>
-    <id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook DDR3 VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW.</description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <odmVisable/>
-</attribute>
-<attribute>
-    <id>ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Machine Readable Workbook DDR4 VMEM regulator power limit per CDIMM assuming a full configuration. Units in cW.</description>
-    <valueType>uint32</valueType>
-    <platInit/>
-    <odmVisable/>
 </attribute>
 
 <attribute>

@@ -595,21 +595,6 @@ if(defined $optPol->{'loadline-overrides'})
 
 my $xbusFfePrecursor = $reqPol->{'io_xbus_tx_ffe_precursor'};
 
-
-
-if ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'required')
-{
-   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 1];
-}
-elsif ($reqPol->{'mba_cacheline_interleave_mode_control'} eq 'requested')
-{
-   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 2];
-}
-else
-{
-   push @systemAttr, ["MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL", 0];
-}
-
 if ($MAXNODE > 1 && $sysname !~ m/mfg/)
 {
     push @systemAttr, ["DO_ABUS_DECONFIG", 0];

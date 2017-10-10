@@ -7329,16 +7329,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 </attribute>
 
 <attribute>
-    <id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id>
-    <description>At a system level, this attribute controls if interleaving is required, requested or never.  The MRW.</description>
-    <simpleType>
-        <uint8_t></uint8_t>
-    </simpleType>
-    <persistency>non-volatile</persistency>
-    <readable/>
-</attribute>
-
-<attribute>
     <id>PROC_PCIE_PCS_RX_VGA_CONTRL_REGISTER3</id>
     <!-- TARGET_TYPE_PEC -->
     <description>

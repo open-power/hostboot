@@ -123,9 +123,9 @@ extern "C" {
 
         // get input attributes
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba,  l_custom_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_dram_databus_util));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                l_throttle_d));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_MEM_WATT_TARGET,
                                i_target_mba, l_channel_pair_watt_target));
@@ -139,9 +139,9 @@ extern "C" {
         // other attributes for custom dimms to get
         if (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
         {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT,
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT,
                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_power_curve_percent_uplift));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE,
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE,
                                    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_power_curve_percent_uplift_idle));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_TOTAL_POWER_SLOPE,
                                    i_target_mba, l_total_power_slope_array));

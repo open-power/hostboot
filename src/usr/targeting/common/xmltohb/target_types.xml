@@ -945,7 +945,6 @@
   <attribute><id>MNFG_XBUS_MIN_EYE_WIDTH</id></attribute>
   <attribute><id>REDUNDANT_CLOCKS</id></attribute>
   <attribute><id>BRAZOS_RX_FIFO_OVERRIDE</id></attribute>
-  <attribute><id>MRW_MBA_CACHELINE_INTERLEAVE_MODE_CONTROL</id></attribute>
   <attribute><id>MAX_DMI_PER_PROC</id></attribute>
   <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
   <attribute><id>USE_TCES_FOR_DMAS</id></attribute>

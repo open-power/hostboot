@@ -432,17 +432,17 @@ extern "C" {
                                i_target_mba, l_num_dimms_on_port));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_thermal_power_limit));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MEM_THROTTLE_DENOMINATOR, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                l_runtime_throttle_d));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MAX_DRAM_DATABUS_UTIL,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_dram_databus_util));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm_ddr4));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_number_dimms_per_reg));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_adj_enable));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reg_max_dimm_count));
@@ -516,7 +516,7 @@ extern "C" {
 
         l_dimm_reg_power_limit_per_dimm_adj = l_dimm_reg_power_limit_per_dimm;
 
-        if (l_dimm_reg_power_limit_adj_enable == fapi2::ENUM_ATTR_CEN_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE_TRUE)
+        if (l_dimm_reg_power_limit_adj_enable == fapi2::ENUM_ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE_TRUE)
         {
             // adjust reg power limit per cdimm only if l_reg_max_dimm_count>0 and l_reg_max_dimm_count<l_max_number_dimms_per_reg
             if (

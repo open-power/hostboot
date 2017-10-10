@@ -226,7 +226,6 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
         $targetObj->deleteAttribute($target,"MRW_CDIMM_MASTER_I2C_TEMP_SENSOR_ENABLE");
         $targetObj->deleteAttribute($target,"MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE");
         $targetObj->deleteAttribute($target,"MRW_DRAMINIT_RESET_DISABLE");
-        $targetObj->deleteAttribute($target,"MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP");
         $targetObj->deleteAttribute($target,"MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA");
         $targetObj->deleteAttribute($target,"MRW_STRICT_MBA_PLUG_RULE_CHECKING");
         $targetObj->deleteAttribute($target,"MSS_DRAMINIT_RESET_DISABLE");
@@ -2370,7 +2369,7 @@ sub errorCheck
         ## this checks if at least 1 abus is connected
         my $found_abus = 0;
         my $abus_error = "";
-        
+
         foreach my $child (@{ $targetObj->getTargetChildren($target) })
         {
             my $child_type = $targetObj->getBusType($child);
@@ -2378,7 +2377,7 @@ sub errorCheck
             {
               my $proc_type = $targetObj->getAttribute($target, "PROC_MASTER_TYPE");
 
-              if ($proc_type eq "NOT_MASTER" ) 
+              if ($proc_type eq "NOT_MASTER" )
               {
                     if (!$targetObj->isBadAttribute($child, "PEER_TARGET"))
                     {
