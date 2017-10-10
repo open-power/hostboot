@@ -130,7 +130,7 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54, 0x00, 0x00, 0x02, 0x01, 0x01, 0x06, /// V
                           };
 
 #define VALIDATE_VID_VALUES(w,x,y,z,state) \
-    if (!((w < x) && (x < y) && (y < z)))  \
+    if (!((w <= x) && (x <= y) && (y <= z)))  \
        {state = 0;}
 
 #define VALIDATE_THRESHOLD_VALUES(w,x,y,z,state) \
