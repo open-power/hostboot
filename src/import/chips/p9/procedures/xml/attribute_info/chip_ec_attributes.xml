@@ -2274,6 +2274,23 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_INCREASE_JITTER</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Cumulus DD1.0+ : increase the L2 re-request jitter for larger systems
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_NOT_HW409069</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
