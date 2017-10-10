@@ -41,8 +41,8 @@
 #include <initservice/initserviceif.H>
 #include <isteps/hwpisteperror.H>
 
-#include "TodTrace.H"
-#include "TodSvc.H"
+#include <tod/TodTrace.H>
+#include <tod/TodSvc.H>
 
 using namespace ISTEP_ERROR;
 

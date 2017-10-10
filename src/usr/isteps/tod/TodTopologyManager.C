@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodTopologyManager.C $                 */
+/* $Source: src/usr/isteps/tod/TodTopologyManager.C $                     */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -555,11 +555,11 @@ void TodTopologyManager::dumpTopology() const
                 while(l_childList.end() != l_childItr)
                 {
                     TOD_INF("TOPOLOGY DUMP> 0x%08X---%s---%s---0x%08X",
-                      (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
-                      busnames[(*l_childItr)->getBusIn()],
-                      busnames[(*l_childItr)->getBusOut()],
-                      (*l_childItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
-                      ++l_childItr;
+                   (*l_procItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>(),
+                   busnames[(*l_childItr)->getBusIn()],
+                   busnames[(*l_childItr)->getBusOut()],
+                   (*l_childItr)->getTarget()->getAttr<TARGETING::ATTR_HUID>());
+                   ++l_childItr;
                 }
                 ++l_procItr;
             }

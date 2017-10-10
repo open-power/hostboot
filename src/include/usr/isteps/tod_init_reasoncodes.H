@@ -63,6 +63,8 @@ namespace TOD
         TOD_UTIL_MOD_GET_PARENT               = 0x1C,
         TOD_MOD_LOG_UNSUPPORTED_BUSTYPE       = 0x1D,
         TOD_IS_MPIPL                          = 0x1E,
+        TOD_RT_TOPOLOGY_RESET_BACKUP          = 0x1F,
+        TOD_RT_TOPOLOGY_DATA                  = 0x20,
     };
 
     enum TODReasonCode
@@ -91,6 +93,9 @@ namespace TOD
         TOD_PARENT_NOT_FOUND                  = TOD_COMP_ID | 0x17,
         TOD_DRAWER_SET_MDMT                   = TOD_COMP_ID | 0x18,
         TOD_TOP_LEVEL_TARGET_NOT_FOUND        = TOD_COMP_ID | 0x19,
+        TOD_RT_NULL_FIRMWARE_REQUEST_PTR      = TOD_COMP_ID | 0x1A,
+        TOD_RT_TOPOLOGY_RESET_BACKUP_ERR      = TOD_COMP_ID | 0x1B,
+        TOD_RT_TOPOLOGY_DATA_ERR              = TOD_COMP_ID | 0x1C,
     };
 
     enum TODUserDetailDataSubSection

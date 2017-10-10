@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodSvc.C $                             */
+/* $Source: src/usr/isteps/tod/TodSvc.C $                                 */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -521,8 +521,8 @@ errlHndl_t TodSvc::setActiveMdmtForResetBackup(
              * @errortype
              * @moduleid     TOD_FIND_MASTER_PROC
              * @reasoncode   TOD_MASTER_TARGET_NOT_FOUND
-             * @userdata1[32:64] 1 =  Master proc was not found , zero otherwise
-             * @userdata1[32:63] 1 =  Master drawer was not found, zero otherwise
+             * @userdata1[32:64] 1 = Master proc was not found , zero otherwise
+             * @userdata1[32:63] 1 = Master drawer was not found, zero otherwise
              * @userdata2[0:31]  EMOD_TOD_SET_ACTIVE_MDMT
              * @userdata2[32:64] Active topology
              * @devdesc      Either processor or drawer object was not found for

@@ -348,5 +348,4 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                   "FirmwareRequestTest::testFirmwareRequestHbrtToFsp");
 
     }  // end testFirmwareRequestHbrtToFsp
-
 };  // end class FirmwareRequestTest

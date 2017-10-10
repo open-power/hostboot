@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,6 +142,7 @@ namespace   INITSERVICE
 const DepModInfo g_istep18Dependancies = {
         {
 #ifndef CONFIG_VPO_COMPILE
+            DEP_LIB(libtod.so),
             DEP_LIB(libistep18.so),
 #endif
             NULL

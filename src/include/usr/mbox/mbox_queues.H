@@ -73,6 +73,7 @@ namespace MBOX
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
         FSP_VPD_MSGQ            = 0x8000000C,
         FSP_PRD_SYNC_MSGQ_ID    = 0x8000000D,
+        FSP_TOD_MSGQ            = 0x8000000E,
         FSP_SBE_SYNC_MSGQ_ID    = 0x8000000F,
         FSP_LID_MSGQ            = FSP_ATTR_SYNC_MSGQ,
 
@@ -80,8 +81,9 @@ namespace MBOX
         FSP_ECHO_MSGQ = 0xFFFFFFFF,     // Fake FSP for test
     };
 
-    // Message types are only unique with in each message queue. Each message queue can
-    // use the entire range limited only by the restrictions listed below.
+    // Message types are only unique with in each message queue. Each message
+    // queue can use the entire range limited only by the restrictions listed
+    // below.
     //
     // Each HB and FSP service will need it's own list of message types
     // Not sure where they belong.
@@ -89,8 +91,8 @@ namespace MBOX
     // types 0x00000000 - 0x3FFFFFFF are considered secure messages
     // and are disabled when under SecureBoot environment
     // types 0x40000000 - 0x7FFFFFFF can be done at anytime
-    // types 0x80000000 - 0xFFFFFFFF are reserved on hostboot for kernel services
-    // This means hostboot services can't use them, but this is not a restriction
+    // types 0x80000000 - 0xFFFFFFFF are reserved on HB for kernel services
+    // This means HB services can't use them, but this is not a restriction
     // on FSP services
     enum
     {

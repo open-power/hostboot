@@ -202,6 +202,7 @@ EXTENDED_MODULES += p9_cpuWkup
 EXTENDED_MODULES += p9_phbPerst
 EXTENDED_MODULES += $(if $(CONFIG_ENABLE_HDAT_IN_HOSTBOOT),hdat)
 EXTENDED_MODULES += $(if $(CONFIG_SECUREBOOT),secureboot_ext)
+EXTENDED_MODULES += tod
 
 #***************************************
 # Working test modules
@@ -285,6 +286,7 @@ RUNTIME_MODULES += secureboot_rt
 RUNTIME_MODULES += p9_cpuWkup
 RUNTIME_MODULES += fsi_rt
 RUNTIME_MODULES += sbeio_rt
+RUNTIME_MODULES += tod_rt
 
 RUNTIME_DATA_MODULES +=
 RUNTIME_TESTCASE_MODULES += cxxtest_rt

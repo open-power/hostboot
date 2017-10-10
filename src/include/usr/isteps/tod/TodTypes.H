@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodTypes.H $                           */
+/* $Source: src/include/usr/isteps/tod/TodTypes.H $                       */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,16 @@
 
 namespace TOD
 {
+
+//------------------------------------------------------------------------------
+//Forward declarations
+//------------------------------------------------------------------------------
+struct TodChipData;
+
+//------------------------------------------------------------------------------
+//Typedefs
+//------------------------------------------------------------------------------
+typedef std::vector<TodChipData> TodChipDataContainer;
 
     /**
      * Enums for the TodChipHeader->flags, These values are defined as per

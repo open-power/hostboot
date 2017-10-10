@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodUtils.C $                           */
+/* $Source: src/usr/isteps/tod/TodUtils.C $                               */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -160,6 +160,15 @@ errlHndl_t getMaxConfigParams(
 
         o_maxConfigParams.max_mcs_per_sys = l_pTopLevel->getAttr
                         < TARGETING::ATTR_MAX_MCS_PER_SYSTEM > ();
+
+        // TODO RTC 181481: attribute ATTR_MAX_COMPUTE_NODES_PER_SYSTEM is
+        // currently not implemented as needed to do this assignment.  I was
+        // assured (10/2017) that HB only supports one node, so I am defaulting
+        // this to 1.  In the future HB will need to be multi-node aware and
+        // TARGETING::ATTR_MAX_COMPUTE_NODES_PER_SYSTEM implemented.
+        o_maxConfigParams.max_compute_nodes_per_sys = 1;
+//        o_maxConfigParams.max_compute_nodes_per_sys = l_pTopLevel->getAttr
+//                        < TARGETING::ATTR_MAX_COMPUTE_NODES_PER_SYSTEM > ();
 
     } while(0);
 
