@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <arch/pirformat.H>
 #include <runtime/customize_attrs_for_payload.H>
 #include <runtime/rt_targeting.H>
+#include <runtime/interface.h>
 #include <map>
 #include <util/memoize.H>
 
@@ -170,5 +171,27 @@ errlHndl_t getHbTarget(
 {
       return Util::Memoize::memoize(_getHbTarget,i_rtTargetId,o_target);
 }
+
+int hbrt_update_prep(void)
+{
+    int rc = 0;
+
+    return rc;
+}
+
+    //------------------------------------------------------------------------
+
+    struct registerRtTarg
+    {
+        registerRtTarg()
+        {
+/*          Do not register interface until HB is ready for Host to call it
+            @TODO RTC: 181285 to enable the interface
+            runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
+            rt_intf->prepare_hbrt_update = &hbrt_update_prep; */
+        }
+    };
+
+    registerRtTarg g_registerRtTarg;
 
 }; // End namespace RT_TARG
