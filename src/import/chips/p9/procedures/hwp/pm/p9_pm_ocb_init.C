@@ -216,7 +216,7 @@ fapi2::ReturnCode p9_pm_ocb_init(
     const p9ocb::PM_OCB_CHAN_OUFLOW  i_ocb_ouflow_en,
     const p9ocb::PM_OCB_ITPTYPE      i_ocb_itp_type)
 {
-    FAPI_IMP("p9_pm_ocb_init Enter");
+    FAPI_INF("p9_pm_ocb_init Enter");
 
     // -------------------------------------------------------------------------
     // INIT mode: Placeholder; NOOP at present
@@ -260,7 +260,7 @@ fapi2::ReturnCode p9_pm_ocb_init(
     }
 
 fapi_try_exit:
-    FAPI_IMP("p9_pm_ocb_init EXIT");
+    FAPI_INF("p9_pm_ocb_init EXIT");
     return fapi2::current_err;
 }
 
@@ -275,7 +275,7 @@ fapi2::ReturnCode pm_ocb_setup(
     const p9ocb::PM_OCB_CHAN_OUFLOW i_ocb_ouflow_en,
     const p9ocb::PM_OCB_ITPTYPE     i_ocb_itp_type)
 {
-    FAPI_IMP("pm_ocb_setup Enter");
+    FAPI_INF("pm_ocb_setup Enter");
 
     uint32_t l_ocbase = 0x0;
     fapi2::buffer<uint64_t> l_mask_or(0);
@@ -447,30 +447,30 @@ fapi2::ReturnCode pm_ocb_setup(
     // -------------------------------------------------------------------------
     // Print Channel Configuration Info
     // -------------------------------------------------------------------------
-    FAPI_IMP("-----------------------------------------------------");
-    FAPI_IMP("OCB Channel Configuration                            ");
-    FAPI_IMP("-----------------------------------------------------");
-    FAPI_IMP("  channel number             => %d ", i_ocb_chan);
-    FAPI_IMP("  channel type               => %d ", i_ocb_type);
+    FAPI_INF("-----------------------------------------------------");
+    FAPI_INF("OCB Channel Configuration                            ");
+    FAPI_INF("-----------------------------------------------------");
+    FAPI_INF("  channel number             => %d ", i_ocb_chan);
+    FAPI_INF("  channel type               => %d ", i_ocb_type);
 
     if ((i_ocb_type == p9ocb::OCB_TYPE_PUSHQ) ||
         (i_ocb_type == p9ocb::OCB_TYPE_PULLQ))
     {
-        FAPI_IMP("  queue length               => %d ", i_ocb_q_len);
-        FAPI_IMP("  interrupt type             => %d ", i_ocb_itp_type);
+        FAPI_INF("  queue length               => %d ", i_ocb_q_len);
+        FAPI_INF("  interrupt type             => %d ", i_ocb_itp_type);
 
         if (i_ocb_type == p9ocb::OCB_TYPE_PUSHQ)
         {
-            FAPI_IMP("  push write overflow enable => %d ", i_ocb_ouflow_en);
+            FAPI_INF("  push write overflow enable => %d ", i_ocb_ouflow_en);
         }
         else
         {
-            FAPI_IMP("  pull write underflow enable => %d ", i_ocb_ouflow_en);
+            FAPI_INF("  pull write underflow enable => %d ", i_ocb_ouflow_en);
         }
     }
 
-    FAPI_IMP("  channel base address       => 0x%08X ", i_ocb_bar);
-    FAPI_IMP("-----------------------------------------------------");
+    FAPI_INF("  channel base address       => 0x%08X ", i_ocb_bar);
+    FAPI_INF("-----------------------------------------------------");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -480,7 +480,7 @@ fapi_try_exit:
 fapi2::ReturnCode pm_ocb_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    FAPI_IMP("p9_pm_ocb_reset Enter");
+    FAPI_INF("p9_pm_ocb_reset Enter");
     fapi2::buffer<uint64_t> l_buf64;
 
     // vector of reset channels
