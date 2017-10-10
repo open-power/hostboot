@@ -554,6 +554,7 @@ typedef struct hostInterfaces
           // HBRT_FW_MSG_HBRT_FSP_RESP
           // This struct sends/receives an MBox message to the FSP
           struct GenericFspMboxMessage_t generic_msg;
+
        }; // end union
     };  // end struct hbrt_fw_msg
 

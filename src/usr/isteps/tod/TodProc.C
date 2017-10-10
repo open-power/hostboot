@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodProc.C $                            */
+/* $Source: src/usr/isteps/tod/TodProc.C $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -42,7 +42,7 @@
 #include <isteps/tod_init_reasoncodes.H>
 #include "TodDrawer.H"
 #include "TodProc.H"
-#include "TodTypes.H"
+#include <isteps/tod/TodTypes.H>
 #include "TodControls.H"
 #include <hwas/common/deconfigGard.H>
 #include "TodAssert.H"

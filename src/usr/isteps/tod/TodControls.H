@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodControls.H $                        */
+/* $Source: src/usr/isteps/tod/TodControls.H $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include "TodSvcUtil.H"
 #include "TodAssert.H"
 #include "TodTrace.H"
+#include <isteps/tod/TodTypes.H>
 
 namespace TOD
 {
@@ -54,14 +55,12 @@ namespace TOD
 class TodDrawer;
 class TodProc;
 class TodControls;
-struct TodChipData;
 
 //------------------------------------------------------------------------------
 //Typedefs
 //------------------------------------------------------------------------------
 //Use "thesTodControls_t::Instance()" to access the singleton via reference
 typedef Singleton<TodControls> theTodControls_t;
-typedef std::vector<TodChipData> TodChipDataContainer;
 typedef std::vector<TARGETING::ConstTargetHandle_t>
     BlacListedProcContainer;
 typedef std::vector<TARGETING::ConstTargetHandle_t>
@@ -732,7 +731,6 @@ private:
       //Black listed processors that should not be considered as MDMT
       BlacListedProcContainer iv_BlackListedProcs;
 
-
       //List of garded targets on the system
       GardedTargetsContainer iv_gardedTargets;
 
@@ -762,14 +760,14 @@ private:
        *
        */
       struct GardedUnit_t{
-          TARGETING::ATTR_HUID_type       iv_huid;  //HUID of garded unit
-          TARGETING::ATTR_HUID_type       iv_nodeHuid; //Node containing the unit
-          uint32_t                        iv_errlogId; //Garded Error log
-          HWAS::GARD_ErrorType            iv_errType; //Type of gard error
-          TARGETING::CDM_DOMAIN           iv_domain; //CDM Domain of the unit
-          TARGETING::ATTR_TYPE_type       iv_type; //Type of the unit
-          TARGETING::ATTR_CLASS_type      iv_class; //Class of the unit
-          uint32_t                        iv_rid; //RID of the unit
+          TARGETING::ATTR_HUID_type   iv_huid;  //HUID of garded unit
+          TARGETING::ATTR_HUID_type   iv_nodeHuid; //Node containing the unit
+          uint32_t                    iv_errlogId; //Garded Error log
+          HWAS::GARD_ErrorType        iv_errType; //Type of gard error
+          TARGETING::CDM_DOMAIN       iv_domain; //CDM Domain of the unit
+          TARGETING::ATTR_TYPE_type   iv_type; //Type of the unit
+          TARGETING::ATTR_CLASS_type  iv_class; //Class of the unit
+          uint32_t                    iv_rid; //RID of the unit
           NagUpdateAction             iv_nagDisabled; // Default to NAG enable
           GardedUnit_t() : iv_huid(TOD_HUID_INVALID),
                            iv_nodeHuid(TOD_HUID_INVALID),
@@ -929,6 +927,9 @@ errlHndl_t queryActiveConfig(p9_tod_setup_tod_sel& o_activeConfig,
 void setMdmtOfActiveConfig(const p9_tod_setup_tod_sel i_config,
              TodProc* i_proc,
              TodDrawer* i_drawer);
+
+// Wrapper function for TodControls::getConfigStatus instance
+bool getConfigStatus(const p9_tod_setup_tod_sel i_config);
 
 } //end of namespace
 

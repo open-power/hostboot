@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodProc.H $                            */
+/* $Source: src/usr/isteps/tod/TodProc.H $                                */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -38,7 +38,6 @@
 //------------------------------------------------------------------------------
 //HWPF - For TOD constants
 #include <p9_tod_utils.H>
-#include "TodTypes.H"
 #include "TodSvcUtil.H"
 #include "TodAssert.H"
 
@@ -125,13 +124,14 @@ class TodProc
          * @param[in] i_destination, Pointer to destination TodProc object
          *  that has to be connected.
          *
-         * @param[in] i_busChipUnitType, Type of the bus (A/X) for which connection
-         *   has to be determined
+         * @param[in] i_busChipUnitType, Type of the bus (A/X) for which
+         *   connection has to be determined
          *
          * @param[out] o_isConnected, this parameter will be set to true if
          *  source and destination connect over the specified bus type. Before
          *  looking for o_isConnected the caller should check for returned error
-         *  log handle and only if it is NULL o_isConnected should be considered.
+         *  log handle and only if it is NULL o_isConnected should be
+         *  considered.
          *
          * @return Error log handle, indicates status of request
          * @retval NULL indicates that connect method's algorithm  executed

@@ -45,6 +45,7 @@ SUBDIRS+=mss.d
 SUBDIRS+=cen.d
 SUBDIRS+=cpuWkup.d
 SUBDIRS+=p9_phbPerst.d
+SUBDIRS+=tod.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodControls.C $                        */
+/* $Source: src/usr/isteps/tod/TodControls.C $                            */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -38,7 +38,6 @@
 #include "TodDrawer.H"
 #include "TodSvcUtil.H"
 #include "TodControls.H"
-#include "TodTypes.H"
 #include "TodTrace.H"
 #include "TodUtils.H"
 #include <devicefw/userif.H>
@@ -436,8 +435,8 @@ errlHndl_t  TodControls::buildTodDrawers(
 
         } // end node list loop
 
-        //Validate that we had at least one TOD drawer at the end of this process
-        //else generate an error
+        //Validate that we had at least one TOD drawer at the end of this
+        // process else generate an error
         if (iv_todConfig[i_config].iv_todDrawerList.empty())
         {
             TOD_ERR("No TOD drawer could be built for the configuration "
@@ -974,6 +973,7 @@ errlHndl_t TodControls :: writeTodProcData(
                             TOD_PRI_MDMT;
                     }
                 }
+
 
                 //See if the current proc chip is MDMT of the secondary
                 //network
@@ -1770,7 +1770,8 @@ errlHndl_t buildGardedTargetsList()
 void setConfigStatus(const p9_tod_setup_tod_sel i_config,
                         const bool i_isConfigured )
 {
-    Singleton<TodControls>::instance().setConfigStatus(i_config, i_isConfigured);
+    Singleton<TodControls>::instance().setConfigStatus(i_config,
+                                                       i_isConfigured);
 }
 
 // Wrapper function for TodControls::getConfiguredMdmt instance
@@ -1809,6 +1810,12 @@ void setMdmtOfActiveConfig(const p9_tod_setup_tod_sel i_config,
 {
     return Singleton<TodControls>::instance().setMdmtOfActiveConfig(i_config,
     i_proc, i_drawer);
+}
+
+// Wrapper function for TodControls::getConfigStatus instance
+bool getConfigStatus(const p9_tod_setup_tod_sel i_config)
+{
+    return Singleton<TodControls>::instance().getConfigStatus(i_config);
 }
 
 }//end of namespace

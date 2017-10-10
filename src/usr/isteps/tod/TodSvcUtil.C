@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/isteps/istep18/TodSvcUtil.C $                         */
+/* $Source: src/usr/isteps/tod/TodSvcUtil.C $                             */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -193,10 +193,8 @@ uint32_t getMaxProcsOnSystem()
     uint32_t l_maxProcCount = 0;
     if (!l_errHdl )
     {
-        //FIX_ME: need to find out how to populate this variable
-        //l_maxProcCount = l_maxCfgParams.max_compute_nodes_per_sys *
-        l_maxProcCount =
-            l_maxCfgParams.max_procchips_per_node;
+        l_maxProcCount = l_maxCfgParams.max_compute_nodes_per_sys *
+                         l_maxCfgParams.max_procchips_per_node;
         TOD_INF("Maximum procs on system = 0x%08X", l_maxProcCount);
     }
     else

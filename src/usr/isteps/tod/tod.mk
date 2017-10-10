@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/isteps/istep18/makefile $
+# $Source: src/usr/isteps/tod/tod.mk $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,10 +22,12 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
 
-MODULE = istep18
+# Define common TOD objects
+OBJS += TodSvcUtil.o
+OBJS += TodUtils.o
 
+# Define common include paths
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest
 ##      support for Targeting and fapi
 EXTRAINCDIR += ${PROCEDURES_PATH}
@@ -33,17 +35,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
-EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 
-## pointer to common HWP files
+VPATH += ../
 
-OBJS += call_tod_init.o
-OBJS += call_tod_setup.o
-
+# include common mk files
 include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURES_PATH}/p9_tod_init.mk
-include ${PROCEDURES_PATH}/p9_tod_setup.mk
-include ${PROCEDURES_PATH}/p9_tod_save_config.mk
-include ${ROOTPATH}/config.mk
-
-VPATH += ${PROCEDURES_PATH}
+include $(ROOTPATH)/config.mk
