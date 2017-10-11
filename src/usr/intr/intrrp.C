@@ -1886,6 +1886,7 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl comp already shutdown. Log error and continue
+        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error masking all interrupt sources.");
     }
 
@@ -1906,6 +1907,7 @@ void IntrRp::shutDown(uint64_t i_status)
             if (l_err)
             {
                 delete l_err;
+                l_err = nullptr;
                 TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
             }
             //Disable common interrupt BARs
@@ -1914,6 +1916,7 @@ void IntrRp::shutDown(uint64_t i_status)
             if (l_err)
             {
                 delete l_err; //errl cmp already shutdown. Log error + continue
+                l_err = nullptr;
                 TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common Interrupt BARs");
             }
         }
@@ -1932,6 +1935,7 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err;
+        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error re-enabling VPC Pull Err");
     }
 
@@ -1940,6 +1944,7 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl cmp already shutdown. Log error + continue
+        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Common"
                                " Interrupt BARs for master proc");
     }
@@ -1950,6 +1955,7 @@ void IntrRp::shutDown(uint64_t i_status)
     if (l_err)
     {
         delete l_err; //errl cmp already shutdown. Log error + continue
+        l_err = nullptr;
         TRACFCOMP(g_trac_intr, "IntrRp::shutDown() Error disabling Master Interrupt BARs");
     }
 
