@@ -349,6 +349,14 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         // At this point, we are done with the procedure.
         o_done = true;
 
+        // If iv_ban is true, then ban TPS on this rank.
+        if ( iv_ban )
+        {
+            // It doesn't matter what we set the value to, we just need to
+            // make sure the rank exists in the map.
+            getMcaDataBundle(iv_chip)->iv_tpsBans[iv_rank] = true;
+        }
+
         // Since TPS is complete, clear the CE table for this slave rank.
         getMcaDataBundle(iv_chip)->iv_ceTable.deactivateRank( iv_rank );
 
@@ -1116,25 +1124,35 @@ uint32_t TpsEvent<TYPE_MCA>::nextStep( STEP_CODE_DATA_STRUCT & io_sc,
 
     o_done = false;
 
-    switch ( iv_phase )
+    do
     {
-        case TD_PHASE_0:
-            // Start TPS phase 1
-            o_rc = startTpsPhase1_rt( io_sc );
+        // Check if TPS is banned on this rank.
+        if ( 1 == getMcaDataBundle(iv_chip)->iv_tpsBans.count(iv_rank) )
+        {
+            // If TPS is banned, abort the procedure.
+            o_done = true;
             break;
-        case TD_PHASE_1:
-            // Analyze TPS phase 1
-            o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
-            break;
-        default: PRDF_ASSERT( false ); // invalid phase
+        }
 
-    }
+        switch ( iv_phase )
+        {
+            case TD_PHASE_0:
+                // Start TPS phase 1
+                o_rc = startTpsPhase1_rt( io_sc );
+                break;
+            case TD_PHASE_1:
+                // Analyze TPS phase 1
+                o_rc = analyzeTpsPhase1_rt( io_sc, o_done );
+                break;
+            default: PRDF_ASSERT( false ); // invalid phase
+        }
 
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "TPS failed: 0x%08x,0x%02x", iv_chip->getHuid(),
-                  getKey() );
-    }
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "TPS failed: 0x%08x,0x%02x", iv_chip->getHuid(),
+                      getKey() );
+        }
+    }while(0);
 
     return o_rc;
 

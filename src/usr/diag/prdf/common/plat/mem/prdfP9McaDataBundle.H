@@ -199,6 +199,9 @@ class McaDataBundle : public DataBundle
      *  scrubbing is resumed. */
     bool iv_maskMainlineNceTce = false;
 
+    /** Map to keep track of ranks that have banned TPS. */
+    std::map<MemRank, bool> iv_tpsBans;
+
     #endif
 };
 
