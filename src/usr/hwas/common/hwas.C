@@ -1510,6 +1510,11 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         PredicateHwas l_functional;
         if(o_bootable)
         {
+            // Speculative deconfig sets the specdeconfig to true for the target
+            // in question, so we want to filter out the targets that have been
+            // speculatively deconfigured. Setting specdeconfig to false in this
+            // predicate will ensure that those targets are left out of the list
+            // of functional targets.
             l_functional.specdeconfig(false);
         }
         l_functional.functional(true);
@@ -1921,8 +1926,16 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
         }
 
         // check for functional NX chiplets
+        // Take specdeconfig into account here
         TargetHandleList l_functionalNXChiplets;
-        getChildChiplets(l_functionalNXChiplets, pTop, TYPE_NX, true);
+        PredicateCTM l_nxChiplet(CLASS_UNIT, TYPE_NX);
+        PredicatePostfixExpr l_checkExprFunctionalNxChiplets;
+        l_checkExprFunctionalNxChiplets.push(&l_nxChiplet)
+                                       .push(&l_functional)
+                                       .And();
+        targetService().getAssociated(l_functionalNXChiplets, pTop,
+                        TargetService::CHILD, TargetService::ALL,
+                        &l_checkExprFunctionalNxChiplets);
         HWAS_DBG( "checkMinimumHardware: %d NX chiplets",
                   l_functionalNXChiplets.size());
 
