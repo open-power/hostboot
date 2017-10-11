@@ -307,8 +307,7 @@
     <id>ATTR_CHIP_EC_FEATURE_HW407180</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-        Filter pll setting differences.
-        Cumulus matches nimbus dd2.
+        Apply Nimbus DD1 specific filter PLL settings
     </description>
     <chipEcFeature>
       <chip>
@@ -316,6 +315,54 @@
         <ec>
           <value>0x20</value>
           <test>LESS_THAN</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW423532</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Apply bgoffset m1 to filter PLLs
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x21</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW423535</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+        Apply bandwidth updates to filter PLLs + OBUS Tank PLL
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
