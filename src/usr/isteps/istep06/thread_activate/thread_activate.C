@@ -46,6 +46,7 @@
 #include    <p9_thread_control.H>
 #include    <arch/pirformat.H>
 #include    <arch/pvrformat.H>
+#include    <arch/ppc.H>
 
 //  targeting support
 #include    <targeting/common/target.H>

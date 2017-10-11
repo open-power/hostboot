@@ -40,7 +40,6 @@
 #include <errl/errlentry.H>
 #include <errldisplay/errldisplay.H>
 #include <sys/sync.h>
-#include <kernel/timemgr.H>
 #include <hbotcompid.H>
 #include <hwas/common/hwasCallout.H>
 #include <mbox/mbox_queues.H>

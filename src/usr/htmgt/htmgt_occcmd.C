@@ -39,6 +39,7 @@
 #include <isteps/pm/occAccess.H>
 
 #include <sys/time.h>
+#include <arch/ppc.H>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <stdio.h>

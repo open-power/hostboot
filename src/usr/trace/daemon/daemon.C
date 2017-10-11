@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <sys/msg.h>
 #include <sys/task.h>
 #include <kernel/console.H>
+#include <arch/ppc.H>
 #include <util/align.H>
 
 #include <targeting/common/commontargeting.H>

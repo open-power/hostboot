@@ -32,6 +32,7 @@
 #include <util/align.H>
 #include <sys/mmio.h>
 #include <sys/mm.h>
+#include <arch/ppc.H>
 #include <errno.h>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,12 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef __UTIL_LOCKFREE_ABAPTR_H
 #define __UTIL_LOCKFREE_ABAPTR_H
+
+// This code makes assumptions on pointer sizes that are not valid within
+//  our runtime environment, therefore it cannot ever be used there.
+#ifdef __HOSTBOOT_RUNTIME
+#error "AbaPtr is not allowed in HBRT"
+#endif
 
 #include <stdint.h>
 #include <assert.h>

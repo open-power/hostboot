@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <sys/task.h>
 #include <sys/sync.h>
 #include <sys/misc.h>
+#include <arch/ppc.H>
 #include <string.h>
 #include <devicefw/driverif.H>
 #include <trace/interface.H>
