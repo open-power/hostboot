@@ -58,7 +58,7 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR1 =
     // { density in GBs, tRFC4(min) in picoseconds }
     {4, 90000},
     {8, 120000},
-    // 16Gb - TBD
+    {16, 185000},
 };
 
 // Proposed DDR4 3DS Addendum
@@ -69,8 +69,8 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR2 =
 {
     // { density in GBs, tRFC4(min) in picoseconds }
     {4, 55000},
-    {8, 90000}
-    // 16Gb - TBD
+    {8, 90000},
+    {16, 120000},
 };
 
 // Proposed DDR4 3DS Addendum
@@ -81,8 +81,8 @@ static const std::vector<std::pair<uint8_t, uint64_t> > TRFC_DLR4 =
 {
     // { density in GBs, tRFC4(min) in picoseconds }
     {4, 40000},
-    {8, 55000}
-    // 16Gb - TBD
+    {8, 55000},
+    {16, 90000},
 };
 
 ///
