@@ -846,9 +846,7 @@ void* call_host_set_voltages(void *io_pArgs)
                      "Error in call_host_set_voltages::platform_set_nest_voltages()")
 
                     // Create IStep error log and cross reference occurred error
-                    //@fixme-RTC:176741-Ignore these logs until HWPs are fixed
-                    //l_stepError.addErrorDetails( l_err );
-                    l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    l_stepError.addErrorDetails( l_err );
 
                     //Commit Error
                     errlCommit( l_err, ISTEP_COMP_ID );
