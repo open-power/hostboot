@@ -37,6 +37,8 @@
 #include <arch/pvrformat.H>
 #include <sys/task.h>
 #include <sys/mmio.h>
+#include <arch/ppc.H>
+
 
 //  targeting support
 #include    <targeting/namedtarget.H>

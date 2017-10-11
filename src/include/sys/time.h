@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,7 +26,10 @@
 #define __SYS_TIME_H
 
 #include <stdint.h>
+
+#ifndef __HOSTBOOT_RUNTIME
 #include <kernel/timemgr.H>
+#endif
 
 //******************************************************************************
 // Macros

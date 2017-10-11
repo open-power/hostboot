@@ -26,9 +26,12 @@
 #define __KERNEL_HEAPMGR_H
 
 #include <stdint.h>
-#include <util/lockfree/stack.H>
 #include <builtins.h>
 #include <kernel/types.h>
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <util/lockfree/stack.H>
+#endif
 
 extern "C"
 void kernel_execute_decrementer();
@@ -81,6 +84,8 @@ class HeapManager
 
         };
 
+// we only want the constants in HBRT
+#ifndef __HOSTBOOT_RUNTIME
         friend class CpuManager;
         friend void kernel_execute_decrementer();
 
@@ -231,5 +236,8 @@ class HeapManager
         static uint32_t cv_smallheap_page_count; //!< # of pages being used
         static uint32_t cv_largeheap_page_count; //!< # of pages being used
         static uint32_t cv_largeheap_page_max;   //!< Max # of pages used
+
+#endif //__HOSTBOOT_RUNTIME
+
 };
 #endif

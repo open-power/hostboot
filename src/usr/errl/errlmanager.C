@@ -39,6 +39,7 @@
 #include <errl/errlentry.H>
 #include <initservice/taskargs.H>
 #include <sys/task.h>
+#include <arch/ppc.H>
 #include <stdlib.h>
 #include <string.h>
 #include <mbox/mbox_queues.H>

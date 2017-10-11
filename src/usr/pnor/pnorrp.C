@@ -28,6 +28,7 @@
 #include <pnor/pnor_reasoncodes.H>
 #include <initservice/taskargs.H>
 #include <sys/msg.h>
+#include <arch/ppc.H>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
