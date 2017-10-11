@@ -158,6 +158,7 @@ sub loadPnorLayout
             my $reprovision = (exists $sectionEl->{reprovision} ? "yes" : "no");
             my $clearOnEccErr = (exists $sectionEl->{clearOnEccErr} ? "yes" : "no");
             my $readOnly = (exists $sectionEl->{readOnly} ? "yes" : "no");
+            my $volatile = (exists $sectionEl->{volatile} ? "yes" : "no");
             if (($i_testRun == 0) && ($sectionEl->{testonly}[0] eq "yes"))
             {
                 next;
@@ -185,6 +186,7 @@ sub loadPnorLayout
             $$i_pnorLayoutRef{sections}{$physicalOffset}{reprovision} = $reprovision;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{clearOnEccErr} = $clearOnEccErr;
             $$i_pnorLayoutRef{sections}{$physicalOffset}{readOnly} = $readOnly;
+            $$i_pnorLayoutRef{sections}{$physicalOffset}{volatile} = $volatile;
 
             #store the physical offsets of each section in a hash, so, it is easy
             #to search physicalOffsets based on the name of the section (eyecatch)
