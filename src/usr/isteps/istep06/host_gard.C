@@ -192,24 +192,32 @@ void* host_gard( void *io_pArgs )
         core_msg->type = SBE::MSG_IPL_MASTER_CORE;
         const TARGETING::Target*  l_masterCore  = TARGETING::getMasterCore( );
 
-         /*@ errorlog tag
-          *  @errortype      ERRL_SEV_CRITICAL_SYS_TERM
-          *  @moduleid       ISTEP::MOD_HOST_GARD
-          *  @reasoncode     ISTEP::RC_MASTER_CORE_NULL
-          *  @userdata1      0
-          *  @userdata2      0
-          *  @devdesc        host_gard: no masterCore found
-          */
         if (l_masterCore == NULL)
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
-                "No masterCore Found" );
-            const bool hbSwError = true;
-            l_err = new ERRORLOG::ErrlEntry
+                 "No masterCore Found." );
+            if( INITSERVICE::spBaseServicesEnabled() )
+            {
+                const bool hbSwError = true;
+                l_err = new ERRORLOG::ErrlEntry
                     (ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
                      ISTEP::MOD_HOST_GARD,
                      ISTEP::RC_MASTER_CORE_NULL,
                      0, 0, hbSwError);
+            }
+            else
+            {
+                // The masterCore may have a GARD record, update SBE
+                // and let it reboot to another core
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"host_gard: "
+                    "Calling updateProcessorSbeSeeproms..." );
+                l_err = SBE::updateProcessorSbeSeeproms();
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                        "host_gard: Error calling updateProcessorSbeSeeproms");
+                }
+            }
             break;
         }
 
