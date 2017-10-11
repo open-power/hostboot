@@ -48,6 +48,7 @@
 #include <hwas/hwasPlat.H>
 #include <vpd/vpd_if.H>
 #include <console/consoleif.H>
+#include <attributetraits.H>
 #ifdef CONFIG_BMC_IPMI
 #include <ipmi/ipmifruinv.H>
 #include <ipmi/ipmisensor.H>
@@ -64,9 +65,6 @@
 #include <p9_query_cache_access_state.H>
 #include <p9_hcd_core_stopclocks.H>
 #include <p9_hcd_cache_stopclocks.H>
-#include <p9_pm_ocb_init.H>
-#include <p9_pm_ocb_indir_setup_linear.H>
-#include <p9_pm_ocb_indir_access.H>
 #include <p9_hcd_common.H>
 #include <p9_quad_power_off.H>
 #include <p9_perv_scom_addresses.H>
@@ -225,31 +223,17 @@ errlHndl_t powerDownSlaveQuads()
     TARGETING::Target* l_sys_target = nullptr;
     TARGETING::targetService().getTopLevelTarget(l_sys_target);
     errlHndl_t l_err = NULL;
-    const uint8_t SIZE_OF_RING_DATA_PER_EQ = 0x40;
-    const uint8_t NUM_ENTRIES_IN_RING_DATA = 0x8;
-    const uint32_t OCC_SRAM_RING_STASH_BAR = 0xFFF3FC00;
-    uint64_t EX_0_CME_SCOM_SICR_SCOM1 = 0x1001203E;
-    uint64_t CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK = 0x0C00000000000000;
 
     bool l_isMasterEq = false;
-    uint64_t l_ringData[8] = {0,0,0,0,0,0,0,0};
-    uint32_t l_ocb_buff_length_act = 0;
-    uint8_t l_quad_pos;
-    uint32_t l_ringStashAddr;
-    size_t   MASK_SIZE = sizeof(CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK);
+    bool l_masterFound = false;
+    //Need to know who master is so we can skip them
+    uint8_t l_masterCoreId = TARGETING::getMasterCore()->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     TARGETING::TargetHandleList l_eqTargetList;
     getAllChiplets(l_eqTargetList, TARGETING::TYPE_EQ, true);
 
     TARGETING::TargetHandleList l_procChips;
     TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
-
-    uint8_t  l_isRingSaveMpipl = 0;
-    FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_RING_SAVE_MPIPL, l_procChips[0], l_isRingSaveMpipl);
-
-
-    //Need to know who master is so we can skip them
-    uint8_t l_masterCoreId = TARGETING::getMasterCore()->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
     //Loop through EQs
     for(const auto & l_eq_target : l_eqTargetList)
@@ -267,8 +251,9 @@ errlHndl_t powerDownSlaveQuads()
                                      l_eq_target,
                                      TARGETING::TYPE_CORE,
                                      true);
+        //If this ex is on the master processor and we have not found the master ex yet
         //Check if either of the cores is master (probably could just check the first)
-        if (l_is_master_chip == 1)
+        if (l_is_master_chip == fapi2::ENUM_ATTR_PROC_SBE_MASTER_CHIP_TRUE && !l_masterFound)
         {
             for(const auto & l_core_target : l_coreTargetList)
             {
@@ -278,44 +263,13 @@ errlHndl_t powerDownSlaveQuads()
                     break;
                 }
             }
-        }
-
-        //If this is the master quad, we have already power cycled so we dont need this
-        if(l_isMasterEq)
-        {
-            //deassert pm exit flag on master core (both ex targs to be safe)
-            TARGETING::TargetHandleList l_exChildren;
-            TARGETING::getChildChiplets( l_exChildren,
-                                         l_eq_target,
-                                         TARGETING::TYPE_EX,
-                                         true);
-
-            //TODO 171340 Need to rm clear of PM_EXIT bit in EX_0_CME_SCOM_SICR_SCOM1 reg during MPIPL
-            for(const auto & l_ex_child : l_exChildren)
-            {
-                // Clear bits 4 & 5 of CME_SCOM_SICR which sets PM_EXIT for C0 and C1 respectively
-                l_err = deviceWrite(l_ex_child,
-                                    &CME_SCOM_SICR_PM_EXIT_C0_AND_C1_MASK,
-                                    MASK_SIZE,
-                                    DEVICE_SCOM_ADDRESS(EX_0_CME_SCOM_SICR_SCOM1)); //0x1001203E
-                if(l_err)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "Error clearing bits 4 and 5 of CME_SCOM_SICR on ex %d", l_ex_child->getAttr<TARGETING::ATTR_CHIP_UNIT>());
-                    break;
-                }
-            }
-
-            if(l_err)
-            {
-                //If there is an error break out of the EQ loop, something is wrong
-                break;
-            }
-            else
+            //If this is the master quad, we have already power cycled so we dont need this
+            if(l_isMasterEq)
             {
                 //continue to next EQ
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                        "Found and prepped master, jumping to next EQ");
+                          "Found and prepped master, jumping to next EQ");
+                l_masterFound = true;
                 continue;
             }
         }
@@ -422,47 +376,12 @@ errlHndl_t powerDownSlaveQuads()
             FAPI_INVOKE_HWP(l_err,
                             p9_quad_power_off,
                             l_fapi_eq_target,
-                            l_ringData);
+                            nullptr);
             if(l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "Error powering off EQ %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
                 //Break from do-while
-                break;
-            }
-
-            if(l_isRingSaveMpipl)
-            {
-                FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, l_fapi_eq_target, l_quad_pos);
-
-                l_ringStashAddr = OCC_SRAM_RING_STASH_BAR + (SIZE_OF_RING_DATA_PER_EQ * l_quad_pos);
-
-                // Setup use OCB channel 0 for placing ring data in SRAM
-                FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_setup_linear, l_chip,
-                            p9ocb::OCB_CHAN0,
-                            p9ocb::OCB_TYPE_LINSTR,
-                            l_ringStashAddr);   // Bar
-
-                FAPI_INVOKE_HWP(l_err, p9_pm_ocb_indir_access,
-                            l_chip,
-                            p9ocb::OCB_CHAN0,
-                            p9ocb::OCB_PUT,
-                            NUM_ENTRIES_IN_RING_DATA,
-                            true,
-                            l_ringStashAddr,
-                            l_ocb_buff_length_act,
-                            l_ringData);
-
-                for(int x = 0; x < NUM_ENTRIES_IN_RING_DATA; x++)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            "Wrote %lx to OCC SRAM addr: 0x%lx", l_ringData[x], l_ringStashAddr + (x * 8));
-                }
-            }
-
-            if(l_err)
-            {
-                //Dont try to power down anymore EQs if we get a scom fail
                 break;
             }
 
