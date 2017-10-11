@@ -329,7 +329,7 @@ errlHndl_t PnorDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
          * Then open the new one at the right position. The required
          * alignment differs between protocol versions
          */
-        TRACFCOMP(g_trac_pnor,
+        TRACDCOMP(g_trac_pnor,
                     "astMboxDD::adjustMboxWindow using protocol version: %d",
                     iv_protocolVersion);
         if (iv_protocolVersion == 1)
@@ -381,9 +381,9 @@ errlHndl_t PnorDD::adjustMboxWindow(bool i_isWrite, uint32_t i_reqAddr,
         iv_curWindowOpen = true;
         iv_curWindowWrite = i_isWrite;
 
-        TRACFCOMP(g_trac_pnor, " curWindowOffset    = %08x", iv_curWindowOffset);
-        TRACFCOMP(g_trac_pnor, " curWindowSize      = %08x", iv_curWindowSize);
-        TRACFCOMP(g_trac_pnor, " curWindowLpcOffset = %08x", iv_curWindowLpcOffset);
+        TRACDCOMP(g_trac_pnor, " curWindowOffset    = %08x", iv_curWindowOffset);
+        TRACDCOMP(g_trac_pnor, " curWindowSize      = %08x", iv_curWindowSize);
+        TRACDCOMP(g_trac_pnor, " curWindowLpcOffset = %08x", iv_curWindowLpcOffset);
 
     }
     while (true);
