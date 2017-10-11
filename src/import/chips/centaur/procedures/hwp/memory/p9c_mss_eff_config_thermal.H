@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 /// @file p9c_mss_eff_config_thermal.H
 /// @brief  Header file for mss_eff_config_thermal
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamaring@us.ibm.com>
 /// *HWP HWP Backup: Mike Pardeik <pardeik@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -44,23 +44,23 @@ typedef fapi2::ReturnCode (*p9c_mss_eff_config_thermal_FP_t)(const fapi2::Target
 
 extern "C" {
     ///
-    /// @brief mss_eff_config_thermal procedure. Sets up dimm power curve attributes and dimm and channel throttle attributes
-    /// @param[in]  i_target_mba  Reference to centaur mba target
+    /// @brief Sets up dimm power curve attributes and dimm and channel throttle attributes
+    /// @param[in]  i_target_mba:  MBA Target
     /// @return ReturnCode
     ///
     fapi2::ReturnCode p9c_mss_eff_config_thermal(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 
     ///
-    /// @brief mss_eff_config_thermal_powercurve(): This function determines the
+    /// @brief This function determines the
     /// power curve attribute values to use
-    /// @param[in]   const fapi2::Target<fapi2::TARGET_TYPE_MBA> & i_target_mba:  MBA Target<fapi2::TARGET_TYPE_MBA> passed in
+    /// @param[in] i_target_mba:  MBA Target
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode mss_eff_config_thermal_powercurve(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
 
     ///
-    /// @brief mss_eff_config_thermal_throttles(): This function determines the throttle attribute values to use
-    /// @l_param[in]   const fapi2::Target<fapi2::TARGET_TYPE_MBA> & i_target_mba:  MBA Target<fapi2::TARGET_TYPE_MBA> passed in
+    /// @brief This function determines the throttle attribute values to use
+    /// @param[in] i_target_mba:  MBA Target
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode mss_eff_config_thermal_throttles(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);

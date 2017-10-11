@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,16 +25,15 @@
 /// @file p9c_mss_eff_config_thermal.C
 /// @brief  set the default throttle and power attributes for dimms in a given system
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Andre Marin <aamaring@us.ibm.com>
 /// *HWP HWP Backup: Mike Pardeik <pardeik@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
 /// *HWP Consumed by: HB
-
-// attributes for dimms in a given system
+//
 // -- The power attributes are the slope/intercept values.  Note that these
 //    values are in cW.
-//    -- ISDIMM will calculate values based on various attributes
+//    -- ISDIMM will use hardcoded values
 //    -- CDIMM will get values from VPD
 // -- The throttle attributes will setup values for IPL and runtime
 //
@@ -45,20 +44,34 @@
 #include <p9c_mss_bulk_pwr_throttles.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <dimmConsts.H>
+#include <generic/memory/lib/utils/count_dimm.H>
+#include <generic/memory/lib/utils/find.H>
 //------------------------------------------------------------------------------
 //  Includes
 //------------------------------------------------------------------------------
 #include <fapi2.H>
 
+using fapi2::TARGET_TYPE_MEMBUF_CHIP;
+using fapi2::TARGET_TYPE_MBA;
+using fapi2::FAPI2_RC_SUCCESS;
+
 // Only use values here (not any valid bits or flag bits)
 constexpr uint32_t CDIMM_POWER_SLOPE_DEFAULT = 0x0358;
 constexpr uint32_t CDIMM_POWER_INT_DEFAULT = 0x00CE;
 
+// ISDIMM power curves (non-custom DIMMs)
+// Hard coded values make one DIMM power curve for all configurations
+// If other future systems need different hard coded values, then these will need to come from MRW
+constexpr uint32_t ISDIMM_VMEM_POWER_SLOPE_DEFAULT = 0x0234;
+constexpr uint32_t ISDIMM_VMEM_POWER_INT_DEFAULT = 0x027F;
+constexpr uint32_t ISDIMM_VMEM_PLUS_VPP_POWER_SLOPE_DEFAULT = 0x0247;
+constexpr uint32_t ISDIMM_VMEM_PLUS_VPP_POWER_INT_DEFAULT = 0x02BC;
+
 extern "C" {
     ///
-    /// @brief mss_eff_config_thermal(): This function determines the
+    /// @brief This function determines the
     /// power curve and throttle attribute values to use
-    /// @param[in]   const fapi2::Target<fapi2::TARGET_TYPE_MBA> & i_target_mba:  MBA Target<fapi2::TARGET_TYPE_MBA> passed in
+    /// @param[in] i_target_mba:  MBA Target
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode p9c_mss_eff_config_thermal(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
@@ -66,6 +79,13 @@ extern "C" {
 
         FAPI_INF("*** Running mss_eff_config_thermal on %s ***",
                  mss::c_str(i_target_mba));
+
+        // If MBA has no DIMMs, return as there is nothing to do
+        if (mss::count_dimm(i_target_mba) == 0)
+        {
+            FAPI_INF("++++ NO DIMM on %s ++++", mss::c_str(i_target_mba));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
 
         FAPI_TRY(mss_eff_config_thermal_powercurve(i_target_mba));
         FAPI_TRY(mss_eff_config_thermal_throttles(i_target_mba));
@@ -78,9 +98,9 @@ extern "C" {
     }
 
     ///
-    /// @brief mss_eff_config_thermal_powercurve(): This function determines the
+    /// @brief This function determines the
     /// power curve attribute values to use
-    /// @param[in]   const fapi2::Target<fapi2::TARGET_TYPE_MBA> & i_target_mba:  MBA Target<fapi2::TARGET_TYPE_MBA> passed in
+    /// @param[in] i_target_mba:  MBA Target
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode mss_eff_config_thermal_powercurve(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
@@ -123,7 +143,7 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN,
                                i_target_mba, l_dram_gen));
 
-        // Only get power curve values for custom dimms to prevent errors
+        // get power curve values for custom DIMMs
         if (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
         {
             // These are the CDIMM power curve values for only VMEM (DDR3 and DDR4)
@@ -237,7 +257,8 @@ extern "C" {
                                    0x4000) == 0))
                             )
                             {
-                                FAPI_INF("WARNING:  VMEM power curve data is lab data, not ship level data. Using data anyways.");
+                                FAPI_INF("%s WARNING:  VMEM power curve data is lab data, not ship level data. Using data anyways.",
+                                         mss::c_str(i_target_mba));
                             }
 
                             // check total power curve (VMEM+VPP) values for DDR4
@@ -270,7 +291,8 @@ extern "C" {
                                            0x4000) == 0))
                                     )
                                     {
-                                        FAPI_INF("WARNING:  Total power curve data is lab data, not ship level data. Using data anyways.");
+                                        FAPI_INF("%s WARNING:  Total power curve data is lab data, not ship level data. Using data anyways.",
+                                                 mss::c_str(i_target_mba));
                                     }
                                 }
                                 else
@@ -293,11 +315,12 @@ extern "C" {
                                         FAPI_ASSERT(false,
                                                     fapi2::CEN_MSS_DIMM_POWER_CURVE_DATA_INVALID().
                                                     set_MEM_CHIP(l_target_chip).
-                                                    set_FFDC_DATA_1(l_cdimm_master_power_slope).
-                                                    set_FFDC_DATA_2(l_cdimm_master_power_intercept).
-                                                    set_FFDC_DATA_3(l_cdimm_supplier_power_slope).
-                                                    set_FFDC_DATA_4(l_cdimm_supplier_power_intercept),
-                                                    "");
+                                                    set_MASTER_SLOPE(l_cdimm_master_power_slope).
+                                                    set_MASTER_INTERCEPT(l_cdimm_master_power_intercept).
+                                                    set_SUPPLIER_SLOPE(l_cdimm_supplier_power_slope).
+                                                    set_SUPPLIER_INTERCEPT(l_cdimm_supplier_power_intercept),
+                                                    "%s CDIMM VPD power curve values not valid", mss::c_str(i_target_mba)
+                                                   );
                                     }
                                 }
                             }
@@ -342,26 +365,55 @@ extern "C" {
                                 FAPI_ASSERT(false,
                                             fapi2::CEN_MSS_DIMM_POWER_CURVE_DATA_INVALID().
                                             set_MEM_CHIP(l_target_chip).
-                                            set_FFDC_DATA_1(l_cdimm_master_power_slope).
-                                            set_FFDC_DATA_2(l_cdimm_master_power_intercept).
-                                            set_FFDC_DATA_3(l_cdimm_supplier_power_slope).
-                                            set_FFDC_DATA_4(l_cdimm_supplier_power_intercept),
-                                            "");
+                                            set_MASTER_SLOPE(l_cdimm_master_power_slope).
+                                            set_MASTER_INTERCEPT(l_cdimm_master_power_intercept).
+                                            set_SUPPLIER_SLOPE(l_cdimm_supplier_power_slope).
+                                            set_SUPPLIER_INTERCEPT(l_cdimm_supplier_power_intercept),
+                                            "%s CDIMM VPD power curve values not valid", mss::c_str(i_target_mba)
+                                           );
                             }
                         }
 
-                        FAPI_DBG("CDIMM VMEM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]", l_port, l_dimm,
+                        FAPI_DBG("%s CustomDIMM VMEM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]",
+                                 mss::c_str(i_target_mba), l_port, l_dimm,
                                  l_power_slope_array[l_port][l_dimm], l_power_int_array[l_port][l_dimm], l_power_slope2_array[l_port][l_dimm],
                                  l_power_int2_array[l_port][l_dimm]);
-                        FAPI_DBG("CDIMM Total Power [P%d:D%d][VMEM SLOPE=%d:INT=%d cW][VMEM SLOPE2=%d:INT2=%d cW]", l_port, l_dimm,
+                        FAPI_DBG("%s CustomDIMM VMEM+VPP Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]",
+                                 mss::c_str(i_target_mba), l_port, l_dimm,
                                  l_total_power_slope_array[l_port][l_dimm], l_total_power_int_array[l_port][l_dimm],
                                  l_total_power_slope2_array[l_port][l_dimm],
                                  l_total_power_int2_array[l_port][l_dimm]);
                     }
+                    // non custom dimm power curves
+                    else
+                    {
+                        l_power_slope_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_POWER_SLOPE_DEFAULT;
+                        l_power_int_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_POWER_INT_DEFAULT;
+                        l_power_slope2_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_POWER_SLOPE_DEFAULT;
+                        l_power_int2_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_POWER_INT_DEFAULT;
+                        l_total_power_slope_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_PLUS_VPP_POWER_SLOPE_DEFAULT;
+                        l_total_power_int_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_PLUS_VPP_POWER_INT_DEFAULT;
+                        l_total_power_slope2_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_PLUS_VPP_POWER_SLOPE_DEFAULT;
+                        l_total_power_int2_array[l_port][l_dimm] =
+                            ISDIMM_VMEM_PLUS_VPP_POWER_INT_DEFAULT;
+                        FAPI_DBG("%s NonCustomDIMM VMEM Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]",
+                                 mss::c_str(i_target_mba), l_port, l_dimm,
+                                 l_power_slope_array[l_port][l_dimm], l_power_int_array[l_port][l_dimm], l_power_slope2_array[l_port][l_dimm],
+                                 l_power_int2_array[l_port][l_dimm]);
+                        FAPI_DBG("%s NonCustomDIMM VMEM+VPP Power [P%d:D%d][SLOPE=%d:INT=%d cW][SLOPE2=%d:INT2=%d cW]",
+                                 mss::c_str(i_target_mba), l_port, l_dimm,
+                                 l_total_power_slope_array[l_port][l_dimm], l_total_power_int_array[l_port][l_dimm],
+                                 l_total_power_slope2_array[l_port][l_dimm],
+                                 l_total_power_int2_array[l_port][l_dimm]);
 
-                    // non custom dimms will no longer use power curves
-                    // These will use a simplified approach of using throttle values for certain ranges of power
-                    // in mss_bulk_pwr_throttles.
+                    }
                 }
             }
         }
@@ -388,8 +440,8 @@ extern "C" {
     }
 
     ///
-    /// @brief mss_eff_config_thermal_throttles(): This function determines the throttle attribute values to use
-    /// @l_param[in]   const fapi2::Target<fapi2::TARGET_TYPE_MBA> & i_target_mba:  MBA Target<fapi2::TARGET_TYPE_MBA> passed in
+    /// @brief This function determines the throttle attribute values to use
+    /// @param[in] i_target_mba:  MBA Target
     /// @return fapi2::ReturnCode
     ///
     fapi2::ReturnCode mss_eff_config_thermal_throttles(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba)
@@ -398,7 +450,7 @@ extern "C" {
         FAPI_INF("*** Running mss_eff_config_thermal_throttles on %s ***",
                  mss::c_str(i_target_mba));
 
-// variables used in this function
+        // variables used in this function
         uint8_t l_custom_dimm = 0;
         uint8_t l_num_dimms_on_port = 0;
         uint32_t l_runtime_throttle_n_per_mba = 0;
@@ -407,12 +459,12 @@ extern "C" {
         uint32_t l_dimm_thermal_power_limit = 0;
         uint32_t l_channel_pair_thermal_power_limit = 0;
         uint8_t l_num_mba_with_dimms = 0;
-        uint8_t l_mba_index = 0;
         uint8_t l_ras_increment = 0;
         uint8_t l_cas_increment = 0;
         uint32_t l_max_dram_databus_util = 0;
         uint32_t l_dimm_reg_power_limit_per_dimm_adj = 0;
         uint32_t l_dimm_reg_power_limit_per_dimm = 0;
+        uint32_t l_dimm_reg_power_limit_per_dimm_ddr3 = 0;
         uint32_t l_dimm_reg_power_limit_per_dimm_ddr4 = 0;
         uint8_t l_max_number_dimms_per_reg = 0;
         uint8_t l_dimm_reg_power_limit_adj_enable = 0;
@@ -422,29 +474,16 @@ extern "C" {
         uint32_t l_power_int_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint32_t l_total_power_slope_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
         uint32_t l_total_power_int_array[MAX_PORTS_PER_MBA][MAX_DIMM_PER_PORT] = {0};
-        float MAX_UTIL;
-        fapi2::ReturnCode rc;
+        fapi2::ReturnCode l_rc;
+        uint8_t l_throttle_multiplier = 0;
+        uint32_t l_safemode_throttle_n_per_mba = 0;
+        uint32_t l_safemode_throttle_n_per_chip = 0;
 
         // Get Centaur target for the given MBA
-        const auto l_target_chip = i_target_mba.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_CUSTOM_DIMM, i_target_mba, l_custom_dimm));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_NUM_DROPS_PER_PORT,
                                i_target_mba, l_num_dimms_on_port));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_thermal_power_limit));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
-                               l_runtime_throttle_d));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_dram_databus_util));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm_ddr4));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_number_dimms_per_reg));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE,
-                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_adj_enable));
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT,
                                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_reg_max_dimm_count));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_EFF_DRAM_GEN,
                                i_target_mba, l_dram_gen));
@@ -457,29 +496,84 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_TOTAL_POWER_INT,
                                i_target_mba, l_total_power_int_array));
 
-        // Get number of Centaur MBAs that have dimms present
-        // Custom dimms (CDIMMs) use mba/chip throttling, so count number of mbas that have dimms
-        if (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
+        // If any of these are zero and used, then we will end up with an error in p9c_mss_bulk_pwr_throttles
+        //   (CEN_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER), so no need to check these here
+        // ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT
+        // ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3
+        // ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_THERMAL_MEMORY_POWER_LIMIT,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_thermal_power_limit));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR3,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm_ddr3));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_VMEM_REGULATOR_MEMORY_POWER_LIMIT_PER_DIMM_DDR4,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_per_dimm_ddr4));
+
+        // If these are zero then the power limit adjustment just won't happen
+        // Not deemed critical enough to stop the IPL, so no error will be called out
+        // ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR
+        // ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_NUMBER_DIMMS_POSSIBLE_PER_VMEM_REGULATOR,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_number_dimms_per_reg));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_VMEM_REGULATOR_POWER_LIMIT_PER_DIMM_ADJ_ENABLE,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_dimm_reg_power_limit_adj_enable));
+
+        // Error out if we have invalid MRW attribute combination:
+        // ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL = 0 with ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS > 0 (throttling enabled) is not valid
+        //   because we would end up with N=0 and M>0 for N/M throttling which will cause hangs
+        // Note that M=0 has memory throttling disabled
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_runtime_throttle_d));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_max_dram_databus_util));
+        FAPI_ASSERT( !((l_runtime_throttle_d > 0) && (l_max_dram_databus_util == 0)),
+                     fapi2::CEN_MSS_MRW_MAX_DRAM_DATABUS_UTIL_INVALID().
+                     set_MRW_DRAM_UTIL(l_max_dram_databus_util).
+                     set_MRW_M_THROTTLE(l_runtime_throttle_d),
+                     "Invalid MRW values:  ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL %d ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS %d", l_max_dram_databus_util,
+                     l_runtime_throttle_d);
+
+        // Error out if the safemode MRW attributes are zero
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_safemode_throttle_n_per_mba));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP,
+                               fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_safemode_throttle_n_per_chip));
+        FAPI_ASSERT( !((l_safemode_throttle_n_per_mba == 0) || (l_safemode_throttle_n_per_chip == 0)),
+                     fapi2::CEN_MSS_MRW_SAFEMODE_THROTTLES_INVALID().
+                     set_MRW_SAFEMODE_N_MBA(l_safemode_throttle_n_per_mba).
+                     set_MRW_SAFEMODE_N_CHIP(l_safemode_throttle_n_per_chip),
+                     "Invalid MRW values:  ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA %d ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP %d",
+                     l_safemode_throttle_n_per_mba, l_safemode_throttle_n_per_chip);
+
+        // If throttling is disabled, set max util to MAX_UTIL
+        if (l_runtime_throttle_d == 0)
         {
-            const auto l_target_mba_array = l_target_chip.getChildren<fapi2::TARGET_TYPE_MBA>();
-            l_num_mba_with_dimms = 0;
+            FAPI_INF("%s Memory Throttling is Disabled with M=0", mss::c_str(i_target_mba));
+            l_max_dram_databus_util = MAX_UTIL;
+        }
 
-            for (l_mba_index = 0; l_mba_index < l_target_mba_array.size(); l_mba_index++)
+        // get number of mba's with dimms, used below to help determine power limit values below
+        // Have to have this section in braces otherwise compile fails
+        {
+            const auto& l_target_chip = mss::find_target<TARGET_TYPE_MEMBUF_CHIP>(i_target_mba);
+
+            for (const auto& l_mba : mss::find_targets<TARGET_TYPE_MBA>(l_target_chip))
             {
-                const auto l_target_dimm_array = l_target_mba_array[l_mba_index].getChildren<fapi2::TARGET_TYPE_DIMM>();
-
-                if (l_target_dimm_array.size() > 0)
+                if (mss::count_dimm(l_mba) > 0)
                 {
                     l_num_mba_with_dimms++;
                 }
             }
         }
-        // ISDIMM (non custom dimm) uses dimm/mba throttling, so set num_mba_with_dimms to 1
-        else
-        {
-            l_num_mba_with_dimms = 1;
-        }
 
+        // Set the throttle multiplier based on how throttles are used
+        // CDIMMs use per mba and per chip throttles (for l_throttle_n_per_mba and l_throttle_n_per_chip), set to 2
+        // ISDIMMs use per slot and per mba throttles (for l_throttle_n_per_mba and l_throttle_n_per_chip), set to 1
+        l_throttle_multiplier = (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ? 2 : 1;
+
+        FAPI_INF("%s [Number MBAs with DIMMs %d][Throttle Multiplier %d]", mss::c_str(i_target_mba), l_num_mba_with_dimms,
+                 l_throttle_multiplier);
 
 //------------------------------------------------------------------------------
 // Memory Throttle Determination
@@ -503,16 +597,8 @@ extern "C" {
         // adjust the regulator power limit per dimm if enabled and use this if less than the thermal limit
 
         // If DDR4, use DDR4 regulator power limit
-        if (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
-        {
-            l_dimm_reg_power_limit_per_dimm = l_dimm_reg_power_limit_per_dimm_ddr4;
-        }
-
-        // If reg power limit is zero, then set to thermal limit - needed for ISDIMM systems since some of these MRW attributes are not defined
-        if (l_dimm_reg_power_limit_per_dimm == 0)
-        {
-            l_dimm_reg_power_limit_per_dimm = l_dimm_thermal_power_limit;
-        }
+        l_dimm_reg_power_limit_per_dimm = (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4) ?
+                                          l_dimm_reg_power_limit_per_dimm_ddr4 : l_dimm_reg_power_limit_per_dimm_ddr3;
 
         l_dimm_reg_power_limit_per_dimm_adj = l_dimm_reg_power_limit_per_dimm;
 
@@ -528,45 +614,35 @@ extern "C" {
                     l_dimm_reg_power_limit_per_dimm
                     * l_max_number_dimms_per_reg
                     / l_reg_max_dimm_count;
-                FAPI_INF("VMEM Regulator Power/DIMM Limit Adjustment from %d to %d cW (DIMMs under regulator %d/%d)",
-                         l_dimm_reg_power_limit_per_dimm, l_dimm_reg_power_limit_per_dimm_adj, l_reg_max_dimm_count, l_max_number_dimms_per_reg);
+                FAPI_INF("%s VMEM Regulator Power/DIMM Limit Adjustment from %d to %d cW (DIMMs under regulator %d/%d)",
+                         mss::c_str(i_target_mba), l_dimm_reg_power_limit_per_dimm, l_dimm_reg_power_limit_per_dimm_adj,
+                         l_reg_max_dimm_count, l_max_number_dimms_per_reg);
             }
         }
 
         // Use the smaller of the thermal limit and regulator power limit per dimm
-        if (l_dimm_reg_power_limit_per_dimm_adj < l_dimm_thermal_power_limit)
-        {
-            l_dimm_thermal_power_limit = l_dimm_reg_power_limit_per_dimm_adj;
-        }
+        FAPI_INF("%s Power/DIMM:  VMEM Regulator Limit %d cW, DIMM Thermal Limit %d cW",
+                 mss::c_str(i_target_mba), l_dimm_reg_power_limit_per_dimm_adj, l_dimm_thermal_power_limit);
+        l_dimm_thermal_power_limit = (l_dimm_reg_power_limit_per_dimm_adj < l_dimm_thermal_power_limit) ?
+                                     l_dimm_reg_power_limit_per_dimm_adj : l_dimm_thermal_power_limit;
 
         // Adjust the thermal/power limit to represent the power for all dimms under an MBA
-        if (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES)
-        {
-            l_channel_pair_thermal_power_limit =
-                l_dimm_thermal_power_limit / l_num_mba_with_dimms;
-        }
+        // CDIMM thermal power limit is for both MBAs, so divide by number of MBAs
         // ISDIMMs thermal power limit from MRW is per DIMM, so multiply by number of dimms on channel to get channel power and multiply by 2 to get channel pair power
-        else
-        {
-            // ISDIMMs
-            l_channel_pair_thermal_power_limit =
-                l_dimm_thermal_power_limit * l_num_dimms_on_port * 2;
-        }
+        l_channel_pair_thermal_power_limit = (l_custom_dimm == fapi2::ENUM_ATTR_CEN_EFF_CUSTOM_DIMM_YES) ?
+                                             (l_dimm_thermal_power_limit / l_num_mba_with_dimms) :
+                                             (l_dimm_thermal_power_limit * l_num_dimms_on_port * 2);
 
         // Update the channel pair power limit attribute
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_MEM_WATT_TARGET,
                                i_target_mba, l_channel_pair_thermal_power_limit));
 
-
-
-
-
         // Initialize the runtime throttle attributes to an unthrottled value for mss_bulk_pwr_throttles
-        // max utilization comes from MRW value in c% - convert to %
-        MAX_UTIL = (float) l_max_dram_databus_util / 100;
-        l_runtime_throttle_n_per_mba = (int)(l_runtime_throttle_d * (MAX_UTIL / 100) / 4);
-        l_runtime_throttle_n_per_chip = (int)(l_runtime_throttle_d * (MAX_UTIL / 100) / 4) *
-                                        l_num_mba_with_dimms;
+        l_runtime_throttle_n_per_mba = (static_cast<uint32_t>(l_runtime_throttle_d * ((static_cast<double>
+                                        (convert_to_percent(l_max_dram_databus_util))) / PERCENT_CONVERSION) / ADDR_TO_DATA_UTIL_CONVERSION));
+        l_runtime_throttle_n_per_chip = (static_cast<uint32_t>(l_runtime_throttle_d * ((static_cast<double>
+                                         (convert_to_percent(l_max_dram_databus_util))) / PERCENT_CONVERSION) / ADDR_TO_DATA_UTIL_CONVERSION) *
+                                         l_throttle_multiplier);
 
         // for better custom dimm performance for DDR4, set the per mba throttle to the per chip throttle
         // Not planning on doing this for DDR3
@@ -579,17 +655,14 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
                                i_target_mba, l_runtime_throttle_n_per_mba));
 
-
-
-
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
                                i_target_mba, l_runtime_throttle_n_per_chip));
-
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
                                i_target_mba, l_runtime_throttle_d));
 
-        FAPI_INF("Min Power/Thermal Limit per MBA %d cW.  Unthrottled values [%d/%d/%d].", l_channel_pair_thermal_power_limit,
+        FAPI_INF("%s Min Power/Thermal Limit per MBA %d cW.  Unthrottled values [%d/%d/%d].",
+                 mss::c_str(i_target_mba), l_channel_pair_thermal_power_limit,
                  l_runtime_throttle_n_per_mba, l_runtime_throttle_n_per_chip, l_runtime_throttle_d);
 
 
@@ -606,7 +679,8 @@ extern "C" {
 
         // Call the procedure function that takes a channel pair power limit and
         // converts it to throttle values
-        FAPI_EXEC_HWP(rc, p9c_mss_bulk_pwr_throttles, i_target_mba);
+        FAPI_EXEC_HWP(l_rc, p9c_mss_bulk_pwr_throttles, i_target_mba);
+        FAPI_TRY(l_rc, "Failed running p9c_mss_bulk_pwr_throttles on %s", mss::c_str(i_target_mba));
 
         // Reset the total power curve attributes back to the original values
         if (l_dram_gen == fapi2::ENUM_ATTR_CEN_EFF_DRAM_GEN_DDR4)
@@ -635,13 +709,11 @@ extern "C" {
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_MBA,
                                i_target_mba, l_runtime_throttle_n_per_mba));
 
-
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_NUMERATOR_PER_CHIP,
                                i_target_mba, l_runtime_throttle_n_per_chip));
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_RUNTIME_MEM_THROTTLE_DENOMINATOR,
                                i_target_mba, l_runtime_throttle_d));
-
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_THROTTLE_CONTROL_RAS_WEIGHT,
                                i_target_mba, l_ras_increment));

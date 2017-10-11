@@ -22,3 +22,37 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p9c_mss_util_to_throttle.H
+/// @brief determine the minimum N throttle settings for N/M throttling for a given dram data bus util value
+///
+/// *HWP HWP Owner: Andre Marin <aamaring@us.ibm.com>
+/// *HWP HWP Backup: Michael Pardeik <pardeik@us.ibm.com>
+/// *HWP Team: Memory
+/// *HWP Level: 2
+/// *HWP Consumed by: HB:CI
+///
+
+#ifndef MSS_UTIL_TO_THROTTLE_H_
+#define MSS_UTIL_TO_THROTTLE_H_
+
+//------------------------------------------------------------------------------
+//  Includes
+//------------------------------------------------------------------------------
+#include <fapi2.H>
+
+typedef fapi2::ReturnCode (*p9c_mss_util_to_throttle_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_MBA>&);
+
+extern "C"
+{
+
+    ///
+    /// @brief This function will determine N/M throttles and channel pair power for a given dram data bus util value from attribute ATTR_CEN_MSS_DATABUS_UTIL_PER_MBA
+    /// @param[in] i_target_mba:  MBA Target
+    /// @return fapi2::ReturnCode
+    ///
+    fapi2::ReturnCode p9c_mss_util_to_throttle(const fapi2::Target<fapi2::TARGET_TYPE_MBA>& i_target_mba);
+
+} // extern "C"
+
+#endif // MSS_UTIL_TO_THROTTLE_H_

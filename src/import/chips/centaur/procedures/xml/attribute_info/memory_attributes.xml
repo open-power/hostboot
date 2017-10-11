@@ -3471,16 +3471,6 @@ Will be set at an MBA level with one policy to be used</description>
 </attribute>
 
 <attribute>
-    <id>ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT</id>
-    <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Maximum number of installed DIMMs per VMEM regulator for all VMEM regulators in the system.</description>
-    <valueType>uint8</valueType>
-    <writeable/>
-    <odmVisable/>
-    <odmChangeable/>
-</attribute>
-
-<attribute>
     <id>ATTR_CEN_MRW_WR_VREF_CHECK_VREF_STEP_SIZE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>Machine Readable Workbook attribute that holds the step size of the VREF when doing a box shmoo</description>

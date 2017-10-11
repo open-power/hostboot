@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,13 +22,14 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<hwpErrors>
 <!-- $Id: memory_mss_bulk_pwr_throttles.xml,v 1.5 2014/06/02 13:11:07 pardeik Exp $ -->
 <!-- For file ../../ipl/fapi/mss_bulk_pwr_throttles.C -->
 <!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
-<!-- // *! BACKUP NAME : Jacob Sloat       Email: jdsloat@us.ibm.com -->
-
+<!-- // *! BACKUP NAME : Stephen Glancy    Email: sglancy@us.ibm.com -->
 <!-- Original Source for RC_CEN_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER memory_errors.xml -->
+
+<hwpErrors>
+
   <hwpError>
     <rc>RC_CEN_MSS_NOT_ENOUGH_AVAILABLE_DIMM_POWER</rc>
     <description>Unable to find throttle setting that has DIMM power underneath the limit.</description>
@@ -51,6 +52,30 @@
       <childType>TARGET_TYPE_DIMM</childType>
     </childTargets>
   </deconfigure>
-</hwpError>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_MIN_UTILIZATION_ERROR</rc>
+    <description>Unable to find throttle setting that has utilization at or higher than the minimum limit.</description>
+  <ffdc>UTIL_CALC</ffdc>
+  <ffdc>UTIL_TARGET</ffdc>
+  <callout>
+    <childTargets>
+      <parent>MEM_MBA</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+    <priority>MEDIUM</priority>
+  </callout>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  <deconfigure>
+    <childTargets>
+      <parent>MEM_MBA</parent>
+      <childType>TARGET_TYPE_DIMM</childType>
+    </childTargets>
+  </deconfigure>
+  </hwpError>
 
 </hwpErrors>

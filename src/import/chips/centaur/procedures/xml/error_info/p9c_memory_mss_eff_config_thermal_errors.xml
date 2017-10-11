@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -39,18 +39,26 @@
   <hwpError>
     <rc>RC_CEN_MSS_DIMM_POWER_CURVE_DATA_INVALID</rc>
     <description>DIMM power curve data is invalid</description>
-    <ffdc>FFDC_DATA_1</ffdc>
-    <ffdc>FFDC_DATA_2</ffdc>
-    <ffdc>FFDC_DATA_3</ffdc>
-    <ffdc>FFDC_DATA_4</ffdc>
+    <ffdc>MASTER_SLOPE</ffdc>
+    <ffdc>MASTER_INTERCEPT</ffdc>
+    <ffdc>SUPPLIER_SLOPE</ffdc>
+    <ffdc>SUPPLIER_INTERCEPT</ffdc>
     <callout><target>MEM_CHIP</target><priority>HIGH</priority></callout>
-</hwpError>
+  </hwpError>
+
   <hwpError>
-    <rc>RC_CEN_MSS_DIMM_NOT_FOUND_IN_POWER_TABLE</rc>
-    <description>Unable to find matching entry in DIMM power table</description>
-    <ffdc>FFDC_DATA_1</ffdc>
-    <ffdc>FFDC_DATA_2</ffdc>
-    <ffdc>FFDC_DATA_3</ffdc>
-    <callout><target>MEM_DIMM</target><priority>HIGH</priority></callout>
-</hwpError>
+    <rc>RC_CEN_MSS_MRW_MAX_DRAM_DATABUS_UTIL_INVALID</rc>
+    <description>Invalid value found for attribute </description>
+    <ffdc>MRW_DRAM_UTIL</ffdc>
+    <ffdc>MRW_M_THROTTLE</ffdc>
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_MRW_SAFEMODE_THROTTLES_INVALID</rc>
+    <description>Invalid value found for attribute </description>
+    <ffdc>MRW_SAFEMODE_N_MBA</ffdc>
+    <ffdc>MRW_SAFEMODE_N_CHIP</ffdc>
+    <callout><procedure>CODE</procedure><priority>HIGH</priority></callout>
+  </hwpError>
 </hwpErrors>

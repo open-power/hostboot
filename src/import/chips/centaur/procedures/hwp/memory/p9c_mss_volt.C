@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 /// @file p9c_mss_volt.C
 /// @brief Reads in supported DIMM voltages from SPD and determines optimal voltage bin for the DIMM voltage domain.
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 /// *HWP HWP Backup: Andre Marin <aamaring@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2
@@ -354,7 +354,7 @@ fapi2::ReturnCode p9c_mss_volt(const std::vector<fapi2::Target<fapi2::TARGET_TYP
     }
 
     // Initialize DIMM Count Attribute for mss_volt_dimm_count to use
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_VMEM_REGULATOR_MAX_DIMM_COUNT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_dimm_count));
 
 fapi_try_exit:

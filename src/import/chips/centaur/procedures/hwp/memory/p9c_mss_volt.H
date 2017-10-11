@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 /// @file p9c_mss_volt.H
 /// @brief Reads in supported DIMM voltages from SPD and determines optimal voltage bin for the DIMM voltage domain.
 ///
-/// *HWP HWP Owner: Luke Mulkey <lwmulkey@us.ibm.com>
+/// *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 /// *HWP HWP Backup: Andre Marin <aamaring@us.ibm.com>
 /// *HWP Team: Memory
 /// *HWP Level: 2

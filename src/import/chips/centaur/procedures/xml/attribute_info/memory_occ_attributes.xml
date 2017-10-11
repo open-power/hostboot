@@ -22,5 +22,41 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- -->
+<!-- @file memory_occ_attributes.xml -->
+<!-- @brief Attribute xml for occ memory attributes -->
+<!-- -->
+<!-- *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com> -->
+<!-- *HWP HWP Backup: Michael Pardeik <pardeik@us.ibm.com> -->
+<!-- *HWP FW Owner: Bill Hoffa <wghoffa@us.ibm.com> -->
+<!-- *HWP Team: Memory -->
+<!-- *HWP Level: 2 -->
+<!-- *HWP Consumed by: FSP:HB -->
+<!-- -->
 <attributes>
+
+<attribute>
+    <id>ATTR_CEN_MSS_DATABUS_UTIL_PER_MBA</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>MBA DRAM data bus utilization percent to use to determine cfg_nm_n_per_mba</description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+
+<!--
+<attribute>
+    <id>ATTR_CEN_MSS_UTIL_N_PER_MBA</id>
+    <targetType>TARGET_TYPE_MBA</targetType>
+    <description>cfg_nm_n_per_mba throttle N value calculated from ATTR_CEN_MSS_DATABUS_UTIL_PER_MBA</description>
+    <valueType>uint32</valueType>
+    <writeable/>
+    <odmVisable/>
+    <odmChangeable/>
+    <persistRuntime/>
+</attribute>
+-->
+
 </attributes>

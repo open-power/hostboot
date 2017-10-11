@@ -22,5 +22,20 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- // *! OWNER NAME  : Michael Pardeik   Email: pardeik@us.ibm.com -->
+<!-- // *! BACKUP NAME : Stephen Glancy    Email: sglancy@us.ibm.com -->
+
 <hwpErrors>
+
+  <hwpError>
+    <rc>RC_CEN_MSS_DIMM_COUNT_EXCEEDS_MAX</rc>
+    <description>DIMM count for targets exceeds MRW VMEM DIMM Limit.</description>
+  <ffdc>COUNT_CALC</ffdc>
+  <ffdc>COUNT_MAX</ffdc>
+  <callout>
+    <procedure>CODE</procedure>
+    <priority>HIGH</priority>
+  </callout>
+  </hwpError>
+
 </hwpErrors>

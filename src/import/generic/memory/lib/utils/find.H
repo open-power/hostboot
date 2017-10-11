@@ -27,8 +27,8 @@
 /// @file find.H
 /// @brief Templates for finding things
 ///
-// *HWP HWP Owner: Jacob Harvey <jlharvey@us.ibm.com>
-// *HWP HWP Backup: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Owner: Andre Marin <aamarin@us.ibm.com>
+// *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
@@ -59,6 +59,25 @@ template< fapi2::TargetType M, fapi2::TargetType T >
 inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target)
 {
     return i_target.template getChildren<M>();
+}
+
+///
+/// @brief find a set of elements based on a fapi2 target
+/// @tparam M the target type to be returned
+/// @tparam T the fapi2 target type of the argument
+/// @param[in] i_target the fapi2 target T
+/// @param[in] i_state the fapi2 target state for the children of i_target
+/// @return a vector of M targets that match the target state specified
+/// @note Only works for valid parent-child relationships
+/// So calling find_targets<TARGET_TYPE_DIMM>(l_mca) will work here
+/// but calling find_targets<TARGET_TYPE_DIMM>(l_mcs) will not work
+/// Compiler will freak out and we'll never get a bad relationship/ error at runtime
+/// If we do, it's on fapi2
+///
+template< fapi2::TargetType M, fapi2::TargetType T >
+inline std::vector< fapi2::Target<M> > find_targets( const fapi2::Target<T>& i_target, fapi2::TargetState i_state)
+{
+    return i_target.template getChildren<M>(i_state);
 }
 
 ///
