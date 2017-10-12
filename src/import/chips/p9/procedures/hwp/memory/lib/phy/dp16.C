@@ -2489,6 +2489,11 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
     l_value = ((l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2666) || (l_freq == fapi2::ENUM_ATTR_MSS_FREQ_MT2400)) ?
               blue_waterfall_range::TWO_TO_FIVE :
               blue_waterfall_range::ONE_TO_FOUR;
+
+    // So if the red waterfall workaround was/ is going to run, we have to change the blue waterfall range
+    // This is freq independent
+    mss::workarounds::dp16::update_blue_waterfall_extend_range( i_target, l_value);
+
     FAPI_INF("%s Initializing RDCLK extended range to 0x%01x", c_str(i_target), l_value);
 
     // Loops through all DP's and sets the register values
