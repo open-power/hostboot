@@ -138,13 +138,13 @@ int32_t getRawCardType( TARGETING::TargetHandle_t i_mba,
                         CEN_SYMBOL::WiringType & o_type );
 
 /**
- * @brief  Cleanup MCIFIR bits on proc side for hostboot.
- * @param  i_mbChip   Membuf chip.
- * @param  i_sc  Service Data Collector.
+ * @brief  When handling attentions on a memory buffer, there will be FIR bits
+ *         on the processor side of the bus that must be manually cleaned up in
+ *         order to completely clear the attention.
+ * @param  i_mbChip MEMBUF chip.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
-int32_t mcifirCleanup( ExtensibleChip *i_mbChip,
-                       STEP_CODE_DATA_STRUCT & i_sc );
+uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip );
 
 } // end namespace MemUtils
 

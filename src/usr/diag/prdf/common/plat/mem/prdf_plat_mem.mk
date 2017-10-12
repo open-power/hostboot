@@ -51,6 +51,7 @@ prd_obj += prdfMemUtils.o
 prd_obj += prdfMemThresholds.o
 
 # rule plugin related
+prd_rule_plugin += prdfCenMembuf.o
 prd_rule_plugin += prdfP9Mca_common.o
 prd_rule_plugin += prdfP9Mcbist_common.o
 
