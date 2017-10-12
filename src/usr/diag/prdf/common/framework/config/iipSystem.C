@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -396,8 +396,16 @@ int32_t System::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         // In that case get the secondary signature and update this.
         if ( NULL != l_temp_sdc )
         {
-            // Merge SUE flag
-            if( serviceData.service_data->IsSUE() )
+            // Merge SUE flag, but only when the UERE flag is not set. We want
+            // to merge the flag in cases where we happen to get another attn
+            // at around the same time as a CS that has the SUE flag set, so
+            // when we analyze to that other attn, we account for the SUE flag
+            // from the CS and adjust the gard policy to null accordingly.
+            // However, we do not want to merge the flags when we get the SUE
+            // and UERE flags together, as then we end up adjusting the gard
+            // policy to null when analyzing the SueSource, which we don't want.
+            if( serviceData.service_data->IsSUE() &&
+                !serviceData.service_data->IsUERE() )
             {
                 l_temp_sdc->SetSUE();
             }
