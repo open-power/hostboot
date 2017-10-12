@@ -38,6 +38,14 @@
         access      write_only;
     };
 
+    register MCBISTFIR_OR
+    {
+        name        "P9 MCBIST target MCBISTFIR OR";
+        scomaddr    0x07012302;
+        capture     group never;
+        access      write_only;
+    };
+
     register MCBISTFIR_MASK_OR
     {
         name        "P9 MCBIST target MCBISTFIR MASK OR";
@@ -238,6 +246,13 @@
     {
         name        "P9 MCBIST target MCBIST Control Register";
         scomaddr    0x070123DB;
+        capture     group default;
+    };
+
+    register MCB_CNTLSTAT
+    {
+        name        "P9 MCBIST Configured Command Sequence Status Register";
+        scomaddr    0x070123DC;
         capture     group default;
     };
 

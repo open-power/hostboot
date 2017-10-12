@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,15 @@ class MbaDomain : public RuleChipDomain
     virtual bool Query( ATTENTION_TYPE i_attnType )
     {  return false;  }
 
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief Starts memory background scrubbing or VCM procedure for MBA
+     *        during R/R and F/O if required.
+     */
+    void handleRrFo();
+
+    #endif
 };
 
 } // end namespace PRDF
