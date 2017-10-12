@@ -220,6 +220,24 @@ inline void update_red_waterfall(uint64_t& io_red_waterfall)
 }
 
 ///
+/// @brief If red_waterfall workaround is run, the blue waterfall range needs to be 1-4
+/// @param[in] i_target - the target to operate on
+/// @param[in,out] io_blue_extended_range - the blue waterfall range variable
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note this is freq independant
+///
+inline void update_blue_waterfall_extend_range( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        blue_waterfall_range& io_blue_extended_range)
+{
+    const bool l_red_waterfall = mss::chip_ec_feature_red_waterfall_adjust(i_target);
+
+    if ( l_red_waterfall )
+    {
+        io_blue_extended_range = blue_waterfall_range::ONE_TO_FOUR;
+    }
+}
+
+///
 /// @brief Gets the red waterfall and gate delay values for a given DP quad
 /// @tparam uint64_t QUAD - which quad to access
 /// @param[in,out] io_waterfall_reg   - waterfall register data
