@@ -141,6 +141,21 @@ fapi2::ReturnCode dram_device_type(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    uint8_t& o_value);
 
 ///
+/// @brief       Wrapper function for finding the raw card
+/// @param[in]   i_target the dimm target
+/// @param[in]   i_dimm_type
+/// @param[in]   i_ref_raw_card_rev for FFDC
+/// @param[in]   i_map raw card map
+/// @return      rcw_settings vector of rcw settings
+/// @note        This specialization is suited for creating a cache with custom
+///              SPD data (e.g. testing custom SPD).
+///
+rcw_settings find_raw_card( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                            const uint64_t i_dimm_type,
+                            const uint8_t i_ref_raw_card_rev,
+                            const std::vector<std::pair<uint8_t, rcw_settings> > i_map);
+
+///
 /// @brief Decodes reference raw card
 /// @param[in] i_target dimm target
 /// @param[in] i_spd_data SPD data
