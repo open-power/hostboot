@@ -5358,6 +5358,47 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_P9A_LOGIC_ONLY</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Returns true if spy name has usage only in P9A.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_IOF0PLL_INITF</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Cumulus and Axone only: IOF0PLL initf
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_AXONE</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_EXTRACT_SBE_RC_P9NDD1_CHIPS</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
