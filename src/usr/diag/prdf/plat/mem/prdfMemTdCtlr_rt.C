@@ -914,6 +914,230 @@ uint32_t MemTdCtlr<TYPE_MBA>::unmaskEccAttns()
 
 //------------------------------------------------------------------------------
 
+template<>
+uint32_t MemTdCtlr<TYPE_MCBIST>::handleRrFo()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MCBIST>::handleRrFo] "
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check if maintenance command complete attention is set.
+        SCAN_COMM_REGISTER_CLASS * mcbistfir =
+                                iv_chip->getRegister("MCBISTFIR");
+        o_rc = mcbistfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCBISTFIR");
+            break;
+        }
+
+        // If there is a command complete attention, nothing to do, break out.
+        if ( mcbistfir->IsBitSet(10) ||  mcbistfir->IsBitSet(12) )
+            break;
+
+
+        // Check if a command is not running.
+        // If bit 0 of MCB_CNTLSTAT is on, a mcbist run is in progress.
+        SCAN_COMM_REGISTER_CLASS * mcb_cntlstat =
+            iv_chip->getRegister("MCB_CNTLSTAT");
+        o_rc = mcb_cntlstat->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MCB_CNTLSTAT" );
+            break;
+        }
+
+        // If a command is not running, set command complete attn, break.
+        if ( !mcb_cntlstat->IsBitSet(0) )
+        {
+            SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
+                iv_chip->getRegister("MCBISTFIR_OR");
+            mcbistfir_or->SetBit( 10 );
+
+            mcbistfir_or->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on MCBISTFIR_OR" );
+            }
+            break;
+        }
+
+        // Check if there are unverified chip marks.
+        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
+
+        for ( auto & entry : vectorList )
+        {
+            ExtensibleChip * mcaChip = entry.getChip();
+            MemRank rank = entry.getRank();
+
+            // Get the chip mark
+            MemMark chipMark;
+            o_rc = MarkStore::readChipMark<TYPE_MCA>( mcaChip, rank, chipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MCA>(0x%08x,%d) "
+                        "failed", mcaChip->getHuid(), rank.getMaster() );
+                break;
+            }
+
+            if ( !chipMark.isValid() ) continue; // no chip mark present
+
+            // Get the DQ Bitmap data.
+            TargetHandle_t mcaTrgt = mcaChip->GetChipHandle();
+            MemDqBitmap<DIMMS_PER_RANK::MCA> dqBitmap;
+
+            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MCA>(mcaTrgt, rank, dqBitmap);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MCA>"
+                        "(0x%08x, %d)", getHuid(mcaTrgt), rank.getMaster() );
+                break;
+            }
+
+            // Check if the chip mark is verified or not.
+            bool cmVerified = false;
+            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark failed." );
+                break;
+            }
+
+            // If there are any unverified chip marks, stop the command, break.
+            if ( !cmVerified )
+            {
+                o_rc = stopBgScrub<TYPE_MCBIST>( iv_chip );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MCBIST>(0x%08x) "
+                              "failed", iv_chip->getHuid() );
+                }
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t MemTdCtlr<TYPE_MBA>::handleRrFo()
+{
+    #define PRDF_FUNC "[MemTdCtlr<TYPE_MBA>::handleRrFo] "
+
+     uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Check if maintenance command complete attention is set.
+        SCAN_COMM_REGISTER_CLASS * mbaspa =
+                                iv_chip->getRegister("MBASPA");
+        o_rc = mbaspa->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBASPA");
+            break;
+        }
+
+        // If there is a command complete attention, nothing to do, break out.
+        if ( mbaspa->IsBitSet(0) ||  mbaspa->IsBitSet(8) )
+            break;
+
+        // Check if a maintenance command is running currently.
+        SCAN_COMM_REGISTER_CLASS * mbmsr =
+                                iv_chip->getRegister("MBMSR");
+
+        o_rc = mbmsr->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on MBMSR");
+            break;
+        }
+
+        // If a command is not running, set command complete attn, break.
+        if ( !mbmsr->IsBitSet(0) )
+        {
+            SCAN_COMM_REGISTER_CLASS * mbaspa_or =
+                iv_chip->getRegister("MBASPA_OR");
+            mbaspa_or->SetBit( 0 );
+
+            mbaspa_or->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on MBASPA_OR" );
+            }
+            break;
+        }
+
+        // Check if there are unverified chip marks.
+        std::vector<TdRankListEntry> vectorList = iv_rankList.getList();
+
+        for ( auto & entry : vectorList )
+        {
+            ExtensibleChip * mbaChip = entry.getChip();
+            MemRank rank = entry.getRank();
+
+            // Get the chip mark
+            MemMark chipMark;
+            o_rc = MarkStore::readChipMark<TYPE_MBA>( mbaChip, rank, chipMark );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "readChipMark<TYPE_MBA>(0x%08x,%d) "
+                        "failed", mbaChip->getHuid(), rank.getMaster() );
+                break;
+            }
+
+            if ( !chipMark.isValid() ) continue; // no chip mark present
+
+            // Get the DQ Bitmap data.
+            TargetHandle_t mbaTrgt = mbaChip->GetChipHandle();
+            MemDqBitmap<DIMMS_PER_RANK::MBA> dqBitmap;
+
+            o_rc = getBadDqBitmap<DIMMS_PER_RANK::MBA>(mbaTrgt, rank, dqBitmap);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getBadDqBitmap<DIMMS_PER_RANK::MBA>"
+                        "(0x%08x, %d)", getHuid(mbaTrgt), rank.getMaster() );
+                break;
+            }
+
+            // Check if the chip mark is verified or not.
+            bool cmVerified = false;
+            o_rc = dqBitmap.isChipMark( chipMark.getSymbol(), cmVerified );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "dqBitmap.isChipMark failed." );
+                break;
+            }
+
+            // If there are any unverified chip marks, stop the command, break.
+            if ( !cmVerified )
+            {
+                o_rc = stopBgScrub<TYPE_MBA>( iv_chip );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "stopBgScrub<TYPE_MBA>(0x%08x) failed",
+                            iv_chip->getHuid() );
+                }
+                break;
+            }
+        }
+
+    } while (0);
+
+    return o_rc;
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+
 // Avoid linker errors with the template.
 template class MemTdCtlr<TYPE_MCBIST>;
 template class MemTdCtlr<TYPE_MBA>;

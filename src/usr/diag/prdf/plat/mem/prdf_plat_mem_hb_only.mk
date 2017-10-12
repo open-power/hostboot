@@ -40,6 +40,7 @@ prd_incpath += ${PRD_SRC_PATH}/plat/mem
 # plat/mem/ (non-rule plugin related)
 prd_obj += prdfMemScrubUtils.o
 prd_obj += prdfMemTdCtlr.o
+prd_obj += prdfP9McbistDomain.o
 
 # plat/mem/ (rule plugin related)
 prd_rule_plugin += prdfCenMba.o
@@ -56,7 +57,6 @@ ifneq (${HOSTBOOT_RUNTIME},1)
 prd_obj += prdfMemTdCtlr_ipl.o
 prd_obj += prdfMemTps_ipl.o
 prd_obj += prdfMemVcm_ipl.o
-prd_obj += prdfP9McbistDomain.o
 prd_obj += prdfMemIplCeStats.o
 prd_obj += prdfRestoreDramRepairs.o
 

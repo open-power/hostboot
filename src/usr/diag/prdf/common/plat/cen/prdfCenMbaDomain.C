@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/plat/mem/prdfP9McbistDomain.H $             */
+/* $Source: src/usr/diag/prdf/common/plat/cen/prdfCenMbaDomain.C $        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,59 +23,58 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef __prdfP9McbistDomain_H
-#define __prdfP9McbistDomain_H
+/**
+ * @file prdfCenMbaDomain.C
+ * @brief chip Plug-in code for mcbist domain
+ */
 
-#include <prdfRuleChipDomain.H>
+#include <prdfCenMbaDomain.H>
+
+// Framework includes
+#include <prdfExtensibleChip.H>
+#include <prdfPlatServices.H>
+#include <prdfTrace.H>
+#ifdef __HOSTBOOT_RUNTIME
+#include <prdfCenMbaDataBundle.H>
+#endif
+
+using namespace TARGETING;
 
 namespace PRDF
 {
 
-class McbistDomain : public RuleChipDomain
+using namespace PlatServices;
+
+#ifdef __HOSTBOOT_RUNTIME
+void MbaDomain::handleRrFo()
 {
-  public:
+    #define PRDF_FUNC "[MbaDomain::handleRrFo] "
 
-    /**
-     * @brief Constructor
-     * @param i_did  The domain ID
-     * @param i_size The projected size of the domain
-     */
-    McbistDomain( DOMAIN_ID i_did, uint32_t i_size = MCBIST_DOMAIN_SIZE ) :
-                  RuleChipDomain( i_did, i_size )
-    {}
+    do
+    {
+        uint32_t domainSize = GetSize();
+        // Iterate all MBAs in the domain.
+        for ( uint32_t i = 0; i < domainSize; ++i )
+        {
+            RuleChip * mbaChip = LookUp(i);
 
-    /**
-     * @brief  Query for an attention of a specific type in this domain
-     * @param  i_attnType [MACHINE_CHECK | RECOVERABLE | SPECIAL]
-     * @return false
-     * @note   This function will always return false. That way PRD will look
-     *         for the attention via the processor chip.
-     */
-    virtual bool Query( ATTENTION_TYPE i_attnType )
-    {  return false;  }
+            // Start background scrub if required.
+            MbaDataBundle * mbadb = getMbaDataBundle( mbaChip );
+            int32_t l_rc = mbadb->getTdCtlr()->handleRrFo();
+            if ( SUCCESS != l_rc )
+            {
+                // Let us not fail here. If problem is contained within a MBA
+                // we will discover it again during normal TD procedures.
+                PRDF_ERR( PRDF_FUNC "handleRrFo() failed: MBA=0x%08x",
+                          mbaChip->GetId() );
+                continue; // Keep going.
+            }
+        }
 
-    #ifdef __HOSTBOOT_RUNTIME
+    } while (0);
 
-    /**
-     * @brief Starts memory background scrubbing or VCM procedure for MCBIST
-     *        during R/R and F/O if required.
-     */
-    void handleRrFo();
-
-    #endif
-
-    #ifndef __HOSTBOOT_RUNTIME
-
-    /**
-     * @brief Starts memory background scrubbing for all memory.
-     * @param Non-SUCCESS if an internal function failed, SUCCESS otherwise.
-     */
-    int32_t startScrub();
-
-    #endif
-
-};
+    #undef PRDF_FUNC
+}
+#endif
 
 } // end namespace PRDF
-
-#endif /* __prdfP9McbistDomain_H */

@@ -44,6 +44,12 @@
 #include <prdfRegisterCache.H>
 #include <prdfScanFacility.H>
 #include <prdfMfgThresholdMgr.H>
+
+#ifdef __HOSTBOOT_RUNTIME
+#include <prdfP9McbistDomain.H>
+#include <prdfCenMbaDomain.H>
+#endif
+
 #if !defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
 #include <prdfSdcFileControl.H>
 #endif
@@ -146,6 +152,27 @@ errlHndl_t noLock_initialize()
         // Flush rule table cache since objects are all built.
         Prdr::LoadChipCache::flushCache();
     }
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    // Handle R/R scenario.
+    TARGETING::Target* masterProc = nullptr;
+    TARGETING::targetService().masterProcChipTargetHandle(masterProc);
+
+    if (TARGETING::MODEL_NIMBUS == masterProc->getAttr<TARGETING::ATTR_MODEL>())
+    {
+        McbistDomain * domain =
+            (McbistDomain *)systemPtr->GetDomain(MCBIST_DOMAIN);
+        domain->handleRrFo();
+    }
+    else
+    {
+        MbaDomain * domain =
+            (MbaDomain *)systemPtr->GetDomain(MBA_DOMAIN);
+        domain->handleRrFo();
+    }
+
+    #endif
 
     PRDF_EXIT( PRDF_FUNC );
 

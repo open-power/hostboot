@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <prdfPlatServices.H>
 #include <prdfTrace.H>
 #include <prdfMemBgScrub.H>
+#include <prdfP9McbistDataBundle.H>
 
 using namespace TARGETING;
 
@@ -43,6 +44,7 @@ namespace PRDF
 
 using namespace PlatServices;
 
+#ifndef __HOSTBOOT_RUNTIME
 int32_t McbistDomain::startScrub()
 {
     #define PRDF_FUNC "[McbistDomain::startScrub] "
@@ -72,5 +74,38 @@ int32_t McbistDomain::startScrub()
 
     #undef PRDF_FUNC
 }
+#endif
+
+#ifdef __HOSTBOOT_RUNTIME
+void McbistDomain::handleRrFo()
+{
+    #define PRDF_FUNC "[McbistDomain::handleRrFo] "
+
+    do
+    {
+        uint32_t domainSize = GetSize();
+        // Iterate all MCBISTs in the domain.
+        for ( uint32_t i = 0; i < domainSize; ++i )
+        {
+            RuleChip * mcbChip = LookUp(i);
+
+            // Start background scrub if required.
+            McbistDataBundle * mcbdb = getMcbistDataBundle( mcbChip );
+            int32_t l_rc = mcbdb->getTdCtlr()->handleRrFo();
+            if ( SUCCESS != l_rc )
+            {
+                // Let us not fail here. If problem is contained within a MCBIST
+                // we will discover it again during normal TD procedures.
+                PRDF_ERR( PRDF_FUNC "handleRrFo() failed: MCBIST=0x%08x",
+                          mcbChip->GetId() );
+                continue; // Keep going.
+            }
+        }
+
+    } while (0);
+
+    #undef PRDF_FUNC
+}
+#endif
 
 } // end namespace PRDF

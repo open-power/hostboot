@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -37,4 +37,4 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/cen
 # Object files common to both FSP and Hostboot
 ################################################################################
 
-
+prd_obj += prdfCenMbaDomain.o

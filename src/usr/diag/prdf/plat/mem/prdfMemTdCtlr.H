@@ -108,6 +108,24 @@ class MemTdCtlr
      */
     void pushToQueue( TdEntry * i_entry ) { iv_queue.push(i_entry); }
 
+    #ifdef __HOSTBOOT_RUNTIME
+
+    /**
+     * @brief Handles reset-reload or FO scenario.
+     * @note  This function will check if PRD was unable to restart maintenance
+     *        command before R/R or FO. In that scenario, this function will
+     *        start maintenance command. As during R/R or F/O we do not have any
+     *        mechanism to restore the complete state of TD controller, we will
+     *        not start any interrupted or pending TD procedure. We will only
+     *        start BG scrub. If we found any chip marks during TD state
+     *        machine initialize we will start VCM procedure rather than
+     *        BG scrub.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t handleRrFo();
+
+    #endif
+
   private:
 
     /**
