@@ -2495,6 +2495,10 @@ fapi2::ReturnCode reset_drift_limits( const fapi2::Target<TARGET_TYPE_MCA>& i_ta
               blue_waterfall_range::TWO_TO_FIVE :
               blue_waterfall_range::ONE_TO_FOUR;
 
+    // So if the red waterfall workaround was/ is going to run, we have to change the blue waterfall range
+    // This is freq independent
+    mss::workarounds::dp16::update_blue_waterfall_extend_range( i_target, l_value);
+
     //From John Bialas : the value is good for hardware, but not so much in sim, in sim they should be 0s - bgass - 10/6/2017
     l_value = (l_sim == 1) ? blue_waterfall_range::ZERO_TO_THREE : l_value;
 
