@@ -1111,6 +1111,7 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC00
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Global Features Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc00()
 {
@@ -1121,7 +1122,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc00()
     // Update MCS attribute
     l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc00;
 
-    FAPI_INF("%s: RC00 settting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] );
+    FAPI_INF("%s: RC00 settting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc00[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC00, iv_mcs, l_attrs_dimm_rc00) );
 
 fapi_try_exit:
@@ -1131,6 +1132,7 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC01
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Clock Driver Enable Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc01()
 {
@@ -1249,7 +1251,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc04()
     // Update MCS attribute
     l_attrs_dimm_rc04[iv_port_index][iv_dimm_index] = l_buffer;
 
-    FAPI_INF("%s: RC04 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc04[iv_port_index][iv_dimm_index] );
+    FAPI_INF("%s: RC04 setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc04[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC04, iv_mcs, l_attrs_dimm_rc04) );
 
 fapi_try_exit:
@@ -1291,7 +1293,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc05()
     // Update MCS attribute
     l_attrs_dimm_rc05[iv_port_index][iv_dimm_index] = l_buffer;
 
-    FAPI_INF( "%s: RC05 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc05[iv_port_index][iv_dimm_index] )
+    FAPI_INF( "%s: RC05 setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc05[iv_port_index][iv_dimm_index] )
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC05, iv_mcs, l_attrs_dimm_rc05) );
 
 fapi_try_exit:
@@ -1301,17 +1303,20 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC06_07
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Command Space Control Word -- used to issue register commands
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc06_07()
 {
+    constexpr uint64_t NO_OP = 0x0F;
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc06_07[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc06_07(iv_mcs, &l_attrs_dimm_rc06_07[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc06_07[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc06_07;
+    // Set to NO_OP state. Will be used for rcd commands
+    l_attrs_dimm_rc06_07[iv_port_index][iv_dimm_index] = NO_OP;
 
-    FAPI_INF( "%s: RC06_07 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc06_07[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC06_07 setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc06_07[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC06_07, iv_mcs, l_attrs_dimm_rc06_07) );
 
 fapi_try_exit:
@@ -1482,25 +1487,30 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC09
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Power Saving Settings Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc09()
 {
     // Sets up constant values
-    constexpr uint64_t CKE_POWER_DOWN_MODE_ENABLE = 4;
-    constexpr uint64_t CKE_POWER_DOWN_MODE_TOTAL_LEN = 1;
+    constexpr uint64_t CKE_POWER_DOWN_MODE_ENABLE_POS = 4;
+    constexpr uint64_t CKE_POWER_DOWN_MODE_ENABLE = 1;
+
     constexpr uint64_t ODT_POS_OFFSET = 4;
     constexpr uint64_t ODT_ATTR_LEN = 2;
     constexpr uint64_t IBT_OFF_POS = 5;
-    const auto l_num_dimms = mss::count_dimm(iv_mca);
+    constexpr uint64_t IBT_OFF = 1;
+    constexpr uint64_t IBT_ON = 0;
 
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc09[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
 
-    fapi2::buffer<uint8_t> l_rc09(iv_pDecoder->iv_raw_card.iv_rc09);
-    FAPI_TRY( eff_dimm_ddr4_rc09(iv_mcs, &l_attrs_dimm_rc09[0][0]) );
+    fapi2::buffer<uint8_t> l_rc09;
+    l_rc09.writeBit<CKE_POWER_DOWN_MODE_ENABLE_POS>(CKE_POWER_DOWN_MODE_ENABLE)
+    .writeBit<IBT_OFF_POS>(IBT_OFF);
 
     // If CKE power down mode is on and we're in dual drop mode, then we need to configure the IBT mode
-    if(l_rc09.getBit<CKE_POWER_DOWN_MODE_ENABLE, CKE_POWER_DOWN_MODE_TOTAL_LEN>() && l_num_dimms == 2)
+    if((l_rc09.getBit<CKE_POWER_DOWN_MODE_ENABLE_POS>() == CKE_POWER_DOWN_MODE_ENABLE)
+       && (mss::count_dimm(iv_mca) == MAX_DIMM_PER_PORT))
     {
         FAPI_INF("%s Checking whether the DIMM needs IBT mode on or off", mss::c_str(iv_dimm));
 
@@ -1521,7 +1531,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc09()
         const auto l_this_dimm_pos = mss::relative_pos<fapi2::TARGET_TYPE_MCA>(iv_dimm);
         const auto l_other_dimm_pos = l_this_dimm_pos == 0 ? 1 : 0;
         const auto l_other_dimm = l_dimms[l_other_dimm_pos];
-        bool l_ibt_off = true;
+        bool l_ibt = IBT_OFF;
 
         // 2) Gets the ODT values for the other DIMM
         uint8_t l_wr_odt[MAX_RANK_PER_DIMM] = {};
@@ -1544,23 +1554,23 @@ fapi2::ReturnCode eff_dimm::dimm_rc09()
             // Are either the writed or read ODT's enabled for this DIMM?
             if(l_temp_wr.getBit(l_this_dimm_odt, ODT_ATTR_LEN) || l_temp_rd.getBit(l_this_dimm_odt, ODT_ATTR_LEN))
             {
-                // Either write or read ODT is enabled - IBT off needs to be false
-                // Note: this is taken from JEDEC so we have a double negative
-                l_ibt_off = false;
+                l_ibt = IBT_ON;
                 break;
             }
         }
 
         // 4) Modifies the value
-        l_rc09.writeBit<IBT_OFF_POS>(l_ibt_off);
-        FAPI_INF("%s has IBT value of %s giving a value of 0x%02x", mss::c_str(iv_dimm), l_ibt_off ? "OFF - 1" : "ON - 0",
+        l_rc09.writeBit<IBT_OFF_POS>(l_ibt);
+        FAPI_INF("%s has IBT value of %s giving a value of 0x%02x", mss::c_str(iv_dimm), l_ibt == IBT_OFF ? "OFF" : "ON",
                  uint8_t(l_rc09));
     }
+
+    FAPI_TRY( eff_dimm_ddr4_rc09(iv_mcs, &l_attrs_dimm_rc09[0][0]) );
 
     // Update MCS attribute
     l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] = l_rc09;
 
-    FAPI_INF( "%s: RC09 setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC09 setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc09[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC09, iv_mcs, l_attrs_dimm_rc09) );
 
 fapi_try_exit:
@@ -1606,7 +1616,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc0a()
             break;
     }
 
-    FAPI_INF( "%s: RC0A setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC0A setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0a[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0A, iv_mcs, l_attrs_dimm_rc0a) );
 
 fapi_try_exit:
@@ -1616,17 +1626,24 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC0B
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Operating Voltage VDD and VrefCA Source Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc0b()
 {
+    // Settings for rc0b:
+    // Input Receiver Vref Source to:     External VrefCA input
+    // QVrefCA and BVrefCA Sources to:    External VrefCA input connected to QVrefCA and BVrefCA
+    // Register VDD Operating Voltage to: 1.2 V
+    constexpr uint8_t RC0B = 0x0E;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc0b[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc0b(iv_mcs, &l_attrs_dimm_rc0b[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0b;
+    l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] = RC0B;
 
-    FAPI_INF( "%s: RC0B setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC0B setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0b[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0B, iv_mcs, l_attrs_dimm_rc0b) );
 
 fapi_try_exit:
@@ -1636,17 +1653,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC0C
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Training Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc0c()
 {
+    // Setting to normal operating mode
+    constexpr uint8_t NORMAL_OP_MODE = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc0c[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc0c(iv_mcs, &l_attrs_dimm_rc0c[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0c;
+    l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] = NORMAL_OP_MODE;
 
-    FAPI_INF( "%s: RC0C setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC0C setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0c[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0C, iv_mcs, l_attrs_dimm_rc0c) );
 
 fapi_try_exit:
@@ -1702,7 +1723,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc0d()
     FAPI_TRY( spd::base_module_type(iv_dimm, iv_pDecoder->iv_spd_data, l_dimm_type) );
     l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] = l_buffer;
 
-    FAPI_INF( "%s: RC0D setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC0D setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0d[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0D, iv_mcs, l_attrs_dimm_rc0d) );
 
 fapi_try_exit:
@@ -1743,17 +1764,23 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC0F
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Command Latency Adder Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc0f()
 {
+    // Normal mode:
+    // Set 1 nCK latency adder to Qn1, QxCSn, QxCKEn2, QxODTn
+    // 0nCK latency adder to QxPAR
+    constexpr uint8_t NORMAL_MODE = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc0f[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc0f(iv_mcs, &l_attrs_dimm_rc0f[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc0f;
+    l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] = NORMAL_MODE;
 
-    FAPI_INF( "%s: RC0F setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC0F setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc0f[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC0F, iv_mcs, l_attrs_dimm_rc0f) );
 
 fapi_try_exit:
@@ -1763,17 +1790,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_1x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note Internal VrefCA Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc1x()
 {
+    // Normal Mode: VDDR/2
+    constexpr uint8_t HALF_VDDR = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_1x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_1x(iv_mcs, &l_attrs_dimm_rc_1x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_1x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc1x;
+    l_attrs_dimm_rc_1x[iv_port_index][iv_dimm_index] = HALF_VDDR;
 
-    FAPI_INF( "%s: RC1X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_1x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC1X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_1x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_1x, iv_mcs, l_attrs_dimm_rc_1x) );
 
 fapi_try_exit:
@@ -1783,17 +1814,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_2x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note I2C Bus Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc2x()
 {
+    //Normal mode
+    constexpr uint8_t NORMAL_MODE = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_2x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_2x(iv_mcs, &l_attrs_dimm_rc_2x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_2x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc2x;
+    l_attrs_dimm_rc_2x[iv_port_index][iv_dimm_index] = NORMAL_MODE;
 
-    FAPI_INF( "%s: RC2X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_2x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC2X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_2x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_2x, iv_mcs, l_attrs_dimm_rc_2x) );
 
 fapi_try_exit:
@@ -1841,7 +1876,7 @@ fapi2::ReturnCode eff_dimm::dimm_rc3x()
             break;
     }
 
-    FAPI_INF( "%s: RC3X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_3x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC3X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_3x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_3x, iv_mcs, l_attrs_dimm_rc_3x) );
 
 
@@ -1852,17 +1887,22 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_4x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note CW Source Selection Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc4x()
 {
+    // This will get overwritten when sending rcw's
+    // Defaulting to control word selection function space 0
+    constexpr uint8_t CW_SELECTION_FS0 = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_4x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_4x(iv_mcs, &l_attrs_dimm_rc_4x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_4x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc4x;
+    l_attrs_dimm_rc_4x[iv_port_index][iv_dimm_index] = CW_SELECTION_FS0;
 
-    FAPI_INF( "%s: RC4X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_4x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC4X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_4x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_4x, iv_mcs, l_attrs_dimm_rc_4x) );
 
 fapi_try_exit:
@@ -1872,17 +1912,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_5x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note CW Destination Selection & Write/Read Additional QxODT[1:0] Signal High
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc5x()
 {
+    // Default 0nCK addition to ODT
+    constexpr uint8_t DEFAULT_0_ODT_ADD = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_5x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_5x(iv_mcs, &l_attrs_dimm_rc_5x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_5x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc5x;
+    l_attrs_dimm_rc_5x[iv_port_index][iv_dimm_index] = DEFAULT_0_ODT_ADD;
 
-    FAPI_INF( "%s: RC5X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_5x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC5X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_5x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_5x, iv_mcs, l_attrs_dimm_rc_5x) );
 
 fapi_try_exit:
@@ -1892,17 +1936,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_6x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note CW Data Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc6x()
 {
+    // Attribute gets overwritten for rcd commands
+    constexpr uint8_t RC6X = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_6x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_6x(iv_mcs, &l_attrs_dimm_rc_6x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_6x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc6x;
+    l_attrs_dimm_rc_6x[iv_port_index][iv_dimm_index] = RC6X;
 
-    FAPI_INF( "%s: RC6X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_6x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC6X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_6x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_6x, iv_mcs, l_attrs_dimm_rc_6x) );
 
 fapi_try_exit:
@@ -1961,17 +2009,23 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_8x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @notw ODT Input Buffer/IBT, QxODT Output Buffer and Timing Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc8x()
 {
+    // Setting to defaults:
+    // QxODT[1:0] asserted same time as Write Command
+    // QxODT[1:0] asserted same time as Read Command
+    constexpr uint8_t DEFAULT_QXODT_TIMING = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_8x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_8x(iv_mcs, &l_attrs_dimm_rc_8x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_8x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc8x;
+    l_attrs_dimm_rc_8x[iv_port_index][iv_dimm_index] = DEFAULT_QXODT_TIMING;
 
-    FAPI_INF( "%s: RC8X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_8x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC8X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_8x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_8x, iv_mcs, l_attrs_dimm_rc_8x) );
 
 fapi_try_exit:
@@ -1981,17 +2035,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_9x
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note QxODT[1:0] Write Pattern Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rc9x()
 {
+    // Setting to Default's : QxODT's are not asserted during writes
+    constexpr uint8_t RC9X = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_9x[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_9x(iv_mcs, &l_attrs_dimm_rc_9x[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_9x[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rc9x;
+    l_attrs_dimm_rc_9x[iv_port_index][iv_dimm_index] = RC9X;
 
-    FAPI_INF( "%s: RC9X setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_9x[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RC9X setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_9x[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_9x, iv_mcs, l_attrs_dimm_rc_9x) );
 
 fapi_try_exit:
@@ -2001,17 +2059,21 @@ fapi_try_exit:
 ///
 /// @brief Determines & sets effective config for DIMM RC_AX
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note QxODT[1:0] Read Pattern Control Word
 ///
 fapi2::ReturnCode eff_dimm::dimm_rcax()
 {
+    // Setting to Default's : QxODT's are not asserted during reads
+    constexpr uint8_t RCAX = 0x00;
+
     // Retrieve MCS attribute data
     uint8_t l_attrs_dimm_rc_ax[PORTS_PER_MCS][MAX_DIMM_PER_PORT] = {};
     FAPI_TRY( eff_dimm_ddr4_rc_ax(iv_mcs, &l_attrs_dimm_rc_ax[0][0]) );
 
     // Update MCS attribute
-    l_attrs_dimm_rc_ax[iv_port_index][iv_dimm_index] = iv_pDecoder->iv_raw_card.iv_rcax;
+    l_attrs_dimm_rc_ax[iv_port_index][iv_dimm_index] = RCAX;
 
-    FAPI_INF( "%s: RCAX setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_ax[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RCAX setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_ax[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Ax, iv_mcs, l_attrs_dimm_rc_ax) );
 
 fapi_try_exit:
@@ -2066,7 +2128,7 @@ fapi2::ReturnCode eff_dimm::dimm_rcbx()
     FAPI_TRY( eff_dimm_ddr4_rc_bx(iv_mcs, &l_attrs_dimm_rc_bx[0][0]) );
     l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] = l_buf;
 
-    FAPI_INF( "%s: RCBX setting: %d", mss::c_str(iv_dimm), l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] );
+    FAPI_INF( "%s: RCBX setting: 0x%02x", mss::c_str(iv_dimm), l_attrs_dimm_rc_bx[iv_port_index][iv_dimm_index] );
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_DIMM_DDR4_RC_Bx, iv_mcs, l_attrs_dimm_rc_bx) );
 
 fapi_try_exit:

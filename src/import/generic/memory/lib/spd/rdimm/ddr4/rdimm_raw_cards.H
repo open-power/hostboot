@@ -90,6 +90,7 @@ extern rcw_settings rdimm_rc_c2;
 extern rcw_settings rdimm_rc_custom;
 extern rcw_settings rdimm_rc_nvdimm;
 extern rcw_settings rdimm_rc_vbu;
+extern rcw_settings rdimm_rc_default;
 
 }// mss
 
