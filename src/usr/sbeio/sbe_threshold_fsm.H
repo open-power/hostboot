@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <p9_extract_sbe_rc.H>
+#include <sbeio/sbe_retry_handler.H>
 
 namespace SBE_FSM
 {
@@ -33,11 +34,13 @@ namespace SBE_FSM
   *
   * @param[in] i_target     - current proc target
   * @param[in] i_orig_error - Original SBE error
+  * @param[in] i_obj        - SbeRetryHandler object
   *
   * @return - pass(0) or specific returned SBE error
   */
 P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
-                        TARGETING::Target * i_target,uint8_t i_orig_error);
+                        TARGETING::Target * i_target,uint8_t i_orig_error,
+                        SBEIO::SbeRetryHandler * i_obj);
 
 /**
  * @brief This is the other side retry.  If we fail twice on the same
@@ -45,11 +48,13 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
  *
  * @param[in] i_target     - current proc target
  * @param[in] i_orig_error - Original SBE error
+ * @param[in] i_obj        - SbeRetryHandler object
  *
  * @return - pass(0) or specific returned SBE error
  */
 P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
-                        TARGETING::Target * i_target,uint8_t i_orig_error);
+                        TARGETING::Target * i_target,uint8_t i_orig_error,
+                        SBEIO::SbeRetryHandler * i_obj);
 
 /**
  * @brief This is the working (passing) exit state.  This state occurs
@@ -59,11 +64,13 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
  *
  * @param[in] i_target     - current proc target
  * @param[in] i_orig_error - Original SBE error
+ * @param[in] i_obj        - SbeRetryHandler object
  *
  * @return - pass(0) or specific returned SBE error
  */
 P9_EXTRACT_SBE_RC::RETURN_ACTION working_exit_state(
-                        TARGETING::Target * i_target,uint8_t i_orig_error);
+                        TARGETING::Target * i_target,uint8_t i_orig_error,
+                        SBEIO::SbeRetryHandler * i_obj);
 
 /**
  * @brief This is the failing exit state.  This state only occurs when
@@ -73,11 +80,13 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION working_exit_state(
  *
  * @param[in] i_target     - current proc target
  * @param[in] i_orig_error - Original SBE error
+ * @param[in] i_obj        - SbeRetryHandler object
  *
  * @return - pass(0) or specific returned SBE error
  */
 P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
-                        TARGETING::Target * i_target,uint8_t i_orig_error);
+                        TARGETING::Target * i_target,uint8_t i_orig_error,
+                        SBEIO::SbeRetryHandler * i_obj);
 
 /**
  * @brief This is the main function of the finite state machine. It
@@ -89,10 +98,12 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
  * @param[in] i_target        - Current Proc target
  * @param[in] i_currentAction - Most recent return value from HWP
  * @param[in] i_previousError - The previous return value from HWP
+ * @param[in] i_obj           - SbeRetryHandler object
  */
 void sbe_threshold_handler( bool i_procSide,
                             TARGETING::Target * i_target,
                             P9_EXTRACT_SBE_RC::RETURN_ACTION i_currentAction,
-                            uint8_t i_previousError);
+                            uint8_t i_previousError,
+                            SBEIO::SbeRetryHandler * i_obj );
 
 }; // End of namespace SBE_FSM

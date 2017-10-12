@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/sbe_extract_rc_handler.C $                      */
+/* $Source: src/usr/sbeio/sbe_retry_handler.C $                           */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -23,7 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 /**
- * @file sbe_extract_rc_handler.C
+ * @file sbe_extract_dd.C
  *
  * Handle a SBE extract rc error.  We use a switch-case to determine
  * what action to take, and a finite state machine to control the
@@ -51,7 +51,6 @@
 #include <p9_start_cbs.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_perv_scom_addresses.H>
-#include <sbeio/sbe_extract_rc_handler.H>
 #include <sbe/sbe_update.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbe_sp_intf.H>
@@ -64,18 +63,42 @@
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
-    TRACFCOMP(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+    TRACFCOMP(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 #define SBE_TRACD(printf_string,args...) \
-    TRACDCOMP(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+    TRACDCOMP(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 #define SBE_TRACU(args...)
 #define SBE_TRACFBIN(printf_string,args...) \
-    TRACFBIN(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+    TRACFBIN(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 #define SBE_TRACDBIN(printf_string,args...) \
-    TRACDBIN(g_trac_sbeio,"sbe_extract_rc_handler.C: " printf_string,##args)
+    TRACDBIN(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 
-using namespace SBEIO;
+namespace SBEIO
+{
 
-void proc_extract_sbe_handler( TARGETING::Target * i_target,
+/**
+ * @brief Static instance function
+ */
+SbeRetryHandler& SbeRetryHandler::getInstance()
+{
+    return Singleton<SbeRetryHandler>::instance();
+}
+
+SbeRetryHandler::SbeRetryHandler()
+: iv_sbeRestarted(false)
+, iv_sbeOtherSide(false)
+, iv_sbeErrorLogged(false)
+{
+    SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
+
+    SBE_TRACF(EXIT_MRK "SbeRetryHandler::SbeRetryHandler()");
+}
+
+SbeRetryHandler::~SbeRetryHandler()
+{
+
+}
+
+void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
                                uint8_t i_current_error)
 {
     SBE_TRACF(ENTER_MRK "proc_extract_sbe_handler error: %x",
@@ -118,7 +141,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
 
             SBE_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                        TARGETING::get_huid(i_target));
-            handle_sbe_restart(i_target, false,
+            this->handle_sbe_restart(i_target, false,
                             P9_EXTRACT_SBE_RC::RESTART_SBE);
             break;
         }
@@ -146,7 +169,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                     l_fapi2_proc_target(i_target);
 
-            l_errl = switch_sbe_sides(i_target);
+            l_errl = this->switch_sbe_sides(i_target);
             if(l_errl)
             {
                 errlCommit(l_errl,ISTEP_COMP_ID);
@@ -160,7 +183,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
                    TARGETING::get_huid(i_target));
 
-            handle_sbe_restart(i_target, false,
+            this->handle_sbe_restart(i_target, false,
                    P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
 
             if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>())
@@ -190,7 +213,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                     l_fapi2_proc_target(i_target);
 
-            l_errl = switch_sbe_sides(i_target);
+            l_errl = this->switch_sbe_sides(i_target);
             if(l_errl)
             {
                 errlCommit(l_errl,ISTEP_COMP_ID);
@@ -205,7 +228,7 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
             SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
                    TARGETING::get_huid(i_target));
 
-            handle_sbe_restart(i_target, false,
+            this->handle_sbe_restart(i_target, false,
                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM);
 
             if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>())
@@ -287,12 +310,14 @@ void proc_extract_sbe_handler( TARGETING::Target * i_target,
     return;
 }
 
-SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
+SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
+                TARGETING::Target * i_target)
 {
     SBE_TRACF(ENTER_MRK "check_sbe_reg");
 
     errlHndl_t l_errl = nullptr;
-    SBE_REG_RETURN l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
+    SbeRetryHandler::SBE_REG_RETURN l_ret =
+            SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
     do
     {
@@ -301,14 +326,14 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
 
         sbeMsgReg_t l_sbeReg;
 
-        l_errl = sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
+        l_errl = this->sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
 
         if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
         {
             // See if async FFDC bit is set in SBE register
             if(l_sbeReg.asyncFFDC)
             {
-                bool l_flowCtrl = sbe_get_ffdc_handler(i_target);
+                bool l_flowCtrl = this->sbe_get_ffdc_handler(i_target);
 
                 if(l_flowCtrl)
                 {
@@ -317,7 +342,7 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
             }
 
             // Handle that SBE failed to boot in the allowed time
-            sbe_boot_fail_handler(i_target,l_sbeReg);
+            this->sbe_boot_fail_handler(i_target,l_sbeReg);
         }
         else if (l_errl)
         {
@@ -346,9 +371,9 @@ SBE_REG_RETURN check_sbe_reg(TARGETING::Target * i_target)
 
 }
 
-P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
+P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                 TARGETING::Target * i_target,
-                SBE_REG_RETURN i_sbe_reg,
+                SbeRetryHandler::SBE_REG_RETURN i_sbe_reg,
                 P9_EXTRACT_SBE_RC::RETURN_ACTION i_current_sbe_error,
                 bool i_fromStateMachine)
 {
@@ -359,18 +384,18 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
 
     switch(i_sbe_reg)
     {
-        case SBE_REG_RETURN::FUNCTION_ERROR:
+        case SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR:
         {
             // There has been a failure getting the SBE register
             // We cannot continue any further, return failure.
             return P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
         }
-        case SBE_REG_RETURN::SBE_AT_RUNTIME:
+        case SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME:
         {
             // The SBE has successfully booted at runtime
             return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
         }
-        case SBE_REG_RETURN::SBE_FAILED_TO_BOOT:
+        case SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT:
         {
             if((!i_fromStateMachine) &&
                (i_current_sbe_error == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
@@ -424,12 +449,14 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
             if(i_current_sbe_error == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
             {
                 // Call sbe_threshold handler on the opposite side
-                SBE_FSM::sbe_threshold_handler(false, i_target, l_rcAction, l_prevError);
+                SBE_FSM::sbe_threshold_handler(false, i_target, l_rcAction,
+                                l_prevError, this);
             }
             else
             {
                 // Call sbe_threshold handler on the same side
-                SBE_FSM::sbe_threshold_handler(true, i_target, l_rcAction, l_prevError);
+                SBE_FSM::sbe_threshold_handler(true, i_target, l_rcAction,
+                                l_prevError, this);
             }
             return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
         }
@@ -459,7 +486,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  handle_sbe_reg_value(
     }
 }
 
-P9_EXTRACT_SBE_RC::RETURN_ACTION handle_sbe_restart(
+P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::handle_sbe_restart(
             TARGETING::Target * i_target,
             bool i_fromStateMachine,
             P9_EXTRACT_SBE_RC::RETURN_ACTION i_current_condition)
@@ -479,18 +506,18 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION handle_sbe_restart(
         errlCommit(l_errl, ISTEP_COMP_ID);
     }
 
-    SBE_REG_RETURN l_checkSBE = check_sbe_reg(i_target);
+    SbeRetryHandler::SBE_REG_RETURN l_checkSBE = check_sbe_reg(i_target);
     return handle_sbe_reg_value(i_target, l_checkSBE,
                     i_current_condition, i_fromStateMachine);
 }
 
-errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
+errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                 TARGETING::Target * i_target,
-                SBE_REG_RETURN * o_returnAction)
+                SbeRetryHandler::SBE_REG_RETURN * o_returnAction)
 {
     errlHndl_t l_errl = NULL;
 
-    (*o_returnAction) = SBE_FAILED_TO_BOOT;
+    (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(i_target);
@@ -520,7 +547,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                       "on loop %d",
                       l_errl->plid(),
                       l_loops );
-            (*o_returnAction) = SBE_REG_RETURN::FUNCTION_ERROR;
+            (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR;
             break;
         }
         else if ((*o_sbeReg).currState == SBE_STATE_RUNTIME)
@@ -529,7 +556,7 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                       "on loop %d",
                       TARGETING::get_huid(i_target), (*o_sbeReg).reg,
                       l_loops);
-            (*o_returnAction) = SBE_REG_RETURN::SBE_AT_RUNTIME;
+            (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME;
             break;
         }
         else if ((*o_sbeReg).asyncFFDC)
@@ -575,7 +602,8 @@ errlHndl_t sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
     return l_errl;
 }
 
-P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc(uint32_t i_rc)
+P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::action_for_ffdc_rc(
+                uint32_t i_rc)
 {
     P9_EXTRACT_SBE_RC::RETURN_ACTION l_action;
 
@@ -632,7 +660,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION action_for_ffdc_rc(uint32_t i_rc)
     return l_action;
 }
 
-bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
+bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 {
     bool l_flowCtrl = false;
     errlHndl_t l_errl = nullptr;
@@ -730,7 +758,7 @@ bool sbe_get_ffdc_handler(TARGETING::Target * i_target)
     return l_flowCtrl;
 }
 
-void sbe_boot_fail_handler(TARGETING::Target * i_target,
+void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
                            sbeMsgReg_t i_sbeReg)
 {
     errlHndl_t l_errl = nullptr;
@@ -815,7 +843,7 @@ void sbe_boot_fail_handler(TARGETING::Target * i_target,
     return;
 }
 
-errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
+errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
 {
     errlHndl_t l_errl = NULL;
     fapi2::buffer<uint32_t> l_read_reg;
@@ -879,4 +907,4 @@ errlHndl_t switch_sbe_sides(TARGETING::Target * i_target)
     return l_errl;
 }
 
-
+} // End of namespace SBEIO

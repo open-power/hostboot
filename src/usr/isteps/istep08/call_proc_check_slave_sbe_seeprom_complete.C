@@ -64,7 +64,7 @@
 #include <p9_extract_sbe_rc.H>
 #include <p9_get_sbe_msg_register.H>
 #include <p9_getecid.H>
-#include <sbeio/sbe_extract_rc_handler.H>
+#include <sbeio/sbe_retry_handler.H>
 
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
@@ -127,16 +127,19 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                    " on processor target %.8X",
                    TARGETING::get_huid(l_cpu_target));
 
-        SBE_REG_RETURN l_ret = SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
+        SBEIO::SbeRetryHandler::SBE_REG_RETURN l_ret =
+                SBEIO::SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
-        l_errl = sbe_timeout_handler(&l_sbeReg,l_cpu_target,&l_ret);
+        l_errl = SBEIO::SbeRetryHandler::getInstance().sbe_timeout_handler(
+                        &l_sbeReg,l_cpu_target,&l_ret);
 
         if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
         {
             // See if async FFDC bit is set in SBE register
             if(l_sbeReg.asyncFFDC)
             {
-                bool l_flowCtrl = sbe_get_ffdc_handler(l_cpu_target);
+                bool l_flowCtrl = SBEIO::SbeRetryHandler::getInstance().
+                        sbe_get_ffdc_handler(l_cpu_target);
 
                 if(l_flowCtrl)
                 {
@@ -145,7 +148,8 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             }
 
             // Handle that SBE failed to boot in the allowed time
-            sbe_boot_fail_handler(l_cpu_target,l_sbeReg);
+            SBEIO::SbeRetryHandler::getInstance().sbe_boot_fail_handler(
+                            l_cpu_target,l_sbeReg);
         }
         else if (l_errl)
         {
@@ -156,7 +160,7 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
             // capture the target data in the elog
             ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
 
-            // Create IStep error log and cross reference to error that occurred
+            // Create IStep error log and cross reference to error
             l_stepError.addErrorDetails( l_errl );
 
             // Commit error log
