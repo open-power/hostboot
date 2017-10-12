@@ -816,29 +816,22 @@ fapi2::ReturnCode raw_card_factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_targ
                (l_hybrid_type == fapi2::ENUM_ATTR_EFF_HYBRID_MEMORY_TYPE_NVDIMM))
             {
                 l_ref_raw_card_rev = mss::rdimm::raw_card_rev::NVDIMM;
-                FAPI_INF("%s is an NVDIMM, overwrote l_ref_raw_card_rev to be 0x%02x", mss::c_str(i_target), l_ref_raw_card_rev);
+                FAPI_INF("%s is an NVDIMM, overwrote l_ref_raw_card_rev to be 0x%02x",
+                         mss::c_str(i_target),
+                         l_ref_raw_card_rev);
             }
 
-            FAPI_ASSERT( find_value_from_key( mss::rdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card),
-                         fapi2::MSS_INVALID_RAW_CARD()
-                         .set_DIMM_TYPE(l_dimm_type)
-                         .set_RAW_CARD_REV(l_ref_raw_card_rev)
-                         .set_DIMM_TARGET(i_target),
-                         "Invalid reference raw card received for RDIMM: %d for %s",
-                         l_ref_raw_card_rev,
-                         mss::c_str(i_target) );
+            o_raw_card = find_raw_card( i_target,
+                                        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM,
+                                        l_ref_raw_card_rev,
+                                        mss::rdimm::RAW_CARDS);
             break;
 
         case fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM:
-
-            FAPI_ASSERT( find_value_from_key( mss::lrdimm::RAW_CARDS, l_ref_raw_card_rev, o_raw_card),
-                         fapi2::MSS_INVALID_RAW_CARD()
-                         .set_DIMM_TYPE(l_dimm_type)
-                         .set_RAW_CARD_REV(l_ref_raw_card_rev)
-                         .set_DIMM_TARGET(i_target),
-                         "Invalid reference raw card received for LRDIMM: %d for %s",
-                         l_ref_raw_card_rev,
-                         mss::c_str(i_target));
+            o_raw_card = find_raw_card( i_target,
+                                        fapi2::ENUM_ATTR_EFF_DIMM_TYPE_LRDIMM,
+                                        l_ref_raw_card_rev,
+                                        mss::lrdimm::RAW_CARDS);
             break;
 
         default:
@@ -947,6 +940,43 @@ fapi2::ReturnCode factory(const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief       Wrapper function for finding the raw card
+/// @param[in]   i_target the dimm target
+/// @param[in]   i_dimm_type
+/// @param[in]   i_ref_raw_card_rev for FFDC
+/// @param[in]   i_map raw card map
+/// @return      rcw_settings vector of rcw settings
+/// @note        This specialization is suited for creating a cache with custom
+///              SPD data (e.g. testing custom SPD).
+///
+rcw_settings find_raw_card( const fapi2::Target<TARGET_TYPE_DIMM>& i_target,
+                            const uint64_t i_dimm_type,
+                            const uint8_t i_ref_raw_card_rev,
+                            const std::vector<std::pair<uint8_t, rcw_settings> > i_map)
+{
+    rcw_settings l_raw_card;
+
+    FAPI_ASSERT( find_value_from_key( i_map, i_ref_raw_card_rev, l_raw_card),
+                 fapi2::MSS_INVALID_RAW_CARD()
+                 .set_DIMM_TYPE(i_dimm_type)
+                 .set_RAW_CARD_REV(i_ref_raw_card_rev)
+                 .set_DIMM_TARGET(i_target),
+                 "Invalid reference raw card received for %s: %d for %s",
+                 (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ? "RDIMM" : "LRDIMM",
+                 i_ref_raw_card_rev,
+                 mss::c_str(i_target) );
+
+    return l_raw_card;
+
+// If we got here there was a raw card we don't have values for, so putting the default
+fapi_try_exit:
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return (i_dimm_type == fapi2::ENUM_ATTR_EFF_DIMM_TYPE_RDIMM) ?
+           rdimm_rc_default : lrdimm_rc_default;
 }
 
 ///
