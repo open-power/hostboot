@@ -178,7 +178,7 @@ actionclass level2_dump_SW
 actionclass level2_M_self_L_th_1
 {
     callout2ndLvlMed;
-    calloutSelfLow;
+    calloutSelfLowNoGard;
     threshold1;
 };
 
