@@ -66,6 +66,7 @@ extern const std::vector< std::pair< uint8_t, rcw_settings> > RAW_CARDS;
 
 // Exposed so we can test them.
 extern rcw_settings lrdimm_rc_b0;
+extern rcw_settings lrdimm_rc_default;
 
 }// mss
 
