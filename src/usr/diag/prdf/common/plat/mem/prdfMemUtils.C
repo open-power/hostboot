@@ -458,9 +458,44 @@ uint8_t getDramSize<TYPE_MBA>(ExtensibleChip *i_chip, uint8_t i_dimmSlct)
 
 }
 
-//TODO RTC 166802
 //------------------------------------------------------------------------------
-/*
+
+uint32_t chnlFirCleanup( ExtensibleChip * i_mbChip )
+{
+    #define PRDF_FUNC "[MemUtils::chnlFirCleanup] "
+
+    uint32_t o_rc = SUCCESS;
+
+    ExtensibleChip * dmiChip = getConnectedParent( i_mbChip, TYPE_DMI );
+
+    // Clear the associated FIR bits for all attention types.
+    // NOTE: If there are any active attentions left in the Centaur the
+    //       associated FIR bit will be redriven with the next packet on the bus
+
+    SCAN_COMM_REGISTER_CLASS * reg = dmiChip->getRegister("CHIFIR_AND");
+
+    reg->setAllBits();
+    reg->ClearBit(16); // CS
+    reg->ClearBit(19); // RE
+    reg->ClearBit(20); // SPA
+    reg->ClearBit(21); // maintenance command complete
+
+    o_rc = reg->Write();
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "CHIFIR_AND write failed on 0x%08x",
+                  dmiChip->getHuid() );
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+
+}
+
+//------------------------------------------------------------------------------
+
+/* TODO RTC 166802
 int32_t checkMcsChannelFail( ExtensibleChip * i_mcsChip,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
