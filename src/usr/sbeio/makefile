@@ -56,7 +56,7 @@ OBJS += sbe_fifo_buffer.o
 OBJS += sbe_ffdc_package_parser.o
 OBJS += sbe_attn.o
 OBJS += sbe_threshold_fsm.o
-OBJS += sbe_extract_rc_handler.o
+OBJS += sbe_retry_handler.o
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 include ${ROOTPATH}/procedure.rules.mk

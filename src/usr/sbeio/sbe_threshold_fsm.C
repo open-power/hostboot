@@ -31,10 +31,9 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <ipmi/ipmiwatchdog.H>
-
-#include <sbeio/sbeioreasoncodes.H>
+#include <sbeio/sbe_retry_handler.H>
 #include "sbe_threshold_fsm.H"
-#include <sbeio/sbe_extract_rc_handler.H>
+#include <sbeio/sbeioreasoncodes.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -57,7 +56,8 @@ namespace SBE_FSM
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION (* sbe_handler_state[])(
                  TARGETING::Target * i_target,
-                 uint8_t i_prev_error) =
+                 uint8_t i_prev_error,
+                 SbeRetryHandler * i_obj) =
     { same_side_retry_state, // SAME_SIDE_RETRY
       other_side_state,      // OTHER_SIDE
       working_exit_state,    // WORKING_EXIT
@@ -91,7 +91,8 @@ enum STATE_CODES get_next_state( enum STATE_CODES i_src, uint8_t i_rc )
 void sbe_threshold_handler( bool i_procSide,
                           TARGETING::Target * i_target,
                           P9_EXTRACT_SBE_RC::RETURN_ACTION i_initialAction,
-                          uint8_t i_previousError)
+                          uint8_t i_previousError,
+                          SbeRetryHandler * i_obj )
 {
     // Note: This is set up as a finite state machine since all actions are
     //       connected and most of them lead to another.
@@ -107,7 +108,7 @@ void sbe_threshold_handler( bool i_procSide,
     // Setup the rest of the FSM
     P9_EXTRACT_SBE_RC::RETURN_ACTION l_returnedAction;
     P9_EXTRACT_SBE_RC::RETURN_ACTION (*state_fcn)(TARGETING::Target * i_target,
-                    uint8_t i_orig_error );
+                    uint8_t i_orig_error, SbeRetryHandler * i_obj);
 
     // Begin FSM
     for(;;)
@@ -125,7 +126,7 @@ void sbe_threshold_handler( bool i_procSide,
 #endif
 
         state_fcn = SBE_FSM::sbe_handler_state[cur_state];
-        l_returnedAction = state_fcn(i_target, i_initialAction);
+        l_returnedAction = state_fcn(i_target, i_initialAction, i_obj);
 
         if( cur_state == WORKING_EXIT ||
             cur_state == FAILING_EXIT)
@@ -144,20 +145,22 @@ void sbe_threshold_handler( bool i_procSide,
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
                             TARGETING::Target * i_target,
-                            uint8_t i_orig_error)
+                            uint8_t i_orig_error,
+                            SbeRetryHandler * i_obj)
 {
     SBE_FSM_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                TARGETING::get_huid(i_target));
 
     // We don't actually need an accurate p9_extract_sbe_rc value if
     // we're coming from the state machine, so we send in a pass.
-    return handle_sbe_restart(i_target,true,
+    return i_obj->handle_sbe_restart(i_target,true,
                     P9_EXTRACT_SBE_RC::ERROR_RECOVERED);
 }
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
                          TARGETING::Target * i_target,
-                         uint8_t i_orig_error)
+                         uint8_t i_orig_error,
+                         SbeRetryHandler * i_obj)
 {
     SBE_FSM_TRACF("Running p9_start_cbs HWP on processor target %.8X",
                TARGETING::get_huid(i_target));
@@ -168,7 +171,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(i_target);
 
-    l_errl = switch_sbe_sides(i_target);
+    l_errl = i_obj->switch_sbe_sides(i_target);
     if(l_errl)
     {
         errlCommit(l_errl,ISTEP_COMP_ID);
@@ -178,7 +181,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
     // We don't actually need an accurate p9_extract_sbe_rc value if
     // we're coming from the state machine, so we send in a pass.
     P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
-            handle_sbe_restart(i_target, true,
+            i_obj->handle_sbe_restart(i_target, true,
                     P9_EXTRACT_SBE_RC::ERROR_RECOVERED);
     if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>())
     {
@@ -209,14 +212,16 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION working_exit_state(
                            TARGETING::Target * i_target,
-                           uint8_t i_orig_error)
+                           uint8_t i_orig_error,
+                           SbeRetryHandler * i_obj)
 {
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
                            TARGETING::Target * i_target,
-                           uint8_t i_orig_error)
+                           uint8_t i_orig_error,
+                           SbeRetryHandler * i_obj)
 {
     errlHndl_t l_errl = NULL;
 
@@ -237,7 +242,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 #endif
-        proc_extract_sbe_handler(i_target,
+        i_obj->proc_extract_sbe_handler(i_target,
                                  P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
     }
 
