@@ -44,6 +44,7 @@ SUBDIRS+=p9_stop_util.d
 SUBDIRS+=mss.d
 SUBDIRS+=cen.d
 SUBDIRS+=cpuWkup.d
+SUBDIRS+=p9_phbPerst.d
 
 OBJS += hwpisteperror.o
 OBJS += hwpistepud.o

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/initservice/istepdispatcher/makefile $
+# $Source: src/usr/isteps/p9_phbPerst/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -23,27 +23,19 @@
 #
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
-MODULE = istepdisp
+MODULE = p9_phbPerst
+PROCEDURES_PATH    = ${ROOTPATH}/src/import/chips/p9/procedures
 
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
-
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/nest/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 
-VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
-
-OBJS += istepdispatcher.o
-OBJS += initsvcudistep.o
-OBJS += sptask.o
-OBJS += splesscommon.o
-OBJS += bootconfig.o
-OBJS += bootconfigif.o
-OBJS += $(if $(CONFIG_BMC_AST2400),bootconfig_ast2400.o)
-
-## SUBDIRS += test.d
-
+include ${ROOTPATH}/procedure.rules.mk
+include $(PROCEDURES_PATH)/hwp/nest/p9_perst_phb.mk
 include ${ROOTPATH}/config.mk
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/nest/
+

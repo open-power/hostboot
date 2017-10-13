@@ -79,6 +79,8 @@
 #include <trace/trace.H>
 #include <util/utilmbox_scratch.H>
 #include <secureboot/service.H>
+#include <p9_perst_phb.H>
+#include <plat_hwp_invoker.H>
 
 // ---------------------------
 // Used to grab SBE boot side
@@ -132,7 +134,8 @@ IStepDispatcher::IStepDispatcher() :
     iv_substepToCompleteBeforeShutdown(0),
     iv_acceptIstepMessages(true),
     iv_newGardRecord(false),
-    iv_stopIpl(false)
+    iv_stopIpl(false),
+    iv_p9_phbPerstLibLoaded(false)
 
 {
     mutex_init(&iv_bkPtMutex);
@@ -1349,6 +1352,21 @@ void IStepDispatcher::msgHndlr()
                 // Further process the shutdown message
                 handleShutdownMsg(pMsg);
                 break;
+
+            case PERST_ASSERT:
+                // PERST Assert requested from Fsp
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: PERST_ASSERT");
+                // Further process the PERST Assert message
+                handlePerstMsg(pMsg);
+                break;
+
+            case PERST_NEGATE:
+                // PERST Negate requested from Fsp
+                TRACFCOMP(g_trac_initsvc, INFO_MRK"msgHndlr: PERST_NEGATE");
+                // Further process the PERST Negate message
+                handlePerstMsg(pMsg);
+                break;
+
             default:
                 TRACFCOMP(g_trac_initsvc, ERR_MRK"msgHndlr: Ignoring unknown message 0x%08x",
                           pMsg->type);
@@ -2122,6 +2140,104 @@ void IStepDispatcher::handleProcFabIovalidMsg(msg_t * & io_pMsg)
     }
 
     TRACFCOMP( g_trac_initsvc, EXIT_MRK"IStepDispatcher::handleProcFabIovalidMsg");
+}
+
+
+// ----------------------------------------------------------------------------
+// IStepDispatcher::handlePerstMsg()
+// ----------------------------------------------------------------------------
+void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
+{
+    TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::handlePerstMsg");
+
+    // assume the HWP will succeed
+    io_pMsg->data[1] = true;
+
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+        if // HWP Perst Libraries have not yet been loaded
+          ( iv_p9_phbPerstLibLoaded == false )
+        {
+            // load the libraries
+            l_errl = VFS::module_load( "p9_phbPerst.so" );
+
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_initsvc,
+                           "handlePerstMsg: Error loading p9_phbPerst, "
+                           "PLID = 0x%x",
+                           l_errl->plid() );
+
+                io_pMsg->data[1] = false;
+                errlCommit( l_errl, INITSVC_COMP_ID );
+                break;
+            }
+            else
+            {
+                iv_p9_phbPerstLibLoaded = true;
+            }
+        } // end load libraries
+
+        // translate message inputs to fapi target and HWP Perst action
+        const TARGETING::ATTR_HUID_type huid =
+                static_cast <const TARGETING::ATTR_HUID_type>(io_pMsg->data[0]);
+        TARGETING::Target * pInputTarget =
+                TARGETING::Target::getTargetFromHuid( huid );
+
+        const fapi2::Target<fapi2::TARGET_TYPE_PHB> fapi2_target(pInputTarget);
+
+        uint32_t msgPerstAction = io_pMsg->type;
+
+        PERST_ACTION hwpPerstAction = (msgPerstAction == PERST_ASSERT) ?
+                ACTIVATE_PERST : DEACTIVATE_PERST;
+
+        // Execute the PERST directive
+        FAPI_INVOKE_HWP( l_errl,
+                         p9_perst_phb,
+                         fapi2_target,
+                         hwpPerstAction );
+
+        if(l_errl)
+        {
+            TRACFCOMP( g_trac_initsvc,
+                       "ERROR : call p9_perst_phb, PLID=0x%x",
+                       l_errl->plid()  );
+            l_errl->collectTrace("INITSVC",256);
+            l_errl->collectTrace("FAPI",256);
+            errlCommit(l_errl, HWPF_COMP_ID);
+
+            io_pMsg->data[1] = false;
+        }
+    } while(0);
+
+    if (msg_is_async(io_pMsg))
+    {
+        // It is expected that handle Perst messages are sync.
+        //  otherwise we don't have a way to send the results
+        //  back to the FSP.
+        // This leg drops results on the floor
+        TRACFBIN( g_trac_initsvc,
+                  INFO_MRK
+                 "IStepDispatcher::handlePerstMsg :"
+                 "Async msg, no Response to FSP, Msg = ",
+                 io_pMsg,
+                 sizeof(*io_pMsg) );
+
+        msg_free(io_pMsg);
+        io_pMsg = NULL;
+    }
+    else
+    {
+        // Send the message back as a response
+        msg_respond(iv_msgQ, io_pMsg);
+        io_pMsg = NULL;
+    }
+
+    TRACFCOMP(g_trac_initsvc, EXIT_MRK"IStepDispatcher::handlePerstMsg");
+
+    return;
 }
 
 // ----------------------------------------------------------------------------
