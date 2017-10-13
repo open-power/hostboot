@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -59,7 +61,9 @@ enum
     HWSVR_IPL_PROGRESS_CODE     = 0x11,
     HWSVR_DO_IOVALID_PROCESSING = 0xC1,
     HWSVR_COALESCE_HOST         = 0xC2,
-    HWSVR_DO_SHUTDOWN           = 0x12
+    HWSVR_DO_SHUTDOWN           = 0x12,
+    HWSVR_PERST_ASSERT          = 0x20,
+    HWSVR_PERST_NEGATE          = 0x21
 };
 
 // ------------------------------------------------------------------
@@ -83,7 +87,10 @@ enum
                                 HWSVR_DO_SHUTDOWN,
     COALESCE_HOST           = MBOX::FIRST_UNSECURE_MSG |
                                 HWSVR_COALESCE_HOST,
-
+    PERST_ASSERT            = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_PERST_ASSERT,
+    PERST_NEGATE            = MBOX::FIRST_UNSECURE_MSG |
+                                HWSVR_PERST_NEGATE
 };
 
 }   // namespace

@@ -346,6 +346,15 @@ private:
     void handleIStepRequestMsg(msg_t * & io_pMsg);
 
     /**
+     * @brief Handles a PERST request message.
+     *
+     * Calls p9_perst_phb() to perform the requested function
+     *
+     * @param[io] io_pMsg Reference to pointer to message (cleaned up)
+     */
+    void handlePerstMsg(msg_t * & io_pMsg);
+
+    /**
      * @brief This function will be used to query the istep master list and the
      *      other istep headers to know what functions/tasks need to be started
      *      for the Istep/Substep that we are in.
@@ -471,6 +480,9 @@ private:
     // Instance variable to state if a power off is in progress and
     // the istep dispatcher should stop executing steps
     bool iv_stopIpl;
+
+    // Instance variable to state if the PHB Perst libraries are loaded
+    bool iv_p9_phbPerstLibLoaded;
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;
