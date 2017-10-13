@@ -228,37 +228,30 @@ TESTCASE_MODULES += testmemoize
 TESTCASE_MODULES += testprdf
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testmdia)
 TESTCASE_MODULES += testpirformat
+TESTCASE_MODULES += testi2c
+TESTCASE_MODULES += testmbox
+TESTCASE_MODULES += testrtloader
+TESTCASE_MODULES += testsbe
+TESTCASE_MODULES += testsbeio
+TESTCASE_MODULES += testerrl
+TESTCASE_MODULES += testhwas
+TESTCASE_MODULES += testvpd
+TESTCASE_MODULES += testsyslib
+TESTCASE_MODULES += testscom
+TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
+TESTCASE_MODULES += testintr
+TESTCASE_MODULES += testfapi2
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
 #All of these are tracked by a RTC story
 #******************************************************************
 
-TESTCASE_MODULES += testerrl
-TESTCASE_MODULES += testhwas
-TESTCASE_MODULES += testvpd
-TESTCASE_MODULES += testsyslib
-TESTCASE_MODULES += testscom
 #TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testdump)  @fixme-RTC:180751
-TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
-
-TESTCASE_MODULES += testintr
-
-# @thi - Disable to isolate  libtestfapi2.so crash
-#TESTCASE_MODULES += testfapi2
-
-TESTCASE_MODULES += testi2c
-
-TESTCASE_MODULES += testsbe
-TESTCASE_MODULES += testsbeio
-
 # @TODO DefecT: 1035550 Figure out why testattn is failing sometimes
 #TESTCASE_MODULES += testattn
 
-TESTCASE_MODULES += testmbox
 
-
-TESTCASE_MODULES += testrtloader
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o
