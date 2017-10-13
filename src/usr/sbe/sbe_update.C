@@ -1804,8 +1804,11 @@ namespace SBE
                    TARGETING::get_huid(io_sbeState.target));
 
 
-        errlHndl_t err = NULL;
-        void *sbeHbblImgPtr = NULL;
+        errlHndl_t err = nullptr;
+        void *sbeHbblImgPtr = nullptr;
+        bool l_sideZeroIsActive = true;
+        bool l_sbeSupportedSeepromReadOp = true;
+        bool l_errFoundDuringChipOp = false;
 
         // Clear build information
         io_sbeState.new_imageBuild.buildDate = 0;
@@ -1816,6 +1819,62 @@ namespace SBE
 
         do{
 
+            /***********************************************/
+            /*  Determine which SEEPROM System Booted On   */
+            /***********************************************/
+            //Get Current (boot) Side
+            sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
+            err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
+            if(err)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error returned from getSbeBootSeeprom(), "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+            io_sbeState.cur_seeprom_side = tmp_cur_side;
+            if (io_sbeState.cur_seeprom_side == SBE_SEEPROM0)
+            {
+                io_sbeState.alt_seeprom_side = SBE_SEEPROM1;
+            }
+            else if ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
+            {
+                io_sbeState.alt_seeprom_side = SBE_SEEPROM0;
+                l_sideZeroIsActive = false;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
+                           "Unexpected cur_seeprom_side value = 0x%X, ",
+                           io_sbeState.cur_seeprom_side);
+
+                 /*@
+                  * @errortype
+                  * @moduleid     SBE_GET_TARGET_INFO_STATE
+                  * @reasoncode   SBE_INVALID_SEEPROM_SIDE
+                  * @userdata1    Temporary Current Side
+                  * @userdata2    SBE State Current Side
+                  * @devdesc      Invalid Boot SEEPROM Side Found
+                  */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                    SBE_GET_TARGET_INFO_STATE,
+                                    SBE_INVALID_SEEPROM_SIDE,
+                                    tmp_cur_side,
+                                    io_sbeState.cur_seeprom_side);
+                err->collectTrace(SBE_COMP_NAME);
+                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH );
+
+                break;
+            }
+
+            TRACUCOMP( g_trac_sbe,"getSbeInfoState() - cur=0x%X, alt=0x%X",
+                       io_sbeState.cur_seeprom_side,
+                       io_sbeState.alt_seeprom_side);
+
             /************************************************************/
             /*  Set Target Properties (target_is_master previously set) */
             /************************************************************/
@@ -1823,51 +1882,138 @@ namespace SBE
 
 
             /*******************************************/
-            /*  Get SEEPROM A SBE Version Information  */
+            /*  Get SEEPROM 0 SBE Version Information  */
             /*******************************************/
-            err = getSeepromSideVersion(io_sbeState.target,
-                                        EEPROM::SBE_PRIMARY,
-                                        io_sbeState.seeprom_0_ver,
-                                        io_sbeState.seeprom_0_ver_ECC_fail);
 
-            if(err)
+            // If the current seeprom is side 0 and is on master proc,
+            // then attempt read via chipOp
+            if (l_sideZeroIsActive && io_sbeState.target_is_master)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                           "getting SBE Information from SEEPROM A (0x%X), "
-                           "RC=0x%X, PLID=0x%lX",
-                           EEPROM::SBE_PRIMARY,
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                break;
+                err = getSeepromSideVersionViaChipOp(io_sbeState.target,
+                                            io_sbeState.seeprom_0_ver,
+                                            l_sbeSupportedSeepromReadOp);
+
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via ChipOp "
+                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
+                            ERRL_GETRC_SAFE(err),
+                            ERRL_GETPLID_SAFE(err));
+                    //Commit error as informational and attempt reading via i2c
+                    l_errFoundDuringChipOp = true;
+                    err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    err->collectTrace(SBE_COMP_NAME, 256);
+                    err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( err, SBEIO_COMP_ID );
+                }
+                else if(!l_sbeSupportedSeepromReadOp)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                    "getting SBE Information from SEEPROM 0 (Primary) via ChipOp. The "
+                    "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
+                }
+                else
+                {
+                    TRACDBIN(g_trac_sbe, "getSbeInfoState found via ChipOp -spA",
+                            &(io_sbeState.seeprom_0_ver),
+                            sizeof(sbeSeepromVersionInfo_t));
+                }
             }
 
-            TRACDBIN(g_trac_sbe, "getSbeInfoState-spA",
-                     &(io_sbeState.seeprom_0_ver),
-                     sizeof(sbeSeepromVersionInfo_t));
-
-
-            /*******************************************/
-            /*  Get SEEPROM B SBE Version Information  */
-            /*******************************************/
-            err = getSeepromSideVersion(io_sbeState.target,
-                                        EEPROM::SBE_BACKUP,
-                                        io_sbeState.seeprom_1_ver,
-                                        io_sbeState.seeprom_1_ver_ECC_fail);
-
-            if(err)
+            //If side 0 is not active, or this is a slave proc, or there was
+            //an error trying to read the primary via chipOp, then try reading via I2C
+            if(!l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
+                l_errFoundDuringChipOp|| !io_sbeState.target_is_master)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
-                           "getting SBE Information from SEEPROM B (0x%X), "
-                           "RC=0x%X, PLID=0x%lX",
-                           EEPROM::SBE_BACKUP,
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                break;
+
+                err = getSeepromSideVersionViaI2c(io_sbeState.target,
+                                            EEPROM::SBE_PRIMARY,
+                                            io_sbeState.seeprom_0_ver,
+                                            io_sbeState.seeprom_0_ver_ECC_fail);
+
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                            "getting SBE Information from SEEPROM 0 (Primary) via I2C, "
+                            "RC=0x%X, PLID=0x%lX",
+                            ERRL_GETRC_SAFE(err),
+                            ERRL_GETPLID_SAFE(err));
+                    break;
+                }
+
+                TRACDBIN(g_trac_sbe, "getSbeInfoState found via I2C -spA",
+                        &(io_sbeState.seeprom_0_ver),
+                        sizeof(sbeSeepromVersionInfo_t));
             }
 
-            TRACDBIN(g_trac_sbe, "getSbeInfoState-spB",
-                     &(io_sbeState.seeprom_1_ver),
-                     sizeof(sbeSeepromVersionInfo_t));
+
+            /*******************************************/
+            /*  Get SEEPROM 1 SBE Version Information  */
+            /*******************************************/
+
+            //If side 1 is active and this is master, then attempt read via chipOp
+            //Note that there is no reason to attempt chipOp on backup if it failed
+            //on the primary.
+            if (!l_sideZeroIsActive && l_sbeSupportedSeepromReadOp &&
+                !l_errFoundDuringChipOp && io_sbeState.target_is_master)
+            {
+                err = getSeepromSideVersionViaChipOp(io_sbeState.target,
+                                                  io_sbeState.seeprom_1_ver,
+                                                  l_sbeSupportedSeepromReadOp);
+
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via Chipop, "
+                            "RC=0x%X, PLID=0x%lX, will attempt I2C read instead",
+                            ERRL_GETRC_SAFE(err),
+                            ERRL_GETPLID_SAFE(err));
+                    //Commit error as informational and attempt reading via i2c
+                    l_errFoundDuringChipOp = true;
+                    err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    err->collectTrace(SBE_COMP_NAME, 256);
+                    err->collectTrace(SBEIO_COMP_NAME, 256);
+                    errlCommit( err, SBEIO_COMP_ID );
+                }
+                else if(!l_sbeSupportedSeepromReadOp)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                                "getting SBE Information from SEEPROM 1 (Backup) via ChipOp. The "
+                                "SBE firmware level does not support readSeeprom Op, will attempt I2C read instead");
+                }
+                else
+                {
+                    TRACDBIN(g_trac_sbe, "getSbeInfoState found via Chipop -spB",
+                            &(io_sbeState.seeprom_1_ver),
+                            sizeof(sbeSeepromVersionInfo_t));
+                }
+            }
+
+            //If side 1 is not active, or this is a slave proc,  or there was
+            //an error trying to read the primary via chipOp, then try reading via I2C
+            if(l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
+                l_errFoundDuringChipOp || !io_sbeState.target_is_master)
+            {
+                err = getSeepromSideVersionViaI2c(io_sbeState.target,
+                                            EEPROM::SBE_BACKUP,
+                                            io_sbeState.seeprom_1_ver,
+                                            io_sbeState.seeprom_1_ver_ECC_fail);
+
+                if(err)
+                {
+                    TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error "
+                            "getting SBE Information from SEEPROM 1 (Backup) via I2C, "
+                            "RC=0x%X, PLID=0x%lX",
+                            ERRL_GETRC_SAFE(err),
+                            ERRL_GETPLID_SAFE(err));
+                    break;
+                }
+
+                TRACDBIN(g_trac_sbe, "getSbeInfoState-spB found via I2C",
+                        &(io_sbeState.seeprom_1_ver),
+                        sizeof(sbeSeepromVersionInfo_t));
+            }
 
 
             /*******************************************/
@@ -2201,62 +2347,6 @@ namespace SBE
                 io_sbeState.permanent_seeprom_side = SBE_SEEPROM1;
             }
 
-
-            /***********************************************/
-            /*  Determine which SEEPROM System Booted On   */
-            /***********************************************/
-            //Get Current (boot) Side
-            sbeSeepromSide_t tmp_cur_side = SBE_SEEPROM_INVALID;
-            err = getSbeBootSeeprom(io_sbeState.target, tmp_cur_side);
-            if(err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
-                           "Error returned from getSbeBootSeeprom(), "
-                           "RC=0x%X, PLID=0x%lX",
-                           ERRL_GETRC_SAFE(err),
-                           ERRL_GETPLID_SAFE(err));
-                break;
-            }
-
-            io_sbeState.cur_seeprom_side = tmp_cur_side;
-            if (io_sbeState.cur_seeprom_side == SBE_SEEPROM0)
-            {
-                io_sbeState.alt_seeprom_side = SBE_SEEPROM1;
-            }
-            else if ( io_sbeState.cur_seeprom_side == SBE_SEEPROM1)
-            {
-                io_sbeState.alt_seeprom_side = SBE_SEEPROM0;
-            }
-            else
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error: "
-                           "Unexpected cur_seeprom_side value = 0x%X, ",
-                           io_sbeState.cur_seeprom_side);
-
-                 /*@
-                  * @errortype
-                  * @moduleid     SBE_GET_TARGET_INFO_STATE
-                  * @reasoncode   SBE_INVALID_SEEPROM_SIDE
-                  * @userdata1    Temporary Current Side
-                  * @userdata2    SBE State Current Side
-                  * @devdesc      Invalid Boot SEEPROM Side Found
-                  */
-                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                    SBE_GET_TARGET_INFO_STATE,
-                                    SBE_INVALID_SEEPROM_SIDE,
-                                    tmp_cur_side,
-                                    io_sbeState.cur_seeprom_side);
-                err->collectTrace(SBE_COMP_NAME);
-                err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH );
-
-                break;
-            }
-
-            TRACUCOMP( g_trac_sbe,"getSbeInfoState() - cur=0x%X, alt=0x%X",
-                       io_sbeState.cur_seeprom_side,
-                       io_sbeState.alt_seeprom_side);
-
         }while(0);
 
         if(err && (io_sbeState.new_imageBuild.buildDate != 0) &&
@@ -2276,13 +2366,13 @@ namespace SBE
 
 
 /////////////////////////////////////////////////////////////////////
-    errlHndl_t getSeepromSideVersion(TARGETING::Target* i_target,
+    errlHndl_t getSeepromSideVersionViaI2c(TARGETING::Target* i_target,
                                      EEPROM::eeprom_chip_types_t i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail)
     {
         TRACUCOMP( g_trac_sbe,
-                   ENTER_MRK"getSeepromSideVersion(): HUID=0x%.8X, side:%d",
+                   ENTER_MRK"getSeepromSideVersionViaI2c(): HUID=0x%.8X, side:%d",
                    TARGETING::get_huid(i_target), i_seepromSide);
 
         errlHndl_t err = NULL;
@@ -2314,7 +2404,7 @@ namespace SBE
 
             if(err)
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersionViaI2c() - "
                            "Error reading SBE Version from Seeprom 0x%X, "
                            "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
                            i_seepromSide, TARGETING::get_huid(i_target),
@@ -2324,7 +2414,7 @@ namespace SBE
             }
 
             TRACDBIN(g_trac_sbe,
-                     "getSeepromSideVersion() - tmp_data_ECC",
+                     "getSeepromSideVersionViaI2c() - tmp_data_ECC",
                      tmp_data_ECC,
                      sbeInfoSize_ECC);
 
@@ -2342,7 +2432,7 @@ namespace SBE
                                   SBE_VERSION_SEEPROM_ADDRESS,
                                   SBE_SEEPROM_SIZE);
 
-            TRACUCOMP( g_trac_sbe, "getSeepromSideVersion(): First 8-Bytes: "
+            TRACUCOMP( g_trac_sbe, "getSeepromSideVersionViaI2c(): First 8-Bytes: "
                        "eccStatus=%d, version=0x%X, data_crc=0x%X",
                        eccStatus, o_info.struct_version, o_info.data_crc);
 
@@ -2357,7 +2447,7 @@ namespace SBE
             else
             {
                 // Unsupported versions - ignoring any ECC errors
-                TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): Unsupported "
+                TRACFCOMP( g_trac_sbe, "getSeepromSideVersionViaI2c(): Unsupported "
                            "Struct Version=0x%X, ignoring any eccStatus=%d",
                            o_info.struct_version, eccStatus);
 
@@ -2372,7 +2462,7 @@ namespace SBE
                                   SBE_VERSION_SEEPROM_ADDRESS,
                                   SBE_SEEPROM_SIZE);
 
-            TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): eccStatus=%d, "
+            TRACFCOMP( g_trac_sbe, "getSeepromSideVersionViaI2c(): eccStatus=%d, "
                        "sizeof o_info/sI=%d, sI_ECC=%d, origin golden=%i",
                        eccStatus, sbeInfoSize, sbeInfoSize_ECC, o_info.origin);
 
@@ -2380,7 +2470,7 @@ namespace SBE
             // clear data and set o_seeprom_ver_ECC_fail=true
             if ( eccStatus == PNOR::ECC::UNCORRECTABLE )
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersion() - ECC "
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSeepromSideVersionViaI2c() - ECC "
                            "ERROR: Handled. eccStatus=%d, side=%d, sizeof "
                            "o_info/sI=%d, sI_ECC=%d",
                            eccStatus, i_seepromSide, sbeInfoSize,
@@ -2389,14 +2479,14 @@ namespace SBE
                 memset( &o_info, 0, sizeof(o_info));
                 o_seeprom_ver_ECC_fail = true;
 
-                TRACUCOMP( g_trac_sbe, "getSeepromSideVersion(): clearing out "
+                TRACUCOMP( g_trac_sbe, "getSeepromSideVersionViaI2c(): clearing out "
                 "version data (o_info) for side %d and returning "
                 "o_seeprom_ver_ECC_fail as true (%d)",
                 i_seepromSide, o_seeprom_ver_ECC_fail);
             }
 
             TRACDBIN(g_trac_sbe,
-                     "getSeepromSideVersion: data (no ECC)",
+                     "getSeepromSideVersionViaI2c: data (no ECC)",
                      &o_info,
                      sizeof(o_info));
 
@@ -2407,10 +2497,101 @@ namespace SBE
 
 
         TRACUCOMP( g_trac_sbe,
-                   EXIT_MRK"getSeepromSideVersion: o_seeprom_ver_ECC_fail=%d",
+                   EXIT_MRK"getSeepromSideVersionViaI2c: o_seeprom_ver_ECC_fail=%d",
                    o_seeprom_ver_ECC_fail );
 
         return err;
+    }
+
+errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
+                                          sbeSeepromVersionInfo_t& o_info,
+                                          bool& o_opSupported)
+    {
+        errlHndl_t l_err = nullptr;
+
+        // Set these variables to the read out the max struct size
+        // Supported version 1 is a subset of supported version 2
+        size_t sbeInfoSize = sizeof(sbeSeepromVersionInfo_t);
+
+        //Set up the buffer which the SBE will copy the version info to
+        //Add 127 bytes to the buffer length so we can guarantee a 128 byte aligned addr
+        //Note that the SBE_SEEPROM_VERSION_READ_SIZE is 3 * 128 Bytes to be cacheline aligned
+        uint8_t * l_seepromReadBuffer = static_cast<uint8_t*>(
+                                               malloc(SBE_SEEPROM_VERSION_READ_SIZE + 127 ));
+
+        uint64_t l_seepromReadBufferAligned = ALIGN_X(reinterpret_cast<uint64_t>(l_seepromReadBuffer),
+                                                      128);
+
+        do{
+
+            /***********************************************/
+            /*  Read SBE Version SBE Version Information   */
+            /***********************************************/
+            // Clear Buffer
+            memset( reinterpret_cast<uint8_t*>(l_seepromReadBufferAligned),
+                    0,
+                    SBE_SEEPROM_VERSION_READ_SIZE );
+
+            // Clear destination
+            memset( &o_info, 0, sizeof(o_info) );
+
+            l_err = SBEIO::sendPsuReadSeeprom(i_target,
+                               END_OF_SEEPROM_MINUS_READ_SIZE,
+                               SBE_SEEPROM_VERSION_READ_SIZE,
+                               mm_virt_to_phys(reinterpret_cast<void*>(l_seepromReadBufferAligned)),
+                               o_opSupported);
+
+            if(!l_err && o_opSupported)
+            {
+
+                TRACDBIN(g_trac_sbe,
+                        "getSeepromSideVersionViaChipOp() - l_seepromReadBufferAligned",
+                        reinterpret_cast<uint8_t*>(l_seepromReadBufferAligned),
+                        SBE_SEEPROM_VERSION_READ_SIZE);
+
+                // Initially only look at the first 8-Bytes which should include
+                // the struct version value
+                memcpy ( &o_info, reinterpret_cast<void*>(l_seepromReadBufferAligned), 8);
+
+                if ( STRUCT_VERSION_CHECK(o_info.struct_version) )
+                {
+                    // Supported Versions - set size variable
+                    sbeInfoSize = SBE_SEEPROM_STRUCT_SIZES[o_info.struct_version];
+                }
+                else
+                {
+                    // Unsupported versions
+                    TRACFCOMP( g_trac_sbe, "getSeepromSideVersion(): Unsupported "
+                            "Struct Version=0x%X",
+                            o_info.struct_version);
+
+                    break;
+                }
+
+                //Copy the sbeInfo data into the struct that was passed into the function
+                memcpy ( &o_info, reinterpret_cast<void*>(l_seepromReadBufferAligned), sbeInfoSize);
+
+                TRACDBIN(g_trac_sbe,
+                        "getSeepromSideVersionViaChipOp: data (no ECC)",
+                        &o_info,
+                        sizeof(o_info));
+            }
+            else
+            {
+                TRACFCOMP( g_trac_sbe,
+                        "Error reading seeprom via chipOp, either the Op isnt supported by SBE or"
+                        " something else went wrong, not going to attempt to parse results");
+            }
+
+        }while(0);
+
+        //Free up the buffer before returning no matter what
+        free(l_seepromReadBuffer);
+        l_seepromReadBuffer = nullptr;
+
+        TRACUCOMP( g_trac_sbe,
+                   EXIT_MRK"getSeepromSideVersionViaChipOp" );
+        return l_err;
     }
 
 
