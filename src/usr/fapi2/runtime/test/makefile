@@ -32,13 +32,12 @@ MODULE = testfapi2_rt
 
 include ../../test/fapi2Test.mk
 
-$(info TESTS before is ${TESTS})
+#Use temp variables to remove the tests we do not want to run in runtime
 TMPVAR1 := ${TESTS}
 #RTC: 181003 need to determine why fapi2HwpErrorBufferTest.H is getting data storage exception in RT
 TESTS = $(filter-out ${ROOTPATH}/src/usr/fapi2/test/getVpdTest.H ${ROOTPATH}/src/usr/fapi2/test/fapi2GetVpdTest.H ${ROOTPATH}/src/usr/fapi2/test/fapi2HwpErrorBufferTest.H ${ROOTPATH}/src/usr/fapi2/test/fapi2SubroutineExecutorTest.H  ,  ${TMPVAR1})
 TMPVAR2 := ${OBJS}
 OBJS = $(filter-out getVpdTest.o, ${TMPVAR2})
 include ${ROOTPATH}/config.mk
-$(info TESTS after is ${TESTS})
 VPATH += ../../test/
 
