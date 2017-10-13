@@ -1276,8 +1276,17 @@ int32_t getDimmRowCol( TARGETING::TargetHandle_t i_mba, uint8_t & o_rowNum,
             break;
         }
 
-        o_rowNum = i_mba->getAttr<ATTR_EFF_DRAM_ROWS>();
-        o_colNum = i_mba->getAttr<ATTR_EFF_DRAM_COLS>();
+        ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
+        if ( MODEL_CUMULUS == l_procModel )
+        {
+            o_rowNum = i_mba->getAttr<ATTR_CEN_EFF_DRAM_ROWS>();
+            o_colNum = i_mba->getAttr<ATTR_CEN_EFF_DRAM_COLS>();
+        }
+        else // NIMBUS or something without CENTAURs
+        {
+            o_rowNum = i_mba->getAttr<ATTR_EFF_DRAM_ROWS>();
+            o_colNum = i_mba->getAttr<ATTR_EFF_DRAM_COLS>();
+        }
 
         o_rc = SUCCESS;
 
@@ -1315,7 +1324,18 @@ void __getMasterRanks( TargetHandle_t i_trgt, std::vector<MemRank> & o_ranks,
     o_ranks.clear();
 
     uint8_t info[2][2];
-    if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
+
+    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
+    if ( MODEL_CUMULUS == l_procModel )
+    {
+        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_DIMM_RANKS_CONFIGED>(info) )
+        {
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_CEN_EFF_DIMM_RANKS_CONFIGED> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+    }
+    else if ( !i_trgt->tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED>(info) )
     {
         PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_DIMM_RANKS_CONFIGED> "
                   "failed: i_trgt=0x%08x", getHuid(i_trgt) );
@@ -1444,16 +1464,37 @@ uint8_t __getNumMasterRanksPerDimm( TargetHandle_t i_trgt,
     PRDF_ASSERT( T == getTargetType(i_trgt) );
     PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
+    uint8_t num;
 
-    ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
-    if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
+
+    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
+    if ( MODEL_CUMULUS == l_procModel )
     {
-        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM> "
-                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-        PRDF_ASSERT( false ); // attribute does not exist for target
+        ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC
+                      "tryGetAttr<ATTR_CEN_EFF_NUM_MASTER_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_pos][i_ds];
+    }
+    else
+    {
+        ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC
+                      "tryGetAttr<ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_pos][i_ds];
     }
 
-    uint8_t num = attr[i_pos][i_ds];
     PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT );
 
     return num;
@@ -1498,16 +1539,35 @@ uint8_t __getNumRanksPerDimm( TargetHandle_t i_trgt,
     PRDF_ASSERT( T == getTargetType(i_trgt) );
     PRDF_ASSERT( i_pos < 2 );
     PRDF_ASSERT( i_ds < MAX_DIMM_PER_PORT );
+    uint8_t num;
 
-    ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
-    if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
+    ATTR_MODEL_type l_procModel = getChipModel( getMasterProc() );
+    if ( MODEL_CUMULUS == l_procModel )
     {
-        PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM> "
-                  "failed: i_trgt=0x%08x", getHuid(i_trgt) );
-        PRDF_ASSERT( false ); // attribute does not exist for target
+        ATTR_CEN_EFF_NUM_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_CEN_EFF_NUM_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC
+                      "tryGetAttr<ATTR_CEN_EFF_NUM_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_pos][i_ds];
+    }
+    else
+    {
+        ATTR_EFF_NUM_RANKS_PER_DIMM_type attr;
+        if ( !i_trgt->tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM>(attr) )
+        {
+            PRDF_ERR( PRDF_FUNC "tryGetAttr<ATTR_EFF_NUM_RANKS_PER_DIMM> "
+                      "failed: i_trgt=0x%08x", getHuid(i_trgt) );
+            PRDF_ASSERT( false ); // attribute does not exist for target
+        }
+
+        num = attr[i_pos][i_ds];
     }
 
-    uint8_t num = attr[i_pos][i_ds];
     PRDF_ASSERT( num < MASTER_RANKS_PER_DIMM_SLCT*SLAVE_RANKS_PER_MASTER_RANK );
 
     return num;
