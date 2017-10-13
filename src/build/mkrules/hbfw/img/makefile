@@ -310,9 +310,6 @@ gen_system_specific_images_bypass_cache :
 	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
 	.endif
 
-	# @TODO RTC 178235 Remove Symbolic Link Creation Below
-	ln -f -s p9n.SbePartition.header.bin p9nSbePartition.header.bin
-
 # build_sbe_partitions build step generates SBE partition files that ODE is
 # unaware of due to the file cache that we cannot disable.  To work around that,
 # build the PNOR images under recursive make, which gets a fresh view of the
