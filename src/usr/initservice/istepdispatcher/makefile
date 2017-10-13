@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2016
+# Contributors Listed Below - COPYRIGHT 2011,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -30,6 +30,9 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ecmddatabuffer
 # Next includes required for attribute override support
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 
 VPATH = ${ROOTPATH}/src/usr/initservice/bootconfig/
 

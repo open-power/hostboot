@@ -80,6 +80,13 @@
 #include <util/utilmbox_scratch.H>
 #include <secureboot/service.H>
 
+// ---------------------------
+// Used to grab SBE boot side
+#include <sbe/sbe_update.H>
+#include <devicefw/userif.H>
+#include <p9_perv_scom_addresses.H>
+// ---------------------------
+
 namespace ISTEPS_TRACE
 {
     // declare storage for isteps_trace!
@@ -259,6 +266,63 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
         uint8_t l_tlEnabled = l_pSys->getAttr<TARGETING::ATTR_OP_TRACE_LITE>();
         TRACE::setTraceLite(l_tlEnabled);
 #endif
+
+
+        //////////////////
+        // Send to console which SBE side we are currently on
+        //////////////////
+        SBE::sbeSeepromSide_t l_bootside = SBE::SBE_SEEPROM_INVALID;
+        TARGETING::Target * l_masterTarget = nullptr;
+        TARGETING::targetService().masterProcChipTargetHandle(l_masterTarget);
+
+        // NOTE: can't just call SBE::getSbeBootSeeprom(..) as it isn't loaded
+
+        uint64_t scomData = 0x0;
+        // Read PERV_SB_CS_SCOM 0x00050008
+        size_t op_size = sizeof(scomData);
+        err = deviceRead( l_masterTarget,
+                          &scomData,
+                          op_size,
+                          DEVICE_SCOM_ADDRESS(PERV_SB_CS_SCOM) );
+        if( err )
+        {
+            TRACFCOMP( g_trac_initsvc, ERR_MRK"IStepDispatcher() - "
+                       "Unable to find SBE boot side, Error "
+                       "reading SB CS SCOM (0x%.8X) from Target :"
+                       "HUID=0x%.8X, RC=0x%X, PLID=0x%lX",
+                       PERV_SB_CS_SCOM, // 0x00050008
+                       TARGETING::get_huid(l_masterTarget),
+                       ERRL_GETRC_SAFE(err),
+                       ERRL_GETPLID_SAFE(err));
+            err->collectTrace("INITSVC", 1024);
+            errlCommit(err, INITSVC_COMP_ID );
+        }
+        else
+        {
+            if(scomData & SBE::SBE_BOOT_SELECT_MASK)
+            {
+                l_bootside = SBE::SBE_SEEPROM1;
+            }
+            else
+            {
+                l_bootside = SBE::SBE_SEEPROM0;
+            }
+
+            TRACFCOMP( g_trac_initsvc,
+                INFO_MRK"IStepDispatcher(): SBE boot side %d for proc=%.8X",
+                l_bootside, TARGETING::get_huid(l_masterTarget) );
+
+
+            #ifdef CONFIG_CONSOLE
+            // Sending to console SBE side
+            CONSOLE::displayf( NULL,
+                    "Booting from SBE side %d on master proc=%.8X",
+                    l_bootside, TARGETING::get_huid(l_masterTarget) );
+            CONSOLE::flush();
+            #endif
+        }
+        ////////////////
+
 
         if(iv_mailboxEnabled)
         {
