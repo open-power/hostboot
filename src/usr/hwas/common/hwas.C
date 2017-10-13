@@ -591,6 +591,62 @@ bool isChipFunctional(const TARGETING::TargetHandle_t &i_target,
     return l_chipFunctional;
 } // isChipFunctional
 
+// Checks the passed in target for functionality. This function assumes
+// that the passed in target is of TYPE_OBUS. Returns true if the target
+// is functional; false otherwise.
+bool isObusFunctional(const TARGETING::TargetHandle_t &i_desc,
+                      const uint16_t i_pgData[])
+{
+    bool l_isFunctional = true;
+
+    ATTR_CHIP_UNIT_type indexOB = i_desc->getAttr<ATTR_CHIP_UNIT>();
+    // Check all bits in OBUSx entry
+    if (i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB] != VPD_CP00_PG_OBUS_GOOD)
+    {
+        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                "actual 0x%04X, expected 0x%04X - bad",
+                i_desc->getAttr<ATTR_HUID>(), indexOB,
+                VPD_CP00_PG_OB0_INDEX + indexOB,
+                i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB],
+                VPD_CP00_PG_OBUS_GOOD);
+        l_isFunctional = false;
+    }
+    else
+    // Check PBIOO0 bit in N1 entry
+    // Rule 3 / Rule 4  PBIOO0 to be good with Nimbus and Cumulus except
+    //                  Nimbus Sforza (without optics and NVLINK), so is
+    //                  associated with all OBUS entries
+    if ((i_pgData[VPD_CP00_PG_N1_INDEX] & VPD_CP00_PG_N1_PBIOO0) != 0)
+    {
+        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                "actual 0x%04X, expected 0x%04X - bad",
+                i_desc->getAttr<ATTR_HUID>(), indexOB,
+                VPD_CP00_PG_N1_INDEX,
+                i_pgData[VPD_CP00_PG_N1_INDEX],
+                (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                ~VPD_CP00_PG_N1_PBIOO0));
+        l_isFunctional = false;
+    }
+    else
+    // Check PBIOO1 bit in N1 entry if second or third OBUS
+    // Rule 4  PBIOO1 to be associated with OBUS1 and OBUS2 which only are
+    //         valid on a Cumulus
+    if (((1 == indexOB) || (2 == indexOB)) && ((i_pgData[VPD_CP00_PG_N1_INDEX] &
+        VPD_CP00_PG_N1_PBIOO1) != 0))
+    {
+        HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
+                "actual 0x%04X, expected 0x%04X - bad",
+                i_desc->getAttr<ATTR_HUID>(), indexOB,
+                VPD_CP00_PG_N1_INDEX,
+                i_pgData[VPD_CP00_PG_N1_INDEX],
+                (i_pgData[VPD_CP00_PG_N1_INDEX] &
+                ~VPD_CP00_PG_N1_PBIOO1));
+        l_isFunctional = false;
+    }
+
+    return l_isFunctional;
+}
+
 
 bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                       const uint16_t i_pgData[])
@@ -618,54 +674,7 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
     else
     if (i_desc->getAttr<ATTR_TYPE>() == TYPE_OBUS)
     {
-        ATTR_CHIP_UNIT_type indexOB =
-            i_desc->getAttr<ATTR_CHIP_UNIT>();
-        // Check all bits in OBUSx entry
-        if (i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB] !=
-            VPD_CP00_PG_OBUS_GOOD)
-        {
-            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexOB,
-                     VPD_CP00_PG_OB0_INDEX + indexOB,
-                     i_pgData[VPD_CP00_PG_OB0_INDEX + indexOB],
-                     VPD_CP00_PG_OBUS_GOOD);
-            l_descFunctional = false;
-        }
-        else
-        // Check PBIOO0 bit in N1 entry
-        // Rule 3 / Rule 4  PBIOO0 to be good with Nimbus and Cumulus except
-        //                  Nimbus Sforza (without optics and NVLINK), so is
-        //                  associated with all OBUS entries
-        if ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-              VPD_CP00_PG_N1_PBIOO0) != 0)
-        {
-            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexOB,
-                     VPD_CP00_PG_N1_INDEX,
-                     i_pgData[VPD_CP00_PG_N1_INDEX],
-                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                      ~VPD_CP00_PG_N1_PBIOO0));
-            l_descFunctional = false;
-        }
-        else
-        // Check PBIOO1 bit in N1 entry if second or third OBUS
-        // Rule 4  PBIOO1 to be associated with OBUS1 and OBUS2 which only are
-        //         valid on a Cumulus
-        if (((1 == indexOB) || (2 == indexOB)) &&
-            ((i_pgData[VPD_CP00_PG_N1_INDEX] &
-              VPD_CP00_PG_N1_PBIOO1) != 0))
-        {
-            HWAS_INF("pDesc %.8X - OB%d pgData[%d]: "
-                     "actual 0x%04X, expected 0x%04X - bad",
-                     i_desc->getAttr<ATTR_HUID>(), indexOB,
-                     VPD_CP00_PG_N1_INDEX,
-                     i_pgData[VPD_CP00_PG_N1_INDEX],
-                     (i_pgData[VPD_CP00_PG_N1_INDEX] &
-                      ~VPD_CP00_PG_N1_PBIOO1));
-            l_descFunctional = false;
-        }
+        l_descFunctional = isObusFunctional(i_desc, i_pgData);
     }
     else
     if ((i_desc->getAttr<ATTR_TYPE>() == TYPE_PEC)
@@ -1084,6 +1093,14 @@ bool isDescFunctional(const TARGETING::TargetHandle_t &i_desc,
                  (i_pgData[VPD_CP00_PG_N3_INDEX] &
                   ~VPD_CP00_PG_N3_NPU));
             l_descFunctional = false;
+        }
+
+        // If the target is functional at this point, check its parent
+        // to make sure it is also functional. Then mark the target
+        // not functional if its parent is not functional.
+        if(l_descFunctional)
+        {
+            l_descFunctional = isObusFunctional(l_obus_ptr, i_pgData);
         }
     }
     else
