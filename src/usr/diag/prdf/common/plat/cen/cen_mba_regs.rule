@@ -24,6 +24,18 @@
 # IBM_PROLOG_END_TAG
 
     ############################################################################
+    # Additional regs for CEN MBA target MBASPA
+    ############################################################################
+
+    register MBASPA_AND
+    {
+        name        "CEN MBA target MBASPA atomic AND";
+        scomaddr    0x03010612;
+        capture     group never;
+        access      write_only;
+    };
+
+    ############################################################################
     # Maintenance Command Registers
     ############################################################################
 
