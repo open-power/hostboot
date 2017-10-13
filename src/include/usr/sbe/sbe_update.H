@@ -77,11 +77,16 @@ namespace SBE
     const uint64_t SBE_VERSION_SPACE_WITH_ECC   = (256 * 9) / 8; // 256B + ECC
     const uint64_t SBE_SEEPROM_SIZE             = 64*KILOBYTE;   // 64KB
     const uint64_t SBE_SEEPROM_ECC_PAD          = SBE_SEEPROM_SIZE % 9;
+    const uint64_t SBE_SEEPROM_SIZE_WO_ECC      = ((64*KILOBYTE - SBE_SEEPROM_ECC_PAD) / 9) * 8 ;
     // SBE Version (with ECC) kept at end of fourth 64KB memory
     // Adjust end of usable memory with ECC to be a multiple of 9 bytes
     const uint64_t SBE_VERSION_SEEPROM_ADDRESS  = 4*SBE_SEEPROM_SIZE
                                                 - SBE_SEEPROM_ECC_PAD
                                                 - SBE_VERSION_SPACE_WITH_ECC;
+
+    const uint64_t SBE_SEEPROM_VERSION_READ_SIZE = 0x100; // 128 Bytes * 2  (256 decimal)
+    const uint64_t END_OF_SEEPROM_MINUS_READ_SIZE = 4*SBE_SEEPROM_SIZE_WO_ECC
+                                                  - SBE_SEEPROM_VERSION_READ_SIZE;
 
     // Used to read SBE Boot Side from processor
     // (PERV_SB_CS_SCOM 0x00050008 or PERV_SB_CS_FSI 0x2808)
@@ -478,7 +483,7 @@ namespace SBE
                                  sbeSeepromSide_t& o_bootSide);
 
     /**
-     * @brief Collects Version information from a specific SEEPROM
+     * @brief Collects Version information from a specific SEEPROM using I2C
      *
      * @param[in] i_target      Target processor to customize
      *
@@ -492,10 +497,24 @@ namespace SBE
      *
      * @return errlHndl_t    Error log handle on failure.
      */
-    errlHndl_t getSeepromSideVersion(TARGETING::Target* i_target,
+    errlHndl_t getSeepromSideVersionViaI2c(TARGETING::Target* i_target,
                                      EEPROM::eeprom_chip_types_t i_seepromSide,
                                      sbeSeepromVersionInfo_t& o_info,
                                      bool& o_seeprom_ver_ECC_fail);
+    /**
+     * @brief Collects Version information from a specific SEEPROM using PSU ChipOp
+     *
+     * @param[in] i_target        Target processor to customize
+     *
+     * @param[out] o_info         Struct containing the SBE Version Information
+     *
+     * @param[out] o_opSupported  output if sbe supports seeprom read chip op or not
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
+                                     sbeSeepromVersionInfo_t& o_info,
+                                     bool& o_opSupported);
 
     /**
      * @brief Updates a specific SEEPROM

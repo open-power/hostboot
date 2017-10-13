@@ -285,6 +285,28 @@ namespace SBEIO
                                     uint64_t i_dataSize,
                                     const char * i_hwpName);
 
+    /**
+    * @brief Sends a PSU chipOp to request Seeprom read from SBE
+    *
+    * @param[in]  i_target         Target with SBE to send read request to
+    * @param[in]  i_seepromOffset  Offset in the seeprom image where we want
+    *                              to start copying from (ignores ECC)
+    * @param[in]  i_readSize       Amount of bytes we want to copy (ignores ECC)
+    * @param[in]  i_destAddr       Address that hostboot has prepared which the
+    *                              sbe will write too
+    * @param[out] o_opSupported    Bool which tells us if the sbe supports the
+    *                              chipOp or not
+    *
+    * @return errlHndl_t Error log handle on failure.
+    *
+    */
+    errlHndl_t sendPsuReadSeeprom(TARGETING::Target * i_target,
+                                  uint32_t i_seepromOffset,
+                                  uint32_t i_readSize,
+                                  uint64_t i_destAddr,
+                                  bool   & o_opSupported);
+
+
 
 } //end namespace SBEIO
 
