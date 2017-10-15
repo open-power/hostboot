@@ -46,6 +46,7 @@
 #include <errl/errludlogregister.H>
 #include <hw_access_def.H>
 #include <p9_scom_addr.H>
+#include <targeting/common/utilFilter.H>
 
 
 
@@ -66,6 +67,25 @@ namespace SCOM
 void addScomFailFFDC( errlHndl_t i_err,
                       TARGETING::Target* i_target,
                        uint64_t i_addr );
+
+/**
+ * @brief Perform a manual multicast operation if appropriate
+ *
+ * @param[in] i_opType  Read/Write
+ * @param[in] i_target  Processor target
+ * @param[in] o_buffer  Output buffer
+ * @param[inout] io_buflen  Size of buffer (must be 8 bytes)
+ * @param[in] i_addr  SCOM address
+ * @param[out] o_didWorkaround  true if the manual workaround was
+ *             performed
+ * @return nullptr for success
+ */
+errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
+                                  TARGETING::Target* i_target,
+                                  void* io_buffer,
+                                  size_t& io_buflen,
+                                  uint64_t i_addr,
+                                  bool& o_didWorkaround );
 
 
 // Register Scom access functions to DD framework
@@ -752,6 +772,14 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
     errlHndl_t l_err = NULL;
 
+    // P9 has a bug in the multicast logic that causes it to return a
+    //  'chiplet offline' error if there are any chiplets in the multicast
+    //  group that are offline.  If the scom is performed via the PIB
+    //  we will see a pib error but the data will be valid.  If the scom
+    //  is performed via the ADU we will see an error but the data we
+    //  get returned will be all FFs.
+    bool l_multicastBugError = false;
+
     do{
         TARGETING::ScomSwitches scomSetting;
         scomSetting.useXscom = true;  //Default to Xscom supported.
@@ -759,18 +787,40 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
         {
             scomSetting =
               i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+
+            if( TARGETING::TYPE_PROC
+                == i_target->getAttr<TARGETING::ATTR_TYPE>() )
+            {
+                l_multicastBugError = true;
+            }
         }
 
         //Always XSCOM the Master Sentinel
         if((TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target) ||
             (scomSetting.useXscom))
         {  //do XSCOM
+            // xscom uses ADU so we'll do a workaround instead of ignoring
+            //  the error code
+            l_multicastBugError = false;
 
-            l_err = deviceOp(i_opType,
-                             i_target,
-                             io_buffer,
-                             io_buflen,
-                             DEVICE_XSCOM_ADDRESS(i_addr));
+            //Check to see if we need to do the multicast bug workaround
+            // and do it, returns true if the workaround was performed
+            // which means we skip the regular call
+            bool l_didWorkaround = false;
+            l_err = doMulticastWorkaround(i_opType,
+                                          i_target,
+                                          io_buffer,
+                                          io_buflen,
+                                          i_addr,
+                                          l_didWorkaround);
+            if( !l_didWorkaround && !l_err )
+            {
+                l_err = deviceOp(i_opType,
+                                 i_target,
+                                 io_buffer,
+                                 io_buflen,
+                                 DEVICE_XSCOM_ADDRESS(i_addr));
+            }
             break;
         }
         else if(scomSetting.useSbeScom)
@@ -825,7 +875,7 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
     }
 
 
-    if( l_err && p9_scom_addr(i_addr).is_multicast() )
+    if( l_err && p9_scom_addr(i_addr).is_multicast() && l_multicastBugError )
     {
         //Delete the error if the mask matches the pib err
         for(auto data : l_err->getUDSections(SCOM_COMP_ID, SCOM::SCOM_UDT_PIB))
@@ -1071,5 +1121,92 @@ void addScomFailFFDC( errlHndl_t i_err,
     l_insideFFDC = false;
 }
 
+
+/**
+ * @brief Perform a manual multicast operation if appropriate
+ */
+errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
+                                  TARGETING::Target* i_target,
+                                  void* io_buffer,
+                                  size_t& io_buflen,
+                                  uint64_t i_addr,
+                                  bool& o_didWorkaround )
+{
+    errlHndl_t l_err = nullptr;
+    uint64_t* l_summaryReg = reinterpret_cast<uint64_t*>(io_buffer);
+
+    constexpr uint64_t IS_MULTICAST = 0x40000000;
+    constexpr uint64_t MULTICAST_GROUP = 0x07000000;
+    constexpr uint64_t IS_PCBSLAVE = 0x000F0000;
+    constexpr uint64_t CHIPLET_BYTE = 0xFF000000;
+    constexpr uint64_t MULTICAST_OP = 0x38000000;
+    constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
+
+    // Skip calls to the SENTINEL since we don't have the
+    //  ability to find its children
+    if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
+        == i_target )
+    {
+        o_didWorkaround = false;
+        return nullptr;
+    }
+
+    // Only perform this workaround for:
+    //  - reads
+    //  - multicast registers
+    //  - scom is not part of pcb slave
+    //  - multicast read option XXX 'bit-wise'
+    //  - multicast group0 'all functional chiplets'
+    if( !((DeviceFW::READ == i_opType)
+          && ((IS_MULTICAST & i_addr) == IS_MULTICAST)
+          && ((IS_PCBSLAVE & i_addr) != IS_PCBSLAVE)
+          && ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE)
+          && ((MULTICAST_GROUP & i_addr) == 0)) )
+    {
+        o_didWorkaround = false;
+        return nullptr;
+    }
+    TRACFCOMP( g_trac_scom, "doMulticastWorkaround on %.8X for %.8X", TARGETING::get_huid(i_target), i_addr );
+
+    // Loop around every functional pervasive target
+    TARGETING::TargetHandleList l_chiplets;
+    TARGETING::getChildChiplets( l_chiplets,
+                                 i_target,
+                                 TARGETING::TYPE_PERV,
+                                 true );
+    for( auto l_chiplet : l_chiplets )
+    {
+        uint64_t l_data = 0;
+        uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
+        uint64_t l_unit = l_chiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        l_addr |= (l_unit << 24);
+        TRACFCOMP( g_trac_scom, "doMulticastWorkaround> scom to %.8X", l_addr );
+        io_buflen = sizeof(uint64_t);
+        l_err = deviceOp(i_opType,
+                         i_target,
+                         &l_data,
+                         io_buflen,
+                         DEVICE_XSCOM_ADDRESS(l_addr));
+        // just ignore any errors, we expect they will happen
+        if( l_err )
+        {
+            delete l_err;
+            l_err = nullptr;
+        }
+        // if any bits are set, set this unit's bit in summary reg
+        //   note: this is good enough for the use-case we have now
+        //         but a better implementation would be to actually
+        //         check the select regs as well so we know which bit(s)
+        //         are the trigger
+        else if( l_data & 0x8000000000000000 )
+        {
+            *l_summaryReg |= (0x8000000000000000 >> l_unit);
+        }
+    }
+
+    o_didWorkaround = true;
+
+    return l_err;
+}
 
 } // end namespace
