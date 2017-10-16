@@ -258,6 +258,7 @@ sub createTargetExtensionFromFapi(\%,\%)
     TARGET_TYPE_CAPP          => "unit-capp-power9",
     TARGET_TYPE_DMI           => "unit-dmi-power9",
     TARGET_TYPE_OBUS          => "unit-obus-power9",
+    TARGET_TYPE_OBUS_BRICK    => "unit-obus-brick-power9",
     TARGET_TYPE_SBE           => "unit-sbe-power9",
     TARGET_TYPE_PPE           => "unit-ppe-power9",
     TARGET_TYPE_PERV          => "unit-perv-power9",
