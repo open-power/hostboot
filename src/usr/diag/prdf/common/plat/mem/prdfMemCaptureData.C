@@ -118,7 +118,8 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     BitStringBuffer bsb( sz_buf*8 );
     uint32_t curPos = 0;
 
-    bsb.setFieldJustify( curPos, 32, extMemMru.mmMeld.u  ); curPos+=32;
+    // TODO RTC 179854
+    bsb.setFieldJustify( curPos, 32, htonl(extMemMru.mmMeld.u)  ); curPos+=32;
     bsb.setFieldJustify( curPos,  8, extMemMru.cardType  ); curPos+= 8;
     bsb.setFieldJustify( curPos,  1, extMemMru.isBufDimm ); curPos+= 1;
     bsb.setFieldJustify( curPos,  1, extMemMru.isX4Dram  ); curPos+= 1;

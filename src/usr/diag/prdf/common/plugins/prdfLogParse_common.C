@@ -55,6 +55,7 @@
 #include <prdfBitString.H>
 
 #include <hwas/common/hwasCallout.H>
+#include <netinet/in.h>
 
 //------------------------------------------------------------------------------
 // Data structures
@@ -770,7 +771,9 @@ bool parseExtMemMru( void * i_buffer, uint32_t i_buflen,
 
         MemoryMruData::ExtendedData extMemMru;
 
-        extMemMru.mmMeld.u  = bs.getFieldJustify( curPos, 32 ); curPos+=32;
+        // TODO RTC 179854
+        extMemMru.mmMeld.u  = ntohl( bs.getFieldJustify( curPos, 32 ) );
+                              curPos+=32;
         extMemMru.cardType  = bs.getFieldJustify( curPos,  8 ); curPos+= 8;
         extMemMru.isBufDimm = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
         extMemMru.isX4Dram  = bs.getFieldJustify( curPos,  1 ); curPos+= 1;
