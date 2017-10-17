@@ -45,7 +45,6 @@ EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p9/procedures/hwp/sbe/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/accessors/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
-EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 EXTRAINCDIR += ${HWP_PATH}
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory
 EXTRAINCDIR += ${HWP_PATH_2}/hwp/memory/lib/
@@ -153,15 +152,9 @@ include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundv_bucke
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket.mk
 include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/pm/p9_pm_get_poundw_bucket_attr.mk
 
-# We specifically removed this from the istep10.so and placed it here because
-# we have to reapply this init on the shutdown path after the interrupt resource
-# provider is shutdown
-include $(ROOTPATH)/src/import/chips/p9/procedures/hwp/initfiles/p9_int_scom.mk
-
 VPATH += ${HWP_PATH_1}/hwp/accessors
 VPATH += ${ROOTPATH}/src/import/hwpf/fapi2/src/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
-VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 VPATH += ${GENPATH}
