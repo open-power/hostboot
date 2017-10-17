@@ -23,6 +23,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
+
+# Enable strict error checking
+set -exo pipefail
+
 TARGET_DIR="invalid directory"
 TARGET="fsp_TARGET"
 SBFW_DIR="invalid directory"
@@ -173,10 +177,20 @@ else
     fi
 fi
 
-# @TODO RTC:157356
-# Temporary development signing tools to create valid container headers
-export SIGNING_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/secure-boot-scripts/rom_new_header/sign/obj"
-export DEV_KEY_DIR="/gsa/ausgsa/home/h/o/hostboot/hostboot-project/secure-dev-signing/dev_keys"
+# Point to various signing related path components
+export SIGNING_BASE_DIR=/esw/bin/sb-signing
+echo "Secure Boot: Signing base dir is ${SIGNING_BASE_DIR}"
+export SIGNING_UTILS_DIR=sb-signing-utils
+echo "Secure Boot: Signing utils dir is ${SIGNING_UTILS_DIR}"
+
+# Point to the development signing keys
+export DEV_KEY_DIR="${SIGNING_BASE_DIR}/sb-signing-keys"
+echo "Secure Boot: Development keys dir is ${DEV_KEY_DIR}"
+
+# Force genPnorImages.pl to use the open signing tool
+export SIGNING_TOOL_EDITION="community";
+echo "Secure Boot: Signing tool edition is ${SIGNING_TOOL_EDITION}"
+
 # Dynamically check config file if secureboot enabled build occurred
 if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
     if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then

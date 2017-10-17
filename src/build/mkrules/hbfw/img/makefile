@@ -113,6 +113,42 @@ IMPRINT_HW_KEY_HASH = ${imprintHwKeyHash:P}
 #       the same --systemBinFiles parameter for genPnorImages
 GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 
+# Determine which version of Redhat we're building on and generate the
+# associated sub-directory name used to construct the signing binaries path.
+# Most pool machines have back level libraries used for signing, so point to
+# usable ones.
+# The unescaped version of the command is:
+#     sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release
+# Any character not in the following set must be escaped:
+#     [a-zA-Z0-9,._+:@%/-]
+RH_DIR%=${DUMMY:!sed "s/\^.\*release \\\(\[0-9\]\*\\\)\..\*\$/rh\\1/\" /etc/redhat-release!e}
+
+# Concatenate the base path, Redhat specific dir, and tool subdir to form the
+# complete signing tools path
+SIGNING_DIR%=${SIGNING_BASE_DIR}/${RH_DIR}/${SIGNING_UTILS_DIR}
+
+# Construct the set of libs we need to preload to ensure compatibility
+SIGNING_LIBS%=${SIGNING_DIR}/libssl.so:${SIGNING_DIR}/libcrypto.so
+
+# Put signing tool dir in the path so child programs can be located.
+# Additionally, put /usr/bin at the front to prevent certain CI situations from
+# using old openssl binaries.
+PATH%=/usr/bin:${SIGNING_DIR}:${PATH}
+
+# Dump information about the Secure Boot configuration
+dump-secureboot-config : .FORCEBLD
+	echo -e "\n\n\
+Secure Boot Signing Config:\n\
+    Signing base dir     [${SIGNING_BASE_DIR}]\n\
+    Redhat subdir        [${RH_DIR}]\n\
+    Signing utils subdir [${SIGNING_UTILS_DIR}]\n\
+    Final signing dir    [${SIGNING_DIR}]\n\
+    Development key dir  [${DEV_KEY_DIR}]\n\
+    Signing edition      [${SIGNING_TOOL_EDITION}]\n\
+    Compile secureboot?  [${CONFIG_SECUREBOOT}]\n\
+    Libs to preload      [${SIGNING_LIBS}]\n\
+    Path                 [${PATH}]\n\n"
+
 # Default to using FSP layout for common file purposes and use existing hb
 # techniques to enable default layout when appropriate.
 PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
@@ -142,7 +178,7 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
 
-gen_default_images: cp_hbfiles
+gen_default_images: cp_hbfiles dump-secureboot-config
 	currentsb -chain
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
@@ -160,7 +196,7 @@ gen_default_images: cp_hbfiles
     # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
 
 	# Call script to generate final bin files for default images
-	${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
@@ -301,9 +337,9 @@ ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
                              --systemBinFiles ${GEN_CUMULUS_BIN_FILES}
 .endif
 
-gen_system_specific_images_bypass_cache :
+gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
-	${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
 
 	#for NIMBUS fake pnor skip version header
 	.if(${FAKEPNOR} != "")
