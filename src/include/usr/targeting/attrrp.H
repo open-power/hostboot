@@ -40,7 +40,6 @@
 #include <sys/msg.h>
 #include <targeting/adapters/types.H>
 #include <targeting/common/targetservice.H>
-#include <targeting/attrsync.H>
 #include <targeting/common/attributeTank.H>
 
 namespace TARGETING
@@ -72,6 +71,11 @@ class AttrRP
                            std::vector<sectionRefData>& o_pages,
                            const SECTION_TYPE i_sectionId,
                            const TARGETING::NODE_ID i_nodeId);
+
+#ifdef __HOSTBOOT_RUNTIME
+    friend int RT_TARG::saveRestoreAttrs(void *,
+                                         void *);
+#endif
 
     public:
 
@@ -216,6 +220,16 @@ class AttrRP
         static errlHndl_t saveOverrides( uint8_t* i_dest,
                                          size_t& io_size );
 
+#else
+        /**
+         *  @brief Fill in new attribute resource provider for HBRT.
+         *
+         *  @param[in] i_header
+         *      TargetingHeader to use with filling in the new RT AttrRP.
+         *
+         *  @return void
+         */
+        void fillInAttrRP(TargetingHeader* i_header);
 #endif
 
     protected:
@@ -228,12 +242,29 @@ class AttrRP
          */
         AttrRP()
 #ifndef __HOSTBOOT_RUNTIME
-            : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
+            : iv_msgQ(NULL), iv_sections(NULL), iv_sectionCount(0),
+              iv_isMpipl(false)
 #else
-            : iv_sections(NULL), iv_sectionCount(0), iv_isMpipl(false)
+            : iv_isTempInstance(false), iv_sections(NULL), iv_sectionCount(0),
+              iv_isMpipl(false)
 #endif
         {
         };
+
+#ifdef __HOSTBOOT_RUNTIME
+        /**
+         *  @brief Initialize temporary attribute resource provider
+         *
+         *  @par Detailed Description"
+         *      Ensures member variables are initialized to sane values.
+         */
+        AttrRP(TargetingHeader* i_header)
+            : iv_isTempInstance(true), iv_isMpipl(false)
+        {
+            // Fill in member variables
+            fillInAttrRP(i_header);
+        };
+#endif
 
         /**
          *  @brief Destroy the attribute resource provider
@@ -241,9 +272,10 @@ class AttrRP
          *  @par Detailed Description:
          *      Frees any memory allocated by the resource provider.
          *
-         *  @note This should never actually be used because the daemon
-         *        thread and the vmm blocks are unable to be reclaimed.
-         *        Function will assert if called due to leaky behavior.
+         *  @note This should never actually be used for the singleton
+         *        instance because the daemon thread and the vmm blocks
+         *        are unable to be reclaimed.  Function will assert if
+         *        called due to leaky behavior.
          */
         ~AttrRP();
 
@@ -388,6 +420,9 @@ class AttrRP
 
         // Message Queue for VMM requests
         msg_q_t iv_msgQ;
+#else
+        // Indicator that AttrRP instance is a temporary one, not the singleton
+        bool iv_isTempInstance;
 #endif
         // Parsed structures of the attribute sections.
         AttrRP_Section* iv_sections;

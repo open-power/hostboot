@@ -29,6 +29,7 @@
 #include <errl/errlentry.H>
 #include <targeting/common/targreasoncodes.H>
 #include <targeting/targplatreasoncodes.H>
+#include <targeting/attrsync.H>
 #include <util/runtime/util_rt.H>
 
 #include "../attrrp_common.C"
@@ -37,6 +38,98 @@ using namespace ERRORLOG;
 
 namespace TARGETING
 {
+    void AttrRP::fillInAttrRP(TargetingHeader* i_header)
+    {
+        TRACFCOMP(g_trac_targeting, ENTER_MRK"AttrRP::fillInAttrRP");
+
+        do
+        {
+            // Create AttributeSync
+            AttributeSync l_attributeSync = AttributeSync();
+
+            // Allocate section structures based on section count in header.
+            iv_sectionCount = i_header->numSections;
+            iv_sections = new AttrRP_Section[iv_sectionCount]();
+
+            // Find start to the first section:
+            //          (header address + size of header + offset in header)
+            TargetingSection* l_section =
+                reinterpret_cast<TargetingSection*>(
+                    reinterpret_cast<uint64_t>(i_header) +
+                    sizeof(TargetingHeader) + i_header->offsetToSections
+                );
+
+            uint64_t l_offset = 0;
+
+            for (size_t i = 0; i < iv_sectionCount; ++i, ++l_section)
+            {
+                iv_sections[i].type = l_section->sectionType;
+                iv_sections[i].size = l_section->sectionSize;
+
+                iv_sections[i].vmmAddress =
+                        static_cast<uint64_t>(
+                            TARG_TO_PLAT_PTR(i_header->vmmBaseAddress)) +
+                        i_header->vmmSectionOffset*i;
+                iv_sections[i].pnorAddress =
+                        reinterpret_cast<uint64_t>(i_header) + l_offset;
+
+                l_offset += ALIGN_PAGE(iv_sections[i].size);
+
+                TRACFCOMP(g_trac_targeting,
+                          "Decoded Attribute Section: %d, 0x%lx, 0x%lx, 0x%lx",
+                          iv_sections[i].type,
+                          iv_sections[i].vmmAddress,
+                          iv_sections[i].pnorAddress,
+                          iv_sections[i].size);
+            }
+
+            for (size_t i = 0; i < iv_sectionCount; ++i)
+            {
+                // get section data from current AttrRP
+                std::vector <TARGETING::sectionRefData>l_pages;
+                l_pages =
+                    l_attributeSync.syncSectionFromAttrRP(iv_sections[i].type);
+
+                // write section data to new AttrRP
+                uint8_t * l_dataPtr = nullptr; // ptr to Attribute address space
+                bool      l_rc = true;         // true if write is successful
+
+                // for each page
+                for(std::vector<TARGETING::sectionRefData>::const_iterator
+                        pageIter = l_pages.begin();
+                    (pageIter != l_pages.end()) && (true == l_rc);
+                    ++pageIter)
+                {
+                    // check that page number is within range
+                    uint64_t l_pageOffset = (*pageIter).pageNumber * PAGESIZE;
+                    if ( iv_sections[i].size < (l_pageOffset + PAGESIZE) )
+                    {
+                        TARG_ERR("page offset 0x%lx is greater than "
+                                 "size 0x%lx of section %u",
+                                 l_pageOffset,
+                                 iv_sections[i].size,
+                                 iv_sections[i].type);
+
+                        l_rc = false;
+                        break;
+                    }
+
+                    // adjust the pointer out by page size * page number
+                    l_dataPtr =
+                        reinterpret_cast<uint8_t *>(iv_sections[i].pnorAddress)
+                        + l_pageOffset;
+
+                    memcpy( l_dataPtr, (*pageIter).dataPtr, PAGESIZE );
+
+                }
+            }
+        } while(false);
+
+        TRACFCOMP(g_trac_targeting, EXIT_MRK"AttrRP::fillInAttrRP");
+
+        return;
+    }
+
     void AttrRP::startup(errlHndl_t& io_taskRetErrl, bool isMpipl)
     {
         TRACFCOMP(g_trac_targeting, "AttrRP::startup");
@@ -48,6 +141,7 @@ namespace TARGETING
             TargetingHeader* l_header =
               reinterpret_cast<TargetingHeader*>(
                   hb_get_rt_rsvd_mem(Util::HBRT_MEM_LABEL_ATTR,0,attr_size));
+
 
             if ((NULL == l_header) ||
                 (l_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))

@@ -276,6 +276,50 @@ void Target::_getAttrPtr(
 }
 
 //******************************************************************************
+// Target::_getAttrPtr
+//******************************************************************************
+
+void Target::_getAttrPtr(
+            ATTRIBUTE_ID  i_attr,
+            AttrRP*       i_attrRP,
+            ATTRIBUTE_ID* i_pAttrId,
+            AbstractPointer<void>* i_ppAttrAddr,
+            void*&        o_pAttr) const
+{
+
+    #define TARG_FN "_getAttrPtr()"
+
+    void* l_pAttr = NULL;
+
+    // Search for the attribute ID.
+    ATTRIBUTE_ID* ptr = std::lower_bound(i_pAttrId,
+                                         i_pAttrId + iv_attrs,
+                                         i_attr);
+    if ((ptr != i_pAttrId + iv_attrs) && (*ptr == i_attr))
+    {
+        // Locate the corresponding attribute address
+        l_pAttr =
+            TARG_TO_PLAT_PTR(*(i_ppAttrAddr + std::distance(i_pAttrId, ptr)));
+
+        // Only translate addresses on platforms where addresses are
+        // 4 byte wide (FSP).  The compiler should perform dead code
+        // elimination this path on platforms with 8 byte wide
+        // addresses (Hostboot), since the "if" check can be statically
+        // computed at compile time.
+        if(TARG_ADDR_TRANSLATION_REQUIRED)
+        {
+            l_pAttr =
+                i_attrRP->translateAddr(l_pAttr,
+                                        static_cast<const Target*>(this));
+        }
+    }
+
+    o_pAttr = l_pAttr;
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
 // Target::_getHbMutexAttr
 //******************************************************************************
 

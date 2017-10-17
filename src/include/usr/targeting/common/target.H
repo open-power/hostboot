@@ -58,6 +58,8 @@
 namespace RT_TARG
 {
     void adjustTargeting4Runtime();
+    int saveRestoreAttrs(void *i_rsvdMemPtr,
+                         void *io_lidStructPtr);
 }
 #endif
 
@@ -98,6 +100,7 @@ namespace TARGETING
 // Type Aliases
 //******************************************************************************
 class AttributeTank;
+class AttrRP;
 class Target;
 typedef const Target* ConstTargetHandle_t;
 typedef       Target* TargetHandle_t;
@@ -480,6 +483,31 @@ class Target
             void*&       o_pAttr) const;
 
         /**
+         *  @brief Gets a pointer to the target's associated attribute
+         *
+         *  Gets a pointer to the target's associated attribute
+         *
+         *  @param[in] i_attr Attribute to retrieve
+         *  @param[in] i_attrRP Pointer to attribute resource provider
+         *  @param[in] i_pAttrId Pointer to array of attribute IDs for target
+         *  @param[in] i_ppAttrAddr Pointer to array of attribute addresses
+         *  @param[out] o_pAttr Pointer to data location to hold the attribute
+         *      data
+         *
+         *  @pre Target service must be initialized
+         *
+         *  @post If attribute exists for the associated target, caller's
+         *      pointer updated with associated attribute pointer.  Otherwise,
+         *      caller's pointer updated to NULL.
+         */
+        void _getAttrPtr(
+            ATTRIBUTE_ID  i_attr,
+            AttrRP*       i_attrRP,
+            ATTRIBUTE_ID* i_pAttrId,
+            AbstractPointer<void>* i_ppAttrAddr,
+            void*&        o_pAttr) const;
+
+        /**
          *  @brief Returns pointer to a mutex attribute associated with the
          *     target
          *
@@ -632,6 +660,8 @@ class Target
 
 #ifdef __HOSTBOOT_RUNTIME
         friend void RT_TARG::adjustTargeting4Runtime();
+        friend int RT_TARG::saveRestoreAttrs(void *,
+                                             void *);
 #endif
 
 

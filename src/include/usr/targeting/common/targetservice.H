@@ -63,6 +63,9 @@
 
 namespace TARGETING
 {
+    // Forward declaration of attribute resource provider class.
+    class AttrRP;
+
     class TargetService;
 
     /*
@@ -710,6 +713,60 @@ class TargetService
          */
         void getMasterNodeTarget(Target*& o_masterNodeTarget) const;
 
+        /**
+         *  @brief Returns Target Range Filter information.
+         *
+         *  @par Detailed Description:
+         *  Returns the Target Range Filter information for the specified
+         *  attribute data and resource provider.
+         *
+         *  @param[in] i_attrData pointer to attribute data
+         *
+         *  @param[in] i_attrRP pointer to attribute resource provider
+         *
+         *  @param[out] o_maxTargets maximum targets in the range
+         *
+         *  @param[in] i_nodeId, node ID for the target. Defaults to 0.
+         *
+         *  @pre TargetService must be initialized.
+         *
+         *  @post Returns the Target Range Filter information for the specified
+         *  attribute data and resource provider.
+         *
+         *  @return TargetRangeFilter
+         */
+        TargetRangeFilter getTargetRangeFilter(void *i_attrData,
+                                               AttrRP *i_attrRP,
+                                               uint32_t &o_maxTargets,
+                                               NODE_ID i_nodeId = 0);
+
+        /**
+         *  @brief Returns Target Attribute information.
+         *
+         *  @par Detailed Description:
+         *  Returns the Target Attribute information for the specified
+         *  target and resource provider.
+         *
+         *  @param[in] i_target pointer to target
+         *
+         *  @param[in] i_attrRP pointer to attribute resource provider
+         *
+         *  @param[out] o_pAttrId pointer to array of attribute IDs
+         *
+         *  @param[out] o_ppAttrAddr pointer to array of attribute addresses
+         *
+         *  @pre TargetService must be initialized.
+         *
+         *  @post Returns the Target Attribute information for the specified
+         *  target and resource provider.
+         *
+         *  @return Number of attributes in the arrays
+         */
+        uint32_t getTargetAttributes(Target*i_target,
+                                     AttrRP *i_attrRP,
+                                     ATTRIBUTE_ID* &o_pAttrId,
+                                     AbstractPointer<void>* &o_ppAttrAddr);
+
 
     private:
 
@@ -768,11 +825,15 @@ class TargetService
          *  specific information of the type NodeSpecificInfo. May refer to
          *  structure definition
          *
+         *  @param[in] i_attrRP, attribute resource provider to use if address
+         *  translation is required. Defaults to NULL, ie, AttrRP Singleton.
+         *
          *  @pre Target service must not be initialized
          *
          *  @post Target service target pool configured for access
          */
-        void _configureTargetPool(NodeSpecificInfo& i_nodeInfoContainer);
+        void _configureTargetPool(NodeSpecificInfo& i_nodeInfoContainer,
+                                  AttrRP *i_attrRP = NULL);
 
         /**
          *  @brief Computes the maximum number of targets, caches the value
@@ -785,13 +846,17 @@ class TargetService
          *  specific information of the type NodeSpecificInfo. May refer to
          *  structure definition
          *
+         *  @param[in] i_attrRP, attribute resource provider to use if address
+         *  translation is required. Defaults to NULL, ie, AttrRP Singleton.
+         *
          *  @pre Target service must not already be initialized
          *
          *  @post Target service updated with maximum target count in
          *  nodeContainer.
          *
          */
-        void _maxTargets(NodeSpecificInfo & io_nodeInfoContainer);
+        void _maxTargets(NodeSpecificInfo & io_nodeInfoContainer,
+                         AttrRP *i_attrRP = NULL);
 
 
         //@NEBA
