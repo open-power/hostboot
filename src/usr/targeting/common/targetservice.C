@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1085,11 +1085,15 @@ void TargetService::readSectionData(
 //******************************************************************************
 
 void TargetService::_configureTargetPool(
-    NodeSpecificInfo& i_nodeInfoContainer)
+    NodeSpecificInfo& i_nodeInfoContainer,
+    AttrRP *i_attrRP)
 {
 #define TARG_FN "_configureTargetPool(...)"
 
     TARG_ENTER();
+
+    AttrRP *l_attrRP = (i_attrRP == NULL)
+                     ? &TARG_GET_SINGLETON(TARGETING::theAttrRP) : i_attrRP;
 
     _maxTargets(i_nodeInfoContainer);
 
@@ -1114,7 +1118,7 @@ void TargetService::_configureTargetPool(
     if(TARG_ADDR_TRANSLATION_REQUIRED)
     {
         i_nodeInfoContainer.targets = static_cast<Target(*)[]>(
-             TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+             l_attrRP->translateAddr(
                     i_nodeInfoContainer.targets, i_nodeInfoContainer.nodeId));
         TARG_ASSERT(i_nodeInfoContainer.targets, TARG_ERR_LOC
                     "FATAL: Could not determine location of targets after "
@@ -1132,9 +1136,13 @@ void TargetService::_configureTargetPool(
 // TargetService::_maxTargets
 //******************************************************************************
 
-void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer)
+void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer,
+                                AttrRP *i_attrRP)
 {
     #define TARG_FN "_maxTargets(...)"
+
+    AttrRP *l_attrRP = (i_attrRP == NULL)
+                     ? &TARG_GET_SINGLETON(TARGETING::theAttrRP) : i_attrRP;
 
     // Target count found by following the pointer pointed to by the iv_pPnor
     // pointer.
@@ -1149,8 +1157,8 @@ void TargetService::_maxTargets(NodeSpecificInfo& io_nodeInfoContainer)
     // can be statically computed at compile time.
     if(TARG_ADDR_TRANSLATION_REQUIRED)
     {
-        pNumTargets = static_cast<uint32_t*>(
-                TARG_GET_SINGLETON(TARGETING::theAttrRP).translateAddr(
+        pNumTargets =
+            static_cast<uint32_t*>(l_attrRP->translateAddr(
                         pNumTargets, io_nodeInfoContainer.nodeId));
     }
 
@@ -1391,6 +1399,111 @@ void TargetService::getMasterNodeTarget(
            "Node Target of the System's Master Node cannot be NULL");
 
     #undef TARG_FN
+}
+
+//******************************************************************************
+// TargetService::getTargetRangeFilter
+//******************************************************************************
+
+TargetRangeFilter TargetService::getTargetRangeFilter(void *i_attrData,
+                                                      AttrRP *i_attrRP,
+                                                      uint32_t &o_maxTargets,
+                                                      NODE_ID i_nodeId)
+{
+    #define TARG_FN "getTargetRangeFilter(...)"
+    TARG_ENTER();
+
+    // Get pointer to TargetingHeader for attribute data
+    TargetingHeader* l_header =
+        reinterpret_cast<TargetingHeader*>(i_attrData);
+
+    // Verify TargetingHeader
+    TARG_ASSERT(l_header != NULL, TARG_ERR_LOC
+                "TargetingHeader for attribute data is NULL");
+    TARG_ASSERT(l_header->eyeCatcher == PNOR_TARG_EYE_CATCHER, TARG_ERR_LOC
+                "TargetingHeader eyecatcher 0x%16llX is incorrect",
+                l_header->eyeCatcher)
+
+    // Create node info
+    TargetService::NodeSpecificInfo l_nodeSpecificInfo;
+    l_nodeSpecificInfo.nodeId = i_nodeId;
+
+    // Save away the address of the targeting data in pPnor field
+    l_nodeSpecificInfo.pPnor =
+        reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(l_header) +
+                                    l_header->headerSize);
+
+    (void)TargetService::_configureTargetPool(l_nodeSpecificInfo,
+                                              i_attrRP);
+
+    l_nodeSpecificInfo.initialized = true;
+
+    // Create pointer to first target in new attribute data
+    // First target is after header and number of targets count
+    Target* l_pFirstTarget = &(*(l_nodeSpecificInfo.targets))[0];
+    TARG_INF("getTargetRangeFilter: First target pointer %p, huid 0x%.8x",
+              l_pFirstTarget,
+              get_huid(l_pFirstTarget));
+
+    // Create TargetRangeFilter for attribute data
+    TargetRangeFilter l_rangeFilter(TargetIterator(l_pFirstTarget),
+                                    TargetIterator(NULL),
+                                    NULL);
+
+    // Set maximum target value to be returned
+    o_maxTargets = l_nodeSpecificInfo.maxTargets;
+
+    TARG_EXIT();
+    #undef TARG_FN
+
+    return  l_rangeFilter;
+}
+
+//******************************************************************************
+// TargetService::getTargetAttributes
+//******************************************************************************
+
+uint32_t TargetService::getTargetAttributes(Target*i_target,
+                                            AttrRP *i_attrRP,
+                                            ATTRIBUTE_ID* &o_pAttrId,
+                                            AbstractPointer<void>*
+                                                &o_ppAttrAddr)
+{
+    #define TARG_FN "getTargetAttributes(...)"
+    // TARG_ENTER();
+
+    // Transform platform neutral pointers into platform specific pointers, and
+    // optimize processing by not having to do the conversion in the loop below
+    // (it's guaranteed that attribute metadata will be in the same contiguous
+    // VMM region)
+    o_pAttrId = TARG_TO_PLAT_PTR(i_target->iv_pAttrNames);
+    o_ppAttrAddr = TARG_TO_PLAT_PTR(i_target->iv_pAttrValues);
+    TARG_DBG("o_pAttrId before translation = %p, "
+             "o_ppAttrAddr before translation = %p",
+             o_pAttrId,
+             o_ppAttrAddr);
+
+    // Only translate addresses on platforms where addresses are 4 bytes wide
+    // (FSP). The compiler should perform dead code elimination of this path on
+    // platforms with 8 byte wide addresses (Hostboot), since the "if" check can
+    // be statically computed at compile time.
+    if(TARG_ADDR_TRANSLATION_REQUIRED)
+    {
+        o_pAttrId = static_cast<ATTRIBUTE_ID*>(
+            i_attrRP->translateAddr(o_pAttrId, i_target));
+        o_ppAttrAddr = static_cast<AbstractPointer<void>*>(
+            i_attrRP->translateAddr(o_ppAttrAddr, i_target));
+        TARG_DBG("o_pAttrId after translation = %p, "
+                 "o_ppAttrAddr after translation = %p",
+                 o_pAttrId,
+                 o_ppAttrAddr);
+    }
+
+    // TARG_EXIT();
+    #undef TARG_FN
+
+    // Return the number of attributes for this target
+    return i_target->iv_attrs;
 }
 
 #undef TARG_CLASS

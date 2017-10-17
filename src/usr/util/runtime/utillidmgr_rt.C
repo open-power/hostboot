@@ -348,9 +348,10 @@ const uint32_t * UtilLidMgr::getLidList(size_t * o_num)
             Util::WOF_LIDID,
             Util::WOF_CONTAINER_LIDID,
             Util::NIMBUS_HCODE_LIDID,
-            Util::HWREFIMG_RINGOVD_LIDID,
+            Util::CUMULUS_HCODE_LIDID,
             Util::HCODE_CONTAINER_LIDID,
-            Util::HWREFIMG_RINGOVD_LIDID
+            Util::HWREFIMG_RINGOVD_LIDID,
+            Util::TARGETING_BINARY_LIDID
         };
         *o_num = sizeof(lidlist)/sizeof(lidlist[0]);
         return lidlist;
@@ -365,7 +366,8 @@ bool UtilLidMgr::lidInHbResvMem(const uint32_t i_lidId) const
            i_lidId == Util::NIMBUS_HCODE_LIDID ||
            i_lidId == Util::CUMULUS_HCODE_LIDID ||
            i_lidId == Util::HCODE_CONTAINER_LIDID ||
-           i_lidId == Util::HWREFIMG_RINGOVD_LIDID;
+           i_lidId == Util::HWREFIMG_RINGOVD_LIDID ||
+           i_lidId == Util::TARGETING_BINARY_LIDID;
 }
 
 //------------------------------------------------------------------------

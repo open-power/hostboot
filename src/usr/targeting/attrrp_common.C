@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,9 +56,15 @@ namespace TARGETING
         }
 #ifndef __HOSTBOOT_RUNTIME
         msg_q_destroy(iv_msgQ);
+        TARG_ASSERT(false, "Assert to exit ~AttrRP");
+#else
+        // Only assert if this in not a temporary AttrRP instance
+        if (!iv_isTempInstance)
+        {
+            TARG_ASSERT(false, "Assert to exit ~AttrRP");
+        }
 #endif
 
-        TARG_ASSERT(false, "Assert to exit ~AttrRP");
     }
 
     void AttrRP::init(errlHndl_t &io_taskRetErrl, bool i_isMpipl)

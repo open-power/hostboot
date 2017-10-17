@@ -2325,6 +2325,7 @@ sub writeTraitFileTraits {
     my($attributes,$outFile) = @_;
 
     my $typedefs = "";
+    my $sizefunc = "";
 
     my %attrValHash;
 
@@ -2450,14 +2451,14 @@ sub writeTraitFileTraits {
             print $outFile "};\n\n";
 
             $typedefs .= "// Type aliases and/or sizes for ATTR_"
-            . "$attribute->{id} attribute\n";
+                . "$attribute->{id} attribute\n";
 
             $typedefs .= "typedef " . $type .
-            " $attribute->{id}" . "_ATTR" . $dimensions . ";\n";
+                " $attribute->{id}" . "_ATTR" . $dimensions . ";\n";
 
             # Append a more friendly type alias for attribute
             $typedefs .= "typedef " . $type .
-            " ATTR_" . "$attribute->{id}" . "_type" . $dimensions . ";\n";
+                " ATTR_" . "$attribute->{id}" . "_type" . $dimensions . ";\n";
 
             # If a string, append max # of characters for the string
             if(   (exists $attribute->{simpleType})
@@ -2465,11 +2466,21 @@ sub writeTraitFileTraits {
             {
                 my $size = $attribute->{simpleType}->{string}->{sizeInclNull}-1;
                 $typedefs .= "const size_t ATTR_"
-                .  "$attribute->{id}" . "_max_chars = "
-                .  "$size"
-                . ";\n";
+                    .  "$attribute->{id}" . "_max_chars = "
+                    .  "$size"
+                    . ";\n";
             }
             $typedefs .= "\n";
+
+            # Create case definitions for attrSizeLookup function
+
+            $sizefunc .= "    // Get size for ATTR_$attribute->{id}" .
+                " attribute\n";
+            $sizefunc .= "    case ATTR_$attribute->{id}:\n";
+            $sizefunc .= "        l_attrSize = sizeof(ATTR_" .
+                "$attribute->{id}_type);\n";
+            $sizefunc .= "        break;\n";
+            $sizefunc .= "\n";
         }
     };
 
@@ -2477,6 +2488,36 @@ sub writeTraitFileTraits {
     print $outFile wrapBrief("Mapping of alias type name to underlying type");
     print $outFile " */\n";
     print $outFile $typedefs ."\n";
+
+    # Create attrSizeLookup function
+
+    print $outFile <<VERBATIM;
+/**
+ *  \@brief Function to return size of specified attribute
+ *
+ *  \@param[in] i_attrId Attribute ID for attribute to look up size
+ *  \@return uint32_t Size of the attribute
+ *
+ *  \@retval Size of the attribute if succeeded
+ *  \@retval 0 if failed
+ *
+ */
+inline uint32_t attrSizeLookup(ATTRIBUTE_ID i_attrId)
+{
+    uint32_t l_attrSize = 0;
+
+    switch(i_attrId) {
+VERBATIM
+    print $outFile $sizefunc;
+    print $outFile <<VERBATIM;
+    default:
+        break;
+    }
+
+    return l_attrSize;
+}
+
+VERBATIM
 }
 
 ################################################################################

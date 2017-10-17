@@ -50,6 +50,7 @@ enum TargetingModuleId
     TARG_APPLY_ATTR_OVER            = 0x0A,
     TARG_HANDLE_ENUM_CHECK_FAILURE  = 0x0B,
     TARG_HANDLE_RANGE_CHECK_FAILURE = 0x0C,
+    TARG_RT_SAVE_RESTORE_ATTRS      = 0x0D,
 };
 
 enum TargetingReasonCode

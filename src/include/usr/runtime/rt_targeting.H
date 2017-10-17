@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,13 +54,35 @@ namespace RT_TARG
                            rtChipId_t &o_targetId);
 
     /**
-     * @brier Convert a runtime chip_id (target) into a TARGETING::Target
+     * @brief Convert a runtime chip_id (target) into a TARGETING::Target
      * @param[in] The rt chipId
      * @param[out] The TARGETING::Target pointer
      * @return error log handle on error else NULL
      */
     errlHndl_t getHbTarget(rtChipId_t i_rt_chip_id,
                            TARGETING::Target *& o_target);
+
+    /**
+     * @brief Save/Restore attribute values from current Reserved Memory data
+     * into new LID Structure data
+     * @param[in] Pointer to current Reserved Memory targeting binary data
+     * @param[in/out] Pointer to new LID Structure targeting binary data
+     * @return 0 on success, else return code
+     */
+    int saveRestoreAttrs(void *i_rsvdMemPtr,
+                         void *io_lidStructPtr);
+
+    /**
+     * @brief Validate LID Structure against Reserved Memory.  Check that the
+     * TargetingHeader eyecatchers are valid, that the TargetingHeader number of
+     * sections match, and that the types and sizes of each TargetingSection
+     * match.
+     * @param[in] Pointer to new LID Structure targeting binary data
+     * @param[in] Pointer to current Reserved Memory targeting binary data
+     * @return 0 on success, else return code
+     */
+    int validateData(void *i_lidStructPtr,
+                     void *i_rsvdMemPtr);
 
     /**
      * @brief Apply ATTR_TMP overrides to be available for run time

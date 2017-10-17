@@ -61,6 +61,7 @@ namespace TARGETING
 
     }
 
+#ifndef __HOSTBOOT_RUNTIME
     ATTR_SYNC_RC AttributeSync::updateSectionData() const
     {
         TARG_INF( ENTER_MRK "AttributeSync::updateSectionData - "
@@ -90,6 +91,23 @@ namespace TARGETING
         return l_rc;
     }
 
+#else
+    std::vector<TARGETING::sectionRefData> AttributeSync::syncSectionFromAttrRP(
+                                      TARGETING::SECTION_TYPE i_section_to_sync)
+    {
+        iv_section_to_sync = i_section_to_sync;
+
+        do
+        {
+            // set up the pointers to the data area
+            getSectionData();
+        } while(0);
+
+        return iv_pages;
+    }
+#endif
+
+#ifndef __HOSTBOOT_RUNTIME
     errlHndl_t AttributeSync::syncSectionToFsp(
                                     TARGETING::SECTION_TYPE i_section_to_sync )
     {
@@ -625,6 +643,7 @@ namespace TARGETING
         TARG_INF( EXIT_MRK "syncAllAttributesFromFsp" );
         return  l_errl;
     }
+#endif
 
 };   // end namespace
 
