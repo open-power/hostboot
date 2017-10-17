@@ -66,8 +66,8 @@ enum sizes
     MAX_NUM_CAL_SLEW_RATES = 4,    ///< 3V/ns, 4V/ns, 5V/ns, 6V/n
     MAX_DQ_BITS = 72,              /// TODO RTC:157753 This is Nimbus specific. Should be attribute/trait of processor.
     MAX_DQ_NIBBLES = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For ISDIMMs are 18 DQ nibbles for DQ 72 bits
-    MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x8's there are 9 DRAM for 72 bits
-    MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x4's there are 18 DRAM for 72 bits
+    MAX_DRAMS_X8 = MAX_DQ_BITS / BITS_PER_BYTE, ///< For x8's there are 9 DRAM for 72 bits
+    MAX_DRAMS_X4 = MAX_DQ_BITS / BITS_PER_NIBBLE, ///< For x4's there are 18 DRAM for 72 bits
 
     NUM_MRW_FREQS = 4,             ///< Used for ATTR_MSS_MRW_SUPPORTED_FREQ
     NUM_MAX_FREQS = 5,             ///< Used for ATTR_MAX_ALLOWED_DIMM_FREQ
