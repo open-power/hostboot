@@ -362,6 +362,10 @@
         <id>ATTR_IO_XBUS_CHAN_EQ</id>
         <default>0x0</default>
     </attribute> 
+    <attribute>
+      <id>ATTR_IO_O_CHANNEL_TYPE</id>
+      <default>0x0</default>
+    </attribute>
 
 <!-- =====================================================================
      End of temporary definitions
