@@ -173,6 +173,24 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
 
         c->setAllBits(); d->setAllBits(); e->setAllBits();
 
+        // We don't want to mask the IUE bits in the MCAECCFIR if they are on
+        // so if we trigger a port fail that causes a checkstop we have
+        // something to blame it on.
+        SCAN_COMM_REGISTER_CLASS * mcaeccfir = i_chip->getRegister("MCAECCFIR");
+
+        o_rc = mcaeccfir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() Failed on MCAECCFIR: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        if ( mcaeccfir->IsBitSet(17) )
+            e->ClearBit(17);
+        if ( mcaeccfir->IsBitSet(37) )
+            e->ClearBit(37);
+
         o_rc = c->Write() | d->Write() | e->Write();
         if ( SUCCESS != o_rc )
         {
@@ -256,6 +274,9 @@ uint32_t iuePortFail<TYPE_MCA>( ExtensibleChip * i_chip,
             {
                 resetTh.second.reset();
             }
+
+            db->iv_iuePortFail = true;
+
             break;
         }
     }
@@ -750,6 +771,24 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // Get the data bundle from chip.
         D db = static_cast<D>( i_chip->getDataBundle() );
+
+        // If we have already caused a port fail, mask the IUE bits.
+        if ( true == db->iv_iuePortFail )
+        {
+            SCAN_COMM_REGISTER_CLASS * mask_or =
+                i_chip->getRegister("MCAECCFIR_MASK_OR");
+
+            mask_or->SetBit(17);
+            mask_or->SetBit(37);
+
+            o_rc = mask_or->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x",
+                          i_chip->getHuid() );
+                break;
+            }
+        }
 
         // Get the DIMM select.
         uint8_t ds = i_rank.getDimmSlct();

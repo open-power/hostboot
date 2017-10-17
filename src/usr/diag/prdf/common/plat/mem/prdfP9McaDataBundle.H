@@ -190,6 +190,9 @@ class McaDataBundle : public DataBundle
     /** Threshold table for IUEs. Threshold per DIMM */
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 
+    /** Bool to indicate if we've triggered a port fail because of IUEs. */
+    bool iv_iuePortFail = false;
+
     #endif
 
     #ifdef __HOSTBOOT_RUNTIME
