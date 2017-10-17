@@ -564,11 +564,6 @@
     </attribute>
 
     <attribute>
-          <id>ATTR_DMI_REFCLOCK_SWIZZLE</id>
-          <no_export/>
-    </attribute>
-
-    <attribute>
           <id>ATTR_MRW_MEM_SENSOR_CACHE_ADDR_MAP</id>
           <no_export/>
     </attribute>
