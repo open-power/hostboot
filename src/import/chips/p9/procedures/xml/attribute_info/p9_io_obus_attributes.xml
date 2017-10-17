@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -110,6 +110,21 @@
     Value to select amount of tx ffe postcusor to apply.
   </description>
   <valueType>uint8</valueType>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_CHANNEL_TYPE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates if the Obus channel is a board or a cable
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    BOARD = 0x0,
+    CABLE = 0x1
+  </enum>
   <initToZero/>
   <platInit/>
 </attribute>
