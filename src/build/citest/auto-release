@@ -42,20 +42,38 @@ function build {
     hbRelease define --level $RELEASE_NAME --released $PREVIOUS_RELEASE --base $BASE --branch $GIT_BRANCH || exit -1
     hbRelease release --level $RELEASE_NAME || exit -1
 
-    ### Compile and provide binaries
-    setup
-    if echo $FIPS_RELEASE | grep -q fips9; then
-        export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
-    fi
-    BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
-
-    # Run hb distribute to put binaries in cmvc checkout directory
     export SANDBOXROOT=$WORKSPACE
     export SANDBOXNAME=$RELEASE_NAME
     export SANDBOXBASE=$SANDBOXROOT/$SANDBOXNAME
-    mkdir -p $SANDBOXBASE
+    mkdir -p $SANDBOXBASE || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw/nimbus || exit -1
+    mkdir -p $CMVC_DIR/src/hbfw/cumulus || exit -1
+
+    ### Compile and provide binaries
+    setup
+    if echo $FIPS_RELEASE | grep -q fips9; then
+        # First bulid the standalone
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+        # With PNOR env var not set, hb prime will make all of the pnor images
+        unset PNOR
+        # prime will put the files into expected locations
+        hb simsetup || exit -1
+        hb prime || exit -1
+        cp $SANDBOXBASE/obj/ppc/hbfw/img/nimbus.pnor $CMVC_DIR/src/hbfw/nimbus || exit -1
+        cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/nimbus || exit -1
+        cp $SANDBOXBASE/obj/ppc/hbfw/img/cumulus.pnor $CMVC_DIR/src/hbfw/cumulus || exit -1
+        cp $SANDBOXBASE/src/hbfw/simics.tar $CMVC_DIR/src/hbfw/cumulus || exit -1
+
+        make clean
+        # Now build the FSP-based images
+        export CONFIG_FILE="$HOSTBOOT_WORKSPACE/src/build/configs/fsprelease.config"
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+    else
+        BUILD_MINIMAL=1 nice -+20 make -j16 || exit -1
+    fi
+
+    # Run hb distribute to put binaries in cmvc checkout directory
     hb prime --release $SANDBOXBASE || exit -1
-    mkdir -p $CMVC_DIR/src/hbfw || exit -1
     cp -rf $SANDBOXBASE/fsp/* $CMVC_DIR/src/hbfw || exit -1
     rm -rf $SANDBOXBASE/fsp || exit -1
 
