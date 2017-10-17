@@ -46,3 +46,5 @@ vpath %.C ${GENDIR} ${GENDIR}/plugins/prdf/rule
 EXTRAINCDIR += ${GENDIR}/plugins
 EXTRAINCDIR += ${GENDIR}/plugins/prdf/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf/plugins/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/centaur/common/include/

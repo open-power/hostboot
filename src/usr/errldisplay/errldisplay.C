@@ -60,6 +60,7 @@
 #include <errl/errlreasoncodes.H>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <initservice/taskargs.H>
 #include <algorithm>
 #include <console/consoleif.H>
@@ -529,6 +530,19 @@ void ErrLogDisplay::displayTarget(void *data, size_t size)
     }
 }
 
+#ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
+static void printHex(char *i_buf, const size_t i_size)
+{
+    char byte_str[256] = { 0, };
+    size_t pos = 0;
+    // Limit dump to first 32 bytes.
+    for ( size_t i = 0; i < std::min( i_size, 32ul ); ++i )
+        pos += sprintf( byte_str + pos, "%s%02X", (i % 4) == 0 ? " " : "",
+                        i_buf[i] );
+    CONSOLE::displayf( NULL, "    %s", byte_str );
+}
+#endif
+
 void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
 {
 #ifdef CONFIG_CONSOLE_OUTPUT_FFDCDISPLAY
@@ -539,23 +553,96 @@ void ErrLogDisplay::displayHwpf(void *data, size_t size, uint8_t i_type)
     {
     case ERRORLOG::ERRL_UDT_STRING:
         //this is error code str -- single word of data is HWPF RC
-        CONSOLE::displayf(NULL,
-                          "------------------------------------------------");
-        fapi2::hbfwErrDisplayHwpRc(*word_buf);
+        CONSOLE::displayf( NULL,
+                           "------------------------------------------------" );
+        const char *rc;
+        const char *desc;
+        fapi2::hbfwErrLookupHwpRc( *word_buf, rc, desc );
+        CONSOLE::displayf( NULL, "  HwpReturnCode              : %s",
+                           rc ? rc : "Unknown" );
+        CONSOLE::displayf( NULL, "  HWP Error description      : %s",
+                           desc ? desc : "Unknown" );
         break;
 
     case ERRORLOG::ERRL_UDT_TARGET:
         {
-            //this is HWPF FFDC.  First word is hash, rest of data is hex
-            //reserve space for 16 words of data with spaces between
-
-            CONSOLE::displayf(NULL,
-                 "------------------------------------------------");
-            void * buf = reinterpret_cast<void*>(
-                             reinterpret_cast<char*>( data )+4);
-            fapi2::hbfwErrDisplayHwpRcFFDC(*word_buf,buf, size-4);
-            break;
+        //this is HWPF FFDC.  First word is hash, rest of data is hex
+        //reserve space for 16 words of data with spaces between
+        CONSOLE::displayf( NULL,
+                           "------------------------------------------------" );
+        fapi2::hbfwFfdcType type;
+        uint64_t value;
+        const char *str;
+        int index = 0;
+        char *buf = reinterpret_cast<char*>( data ) + sizeof( *word_buf );
+        size -= sizeof( *word_buf );
+        while ( fapi2::hbfwErrLookupHwpRcFFDC( *word_buf, index, type, value,
+                                               str ) )
+        {
+            if( type == fapi2::HBFW_FFDC_TYPE_HWP_RC_FFDC )
+            {
+                const char *rc;
+                const char *desc;
+                fapi2::hbfwErrLookupHwpRc( value, rc, desc );
+                CONSOLE::displayf( NULL, "  HwpReturnCode              : %s",
+                                   rc ? rc : "Unknown" );
+                CONSOLE::displayf( NULL, "  FFDC                       : %s",
+                                   str ? str : "Unknown" );
+                printHex(buf, size);
+                size = 0;
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_FAIL )
+            {
+                uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
+                CONSOLE::displayf( NULL, "  Failed SCOM address        : %#016lX",
+                                   val64 );
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_PIB_RC )
+            {
+                uint64_t val32 = be64toh( *reinterpret_cast<uint32_t*>( buf ) );
+                CONSOLE::displayf( NULL, "  PIB RC                     : %#08lX",
+                                   val32 );
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_REGISTER_SET )
+            {
+                CONSOLE::displayf( NULL, "  Register FFDC              : %s",
+                                   str ? str : "Unknown" );
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_CHIP_POSITION
+                && (size >= sizeof(uint32_t)) )
+            {
+                uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
+                CONSOLE::displayf( NULL, "  Chip Position              : %X",
+                                   val32 );
+                buf += sizeof(uint32_t);
+                size -= sizeof(uint32_t);
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_CFAM_REG
+                && (size >= sizeof(uint32_t)) )
+            {
+                uint32_t val32 = be32toh( *reinterpret_cast<uint32_t*>( buf ) );
+                CONSOLE::displayf( NULL, "  CFAM Register              : %s",
+                                   str ? str : "Unknown" );
+                CONSOLE::displayf( NULL, "    %08X", val32 );
+                buf += sizeof(uint32_t);
+                size -= sizeof(uint32_t);
+            }
+            else if( type == fapi2::HBFW_FFDC_TYPE_SCOM_REG
+                && (size >= sizeof(uint64_t)) )
+            {
+                uint64_t val64 = be64toh( *reinterpret_cast<uint64_t*>( buf ) );
+                CONSOLE::displayf( NULL, "  SCOM Register              : %s",
+                                   str ? str : "Unknown" );
+                CONSOLE::displayf( NULL, "    %08llX %08llX",
+                                   (val64 >> 32) & 0xffffffff,
+                                   (val64 & 0xffffffff) );
+                buf += sizeof(uint64_t);
+                size -= sizeof(uint64_t);
+            }
+            index++;
         }
+        break;
+    }
     }
 #endif
 }
