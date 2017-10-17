@@ -114,5 +114,20 @@
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_O_CHANNEL_TYPE</id>
+  <targetType>TARGET_TYPE_OBUS</targetType>
+  <description>
+    Indicates if the Obus channel is a board or a cable
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    BOARD = 0x0,
+    CABLE = 0x1
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 
 </attributes>
