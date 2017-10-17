@@ -52,6 +52,8 @@
 #include <p9_cpu_special_wakeup.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
+#include <errno.h>
+#include <p9_int_scom.H>
 
 #ifdef CONFIG_DRTM_TRIGGERING
 #include <secureboot/drtm.H>
@@ -74,7 +76,7 @@ namespace ISTEP_21
  * @param[in] Host boot master instance number (logical node number)
  * @param[in] Is this the master HB instance [true|false]
  *
- * @return errlHndl_t - NULL if succesful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if succesful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t callShutdown ( uint64_t i_hbInstance, bool i_masterIntance );
@@ -83,7 +85,7 @@ errlHndl_t callShutdown ( uint64_t i_hbInstance, bool i_masterIntance );
  * @brief This function will send an IPC message to all other HB instances
  *        to perfrom the shutdown sequence.
  * @param[in] Hostboot master instance number (logical node number)
- * @Return errlHndlt_t - Null if succesful, otherwise an error Handle
+ * @Return errlHndlt_t - nullptr if succesful, otherwise an error Handle
  */
 errlHndl_t broadcastShutdown ( uint64_t i_hbInstance );
 
@@ -106,7 +108,7 @@ errlHndl_t enableCoreCheckstops();
  * @brief This function will clear the PORE BARs.  Needs to be done
  *      depending on payload type
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t clearPoreBars ( void );
@@ -119,90 +121,169 @@ errlHndl_t clearPoreBars ( void );
  *
  * @param[in] i_spFuncs - The SpFuncs system attribute.
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs );
 
+enum msg_preshutdown_types_t
+{
+    MSG_PRE_SHUTDOWN_INITS = 1 //Tells the msgQ to run inits that
+                               //are needed before shutdown
+};
+
+void msgHandler(msg_q_t i_msgQ)
+{
+    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ENTER_MRK"call_host_start_payload::msgHandler()");
+
+    while(1)
+    {
+        msg_t* msg = msg_wait(i_msgQ); // wait for interrupt msg
+
+        switch(msg->type)
+        {
+            case MSG_PRE_SHUTDOWN_INITS:
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"Pre-Shutdown Inits event received");
+                errlHndl_t l_errl = nullptr;
+                TARGETING::TargetHandleList l_cpuTargetList;
+                getAllChips(l_cpuTargetList, TYPE_PROC);
+                fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+                for (const auto & l_cpu_target: l_cpuTargetList)
+                {
+                    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2_proc_target(l_cpu_target);
+                    FAPI_INVOKE_HWP( l_errl,
+                                     p9_int_scom,
+                                     l_cpu_target,
+                                     FAPI_SYSTEM);
+                    if(l_errl)
+                    {
+                        l_errl->collectTrace("ISTEPS_TRACE",256);
+                        errlCommit(l_errl, ISTEP_COMP_ID );
+                    }
+                }
+
+                msg_respond(i_msgQ, msg);
+                break;
+            }
+            default:
+                msg->data[1] = -EINVAL;
+                msg_respond(i_msgQ, msg);
+                break;
+        }
+    }
+}
+
+
+/**
+* Helper function to start the messge handler
+*/
+void* msg_handler(msg_q_t i_msgQ)
+{
+    msgHandler(i_msgQ);
+    return nullptr;
+}
+
 
 void* call_host_start_payload (void *io_pArgs)
 {
-    errlHndl_t  l_errl  =   NULL;
+    errlHndl_t  l_errl  =   nullptr;
 
     IStepError l_StepError;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_start_payload entry" );
 
-    // Place a separator in the TPM to indicate we are passing control
-    //  to the next level of firmware in the stack
-    l_errl = TRUSTEDBOOT::pcrExtendSeparator();
+    do{
 
-    // For single-node systems, the non-master processors can be in a
-    // different logical (powerbus) group.  Need to migrate task to master.
-    task_affinity_pin();
-    task_affinity_migrate_to_master();
+        // Place a separator in the TPM to indicate we are passing control
+        //  to the next level of firmware in the stack
+        l_errl = TRUSTEDBOOT::pcrExtendSeparator();
 
-    uint64_t this_node = PIR_t(task_getcpuid()).groupId;
+        if(l_errl)
+        {
+            break;
+        }
 
-    task_affinity_unpin();
+        msg_q_t l_msgQ = msg_q_create();
+
+        // Register event to be called on shutdown
+        INITSERVICE::registerShutdownEvent(l_msgQ,
+                                           MSG_PRE_SHUTDOWN_INITS,
+                                           INITSERVICE::PRESHUTDOWN_INIT_PRIORITY);
+
+        // Create a task to handle the messages
+        task_create(ISTEP_21::msg_handler, l_msgQ);
+
+        // For single-node systems, the non-master processors can be in a
+        // different logical (powerbus) group.  Need to migrate task to master.
+        task_affinity_pin();
+        task_affinity_migrate_to_master();
+
+        uint64_t this_node = PIR_t(task_getcpuid()).groupId;
+
+        task_affinity_unpin();
 
 #ifdef CONFIG_BMC_IPMI
 
-    // TODO ISSUE 118082
-    // ENABLE CODE BELOW ONCE OPAL COMPLETES ipmi WATCHDOG
+        // TODO ISSUE 118082
+        // ENABLE CODE BELOW ONCE OPAL COMPLETES ipmi WATCHDOG
 #if 0
-            //run the ipmi watchdog for a longer period to transition
-            // to opel
-            errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-                    IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN);
+                //run the ipmi watchdog for a longer period to transition
+                // to opel
+                errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
+                        IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN);
 
-            if(err_ipmi)
-            {
-               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "init: ERROR: Set IPMI watchdog Failed");
+                if(err_ipmi)
+                {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                                "init: ERROR: Set IPMI watchdog Failed");
+                    err_ipmi->collectTrace("ISTEPS_TRACE",256);
+                    errlCommit(err_ipmi, ISTEP_COMP_ID );
+
+                }
+#endif
+
+        // TODO ISSUE 118082
+        // REMOVE CODE BELOW ONCE OPAL COMPLETES IPMI WATCHDOG
+        // THE CODE BELOW STOPS THE IPMI TIMER FROM RUNNING
+        // TO PREVENT IT GETTING TRIGGERED DURING HB_OPAL TRANSITION
+
+        // Call setWatchdogTimer without the default DON'T STOP
+        // flag to stop the watchdog timer
+        errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
+                IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN,
+                IPMIWATCHDOG::BIOS_FRB2);
+
+        if(err_ipmi)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                            "init: ERROR: Set IPMI watchdog Failed");
                 err_ipmi->collectTrace("ISTEPS_TRACE",256);
                 errlCommit(err_ipmi, ISTEP_COMP_ID );
-
-            }
-#endif
-
-    // TODO ISSUE 118082
-    // REMOVE CODE BELOW ONCE OPAL COMPLETES IPMI WATCHDOG
-    // THE CODE BELOW STOPS THE IPMI TIMER FROM RUNNING
-    // TO PREVENT IT GETTING TRIGGERED DURING HB_OPAL TRANSITION
-
-    // Call setWatchdogTimer without the default DON'T STOP
-    // flag to stop the watchdog timer
-    errlHndl_t err_ipmi = IPMIWATCHDOG::setWatchDogTimer(
-            IPMIWATCHDOG::DEFAULT_HB_OPAL_TRANSITION_COUNTDOWN,
-            IPMIWATCHDOG::BIOS_FRB2);
-
-    if(err_ipmi)
-    {
-       TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "init: ERROR: Set IPMI watchdog Failed");
-        err_ipmi->collectTrace("ISTEPS_TRACE",256);
-        errlCommit(err_ipmi, ISTEP_COMP_ID );
-
-    }
+        }
 
 #endif
 
-    // broadcast shutdown to other HB instances.
-    l_errl = broadcastShutdown(this_node);
+        // broadcast shutdown to other HB instances.
+        l_errl = broadcastShutdown(this_node);
 
-    if( l_errl == NULL)
-    {
+        if(l_errl)
+        {
+            break;
+        }
         //  - Run CXX testcases
         l_errl = INITSERVICE::executeUnitTests();
-    }
+
+        if(l_errl)
+        {
+            break;
+        }
+
 
 #ifdef CONFIG_DRTM_TRIGGERING
-
-    if(l_errl == nullptr)
-    {
         bool drtmMpipl = false;
         SECUREBOOT::DRTM::isDrtmMpipl(drtmMpipl);
         if(!drtmMpipl)
@@ -226,27 +307,29 @@ void* call_host_start_payload (void *io_pArgs)
                     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
                         "call_host_start_payload: Failed in call to "
                         "initiateDrtm()");
+                    break;
                 }
             }
         }
-    }
-
 #endif
 
-    if( l_errl == NULL )
-    {
         l_errl = disableSpecialWakeup();
-    }
+        if(l_errl)
+        {
+            break;
+        }
 
-    if( l_errl == NULL )
-    {
         //  - Call shutdown using payload base, and payload entry.
         //      - base/entry will be from system attributes
         //      - this will start the payload (Phyp)
         // NOTE: this call will not return if successful.
         l_errl = callShutdown(this_node, true);
+        if(l_errl)
+        {
+            break;
+        }
 
-    };
+    }while(0);
 
     if( l_errl )
     {
@@ -274,7 +357,7 @@ void* call_host_start_payload (void *io_pArgs)
 errlHndl_t callShutdown ( uint64_t i_masterInstance,
                           bool i_isMaster)
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
     uint64_t payloadBase = 0x0;
     uint64_t payloadEntry = 0x0;
     uint64_t payloadData = 0x0;
@@ -319,10 +402,10 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
         // Get Target Service, and the system target.
         TargetService& tS = targetService();
-        TARGETING::Target* sys = NULL;
+        TARGETING::Target* sys = nullptr;
         (void) tS.getTopLevelTarget( sys );
 
-        if( NULL == sys )
+        if( nullptr == sys )
         {
             // Error getting system target to get payload related values.  We
             // will create an error to be passed back.  This will cause the
@@ -404,10 +487,10 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
 
 errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 {
-    errlHndl_t err = NULL;
-    TARGETING::Target * sys = NULL;
+    errlHndl_t err = nullptr;
+    TARGETING::Target * sys = nullptr;
     TARGETING::targetService().getTopLevelTarget( sys );
-    assert(sys != NULL);
+    assert(sys != nullptr);
 
     TARGETING::ATTR_HB_EXISTING_IMAGE_type hb_images =
         sys->getAttr<TARGETING::ATTR_HB_EXISTING_IMAGE>();
@@ -503,7 +586,7 @@ errlHndl_t broadcastShutdown ( uint64_t i_hbInstance )
 
 errlHndl_t disableSpecialWakeup()
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     TargetHandleList l_cores;
     getAllChiplets(l_cores, TYPE_CORE);
@@ -552,17 +635,17 @@ errlHndl_t disableSpecialWakeup()
  */
 errlHndl_t enableCoreCheckstops()
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
     //@TODO RTC:133848
 #if 0
-    void* l_slwPtr = NULL;
+    void* l_slwPtr = nullptr;
     int mm_rc = 0;
 
     // for OpenPower systems, leave core checkstops as system checkstops
     if( is_sapphire_load() && (!INITSERVICE::spBaseServicesEnabled()) )
     {
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Leaving local core checkstops as escalating to system checkstop" );
-        return NULL;
+        return nullptr;
     }
     //@todo-RTC:130092 Remove this when Opal support is in place
 
@@ -581,7 +664,7 @@ errlHndl_t enableCoreCheckstops()
           l_pChipTarget->getAttr<TARGETING::ATTR_SLW_IMAGE_ADDR>();
         l_slwPtr = mm_block_map(reinterpret_cast<void*>(l_physAddr),
                                 HOMER_MAX_STOP_IMG_SIZE_IN_MB*MEGABYTE);
-        if( l_slwPtr == NULL )
+        if( l_slwPtr == nullptr )
         {
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Error from mm_block_map : phys=%.16X", l_physAddr );
             /*@
@@ -702,7 +785,7 @@ errlHndl_t enableCoreCheckstops()
             // Just commit error and keep going
             errlCommit( l_errl, ISTEP_COMP_ID );
         }
-        l_slwPtr = NULL;
+        l_slwPtr = nullptr;
 
         if(l_errl)
         {
@@ -717,12 +800,12 @@ errlHndl_t enableCoreCheckstops()
  * @brief This function will clear the PORE BARs.  Needs to be done
  *      depending on payload type
  *
- * @return errlHndl_t - NULL if successful, otherwise a pointer to the error
+ * @return errlHndl_t - nullptr if successful, otherwise a pointer to the error
  *      log.
  */
 errlHndl_t clearPoreBars ( void )
 {
-    errlHndl_t l_errl = NULL;
+    errlHndl_t l_errl = nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "set PORE bars back to 0" );
@@ -790,7 +873,7 @@ errlHndl_t clearPoreBars ( void )
 errlHndl_t notifyFsp ( bool i_istepModeFlag,
                        TARGETING::SpFunctions i_spFuncs )
 {
-    errlHndl_t err = NULL;
+    errlHndl_t err = nullptr;
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                ENTER_MRK"notifyFsp()" );
