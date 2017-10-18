@@ -145,7 +145,7 @@ fapi_try_exit:
 
 
 // NOTE: see comments above function prototype in header
-fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
+fapi2::ReturnCode p9_fbc_utils_get_chip_base_address_no_aliases(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9_fbc_utils_addr_mode_t i_addr_mode,
     uint64_t& o_base_address_nm0,
@@ -198,7 +198,6 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
     }
 
     // else, leave chip ID=0 for the purposes of establishing drawer base address
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY, FAPI_SYSTEM, l_mirror_policy),
              "Error from FAPI_ATTR_GET (ATTR_MEM_MIRROR_PLACEMENT_POLICY)");
 
@@ -239,6 +238,131 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
         o_base_address_nm1 = l_base_address();               // 10
         l_base_address.setBit<FABRIC_ADDR_MSEL_END_BIT>();
         o_base_address_mmio = l_base_address();              // 11
+    }
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+// NOTE: see comments above function prototype in header
+fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p9_fbc_utils_addr_mode_t i_addr_mode,
+    std::vector<uint64_t>& o_base_address_nm0,
+    std::vector<uint64_t>& o_base_address_nm1,
+    std::vector<uint64_t>& o_base_address_m,
+    uint64_t& o_base_address_mmio)
+{
+    uint64_t l_base_address_nm0 = 0;
+    uint64_t l_base_address_nm1 = 0;
+    uint64_t l_base_address_m = 0;
+    uint8_t l_addr_extension_group_id;
+    uint8_t l_addr_extension_chip_id;
+    fapi2::buffer<uint64_t> l_addr_extension_enable = 0;
+    uint8_t l_regions_per_msel = 1;
+    std::vector<uint8_t> l_alias_bit_positions;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2_Type l_hw423589_option2;
+
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address_no_aliases(i_target,
+             i_addr_mode,
+             l_base_address_nm0,
+             l_base_address_nm1,
+             l_base_address_m,
+             o_base_address_mmio),
+             "Error from p9_fbc_utils_get_chip_base_address_no_aliases");
+
+    // read attributes defining address extension enable configuration
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE, i_target, l_extended_addressing_mode),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2, i_target, l_hw423589_option2),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION2)");
+
+    if (l_extended_addressing_mode)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID");
+
+        // align to RA
+        l_addr_extension_enable.insertFromRight < FABRIC_ADDR_LS_GROUP_ID_START_BIT,
+                                                FABRIC_ADDR_LS_GROUP_ID_END_BIT - FABRIC_ADDR_LS_GROUP_ID_START_BIT + 1 >
+                                                (l_addr_extension_group_id);
+        l_addr_extension_enable.insertFromRight < FABRIC_ADDR_LS_CHIP_ID_START_BIT,
+                                                FABRIC_ADDR_LS_CHIP_ID_END_BIT - FABRIC_ADDR_LS_CHIP_ID_START_BIT + 1 >
+                                                (l_addr_extension_chip_id);
+    }
+
+    // walk across bits set in enable bit field, count number of bits set
+    // to determine permutations
+    FAPI_DBG("Address extension enable mask: 0x%016lX", l_addr_extension_enable());
+
+    if (l_addr_extension_enable != 0)
+    {
+        for (uint8_t ii = FABRIC_ADDR_LS_GROUP_ID_START_BIT;
+             ii <= FABRIC_ADDR_LS_CHIP_ID_END_BIT;
+             ii++)
+        {
+            if (l_addr_extension_enable.getBit(ii))
+            {
+                l_regions_per_msel *= 2;
+                l_alias_bit_positions.push_back(ii);
+            }
+        }
+    }
+
+    FAPI_DBG("Valid regions per msel: %d", l_regions_per_msel);
+
+    for (uint8_t l_region = 0;
+         l_region < l_regions_per_msel;
+         l_region++)
+    {
+        fapi2::buffer<uint64_t> l_alias_mask = 0;
+        FAPI_DBG("Generating region: %d", l_region);
+
+        if (l_region)
+        {
+            uint8_t l_value = l_region;
+
+            for (int jj = l_alias_bit_positions.size() - 1;
+                 jj >= 0;
+                 jj--)
+            {
+                l_alias_mask.writeBit(l_value & 1,
+                                      l_alias_bit_positions[jj]);
+                l_value = l_value >> 1;
+            }
+        }
+
+        FAPI_DBG("Mask: 0x%016lX", l_alias_mask());
+
+        // hide region reserved for GPU LPC
+        if (!l_hw423589_option2 || (l_region != 1))
+        {
+            o_base_address_nm0.push_back(l_base_address_nm0 |
+                                         l_alias_mask());
+            o_base_address_m.push_back(l_base_address_m |
+                                       l_alias_mask());
+        }
+
+        // second non-mirrored msel region unusable with HW423589_OPTION2
+        // (no MCD resources available to map)
+        if (!l_hw423589_option2)
+        {
+            o_base_address_nm1.push_back(l_base_address_nm1 |
+                                         l_alias_mask());
+        }
     }
 
 fapi_try_exit:
