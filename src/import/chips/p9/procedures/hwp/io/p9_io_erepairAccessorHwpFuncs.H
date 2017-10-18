@@ -164,8 +164,8 @@ fapi2::ReturnCode erepairSetFailedLanes(
     fapi2::TARGET_TYPE_MEMBUF_CHIP |
     fapi2::TARGET_TYPE_MCS_CHIPLET |
     fapi2::TARGET_TYPE_MCS >          &i_rxEndp_target,
-    const std::vector<uint8_t>& i_rxFailLanes,
     const uint8_t                     i_clkGroup,
+    const std::vector<uint8_t>& i_rxFailLanes,
     bool&                       o_thresholdExceed);
 
 /**
