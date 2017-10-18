@@ -148,6 +148,15 @@ namespace MBOX
             }
 
             /**
+             * Clear the count of shutdown dma request sent
+             */
+            ALWAYS_INLINE
+            void clrShutdownDmaRequestSentCnt( void )
+            {
+                iv_dma_req_sent_cnt = 0;
+            }
+
+            /**
              * Query the max number of DMA bfrs
              * @return [max number of DMA bfrs]
              */
@@ -190,6 +199,7 @@ namespace MBOX
             uint64_t iv_dir;           //!< 1 bit per 1k buffer, 1 = available
             int iv_dma_req_sent_cnt;   //!< number of Requests sent to
                                        //    retrieve all buffers
+            mutable mutex_t iv_mutex;  //used to protect get/release
 
     };
 }; // namespace

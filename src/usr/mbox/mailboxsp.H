@@ -359,8 +359,9 @@ namespace MBOX
             typedef std::pair<uint64_t, uint64_t> addr_size_t;
             typedef std::list<addr_size_t> addr_list_t;
 
-            msg_q_t     iv_msgQ;        //!< mailbox mesage queue
+            msg_q_t     iv_msgQ;        //!< mailbox message queue
             send_q_t    iv_sendq;       //!< msg to send queue
+            mutable mutex_t iv_sendq_mutex; // SMP protection
             mbox_msg_t  iv_msg_to_send; //!< message being sent
             respond_q_t iv_respondq;    //!< msg respond pending list
             registry_t  iv_registry;    //!< Registered queue

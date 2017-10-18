@@ -95,6 +95,7 @@ MailboxSp::MailboxSp()
         iv_reclaim_sent_cnt(0),
         iv_reclaim_rsp_cnt(0)
 {
+    mutex_init(&iv_sendq_mutex);
     // mailbox target
     TARGETING::targetService().masterProcChipTargetHandle(iv_trgt);
 }
@@ -631,7 +632,9 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
         }
         else
         {
+            mutex_lock(&iv_sendq_mutex);
             iv_sendq.push_back(mbox_msg);
+            mutex_unlock(&iv_sendq_mutex);
             TRACFCOMP(g_trac_mbox,"I>Mailbox suspending or suspended.");
             trace_msg("QUEUED",mbox_msg);
         }
@@ -642,6 +645,7 @@ void MailboxSp::handleNewMessage(msg_t * i_msg)
 // Note: When called due to an ACK or retry, iv_rts should be true.
 void MailboxSp::send_msg(mbox_msg_t * i_msg)
 {
+    mutex_lock(&iv_sendq_mutex);
     if(i_msg)
     {
         iv_sendq.push_back(*i_msg);
@@ -654,6 +658,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
     //
     if(!iv_rts || iv_dma_pend || iv_sendq.size() == 0)
     {
+        mutex_unlock(&iv_sendq_mutex);
         return;
     }
 
@@ -720,7 +725,7 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
 
                 // track the msg until completion
                 //  actual msg send happens below
-                iv_reclaim_sent_cnt++;
+                __sync_fetch_and_add( &iv_reclaim_sent_cnt, 1 );
             }
             else
             {
@@ -831,6 +836,9 @@ void MailboxSp::send_msg(mbox_msg_t * i_msg)
             err = NULL;
         }
     }
+
+    mutex_unlock(&iv_sendq_mutex);
+    return;
 }
 
 
@@ -1188,7 +1196,7 @@ void MailboxSp::handle_hbmbox_resp(mbox_msg_t & i_mbox_msg)
         (i_mbox_msg.msg_payload.data[0]);
 
     // track response received
-    iv_reclaim_rsp_cnt++;
+    __sync_fetch_and_add( &iv_reclaim_rsp_cnt, 1);
 
     iv_dma_pend = false;
 
@@ -1393,7 +1401,7 @@ void MailboxSp::sendReclaimDmaBfrsMsg( mbox_msg_t & i_mbox_msg )
     i_mbox_msg.msg_payload.__reserved__async = 1;
 
     // track the msg until completion;
-    iv_reclaim_sent_cnt++;
+    __sync_fetch_and_add( &iv_reclaim_sent_cnt, 1 );
 
     send_msg(&i_mbox_msg);
 
@@ -1901,6 +1909,7 @@ void MailboxSp::handleUnclaimed()
 void MailboxSp::handleShutdown()
 {
     // Shutdown the hardware
+    iv_dmaBuffer.clrShutdownDmaRequestSentCnt();
     errlHndl_t err = mboxddShutDown(iv_trgt);
 
 #if (0) // @todo RTC:126643

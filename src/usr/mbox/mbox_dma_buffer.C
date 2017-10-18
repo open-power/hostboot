@@ -49,6 +49,8 @@ DmaBuffer::DmaBuffer() :
 
     iv_phys_head = mm_virt_to_phys(iv_head);
     memset(iv_head, '\0', VmmManager::MBOX_DMA_SIZE);
+
+    mutex_init(&iv_mutex);
 }
 
 
@@ -89,14 +91,20 @@ void DmaBuffer::release(void * i_buffer, size_t i_size)
 
     mask >>= offset;
 
+    mutex_lock(&iv_mutex);
     iv_dir |= mask;
+    mutex_unlock(&iv_mutex);
+
     TRACDCOMP(g_trac_mbox,"MBOX DMA free dir: %016lx",iv_dir);
 }
 
 
 void DmaBuffer::addBuffers(uint64_t i_map)
 {
+    mutex_lock(&iv_mutex);
     iv_dir |= i_map;
+    mutex_unlock(&iv_mutex);
+
     TRACDCOMP(g_trac_mbox,"MBOXDMA addBuffers. dir: %016lx",iv_dir);
 }
 
@@ -123,6 +131,7 @@ void * DmaBuffer::getBuffer(uint64_t & io_size)
 
     io_size = 0;
 
+    mutex_lock(&iv_mutex);
     // look for a contiguous block of DMA space.
     // If shift_count goes to zero, the request could not be granted.
     while(shift_count)
@@ -143,6 +152,8 @@ void * DmaBuffer::getBuffer(uint64_t & io_size)
         uint64_t offset = start_page * VmmManager::MBOX_DMA_PAGESIZE;
         r_addr = static_cast<void*>(static_cast<uint8_t*>(iv_head) + offset);
     }
+    mutex_unlock(&iv_mutex);
+
     TRACDCOMP(g_trac_mbox,"MBOX DMA allocate dir: %016lx",iv_dir);
 
     return r_addr;
