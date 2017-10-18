@@ -7,6 +7,7 @@
 /*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
+/* [+] Jim Yuan                                                           */
 /*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
@@ -421,9 +422,9 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
 
            strcpy( iv_impl.hdatBmcFamily , l_bmcManufacturer);
            strcat( iv_impl.hdatBmcFamily , ",");
-           strcpy( iv_impl.hdatBmcFamily , l_bmcHwChip);
+           strcat( iv_impl.hdatBmcFamily , l_bmcHwChip);
            strcat( iv_impl.hdatBmcFamily , ",");
-           strcpy( iv_impl.hdatBmcFamily , l_bmcSw);
+           strcat( iv_impl.hdatBmcFamily , l_bmcSw);
         }
         else
         {
