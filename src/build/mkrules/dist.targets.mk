@@ -311,7 +311,8 @@ fsp.tar_CONTENTS = \
     obj/genfiles/attrEnumInfo.csv \
     obj/genfiles/targAttrInfo.csv\
     obj/genfiles/plugins/hbfwPlatHwpErrParser.H:plugins/ \
-    obj/genfiles/plugins/hbfwPlatHwpErrParserFFDC.H:plugins
+    obj/genfiles/plugins/hbfwPlatHwpErrParserFFDC.H:plugins \
+    src/include/runtime/generic_hbrt_fsp_message.H
 
 #
 # Portions of the FSP sandbox which must be rebuilt based on file changes.
