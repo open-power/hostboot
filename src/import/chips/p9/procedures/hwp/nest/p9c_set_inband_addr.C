@@ -50,7 +50,10 @@
 fapi2::ReturnCode p9c_set_inband_addr(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
-    uint64_t l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m, l_base_addr_mmio;
+    std::vector<uint64_t> l_base_addr_nm0;
+    std::vector<uint64_t> l_base_addr_nm1;
+    std::vector<uint64_t> l_base_addr_m;
+    uint64_t l_base_addr_mmio;
 
     FAPI_DBG("Start");
     // determine base address of chip MMIO range
