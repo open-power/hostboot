@@ -2262,11 +2262,11 @@ namespace SBE
         if(err && (io_sbeState.new_imageBuild.buildDate != 0) &&
            (io_sbeState.new_imageBuild.buildTime != 0))
         {
-            err->addFFDC(SBE_COMP_ID,
+            err->addFFDC(ERRL_COMP_ID,
                          &(io_sbeState.new_imageBuild),
                          sizeof(io_sbeState.new_imageBuild),
                          0,                   // Version
-                         ERRL_UDT_NOFORMAT,   // parser ignores data
+                         ERRL_UDT_BUILD,      // parser for XIP image build info
                          false );             // merge
         }
 
@@ -4482,7 +4482,7 @@ namespace SBE
 
 
                         TRACFCOMP(g_trac_sbe,"preReIplCheck(): MVPD update "
-                                  "Requried for tgt=0x%X (u_a=0x%X, flag=0x%X)",
+                                  "Required for tgt=0x%X (u_a=0x%X, flag=0x%X)",
                                   TARGETING::get_huid(io_sbeStates_v[i].target),
                                   io_sbeStates_v[i].update_actions,
                                   io_sbeStates_v[i].mvpdSbKeyword.flags);

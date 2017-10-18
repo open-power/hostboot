@@ -38,6 +38,7 @@
 #include "errludlogregister.H"
 #include "errludcallout.H"
 #include "errludsensor.H"
+#include "errludbuild.H"
 
 namespace ERRORLOG
 {
@@ -65,6 +66,7 @@ public:
         registerParser<ErrlUserDetailsParserLogRegister>(ERRL_UDT_LOGREGISTER);
         registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
         registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
+        registerParser<ErrlUserDetailsParserBuild>(ERRL_UDT_BUILD);
     }
 
 private:
