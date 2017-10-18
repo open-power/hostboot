@@ -47,8 +47,6 @@ namespace decoder
 ///
 inline void select_mt_blob(const std::vector<uint8_t*>& i_blobs, uint8_t** o_blob)
 {
-    constexpr uint64_t EQUAL_MEM_CONTENTS = 0;
-
     if( i_blobs.size() != mss::PORTS_PER_MCS )
     {
         // Asserting out instead of collecting FFDC since this is a
@@ -65,7 +63,7 @@ inline void select_mt_blob(const std::vector<uint8_t*>& i_blobs, uint8_t** o_blo
     // correct for version layout, signature hash, and version data.
     constexpr uint8_t l_zero_array[mss::VPD_KEYWORD_MAX] = {};
 
-    if( memcmp(i_blobs[0], l_zero_array, mss::VPD_KEYWORD_MAX) == EQUAL_MEM_CONTENTS )
+    if( memcmp(i_blobs[0], l_zero_array, mss::VPD_KEYWORD_MAX) == MEMCMP_EQUAL )
     {
         *o_blob = i_blobs[1];
         return;
