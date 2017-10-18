@@ -206,6 +206,8 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< uint64_t > RD_STATUS0_REG;
         static const std::vector< uint64_t > WR_ERROR0_REG;
 
+        // Registers needed for PDA
+        static const std::vector< uint64_t > DATA_BIT_ENABLE1;
 
         // Definitions of the gate delay and waterfall bits' locations
         constexpr static const uint64_t GATE_DELAY_BIT_POS[NUM_QUAD_PER_DP16] =
