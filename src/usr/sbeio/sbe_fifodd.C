@@ -65,6 +65,10 @@ extern trace_desc_t* g_trac_sbeio;
 */
 #define READ_BUFFER_SIZE 2048
 
+// @TODO RTC 181067 Disable blacklist violation tolerance once all existing
+// violations have been fixed
+#define TOLERATE_BLACKLIST_ERRS 1
+
 using namespace ERRORLOG;
 
 namespace SBEIO
@@ -330,6 +334,10 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
 
     SBE_TRACD(ENTER_MRK "readResponse");
 
+#ifdef TOLERATE_BLACKLIST_ERRS
+    auto blacklisted = false;
+#endif
+
     do
     {
         // EOT is expected before the response buffer is full. Room for
@@ -488,6 +496,29 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
                                          l_pStatusHeader->primaryStatus,
                                          l_pStatusHeader->secondaryStatus));
 
+            #ifdef TOLERATE_BLACKLIST_ERRS
+            if(   (FIFO_STATUS_MAGIC == l_pStatusHeader->magic)
+               && (SBE_PRI_UNSECURE_ACCESS_DENIED == l_pStatusHeader->primaryStatus)
+               && (SBE_SEC_BLACKLISTED_REG_ACCESS == l_pStatusHeader->secondaryStatus))
+            {
+                blacklisted = true;
+
+                const SbeFifo::fifoPutScomRequest* pScomRequest =
+                    reinterpret_cast<const SbeFifo::fifoPutScomRequest*>(
+                        i_pFifoRequest);
+
+                SBE_TRACF(ERR_MRK "SbeFifo::readResponse: Secure Boot "
+                    "violation; request blacklisted by SBE.  Reference EID "
+                    "0x%08X, PLID 0x%08X, reason code 0x%04X, "
+                    "class 0x%02X, command 0x%02X, address 0x%016llX, "
+                    "data 0x%016llX",
+                    errl->eid(),errl->plid(),errl->reasonCode(),
+                    pScomRequest->commandClass, pScomRequest->command,
+                    pScomRequest->address, pScomRequest->data);
+
+                errl->collectTrace(SBEIO_COMP_NAME);
+            }
+            #endif
 
             if(!l_fifoBuffer.msgContainsFFDC())
             {
@@ -577,6 +608,18 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target * i_target,
     while (0);
 
     SBE_TRACD(EXIT_MRK "readResponse");
+
+#ifdef TOLERATE_BLACKLIST_ERRS
+    if(blacklisted)
+    {
+        // Do not terminate the boot when tolerating blacklist errors, just log
+        // the error and move on.  Note that until all blacklist violations are
+        // fixed, SBE will still execute the request, but will return primary
+        // status as access denied and secondary status as blacklist violation,
+        // which is how we know there is a theoretical problem to address.
+        ERRORLOG::errlCommit(errl, SBEIO_COMP_ID);
+    }
+#endif
 
     return errl;
 }
