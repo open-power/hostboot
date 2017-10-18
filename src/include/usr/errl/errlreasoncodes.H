@@ -75,6 +75,7 @@ namespace ERRORLOG
         ERRL_UDT_PRINTK           = 0x07,
         ERRL_UDT_SENSOR           = 0x08,
         ERRL_UDT_STRING_SET       = 0x09,
+        ERRL_UDT_BUILD            = 0x0A,
     };
 
     // Identifiers for ERRL user data subsection versions

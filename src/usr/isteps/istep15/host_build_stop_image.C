@@ -576,11 +576,11 @@ void* host_build_stop_image (void *io_pArgs)
                 // capture the target data in the elog
                 ErrlUserDetailsTarget(l_procChip).addToLog( l_errl );
 
-                l_errl->addFFDC( HWPF_COMP_ID,
+                l_errl->addFFDC( ERRL_COMP_ID,
                                  reinterpret_cast<void *>(&l_imageBuild),
                                  sizeof(Util::imageBuild_t),
                                  0,                   // Version
-                                 ERRL_UDT_NOFORMAT,   // parser ignores data
+                                 ERRL_UDT_BUILD,      // parse XIP image build
                                  false );             // merge
 
                 // Create IStep error log and cross ref error that occurred

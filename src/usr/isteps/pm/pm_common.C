@@ -346,11 +346,11 @@ namespace HBPM
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            ERR_MRK"loadHcode: p9_hcode_image_build failed!" );
-                l_errl->addFFDC( ISTEP_COMP_ID,
+                l_errl->addFFDC( ERRL_COMP_ID,
                                  reinterpret_cast<void *>(&l_imageBuild),
                                  sizeof(Util::imageBuild_t),
                                  0,                           // Version
-                                 ERRORLOG::ERRL_UDT_NOFORMAT, // parser ignores
+                                 ERRORLOG::ERRL_UDT_BUILD,    // parse build
                                  false );                     // merge
                 l_errl->collectTrace("ISTEPS_TRACE",256);
 
