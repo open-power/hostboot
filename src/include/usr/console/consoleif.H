@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -36,7 +36,7 @@ namespace CONSOLE
      *
      *  @param[in] - String to display.
      */
-#ifdef CONFIG_CONSOLE
+#if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
     extern void display(const char*);
 #else
     inline void display(const char*) {};
@@ -47,7 +47,7 @@ namespace CONSOLE
      *  @param[in] - Header (or NULL).
      *  @param[in] - Format string.
      */
-#ifdef CONFIG_CONSOLE
+#if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
     extern void displayf(const char*, const char*, ...);
 #else
     inline void displayf(const char*, const char*, ...) {};
@@ -59,7 +59,7 @@ namespace CONSOLE
      *  @param[in] - Format string.
      *  @param[in] - va_list of arguments.
      */
-#ifdef CONFIG_CONSOLE
+#if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
     extern void vdisplayf(const char*, const char*, va_list);
 #else
     inline void vdisplayf(const char*, const char*, va_list) {};
@@ -68,12 +68,13 @@ namespace CONSOLE
 
     /** @brief Wait for console buffers to be flushed to device.
     */
-#ifdef CONFIG_CONSOLE
+#if (defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME))
     extern void flush();
 #else
     inline void flush() {};
 #endif
 
 };
+
 
 #endif
