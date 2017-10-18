@@ -281,6 +281,79 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Set MRS_CMD_DQ_ON
+/// @tparam T fapi2::TargetType - defaults to MCA
+/// @tparam TT wcTraits - defaults to MCA version of the traits
+/// @param[in,out] io_data buffer to set
+/// @param[in] i_value the value to write into the buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline void set_pda_dq_on_delay( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    io_data.insertFromRight<TT::MRS_CMD_DQ_ON, TT::MRS_CMD_DQ_ON_LEN>(i_value);
+}
+
+///
+/// @brief Get MRS_CMD_DQ_ON
+/// @tparam T fapi2::TargetType - defaults to MCA
+/// @tparam TT wcTraits - defaults to MCA version of the traits
+/// @param[in] i_data buffer to read from
+/// @param[out] o_value the value gotten from the buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline void get_pda_dq_on_delay( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::MRS_CMD_DQ_ON, TT::MRS_CMD_DQ_ON_LEN>(o_value);
+}
+
+///
+/// @brief Set MRS_CMD_DQ_OFF
+/// @tparam T fapi2::TargetType - defaults to MCA
+/// @tparam TT wcTraits - defaults to MCA version of the traits
+/// @param[in,out] io_data buffer to set
+/// @param[in] i_value the value to write into the buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline void set_pda_dq_off_delay( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
+{
+    io_data.insertFromRight<TT::MRS_CMD_DQ_OFF, TT::MRS_CMD_DQ_OFF_LEN>(i_value);
+}
+
+///
+/// @brief Get MRS_CMD_DQ_OFF
+/// @tparam T fapi2::TargetType - defaults to MCA
+/// @tparam TT wcTraits - defaults to MCA version of the traits
+/// @param[in] i_data buffer to read from
+/// @param[out] o_value the value gotten from the buffer
+///
+template< fapi2::TargetType T = fapi2::TARGET_TYPE_MCA, typename TT = wcTraits<T> >
+inline void get_pda_dq_off_delay( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
+{
+    i_data.extractToRight<TT::MRS_CMD_DQ_OFF, TT::MRS_CMD_DQ_OFF_LEN>(o_value);
+}
+
+///
+/// @brief Enables or disables MRS in PDA mode in the PHY
+/// @param[in,out] io_data buffer to set
+/// @param[in] i_state the value to write into the buffer
+///
+inline void set_pda_mode( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
+{
+    io_data.writeBit<MCA_DDRPHY_WC_CONFIG3_P0_PDA_RANKDELAY_ENABLE>(i_state);
+}
+
+///
+/// @brief Gets the PDA enable bit in the PHY
+/// @param[in] io_data buffer to set
+/// @param[out] o_state the value read from the buffer
+///
+inline void get_pda_mode( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
+{
+    o_state = i_data.getBit<MCA_DDRPHY_WC_CONFIG3_P0_PDA_RANKDELAY_ENABLE>() ?
+              mss::states::ON :
+              mss::states::OFF;
+}
 
 ///
 /// @brief Read WC_RTT_WR_SWAP_ENABLE

@@ -800,6 +800,7 @@ fapi2::ReturnCode mrs06_decode(const ccs::instruction_t<fapi2::TARGET_TYPE_MCBIS
 /// @defgroup mrs-structs
 /// @addtogroup mrs-structs
 // Each MRS has it's attributes encapsulated in it's little struct.
+// Comparisions for the MRS will be done in the order they'd be built in (according to the JEDEC spec) with the MSB going first
 /// @{
 
 ///
@@ -828,6 +829,49 @@ struct mrs00_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs00_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // write recover/RTP
+        // CAS latency
+        // DLL reset
+        // TM
+        // Read burst type
+        // Burst length
+
+        if(iv_write_recovery != i_rhs.iv_write_recovery)
+        {
+            return iv_write_recovery < i_rhs.iv_write_recovery;
+        }
+
+        if(iv_cas_latency != i_rhs.iv_cas_latency)
+        {
+            return iv_cas_latency < i_rhs.iv_cas_latency;
+        }
+
+        if(iv_dll_reset != i_rhs.iv_dll_reset)
+        {
+            return iv_dll_reset < i_rhs.iv_dll_reset;
+        }
+
+        if(iv_test_mode != i_rhs.iv_test_mode)
+        {
+            return iv_test_mode < i_rhs.iv_test_mode;
+        }
+
+        if(iv_read_burst_type != i_rhs.iv_read_burst_type)
+        {
+            return iv_read_burst_type < i_rhs.iv_read_burst_type;
+        }
+
+        return iv_burst_length < i_rhs.iv_burst_length;
+    }
 
     uint8_t iv_burst_length;
     uint8_t iv_read_burst_type;
@@ -860,6 +904,59 @@ struct mrs01_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs01_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // Qoff
+        // TDQS enable
+        // RTT_NOM
+        // Write leveling enable
+        // Additive latency
+        // Ouptut driver impedance control
+        // DLL enable
+
+        if(iv_qoff != i_rhs.iv_qoff)
+        {
+            return iv_qoff < i_rhs.iv_qoff;
+        }
+
+        if(iv_tdqs != i_rhs.iv_tdqs)
+        {
+            return iv_tdqs < i_rhs.iv_tdqs;
+        }
+
+        const auto l_rtt_nom = memcmp(iv_rtt_nom, i_rhs.iv_rtt_nom, sizeof(i_rhs.iv_rtt_nom));
+
+        if(l_rtt_nom != MEMCMP_EQUAL)
+        {
+            return l_rtt_nom < MEMCMP_EQUAL;
+        }
+
+        if(iv_wl_enable != i_rhs.iv_wl_enable)
+        {
+            return iv_wl_enable < i_rhs.iv_wl_enable;
+        }
+
+        if(iv_additive_latency != i_rhs.iv_additive_latency)
+        {
+            return iv_additive_latency < i_rhs.iv_additive_latency;
+        }
+
+        const auto l_odic = memcmp(iv_odic, i_rhs.iv_odic, sizeof(i_rhs.iv_odic));
+
+        if(l_odic != MEMCMP_EQUAL)
+        {
+            return l_odic < MEMCMP_EQUAL;
+        }
+
+        return iv_dll_enable < i_rhs.iv_dll_enable;
+    }
 
     uint8_t iv_dll_enable;
     uint8_t iv_odic[MAX_RANK_PER_DIMM];
@@ -894,6 +991,39 @@ struct mrs02_data
     ///
     mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs02_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // write crc
+        // rtt wr
+        // LPASR
+        // cwl
+
+        if(iv_write_crc != i_rhs.iv_write_crc)
+        {
+            return iv_write_crc < i_rhs.iv_write_crc;
+        }
+
+        const auto l_rtt_wr = memcmp(iv_dram_rtt_wr, i_rhs.iv_dram_rtt_wr, sizeof(i_rhs.iv_dram_rtt_wr));
+
+        if(l_rtt_wr != MEMCMP_EQUAL)
+        {
+            return l_rtt_wr < MEMCMP_EQUAL;
+        }
+
+        if(iv_lpasr != i_rhs.iv_lpasr)
+        {
+            return iv_lpasr < i_rhs.iv_lpasr;
+        }
+
+        return iv_cwl < i_rhs.iv_cwl;
+    }
+
     uint8_t iv_lpasr;
     uint8_t iv_cwl;
     uint8_t iv_write_crc;
@@ -924,6 +1054,61 @@ struct mrs03_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs03_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // MPR read format
+        // crc wr latency
+        // fine refresh
+        // temp sensor
+        // PDA (per-DRAM addressability)
+        // geardown mode
+        // MPR mode
+        // MPR page
+
+        if(iv_read_format != i_rhs.iv_read_format)
+        {
+            return iv_read_format < i_rhs.iv_read_format;
+        }
+
+        if(iv_crc_wr_latency != i_rhs.iv_crc_wr_latency)
+        {
+            return iv_crc_wr_latency < i_rhs.iv_crc_wr_latency;
+        }
+
+        if(iv_fine_refresh != i_rhs.iv_fine_refresh)
+        {
+            return iv_fine_refresh < i_rhs.iv_fine_refresh;
+        }
+
+        if(iv_temp_readout != i_rhs.iv_temp_readout)
+        {
+            return iv_temp_readout < i_rhs.iv_temp_readout;
+        }
+
+        if(iv_pda != i_rhs.iv_pda)
+        {
+            return iv_pda < i_rhs.iv_pda;
+        }
+
+        if(iv_geardown != i_rhs.iv_geardown)
+        {
+            return iv_geardown < i_rhs.iv_geardown;
+        }
+
+        if(iv_mpr_mode != i_rhs.iv_mpr_mode)
+        {
+            return iv_mpr_mode < i_rhs.iv_mpr_mode;
+        }
+
+        return iv_mpr_page < i_rhs.iv_mpr_page;
+    }
 
     uint8_t iv_mpr_mode;
     uint8_t iv_mpr_page;
@@ -958,6 +1143,79 @@ struct mrs04_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs04_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // PPR
+        // Write preamble
+        // Read preamble
+        // Read preamble training mode
+        // Refresh abort
+        // CS to command address latency
+        // Soft PPR
+        // VREF monitor
+        // Temperature controlled refresh mode
+        // Temperature controlled refresh range
+        // Maximum power down mode
+
+        if(iv_ppr != i_rhs.iv_ppr)
+        {
+            return iv_ppr < i_rhs.iv_ppr;
+        }
+
+        if(iv_wr_preamble != i_rhs.iv_wr_preamble)
+        {
+            return iv_wr_preamble < i_rhs.iv_wr_preamble;
+        }
+
+        if(iv_rd_preamble != i_rhs.iv_rd_preamble)
+        {
+            return iv_rd_preamble < i_rhs.iv_rd_preamble;
+        }
+
+        if(iv_rd_pre_train_mode != i_rhs.iv_rd_pre_train_mode)
+        {
+            return iv_rd_pre_train_mode < i_rhs.iv_rd_pre_train_mode;
+        }
+
+        if(iv_ref_abort != i_rhs.iv_ref_abort)
+        {
+            return iv_ref_abort < i_rhs.iv_ref_abort;
+        }
+
+        if(iv_cs_cmd_latency != i_rhs.iv_cs_cmd_latency)
+        {
+            return iv_cs_cmd_latency < i_rhs.iv_cs_cmd_latency;
+        }
+
+        if(iv_soft_ppr != i_rhs.iv_soft_ppr)
+        {
+            return iv_soft_ppr < i_rhs.iv_soft_ppr;
+        }
+
+        if(iv_vref_mon != i_rhs.iv_vref_mon)
+        {
+            return iv_vref_mon < i_rhs.iv_vref_mon;
+        }
+
+        if(iv_temp_ref_mode != i_rhs.iv_temp_ref_mode)
+        {
+            return iv_temp_ref_mode < i_rhs.iv_temp_ref_mode;
+        }
+
+        if(iv_temp_refresh_range != i_rhs.iv_temp_refresh_range)
+        {
+            return iv_temp_refresh_range < i_rhs.iv_temp_refresh_range;
+        }
+
+        return iv_max_pd_mode < i_rhs.iv_max_pd_mode;
+    }
 
     uint8_t iv_max_pd_mode;
     uint8_t iv_temp_refresh_range;
@@ -996,6 +1254,69 @@ struct mrs05_data
     ///
     mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs05_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // Read DBI
+        // Write DBI
+        // Data mask
+        // CA parity - persistent error
+        // RTT_PARK
+        // ODT input buffer
+        // CA parity error status
+        // CRC error clear
+        // CA parity latency mode
+
+        if(iv_read_dbi != i_rhs.iv_read_dbi)
+        {
+            return iv_read_dbi < i_rhs.iv_read_dbi;
+        }
+
+        if(iv_write_dbi != i_rhs.iv_write_dbi)
+        {
+            return iv_write_dbi < i_rhs.iv_write_dbi;
+        }
+
+        if(iv_data_mask != i_rhs.iv_data_mask)
+        {
+            return iv_data_mask < i_rhs.iv_data_mask;
+        }
+
+        if(iv_ca_parity != i_rhs.iv_ca_parity)
+        {
+            return iv_ca_parity < i_rhs.iv_ca_parity;
+        }
+
+        const auto l_rtt_park = memcmp(iv_rtt_park, i_rhs.iv_rtt_park, sizeof(i_rhs.iv_rtt_park));
+
+        if(l_rtt_park != MEMCMP_EQUAL)
+        {
+            return l_rtt_park < MEMCMP_EQUAL;
+        }
+
+        if(iv_odt_input_buffer != i_rhs.iv_odt_input_buffer)
+        {
+            return iv_odt_input_buffer < i_rhs.iv_odt_input_buffer;
+        }
+
+        if(iv_ca_parity_error_status != i_rhs.iv_ca_parity_error_status)
+        {
+            return iv_ca_parity_error_status < i_rhs.iv_ca_parity_error_status;
+        }
+
+        if(iv_crc_error_clear != i_rhs.iv_crc_error_clear)
+        {
+            return iv_crc_error_clear < i_rhs.iv_crc_error_clear;
+        }
+
+        return iv_ca_parity_latency < i_rhs.iv_ca_parity_latency;
+    }
+
     uint8_t iv_ca_parity_latency;
     uint8_t iv_crc_error_clear;
     uint8_t iv_ca_parity_error_status;
@@ -1030,6 +1351,42 @@ struct mrs06_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    ///
+    /// @brief Less than operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is less than i_rhs
+    ///
+    bool operator<(const mss::ddr4::mrs06_data& i_rhs) const
+    {
+        // MSB to LSB - 2015 JEDEC spec
+        // TCCD_L
+        // Train enable
+        // Train range
+        // Train value
+
+        if(iv_tccd_l != i_rhs.iv_tccd_l)
+        {
+            return iv_tccd_l < i_rhs.iv_tccd_l;
+        }
+
+        const auto l_enable = memcmp(iv_vrefdq_train_enable, i_rhs.iv_vrefdq_train_enable,
+                                     sizeof(i_rhs.iv_vrefdq_train_enable));
+
+        if(l_enable != MEMCMP_EQUAL)
+        {
+            return l_enable < MEMCMP_EQUAL;
+        }
+
+        const auto l_range = memcmp(iv_vrefdq_train_range, i_rhs.iv_vrefdq_train_range, sizeof(i_rhs.iv_vrefdq_train_range));
+
+        if(l_range != MEMCMP_EQUAL)
+        {
+            return l_range < MEMCMP_EQUAL;
+        }
+
+        return memcmp(iv_vrefdq_train_value, i_rhs.iv_vrefdq_train_value, sizeof(i_rhs.iv_vrefdq_train_value)) < MEMCMP_EQUAL;
+    }
 
     uint8_t iv_vrefdq_train_value[MAX_RANK_PER_DIMM];
     uint8_t iv_vrefdq_train_range[MAX_RANK_PER_DIMM];
