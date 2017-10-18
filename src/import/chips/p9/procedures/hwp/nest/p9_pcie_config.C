@@ -41,7 +41,9 @@
 
 #include <p9_misc_scom_addresses.H>
 #include <p9_misc_scom_addresses_fld.H>
-
+#include <p9n2_misc_scom_addresses.H>
+#include <p9n2_misc_scom_addresses_fld.H>
+#include <p9_fbc_utils.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -86,11 +88,13 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_PROC_PCIE_BAR_SIZE_Type l_bar_sizes;
     fapi2::ATTR_CHIP_EC_FEATURE_HW363246_Type l_hw363246;
     fapi2::ATTR_CHIP_EC_FEATURE_HW410503_Type l_hw410503;
+    fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     fapi2::buffer<uint64_t> l_buf = 0;
     uint8_t l_attr_proc_pcie_iovalid_enable = 0;
-    uint64_t l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m, l_base_addr_mmio;
+    std::vector<uint64_t> l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m;
+    uint64_t l_base_addr_mmio;
 
     auto l_pec_chiplets_vec = i_target.getChildren<fapi2::TARGET_TYPE_PEC>(
                                   fapi2::TARGET_STATE_FUNCTIONAL);
@@ -138,6 +142,11 @@ fapi2::ReturnCode p9_pcie_config(
                            l_hw363246),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW363246)");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE,
+                           i_target,
+                           l_extended_addressing_mode),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
     // initialize functional PEC chiplets
     for (auto l_pec_chiplet : l_pec_chiplets_vec)
     {
@@ -152,6 +161,30 @@ fapi2::ReturnCode p9_pcie_config(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_PCIE_IOVALID_ENABLE, l_pec_chiplet,
                                l_attr_proc_pcie_iovalid_enable));
         FAPI_DBG("l_attr_proc_pcie_iovalid_enable: %#x", l_attr_proc_pcie_iovalid_enable);
+
+        // configure extended addressing facility
+        if (l_extended_addressing_mode)
+        {
+            uint8_t l_addr_extension_group_id;
+            uint8_t l_addr_extension_chip_id;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID,
+                                   FAPI_SYSTEM,
+                                   l_addr_extension_group_id),
+                     "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID,
+                                   FAPI_SYSTEM,
+                                   l_addr_extension_chip_id),
+                     "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID)");
+
+            FAPI_TRY(fapi2::getScom(l_pec_chiplet, P9N2_PEC_ADDREXTMASK_REG, l_buf),
+                     "Error from getScom (P9N2_PEC_ADDREXTMASK_REG)");
+            l_buf.insertFromRight<P9N2_PEC_ADDREXTMASK_REG_PE,
+                                  P9N2_PEC_ADDREXTMASK_REG_PE_LEN>(
+                                      (l_addr_extension_group_id << 3) |
+                                      l_addr_extension_chip_id);
+            FAPI_TRY(fapi2::putScom(l_pec_chiplet, P9N2_PEC_ADDREXTMASK_REG, l_buf),
+                     "Error from putScom (P9N2_PEC_ADDREXTMASK_REG)");
+        }
 
         // Phase2 init step 1
         // NestBase+0x00
