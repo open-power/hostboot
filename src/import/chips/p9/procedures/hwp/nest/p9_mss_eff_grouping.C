@@ -212,25 +212,13 @@ fapi2::ReturnCode EffGroupingProcAttrs::calcProcBaseAddr(
     uint64_t l_memBaseAddr1, l_mmioBaseAddr;
 
     // Get the Mirror/Non-mirror base addresses
-    FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address_no_aliases(i_target,
              EFF_FBC_GRP_CHIP_IDS,
              iv_memBaseAddr,
              l_memBaseAddr1,
              iv_mirrorBaseAddr,
              l_mmioBaseAddr),
-             "p9_fbc_utils_get_chip_base_address() returns an error, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Write base addr for non-mirror memory regions
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MEM_BASE, i_target,
-                           iv_memBaseAddr),
-             "Error setting ATTR_PROC_MEM_BASE, l_rc 0x%.8X",
-             (uint64_t)fapi2::current_err);
-
-    // Set base addr for mirror memory regions
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_MIRROR_BASE, i_target,
-                           iv_mirrorBaseAddr),
-             "Error setting ATTR_PROC_MIRROR_BASE, l_rc 0x%.8X",
+             "p9_fbc_utils_get_chip_base_address_no_aliases() returns an error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
 
 fapi_try_exit:

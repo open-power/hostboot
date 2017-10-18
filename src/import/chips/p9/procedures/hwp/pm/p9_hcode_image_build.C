@@ -3451,11 +3451,17 @@ fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i
 {
 
     FAPI_INF(">> setFabricIds");
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     uint32_t l_system_id;
     uint8_t  l_group_id;
     uint8_t  l_chip_id;
+    uint8_t  l_addr_extension_group_id;
+    uint8_t  l_addr_extension_chip_id;
     fapi2::buffer<uint16_t> l_location_id = 0;
+    fapi2::buffer<uint16_t> l_addr_extension = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     uint16_t l_locationVal = 0;
+    uint16_t l_addr_extension_val = 0;
 
     cmeHeader_t* pCmeHdr = (cmeHeader_t*) & i_pChipHomer->cpmrRegion.cmeSramRegion[CME_INT_VECTOR_SIZE];
     sgpeHeader_t* pSgpeHdr = (sgpeHeader_t*)& i_pChipHomer->qpmrRegion.sgpeRegion.sgpeSramImage[SGPE_INT_VECTOR_SIZE];
@@ -3502,6 +3508,39 @@ fapi2::ReturnCode setFabricIds( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PROC& i
     // Populate the SGPE Header
     pSgpeHdr->g_sgpe_location_id = SWIZZLE_2_BYTE(l_locationVal);
 
+    // configure extended addressing facility
+    // only place non zero value in SGPE header if supported by chip type
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE,
+                           i_procTgt,
+                           l_extended_addressing_mode),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
+    if (l_extended_addressing_mode)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_group_id),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID");
+
+        FAPI_DBG("Fabric Address Extension Group ID  :   0x%01X", l_addr_extension_group_id);
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_chip_id),
+                 "Error from FAPI_ATTR_GET for attribute ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID");
+
+        FAPI_DBG("Fabric Address Extension Chip ID   :   0x%01X", l_addr_extension_chip_id);
+
+        l_addr_extension.insert<0, 4, 8-4, uint8_t>(l_addr_extension_group_id);
+        l_addr_extension.insert<4, 3, 8-3, uint8_t>(l_addr_extension_chip_id);
+    }
+
+    FAPI_DBG("Address Extension ID   :   0x%04X", l_addr_extension);
+    l_addr_extension.extract<0, 16>(l_addr_extension_val);
+
+    // Populate the SGPE Header
+    pSgpeHdr->g_sgpe_addr_extension = SWIZZLE_2_BYTE(l_addr_extension_val);
+
 fapi_try_exit:
     FAPI_INF("<< setFabricIds");
     return fapi2::current_err;
@@ -3523,9 +3562,8 @@ fapi2::ReturnCode populateNcuRngBarScomReg( void* i_pChipHomer, CONST_FAPI2_PROC
     uint8_t  attrVal = 0;
     uint64_t nxRangeBarAddrOffset = 0;
     uint64_t regNcuRngBarData   = 0;
-    uint64_t baseAddressNm0     = 0;
-    uint64_t baseAddressNm1     = 0;
-    uint64_t baseAddressMirror  = 0;
+    std::vector<uint64_t> baseAddressNm0, baseAddressNm1;
+    std::vector<uint64_t> baseAddressMirror;
     uint32_t ncuBarRegisterAddr = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 

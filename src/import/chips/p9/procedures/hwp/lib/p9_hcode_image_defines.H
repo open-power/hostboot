@@ -237,7 +237,7 @@ HCD_HDR_UINT32(g_sgpe_build_date, 0);
 HCD_HDR_UINT32(g_sgpe_build_ver, 0);
 HCD_HDR_UINT32(g_sgpe_reserve_flags, 0);
 HCD_HDR_UINT16(g_sgpe_location_id, 0);
-HCD_HDR_UINT16(g_sgpe_reserve3, 0);
+HCD_HDR_UINT16(g_sgpe_addr_extension, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_cmn_ring_ovrd_occ_offset, 0);
 HCD_HDR_UINT32(g_sgpe_spec_ring_occ_offset, 0);

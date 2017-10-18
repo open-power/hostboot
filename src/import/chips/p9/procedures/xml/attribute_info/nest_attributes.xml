@@ -395,6 +395,28 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Address extension enable value for RA 15:18
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Address extension enable value for RA 19:21
+  </description>
+  <valueType>uint8</valueType>
+  <writeable/>
+  <initToZero/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_PROC_FABRIC_GROUP_ID</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>
@@ -842,6 +864,19 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_MAX_INTERLEAVE_GROUP_SIZE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    The physical capacity of each msel region is 4_TB without extended addressing.
+    This attribute defines the maximum addressable space to be used within each msel,
+    which may be lower than the physical capacity.
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <persistRuntime/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_MEM_MIRROR_PLACEMENT_POLICY</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Define placement policy/scheme for non-mirrored/mirrored memory
@@ -858,22 +893,6 @@
   </enum>
   <platInit/>
   <persistRuntime/>
-</attribute>
-<!-- ********************************************************************** -->
-<attribute>
-  <id>ATTR_PROC_MEM_BASE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The location where the stacking of non-mirrored memory groups
-                of the chip starts.  This address is determined in a fixed
-                manner from the chip's position in the fabric topology (i.e.
-                each chip will consume a fixed portion of the system address
-                map).
-                Set by p9_mss_eff_grouping.
-  </description>
-  <valueType>uint64</valueType>
-  <writeable/>
-  <persistRuntime/>
-  <initToZero/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -908,22 +927,6 @@
   <initToZero/>
 </attribute>
 <!-- ********************************************************************* -->
-<attribute>
-  <id>ATTR_PROC_MIRROR_BASE</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description> The location where the stacking of mirrored memory groups
-                of the chip starts.  This address is determined in a fixed
-                manner from the chip's position in the fabric topology (i.e.
-                each chip will consume a fixed portion of the system address
-                map).
-                Set by p9_mss_eff_grouping.
-  </description>
-  <valueType>uint64</valueType>
-  <writeable/>
-  <persistRuntime/>
-  <initToZero/>
-</attribute>
-<!-- ********************************************************************** -->
 <attribute>
   <id>ATTR_PROC_MIRROR_BASES</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>

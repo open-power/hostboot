@@ -69,6 +69,13 @@ const uint64_t P9_FBC_UTILS_LAST_ADDR_IN_CACHELINE = 0x78ULL;
 // cacheline size = 128B
 const uint64_t FABRIC_CACHELINE_SIZE = 0x80;
 
+// chip address extension mask, for HW423589_OPTION2
+// repurposes chip ID(0:2) as address bits
+const uint8_t CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_HW423589_OPTION2 = 0x0;
+const uint8_t CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2 = 0x7;
+
+const uint64_t MAX_INTERLEAVE_GROUP_SIZE                  = 0x40000000000ULL; // 4_TB
+const uint64_t MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2 = 0x8000000000ULL;  // 512_GB
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -99,22 +106,52 @@ fapi2::ReturnCode p9_fbc_utils_override_fbc_stop(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 ///
-/// @brief Return base address origin (non-mirrored/mirrored/MMIO) for this chip
+/// @brief Return set of base addresses (non-mirrored/mirrored/MMIO) for this chip,
+///        accounting for fixed msel assignments, but not aliasing
+///        enabled by chip address extension facility
 ///
 /// @param[in] i_target Reference to processor chip target
 /// @param[in] i_addr_mode Specifies mode for chip base/origin address calculations
-/// @param[out] o_base_address_nm0 Non-mirrored base address (range 0) for this chip
-/// @param[out] o_base_address_nm1 Non-mirrored base address (range 1) for this chip
-/// @param[out] o_base_address_m Mirrored base address for this chip
-/// @param[out] o_base_address_mmio MMIO base address for this chip
+/// @param[out] o_base_address_nm0 Non-mirrored base address for
+///             this chip (covering msel=0b00)
+/// @param[out] o_base_address_nm1 Non-mirrored base address for
+///             this chip (covering msel=0b01)
+/// @param[out] o_base_address_m Mirrored base address for
+///             this chip (covering msel=0b10)
+/// @param[out] o_base_address_mmio MMIO base address for this chip (msel=0b11)
 /// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
+fapi2::ReturnCode p9_fbc_utils_get_chip_base_address_no_aliases(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const p9_fbc_utils_addr_mode_t i_addr_mode,
     uint64_t& o_base_address_nm0,
     uint64_t& o_base_address_nm1,
     uint64_t& o_base_address_m,
+    uint64_t& o_base_address_mmio);
+
+///
+/// @brief Return set of base addresses (non-mirrored/mirrored/MMIO) for this chip,
+///        accounting for fixed msel assignments as well as variable aliasing
+///        enabled by chip address extension facility
+///
+/// @param[in] i_target Reference to processor chip target
+/// @param[in] i_addr_mode Specifies mode for chip base/origin address calculations
+/// @param[out] o_base_address_nm0 List of non-mirrored base addresses for
+///             this chip (covering msel=0b00), ordered from smallest->largest
+/// @param[out] o_base_address_nm1 List of non-mirrored base addresses for
+///             this chip (covering msel=0b01), ordered from smallest->largest
+/// @param[out] o_base_address_m List of mirrored base addresses for
+///             this chip (covering msel=0b10), ordered from
+///             smallest->largest
+/// @param[out] o_base_address_mmio MMIO base address for this chip (msel=0b11)
+/// @return fapi::ReturnCode, FAPI2_RC_SUCCESS if success, else error code.
+///
+fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const p9_fbc_utils_addr_mode_t i_addr_mode,
+    std::vector<uint64_t>& o_base_address_nm0,
+    std::vector<uint64_t>& o_base_address_nm1,
+    std::vector<uint64_t>& o_base_address_m,
     uint64_t& o_base_address_mmio);
 
 #endif // _P9_FBC_UTILS_H_
