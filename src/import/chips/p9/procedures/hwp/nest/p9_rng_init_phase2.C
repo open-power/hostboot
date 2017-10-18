@@ -67,9 +67,7 @@ p9_rng_init_phase2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     uint64_t l_nx_rng_bar_base_addr_offset = 0;
     uint8_t  l_nx_rng_failed_int_enable = 0;
     uint64_t l_nx_rng_failed_int_addr = 0;
-    uint64_t l_base_addr_nm0;
-    uint64_t l_base_addr_nm1;
-    uint64_t l_base_addr_m;
+    std::vector<uint64_t> l_base_addr_nm0, l_base_addr_nm1, l_base_addr_m;
     uint64_t l_base_addr_mmio;
     uint8_t  l_HW403701;
 
