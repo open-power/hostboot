@@ -414,7 +414,7 @@ static fapi2::ReturnCode update_eq_config(
 
     // Write the recalculated OCC Quad Configuration Status Register
     FAPI_INF("  Writing OCC QCSR");
-    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_QCSR_SCOM2, l_ex_config),
+    FAPI_TRY(fapi2::putScom(i_target, PU_OCB_OCI_QCSR_SCOM, l_ex_config),
              "Error writing to CCSR");
 
 fapi_try_exit:
