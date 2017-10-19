@@ -40,7 +40,8 @@ sbex -t 1034144
 
 mkdir $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries -p
 cp /gsa/rchgsa/home/c/r/crgeddes/documents/hbBuild/p9_ipl_build $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries/
-
+# Workaround for hb prime
+chmod 777 $sb/../ -R
 
 
 
