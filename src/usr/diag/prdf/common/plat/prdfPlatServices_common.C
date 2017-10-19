@@ -357,13 +357,13 @@ int32_t getBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
         fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
 
-        FAPI_INVOKE_HWP( errl, dimmGetBadDqBitmap, l_fapiTrgt,
+        FAPI_INVOKE_HWP( errl, p9DimmGetBadDqBitmap, l_fapiTrgt,
                          i_rank.getDimmSlct(), i_rank.getRankSlct(),
                          data[ps], ps );
 
         if ( nullptr != errl )
         {
-            PRDF_ERR( PRDF_FUNC "dimmGetBadDqBitmap() failed: i_trgt=0x%08x "
+            PRDF_ERR( PRDF_FUNC "p9DimmGetBadDqBitmap() failed: i_trgt=0x%08x "
                     "ps=%d ds=%d rs=%d", getHuid(i_trgt), ps,
                     i_rank.getDimmSlct(), i_rank.getRankSlct() );
             PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );
@@ -423,13 +423,13 @@ int32_t setBadDqBitmap( TargetHandle_t i_trgt, const MemRank & i_rank,
 
             fapi2::Target<l_trgtType> l_fapiTrgt( i_trgt );
 
-            FAPI_INVOKE_HWP( errl, dimmSetBadDqBitmap, l_fapiTrgt,
+            FAPI_INVOKE_HWP( errl, p9DimmSetBadDqBitmap, l_fapiTrgt,
                              i_rank.getDimmSlct(), i_rank.getRankSlct(),
                              data[ps], ps );
 
             if ( nullptr != errl )
             {
-                PRDF_ERR( PRDF_FUNC "dimmSetBadDqBitmap() failed: "
+                PRDF_ERR( PRDF_FUNC "p9DimmSetBadDqBitmap() failed: "
                           "i_trgt=0x%08x ps=%d ds=%d rs=%d", getHuid(i_trgt),
                           ps, i_rank.getDimmSlct(), i_rank.getRankSlct() );
                 PRDF_COMMIT_ERRL( errl, ERRL_ACTION_REPORT );

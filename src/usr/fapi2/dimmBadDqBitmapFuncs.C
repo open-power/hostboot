@@ -129,14 +129,14 @@ fapi2::ReturnCode dimmBadDqCheckParamGetBitmap( const fapi2::Target
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode dimmGetBadDqBitmap( const fapi2::Target
+fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     uint8_t (&o_data)[mss::BAD_DQ_BYTE_COUNT],
     const uint8_t i_port )
 {
-    FAPI_INF( ">>dimmGetBadDqBitmap. %d:%d", i_dimm, i_rank );
+    FAPI_INF( ">>p9DimmGetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
     fapi2::ReturnCode l_rc;
 
@@ -150,7 +150,7 @@ fapi2::ReturnCode dimmGetBadDqBitmap( const fapi2::Target
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {
-            FAPI_ERR( "dimmGetBadDqBitmap: Error from "
+            FAPI_ERR( "p9DimmGetBadDqBitmap: Error from "
                       "dimmBadDqCheckParamGetBitmap." );
             break;
         }
@@ -158,20 +158,20 @@ fapi2::ReturnCode dimmGetBadDqBitmap( const fapi2::Target
         memcpy( o_data, l_dqBitmap[i_rank], mss::BAD_DQ_BYTE_COUNT );
     }while(0);
 
-    FAPI_INF( "<<dimmGetBadDqBitmap" );
+    FAPI_INF( "<<p9DimmGetBadDqBitmap" );
 
     return l_rc;
 }
 
 //------------------------------------------------------------------------------
-fapi2::ReturnCode dimmSetBadDqBitmap( const fapi2::Target
+fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
     const uint8_t (&i_data)[mss::BAD_DQ_BYTE_COUNT],
     const uint8_t i_port )
 {
-    FAPI_INF( ">>dimmSetBadDqBitmap. %d:%d", i_dimm, i_rank );
+    FAPI_INF( ">>p9DimmSetBadDqBitmap. %d:%d", i_dimm, i_rank );
 
     fapi2::ReturnCode l_rc;
 
@@ -186,7 +186,7 @@ fapi2::ReturnCode dimmSetBadDqBitmap( const fapi2::Target
                                              l_dimmTrgt, l_dqBitmap );
         if ( l_rc )
         {
-            FAPI_ERR( "dimmSetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP." );
+            FAPI_ERR("p9DimmSetBadDqBitmap: Error getting ATTR_BAD_DQ_BITMAP.");
             break;
         }
         // Add the rank bitmap to the DIMM bitmap and write the bitmap.
@@ -197,7 +197,7 @@ fapi2::ReturnCode dimmSetBadDqBitmap( const fapi2::Target
         l_errl = fapi2::platAttrSvc::getTargetingTarget(i_fapiTrgt, l_trgt);
         if ( l_errl )
         {
-            FAPI_ERR( "dimmSetBadDqBitmap: Error from getTargetingTarget" );
+            FAPI_ERR( "p9DimmSetBadDqBitmap: Error from getTargetingTarget" );
             break;
         }
 
@@ -206,11 +206,11 @@ fapi2::ReturnCode dimmSetBadDqBitmap( const fapi2::Target
 
         if ( l_rc )
         {
-            FAPI_ERR( "dimmSetBadDqBitmap: Error setting ATTR_BAD_DQ_BITMAP." );
+            FAPI_ERR("p9DimmSetBadDqBitmap: Error setting ATTR_BAD_DQ_BITMAP.");
         }
     }while(0);
 
-    FAPI_INF( "<<dimmSetBadDqBitmap" );
+    FAPI_INF( "<<p9DimmSetBadDqBitmap" );
 
     return l_rc;
 }
