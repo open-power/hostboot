@@ -49,7 +49,7 @@ extern "C"
  *
  * @return ReturnCode
  */
-fapi2::ReturnCode dimmGetBadDqBitmap( const fapi2::Target
+fapi2::ReturnCode p9DimmGetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,
@@ -74,7 +74,7 @@ fapi2::ReturnCode dimmGetBadDqBitmap( const fapi2::Target
  *
  * @return ReturnCode
  */
-fapi2::ReturnCode dimmSetBadDqBitmap( const fapi2::Target
+fapi2::ReturnCode p9DimmSetBadDqBitmap( const fapi2::Target
     <fapi2::TARGET_TYPE_MCA|fapi2::TARGET_TYPE_MBA> & i_fapiTrgt,
     const uint8_t i_dimm,
     const uint8_t i_rank,

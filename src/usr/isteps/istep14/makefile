@@ -77,6 +77,7 @@ OBJS += p9c_mss_unmask_errors.o
 OBJS += p9c_mss_power_cleanup.o
 OBJS += p9c_cen_stopclocks.o
 OBJS += p9c_mss_maint_cmds.o
+OBJS += p9c_dimmBadDqBitmapFuncs.o
 
 #include ${PROCEDURE_PATH}/hwp/nest/p9_htm_setup.mk
 #include ${PROCEDURE_PATH}/hwp/nest/p9_pcie_config.mk
