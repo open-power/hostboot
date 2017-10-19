@@ -183,6 +183,7 @@ prd_obj_no_sim += p9_l2_flush.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/centaur/procedures/hwp/memory
 prd_obj_no_sim += p9c_mss_maint_cmds.o
+prd_obj_no_sim += p9c_dimmBadDqBitmapFuncs.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
