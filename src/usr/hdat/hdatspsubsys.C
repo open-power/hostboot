@@ -421,9 +421,9 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
 
            strcpy( iv_impl.hdatBmcFamily , l_bmcManufacturer);
            strcat( iv_impl.hdatBmcFamily , ",");
-           strcpy( iv_impl.hdatBmcFamily , l_bmcHwChip);
+           strcat( iv_impl.hdatBmcFamily , l_bmcHwChip);
            strcat( iv_impl.hdatBmcFamily , ",");
-           strcpy( iv_impl.hdatBmcFamily , l_bmcSw);
+           strcat( iv_impl.hdatBmcFamily , l_bmcSw);
         }
         else
         {
