@@ -311,7 +311,8 @@ errlHndl_t discoverTargets()
 
             if( (pTarget->getAttr<ATTR_CLASS>() == CLASS_CHIP) &&
                 (pTarget->getAttr<ATTR_TYPE>() != TYPE_TPM) &&
-                (pTarget->getAttr<ATTR_TYPE>() != TYPE_SP) )
+                (pTarget->getAttr<ATTR_TYPE>() != TYPE_SP) &&
+                (pTarget->getAttr<ATTR_TYPE>() != TYPE_BMC) )
             {
                 // read Chip ID/EC data from these physical chips
                 errl = platReadIDEC(pTarget);
