@@ -885,6 +885,48 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
             if( errhdl ) { break; }
 
         }
+        else if( RUNTIME::HRMOR_STASH == i_section )
+        {
+            //Look up the tuple that this section is located in
+            errhdl = getAndCheckTuple(i_section, tuple);
+            if( errhdl) {break; }
+
+            TRACUCOMP( g_trac_runtime, "HRMOR_STASH tuple=%p", tuple );
+            uint64_t base_addr = 0;
+            //Find the virtual address of the tuple we found
+            errhdl = getSpiraTupleVA(tuple, base_addr);
+            if( errhdl ) { break; }
+
+            //Set up the MDT(memory description tree) header
+            //(see hdatstructs.H and 11.2.1 MS Area Structure)
+            hdatHDIF_t* mdt_header =
+            reinterpret_cast<hdatHDIF_t*>(base_addr);
+
+            // Check the headers and version info
+            errhdl = check_header( mdt_header,
+                                   MDT_HEADER );
+            if( errhdl ) { break; }
+
+            //Array of ptrs to different subsections of the MDT
+            hdatHDIFDataHdr_t* mdt_data_ptrs =
+              reinterpret_cast<hdatHDIFDataHdr_t*>
+              (mdt_header->hdatDataPtrOffset + base_addr);
+
+            //ensure the memory range we are passing out is valid hdat address space
+            errhdl = verify_hdat_address(mdt_data_ptrs,
+                            mdt_header->hdatDataPtrCnt * sizeof(hdatHDIFDataHdr_t) );
+            if( errhdl ) { break; }
+
+            //The address passed out will point to where hostboot can store an
+            //address that PHYP can look up to figure out where to write the HRMOR
+            //when it changes
+            o_dataAddr = mdt_data_ptrs[MDT_MAINSTORE_ADDR_SECTION].hdatOffset +            // offset to ms addr section
+                                       base_addr +                                         // base of hdat
+                                       MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_OFFSET; // 0x1C
+
+            o_dataSize = MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_SIZE; // 8 bytes
+
+        }
         // Not sure how we could get here...
         else
         {
@@ -1459,6 +1501,10 @@ errlHndl_t hdatService::getAndCheckTuple(const SectionId i_section,
         case RUNTIME::HSVC_NODE_DATA:
             l_spiraS = SPIRAS_HSVC_DATA;
             l_spiraL = SPIRAL_HSVC_DATA;
+            break;
+        case RUNTIME::HRMOR_STASH:
+            l_spiraS = SPIRAS_MDT;
+            l_spiraL = SPIRAL_MDT;
             break;
         default:
             TRACFCOMP(g_trac_runtime, ERR_MRK"getAndCheckTuple> section %d not supported",

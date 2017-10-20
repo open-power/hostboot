@@ -53,6 +53,7 @@ uint64_t hb_get_rt_rsvd_mem(Util::hbrt_mem_label_t i_label,
         case Util::HBRT_MEM_LABEL_ATTR:
         case Util::HBRT_MEM_LABEL_ATTROVER:
         case Util::HBRT_MEM_LABEL_PADDING:
+        case Util::HBRT_MEM_LABEL_HYPCOMM:
             if( (g_hostInterfaces != NULL) &&
                 (g_hostInterfaces->get_reserved_mem) )
             {

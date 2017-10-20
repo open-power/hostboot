@@ -376,6 +376,14 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
     l_hbTOC.total_entries++;
 
+    // Fill in HYPCOMM size
+    l_hbTOC.entry[l_hbTOC.total_entries].label = Util::HBRT_MEM_LABEL_HYPCOMM;
+    l_hbTOC.entry[l_hbTOC.total_entries].offset = 0;
+    l_hbTOC.entry[l_hbTOC.total_entries].size = sizeof(hbHypCommArea_t);
+    l_totalSectionSize +=
+        ALIGN_PAGE(l_hbTOC.entry[l_hbTOC.total_entries].size);
+    l_hbTOC.total_entries++;
+
     l_totalSectionSize += sizeof(l_hbTOC);  // Add 4KB Table of Contents
 
     // Fill in PADDING size
@@ -477,14 +485,14 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
             switch ( l_hbTOC.entry[i].label )
             {
                 case Util::HBRT_MEM_LABEL_ATTROVER:
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTROVER address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTROVER  v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> memcpy %d size", actual_size);
                     memcpy( reinterpret_cast<void*>(l_prevDataAddr),
                             l_overrideData,
                             actual_size);
                     break;
                 case Util::HBRT_MEM_LABEL_ATTR:
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTR address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> ATTR v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
                     l_elog = TARGETING::AttrRP::save(
                                 reinterpret_cast<uint8_t*>(l_prevDataAddr),
                                 aligned_size);
@@ -497,7 +505,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                     TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> TARGETING::AttrRP::save(0x%.16llX) done", l_prevDataAddr);
                     break;
                 case Util::HBRT_MEM_LABEL_VPD:
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
                     l_elog = VPD::vpd_load_rt_image(l_prevDataAddr);
                     if(l_elog)
                     {
@@ -505,8 +513,71 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                                    "fill_RsvMem_hbData> failed VPD call" );
                         break;
                     }
-                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD address 0x%.16llX, size: %lld done", l_prevDataAddr, aligned_size);
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> VPD v address 0x%.16llX, size: %lld done", l_prevDataAddr, aligned_size);
                     break;
+                case Util::HBRT_MEM_LABEL_HYPCOMM:
+                {
+                    TRACFCOMP( g_trac_runtime, "fill_RsvMem_hbData> HYPCOMM v address 0x%.16llX, size: %lld", l_prevDataAddr, aligned_size);
+                    //This will call default contructor setting up the version and magic number,
+                    // and zero'ing out the data area
+                    TARGETING::Target * sys = NULL;
+                    TARGETING::targetService().getTopLevelTarget( sys );
+                    assert(sys != NULL);
+
+                    // Figure out what kind of payload we have
+                    TARGETING::PAYLOAD_KIND payload_kind
+                        = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
+
+                    hbHypCommArea_t l_hbCommArea;
+                    uint64_t l_hdatPtrToHrmorStashAddr = 0;
+                    size_t   l_hdatPtrHrmorStashSize   = 0;
+                    //TODO RTC 180959 enable this when HDAT has added in HRMOR ptr space in MS Addr Config section of HDAT
+//                    uint64_t * l_pHdatPtrToHrmorStashAddr;
+//                    memcpy a copy of the hbHypCommArea struct to the end of the hbData section
+                    memcpy( reinterpret_cast<void*>(l_prevDataAddr),
+                            reinterpret_cast<void*>(&l_hbCommArea),
+                            sizeof(hbHypCommArea_t));
+
+                    if(payload_kind != TARGETING::PAYLOAD_KIND_NONE)
+                    {
+                        //Find the v addr in hdat that the hypervisor will look
+                        //at to determine where to write HRMOR and possibly in
+                        //the future information in hostboot's reserved memory section.
+                        l_elog = RUNTIME::get_host_data_section( RUNTIME::HRMOR_STASH,
+                                                                0,
+                                                                l_hdatPtrToHrmorStashAddr,
+                                                                l_hdatPtrHrmorStashSize );
+                        if(l_elog)
+                        {
+                            TRACFCOMP( g_trac_runtime,
+                                    "fill_RsvMem_hbData> failed to find HRMOR stash address in HDAT" );
+                            break;
+                        }
+
+                        //This should always return a size of 8 as this is a 64 bit address
+                        assert(l_hdatPtrHrmorStashSize == sizeof(uint64_t),
+                               "The size of the HRMOR_STASH area should always be %d bytes,  not %d",
+                               sizeof(uint64_t), l_hdatPtrHrmorStashSize);
+
+                        //Cast the value returned from get_host_data_section to a uint64_t pointer
+    //                     l_pHdatPtrToHrmorStashAddr = reinterpret_cast<uint64_t *>(l_hdatPtrToHrmorStashAddr);
+
+                        //TODO RTC 180959 enable this when HDAT has added in HRMOR ptr space in MS Addr Config section of HDAT
+                        //Set the value of the pointer to be the physical address
+                        //of the hrmor stash in the hb-hyp communication area
+    //                     *l_pHdatPtrToHrmorStashAddr = io_start_address + l_hbTOC.entry[i].offset + HYPCOMM_STRUCT_HRMOR_OFFSET;
+
+                        TRACFCOMP( g_trac_runtime,
+                                  "fill_RsvMem_hbData> HYPCOMM v address 0x%.16llX, size: %lld done",
+                                  l_prevDataAddr, aligned_size);
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_runtime,
+                                  "fill_RsvMem_hbData> Payload kind was determined to be NONE, skipping setting up HYP comm");
+                    }
+                    break;
+                }
                 default:
                     break;
             }
@@ -525,7 +596,6 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
         memcpy( reinterpret_cast<void*>(l_vAddr),
                 &l_hbTOC,
                 sizeof(l_hbTOC));
-
     } while (0);
 
     if (l_vAddr != 0)

@@ -46,6 +46,9 @@ namespace Util
     // Ascii label "PADDING " in hex
     constexpr hbrt_mem_label_t HBRT_MEM_LABEL_PADDING  = 0x50414444494E4720;
 
+    // Ascii label "HYPCOMM " in hex
+    constexpr hbrt_mem_label_t HBRT_MEM_LABEL_HYPCOMM  = 0x485950434f4d4d20;
+
     /** @brief A 32 byte table of contents entry */
     struct hbrtTableOfContentsEntry_t
     {

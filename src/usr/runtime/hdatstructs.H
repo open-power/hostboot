@@ -374,4 +374,38 @@ struct hdatMsVpdRhbAddrRange_t
     uint8_t  reserved[7];              // 0x0059 Reserved
 }  __attribute__ ((packed));
 
+// Supported versions
+enum hbHypCommAreaVersionInfo {
+    STRUCT_VERSION_FIRST  = 0x1,
+    STRUCT_VERSION_LATEST = 0x1,
+};
+
+// Size of supported versions - must be 8-byte aligned
+const size_t  HB_HYP_COMM_STRUCT_SIZES[STRUCT_VERSION_LATEST+1]
+{
+    0,
+    32,  // ver1: size of struct is 32 bytes
+};
+
+// Magic number for hbHypCommArea (ASCII = "HYPECOMM")
+const uint64_t HYPECOMM_MAGIC_NUM = 0x48595045434f4d4d;
+
+// Number of bytes into struct for HRMOR address
+// (offset to start of data in hbHypCommArea_t struct)
+const uint8_t  HYPCOMM_STRUCT_HRMOR_OFFSET = 24;
+
+struct hbHypCommArea_t
+{
+    uint64_t magicNum;          // 8 bytes 0x48595045434f4d4d = HYPECOMM
+    size_t   size;              // 8 bytes
+    uint32_t version;           // 4 bytes
+    uint8_t padding[4];         // 4 bytes put padding in so hrmor is 8 byte aligned
+    //Start Data                // 0x18 or 24 byte offset to data
+    uint64_t hrmorAddress;      // 8 bytes
+    hbHypCommArea_t(): magicNum(HYPECOMM_MAGIC_NUM), size(HB_HYP_COMM_STRUCT_SIZES[STRUCT_VERSION_LATEST]),
+                       version(STRUCT_VERSION_LATEST), padding{0,0,0,0}, hrmorAddress(0)
+    {
+    }
+} PACKED;
+
 #endif
