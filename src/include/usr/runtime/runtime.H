@@ -126,8 +126,18 @@ errlHndl_t populate_TpmInfoByNode();
 #define HB_RSV_MEM_NUM_PTRS  49
 
 //Note this means the Reserved Mem sub-section is the 6th
-//(0 based) of the MDT section (See HDAT spec)
-#define MDT_RESERVED_HB_MEM_SECTION 5
+//(0 based) of the MDT section (See HDAT spec 11.1.1)
+#define MDT_MAINSTORE_ADDR_SECTION   0
+#define MDT_RESERVED_HB_MEM_SECTION  5
+
+// Defines offset into mainstore address section wher HB writes the address
+// of the HYP/HB comm area
+// (See HDAT spec 11.1.2.1 Mainstore Address Configuration)
+#define MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_OFFSET 0x1C
+// Defines amount of bytes set aside for HB to write the address
+// of the HYP/HB communication area address space
+// (See HDAT spec 11.1.2.1 Mainstore Address Configuration)
+#define MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_SIZE   0x8
 
 /**
  * HDAT Sections
@@ -151,7 +161,9 @@ enum SectionId
     IPMI_DATA,            //< IPMI Sensor Mapping Data
     NODE_TPM_RELATED,     //< Node TPM Related Data
     RESERVED_MEM,         //< Hostboot's Reserved Mainstore Memory
-    LAST_SECTION = RESERVED_MEM   //< Placeholder for arrays
+    HRMOR_STASH,          //< Pointer to address in reserved memory
+                          //  where PHYP can write HRMOR
+    LAST_SECTION = HRMOR_STASH   //< Placeholder for arrays
 };
 
 /**

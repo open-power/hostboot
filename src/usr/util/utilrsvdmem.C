@@ -60,6 +60,7 @@ namespace Util
             case HBRT_MEM_LABEL_ATTR:
             case HBRT_MEM_LABEL_ATTROVER:
             case HBRT_MEM_LABEL_PADDING:
+            case HBRT_MEM_LABEL_HYPCOMM:
                 // Find offset of label section
                 for (uint16_t i = 0; i < toc_ptr->total_entries; i++)
                 {
