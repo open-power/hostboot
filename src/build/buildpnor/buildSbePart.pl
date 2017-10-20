@@ -187,7 +187,7 @@ sub genOutputImage
     print $FILEHANDLE pack('N', 1);
 
     #Insert header data for each EC provided
-    for $key ( keys %{$i_ecImgs})
+    for $key (sort { $a <=> $b} keys %{$i_ecImgs})
     {
         trace(2, "$this_func: Inserting header for EC=$key");
         my $filesize = -s $$i_ecImgs{$key};
@@ -221,7 +221,7 @@ sub genOutputImage
     close $FILEHANDLE;
 
     #Insert actual image for each EC provided
-    for $key ( keys %{$i_ecImgs})
+    for $key (sort { $a <=> $b} keys %{$i_ecImgs})
     {
         trace(2, "$this_func: Inserting data for EC=$key, offset=$ecOffsets{$key}");
 
