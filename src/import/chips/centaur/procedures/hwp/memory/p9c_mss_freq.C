@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -605,7 +605,7 @@ fapi2::ReturnCode p9c_mss_freq(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHI
     }
 
     //Setting Max CL = 13 for 1600 DDR4 TSV
-    if (l_freq_override == 1600 && l_cas_latency > 13)
+    if (l_dimm_freq_min == 1600 && l_cas_latency > 13)
     {
         FAPI_INF( "Setting CL to 13 from %d", l_cas_latency);
         l_cas_latency = 13;
