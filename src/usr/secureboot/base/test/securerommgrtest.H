@@ -25,7 +25,7 @@
 #ifndef __SECUREROMMANAGERTEST_H
 #define __SECUREROMMANAGERTEST_H
 
-
+#include <array>
 #include <sys/mm.h>
 #include <sys/mmio.h>
 #include <vfs/vfs.H>
@@ -35,6 +35,7 @@
 #include <secureboot/service.H>
 #include <secureboot/secure_reasoncodes.H>
 #include <kernel/bltohbdatamgr.H>
+#include <stddef.h>
 
 #include "../securerommgr.H"
 
@@ -398,6 +399,132 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_hash_page_table_verify");
     }
 
+    void test_verifyComponent(void)
+    {
+        errlHndl_t pError = nullptr;
+
+        // Signed file variables
+        const char* signedFile_name = "secureboot_signed_container";
+        void*  signedFile_pageAddr  = nullptr;
+        size_t  signedFile_size     = 0;
+        uint64_t signedFile_vaddr   = 0;
+
+        do {
+
+        struct verifyComponentTest
+        {
+            const char* pActualCompId;
+            const char* pRefCompId;
+            bool shouldPass;
+        };
+
+        const std::vector<verifyComponentTest> tests =
+            { {"ABCD1234","ABCD12345", true },
+              {"ABCD1234","ABCD1234" , true },
+              {"ABCD1234","ABCD123"  , false},
+              {"ABCD123" ,"ABCD12345", false},
+              {"ABCD123" ,"ABCD1234" , false},
+              {"ABCD123" ,"ABCD123"  , true },
+              {"A"       ,"A"        , true },
+              {"A"       ,"B"        , false},
+              {"A"       ,"AB"       , false},
+              {"A"       ,""         , false},
+              {""        ,"A"        , false},
+              {""        ,""         , true } };
+
+        // Call utility function
+        pError = loadSignedFile( signedFile_name,
+                                 signedFile_pageAddr,
+                                 signedFile_size,
+                                 signedFile_vaddr);
+
+        if (pError)
+        {
+            TS_FAIL("SecureRomManagerTest::test_verifyComponent: "
+                "loadSignedFile() Failed");
+            errlCommit(pError, SECURE_COMP_ID);
+            break;
+        }
+
+        char pHeader[MAX_SECURE_HEADER_SIZE]={0};
+        memcpy(pHeader,signedFile_pageAddr,sizeof(pHeader));
+
+        char* const pCompIdInContainer = pHeader
+            + offsetof(ROM_container_raw,prefix)
+            + offsetof(ROM_prefix_header_raw,ecid)
+            + offsetof(ROM_prefix_data_raw,sw_pkey_q)
+            + offsetof(ROM_sw_header_raw,component_id);
+
+        const size_t compIdSize = sizeof(ROM_sw_header_raw::component_id);
+
+        for(const auto& test : tests)
+        {
+            memset(pCompIdInContainer,0x00,compIdSize);
+            strncpy(pCompIdInContainer,test.pActualCompId,compIdSize);
+            SECUREBOOT::ContainerHeader containerHeader(pHeader);
+
+            pError = SECUREBOOT::verifyComponent(
+                containerHeader,
+                test.pRefCompId);
+            if(pError)
+            {
+                if(test.shouldPass)
+                {
+                    TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
+                        "Expected SECUREBOOT::verifyComponent to pass, but it "
+                        "failed.  Actual component ID was [%s], reference "
+                        "component ID was [%s]",
+                        test.pActualCompId,
+                        test.pRefCompId);
+                    errlCommit(pError, SECURE_COMP_ID);
+                }
+                else // Should fail
+                {
+                    // But verify it's the right fail
+                    if(   (   pError->reasonCode()
+                           != SECUREBOOT::RC_ROM_VERIFY)
+                       || (   pError->moduleId()
+                           !=  SECUREBOOT::MOD_SECURE_VERIFY_COMPONENT))
+                    {
+                        TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
+                            "Expected SECUREBOOT::verifyComponent to fail with "
+                            "reason code of 0x%04X and module ID of 0x%02, but "
+                            "failed with reason code of 0x%04X and module ID "
+                            "of 0x%02X.  Actual component ID was [%s], "
+                            "reference component ID was [%s]",
+                            SECUREBOOT::RC_ROM_VERIFY,
+                            SECUREBOOT::MOD_SECURE_VERIFY_COMPONENT,
+                            pError->reasonCode(),
+                            pError->moduleId(),
+                            test.pActualCompId,
+                            test.pRefCompId);
+                        errlCommit(pError, SECURE_COMP_ID);
+                    }
+                    else
+                    {
+                        delete pError;
+                        pError = nullptr;
+                    }
+                }
+            }
+            else if(!test.shouldPass)
+            {
+                TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
+                    "Expected SECUREBOOT::verifyComponent to fail, but it "
+                    "passed.  Actual component ID was [%s], reference "
+                    "component ID was [%s]",
+                    test.pActualCompId,
+                    test.pRefCompId);
+            }
+        }
+
+        } while(0);
+
+        if ( signedFile_pageAddr != nullptr   )
+        {
+            unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+    }
 };
 
 /**********************************************************************/

@@ -58,6 +58,7 @@ public:
     ErrlUserDetailsParserFactoryErrl()
     {
         registerParser<ErrlUserDetailsParserString>(ERRL_UDT_STRING);
+        registerParser<ErrlUserDetailsParserStringSet>(ERRL_UDT_STRING_SET);
         registerParser<ErrlUserDetailsParserTarget>(ERRL_UDT_TARGET);
         registerParser<ErrlUserDetailsParserBackTrace>(ERRL_UDT_BACKTRACE);
         registerParser<ErrlUserDetailsParserAttribute>(ERRL_UDT_ATTRIBUTE);
@@ -68,10 +69,16 @@ public:
 
 private:
 
-    // Disabled
-    ErrlUserDetailsParserFactoryErrl(const ErrlUserDetailsParserFactoryErrl &);
+    // Parser isn't compiled with c++11 in all environments, and therefore
+    // "delete" of unused interfaces (like below) is not supported, nor are
+    // functions with move semantics
+
+    // Disable compiler provided default functions
+    ErrlUserDetailsParserFactoryErrl(
+        const ErrlUserDetailsParserFactoryErrl &);
     ErrlUserDetailsParserFactoryErrl & operator=(
         const ErrlUserDetailsParserFactoryErrl &);
+
 };
 
 }

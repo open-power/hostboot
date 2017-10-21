@@ -58,6 +58,8 @@ typedef uint8_t PAGE_TABLE_ENTRY_t[HASH_PAGE_TABLE_ENTRY_SIZE];
 
 namespace SECUREBOOT
 {
+    class ContainerHeader;
+
     /** @brief Perform initialization of Secureboot for the Base image.
      *
      *  - Copy secure header from original location.
@@ -221,6 +223,24 @@ namespace SECUREBOOT
      */
     errlHndl_t verifyContainer(void * i_container,
                                const SHA512_t* i_hwKeyHash = nullptr);
+
+    /**
+     * @brief Verify component ID in a container header against a reference
+     *     component ID. Up to 8 ASCII characters, not including NULL, will be
+     *     compared (thus, it is critical that all components are unique with
+     *     respect to the first 8 bytes).
+     *
+     * @param[in] i_containerHeader Verified container's header
+     * @param[in] i_pComponentString Reference component ID string; must not be
+     *     nullptr or function will assert.
+     *
+     * @return errlHndl_t Error log handle
+     * @retval nullptr Component ID verification succeeded
+     * @retval !nullptr Error; component ID verification failed
+     */
+    errlHndl_t verifyComponent(
+        const ContainerHeader& i_containerHeader,
+        const char*            i_pComponentId);
 
     /**
      * @brief Hash Signed Blob

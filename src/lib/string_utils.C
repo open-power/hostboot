@@ -121,3 +121,60 @@ extern "C" int memcmp(const void *p1, const void *p2, size_t len)
 
     return 0;
 }
+
+extern "C" int strncmp(const char* a, const char* b, size_t l)
+{
+    if(l==0)
+    {
+        return 0;
+    }
+
+    const char* begin=a;
+    while(   (*a != '\0') && (*b != '\0')
+          && (static_cast<size_t>(a-begin)+1<l) )
+    {
+        if (*a == *b)
+        {
+            a++; b++;
+        }
+        else
+        {
+            return (*a > *b) ? 1 : -1;
+        }
+    }
+    if (*a == *b)
+    {
+        return 0;
+    }
+    if (*a == '\0')
+    {
+        return -1;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+extern "C" char* strncpy(char* d, const char* s, size_t l)
+{
+    char* d1 = d;
+    size_t len = 0;
+
+    do
+    {
+        if (len++ >= l) break;
+        *d1 = *s;
+        if (*s == '\0') break;
+        d1++; s++;
+    } while(1);
+
+    // pad the remainder
+    while( len < l )
+    {
+        d1[len++] = '\0';
+    }
+
+    return d;
+}
+

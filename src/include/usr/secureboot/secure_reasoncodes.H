@@ -40,6 +40,7 @@ namespace SECUREBOOT
         MOD_SECURE_READ_REG             = 0x06,
         MOD_SECURE_WRITE_REG            = 0x07,
         MOD_SECURE_SETTINGS_INIT        = 0x08,
+        MOD_SECURE_VERIFY_COMPONENT     = 0x09,
    };
 
     enum SECUREReasonCode

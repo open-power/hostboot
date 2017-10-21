@@ -41,6 +41,8 @@ my %traceText = (
     # @TODO RTC:167740 TI on failed magic # check once signing is widespread
     "18" => "Main verify skip verification - no magic number ",
     "19" => "Main verify skip verification - SAB unset ",
+    "1A" => "Main verify component ID succeeded",
+    "1B" => "Main verify component ID failed",
     "20" => "HandleMMIO started",
     "21" => "HandleMMIO started using BYTESIZE",
     "24" => "HandleMMIO started using WORDSIZE",

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,18 @@ namespace SCOM
                 (SCOM_UDT_PIB);
             }
 
-            //Disabled
-            UserDetailsParserFactory(const UserDetailsParserFactory &) = delete;
-            UserDetailsParserFactory & operator=
-            (const UserDetailsParserFactory &) = delete;
+
+          private:
+
+            // Parser isn't compiled with c++11 in all environments, and
+            // therefore "delete" of unused interfaces (like below) is not
+            // supported, nor are functions with move semantics
+
+            // Disable compiler provided default functions
+            UserDetailsParserFactory(
+                const UserDetailsParserFactory &);
+            UserDetailsParserFactory & operator= (
+                const UserDetailsParserFactory &);
     };
 };
 

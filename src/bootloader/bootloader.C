@@ -178,6 +178,89 @@ namespace Bootloader{
     }
 
     /**
+     *  @brief Verify container's component ID against a reference
+     *     component ID. Up to 8 ASCII characters, not including NULL, will be
+     *     compared (thus, it is critical that all components are unique with
+     *     respect to the first 8 bytes).
+     *
+     *  @param[in] i_pHeader Void pointer to start of the container's secure
+     *      header.  Must not be nullptr or function will assert.
+     *  @param[in] i_pComponentId Reference component ID to compare to.  Must
+     *      not be nullptr or function will assert.
+     */
+    void verifyComponent(
+        const void* const i_pHeader,
+        const char* const i_pComponentId)
+    {
+        assert(i_pHeader != nullptr);
+        assert(i_pComponentId != nullptr);
+
+        const auto* const pHwPrefix =
+            reinterpret_cast<const ROM_prefix_header_raw* const>(
+                  reinterpret_cast<const uint8_t* const>(i_pHeader)
+                + offsetof(ROM_container_raw,prefix));
+        const auto swKeyCount = pHwPrefix->sw_key_count;
+        const auto ecidCount = pHwPrefix->ecid_count;
+
+        const char* const pCompIdInContainer =
+              reinterpret_cast<const char* const>(i_pHeader)
+            + offsetof(ROM_container_raw,prefix)
+            + offsetof(ROM_prefix_header_raw,ecid)
+            + ecidCount*ECID_SIZE
+            + offsetof(ROM_prefix_data_raw,sw_pkey_p)
+            + swKeyCount*sizeof(ecc_key_t)
+            + offsetof(ROM_sw_header_raw,component_id);
+
+        if(strncmp(pCompIdInContainer,
+                   i_pComponentId,
+                   sizeof(ROM_sw_header_raw::component_id)) != 0)
+        {
+            char pTruncatedComponentId[
+                  sizeof(ROM_sw_header_raw::component_id)
+                + sizeof(uint8_t)]={0};
+            strncpy(pTruncatedComponentId,
+                    i_pComponentId,
+                    sizeof(ROM_sw_header_raw::component_id));
+
+            BOOTLOADER_TRACE(BTLDR_TRC_COMP_ID_VERIFY_FAILED);
+
+            // Read SBE HB shared data
+            const auto pBlConfigData = reinterpret_cast<
+                BootloaderConfigData_t *>(SBE_HB_COMM_ADDR);
+
+            /*@
+             * @errortype
+             * @moduleid         Bootloader::MOD_BOOTLOADER_VERIFY_COMP_ID
+             * @reasoncode       SECUREBOOT::RC_ROM_VERIFY
+             * @userdata1[0:15]  TI_WITH_SRC
+             * @userdata1[16:31] TI_BOOTLOADER
+             * @userdata1[32:63] Failing address = 0
+             * @userdata2[0:31]  First 4 bytes of observed component ID
+             * @userdata2[32:63] Last 4 bytes of observed component ID
+             * @errorInfo[0:15]  SBE boot side
+             * @errorInfo[16:31] Unused
+             * @devdesc          Container component ID verification failed.
+             * @custdesc         Platform security violation detected
+             */
+            bl_terminate(
+                MOD_BOOTLOADER_VERIFY_COMP_ID,
+                SECUREBOOT::RC_ROM_VERIFY,
+                *reinterpret_cast<const uint32_t*>(
+                   pCompIdInContainer),
+                *reinterpret_cast<const uint32_t*>(
+                   pCompIdInContainer+sizeof(uint32_t)),
+                true,
+                0,
+                TWO_UINT16_TO_UINT32(
+                    pBlConfigData->sbeBootSide,0));
+        }
+        else
+        {
+            BOOTLOADER_TRACE(BTLDR_TRC_COMP_ID_VERIFY_SUCCESS);
+        }
+    }
+
+    /**
      * @brief Verify Container against system hash keys
      *
      * @param[in] i_pContainer  Void pointer to effective address
@@ -298,10 +381,12 @@ namespace Bootloader{
             }
 
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SUCCESS);
+
+            verifyComponent(i_pContainer,
+                            PNOR::SectionIdToString(PNOR::HB_BASE_CODE));
         }
 #endif
     }
-
 
     /** Bootloader main function to work with and start HBB.
      *

@@ -34,12 +34,14 @@
 #include <errl/errlmanager.H>
 #include "../common/securetrace.H"
 #include <kernel/bltohbdatamgr.H>
+#include <errl/errludstring.H>
+#include <string.h>
 
 #include "securerommgr.H"
 #include <secureboot/settings.H>
 #include <config.h>
 #include <console/consoleif.H>
-#include <array>
+#include <secureboot/containerheader.H>
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -83,6 +85,61 @@ errlHndl_t verifyContainer(void * i_container, const SHA512_t* i_hwKeyHash)
     }
 
     return l_errl;
+}
+
+errlHndl_t verifyComponent(
+    const ContainerHeader& i_containerHeader,
+    const char* const      i_pComponentId)
+{
+    assert(i_pComponentId != nullptr,"BUG! Component ID string was nullptr");
+
+    errlHndl_t pError = nullptr;
+
+    if(strncmp(i_containerHeader.componentId(),
+               i_pComponentId,
+               sizeof(ROM_sw_header_raw::component_id)) != 0)
+    {
+        char pTruncatedComponentId[sizeof(ROM_sw_header_raw::component_id)+
+                                  sizeof(uint8_t)]={0};
+        strncpy(pTruncatedComponentId,
+                i_pComponentId,
+                sizeof(ROM_sw_header_raw::component_id));
+
+        TRACFCOMP(g_trac_secure,ERR_MRK"SECUREROM::verifyComponent: "
+            "Secure Boot verification failure; container's component ID of "
+            "[%s] does not match expected component ID of [%s] (truncated "
+            "from [%s]",
+            i_containerHeader.componentId(),
+            pTruncatedComponentId,
+            i_pComponentId);
+
+        /*@
+         * @errortype
+         * @severity     ERRL_SEV_UNRECOVERABLE
+         * @moduleid     SECUREBOOT::MOD_SECURE_VERIFY_COMPONENT
+         * @reasoncode   SECUREBOOT::RC_ROM_VERIFY
+         * @devdesc      Container's component ID does not match expected
+         *               component ID
+         * @custdesc     Secure Boot firmware validation failed
+         */
+        pError = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            SECUREBOOT::MOD_SECURE_VERIFY_COMPONENT,
+            SECUREBOOT::RC_ROM_VERIFY,
+            0,
+            0,
+            true /*Add HB Software Callout*/ );
+
+        ERRORLOG::ErrlUserDetailsStringSet stringSet;
+        stringSet.add("Actual component ID",i_containerHeader.componentId());
+        stringSet.add("Expected ID (truncated)",pTruncatedComponentId);
+        stringSet.add("Expected ID (full)",i_pComponentId);
+        stringSet.addToLog(pError);
+
+        pError->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
+    }
+
+    return pError;
 }
 
 /**
