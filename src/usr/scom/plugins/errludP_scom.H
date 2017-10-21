@@ -98,9 +98,17 @@ namespace SCOM
                 i_parser.PrintString("Pib Err", l_outputStr );
             }
 
-            // Disabled
-            UdParserPib(const UdParserPib&) = delete;
-            UdParserPib & operator=(const UdParserPib&) = delete;
+          private:
+
+            // Parser isn't compiled with c++11 in all environments, and
+            // therefore "delete" of unused interfaces (like below) is not
+            // supported, nor are functions with move semantics
+
+            // Disable compiler provided default functions
+            UdParserPib(
+                const UdParserPib&);
+            UdParserPib & operator=(
+                const UdParserPib&);
     };
 
 }

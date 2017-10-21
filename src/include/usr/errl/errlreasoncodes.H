@@ -62,7 +62,7 @@ namespace ERRORLOG
         ERRL_LAST_ERR             = ERRL_COMP_ID | 0xFF
     };
 
-    // Identifiers for ERRL user data sections.
+    // Identifiers for ERRL user data subsections.
     enum errlUserDetailDataSubsection
     {
         ERRL_UDT_NOFORMAT         = 0x00,
@@ -74,6 +74,13 @@ namespace ERRORLOG
         ERRL_UDT_CALLOUT          = 0x06,
         ERRL_UDT_PRINTK           = 0x07,
         ERRL_UDT_SENSOR           = 0x08,
+        ERRL_UDT_STRING_SET       = 0x09,
+    };
+
+    // Identifiers for ERRL user data subsection versions
+    enum errlUserDetailDataSubsectionVersion
+    {
+        ERRL_UDT_STRING_SET_VER_1 = 0x01,
     };
 };
 

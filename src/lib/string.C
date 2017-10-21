@@ -78,28 +78,6 @@ extern "C" char* strcpy(char* d, const char* s)
     } while(1);
 }
 
-extern "C" char* strncpy(char* d, const char* s, size_t l)
-{
-    char* d1 = d;
-    size_t len = 0;
-
-    do
-    {
-        if (len++ >= l) break;
-        *d1 = *s;
-        if (*s == '\0') break;
-        d1++; s++;
-    } while(1);
-
-    // pad the remainder
-    while( len < l )
-    {
-        d1[len++] = '\0';
-    }
-
-    return d;
-}
-
 extern "C" int strcmp(const char* a, const char* b)
 {
     while((*a != '\0') && (*b != '\0'))

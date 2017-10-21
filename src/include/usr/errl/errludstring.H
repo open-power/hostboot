@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -57,10 +59,60 @@ public:
      */
     virtual ~ErrlUserDetailsString();
 
-private:
-    // Disabled
-    ErrlUserDetailsString(const ErrlUserDetailsString &);
-    ErrlUserDetailsString & operator=(const ErrlUserDetailsString &);
+  private:
+
+    // Disable compiler provided default functions
+    ErrlUserDetailsString(
+        const ErrlUserDetailsString &);
+    ErrlUserDetailsString & operator=(
+        const ErrlUserDetailsString &);
+    ErrlUserDetailsString (
+        ErrlUserDetailsString&&) = delete;
+    ErrlUserDetailsString& operator = (
+        ErrlUserDetailsString&&) = delete;
+};
+
+/**
+ * @class ErrlUserDetailsStringSet
+ *
+ * @brief Adds multiple, tagged FFDC strings to an error log as user details
+ *     data
+ */
+class ErrlUserDetailsStringSet : public ErrlUserDetails
+{
+
+  public:
+
+    /**
+     *  @brief Constructor; creates the object
+     */
+    ErrlUserDetailsStringSet();
+
+    /**
+     *  @brief Adds a new tagged string to the object's string cache
+     *
+     *  @param[in] i_pDescriptionString Description of the string to add.  Must
+     *      not be nullptr or function will substitute an error message.
+     *  @param[in] i_pString The string to add.  Must not be nullptr or function
+     *      will substitute an error message.
+     */
+    void add(const char* i_pDescriptionString,
+             const char* i_pString);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~ErrlUserDetailsStringSet();
+
+    // Disable compiler provided default functions
+    ErrlUserDetailsStringSet(
+        const ErrlUserDetailsStringSet&) = delete;
+    ErrlUserDetailsStringSet& operator=(
+        const ErrlUserDetailsStringSet&) = delete;
+    ErrlUserDetailsStringSet (
+        ErrlUserDetailsStringSet&&) = delete;
+    ErrlUserDetailsStringSet& operator = (
+        ErrlUserDetailsStringSet&&) = delete;
 };
 
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@ extern "C"
     char* strcpy(char* d, const char* s);
     char* strncpy(char* d, const char* s, size_t l);
     int strcmp(const char* s1, const char* s2) __attribute__((pure));
+    int strncmp(const char* s1, const char* s2, size_t l) __attribute__((pure));
     size_t strlen(const char* s1) __attribute__((pure));
     size_t strnlen(const char* s1, size_t n) __attribute__((pure));
 

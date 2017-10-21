@@ -77,6 +77,12 @@ enum BootloaderTraces
     /** Bootloader main verifyContainer skip verification - SAB unset */
     BTLDR_TRC_MAIN_VERIFY_SAB_UNSET          = 0x19,
 
+    /** Bootloader main verifyComponent succeeded */
+    BTLDR_TRC_COMP_ID_VERIFY_SUCCESS         = 0x1A,
+
+    /** Bootloader main verifyComponent failed */
+    BTLDR_TRC_COMP_ID_VERIFY_FAILED          = 0x1B,
+
     /** Bootloader handleMMIO started */
     BTLDR_TRC_HANDLEMMIO_START               = 0x20,
 
