@@ -178,20 +178,11 @@ errlHndl_t UtilLidMgr::loadLid()
                 else
                 {
                     // If no secure header, just use PNOR size
+                    // NOTE: Unsigned sections with sha512Version have already
+                    //       skipped over the header and decreased size while
+                    //       parsing the PNOR TOC
                     iv_lidSize = iv_lidPnorInfo.size;
                     UTIL_FT("UtilLidMgr::loadLid - iv_lidSize=%d", iv_lidSize );
-
-                    // Need to increment past header if one exists
-                    if (iv_lidPnorInfo.sha512Version)
-                    {
-                        UTIL_FT("UtilLidMgr::loadLid - resv mem section is not secure, but has header");
-                        // Increment by page size to not expose sha512 version header
-                        iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
-                                       PAGESIZE;
-                        iv_lidSize -= PAGESIZE;
-                        UTIL_FT("UtilLidMgr::loadLid - iv_lidSize=%d",
-                                iv_lidSize );
-                    }
                 }
             }
         }
