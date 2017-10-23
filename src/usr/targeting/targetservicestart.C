@@ -46,6 +46,7 @@
 #include <targeting/adapters/assertadapter.H>
 #include <initservice/taskargs.H>
 #include <util/utilmbox_scratch.H>
+#include <util/align.H>
 
 // This component
 #include <targeting/common/targetservice.H>
@@ -58,6 +59,7 @@
 #include <config.h>
 #include <initservice/initserviceif.H>
 #include <util/misc.H>
+#include <util/utilrsvdmem.H>
 #include <kernel/bltohbdatamgr.H>
 #include <map>
 #include <arch/memorymap.H>
@@ -65,6 +67,8 @@
 #include <xscom/xscomif.H>
 #include <bootloader/bootloaderif.H>
 #include <sbeio/sbeioif.H>
+#include <sys/mm.h>
+#include "../runtime/hdatstructs.H"
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -437,6 +441,70 @@ static void initializeAttributes(TargetService& i_targetService,
                 auto tpmMutex=tpm->getHbMutexAttr<ATTR_HB_TPM_MUTEX>();
                 mutex_init(tpmMutex);
             }
+
+            // Setup physical TOC address
+            uint64_t l_hbdTocAddr = AttrRP::getHbDataTocAddr();
+
+            // Variables to store information about Hostboot/Hypervisor communcation area
+            uint64_t l_hypComm_virt_addr = 0;
+            uint64_t l_hypComm_phys_addr = 0;
+            uint64_t l_hypComm_size = 0;
+
+            // Now map the TOC to find the total size of the data section
+            Util::hbrtTableOfContents_t * l_toc_ptr =
+                reinterpret_cast<Util::hbrtTableOfContents_t *>(
+                    mm_block_map(reinterpret_cast<void*>(l_hbdTocAddr),
+                                 ALIGN_PAGE(sizeof(Util::hbrtTableOfContents_t))));
+
+            // read the TOC and look for ATTR data section
+            l_hypComm_virt_addr = Util::hb_find_rsvd_mem_label(
+                                                Util::HBRT_MEM_LABEL_HYPCOMM,
+                                                l_toc_ptr,
+                                                l_hypComm_size);
+
+
+            //This will tell us how far from the beginning of the toc_ptr the hypComm area starts
+            uint64_t l_hypComm_offset = l_hypComm_virt_addr - reinterpret_cast<uint64_t>(l_toc_ptr);
+
+            //Use the offset found w/ virtual addresses to determine the physical address of the
+            //hostboot/hypervisor comm area
+            l_hypComm_phys_addr = l_hbdTocAddr + l_hypComm_offset;
+
+            // Clear the mapped memory for the TOC, it is not longer needed as we have phys ptr
+            assert (0 == mm_block_unmap(reinterpret_cast<void*>(l_toc_ptr)),
+                    "Failed to unmap hbData TOC");
+
+            // The hb/hyp communcation area is at the end of the hostboot
+            // data reserved mem section.
+            hbHypCommArea_t * l_hbHypComm_ptr =
+                reinterpret_cast<hbHypCommArea_t *>(
+                    mm_block_map(reinterpret_cast<void*>(l_hypComm_phys_addr),
+                                 ALIGN_PAGE(sizeof(l_hypComm_size))));
+
+            // Make sure the magic number and version are valid
+            if(l_hbHypComm_ptr->magicNum == HYPECOMM_MAGIC_NUM && l_hbHypComm_ptr->version >= STRUCT_VERSION_FIRST)
+            {
+              // if the hrmor in the comm area is non-zero then set the payload base attribute
+              if( l_hbHypComm_ptr->hrmorAddress)
+              {
+                TARG_INF("Setting ATTR_PAYLOAD_BASE to new hrmor given by hypervisor: 0x%lx",
+                          l_hbHypComm_ptr->hrmorAddress);
+                 l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(l_hbHypComm_ptr->hrmorAddress);
+              }
+              else
+              {
+                TARG_INF("Using default HRMOR as hypervisor did notify us of a change in it's HRMOR on previous boot");
+              }
+
+            }
+            else
+            {
+                TARG_INF("Warning!! hbHypCommArea_t's version is invalid so we cannot check if hrmor has been changed");
+            }
+
+            // Clear the mapped memory for the hbHypComm area
+            assert(0 == mm_block_unmap(reinterpret_cast<void*>(l_hbHypComm_ptr)),
+                  "Failed to unmap hbHypComm area");
         }
         else
         {

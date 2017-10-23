@@ -76,6 +76,15 @@ class AttrRP
     public:
 
         /**
+         *  @brief Returns physical address of HB data reserved mem TOC
+         *         note: does not unmap address
+         *
+         *  @return phys addr of table of contents of hb data reserved memory
+         *
+         */
+        static uint64_t getHbDataTocAddr();
+
+        /**
          *  @brief Returns base address of the RO section containing the
          *      targets
          *
