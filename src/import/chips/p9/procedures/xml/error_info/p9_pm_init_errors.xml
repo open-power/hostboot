@@ -44,4 +44,49 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_RESET_PSAFE_EXT_VDD_VOLT_FAIL</rc>
+    <description>present external VDD value is less than safe mode voltage
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>DPLL_FREQ</ffdc>
+    <ffdc>SAFE_MODE_FREQ</ffdc>
+    <ffdc>SAFE_MODE_VOLTAGE</ffdc>
+    <ffdc>EXT_VDD_VOLTAGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_RESET_PSAFE_DPLL_FREQ_FAIL</rc>
+    <description>present dpll frequency value is less than safe mode frequency
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>DPLL_FREQ</ffdc>
+    <ffdc>SAFE_MODE_FREQ</ffdc>
+    <ffdc>SAFE_MODE_VOLTAGE</ffdc>
+    <ffdc>EXT_VDD_VOLTAGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PM_RESET_PSAFE_BOTH_VOLT_FREQ_FAIL</rc>
+    <description>present external VDD value is less than safe mode voltage and
+    DPLL frequency is less the safe mode frequency.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>DPLL_FREQ</ffdc>
+    <ffdc>SAFE_MODE_FREQ</ffdc>
+    <ffdc>SAFE_MODE_VOLTAGE</ffdc>
+    <ffdc>EXT_VDD_VOLTAGE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
 </hwpErrors>
