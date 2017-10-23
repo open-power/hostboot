@@ -32,16 +32,7 @@
 #mkdir -p $sb/simu/data/cec-chip/
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
-#pull in href tor
-sbex -t 1035576
-#pull in hwsv tor
-sbex -t 1034144
 
-
-mkdir $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries -p
-cp /gsa/rchgsa/home/c/r/crgeddes/documents/hbBuild/p9_ipl_build $sb/../obj/ppc/hwsv/server/buildhwpfimport/hwpf2/tools/x86_binaries/
-# Workaround for hb prime
-chmod 777 $sb/../ -R
 
 
 
