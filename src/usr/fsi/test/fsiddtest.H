@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,8 +66,9 @@ class FsiDDTest : public CxxTest::TestSuite
             PROCWRAP,
             PROC1,
             PROC2,
-            CENTAUR0,
-            CENTAUR8,
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            //CENTAUR0,
+            //CENTAUR8,
             SENTINEL,
             NUM_TARGETS
         };
@@ -99,6 +100,8 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC1] = fsi_target;
 
+        // @todo RTC 178802 Enable test cases turned off during bring up
+        /*
         // alt-master processor target (physical:sys-0/node-0/proc-2)
         epath.removeLast();
         epath.addLast(TARGETING::TYPE_PROC,2);
@@ -116,6 +119,7 @@ class FsiDDTest : public CxxTest::TestSuite
         epath.addLast(TARGETING::TYPE_MEMBUF,8);
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[CENTAUR8] = fsi_target;
+        */
 
         // scratch data to use
         struct {
@@ -134,7 +138,7 @@ class FsiDDTest : public CxxTest::TestSuite
 
             //** Slave Regs (via absolute address)
             //DATA_0 from FSI2PIB off MFSI-0
-            { PROC0, 0x081000, 0x12345678, true, false }, 
+            { PROC0, 0x081000, 0x12345678, true, false },
             //CHIPID from SHIFT off cMFSI-0
             { PROC0, 0x041028, 0x160E9049, false, false },
             //CMFSI MVER from Proc off MFSI-2
@@ -152,21 +156,23 @@ class FsiDDTest : public CxxTest::TestSuite
 
             //** Slave Regs
             //FEL from SHIFT off MFSI-2
-            { PROC2, 0x001000, 0x12345678, true, false }, 
+            { PROC2, 0x001000, 0x12345678, true, false },
 
+            // @todo RTC 178802 Enable test cases turned off during bring up
             //** Slave Regs
             //Config Table entry for slave0 off cMFSI-0
-            { CENTAUR0, 0x000000, 0xC0010E95, false, false },
+            //{ CENTAUR0, 0x000000, 0xC0010E95, false, false },
             //CHIPID from FSI2PIB off cMFSI-0
-            { CENTAUR0, 0x001028, 0x160E9049, false, false },
+            //{ CENTAUR0, 0x001028, 0x160E9049, false, false },
             //FEL from SHIFT off cMFSI-0
-            { CENTAUR0, 0x000C08, 0x12344321, true, false },
+            //{ CENTAUR0, 0x000C08, 0x12344321, true, false },
 
+            // @todo RTC 178802 Enable test cases turned off during bring up
             //** Slave Regs
             //FEL from SHIFT off cMFSI-0 of MFSI-1
-            { CENTAUR8, 0x001000, 0x33333333, true, false },
+            //{ CENTAUR8, 0x001000, 0x33333333, true, false },
             //CHIPID from FSI2PIB off cMFSI-0 of MFSI-1
-            { CENTAUR8, 0x001028, 0x160E9049, false, false },
+            //{ CENTAUR8, 0x001028, 0x160E9049, false, false },
         };
         const uint64_t NUM_ADDRS = sizeof(test_data)/sizeof(test_data[0]);
 
@@ -178,7 +184,7 @@ class FsiDDTest : public CxxTest::TestSuite
         uint64_t patterns_to_run = 0;
         for( uint64_t x = 0; x < NUM_ADDRS; x++ )
         {
-          
+
             // direct writes to slave regs
             if( test_data[x].fsitarget == PROC0 )
             {
@@ -189,13 +195,14 @@ class FsiDDTest : public CxxTest::TestSuite
                 {
                     test_data[x].present = true;
                 }
-                else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
-                         && (fsi_targets[CENTAUR0] != NULL)
-                         && (fsi_targets[CENTAUR0]->
-                             getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
-                {
-                    test_data[x].present = true;
-                }
+                // @todo RTC 178802 Enable test cases turned off during bring up
+                //else if( ((0xFF0000 & test_data[x].addr) == 0x040000)
+                //         && (fsi_targets[CENTAUR0] != NULL)
+                //         && (fsi_targets[CENTAUR0]->
+                //             getAttr<TARGETING::ATTR_HWAS_STATE>().functional))
+                //{
+                //    test_data[x].present = true;
+                //}
                 else if( ((0xFF0000 & test_data[x].addr) == 0x100000)
                          && (fsi_targets[PROC2] != NULL)
                          && (fsi_targets[PROC2]->
@@ -313,7 +320,7 @@ class FsiDDTest : public CxxTest::TestSuite
                 TRACFCOMP(g_trac_fsi, "FsiDDTest::test_readWrite> Data mismatch : [%d] addr=0x%X, exp=0x%X, act=0x%X", x,  test_data[x].addr, test_data[x].data, read_data[x] );
 //@TODO RTC:178802
 //                TS_FAIL( "FsiDDTest::test_readWrite> ERROR : Data mismatch" );
-//                fails++;                
+//                fails++;
             }
         }
 
@@ -360,7 +367,7 @@ class FsiDDTest : public CxxTest::TestSuite
 
         // master sentinel should fail
         total++;
-        size_t op_size = sizeof(uint32_t);       
+        size_t op_size = sizeof(uint32_t);
         l_err = DeviceFW::deviceRead(
                           TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL,
                           &regdata,
@@ -384,8 +391,8 @@ class FsiDDTest : public CxxTest::TestSuite
 
         // NULL target should fail
         total++;
-        op_size = sizeof(uint32_t);       
-        l_err = DeviceFW::deviceRead( NULL, 
+        op_size = sizeof(uint32_t);
+        l_err = DeviceFW::deviceRead( NULL,
                                       &regdata,
                                       op_size,
                                       DEVICE_FSI_ADDRESS(0x111111) );
@@ -410,6 +417,9 @@ class FsiDDTest : public CxxTest::TestSuite
     void test_FFDC(void)
     {
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Start" );
+
+        // @todo RTC 178802 Enable test cases turned off during bring up
+        /*
         errlHndl_t l_err = NULL;
 
         // Find any Centaur target
@@ -447,6 +457,7 @@ class FsiDDTest : public CxxTest::TestSuite
             FSI::getFsiFFDC( FSI::FFDC_PIB_FAIL, l_err, fsi_target );
             errlCommit(l_err,CXXTEST_COMP_ID);
         }
+        */
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_FFDC> Finish" );
     };
 
@@ -460,7 +471,8 @@ class FsiDDTest : public CxxTest::TestSuite
 
         enum {
             PROC0,
-            CENTAUR4,
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            //CENTAUR4,
             NUM_TARGETS
         };
         TARGETING::Target* fsi_targets[NUM_TARGETS];
@@ -479,11 +491,12 @@ class FsiDDTest : public CxxTest::TestSuite
         fsi_target = TARGETING::targetService().toTarget(epath);
         fsi_targets[PROC0] = fsi_target;
 
+        // @todo RTC 178802 Enable test cases turned off during bring up
         // local centaur target (physical:sys-0/node-0/membuf-4)
-        epath.removeLast();
-        epath.addLast(TARGETING::TYPE_MEMBUF,4);
-        fsi_target = TARGETING::targetService().toTarget(epath);
-        fsi_targets[CENTAUR4] = fsi_target;
+        //epath.removeLast();
+        //epath.addLast(TARGETING::TYPE_MEMBUF,4);
+        //fsi_target = TARGETING::targetService().toTarget(epath);
+        //fsi_targets[CENTAUR4] = fsi_target;
 
 
 
@@ -537,7 +550,7 @@ class FsiDDTest : public CxxTest::TestSuite
 
         TRACFCOMP( g_trac_fsi, "FsiDDTest::test_getFsiLinkInfo> End" );
     }
-};     
+};
 
 
 #endif

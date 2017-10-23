@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 
 #include <prdfTrace.H>
 #include <prdfMain.H>
+#include <prdfTargetServices.H>
 #include "prdfsimMacros.H"
 
 class NTPLFIR:public CxxTest::TestSuite
@@ -46,71 +47,81 @@ class NTPLFIR:public CxxTest::TestSuite
 
         void TestNimPll(void)
         {
-            PRDS_BEGIN("Nimbus PLL test");
-
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x00ed0000 );
-
-            //GLOBAL_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
-
-            //TP_CHIPLET_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
-
-            //TP_LFIR  -- bit 21 on P9
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
-
-            //TP_LFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
-
-            //XBUS_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
-                            0x0000004000000000);
-
-            //TP_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
-
-            PRDS_START_SIM();
-
-            if(!(PRDS_END()))
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
+                    PRDF::PlatServices::getMasterProc() ) )
             {
-                TS_FAIL("Expected Signature Failed Nimbus PLL test");
+                PRDS_BEGIN("Nimbus PLL test");
+
+                PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x00ed0000 );
+
+                //GLOBAL_RE_FIR
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
+
+                //TP_CHIPLET_RE_FIR
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+                //TP_LFIR  -- bit 21 on P9
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
+
+                //TP_LFIR_ACT1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
+                //XBUS_ERROR_REG
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
+                                0x0000004000000000);
+
+                //TP_ERROR_REG
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
+
+                PRDS_START_SIM();
+
+                if(!(PRDS_END()))
+                {
+                    TS_FAIL("Expected Signature Failed Nimbus PLL test");
+                }
             }
         }
 
         void TestNimPllAtThreshold(void)
         {
-            PRDS_BEGIN("Nimbus PLL test At Threshold");
-
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",  0x00ed0000 );
-
-            //GLOBAL_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
-
-            //TP_CHIPLET_RE_FIR
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
-
-            //TP_LFIR  -- bit 21 on P9
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
-
-            //TP_LFIR_ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
-
-            //XBUS_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
-                            0x0000004000000000);
-
-            //TP_ERROR_REG
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
-
-            PRDS_START_SIM();
-
-            if(!(PRDS_END()))
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
+                    PRDF::PlatServices::getMasterProc() ) )
             {
-                TS_FAIL("Nimbus PLL test At Threshold");
+                PRDS_BEGIN("Nimbus PLL test At Threshold");
+
+                PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}",  0x00ed0000 );
+
+                //GLOBAL_RE_FIR
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B, 0x4000000000000000);
+
+                //TP_CHIPLET_RE_FIR
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040001, 0x4000000000000000);
+
+                //TP_LFIR  -- bit 21 on P9
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0104000a, 0x0000040000000000);
+
+                //TP_LFIR_ACT1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x01040011, 0xFFFFFFFFFFFFFFFF);
+
+                //XBUS_ERROR_REG
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}:XBUS{1}", 0x060F001F,
+                                0x0000004000000000);
+
+                //TP_ERROR_REG
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x010F001F, 0x0000004000000000);
+
+                PRDS_START_SIM();
+
+                if(!(PRDS_END()))
+                {
+                    TS_FAIL("Nimbus PLL test At Threshold");
+                }
             }
         }
 

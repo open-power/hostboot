@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ namespace RT_TARG
             const TARGETING::Target * l_target = *target;
             TARGETING::Target * l_peer =  static_cast<Target*>(NULL);
             bool l_hasPeer = l_target->tryGetAttr<ATTR_PEER_TARGET>(l_peer);
-            if (l_hasPeer)
+            if (l_hasPeer && (l_peer != nullptr))
             {
                 TRACDCOMP(g_trac_targeting,
                       "translate peer target for=%p %x",

@@ -30,6 +30,7 @@
 #include <diag/attn/attn.H>
 #include <diag/mdia/mdia.H>
 #include <targeting/common/targetservice.H>
+#include <util/misc.H>
 
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
 #include <lib/fir/memdiags_fir.H> // for mss::unmask::after_memdiags
@@ -145,9 +146,13 @@ void* call_mss_memdiag (void* io_pArgs)
         {
             TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
 
-            // Start Memory Diagnostics
-            errl = __runMemDiags( trgtList );
-            if ( nullptr != errl ) break;
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            if ( Util::isSimicsRunning() == false )
+            {
+                // Start Memory Diagnostics
+                errl = __runMemDiags( trgtList );
+                if ( nullptr != errl ) break;
+            }
 
             // No need to unmask or turn off FIFO. That is already contained
             // within the other Centaur HWPs.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@ void test_fapi2GetParent()
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
         TARGETING::Target * l_nimbusProc = NULL;
+        TARGETING::Target * l_cumulusProc = NULL;
 
         //Take the first NIMBUS proc and use it
         for(uint32_t i = 0; i < l_chipList.size(); i++)
@@ -63,8 +64,20 @@ void test_fapi2GetParent()
               l_nimbusProc = l_chipList[i];
               break;
             }
+            if(TARGETING::MODEL_CUMULUS ==
+            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+            {
+              l_cumulusProc = l_chipList[i];
+              break;
+            }
         }
 
+        if(l_cumulusProc)
+        {
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            // This test needs to be updated for Cumulus
+            break;
+        }
         if(l_nimbusProc == NULL)
         {
             // Send an errorlog because we cannot find any NIMBUS procs.

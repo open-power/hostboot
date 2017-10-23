@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@ void test_fapi2GetChildren()
     uint32_t l_expectedSize = 0;
     errlHndl_t l_err = NULL;
     TARGETING::Target * l_nimbusProc = NULL;
+    TARGETING::Target * l_cumulusProc = NULL;
     do
     {
         // Create a vector of TARGETING::Target pointers
@@ -61,7 +62,7 @@ void test_fapi2GetChildren()
         // Get a list of all of the proc chips
         TARGETING::getAllChips(l_chipList, TARGETING::TYPE_PROC, false);
 
-        //Take the first NIMBUS proc and use it
+        //Take the first proc and use it
         for(uint32_t i = 0; i < l_chipList.size(); i++)
         {
             if(TARGETING::MODEL_NIMBUS ==
@@ -70,8 +71,20 @@ void test_fapi2GetChildren()
               l_nimbusProc = l_chipList[i];
               break;
             }
+            if(TARGETING::MODEL_CUMULUS ==
+            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+            {
+              l_cumulusProc = l_chipList[i];
+              break;
+            }
         }
         numTests++;
+        if(l_cumulusProc)
+        {
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            // This test needs to be updated for Cumulus
+            break;
+        }
         if(l_nimbusProc == NULL)
         {
             // Send an errorlog because we cannot find any NIMBUS procs.
@@ -475,6 +488,7 @@ void test_fapi2GetChildrenFilter()
     uint32_t l_expectedSize = 0;
     errlHndl_t l_err = NULL;
     TARGETING::Target * l_nimbusProc = NULL;
+    TARGETING::Target * l_cumulusProc = NULL;
     do
     {
         FAPI_DBG("start of test_fapi2GetChildrenFilter()");
@@ -494,9 +508,21 @@ void test_fapi2GetChildrenFilter()
               l_nimbusProc = l_chipList[i];
               break;
             }
+            if(TARGETING::MODEL_CUMULUS ==
+            l_chipList[i]->getAttr<TARGETING::ATTR_MODEL>())
+            {
+              l_cumulusProc = l_chipList[i];
+              break;
+            }
         }
         numTests++;
 
+        if(l_cumulusProc)
+        {
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            // This test needs to be updated for Cumulus
+            break;
+        }
         if(l_nimbusProc == NULL)
         {
             // Send an errorlog because we cannot find any NIMBUS procs.
