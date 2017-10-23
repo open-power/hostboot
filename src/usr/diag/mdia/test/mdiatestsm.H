@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,8 @@ class MdiaSmTest : public CxxTest::TestSuite
             fapi2::TargetType type = getMdiaTargetType();
             if (fapi2::TARGET_TYPE_MBA_CHIPLET == type)
             {
-                TARGETING::getAllChiplets(tmp, TYPE_MBA);
+                // @todo RTC 178802 Enable test cases turned off during bring up
+                //TARGETING::getAllChiplets(tmp, TYPE_MBA);
             }
             else
             {
@@ -134,17 +135,19 @@ class MdiaSmTest : public CxxTest::TestSuite
             TargetHandleList targets;
             getTargets(2, targets);
 
-            wkFlentries[targets[0]] = wkFlentries[targets[1]];
-
-            s.setup(wkFlentries);
-
-            s.reset();
-
-            if(!s.iv_workFlowProperties.empty())
+            if(targets.size() > 0)
             {
-                TS_FAIL("unexpected workflow properties found (5)");
-            }
+                wkFlentries[targets[0]] = wkFlentries[targets[1]];
 
+                s.setup(wkFlentries);
+
+                s.reset();
+
+                if(!s.iv_workFlowProperties.empty())
+                {
+                    TS_FAIL("unexpected workflow properties found (5)");
+                }
+            }
             TS_TRACE(EXIT_MRK "testSmReset");
         }
 
@@ -180,37 +183,39 @@ class MdiaSmTest : public CxxTest::TestSuite
             TargetHandleList targets;
             getTargets(2, targets);
 
-            wkFlentries[targets[0]] = wkFlentries[targets[1]];
-
-            s.setup(wkFlentries);
-
-            uint64_t idx = s.iv_workFlowProperties.size();
-
-            while(idx-- != 0)
+            if(targets.size() > 0)
             {
-                TargetHandle_t t = getTarget(*s.iv_workFlowProperties[idx]);
+                wkFlentries[targets[0]] = wkFlentries[targets[1]];
 
-                WorkFlowAssoc assoc = wkFlentries.find(t);
+                s.setup(wkFlentries);
 
-                if(static_cast<const WorkFlowAssocMap &>(wkFlentries).end()
-                    == assoc)
+                uint64_t idx = s.iv_workFlowProperties.size();
+
+                while(idx-- != 0)
                 {
-                    TS_FAIL("unexpected target found in workflow properties");
-                }
+                    TargetHandle_t t = getTarget(*s.iv_workFlowProperties[idx]);
 
-                if(s.iv_workFlowProperties[idx]->status != IN_PROGRESS)
-                {
-                    TS_FAIL("unexpected status found in workflow properties");
-                }
+                    WorkFlowAssoc assoc = wkFlentries.find(t);
 
-                if(s.iv_workFlowProperties[idx]->workItem
-                    != getWorkFlow(assoc).begin())
-                {
-                    TS_FAIL("unexpected work item found in"
-                            " workflow properties");
+                    if(static_cast<const WorkFlowAssocMap &>(wkFlentries).end()
+                        == assoc)
+                    {
+                        TS_FAIL("unexpected target found in workflow properties");
+                    }
+
+                    if(s.iv_workFlowProperties[idx]->status != IN_PROGRESS)
+                    {
+                        TS_FAIL("unexpected status found in workflow properties");
+                    }
+
+                    if(s.iv_workFlowProperties[idx]->workItem
+                        != getWorkFlow(assoc).begin())
+                    {
+                        TS_FAIL("unexpected work item found in"
+                                " workflow properties");
+                    }
                 }
             }
-
             TS_TRACE(EXIT_MRK "testSmSetup");
         }
 
@@ -269,26 +274,28 @@ class MdiaSmTest : public CxxTest::TestSuite
             TargetHandleList targets;
             getTargets(2, targets);
 
-            wkFlentries[targets[0]] = wkFlentries[targets[1]];
-
-            s.setup(wkFlentries);
-
-            tid = task_create(&startSm, &s);
-
-            if(tid < 0)
+            if(targets.size() > 0)
             {
-                TS_FAIL("child task not started (3)");
+                wkFlentries[targets[0]] = wkFlentries[targets[1]];
+
+                s.setup(wkFlentries);
+
+                tid = task_create(&startSm, &s);
+
+                if(tid < 0)
+                {
+                    TS_FAIL("child task not started (3)");
+                }
+
+                s.wait();
+
+                task_wait_tid(tid, &status, 0);
+
+                if(status != TASK_STATUS_EXITED_CLEAN)
+                {
+                    TS_FAIL("child task crashed (3)");
+                }
             }
-
-            s.wait();
-
-            task_wait_tid(tid, &status, 0);
-
-            if(status != TASK_STATUS_EXITED_CLEAN)
-            {
-                TS_FAIL("child task crashed (3)");
-            }
-
             TS_TRACE(ENTER_MRK "testSmWait");
         }
 
@@ -332,23 +339,25 @@ class MdiaSmTest : public CxxTest::TestSuite
 
             getTargets(1, targets);
 
-            const Checks * it = checks + sizeof(checks)/sizeof(*checks);
-            while(it-- != checks)
+            if(targets.size() > 0)
             {
-                sm.reset();
-                wkFlentries.clear();
-                wkFlentries[targets[0]].push_back(it->workItem);
-
-                sm.setup(wkFlentries);
-                WorkFlowProperties & tmp = *sm.iv_workFlowProperties.front();
-
-                if(StateMachine::workItemIsAsync(tmp) != it->expected)
+                const Checks * it = checks + sizeof(checks)/sizeof(*checks);
+                while(it-- != checks)
                 {
-                    TS_FAIL("unexpected result from "
-                            "StateMachine::workItemIsAsync: %d", it->workItem);
+                    sm.reset();
+                    wkFlentries.clear();
+                    wkFlentries[targets[0]].push_back(it->workItem);
+
+                    sm.setup(wkFlentries);
+                    WorkFlowProperties & tmp = *sm.iv_workFlowProperties.front();
+
+                    if(StateMachine::workItemIsAsync(tmp) != it->expected)
+                    {
+                        TS_FAIL("unexpected result from "
+                                "StateMachine::workItemIsAsync: %d", it->workItem);
+                    }
                 }
             }
-
             TS_TRACE(EXIT_MRK "testSmWorkItemIsAsync");
         }
 
@@ -389,115 +398,117 @@ class MdiaSmTest : public CxxTest::TestSuite
             TargetHandleList targets;
             getTargets(2, targets);
 
-            wkFlentries[targets[0]] = wkFlentries[targets[0]];
-
-            s.setup(wkFlentries);
-
-            if(s.allWorkFlowsComplete())
+            if(targets.size() > 0)
             {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (3)");
+                wkFlentries[targets[0]] = wkFlentries[targets[0]];
+
+                s.setup(wkFlentries);
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (3)");
+                }
+
+                s.reset();
+
+                // list with non-empty workflow should not indicate
+                // all workflows complete
+
+                wkFlentries[targets[0]].push_back(RESTORE_DRAM_REPAIRS);
+
+                s.setup(wkFlentries);
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (4)");
+                }
+
+                // single entry with FAILED status should indicate
+                // all workflows complete
+
+                s.iv_workFlowProperties.front()->status = FAILED;
+
+                if(!s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (5)");
+                }
+
+                // single entry with TIMED_OUT status should indicate
+                // all workflows complete
+
+                s.iv_workFlowProperties.front()->status = COMMAND_TIMED_OUT;
+
+                if(!s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (6)");
+                }
+
+                // single entry with COMPLETE status should indicate
+                // all workflows complete
+
+                s.iv_workFlowProperties.front()->status = COMPLETE;
+
+                if(!s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (7)");
+                }
+
+                s.reset();
+
+                // list with two non-empty workflow should not indicate
+                // all workflows complete
+
+                wkFlentries[targets[0]] = wkFlentries[targets[1]];
+
+                wkFlentries[targets[0]].push_back(RESTORE_DRAM_REPAIRS);
+                wkFlentries[targets[1]].push_back(RESTORE_DRAM_REPAIRS);
+
+                s.setup(wkFlentries);
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (8)");
+                }
+
+                // single entry with FAILED status should not indicate
+                // not workflows complete
+
+                s.iv_workFlowProperties.front()->status = FAILED;
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (9)");
+                }
+
+                // single entry with TIMED_OUT status should not
+                // indicate all workflows complete
+
+                s.iv_workFlowProperties.front()->status = COMMAND_TIMED_OUT;
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (10)");
+                }
+
+                // single entry with COMPLETE status should not indicate
+                // all workflows complete
+
+                s.iv_workFlowProperties.front()->status = COMPLETE;
+
+                if(s.allWorkFlowsComplete())
+                {
+                    TS_FAIL("unexpected result from "
+                            "StateMachine::allWorkFlowsComplete (11)");
+                }
             }
-
-            s.reset();
-
-            // list with non-empty workflow should not indicate
-            // all workflows complete
-
-            wkFlentries[targets[0]].push_back(RESTORE_DRAM_REPAIRS);
-
-            s.setup(wkFlentries);
-
-            if(s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (4)");
-            }
-
-            // single entry with FAILED status should indicate
-            // all workflows complete
-
-            s.iv_workFlowProperties.front()->status = FAILED;
-
-            if(!s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (5)");
-            }
-
-            // single entry with TIMED_OUT status should indicate
-            // all workflows complete
-
-            s.iv_workFlowProperties.front()->status = COMMAND_TIMED_OUT;
-
-            if(!s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (6)");
-            }
-
-            // single entry with COMPLETE status should indicate
-            // all workflows complete
-
-            s.iv_workFlowProperties.front()->status = COMPLETE;
-
-            if(!s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (7)");
-            }
-
-            s.reset();
-
-            // list with two non-empty workflow should not indicate
-            // all workflows complete
-
-            wkFlentries[targets[0]] = wkFlentries[targets[1]];
-
-            wkFlentries[targets[0]].push_back(RESTORE_DRAM_REPAIRS);
-            wkFlentries[targets[1]].push_back(RESTORE_DRAM_REPAIRS);
-
-            s.setup(wkFlentries);
-
-            if(s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (8)");
-            }
-
-            // single entry with FAILED status should not indicate
-            // not workflows complete
-
-            s.iv_workFlowProperties.front()->status = FAILED;
-
-            if(s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (9)");
-            }
-
-            // single entry with TIMED_OUT status should not
-            // indicate all workflows complete
-
-            s.iv_workFlowProperties.front()->status = COMMAND_TIMED_OUT;
-
-            if(s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (10)");
-            }
-
-            // single entry with COMPLETE status should not indicate
-            // all workflows complete
-
-            s.iv_workFlowProperties.front()->status = COMPLETE;
-
-            if(s.allWorkFlowsComplete())
-            {
-                TS_FAIL("unexpected result from "
-                        "StateMachine::allWorkFlowsComplete (11)");
-            }
-
             TS_TRACE(EXIT_MRK "testSmAllWorkFlowsComplete");
         }
 
@@ -514,53 +525,55 @@ class MdiaSmTest : public CxxTest::TestSuite
 
             getTargets(1, targets);
 
-            list[targets[0]].push_back(DUMMY_ASYNC_PHASE);
-            sm.setup(list);
-
-            WorkFlowProperties * tmp = sm.iv_workFlowProperties.front();
-
-            WorkFlow::const_iterator sit = tmp->workItem;
-
-            sm.executeWorkItem(tmp);
-
-            // should not have advanced the work item for async
-
-            if(sit != tmp->workItem)
+            if(targets.size() > 0)
             {
-                TS_FAIL("unexpected next work item after "
-                         "executing work item (1)");
+                list[targets[0]].push_back(DUMMY_ASYNC_PHASE);
+                sm.setup(list);
+
+                WorkFlowProperties * tmp = sm.iv_workFlowProperties.front();
+
+                WorkFlow::const_iterator sit = tmp->workItem;
+
+                sm.executeWorkItem(tmp);
+
+                // should not have advanced the work item for async
+
+                if(sit != tmp->workItem)
+                {
+                    TS_FAIL("unexpected next work item after "
+                            "executing work item (1)");
+                }
+
+                if(tmp->status != IN_PROGRESS)
+                {
+                    TS_FAIL("unexpected status after executing work item (1)");
+                }
+
+                sm.reset();
+                list.clear();
+
+                list[targets[0]].push_back(DUMMY_SYNC_PHASE);
+                sm.setup(list);
+
+                tmp = sm.iv_workFlowProperties.front();
+
+                sit = tmp->workItem;
+
+                sm.executeWorkItem(tmp);
+
+                // should have advanced the work item for sync
+
+                if(std::distance(sit, tmp->workItem) != 1)
+                {
+                    TS_FAIL("unexpected next work item after "
+                            "executing work item (2)");
+                }
+
+                if(tmp->status != COMPLETE)
+                {
+                    TS_FAIL("unexpected status after executing work item (2)");
+                }
             }
-
-            if(tmp->status != IN_PROGRESS)
-            {
-                TS_FAIL("unexpected status after executing work item (1)");
-            }
-
-            sm.reset();
-            list.clear();
-
-            list[targets[0]].push_back(DUMMY_SYNC_PHASE);
-            sm.setup(list);
-
-            tmp = sm.iv_workFlowProperties.front();
-
-            sit = tmp->workItem;
-
-            sm.executeWorkItem(tmp);
-
-            // should have advanced the work item for sync
-
-            if(std::distance(sit, tmp->workItem) != 1)
-            {
-                TS_FAIL("unexpected next work item after "
-                        "executing work item (2)");
-            }
-
-            if(tmp->status != COMPLETE)
-            {
-                TS_FAIL("unexpected status after executing work item (2)");
-            }
-
             TS_TRACE(EXIT_MRK "testSmExecuteWorkItem");
         }
 
@@ -575,18 +588,20 @@ class MdiaSmTest : public CxxTest::TestSuite
 
             getTargets(1, targets);
 
-            list[targets[0]].push_back(DUMMY_SYNC_PHASE);
-
-            sm.setup(list);
-
-            WorkFlowProperties * tmp = sm.iv_workFlowProperties.front();
-
-            err = sm.doMaintCommand(*tmp);
-            if ( NULL != err )
+            if(targets.size() > 0)
             {
-                TS_FAIL("doMaintCommand() failed");
-            }
+                list[targets[0]].push_back(DUMMY_SYNC_PHASE);
 
+                sm.setup(list);
+
+                WorkFlowProperties * tmp = sm.iv_workFlowProperties.front();
+
+                err = sm.doMaintCommand(*tmp);
+                if ( NULL != err )
+                {
+                    TS_FAIL("doMaintCommand() failed");
+                }
+            }
             TS_TRACE(EXIT_MRK "testDoMaintCmd");
 
         }
@@ -601,34 +616,37 @@ class MdiaSmTest : public CxxTest::TestSuite
 
             getTargets(2, targets);
 
-            list[targets[0]].push_back(DUMMY_SYNC_PHASE);
-            list[targets[1]].push_back(DUMMY_SYNC_PHASE);
-
-            sm.setup(list);
-
-            TargetHandleList mcbistList;
-            getAllChiplets(mcbistList, TYPE_MCBIST);
-
-            if (mcbistList.size() > 0)
+            if(targets.size() > 0)
             {
-                TargetHandle_t mcbist = mcbistList[0];
+                list[targets[0]].push_back(DUMMY_SYNC_PHASE);
+                list[targets[1]].push_back(DUMMY_SYNC_PHASE);
 
-                MaintCommandEvent event;
-                event.target = mcbist;
-                event.type = COMMAND_COMPLETE;
-                bool rc = false;
+                sm.setup(list);
 
-                rc = sm.processMaintCommandEvent(event);
-                if (true == rc)
+                TargetHandleList mcbistList;
+                getAllChiplets(mcbistList, TYPE_MCBIST);
+
+                if (mcbistList.size() > 0)
                 {
-                    TS_TRACE("testProcessMaintCommandEvent: "
-                             "a work item was dispatched");
-                }
-                else
-                {
-                    TS_TRACE("testProcessMaintCommandEvent: "
-                             "a work item was not dispatched");
+                    TargetHandle_t mcbist = mcbistList[0];
 
+                    MaintCommandEvent event;
+                    event.target = mcbist;
+                    event.type = COMMAND_COMPLETE;
+                    bool rc = false;
+
+                    rc = sm.processMaintCommandEvent(event);
+                    if (true == rc)
+                    {
+                        TS_TRACE("testProcessMaintCommandEvent: "
+                                "a work item was dispatched");
+                    }
+                    else
+                    {
+                        TS_TRACE("testProcessMaintCommandEvent: "
+                                "a work item was not dispatched");
+
+                    }
                 }
             }
             TS_TRACE(EXIT_MRK "testProcessMaintCommandEvent");
@@ -674,29 +692,31 @@ class MdiaSmTest : public CxxTest::TestSuite
             TargetHandleList targets;
             getTargets(2, targets);
 
-            wkFlentries[targets[0]] = wkFlentries[targets[0]];
-
-            err = s.run(wkFlentries);
-
-            if(err)
+            if(targets.size() > 0)
             {
-                TS_FAIL("StateMachine::run(4) failed unexpectedly");
+                wkFlentries[targets[0]] = wkFlentries[targets[0]];
+
+                err = s.run(wkFlentries);
+
+                if(err)
+                {
+                    TS_FAIL("StateMachine::run(4) failed unexpectedly");
+                }
+
+                // run again, with a list and workflow
+
+                wkFlentries[targets[0]].push_back(DUMMY_SYNC_PHASE);
+                wkFlentries[targets[0]].push_back(DUMMY_SYNC_PHASE);
+                wkFlentries[targets[1]].push_back(DUMMY_SYNC_PHASE);
+                wkFlentries[targets[1]].push_back(DUMMY_SYNC_PHASE);
+
+                err = s.run(wkFlentries);
+
+                if(err)
+                {
+                    TS_FAIL("StateMachine::run(5) failed unexpectedly");
+                }
             }
-
-            // run again, with a list and workflow
-
-            wkFlentries[targets[0]].push_back(DUMMY_SYNC_PHASE);
-            wkFlentries[targets[0]].push_back(DUMMY_SYNC_PHASE);
-            wkFlentries[targets[1]].push_back(DUMMY_SYNC_PHASE);
-            wkFlentries[targets[1]].push_back(DUMMY_SYNC_PHASE);
-
-            err = s.run(wkFlentries);
-
-            if(err)
-            {
-                TS_FAIL("StateMachine::run(5) failed unexpectedly");
-            }
-
             TS_TRACE(EXIT_MRK "testSmRun");
         }
 };

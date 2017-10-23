@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,8 +95,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyiPhbChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyiPhbChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -149,8 +150,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyObusBrickChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyObusBrickChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -201,8 +203,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyPecChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyPecChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -260,8 +263,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyCappChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyCappChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -284,6 +288,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
             TARGETING::PredicateCTM predMcbist(TARGETING::CLASS_UNIT,
                     TARGETING::TYPE_MCBIST);
 
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
             TARGETING::TargetHandleList l_TargetList;
             TARGETING::targetService().getAssociated( l_TargetList, pSys,
                     TARGETING::TargetService::CHILD,
@@ -292,7 +299,11 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
             if (l_TargetList.empty())
             {
-                TS_FAIL("testVerifyMcbistChipletNum: empty l_TargetList");
+                if(TARGETING::MODEL_NIMBUS ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyMcbistChipletNum: empty l_TargetList");
+                }
                 break;
             }
 
@@ -312,8 +323,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyMcbistChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyMcbistChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -335,6 +347,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
             TARGETING::PredicateCTM predMcs(TARGETING::CLASS_UNIT,
                     TARGETING::TYPE_MCS);
 
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
             TARGETING::TargetHandleList l_TargetList;
             TARGETING::targetService().getAssociated( l_TargetList, pSys,
                     TARGETING::TargetService::CHILD,
@@ -343,7 +358,11 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
             if (l_TargetList.empty())
             {
-                TS_FAIL("testVerifyMcsChipletNum: empty l_TargetList");
+                if(TARGETING::MODEL_NIMBUS ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyMcsChipletNum: empty l_TargetList");
+                }
                 break;
             }
 
@@ -373,8 +392,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyMcsChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyMcsChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -397,6 +417,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
             TARGETING::PredicateCTM predMca(TARGETING::CLASS_UNIT,
                     TARGETING::TYPE_MCA);
 
+            TARGETING::Target* l_pMasterProcChip = nullptr;
+            TARGETING::targetService().masterProcChipTargetHandle(l_pMasterProcChip);
+
             TARGETING::TargetHandleList l_TargetList;
             TARGETING::targetService().getAssociated( l_TargetList, pSys,
                     TARGETING::TargetService::CHILD,
@@ -405,7 +428,11 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
             if (l_TargetList.empty())
             {
-                TS_FAIL("testVerifyMcaChipletNum: empty pMcbistList");
+                if(TARGETING::MODEL_NIMBUS ==
+                    l_pMasterProcChip->getAttr<TARGETING::ATTR_MODEL>())
+                {
+                    TS_FAIL("testVerifyMcaChipletNum: empty l_TargetList");
+                }
                 break;
             }
 
@@ -425,8 +452,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyMcaChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyMcaChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -488,8 +516,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyObusChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyObusChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -536,8 +565,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
                 // XBUS 0,1 maps to pervasive id 0x06
                 if (l_chiplet_id != START_XBUS_CHIPLET_NUM)
                 {
-                    TS_FAIL("testVerifyXbusChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         START_XBUS_CHIPLET_NUM, l_chiplet_id);
+                    TS_FAIL("testVerifyXbusChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            START_XBUS_CHIPLET_NUM, l_chiplet_id);
                     break;
                 }
             }
@@ -586,8 +616,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_chip_unit)
                 {
-                    TS_FAIL("testVerifyPervChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_chip_unit, l_chiplet_id);
+                    TS_FAIL("testVerifyPervChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_chip_unit, l_chiplet_id);
                     break;
                 }
             }
@@ -639,8 +670,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyEQChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyEQChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -700,8 +732,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyEXChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyEXChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -754,8 +787,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
 
                 if (l_chiplet_id != l_exp_chiplet_id)
                 {
-                    TS_FAIL("testVerifyCoreChipletNum: Mismatch - Expected: %.8X:, Found: %.8X",
-                         l_exp_chiplet_id, l_chiplet_id);
+                    TS_FAIL("testVerifyCoreChipletNum: Mismatch HUID %.8X - Expected: %.8X:, Found: %.8X",
+                            TARGETING::get_huid(l_Target),
+                            l_exp_chiplet_id, l_chiplet_id);
                     break;
                 }
             }
@@ -790,6 +824,9 @@ class Fapi2GetChipletNum : public CxxTest::TestSuite
             testVerifyMcsChipletNum();
 
             testVerifyMcaChipletNum();
+
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            // Need to add Cumulus specific tests here - MC/MI/DMI
 
             testVerifyCappChipletNum();
 

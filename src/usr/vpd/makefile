@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2013,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -52,7 +52,7 @@ BINARY_FILES += $(IMGDIR)/vpo_djvpd.dat:eb4dce98f19ebfe77243be1c56d3d0eaa1889d90
 #   on 1/3/2017
 # Modified PG record to have proper XBUS data and only the first 4 cores
 BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e55769d
-BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:423208204c2f0e759610f4f39243362fd4b6d103
+BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:d9299c4027c597c31337b46ed311edc131ec93bc
 
 #Update to Centaur DD2.0 for CCIN 31E8
 

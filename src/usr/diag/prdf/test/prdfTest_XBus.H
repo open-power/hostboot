@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 
 #include <prdfTrace.H>
 #include <prdfMain.H>
+#include <prdfTargetServices.H>
 #include "prdfsimMacros.H"
 
 class XBUSFIR:public CxxTest::TestSuite
@@ -45,43 +46,52 @@ class XBUSFIR:public CxxTest::TestSuite
 
         void TestRecoverable(void)
         {
-            PRDS_BEGIN("XBUSFIR Recoverable attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0000);
-            // GLOBAL_RE_FIR set bit 6
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B , 0x0200000000000000);
-            // XBUS_CHIPLET_RE_FIR set bit 1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040001, 0x4000000000000000);
-            // set bit 0
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x8000000000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0xFFFFFFFFFFFFFFFF);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
+                    PRDF::PlatServices::getMasterProc() ) )
             {
-                TS_FAIL("Expected Signature Failed XBUSFIR Recoverable attention");
+                PRDS_BEGIN("XBUSFIR Recoverable attention");
+                PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::RECOVERABLE);
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0000);
+                // GLOBAL_RE_FIR set bit 6
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001B , 0x0200000000000000);
+                // XBUS_CHIPLET_RE_FIR set bit 1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040001, 0x4000000000000000);
+                // set bit 0
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x8000000000000000);
+                // ACT1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0xFFFFFFFFFFFFFFFF);
+                PRDS_START_SIM();
+                if(!(PRDS_END()))
+                {
+                    TS_FAIL("Expected Signature Failed XBUSFIR Recoverable attention");
+                }
             }
-
         }
 
 
         void TestCheckstop(void)
         {
-            PRDS_BEGIN("XBUSFIR Checkstop attention");
-            PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
-            PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0002);
-            // GLOBAL_CHKSTOP_FIR set bit 6
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x0200000000000000);
-            // XBUS_CHIPLET_CHKSTOP_FIR set bit 3
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040000, 0x1000000000000000);
-            // set bit 2
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x2000000000000000);
-            // ACT1
-            PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0x0000000000000000);
-            PRDS_START_SIM();
-            if(!(PRDS_END()))
+            // @todo RTC 178802 Enable test cases turned off during bring up
+            if ( TARGETING::MODEL_CUMULUS != PRDF::PlatServices::getChipModel(
+                    PRDF::PlatServices::getMasterProc() ) )
             {
-                TS_FAIL("Expected Signature Failed XBUSFIR Checkstop attention");
+                PRDS_BEGIN("XBUSFIR Checkstop attention");
+                PRDS_ERROR_ENTRY("NODE{0}:PROC{0}", PRDF::CHECK_STOP);
+                PRDS_EXPECTED_SIGNATURE("NODE{0}:PROC{0}", 0x18fc0002);
+                // GLOBAL_CHKSTOP_FIR set bit 6
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x500F001C , 0x0200000000000000);
+                // XBUS_CHIPLET_CHKSTOP_FIR set bit 3
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040000, 0x1000000000000000);
+                // set bit 2
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x0604000a, 0x2000000000000000);
+                // ACT1
+                PRDS_SCR_WRITE("NODE{0}:PROC{0}", 0x06040011, 0x0000000000000000);
+                PRDS_START_SIM();
+                if(!(PRDS_END()))
+                {
+                    TS_FAIL("Expected Signature Failed XBUSFIR Checkstop attention");
+                }
             }
         }
 };

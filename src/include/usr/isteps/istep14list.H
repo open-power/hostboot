@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@
  * 14.7  proc_exit_cache_contained
  *       : Execution from memory
  * 14.8  host_mpipl_service
- *       : Perform MPIPL tasks 
+ *       : Perform MPIPL tasks
  *
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.

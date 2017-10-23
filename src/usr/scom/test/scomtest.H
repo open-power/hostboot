@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1147,9 +1147,10 @@ public:
          TRACFCOMP( g_trac_scom, "ScomTest::test_P9_translateScom_SBE> %d/%d fails", fails, total );
   }
 
-
   void test_Centaur_ScomTranslations(void)
   {
+    // @todo RTC 178802 Enable test cases turned off during bring up
+    /*
     TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_ScomTranslations> Start" );
 
     uint64_t fails = 0;
@@ -1259,6 +1260,7 @@ public:
         }
     }
     TRACFCOMP( g_trac_scom, "ScomTest::test_Centaur_translateScom_SBE> %d/%d fails", fails, total );
+    */
   }
 
 
