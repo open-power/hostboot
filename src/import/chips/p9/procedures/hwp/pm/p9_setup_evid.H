@@ -40,6 +40,22 @@
 #include <fapi2.H>
 #include <p9_pstate_parameter_block.H>
 
+enum P9_SETUP_EVID_CONSTANTS
+{
+// By convention, the Pstate GPE will use bridge 0.  Other entities
+// will use bridge 1
+    BRIDGE_NUMBER = 1,
+
+// Default voltages if mailbox -> attributes are not setup
+    AVSBUS_VOLTAGE_WRITE_RETRY_COUNT = 5,
+    VDD_SETUP = 6,
+    VDN_SETUP = 7,
+    VCS_SETUP = 8,
+
+};
+
+
+
 extern "C"
 {
 
@@ -91,6 +107,21 @@ extern "C"
     fapi2::ReturnCode
     p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                   const VoltageConfigActions_t i_action);
+
+/// @brief update VDD,VDN and VCS voltage values
+/// @param [in]  i_target TARGET_TYPE_PROC_CHIP
+/// @param [in]  i_bus_num AVS BUS number
+/// @param [in]  i_rail_select AVS bus rail select
+/// @param [in]  i_voltage_mv voltage value in mv
+/// @param [in]  i_evid_value EVID setup mode
+//@return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode
+    p9_setup_evid_voltageWrite(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const uint8_t i_bus_num,
+        const uint8_t i_rail_select,
+        const uint32_t i_voltage_mv,
+        const P9_SETUP_EVID_CONSTANTS i_evid_value);
 
 
 } // extern C
