@@ -76,15 +76,28 @@ namespace IPMISEL
      * @param[in] size of eSEL data
      * @param[in] eid of errorlog for this eSEL (for ack)
      * @param[in] callout list,which has sel event details
+     * @param[in] is eSEL for informational call home error
      */
     void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-                  uint32_t i_eid,std::vector<sel_info_t*>&i_calloutList);
+                  uint32_t i_eid,std::vector<sel_info_t*>&i_calloutList,
+                  bool i_infoCallHome);
 
     // per IPMI Spec, section 32.1 SEL Event Records
     enum sel_record_type
     {
         record_type_system_event    = 0x02,
+
+        // Used to send callhome informational eSEL to BMC
+        // currently used to send OCC telemetry information to the BMC
+        record_type_oem_call_home_info_event = 0xDD,
+
+        // This is a procedure callout
+        // byte 0 = procedure ID
+        // bytes 4,5 = record ID of associated eSEL
         record_type_oem_sel_for_procedure_callout = 0xDE,
+
+        // Normal flattened PEL, often just called the eSEL
+        // bytes 4-6 = 040020
         record_type_ami_esel        = 0xDF,
     };
 
@@ -301,17 +314,19 @@ namespace IPMISEL
      * @brief parse the msg and call send_esel to send the esel (handles if
      * the SEL reservation is lost)
      * @param[in] i_msg
+     * @param[in] i_infoCallHome - informational call-home log
      */
-    void process_esel(msg_t *i_msg);
+    void process_esel(msg_t *i_msg, bool i_infoCallHome);
 
     /**
      * @brief do the actual ipmi calls to send the esel data to the bmc
      * @param[in] i_data  esel data
      * @param[in] o_err   any error generated during the send
      * @param[in] o_cc    ipmi completion code from last sendrecv
+     * @param[in] i_infoCallHome - informational call-home log
      */
-    void send_esel(IPMISEL::eselInitData * i_data,
-          errlHndl_t &o_err, IPMI::completion_code &o_cc);
+    void send_esel(IPMISEL::eselInitData * i_data, errlHndl_t &o_err,
+                IPMI::completion_code &o_cc, bool i_infoCallHome);
 
     /**
      * @brief read the SEL time

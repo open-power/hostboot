@@ -607,6 +607,18 @@ private:
      * @param[in/out]   io_err - errorlog that's being checked and updatd
      */
     void setErrlSkipFlag(errlHndl_t io_err);
+
+#ifdef CONFIG_BMC_IPMI
+    /**
+     * @brief Helper function to grab the value of
+     *        ATTR_ALLOW_CALLHOME_ESELS_TO_BMC and
+     *        return it as a boolean value
+     *
+     * @return true if these ESELs are allowed, false otherwise
+     */
+    bool allowCallHomeEselsToBmc(void);
+#endif
+
 };
 
 

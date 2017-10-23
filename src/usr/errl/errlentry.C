@@ -87,7 +87,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_Src( SRC_ERR_INFO, i_modId, i_reasonCode, i_user1, i_user2 ),
     iv_termState(TERM_STATE_UNKNOWN),
     iv_sevFinal(false),
-    iv_skipShowingLog(true)
+    iv_skipShowingLog(true),
+    iv_eselCallhomeInfoEvent(false)
 {
     #ifdef CONFIG_ERRL_ENTRY_TRACE
     TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16X %.16X", plid(), i_reasonCode, i_modId, i_user1, i_user2 );
@@ -780,7 +781,11 @@ void ErrlEntry::commit( compId_t  i_committerComponent )
     // User header contains the component ID of the committer.
     iv_User.setComponentId( i_committerComponent );
 
-    setSubSystemIdBasedOnCallouts();
+    // Avoid adding a callout to informational callhome "error"
+    if (!getEselCallhomeInfoEvent())
+    {
+        setSubSystemIdBasedOnCallouts();
+    }
 
     // Add the captured backtrace to the error log
     if (iv_pBackTrace)
