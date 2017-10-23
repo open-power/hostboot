@@ -695,6 +695,34 @@ extern "C"
                         "Incompatable DRAM width on %s!", mss::c_str(i_target_mba));
         }
 
+        if (
+            (i_data->sdram_die_count[0][0]
+             != i_data->sdram_die_count[1][0])
+            ||
+            (
+                (i_atts->eff_num_drops_per_port
+                 == fapi2::ENUM_ATTR_CEN_EFF_NUM_DROPS_PER_PORT_DUAL)
+                &&
+                (
+                    (i_data->sdram_die_count[0][1]
+                     != i_data->sdram_die_count[1][1])
+                    ||
+                    (i_data->sdram_die_count[0][0]
+                     != i_data->sdram_die_count[0][1])
+                )
+            )
+        )
+        {
+            FAPI_ASSERT(false,
+                        fapi2::CEN_MSS_EFF_CONFIG_INCOMPATABLE_DIMM_RANKS().
+                        set_TARGET_MBA(i_target_mba).
+                        set_NUM_RANKS_0_0(i_data->sdram_die_count[0][0]).
+                        set_NUM_RANKS_0_1(i_data->sdram_die_count[0][1]).
+                        set_NUM_RANKS_1_0(i_data->sdram_die_count[1][0]).
+                        set_NUM_RANKS_1_1(i_data->sdram_die_count[1][1]),
+                        "Incompatable num die on %s! Non-Matching Height TSV DIMMs.", mss::c_str(i_target_mba));
+        }
+
     fapi_try_exit:
         return fapi2::current_err;
     } // end of mss_eff_config_verify_spd_data()
