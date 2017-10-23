@@ -50,17 +50,6 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_quad_scom_addresses_fld.H>
 
-enum P9_SETUP_EVID_CONSTANTS
-{
-// By convention, the Pstate GPE will use bridge 0.  Other entities
-// will use bridge 1
-    BRIDGE_NUMBER = 1,
-
-// Default voltages if mailbox -> attributes are not setup
-    AVSBUS_VOLTAGE_WRITE_RETRY_COUNT = 5
-
-};
-
 
 //-----------------------------------------------------------------------------
 // Procedure
@@ -373,11 +362,6 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
 {
 
 
-    fapi2::buffer<uint64_t> l_data64;
-    fapi2::buffer<uint8_t> l_data8;
-    uint8_t l_count = 0;
-    uint8_t l_goodResponse = 0;
-    uint8_t l_throwAssert = 0;
 
     AttributeList attrs;
     GlobalPstateParmBlock l_globalppb;
@@ -402,129 +386,96 @@ p9_setup_evid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target, const
                                        attrs.proc_dpll_divider),
                   "Error from p9_setup_dpll_values function");
 
-
-        // Initialize the buses
-        FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                          attrs.vdd_bus_num, BRIDGE_NUMBER),
-                 "Initializing avsBus VDD, bridge %d", BRIDGE_NUMBER);
-        FAPI_TRY(avsInitExtVoltageControl(i_target,
-                                          attrs.vdn_bus_num, BRIDGE_NUMBER),
-                 "Initializing avsBus VDN, bridge %d", BRIDGE_NUMBER);
-
-        l_count = 0;
-
-        do
+        if (attrs.vdd_voltage_mv)
         {
-            FAPI_INF("Sending an Idle frame before Voltage writes");
-
-            // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
-            // initialize the AVS slave on VDD bus
-            FAPI_TRY(avsIdleFrame(i_target, attrs.vdd_bus_num, BRIDGE_NUMBER));
-
-            if (!attrs.vdd_voltage_mv)
-            {
-                FAPI_IMP("VDD voltage value is zero,so we can't set boot voltage");
-                break;
-            }
-
-            // Set Boot VDD Voltage
-            FAPI_TRY(avsVoltageWrite(i_target,
-                                     attrs.vdd_bus_num,
-                                     BRIDGE_NUMBER,
-                                     attrs.vdd_rail_select,
-                                     attrs.vdd_voltage_mv),
-                     "Setting VDD voltage via AVSBus %d, Bridge %d",
-                     attrs.vdd_bus_num,
-                     BRIDGE_NUMBER);
-
-            // Throw an assertion if we don't get a good response.
-            l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
-            FAPI_TRY(avsValidateResponse(i_target,  attrs.vdd_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
-
-            l_count++;
+            FAPI_TRY(p9_setup_evid_voltageWrite(i_target,
+                                                attrs.vdd_bus_num,
+                                                attrs.vdd_rail_select,
+                                                attrs.vdd_voltage_mv,
+                                                VDD_SETUP),
+                     "Error from VDD setup function");
         }
-        while (l_goodResponse == 0);
 
-
-
-
-        l_count = 0;
-
-        do
+        if (attrs.vdn_voltage_mv)
         {
-
-            // VDN bus
-            FAPI_TRY(avsIdleFrame(i_target, attrs.vdn_bus_num, BRIDGE_NUMBER));
-
-            if (!attrs.vdn_voltage_mv)
-            {
-                FAPI_IMP("VDN voltage value is zero,so we can't set boot voltage");
-                break;
-            }
-
-            // Set Boot VDN Voltage
-            FAPI_TRY(avsVoltageWrite(i_target,
-                                     attrs.vdn_bus_num,
-                                     BRIDGE_NUMBER,
-                                     attrs.vdn_rail_select,
-                                     attrs.vdn_voltage_mv),
-                     "Setting VDN voltage via AVSBus %d, Bridge %d",
-                     attrs.vdn_bus_num,
-                     BRIDGE_NUMBER);
-
-
-            // Throw an assertion if we don't get a good response.
-            l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
-            FAPI_TRY(avsValidateResponse(i_target,  attrs.vdn_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
-            l_count++;
+            FAPI_TRY(p9_setup_evid_voltageWrite(i_target,
+                                                attrs.vdn_bus_num,
+                                                attrs.vdn_rail_select,
+                                                attrs.vdn_voltage_mv,
+                                                VDN_SETUP),
+                     "error from VDN setup function");
         }
-        while (l_goodResponse == 0);
-
 
         // Set Boot VCS Voltage
         if(attrs.vcs_bus_num == 0xFF)
         {
 
             FAPI_INF("VCS rail is not connected to AVSBus. Skipping VCS programming");
-
         }
         else
         {
-
-            l_count = 0;
-
-            do
+            if (attrs.vcs_voltage_mv)
             {
-                // VCS bus
-                FAPI_TRY(avsIdleFrame(i_target, attrs.vcs_bus_num, BRIDGE_NUMBER));
-
-                if (!attrs.vcs_voltage_mv)
-                {
-                    FAPI_IMP("VCS voltage value is zero,so we can't set boot voltage");
-                    break;
-                }
-
-                // Set Boot VCS voltage
-                FAPI_TRY(avsVoltageWrite(i_target,
-                                         attrs.vcs_bus_num,
-                                         BRIDGE_NUMBER,
-                                         attrs.vcs_rail_select,
-                                         attrs.vcs_voltage_mv),
-                         "Setting VCS voltage via AVSBus %d, Bridge %d",
-                         attrs.vcs_bus_num,
-                         BRIDGE_NUMBER);
-
-                // Throw an assertion if we don't get a good response.
-                l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
-                FAPI_TRY(avsValidateResponse(i_target,  attrs.vcs_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
-
-                l_count++;
+                FAPI_TRY(p9_setup_evid_voltageWrite(i_target,
+                                                    attrs.vcs_bus_num,
+                                                    attrs.vcs_rail_select,
+                                                    attrs.vcs_voltage_mv,
+                                                    VCS_SETUP),
+                         "error from VCS setup function");
             }
-            while (l_goodResponse == 0);
-
         }
-
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+} // Procedure
+
+
+fapi2::ReturnCode
+p9_setup_evid_voltageWrite(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                           const uint8_t i_bus_num,
+                           const uint8_t i_rail_select,
+                           const uint32_t i_voltage_mv,
+                           const P9_SETUP_EVID_CONSTANTS i_evid_value)
+
+{
+    uint8_t l_count = 1;
+    uint8_t l_goodResponse = 0;
+    uint8_t l_throwAssert = 0;
+
+    if (i_evid_value != VCS_SETUP)
+    {
+        // Initialize the buses
+        FAPI_TRY(avsInitExtVoltageControl(i_target,
+                                          i_bus_num, BRIDGE_NUMBER),
+                 "Initializing avsBus VDD/VDN, bridge %d", BRIDGE_NUMBER);
+    }
+
+    do
+    {
+        FAPI_INF("Sending an Idle frame before Voltage writes");
+
+        // Drive AVS Bus with a frame value 0xFFFFFFFF (idle frame) to
+        // initialize the AVS slave
+        FAPI_TRY(avsIdleFrame(i_target, i_bus_num, BRIDGE_NUMBER));
+
+        // Set Boot voltage
+        FAPI_TRY(avsVoltageWrite(i_target,
+                                 i_bus_num,
+                                 BRIDGE_NUMBER,
+                                 i_rail_select,
+                                 i_voltage_mv),
+                 "Setting voltage via AVSBus %d, Bridge %d",
+                 i_bus_num,
+                 BRIDGE_NUMBER);
+
+        // Throw an assertion if we don't get a good response.
+        l_throwAssert =  l_count >= AVSBUS_VOLTAGE_WRITE_RETRY_COUNT;
+        FAPI_TRY(avsValidateResponse(i_target,  i_bus_num, BRIDGE_NUMBER, l_throwAssert, l_goodResponse));
+
+        l_count++;
+    }
+    while (l_goodResponse == 0);
 
 fapi_try_exit:
     return fapi2::current_err;
