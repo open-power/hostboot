@@ -1148,6 +1148,50 @@ void getGPUConfigMessageData(const TargetHandle_t i_occ,
 
 } // end getGPUConfigMessageData()
 
+// Determine if the BMC will allow turbo to be used.
+// Returns true if BMC suppoted and turbo is allowed.
+//         true if BMC Unsupported
+//         false if supported and not allowed.
+//         else false
+bool bmcAllowsTurbo(Target* i_sys)
+{
+    bool turboAllowed = true;
+
+    uint32_t sensorNum = UTIL::getSensorNumber(i_sys,
+                                               SENSOR_NAME_TURBO_ALLOWED);
+    // VALID IPMI sensors are 0-0xFE
+    if (sensorNum != 0xFF)
+    {
+        // Check if turbo frequency is allowed on BMC
+        SENSOR::getSensorReadingData turboSupportData;
+        SENSOR::SensorBase turboSensor(SENSOR_NAME_TURBO_ALLOWED, i_sys);
+        errlHndl_t err = turboSensor.readSensorData(turboSupportData);
+
+        if (NULL == err)
+        {
+            // 0x02 == Asserted bit (turbo frequency is allowed)
+            if ((turboSupportData.event_status & 0x02) == 0x02)
+            {
+                TMGT_INF("bmcAllowsTurbo: turbo is allowed");
+            }
+            else
+            {
+                turboAllowed = false;
+            }
+        }
+        else
+        {
+            // error reading sensor, assume turbo is allowed
+            TMGT_ERR("bmcAllowsTurbo: unable to read turbo support sensor "
+                     " from BMC, rc=0x%04X",
+                     err->reasonCode());
+            delete err;
+        }
+    }
+    // else, sensor not supported on this platform so turbo is allowed
+
+    return turboAllowed;
+}
 
 
 void getFrequencyPointMessageData(uint8_t* o_data,
@@ -1176,6 +1220,7 @@ void getFrequencyPointMessageData(uint8_t* o_data,
     check_wof_support(turbo, ultra);
     if (turbo == 0)
     {
+
         // If turbo not supported, send nominal for turbo
         // and reason code for ultra-turbo (no WOF support)
         turbo = nominal;
@@ -1321,72 +1366,85 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
     targetService().getTopLevelTarget(sys);
     assert(sys != nullptr);
 
+    // Check if MRW allows turbo
     uint8_t turboAllowed =
         sys->getAttr<ATTR_OPEN_POWER_TURBO_MODE_SUPPORTED>();
     if (turboAllowed)
     {
-        o_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+        const uint16_t nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
 
-        //Ultra Turbo Frequency in MHz
-        ATTR_SYSTEM_WOF_DISABLE_type wofSupported;
-        if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_DISABLE>(wofSupported))
+        // Check if BMC allows turbo
+        if (bmcAllowsTurbo(sys))
         {
-            o_ultra = WOF_SYSTEM_DISABLED;
-            G_wofSupported = false;
-        }
-        else
-        {
-            // Loop through all functional OCCs
-            uint8_t largest_wof_reset_count = 0;
-            uint8_t occ_instance = 0;
-            std::vector<Occ*> occList = OccManager::getOccArray();
-            for ( const auto & occ : occList )
+            o_turbo = sys->getAttr<ATTR_FREQ_CORE_MAX>();
+
+            //Ultra Turbo Frequency in MHz
+            ATTR_SYSTEM_WOF_DISABLE_type wofSupported;
+            if (!sys->tryGetAttr<ATTR_SYSTEM_WOF_DISABLE>(wofSupported))
             {
-                if (occ->wofResetCount() > largest_wof_reset_count)
-                {
-                    occ_instance = occ->getInstance();
-                    largest_wof_reset_count = occ->wofResetCount();
-                }
-            }
-            const uint16_t nominal = sys->getAttr<ATTR_NOMINAL_FREQ_MHZ>();
-            const uint16_t tempUt = sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
-            if( wofSupported == SYSTEM_WOF_DISABLE_ON )
-            {
-                TMGT_INF("System does not support WOF");
-                G_wofSupported = false;
                 o_ultra = WOF_SYSTEM_DISABLED;
-            }
-            else if( tempUt == 0 )
-            {
-                TMGT_INF("Missing Ultra Turbo VPD point. WOF disabled.");
                 G_wofSupported = false;
-                o_ultra = WOF_MISSING_ULTRA_TURBO;
-            }
-            else if( largest_wof_reset_count >= WOF_RESET_COUNT_THRESHOLD )
-            {
-                TMGT_INF("WOF reset count reached for OCC%d. WOF disabled.",
-                         occ_instance);
-                G_wofSupported = false;
-                o_ultra = WOF_RESET_COUNT_REACHED;
-            }
-            else if( o_turbo <= nominal )
-            {
-                TMGT_INF("Turbo (%d) < nominal (%d). WOF disabled.",
-                         o_turbo, nominal);
-                G_wofSupported = false;
-                o_ultra = WOF_UNSUPPORTED_FREQ;
-            }
-            else if( tempUt <= o_turbo )
-            {
-                TMGT_INF("Ultra Turbo (%d) < Turbo (%d). WOF disabled.",
-                         tempUt, o_turbo);
-                G_wofSupported = false;
-                o_ultra = WOF_UNSUPPORTED_FREQ;
             }
             else
             {
-                o_ultra = tempUt;
+                // Loop through all functional OCCs
+                uint8_t largest_wof_reset_count = 0;
+                uint8_t occ_instance = 0;
+                std::vector<Occ*> occList = OccManager::getOccArray();
+                for ( const auto & occ : occList )
+                {
+                    if (occ->wofResetCount() > largest_wof_reset_count)
+                    {
+                        occ_instance = occ->getInstance();
+                        largest_wof_reset_count = occ->wofResetCount();
+                    }
+                }
+                const uint16_t tempUt=sys->getAttr<ATTR_ULTRA_TURBO_FREQ_MHZ>();
+                if( wofSupported == SYSTEM_WOF_DISABLE_ON )
+                {
+                    TMGT_INF("System does not support WOF");
+                    G_wofSupported = false;
+                    o_ultra = WOF_SYSTEM_DISABLED;
+                }
+                else if( tempUt == 0 )
+                {
+                    TMGT_INF("Missing Ultra Turbo VPD point. WOF disabled.");
+                    G_wofSupported = false;
+                    o_ultra = WOF_MISSING_ULTRA_TURBO;
+                }
+                else if( largest_wof_reset_count >= WOF_RESET_COUNT_THRESHOLD )
+                {
+                    TMGT_INF("WOF reset count reached for OCC%d. WOF disabled.",
+                             occ_instance);
+                    G_wofSupported = false;
+                    o_ultra = WOF_RESET_COUNT_REACHED;
+                }
+                else if( o_turbo <= nominal )
+                {
+                    TMGT_INF("Turbo (%d) < nominal (%d). WOF disabled.",
+                             o_turbo, nominal);
+                    G_wofSupported = false;
+                    o_ultra = WOF_UNSUPPORTED_FREQ;
+                }
+                else if( tempUt <= o_turbo )
+                {
+                    TMGT_INF("Ultra Turbo (%d) < Turbo (%d). WOF disabled.",
+                             tempUt, o_turbo);
+                    G_wofSupported = false;
+                    o_ultra = WOF_UNSUPPORTED_FREQ;
+                }
+                else
+                {
+                    o_ultra = tempUt;
+                }
             }
+        }
+        else
+        {
+            TMGT_INF("getFrequencyPoint: Turbo/WOF not allowed by BMC");
+            TMGT_CONSOLE("Turbo frequency not allowed due to BMC limit");
+            o_turbo = nominal;
+            G_wofSupported = false;
         }
 
         if( !G_wofSupported )
