@@ -1180,7 +1180,6 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
         uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
         uint64_t l_unit = l_chiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
         l_addr |= (l_unit << 24);
-        TRACFCOMP( g_trac_scom, "doMulticastWorkaround> scom to %.8X", l_addr );
         io_buflen = sizeof(uint64_t);
         l_err = deviceOp(i_opType,
                          i_target,
