@@ -334,6 +334,33 @@ namespace TARGETING
         }
     }
 
+    uint64_t AttrRP::getHbDataTocAddr()
+    {
+        // Setup physical TOC address
+        uint64_t l_toc_addr = 0;
+        Bootloader::keyAddrPair_t l_keyAddrPairs =
+            g_BlToHbDataManager.getKeyAddrPairs();
+
+        for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+        {
+            if(l_keyAddrPairs.key[keyIndex] == SBEIO::RSV_MEM_ATTR_ADDR)
+            {
+                l_toc_addr = l_keyAddrPairs.addr[keyIndex];
+                break;
+            }
+        }
+
+        if(!l_toc_addr)
+        {
+            // Setup physical TOC address to hardcoded value
+            l_toc_addr = cpu_spr_value(CPU_SPR_HRMOR) +
+                VMM_HB_DATA_TOC_START_OFFSET;
+        }
+
+        // return the vaddr found from the mapping
+        return l_toc_addr;
+    }
+
     errlHndl_t AttrRP::parseAttrSectHeader()
     {
         errlHndl_t l_errl = NULL;
@@ -372,39 +399,17 @@ namespace TARGETING
                 //Create a block map of the address space we used to store
                 //attribute information on the initial IPL
                 //Account HRMOR (non 0 base addr)
-
-                ///////////////////////////////////////////////////////////////
-                // This should change to get address from SBE.  Currently hack
-                // to the start of ATTR data section on FSP systems
                 uint64_t l_phys_attr_data_addr = 0;
                 uint64_t l_attr_data_size = 0;
 
                 // Setup physical TOC address
-                uint64_t l_toc_addr = 0;
-
-                Bootloader::keyAddrPair_t l_keyAddrPairs =
-                    g_BlToHbDataManager.getKeyAddrPairs();
-
-                for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
-                {
-                    if(l_keyAddrPairs.key[keyIndex] == SBEIO::RSV_MEM_ATTR_ADDR)
-                    {
-                        l_toc_addr = l_keyAddrPairs.addr[keyIndex];
-                    }
-                }
-
-                if(!l_toc_addr)
-                {
-                    // Setup physical TOC address to hardcoded value
-                    l_toc_addr = cpu_spr_value(CPU_SPR_HRMOR) +
-                                        VMM_HB_DATA_TOC_START_OFFSET;
-                }
+                uint64_t l_toc_addr = AttrRP::getHbDataTocAddr();
 
                 // Now map the TOC to find the ATTR label address & size
                 Util::hbrtTableOfContents_t * l_toc_ptr =
-                        reinterpret_cast<Util::hbrtTableOfContents_t *>(
-                            mm_block_map(reinterpret_cast<void*>(l_toc_addr),
-                            sizeof(Util::hbrtTableOfContents_t)));
+                reinterpret_cast<Util::hbrtTableOfContents_t *>(
+                mm_block_map(reinterpret_cast<void*>(l_toc_addr),
+                             sizeof(Util::hbrtTableOfContents_t)));
 
                 if (l_toc_ptr != 0)
                 {

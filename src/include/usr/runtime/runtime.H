@@ -130,7 +130,7 @@ errlHndl_t populate_TpmInfoByNode();
 #define MDT_MAINSTORE_ADDR_SECTION   0
 #define MDT_RESERVED_HB_MEM_SECTION  5
 
-// Defines offset into mainstore address section wher HB writes the address
+// Defines offset into mainstore address section where HB writes the address
 // of the HYP/HB comm area
 // (See HDAT spec 11.1.2.1 Mainstore Address Configuration)
 #define MDT_MAINSTORE_ADDR_SECTION_HYP_HB_COMM_ADDR_OFFSET 0x1C
