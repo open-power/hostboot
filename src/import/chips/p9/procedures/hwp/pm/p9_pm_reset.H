@@ -80,6 +80,16 @@ extern "C"
     fapi2::ReturnCode p9_pm_reset(
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         void* i_pHomerImage);
+
+//------------------------------------------------------------------------------
+///
+/// @brief PSAFE values update of DPLL and External voltage
+///
+/// @param[in] i_target Proc Chip target
+///
+/// @return FAPI2_RC_SUCCESS on success, else error code.
+    fapi2::ReturnCode p9_pm_reset_psafe_update
+    (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 }
 
 #endif // _P9_PM_RESET_H
