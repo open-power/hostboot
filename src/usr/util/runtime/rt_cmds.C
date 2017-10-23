@@ -37,6 +37,7 @@
 #include <devicefw/driverif.H>
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
+#include <errl/errlreasoncodes.H>
 #include <vector>
 
 namespace Util
@@ -633,11 +634,12 @@ void cmd_putscom( char*& o_output,
 void cmd_errorlog( char*& o_output,
                    uint64_t i_word1,
                    uint64_t i_word2,
-                   uint32_t i_callout )
+                   uint32_t i_callout,
+                   uint32_t i_ffdcLength )
 {
-    UTIL_FT( "cmd_errorlog> word1=%.8X%.8X, word2=%.8X%.8X, i_callout=%.8X",
+    UTIL_FT( "cmd_errorlog> word1=%.8X%.8X, word2=%.8X%.8X, i_callout=%.8X ffdcLength=%ld",
              (uint32_t)(i_word1>>32), (uint32_t)i_word1,
-             (uint32_t)(i_word2>>32), (uint32_t)i_word2, i_callout );
+             (uint32_t)(i_word2>>32), (uint32_t)i_word2, i_callout, i_ffdcLength );
     o_output = new char[100];
 
     errlHndl_t l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
@@ -654,7 +656,44 @@ void cmd_errorlog( char*& o_output,
                              HWAS::NO_DECONFIG,
                              HWAS::GARD_NULL );
     }
+
+    if (i_ffdcLength > 0)
+    {
+        uint8_t data[256];
+
+        uint8_t l_count = 0;
+        uint16_t l_ffdc_length = 256; // break into 256 byte additions
+        do {
+            if (i_ffdcLength > l_ffdc_length)
+            {
+                i_ffdcLength -= l_ffdc_length;
+            }
+            else
+            {
+                l_ffdc_length = i_ffdcLength;
+                i_ffdcLength = 0;
+            }
+            memset(data, l_count, l_ffdc_length);
+
+            l_err->addFFDC(UTIL_COMP_ID,
+                         &data,
+                         l_ffdc_length,
+                         0,         // Version
+                         ERRORLOG::ERRL_UDT_NOFORMAT,   // parser ignores data
+                         false );   // merge
+            l_count++;
+        } while (i_ffdcLength > 0);
+
+        if (i_word1 == 1)
+        {
+            // mark error as dd type
+            l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            l_err->setEselCallhomeInfoEvent(true);
+        }
+    }
+
     l_err->collectTrace("UTIL", 1024);
+
     uint32_t l_plid = l_err->plid();
     errlCommit(l_err, UTIL_COMP_ID);
     sprintf( o_output, "Committed plid 0x%.8X", l_plid );
@@ -871,17 +910,23 @@ int hbrtCommand( int argc,
     else if( !strcmp( argv[0], "errorlog" ) )
     {
         // errorlog <word1> <word2> <huid to callout>
-        if( (argc == 3) || (argc == 4) )
+        if( (argc == 3) || (argc == 4) || (argc == 5) )
         {
             uint32_t l_huid = 0;
+            uint32_t l_ffdcLength = 0;
             if( argc == 4 )
             {
                 l_huid = strtou64( argv[3], NULL, 16 );
             }
+            if (argc == 5)
+            {
+                l_ffdcLength = strtou64( argv[4], NULL, 16 );
+            }
             cmd_errorlog( *l_output,
                           strtou64( argv[1], NULL, 16 ),
                           strtou64( argv[2], NULL, 16 ),
-                          l_huid );
+                          l_huid,
+                          l_ffdcLength );
         }
         else
         {
@@ -918,7 +963,7 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "putscom <huid> <address> <data>\n" );
         strcat( *l_output, l_tmpstr );
-        sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>]\n" );
+        sprintf( l_tmpstr, "errorlog <word1> <word2> [<huid to callout>] [size]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "sbemsg <chipid>\n" );
         strcat( *l_output, l_tmpstr );

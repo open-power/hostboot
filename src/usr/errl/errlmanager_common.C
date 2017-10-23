@@ -530,6 +530,24 @@ inline bool SensorModifier::modifySensor(uint8_t i_sensorType,
     return l_retval;
 }
 
+// Retrieve if informational/call-home eSELs are allowed to the BMC
+bool ErrlManager::allowCallHomeEselsToBmc(void)
+{
+    bool l_allowed = false;
+    uint8_t flag = 0;
+    TARGETING::Target* sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(sys);
+    if (sys)
+    {
+        flag = sys->getAttr<TARGETING::ATTR_ALLOW_CALLHOME_ESELS_TO_BMC>();
+    }
+    if (flag)
+    {
+        l_allowed = true;
+    }
+
+    return l_allowed;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // ErrlManager::sendErrLogToBmc()
@@ -540,12 +558,24 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
                  ENTER_MRK
                 "sendErrLogToBmc errlogId 0x%.8x, i_sendSels %d",
                 io_err->eid(), i_sendSels);
+
+    bool l_send_eSel_only = !i_sendSels; // don't send callout sensor SEL
+    bool l_callhome_type = false;        // Is this a callhome type eSEL?
+    if (io_err->getEselCallhomeInfoEvent() && allowCallHomeEselsToBmc())
+    {
+        TRACFCOMP( g_trac_errl, INFO_MRK
+            "sendErrLogToBmc: setting l_callhome_type" );
+        l_callhome_type = true;
+        l_send_eSel_only = true;  // just send eSEL without any callout SELs
+    }
+
     do {
+
         // keep track of procedure callouts that modify hardware callouts
         SensorModifier l_modifier;
 
         // Decide whether we want to skip the error log
-        if( io_err->getSkipShowingLog() )
+        if( io_err->getSkipShowingLog() && !l_callhome_type )
         {
             TRACFCOMP( g_trac_errl, INFO_MRK
                 "sendErrLogToBmc: %.8X is INFORMATIONAL/RECOVERED; skipping",
@@ -558,7 +588,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         std::vector< HWAS::callout_ud_t* > l_callouts;
         HWAS::callout_ud_t l_calloutToAdd; // used for EIBUS error
         HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_NONE;
-        if (i_sendSels)
+        if (!l_send_eSel_only)
         {
             bool l_busCalloutEncountered = false; // flag bus callout
 
@@ -663,7 +693,7 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         // bool default constructor initializes to false as per C++ standard
         std::map<uint8_t, bool> l_sensorNumberEncountered;
 
-        if (i_sendSels)
+        if (!l_send_eSel_only)
         {
             l_selEventList.clear();
             std::vector<HWAS::callout_ud_t*>::const_iterator i;
@@ -775,7 +805,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
             {
                 IPMISEL::sendESEL(l_pelData, l_pelSize,
                                     io_err->eid(),
-                                    l_selEventList);
+                                    l_selEventList,
+                                    l_callhome_type);
                 TRACFCOMP(g_trac_errl, INFO_MRK
                 "sendErrLogToBmc callout size %d",
                 l_selEventList.size());
@@ -799,8 +830,8 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
 
             l_selEventList.push_back(l_selEvent);
 
-            IPMISEL::sendESEL(l_pelData, l_pelSize,
-                            io_err->eid(), l_selEventList);
+            IPMISEL::sendESEL(l_pelData, l_pelSize, io_err->eid(),
+                             l_selEventList, l_callhome_type);
         }
 
         // free the buffer

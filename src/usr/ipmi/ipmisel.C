@@ -89,7 +89,8 @@ enum esel_retry
 namespace IPMISEL
 {
 void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
-              uint32_t i_eid, std::vector<sel_info_t*>&i_selEventList)
+              uint32_t i_eid, std::vector<sel_info_t*>&i_selEventList,
+              bool i_infoCallHome)
 {
     IPMI_TRAC(ENTER_MRK "sendESEL() %d",i_selEventList.size());
 
@@ -103,13 +104,13 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 #endif
     msg->type = MSG_SEND_ESEL;
     msg->data[0] = i_eid;
-    eselInitData *eselData = 
+    eselInitData *eselData =
     new eselInitData(i_selEventList, i_eselData, i_dataSize);
 
     msg->extra_data = eselData;
 
 #ifdef __HOSTBOOT_RUNTIME
-    process_esel(msg);
+    process_esel(msg, i_infoCallHome);
 #else
     // one message queue to the SEL thread
     static msg_q_t mq = Singleton<IpmiSEL>::instance().msgQueue();
@@ -129,7 +130,7 @@ void sendESEL(uint8_t* i_eselData, uint32_t i_dataSize,
 /*
  * @brief process esel msg
  */
-void process_esel(msg_t *i_msg)
+void process_esel(msg_t *i_msg, bool i_infoCallHome)
 {
     errlHndl_t l_err = NULL;
     IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
@@ -144,7 +145,7 @@ void process_esel(msg_t *i_msg)
     {
         IPMI_TRAC(ENTER_MRK"sel list size %d", l_data->selInfoList.size());
         std::vector<sel_info_t*>::iterator it;
-        for (it = l_data->selInfoList.begin(); it != l_data->selInfoList.end(); 
+        for (it = l_data->selInfoList.begin(); it != l_data->selInfoList.end();
         ++it)
         {
             sel_info_t *l_sel = *it;
@@ -153,12 +154,12 @@ void process_esel(msg_t *i_msg)
             l_data->selEvent = true;
 
             //If sensor type is sys event then need to send the oem sel
-            //to handle procedure callout        
+            //to handle procedure callout
             if (l_sel->sensorType == TARGETING::SENSOR_TYPE_SYS_EVENT)
             {
                 //oem sel data
                 l_data->selEvent = false;
-                l_oemSel.record_type = 
+                l_oemSel.record_type =
                 record_type_oem_sel_for_procedure_callout;
                 l_oemSel.event_data1 = l_sel->eventOffset;
                 l_sel->eventOffset = SENSOR::UNDETERMINED_SYSTEM_HW_FAILURE;
@@ -174,13 +175,13 @@ void process_esel(msg_t *i_msg)
             l_eSel.event_dir_type = l_sel->eventDirType;
             l_eSel.event_data1 = l_sel->eventOffset;
             memcpy(l_data->eSel,&l_eSel,sizeof(selRecord));
-                
+
 
             uint32_t l_send_count = MAX_SEND_COUNT;
             while (l_send_count > 0)
             {
-                // try to send the eles to the bmc
-                send_esel(l_data, l_err, l_cc);
+                // try to send the esel to the bmc
+                send_esel(l_data, l_err, l_cc, i_infoCallHome);
 
                 // if no error but last completion code was:
                 if ((l_err == NULL) &&
@@ -244,7 +245,8 @@ void process_esel(msg_t *i_msg)
  * @brief Send esel data to bmc
  */
 void send_esel(eselInitData * i_data,
-            errlHndl_t &o_err, IPMI::completion_code &o_cc)
+            errlHndl_t &o_err, IPMI::completion_code &o_cc,
+            bool i_infoCallHome)
 {
     IPMI_TRAC(ENTER_MRK "send_esel");
     uint8_t* data = NULL;
@@ -305,8 +307,18 @@ void send_esel(eselInitData * i_data,
         memcpy(&data[PARTIAL_ADD_ESEL_REQ], i_data->eSel,
                 sizeof(selRecord));
         // update to make this what AMI eSEL wants
-        data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] = record_type_ami_esel;
-        data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,event_data1)] = event_data1_ami;
+        if (i_infoCallHome)
+        {
+            data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] =
+                record_type_oem_call_home_info_event;
+        }
+        else
+        {
+            data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] =
+                record_type_ami_esel;
+        }
+        data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,event_data1)] =
+            event_data1_ami;
 
         o_cc = IPMI::CC_UNKBAD;
         TRACFBIN( g_trac_ipmi, INFO_MRK"1st partial_add_esel:", data, len);
@@ -394,8 +406,8 @@ void send_esel(eselInitData * i_data,
         }
     }while(0);
 
-    // if eSEL wasn't created due to an error, we don't want to continue
-    if ((o_err == NULL) && (o_cc == IPMI::CC_OK))
+    // if eSEL wasn't created due to an error or callhome, we don't want to continue
+    if ((o_err == NULL) && (o_cc == IPMI::CC_OK) && (!i_infoCallHome))
     {
         // caller wants us to NOT create sensor SEL
         if ((i_data->eSel[offsetof(selRecord,sensor_type)] == SENSOR::INVALID_TYPE) &&
@@ -541,7 +553,7 @@ void IpmiSEL::execute(void)
         switch(msg_type)
         {
             case IPMISEL::MSG_SEND_ESEL:
-                IPMISEL::process_esel(msg);
+                IPMISEL::process_esel(msg, false);
                 //done with msg
                 msg_free(msg);
                 break;

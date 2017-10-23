@@ -612,6 +612,24 @@ public:
     */
     std::vector<void*> getUDSections(compId_t i_compId, uint8_t i_subSect);
 
+    /**
+     * @brief set iv_eselCallhomeInfoEvent
+     *
+     *      When true, send this error as a special callhome
+     *                 type of eSEL to the BMC
+     *
+     * @return nothing
+     */
+    void setEselCallhomeInfoEvent(bool i_valid);
+
+    /**
+     * @brief get iv_eselCallhomeInfoEvent
+     *
+     * @return true if this log should result in a callhome event type eSEL,
+     *         false otherwise
+     */
+    bool getEselCallhomeInfoEvent();
+
 private:
 
      /**
@@ -788,6 +806,7 @@ private:
      */
     bool getSkipShowingLog();
 
+
     /**
      * @brief Sets internal flag to indicate if this log should be
      *    saved to PNOR and sent to the BMC
@@ -838,6 +857,9 @@ private:
    //BMC, or displayed in the console
    bool iv_skipShowingLog;
 
+   // when true, send this special type of eSEL to the BMC
+   // This is used to send OCC informational errors up to BMC
+   bool iv_eselCallhomeInfoEvent;
 };
 
 
@@ -982,6 +1004,21 @@ inline void ErrlEntry::setSkipShowingLog(bool i_showLog)
 inline bool ErrlEntry::getSkipShowingLog()
 {
     return iv_skipShowingLog;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline void ErrlEntry::setEselCallhomeInfoEvent(bool i_valid)
+{
+    iv_eselCallhomeInfoEvent = i_valid;
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::getEselCallhomeInfoEvent()
+{
+    return iv_eselCallhomeInfoEvent;
 }
 
 } // End namespace
