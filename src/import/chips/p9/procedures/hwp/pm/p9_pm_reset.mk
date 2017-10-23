@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_pm_reset
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_utils
+lib$(PROCEDURE)_DEPLIBS+=p9_setup_evid
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_firinit
 lib$(PROCEDURE)_EXTRALIBS+=p9_pm_occ_control
