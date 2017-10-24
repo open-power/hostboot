@@ -54,7 +54,9 @@ const uint32_t  MAX_NOOF_DD_LEVELS_IN_IMAGE = 20;
 #define NUM_OF_QUADS     6
 #define CORES_PER_QUAD  (NUM_OF_CORES/NUM_OF_QUADS)
 
-#define INFRASTRUCT_RC_SUCCESS 0
+#define INFRASTRUCT_RC_SUCCESS                     0
+#define INFRASTRUCT_RC_CODE_BUG                    1
+#define INFRASTRUCT_RC_INVALID_IMAGE_SECTION_TYPE  2
 
 enum SYSPHASE
 {
