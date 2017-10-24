@@ -54,7 +54,7 @@ constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_38 = 38;
 constexpr uint64_t literal_51 = 51;
 constexpr uint64_t literal_64 = 64;
-constexpr uint64_t literal_0x8 = 0x8;
+constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_1867 = 1867;
 constexpr uint64_t literal_2134 = 2134;
@@ -69,7 +69,6 @@ constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_0b1000 = 0b1000;
 constexpr uint64_t literal_0b011000 = 0b011000;
 constexpr uint64_t literal_0x02 = 0x02;
-constexpr uint64_t literal_0b1 = 0b1;
 constexpr uint64_t literal_0x01 = 0x01;
 constexpr uint64_t literal_0b0 = 0b0;
 constexpr uint64_t literal_0x00 = 0x00;
@@ -393,7 +392,7 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
             {
                 FAPI_TRY(fapi2::getScom( TGT0, 0x501082bull, l_scom_buffer ));
 
-                l_scom_buffer.insert<45, 1, 63, uint64_t>(literal_0x8 );
+                l_scom_buffer.insert<45, 1, 63, uint64_t>(literal_0b1 );
                 constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON = 0x1;
                 l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON );
                 constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_DISABLE_WRTO_IG_ON = 0x1;
