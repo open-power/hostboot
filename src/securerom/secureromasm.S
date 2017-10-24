@@ -6,6 +6,7 @@
 # OpenPOWER HostBoot Project
 #
 # Contributors Listed Below - COPYRIGHT 2017
+# [+] Google Inc.
 # [+] International Business Machines Corp.
 #
 #
@@ -152,7 +153,3 @@ _rom_sreset:
     nop
 
 .section .data
-
-.global hbi_ImageId
-hbi_ImageId:
-    .space 128
