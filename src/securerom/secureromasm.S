@@ -152,7 +152,3 @@ _rom_sreset:
     nop
 
 .section .data
-
-.global hbi_ImageId
-hbi_ImageId:
-    .space 128
