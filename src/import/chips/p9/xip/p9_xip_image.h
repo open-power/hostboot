@@ -92,7 +92,17 @@
 
 #ifndef __ASSEMBLER__
 
-// these are common P9-XIP sections defined for a images
+// List of image section types supported in the XIP image
+
+typedef enum {
+    IST_XIP,  // A legacy XIP image
+    IST_TOR,  // A standalone TOR ring section image
+    IST_DDCO, // A standalone DD level container
+    NOOF_IST,
+    IST_UNDEFINED = 0xff
+} image_section_type_t;
+
+// These are the common P9-XIP sections defined for every image
 typedef enum {
     P9_XIP_SECTION_HEADER    = 0,
     P9_XIP_SECTION_FIXED     = 1,
