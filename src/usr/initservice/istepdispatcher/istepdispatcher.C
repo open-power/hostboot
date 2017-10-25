@@ -621,7 +621,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                 }
                 else
                 {
-
                     if (!err)
                     {
                         // Reconfig loop required, but the istep is either outside
@@ -633,7 +632,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             err = failedDueToDeconfig(istep, substep,
                                                       newIstep, newSubstep);
                         }
-                        else
+                        else if (!l_manufacturingMode)
                         {
                             #ifdef CONFIG_BMC_IPMI
                             // Check the newGardRecord instance variable
