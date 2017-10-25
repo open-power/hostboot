@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,6 +179,7 @@ p9_setup_bars_mcd_enable(
     fapi2::buffer<uint64_t> l_fir_data = 0;
     fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
     fapi2::buffer<uint64_t> l_mcd_vgc_data = 0;
+    fapi2::ATTR_FABRIC_PRESENT_GROUPS_Type l_present_groups = 0;
 
     // configure FIR
     // clear FIR
@@ -246,7 +247,11 @@ p9_setup_bars_mcd_enable(
                                                l_addr_extension_chip_id);
     }
 
-    l_mcd_vgc_data.insertFromRight<PU_BANK0_MCD_VGC_AVAIL_GROUPS, PU_BANK0_MCD_VGC_AVAIL_GROUPS_LEN>(MCD_VGC_AVAIL_GROUPS);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_PRESENT_GROUPS,
+                           i_target_sys,
+                           l_present_groups),
+             "Error from FAPI_ATTR_GET (ATTR_FABRIC_PRESENT_GROUPS)");
+    l_mcd_vgc_data.insertFromRight<PU_BANK0_MCD_VGC_AVAIL_GROUPS, P9_FBC_UTILS_NUM_GROUP_IDS>(l_present_groups);
     l_mcd_vgc_data.setBit<PU_BANK0_MCD_VGC_HANG_POLL_ENABLE>();
     FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_VGC, l_mcd_vgc_data),
              "Error from putScom (PU_BANK0_MCD_VGC)");
