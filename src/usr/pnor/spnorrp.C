@@ -359,6 +359,11 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 break;
             }
         }
+        else
+        {
+            TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on secure section %s",
+                      PNOR::SectionIdToString(i_id));
+        }
 
         l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
         l_info.size += PAGESIZE; // add a page to size to account for the header
