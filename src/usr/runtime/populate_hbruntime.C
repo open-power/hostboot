@@ -1092,9 +1092,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             break;
         }
 
-        // @TODO RTC:125304 enable when PHYP changes necessary for pre-verified
-        //       lids are in a fips release
-/*
         // Load lids from Master Container Lid Container provided by FSP
         if (INITSERVICE::spBaseServicesEnabled())
         {
@@ -1105,7 +1102,6 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
                 break;
             }
         }
-*/
     } while(0);
 
     // If lock obtained, always unlock Pre verified lid manager

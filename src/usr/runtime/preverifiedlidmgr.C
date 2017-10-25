@@ -180,12 +180,9 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     bool l_loadImage = false;
     if(cv_payloadKind == TARGETING::PAYLOAD_KIND_PHYP)
     {
-        // @TODO RTC:178163 enable when PHYP changes necessary for pre-verified
-        //       lids are in a fips release
-/*
         l_loadImage = true;
         // Verified Lid - Header Only
-        if ( (l_lids.containerLid != INVALID_LIDID) &&
+        if ( (l_lids.containerLid != Util::INVALID_LIDID) &&
              !isLidLoaded(l_lids.containerLid))
         {
             char l_containerLidStr [Util::lidIdStrLength] {};
@@ -204,7 +201,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
         }
 
         // Verified Lid - Content Only
-        if ( (l_lids.lid != INVALID_LIDID) &&
+        if ( (l_lids.lid != Util::INVALID_LIDID) &&
              !isLidLoaded(l_lids.lid))
         {
             char l_lidStr[Util::lidIdStrLength] {};
@@ -220,7 +217,6 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
                 break;
             }
         }
-*/
     }
     else if(cv_payloadKind == TARGETING::PAYLOAD_KIND_SAPPHIRE)
     {

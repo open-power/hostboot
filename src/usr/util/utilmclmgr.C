@@ -621,11 +621,10 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         SECUREBOOT::ContainerHeader l_conHdr(iv_pVaddr);
 
         // Cache size stats into comp info cache
-        // @TODO RTC:125304 re-enable when total size is supported correctly
-        //io_compInfo.totalSize = l_conHdr.totalContainerSize();
+        io_compInfo.totalSize = l_conHdr.totalContainerSize();
         io_compInfo.protectedSize = l_conHdr.payloadTextSize();
-        //io_compInfo.unprotectedSize = l_conHdr.totalContainerSize() -
-        //                             l_conHdr.payloadTextSize();
+        io_compInfo.unprotectedSize = l_conHdr.totalContainerSize() -
+                                      l_conHdr.payloadTextSize();
 
         // @TODO RTC:125304 re-enable when component id is supported in lids
         if (0)// memcmp(l_conHdr.componentId(), i_compId.data(),

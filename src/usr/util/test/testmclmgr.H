@@ -32,6 +32,7 @@
 #include "../utilbase.H"
 #include <usr/vmmconst.h>
 #include <runtime/preverifiedlidmgr.H>
+#include <util/util_reasoncodes.H>
 
 namespace MCL
 {
@@ -224,9 +225,9 @@ public:
     /**
      *  @brief Test that MCL manager properly parses a MCL
      */
-    void testMCLparser(void)
+    void testMclParser(void)
     {
-        UTIL_FT(ENTER_MRK"testMCLparser start" );
+        UTIL_FT(ENTER_MRK"testMclParser start" );
         // Generate test MCL
         TestMcl l_TestMcl{};
 
@@ -237,10 +238,10 @@ public:
         // Ensure the Comp Info Caches match
         if (l_TestMcl.iv_compInfoCache != l_mcl.iv_compInfoCache)
         {
-            TS_FAIL("testMCLparser> Comp Info Caches do not match");
+            TS_FAIL("testMclParser> Comp Info Caches do not match");
         }
 
-        UTIL_FT(EXIT_MRK"testMCLparser complete");
+        UTIL_FT(EXIT_MRK"testMclParser complete");
     }
 
     void testProcessMclComponents()
@@ -291,7 +292,7 @@ public:
         errlHndl_t l_errl = nullptr;
 
         // Generate test MCL with Secure Lids
-        TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
+        TestMcl l_TestMcl { {Util::TEST_LIDID},
                             {{COMP_TEST2,true}}
                           };
 
@@ -323,6 +324,66 @@ public:
         PreVerifiedLidMgr::unlock();
 
         UTIL_FT(EXIT_MRK"testProcessSecureMclComponents complete");
+    }
+
+    void testMclSizeMismatch()
+    {
+        UTIL_FT(ENTER_MRK"testMclSizeMismatch start" );
+
+        errlHndl_t l_errl = nullptr;
+
+        // Generate test MCL with Secure Lids
+        // Add 2 secure sections.
+        // The secure header for the first one will only have the size of 1 lid
+        // So we will get a mismatch between the Secure header's total container
+        // size and what the UtilLidMgr reads out.
+        TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
+                            {{COMP_TEST2,true}}
+                          };
+
+        // Pass test MCL to MCL manager
+        MasterContainerLidMgr l_mcl(l_TestMcl.iv_bufferStart,
+                                    l_TestMcl.iv_size);
+
+        // Ensure the Comp Info Caches match
+        if (l_TestMcl.iv_compInfoCache != l_mcl.iv_compInfoCache)
+        {
+            TS_FAIL("testMclSizeMismatch> Comp Info Caches do not match");
+        }
+
+        PreVerifiedLidMgr::initLock(PREVERLIDMGR_TEST_ADDR);
+
+        // Get Instance of Pre-Verified lid manager
+        auto l_preVerLidMgr = PreVerifiedLidMgr::getInstance();
+
+        // Clear lids loaded cache as other test cases fill it in.
+        l_preVerLidMgr.cv_lidsLoaded.clear();
+
+        l_errl = l_mcl.processComponents();
+        if(l_errl)
+        {
+            // Expected Error
+            if(l_errl->reasonCode() == Util::UTIL_MCL_SIZE_MISMATCH)
+            {
+                delete l_errl;
+                l_errl = nullptr;
+                UTIL_FT("testMclSizeMismatch expected error");
+            }
+            // Not Expected Error
+            else
+            {
+                errlCommit(l_errl,UTIL_COMP_ID);
+                TS_FAIL("testMclSizeMismatch> processComponents returned an unexpected error");
+            }
+        }
+        else
+        {
+            TS_FAIL("testMclSizeMismatch> processComponents did not return expected error");
+        }
+
+        PreVerifiedLidMgr::unlock();
+
+        UTIL_FT(EXIT_MRK"testMclSizeMismatch complete");
     }
 };
 
