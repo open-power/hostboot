@@ -65,6 +65,7 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
     uint64_t rd_tag_delay = 0;
     uint64_t wr_done_delay = 0;
     uint64_t mnfg_flag = 0;
+    fapi2::buffer<uint64_t> l_aue_buffer;
     fapi2::ATTR_CHIP_EC_FEATURE_HW414700_Type l_checkstop_flag;
 
     for (const auto& p : mss::find_targets<TARGET_TYPE_MCA>(i_target))
@@ -86,9 +87,7 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_AUE>()
         .recoverable_error<MCA_FIR_MAINLINE_UE>()
         .checkstop<MCA_FIR_MAINLINE_IAUE>()
-        .recoverable_error<MCA_FIR_MAINLINE_IUE>()
-        .checkstop<MCA_FIR_MAINTENANCE_AUE>()
-        .checkstop<MCA_FIR_MAINTENANCE_IAUE>();
+        .recoverable_error<MCA_FIR_MAINLINE_IUE>();
 
         // If ATTR_CHIP_EC_FEATURE_HW414700 is enabled set checkstops
         auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
@@ -112,6 +111,14 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
 
         FAPI_TRY(l_ecc64_fir_reg.write(), "unable to write fir::reg %d", MCA_FIR);
         FAPI_TRY(l_cal_fir_reg.write(), "unable to write fir::reg %d", MCA_MBACALFIRQ);
+
+        // Change Maint AUE and IAUE to checkstop without unmasking
+        // Normal setup modifies masked bits in addition to setting checkstop
+        // This causes issues if error has occured, manually scoming to avoid this
+        FAPI_TRY( mss::getScom(p, MCA_ACTION1, l_aue_buffer) );
+        l_aue_buffer.clearBit<MCA_FIR_MAINTENANCE_AUE>();
+        l_aue_buffer.clearBit<MCA_FIR_MAINTENANCE_IAUE>();
+        FAPI_TRY( mss::putScom(p, MCA_ACTION1, l_aue_buffer) );
 
         // Note: We also want to include the following setup RCD recovery and port fail
         FAPI_TRY( mss::change_port_fail_disable(p, mss::LOW) );
