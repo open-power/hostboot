@@ -22,7 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// $Id: mss_freq.C,v 1.32 2017/10/02 15:07:18 lwmulkey Exp $
+// $Id: mss_freq.C,v 1.33 2017/10/20 15:22:29 lwmulkey Exp $
 /* File mss_freq.C created by JEFF SABROWSKI on Fri 21 Oct 2011. */
 
 //------------------------------------------------------------------------------
@@ -73,6 +73,7 @@
 //  1.30   | jdsloat  | 01/29/14 | Fixed 1600 speed limitation for DDR4
 //  1.31   | sglancy  | 09/16/15 | Changed DMI capable values to allow for 8.0GBits/s or 9.6GBits/s if not specifically needing 8.0GBits/s
 //  1.32   | lwmulkey | 10/02/17 | Limit 1600 parts to CL = 13 for 2666 TSV dimms
+//  1.33   | lwmulkey | 10/20/17 | Bug fix: freq_override -> freq_min in CL=13 hardcode
 
 // Add continues to logerrors to lines 650, 560.  IN order to avoid possible future problems.
 //
@@ -820,7 +821,7 @@ fapi::ReturnCode mss_freq(const fapi::Target &i_target_memb)
             }
 
             //Setting Max CL = 13 for 1600 DDR4 TSV
-            if (l_freq_override == 1600 && l_cas_latency > 13)
+            if (l_dimm_freq_min == 1600 && l_cas_latency > 13)
             {
                 FAPI_INF( "Setting CL to 13 from %d", l_cas_latency);
                 l_cas_latency = 13;
