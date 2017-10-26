@@ -425,6 +425,9 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
         SECUREBOOT::ContainerHeader l_conHdr(l_tempAddr);
         size_t l_totalContainerSize = l_conHdr.totalContainerSize();
+        auto l_prefixHdrFlags = l_conHdr.prefixHeaderFlags();
+
+        TRACFCOMP(g_trac_pnor, "Prefix hdr flags:0x%X",l_prefixHdrFlags);
 
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections "
                 "Total container size = 0x%.16llX", l_totalContainerSize);
