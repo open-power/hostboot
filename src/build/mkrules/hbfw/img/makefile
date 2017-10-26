@@ -286,7 +286,10 @@ CUMULUS_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 ## System Specific
 ZZ_WOFDATA_IMG = ${ENGD_WOFPATH:Fzz_wof_data.bin}
 ZEPPELIN_WOFDATA_IMG = ${ENGD_WOFPATH:Fzeppelin_wof_data.bin}
-ZZ_MEMD_IMG = ${ENGD_MEMDPATH:Fzz_memd_data.bin}
+FLEETWOOD_WOFDATA_IMG = ${ENGD_WOFPATH:Ffleetwood_wof_data.bin}
+ZZ_MEMD_IMG = ${ENGD_MEMDPATH:Fzz_memd_output.dat}
+ZEPPELIN_MEMD_IMG = ${ENGD_MEMDPATH:Fzeppelin_memd_output.dat}
+FLEETWOOD_MEMD_IMG = ${ENGD_MEMDPATH:Ffleetwood_memd_output.dat}
 
 # Input fake images
 NIMBUS_VPO_HBD_IMG = vbu_NIMBUS_targeting.bin
@@ -306,6 +309,8 @@ CUMULUS_OCC_FINAL_IMG = CUMULUS.OCC.bin
 ZZ_WOFDATA_FINAL_IMG = ZZ.WOFDATA.bin
 ZEPPELIN_WOFDATA_FINAL_IMG = ZEPPELIN.WOFDATA.bin
 ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
+ZEPPELIN_MEMD_FINAL_IMG = ZEPPELIN.MEMD.bin
+FLEETWOOD_MEMD_FINAL_IMG = FLEETWOOD.MEMD.bin
 
 
 # Decide which PNOR to build
@@ -319,7 +324,8 @@ ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
         GEN_CUMULUS_BIN_FILES = CUMULUS:SBE=${${CUMULUS_SBE_IMG}:P},HCODE=${${CUMULUS_HCODE_IMG}:P},OCC=${${CUMULUS_OCC_IMG}:P},HBD=${${CUMULUS_HBD_IMG}:P}
     .endif
     GEN_ZZ_BIN_FILES = ZZ:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P}
-    GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P}
+    GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P},MEMD=${${ZEPPELIN_MEMD_IMG}:P}
+    GEN_FLEETWOOD_BIN_FILES = FLEETWOOD:WOFDATA=${${FLEETWOOD_WOFDATA_IMG}:P},MEMD=${${FLEETWOOD_MEMD_IMG}:P}
 
     SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
@@ -327,6 +333,7 @@ ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
                              --systemBinFiles ${GEN_CUMULUS_BIN_FILES} \
                              --systemBinFiles ${GEN_ZZ_BIN_FILES} \
                              --systemBinFiles ${GEN_ZEPPELIN_BIN_FILES} \
+                             --systemBinFiles ${GEN_FLEETWOOD_BIN_FILES} \
                              --hwKeyHashFile ${IMPRINT_HW_KEY_HASH}
 .else
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
