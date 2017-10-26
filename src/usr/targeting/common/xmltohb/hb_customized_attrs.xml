@@ -659,6 +659,12 @@
         <default>0x2</default>
         <persistency>volatile-zeroed</persistency>
     </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
+        <default>0x1</default>
+        <no_export/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
