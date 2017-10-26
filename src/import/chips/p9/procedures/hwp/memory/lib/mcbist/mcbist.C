@@ -79,7 +79,8 @@ namespace mcbist
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< >
-fapi2::ReturnCode load_maint_pattern( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target, const pattern& i_pattern,
+fapi2::ReturnCode load_maint_pattern( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target,
+                                      const pattern& i_pattern,
                                       const bool i_invert )
 {
     // Init the fapi2 return code
@@ -733,25 +734,52 @@ const mss::states is_broadcast_capable(const std::vector<fapi2::Target<fapi2::TA
 template< >
 const mss::states is_broadcast_capable(const fapi2::Target<fapi2::TARGET_TYPE_MCBIST>& i_target)
 {
-    // Steps to determine if this MCBIST is broadcastable
-    // 1) Check the number of DIMM's on each MCA - true only if they all match
-    // 2) Check that all of the DIMM kinds are equal - if the are, then we can do broadcast mode
-    // 3) if both 1 and 2 are true, then broadcast capable, otherwise false
+    // First off, check if we need to disable broadcast mode due to a chip size bug
+    // Note: the bug check is decidedly more complicated than the EC check, but we'll just disable BC mode out of safety concerns
+    // Better to go slow and steady and initialize the chip properly than to go fast and leave the memory initialized poorly
+    if( mss::chip_ec_feature_mcbist_end_of_rank(i_target) )
+    {
+        FAPI_INF("%s A chip bug prevents broadcast mode. Chip is not brodcast capable", mss::c_str(i_target));
+        return mss::states::NO;
+    }
 
-    // 1) Check the number of DIMM's on each MCA - if they don't match, then no
-    const auto l_mca_check = is_broadcast_capable(mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target));
+    // If BC mode is disabled in the MRW, then it's disabled here
+    uint8_t l_bc_mode_enable = 0;
+    FAPI_TRY(mss::mrw_memdiags_bcmode(l_bc_mode_enable));
 
-    // 2) Check that all of the DIMM kinds are equal - if the are, then we can do broadcast mode
-    const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
-    const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
-    const auto l_dimm_kind_check = is_broadcast_capable(l_dimm_kinds);
+    if( l_bc_mode_enable == fapi2::ENUM_ATTR_MSS_MRW_MEMDIAGS_BCMODE_DISABLE )
+    {
+        FAPI_INF("%s MRW attribute has broadcast mode disabled", mss::c_str(i_target));
+        return mss::states::NO;
+    }
 
-    // 3) if both 1/2 are true, then broadcastable, otherwise false
-    const auto l_capable = (l_mca_check == mss::states::YES && l_dimm_kind_check == mss::states::YES) ?
-                           mss::states::YES : mss::states::NO;
+    // Now that we are guaranteed to have a chip that could run broadcast mode, do the following steps to check whether our config is broadcast capable:
+    {
+        // Steps to determine if this MCBIST is broadcastable
+        // 1) Check the number of DIMM's on each MCA - true only if they all match
+        // 2) Check that all of the DIMM kinds are equal - if they are, then we can do broadcast mode
+        // 3) if both 1 and 2 are true, then broadcast capable, otherwise false
 
-    FAPI_INF("%s %s broadcast capable", mss::c_str(i_target), (l_capable == mss::states::YES) ? "is" : "is not");
-    return l_capable;
+        // 1) Check the number of DIMM's on each MCA - if they don't match, then no
+        const auto l_mca_check = is_broadcast_capable(mss::find_targets<fapi2::TARGET_TYPE_MCA>(i_target));
+
+        // 2) Check that all of the DIMM kinds are equal - if they are, then we can do broadcast mode
+        const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
+        const auto l_dimm_kinds = mss::dimm::kind::vector(l_dimms);
+        const auto l_dimm_kind_check = is_broadcast_capable(l_dimm_kinds);
+
+        // 3) if both 1/2 are true, then broadcastable, otherwise false
+        const auto l_capable = ((l_mca_check == mss::states::YES) && (l_dimm_kind_check == mss::states::YES)) ?
+                               mss::states::YES : mss::states::NO;
+
+        FAPI_INF("%s %s broadcast capable", mss::c_str(i_target), (l_capable == mss::states::YES) ? "is" : "is not");
+        return l_capable;
+    }
+
+fapi_try_exit:
+    FAPI_ERR("%s failed to get an MRW attribute, an egregious error. Returning NOT broadcast capable",
+             mss::c_str(i_target));
+    return mss::states::NO;
 }
 
 ///

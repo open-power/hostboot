@@ -2974,7 +2974,7 @@ fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<T>& i_target,
         const mcbist::program<T>& i_program );
 
 ///
-/// @brief Load MCBIST Thre load_addr_gen
+/// @brief Load MCBIST Thresholds
 /// @tparam T, the fapi2::TargetType - derived
 /// @tparam TT, the mcbistTraits associated with T - derived
 /// @param[in] i_target the target to effect
