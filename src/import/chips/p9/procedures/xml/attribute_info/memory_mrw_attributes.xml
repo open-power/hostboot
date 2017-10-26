@@ -616,4 +616,17 @@
     <default> 0  </default>
     <mssAccessorName>mrw_temp_refresh_mode</mssAccessorName>
   </attribute>
+
+  <attribute>
+    <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        A switch for memdiags broadcast mode
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <enum> ENABLE = 0, DISABLE = 1 </enum>
+    <mssAccessorName>mrw_memdiags_bcmode</mssAccessorName>
+  </attribute>
 </attributes>
