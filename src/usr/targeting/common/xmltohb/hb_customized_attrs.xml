@@ -608,7 +608,7 @@
     <attribute><id>ATTR_CEN_MRW_CDIMM_SPARE_I2C_TEMP_SENSOR_ENABLE</id><default>0x01</default></attribute>
     <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_MBA</id><default>0x00000060</default></attribute>
     <attribute><id>ATTR_CEN_MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id><default>0x00000020</default></attribute>
- 
+
     <attribute><id>ATTR_CEN_VPD_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
     <attribute><id>ATTR_CEN_VPD_SLEW_RATE_DQ_DQS</id><default>0x03,0x03</default></attribute>
     <attribute><id>ATTR_CEN_EFF_CEN_DRV_IMP_DQ_DQS</id><default>OHM34_FFE0,OHM34_FFE0</default></attribute>
@@ -625,6 +625,12 @@
         <id>ATTR_CEN_MCBIST_USER_BANK</id>
         <default>0x2</default>
         <persistency>volatile-zeroed</persistency>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
+        <default>0x1</default>
+        <no_export/>
     </attribute>
     <!-- =====================================================================
      End of customizations definitions

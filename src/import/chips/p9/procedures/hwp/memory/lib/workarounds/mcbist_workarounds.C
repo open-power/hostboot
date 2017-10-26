@@ -138,6 +138,7 @@ fapi2::ReturnCode end_of_rank( const fapi2::Target<TARGET_TYPE_MCBIST>& i_target
 
     // If we're here, we need to fix up our program. We need to set our stop to stop immediate, which implies
     // we don't do broadcasts and we can't do read, we have to do display.
+    FAPI_INF("%s replacing reads and changing broadcast mode due to a chip bug", mss::c_str(i_target));
     replace_read_helper(io_program);
 
     return fapi2::FAPI2_RC_SUCCESS;
