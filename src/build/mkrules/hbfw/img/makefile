@@ -176,6 +176,10 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
     PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
 .endif
 
+# Since this makefile is only ever used for an FSP signing environment, then
+# we can just specify that we want an fspbuild here without any condition.
+BUILD_TYPE_PARAMS = --build-type fspbuild
+
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
@@ -226,7 +230,7 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
     # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
 
 	# Call script to generate final bin files for default images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
@@ -379,7 +383,7 @@ ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS}
 
 	#for NIMBUS fake pnor skip version header
 	.if(${FAKEPNOR} != "")

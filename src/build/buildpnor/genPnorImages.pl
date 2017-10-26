@@ -79,16 +79,18 @@ use constant LOCAL_SIGNING_FLAG => " -flag ";
 use constant OP_SIGNING_FLAG => " --flags ";
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
-use constant FIPS_BUILD_FLAG => 0x40000000;
+# TODO 1633655 For now, as a workaround FIPS_BUILD_FLAG will be the same as
+# OP_BUILD_FLAG until the larger team is ready to take on the new value.
+use constant FIPS_BUILD_FLAG => 0x80000000;
+# use constant FIPS_BUILD_FLAG => 0x40000000;
 # Applies to SBE image only
 use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
 # Size of HW keys' Hash
 use constant HW_KEYS_HASH_SIZE => 64;
 
-# TODO: RTC 163655
-# Implement dynamic support for choosing FSP or op-build flag type.
-# For now, assume OP build
+# Dynamic support for choosing FSP or op-build flag type.
+# Default to OP build
 my $buildFlag = OP_BUILD_FLAG;
 
 # Corrupt parameter strings
@@ -122,6 +124,7 @@ my %partitionsToCorrupt = ();
 my $sign_mode = $DEVELOPMENT;
 my $hwKeyHashFile = "";
 my $hb_standalone="";
+my $buildType="";
 
 # @TODO RTC 170650: Set default to 0 after all environments provide external
 # control over this policy, plus remove '!' from 'lab-security-override'
@@ -143,6 +146,7 @@ GetOptions("binDir:s" => \$bin_dir,
            "hb-standalone" => \$hb_standalone,
            "lab-security-override!" => \$labSecurityOverride,
            "emit-eccless" => \$emitEccless,
+           "build-type:s" => \$buildType,
            "help" => \$help);
 
 if ($help)
@@ -154,6 +158,12 @@ if ($help)
 ################################################################################
 # Environment Setup, Checking, and Variable Initialization
 ################################################################################
+
+# Get the build type
+if ($buildType eq "fspbuild")
+{
+    $buildFlag = FIPS_BUILD_FLAG;
+}
 
 # Put mode transition input into a hash and ensure a valid signing mode
 my %signMode = ( $DEVELOPMENT => 1,
@@ -1313,6 +1323,12 @@ print <<"ENDUSAGE";
                                       physical jumpers on the system planar.
     --emit-eccless                In addition to typical output, also emit
                                       ECC-less versions of any input binaries
+    --build-type                  Specify whether the type of build is FIPS or
+                                      OpenPower, indicated by either 'fspbuild'
+                                      or 'opbuild' immediately following the
+                                      switch (separated with a space and not
+                                      including the single quotes). OpenPower is
+                                      the default.
 
   Current Limitations:
     - Issues with dependency on ENGD build for certain files such as SBE. This is why [--build-all | --install-all ] are used.

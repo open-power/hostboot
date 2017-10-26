@@ -75,6 +75,13 @@ class ContainerHeader
         size_t totalContainerSize() const;
 
         /**
+         * @brief Retrieves the prefix header flags
+         *
+         * @return uint32_t containing prefix header flags
+         */
+        uint32_t prefixHeaderFlags() const;
+
+        /**
          * @brief Retrieves pointer to first hw key
          * @return ecc_key_t* - ptr to first hw key
          */

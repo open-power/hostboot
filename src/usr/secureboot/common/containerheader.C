@@ -152,6 +152,11 @@ size_t ContainerHeader::totalContainerSize() const
     return iv_headerInfo.hw_hdr.container_size;
 }
 
+uint32_t ContainerHeader::prefixHeaderFlags() const
+{
+    return iv_headerInfo.hw_prefix_hdr.flags;
+}
+
 const ecc_key_t* ContainerHeader::hw_keys() const
 {
     return &iv_headerInfo.hw_hdr.hw_pkey_a;
