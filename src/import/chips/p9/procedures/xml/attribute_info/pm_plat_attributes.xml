@@ -978,7 +978,7 @@
     <valueType>uint8</valueType>
     <enum>OFF=0, ON=1</enum>
     <platInit/>
-    <initToZero/>
+    <default>ON</default>
     <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
