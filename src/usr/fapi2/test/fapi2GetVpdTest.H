@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,9 @@
 
 #include <cxxtest/TestSuite.H>
 #include <getVpdTest.H>
+#include <pnor/pnorif.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 class GetVPDTest : public CxxTest::TestSuite
 {
@@ -43,19 +46,42 @@ public:
 
 void testGetVPD(void)
 {
-    testGetVPD_MR();
+#ifdef CONFIG_SECUREBOOT
+    errlHndl_t pError=NULL;
+    do
+    {
+        pError = PNOR::loadSecureSection(PNOR::MEMD);
+        if(pError)
+        {
+            TS_FAIL("testGetVPD:: failed to load MEMD secure section");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+#endif
+        testGetVPD_MR();
 
-    testGetVPD_MT();
+        testGetVPD_MT();
 
-    testDecode_MR();
+        testDecode_MR();
 
-    testDecode_MT();
+        testDecode_MT();
 
-    testGetVPD_Override();
+        testGetVPD_Override();
 
-    testGetVPD_DQ();
+        testGetVPD_DQ();
 
-    testGetVPD_CK();
+        testGetVPD_CK();
+#ifdef CONFIG_SECUREBOOT
+        pError = PNOR::unloadSecureSection(PNOR::MEMD);
+        if(pError)
+        {
+            TS_FAIL("testGetVPD:: failed to unload MEMD secure section");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+    } while(0);
+#endif
+
 }
 
 }; // GetVPDTest class
