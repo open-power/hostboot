@@ -88,6 +88,7 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_PROC_PCIE_BAR_SIZE_Type l_bar_sizes;
     fapi2::ATTR_CHIP_EC_FEATURE_HW363246_Type l_hw363246;
     fapi2::ATTR_CHIP_EC_FEATURE_HW410503_Type l_hw410503;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1_Type l_hw423589_option1;
     fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -196,6 +197,7 @@ fapi2::ReturnCode p9_pcie_config(
         // Set bits 34:35 = 0b11 Set P9 Style cache-inject behavior
         // Set bits 46:48 = 0b011 Set P9 Style cache-inject rate, 1/16 cycles
         // Set bit 60 = 0b1 only if PEC is bifurcated or trifurcated.
+        // if HW423589_option1, set Disable Group Scope (r/w) and Use Vg(sys) at Vg scope
         FAPI_TRY(fapi2::getScom(l_pec_chiplet, PEC_PBCQHWCFG_REG, l_buf),
                  "Error from getScom (PEC_PBCQHWCFG_REG)");
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_POLL_SCALE,
@@ -206,6 +208,20 @@ fapi2::ReturnCode p9_pcie_config(
                               PEC_PBCQHWCFG_REG_HANG_PE_SCALE_LEN>(PEC_PBCQ_HWCFG_HANG_PE_SCALE);
         l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_OOO_MODE>();
         l_buf.setBit<PEC_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN>();
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1,
+                               i_target,
+                               l_hw423589_option1),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION1)");
+
+        if (l_hw423589_option1)
+        {
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_SCOPE_GROUP>();
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_SCOPE_GROUP>();
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_WR_VG>();
+            l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_RD_VG>();
+        }
+
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
                               PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
                                   PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
