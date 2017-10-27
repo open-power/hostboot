@@ -111,6 +111,18 @@ fapi2::ReturnCode p9_int_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<49, 1, 63, uint64_t>(literal_0 );
             }
 
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_INT_INT_CQ_INT_CQ_PBO_CTL_DISABLE_G_ON = 0x1;
+                l_scom_buffer.insert<47, 1, 63, uint64_t>(l_INT_INT_CQ_INT_CQ_PBO_CTL_DISABLE_G_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_INT_INT_CQ_INT_CQ_PBO_CTL_DISABLE_VG_NOT_SYS_ON = 0x1;
+                l_scom_buffer.insert<46, 1, 63, uint64_t>(l_INT_INT_CQ_INT_CQ_PBO_CTL_DISABLE_VG_NOT_SYS_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5013021ull, l_scom_buffer));
         }
         {

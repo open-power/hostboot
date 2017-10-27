@@ -285,13 +285,24 @@ fapi2::ReturnCode pba_init(
     uint8_t l_attr_pbax_groupid;
     uint8_t l_attr_pbax_chipid;
     uint8_t l_attr_pbax_broadcast_vector;
+    uint8_t l_hw423589_option1;
 
-    // Clear PBA CONFIG. This register is cleared as there are no chicken
-    // switches that need to be disabled. All other bits are set by OCC Firmware
-    FAPI_TRY(fapi2::putScom(i_target, PU_PBACFG, l_data64),
-             "Failed to clear PBA_CONFIG");
+    // Setup PBA CONFIG
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1,
+                           i_target,
+                           l_hw423589_option1));
+    l_data64.flush<0>();
+
+    if (l_hw423589_option1)
+    {
+        l_data64.setBit<PU_PBACFG_CHSW_DIS_GROUP_SCOPE>();
+    }
+
+    FAPI_INF("Resetting PBACFG with value = 0x%16llX", uint64_t(l_data64));
+    FAPI_TRY(fapi2::putScom(i_target, PU_PBACFG, l_data64));
 
     // Clear the PBA FIR
+    l_data64.flush<0>();
     FAPI_TRY(fapi2::putScom(i_target, PU_PBAFIR, l_data64),
              "Failed to clear PBA_FIR");
 
@@ -396,13 +407,13 @@ fapi2::ReturnCode pba_reset(
         PU_PBASLVCTL1_SCOM,
         PU_PBASLVCTL2_SCOM,
         PU_PBAFIR,
-        PU_PBACFG,
         PU_PBAERRRPT0
     };
 
     FAPI_IMP(">> pba_reset ...");
 
     fapi2::buffer<uint64_t> l_data64;
+    uint8_t l_hw423589_option1;
 
     // Stop the  BCDE and BCUE
     FAPI_TRY(pba_bc_stop(i_target), "pba_bc_stop() detected an error");
@@ -418,10 +429,24 @@ fapi2::ReturnCode pba_reset(
     }
 
     // Perform non-zero reset operations
+    // set PBACFG register
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1,
+                           i_target,
+                           l_hw423589_option1));
+    l_data64.flush<0>();
+
+    if (l_hw423589_option1)
+    {
+        l_data64.setBit<PU_PBACFG_CHSW_DIS_GROUP_SCOPE>();
+    }
+
+    FAPI_INF("Resetting PBACFG with value = 0x%16llX", uint64_t(l_data64));
+    FAPI_TRY(fapi2::putScom(i_target, PU_PBACFG, l_data64));
+
     // Reset PBAX errors via Configuration Register
     //     Bit 2: PBAXCFG_SND_RESET
     //     Bit 3: PBAXCFG_RCV_RESET
-    l_data64.setBit<2, 2>();
+    l_data64.flush<0>().setBit<2, 2>();
     FAPI_INF("Resetting PBAX errors via PBAX config register 0x%08llX with "
              "value = 0x%16llX", PU_PBAXCFG_SCOM, uint64_t(l_data64));
     FAPI_TRY(fapi2::putScom(i_target, PU_PBAXCFG_SCOM, l_data64));
