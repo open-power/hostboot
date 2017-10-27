@@ -38,7 +38,16 @@ VPATH += ../fsp
 DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
-build_all: cp_hbfiles gen_default_images
+# Modify the dependency list when building a CFM test image
+.if(${CFM_TEST_IMAGE} != "")
+    BUILD_ALL_DEPS = cp_hbfiles gen_default_images update_image_id
+    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles update_image_id dump-secureboot-config
+.else
+    BUILD_ALL_DEPS = cp_hbfiles gen_default_images
+    GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles dump-secureboot-config
+.endif
+
+build_all: $(BUILD_ALL_DEPS)
 install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
 
 #Some useful search paths
@@ -49,13 +58,23 @@ ENGD_SRCPATH  = ${SRCPATH:S/hbfw\/img/engd\/href/g}
 SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
-
+HBFW_SIMPATH  = ${HBFW_OBJPATH:S/img/simics/g}
+HBFW_IMGPATH  = ${.PATH:M*img*}
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
 # during build flash pass and consumption by HWSV.
 # Having external users acquire from OBJ dir as there are packaging
 # changes expected in the future which will require using OBJ version.
 #################################################
+
+#variables defined to ease finding symbol files used for
+#editing image tag for CFM images
+hostboot_SYMS=hbicore.syms
+hostboot_runtime_SYMS=hbirt.syms
+hostboot_securerom_SYMS=securerom.syms
+hostboot_bootloader_SYMS=hbibl.syms
+
+IMAGE_EDIT_PROGRAM=editimgid
 
 # Input default images
 BOOTLDR_IMG = hostboot_bootloader.bin
@@ -176,10 +195,20 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
     DEFAULT_PARAMS = --systemBinFiles ${GEN_DEFAULT_BIN_FILES} --pnorLayout ${PNOR_LAYOUT}
 .endif
 
+# rule to update hostboot image tags for custom CFM image, only enabled
+# when the enviroment variable CFM_TEST_IMAGE is populated
+update_image_id: cp_hbfiles validate_cfm_image_name
+	${HBFW_IMGPATH:F${IMAGE_EDIT_PROGRAM}} --binFile=${CFM_TEST_IMAGE:p} \
+        --symsFile=${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
+
+# make sure the files exist - the perl script isnt all that smart
+validate_cfm_image_name: ${CFM_TEST_IMAGE:p} \
+   	${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
+
 cp_hbfiles: .SPECTARG
 	${BASE_IMAGES:@image@cp -f ${SRCPATH:F${image}} ${image};@}
 
-gen_default_images: cp_hbfiles dump-secureboot-config
+gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
 	currentsb -chain
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
