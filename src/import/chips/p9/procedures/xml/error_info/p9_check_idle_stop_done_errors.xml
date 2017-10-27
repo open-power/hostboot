@@ -30,7 +30,7 @@
   <!-- *********************************************************************** -->
   <hwpError>
     <rc>RC_SGPE_HCODE_HALTED</rc>
-    <description> SGPE Hcode is in HALT state</description> 
+    <description> SGPE Hcode is in HALT state</description>
     <ffdc>OCC_LFIR</ffdc>
     <ffdc>CHIP</ffdc>
 
@@ -157,10 +157,18 @@
       <priority>HIGH</priority>
     </callout>
 
-     <callout>
-      <target>CHIP</target>
+    <callout>
+      <target>EX</target>
       <priority>LOW</priority>
     </callout>
+
+    <deconfigure>
+        <target>EX</target>
+    </deconfigure>
+
+    <gard>
+        <target>EX</target>
+    </gard>
 
     <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
     <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
@@ -195,9 +203,17 @@
     </callout>
 
      <callout>
-      <target>CHIP</target>
+      <target>EX</target>
       <priority>LOW</priority>
     </callout>
+
+    <deconfigure>
+        <target>EX</target>
+    </deconfigure>
+
+    <gard>
+        <target>EX</target>
+    </gard>
 
     <collectFfdc>p9_eq_clear_atomic_lock, EQ_TARGET</collectFfdc>
     <collectFfdc>p9_collect_ppe_state, CHIP, PPE_STATE_MODE, PPE_BASE_ADDRESS_LIST</collectFfdc>
