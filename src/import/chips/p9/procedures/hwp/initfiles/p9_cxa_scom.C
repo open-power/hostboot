@@ -133,6 +133,18 @@ fapi2::ReturnCode p9_cxa_scom(const fapi2::Target<fapi2::TARGET_TYPE_CAPP>& TGT0
                 l_scom_buffer.insert<25, 3, 61, uint64_t>(l_TGT1_ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID );
             }
 
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_DISABLE_G_ON = 0x1;
+                l_scom_buffer.insert<4, 1, 63, uint64_t>(l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_DISABLE_G_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_DISABLE_VG_NOT_SYS_ON = 0x1;
+                l_scom_buffer.insert<3, 1, 63, uint64_t>(l_CAPP0_CXA_TOP_CXA_APC0_APCCTL_DISABLE_VG_NOT_SYS_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x2010818ull, l_scom_buffer));
         }
         {
