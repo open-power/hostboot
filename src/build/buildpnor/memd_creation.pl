@@ -43,20 +43,35 @@ print "Creating MEMD binary...\n";
 
 my $memd_dir = "";
 my $memd_output = "";
+my @memd_files = "";
 my $help = 0;
 my $man = 0;
 
 GetOptions(
     "memd_dir=s" => \$memd_dir,
     "memd_output=s" => \$memd_output,
+    "memd_files=s" => \@memd_files,
     "help" => \$help,
     "man" => \$man) || pod2usage(-verbose=>0);
+
+# The remaining parms will be memd files
+push(@memd_files,@ARGV);
 
 pod2usage(-verbose => 1) if $help;
 pod2usage(-verbose => 2) if $man;
 
 # Find files
-my @memd_files = glob($memd_dir . '/*');
+if($memd_dir)
+{
+    print "Reading files from $memd_dir\n";
+    @memd_files = glob($memd_dir . '/*');
+}
+elsif(@memd_files)
+{
+    # Remove the empty first element
+    shift(@memd_files);
+    print "Reading memd files @memd_files\n";
+}
 
 # Get the max file size - offset for each file binary
 my $max_file_size = 0;
@@ -115,13 +130,12 @@ foreach my $file (@memd_files)
     }
 
     # Removing the first byte of the MEMD binary
-    my $new_file = "$memd_dir/edited_memd.dat";
+    my $new_file = File::Basename::basename "$file.tmp";
     run_command("tail -c +2 $file > $new_file");
-    run_command("mv $new_file $file");
 
     seek($fh, $offset, 0);
-    print "Writing the file $file...\n";
-    open(my $in_file, '<', $file) or die "Could not open file '$file' $!";
+    print "Writing the file $new_file...\n";
+    open(my $in_file, '<', $new_file) or die "Could not open file '$new_file' $!";
 
     while ( <$in_file> )
     {
