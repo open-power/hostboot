@@ -1,0 +1,92 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/tools/editimgid $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2017
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+use strict;
+
+use Getopt::Long;
+
+my $imageIdSym = "hbi_ImageId";
+
+my $img = "";
+my $symsFile = "";
+
+
+sub usage
+{
+    ## needs to files as inputs
+    print   "Need 2 file names.   \nUsage:\n";
+    print   "\teditimgid --binFile <path to image>/hostboot.bin --symsFile <path to syms file>/hhbicore.syms\n\n";
+    exit    -1;
+}
+
+
+GetOptions('binFile=s' => \$img,
+            'symsFile=s' => \$symsFile);
+
+usage() unless $img and $symsFile;
+
+#example from hbicore.syms:
+# V,0002f008,00000000,00000000,hbi_ImageId
+#   1. find the hbi_ImageId
+#   2. chop off columns 1,2
+#   3. now the address is in the first 8 columns, chop off the rest
+my $addressStr = `grep hbi_ImageId $symsFile  | colrm 1 2 | colrm 9`;
+
+#if the address is empty or we got a bad rc - exit
+if ($addressStr eq '' || $? )
+{
+    printf "error reading address from $symsFile";
+    exit(-1);
+}
+my $address = hex $addressStr;
+
+#image id is a 128 byte field, written as a null terminated
+#string, extract all but the null terminator
+my $imageId = `dd if=$img bs=1 skip=$address count=127`;
+
+if ($imageId eq '' || $?)
+{
+    print "error reading image id tag from $img rc=$?\n";
+    exit (-1);
+}
+
+#remove any non printable chars from the data
+$imageId =~ s/[^[:print:]]+//g;
+
+$imageId = $imageId . "/" . "cfm";
+
+#make sure we can edit the file
+my $mode = 0755;
+chmod $mode, $img;
+
+my $cmd = "echo -n $imageId | dd of=$img conv=notrunc bs=1 ";
+
+# write back the full 127 byte field
+$cmd = $cmd . "seek=$address count=127 >& /dev/null";
+
+system("$cmd") == 0
+          or die "Failed to update the image RC=$?";
+
+exit $?
