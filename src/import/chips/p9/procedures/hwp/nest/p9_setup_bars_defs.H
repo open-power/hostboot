@@ -295,6 +295,7 @@ struct p9_setup_bars_chip_info
     uint64_t base_address_mmio;
     std::vector<p9_setup_bars_addr_range> ranges;
     uint8_t hw423589_option2;
+    uint8_t hw423589_option1;
     uint8_t extended_addressing_mode;
 };
 

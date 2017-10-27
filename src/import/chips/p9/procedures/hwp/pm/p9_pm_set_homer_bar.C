@@ -151,7 +151,7 @@ p9_pm_set_homer_bar(  const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targe
                   PBA_BAR0,
                   i_mem_bar,
                   i_mem_size,
-                  p9pba::GROUP, 0);
+                  p9pba::LOCAL_NODAL, 0);
 
     fapi2::current_err = l_rc;
 

@@ -122,6 +122,30 @@ fapi2::ReturnCode p9_mmu_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                 l_scom_buffer.insert<8, 3, 61, uint64_t>(literal_0x3 );
             }
 
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_GROUP_ON = 0x1;
+                l_scom_buffer.insert<1, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_GROUP_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_GROUP_ON = 0x1;
+                l_scom_buffer.insert<5, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_GROUP_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_VG_NOT_SYS_ON = 0x1;
+                l_scom_buffer.insert<2, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_WR_DISABLE_VG_NOT_SYS_ON );
+            }
+
+            if (((l_chip_id == 0x5) && (l_chip_ec == 0x20)) || ((l_chip_id == 0x5) && (l_chip_ec == 0x22)) )
+            {
+                constexpr auto l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_VG_NOT_SYS_ON = 0x1;
+                l_scom_buffer.insert<6, 1, 63, uint64_t>(l_NMMU_MM_FBC_CQ_WRAP_NXCQ_SCOM_DMA_RD_DISABLE_VG_NOT_SYS_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5012c15ull, l_scom_buffer));
         }
         {
