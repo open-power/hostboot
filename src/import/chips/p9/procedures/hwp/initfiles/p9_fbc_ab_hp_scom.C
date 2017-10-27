@@ -29,8 +29,8 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0 = 0;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_3 = 3;
 constexpr uint64_t literal_4 = 4;
@@ -58,6 +58,9 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT0, l_chip_ec));
         fapi2::ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP_Type l_TGT0_ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP, TGT0, l_TGT0_ATTR_PROC_FABRIC_SYSTEM_MASTER_CHIP));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1_Type l_TGT0_ATTR_CHIP_EC_FEATURE_HW423589_OPTION1;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1, TGT0,
+                               l_TGT0_ATTR_CHIP_EC_FEATURE_HW423589_OPTION1));
         fapi2::ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_Type l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_GROUP_MASTER_CHIP, TGT0, l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP));
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
@@ -138,7 +141,8 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<1, 1, 61, uint64_t>(l_PB_COM_PB_CFG_TM_MASTER_NEXT_OFF );
             }
 
-            if ((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE))
+            if (((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE)
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW423589_OPTION1 == literal_0)))
             {
                 constexpr auto l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON = 0x7;
                 l_scom_buffer.insert<2, 1, 61, uint64_t>(l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON );
@@ -1182,7 +1186,8 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<1, 1, 62, uint64_t>(l_PB_COM_PB_CFG_TM_MASTER_NEXT_OFF );
             }
 
-            if ((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE))
+            if (((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE)
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW423589_OPTION1 == literal_0)))
             {
                 constexpr auto l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON = 0x7;
                 l_scom_buffer.insert<2, 1, 62, uint64_t>(l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON );
@@ -2226,7 +2231,8 @@ fapi2::ReturnCode p9_fbc_ab_hp_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 l_scom_buffer.insert<1, 1, 63, uint64_t>(l_PB_COM_PB_CFG_TM_MASTER_NEXT_OFF );
             }
 
-            if ((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE))
+            if (((l_TGT0_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP == fapi2::ENUM_ATTR_PROC_FABRIC_GROUP_MASTER_CHIP_TRUE)
+                 && (l_TGT0_ATTR_CHIP_EC_FEATURE_HW423589_OPTION1 == literal_0)))
             {
                 constexpr auto l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON = 0x7;
                 l_scom_buffer.insert<2, 1, 63, uint64_t>(l_PB_COM_PB_CFG_CHG_RATE_GP_MASTER_NEXT_ON );
