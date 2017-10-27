@@ -95,6 +95,11 @@ p9_setup_bars_build_chip_info(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
                            io_chip_info.hw423589_option2),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION2)");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION1,
+                           i_target,
+                           io_chip_info.hw423589_option1),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION1)");
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -1247,17 +1252,20 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
              "Error from p9_setup_bars_npu");
 
     // MCD
-    if (l_chip_info.extended_addressing_mode && l_chip_info.hw423589_option2)
+    if (!l_chip_info.hw423589_option1)
     {
-        FAPI_TRY(p9_setup_bars_mcd_HW423589_OPTION2(i_target,
-                 FAPI_SYSTEM,
-                 l_chip_info),
-                 "Error from p9_setup_bars_mcd_HW423589_OPTION2");
-    }
-    else
-    {
-        FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
-                 "Error from p9_setup_bars_mcd");
+        if (l_chip_info.extended_addressing_mode && l_chip_info.hw423589_option2)
+        {
+            FAPI_TRY(p9_setup_bars_mcd_HW423589_OPTION2(i_target,
+                     FAPI_SYSTEM,
+                     l_chip_info),
+                     "Error from p9_setup_bars_mcd_HW423589_OPTION2");
+        }
+        else
+        {
+            FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
+                     "Error from p9_setup_bars_mcd");
+        }
     }
 
     // INT
