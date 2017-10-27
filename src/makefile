@@ -241,8 +241,7 @@ TESTCASE_MODULES += testsyslib
 TESTCASE_MODULES += testscom
 TESTCASE_MODULES += $(if $(CONFIG_VPO_COMPILE),,testruntime)
 TESTCASE_MODULES += testintr
-# RTC:181401 figure out why we are seeing a data storage exception during fapi2 tests
-#TESTCASE_MODULES += testfapi2
+TESTCASE_MODULES += testfapi2
 
 #******************************************************************
 #KNOWN ISSUES (I might let these run but there is something wrong)
