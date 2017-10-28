@@ -39,6 +39,7 @@
 #include <initservice/initserviceif.H>
 #include <sys/mm.h>
 #include <errl/errlmanager.H>
+#include <util/misc.H>
 
 namespace fapi2
 {
@@ -109,7 +110,9 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
     FAPI_DBG("Entering platParseWOFTables ....");
 
     errlHndl_t l_errl = nullptr;
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    uint8_t* l_simMatch = nullptr;
+    size_t l_simMatchSize = 0;
 
     TARGETING::Target * l_sys = nullptr;
     TARGETING::Target * l_mProc = nullptr;
@@ -446,6 +449,23 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             {
                 // Save the header for later
                 l_headers.push_back(l_wth);
+
+                // We run with fewer cores in Simics, ignore the core field
+                //  if we don't find a complete match
+                if( Util::isSimicsRunning() && l_simMatch == nullptr )
+                {
+                    if( (l_wth->socket_power_w == l_socketPower) &&
+                        (l_wth->sort_power_freq_mhz == l_sortFreq) )
+                    {
+                        FAPI_INF("Found a potential WOF table match for Simics");
+                        // Copy the WOF table to a local var temporarily
+                        l_simMatchSize = l_ste[l_ent].size;
+                        l_simMatch = new uint8_t[l_simMatchSize];
+                        memcpy(l_simMatch,
+                               reinterpret_cast<uint8_t*>(l_wth),
+                               l_simMatchSize);
+                    }
+                }
             }
         }
 
@@ -454,8 +474,18 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
             break;
         }
 
+        if( Util::isSimicsRunning()
+            && (l_ent == l_img->entryCount)
+            && (l_simMatch != nullptr) )
+        {
+            FAPI_INF("Using fuzzy match for Simics");
+            // Copy the WOF table to the ouput pointer
+            memcpy(o_wofData,
+                   l_simMatch,
+                   l_simMatchSize);
+        }
         //Check for no match
-        if(l_ent == l_img->entryCount)
+        else if(l_ent == l_img->entryCount)
         {
             FAPI_ERR("No WOF table match found");
             /*@
@@ -572,6 +602,11 @@ fapi2::ReturnCode platParseWOFTables(uint8_t* o_wofData)
         }
 #endif
 
+    }
+
+    if( l_simMatch )
+    {
+        delete[] l_simMatch;
     }
 
     FAPI_DBG("Exiting platParseWOFTables ....");
