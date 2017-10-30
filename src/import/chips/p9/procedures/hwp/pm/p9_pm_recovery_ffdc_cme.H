@@ -55,10 +55,17 @@ namespace p9_stop_recov_ffdc
             /// @brief  destructor
             virtual ~PlatCme() { };
 
+            /// @brief      Initializes the CME FFDC Sub-Sections in HOMER with default headers
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            ///  @return     fapi2 return code
+            fapi2::ReturnCode init ( void* i_pHomerBuf );
+
             /// @brief      collects FFDC pertaining to all functional CMEs in the chip.
-            /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            /// @param[in]  i_ffdcType   indicates the content type to collect
             //  @return     fapi2 return code.
-            fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
+            fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
+                                           uint8_t i_ffdcType = ALL );
 
         private:
             /// @brief      collects trace info from a given CME SRAM buffer.
@@ -90,13 +97,10 @@ namespace p9_stop_recov_ffdc
             /// @brief updates the CME FFDC Header
             ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for CME FFDC Header
             ///@param[in]   i_cmePos        position of CME instance
-            ///param[in]    i_ffdcValid     bit vector summarizing FFDC validity
-            ///@param[in]   i_haltCondition hlat state of CME
+            ///param[in]    i_sectionsValid bit vector summarizing FFDC validity
             ///@return      fapi2 return code.
-            ///@note        refer to PPE Spec for details on halt state.
-
-            fapi2::ReturnCode updateCmeFfdcHeader( uint8_t * i_pHomerBuf, uint8_t i_cmePos,
-                                                   uint8_t i_ffdcValid, uint8_t i_haltCondition );
+            fapi2::ReturnCode updateCmeFfdcHeader( uint8_t* i_pHomerBuf, uint8_t i_cmePos,
+                                                   uint16_t i_sectionsValid );
     };
 
 extern "C"
