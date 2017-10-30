@@ -468,6 +468,26 @@ void send_esel(eselInitData * i_data,
     return;
 } // send_esel
 
+uint32_t get_sel_time()
+{
+    uint8_t *data = NULL;
+    size_t len = 0;
+    errlHndl_t l_err;
+    IPMI::completion_code l_cc = IPMI::CC_UNKBAD;
+
+    l_err = IPMI::sendrecv( IPMI::get_sel_time(), l_cc, len, data );
+    if( l_err || l_cc != IPMI::CC_OK || len != sizeof(uint32_t) )
+    {
+        delete l_err;
+        delete [] data;
+        return 0;
+    }
+
+    uint32_t timet = le32toh(*reinterpret_cast<uint32_t*>(data));
+    delete [] data;
+    return timet;
+}
+
 } // IPMISEL
 
 #ifndef __HOSTBOOT_RUNTIME

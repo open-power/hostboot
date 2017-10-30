@@ -245,6 +245,9 @@ namespace IPMI
 
 
     // Storage messages
+    inline const command_t get_sel_time(void)
+    { return std::make_pair(NETFUN_STORAGE, 0x48); }
+
     inline const command_t set_sel_time(void)
     { return std::make_pair(NETFUN_STORAGE, 0x49); }
 
