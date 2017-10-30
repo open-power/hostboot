@@ -254,7 +254,7 @@ fapi2::ReturnCode add_enable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     // Overrides the PDA value to be enabled
     l_mrs03.iv_pda = fapi2::ENUM_ATTR_EFF_PER_DRAM_ACCESS_ENABLE;
 
-    FAPI_TRY( mss::mrs_engine(i_target, l_mrs03, i_rank, DELAY, io_inst) );
+    FAPI_TRY( mss::mrs_engine(i_target, l_mrs03, i_rank, mss::ddr4::pda::SAFE_COMMAND_DELAY, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -306,7 +306,7 @@ fapi2::ReturnCode add_disable( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_t
     // Overrides the PDA value to be disabled
     l_mrs03.iv_pda = fapi2::ENUM_ATTR_EFF_PER_DRAM_ACCESS_DISABLE;
 
-    FAPI_TRY( mss::mrs_engine(i_target, l_mrs03, i_rank, DELAY, io_inst) );
+    FAPI_TRY( mss::mrs_engine(i_target, l_mrs03, i_rank, mss::ddr4::pda::SAFE_COMMAND_DELAY, io_inst) );
 
 fapi_try_exit:
     return fapi2::current_err;
