@@ -39,15 +39,43 @@ namespace p9_stop_recov_ffdc
 {
 
 /**
+ * @brief   enumerates all the sub-steps in a PM Reset Flow
+ */
+enum PmResetStep
+{
+    PM_RESET_UNKNOWN = 0,
+    PM_RESET_FFDC_SEC_INIT,
+    PM_RESET_FFDC_CHK_PPE_HALT,
+    PM_RESET_FFDC_GET_FIRS,
+    PM_RESET_FIR_OCC,
+    PM_RESET_OCC_CTRL,
+    PM_RESET_SPL_WKUP_EX_ALL,
+    PM_RESET_FIR_PBA,
+    PM_RESET_FIR_PPM,
+    PM_RESET_FIR_CME,
+    PM_RESET_OCC_GPE,
+    PM_RESET_PGPE,
+    PM_RESET_SGPE,
+    PM_RESET_EC_EQ,
+    PM_RESET_DISABLE_RES_CLKS,
+    PM_RESET_OCC_SRAM,
+    PM_RESET_OCB,
+    PM_RESET_PSS,
+    PM_RESET_MAX
+};
+
+/**
  * @brief   enumerates all the platforms involved with STOP Recovery.
  */
 enum PmComplexPlatId
 {
+    PLAT_NONE   =   0x00,
     PLAT_CME    =   0x01,
     PLAT_SGPE   =   0x02,
     PLAT_PGPE   =   0x03,
     PLAT_OCC    =   0x04,
-    PLAT_PPM    =   0x05,
+    PLAT_CPPM   =   0x05,
+    PLAT_QPPM   =   0x06,
 };
 
 /**
@@ -55,11 +83,51 @@ enum PmComplexPlatId
  */
 enum FfdcDataType
 {
-    IMAGE_HEADER     =  0x01,
-    DASH_BOARD_VAR   =  0x02,
-    TRACES           =  0x03,
-    INTERNAL_REG     =  0x04,
-    SCOM_REG         =  0x05,
+    INIT             =  0x00, // initializes FFDC section headers
+    IMAGE_HEADER     =  0x01, // collect PPE SRAM Image Header
+    DASH_BOARD_VAR   =  0x02, // collect PPE GLobal Variables / Dash
+    TRACES           =  0x04, // collect FW traces from SRAM
+    INTERNAL_REG     =  0x08, // collect internal regsiters
+    SCOM_REG         =  0x10, // collect SCOM registers
+    PPE_STATE        =  0x20, // collect PPE SPRs, XIRs, and GPRs
+    PPE_HALT_STATE   =  0x40, // collect the PPE Engine HALT State
+    FIR_STATE        =  0x80,
+    ALL              =  ( IMAGE_HEADER |
+                          DASH_BOARD_VAR |
+                          TRACES |
+                          INTERNAL_REG |
+                          SCOM_REG |
+                          PPE_STATE |
+                          PPE_HALT_STATE |
+                          FIR_STATE)
+};
+
+/**
+ * @brief enumerates bit positions used to mark sections in PM FFDC as valid
+ */
+enum PmFfdcSectionState
+{
+    PM_FFDC_INVALID        =   0x0000,  // none of the sections is valid
+    PM_FFDC_FIR_VALID      =   0x0001,  // fir section valid
+    PM_FFDC_QUAD0_VALID    =   0x0002,  // quad 0 section valid
+    PM_FFDC_QUAD1_VALID    =   0x0004,  // quad 1 section valid
+    PM_FFDC_QUAD2_VALID    =   0x0008,  // quad 2 section valid
+    PM_FFDC_QUAD3_VALID    =   0x0010,  // quad 3 section valid
+    PM_FFDC_QUAD4_VALID    =   0x0020,  // quad 4 section valid
+    PM_FFDC_QUAD5_VALID    =   0x0040,  // quad 5 section valid
+    PM_FFDC_SGPE_VALID     =   0x0080,  // sgpe section valid
+    PM_FFDC_PGPE_VALID     =   0x0100,  // pgpe section valid
+    PM_FFDC_OCC_VALID      =   0x0200,  // occ section valid
+    PM_FFDC_VALID_ALL      =   ( PM_FFDC_FIR_VALID   |
+                                 PM_FFDC_QUAD0_VALID |
+                                 PM_FFDC_QUAD1_VALID |
+                                 PM_FFDC_QUAD2_VALID |
+                                 PM_FFDC_QUAD3_VALID |
+                                 PM_FFDC_QUAD4_VALID |
+                                 PM_FFDC_QUAD5_VALID |
+                                 PM_FFDC_SGPE_VALID  |
+                                 PM_FFDC_PGPE_VALID  |
+                                 PM_FFDC_OCC_VALID )
 };
 
 /**
@@ -68,14 +136,14 @@ enum FfdcDataType
 
 enum PpeFfdcValidStatus
 {
-    PPE_FFDC_INVALID        =   0x00,  //entire PPE FFDC is not valid
-    PPE_DASHBOARD_VALID     =   0x01,  // PPE globals are valid
-    PPE_IMAGE_HEADER_VALID  =   0x02,  // PPE image header is valid
-    PPE_TRACE_VALID         =   0x04,  // PPE Traces are valid
-    PPE_STATE_VALID         =   0x08,  // PPE XIRS, GPES and SPRs are valid
-    PPE_INT_REG_VALID       =   0x10,  // PPE Int Regs are valid
-    PPE_HALT_STATE_VALID    =   0x20,  // PPE Halt State Info is valid
-    PPE_FFDC_ALL_VALID      =   0x3F,  // Entire PPE FFDC is valid
+    PPE_FFDC_INVALID        = 0x0000,  //entire PPE FFDC is not valid
+    PPE_DASHBOARD_VALID     = 0x0001,  // PPE globals are valid
+    PPE_IMAGE_HEADER_VALID  = 0x0002,  // PPE image header is valid
+    PPE_TRACE_VALID         = 0x0004,  // PPE Traces are valid
+    PPE_STATE_VALID         = 0x0008,  // PPE XIRS, GPES and SPRs are valid
+    PPE_INT_REG_VALID       = 0x0010,  // PPE Int Regs are valid
+    PPE_HALT_STATE_VALID    = 0x0020,  // PPE Halt State Info is valid
+    PPE_FFDC_ALL_VALID      = 0x003F,  // Entire PPE FFDC is valid
 };
 
 /**
@@ -95,23 +163,50 @@ enum PpeHaltCondition
     PPE_HALT_COND_UNKNOWN = 0xFF  // Could not read or interpret XSR
 };
 
+
+/**
+ * @brief   Top level header of the PM Complex FFDC in HOMER
+ */
+struct __attribute__((packed)) PmFfdcHeader
+{
+    uint32_t  iv_magicNumber;     // Magic Word of Top Level PM FFDC
+    uint8_t   iv_versionMajor;    // Major Version of the Layout Header
+    uint8_t   iv_versionMinor;    // Minor Version of the Layout Header
+    uint16_t  iv_headerSize;      // Size of this Header
+    uint32_t  iv_sectionSize;     // Size of complete PM FFDC mapped by this
+    uint8_t   iv_ffdcValid;       // Validity of the complete PM FFDC
+    uint8_t   iv_phase;           // Last executed step in PM Reset
+    uint16_t  iv_sectionsValid;   // See PmFfdcSectionState
+    uint32_t  iv_procPosition;    // Logical position of Proc Chip in system
+    uint16_t  iv_errorMarker;     // High level error marker
+    uint16_t  iv_firOffset;       // Offset to FIR FFDC sub-section
+    uint16_t  iv_quadOffset[MAX_QUADS_PER_CHIP];   // Offset to Quad subsections
+    uint16_t  iv_sgpeOffset;      // Offset to the SGPE FFDC sub-section
+    uint16_t  iv_pgpeOffset;      // Offset to the PGPE FFDC sub-section
+    uint16_t  iv_occOffset;       // Offset to the OCC FFDC sub-section
+    uint8_t   iv_reserved[6];     // Reserved
+    uint32_t  iv_ccsr;            // CCSR on PM Reset entry
+    uint32_t  iv_qcsr;            // QCSR on PM Reset entry
+};
+
 /**
  * @brief   models header of FFDC region of HOMER associated with a CME.
  */
 struct __attribute__((packed)) PpeFfdcHeader
 {
     uint32_t  iv_ppeMagicNumber;
-    uint8_t   iv_ppeNumber;
-    uint8_t   iv_headerSize;
+    uint8_t   iv_versionMajor;
+    uint8_t   iv_versionMinor;
+    uint16_t  iv_headerSize;
     uint16_t  iv_sectionSize;
-    uint8_t   iv_ffdcValid;
+    uint16_t  iv_sectionsValid;
+    uint8_t   iv_ppeNumber;
     uint8_t   iv_ppeHaltCondition;
     uint16_t  iv_dashBoardOffset;
     uint16_t  iv_sramHeaderOffset;
     uint16_t  iv_sprOffset;
     uint16_t  iv_intRegOffset;
     uint16_t  iv_offsetTraces;
-    uint8_t   iv_reserve[4];
 };
 
 /**
@@ -120,9 +215,13 @@ struct __attribute__((packed)) PpeFfdcHeader
 struct __attribute__((packed)) QuadFfdcHeader
 {
     uint32_t iv_quadMagicWord;
-    uint8_t  iv_quadInstance;
-    uint8_t  iv_quadHeaderSize;
+    uint8_t  iv_versionMajor;
+    uint8_t  iv_versionMinor;
+    uint16_t iv_quadHeaderSize;
     uint16_t iv_sectionSize;
+    uint16_t iv_sectionsValid;
+    uint8_t  iv_reserve1;
+    uint8_t  iv_quadInstance;
     uint16_t iv_offsetCppm0;
     uint16_t iv_offsetCppm1;
     uint16_t iv_offsetCppm2;
@@ -130,8 +229,7 @@ struct __attribute__((packed)) QuadFfdcHeader
     uint16_t iv_offsetCme0;
     uint16_t iv_offsetCme1;
     uint16_t iv_offsetQppm;
-    uint8_t  iv_ffdcValid;
-    uint8_t  iv_reserve;
+    uint8_t  iv_reserve2[4];
 };
 
 
@@ -140,25 +238,46 @@ struct __attribute__((packed)) QuadFfdcHeader
  */
 enum OccFfdcValidStatus
 {
-    OCC_FFDC_INVALID             =   0x00,  // None of the FFDC section is valid
-    OCC_FFDC_TRACE_ERR_VALID     =   0x01,  // OCC ERR traces section valid
-    OCC_FFDC_TRACE_IMP_VALID     =   0x02,  // OCC IMP traces section valid
-    OCC_FFDC_TRACE_INF_VALID     =   0x04,  // OCC INF traces section valid
-    OCC_FFDC_TRACE_SSX_VALID     =   0x08,  // OCC SSX trace section valid
-    OCC_FFDC_TRACE_GPE0_VALID    =   0x10,  // OCC GPE0 Trace Section valid
-    OCC_FFDC_TRACE_GPE1_VALID    =   0x20,  // OCC GPE1 Trace Section Valid
-    OCC_FFDC_SHARED_REGION_VALID =   0x40,  // OCC Shared Region Section valid
-    OCC_FFDC_REGISTERS_VALID     =   0x80,  // OCC Register Section valid
-    OCC_FFDC_VALID_ALL           =   ( OCC_FFDC_TRACE_ERR_VALID |
-                                       OCC_FFDC_TRACE_IMP_VALID |
-                                       OCC_FFDC_TRACE_INF_VALID |
-                                       OCC_FFDC_TRACE_SSX_VALID |
-                                       OCC_FFDC_TRACE_GPE0_VALID |
-                                       OCC_FFDC_TRACE_GPE1_VALID |
-                                       OCC_FFDC_SHARED_REGION_VALID |
-                                       OCC_FFDC_REGISTERS_VALID )
+    OCC_FFDC_INVALID      =   0x0000,  // None of the FFDC section is valid
+    OCC_FFDC_TRACE_ERR    =   0x0001,  // OCC ERR traces section valid
+    OCC_FFDC_TRACE_IMP    =   0x0002,  // OCC IMP traces section valid
+    OCC_FFDC_TRACE_INF    =   0x0004,  // OCC INF traces section valid
+    OCC_FFDC_TRACE_SSX    =   0x0008,  // OCC SSX trace section valid
+    OCC_FFDC_TRACE_GPE0   =   0x0010,  // OCC GPE0 Trace Section valid
+    OCC_FFDC_TRACE_GPE1   =   0x0020,  // OCC GPE1 Trace Section Valid
+    OCC_FFDC_SHARED_REGION =  0x0040,  // OCC Shared Region Section valid
+    OCC_FFDC_REGISTERS    =   0x0080,  // OCC Register Section valid
+    OCC_FFDC_VALID_ALL           =   ( OCC_FFDC_TRACE_ERR |
+                                       OCC_FFDC_TRACE_IMP |
+                                       OCC_FFDC_TRACE_INF |
+                                       OCC_FFDC_TRACE_SSX |
+                                       OCC_FFDC_TRACE_GPE0 |
+                                       OCC_FFDC_TRACE_GPE1 |
+                                       OCC_FFDC_SHARED_REGION |
+                                       OCC_FFDC_REGISTERS)
 };
 
+
+/**
+ * @brief models FIR FFDC header.
+ * @note iv_validityVector bits 0:11  => CME0:11 FIR valid
+ *                         bit  12    => OCC FIRs valid
+ *                         bits 13:15 => Reserved
+ */
+const uint16_t PM_FFDC_FIR_VALID_POS_0 = 0x8000;
+const uint8_t PM_FFDC_FIR_VALID_POS_MAX = 13;
+const uint8_t PM_FFDC_FIR_VALID_POS_OCC = 12;
+
+struct __attribute__((packed)) FirFfdcHeader
+{
+    uint32_t iv_magicWord;
+    uint8_t  iv_versionMajor;
+    uint8_t  iv_versionMinor;
+    uint16_t iv_headerSize;
+    uint16_t iv_sectionSize;
+    uint16_t iv_validityVector; // See note in doxygen above
+    uint8_t  iv_reserved[4];
+};
 
 /**
  * @brief models C_Q_PPM FFDC header.
@@ -166,11 +285,13 @@ enum OccFfdcValidStatus
 struct __attribute__((packed)) PpmFfdcHeader
 {
     uint32_t iv_ppmMagicWord;
-    uint8_t  iv_Instance;
-    uint8_t  iv_ppmHeaderSize;
+    uint8_t  iv_versionMajor;
+    uint8_t  iv_versionMinor;
+    uint16_t iv_ppmHeaderSize;
     uint16_t iv_sectionSize;
-    uint8_t  iv_ffdcValid;
-    uint8_t iv_reserved[7];
+    uint16_t iv_ffdcValid;
+    uint8_t  iv_Instance;
+    uint8_t  iv_reserved[3];
 };
 
 /**
@@ -179,9 +300,11 @@ struct __attribute__((packed)) PpmFfdcHeader
 struct __attribute__((packed)) OccFfdcHeader
 {
     uint32_t iv_magicWord;
-    uint8_t  iv_ffdcValid;
-    uint8_t  iv_headerSize;
+    uint8_t  iv_versionMajor;
+    uint8_t  iv_versionMinor;
+    uint16_t iv_headerSize;
     uint16_t iv_sectionSize;
+    uint16_t iv_sectionsValid;
     uint16_t iv_offsetErrTrace;
     uint16_t iv_offsetImpTrace;
     uint16_t iv_offsetInfTrace;
@@ -190,6 +313,16 @@ struct __attribute__((packed)) OccFfdcHeader
     uint16_t iv_offsetGpe1Trace;
     uint16_t iv_offsetSharedSram;
     uint16_t iv_offsetOccRegs;
+    uint8_t  iv_reserved[4];
+};
+
+/**
+ * @brief   PM FFDC section header area
+ */
+union PmFfdcHdrRegion
+{
+    uint8_t      iv_pmFfdcHdrArea[FFDC_PM_HEADER_SIZE];
+    PmFfdcHeader iv_pmFfdcHdr;
 };
 
 /**
@@ -231,9 +364,9 @@ struct  __attribute__((packed)) PpeFfdcLayout
 struct __attribute__((packed)) HomerQuadFfdcRegion
 {
     uint8_t iv_quadFfdcHeader[FFDC_QUAD_HDR_SIZE];
-    uint8_t iv_quadCppmRegion[MAX_CORES_PER_QUAD][FFDC_CPPM_REGISTERS_SIZE];
+    uint8_t iv_quadCppmRegion[MAX_CORES_PER_QUAD][FFDC_CPPM_REGION_SIZE];
     uint8_t iv_quadCmeBlock[MAX_CMES_PER_QUAD][FFDC_PPE_BLOCK_SIZE];
-    uint8_t iv_quadQppmRegion[FFDC_QPPM_REGISTERS_SIZE];
+    uint8_t iv_quadQppmRegion[FFDC_QPPM_REGION_SIZE];
 };
 
 /**
@@ -253,11 +386,22 @@ struct __attribute__((packed)) OccFfdcRegion
 };
 
 /**
+ * @brief   models Quad FFDC region of HOMER.
+ */
+struct __attribute__((packed)) FirFfdcRegion
+{
+    uint8_t iv_firFfdcHeader[FFDC_FIR_HDR_SIZE];
+    uint8_t iv_firCmeBlock[MAX_CMES_PER_CHIP][FFDC_CME_FIR_REGISTERS_SIZE];
+    uint8_t iv_OccPbaBlock[FFDC_FIR_REGISTER_SIZE];
+};
+
+/**
  * @brief   models full FFDC region of HOMER.
  */
 struct  __attribute__((packed)) HomerFfdcRegion
 {
-    uint8_t iv_homerFfdcHeader[FFDC_HOMER_TOP_HEADER];
+    PmFfdcHdrRegion     iv_pmFfdcHdrRegion;
+    FirFfdcRegion       iv_firFfdcRegion;
     HomerQuadFfdcRegion iv_quadFfdc[MAX_QUADS_PER_CHIP];
     PpeFfdcLayout       iv_sgpeFfdcRegion;
     PpeFfdcLayout       iv_pgpeFfdcRegion;
