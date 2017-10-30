@@ -672,17 +672,19 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW416227</id>
+    <id>ATTR_CHIP_EC_FEATURE_EMQ_DIS_TRACKER</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD2.0, Cumulus DD1.0: HW416227 - Disable Tracker
+      Nimbus DD1.0: HW393929 / HW394578
+      Nimbus DD2.0 / Cumulus DD1.0: HW416227
+      Nimbus DD2.1 / Nimbus DD2.2: HW425027
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>EQUAL</test>
+          <value>0x22</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
@@ -696,17 +698,26 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW393929_HW394578</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <id>ATTR_CHIP_EC_FEATURE_HW425526</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Nimbus DD1 only: HW393929 / HW394578
+      HW425526 - Force H-Bit in the TLB
+      Nimbus DD1.0 / DD2.0 / DD2.1 / DD2.2
+      Cumulus DD1.0
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
+          <value>0x22</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
@@ -2563,23 +2574,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW398269</id>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD1: Reckless Carpenter
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW399765</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2903,23 +2897,6 @@
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW408628</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      HW408628
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
           <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
