@@ -50,67 +50,116 @@
  {
     PlatSgpe::PlatSgpe( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt )
       : PlatPmComplex( i_procChipTgt,
+                       PLAT_SGPE,
                        OCC_SRAM_SGPE_HEADER_ADDR,
                        OCC_SRAM_SGPE_TRACE_START,
-                       OCC_SRAM_SGPE_DASHBOARD_START,
-                       PLAT_SGPE )
+                       OCC_SRAM_SGPE_DASHBOARD_START )
     { }
+
+//----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatSgpe::init ( void* i_pHomerBuf )
+    {
+        FAPI_DBG (">> PlatSgpe::init" );
+        FAPI_TRY ( collectFfdc( i_pHomerBuf, INIT),
+                   "Failed To init SGPE FFDC" );
+
+    fapi_try_exit:
+        FAPI_DBG ("<< PlatSgpe::init" );
+        return fapi2::current_err;
+    }
 
     //----------------------------------------------------------------------
 
-    fapi2::ReturnCode PlatSgpe::collectFfdc( void * i_pHomerBuf )
+    fapi2::ReturnCode PlatSgpe::collectFfdc( void *  i_pHomerBuf,
+                                             uint8_t i_ffdcType )
     {
         FAPI_DBG(">> PlatSgpe::collectFfdc");
-        fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
-        uint8_t l_ffdcValdityVect = PPE_FFDC_ALL_VALID;
 
-        uint8_t l_haltState = PPE_HALT_COND_UNKNOWN;
-        uint8_t *l_pFfdcLoc = NULL;
+        fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
 
         HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
 
-        l_pFfdcLoc = (uint8_t *)(&l_pHomerFfdc->iv_sgpeFfdcRegion);
+        uint8_t* l_pFfdcLoc = (uint8_t *)(&l_pHomerFfdc->iv_sgpeFfdcRegion);
+        PpeFfdcHeader* l_pSgpeFfdcHdr = (PpeFfdcHeader*) l_pFfdcLoc;
+
+        uint16_t l_ffdcValdityVect = l_pSgpeFfdcHdr->iv_sectionsValid;
+
+        if ( i_ffdcType & INIT )
+        {   // overwrite on init
+            l_ffdcValdityVect = PPE_FFDC_INVALID;
+        }
 
         //In case of error , invalidate FFDC in header.
-        l_retCode = collectPpeState ( SGPE_BASE_ADDRESS, l_pFfdcLoc );
-        if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+        if ( i_ffdcType & PPE_HALT_STATE )
         {
-            FAPI_ERR ( "Error collecting SGPE State" );
-            // PPE State Data is bad & continue SRAM FFDC collection
-            l_ffdcValdityVect &= ~PPE_STATE_VALID;
+            l_ffdcValdityVect |= PPE_HALT_STATE_VALID;
+            l_retCode = readPpeHaltState ( SGPE_BASE_ADDRESS, l_pFfdcLoc );
+            if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+            {
+                FAPI_ERR ( "Error collecting SGPE Halt State" );
+                l_ffdcValdityVect &= ~PPE_HALT_STATE_VALID;
+            }
         }
 
-        l_retCode = collectTrace( l_pFfdcLoc );
-
-        if( l_retCode )
+        if ( i_ffdcType & PPE_STATE )
         {
-            FAPI_ERR("Error in collecting SGPE Trace " );
-            l_ffdcValdityVect &= ~PPE_TRACE_VALID;
+            l_ffdcValdityVect |= PPE_STATE_VALID;
+            l_retCode = collectPpeState ( SGPE_BASE_ADDRESS, l_pFfdcLoc );
+            if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+            {
+                FAPI_ERR ( "Error collecting SGPE State" );
+                // PPE State Data is bad & continue SRAM FFDC collection
+                l_ffdcValdityVect &= ~PPE_STATE_VALID;
+            }
         }
 
-        l_retCode = collectGlobals( l_pFfdcLoc );
-
-        if( l_retCode )
+        if ( i_ffdcType & TRACES )
         {
-            FAPI_ERR("Error in collecting SGPE Globals" );
-            l_ffdcValdityVect &= ~PPE_DASHBOARD_VALID;
+            l_ffdcValdityVect |= PPE_TRACE_VALID;
+            l_retCode = collectTrace( l_pFfdcLoc );
+            if( l_retCode )
+            {
+                FAPI_ERR("Error in collecting SGPE Trace " );
+                l_ffdcValdityVect &= ~PPE_TRACE_VALID;
+            }
         }
 
-
-        l_retCode = collectImageHeader( l_pFfdcLoc );
-
-        if( l_retCode )
+        if ( i_ffdcType & DASH_BOARD_VAR )
         {
-            FAPI_ERR("Error in collecting SGPE Image header" );
-            l_ffdcValdityVect &= ~PPE_IMAGE_HEADER_VALID;
+            l_ffdcValdityVect |= PPE_DASHBOARD_VALID;
+            l_retCode = collectGlobals( l_pFfdcLoc );
+
+            if( l_retCode )
+            {
+                FAPI_ERR("Error in collecting SGPE Globals" );
+                l_ffdcValdityVect &= ~PPE_DASHBOARD_VALID;
+            }
         }
 
-        FAPI_TRY( updateSgpeFfdcHeader( l_pFfdcLoc, l_ffdcValdityVect, l_haltState ),
+        if ( i_ffdcType & IMAGE_HEADER )
+        {
+            l_ffdcValdityVect |= PPE_IMAGE_HEADER_VALID;
+            l_retCode = collectImageHeader( l_pFfdcLoc );
+
+            if( l_retCode )
+            {
+                FAPI_ERR("Error in collecting SGPE Image header" );
+                l_ffdcValdityVect &= ~PPE_IMAGE_HEADER_VALID;
+            }
+        }
+
+        FAPI_TRY( updateSgpeFfdcHeader( l_pFfdcLoc, l_ffdcValdityVect),
                           "Failed To Update SGPE FFDC Header for SGPE " );
 
-        fapi_try_exit:
-        FAPI_DBG("<< PlatSgpe::collectFfdc");
+        if (l_ffdcValdityVect == PPE_FFDC_INVALID)
+            setPmFfdcSectionValid ( i_pHomerBuf, PM_FFDC_SGPE_VALID, false );
+        else
+            setPmFfdcSectionValid ( i_pHomerBuf, PM_FFDC_SGPE_VALID );
+
+    fapi_try_exit:
+        FAPI_DBG("<< PlatSgpe::collectFfdc: 0x%02X", l_ffdcValdityVect);
         return fapi2::current_err;
     }
 
@@ -185,15 +234,15 @@
 
     //-----------------------------------------------------------------------
 
-    fapi2::ReturnCode PlatSgpe::updateSgpeFfdcHeader( uint8_t * i_pHomerBuf,
-                                                      uint8_t i_ffdcValid, uint8_t i_haltState )
+    fapi2::ReturnCode PlatSgpe::updateSgpeFfdcHeader( uint8_t* i_pHomerBuf,
+                                                      uint16_t i_sectionsValid )
     {
         FAPI_DBG(">> updateSgpeFfdcHeader" );
 
         PpeFfdcHeader * l_pSgpeFfdcHdr       =  ( (PpeFfdcHeader *)(( PpeFfdcHdrRegion * ) i_pHomerBuf ));
         l_pSgpeFfdcHdr->iv_ppeMagicNumber    =  htobe32( FFDC_SGPE_MAGIC_NUM );
         l_pSgpeFfdcHdr->iv_ppeNumber         =  0;
-        PlatPmComplex::updatePpeFfdcHeader( l_pSgpeFfdcHdr, i_ffdcValid, i_haltState );
+        PlatPmComplex::updatePpeFfdcHeader( l_pSgpeFfdcHdr, i_sectionsValid );
 
         FAPI_DBG("<< updateSgpeFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
@@ -208,7 +257,7 @@ extern "C"
         FAPI_IMP(">> p9_pm_recovery_sgpe" );
 
         PlatSgpe l_sgpeFfdc( i_procChip );
-        FAPI_TRY( l_sgpeFfdc.collectFfdc( i_pFfdcBuf ),
+        FAPI_TRY( l_sgpeFfdc.collectFfdc( i_pFfdcBuf, (ALL & ~PPE_HALT_STATE) ),
                   "Failed To Collect SGPE FFDC" );
 
         fapi_try_exit:

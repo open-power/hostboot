@@ -25,8 +25,10 @@
 PROCEDURE=p9_pm_recovery_ffdc_cme
 CME_FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/pm/
 CME_FFDC_INC+=$(ROOTPATH)/chips/p9/procedures/hwp/lib
-lib$(PROCEDURE)_DEPLIBS += p9_pm_recovery_ffdc_base
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_base
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_setup_linear
 lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_state
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_utils
 $(call ADD_MODULE_INCDIR,$(CME_FFDC_INC))
 $(call BUILD_PROCEDURE)

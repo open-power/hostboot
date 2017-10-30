@@ -51,110 +51,176 @@
  {
     PlatCme::PlatCme( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt )
       : PlatPmComplex( i_procChipTgt,
+                       PLAT_CME,
                        FFDC_PPE_IMG_HDR_START,
                        FFDC_CME_TRACE_START,
-                       FFDC_CME_DASH_BOARD_START,
-                       PLAT_CME )
+                       FFDC_CME_DASH_BOARD_START )
     { }
 
     //----------------------------------------------------------------------
 
-    fapi2::ReturnCode PlatCme::collectFfdc( void * i_pHomerBuf )
+    fapi2::ReturnCode PlatCme::init ( void* i_pHomerBuf )
     {
-        FAPI_DBG(">> PlatCme::collectFfdc");
+        FAPI_DBG (">> PlatCme::init" );
+        FAPI_TRY ( collectFfdc( i_pHomerBuf, INIT),
+                   "Failed To init CME FFDC" );
+
+    fapi_try_exit:
+        FAPI_DBG ("<< PlatCme::init" );
+        return fapi2::current_err;
+    }
+
+    //----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatCme::collectFfdc( void*   i_pHomerBuf,
+                                            uint8_t i_ffdcType )
+    {
+        FAPI_DBG ( ">> PlatCme::collectFfdc: i_ffdcType: 0x%02X", i_ffdcType );
         fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
         auto l_exList =
             getProcChip().getChildren< fapi2::TARGET_TYPE_EX > ( fapi2::TARGET_STATE_PRESENT );
         uint8_t l_quadPos = 0;
         uint8_t l_exPos   = 0;
         uint8_t l_cmePos  = 0;
-        uint8_t l_ffdcValdityVect = PPE_FFDC_ALL_VALID;
-        uint8_t l_haltState = PPE_HALT_COND_UNKNOWN;
         uint8_t *l_pFfdcLoc = NULL;
+        uint8_t* l_pFirFfdcLoc = NULL;
         HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
 
         for( auto ex : l_exList )
         {
-            l_ffdcValdityVect = PPE_FFDC_ALL_VALID;
-
             FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, ex, l_cmePos ),
                       "FAPI_ATTR_GET Failed To Read EX Position" );
-
-            if( !ex.isFunctional() )
-            {
-                //Marking CME FFDC region as Invalid
-                l_ffdcValdityVect = PPE_FFDC_INVALID;
-                FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect, l_haltState ),
-                          "Failed To Update CME FFDC Header for CME 0x%0d", l_cmePos );
-                continue;
-            }
 
             l_exPos     =   l_cmePos % 2;
             l_quadPos   =   l_cmePos >> 1;
             l_pFfdcLoc = &l_pHomerFfdc->iv_quadFfdc[l_quadPos].iv_quadCmeBlock[l_exPos][0];
+            l_pFirFfdcLoc = &l_pHomerFfdc->iv_firFfdcRegion.iv_firCmeBlock[l_cmePos][0];
+
+            PpeFfdcHeader* l_pCmeFfdcHdr = (PpeFfdcHeader*) l_pFfdcLoc;
+            uint16_t l_ffdcValdityVect = l_pCmeFfdcHdr->iv_sectionsValid;
+
+            if ( !ex.isFunctional() || (i_ffdcType & INIT))
+            {
+                //Marking CME FFDC region as Invalid
+                l_ffdcValdityVect = PPE_FFDC_INVALID;
+                FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect ),
+                          "Failed To Update CME FFDC Header for CME 0x%0d", l_cmePos );
+
+                // Mark CME FIR FFDC invalid
+                FAPI_TRY ( updateFirFfdcHeader (
+                           &l_pHomerFfdc->iv_firFfdcRegion.iv_firFfdcHeader[0],
+                           l_cmePos,
+                           false ) );
+                continue;
+            }
 
             FAPI_INF("CME FFDC Quad Pos %d Ex Pos %d ", l_quadPos, l_exPos );
 
             //In case of error , invalidate FFDC in header.
+            // INIT case handled above where only header update is needed
 
-            // @TODO this is still after reset, which would have already
-            // halted the ppe. We need a wa to record this before reset
-            // and pass it down, or have a spl r-m-w update per member
-            // of the PPE Header?
-            // l_retCode = getPpeHaltState (
-            //             getCmeBaseAddress (l_cmePos),
-            //             l_haltState);
-
-            l_retCode = collectPpeState ( getCmeBaseAddress (l_cmePos),
-                                          l_pFfdcLoc );
-            if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+            if ( i_ffdcType & FIR_STATE )
             {
-                FAPI_ERR ( "Error collecting CME State, CME Pos 0x08x",
-                           l_cmePos );
-                l_ffdcValdityVect &= ~PPE_STATE_VALID;
-            }
-            l_retCode = collectTrace( l_pFfdcLoc, ex );
+                bool l_firValid = true;
 
-            if( l_retCode )
-            {
-                FAPI_ERR("Error in collecting CME Trace CME Pos 0x%08x", l_cmePos );
-                l_ffdcValdityVect &= ~PPE_TRACE_VALID;
+                l_retCode = collectRegisterData <fapi2::TARGET_TYPE_EX> (
+                            ex, l_pFirFfdcLoc, fapi2::PM_CME_FIR_REGISTERS );
+                if (l_retCode)
+                {
+                    FAPI_ERR ("CME %d FIR Data collection fail", l_cmePos);
+                    l_firValid = false;
+                }
+                // Update CME FIR FFDC
+                FAPI_TRY ( updateFirFfdcHeader (
+                           &l_pHomerFfdc->iv_firFfdcRegion.iv_firFfdcHeader[0],
+                           l_cmePos,
+                           l_firValid ) );
+
+                // Since the top level header FIR Section validity is an aggregate
+                // of OCC FIR and multiple CME FIRs, it is updated only in OCC plat
             }
 
-            l_retCode = collectGlobals( l_pFfdcLoc, ex );
-
-            if( l_retCode )
+            if ( i_ffdcType & PPE_HALT_STATE )
             {
-                FAPI_ERR("Error in collecting CME Globals, CME Pos 0x%08x", l_cmePos );
-                l_ffdcValdityVect &= ~PPE_DASHBOARD_VALID;
-
+                l_ffdcValdityVect |= PPE_HALT_STATE_VALID;
+                l_retCode = readPpeHaltState ( getCmeBaseAddress (l_cmePos),
+                                               l_pFfdcLoc );
+                if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+                {
+                    FAPI_ERR ( "Error reading CME Halt State, CME Pos 0x08x",
+                               l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_HALT_STATE_VALID;
+                }
             }
 
-            l_retCode = collectImageHeader( l_pFfdcLoc, ex );
-
-            if( l_retCode )
+            if ( i_ffdcType & PPE_STATE )
             {
-                FAPI_ERR("Error in collecting CME Image header, CME Pos 0x%08x", l_cmePos );
-                l_ffdcValdityVect &= ~PPE_IMAGE_HEADER_VALID;
+                l_ffdcValdityVect |= PPE_STATE_VALID;
+                l_retCode = collectPpeState ( getCmeBaseAddress (l_cmePos),
+                                              l_pFfdcLoc );
+                if ( l_retCode != fapi2::FAPI2_RC_SUCCESS )
+                {
+                    FAPI_ERR ( "Error collecting CME State, CME Pos 0x08x",
+                               l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_STATE_VALID;
+                }
             }
 
-            l_retCode = collectInternalReg( l_pFfdcLoc, ex , l_cmePos);
-
-            if( l_retCode )
+            if ( i_ffdcType & TRACES )
             {
-               FAPI_ERR("Error in collecting CME Internal Regs, CME Pos 0x%08x", l_cmePos );
-                l_ffdcValdityVect &= ~PPE_INT_REG_VALID;
+                l_ffdcValdityVect |= PPE_TRACE_VALID;
+                l_retCode = collectTrace( l_pFfdcLoc, ex );
+
+                if( l_retCode )
+                {
+                    FAPI_ERR("Error in collecting CME Trace CME Pos 0x%08x", l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_TRACE_VALID;
+                }
             }
 
+            if ( i_ffdcType & DASH_BOARD_VAR )
+            {
+                l_ffdcValdityVect |= PPE_DASHBOARD_VALID;
+                l_retCode = collectGlobals( l_pFfdcLoc, ex );
 
+                if( l_retCode )
+                {
+                    FAPI_ERR("Error in collecting CME Globals, CME Pos 0x%08x", l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_DASHBOARD_VALID;
+                }
+            }
 
-            FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect, l_haltState ),
+            if ( i_ffdcType & IMAGE_HEADER )
+            {
+                l_ffdcValdityVect |= PPE_IMAGE_HEADER_VALID;
+                l_retCode = collectImageHeader( l_pFfdcLoc, ex );
+
+                if( l_retCode )
+                {
+                    FAPI_ERR("Error in collecting CME Image header, CME Pos 0x%08x", l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_IMAGE_HEADER_VALID;
+                }
+            }
+
+            if ( i_ffdcType & INTERNAL_REG )
+            {
+                l_ffdcValdityVect |= PPE_INT_REG_VALID;
+                l_retCode = collectInternalReg( l_pFfdcLoc, ex , l_cmePos);
+
+                if( l_retCode )
+                {
+                    FAPI_ERR("Error in collecting CME Internal Regs, CME Pos 0x%08x", l_cmePos );
+                    l_ffdcValdityVect &= ~PPE_INT_REG_VALID;
+                }
+            }
+
+            FAPI_TRY( updateCmeFfdcHeader( l_pFfdcLoc, l_cmePos, l_ffdcValdityVect ),
                       "Failed To Update CME FFDC Header for CME 0x%0d", l_cmePos );
 
         }
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectFfdc");
         return fapi2::current_err;
     }
@@ -176,7 +242,7 @@
                       FFDC_PPE_TRACES_SIZE ),
                   "Trace Collection Failed" );
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectTrace" );
         return fapi2::current_err;
     }
@@ -197,7 +263,7 @@
                       FFDC_PPE_SCORE_BOARD_SIZE ),
                   "Failed To Collect CME Global Variables" );
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectGlobals" );
         return fapi2::current_err;
     }
@@ -221,7 +287,7 @@
                       "Failed to collect register data for CME instance %u",i_exPos);
 
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectInternalReg" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -242,22 +308,22 @@
                     FFDC_PPE_IMG_HDR_SIZE ),
                   "Failed To Collect CME Image Header" );
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectImageHeader" );
         return fapi2::current_err;
     }
 
     //-----------------------------------------------------------------------
 
-    fapi2::ReturnCode PlatCme::updateCmeFfdcHeader( uint8_t * i_pHomerBuf, uint8_t i_cmePos,
-                                                    uint8_t l_ffdcValdityVect, uint8_t i_haltState )
+    fapi2::ReturnCode PlatCme::updateCmeFfdcHeader( uint8_t* i_pHomerBuf, uint8_t i_cmePos,
+                                                    uint16_t i_sectionsValid )
     {
         FAPI_DBG(">> updateCmeFfdcHeader" );
 
         PpeFfdcHeader * l_pCmeFfdcHdr =  ( (PpeFfdcHeader *)(( PpeFfdcHdrRegion * ) i_pHomerBuf ));
         l_pCmeFfdcHdr->iv_ppeMagicNumber    =  htobe32(FFDC_CME_MAGIC_NUM);
         l_pCmeFfdcHdr->iv_ppeNumber         =  i_cmePos;
-        PlatPmComplex::updatePpeFfdcHeader( l_pCmeFfdcHdr, l_ffdcValdityVect, i_haltState );
+        PlatPmComplex::updatePpeFfdcHeader( l_pCmeFfdcHdr, i_sectionsValid );
 
         FAPI_DBG("<< updateCmeFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
@@ -270,10 +336,11 @@ extern "C"
     {
         FAPI_IMP(">> p9_pm_recovery_ffdc_cme" );
         PlatCme l_cmeFfdc( i_procChip );
-        FAPI_TRY( l_cmeFfdc.collectFfdc( i_pFfdcBuf ),
+        FAPI_TRY( l_cmeFfdc.collectFfdc( i_pFfdcBuf,
+                                         (ALL & ~(PPE_HALT_STATE | FIR_STATE))),
                   "Failed To Collect CME FFDC" );
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_IMP("<< p9_pm_recovery_ffdc_cme" );
         return fapi2::current_err;
     }

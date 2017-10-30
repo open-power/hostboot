@@ -55,28 +55,37 @@ namespace p9_stop_recov_ffdc
             /// @brief  destructor
             virtual ~CppmRegs () { };
 
-            /// @brief      collects Register FFDC pertaining to all functional cores in the chip.
+            /// @brief      Initializes the Quad and CPPM FFDC Sub-Sections in HOMER with default headers
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            ///  @return    fapi2 return code
+            fapi2::ReturnCode init ( void* i_pHomerBuf );
+
+            /// @brief      collects FFDC pertaining to all functional cores in the chip.
             /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            /// @param[in]  i_ffdcType      indicates the content type to collect
             //  @return     fapi2 return code.
-            fapi2::ReturnCode collectRegFfdc( void* i_pHomerBuf );
+            fapi2::ReturnCode collectFfdc ( void*    i_pHomerBuf,
+                                            uint8_t  i_ffdcType = ALL );
 
         private:
             /// @brief updates the CPPM FFDC Header
             ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for CPPM Header
             ///@param[in]   i_CppmInstance  CPPM instance
+            ///@param[in]   i_ffdcValid     non-zero indicates the CPPM FFDC is valid
             ///@return      fapi2 return code.
 
             fapi2::ReturnCode updateCppmFfdcHeader( uint8_t * i_pHomerBuf, 
                                                     const uint8_t i_cppmInstance,
-                                                    const uint8_t i_ffdcValid);
+                                                    const uint16_t i_ffdcValid);
             /// @brief updates the QUAD FFDC Header
-            ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for CPPM Header
+            ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for Quad Header
             ///@param[in]   i_quadInstance  Quad instance
+            ///@param[in]   i_ffdcValid     non-zero indicates the Quad FFDC is valid
             ///@return      fapi2 return code.
 
             fapi2::ReturnCode updateQuadFfdcHeader( uint8_t * i_pHomerBuf, 
                                                     const uint8_t i_quadInstance,
-                                                    const uint8_t i_ffdcValid);
+                                                    const uint16_t i_ffdcValid);
     };
 
 extern "C"

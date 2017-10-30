@@ -55,10 +55,17 @@ namespace p9_stop_recov_ffdc
             /// @brief  destructor
             virtual ~QppmRegs () { };
 
-            /// @brief      collects Register FFDC pertaining to all functional cores in the chip.
+            /// @brief      Initializes the QPPM FFDC Sub-Sections in HOMER with default headers
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            ///  @return     fapi2 return code
+            fapi2::ReturnCode init ( void* i_pHomerBuf );
+
+            /// @brief      collects FFDC pertaining to QPMMs of all functional quads in the chip.
             /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            //  @param[in]  i_ffdcType      indicates the content type to collect
             //  @return     fapi2 return code.
-            fapi2::ReturnCode collectRegFfdc( void* i_pHomerBuf );
+            fapi2::ReturnCode collectFfdc ( void*   i_pHomerBuf,
+                                            uint8_t i_ffdcType = ALL );
 
         private:
             /// @brief updates the QPPM FFDC Header
@@ -69,7 +76,7 @@ namespace p9_stop_recov_ffdc
 
             fapi2::ReturnCode updateQppmFfdcHeader( uint8_t * i_pHomerBuf, 
                                                     const uint8_t i_qppmInstance,
-                                                    const uint8_t i_ffdcValid);
+                                                    const uint16_t i_ffdcValid);
 
     };
 

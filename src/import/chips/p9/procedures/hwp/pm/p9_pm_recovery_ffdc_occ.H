@@ -56,18 +56,35 @@ namespace p9_stop_recov_ffdc
             /// @brief  destructor
             virtual ~PlatOcc() { };
 
+            /// @brief      Initializes the OCC FFDC Sub-Sections in HOMER with default header
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            ///  @return    fapi2 return code
+            fapi2::ReturnCode init ( void* i_pHomerBuf );
+
             /// @brief      collects FFDC of the OCC 405, GPE0 and GPE1.
-            /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            /// @param[in]  i_ffdcType   indicates the content type to collect
             /// @return     fapi2 return code.
-            fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
+            fapi2::ReturnCode collectFfdc ( void*   i_pHomerBuf,
+                                            uint8_t i_ffdcType = ALL );
 
         private:
-            /// @brief      collects trace info from OCC SRAM buffer.
+            /// @brief      collects trace info from a known region OCC SRAM
             /// @param[in]  i_pHomerBuf     location in HOMER to write at
-            /// @param[in]  i_sramAddress   location in OCC SRAM to read from
+            /// @param[in]  i_occSramRegion See OccFfdcValidStatus,
+            ///                             Indicates OCC SRAM Region to read
             /// @return     fapi2 return code.
-            fapi2::ReturnCode  collectTrace( uint8_t * i_pHomerBuf,
-                                             uint32_t  i_sramAddress );
+            fapi2::ReturnCode  collectTrace( uint8_t* i_pHomerBuf,
+                                             uint8_t  i_occSramRegion );
+
+            /// @brief      reads OCC SRAM to find out the region extent and
+            ///             then collects info from that region
+            /// @param[in]  i_pHomerBuf     location in HOMER to write at
+            /// @param[in]  i_occSramRegion See OccFfdcValidStatus.
+            ///                             Indicates OCC SRAM Region to read
+            /// @return     fapi2 return code.
+            fapi2::ReturnCode readSramRegion ( uint8_t* i_pHomerBuf,
+                                               uint8_t i_occSramRegion );
 
             /// @brief updates the OCC FFDC Header
             /// @param[in]   i_pHomerBuf points to a location in HOMER meant for
@@ -76,7 +93,14 @@ namespace p9_stop_recov_ffdc
             ///                          valid. See OccFfdcValidStatus
             ///@return      fapi2 return code.
             fapi2::ReturnCode updateOccFfdcHeader ( uint8_t* i_pHomerBuf,
-                                                    uint8_t  i_ffdcValid );
+                                                    uint16_t  i_ffdcValid );
+
+            /// @brief      collects register info for a given OCC
+            /// @param[in]  i_pHomerBuf     points to location of HOMER meant for OCC internal register.
+            ///@return      fapi2 return code.
+            fapi2::ReturnCode  collectOccReg( uint8_t * i_pHomerBuf);
+
+
     };
 
 extern "C"

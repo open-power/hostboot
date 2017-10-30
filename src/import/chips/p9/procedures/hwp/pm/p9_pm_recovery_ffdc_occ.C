@@ -46,99 +46,217 @@
 #include <stddef.h>
 #include <endian.h>
 
- namespace p9_stop_recov_ffdc
- {
+namespace p9_stop_recov_ffdc
+{
     PlatOcc::PlatOcc (
     const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt ) :
-    PlatPmComplex(i_procChipTgt, 0, 0, 0, PLAT_OCC)
+    PlatPmComplex ( i_procChipTgt, PLAT_OCC )
     { }
 
     //----------------------------------------------------------------------
 
-    fapi2::ReturnCode PlatOcc::collectFfdc( void * i_pHomerBuf )
+    fapi2::ReturnCode PlatOcc::init ( void* i_pHomerBuf )
+    {
+        FAPI_DBG (">> PlatOcc::init" );
+        FAPI_TRY ( collectFfdc( i_pHomerBuf, INIT),
+        "Failed To init OCC FFDC" );
+
+    fapi_try_exit:
+        FAPI_DBG ("<< PlatOcc::init" );
+        return fapi2::current_err;
+    }
+
+    //----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatOcc::collectFfdc( void*   i_pHomerBuf,
+                                            uint8_t i_ffdcType )
     {
         FAPI_DBG(">> PlatOcc::collectFfdc");
         fapi2::ReturnCode l_retCode = fapi2::FAPI2_RC_SUCCESS;
-        uint8_t l_ffdcValid = OCC_FFDC_INVALID;
         uint8_t* l_pFfdcLoc = NULL;
 
         HomerFfdcRegion* l_pHomerFfdc = (HomerFfdcRegion*)
              ((uint8_t*) i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
 
         l_pFfdcLoc = (uint8_t*) (&l_pHomerFfdc->iv_occFfdcRegion);
+        OccFfdcHeader* l_pOccFfdcHdr = ((OccFfdcHeader*)
+                                       ((OccFfdcHdrRegion*) l_pFfdcLoc));
+        uint16_t l_ffdcValid = l_pOccFfdcHdr->iv_sectionsValid;
 
-        l_retCode = collectTrace (l_pFfdcLoc, OCC_SRAM_TRACE_BUF_BASE_ERR);
-        if( l_retCode )
-        {
-            FAPI_ERR ("Error collecting OCC ERR Traces");
+        if ( i_ffdcType & INIT )
+        {   // overwrite validity of OOC section header on init
+            l_ffdcValid = OCC_FFDC_INVALID;
+            // Mark OCC FIR FFDC bit as invalid on init
+            FAPI_TRY ( updateFirFfdcHeader (
+                       &l_pHomerFfdc->iv_firFfdcRegion.iv_firFfdcHeader[0],
+                       PM_FFDC_FIR_VALID_POS_OCC,
+                       false ) );
+            // Update validity in top level header
+            setPmFfdcSectionValid (i_pHomerBuf, (PM_FFDC_OCC_VALID | PM_FFDC_FIR_VALID), false);
         }
-        l_ffdcValid |= OCC_FFDC_TRACE_ERR_VALID;
 
-        l_retCode = collectTrace (l_pFfdcLoc, OCC_SRAM_TRACE_BUF_BASE_IMP);
-        if( l_retCode )
+        if ( i_ffdcType & FIR_STATE )
         {
-            FAPI_ERR ("Error collecting OCC IMP Traces");
-        }
-        l_ffdcValid |= OCC_FFDC_TRACE_IMP_VALID;
+            bool l_firValid = true;
 
-        l_retCode = collectTrace (l_pFfdcLoc, OCC_SRAM_TRACE_BUF_BASE_INF);
-        if( l_retCode )
+            l_retCode = collectRegisterData <fapi2::TARGET_TYPE_PROC_CHIP> (
+                        getProcChip(),
+                         &l_pHomerFfdc->iv_firFfdcRegion.iv_OccPbaBlock[0],
+                        fapi2::PM_FIR_REGISTERS );
+            if (l_retCode)
+            {
+                FAPI_ERR ("OCC FIR Data collection fail");
+                l_firValid = false;
+            }
+            // Update FIR FFDC header with the OCC FIR validity status
+            FAPI_TRY ( updateFirFfdcHeader (
+                       &l_pHomerFfdc->iv_firFfdcRegion.iv_firFfdcHeader[0],
+                       PM_FFDC_FIR_VALID_POS_OCC,
+                       l_firValid ) );
+
+            setPmFfdcSectionValid (i_pHomerBuf, PM_FFDC_FIR_VALID);
+        }
+
+        if ( i_ffdcType & TRACES )
         {
-            FAPI_ERR ("Error collecting OCC INF Traces");
+            l_ffdcValid |= OCC_FFDC_TRACE_ERR;
+            l_retCode = collectTrace (l_pFfdcLoc, OCC_FFDC_TRACE_ERR);
+            if( l_retCode )
+            {
+                FAPI_ERR ("Error collecting OCC ERR Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_ERR;
+            }
+
+            l_ffdcValid |= OCC_FFDC_TRACE_IMP;
+            l_retCode = collectTrace (l_pFfdcLoc, OCC_FFDC_TRACE_IMP);
+            if( l_retCode )
+            {
+                FAPI_ERR ("Error collecting OCC IMP Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_IMP;
+            }
+
+            l_ffdcValid |= OCC_FFDC_TRACE_INF;
+            l_retCode = collectTrace (l_pFfdcLoc, OCC_FFDC_TRACE_INF);
+            if( l_retCode )
+            {
+                FAPI_ERR ("Error collecting OCC INF Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_INF;
+            }
+
+            // OCC team has not yet enabled SSX tracing
+            // Avoid collecting unknown data from SRAM until it is enabled
+#if 0
+            l_ffdcValid |= OCC_FFDC_TRACE_SSX;
+            l_retCode = readSramRegion (l_pFfdcLoc, OCC_FFDC_TRACE_SSX);
+            if ( l_retCode )
+            {
+                FAPI_ERR ("Error collecting OCC SSX Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_SSX;
+            }
+#endif
+
+            l_ffdcValid |= OCC_FFDC_TRACE_GPE0;
+            l_retCode = readSramRegion (l_pFfdcLoc, OCC_FFDC_TRACE_GPE0);
+            if ( l_retCode )
+            {
+                FAPI_ERR ("Error collecting GPE0 Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_GPE0;
+            }
+
+            l_ffdcValid |= OCC_FFDC_TRACE_GPE1;
+            l_retCode = readSramRegion (l_pFfdcLoc, OCC_FFDC_TRACE_GPE1);
+            if ( l_retCode )
+            {
+                FAPI_ERR ("Error collecting GPE1 Traces");
+                l_ffdcValid &= ~OCC_FFDC_TRACE_GPE1;
+            }
+
+            l_ffdcValid |= OCC_FFDC_SHARED_REGION;
+            l_retCode = readSramRegion (l_pFfdcLoc, OCC_FFDC_SHARED_REGION);
+            if ( l_retCode )
+            {
+                FAPI_ERR ("Error collecting OCC Shared Region");
+                l_ffdcValid &= ~OCC_FFDC_SHARED_REGION;
+            }
+            setPmFfdcSectionValid (i_pHomerBuf, PM_FFDC_OCC_VALID);
         }
-        l_ffdcValid |= OCC_FFDC_TRACE_INF_VALID;
 
-        // @TODO Read SRAM for Base and Size of other undefined regions
-        //       before collectTrace
+        if ( i_ffdcType & SCOM_REG )
+        {
+            l_ffdcValid |= OCC_FFDC_REGISTERS;
+            l_retCode = collectOccReg( l_pFfdcLoc);
 
-        // @TODO Collect OCC Registers
+            if( l_retCode )
+            {
+                FAPI_ERR("Error in collecting OCC scom Regs");
+                l_ffdcValid &= ~OCC_FFDC_REGISTERS;
+            }
+            setPmFfdcSectionValid (i_pHomerBuf, PM_FFDC_OCC_VALID);
+        }
 
         FAPI_TRY( updateOccFfdcHeader( l_pFfdcLoc, l_ffdcValid ),
                           "Failed To Update OCC FFDC Header for OCC" );
 
     fapi_try_exit:
-        FAPI_DBG("<< PlatSgpe::collectFfdc");
+        FAPI_DBG("<< PlatOcc::collectFfdc");
+        return fapi2::current_err;
+    }
+
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatOcc::collectOccReg( uint8_t * i_pOccReg)
+    {
+        FAPI_DBG(">> PlatOcc::collectOccReg" );
+
+        OccFfdcRegion* l_pOccFfdc = ( OccFfdcRegion*) (i_pOccReg);
+        uint8_t * l_pRegs = &l_pOccFfdc->iv_occRegs[0];
+
+        FAPI_TRY(collectRegisterData<fapi2::TARGET_TYPE_PROC_CHIP> (getProcChip(),
+                                     l_pRegs,
+                                     static_cast<fapi2::HwpFfdcId>(fapi2::OCC_FFDC_REGISTERS)),
+                      "Failed to collect register data for OCC ");
+
+
+    fapi_try_exit:
+        FAPI_DBG("<< PlatOcc::collectOccReg" );
         return fapi2::current_err;
     }
 
     //-----------------------------------------------------------------------
 
     fapi2::ReturnCode PlatOcc::collectTrace ( uint8_t* i_pTraceBuf,
-                                              uint32_t i_sramAddr )
+                                              uint8_t  i_occSramRegion )
     {
-        FAPI_DBG ( ">> PlatOcc::collectTrace: 0x%08X",
-                   i_sramAddr );
+        FAPI_DBG ( ">> PlatOcc::collectTrace: 0x%02X", i_occSramRegion );
 
         OccFfdcRegion* l_pOccFfdc = ( OccFfdcRegion*) (i_pTraceBuf);
         uint8_t* l_pTraceLoc = NULL;
         uint32_t l_len = 0;
+        uint32_t l_sramAddr = 0;
 
-        switch (i_sramAddr)
+        switch ( i_occSramRegion )
         {
-            case OCC_SRAM_TRACE_BUF_BASE_ERR:
+            case OCC_FFDC_TRACE_ERR:
                 l_pTraceLoc = &l_pOccFfdc->iv_occTraceErr[0];
-                setTraceBufAddr (OCC_SRAM_TRACE_BUF_BASE_ERR);
+                l_sramAddr = OCC_SRAM_TRACE_BUF_BASE_ERR;
                 l_len = FFDC_TRACE_ERR_SIZE;
                 break;
 
-            case OCC_SRAM_TRACE_BUF_BASE_INF:
-               l_pTraceLoc = &l_pOccFfdc->iv_occTraceInf[0];
-                setTraceBufAddr (OCC_SRAM_TRACE_BUF_BASE_INF);
+            case OCC_FFDC_TRACE_INF:
+                l_pTraceLoc = &l_pOccFfdc->iv_occTraceInf[0];
+                l_sramAddr = OCC_SRAM_TRACE_BUF_BASE_INF;
                 l_len = FFDC_TRACE_INF_SIZE;
                 break;
 
-            case OCC_SRAM_TRACE_BUF_BASE_IMP:
+            case OCC_FFDC_TRACE_IMP:
                 l_pTraceLoc = &l_pOccFfdc->iv_occTraceImp[0];
-                setTraceBufAddr (OCC_SRAM_TRACE_BUF_BASE_IMP);
+                l_sramAddr = OCC_SRAM_TRACE_BUF_BASE_IMP;
                 l_len = FFDC_TRACE_IMP_SIZE;
                 break;
 
-            // @TODO will have to collect other OCC SRAM regions once
-            // the util to read and get base + size is done
-
             default:
                 FAPI_ERR ( "PlatOcc::collectTrace Unknown Address! 0x%08X",
-                           i_sramAddr );
+                           l_sramAddr );
                 // this is likely a code bug, but the overall ffdc flow
                 // must carry on, so we do not break with an error
                 break;
@@ -146,12 +264,13 @@
 
         if ( l_len != 0 )
         {
+            setTraceBufAddr (l_sramAddr);
             FAPI_TRY ( collectSramInfo ( getProcChip(),
                                          l_pTraceLoc,
                                          TRACES,
                                          l_len ),
                        "::collectTrace Failed Addr: 0x%08X Len: %lu bytes",
-                       i_sramAddr, l_len );
+                       l_sramAddr, l_len );
         }
 
     fapi_try_exit:
@@ -161,17 +280,131 @@
 
     //--------------------------------------------------------------------------
 
+    fapi2::ReturnCode PlatOcc::readSramRegion ( uint8_t* i_pHomerBuf,
+                                                uint8_t  i_occSramRegion )
+    {
+        FAPI_DBG ( ">> PlatOcc::readSramRegion: 0x%02X", i_occSramRegion );
+
+        OccFfdcRegion* l_pOccFfdc = ( OccFfdcRegion*) (i_pHomerBuf);
+        uint8_t* l_pLoc = NULL;
+        uint32_t l_len = 0;
+        uint32_t l_sramAddr = 0;
+
+        switch ( i_occSramRegion )
+        {
+            case OCC_FFDC_TRACE_SSX:
+                l_pLoc = &l_pOccFfdc->iv_occTraceSsx[0];
+                l_sramAddr = OCC_SRAM_TRACE_BUF_BASE_SSX_PTR;
+                break;
+
+            case OCC_FFDC_TRACE_GPE0:
+                l_pLoc = &l_pOccFfdc->iv_occTraceGpe0[0];
+                l_sramAddr = GPE0_SRAM_BASE_ADDR + GPE_DEBUG_PTR_OFFSET;
+                break;
+
+            case OCC_FFDC_TRACE_GPE1:
+                l_pLoc = &l_pOccFfdc->iv_occTraceGpe1[0];
+                l_sramAddr = GPE1_SRAM_BASE_ADDR + GPE_DEBUG_PTR_OFFSET;
+                break;
+
+            case OCC_FFDC_SHARED_REGION:
+                l_pLoc = &l_pOccFfdc->iv_occSharedSram[0];
+                l_sramAddr = OCC_SRAM_PGPE_HEADER_ADDR +
+                             PGPE_SHARED_SRAM_ADDR_BYTE;
+                break;
+
+            default:
+                FAPI_ERR ( "PlatOcc::readSramRegion Unknown Address! 0x%08X",
+                           l_sramAddr );
+                break;
+        }
+
+        // For regions where the start and size are not pre-defined
+        // read the start address and size of the region from SRAM.
+        // The start address and size are expected to be 4 byte apart
+        fapi2::variable_buffer l_buf (128);
+        uint32_t l_sramSize = 0;
+
+        // Read from an 8B aligned address and adjust data accordingly
+        uint32_t l_bytesToAlign = l_sramAddr & 0x7UL;
+        uint32_t l_bitStartPos = l_bytesToAlign * 8;
+
+        FAPI_DBG ("SRAM Region Params: %d Addr: 0x%08X Aligned Addr: 0x%08X",
+                  i_occSramRegion, l_sramAddr, (l_sramAddr-l_bytesToAlign));
+        l_sramAddr -= l_bytesToAlign;
+        setTraceBufAddr (l_sramAddr);
+
+        // Read 16 bytes from SRAM
+        FAPI_TRY ( collectSramInfo (
+                   getProcChip (),
+                   reinterpret_cast<uint8_t*>(l_buf.pointer()),
+                   TRACES,
+                   16 ) );
+
+        // Get the read data at an offset based on the aligned address
+        FAPI_TRY (l_buf.extract (l_sramAddr, l_bitStartPos, 32));
+        FAPI_TRY (l_buf.extract (l_sramSize, (l_bitStartPos+64), 32));
+
+        FAPI_INF ("SRAM Region: 0x%08X Addr: 0x%08X Size: %d bytes",
+                  i_occSramRegion, l_sramAddr, l_sramSize);
+
+        // Ensure size of the region is not overshooting its budget in HOMER
+        switch (i_occSramRegion)
+        {
+            case OCC_FFDC_TRACE_SSX:
+                l_len = (l_sramSize > FFDC_TRACE_SSX_SIZE) ?
+                        FFDC_TRACE_SSX_SIZE : l_sramSize;
+                break;
+            case OCC_FFDC_TRACE_GPE0:
+                l_len = (l_sramSize > FFDC_TRACE_GPE0_SIZE) ?
+                        FFDC_TRACE_GPE0_SIZE : l_sramSize;
+                break;
+            case OCC_FFDC_TRACE_GPE1:
+                l_len = (l_sramSize > FFDC_TRACE_GPE1_SIZE) ?
+                        FFDC_TRACE_GPE1_SIZE : l_sramSize;
+                break;
+            case OCC_FFDC_SHARED_REGION:
+                l_len = (l_sramSize > FFDC_SHARED_SRAM_SIZE) ?
+                        FFDC_SHARED_SRAM_SIZE : l_sramSize;
+                break;
+            default:
+                FAPI_ERR ( "PlatOcc::readSramRegion bad region! 0x%08X",
+                           i_occSramRegion);
+                l_len = 0;
+                break;
+        }
+
+        if ( l_len != 0 )
+        {
+            setTraceBufAddr (l_sramAddr);
+            FAPI_TRY ( collectSramInfo ( getProcChip(),
+                                         l_pLoc,
+                                         TRACES,
+                                         l_len ),
+                       "::readSramRegion Failed Addr: 0x%08X Len: %lu bytes",
+                       l_sramAddr, l_len );
+        }
+
+    fapi_try_exit:
+        FAPI_DBG("<< PlatOcc::readSramRegion" );
+        return fapi2::current_err;
+    }
+
+    //--------------------------------------------------------------------------
+
     fapi2::ReturnCode PlatOcc::updateOccFfdcHeader ( uint8_t * i_pHomerBuf,
-                                                     uint8_t  i_ffdcValid )
+                                                     uint16_t  i_ffdcValid )
     {
         FAPI_DBG(">> updateOccFfdcHeader" );
 
         OccFfdcHeader* l_pOccFfdcHdr = ((OccFfdcHeader*)
                                        ((OccFfdcHdrRegion*) i_pHomerBuf));
         l_pOccFfdcHdr->iv_magicWord =  htobe32( FFDC_OCC_MAGIC_NUM );
-        l_pOccFfdcHdr->iv_ffdcValid = i_ffdcValid;
-        l_pOccFfdcHdr->iv_headerSize = sizeof (OccFfdcHeader);
+        l_pOccFfdcHdr->iv_versionMajor = 1;
+        l_pOccFfdcHdr->iv_versionMinor = 0;
+        l_pOccFfdcHdr->iv_headerSize = htobe16 (sizeof (OccFfdcHeader));
         l_pOccFfdcHdr->iv_sectionSize = htobe16 (sizeof (OccFfdcRegion));
+        l_pOccFfdcHdr->iv_sectionsValid = htobe16 (i_ffdcValid);
         l_pOccFfdcHdr->iv_offsetErrTrace =
               htobe16 (offsetof (struct OccFfdcRegion, iv_occTraceErr[0]));
         l_pOccFfdcHdr->iv_offsetImpTrace =
@@ -190,8 +423,8 @@
               htobe16 (offsetof (struct OccFfdcRegion, iv_occRegs[0]));
 
         FAPI_DBG( "================== OCC Header ==========================" );
-        FAPI_DBG( "FFDC Validity Vector         :   0x%02x", l_pOccFfdcHdr->iv_ffdcValid );
-        FAPI_DBG( "OCC Header Size              :   0x%02x", l_pOccFfdcHdr->iv_headerSize );
+        FAPI_DBG( "FFDC Validity Vector         :   0x%04x", REV_2_BYTE(l_pOccFfdcHdr->iv_sectionsValid ));
+        FAPI_DBG( "OCC Header Size              :   0x%04x", REV_2_BYTE(l_pOccFfdcHdr->iv_headerSize ));
         FAPI_DBG( "OCC FFDC Section Size        :   0x%04x", REV_2_BYTE(l_pOccFfdcHdr->iv_sectionSize) );
         FAPI_DBG( "OCC ERR Trace Offset         :   0x%04x", REV_2_BYTE(l_pOccFfdcHdr->iv_offsetErrTrace));
         FAPI_DBG( "OCC IMP Trace Offset         :   0x%04x", REV_2_BYTE(l_pOccFfdcHdr->iv_offsetImpTrace));
@@ -217,7 +450,7 @@ extern "C"
         FAPI_DBG (">> p9_pm_recovery_occ" );
 
         PlatOcc l_occFfdc( i_procChip );
-        FAPI_TRY( l_occFfdc.collectFfdc( i_pFfdcBuf ),
+        FAPI_TRY( l_occFfdc.collectFfdc ( i_pFfdcBuf, (TRACES | SCOM_REG)),
                   "Failed To Collect OCC FFDC" );
 
     fapi_try_exit:

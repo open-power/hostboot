@@ -25,7 +25,14 @@
 PROCEDURE = p9_pm_recovery_ffdc_base
 FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/lib/
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_setup_linear
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_pgpe
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_sgpe
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_cme
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_cppm
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_occ
+lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_qppm
 lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access
 lib$(PROCEDURE)_DEPLIBS+=p9_ppe_state
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_utils
 $(call ADD_MODULE_INCDIR,$(FFDC_INC))
 $(call BUILD_PROCEDURE)
