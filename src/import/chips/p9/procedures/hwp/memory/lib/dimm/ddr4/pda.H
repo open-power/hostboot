@@ -67,7 +67,7 @@ enum consts : uint64_t
     // 10 cycles for safety
     SAFETY = 10,
     // Total delay is your register max + safety
-    DELAY = MAX_PDA_REG + SAFETY,
+    SAFE_COMMAND_DELAY = MAX_PDA_REG + SAFETY,
 
     // PDA on/off settings
     START_DELAY_VALUE = 0,
