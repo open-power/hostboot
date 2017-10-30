@@ -48,66 +48,90 @@
  namespace p9_stop_recov_ffdc
  {
     QppmRegs::QppmRegs( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt )
-      : PlatPmComplex( i_procChipTgt,0,0,0,PLAT_PPM)
+      : PlatPmComplex ( i_procChipTgt, PLAT_QPPM )
     { }
 
     //----------------------------------------------------------------------
 
-    fapi2::ReturnCode QppmRegs::collectRegFfdc( void * i_pHomerBuf )
+    fapi2::ReturnCode QppmRegs::init ( void* i_pHomerBuf )
     {
-        FAPI_DBG(">> QppmRegs::collectRegFfdc");
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        fapi2::ReturnCode l_rc = fapi2::current_err;
+        FAPI_DBG (">> QppmRegs::init" );
+        FAPI_TRY ( collectFfdc( i_pHomerBuf, INIT),
+                   "Failed To init QPPM REGS FFDC" );
+
+    fapi_try_exit:
+        FAPI_DBG ("<< QppmRegs::init" );
+        return fapi2::current_err;
+    }
+
+    //----------------------------------------------------------------------
+
+    fapi2::ReturnCode QppmRegs::collectFfdc ( void*   i_pHomerBuf,
+                                              uint8_t i_ffdcType )
+    {
+        FAPI_DBG(">> QppmRegs::collectFfdc");
+
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
         auto l_quadList =
             getProcChip().getChildren< fapi2::TARGET_TYPE_EQ > ( fapi2::TARGET_STATE_PRESENT );
         uint8_t l_quadPos = 0;
-        uint8_t *l_pFfdcLoc = NULL;
-        uint8_t l_ffdcValid = 0;
+        uint8_t* l_pFfdcLoc = NULL;
+        uint16_t l_ffdcValid = 0;
         HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
 
         for( auto quad : l_quadList )
         {
+
             FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS, quad, l_quadPos ),
                       "FAPI_ATTR_GET Failed To Read QUAD Position" );
 
             l_pFfdcLoc = &l_pHomerFfdc->iv_quadFfdc[l_quadPos].iv_quadQppmRegion[0];
-            if( quad.isFunctional() )
-            {
-                l_ffdcValid = 1;
-                FAPI_INF("QPPM FFDC Pos %d ", l_quadPos);
 
-                l_rc = collectRegisterData<fapi2::TARGET_TYPE_EQ> (quad,
-                                            l_pFfdcLoc + sizeof(PpmFfdcHeader),
-                                            static_cast<fapi2::HwpFfdcId>(fapi2::QPPM_FFDC_REGISTERS));
-                if (l_rc )
+            // On INIT, update the headers just as in case of not functional
+            if (quad.isFunctional())
+            {
+                // Note: ( i_ffdcType & INIT ) is the default case
+                if ( i_ffdcType & SCOM_REG )
                 {
-                    l_ffdcValid = 0;
+                    l_ffdcValid = 1;
+                    FAPI_INF("QPPM FFDC Pos %d ", l_quadPos);
+
+                    l_rc = collectRegisterData <fapi2::TARGET_TYPE_EQ> (
+                           quad,
+                           l_pFfdcLoc + sizeof(PpmFfdcHeader),
+                           static_cast<fapi2::HwpFfdcId>(fapi2::QPPM_FFDC_REGISTERS));
+                    if (l_rc )
+                    {
+                        l_ffdcValid = 0;
+                    }
                 }
             }
-
 
             FAPI_TRY( updateQppmFfdcHeader( l_pFfdcLoc, l_quadPos, l_ffdcValid),
                       "Failed To Update QPPM FFDC Header for quad 0x%0d", l_quadPos);
         }
 
-        fapi_try_exit:
-        FAPI_DBG("<< QppmRegs::collectRegFfdc");
+    fapi_try_exit:
+        FAPI_DBG("<< QppmRegs::collectFfdc");
         return fapi2::current_err;
     }
 
     fapi2::ReturnCode QppmRegs::updateQppmFfdcHeader( uint8_t * i_pHomerBuf, 
                                                       const uint8_t i_quadPos,
-                                                      const uint8_t i_ffdcValid)
+                                                      const uint16_t i_ffdcValid)
     {
         FAPI_DBG(">> updateQppmFfdcHeader" );
 
-        PpmFfdcHeader * l_QppmFfdcHdr       =   (PpmFfdcHeader *) i_pHomerBuf ;
-        l_QppmFfdcHdr->iv_ppmMagicWord      =  htobe32(FFDC_QPPM_MAGIC_NUM);
-        l_QppmFfdcHdr->iv_Instance          =  i_quadPos;
-        l_QppmFfdcHdr->iv_ppmHeaderSize     =  sizeof(PpmFfdcHeader);
-        l_QppmFfdcHdr->iv_sectionSize       =  FFDC_QPPM_REGISTERS_SIZE;
-        l_QppmFfdcHdr->iv_ffdcValid         =  i_ffdcValid;
+        PpmFfdcHeader * l_QppmFfdcHdr     =   (PpmFfdcHeader *) i_pHomerBuf ;
+        l_QppmFfdcHdr->iv_ppmMagicWord    =  htobe32(FFDC_QPPM_MAGIC_NUM);
+        l_QppmFfdcHdr->iv_versionMajor = 1;
+        l_QppmFfdcHdr->iv_versionMinor = 0;
+        l_QppmFfdcHdr->iv_Instance        =  i_quadPos;
+        l_QppmFfdcHdr->iv_ppmHeaderSize   =  htobe16(sizeof(PpmFfdcHeader));
+        l_QppmFfdcHdr->iv_sectionSize     =  htobe16(FFDC_QPPM_REGION_SIZE);
+        l_QppmFfdcHdr->iv_ffdcValid       =  htobe16 (i_ffdcValid);
 
         FAPI_DBG("<< updateQppmFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
@@ -122,7 +146,7 @@ extern "C"
     {
         FAPI_IMP(">> p9_pm_recovery_ffdc_qppm" );
         QppmRegs l_qppmFfdc( i_procChip );
-        FAPI_TRY( l_qppmFfdc.collectRegFfdc( i_pFfdcBuf ),
+        FAPI_TRY( l_qppmFfdc.collectFfdc( i_pFfdcBuf, SCOM_REG ),
                   "Failed To Collect QPPM FFDC" );
 
         fapi_try_exit:
