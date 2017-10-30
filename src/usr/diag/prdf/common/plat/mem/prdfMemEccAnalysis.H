@@ -107,14 +107,15 @@ uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
 
 /**
  * @brief  Handles a MPE attention.
- * @param  i_chip   MCA or MBA.
- * @param  i_rank   Target rank.
- * @param  io_sc    The step code data struct.
+ * @param  i_chip    MCA or MBA.
+ * @param  i_rank    Target rank.
+ * @param  io_sc     The step code data struct.
+ * @param  i_isFetch Whether this is a fetch attn or not.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T, typename D>
 uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                    STEP_CODE_DATA_STRUCT & io_sc );
+                    STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch = false );
 
 /**
  * @brief  Analyzes a fetch MPE attention.
@@ -203,7 +204,8 @@ uint32_t maskMemPort( ExtensibleChip * i_chip );
 
 template<TARGETING::TYPE T, typename D>
 uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc );
+                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
+                      bool i_isFetch = false );
 
 template<TARGETING::TYPE T, typename D>
 uint32_t addTpsEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
