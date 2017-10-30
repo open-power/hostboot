@@ -294,22 +294,34 @@ uint32_t iuePortFail<TYPE_MCA>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T, typename D>
 uint32_t addVcmEvent( ExtensibleChip * i_chip, const MemRank & i_rank,
-                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc )
+                      const MemMark & i_mark, STEP_CODE_DATA_STRUCT & io_sc,
+                      bool i_isFetch )
 {
     PRDF_ASSERT( T == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
 
     D db = static_cast<D>(i_chip->getDataBundle());
 
     TdEntry * entry = new VcmEvent<T>( i_chip, i_rank, i_mark );
 
-    return db->getTdCtlr()->handleTdEvent( io_sc, entry );
+    // We only want to call handleTdEvent for fetch attentions, if we do it in
+    // other cases we will hit an infinite loop, so we just add the entry to the
+    // queue instead.
+    if ( i_isFetch )
+        o_rc = db->getTdCtlr()->handleTdEvent( io_sc, entry );
+    else
+        db->getTdCtlr()->pushToQueue( entry );
+
+    return o_rc;
 }
 
 template
 uint32_t addVcmEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
                                                  const MemRank & i_rank,
                                                  const MemMark & i_mark,
-                                                 STEP_CODE_DATA_STRUCT & io_sc);
+                                                 STEP_CODE_DATA_STRUCT & io_sc,
+                                                 bool i_isFetch);
 
 #endif
 
@@ -342,7 +354,7 @@ uint32_t addTpsEvent<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
 
 template<TARGETING::TYPE T, typename D>
 uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
-                    STEP_CODE_DATA_STRUCT & io_sc )
+                    STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch )
 {
     #define PRDF_FUNC "[MemEcc::handleMpe] "
 
@@ -373,7 +385,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         #ifdef __HOSTBOOT_RUNTIME
         // Add a VCM request to the TD queue.
-        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc );
+        o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc, i_isFetch );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
@@ -393,7 +405,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 // To resolve template linker errors.
 template
 uint32_t handleMpe<TYPE_MCA, McaDataBundle *>( ExtensibleChip * i_chip,
-    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc );
+    const MemRank & i_rank, STEP_CODE_DATA_STRUCT & io_sc, bool i_isFetch );
 
 //------------------------------------------------------------------------------
 
@@ -439,7 +451,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         D db = static_cast<D>(i_chip->getDataBundle());
         db->iv_ueTable.addEntry( UE_TABLE::FETCH_MPE, addr );
 
-        o_rc = MemEcc::handleMpe<T,D>( i_chip, i_rank, io_sc );
+        o_rc = MemEcc::handleMpe<T,D>( i_chip, i_rank, io_sc, true );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",

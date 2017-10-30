@@ -102,6 +102,11 @@ class MemTdCtlr
     uint32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
                             TdEntry * i_entry );
 
+    /**
+     * @brief  Pushes a new TdEntry to the back of iv_queue.
+     * @param  i_entry  The new TD queue entry.
+     */
+    void pushToQueue( TdEntry * i_entry ) { iv_queue.push(i_entry); }
 
   private:
 
