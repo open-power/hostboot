@@ -55,10 +55,17 @@ namespace p9_stop_recov_ffdc
             /// @brief  destructor
             virtual ~PlatPgpe() { };
 
+            /// @brief      Initializes the PGPE FFDC Sub-Section in HOMER with default header
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            ///  @return     fapi2 return code
+            fapi2::ReturnCode init ( void* i_pHomerBuf );
+
             /// @brief      collects FFDC pertaining to all functional PGPEs in the chip.
-            /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            /// @param[in]  i_ffdcType   indicates the content type to collect
             /// @return     fapi2 return code.
-            fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
+            fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
+                                           uint8_t i_ffdcType = ALL );
 
         private:
             /// @brief      collects trace info from PGPE's SRAM buffer.
@@ -88,13 +95,10 @@ namespace p9_stop_recov_ffdc
 
             /// @brief updates the PGPE FFDC Header
             ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for PGPE FFDC Header
-            ///@param[in]   i_ffdcValid     true if FFDC is valid, false otherwise
-            ///@param[in]   i_haltCondition hlat state of PGPE
+            ///@param[in]   i_sectionsValid bit vector summarizing FFDC validity
             ///@return      fapi2 return code.
-            ///@note        refer to PPE Spec for details on halt state.
-
-            fapi2::ReturnCode updatePgpeFfdcHeader( uint8_t * i_pHomerBuf,
-                                                   bool i_ffdcValid, uint8_t i_haltCondition );
+            fapi2::ReturnCode updatePgpeFfdcHeader( uint8_t* i_pHomerBuf,
+                                                    uint16_t i_sectionsValid );
 
             ///@brief returns type of platform
             PmComplexPlatId getPlatType() { return iv_plat; }
