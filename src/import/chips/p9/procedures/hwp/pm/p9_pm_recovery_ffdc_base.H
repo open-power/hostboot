@@ -22,12 +22,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#ifndef __P9_PM_RECOVERY_BASE_
-#define __P9_PM_RECOVERY_BASE_
+#ifndef __P9_PM_RECOVERY_FFDC_BASE_
+#define __P9_PM_RECOVERY_FFDC_BASE_
 
 
 ///
-/// @file   p9_stop_ffdc_base.H
+/// @file   p9_pm_recovery_ffdc_base.H
 /// @brief  Models generic platform for the FFDC collection of PM complex
 ///
 /// *HWP HWP Owner:      Greg Still <stillgs@us.ibm.com>
@@ -41,39 +41,46 @@
 // Includes
 //--------------------------------------------------------------------------
 #include <fapi2.H>
-#include <collect_reg_ffdc.H>
 #include <stdint.h>
-#include <p9_hcd_memmap_cme_sram.H>
-#include <p9_hcd_memmap_occ_sram.H>
 #include <p9_pm_recovery_ffdc_defines.H>
-#include <p9_pm_ocb_indir_access.H>
-#include <p9_cme_sram_access.H>
-#include <p9_pm_ocb_indir_setup_linear.H>
 #include <p9_ppe_utils.H>
 
 namespace p9_stop_recov_ffdc
 {
+
     class PlatPmComplex
     {
         public:
             /// @brief  constructor
             /// @param[in]  i_procChipTgt       fapi2 target for P9 chip
+            /// @param[in]  i_plat              platform id
             /// @param[in]  i_imageHdrBaseAddr  sram address of start of image header
             /// @param[in]  i_traceBufBaseAddr  sram address of start of trace buffer
             /// @param[in]  i_globalBaseAddr    sram address of start of global variables
-            /// @param[in]  i_plat              platform id
-            PlatPmComplex( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt,
-                           uint32_t i_imageHdrBaseAddr, uint32_t i_traceBufBaseAddr,
-                           uint32_t i_globalBaseAddr,
-                           PmComplexPlatId i_plat );
+            PlatPmComplex( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP >
+                                    i_procChipTgt,
+                           PmComplexPlatId i_plat = PLAT_NONE,
+                           uint32_t i_imageHdrBaseAddr = 0,
+                           uint32_t i_traceBufBaseAddr = 0,
+                           uint32_t i_globalBaseAddr = 0 );
 
             /// @brief  destructor
             virtual ~PlatPmComplex() { };
 
-            /// @brief      collects category of FFDC common for all platforms in PM complex.
-            /// @param[in]  i_pHomerBuf     points to base of P9 HOMER.
+            /// @brief      Initializes the PM FFDC Section Header in HOMER
+            /// @param[in]  i_pHomerBuf  pointer to base of P9 HOMER.
+            //  @return     fapi2 return code
+            virtual fapi2::ReturnCode init ( void* i_pHomerBuf );
+
+            /// @brief      Collects specified FFDC to PM FFDC section of HOMER
+            /// @param[in]  i_pHomerBuf  points to base of P9 HOMER.
+            /// @param[in]  i_ffdcType   indicates the content type to collect
             //  @return     fapi2 return code.
-            virtual fapi2::ReturnCode collectFfdc( void* i_pHomerBuf );
+            virtual fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
+                                                   uint8_t i_ffdcType = ALL );
+
+            /// @brief returns proc chip target associated with platform
+            fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > getProcChip() const { return iv_procChip; }
 
             /// @brief  sets start address of platform's trace buffer.
             void setTraceBufAddr (uint32_t i_addr)
@@ -82,17 +89,25 @@ namespace p9_stop_recov_ffdc
             ///@brief returns instance id.
             PmComplexPlatId getPlatId() { return iv_plat ; }
 
-            /// @brief returns proc chip target associated with platform
-            fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > getProcChip() const { return iv_procChip; }
-
         protected:
+
+           ///@brief sets the validity of a section in the PmFfdcHeader
+           ///@param[in]    i_pHomerBuf Base address of PM FFDC in HOMER
+           ///@param[in]    i_pmFfdcSectionState See PmFfdcSectionState
+           ///@param[in]    i_valid true:  sets the section valid
+           ///                      false: sets the section invalid
+           ///@return      N.A.
+           void setPmFfdcSectionValid ( void*    i_pHomerBuf,
+                                        uint16_t i_pmFfdcSectionState,
+                                        bool     i_valid = true );
+
             ///@brief reads the PPE Halt State from XSR, w/o halting the PPE
             ///@param[in]  i_xirBaseAddress XCR SCOM Address of the PPE
-            ///@param[out] o_haltCondition  p9_stop_recov_ffdc::PpeHaltCondition
+            ///@param[in]  i_pHomerOffset   PPE section base address in HOMER
             ///@return  fapi2 return code
             fapi2::ReturnCode readPpeHaltState (
                       const uint64_t i_xirBaseAddress,
-                      uint8_t&       o_haltCondition );
+                      const uint8_t* i_pHomerOffset );
 
             ///@brief collects PPE State (XIRs, SPRs, GPRs) to a loc in HOMER
             ///@param[in] i_xirBaseAddress XCR SCOM Address of the PPE
@@ -102,7 +117,7 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectPpeState (
                    const uint64_t i_xirBaseAddress,
                    const uint8_t* i_pHomerOffset,
-                   const PPE_DUMP_MODE i_mode = HALT );
+                   const PPE_DUMP_MODE i_mode = FORCE_HALT );
 
             ///@brief collects FFDC from CME/OCC SRAM
             ///@param[in]   i_chipletTarget     fapi2 target for EX or Proc
@@ -120,6 +135,23 @@ namespace p9_stop_recov_ffdc
                                                FfdcDataType i_dataType,
                                                uint32_t i_sramLength );
 
+
+            ///@brief  updates parts of PPE FFDC Header common for all platforms.
+            ///param[in]    i_pFfdcHdr      points to the PPE FFDC header
+            ///param[in]    i_sectionsValid bit vector summarizing FFDC validity
+            fapi2::ReturnCode updatePpeFfdcHeader( PpeFfdcHeader * i_pFfdcHdr,
+                                                   uint16_t i_sectionsValid );
+
+            ///@brief  update header for the FIR FFDC section
+            ///param[in]    i_pFfdcHdr      pointer to FIR FFDC header in HOMER
+            ///param[in]    i_pos           chiplet position
+            ///param[in]    i_ffdcValid     true if valid, false otherwise
+            ///@return  fapi2 return code
+            fapi2::ReturnCode updateFirFfdcHeader( uint8_t* i_pFfdcHdr,
+                                                   uint8_t  i_pos,
+                                                   bool     i_ffdcValid);
+
+
             ///@brief  Collects register data
             ///param[in]    i_chipletTarget Chip/chilpet target
             ///param[out]   o_pHomerBuf     Homer base address to fill register
@@ -131,15 +163,6 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectRegisterData( const fapi2::Target<T>& i_chipletTarget,
                                                    uint8_t* o_pHomerBuf,
                                                    fapi2::HwpFfdcId i_ffdcId);
-
-
-            ///@brief  updates parts of PPE FFDC Header common for all platforms.
-            ///param[in]    i_pFfdcHdr      points to the PPE FFDC header
-            ///param[in]    i_ffdcValid     bit vector summarizing FFDC validity
-            ///param[in]    i_haltState     FFDC halt state
-            ///@note  refer to PPE Spec for halt state description.
-            fapi2::ReturnCode updatePpeFfdcHeader( PpeFfdcHeader * i_pFfdcHdr,
-                                                   uint8_t i_ffdcValid, uint8_t i_haltState );
             #ifndef __HOSTBOOT_MODULE
             ///@brief to debug FFDC contents collected from SRAM.
             ///param[in]    i_pSram     points to location of SRAM info in HOMER.
@@ -156,10 +179,13 @@ namespace p9_stop_recov_ffdc
             PmComplexPlatId iv_plat;
     };
 
+    //---------------------------------------------------------------------------------------------
+
     template<fapi2::TargetType T>
-    fapi2::ReturnCode PlatPmComplex::collectRegisterData(const fapi2::Target<T>& i_chipletTarget,
-                                           uint8_t *o_pHomerBuf,
-                                           fapi2::HwpFfdcId i_ffdcId)
+    fapi2::ReturnCode PlatPmComplex::collectRegisterData (
+                      const fapi2::Target<T>& i_chipletTarget,
+                      uint8_t *o_pHomerBuf,
+                      fapi2::HwpFfdcId i_ffdcId )
     {
         FAPI_DBG(">> collectRegisterData");
         std::vector<uint32_t> l_cfamAddresses;
@@ -172,14 +198,40 @@ namespace p9_stop_recov_ffdc
 
         FAPI_TRY((fapi2::collectRegisterAndAddressData<uint64_t,
                     fapi2::ScomReader<T> >(l_scomAddresses, l_scomReader,
-                                        l_offset, o_pHomerBuf)), 
+                                        l_offset, o_pHomerBuf)),
                    "Failed in collectRegisterAndAddressData");
 
-        fapi_try_exit:
+    fapi_try_exit:
         FAPI_DBG("<< collectRegisterData");
         return fapi2::current_err;
+    };
+
+    //---------------------------------------------------------------------------------------------
+
+    // function pointer typedef definition for HWP call support
+    typedef fapi2::ReturnCode (*p9_pm_recovery_ffdc_base_FP_t)
+            ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+              const void* );
+
+    extern "C"
+    {
+    // -----------------------------------------------------------------------------
+    // Function prototypes
+    // -----------------------------------------------------------------------------
+    ///
+    /// @brief Initializes the PM FFDC section in HOMER with default headers and
+    ///        other FFDC to be collection before the PM Reset Flow
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_base
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
     }
 
 } //namespace p9_stop_recov_ffdc ends
 
-#endif //__P9_PM_RECOVERY_BASE_
+#endif //__P9_PM_RECOVERY_FFDC_BASE_
