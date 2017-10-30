@@ -54,7 +54,12 @@
 //******************************************************************************
 // Forward declarations to allow friend functions to work
 //******************************************************************************
-
+#ifdef __HOSTBOOT_RUNTIME
+namespace RT_TARG
+{
+    void adjustTargeting4Runtime();
+}
+#endif
 
 namespace fapi2
 {
@@ -625,7 +630,9 @@ class Target
         friend class AssociationManager;
         friend class AttributeTank;
 
-
+#ifdef __HOSTBOOT_RUNTIME
+        friend void RT_TARG::adjustTargeting4Runtime();
+#endif
 
 
          friend bool fapi2::
