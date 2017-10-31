@@ -252,7 +252,7 @@ TESTCASE_MODULES += testfapi2
 # @TODO DefecT: 1035550 Figure out why testattn is failing sometimes
 #TESTCASE_MODULES += testattn
 
-
+include ${ROOTPATH}/src/usr/runtime/common/common.mk
 
 RUNTIME_OBJECTS += rt_start.o
 RUNTIME_OBJECTS += rt_main.o
@@ -263,6 +263,7 @@ RUNTIME_OBJECTS += rt_assert.o
 RUNTIME_OBJECTS += rt_vfs.o
 RUNTIME_OBJECTS += rt_task.o
 RUNTIME_OBJECTS += rt_time.o
+RUNTIME_OBJECTS += ${RUNTIME_COMMON_OBJS}
 
 RUNTIME_MODULES += trace_rt
 RUNTIME_MODULES += errl_rt

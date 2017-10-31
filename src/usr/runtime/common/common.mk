@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/runtime/makefile $
+# $Source: src/usr/runtime/common/common.mk $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2017
+# Contributors Listed Below - COPYRIGHT 2017
 # [+] International Business Machines Corp.
 #
 #
@@ -22,21 +22,4 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-HOSTBOOT_RUNTIME = 1
-ROOTPATH = ../..
-include ../usr/runtime/common/common.mk
-VPATH += ../usr/runtime/common
-EXTRAINCDIR += ${ROOTPATH}/src/include/usr/
-
-OBJS += rt_start.o
-OBJS += rt_main.o
-OBJS += rt_console.o
-OBJS += rt_stdlib.o
-OBJS += rt_sync.o
-OBJS += rt_assert.o
-OBJS += rt_vfs.o
-OBJS += rt_task.o
-OBJS += rt_time.o
-OBJS += ${RUNTIME_COMMON_OBJS}
-
-include ${ROOTPATH}/config.mk
+RUNTIME_COMMON_OBJS += runtime_utils.o
