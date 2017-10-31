@@ -60,6 +60,11 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include "sbe_threshold_fsm.H"
 
+#include <devicefw/driverif.H>
+
+/* Global switch sides count */
+static uint8_t g_switch_sides_count = 0;
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
@@ -99,7 +104,8 @@ SbeRetryHandler::~SbeRetryHandler()
 }
 
 void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
-                               uint8_t i_current_error)
+                               uint8_t i_current_error,
+                               SBE_REG_RETURN * o_regReturn)
 {
     SBE_TRACF(ENTER_MRK "proc_extract_sbe_handler error: %x",
                     i_current_error);
@@ -165,10 +171,6 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl, ISTEP_COMP_ID);
 
-            // Run HWP, but from the other side.
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2_proc_target(i_target);
-
             l_errl = this->switch_sbe_sides(i_target);
             if(l_errl)
             {
@@ -210,9 +212,6 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
         }
         case P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM:
         {
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2_proc_target(i_target);
-
             l_errl = this->switch_sbe_sides(i_target);
             if(l_errl)
             {
@@ -278,6 +277,12 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
                                   HWAS::GARD_NULL );
             errlCommit(l_errl, ISTEP_COMP_ID);
 
+            // Set register return to indicate Gard and Callout of proc
+            if(o_regReturn)
+            {
+                *o_regReturn = SBE_REG_RETURN::PROC_DECONFIG;
+            }
+
             break;
         }
         default:
@@ -321,9 +326,6 @@ SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
 
     do
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                    l_fapi2_proc_target(i_target);
-
         sbeMsgReg_t l_sbeReg;
 
         l_errl = this->sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
@@ -342,7 +344,7 @@ SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
             }
 
             // Handle that SBE failed to boot in the allowed time
-            this->sbe_boot_fail_handler(i_target,l_sbeReg);
+            this->sbe_boot_fail_handler(i_target,l_sbeReg,&l_ret);
         }
         else if (l_errl)
         {
@@ -418,6 +420,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                 return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
             }
 
+            SBE_TRACF("Inside handle_sbe_reg_value, calling p9_extract_sbe_rc HWP");
             // Get SBE extract rc
             P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
@@ -759,7 +762,8 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 }
 
 void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
-                           sbeMsgReg_t i_sbeReg)
+                           sbeMsgReg_t i_sbeReg,
+                           SBE_REG_RETURN * o_regReturn)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -790,6 +794,8 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
     // we can still at least boot with master proc
     errlCommit(l_errl,ISTEP_COMP_ID);
 
+    SBE_TRACF("Inside sbe_boot_fail_handler, calling p9_extract_sbe_rc HWP");
+
     // Setup for the HWP
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                         const_cast<TARGETING::Target*> (i_target));
@@ -798,21 +804,21 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
     FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
                     l_fapi2ProcTarget, l_rcAction);
 
-    if(l_errl)
+    //TODO:RTC 180961 handle error. ^^
+
+
+    if(l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
     {
-        SBE_TRACF("ERROR : sbe_boot_fail_handler : "
-               "p9_extract_sbe_rc HWP returning errorlog "
-               "PLID=0x%x",l_errl->plid());
 
-        // capture the target data in the elog
-        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
-
-        // Commit error log
-        errlCommit( l_errl, HWPF_COMP_ID );
-
-    }
-    else if(l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
-    {
+        if(l_errl) //TODO:RTC 180961 handle error ^^
+        {
+            SBE_TRACF("Error found from p9_extract_sbe, fixing later");
+            SBE_TRACF("p9_extract_sbe_rc HWP returned action %d and errorlog "
+                      "PLID=0x%x, rc=0x%.4X", l_rcAction, l_errl->plid(),
+                      l_errl->reasonCode() );
+            delete l_errl;
+            l_errl = nullptr;
+        }
 
         if(INITSERVICE::spBaseServicesEnabled())
         {
@@ -836,8 +842,33 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 #endif
+
+        // Only attempt to recover twice before erroring out
+        if((l_rcAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION) &&
+           (g_switch_sides_count < 2))
+        {
+            // Change action to attempt coming up from backup SEEPROM
+            l_rcAction = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+        }
+
+        // Handle the p9_extract_sbe_rc results (as modified)
+        // Pass o_regReturn back through call chain.
         proc_extract_sbe_handler( i_target,
-                                  l_rcAction);
+                                  l_rcAction,
+                                  o_regReturn);
+    }
+
+    if(l_errl)
+    {
+        SBE_TRACF("Error: sbe_boot_fail_handler : p9_extract_sbe_rc HWP "
+                  " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
+                  l_rcAction, l_errl->plid(), l_errl->reasonCode());
+
+        // Capture the target data in the elog
+        ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
+
+        // Commit error log
+        errlCommit( l_errl, HWPF_COMP_ID );
     }
 
     return;
@@ -846,63 +877,72 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
 errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
 {
     errlHndl_t l_errl = NULL;
-    fapi2::buffer<uint32_t> l_read_reg;
     const uint32_t l_sbeBootSelectMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_fapi2_proc_target(i_target);
 
-    // Read version from MVPD for target proc
-    SBE::mvpdSbKeyword_t l_mvpdSbKeyword;
-    l_errl = getSetMVPDVersion(i_target,
-                    SBE::MVPDOP_READ,
-                    l_mvpdSbKeyword);
-    if(l_errl)
-    {
-        SBE_TRACF("Failure to getSetMVPDVersion");
-        return l_errl;
-    }
+    do{
 
-    fapi2::ReturnCode l_fapi_rc = fapi2::getCfamRegister(
-                    l_fapi2_proc_target, PERV_SB_CS_FSI,
-                    l_read_reg);
-    if(!l_fapi_rc.isRC(0))
-    {
-        l_errl = fapi2::rcToErrl(l_fapi_rc);
-        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-        l_errl->collectTrace(FAPI_TRACE_NAME,384);
+        // Read PERV_SB_CS_FSI_BYTE 0x2820 for target proc
+        uint32_t l_read_reg = 0;
+        size_t l_opSize = sizeof(uint32_t);
+        l_errl = DeviceFW::deviceOp(
+                           DeviceFW::READ,
+                           i_target,
+                           &l_read_reg,
+                           l_opSize,
+                           DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+        if( l_errl )
+        {
+            SBE_TRACF( ERR_MRK"switch_sbe_sides: FSI device read "
+                      "PERV_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
+                      "RC=0x%X, PLID=0x%lX",
+                      PERV_SB_CS_FSI_BYTE, // 0x2820
+                      TARGETING::get_huid(i_target),
+                      ERRL_GETRC_SAFE(l_errl),
+                      ERRL_GETPLID_SAFE(l_errl));
+            break;
+        }
 
-        SBE_TRACF("Failure to getCfamRegister");
-        return l_errl;
-    }
+        // Determine how boot side is currently set
+        if(l_read_reg & l_sbeBootSelectMask) // Currently set for Boot Side 1
+        {
+            // Set Boot Side 0 by clearing bit for side 1
+            SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 0 for HUID 0x%08X",
+                       g_switch_sides_count,
+                       TARGETING::get_huid(i_target));
+            l_read_reg &= ~l_sbeBootSelectMask;
+        }
+        else // Currently set for Boot Side 0
+        {
+            // Set Boot Side 1 by setting bit for side 1
+            SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 1 for HUID 0x%08X",
+                       g_switch_sides_count,
+                       TARGETING::get_huid(i_target));
+            l_read_reg |= l_sbeBootSelectMask;
+        }
 
-    // Determine boot side from flags in MVPD
-    bool l_bootSide0 = (SBE::isIplFromReIplRequest())
-            ? (SBE::REIPL_SEEPROM_0_VALUE == (l_mvpdSbKeyword.flags
-              & SBE::REIPL_SEEPROM_MASK))
-            : (SBE::SEEPROM_0_PERMANENT_VALUE == (l_mvpdSbKeyword.flags
-              & SBE::PERMANENT_FLAG_MASK));
-    if(l_bootSide0)
-    {
-        // Set Boot Side 0 by clearing bit for side 1
-        l_read_reg &= ~l_sbeBootSelectMask;
-    }
-    else
-    {
-        // Set Boot Side 1 by setting bit for side 1
-        l_read_reg |= l_sbeBootSelectMask;
-    }
+        // Increment switch sides count
+        ++g_switch_sides_count;
+        this->iv_sbeOtherSide = true;
 
-    l_fapi_rc = fapi2::putCfamRegister(l_fapi2_proc_target,
-                    PERV_SB_CS_FSI, l_read_reg);
-    if(!l_fapi_rc.isRC(0))
-    {
-        l_errl = fapi2::rcToErrl(l_fapi_rc);
-        l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
-        l_errl->collectTrace(FAPI_TRACE_NAME,384);
-
-        SBE_TRACF("Failure to putCfamRegister");
-        return l_errl;
-    }
+        // Write updated PERV_SB_CS_FSI 0x2820 back into target proc
+        l_errl = DeviceFW::deviceOp(
+                        DeviceFW::WRITE,
+                        i_target,
+                        &l_read_reg,
+                        l_opSize,
+                        DEVICE_FSI_ADDRESS(PERV_SB_CS_FSI_BYTE) );
+        if( l_errl )
+        {
+            SBE_TRACF( ERR_MRK"switch_sbe_sides: FSI device write "
+                      "PERV_SB_CS_FSI_BYTE (0x%.4X), proc target = %.8X, "
+                      "RC=0x%X, PLID=0x%lX",
+                      PERV_SB_CS_FSI_BYTE, // 0x2820
+                      TARGETING::get_huid(i_target),
+                      ERRL_GETRC_SAFE(l_errl),
+                      ERRL_GETPLID_SAFE(l_errl));
+            break;
+        }
+    }while(0);
 
     return l_errl;
 }
