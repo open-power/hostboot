@@ -58,6 +58,7 @@ class SbeRetryHandler
             HWP_ERROR           = 0, // Error returned from HWP
             SBE_AT_RUNTIME      = 1, // SBE is at runtime and booted
             SBE_FAILED_TO_BOOT  = 2, // SBE has failed to boot
+            PROC_DECONFIG       = 3, // Deconfig done on Proc with SBE
         };
 
         /**
@@ -93,12 +94,14 @@ class SbeRetryHandler
          *
          * @param[in]     i_target        - current proc target
          * @param[in]     i_sbeReg        - sbe register
+         * @param[out]    o_regReturn     - sbe reg return
          *
          * @return - NULL
          */
 
         void sbe_boot_fail_handler(TARGETING::Target * i_target,
-                                   sbeMsgReg_t i_sbeReg);
+                                   sbeMsgReg_t i_sbeReg,
+                                   SBE_REG_RETURN * o_regReturn = nullptr);
 
         /*
          * @brief This function handles the HWP calls and error logs
@@ -132,11 +135,13 @@ class SbeRetryHandler
          *
          * @param[in] i_target         - current proc target
          * @param[in] i_current_error  - The most recent return value from HWP
+         * @param[out] o_regReturn     - sbe reg return
          *
          * @return - NULL
          */
         void proc_extract_sbe_handler( TARGETING::Target * i_target,
-                                       uint8_t i_current_error);
+                                       uint8_t i_current_error,
+                                       SBE_REG_RETURN * io_regReturn = nullptr);
 
     private:
 
