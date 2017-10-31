@@ -36,6 +36,8 @@
 #include <arch/ppc.H>
 #include <targeting/common/target.H>
 #include <targeting/common/attributes.H>
+#include <secureboot/containerheader.H>
+#include <runtime/common/runtime_utils.H>
 
 extern trace_desc_t *g_trac_runtime;
 
@@ -47,6 +49,8 @@ PreVerifiedLidMgr::ResvMemInfo PreVerifiedLidMgr::cv_resvMemInfo {};
 PreVerifiedLidMgr::ResvMemInfo PreVerifiedLidMgr::cv_phypResvMemInfo {};
 mutex_t PreVerifiedLidMgr::cv_mutex = MUTEX_INITIALIZER;
 mutex_t PreVerifiedLidMgr::cv_loadImageMutex = MUTEX_INITIALIZER;
+bool PreVerifiedLidMgr::cv_addFakeHdrs = false;
+PNOR::SectionId PreVerifiedLidMgr::cv_curPnorSecId = PNOR::INVALID_SECTION;
 
 /********************
  Public Methods
@@ -156,6 +160,27 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     TRACFCOMP(g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::_loadFromPnor - sec %s",
               PNOR::SectionIdToString(i_sec));
 
+#ifdef CONFIG_SECUREBOOT
+    // If SB compiled in, only add fake secure header if the section is never
+    // signed. e.g. RINGOVD section
+    // Otherwise always add fake secure header when SB compiled out
+    if (!RUNTIME::isPreVerifiedSectionSecure(i_sec))
+    {
+#endif
+        // Check if Header is mising
+        if (!PNOR::cmpSecurebootMagicNumber(
+                reinterpret_cast<uint8_t*>(i_addr)))
+        {
+            TRACFCOMP(g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor adding fake header to %s",
+                      PNOR::SectionIdToString(i_sec));
+            // Add fake headers to pnor loads
+            cv_addFakeHdrs = true;
+            cv_curPnorSecId = i_sec;
+        }
+#ifdef CONFIG_SECUREBOOT
+    }
+#endif
+
     errlHndl_t l_errl = nullptr;
 
     do {
@@ -206,10 +231,11 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
         {
             char l_lidStr[Util::lidIdStrLength] {};
             snprintf (l_lidStr, Util::lidIdStrLength, "%08X",l_lids.lid);
+            assert(i_size > PAGE_SIZE, "PreVerifiedLidMgr::_loadFromPnor - caller did not include size of header for total size");
             l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
                                                    cv_pResvMemInfo->rangeId,
                                                    cv_pResvMemInfo->curAddr+PAGE_SIZE,
-                                                   i_size,
+                                                   i_size-PAGE_SIZE,
                                                    l_lidStr);
             if(l_errl)
             {
@@ -253,6 +279,10 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
 
     } while(0);
 
+    // Force fake header bool to be false and clear cur PNOR section id
+    cv_addFakeHdrs = false;
+    cv_curPnorSecId = PNOR::INVALID_SECTION;
+
     TRACFCOMP( g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromPnor");
 
     mutex_unlock(&cv_loadImageMutex);
@@ -270,6 +300,9 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
 
     TRACFCOMP(g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::_loadFromMCL lid = 0x%X",
               i_lidId);
+
+    // Force fake header bool to be false in MCL path
+    cv_addFakeHdrs = false;
 
     errlHndl_t l_errl = nullptr;
 
@@ -396,11 +429,32 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
     TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X",
               cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr);
 
-    // Include Header page from pnor image.
-    // NOTE: Do not use aligned size for memcpy
-    memcpy(reinterpret_cast<void*>(l_tmpVaddr),
-           reinterpret_cast<void*>(i_imgAddr),
-           i_imgSize);
+    // Inject a fake header when loading from PNOR and secureboot is compiled
+    // out.
+    if(cv_addFakeHdrs)
+    {
+        TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage fake header load");
+        SECUREBOOT::ContainerHeader l_fakeHdr(i_imgSize,
+                                            SectionIdToString(cv_curPnorSecId));
+        // Inject Fake header into reserved memory
+        memcpy(reinterpret_cast<void*>(l_tmpVaddr),
+               l_fakeHdr.fakeHeader(),
+               PAGE_SIZE);
+        // Include rest of image after header
+        // NOTE: Do not use aligned size for memcpy
+        assert(i_imgSize > PAGE_SIZE, "PreVerifiedLidMgr::loadImage - caller did not include size of header for total size");
+        memcpy(reinterpret_cast<void*>(l_tmpVaddr+PAGE_SIZE),
+               reinterpret_cast<void*>(i_imgAddr),
+               i_imgSize-PAGE_SIZE);
+    }
+    else
+    {
+        TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage default load");
+        // NOTE: Do not use aligned size for memcpy
+        memcpy(reinterpret_cast<void*>(l_tmpVaddr),
+               reinterpret_cast<void*>(i_imgAddr),
+               i_imgSize);
+    }
 
     l_errl = RUNTIME::unmapVirtAddr(l_tmpVaddr);
     if(l_errl)

@@ -76,7 +76,6 @@
 #include <pnor/pnor_reasoncodes.H>
 #include <runtime/common/runtime_utils.H>
 
-
 namespace RUNTIME
 {
 
@@ -557,7 +556,8 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
     return l_elog;
 }
 
-errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec)
+errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
+                                    bool i_verified)
 {
     TRACFCOMP( g_trac_runtime,ENTER_MRK"hbResvloadSecureSection() sec %s",
               PNOR::SectionIdToString(i_sec));
@@ -603,16 +603,18 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec)
         auto l_pnorVaddr = l_info.vaddr;
         auto l_imgSize = l_info.size;
 
-    // If section is signed, only the protected size was loaded into memory
-#ifdef CONFIG_SECUREBOOT
-        if (l_info.secure)
+        // If section is signed, only the protected size was loaded into memory
+        if (i_verified)
         {
+#ifdef CONFIG_SECUREBOOT
             l_imgSize = l_info.secureProtectedPayloadSize;
             // Include secure header
             l_pnorVaddr -= PAGESIZE;
+#endif
+            // Add size for secure header.
+            // NOTE: if SB compiled out, a header will be injected later
             l_imgSize += PAGESIZE;
         }
-#endif
 
         // Load Pnor section into HB reserved memory
         l_elog = PreVerifiedLidMgr::loadFromPnor(i_sec, l_pnorVaddr, l_imgSize);
@@ -1070,7 +1072,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // Handle all Pre verified PNOR sections
         for (const auto & secIdPair : preVerifiedPnorSections)
         {
-            l_elog = hbResvLoadSecureSection(secIdPair.first);
+            l_elog = hbResvLoadSecureSection(secIdPair.first, secIdPair.second);
             if (l_elog)
             {
                 break;

@@ -28,6 +28,8 @@
 #include <errl/errlentry.H>
 #include <secureboot/service.H>
 #include <securerom/ROM.H>
+#include <limits.h>
+#include <array>
 
 // Forward Declaration
 class SecureRomManagerTest;
@@ -54,18 +56,37 @@ class ContainerHeader
         ContainerHeader(const void* i_header):
             iv_isValid(false),iv_hdrBytesRead(0)
         {
-            assert(i_header != NULL);
+            assert(i_header != nullptr);
             iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
-            memset(&iv_headerInfo, 0x00, sizeof(iv_headerInfo));
-            memset(iv_hwKeyHash, 0, sizeof(SHA512_t));
-            memset(iv_componentId,0x00,sizeof(iv_componentId));
+            initVars();
             parse_header(i_header);
         };
 
         /**
+         * @brief ContainerHeader
+         *
+         * This constructor generates a fake header with minimal information
+         *
+         * @param[in] i_totalSize   Total Container Size
+         * @param[in] i_compId      Component ID
+         */
+        ContainerHeader(const size_t i_totalSize,
+                        const char* i_compId):
+            iv_isValid(false),iv_hdrBytesRead(0),iv_fakeHeader{}
+        {
+            initVars();
+            genFakeHeader(i_totalSize, i_compId);
+        };
+
+        /**
+         * @brief Initialize internal variables
+         */
+        void initVars();
+
+        /**
          * @brief Destructor
          */
-        ~ContainerHeader(){};
+        ~ContainerHeader(){}
 
         /**
          * @brief Retrieves total container size (includes header, payload text,
@@ -157,6 +178,13 @@ class ContainerHeader
          *  @return const char* Component ID string
          */
         const char* componentId() const;
+
+        /**
+         *  @brief Returns the container's fake header
+         *
+         *  @return const uint8_t* fake header
+         */
+        const uint8_t* fakeHeader() const;
 
     private:
         /**
@@ -258,6 +286,18 @@ class ContainerHeader
          */
         void safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
                               const size_t i_size);
+
+        // Pointer to fake header generated
+        std::array<uint8_t,PAGE_SIZE> iv_fakeHeader;
+
+        /**
+         * @brief Generate fake header with limited information
+         *
+         * @param[in] i_totalSize   Total container size
+         * @param[in] i_compId      Component ID
+         */
+        void genFakeHeader(const size_t i_totalSize,
+                           const char* const i_compId);
 
         friend class ::SecureRomManagerTest;
 };

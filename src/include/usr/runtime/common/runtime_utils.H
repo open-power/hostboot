@@ -45,4 +45,15 @@ extern const PreVerifyVector preVerifiedPnorSections;
  */
 bool isPreVerifiedSection(const PNOR::SectionId i_section);
 
+/**
+ * @brief Determines whether the given section is pre-verified and if so, if
+ *        it's expected to be secure
+ *
+ * @param[in] i_section PNOR section to test.
+ *
+ * @return bool True if pre-verified section is expected to be secure,
+*              false otherwise.
+ */
+bool isPreVerifiedSectionSecure(const PNOR::SectionId i_section);
+
 }

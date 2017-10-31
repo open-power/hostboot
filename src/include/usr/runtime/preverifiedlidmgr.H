@@ -171,6 +171,14 @@ class PreVerifiedLidMgr
     // Depends on the payload kind
     uint64_t (*getNextAddress)(const size_t);
 
+    // Add fake headers during pnor loads
+    // Use Case: Secureboot compiled out or unsigned sections need a header
+    //           added so runtime can parse it for the section size
+    static bool cv_addFakeHdrs;
+
+    // Current Pnor section ID we are processing. Used to generate fake header
+    static PNOR::SectionId cv_curPnorSecId;
+
     /**
      * @brief Get aligned reserved memory size for OPAL
      *        Note: Historically we have used the aligned size for OPAL

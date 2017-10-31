@@ -26,15 +26,15 @@
 #include <util/utillidmgr.H>
 #include <util/utillidpnor.H>
 #include <config.h>
-#ifdef CONFIG_SECUREBOOT
 #include <pnor/pnorif.H>
 #include <errl/errlmanager.H>
-#endif
 
 #include <utility>
 #include <map>
 #include <trace/interface.H>
 #include "utilbase.H"
+#include <initservice/initserviceif.H>
+#include <pnor/pnor_reasoncodes.H>
 
 namespace Util
 {
@@ -100,7 +100,7 @@ PNOR::SectionId getLidPnorSection(const LidId i_lid)
 bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
                                        PNOR::SectionInfo_t &o_lidPnorInfo)
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
     bool l_lidInPnor = false;
 
     // Search if a lid id maps to pnor section
@@ -110,30 +110,58 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
     // LidToPnor will return INVALID_SECITON if no mapping found
     if (l_secId == PNOR::INVALID_SECTION)
     {
-        UTIL_FT("UtilLidMgr::getLidPnorSection lid 0x%X not in PNOR", i_lidId);
+        UTIL_FT("UtilLidMgr::getLidPnorSectionInfo lid 0x%X not in PNOR", i_lidId);
         o_lidPnorInfo.id = PNOR::INVALID_SECTION;
     }
     // A mapping was found
     else
     {
+        // PNOR section is optional or lid is not in PNOR, so just delete error
+        // During IPL
+        //    PNOR section may be optional
+        // In Runtime
+        //    FSP - prohibit access to PNOR
+        //    OP - PNOR access of pre-verifed HB reserved memory sections not allowed.
+#ifdef __HOSTBOOT_RUNTIME
+        // Do not allow PNOR access at runtime on FSP based machines
+        if(INITSERVICE::spBaseServicesEnabled())
+        {
+            break;
+        }
+#endif
         l_err = PNOR::getSectionInfo(l_secId, o_lidPnorInfo);
-        // Section is optional or lid is not in PNOR, so just delete error
-        if (l_err)
+        if (l_err &&
+#ifdef __HOSTBOOT_RUNTIME
+            (l_err->reasonCode() == PNOR::RC_RTPNOR_INVALID_SECTION)
+#else
+            (l_err->reasonCode() == PNOR::RC_INVALID_SECTION)
+#endif
+           )
         {
             o_lidPnorInfo.id = PNOR::INVALID_SECTION;
             delete l_err;
-            l_err = NULL;
+            l_err = nullptr;
+            UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X ignore getSectionInfo error",
+                    i_lidId);
+            break;
+        }
+        else if (l_err)
+        {
+            UTIL_FT(ERR_MRK"UtilLidMgr::getLidPnorSectionInfo Lid 0x%X getSectionInfo error shutting down rc=0x%08X",
+                    l_err->reasonCode());
+            errlCommit(l_err, UTIL_COMP_ID);
+            break;
         }
         else
         {
             l_lidInPnor = true;
-            UTIL_FT("UtilLidMgr::getLidPnorSection Lid 0x%X in PNOR", i_lidId);
+            UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X in PNOR", i_lidId);
 #ifdef CONFIG_SECUREBOOT
 #ifndef __HOSTBOOT_RUNTIME
             // The lid could be securely signed in PNOR
             if(o_lidPnorInfo.secure)
             {
-                UTIL_FT("UtilLidMgr::getLidPnorSection verify Lid in PNOR");
+                UTIL_FT("UtilLidMgr::getLidPnorSectionInfo verify Lid in PNOR");
 
                 // Load the secure section
                 l_err = loadSecureSection(l_secId);
@@ -156,18 +184,6 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
                 iv_lidPnorInfo.size = iv_lidPnorInfo.secureProtectedPayloadSize;
             }
 #endif
-#endif
-
-#ifdef __HOSTBOOT_RUNTIME
-            //use this check for HBRT due to secure lid load setting vaddr
-            //to zero -- which causes isSectionEmpty to segfault
-            if( !o_lidPnorInfo.vaddr )
-            {
-                UTIL_FT("UtilLidMgr::getLidPnorSection PNOR section %s is empty or secure",
-                        PNOR::SectionIdToString(l_secId));
-                l_lidInPnor = false;
-                break;
-            }
 #endif
         }
     }

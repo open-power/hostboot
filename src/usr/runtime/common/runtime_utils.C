@@ -58,4 +58,22 @@ bool isPreVerifiedSection(const PNOR::SectionId i_section)
     return l_result;
 }
 
+bool isPreVerifiedSectionSecure(const PNOR::SectionId i_section)
+{
+    bool l_result = false;
+    auto it = find_if(preVerifiedPnorSections.begin(),
+                      preVerifiedPnorSections.end(),
+                      [&i_section](const PreVerifyPair& p)
+                      {
+                          return p.first == i_section;
+                      });
+
+    if (it != preVerifiedPnorSections.end())
+    {
+        l_result = it->second;
+    }
+
+    return l_result;
+}
+
 }
