@@ -73,6 +73,7 @@ enum SectionId
     HB_VOLATILE,    /**< Semi volatile partition for reconfig */
     MEMD,           /**< Memory configuration data */
     TESTLOAD,       /**< Secureboot test load */
+    CENTAUR_HW_IMG, /**< Centaur HCODE Reference image */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

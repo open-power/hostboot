@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -132,6 +132,15 @@ Layout Description
         <eyeCatch>HBI</eyeCatch>
         <physicalOffset>0x10A000</physicalOffset>
         <physicalRegionSize>0x4F6000</physicalRegionSize>
+        <side>sideless</side>
+    </section>
+    <section>
+        <!-- NOTE: smaller than official layout  for fake-PNOR  -->
+        <description>Centaur Hw Image (12K)</description>
+        <eyeCatch>CENHWIMG</eyeCatch>
+        <physicalOffset>0x600000</physicalOffset>
+        <physicalRegionSize>0x3000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
     </section>
 </pnor>
