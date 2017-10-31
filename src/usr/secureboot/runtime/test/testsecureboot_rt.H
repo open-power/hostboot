@@ -44,6 +44,7 @@
 #include <secureboot/settings.H>
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
+#include "../../../pnor/pnor_utils.H"
 
 class SecurebootRtTestSuite: public CxxTest::TestSuite
 {
@@ -163,70 +164,62 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
     /**
      * @brief Helper to test case that runs getSectionInfo scenarios and checks
      *        for desired results.
+     *        If secure, should throw an error
+     *        Otherwise no error
      * @param[in] i_id, Pnor Section ID
-     * @param[in] i_secure, Indicates if section is expected to be secure or not
      *
      * @return N/A
      */
-    void runAccessSecurePnorTest(PNOR::SectionId i_id, bool i_secure)
+    void runAccessSecurePnorTest(PNOR::SectionId i_id)
     {
         errlHndl_t l_errl = nullptr;
+        bool l_secure = PNOR::isEnforcedSecureSection(i_id);
         PNOR::SectionInfo_t l_info;
 
+        SB_ENTER("runAccessSecurePnorTest %s", PNOR::SectionIdToString(i_id));
+
         l_errl = PNOR::getSectionInfo(i_id, l_info);
-        if(l_errl)
+        if(l_secure)
         {
-            TS_FAIL("testAccessSecurePnorSection: Failed for section %s",
+            SB_INF("runAccessSecurePnorTest is secure");
+            if (l_errl &&
+                (l_errl->reasonCode() == PNOR::RC_RTPNOR_INVALID_SECTION))
+            {
+                SB_INF("runAccessSecurePnorTest caught correct error");
+                delete l_errl;
+                l_errl = nullptr;
+            }
+            else
+            {
+                TS_FAIL("testAccessSecurePnorSection: unexpected reason code for Secure Section %s. Expected RC 0x%.4X Actual RC 0x%.4X",
+                        PNOR::SectionIdToString(i_id),
+                        PNOR::RC_RTPNOR_INVALID_SECTION,
+                        l_errl->reasonCode());
+                errlCommit(l_errl, SECURE_COMP_ID);
+            }
+        }
+        else if(l_errl)
+        {
+            TS_FAIL("testAccessSecurePnorSection: getSectionInfo failed for section %s",
                         PNOR::SectionIdToString(i_id));
             errlCommit(l_errl, SECURE_COMP_ID);
         }
 
-        // TODO: RTC:180063 change this test case back to how it was before
-        //                  having secure sections return vaddr = 0
-        //                  previously in HB commit cefc4c
-        // If we expect the section to be secure, make sure it returns secure
-        // and a vaddr of 0
-        if (i_secure)
-        {
-            if (l_info.secure != 1)
-            {
-                TS_FAIL("testAccessSecurePnorSection: Did not return %s as a secure section",
-                            PNOR::SectionIdToString(i_id));
-            }
-            else if (l_info.vaddr != 0)
-            {
-                TS_FAIL("testAccessSecurePnorSection: Did not return a vaddr of 0 for secure section %s",
-                            PNOR::SectionIdToString(i_id));
-            }
-        }
-        // If we expect the section to be secure, make sure it returns secure
-        // and a vaddr of 0
-        else
-        {
-            if (l_info.vaddr == 0)
-            {
-                TS_FAIL("testAccessSecurePnorSection: Did not return a vaddr of non-zero for a non-secure section %s",
-                            PNOR::SectionIdToString(i_id));
-            }
-        }
+        SB_EXIT("runAccessSecurePnorTest");
     }
 
-    // TODO: RTC:180063 change this test case back to how it was before
-    //                  having secure sections return vaddr = 0 previously
-    //                  in HB commit cefc4c
     void testAccessSecurePnorSection()
     {
+#ifdef CONFIG_SECUREBOOT
         SB_ENTER("testAccessSecurePnorSection");
 
+        // Should thow an error for trying to read a secure section
+        runAccessSecurePnorTest(PNOR::OCC);
+        runAccessSecurePnorTest(PNOR::HB_EXT_CODE);
 
-        // Ensure we get a vaddr of 0 at Runtime
-        runAccessSecurePnorTest(PNOR::OCC, true);
-        runAccessSecurePnorTest(PNOR::HB_EXT_CODE, true);
-
-        // Ensure we get a vaddr of  at Runtime
-        runAccessSecurePnorTest(PNOR::TEST, false);
-
-        SB_EXIT("testAccessSecurePnorSection");
+        // No error for trying to read a secure section
+        runAccessSecurePnorTest(PNOR::TEST);
+#endif
     }
 
 

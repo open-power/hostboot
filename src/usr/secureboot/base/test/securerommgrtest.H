@@ -45,6 +45,7 @@
 #include "../../../vfs/vfsrp.H"
 #include <sys/vfs.h>
 #include <kernel/console.H>
+#include <pnor/pnorif.H>
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -523,6 +524,40 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         if ( signedFile_pageAddr != nullptr   )
         {
             unloadSignedFile( signedFile_pageAddr, signedFile_size);
+        }
+    }
+
+    void test_fakeHeader(void)
+    {
+        TRACFCOMP(g_trac_secure,"SecureRomManagerTest::test_fakeHeader");
+
+        const size_t l_totalContainerSize = 0x10000;
+        // Purposely make a comp id larger than SW_HDR_COMP_ID_SIZE_BYTES
+        // otherwise strncmp below needs a different size
+        const char* l_compId = "FAKEHEADERTEST";
+
+        // Simple call constructor to create fake header and make sure it
+        // does not cause an error
+        SECUREBOOT::ContainerHeader l_fakeHdr(l_totalContainerSize, l_compId);
+
+        // Check if Header is mising
+        if (!PNOR::cmpSecurebootMagicNumber(l_fakeHdr.fakeHeader()))
+        {
+            TS_FAIL("SecureRomManagerTest::test_fakeHeader: missing magic number");
+        }
+
+        // Payload Text Size should be the total container size minus the header
+        if(l_fakeHdr.payloadTextSize() != (l_totalContainerSize - PAGE_SIZE))
+        {
+            TS_FAIL("SecureRomManagerTest::test_fakeHeader: payload text size was not parsed correctly");
+        }
+
+        // Ensure the parsed component ID matches what was passed in through
+        // SW_HDR_COMP_ID_SIZE_BYTES
+        if(strncmp(l_fakeHdr.componentId(), l_compId,
+                   SW_HDR_COMP_ID_SIZE_BYTES) != 0)
+        {
+            TS_FAIL("SecureRomManagerTest::test_fakeHeader: component ID was not parsed correctly");
         }
     }
 };

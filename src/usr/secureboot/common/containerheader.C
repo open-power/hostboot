@@ -34,7 +34,7 @@ namespace SECUREBOOT
 
 void ContainerHeader::parse_header(const void* i_header)
 {
-    assert(i_header != NULL);
+    assert(i_header != nullptr);
     const uint8_t* l_hdr = reinterpret_cast<const uint8_t*>(i_header);
 
     /*---- Parse ROM_container_raw ----*/
@@ -92,6 +92,68 @@ void ContainerHeader::parse_header(const void* i_header)
 
     // Debug printing
     print();
+}
+
+void ContainerHeader::initVars()
+{
+    memset(&iv_headerInfo, 0x00, sizeof(iv_headerInfo));
+    memset(iv_hwKeyHash, 0, sizeof(SHA512_t));
+    memset(iv_componentId,0x00,sizeof(iv_componentId));
+}
+
+void ContainerHeader::genFakeHeader(const size_t i_totalSize,
+                                    const char* const i_compId)
+{
+    SecureHeaderInfo info {};
+    assert(iv_fakeHeader.data() != nullptr, "Internal fake header buffer nullptr");
+
+    uint8_t* l_hdr = reinterpret_cast<uint8_t*>(iv_fakeHeader.data());
+
+     /*---- ROM_container_raw ----*/
+    info.hw_hdr.magic_number = ROM_MAGIC_NUMBER;
+    info.hw_hdr.version = CONTAINER_VERSION;
+    info.hw_hdr.container_size = i_totalSize;
+    // The rom code has a placeholder for the prefix in the first struct so
+    // skip it
+    size_t l_size = offsetof(ROM_container_raw, prefix);
+    memcpy(l_hdr, &info.hw_hdr, l_size);
+    l_hdr += l_size;
+
+    /*---- ROM_prefix_header_raw ----*/
+    info.hw_prefix_hdr.ver_alg.version = HEADER_VERSION;
+    info.hw_prefix_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
+    info.hw_prefix_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
+    info.hw_prefix_hdr.sw_key_count = 1;
+    info.hw_prefix_hdr.payload_size = sizeof(ecc_key_t);
+
+    l_size = offsetof(ROM_prefix_header_raw, ecid);
+    l_size += info.hw_prefix_hdr.ecid_count * ECID_SIZE;
+    memcpy(l_hdr, &info.hw_prefix_hdr, l_size);
+    l_hdr += l_size;
+
+    /*---- Parse ROM_prefix_data_raw ----*/
+    // Skip over variable number of sw keys as they are already zeroed out
+    l_size = offsetof(ROM_prefix_data_raw, sw_pkey_p);
+    l_size += info.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
+    l_hdr += l_size;
+
+    /*---- ROM_sw_header_raw ----*/
+    info.sw_hdr.ver_alg.version = 1;
+    strncpy(info.sw_hdr.component_id, i_compId,SW_HDR_COMP_ID_SIZE_BYTES);
+    info.sw_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
+    info.sw_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
+    info.sw_hdr.payload_size = i_totalSize - PAGE_SIZE;
+
+    l_size = offsetof(ROM_sw_header_raw, ecid);
+    l_size += info.hw_prefix_hdr.ecid_count * ECID_SIZE;
+    memcpy(l_hdr, &info.sw_hdr, l_size);
+    l_hdr += l_size;
+
+    /*---- Parse ROM_sw_sig_raw ----*/
+    // No-op already zeroed out
+
+    iv_pHdrStart = reinterpret_cast<const uint8_t*>(iv_fakeHeader.data());
+    parse_header(iv_fakeHeader.data());
 }
 
 void ContainerHeader::print() const
@@ -218,9 +280,9 @@ void ContainerHeader::validate()
 void ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
                                        const size_t i_size)
 {
-    assert(i_dest != NULL, "ContainerHeader: dest ptr NULL");
-    assert(io_hdr != NULL, "ContainerHeader: current header location ptr NULL");
-    assert(iv_pHdrStart != NULL, "ContainerHeader: start of header ptr NULL");
+    assert(i_dest != nullptr, "ContainerHeader: dest ptr NULL");
+    assert(io_hdr != nullptr, "ContainerHeader: current header location ptr NULL");
+    assert(iv_pHdrStart != nullptr, "ContainerHeader: start of header ptr NULL");
 
     TRACDCOMP(g_trac_secure,"dest: 0x%X src: 0x%X size: 0x%X",i_dest, io_hdr, i_size);
 
@@ -264,5 +326,11 @@ void ContainerHeader::genHwKeyHash()
 
 }
 #endif
+
+const uint8_t* ContainerHeader::fakeHeader() const
+{
+    assert(iv_fakeHeader.data() != nullptr, "Fake header should not be nullptr");
+    return iv_fakeHeader.data();
+}
 
 }; //end of SECUREBOOT namespace

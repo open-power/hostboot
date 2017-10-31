@@ -83,7 +83,8 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         // Handle all Pre verified PNOR sections
         for (const auto & secIdPair : RUNTIME::preVerifiedPnorSections)
         {
-            l_errl = RUNTIME::hbResvLoadSecureSection(secIdPair.first);
+            l_errl = RUNTIME::hbResvLoadSecureSection(secIdPair.first,
+                                                      secIdPair.second);
             if (l_errl)
             {
                 errlCommit(l_errl, RUNTIME_COMP_ID);
@@ -100,16 +101,20 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         // Each section has 2 lids each (Header, Content) except the RINGOVD
         // section. It only has 1 or is inhibited in secure mode
         size_t l_numSections = RUNTIME::preVerifiedPnorSections.size();
-        size_t l_expectedLids = (2 * l_numSections) - 1;
+        // See utillidpnor.C for more info on num of lids
+        size_t l_expectedLids = (2 * l_numSections);
         if (SECUREBOOT::enabled())
         {
-            l_expectedLids--;
+            // RINGOVD not permitted in secure mode
+            l_expectedLids -= 2;
         }
 
         // Ensure the expected number of lids were loaded.
         if (l_preVerLidMgr.cv_lidsLoaded.size() != l_expectedLids)
         {
-            TS_FAIL("testLoadFromPnor> Num of lids loaded not correct");
+            TS_FAIL("testLoadFromPnor> Num of lids loaded not correct %d expected %d",
+                    l_preVerLidMgr.cv_lidsLoaded.size(),
+                    l_expectedLids);
             break;
         }
 

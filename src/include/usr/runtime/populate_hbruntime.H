@@ -23,6 +23,8 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <hdat/hdat.H>
+#include <vector>
+#include <utility>
 
 namespace RUNTIME
 {
@@ -68,9 +70,13 @@ errlHndl_t unmapVirtAddr(uint64_t i_addr);
  *  @brief Pre verify Pnor sections and load into HB reserved memory
  *
  *  @param[in] i_sec - pnor section to pre-verify and load
+ *  @param[in] i_verified - Indicates if pnor section is expected to have a
+ *                          secure header.
+ *                          e.g. RINGOVD currently never has a secure header
  *
  *  @return Error handle if error
  */
-errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec);
+errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
+                                    const bool i_verified);
 
 } // End of Namespace
