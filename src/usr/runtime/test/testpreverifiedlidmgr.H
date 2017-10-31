@@ -32,6 +32,7 @@
 #include <usr/vmmconst.h>
 #include <runtime/populate_hbruntime.H>
 #include <pnor/pnorif.H>
+#include <runtime/common/runtime_utils.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -80,14 +81,14 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
         l_preVerLidMgr.cv_lidsLoaded.clear();
 
         // Handle all Pre verified PNOR sections
-        for (const auto secId : RUNTIME::preVerifiedPnorSections)
+        for (const auto & secIdPair : RUNTIME::preVerifiedPnorSections)
         {
-            l_errl = RUNTIME::hbResvLoadSecureSection(secId);
+            l_errl = RUNTIME::hbResvLoadSecureSection(secIdPair.first);
             if (l_errl)
             {
-                TS_FAIL("testLoadFromPnor> Failed to Load Pnor Section %s",
-                        PNOR::SectionIdToString(secId));
                 errlCommit(l_errl, RUNTIME_COMP_ID);
+                TS_FAIL("testLoadFromPnor> Failed to Load Pnor Section %s",
+                        PNOR::SectionIdToString(secIdPair.first));
                 break;
             }
         }

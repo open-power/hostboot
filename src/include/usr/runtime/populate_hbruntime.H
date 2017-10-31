@@ -64,9 +64,6 @@ errlHndl_t mapPhysAddr(uint64_t i_addr, size_t i_size, uint64_t& o_addr);
  */
 errlHndl_t unmapVirtAddr(uint64_t i_addr);
 
-// PNOR sections that will be pre-verified and loaded into HB reserved memory
-extern const std::vector<PNOR::SectionId> preVerifiedPnorSections;
-
 /**
  *  @brief Pre verify Pnor sections and load into HB reserved memory
  *

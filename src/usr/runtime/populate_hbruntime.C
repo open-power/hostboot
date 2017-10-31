@@ -73,23 +73,12 @@
 #include <runtime/populate_hbruntime.H>
 #include <runtime/preverifiedlidmgr.H>
 #include <util/utilmclmgr.H>
+#include <pnor/pnor_reasoncodes.H>
+#include <runtime/common/runtime_utils.H>
 
 
 namespace RUNTIME
 {
-
-// -- Verified Images
-//   -- OCC
-//   -- WOFDATA
-//   -- HCODE
-// -- Non-verified Images
-///  -- RINGOVD
-const std::vector<PNOR::SectionId> preVerifiedPnorSections {
-    PNOR::OCC,
-    PNOR::WOFDATA,
-    PNOR::HCODE,
-    PNOR::RINGOVD,
-};
 
 mutex_t g_rhbMutex = MUTEX_INITIALIZER;
 
@@ -1079,9 +1068,9 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         l_preVerLidMgrLock = true;
 
         // Handle all Pre verified PNOR sections
-        for (const auto secId : preVerifiedPnorSections)
+        for (const auto & secIdPair : preVerifiedPnorSections)
         {
-            l_elog = hbResvLoadSecureSection(secId);
+            l_elog = hbResvLoadSecureSection(secIdPair.first);
             if (l_elog)
             {
                 break;
