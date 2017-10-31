@@ -63,7 +63,7 @@ void* host_start_occ_xstop_handler( void *io_pArgs )
                              l_homerPhysAddrBase, l_commonPhysAddr);
     do
     {
-        if ( Util::isSimicsRunning() ) break; //Skip if running in Simics
+//         if ( Util::isSimicsRunning() ) break; //Skip if running in Simics
 
         l_errl = HBPM::loadPMComplex(masterproc,
                                     l_homerPhysAddrBase,

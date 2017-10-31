@@ -350,34 +350,36 @@ public:
                                 l_bucketAttr);
 
           uint32_t l_huid = TARGETING::get_huid(l_fapi_eq_target);
-          uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
-          //PROC0EQ1 has an override set in nimbus's standalone xml, this branch checks it
-          if(l_pos == 1)
-          {
-
-              numTests++;
-              if(voltageData.bucketId != 2)
-              {
-                  numFails++;
-                  TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 2, not %d",l_huid, voltageData.bucketId);
-              }
-
-              numTests++;
-              if(*l_bucketAttr != 2)
-              {
-                  numFails++;
-                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 2, not %d",l_huid, *l_bucketAttr);
-              }
-
-              if(l_rc)
-              {
-                  numFails++;
-                  TS_FAIL("Error: Error occured while trying to read voltage data from mvpd");
-                  continue;
-              }
-              continue;
-          }
+         //PROC0EQ1 has an override set in nimbus's standalone xml, this branch checks it
+         //TODO RTC: 181716 Re-enable #V override test path when we have multiple
+         //          EQs avaiable in the simics model
+//        uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+//           if(l_pos == 1)
+//           {
+//
+//               numTests++;
+//               if(voltageData.bucketId != 2)
+//               {
+//                   numFails++;
+//                   TS_FAIL("Error:p9_pm_get_poundv_bucket with EQ with HUID = 0x%X should have returned bucket ID 2, not %d",l_huid, voltageData.bucketId);
+//               }
+//
+//               numTests++;
+//               if(*l_bucketAttr != 2)
+//               {
+//                   numFails++;
+//                   TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDV_BUCKET_DATA EQ with HUID = 0x%X should have bucket ID 2, not %d",l_huid, *l_bucketAttr);
+//               }
+//
+//               if(l_rc)
+//               {
+//                   numFails++;
+//                   TS_FAIL("Error: Error occured while trying to read voltage data from mvpd");
+//                   continue;
+//               }
+//               continue;
+//           }
           numTests++;
           if(voltageData.bucketId != 3)
           {
@@ -443,34 +445,6 @@ public:
                                 l_bucketAttr);
 
           uint32_t l_huid = TARGETING::get_huid(l_fapi_eq_target);
-          uint32_t l_pos = eqChiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
-
-          //PROC0EQ1 has an override set in nimbus's standalone xml,
-          //this branch checks it
-          if(l_pos == 1)
-          {
-              numTests++;
-              if(vdmData.bucketId != 2)
-              {
-                  numFails++;
-                  TS_FAIL("Error:p9_pm_get_poundw_bucket with EQ with HUID = "
-                          "0x%X should have returned bucket ID 2, not %d",
-                          l_huid,
-                          vdmData.bucketId);
-              }
-
-              numTests++;
-              if(*l_bucketAttr != 2)
-              {
-                  numFails++;
-                  TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA "
-                          "EQ with HUID = 0x%X should have bucket ID 2, not %d",
-                          l_huid,
-                          *l_bucketAttr);
-              }
-
-              continue;
-          }
 
           numTests++;
           if(vdmData.bucketId != 3)
@@ -484,11 +458,12 @@ public:
           }
 
           numTests++;
-          if(*l_bucketAttr != 2)
+          //Need to offset by a single uint8_t to get to bucketId data in struct
+          if(*(l_bucketAttr + sizeof(uint8_t)) != 3)
           {
               numFails++;
               TS_FAIL("Error:FAPI_ATTR_GET(fapi2::ATTR_POUNDW_BUCKET_DATA "
-                      "EQ with HUID = 0x%X should have bucket ID 2, not %d",
+                      "EQ with HUID = 0x%X should have bucket ID 3, not %d",
                       l_huid,
                       *l_bucketAttr);
           }
