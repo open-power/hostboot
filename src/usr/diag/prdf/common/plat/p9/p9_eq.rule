@@ -202,137 +202,137 @@ group gEQ_LFIR filter singlebit, cs_root_cause
     (rEQ_LFIR, bit(0)) ? self_th_32perDay;
 
     /** EQ_LFIR[1]
-     *  Errors from Control
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rEQ_LFIR, bit(1)) ? self_th_32perDay;
 
     /** EQ_LFIR[2]
-     *  local err from CC (PCB error)
+     *  Clock Controller: PCB Access Error
      */
     (rEQ_LFIR, bit(2)) ? self_th_32perDay;
 
     /** EQ_LFIR[3]
-     *  local err from CC
+     *  Clock Controller: Summarized Error
      */
     (rEQ_LFIR, bit(3)) ? self_th_32perDay;
 
     /** EQ_LFIR[4]
-     *  local err from PSC
+     *  PSCOM Logic: PCB Access Error
      */
     (rEQ_LFIR, bit(4)) ? defaultMaskedError;
 
     /** EQ_LFIR[5]
-     *  local err from PSC (parity error)
+     *  PSCOM Logic: Summarized internal errors
      */
     (rEQ_LFIR, bit(5)) ? defaultMaskedError;
 
     /** EQ_LFIR[6]
-     *  local err from Thermal (parity error)
+     *  Therm Logic: Summarized internal errors
      */
     (rEQ_LFIR, bit(6)) ? defaultMaskedError;
 
     /** EQ_LFIR[7]
-     *  local err from Thermal (PCB error
+     *  Therm Logic: PCB Access Error
      */
     (rEQ_LFIR, bit(7)) ? defaultMaskedError;
 
     /** EQ_LFIR[8]
-     *  trip critical thermal local err
+     *  Therm Logic: Temperature critical trip
      */
     (rEQ_LFIR, bit(8)) ? defaultMaskedError;
 
     /** EQ_LFIR[9]
-     *  trip fatal thermal local error
+     *  Therm Logic: Temperature fatal trip
      */
     (rEQ_LFIR, bit(9)) ? defaultMaskedError;
 
     /** EQ_LFIR[10]
-     *  therm volttrip error
+     *  UNUSED in P9
      */
     (rEQ_LFIR, bit(10)) ? defaultMaskedError;
 
     /** EQ_LFIR[11]
-     *  local err from Debug ( error)
+     *  Debug Logic: Scom Satellite Error
      */
     (rEQ_LFIR, bit(11)) ? defaultMaskedError;
 
     /** EQ_LFIR[12]
-     *  local err from Trace Array0
+     *  Scom Satellite Error - L3 Trace0
      */
     (rEQ_LFIR, bit(12)) ? defaultMaskedError;
 
     /** EQ_LFIR[13]
-     *  local err from  Trace Array0
+     *  Scom Satellite Error - L3 Trace0
      */
     (rEQ_LFIR, bit(13)) ? defaultMaskedError;
 
     /** EQ_LFIR[14]
-     *  local err from L3 Trace Array1
+     *  Scom Satellite Error - L3 Trace1
      */
     (rEQ_LFIR, bit(14)) ? defaultMaskedError;
 
     /** EQ_LFIR[15]
-     *  local err from L3 Trace Array1
+     *  Scom Satellite Error - L3 Trace1
      */
     (rEQ_LFIR, bit(15)) ? defaultMaskedError;
 
     /** EQ_LFIR[16]
-     *  local err from L20 Trace Array
+     *  Scom Satellite Error - L20 Trace0
      */
     (rEQ_LFIR, bit(16)) ? defaultMaskedError;
 
     /** EQ_LFIR[17]
-     *  local err from L20 Trace Array
+     *  Scom Satellite Error - L20 Trace0
      */
     (rEQ_LFIR, bit(17)) ? defaultMaskedError;
 
     /** EQ_LFIR[18]
-     *  local err from L21 Trace Array
+     *  Scom Satellite Error - L20 Trace1
      */
     (rEQ_LFIR, bit(18)) ? defaultMaskedError;
 
     /** EQ_LFIR[19]
-     *  local err from L21 Trace Array
+     *  Scom Satellite Error - L20 Trace1
      */
     (rEQ_LFIR, bit(19)) ? defaultMaskedError;
 
     /** EQ_LFIR[20]
-     *  Duty cycle adjust err for cache clk
+     *  Duty Cycle Adjust Logic error: cache clk
      */
     (rEQ_LFIR, bit(20)) ? self_th_32perDay;
 
     /** EQ_LFIR[21]
-     *  Duty cycle adjust err for ex00_c0
+     *  Duty Cycle Adjust Logic error: ex00_c0
      */
     (rEQ_LFIR, bit(21)) ? self_th_32perDay;
 
     /** EQ_LFIR[22]
-     *  Duty cycle adjust err for ex00_c1
+     *  Duty Cycle Adjust error :  ex00_c1
      */
     (rEQ_LFIR, bit(22)) ? self_th_32perDay;
 
     /** EQ_LFIR[23]
-     *  Duty cycle adjust err for ex00_l2
+     *  Duty Cycle Adjust error : ex00_l2
      */
     (rEQ_LFIR, bit(23)) ? self_th_32perDay;
 
     /** EQ_LFIR[24]
-     *  local err from duty cycle adjust ex01_c0
+     *  Duty Cycle Adjust Logic error :  ex01_c0
      */
     (rEQ_LFIR, bit(24)) ? self_th_32perDay;
 
     /** EQ_LFIR[25]
-     *  Duty cycle adjust err for ex01_c1
+     *  Duty Cycle Adjust Logic error : ex01_c1
      */
     (rEQ_LFIR, bit(25)) ? self_th_32perDay;
 
     /** EQ_LFIR[26]
-     *  Duty cycle adjust err for ex01_l2
+     *  Duty Cycle Adjust Logic error : ex01_l2
      */
     (rEQ_LFIR, bit(26)) ? self_th_32perDay;
 
     /** EQ_LFIR[27]
-     *  local err from skew adjust skewadj6way
+     *  Skew Adjust Logic Data or deskew error
      */
     (rEQ_LFIR, bit(27)) ? self_th_32perDay;
 
@@ -342,7 +342,7 @@ group gEQ_LFIR filter singlebit, cs_root_cause
     (rEQ_LFIR, bit(28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** EQ_LFIR[41]
-     *  Malfunction Alert broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rEQ_LFIR, bit(41)) ? defaultMaskedError;
 

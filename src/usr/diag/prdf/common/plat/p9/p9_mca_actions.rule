@@ -146,6 +146,6 @@ actionclass excessive_refreshes
 actionclass calibration_complete
 {
     funccall("HwpErrorIsolation");
-    self_th_1;
+    self_th_32perDay;
 };
 

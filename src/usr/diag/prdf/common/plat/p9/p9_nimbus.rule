@@ -2104,207 +2104,207 @@ group gTP_LFIR filter singlebit, cs_root_cause
     (rTP_LFIR, bit(0)) ? self_th_32perDay;
 
     /** TP_LFIR[1]
-     *  GPIO: PCB error during CC access
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rTP_LFIR, bit(1)) ? self_th_32perDay;
 
     /** TP_LFIR[2]
-     *  CC: PCB error during CC access
+     *  Clock Controller: PCB Access Error
      */
     (rTP_LFIR, bit(2)) ? self_th_32perDay;
 
     /** TP_LFIR[3]
-     *  CC local error
+     *  Clock Controller: Summarized Error
      */
     (rTP_LFIR, bit(3)) ? self_th_32perDay;
 
     /** TP_LFIR[4]
-     *  local errors from PSC (PCB error)
+     *  PSCOM Logic: PCB Access Error
      */
     (rTP_LFIR, bit(4)) ? defaultMaskedError;
 
     /** TP_LFIR[5]
-     *  local errors from PSC (parity error)
+     *  PSCOM Logic: Summarized internal errors
      */
     (rTP_LFIR, bit(5)) ? defaultMaskedError;
 
     /** TP_LFIR[6]
-     *  local errors from Thermal (parity error)
+     *  Therm Logic: Summarized internal errors
      */
     (rTP_LFIR, bit(6)) ? defaultMaskedError;
 
     /** TP_LFIR[7]
-     *  local errors from Thermal (PCB error)
+     *  Therm Logic: PCB Access Error
      */
     (rTP_LFIR, bit(7)) ? defaultMaskedError;
 
     /** TP_LFIR[8]
-     *  trip critical error from thermal
+     *  Therm Logic: Temperature critical trip
      */
     (rTP_LFIR, bit(8)) ? defaultMaskedError;
 
     /** TP_LFIR[9]
-     *  trip fatal error from thermal
+     *  Therm Logic: Temperature fatal trip
      */
     (rTP_LFIR, bit(9)) ? defaultMaskedError;
 
     /** TP_LFIR[10]
-     *  therm volttrip error
+     *  UNUSED in P9
      */
     (rTP_LFIR, bit(10)) ? defaultMaskedError;
 
     /** TP_LFIR[11]
-     *  local errors from Debug ( error)
+     *  Debug Logic: Scom Satelite Error
      */
     (rTP_LFIR, bit(11)) ? defaultMaskedError;
 
     /** TP_LFIR[12]
-     *  local errors from Trace Array ( error)
+     *  Trace Logic: Scom Satellite Error
      */
     (rTP_LFIR, bit(12)) ? defaultMaskedError;
 
     /** TP_LFIR[13]
-     *  scom trace array error
+     *  Trace Logic: Scom Satellite Error
      */
     (rTP_LFIR, bit(13)) ? defaultMaskedError;
 
     /** TP_LFIR[14]
-     *  ITR local error
+     *  Freq Meas. Reg PE or VMEAS/KVREF timeout
      */
     (rTP_LFIR, bit(14)) ? defaultMaskedError;
 
     /** TP_LFIR[15]
-     *  ITR local error
+     *  Interrupt Macro: PCB Access Error
      */
     (rTP_LFIR, bit(15)) ? defaultMaskedError;
 
     /** TP_LFIR[16]
-     *  local error from PCB
+     *  PCB Master Logic: PCB Timout
      */
     (rTP_LFIR, bit(16)) ? defaultMaskedError;
 
     /** TP_LFIR[17]
-     *  local errors from I2CM ( error)
+     *  I2C Master Logic: Local Bus Parity error
      */
     (rTP_LFIR, bit(17)) ? self_th_1;
 
     /** TP_LFIR[18]
-     *  local errors from TOD ( error)
+     *  TOD Logic: Summerized internal errors
      */
     (rTP_LFIR, bit(18)) ? defaultMaskedError;
 
     /** TP_LFIR[19]
-     *  local errors from TOD ( error)
+     *  TOD Logic: PIB Slave access errors
      */
     (rTP_LFIR, bit(19)) ? defaultMaskedError;
 
     /** TP_LFIR[20]
-     *  local errors from TOD ( error)
+     *  TOD Logic: UNUSED in P9
      */
     (rTP_LFIR, bit(20)) ? defaultMaskedError;
 
     /** TP_LFIR[21]
-     *  local errors from PORT2 ( error)
+     *  PCB slave Unmasked err summary
      */
     (rTP_LFIR, bit(21)) ? pcb_slave_internal_parity;
 
     /** TP_LFIR[22]
-     *  FIR error from SBE
+     *  SBE Logic: PPE Internal State Error
      */
     (rTP_LFIR, bit(22)) ? self_th_1;
 
     /** TP_LFIR[23]
-     *  FIR error from SBE
+     *  PPE interface invalid seq/protocol err
      */
     (rTP_LFIR, bit(23)) ? self_th_1;
 
     /** TP_LFIR[24]
-     *  FIR error from SBE
+     *  SBE Logic: PPE Watchdog timeout
      */
     (rTP_LFIR, bit(24)) ? self_th_1;
 
     /** TP_LFIR[25]
-     *  FIR error from SBE
+     *  PPE saw proc halt initiated by fw, etc.
      */
     (rTP_LFIR, bit(25)) ? self_th_1;
 
     /** TP_LFIR[26]
-     *  FIR error from SBE
+     *  PPE in halt state driven by RAMDBG bit 0
      */
     (rTP_LFIR, bit(26)) ? defaultMaskedError;
 
     /** TP_LFIR[27]
-     *  FIR error from SBE
+     *  PPE debug: Watchdog timer proc rst/halt
      */
     (rTP_LFIR, bit(27)) ? self_th_1;
 
     /** TP_LFIR[28]
-     *  FIR error from SBE
+     *  SBE Logic: SEEPROM Address err etc.
      */
     (rTP_LFIR, bit(28)) ? defaultMaskedError;
 
     /** TP_LFIR[29]
-     *  FIR error from SBE
+     *  SBE Logic: Any I2C Master Error
      */
     (rTP_LFIR, bit(29)) ? self_th_1;
 
     /** TP_LFIR[30]
-     *  FIR error from SBE
+     *  SBE Logic: Programmable errors
      */
     (rTP_LFIR, bit(30)) ? defaultMaskedError;
 
     /** TP_LFIR[31]
-     *  Local error from OTP
+     *  OTP Logic: invalid reg access etc.
      */
     (rTP_LFIR, bit(31)) ? defaultMaskedError;
 
     /** TP_LFIR[32]
-     *  Local error from Ext trigger
+     *  Trigger from e_c4_occ_rx_alert_b input
      */
     (rTP_LFIR, bit(32)) ? defaultMaskedError;
 
     /** TP_LFIR[33]
-     *  Fast xstop fir error
+     *  Unused in P9
      */
     (rTP_LFIR, bit(33)) ? defaultMaskedError;
 
     /** TP_LFIR[34]
-     *  PCB mcast grp err
+     *  Multicast group: group cntr zero
      */
     (rTP_LFIR, bit(34)) ? defaultMaskedError;
 
     /** TP_LFIR[35]
-     *  PCB parity err
+     *  PCB Master: Receive fsm Inv. state etc.
      */
     (rTP_LFIR, bit(35)) ? defaultMaskedError;
 
     /** TP_LFIR[36]
-     *  Osc Sw fir error
+     *  Osc switch to backup or lost detected
      */
     (rTP_LFIR, bit(36)) ? defaultMaskedError;
 
     /** TP_LFIR[37]
-     *  Osc Sw fir error
+     *  Osc switch to backup or lost detected
      */
     (rTP_LFIR, bit(37)) ? defaultMaskedError;
 
     /** TP_LFIR[38]
-     *  local errors from pibmem
+     *  PIB MEM: Summarized err - PIB access ops
      */
     (rTP_LFIR, bit(38)) ? self_th_1;
 
     /** TP_LFIR[39]
-     *  local errors from pibmem
+     *  PIB MEM: Summarized err-fast access ops
      */
     (rTP_LFIR, bit(39)) ? self_th_1;
 
     /** TP_LFIR[40]
-     *  otp uncorrectable error
+     *  OTP Logic: UE or CE counter overflow
      */
     (rTP_LFIR, bit(40)) ? self_th_1;
 
     /** TP_LFIR[41]
-     *  xstop in another chiplet
+     *  malfunction alert or Local Checkstop
      */
     (rTP_LFIR, bit(41)) ? defaultMaskedError;
 
@@ -2721,77 +2721,77 @@ group gN0_LFIR filter singlebit, cs_root_cause
     (rN0_LFIR, bit(0)) ? self_th_32perDay;
 
     /** N0_LFIR[1]
-     *  Errors from Control
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rN0_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N0_LFIR[2]
-     *  local errors from CC (PCB error)
+     *  Clock Controller: PCB Access Error
      */
     (rN0_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N0_LFIR[3]
-     *  local errors from CC
+     *  Clock Controller: Summarized Error
      */
     (rN0_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N0_LFIR[4]
-     *  local errors from PSC (PCB error)
+     *  PSCOM Logic: PCB Access Error
      */
     (rN0_LFIR, bit(4)) ? defaultMaskedError;
 
     /** N0_LFIR[5]
-     *  local errors from PSC (parity error)
+     *  PSCOM Logic: Summarized internal errors
      */
     (rN0_LFIR, bit(5)) ? defaultMaskedError;
 
     /** N0_LFIR[6]
-     *  local errors from Thermal (parity error)
+     *  Therm Logic: Summarized internal errors
      */
     (rN0_LFIR, bit(6)) ? defaultMaskedError;
 
     /** N0_LFIR[7]
-     *  local errors from Thermal (PCB error
+     *  Therm Logic: PCB Access Error
      */
     (rN0_LFIR, bit(7)) ? defaultMaskedError;
 
     /** N0_LFIR[8]
-     *  critical level Thermal error
+     *  Therm Logic: Temperature critical trip
      */
     (rN0_LFIR, bit(8)) ? defaultMaskedError;
 
     /** N0_LFIR[9]
-     *  fatal level Thermal error
+     *  Therm Logic: Temperature fatal trip
      */
     (rN0_LFIR, bit(9)) ? defaultMaskedError;
 
     /** N0_LFIR[10]
-     *  therm volttrip error
+     *  UNUSED in P9
      */
     (rN0_LFIR, bit(10)) ? defaultMaskedError;
 
     /** N0_LFIR[11]
-     *  local errors from Debug ( error)
+     *  Debug Logic: Scom Satellite Error
      */
     (rN0_LFIR, bit(11)) ? defaultMaskedError;
 
     /** N0_LFIR[12]
-     *  local errors from Trace Array0
+     *  Scom Satellite Error - Trace0
      */
     (rN0_LFIR, bit(12)) ? defaultMaskedError;
 
     /** N0_LFIR[13]
-     *  local errors from Trace Array0
+     *  Scom Satellite Error - Trace0
      */
     (rN0_LFIR, bit(13)) ? defaultMaskedError;
 
     /** N0_LFIR[14]
-     *  local errors from Trace Array1
+     *  Scom Satellite Error - Trace1
      */
     (rN0_LFIR, bit(14)) ? defaultMaskedError;
 
     /** N0_LFIR[15]
-     *  local errors from Trace Array1
+     *  Scom Satellite Error - Trace1
      */
     (rN0_LFIR, bit(15)) ? defaultMaskedError;
 
@@ -2801,12 +2801,12 @@ group gN0_LFIR filter singlebit, cs_root_cause
     (rN0_LFIR, bit(16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N0_LFIR[24]
-     *  spare
+     *  Unused
      */
     (rN0_LFIR, bit(24)) ? defaultMaskedError;
 
     /** N0_LFIR[25]
-     *  Errors from Bsense IO
+     *  Unused
      */
     (rN0_LFIR, bit(25)) ? defaultMaskedError;
 
@@ -2816,7 +2816,7 @@ group gN0_LFIR filter singlebit, cs_root_cause
     (rN0_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N0_LFIR[41]
-     *  Malf-alert Broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rN0_LFIR, bit(41)) ? defaultMaskedError;
 
@@ -3377,127 +3377,97 @@ rule rN1_LFIR
 group gN1_LFIR filter singlebit, cs_root_cause
 {
     /** N1_LFIR[0]
-     *  cir internal parity error
+     *  CFIR internal parity error
      */
     (rN1_LFIR, bit(0)) ? self_th_32perDay;
 
     /** N1_LFIR[1]
-     *  local errors from GPIO
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rN1_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N1_LFIR[2]
-     *  local errors from CC
+     *  Clock Controller: PCB Access Error
      */
     (rN1_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N1_LFIR[3]
-     *  local errors from cc
+     *  Clock Controller: Summarized Error
      */
     (rN1_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N1_LFIR[4]
-     *  pcb error from psc
+     *  PSCOM Logic: PCB Access Error
      */
     (rN1_LFIR, bit(4)) ? defaultMaskedError;
 
     /** N1_LFIR[5]
-     *  PE local errors from PSC
+     *  PSCOM Logic: Summarized internal errors
      */
     (rN1_LFIR, bit(5)) ? defaultMaskedError;
 
     /** N1_LFIR[6]
-     *  parity error from thermal
+     *  Therm Logic: Summarized internal errors
      */
     (rN1_LFIR, bit(6)) ? defaultMaskedError;
 
     /** N1_LFIR[7]
-     *  PCM error from thermal
+     *  Therm Logic: PCB Access Error
      */
     (rN1_LFIR, bit(7)) ? defaultMaskedError;
 
     /** N1_LFIR[8]
-     *  trip critical error from thermal
+     *  Therm Logic: Temperature critical trip
      */
     (rN1_LFIR, bit(8)) ? defaultMaskedError;
 
     /** N1_LFIR[9]
-     *  trip fatal error from thermal
+     *  Therm Logic: Temperature fatal trip
      */
     (rN1_LFIR, bit(9)) ? defaultMaskedError;
 
     /** N1_LFIR[10]
-     *  therm volttrip eror
+     *  UNUSED in P9
      */
     (rN1_LFIR, bit(10)) ? defaultMaskedError;
 
     /** N1_LFIR[11]
-     *  local errors from debug
+     *  Debug Logic: Scom Satellite Error
      */
     (rN1_LFIR, bit(11)) ? defaultMaskedError;
 
     /** N1_LFIR[12]
-     *  scom error from trace array0
+     *  Scom Satellite Error - Trace0
      */
     (rN1_LFIR, bit(12)) ? defaultMaskedError;
 
     /** N1_LFIR[13]
-     *  local errors from trace array0
+     *  Scom Satellite Error - Trace0
      */
     (rN1_LFIR, bit(13)) ? defaultMaskedError;
 
     /** N1_LFIR[14]
-     *  scom error from trace array1
+     *  Scom Satellite Error - Trace1
      */
     (rN1_LFIR, bit(14)) ? defaultMaskedError;
 
     /** N1_LFIR[15]
-     *  local errors from trace array1
+     *  Scom Satellite Error - Trace1
      */
     (rN1_LFIR, bit(15)) ? defaultMaskedError;
 
-    /** N1_LFIR[16]
-     *  scom errors from trace array2
-     */
-    (rN1_LFIR, bit(16)) ? defaultMaskedError;
-
-    /** N1_LFIR[17]
-     *  local errors from trace array2
-     */
-    (rN1_LFIR, bit(17)) ? defaultMaskedError;
-
-    /** N1_LFIR[18]
-     *  local errors from trace array3
-     */
-    (rN1_LFIR, bit(18)) ? defaultMaskedError;
-
-    /** N1_LFIR[19]
-     *  local errors from trace array3
-     */
-    (rN1_LFIR, bit(19)) ? defaultMaskedError;
-
-    /** N1_LFIR[20]
-     *  local errors from trace array4
-     */
-    (rN1_LFIR, bit(20)) ? defaultMaskedError;
-
-    /** N1_LFIR[21]
-     *  local errors from trace array4
-     */
-    (rN1_LFIR, bit(21)) ? defaultMaskedError;
-
-    /** N1_LFIR[22:23]
+    /** N1_LFIR[16:23]
      *  spare
      */
-    (rN1_LFIR, bit(22|23)) ? defaultMaskedError;
+    (rN1_LFIR, bit(16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N1_LFIR[24]
-     *  spare
+     *  Unused
      */
     (rN1_LFIR, bit(24)) ? defaultMaskedError;
 
     /** N1_LFIR[25]
-     *  Errors from Bsense IO
+     *  Unused
      */
     (rN1_LFIR, bit(25)) ? defaultMaskedError;
 
@@ -3507,7 +3477,7 @@ group gN1_LFIR filter singlebit, cs_root_cause
     (rN1_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N1_LFIR[41]
-     *  malfunction alert broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rN1_LFIR, bit(41)) ? defaultMaskedError;
 
@@ -4043,87 +4013,97 @@ rule rN2_LFIR
 group gN2_LFIR filter singlebit, cs_root_cause
 {
     /** N2_LFIR[0]
-     *  cir internal parity error
+     *  CFIR internal parity error
      */
     (rN2_LFIR, bit(0)) ? self_th_32perDay;
 
     /** N2_LFIR[1]
-     *  local errors from GPIO
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rN2_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N2_LFIR[2]
-     *  local errors from CC
+     *  Clock Controller: PCB Access Error
      */
     (rN2_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N2_LFIR[3]
-     *  local errors from cc
+     *  Clock Controller: Summarized Error
      */
     (rN2_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N2_LFIR[4]
-     *  pcb error from psc
+     *  PSCOM Logic: PCB Access Error
      */
     (rN2_LFIR, bit(4)) ? defaultMaskedError;
 
     /** N2_LFIR[5]
-     *  PE local errors from PSC
+     *  PSCOM Logic: Summarized internal errors
      */
     (rN2_LFIR, bit(5)) ? defaultMaskedError;
 
     /** N2_LFIR[6]
-     *  parity error from thermal
+     *  Therm Logic: Summarized internal errors
      */
     (rN2_LFIR, bit(6)) ? defaultMaskedError;
 
     /** N2_LFIR[7]
-     *  PCM error from thermal
+     *  Therm Logic: PCB Access Error
      */
     (rN2_LFIR, bit(7)) ? defaultMaskedError;
 
     /** N2_LFIR[8]
-     *  trip critical error from thermal
+     *  Therm Logic: Temperature critical trip
      */
     (rN2_LFIR, bit(8)) ? defaultMaskedError;
 
     /** N2_LFIR[9]
-     *  trip fatal error from thermal
+     *  Therm Logic: Temperature fatal trip
      */
     (rN2_LFIR, bit(9)) ? defaultMaskedError;
 
     /** N2_LFIR[10]
-     *  therm volttrip eror
+     *  UNUSED in P9
      */
     (rN2_LFIR, bit(10)) ? defaultMaskedError;
 
     /** N2_LFIR[11]
-     *  local errors from debug
+     *  Debug Logic: Scom Satellite Error
      */
     (rN2_LFIR, bit(11)) ? defaultMaskedError;
 
     /** N2_LFIR[12]
-     *  scom error from trace array0
+     *  Scom Satellite Error - Trace0
      */
     (rN2_LFIR, bit(12)) ? defaultMaskedError;
 
     /** N2_LFIR[13]
-     *  local errors from trace array0
+     *  Scom Satellite Error - Trace0
      */
     (rN2_LFIR, bit(13)) ? defaultMaskedError;
 
-    /** N2_LFIR[14:23]
+    /** N2_LFIR[14]
+     *  Scom Satellite Error - Trace1
+     */
+    (rN2_LFIR, bit(14)) ? defaultMaskedError;
+
+    /** N2_LFIR[15]
+     *  Scom Satellite Error - Trace1
+     */
+    (rN2_LFIR, bit(15)) ? defaultMaskedError;
+
+    /** N2_LFIR[16:23]
      *  spare
      */
-    (rN2_LFIR, bit(14|15|16|17|18|19|20|21|22|23)) ? defaultMaskedError;
+    (rN2_LFIR, bit(16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N2_LFIR[24]
-     *  spare
+     *  Unused
      */
     (rN2_LFIR, bit(24)) ? defaultMaskedError;
 
     /** N2_LFIR[25]
-     *  Errors from Bsense IO
+     *  Unused
      */
     (rN2_LFIR, bit(25)) ? defaultMaskedError;
 
@@ -4133,7 +4113,7 @@ group gN2_LFIR filter singlebit, cs_root_cause
     (rN2_LFIR, bit(26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N2_LFIR[41]
-     *  malfunction alert broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rN2_LFIR, bit(41)) ? defaultMaskedError;
 
@@ -4379,127 +4359,92 @@ group gN3_LFIR filter singlebit, cs_root_cause
     (rN3_LFIR, bit(0)) ? self_th_32perDay;
 
     /** N3_LFIR[1]
-     *  Errors from Control
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rN3_LFIR, bit(1)) ? self_th_32perDay;
 
     /** N3_LFIR[2]
-     *  local err from CC (PCB error)
+     *  Clock Controller: PCB Access Error
      */
     (rN3_LFIR, bit(2)) ? self_th_32perDay;
 
     /** N3_LFIR[3]
-     *  local err from CC
+     *  Clock Controller: Summarized Error
      */
     (rN3_LFIR, bit(3)) ? self_th_32perDay;
 
     /** N3_LFIR[4]
-     *  local err from PSC
+     *  PSCOM Logic: PCB Access Error
      */
     (rN3_LFIR, bit(4)) ? defaultMaskedError;
 
     /** N3_LFIR[5]
-     *  local err from PSC (parity error)
+     *  PSCOM Logic: Summarized internal errors
      */
     (rN3_LFIR, bit(5)) ? defaultMaskedError;
 
     /** N3_LFIR[6]
-     *  local err from Thermal (parity error)
+     *  Therm Logic: Summarized internal errors
      */
     (rN3_LFIR, bit(6)) ? defaultMaskedError;
 
     /** N3_LFIR[7]
-     *  local err from Thermal (PCB error
+     *  Therm Logic: PCB Access Error
      */
     (rN3_LFIR, bit(7)) ? defaultMaskedError;
 
     /** N3_LFIR[8]
-     *  trip critical thermal local err
+     *  Therm Logic: Temperature critical trip
      */
     (rN3_LFIR, bit(8)) ? defaultMaskedError;
 
     /** N3_LFIR[9]
-     *  trip fatal thermal local error
+     *  Therm Logic: Temperature fatal trip
      */
     (rN3_LFIR, bit(9)) ? defaultMaskedError;
 
     /** N3_LFIR[10]
-     *  therm volttrip error
+     *  UNUSED in P9
      */
     (rN3_LFIR, bit(10)) ? defaultMaskedError;
 
     /** N3_LFIR[11]
-     *  local err from Debug ( error)
+     *  Debug Logic: Scom Satellite Error
      */
     (rN3_LFIR, bit(11)) ? defaultMaskedError;
 
     /** N3_LFIR[12]
-     *  local err from trace array 0
+     *  Scom Satellite Error - Trace0
      */
     (rN3_LFIR, bit(12)) ? defaultMaskedError;
 
     /** N3_LFIR[13]
-     *  local err from trace array 0
+     *  Scom Satellite Error - Trace0
      */
     (rN3_LFIR, bit(13)) ? defaultMaskedError;
 
     /** N3_LFIR[14]
-     *  local err from trace array 1
+     *  Scom Satellite Error - Trace1
      */
     (rN3_LFIR, bit(14)) ? defaultMaskedError;
 
     /** N3_LFIR[15]
-     *  local err from trace array 1
+     *  Scom Satellite Error - Trace1
      */
     (rN3_LFIR, bit(15)) ? defaultMaskedError;
 
-    /** N3_LFIR[16]
-     *  local err from trace array 2
+    /** N3_LFIR[16:23]
+     *  spare
      */
-    (rN3_LFIR, bit(16)) ? defaultMaskedError;
-
-    /** N3_LFIR[17]
-     *  local err from trace array 2
-     */
-    (rN3_LFIR, bit(17)) ? defaultMaskedError;
-
-    /** N3_LFIR[18]
-     *  local err from trace array 3
-     */
-    (rN3_LFIR, bit(18)) ? defaultMaskedError;
-
-    /** N3_LFIR[19]
-     *  local err from trace array 3
-     */
-    (rN3_LFIR, bit(19)) ? defaultMaskedError;
-
-    /** N3_LFIR[20]
-     *  local err from trace array 4
-     */
-    (rN3_LFIR, bit(20)) ? defaultMaskedError;
-
-    /** N3_LFIR[21]
-     *  local err from trace array 4
-     */
-    (rN3_LFIR, bit(21)) ? defaultMaskedError;
-
-    /** N3_LFIR[22]
-     *  local err from trace array 5
-     */
-    (rN3_LFIR, bit(22)) ? defaultMaskedError;
-
-    /** N3_LFIR[23]
-     *  local err from trace array 5
-     */
-    (rN3_LFIR, bit(23)) ? defaultMaskedError;
+    (rN3_LFIR, bit(16|17|18|19|20|21|22|23)) ? defaultMaskedError;
 
     /** N3_LFIR[24]
-     *  spare
+     *  Unused
      */
     (rN3_LFIR, bit(24)) ? defaultMaskedError;
 
     /** N3_LFIR[25]
-     *  Errors from Bsense IO
+     *  Unused
      */
     (rN3_LFIR, bit(25)) ? defaultMaskedError;
 
@@ -4529,7 +4474,7 @@ group gN3_LFIR filter singlebit, cs_root_cause
     (rN3_LFIR, bit(35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** N3_LFIR[41]
-     *  Malfunction Alert broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rN3_LFIR, bit(41)) ? defaultMaskedError;
 
@@ -7312,7 +7257,7 @@ rule rNPU0FIR
     NPU0FIR & ~NPU0FIR_MASK &  NPU0FIR_ACT0 &  NPU0FIR_ACT1;
 };
 
-group gNPU0FIR filter singlebit, cs_root_cause
+group gNPU0FIR filter singlebit, cs_root_cause( 1, 2, 3, 4, 5, 6, 7, 9, 10, 16, 18, 19, 25, 29, 31, 40, 42, 44, 45, 46 )
 {
     /** NPU0FIR[0]
      *  NTL array CE
@@ -7585,7 +7530,7 @@ rule rNPU1FIR
     NPU1FIR & ~NPU1FIR_MASK &  NPU1FIR_ACT0 &  NPU1FIR_ACT1;
 };
 
-group gNPU1FIR filter singlebit, cs_root_cause
+group gNPU1FIR filter singlebit, cs_root_cause( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 20, 22, 25, 27, 28, 29, 31, 32, 33, 34, 35 )
 {
     /** NPU1FIR[0]
      *  NDL Brick0 stall
@@ -7767,10 +7712,20 @@ group gNPU1FIR filter singlebit, cs_root_cause
      */
     (rNPU1FIR, bit(35)) ? self_th_1;
 
-    /** NPU1FIR[36:61]
+    /** NPU1FIR[36:58]
      *  Reserved
      */
-    (rNPU1FIR, bit(36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61)) ? defaultMaskedError;
+    (rNPU1FIR, bit(36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58)) ? defaultMaskedError;
+
+    /** NPU1FIR[59]
+     *  Reserved
+     */
+    (rNPU1FIR, bit(59)) ? defaultMaskedError;
+
+    /** NPU1FIR[60:61]
+     *  Reserved
+     */
+    (rNPU1FIR, bit(60|61)) ? defaultMaskedError;
 
     /** NPU1FIR[62]
      *  scom error
@@ -8152,77 +8107,77 @@ group gXB_LFIR filter singlebit, cs_root_cause
     (rXB_LFIR, bit(0)) ? self_th_32perDay;
 
     /** XB_LFIR[1]
-     *  local error from GPIO
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rXB_LFIR, bit(1)) ? self_th_32perDay;
 
     /** XB_LFIR[2]
-     *  local err from CC
+     *  Clock Controller: PCB Access Error
      */
     (rXB_LFIR, bit(2)) ? self_th_32perDay;
 
     /** XB_LFIR[3]
-     *  local err from CC
+     *  Clock Controller: Summarized Error
      */
     (rXB_LFIR, bit(3)) ? self_th_32perDay;
 
     /** XB_LFIR[4]
-     *  local err from PSC
+     *  PSCOM Logic: PCB Access Error
      */
     (rXB_LFIR, bit(4)) ? defaultMaskedError;
 
     /** XB_LFIR[5]
-     *  local err from PSC (parity error)
+     *  PSCOM Logic: Summarized internal errors
      */
     (rXB_LFIR, bit(5)) ? defaultMaskedError;
 
     /** XB_LFIR[6]
-     *  local err from Thermal (parity error)
+     *  Therm Logic: Summarized internal errors
      */
     (rXB_LFIR, bit(6)) ? defaultMaskedError;
 
     /** XB_LFIR[7]
-     *  local err from Thermal (PCB error
+     *  Therm Logic: PCB Access Error
      */
     (rXB_LFIR, bit(7)) ? defaultMaskedError;
 
     /** XB_LFIR[8]
-     *  trip critical thermal local err
+     *  Therm Logic: Temperature critical trip
      */
     (rXB_LFIR, bit(8)) ? defaultMaskedError;
 
     /** XB_LFIR[9]
-     *  trip fatal thermal local error
+     *  Therm Logic: Temperature fatal trip
      */
     (rXB_LFIR, bit(9)) ? defaultMaskedError;
 
     /** XB_LFIR[10]
-     *  therm volttrip error
+     *  UNUSED in P9
      */
     (rXB_LFIR, bit(10)) ? defaultMaskedError;
 
     /** XB_LFIR[11]
-     *  local err from Debug ( error)
+     *  Debug Logic: Scom Satelite Error
      */
     (rXB_LFIR, bit(11)) ? defaultMaskedError;
 
     /** XB_LFIR[12]
-     *  local err from trace array 0
+     *  Scom Satellite Err - Trace0
      */
     (rXB_LFIR, bit(12)) ? defaultMaskedError;
 
     /** XB_LFIR[13]
-     *  local err from trace array 0
+     *  Scom Satellite Err - Trace0
      */
     (rXB_LFIR, bit(13)) ? defaultMaskedError;
 
     /** XB_LFIR[14]
-     *  local err from trace array 0
+     *  Scom Satellite Err - Trace1
      */
     (rXB_LFIR, bit(14)) ? defaultMaskedError;
 
     /** XB_LFIR[15]
-     *  local err from trace array 0
+     *  Scom Satellite Err - Trace1
      */
     (rXB_LFIR, bit(15)) ? defaultMaskedError;
 
@@ -8232,7 +8187,7 @@ group gXB_LFIR filter singlebit, cs_root_cause
     (rXB_LFIR, bit(16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** XB_LFIR[41]
-     *  malfunction alert broadcast via obb
+     *  Malfunction Alert or Local Checkstop
      */
     (rXB_LFIR, bit(41)) ? defaultMaskedError;
 
