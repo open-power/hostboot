@@ -392,6 +392,7 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == SBKT ||
                i_section == OCC ||
                i_section == HCODE ||
+               i_section == CENTAUR_HW_IMG ||
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
                i_section == MEMD ||
@@ -465,6 +466,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
         "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
         "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
+        "CENHWIMG",    /**< PNOR::CENTAUR_HW_IMG : Centaur HCODE ref image   */
 #endif
     };
 

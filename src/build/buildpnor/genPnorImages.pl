@@ -576,6 +576,7 @@ sub manipulateImages
         $isNormalSecure ||= ($eyeCatch eq "CAPP");
         $isNormalSecure ||= ($eyeCatch eq "BOOTKERNEL");
         $isNormalSecure ||= ($eyeCatch eq "HCODE");
+        $isNormalSecure ||= ($eyeCatch eq "CENHWIMG");
         $isNormalSecure ||= ($eyeCatch eq "WOFDATA");
         $isNormalSecure ||= ($eyeCatch eq "IMA_CATALOG");
         $isNormalSecure ||= ($eyeCatch eq "TESTRO");

@@ -288,4 +288,13 @@ Layout Description
         <sha512Version/>
         <ecc/>
     </section>
+    <section>
+        <description>Centaur Hw Ref Image (12K)</description>
+        <eyeCatch>CENHWIMG</eyeCatch>
+        <physicalOffset>0x39DE000</physicalOffset>
+        <physicalRegionSize>0x3000</physicalRegionSize>
+        <sha512Version/>
+        <side>sideless</side>
+        <ecc/>
+    </section>
 </pnor>
