@@ -30,6 +30,7 @@
 #include    <sys/mm.h>
 #include    <usr/vmmconst.h>
 #include    <arch/pirformat.H>
+#include    <arch/ppc.H>
 #include    <isteps/pm/pm_common_ext.H>
 #include    <config.h>
 
@@ -62,6 +63,7 @@
 #include    <p9_infrastruct_help.H>
 #include    <p9_hcode_image_defines.H>
 #include    <p9_xip_section_append.H>
+#include    <p9n2_quad_scom_addresses_fld.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -183,6 +185,9 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     //look up the HRMOR value from the HRMOR CPU special purpose register(SPR)
     uint64_t    l_hrmorVal  =   cpu_spr_value(CPU_SPR_HRMOR);
 
+    // create a mask to represent the ATTN enable bit in the HID register
+    uint64_t  l_enblAttnMask = 0x8000000000000000ull >> P9N2_C_HID_EN_ATTN;
+
     //iterate through the cores while copying information from SPRs
     for (const auto & l_core: l_coreIds)
     {
@@ -254,6 +259,23 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                            "ERROR: HRMOR: core=0x%x,thread=0x%x,l_rc=0x%x",
                            l_coreId, l_threadId, l_rc );
                 l_failAddr = P9_STOP_SPR_HRMOR;
+                break;
+            }
+
+            //Call p9_stop_save_cpureg to store the HID SPR value
+            //  (minus ATTN enable bit)
+            uint64_t l_curHidVal =  cpu_spr_value( CPU_SPR_HID );
+            uint64_t l_hidVal = l_curHidVal & (~(l_enblAttnMask));
+            l_rc = p9_stop_save_cpureg( io_image,
+                                        P9_STOP_SPR_HID,
+                                        l_hidVal,
+                                        l_pirVal | l_fuseAdj);
+
+            if ( l_rc ){
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "ERROR: HID: core=0x%x,thread=0x%x,l_rc=0x%x",
+                           l_coreId, l_threadId, l_rc );
+                l_failAddr = P9_STOP_SPR_HID;
                 break;
             }
         }

@@ -190,6 +190,7 @@ enum CpuSprNames
     CPU_SPR_MSR,
     CPU_SPR_LPCR,
     CPU_SPR_HRMOR,
+    CPU_SPR_HID,
 };
 
 /** @fn cpu_spr_value

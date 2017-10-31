@@ -356,6 +356,14 @@ inline uint64_t getPSSCR()
 }
 
 ALWAYS_INLINE
+inline uint64_t getHID()
+{
+    register uint64_t hid = 0;
+    asm volatile("mfspr %0, 1008" : "=r" (hid));
+    return hid;
+}
+
+ALWAYS_INLINE
 inline size_t getCacheLineBytes()
 {
     return 128;

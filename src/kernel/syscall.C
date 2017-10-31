@@ -735,6 +735,10 @@ namespace Systemcalls
                 TASK_SETRTN(t, getHRMOR());
                 break;
 
+            case CPU_SPR_HID:
+                TASK_SETRTN(t, getHID());
+                break;
+
             default:
                 TASK_SETRTN(t, -1);
                 break;
