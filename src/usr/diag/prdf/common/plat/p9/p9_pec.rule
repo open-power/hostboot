@@ -169,82 +169,82 @@ rule rPCI_LFIR
 group gPCI_LFIR filter singlebit, cs_root_cause
 {
     /** PCI_LFIR[0]
-     *  cir internal parity error
+     *  CFIR internal parity error
      */
     (rPCI_LFIR, bit(0)) ? self_th_32perDay;
 
     /** PCI_LFIR[1]
-     *  local errors from GPIO
+     *  Chiplet Control Reg: PCB Access Error
      */
     (rPCI_LFIR, bit(1)) ? self_th_32perDay;
 
     /** PCI_LFIR[2]
-     *  local errors from CC
+     *  Clock Controller: PCB Access Error
      */
     (rPCI_LFIR, bit(2)) ? self_th_32perDay;
 
     /** PCI_LFIR[3]
-     *  local errors from cc
+     *  Clock Controller: Summarized Error
      */
     (rPCI_LFIR, bit(3)) ? self_th_32perDay;
 
     /** PCI_LFIR[4]
-     *  pcb error from psc
+     *  PSCOM Logic: PCB Access Error
      */
     (rPCI_LFIR, bit(4)) ? defaultMaskedError;
 
     /** PCI_LFIR[5]
-     *  PE local errors from PSC
+     *  PSCOM Logic: Summarized internal errors
      */
     (rPCI_LFIR, bit(5)) ? defaultMaskedError;
 
     /** PCI_LFIR[6]
-     *  parity error from thermal
+     *  Therm Logic: Summarized internal errors
      */
     (rPCI_LFIR, bit(6)) ? defaultMaskedError;
 
     /** PCI_LFIR[7]
-     *  PCM error from thermal
+     *  Therm Logic: PCB Access Error
      */
     (rPCI_LFIR, bit(7)) ? defaultMaskedError;
 
     /** PCI_LFIR[8]
-     *  trip critical error from thermal
+     *  Therm Logic: Temperature critical trip
      */
     (rPCI_LFIR, bit(8)) ? defaultMaskedError;
 
     /** PCI_LFIR[9]
-     *  trip fatal error from thermal
+     *  Therm Logic: Temperature fatal trip
      */
     (rPCI_LFIR, bit(9)) ? defaultMaskedError;
 
     /** PCI_LFIR[10]
-     *  therm volttrip eror
+     *  UNUSED in P9
      */
     (rPCI_LFIR, bit(10)) ? defaultMaskedError;
 
     /** PCI_LFIR[11]
-     *  local errors from debug
+     *  Debug Logic: Scom Satellite Error
      */
     (rPCI_LFIR, bit(11)) ? defaultMaskedError;
 
     /** PCI_LFIR[12]
-     *  scom error from trace array0
+     *  Scom Satellite Error - L3 Trace0
      */
     (rPCI_LFIR, bit(12)) ? defaultMaskedError;
 
     /** PCI_LFIR[13]
-     *  local errors from trace array0
+     *  Scom Satellite Error - L3 Trace0
      */
     (rPCI_LFIR, bit(13)) ? defaultMaskedError;
 
     /** PCI_LFIR[14:40]
-     *  spare
+     *  unused
      */
     (rPCI_LFIR, bit(14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40)) ? defaultMaskedError;
 
     /** PCI_LFIR[41]
-     *  malfunction alert broadcast via OOB
+     *  Malfunction Alert or Local Checkstop
      */
     (rPCI_LFIR, bit(41)) ? defaultMaskedError;
 
