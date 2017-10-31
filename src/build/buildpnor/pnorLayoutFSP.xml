@@ -183,6 +183,7 @@ Layout Description - Used when building an FSP driver
         <!-- Physical Size includes Header rounded to ECC valid size -->
         <!-- Max size of actual HBBL content is 20K and 22.5K with ECC -->
         <physicalRegionSize>0x7000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
