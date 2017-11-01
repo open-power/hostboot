@@ -185,6 +185,13 @@ PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
 # we can just specify that we want an fspbuild here without any condition.
 BUILD_TYPE_PARAMS = --build-type fspbuild
 
+# Here we check to see if a key transition mode was set in the environment.
+# This can be either 'imprint' or 'production'. The genPnorImages.pl will catch
+# cases when it is set incorrectly and report an error.
+.if(${SECUREBOOT_KEY_TRANSITION_MODE} != "") # genPnorImages handles bad parm
+    KEY_TRANSITION_MODE_PARAMS = --key-transition ${SECUREBOOT_KEY_TRANSITION_MODE}
+.endif
+
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
@@ -235,7 +242,7 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
     # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
 
 	# Call script to generate final bin files for default images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
