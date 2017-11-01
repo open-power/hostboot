@@ -932,6 +932,11 @@ sub manipulateImages
                     }
                 }
             }
+            if ($eyeCatch eq "SBKT" && $emitEccless)
+            {
+                run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
+            }
+
         }
 
         # ECC Phase

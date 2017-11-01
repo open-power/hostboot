@@ -208,6 +208,7 @@ Layout Description - Used when building an FSP driver
         <eyeCatch>SBKT</eyeCatch>
         <physicalOffset>0x1722000</physicalOffset>
         <physicalRegionSize>0x4000</physicalRegionSize>
+        <sha512Version/>
         <side>sideless</side>
         <ecc/>
     </section>
