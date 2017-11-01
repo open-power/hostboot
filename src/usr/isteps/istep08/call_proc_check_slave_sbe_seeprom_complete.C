@@ -109,6 +109,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
     {
         if ( l_cpu_target  ==  l_pMasterProcTarget )
         {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Master SBE found, HUID %.8X, "
+                       "skipping to look for Slave SBE's.",
+                       TARGETING::get_huid(l_cpu_target));
             // we are just checking the Slave SBE's, skip the master
             continue;
         }
