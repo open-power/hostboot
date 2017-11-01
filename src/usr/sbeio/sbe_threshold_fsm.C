@@ -94,6 +94,8 @@ void sbe_threshold_handler( bool i_procSide,
                           uint8_t i_previousError,
                           SbeRetryHandler * i_obj )
 {
+    SBE_FSM_TRACF(ENTER_MRK, "sbe_threshold_handler()");
+
     // Note: This is set up as a finite state machine since all actions are
     //       connected and most of them lead to another.
 
@@ -148,8 +150,9 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION same_side_retry_state(
                             uint8_t i_orig_error,
                             SbeRetryHandler * i_obj)
 {
-    SBE_FSM_TRACF("Running p9_start_cbs HWP on processor target %.8X",
-               TARGETING::get_huid(i_target));
+    SBE_FSM_TRACF(ENTER_MRK, "same_side_retry_state(): "
+                  "Running p9_start_cbs HWP on processor target %.8X",
+                  TARGETING::get_huid(i_target));
 
     // We don't actually need an accurate p9_extract_sbe_rc value if
     // we're coming from the state machine, so we send in a pass.
@@ -162,8 +165,9 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION other_side_state(
                          uint8_t i_orig_error,
                          SbeRetryHandler * i_obj)
 {
-    SBE_FSM_TRACF("Running p9_start_cbs HWP on processor target %.8X",
-               TARGETING::get_huid(i_target));
+    SBE_FSM_TRACF(ENTER_MRK, "other_side_state(): "
+                  "Running p9_start_cbs HWP on processor target %.8X",
+                  TARGETING::get_huid(i_target));
 
     errlHndl_t l_errl = NULL;
 
@@ -215,6 +219,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION working_exit_state(
                            uint8_t i_orig_error,
                            SbeRetryHandler * i_obj)
 {
+    SBE_FSM_TRACF(ENTER_MRK, "working_exit_state()");
     return P9_EXTRACT_SBE_RC::ERROR_RECOVERED; //pass
 }
 
@@ -223,6 +228,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION failing_exit_state(
                            uint8_t i_orig_error,
                            SbeRetryHandler * i_obj)
 {
+    SBE_FSM_TRACF(ENTER_MRK, "failing_exit_state()");
     errlHndl_t l_errl = NULL;
 
     // Look at original error

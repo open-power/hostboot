@@ -142,6 +142,7 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
         case P9_EXTRACT_SBE_RC::RESTART_SBE:
         case P9_EXTRACT_SBE_RC::RESTART_CBS:
         {
+            SBE_TRACF("proc_extract_sbe_handler(): case RESTART_SBE");
             // Note: These two are only going to have the same handling until
             //       we have runtime handling in place.
 
@@ -153,6 +154,7 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
         }
         case P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM:
         {
+            SBE_TRACF("proc_extract_sbe_handler(): case REIPL_BKP_SEEPROM");
             // Log additional error on proc.
             /*@
              * @errortype  ERRL_SEV_INFORMATIONAL
@@ -212,6 +214,8 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
         }
         case P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM:
         {
+            SBE_TRACF("proc_extract_sbe_handler(): case REIPL_UPD_SEEPROM");
+
             l_errl = this->switch_sbe_sides(i_target);
             if(l_errl)
             {
@@ -254,6 +258,7 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
         }
         case P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION:
         {
+            SBE_TRACF("proc_extract_sbe_handler(): case NO_RECOVERY_ACTION");
             // There is no action possible. Gard and Callout the proc
             /*@
              * @errortype  ERRL_SEV_UNRECOVERABLE
@@ -280,6 +285,8 @@ void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
             // Set register return to indicate Gard and Callout of proc
             if(o_regReturn)
             {
+                SBE_TRACF("proc_extract_sbe_handler(): updating return value "
+                          "to indicate that we have deconfigured the proc");
                 *o_regReturn = SBE_REG_RETURN::PROC_DECONFIG;
             }
 
@@ -369,6 +376,7 @@ SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
         //call_proc_check_slave_sbe_seeprom.C
     } while(0);
 
+    SBE_TRACF(EXIT_MRK "check_sbe_reg");
     return l_ret;
 
 }
@@ -380,6 +388,10 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                 bool i_fromStateMachine)
 {
     errlHndl_t l_errl = NULL;
+    P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+            P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+
+    SBE_TRACF(ENTER_MRK "handle_sbe_reg_value()");
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(i_target);
@@ -388,17 +400,22 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
     {
         case SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR:
         {
+            SBE_TRACF("handle_sbe_reg_value(): case FUNCTION_ERROR");
             // There has been a failure getting the SBE register
             // We cannot continue any further, return failure.
-            return P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            l_ret = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            break;
         }
         case SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME:
         {
+            SBE_TRACF("handle_sbe_reg_value(): case SBE_AT_RUNTIME");
             // The SBE has successfully booted at runtime
-            return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+            l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+            break;
         }
         case SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT:
         {
+            SBE_TRACF("handle_sbe_reg_value(): case SBE_FAILED_TO_BOOT");
             if((!i_fromStateMachine) &&
                (i_current_sbe_error == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
             {
@@ -413,11 +430,14 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                     errlCommit(l_errl,ISTEP_COMP_ID);
                 }
 #endif
+                SBE_TRACF("handle_sbe_reg_value(): Attempting "
+                   "REIPL_UPD_SEEPROM failed. Recalling with BKP_SEEPROM");
                 // If we were trying to reipl and hit the error, we need
                 // to start with a new seeprom before hitting the threshold
                 proc_extract_sbe_handler(i_target,
                                          P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
-                return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+                l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+                break;
             }
 
             SBE_TRACF("Inside handle_sbe_reg_value, calling p9_extract_sbe_rc HWP");
@@ -441,7 +461,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
 
             if(i_fromStateMachine)
             {
-                return l_rcAction;
+                l_ret = l_rcAction;
+                break;
             }
 
             uint8_t l_prevError = (i_target)->getAttr<
@@ -461,7 +482,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                 SBE_FSM::sbe_threshold_handler(true, i_target, l_rcAction,
                                 l_prevError, this);
             }
-            return P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+            l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+            break;
         }
         default:
         {
@@ -484,9 +506,13 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                             get_huid(i_target),i_sbe_reg);
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl, ISTEP_COMP_ID);
-            return P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            l_ret = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            break;
         }
     }
+
+    SBE_TRACF(EXIT_MRK "handle_sbe_reg_value()");
+    return l_ret;
 }
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::handle_sbe_restart(
@@ -494,6 +520,8 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::handle_sbe_restart(
             bool i_fromStateMachine,
             P9_EXTRACT_SBE_RC::RETURN_ACTION i_current_condition)
 {
+    SBE_TRACF(ENTER_MRK "handle_sbe_restart()");
+
     errlHndl_t l_errl = NULL;
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
@@ -510,14 +538,19 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::handle_sbe_restart(
     }
 
     SbeRetryHandler::SBE_REG_RETURN l_checkSBE = check_sbe_reg(i_target);
-    return handle_sbe_reg_value(i_target, l_checkSBE,
-                    i_current_condition, i_fromStateMachine);
+    P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret = handle_sbe_reg_value(i_target,
+                    l_checkSBE, i_current_condition, i_fromStateMachine);
+
+    SBE_TRACF(EXIT_MRK "handle_sbe_restart()");
+    return l_ret;
 }
 
 errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
                 TARGETING::Target * i_target,
                 SbeRetryHandler::SBE_REG_RETURN * o_returnAction)
 {
+    SBE_TRACF(ENTER_MRK "sbe_timeout_handler()");
+
     errlHndl_t l_errl = NULL;
 
     (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
@@ -602,12 +635,15 @@ errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
     }
 
+    SBE_TRACF(EXIT_MRK "sbe_timeout_handler()");
     return l_errl;
 }
 
 P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::action_for_ffdc_rc(
                 uint32_t i_rc)
 {
+    SBE_TRACF(ENTER_MRK "action_for_ffdc_rc()");
+
     P9_EXTRACT_SBE_RC::RETURN_ACTION l_action;
 
     switch(i_rc)
@@ -660,11 +696,14 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::action_for_ffdc_rc(
             break;
     }
 
+    SBE_TRACF(EXIT_MRK "action_for_ffdc_rc()");
     return l_action;
 }
 
 bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 {
+    SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
+
     bool l_flowCtrl = false;
     errlHndl_t l_errl = nullptr;
     uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
@@ -758,6 +797,7 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
     free(l_pFifoResponse);
     l_pFifoResponse = nullptr;
 
+    SBE_TRACF(EXIT_MRK "sbe_get_ffdc_handler()");
     return l_flowCtrl;
 }
 
@@ -765,6 +805,8 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
                            sbeMsgReg_t i_sbeReg,
                            SBE_REG_RETURN * o_regReturn)
 {
+    SBE_TRACF(ENTER_MRK "sbe_boot_fail_handler()");
+
     errlHndl_t l_errl = nullptr;
 
     SBE_TRACF("SBE 0x%.8X never started, sbeReg=0x%.8X",
@@ -871,11 +913,14 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
+    SBE_TRACF(EXIT_MRK "sbe_boot_fail_handler()");
     return;
 }
 
 errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
 {
+    SBE_TRACF(ENTER_MRK "switch_sbe_sides()");
+
     errlHndl_t l_errl = NULL;
     const uint32_t l_sbeBootSelectMask = SBE::SBE_BOOT_SELECT_MASK >> 32;
 
@@ -944,6 +989,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
         }
     }while(0);
 
+    SBE_TRACF(EXIT_MRK "switch_sbe_sides()");
     return l_errl;
 }
 
