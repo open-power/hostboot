@@ -28,6 +28,7 @@ MODULE = util_rt
 
 ## pointer to common HWP files
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/xip/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
 
 OBJS += utilbase.o
 OBJS += utilstream.o
@@ -39,6 +40,7 @@ OBJS += rt_cmds.o
 OBJS += util_rt.o
 OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
+OBJS += utilcommonattr.o
 
 SUBDIRS += test.d
 

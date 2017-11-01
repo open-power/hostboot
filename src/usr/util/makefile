@@ -41,6 +41,7 @@ OBJS += utilsemipersist.o
 OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
 OBJS += utilmclmgr.o
+OBJS += utilcommonattr.o
 
 SUBDIRS += test.d
 SUBDIRS += runtime.d

@@ -429,6 +429,14 @@ ReturnCode platGetMBvpdAttr(
                             sizeof(T));
 }
 
+/// @brief Function to be called by GETMACRO_OB[0,1,2,3]_PLL_BUCKET
+///         functions
+/// @param[in] i_fapiTarget      FAPI2 Target pointer
+/// @param[out] o_bucket_val     corresponding number in PLL frequency list
+/// @param[in] i_index           The index number of the OBUS (0,1,2,3)
+ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                        uint8_t &o_bucket_val,
+                        const uint8_t i_index);
 
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
@@ -460,6 +468,29 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
 #define FAPI2_PLAT_ATTR_SVC_SETMACRO_DIRECT(ID, PTARGET, VAL) \
 platAttrSvc::setTargetingAttr(PTARGET, (const TARGETING::ATTRIBUTE_ID)\
 fapiToTargeting::ID, sizeof(VAL), &(VAL))
+
+//------------------------------------------------------------------------------
+// MACRO to route ATTR_OB[0..3]_PLL_BUCKET access to the correct HB function
+//------------------------------------------------------------------------------
+#define ATTR_OB0_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 0)
+
+#define ATTR_OB1_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 1)
+
+#define ATTR_OB2_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 2)
+
+#define ATTR_OB3_PLL_BUCKET_GETMACRO(ID,PTARGET,VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, PTARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::getPllBucket(PTARGET, VAL, 3)
 
 //------------------------------------------------------------------------------
 // MACRO to route ATTR_NAME access to the correct Hostboot function
@@ -1423,5 +1454,6 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::\
     platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE_Type>(ID, TARGET, VAL)
+
 
 #endif // ATTRIBUTESERVICE_H_

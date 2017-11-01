@@ -4123,6 +4123,17 @@ sub generate_proc
     print "        <default>$obus_ratio</default>\n";
     print "    </attribute>\n";
 
+
+    print "    <attribute>\n";
+    print "        <id>FREQ_O_MHZ</id>\n";
+    print "        <default>" .
+                join (",", ( $reqPol->{'obus_freq_mhz'}->{content},
+                             $reqPol->{'obus_freq_mhz'}->{content},
+                             $reqPol->{'obus_freq_mhz'}->{content},
+                             $reqPol->{'obus_freq_mhz'}->{content} )) .
+                  "</default>\n";
+    print "    </attribute>\n";
+
     my $freq_regions      = $reqPol->{'system_resclk_freq_regions'};
     my $freq_region_index = $reqPol->{'system_resclk_freq_region_index'};
     my $l3_value          = $reqPol->{'system_resclk_l3_value'};

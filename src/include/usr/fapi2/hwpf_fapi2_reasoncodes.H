@@ -61,7 +61,8 @@ namespace fapi2
         MOD_FAPI2_BAD_DQ_BITMAP                     = 0x12,
         MOD_FAPI2_GET_CHIP_CFAM_TARGET              = 0x13,
         MOD_FAPI2_GET_ATTR_CEN_VPD_VERSION          = 0x14,
-        MOD_FAPI2_GET_MB_VPD_ATTR                   = 0x15
+        MOD_FAPI2_GET_MB_VPD_ATTR                   = 0x15,
+        MOD_FAPI2_GET_PLL_BUCKET                    = 0x16,
     };
 
     /**
@@ -140,6 +141,9 @@ namespace fapi2
 
         // DIMM SPD generated errors
         RC_BAD_DQ_MFG_MODE_BITS        = HWPF_COMP_ID | 0x30,
+        // PLL_BUCKET generated errors
+        RC_NO_MATCHING_FREQ            = HWPF_COMP_ID | 0x31,
+        RC_FREQ_LIST_NOT_FOUND         = HWPF_COMP_ID | 0x32,
 
     };
 
