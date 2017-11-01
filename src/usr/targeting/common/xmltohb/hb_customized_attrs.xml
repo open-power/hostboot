@@ -98,27 +98,7 @@
 
     <attribute>
           <id>ATTR_FREQ_O_MHZ</id>
-          <default>1611</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_OB0_PLL_BUCKET</id>
-          <default>1</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_OB1_PLL_BUCKET</id>
-          <default>1</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_OB2_PLL_BUCKET</id>
-          <default>1</default>
-     </attribute>
-
-    <attribute>
-          <id>ATTR_OB3_PLL_BUCKET</id>
-          <default>1</default>
+          <default>1611,1611,1611,1611</default>
      </attribute>
 
     <attribute>

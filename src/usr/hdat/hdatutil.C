@@ -27,6 +27,7 @@
 #include <i2c/eepromif.H>
 #include <stdio.h>
 #include <p9_frequency_buckets.H>
+#include <util/utilcommonattr.H>
 
 #define UINT16_IN_LITTLE_ENDIAN(x) (((x) >> 8) | ((x) << 8))
 #define HDAT_VPD_RECORD_START_TAG 0x84
@@ -2003,14 +2004,20 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
     do{
         for(auto & l_SMPInfoEle : l_SMPLinkInfoCntr)
         {
-            uint8_t l_obusChipletPos = 
+            uint8_t l_obusChipletPos =
                     (uint8_t) l_SMPInfoEle.hdatSMPLinkBrickID / NUM_BRICKS_PER_OBUS;
-            uint32_t l_obusPllFreqBucket = 0;
+            uint8_t l_obusPllFreqBucket = 0;
             switch( l_obusChipletPos){
-                case 0: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB0_PLL_BUCKET>(); break;}
-                case 1: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB1_PLL_BUCKET>(); break;}
-                case 2: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB2_PLL_BUCKET>(); break;}
-                case 3: { l_obusPllFreqBucket = i_pProcTarget->getAttr<ATTR_OB3_PLL_BUCKET>(); break;}
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                {
+                    l_errl = Util::getObusPllBucket(i_pProcTarget,
+                                                    l_obusPllFreqBucket,
+                                                    l_obusChipletPos);
+                     break;
+                }
                 default :{
                     HDAT_ERR(" Invalid obus Brick ID ");
 
@@ -2034,7 +2041,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
                 HDAT_ERR(" Error in getting the PLL Freq bucket");
                 break;
             }
-            
+
             if(l_obusPllFreqBucket >= OBUS_PLL_FREQ_BUCKETS)
             {
                     HDAT_ERR(" Invalid obus Freq bucket ");
@@ -2069,7 +2076,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
             else if(l_chipModel == TARGETING::MODEL_CUMULUS)
             {
                 if(l_chipECLevel == 0x10)
-                {   
+                {
                     l_freqList = const_cast<uint32_t *>(OBUS_PLL_FREQ_LIST_P9C_10);
                 }
             }
@@ -2093,7 +2100,7 @@ errlHndl_t hdatUpdateSMPLinkInfoData(hdatHDIFDataArray_t * i_SMPInfoFullPcrdHdrP
 
             //PLL bucket is 1 based (1,2,3), subtract 1 for 0 based array
             uint32_t l_pllfreq = *(l_freqList+l_obusPllFreqBucket -1);
-            
+
             switch( l_pllfreq ){
                 case 1250:{l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_20GBPS; break; };
                 case 1563:{l_SMPInfoEle.hdatSMPLinkSpeed = HDAT_OBUS_FREQ_25GBPS; break; };

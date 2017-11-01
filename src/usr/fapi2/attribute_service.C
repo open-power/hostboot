@@ -61,6 +61,7 @@
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/util.H>
 #include <../memory/lib/shared/mss_const.H>
+#include <util/utilcommonattr.H>
 
 #include <secureboot/service.H>
 
@@ -1790,6 +1791,35 @@ ReturnCode platGetMBvpdAttr(
     while(0);
 
     return rc;
+}
+
+//******************************************************************************
+// fapi::platAttrSvc::getPllBucket function
+//******************************************************************************
+ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                        uint8_t & o_bucket_val,
+                        const uint8_t i_index)
+{
+    fapi2::ReturnCode l_rc;
+    errlHndl_t l_errl = nullptr;
+
+    TARGETING::Target * l_chipTarget = nullptr;
+    l_errl = getTargetingTarget(i_fapiTarget, l_chipTarget);
+    if(l_errl)
+    {
+        FAPI_ERR("getPllBucket: Error from getTargetingTarget");
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        l_errl = Util::getObusPllBucket(l_chipTarget, o_bucket_val, i_index);
+        if (l_errl)
+        {
+            FAPI_ERR("getPllBucket: Error from getObusPllBucket");
+            l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+        }
+    }
+    return l_rc;
 }
 
 } // End platAttrSvc namespace
