@@ -724,6 +724,30 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_SW406970</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       SW406970 - SCOM clockgating issue
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>LESS_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW362088</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -2591,25 +2615,6 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
-    <id>ATTR_CHIP_EC_FEATURE_HW403465</id>>
-    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-    <description>
-      Nimbus DD1.0 DD2.0
-                  L1 access latency increases when data footprint should still
-                  be within L1 cache size. Revert L1 LRU changes
-    </description>
-    <chipEcFeature>
-      <chip>
-        <name>ENUM_ATTR_NAME_NIMBUS</name>
-        <ec>
-          <value>0x20</value>
-          <test>LESS_THAN_OR_EQUAL</test>
-        </ec>
-      </chip>
-    </chipEcFeature>
-  </attribute>
-  <!-- ******************************************************************** -->
-  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW402145</id>>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -3833,21 +3838,21 @@
     <id>ATTR_CHIP_EC_FEATURE_HW417829</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      HW417829 - Bad rfscv branch
+      HW417829 / HW423787 - Bad rfscv branch
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x20</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <value>0x21</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>GREATER_THAN_OR_EQUAL</test>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
