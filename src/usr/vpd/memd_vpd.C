@@ -194,9 +194,7 @@ namespace MEMD_VPD
  * Including with Centaur vpd minimizes the number of PNOR sections.
  */
 MEMD_VpdFacade::MEMD_VpdFacade() :
-IpVpdFacade(MEMD_VPD::SECTION_SIZE,
-            MEMD_VPD::MAX_SECTIONS,
-            MEMD_VPD::MEMD_VPDRecords,
+IpVpdFacade(MEMD_VPD::MEMD_VPDRecords,
             (sizeof(MEMD_VPD::MEMD_VPDRecords)/sizeof(
                             MEMD_VPD::MEMD_VPDRecords[0])),
             MEMD_VPD::MEMD_VPDKeywords,
@@ -212,6 +210,8 @@ IpVpdFacade(MEMD_VPD::SECTION_SIZE,
     iv_configInfo.vpdReadHW = false;
     iv_configInfo.vpdWritePNOR = false;
     iv_configInfo.vpdWriteHW = false;
+    iv_vpdSectionSize = MEMD_VPD::SECTION_SIZE;
+    iv_vpdMaxSections = MEMD_VPD::MAX_SECTIONS;
 }
 
 /**

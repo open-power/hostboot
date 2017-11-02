@@ -45,20 +45,6 @@
 namespace CVPD
 {
 
-    enum
-    {
-#ifdef CONFIG_CDIMM_FORMAT_FOR_CVPD
-        // 4KB x 64
-        SECTION_SIZE       = 0x1000,
-        MAX_SECTIONS       = 64,
-#else
-        // 8KB x 32
-        SECTION_SIZE       = 0x2000,
-        MAX_SECTIONS       = 32,
-#endif
-    };
-
-
     /**
      * @brief Conversion of CVPD Records to corresponding character
      *        representation.

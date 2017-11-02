@@ -319,9 +319,7 @@ bool VPD::pvpdPresent( TARGETING::Target * i_target )
  * Including with Centaur vpd minimizes the number of PNOR sections.
  */
 PvpdFacade::PvpdFacade() :
-IpVpdFacade(CVPD::SECTION_SIZE, // note use of CVPD
-            CVPD::MAX_SECTIONS, // note use of CVPD
-            PVPD::pvpdRecords,
+IpVpdFacade(PVPD::pvpdRecords,
             (sizeof(PVPD::pvpdRecords)/sizeof(PVPD::pvpdRecords[0])),
             PVPD::pvpdKeywords,
             (sizeof(PVPD::pvpdKeywords)/sizeof(PVPD::pvpdKeywords[0])),
@@ -351,6 +349,20 @@ IpVpdFacade(CVPD::SECTION_SIZE, // note use of CVPD
 #else
     iv_configInfo.vpdWriteHW = false;
 #endif
+
+    // Get System Target
+    TARGETING::Target* sysTgt = NULL;
+    TARGETING::targetService().getTopLevelTarget(sysTgt);
+
+    assert(sysTgt != NULL,"PvpdFacade: "
+           "System target was NULL.");
+
+    iv_vpdSectionSize = sysTgt->getAttr<TARGETING::ATTR_CVPD_SIZE>();
+
+    iv_vpdMaxSections = sysTgt->getAttr<TARGETING::ATTR_CVPD_MAX_SECTIONS>();
+
+    TRACDCOMP( g_trac_vpd, "PvpdFacade VpdSectionSize: %d"
+           "MaxSections: %d ", iv_vpdSectionSize,iv_vpdMaxSections);
 }
 
 // Retrun lists of records that should be copied to pnor.

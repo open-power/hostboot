@@ -136,8 +136,3 @@ config PALMETTO_PASS1
     default n
     help
         Palmetto pass1 specific changes
-
-config CDIMM_FORMAT_FOR_CVPD
-    default n
-    help
-        Assume Custom DIMM VPD layout for CVPD

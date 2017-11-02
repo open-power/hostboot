@@ -39,7 +39,7 @@ OBJS += rtvpd_load.o
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
-BINARY_FILES = $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
+
 #Updated mvpd to contain VRML so that part/serial numbers can be
 #found for procs CCIN 54E3
 BINARY_FILES += $(IMGDIR)/procmvpd.dat:65759fa4aebd2e3b42b25309504a3007b3b51036
@@ -55,13 +55,16 @@ BINARY_FILES += $(IMGDIR)/procmvpd_p9n.dat:a351f3cd5ba8a81a50c3e5a0dea5fea03e557
 BINARY_FILES += $(IMGDIR)/procmvpd_p9c.dat:423208204c2f0e759610f4f39243362fd4b6d103
 
 #Update to Centaur DD2.0 for CCIN 31E8
-ifdef CONFIG_CDIMM_FORMAT_FOR_CVPD
-#download 4k cvpd file
-BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
-else
-#download 8k cvpd file
+
+# CDIMM Format - download 4k cvpd file
+#BINARY_FILES += $(IMGDIR)/cvpd.dat:2e33352ca95279b992927336567adf960dca7d46
+#BINARY_FILES += $(IMGDIR)/dimmspd.dat:e9bd99127597db1d20342d9953f3075c9079e0d2
+
+
+# ISDIMM Format - download 8k cvpd file
 BINARY_FILES += $(IMGDIR)/cvpd.dat:af41c35b5a10f309f2519a871204936a2129e5ea
-endif
+BINARY_FILES += $(IMGDIR)/dimmspd.dat:9852a0ed166442ef69ecd91a0379f282419a371f
+
 
 #Direct memory vpd
 BINARY_FILES += $(IMGDIR)/dvpd.dat:9292032f653710f92bbeb56b39582b2d0e5296b7
