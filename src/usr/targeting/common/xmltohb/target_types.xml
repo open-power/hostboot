@@ -532,6 +532,8 @@
   <attribute><id>PCI_REFCLOCK_RCVR_TERM</id></attribute>
   <attribute><id>SYNC_BETWEEN_STEPS</id></attribute>
   <attribute><id>MIRROR_BASE_ADDRESS</id></attribute>
+  <attribute><id>CVPD_SIZE</id></attribute>
+  <attribute><id>CVPD_MAX_SECTIONS</id></attribute>
   <attribute>
     <default>SYS</default>
     <id>CLASS</id>

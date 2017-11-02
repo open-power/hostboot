@@ -205,9 +205,7 @@ bool VPD::mvpdPresent( TARGETING::Target * i_target )
  * @brief  Constructor
  */
 MvpdFacade::MvpdFacade() :
-IpVpdFacade(MVPD::SECTION_SIZE,
-            MVPD::MAX_SECTIONS,
-            MVPD::mvpdRecords,
+IpVpdFacade(MVPD::mvpdRecords,
             (sizeof(MVPD::mvpdRecords)/sizeof(MVPD::mvpdRecords[0])),
             MVPD::mvpdKeywords,
             (sizeof(MVPD::mvpdKeywords)/sizeof(MVPD::mvpdKeywords[0])),
@@ -237,5 +235,10 @@ IpVpdFacade(MVPD::SECTION_SIZE,
 #else
     iv_configInfo.vpdWriteHW = false;
 #endif
+
+   iv_vpdSectionSize = MVPD::SECTION_SIZE;
+
+   iv_vpdMaxSections = MVPD::MAX_SECTIONS;
+
 }
 

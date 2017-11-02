@@ -73,18 +73,14 @@ uint64_t MEMD_HEADER_SIZE = sizeof(MemdHeader_t);
 /**
  * @brief  Constructor
  */
-IpVpdFacade::IpVpdFacade(uint64_t i_vpdSectionSize,
-                         uint64_t i_vpdMaxSections,
-                         const  recordInfo* i_vpdRecords,
+IpVpdFacade::IpVpdFacade(const  recordInfo* i_vpdRecords,
                          uint64_t i_recSize,
                          const  keywordInfo* i_vpdKeywords,
                          uint64_t i_keySize,
                          PNOR::SectionId i_pnorSection,
                          mutex_t i_mutex,
                          VPD::VPD_MSG_TYPE i_vpdMsgType )
-:iv_vpdSectionSize(i_vpdSectionSize)
-,iv_vpdMaxSections(i_vpdMaxSections)
-,iv_vpdRecords(i_vpdRecords)
+:iv_vpdRecords(i_vpdRecords)
 ,iv_recSize(i_recSize)
 ,iv_vpdKeywords(i_vpdKeywords)
 ,iv_keySize(i_keySize)
@@ -98,6 +94,9 @@ IpVpdFacade::IpVpdFacade(uint64_t i_vpdSectionSize,
     iv_configInfo.vpdReadHW     = false;
     iv_configInfo.vpdWritePNOR  = false;
     iv_configInfo.vpdWriteHW    = false;
+    iv_vpdSectionSize           = 0;
+    iv_vpdMaxSections           = 0;
+
     TRACUCOMP(g_trac_vpd, "IpVpdFacade::IpVpdFacade> " );
 }
 

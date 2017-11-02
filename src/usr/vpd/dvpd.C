@@ -306,9 +306,7 @@ bool DVPD::dvpdPresent( TARGETING::Target * i_target )
  * Including with Centaur vpd minimizes the number of PNOR sections.
  */
 DvpdFacade::DvpdFacade() :
-IpVpdFacade(DVPD::SECTION_SIZE,
-            DVPD::MAX_SECTIONS,
-            DVPD::dvpdRecords,
+IpVpdFacade(DVPD::dvpdRecords,
             (sizeof(DVPD::dvpdRecords)/sizeof(DVPD::dvpdRecords[0])),
             DVPD::dvpdKeywords,
             (sizeof(DVPD::dvpdKeywords)/sizeof(DVPD::dvpdKeywords[0])),
@@ -338,6 +336,10 @@ IpVpdFacade(DVPD::SECTION_SIZE,
 #else
     iv_configInfo.vpdWriteHW = false;
 #endif
+
+iv_vpdSectionSize = DVPD::SECTION_SIZE;
+iv_vpdMaxSections = DVPD::MAX_SECTIONS;
+
 }
 // Retrun lists of records that should be copied to pnor.
 void DvpdFacade::getRecordLists(

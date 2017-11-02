@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -216,9 +216,7 @@ bool VPD::cvpdPresent( TARGETING::Target * i_target )
  * @brief  Constructor
  */
 CvpdFacade::CvpdFacade() :
-IpVpdFacade(CVPD::SECTION_SIZE,
-            CVPD::MAX_SECTIONS,
-            CVPD::cvpdRecords,
+IpVpdFacade(CVPD::cvpdRecords,
             (sizeof(CVPD::cvpdRecords)/sizeof(CVPD::cvpdRecords[0])),
             CVPD::cvpdKeywords,
             (sizeof(CVPD::cvpdKeywords)/sizeof(CVPD::cvpdKeywords[0])),
@@ -248,6 +246,21 @@ IpVpdFacade(CVPD::SECTION_SIZE,
 #else
     iv_configInfo.vpdWriteHW = false;
 #endif
+
+
+// Get System Target
+TARGETING::Target* sysTgt = NULL;
+TARGETING::targetService().getTopLevelTarget(sysTgt);
+
+assert(sysTgt != NULL,"CvpdFacade: "
+       "System target was NULL.");
+
+iv_vpdSectionSize = sysTgt->getAttr<TARGETING::ATTR_CVPD_SIZE>();
+
+iv_vpdMaxSections = sysTgt->getAttr<TARGETING::ATTR_CVPD_MAX_SECTIONS>();
+
+TRACDCOMP( g_trac_vpd, "CvpdFacade VpdSectionSize: %d"
+           "MaxSections: %d ", iv_vpdSectionSize,iv_vpdMaxSections);
 }
 
 // Retrun lists of records that should be copied to pnor.

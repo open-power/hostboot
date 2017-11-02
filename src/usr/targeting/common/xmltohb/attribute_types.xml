@@ -1742,6 +1742,36 @@
   </attribute>
 
   <attribute>
+    <id>CVPD_SIZE</id>
+    <description>Size of CDIMM/ISDIMM
+                 This is the size of the centaur vpd or memory buffer vpd.
+                 It varies based on the type of the DIMM. For ISDIMMs,
+                 the size will be 8KB and for CDIMM, it will be 4KB.
+    </description>
+    <simpleType>
+        <uint64_t>
+            <default>0x2000</default>
+        </uint64_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+</attribute>
+
+<attribute>
+    <id>CVPD_MAX_SECTIONS</id>
+    <description>Max CVPD sections </description>
+    <simpleType>
+        <uint32_t>
+            <default>32</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+</attribute>
+
+  <attribute>
     <description>Base Address of RNG IO Region</description>
     <hwpfToHbAttrMap>
       <id>ATTR_PROC_NX_MMIO_BAR_BASE_ADDR</id>

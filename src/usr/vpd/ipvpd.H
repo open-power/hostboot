@@ -132,12 +132,6 @@ class IpVpdFacade
     /**
      * @brief  Constructor
      *
-     * @param[in] i_vpdSectionSize - Space allocated in PNOR for each
-     *                               instance of the current chip.
-     *
-     * @param[in] i_vpdMaxSections - Number of sections allocated in PNOR
-     *                               for the current chip.
-     *
      * @param[in] i_vpdRecords -     Pointer to array of VPD Records to use
      *
      * @param[in] i_recSize -       size of i_vpdRecords array
@@ -156,9 +150,7 @@ class IpVpdFacade
      *                               data to FSP
      *
      */
-    IpVpdFacade(uint64_t i_vpdSectionSize,
-                uint64_t i_vpdMaxSections,
-                const  recordInfo* i_vpdRecords,
+    IpVpdFacade(const  recordInfo* i_vpdRecords,
                 uint64_t i_recSize,
                 const  keywordInfo* i_vpdKeywords,
                 uint64_t i_keySize,
