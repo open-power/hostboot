@@ -162,14 +162,14 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
 
     // Translate Pnor Section Id to Lid
     auto l_lids = Util::getPnorSecLidIds(i_sec);
-    TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::loadFromPnor - getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
-            l_lids.lid, l_lids.containerLid);
+    TRACDCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor - getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
+               l_lids.lid, l_lids.containerLid);
     assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
 
     // Only load if not previously done.
     if( isLidLoaded(l_lids.containerLid) && isLidLoaded(l_lids.lid) )
     {
-        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::loadFromPnor - sec %s already loaded",
+        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor - sec %s already loaded",
                 PNOR::SectionIdToString(i_sec));
         break;
     }
@@ -195,7 +195,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
                                                    l_containerLidStr);
             if(l_errl)
             {
-                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::loadFromPnor - setNextHbRsvMemEntry Lid header failed");
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromPnor - setNextHbRsvMemEntry Lid header failed");
                 break;
             }
         }
@@ -213,7 +213,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
                                                    l_lidStr);
             if(l_errl)
             {
-                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::loadFromPnor - setNextHbRsvMemEntry Lid content failed");
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromPnor - setNextHbRsvMemEntry Lid content failed");
                 break;
             }
         }
@@ -230,7 +230,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
                                                HDAT::RHB_READ_ONLY);
         if(l_errl)
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::loadFromPnor - setNextHbRsvMemEntry PNOR content failed");
+            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromPnor - setNextHbRsvMemEntry PNOR content failed");
             break;
         }
     }
@@ -241,7 +241,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
         l_errl = loadImage(i_addr, i_size);
         if(l_errl)
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::loadFromPnor - setNextHbRsvMemEntry PNOR content failed");
+            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromPnor - setNextHbRsvMemEntry PNOR content failed");
             break;
         }
     }
@@ -329,8 +329,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
     // Force switch back to default reserved memory info
     cv_pResvMemInfo = &cv_resvMemInfo;
 
-    TRACFCOMP(g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromMCL lid = 0x%X",
-              i_lidId);
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromMCL");
 
     mutex_unlock(&cv_loadImageMutex);
 
@@ -376,7 +375,7 @@ bool PreVerifiedLidMgr::isLidLoaded(uint32_t i_lidId)
 errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
                                         const size_t i_imgSize)
 {
-    TRACFCOMP( g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::loadImage addr = 0x%X, size = 0x%X",
+    TRACDCOMP( g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::loadImage addr = 0x%X, size = 0x%X",
                i_imgAddr, i_imgSize);
 
     errlHndl_t l_errl = nullptr;
@@ -394,7 +393,7 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
         break;
     }
 
-    TRACFCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X",
+    TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X",
               cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr);
 
     // Include Header page from pnor image.
@@ -425,7 +424,7 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
 
     } while(0);
 
-    TRACFCOMP( g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::loadImage");
+    TRACDCOMP( g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::loadImage");
 
     return l_errl;
 }

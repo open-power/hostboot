@@ -109,7 +109,7 @@ MasterContainerLidMgr::~MasterContainerLidMgr()
 
 void MasterContainerLidMgr::initMcl(const void* i_pMcl, const size_t i_mclSize)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::initMcl");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::initMcl");
 
     errlHndl_t l_errl = nullptr;
 
@@ -159,13 +159,13 @@ void MasterContainerLidMgr::initMcl(const void* i_pMcl, const size_t i_mclSize)
     iv_pVaddr = iv_pTempVaddr;
     iv_maxSize = iv_tmpSize;
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::initMcl");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::initMcl");
 }
 
 void MasterContainerLidMgr::releaseMem(const uint64_t i_physAddr,
                                        void *&io_pVaddr)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::releaseMem");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::releaseMem");
 
     errlHndl_t l_errl = nullptr;
     assert(i_physAddr != 0, "MasterContainerLidMgr physical address to release cannot be 0");
@@ -210,14 +210,14 @@ void MasterContainerLidMgr::releaseMem(const uint64_t i_physAddr,
         INITSERVICE::doShutdown(l_reasonCode);
     }
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::releaseMem");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::releaseMem");
 }
 
 void MasterContainerLidMgr::initMem(const uint64_t i_physAddr,
                                     const size_t i_size,
                                     void *&io_pVaddr)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::initMem");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::initMem");
 
     errlHndl_t l_errl = nullptr;
     assert(i_physAddr != 0, "MasterContainerLidMgr physical address cannot be 0");
@@ -263,7 +263,7 @@ void MasterContainerLidMgr::initMem(const uint64_t i_physAddr,
         INITSERVICE::doShutdown(l_reasonCode);
     }
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::initMem");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::initMem");
 }
 
 void MasterContainerLidMgr::parseMcl()
@@ -348,6 +348,8 @@ errlHndl_t MasterContainerLidMgr::processComponents()
             break;
         }
         // Print Comp Info after loading lid and verifying
+        UTIL_FT("MasterContainerLidMgr::processComponents %s Info",
+                iv_curCompIdStr);
         iv_compInfoCache.at(compInfoPair.first).print();
     }
 
@@ -368,7 +370,6 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
     // Check if Component is POWERVM (aka PHYP)
     bool isPhypComp = (i_compId == g_PowervmCompId) ? true : false;
 
-    // @TODO RTC:125304 Provide support for a preloaded PHYP
     // Check if Component is POWERVM (PHYP) and still skip if (!isTCEmode)
     if ( isPhypComp )
     {
@@ -531,7 +532,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
 errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
                                            size_t& o_totalSize)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::loadLids");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::loadLids");
     errlHndl_t l_errl = nullptr;
 
     // Force total size to zero
@@ -587,7 +588,7 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
         o_totalSize += l_lidSize;
     }
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::loadLids");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::loadLids");
 
     return l_errl;
 }
@@ -595,7 +596,7 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
 errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
                                                CompInfo& io_compInfo)
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::verifyExtend");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::verifyExtend");
 
     errlHndl_t l_errl = nullptr;
 
@@ -626,7 +627,7 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         io_compInfo.unprotectedSize = l_conHdr.totalContainerSize() -
                                       l_conHdr.payloadTextSize();
 
-        // @TODO RTC:125304 re-enable when component id is supported in lids
+        // @TODO RTC:181848 re-enable when component id is supported in lids
         if (0)// memcmp(l_conHdr.componentId(), i_compId.data(),
               //        SW_HDR_COMP_ID_SIZE_BYTES) != 0 )
         {
@@ -661,7 +662,7 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
     }
     } while(0);
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::verifyExtend");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::verifyExtend");
 
     return l_errl;
 }
@@ -669,7 +670,7 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
 errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
                             const SECUREBOOT::ContainerHeader& i_conHdr) const
 {
-    UTIL_FT(ENTER_MRK"MasterContainerLidMgr::tpmExtend");
+    UTIL_DT(ENTER_MRK"MasterContainerLidMgr::tpmExtend");
 
     errlHndl_t l_errl = nullptr;
 
@@ -714,7 +715,7 @@ errlHndl_t MasterContainerLidMgr::tpmExtend(const ComponentID& i_compId,
 
     } while(0);
 
-    UTIL_FT(EXIT_MRK"MasterContainerLidMgr::tpmExtend");
+    UTIL_DT(EXIT_MRK"MasterContainerLidMgr::tpmExtend");
 
     return l_errl;
 }
