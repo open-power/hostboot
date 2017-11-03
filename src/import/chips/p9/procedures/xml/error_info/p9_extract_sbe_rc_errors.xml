@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -77,6 +77,60 @@
     <rc>RC_EXTRACT_SBE_RC_PROGRAM_INTERRUPT</rc>
     <description>
     Program interrupt promoted
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_INST_STORE_INTR</rc>
+    <description>
+    Instruction storage interrupt
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_ALIGN_INTR</rc>
+    <description>
+    Alignment interrupt
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_DATA_STORE_INTR</rc>
+    <description>
+    Data storage interrupt
     Action:Retrigger IPL or HRESET [RESTART_SBE]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
@@ -310,6 +364,64 @@
     <description>
     There are 2 bit flips in read data which cannot be corrected
     Action:Update of SEEPROM required or switch seeprom [REIPL_UPD_SEEPROM]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_LOCAL_FI2C_BIT_RATE_ERROR</rc>
+    <description>
+    I2C bit rate divisor is less than min speed value
+    Action:Retrigger IPL or HRESET [RESTART_SBE]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_LOCAL_FI2C_ECC_ERR</rc>
+    <description>
+    There is an ECC error reported in LOCAL_FI2C status registered
+    Action:Update of SEEPROM required or switch seeprom [REIPL_UPD_SEEPROM]
+    </description>
+    <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>I2C_REGISTERS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PIBMEM_REGISTERS</id>                <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>OTPROM_STATUS</id>                   <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SBE_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>MIB_EXTERNAL_SCOMMABLE_REGISTERS</id><targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_EXTRACT_SBE_RC_LOCAL_FI2C_STATUS_ERR</rc>
+    <description>
+    There are an FI2C local status error detected
+    Action:Switch seeprom [REIPL_BKP_SEEPROM]
     </description>
     <collectRegisterFfdc><id>CBS_STATUS_REGISTERS</id>            <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ROOT_CTRL_REGISTERS_CFAM</id>        <targetType>TARGET_TYPE_PROC_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
