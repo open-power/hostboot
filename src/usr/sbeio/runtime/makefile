@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib
 
 EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 
@@ -52,10 +53,17 @@ OBJS += sbe_retry_handler.o
 
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/lib/
 include ${ROOTPATH}/procedure.rules.mk
 include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/p9_get_sbe_msg_register.mk
-include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_extract_sbe_rc.mk
 include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_start_cbs.mk
+
+#Not using the ekb mk file because it includes extra files
+# that we already include in libfapi2:
+# - p9_ppe_utils.o
+#include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_extract_sbe_rc.mk
+OBJS += p9_extract_sbe_rc.o
+OBJS += p9_ppe_common.o
 
 SUBDIRS += test.d
 
