@@ -879,6 +879,22 @@ fapi2::ReturnCode updateImageFlags( Homerlayout_t* i_pChipHomer, CONST_FAPI2_PRO
 
     FAPI_DBG(" ==================== SGPE Header Flags =================");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM,
+                           FAPI_SYSTEM,
+                           attrVal),
+             "Error from FAPI_ATTR_GET for attribute ATTR_ENABLE_MEM_EARLY_DATA_SCOM");
+
+    //Attribute set to 0x01 for CHIP_IS_NODE
+    if( attrVal == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON )
+    {
+        sgpeFlag |= SGPE_ENABLE_MEM_EARLY_DATA_SCOM_POS;
+    }
+
+    FAPI_DBG("Memory Early Data Scom Enabled:   %s", (
+    attrVal == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON) ? "TRUE" : "FALSE" );
+
+    ///
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_PUMP_MODE,
                            FAPI_SYSTEM,
                            attrVal),
