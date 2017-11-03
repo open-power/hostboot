@@ -383,8 +383,8 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
         MemoryMru mm { i_chip->getTrgt(), i_rank, chipMark.getSymbol() };
         io_sc.service_data->SetCallout( mm );
 
+        // Add a VCM request to the TD queue if at runtime or at memdiags.
         #ifdef __HOSTBOOT_RUNTIME
-        // Add a VCM request to the TD queue.
         o_rc = addVcmEvent<T,D>( i_chip, i_rank, chipMark, io_sc, i_isFetch );
         if ( SUCCESS != o_rc )
         {
@@ -393,7 +393,19 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
                       i_rank.getSlave() );
             break;
         }
-        #endif // __HOSTBOOT_RUNTIME
+        #elif defined(__HOSTBOOT_MODULE) && !defined(__HOSTBOOT_RUNTIME)
+        if ( isInMdiaMode() )
+        {
+            o_rc = addVcmEvent<T,D>(i_chip, i_rank, chipMark, io_sc, i_isFetch);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "addVcmEvent() failed: i_chip=0x%08x "
+                        "i_rank=m%ds%d", i_chip->getHuid(), i_rank.getMaster(),
+                        i_rank.getSlave() );
+                break;
+            }
+        }
+        #endif
 
     }while(0);
 
