@@ -118,6 +118,8 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
         uint64_t l_def_refblock_off_special_case = (((l_def_is_dual_slot == literal_0)
                 && (l_TGT2_ATTR_EFF_NUM_MASTER_RANKS_PER_DIMM[l_def_PORT_INDEX][literal_0] == literal_4))
                 && (l_def_SLOT0_DRAM_STACK_HEIGHT == literal_2));
+        fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT3, l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
         fapi2::ATTR_CHIP_EC_FEATURE_HW401780_Type l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW401780, TGT4, l_TGT4_ATTR_CHIP_EC_FEATURE_HW401780));
         fapi2::ATTR_PROC_EPS_READ_CYCLES_T0_Type l_TGT3_ATTR_PROC_EPS_READ_CYCLES_T0;
@@ -329,6 +331,17 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
                 l_scom_buffer.insert<18, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_DISP_OFF );
             }
 
+            if ((l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_OFF))
+            {
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_ECR_ERR_OFF = 0x0;
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_ECR_ERR_OFF );
+            }
+            else if ((l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON))
+            {
+                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_ECR_ERR_ON = 0x1;
+                l_scom_buffer.insert<61, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF2_EN_ALT_ECR_ERR_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010824ull, l_scom_buffer));
         }
         {
@@ -393,8 +406,18 @@ fapi2::ReturnCode p9n_mca_scom(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& TGT0
                 FAPI_TRY(fapi2::getScom( TGT0, 0x501082bull, l_scom_buffer ));
 
                 l_scom_buffer.insert<45, 1, 63, uint64_t>(literal_0b1 );
-                constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON = 0x1;
-                l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON );
+
+                if ((l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_OFF))
+                {
+                    constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON = 0x1;
+                    l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON );
+                }
+                else if ((l_TGT3_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON))
+                {
+                    constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_OFF = 0x0;
+                    l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_OFF );
+                }
+
                 constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_DISABLE_WRTO_IG_ON = 0x1;
                 l_scom_buffer.insert<44, 1, 63, uint64_t>(l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_DISABLE_WRTO_IG_ON );
                 constexpr auto l_MC01_PORT0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_AMO_MSI_RMW_ONLY_ON = 0x1;

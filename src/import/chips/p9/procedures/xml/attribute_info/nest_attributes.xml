@@ -1310,6 +1310,21 @@
   <persistRuntime/>
   <initToZero/>
 </attribute>
+<!-- ******************************************************************** -->
+<attribute>
+  <id>ATTR_ENABLE_MEM_EARLY_DATA_SCOM</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Enable early data from Memory. This also enable cp_me from L3.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    OFF = 0x0,
+    ON = 0x1
+  </enum>
+  <platInit/>
+  <initToZero/>
+</attribute>
 <!-- ********************************************************************** -->
 
 </attributes>
