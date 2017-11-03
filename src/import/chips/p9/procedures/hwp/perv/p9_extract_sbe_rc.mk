@@ -23,4 +23,7 @@
 #
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_extract_sbe_rc
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
+OBJS+=p9_ppe_common.o
+OBJS+=p9_ppe_utils.o
 $(call BUILD_PROCEDURE)
