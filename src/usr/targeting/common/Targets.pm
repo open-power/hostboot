@@ -666,7 +666,7 @@ sub buildAffinity
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $tpm_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $tpm_aff);
-            $self->setAttribute($target, "ORDINAL_ID",    $pos);
+            $self->setAttribute($target, "ORDINAL_ID",    $tpm);
         }
         elsif ($type eq "BMC")
         {
@@ -681,7 +681,7 @@ sub buildAffinity
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $bmc_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $bmc_aff);
-            $self->setAttribute($target, "ORDINAL_ID",    $pos);
+            $self->setAttribute($target, "ORDINAL_ID",    $bmc);
 
         }
         elsif ($type eq "MCS")
@@ -742,12 +742,14 @@ sub buildAffinity
             my $parent_physical = $node_phys . "/proc-$proc";
 
             my $fapi_name = $self->getFapiName($type, $node, $proc);
+            #unique offset per system
+            my $proc_ordinal_id = ($node * $maxInstance{$type}) + $proc;
 
             $self->setHuid($target, $sys_pos, $node);
             $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
             $self->setAttribute($target, "PHYS_PATH",       $parent_physical);
             $self->setAttribute($target, "AFFINITY_PATH",   $parent_affinity);
-            $self->setAttribute($target, "ORDINAL_ID",      $proc);
+            $self->setAttribute($target, "ORDINAL_ID",      $proc_ordinal_id);
             $self->setAttribute($target, "POSITION",        $proc);
 
             $self->setAttribute($target, "FABRIC_GROUP_ID",
@@ -974,12 +976,13 @@ sub setCommonAttrForChiplet
 
     #unique offset per system
     my $offset = ($proc * $maxInstance{$tgt_type}) + $pos;
+    my $chiplet_ordinal_id = (($node * $maxInstance{"PROC"} + $proc ) * $maxInstance{$tgt_type}) + $pos;
     $self->{huid_idx}->{$tgt_type} = $offset;
     $self->setHuid($target, $sys, $node);
     $self->setAttribute($target, "FAPI_NAME",       $fapi_name);
     $self->setAttribute($target, "PHYS_PATH",       $physical_path);
     $self->setAttribute($target, "AFFINITY_PATH",   $affinity_path);
-    $self->setAttribute($target, "ORDINAL_ID",      $pos);
+    $self->setAttribute($target, "ORDINAL_ID",      $chiplet_ordinal_id);
     $self->setAttribute($target, "FAPI_POS",        $offset);
     $self->setAttribute($target, "REL_POS",         $pos);
 
@@ -1310,7 +1313,9 @@ sub processMc
                                      $self->getFapiName($membuf_type, $node, $proc, $membufnum));
 
                         $self->setAttribute($membuf, "FAPI_POS",  $membufnum);
-                        $self->setAttribute($membuf, "ORDINAL_ID", $membufnum);
+                        #unique offset per system
+                        my $membuf_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * $self->{MAX_DMI} + $dmi_num;
+                        $self->setAttribute($membuf, "ORDINAL_ID", $membuf_ordinal_id);
                         $self->setAttribute($membuf, "REL_POS", $membufnum);
                         $self->setAttribute($membuf, "POSITION", $membufnum);
                         $self->setAttribute($membuf, "VPD_REC_NUM", $membufnum);
@@ -1402,9 +1407,13 @@ sub processMc
                                 my $mba_offset = $proc * $maxInstance{"MBA"} +
                                                  MBA_PER_MEMBUF * $membufnum +
                                                  $mba ;
+                                #unique offset per system
+                                my $mba_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * $maxInstance{"MBA"} +
+                                                 MBA_PER_MEMBUF * $membufnum +
+                                                 $mba ;
 
                                 $self->setAttribute($membuf_child, "FAPI_POS",  $mba_offset);
-                                $self->setAttribute($membuf_child, "ORDINAL_ID", $mba_offset);
+                                $self->setAttribute($membuf_child, "ORDINAL_ID", $mba_ordinal_id);
                                 $self->setAttribute($membuf_child, "REL_POS", $mba_offset);
                                 $self->setAttribute($membuf_child, "POSITION", $mba_offset);
 
@@ -1451,6 +1460,12 @@ sub processMc
                                                       DIMMS_PER_MBAPORT*$mba+
                                                       $port_num;
 
+                                        #unique offset per system
+                                        my $dimm_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
+                                                      DIMMS_PER_DMI*$dmi_num+
+                                                      DIMMS_PER_MBAPORT*$mba+
+                                                      $port_num;
+
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
                                                   $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
 
@@ -1464,7 +1479,7 @@ sub processMc
 
                                         $self->setAttribute($dimm,"FAPI_POS", $aff_pos);
 
-                                        $self->setAttribute($dimm, "ORDINAL_ID", $aff_pos);
+                                        $self->setAttribute($dimm, "ORDINAL_ID", $dimm_ordinal_id);
 
                                         $self->setAttribute($dimm, "POSITION", $aff_pos);
 
