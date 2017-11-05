@@ -173,7 +173,7 @@ fapi2::ReturnCode pstate_gpe_init(
         do
         {
             FAPI_TRY(getScom(i_target, PU_OCB_OCI_OCCS2_SCOM, l_occ_scratch2));
-            FAPI_TRY(getScom(i_target, PU_GPE3_PPE_XIDBGPRO, l_xsr_iar));
+            FAPI_TRY(getScom(i_target, PU_GPE2_PPE_XIDBGPRO, l_xsr_iar));
             FAPI_DBG("OCC Scratch2: 0x%016lx; XSR: 0x%016lx Timeout: %d",
                      l_occ_scratch2, l_xsr_iar, l_timeout_counter);
             // fapi2::delay takes ns as the arg
