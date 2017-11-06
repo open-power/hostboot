@@ -264,10 +264,10 @@ fsp.tar_CONTENTS = \
     $(if $(FAKEPNOR), img/dvpd.dat, ) \
     img/simics_NIMBUS_targeting.bin \
     img/simics_CUMULUS_targeting.bin \
-    $(if $(CONFIG_SECUREBOOT),img/simics_NIMBUS_targeting.bin.protected) \
-    $(if $(CONFIG_SECUREBOOT),img/simics_NIMBUS_targeting.bin.unprotected) \
-    $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.protected) \
-    $(if $(CONFIG_SECUREBOOT),img/simics_CUMULUS_targeting.bin.unprotected) \
+    img/simics_NIMBUS_targeting.bin.protected \
+    img/simics_NIMBUS_targeting.bin.unprotected \
+    img/simics_CUMULUS_targeting.bin.protected \
+    img/simics_CUMULUS_targeting.bin.unprotected \
     obj/genfiles/fapiattrs.xml \
     obj/genfiles/attribute_types_sp.xml \
     obj/genfiles/target_types_sp.xml \

@@ -166,6 +166,7 @@ SIGNING_LIBS%=${SIGNING_DIR}/libssl.so:${SIGNING_DIR}/libcrypto.so
 PATH%=/usr/bin:${SIGNING_DIR}:${SIGNING_DIR}/../sb-signing-framework/sb-signing-framework/src/client:${PATH}
 
 # Dump information about the Secure Boot configuration
+# NOTE: fips/$bb/src/Buildconf sets $CONFIG_SECUREBOOT
 dump-secureboot-config : .FORCEBLD
 	echo -e "\n\n\
 Secure Boot Signing Config:\n\
