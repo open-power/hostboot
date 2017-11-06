@@ -69,13 +69,13 @@ p9_setup_bars_build_chip_info(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
 {
     FAPI_DBG("Start");
 
-    FAPI_TRY(p9_fbc_utils_get_chip_base_address_no_aliases(i_target,
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
              EFF_FBC_GRP_CHIP_IDS,
-             io_chip_info.base_address_nm[0],
-             io_chip_info.base_address_nm[1],
+             io_chip_info.base_address_nm0,
+             io_chip_info.base_address_nm1,
              io_chip_info.base_address_m,
              io_chip_info.base_address_mmio),
-             "Error from p9_fbc_utils_get_chip_base_address_no_aliases");
+             "Error from p9_fbc_utils_get_chip_base_address");
 
     FAPI_TRY(p9_fbc_utils_get_group_id_attr(i_target,
                                             io_chip_info.fbc_group_id),
@@ -84,6 +84,16 @@ p9_setup_bars_build_chip_info(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     FAPI_TRY(p9_fbc_utils_get_chip_id_attr(i_target,
                                            io_chip_info.fbc_chip_id),
              "Error from p9_fbc_utils_get_chip_id_attr");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE,
+                           i_target,
+                           io_chip_info.extended_addressing_mode),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2,
+                           i_target,
+                           io_chip_info.hw423589_option2),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION2)");
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -143,6 +153,151 @@ fapi_try_exit:
 }
 
 
+///
+/// @brief Enable MCD units 0/1
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_mcd_enable(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+    p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+
+    uint8_t l_addr_extension_group_id = 0;
+    uint8_t l_addr_extension_chip_id = 0;
+    fapi2::buffer<uint64_t> l_fir_data = 0;
+    fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
+    fapi2::buffer<uint64_t> l_mcd_vgc_data = 0;
+
+    // configure FIR
+    // clear FIR
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCC_FIR_REG, l_fir_data),
+             "Error from putScom (PU_MCC_FIR_REG)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCC_FIR_REG, l_fir_data),
+             "Error from putScom (PU_MCD1_MCC_FIR_REG)");
+    // set action
+    l_fir_data = MCD_FIR_ACTION0;
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION0_REG, l_fir_data),
+             "Error from putScom (PU_MCD_FIR_ACTION0_REG)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION0_REG, l_fir_data),
+             "Error from putScom (PU_MCD1_MCD_FIR_ACTION0_REG)");
+    l_fir_data = MCD_FIR_ACTION1;
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION1_REG, l_fir_data),
+             "Error from putScom (PU_MCD_FIR_ACTION1_REG)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION1_REG, l_fir_data),
+             "Error from putScom (PU_MCD1_MCD_FIR_ACTION1_REG)");
+    // set mask
+    l_fir_data = MCD_FIR_MASK;
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_MASK_REG, l_fir_data),
+             "Error from putScom (PU_MCD_FIR_MASK_REG)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_MASK_REG, l_fir_data),
+             "Error from putScom (PU_MCD1_MCD_FIR_MASK_REG)");
+
+    if (i_chip_info.extended_addressing_mode)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID,
+                               i_target_sys,
+                               l_addr_extension_group_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID,
+                               i_target_sys,
+                               l_addr_extension_chip_id),
+                 "Error from FAPI_ATTR_GET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID");
+    }
+
+    // set MCD vectored group configuration register
+    FAPI_TRY(fapi2::getScom(i_target, PU_BANK0_MCD_VGC, l_mcd_vgc_data),
+             "Error from getScom (PU_BANK0_MCD_VGC)");
+
+    if (l_addr_extension_group_id ||
+        l_addr_extension_chip_id)
+    {
+        l_mcd_vgc_data.setBit<P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_ENABLE>();
+        l_mcd_vgc_data.insertFromRight<P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_MASK,
+                                       P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_MASK_LEN>((l_addr_extension_group_id << 3) |
+                                               l_addr_extension_chip_id);
+    }
+
+    l_mcd_vgc_data.insertFromRight<PU_BANK0_MCD_VGC_AVAIL_GROUPS, PU_BANK0_MCD_VGC_AVAIL_GROUPS_LEN>(MCD_VGC_AVAIL_GROUPS);
+    l_mcd_vgc_data.setBit<PU_BANK0_MCD_VGC_HANG_POLL_ENABLE>();
+    FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_VGC, l_mcd_vgc_data),
+             "Error from putScom (PU_BANK0_MCD_VGC)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_VGC, l_mcd_vgc_data),
+             "Error from putScom (PU_MCD1_BANK0_MCD_VGC)");
+
+    // enable MCD probes
+    l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_ENABLE>();
+    l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_CONTINUOUS>();
+    l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_PACE, PU_BANK0_MCD_REC_PACE_LEN>(MCD_RECOVERY_PACE_RATE);
+    l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_RTY_COUNT, PU_BANK0_MCD_REC_RTY_COUNT_LEN>(MCD_RECOVERY_RTY_COUNT);
+    l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_VG_COUNT, PU_BANK0_MCD_REC_VG_COUNT_LEN>(MCD_RECOVERY_VG_COUNT);
+    FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_REC, l_mcd_rec_data),
+             "Error from putScom (PU_BANK0_MCD_REC)");
+    FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_REC, l_mcd_rec_data),
+             "Error from putScom (PU_MCD1_BANK0_MCD_REC)");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
+/// @brief Program MCD units 0/1 to track non-mirrored regions
+///        of real address space on this chip, for HW423589_OPTION2
+///
+/// @param[in] i_target Processor chip target
+/// @param[in] i_target_sys System target
+/// @param[in] i_chip_info Structure describing chip properties/base addresses
+///
+/// @return FAPI_RC_SUCCESS if all calls are successful, else error
+fapi2::ReturnCode
+p9_setup_bars_mcd_HW423589_OPTION2(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+                                   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_target_sys,
+                                   p9_setup_bars_chip_info& i_chip_info)
+{
+    FAPI_DBG("Start");
+    p9_setup_bars_addr_range l_nm_cover;
+    uint64_t l_cover_size = MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2 / 2;
+
+    // setup two MCD configurations
+    // chip msel0 base       [ size=256 GB ]
+    // chip msel0 base + 256 [ size=256 GB ]
+    l_nm_cover.enabled = true;
+    l_nm_cover.base_addr = i_chip_info.base_address_nm0.front();
+    l_nm_cover.size = l_cover_size;
+
+    FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
+                                           l_nm_cover,
+                                           PU_MCD1_BANK0_MCD_TOP,
+                                           PU_BANK0_MCD_TOP),
+             "Error from p9_setup_bars_mcd_track_range (0)");
+
+    l_nm_cover.base_addr += l_cover_size;
+
+    FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
+                                           l_nm_cover,
+                                           PU_MCD1_BANK0_MCD_STR,
+                                           PU_BANK0_MCD_STR),
+             "Error from p9_setup_bars_mcd_track_range (1)");
+
+    FAPI_TRY(p9_setup_bars_mcd_enable(i_target,
+                                      i_target_sys,
+                                      i_chip_info),
+             "Error from p9_setup_bars_mcd_enable");
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+
 /// @brief Program MCD units 0/1 to track non-mirrored and mirrored regions
 ///        of real address space on this chip
 ///
@@ -157,9 +312,10 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                   p9_setup_bars_chip_info& i_chip_info)
 {
     FAPI_DBG("Start");
-    p9_setup_bars_addr_range l_nm_range[2];
-    p9_setup_bars_addr_range l_m_range;
-    bool l_enable_mcd = false;
+    std::vector<p9_setup_bars_addr_range> l_nm_ranges[2];
+    std::vector<p9_setup_bars_addr_range> l_m_ranges;
+    bool l_enable_mcd_nm = false;
+    bool l_enable_mcd_m = false;
     fapi2::ATTR_MRW_HW_MIRRORING_ENABLE_Type l_mirror_ctl;
 
     // determine range of NM memory which MCD needs to cover on this chip
@@ -167,12 +323,26 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
         fapi2::ATTR_PROC_MEM_BASES_ACK_Type l_nm_bases;
         fapi2::ATTR_PROC_MEM_SIZES_ACK_Type l_nm_sizes;
 
+        // initialize set of ranges -- track the number of mappable regions
+        // in each msel
+        for (uint8_t ii = 0; ii < i_chip_info.base_address_nm0.size(); ii++)
+        {
+            p9_setup_bars_addr_range r;
+            l_nm_ranges[0].push_back(r);
+        }
+
+        for (uint8_t ii = 0; ii < i_chip_info.base_address_nm1.size(); ii++)
+        {
+            p9_setup_bars_addr_range r;
+            l_nm_ranges[1].push_back(r);
+        }
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEM_BASES_ACK, i_target, l_nm_bases),
                  "Error fram FAPI_ATTR_GET (ATTR_PROC_MEM_BASES_ACK)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MEM_SIZES_ACK, i_target, l_nm_sizes),
                  "Error fram FAPI_ATTR_GET (ATTR_PROC_MEM_SIZES_ACK)");
 
-        // add each valid NM group range to its associated NM chip range
+        // add each valid NM group to its associated NM chip range
         for (uint8_t ll = 0; ll < NUM_NON_MIRROR_REGIONS; ll++)
         {
             p9_setup_bars_addr_range l_range(l_nm_bases[ll],
@@ -180,51 +350,109 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             if (l_range.enabled)
             {
-                l_enable_mcd = true;
+                FAPI_DBG("Adding group: %d", ll);
+                l_range.print();
 
-                // determine which NM range (0/1) this range is associated with
-                if (l_range.base_addr < i_chip_info.base_address_nm[1])
+                bool l_range_placed = false;
+                l_enable_mcd_nm = true;
+
+                // determine which msel (nm0/nm1) the region lies within
+                // then determine which NM range this range is associated with
+                // find first range (walking backwards through the sorted
+                // list) for which the starting address of this range is
+                // greater than the base address
+                if ((i_chip_info.base_address_nm1.size() != 0) &&
+                    l_range.base_addr >= i_chip_info.base_address_nm1[0])
                 {
-                    l_nm_range[0].merge(l_range);
+                    // nm1
+                    for (int jj = i_chip_info.base_address_nm1.size() - 1;
+                         (jj >= 0) && !l_range_placed;
+                         jj--)
+                    {
+                        if (l_range.base_addr >= i_chip_info.base_address_nm1[jj])
+                        {
+                            l_nm_ranges[1][jj].merge(l_range);
+                            l_range_placed = true;
+                        }
+                    }
                 }
                 else
                 {
-                    l_nm_range[1].merge(l_range);
+                    // nm0
+                    for (int jj = i_chip_info.base_address_nm0.size() - 1;
+                         (jj >= 0) && !l_range_placed;
+                         jj--)
+                    {
+                        if (l_range.base_addr >= i_chip_info.base_address_nm0[jj])
+                        {
+                            l_nm_ranges[0][jj].merge(l_range);
+                            l_range_placed = true;
+                        }
+                    }
                 }
+
+                // check for consistency -- should always find a match
+                FAPI_ASSERT(l_range_placed,
+                            fapi2::P9_SETUP_BARS_INVALID_MCD_NM_RANGE_ERR().
+                            set_TARGET(i_target).
+                            set_NM_RANGE_IDX(ll).
+                            set_NM_RANGE_BASE_ADDR(l_nm_bases[ll]).
+                            set_NM_RANGE_SIZE(l_nm_sizes[ll]).
+                            set_NM0_CHIP_BASES(i_chip_info.base_address_nm0).
+                            set_NM1_CHIP_BASES(i_chip_info.base_address_nm1),
+                            "Invalid configuration for MCD NM range!");
             }
         }
 
-        // process each NM chip range
-        for (uint8_t l_nm_range_idx = 0; l_nm_range_idx < 2; l_nm_range_idx++)
+        // generate independent cover for each of the two msels
+        for (uint8_t ii = 0; ii < 2; ii++)
         {
-            if (l_nm_range[l_nm_range_idx].enabled)
+            if (l_nm_ranges[ii].size() != 0)
             {
-                // ensure power of two alignment
-                if (!l_nm_range[l_nm_range_idx].is_power_of_2())
+                FAPI_DBG("Generating MCD cover for NM msel %d",
+                         ii);
+
+                p9_setup_bars_addr_range l_nm_cover;
+                l_nm_cover.base_addr = l_nm_ranges[ii][0].base_addr;
+
+                FAPI_DBG("  Cover base address: 0x%016lX",
+                         l_nm_cover.base_addr);
+
+                for (uint8_t jj = 0; jj < l_nm_ranges[ii].size(); jj++)
                 {
-                    l_nm_range[l_nm_range_idx].round_next_power_of_2();
+                    if (l_nm_ranges[ii][jj].enabled)
+                    {
+                        FAPI_DBG("  Processing valid range %d, base addr: 0x%016lX, size: 0x%016lX",
+                                 jj, l_nm_ranges[ii][jj].base_addr, l_nm_ranges[ii][jj].size);
+
+                        l_nm_cover.enabled = true;
+
+                        // ensure power of two alignment
+                        if (!l_nm_ranges[ii][jj].is_power_of_2())
+                        {
+                            l_nm_ranges[ii][jj].round_next_power_of_2();
+                        }
+
+                        i_chip_info.ranges.push_back(l_nm_ranges[ii][jj]);
+                        i_chip_info.ranges.back().print();
+                    }
+
+                    // need to cover size of largest alias region
+                    if (l_nm_cover.size < l_nm_ranges[ii][jj].size)
+                    {
+                        l_nm_cover.size = l_nm_ranges[ii][jj].size;
+                        FAPI_DBG("  Updating cover size: 0x%016lX",
+                                 l_nm_cover.size);
+                    }
                 }
 
-                // verify that base lines up with chip info struct
-                FAPI_ASSERT(l_nm_range[l_nm_range_idx].base_addr == i_chip_info.base_address_nm[l_nm_range_idx],
-                            fapi2::P9_SETUP_BARS_INVALID_MCD_NM_RANGE_ERR().
-                            set_TARGET(i_target).
-                            set_NM_RANGE_IDX(l_nm_range_idx).
-                            set_NM_RANGE_BASE_ADDR(l_nm_range[l_nm_range_idx].base_addr).
-                            set_NM_RANGE_SIZE(l_nm_range[l_nm_range_idx].size).
-                            set_NM_CHIP_BASE(i_chip_info.base_address_nm[l_nm_range_idx]),
-                            "Invalid configuration for MCD NM range!");
-
                 // configure MCD to track this range
-                //   range 0 = MCD_BOT, range 1 = MCD_STR
+                //   nm0 = MCD_BOT, nm1 = MCD_STR
                 FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
-                                                       l_nm_range[l_nm_range_idx],
-                                                       ((l_nm_range_idx == 0) ? (PU_MCD1_BANK0_MCD_BOT) : (PU_MCD1_BANK0_MCD_STR)),
-                                                       ((l_nm_range_idx == 0) ? (PU_BANK0_MCD_BOT) : (PU_BANK0_MCD_STR))),
-                         "Error from p9_setup_bars_mcd_track_range (NM%d)", l_nm_range_idx);
-
-                i_chip_info.ranges.push_back(l_nm_range[l_nm_range_idx]);
-                i_chip_info.ranges.back().print();
+                                                       l_nm_cover,
+                                                       ((ii == 0) ? (PU_MCD1_BANK0_MCD_BOT) : (PU_MCD1_BANK0_MCD_STR)),
+                                                       ((ii == 0) ? (PU_BANK0_MCD_BOT) : (PU_BANK0_MCD_STR))),
+                         "Error from p9_setup_bars_mcd_track_range (NM%d)", ii);
             }
         }
     }
@@ -236,15 +464,24 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
     if (l_mirror_ctl == fapi2::ENUM_ATTR_MRW_HW_MIRRORING_ENABLE_TRUE)
     {
-
         fapi2::ATTR_PROC_MIRROR_BASES_ACK_Type l_m_bases;
         fapi2::ATTR_PROC_MIRROR_SIZES_ACK_Type l_m_sizes;
+        p9_setup_bars_addr_range l_m_cover;
+
+        // initialize set of ranges -- track the number of mappable
+        // regions
+        for (uint8_t ii = 0; ii < i_chip_info.base_address_m.size(); ii++)
+        {
+            p9_setup_bars_addr_range r;
+            l_m_ranges.push_back(r);
+        }
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_BASES_ACK, i_target, l_m_bases),
                  "Error fram FAPI_ATTR_GET (ATTR_PROC_MIRROR_BASES_ACK)");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_MIRROR_SIZES_ACK, i_target, l_m_sizes),
                  "Error fram FAPI_ATTR_GET (ATTR_PROC_MIRROR_SIZES_ACK)");
 
-        // add each valid M group range to the M chip range
+        // add each valid M group range to its associated M chip range
         for (uint8_t ll = 0; ll < NUM_MIRROR_REGIONS; ll++)
         {
             p9_setup_bars_addr_range l_range(l_m_bases[ll],
@@ -252,91 +489,81 @@ p9_setup_bars_mcd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
             if (l_range.enabled)
             {
-                l_enable_mcd = true;
-                l_m_range.merge(l_range);
+                bool l_range_placed = false;
+                l_enable_mcd_m = true;
+
+                // determine which M range this range is associated with
+                // find first range (walking backwards through the sorted
+                // list) for which the starting address of this range is
+                // greater than the base address
+                for (int jj = i_chip_info.base_address_m.size() - 1;
+                     (jj >= 0) && !l_range_placed;
+                     jj--)
+                {
+                    if (l_range.base_addr >= i_chip_info.base_address_m[jj])
+                    {
+                        l_m_ranges[jj].merge(l_range);
+                        l_range_placed = true;
+                    }
+                }
+
+                // check for consistency -- should always find a match
+                FAPI_ASSERT(l_range_placed,
+                            fapi2::P9_SETUP_BARS_INVALID_MCD_M_RANGE_ERR().
+                            set_TARGET(i_target).
+                            set_M_RANGE_IDX(ll).
+                            set_M_RANGE_BASE_ADDR(l_m_bases[ll]).
+                            set_M_RANGE_SIZE(l_m_sizes[ll]).
+                            set_M_CHIP_BASES(i_chip_info.base_address_m),
+                            "Invalid configuration for MCD M range!");
             }
         }
 
-        // process M chip range
-        if (l_m_range.enabled)
+        // process each merged range, find the largest which the MCD needs to
+        // cover -- all aliases will be covered by the MCD config reg programmed
+        if (l_enable_mcd_m)
         {
-            // ensure power of two alignment
-            if (!l_m_range.is_power_of_2())
+            l_m_cover.enabled = true;
+            l_m_cover.base_addr = l_m_ranges[0].base_addr;
+
+            for (uint8_t jj = 0; jj < l_m_ranges.size(); jj++)
             {
-                l_m_range.round_next_power_of_2();
+                if (l_m_ranges[jj].enabled)
+                {
+                    // ensure power of two alignment
+                    if (!l_m_ranges[jj].is_power_of_2())
+                    {
+                        l_m_ranges[jj].round_next_power_of_2();
+                    }
+
+                    i_chip_info.ranges.push_back(l_m_ranges[jj]);
+                    i_chip_info.ranges.back().print();
+                }
+
+                // need to cover size of largest alias
+                if (l_m_cover.size < l_m_ranges[jj].size)
+                {
+                    l_m_cover.size = l_m_ranges[jj].size;
+                }
             }
 
-            // verify that base lines up with chip info struct
-            FAPI_ASSERT(l_m_range.base_addr == i_chip_info.base_address_m,
-                        fapi2::P9_SETUP_BARS_INVALID_MCD_M_RANGE_ERR().
-                        set_TARGET(i_target).
-                        set_M_RANGE_BASE_ADDR(l_m_range.base_addr).
-                        set_M_RANGE_SIZE(l_m_range.size).
-                        set_M_CHIP_BASE(i_chip_info.base_address_m),
-                        "Invalid configuration for MCD M range!");
-
-            // configure MCD to track this range (MCD_TOP)
+            // configure MCD to track this range via MCD_TOP
             FAPI_TRY(p9_setup_bars_mcd_track_range(i_target,
-                                                   l_m_range,
+                                                   l_m_cover,
                                                    PU_MCD1_BANK0_MCD_TOP,
                                                    PU_BANK0_MCD_TOP),
                      "Error from p9_setup_bars_mcd_track_range (M)");
-
-            i_chip_info.ranges.push_back(l_m_range);
-            i_chip_info.ranges.back().print();
         }
     }
 
     // if configured above to track any NM or M space, perform the remainder
     // of the MCD setup (FIR configuration, probe enablement)
-    if (l_enable_mcd)
+    if (l_enable_mcd_nm || l_enable_mcd_m)
     {
-        fapi2::buffer<uint64_t> l_fir_data = 0;
-        fapi2::buffer<uint64_t> l_mcd_rec_data = 0;
-        fapi2::buffer<uint64_t> l_mcd_vgc_data = 0;
-
-        // configure FIR
-        // clear FIR
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCC_FIR_REG, l_fir_data),
-                 "Error from putScom (PU_MCC_FIR_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCC_FIR_REG, l_fir_data),
-                 "Error from putScom (PU_MCD1_MCC_FIR_REG)");
-        // set action
-        l_fir_data = MCD_FIR_ACTION0;
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION0_REG, l_fir_data),
-                 "Error from putScom (PU_MCD_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION0_REG, l_fir_data),
-                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION0_REG)");
-        l_fir_data = MCD_FIR_ACTION1;
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION1_REG, l_fir_data),
-                 "Error from putScom (PU_MCD_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION1_REG, l_fir_data),
-                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION1_REG)");
-        // set mask
-        l_fir_data = MCD_FIR_MASK;
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_MASK_REG, l_fir_data),
-                 "Error from putScom (PU_MCD_FIR_MASK_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_MASK_REG, l_fir_data),
-                 "Error from putScom (PU_MCD1_MCD_FIR_MASK_REG)");
-
-        // set MCD vectored group configuration
-        l_mcd_vgc_data.insertFromRight<PU_BANK0_MCD_VGC_AVAIL_GROUPS, PU_BANK0_MCD_VGC_AVAIL_GROUPS_LEN>(MCD_VGC_AVAIL_GROUPS);
-        l_mcd_vgc_data.setBit<PU_BANK0_MCD_VGC_HANG_POLL_ENABLE>();
-        FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_VGC, l_mcd_vgc_data),
-                 "Error from putScom (PU_BANK0_MCD_VGC)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_VGC, l_mcd_vgc_data),
-                 "Error from putScom (PU_MCD1_BANK0_MCD_VGC)");
-
-        // enable MCD probes
-        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_ENABLE>();
-        l_mcd_rec_data.setBit<PU_BANK0_MCD_REC_CONTINUOUS>();
-        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_PACE, PU_BANK0_MCD_REC_PACE_LEN>(MCD_RECOVERY_PACE_RATE);
-        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_RTY_COUNT, PU_BANK0_MCD_REC_RTY_COUNT_LEN>(MCD_RECOVERY_RTY_COUNT);
-        l_mcd_rec_data.insertFromRight<PU_BANK0_MCD_REC_VG_COUNT, PU_BANK0_MCD_REC_VG_COUNT_LEN>(MCD_RECOVERY_VG_COUNT);
-        FAPI_TRY(fapi2::putScom(i_target, PU_BANK0_MCD_REC, l_mcd_rec_data),
-                 "Error from putScom (PU_BANK0_MCD_REC)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_BANK0_MCD_REC, l_mcd_rec_data),
-                 "Error from putScom (PU_MCD1_BANK0_MCD_REC)");
+        FAPI_TRY(p9_setup_bars_mcd_enable(i_target,
+                                          i_target_sys,
+                                          i_chip_info),
+                 "Error from p9_setup_bars_mcd_enable");
     }
 
 fapi_try_exit:
@@ -1020,8 +1247,19 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
              "Error from p9_setup_bars_npu");
 
     // MCD
-    FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
-             "Error from p9_setup_bars_mcd");
+    if (l_chip_info.extended_addressing_mode && l_chip_info.hw423589_option2)
+    {
+        FAPI_TRY(p9_setup_bars_mcd_HW423589_OPTION2(i_target,
+                 FAPI_SYSTEM,
+                 l_chip_info),
+                 "Error from p9_setup_bars_mcd_HW423589_OPTION2");
+    }
+    else
+    {
+        FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
+                 "Error from p9_setup_bars_mcd");
+    }
+
     // INT
     FAPI_TRY(p9_setup_bars_int(i_target, FAPI_SYSTEM, l_chip_info),
              "Error from p9_setup_bars_int");
