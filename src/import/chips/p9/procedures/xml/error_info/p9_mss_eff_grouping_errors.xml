@@ -64,6 +64,8 @@
         This is a memory plugging error. Refer to memory plugging rules.
     </description>
     <ffdc>MC_PORT</ffdc>
+    <ffdc>MC_PORT_SIZE</ffdc>
+    <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
         <procedure>MEMORY_PLUGGING_ERROR</procedure>
         <priority>HIGH</priority>
@@ -108,15 +110,39 @@
 </hwpError>
 
 <hwpError>
-    <rc>RC_MSS_EFF_GROUPING_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS</rc>
+    <rc>RC_MSS_EFF_GROUPING_NM_REGION_MAP_ERROR</rc>
     <description>
-        p9_mss_eff_grouping found that the base address overlaps with the
-        mirror base address.
+        p9_mss_eff_grouping did not find an available region
+	to map non-mirrored group
     </description>
     <ffdc>PROC_CHIP</ffdc>
-    <ffdc>MEM_BASE_ADDR</ffdc>
-    <ffdc>MIRROR_BASE_ADDR</ffdc>
-    <ffdc>SIZE_NON_MIRROR</ffdc>
+    <ffdc>MEM_BASE_ADDRS</ffdc>
+    <ffdc>CURR_GROUP_IDX</ffdc>
+    <ffdc>CURR_GROUP_SIZE</ffdc>
+    <ffdc>CURR_REGION_IDX</ffdc>
+    <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
+    <ffdc>MAX_REGION_IDX</ffdc>
+    <ffdc>MAX_REGION_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
+
+<hwpError>
+    <rc>RC_MSS_EFF_GROUPING_M_REGION_MAP_ERROR</rc>
+    <description>
+        p9_mss_eff_grouping did not find an available region
+	to map mirrored group
+    </description>
+    <ffdc>PROC_CHIP</ffdc>
+    <ffdc>MIRROR_BASE_ADDRS</ffdc>
+    <ffdc>CURR_GROUP_IDX</ffdc>
+    <ffdc>CURR_GROUP_SIZE</ffdc>
+    <ffdc>CURR_REGION_IDX</ffdc>
+    <ffdc>CURR_REGION_SIZE_LEFT</ffdc>
+    <ffdc>MAX_REGION_IDX</ffdc>
+    <ffdc>MAX_REGION_SIZE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
