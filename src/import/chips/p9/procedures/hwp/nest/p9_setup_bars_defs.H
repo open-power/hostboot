@@ -43,7 +43,7 @@
 #include <fapi2.H>
 #include <p9_fbc_utils.H>
 #include <p9_misc_scom_addresses.H>
-
+#include <p9n2_misc_scom_addresses_fld.H>
 
 //------------------------------------------------------------------------------
 // Structure definitions
@@ -289,10 +289,13 @@ struct p9_setup_bars_chip_info
 {
     uint8_t fbc_group_id;
     uint8_t fbc_chip_id;
-    uint64_t base_address_nm[2];
-    uint64_t base_address_m;
+    std::vector<uint64_t> base_address_nm0;
+    std::vector<uint64_t> base_address_nm1;
+    std::vector<uint64_t> base_address_m;
     uint64_t base_address_mmio;
     std::vector<p9_setup_bars_addr_range> ranges;
+    uint8_t hw423589_option2;
+    uint8_t extended_addressing_mode;
 };
 
 //------------------------------------------------------------------------------
