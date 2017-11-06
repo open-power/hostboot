@@ -114,7 +114,8 @@
     <ffdc>NM_RANGE_IDX</ffdc>
     <ffdc>NM_RANGE_BASE_ADDR</ffdc>
     <ffdc>NM_RANGE_SIZE</ffdc>
-    <ffdc>NM_CHIP_BASE</ffdc>
+    <ffdc>NM0_CHIP_BASES</ffdc>
+    <ffdc>NM1_CHIP_BASES</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -131,7 +132,7 @@
     <ffdc>M_RANGE_IDX</ffdc>
     <ffdc>M_RANGE_BASE_ADDR</ffdc>
     <ffdc>M_RANGE_SIZE</ffdc>
-    <ffdc>M_CHIP_BASE</ffdc>
+    <ffdc>M_CHIP_BASES</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

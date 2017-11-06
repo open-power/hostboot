@@ -120,6 +120,69 @@ fapi2::ReturnCode EffGroupingSysAttrs::getAttrs()
 
     fapi2::ReturnCode l_rc;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t l_addr_extension_group_id = 0;
+    uint8_t l_addr_extension_chip_id = 0;
+    uint64_t l_max_interleave_group_size;
+    fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE_Type l_extended_addressing_mode = 0;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2_Type l_hw423589_option2 = 0;
+
+    auto l_targets = FAPI_SYSTEM.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    if (l_targets.size() != 0)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE,
+                               l_targets.front(),
+                               l_extended_addressing_mode),
+                 "Error from FAPI_ATTR_GET (fapi2::ATTR_CHIP_EC_FEATURE_EXTENDED_ADDRESSING_MODE)");
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW423589_OPTION2,
+                               l_targets.front(),
+                               l_hw423589_option2),
+                 "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW423589_OPTION2)");
+
+        FAPI_DBG("Extended addressing supported: %d, HW423589 option2: %d",
+                 l_extended_addressing_mode,
+                 l_hw423589_option2);
+    }
+
+    if (l_extended_addressing_mode)
+    {
+        if (l_hw423589_option2)
+        {
+            l_addr_extension_group_id = CHIP_ADDRESS_EXTENSION_GROUP_ID_MASK_HW423589_OPTION2;
+            l_addr_extension_chip_id = CHIP_ADDRESS_EXTENSION_CHIP_ID_MASK_HW423589_OPTION2;
+        }
+
+        // enable extended addressing mode, seed attributes from defaults
+        // should allow for testing alternate configurations via Cronus with const
+        // attribute overrides
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_group_id),
+                 "Error from FAPI_ATTR_SET (ATTR_FABRIC_ADDR_EXTENSION_GROUP_ID)");
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID,
+                               FAPI_SYSTEM,
+                               l_addr_extension_chip_id),
+                 "Error from FAPI_ATTR_SET (ATTR_FABRIC_ADDR_EXTENSION_CHIP_ID)");
+    }
+
+    if (l_hw423589_option2)
+    {
+        // restrict max size for MCD issue
+        l_max_interleave_group_size = MAX_INTERLEAVE_GROUP_SIZE_HW423589_OPTION2;
+    }
+    else
+    {
+        l_max_interleave_group_size = MAX_INTERLEAVE_GROUP_SIZE;
+    }
+
+    // store attribute in GB for direct comparison with group size attributes
+    l_max_interleave_group_size = l_max_interleave_group_size >> 30;
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MAX_INTERLEAVE_GROUP_SIZE,
+                           FAPI_SYSTEM,
+                           l_max_interleave_group_size),
+             "Error from FAPI_ATTR_SET (ATTR_MAX_INTERLEAVE_GROUP_SIZE)");
 
     // Get mirror placement policy
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MIRROR_PLACEMENT_POLICY,
@@ -190,9 +253,12 @@ struct EffGroupingProcAttrs
         const EffGroupingSysAttrs i_sysAttrs);
 
     // Public data
-    uint64_t iv_memBaseAddr = 0;    // ATTR_PROC_MEM_BASE
-    uint64_t iv_mirrorBaseAddr = 0; // ATTR_PROC_MIRROR_BASE
-    uint64_t iv_nhtmBarSize;       // ATTR_PROC_NHTM_BAR_SIZE
+    std::vector<uint64_t> iv_memBaseAddr;    // ATTR_PROC_MEM_BASE
+    std::vector<uint64_t> iv_mirrorBaseAddr; // ATTR_PROC_MIRROR_BASE
+
+    uint64_t iv_maxGroupMemSize = 0;         // ATTR_MAX_INTERLEAVE_GROUP_SIZE
+
+    uint64_t iv_nhtmBarSize;                        // ATTR_PROC_NHTM_BAR_SIZE
     uint64_t iv_chtmBarSizes[NUM_OF_CHTM_REGIONS];  // ATTR_PROC_CHTM_BAR_SIZES
 
     uint64_t iv_occSandboxSize = 0; // ATTR_PROC_OCC_SANDBOX_SIZE
@@ -209,17 +275,20 @@ fapi2::ReturnCode EffGroupingProcAttrs::calcProcBaseAddr(
 {
     FAPI_DBG("Entering");
 
-    uint64_t l_memBaseAddr1, l_mmioBaseAddr;
+    std::vector<uint64_t> l_memBaseAddr1;
+    uint64_t l_mmioBaseAddr;
 
     // Get the Mirror/Non-mirror base addresses
-    FAPI_TRY(p9_fbc_utils_get_chip_base_address_no_aliases(i_target,
+    FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
              EFF_FBC_GRP_CHIP_IDS,
              iv_memBaseAddr,
              l_memBaseAddr1,
              iv_mirrorBaseAddr,
              l_mmioBaseAddr),
-             "p9_fbc_utils_get_chip_base_address_no_aliases() returns an error, l_rc 0x%.8X",
+             "p9_fbc_utils_get_chip_base_address() returns an error, l_rc 0x%.8X",
              (uint64_t)fapi2::current_err);
+
+    iv_memBaseAddr.insert(iv_memBaseAddr.end(), l_memBaseAddr1.begin(), l_memBaseAddr1.end());
 
 fapi_try_exit:
     FAPI_DBG("Exiting");
@@ -232,6 +301,12 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     const EffGroupingSysAttrs i_sysAttrs)
 {
     FAPI_DBG("Entering EffGroupingProcAttrs::getAttrs");
+
+    // Get size (max) of each msel region
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MAX_INTERLEAVE_GROUP_SIZE,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           iv_maxGroupMemSize),
+             "Error from FAPI_ATTR_GET (ATTR_MAX_INTERLEAVE_GROUP_SIZE)");
 
     // Get Nest Hardware Trace Macro (NHTM) bar size
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_NHTM_BAR_SIZE, i_target, iv_nhtmBarSize),
@@ -286,8 +361,16 @@ fapi2::ReturnCode EffGroupingProcAttrs::getAttrs(
     FAPI_INF("  ATTR_PROC_FABRIC_SYSTEM_ID 0x%.8X", iv_fabricSystemId);
     FAPI_INF("  ATTR_PROC_FABRIC_GROUP_ID 0x%.8X", iv_fabricGroupId);
     FAPI_INF("  ATTR_PROC_FABRIC_CHIP_ID 0x%.8X", iv_fabricChipId);
-    FAPI_INF("  ATTR_PROC_MEM_BASE 0x%.16llX", iv_memBaseAddr);
-    FAPI_INF("  ATTR_PROC_MIRROR_BASE 0x%.16llX", iv_mirrorBaseAddr);
+
+    for (uint8_t ii = 0; ii < iv_memBaseAddr.size(); ii++)
+    {
+        FAPI_INF("  ATTR_PROC_MEM_BASE[%d] 0x%.16llX", ii, iv_memBaseAddr[ii]);
+    }
+
+    for (uint8_t ii = 0; ii < iv_mirrorBaseAddr.size(); ii++)
+    {
+        FAPI_INF("  ATTR_PROC_MIRROR_BASE[%d] 0x%.16llX", ii, iv_mirrorBaseAddr[ii]);
+    }
 
 fapi_try_exit:
     FAPI_DBG("Exiting EffGroupingProcAttrs::getAttrs");
@@ -519,6 +602,8 @@ struct EffGroupingMemInfo
     // Memory sizes behind MC ports
     uint32_t iv_portSize[NUM_MC_PORTS_PER_PROC];
 
+    // maximum group size which can be formed
+    uint64_t iv_maxGroupMemSize = 0;
 };
 
 // See doxygen in struct definition.
@@ -532,6 +617,13 @@ fapi2::ReturnCode EffGroupingMemInfo::getMemInfo (
 
     // Get the functional MCAs
     auto l_mcaChiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCA>();
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MAX_INTERLEAVE_GROUP_SIZE,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           iv_maxGroupMemSize),
+             "Error from FAPI_ATTR_GET (ATTR_MAX_INTERLEAVE_GROUP_SIZE)");
+
+    FAPI_DBG("iv_maxGroupMemSize: 0x%016lX", iv_maxGroupMemSize);
 
     if (l_mcaChiplets.size() > 0)
     {
@@ -592,7 +684,7 @@ fapi_try_exit:
 }
 
 ///----------------------------------------------------------------------------
-/// struct EffGroupingMemInfo
+/// struct EffGroupingData
 ///----------------------------------------------------------------------------
 ///
 /// @struct EffGroupingData
@@ -1417,13 +1509,13 @@ void grouping_group8PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Group of 8 is possible
-        if (grouped)
+        if (grouped &&
+            ((8 * i_memInfo.iv_portSize[0]) <= i_memInfo.iv_maxGroupMemSize))
         {
             // All 8 ports have same amount of memory, group them
             o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[0];
             o_groupData.iv_data[g][PORTS_IN_GROUP] = 8;
-            o_groupData.iv_data[g][GROUP_SIZE] =
-                (NUM_MC_PORTS_PER_PROC * i_memInfo.iv_portSize[0]);
+            o_groupData.iv_data[g][GROUP_SIZE] = (NUM_MC_PORTS_PER_PROC * i_memInfo.iv_portSize[0]);
             o_groupData.iv_data[g][MEMBER_IDX(0)] = MCPORTID_0;
             o_groupData.iv_data[g][MEMBER_IDX(1)] = MCPORTID_4;
             o_groupData.iv_data[g][MEMBER_IDX(2)] = MCPORTID_2;
@@ -1529,7 +1621,8 @@ void grouping_group6PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Group of 6 is possible
-        if (potential_group)
+        if (potential_group &&
+            ((PORTS_PER_GROUP * i_memInfo.iv_portSize[CFG_6MCPORT[ii][0]]) <= i_memInfo.iv_maxGroupMemSize))
         {
             o_groupData.iv_data[g][PORT_SIZE] =
                 i_memInfo.iv_portSize[CFG_6MCPORT[ii][0]];
@@ -1648,7 +1741,8 @@ void grouping_group4PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         }
 
         // Group of 4 is possible
-        if (potential_group)
+        if (potential_group &&
+            ((PORTS_PER_GROUP * i_memInfo.iv_portSize[CFG_4MCPORT[ii][0]]) <= i_memInfo.iv_maxGroupMemSize))
         {
             FAPI_INF("    Potential group MC ports: MCPORTID %u, MCPORTID %u, MCPORTID %u, MCPORTID %u",
                      CFG_4MCPORT[ii][0], CFG_4MCPORT[ii][1],
@@ -1827,6 +1921,7 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
         //    0 = OK to group
         //    1 = One of the ports has unequal amount of memory
         //    2 = 3rd entry port is odd and its even port has memory.
+        //    3 = group extent exceeds maximum size
         uint8_t l_canNotGroup = 0;
         uint8_t jj = 0;
 
@@ -1856,6 +1951,13 @@ void grouping_group3PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
                     l_canNotGroup = 2;
                     break;
                 }
+            }
+
+            if ((PORTS_PER_GROUP * i_memInfo.iv_portSize[CFG_3MCPORT[ii][0]]) >
+                i_memInfo.iv_maxGroupMemSize)
+            {
+                l_canNotGroup = 3;
+                break;
             }
         }
 
@@ -1946,6 +2048,14 @@ void grouping_2ports_same_MCS(const EffGroupingMemInfo& i_memInfo,
             continue;
         }
 
+        if ((PORTS_PER_GROUP * i_memInfo.iv_portSize[pos]) >
+            i_memInfo.iv_maxGroupMemSize)
+        {
+            FAPI_DBG("Ports %u & %u can't be grouped because group size is too large, skip",
+                     pos, pos + 1);
+            continue;
+        }
+
         // Successfully find 2 ports on same MCS to group
         o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
         o_groupData.iv_data[g][PORTS_IN_GROUP] = PORTS_PER_GROUP;
@@ -2018,6 +2128,16 @@ void grouping_2groupsOf2_cross_MCS(const EffGroupingMemInfo& i_memInfo,
              (i_memInfo.iv_portSize[l_port + 1] == 0) )
         {
             FAPI_DBG("Skip 1st MCS %u, one of its ports already grouped or empty", mcs1);
+            continue;
+        }
+
+        // only need to check size of 1st MCS (since the 2nd MCS would be the
+        // same size)
+        if ((PORTS_PER_GROUP * i_memInfo.iv_portSize[l_port]) >
+            i_memInfo.iv_maxGroupMemSize)
+        {
+            FAPI_DBG("Skip 1st MCS %u, as group size formed would be too large",
+                     mcs1);
             continue;
         }
 
@@ -2154,6 +2274,15 @@ void grouping_group2PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
             continue;
         }
 
+        // Skip if group size would be too large
+        if ((PORTS_PER_GROUP * i_memInfo.iv_portSize[pos]) >
+            i_memInfo.iv_maxGroupMemSize)
+        {
+            FAPI_DBG("Skip this port %u, as group size formed would be too large",
+                     pos);
+            continue;
+        }
+
         // Rules for group of 2 for remaining ports on cross-MCS
         // 1. Both ports must not be grouped yet and have the same amount of memory.
         // 2. For both ports, the other port in their MCS must be empty
@@ -2258,7 +2387,8 @@ void grouping_group1PortsPerGroup(const EffGroupingMemInfo& i_memInfo,
     for (uint8_t pos = 0; pos < NUM_MC_PORTS_PER_PROC; pos++)
     {
         if ( (!o_groupData.iv_portGrouped[pos]) &&
-             (i_memInfo.iv_portSize[pos] != 0) )
+             (i_memInfo.iv_portSize[pos] != 0) &&
+             (i_memInfo.iv_portSize[pos] <= i_memInfo.iv_maxGroupMemSize) )
         {
             // This MCS is not already grouped and has memory
             o_groupData.iv_data[g][PORT_SIZE] = i_memInfo.iv_portSize[pos];
@@ -2335,7 +2465,9 @@ fapi2::ReturnCode grouping_findUngroupedPorts(
         uint8_t l_mcPortNum = l_unGroupedPair.begin()->first;
         FAPI_ASSERT(false,
                     fapi2::MSS_EFF_GROUPING_UNABLE_TO_GROUP_MC()
-                    .set_MC_PORT(l_mcPortNum),
+                    .set_MC_PORT(l_mcPortNum)
+                    .set_MC_PORT_SIZE(i_memInfo.iv_portSize[l_mcPortNum])
+                    .set_MAX_REGION_SIZE(i_memInfo.iv_maxGroupMemSize),
                     "grouping_findUngroupedPorts: Unable to group port %u", l_mcPortNum);
     }
 
@@ -2549,166 +2681,232 @@ fapi_try_exit:
     return;
 }
 
+
 ///
-/// @brief Calculate Mirror Memory base and alt-base addresses
+/// @brief Calculate base and alt-base addresses
 ///
-/// @param[in] i_target           Reference to processor chip target
-/// @param[io] io_procAttrs       Processor Attributes (iv_mirrorBaseAddr can be
-///                                                     updated)
-/// @param[io] io_groupData       Group Data
-/// @param[in] i_totalSizeNonMirr Total non mirrored size
+/// @param[in] i_target     Reference to processor chip target
+/// @param[in] i_procAttrs  Processor Chip Attributes
+/// @param[in] i_cfgMirror  Map mirrored memory
+/// @param[io] io_groupData Group Data
 ///
 /// @return FAPI2_RC_SUCCESS if success, else error code.
 ///
-fapi2::ReturnCode grouping_calcMirrorMemory(
+fapi2::ReturnCode grouping_calcRegions(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-    EffGroupingProcAttrs& io_procAttrs,
+    const EffGroupingProcAttrs& i_procAttrs,
+    const bool i_cfgMirror,
     EffGroupingData& io_groupData)
 {
     FAPI_DBG("Entering");
 
-    // Calculate mirrored group size and non mirrored group size
-    for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
+    // index for region which is used for mapping current group
+    // group size should never exceed the size of a particular
+    // region (enforced by restricting group size at formation time)
+    // if current group will stack on top of the prior group & not overflow
+    // the region, stack it, else place in next region
+    uint8_t l_cur_nm_region_idx = 0;
+    uint8_t l_cur_m_region_idx = 0;
+    uint8_t l_max_nm_region_idx = 0;
+    uint8_t l_max_m_region_idx = 0;
+    uint64_t l_nm_region_size_left = i_procAttrs.iv_maxGroupMemSize;
+    uint64_t l_m_region_size_left = i_procAttrs.iv_maxGroupMemSize / 2;
+    uint64_t l_cur_m_base_addr = 0;
+
+    if (i_procAttrs.iv_memBaseAddr.size())
     {
-        if (io_groupData.iv_mirrorOn[pos])
-        {
-            uint8_t l_mirrorOffset = pos + MIRR_OFFSET;
-
-            // Mirrored size is half the group size
-            io_groupData.iv_data[l_mirrorOffset][GROUP_SIZE] =
-                io_groupData.iv_data[pos][GROUP_SIZE] / 2;
-            io_groupData.iv_data[l_mirrorOffset][PORT_SIZE] =
-                io_groupData.iv_data[pos][PORT_SIZE];
-            io_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP] =
-                io_groupData.iv_data[pos][PORTS_IN_GROUP];
-
-            // Copy port members fron non-mirrored to mirrored group
-            for (uint8_t ii = 0; ii < io_groupData.iv_data[pos][PORTS_IN_GROUP]; ii++)
-            {
-                io_groupData.iv_data[l_mirrorOffset][MEMBER_IDX(ii)] =
-                    io_groupData.iv_data[pos][MEMBER_IDX(ii)];
-            }
-
-            for (uint8_t l_altRegion = 0; l_altRegion < NUM_OF_ALT_MEM_REGIONS; l_altRegion++)
-            {
-                if (io_groupData.iv_data[pos][ALT_VALID(l_altRegion)])
-                {
-                    FAPI_INF("Mirrored group %u needs alt bars definition, group size %u GB",
-                             pos, io_groupData.iv_data[pos][GROUP_SIZE]);
-                    io_groupData.iv_data[l_mirrorOffset][ALT_SIZE(l_altRegion)] =
-                        io_groupData.iv_data[pos][ALT_SIZE(l_altRegion)] / 2;
-                    io_groupData.iv_data[l_mirrorOffset][ALT_VALID(l_altRegion)] = 1;
-                }
-            }
-        }
+        l_max_nm_region_idx = i_procAttrs.iv_memBaseAddr.size() - 1;
     }
 
-    // Convert base addresses to GB for calculation
-    uint64_t memBaseAddr_GB = io_procAttrs.iv_memBaseAddr >> 30;
-    uint64_t mirrorBaseAddr_GB = io_procAttrs.iv_mirrorBaseAddr >> 30;
-    FAPI_DBG("io_procAttrs.iv_memBaseAddr 0x%.16llX, memBaseAddr_GB 0x%.16llX", io_procAttrs.iv_memBaseAddr,
-             memBaseAddr_GB);
-    FAPI_DBG("io_procAttrs.iv_mirrorBaseAddr 0x%.16llX, mirrorBaseAddr_GB 0x%.16llX", io_procAttrs.iv_mirrorBaseAddr,
-             mirrorBaseAddr_GB);
-    FAPI_DBG("io_groupData.iv_totalSizeNonMirr %d", io_groupData.iv_totalSizeNonMirr);
-
-    // Check if the memory base address overlaps with the mirror base address
-    if ( (memBaseAddr_GB > (mirrorBaseAddr_GB + (io_groupData.iv_totalSizeNonMirr / 2))) ||
-         (mirrorBaseAddr_GB > (memBaseAddr_GB + io_groupData.iv_totalSizeNonMirr)) )
+    if (i_procAttrs.iv_mirrorBaseAddr.size())
     {
-        // No overlapping
+        l_max_m_region_idx = i_procAttrs.iv_mirrorBaseAddr.size() - 1;
+    }
+
+    // Calculate mirrored group sizes
+    if (i_cfgMirror)
+    {
+        l_cur_m_base_addr = i_procAttrs.iv_mirrorBaseAddr[l_cur_m_region_idx];
+
         for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
         {
-            if (pos == 0)
+            if (io_groupData.iv_mirrorOn[pos])
             {
-                // Note:
-                // The 2nd memory hole was intended for use with 12Gb DRAM parts,
-                // which we do not have to support - so it will not be used in Nimbus.
-                io_groupData.iv_data[pos][BASE_ADDR] = memBaseAddr_GB;
-            }
-            else
-            {
-                io_groupData.iv_data[pos][BASE_ADDR] =
-                    io_groupData.iv_data[pos - 1][BASE_ADDR] +
-                    io_groupData.iv_data[pos - 1][GROUP_SIZE];
-            }
+                uint8_t l_mirrorOffset = pos + MIRR_OFFSET;
 
-            // Note:
-            // The 2nd memory hole was intended for use with 12Gb DRAM parts,
-            // which we do not have to support - so it will not be used in Nimbus.
-            if (io_groupData.iv_data[pos][ALT_VALID(0)])
-            {
-                io_groupData.iv_data[pos][ALT_BASE_ADDR(0)] =
-                    io_groupData.iv_data[pos][BASE_ADDR] +
-                    io_groupData.iv_data[pos][GROUP_SIZE] -
-                    io_groupData.iv_data[pos][ALT_SIZE(0)];
-            }
+                // Mirrored size is half the group size
+                io_groupData.iv_data[l_mirrorOffset][GROUP_SIZE] =
+                    io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+                io_groupData.iv_data[l_mirrorOffset][PORT_SIZE] =
+                    io_groupData.iv_data[pos][PORT_SIZE];
+                io_groupData.iv_data[l_mirrorOffset][PORTS_IN_GROUP] =
+                    io_groupData.iv_data[pos][PORTS_IN_GROUP];
 
-            if (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1)
-            {
-                io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] = mirrorBaseAddr_GB;
-                mirrorBaseAddr_GB += io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE];
-                io_procAttrs.iv_mirrorBaseAddr = (mirrorBaseAddr_GB << 30);
-
-                if (io_groupData.iv_data[pos][ALT_VALID(0)])
+                // Copy port members fron non-mirrored to mirrored group
+                for (uint8_t ii = 0; ii < io_groupData.iv_data[pos][PORTS_IN_GROUP]; ii++)
                 {
-                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_BASE_ADDR(0)] = io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] +
-                            io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] / 2;
-                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_VALID(0)] = 1;
+                    io_groupData.iv_data[l_mirrorOffset][MEMBER_IDX(ii)] =
+                        io_groupData.iv_data[pos][MEMBER_IDX(ii)];
                 }
 
-                FAPI_DBG("Adjust Mirror Base Address for group %d", pos);
-                FAPI_DBG("New values: io_procAttrs.iv_mirrorBaseAddr 0x%.16llX, mirrorBaseAddr_GB 0x%.16llX",
-                         io_procAttrs.iv_mirrorBaseAddr, mirrorBaseAddr_GB);
-                FAPI_DBG("Mirror group size: io_groupData.iv_data[%d][GROUP_SIZE] = %d", pos + MIRR_OFFSET,
-                         io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE]);
-                FAPI_DBG("Mirror group base addr: io_groupData.iv_data[%d][BASE_ADDR] = 0x%.16llX", pos + MIRR_OFFSET,
-                         io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR]);
+                for (uint8_t l_altRegion = 0; l_altRegion < NUM_OF_ALT_MEM_REGIONS; l_altRegion++)
+                {
+                    if (io_groupData.iv_data[pos][ALT_VALID(l_altRegion)])
+                    {
+                        FAPI_INF("Mirrored group %u needs alt bars definition, group size %u GB",
+                                 pos, io_groupData.iv_data[pos][GROUP_SIZE]);
+                        io_groupData.iv_data[l_mirrorOffset][ALT_SIZE(l_altRegion)] =
+                            io_groupData.iv_data[pos][ALT_SIZE(l_altRegion)] / 2;
+                        io_groupData.iv_data[l_mirrorOffset][ALT_VALID(l_altRegion)] = 1;
+                    }
+                }
             }
         }
     }
-    else
-    {
-        FAPI_ASSERT(false,
-                    fapi2::MSS_EFF_GROUPING_BASE_ADDRESS_OVERLAPS_MIRROR_ADDRESS()
-                    .set_PROC_CHIP(i_target)
-                    .set_MEM_BASE_ADDR(io_procAttrs.iv_memBaseAddr)
-                    .set_MIRROR_BASE_ADDR(io_procAttrs.iv_mirrorBaseAddr)
-                    .set_SIZE_NON_MIRROR(io_groupData.iv_totalSizeNonMirr),
-                    "Mirror Base address overlaps with memory base address");
-    }
 
-fapi_try_exit:
-    FAPI_DBG("Exiting");
-    return fapi2::current_err;
-}
-
-///
-/// @brief Calculate Non-mirror Memory base and alt-base addresses
-///
-/// @param[in] i_procAttrs  Processor Chip Attributes
-/// @param[io] io_groupData Group Data
-///
-void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs& i_procAttrs,
-                                  EffGroupingData& io_groupData)
-{
-    FAPI_DBG("Entering");
-
-    // Assign mirroring and non-mirroring base address for each group
+    // Assign non-mirroring base address for each group
     for (uint8_t pos = 0; pos < io_groupData.iv_numGroups; pos++)
     {
+        bool l_map_mirror = i_cfgMirror &&
+                            (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1);
+
+        // first group goes in first region
         if (pos == 0)
         {
+            FAPI_ASSERT((l_cur_nm_region_idx < l_max_nm_region_idx) &&
+                        (l_nm_region_size_left >=
+                         io_groupData.iv_data[pos][GROUP_SIZE]),
+                        fapi2::MSS_EFF_GROUPING_NM_REGION_MAP_ERROR()
+                        .set_PROC_CHIP(i_target)
+                        .set_MEM_BASE_ADDRS(i_procAttrs.iv_memBaseAddr)
+                        .set_CURR_GROUP_IDX(pos)
+                        .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos][GROUP_SIZE])
+                        .set_CURR_REGION_IDX(l_cur_nm_region_idx)
+                        .set_CURR_REGION_SIZE_LEFT(l_nm_region_size_left)
+                        .set_MAX_REGION_IDX(l_max_nm_region_idx)
+                        .set_MAX_REGION_SIZE(i_procAttrs.iv_maxGroupMemSize),
+                        "Unable to map non-mirrored group!");
+
+            FAPI_ASSERT(!l_map_mirror ||
+                        ((l_cur_m_region_idx < l_max_m_region_idx) &&
+                         (l_m_region_size_left >=
+                          io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])),
+                        fapi2::MSS_EFF_GROUPING_M_REGION_MAP_ERROR()
+                        .set_PROC_CHIP(i_target)
+                        .set_MIRROR_BASE_ADDRS(i_procAttrs.iv_memBaseAddr)
+                        .set_CURR_GROUP_IDX(pos)
+                        .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
+                        .set_CURR_REGION_IDX(l_cur_m_region_idx)
+                        .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
+                        .set_MAX_REGION_IDX(l_max_m_region_idx)
+                        .set_MAX_REGION_SIZE(i_procAttrs.iv_maxGroupMemSize / 2),
+                        "Unable to map mirrored group!");
+
+            // assign non mirrored base address
             io_groupData.iv_data[pos][BASE_ADDR] =
-                (i_procAttrs.iv_memBaseAddr >> 30);
+                (i_procAttrs.iv_memBaseAddr[l_cur_nm_region_idx] >> 30);
+
+            // assign mirrored base address
+            if (l_map_mirror)
+            {
+                io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
+                    l_cur_m_base_addr >> 30;
+            }
         }
         else
         {
-            io_groupData.iv_data[pos][BASE_ADDR] =
-                io_groupData.iv_data[pos - 1][BASE_ADDR] +
-                io_groupData.iv_data[pos - 1][GROUP_SIZE];
+            if (l_nm_region_size_left >= io_groupData.iv_data[pos][GROUP_SIZE])
+            {
+                // stack on top of last region mapped
+                io_groupData.iv_data[pos][BASE_ADDR] =
+                    io_groupData.iv_data[pos - 1][BASE_ADDR] +
+                    io_groupData.iv_data[pos - 1][GROUP_SIZE];
+
+                if (l_map_mirror)
+                {
+                    // should have space to map mirrored group if non-mirrored
+                    // group fits, assert
+                    FAPI_ASSERT((l_m_region_size_left >=
+                                 io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE]),
+                                fapi2::MSS_EFF_GROUPING_M_REGION_MAP_ERROR()
+                                .set_PROC_CHIP(i_target)
+                                .set_MIRROR_BASE_ADDRS(i_procAttrs.iv_memBaseAddr)
+                                .set_CURR_GROUP_IDX(pos)
+                                .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
+                                .set_CURR_REGION_IDX(l_cur_m_region_idx)
+                                .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
+                                .set_MAX_REGION_IDX(l_max_m_region_idx)
+                                .set_MAX_REGION_SIZE(i_procAttrs.iv_maxGroupMemSize / 2),
+                                "Unable to map mirrored group!");
+                    io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
+                        l_cur_m_base_addr >> 30;
+                }
+            }
+            else
+            {
+                // move to next region (mirrored/non-mirrored)
+                l_cur_nm_region_idx++;
+                l_cur_m_region_idx++;
+
+                // reset available size variables
+                l_nm_region_size_left = i_procAttrs.iv_maxGroupMemSize;
+                l_m_region_size_left = i_procAttrs.iv_maxGroupMemSize / 2;
+
+                // assert that mappings are valid
+                FAPI_ASSERT((l_cur_nm_region_idx < l_max_nm_region_idx) &&
+                            (l_nm_region_size_left >=
+                             io_groupData.iv_data[pos][GROUP_SIZE]),
+                            fapi2::MSS_EFF_GROUPING_NM_REGION_MAP_ERROR()
+                            .set_PROC_CHIP(i_target)
+                            .set_MEM_BASE_ADDRS(i_procAttrs.iv_memBaseAddr)
+                            .set_CURR_GROUP_IDX(pos)
+                            .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos][GROUP_SIZE])
+                            .set_CURR_REGION_IDX(l_cur_nm_region_idx)
+                            .set_CURR_REGION_SIZE_LEFT(l_nm_region_size_left)
+                            .set_MAX_REGION_IDX(l_max_nm_region_idx)
+                            .set_MAX_REGION_SIZE(i_procAttrs.iv_maxGroupMemSize),
+                            "Unable to map non-mirrored group!");
+
+                FAPI_ASSERT(!l_map_mirror ||
+                            ((l_cur_m_region_idx < l_max_m_region_idx) &&
+                             (l_m_region_size_left >=
+                              io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])),
+                            fapi2::MSS_EFF_GROUPING_M_REGION_MAP_ERROR()
+                            .set_PROC_CHIP(i_target)
+                            .set_MIRROR_BASE_ADDRS(i_procAttrs.iv_memBaseAddr)
+                            .set_CURR_GROUP_IDX(pos)
+                            .set_CURR_GROUP_SIZE(io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE])
+                            .set_CURR_REGION_IDX(l_cur_m_region_idx)
+                            .set_CURR_REGION_SIZE_LEFT(l_m_region_size_left)
+                            .set_MAX_REGION_IDX(l_max_m_region_idx)
+                            .set_MAX_REGION_SIZE(i_procAttrs.iv_maxGroupMemSize / 2),
+                            "Unable to map mirrored group!");
+
+                // reset mirror base address
+                l_cur_m_base_addr = i_procAttrs.iv_mirrorBaseAddr[l_cur_m_region_idx];
+
+                // assign non mirrored base address
+                io_groupData.iv_data[pos][BASE_ADDR] =
+                    (i_procAttrs.iv_memBaseAddr[l_cur_nm_region_idx] >> 30);
+
+                // assign mirrored base address
+                if (l_map_mirror)
+                {
+                    io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
+                        l_cur_m_base_addr >> 30;
+                }
+            }
         }
 
+        // update remaining size in region
+        l_nm_region_size_left -= io_groupData.iv_data[pos][GROUP_SIZE];
+        l_m_region_size_left -= (io_groupData.iv_data[pos][GROUP_SIZE] / 2);
+
+        // increment mirrored address (regardless of whether mapped
+        // for this group)
+        l_cur_m_base_addr += io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+
+        // set alt region information directly based on base region mapping
         for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
         {
             if (io_groupData.iv_data[pos][ALT_VALID(ii)])
@@ -2717,12 +2915,21 @@ void grouping_calcNonMirrorMemory(const EffGroupingProcAttrs& i_procAttrs,
                     io_groupData.iv_data[pos][BASE_ADDR] +
                     io_groupData.iv_data[pos][GROUP_SIZE] -
                     io_groupData.iv_data[pos][ALT_SIZE(ii)];
+
+                if (l_map_mirror)
+                {
+                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_BASE_ADDR(ii)] =
+                        io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] +
+                        io_groupData.iv_data[pos + MIRR_OFFSET][GROUP_SIZE] / 2;
+                    io_groupData.iv_data[pos + MIRR_OFFSET][ALT_VALID(ii)] = 1;
+                }
             }
         }
     }
 
+fapi_try_exit:
     FAPI_DBG("Exiting");
-    return;
+    return fapi2::current_err;
 }
 
 ///
@@ -2977,21 +3184,13 @@ fapi2::ReturnCode p9_mss_eff_grouping(
         }
     }
 
-    if (l_mirrorIsOn)
-    {
-        FAPI_INF("Mirror memory configured");
-        // Calculate base and alt-base addresses
-        FAPI_TRY(grouping_calcMirrorMemory(i_target, l_procAttrs, l_groupData),
-                 "Error from grouping_calcMirrorMemory, l_rc 0x%.8X",
-                 (uint64_t)fapi2::current_err);
-    }
-    else
-    {
-        // ATTR_MRW_HW_MIRRORING_ENABLE is false
-        // Calculate base and alt-base addresses
-        FAPI_INF("No mirror memory configured");
-        grouping_calcNonMirrorMemory(l_procAttrs, l_groupData);
-    }
+    FAPI_INF("Mapping groups to regions (mirroring=%s)",
+             (l_mirrorIsOn ? ("enabled") : ("disabled")));
+
+    // Calculate base and alt-base addresses
+    FAPI_TRY(grouping_calcRegions(i_target, l_procAttrs, l_mirrorIsOn, l_groupData),
+             "Error from grouping_calcRegions, l_rc 0x%.8X",
+             (uint64_t)fapi2::current_err);
 
     // Set the ATTR_MSS_MEM_MC_IN_GROUP attribute
     FAPI_TRY(grouping_setATTR_MSS_MEM_MC_IN_GROUP(i_target, l_groupData),
