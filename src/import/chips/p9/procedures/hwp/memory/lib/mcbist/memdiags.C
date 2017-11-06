@@ -384,19 +384,21 @@ fapi2::ReturnCode operation<TARGET_TYPE_MCBIST>::multi_port_init()
         FAPI_INF("%s Updating l_dimms size to be %lu", mss::c_str(iv_target), l_dimms.size());
 
         // Bomb out if we have incorrect addresses
-        // The following asssert catches the error earlier and keeps the error meaningful
+        // The following asssert catches the error incorrect address error earlier
+        // It also keeps the error meaningful with an invalid address callout rather than a generic MCBIST error callout
         {
             // Note: we are guaranteed to have at least one DIMM, as we are not broadcast capable without DIMM's
             // The ports are also required to have the same number and type of DIMM's to be broadcast capable
             // As such, we can be guaranteed that we have at least one DIMM below
             const uint64_t l_portdimm_this_dimm = mss::relative_pos<TARGET_TYPE_MCBIST>(l_dimms[0]);
-            FAPI_ASSERT(l_portdimm_this_dimm == l_portdimm_start_address,
+            FAPI_ASSERT(l_portdimm_this_dimm >= l_portdimm_start_address,
                         fapi2::MSS_MEMDIAGS_BCMODE_INVALID_ADDRESS()
                         .set_MCA_TARGET(l_mcas[0])
                         .set_START_ADDRESS(l_portdimm_start_address)
                         .set_MCA_START_ADDRESS(l_portdimm_this_dimm)
                         .set_PATTERN(iv_const.iv_pattern),
-                        "%s was passed an invalid address", mss::c_str(l_mcas[0]));
+                        "%s address (%lu) is greater than this MCBIST's first port's address (%lu)",
+                        mss::c_str(l_mcas[0]), l_portdimm_start_address, l_portdimm_this_dimm);
         }
     }
 
