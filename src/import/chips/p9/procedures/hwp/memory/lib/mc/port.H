@@ -1122,11 +1122,13 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<T>& i_target,
 /// @tparam T, the fapi2 target type of the DIMM (derived)
 /// @param[in] i_target the DIMM target
 /// @param[in] i_rank the rank
+/// @param[in] i_dq one of the bad DQ bits in the bad nibble
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T >
 fapi2::ReturnCode place_chip_mark(const fapi2::Target<T>& i_target,
-                                  const uint64_t i_rank);
+                                  const uint64_t i_rank,
+                                  const uint64_t i_dq);
 
 // Forward declaration for use in repair_state classes
 template< fapi2::TargetType T >
@@ -1169,6 +1171,7 @@ class repair_state
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1176,6 +1179,7 @@ class repair_state
         virtual fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                 const fapi2::Target<T>& i_target,
                 const uint64_t i_rank,
+                const uint64_t i_dq,
                 fapi2::buffer<uint8_t>& io_repairs_applied,
                 fapi2::buffer<uint8_t>& io_repairs_exceeded) = 0;
 
@@ -1224,6 +1228,7 @@ class no_fails : public repair_state<T>
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1231,6 +1236,7 @@ class no_fails : public repair_state<T>
         fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded) override;
 };
@@ -1271,6 +1277,7 @@ class symbol_mark_only : public repair_state<T>
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1278,6 +1285,7 @@ class symbol_mark_only : public repair_state<T>
         fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded) override;
 };
@@ -1318,6 +1326,7 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1325,6 +1334,7 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<T>
         fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded) override;
 };
@@ -1365,6 +1375,7 @@ class chip_mark_only : public repair_state<T>
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1372,6 +1383,7 @@ class chip_mark_only : public repair_state<T>
         fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded) override;
 };
@@ -1412,6 +1424,7 @@ class chip_and_symbol_mark : public repair_state<T>
         /// @param[in,out] io_machine the repair state machine
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
@@ -1419,6 +1432,7 @@ class chip_and_symbol_mark : public repair_state<T>
         fapi2::ReturnCode multiple_bad_dq(repair_state_machine<T>& io_machine,
                                           const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded) override;
 };
@@ -1458,12 +1472,14 @@ class repair_state_machine
         /// @brief Perform a repair for multiple bad DQ bits in a nibble
         /// @param[in] i_target the DIMM target
         /// @param[in] i_rank the rank
+        /// @param[in] i_dq one of the bad DQ bit indexes
         /// @param[in,out] io_repairs_applied 8-bit mask, where a bit set means that rank had repairs applied
         /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
         fapi2::ReturnCode multiple_bad_dq(const fapi2::Target<T>& i_target,
                                           const uint64_t i_rank,
+                                          const uint64_t i_dq,
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded);
 
