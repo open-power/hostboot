@@ -195,8 +195,8 @@ echo "Secure Boot: Signing tool edition is ${SIGNING_TOOL_EDITION}"
 if [[ -f ${PROJECT_ROOT}/obj/genfiles/config.h ]]; then
     if cat ${PROJECT_ROOT}/obj/genfiles/config.h | grep -q "CONFIG_SECUREBOOT 1"; then
         echo "In secure mode"
-        export CONFIG_SECUREBOOT=1
     else
+        export RM_HASH_PAGE_TABLE=1
         echo "In unsecure mode"
     fi
 else

@@ -156,7 +156,9 @@ void*    call_mss_eff_config( void *io_pArgs )
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
+#ifdef CONFIG_SECUREBOOT
     auto memdLoaded = false;
+#endif
 
     do {
 

@@ -523,6 +523,10 @@ sub manipulateImages
     # Partitions that have a hash page table at the beginning of the section
     # for secureboot purposes.
     my %hashPageTablePartitions = (HBI => 1);
+    if($ENV{'RM_HASH_PAGE_TABLE'})
+    {
+        undef %hashPageTablePartitions;
+    }
 
     my %preReqImages = (
         HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
