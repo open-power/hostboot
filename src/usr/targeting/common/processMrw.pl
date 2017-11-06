@@ -241,6 +241,10 @@ foreach my $target (sort keys %{ $targetObj->getAllTargets() })
         $targetObj->deleteAttribute($target,"SYSTEM_WOF_ENABLED");
         $targetObj->deleteAttribute($target,"VDM_ENABLE");
         $targetObj->deleteAttribute($target,"CHIP_HAS_SBE");
+
+        my $maxComputeNodes  = get_max_compute_nodes($targetObj , $target);
+        $targetObj->setAttribute($target, "MAX_COMPUTE_NODES_PER_SYSTEM", $maxComputeNodes);
+
         #handle enumeration changes
         my $enum_val = $targetObj->getAttribute($target,"PROC_FABRIC_PUMP_MODE");
         if ( $enum_val =~ /MODE1/i)
@@ -2252,6 +2256,42 @@ sub setGpioAttributes
     $targetObj->setAttributeField($target, $name, "devAddr", $addr);
     $targetObj->setAttributeField($target, $name, "engine", $engine);
     $targetObj->setAttributeField($target, $name, "vddrPin", $vddrPin);
+}
+
+#--------------------------------------------------
+## Compute max compute node
+sub get_max_compute_nodes
+{
+   my $targetObj = shift;
+   my $sysTarget = shift;
+   my $retVal = 0;
+   ##
+   #Proceeed only for sys targets
+   ##
+   if ($targetObj->getType($sysTarget) eq "SYS")
+   {
+      foreach my $child (@{$targetObj->getTargetChildren($sysTarget)})
+      {
+         if ($targetObj->isBadAttribute($child, "ENC_TYPE") == 0)
+         {
+            my $attrVal =  $targetObj->getAttribute($child, "ENC_TYPE");
+            if ($attrVal eq "CEC")
+            {
+               $retVal++;
+            }
+         }
+      }
+      ##
+      #For Open Power systems this attribute
+      #is not populated, we consider default value as 1
+      # for open power systems.
+      ##
+      if ($retVal  == 0 )
+      {
+         $retVal = 1;
+      }
+   }
+   return $retVal;
 }
 
 #--------------------------------------------------
