@@ -27,7 +27,7 @@ use strict;
 use Cwd;
 use POSIX;
 use Switch;
-use Getopt::Long;
+use Getopt::Long qw(:config no_ignore_case);
 use File::Basename;
 use Data::Dumper;
 use File::Copy qw(copy);
