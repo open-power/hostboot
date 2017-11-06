@@ -107,7 +107,13 @@ bool __badDqCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
             for ( auto sumCheck : i_nibbleStats)
             {
                 if ( !(symData.symbol == sumCheck.symbol) )
-                    sum += sumCheck.count;
+                {
+                    // Check for overflow.
+                    if ( (sum + sumCheck.count) > 0xFF )
+                        sum = 0xFF;
+                    else
+                        sum += sumCheck.count;
+                }
             }
             if ( sum <= 1 )
             {
@@ -140,7 +146,12 @@ bool __badChipCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
 
     for ( auto symData : i_nibbleStats )
     {
-        sum += symData.count;
+        // Check for overflow.
+        if ( (sum + symData.count) > 0xFF )
+            sum = 0xFF;
+        else
+            sum += symData.count;
+
         if ( symData.count > 0 )
             nonZeroCount++;
         if ( symData.count >= 2 )
@@ -182,7 +193,11 @@ void __sumAboveOneCount<TYPE_MCA>( MemUtils::MaintSymbols i_nibbleStats,
     {
         if ( symData.count > 0 )
         {
-            sum += symData.count;
+            if ( (sum + symData.count) > 0xFF )
+                sum = 0xFF;
+            else
+                sum += symData.count;
+
             symList.push_back(symData);
         }
     }
