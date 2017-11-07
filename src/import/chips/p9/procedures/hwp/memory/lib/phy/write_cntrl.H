@@ -397,10 +397,16 @@ inline fapi2::ReturnCode reset_config2( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_fw_rd_wr = 0;
 
+    // Memory clock cycle separation value for write commands during Initial Pattern Write.
+    // This value needs to be set to 5 to get the desired value of 24 clock cycles.
+    // (ipw_wr_wr + 1) * 4 = 24
+    constexpr uint64_t IPW_WR_WR = 5;
+
     FAPI_TRY( mss::fw_rd_wr(i_target, l_fw_rd_wr) );
 
     l_data.insertFromRight<TT::NUM_VALID_SAMPLES, TT::NUM_VALID_SAMPLES_LEN>(WR_LVL_NUM_VALID_SAMPLES);
     l_data.insertFromRight<TT::FW_RD_WR, TT::FW_RD_WR_LEN>(l_fw_rd_wr);
+    l_data.insertFromRight<TT::IPW_WR_WR, TT::IPW_WR_WR_LEN>(IPW_WR_WR);
 
     FAPI_DBG("%s wc_config2 reset 0x%llx", mss::c_str(i_target), l_data);
     FAPI_TRY( write_config2(i_target, l_data), "%s failed to reset wc_config2 register via write", mss::c_str(i_target) );
