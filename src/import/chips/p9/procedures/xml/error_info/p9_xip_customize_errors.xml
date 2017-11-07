@@ -170,6 +170,17 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <rc>RC_XIPC_MVPD_AW_FIELD_VALUE_ERR</rc>
+    <description>Out of range value observed in MVPD AW keyword</description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>MVPD_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
     <rc>RC_XIPC_RS4_REDUNDANT_ERROR</rc>
     <description>rs4_redundant() failed</description>
     <ffdc>CHIP_TARGET</ffdc>
