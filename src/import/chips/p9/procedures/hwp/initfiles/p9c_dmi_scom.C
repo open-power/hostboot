@@ -32,6 +32,7 @@ using namespace fapi2;
 constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_24 = 24;
 constexpr uint64_t literal_12 = 12;
+constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0b0100 = 0b0100;
 constexpr uint64_t literal_28 = 28;
 constexpr uint64_t literal_0 = 0;
@@ -42,7 +43,6 @@ constexpr uint64_t literal_0x5 = 0x5;
 constexpr uint64_t literal_0x7 = 0x7;
 constexpr uint64_t literal_0b0000000000000000111111111 = 0b0000000000000000111111111;
 constexpr uint64_t literal_0b1100111111111111111111111 = 0b1100111111111111111111111;
-constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_0x26 = 0x26;
 constexpr uint64_t literal_0x33 = 0x33;
@@ -113,6 +113,7 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
                 l_scom_buffer.insert<44, 6, 58, uint64_t>(literal_12 );
             }
 
+            l_scom_buffer.insert<40, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<28, 4, 60, uint64_t>(literal_0b0100 );
             constexpr auto l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_SQ_OFF = 0x0;
             l_scom_buffer.insert<16, 1, 63, uint64_t>(l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF2_ENABLE_REFRESH_BLOCK_SQ_OFF );
