@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2016                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -33,43 +33,17 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_PM_EVID_READVOLTAGE_TIMEOUT</rc>
+    <rc>RC_PM_EVID_BOOT_FREQ_GT_UT</rc>
     <description>
-    A timeout occured reading voltage from an AVSBus interface
+    The Boot Frequency is higher than the part's UltraTurbo value.
     </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_VDD_EVID_WRITEVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured writing a voltage to an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_VDN_EVID_WRITEVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured writing a voltage to an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_VCS_EVID_WRITEVOLTAGE_TIMEOUT</rc>
-    <description>
-    A timeout occured writing a voltage to an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
-  </hwpError>
-  <!-- ******************************************************************** -->
-  <hwpError>
-    <rc>RC_PM_EVID_IDLEFRAME_TIMEOUT</rc>
-    <description>
-    A timeout occured writing an idle from to an AVSBus interface
-    </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>BOOT_FREQ</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
