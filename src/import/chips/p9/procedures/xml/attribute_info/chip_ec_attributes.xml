@@ -4483,6 +4483,31 @@
     </chipEcFeature>
   </attribute>
 
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW410503</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Cache Inject Throttle settings for Nimbus DD2.1 and Cumulus 1.0
+      to help with remote cache inject performance.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x21</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
   <!-- ******************************************************************** -->
   <!-- Memory Section                                                       -->
   <!-- ******************************************************************** -->
