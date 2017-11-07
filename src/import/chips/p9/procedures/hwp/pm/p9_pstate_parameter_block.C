@@ -163,7 +163,6 @@ uint8_t g_sysvfrtData[] = {0x56, 0x54, 0x00, 0x00, 0x02, 0x01, 0x01, 0x06, /// V
        {state = 0; }
 
 
-
 double internal_ceil(double x)
 {
     if ((x-(int)(x))>0) return (int)x+1;
@@ -233,6 +232,101 @@ is_vdm_enabled(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
          ? true : false;
 }
 
+
+void
+load_gppb_attrs(const AttributeList*   i_attr,
+                GlobalPstateParmBlock* o_globalppb)
+{
+    //Variables for Loadline, Distribution loss and offset
+    SysPowerDistParms l_vdd_sysparm;
+    memset(&l_vdd_sysparm,0x00,sizeof(SysPowerDistParms));
+
+    SysPowerDistParms l_vcs_sysparm;
+    memset(&l_vcs_sysparm,0x00,sizeof(SysPowerDistParms));
+
+    SysPowerDistParms l_vdn_sysparm;
+    memset(&l_vdn_sysparm,0x00,sizeof(SysPowerDistParms));
+
+    // Frequency step variable
+    double l_frequency_step_khz;
+
+    // -----------------------------------------------
+    // System power distribution parameters
+    // -----------------------------------------------
+    // VDD rail
+    l_vdd_sysparm.loadline_uohm = revle32(i_attr->attr_proc_r_loadline_vdd_uohm);
+    l_vdd_sysparm.distloss_uohm = revle32(i_attr->attr_proc_r_distloss_vdd_uohm);
+    l_vdd_sysparm.distoffset_uv = revle32(i_attr->attr_proc_vrm_voffset_vdd_uv);
+
+    // VCS rail
+    l_vcs_sysparm.loadline_uohm = revle32(i_attr->attr_proc_r_loadline_vcs_uohm);
+    l_vcs_sysparm.distloss_uohm = revle32(i_attr->attr_proc_r_distloss_vcs_uohm);
+    l_vcs_sysparm.distoffset_uv = revle32(i_attr->attr_proc_vrm_voffset_vcs_uv);
+
+    // VDN rail
+    l_vdn_sysparm.loadline_uohm = revle32(i_attr->attr_proc_r_loadline_vdn_uohm);
+    l_vdn_sysparm.distloss_uohm = revle32(i_attr->attr_proc_r_distloss_vdn_uohm);
+    l_vdn_sysparm.distoffset_uv = revle32(i_attr->attr_proc_vrm_voffset_vdn_uv);
+
+    o_globalppb->vdd_sysparm = l_vdd_sysparm;
+    o_globalppb->vcs_sysparm = l_vcs_sysparm;
+    o_globalppb->vdn_sysparm = l_vdn_sysparm;
+
+    // frequency_step_khz
+
+    l_frequency_step_khz = (i_attr->attr_freq_proc_refclock_khz /
+                            i_attr->attr_proc_dpll_divider);
+
+    o_globalppb->frequency_step_khz = revle32((uint32_t)l_frequency_step_khz);
+    o_globalppb->nest_frequency_mhz = revle32(i_attr->attr_nest_frequency_mhz);
+
+    // External VRM parameters
+    o_globalppb->ext_vrm_transition_start_ns =
+            revle32(i_attr->attr_ext_vrm_transition_start_ns);
+    o_globalppb->ext_vrm_transition_rate_inc_uv_per_us =
+            revle32(i_attr->attr_ext_vrm_transition_rate_inc_uv_per_us);
+    o_globalppb->ext_vrm_transition_rate_dec_uv_per_us =
+            revle32(i_attr->attr_ext_vrm_transition_rate_dec_uv_per_us);
+    o_globalppb->ext_vrm_stabilization_time_us =
+            revle32(i_attr->attr_ext_vrm_stabilization_time_us);
+    o_globalppb->ext_vrm_step_size_mv =
+            revle32(i_attr->attr_ext_vrm_step_size_mv);
+
+    // load the biases
+    // Note: all are uint8_t so no endianess correction is necessary
+    for (auto p = 0; p < NUM_OP_POINTS; p++)
+    {
+        switch (p)
+        {
+            case POWERSAVE:
+               o_globalppb->ext_biases[p].frequency_hp = i_attr->attr_freq_bias_powersave;
+               o_globalppb->ext_biases[p].vdd_ext_hp   = i_attr->attr_voltage_ext_vdd_bias_powersave;
+               o_globalppb->int_biases[p].vdd_int_hp   = i_attr->attr_voltage_int_vdd_bias_powersave;
+               break;
+            case NOMINAL:
+               o_globalppb->ext_biases[p].frequency_hp = i_attr->attr_freq_bias_nominal;
+               o_globalppb->ext_biases[p].vdd_ext_hp   = i_attr->attr_voltage_ext_vdd_bias_nominal;
+               o_globalppb->int_biases[p].vdd_int_hp   = i_attr->attr_voltage_int_vdd_bias_nominal;
+               break;
+            case TURBO:
+               o_globalppb->ext_biases[p].frequency_hp = i_attr->attr_freq_bias_turbo;
+               o_globalppb->ext_biases[p].vdd_ext_hp   = i_attr->attr_voltage_ext_vdd_bias_turbo;
+               o_globalppb->int_biases[p].vdd_int_hp   = i_attr->attr_voltage_int_vdd_bias_turbo;
+               break;
+            case ULTRA:
+               o_globalppb->ext_biases[p].frequency_hp = i_attr->attr_freq_bias_ultraturbo;
+               o_globalppb->ext_biases[p].vdd_ext_hp   = i_attr->attr_voltage_ext_vdd_bias_ultraturbo;
+               o_globalppb->int_biases[p].vdd_int_hp   = i_attr->attr_voltage_int_vdd_bias_ultraturbo;
+        }
+
+        o_globalppb->ext_biases[p].vdn_ext_hp = i_attr->attr_voltage_ext_vdn_bias;
+        o_globalppb->ext_biases[p].vcs_ext_hp = i_attr->attr_voltage_ext_vcs_bias;
+
+
+    }
+}
+
+
 // START OF PSTATE PARAMETER BLOCK function
 fapi2::ReturnCode
 p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
@@ -244,6 +338,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ReturnCode l_rc         = 0;
     io_size = 0;
+
+    const uint8_t pv_op_order[NUM_OP_POINTS] = VPD_PV_ORDER;
+    const char*   pv_op_str[NUM_OP_POINTS] = VPD_PV_ORDER_STR;
 
     do
     {
@@ -281,26 +378,14 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         memset (&l_poundw_data,0,sizeof(l_poundw_data));
 
         // MVPD #V variables
-        uint32_t attr_mvpd_voltage_control[PV_D][PV_W];
+        uint32_t attr_mvpd_poundv[PV_D][PV_W];
+        uint32_t attr_mvpd_poundv_biased[PV_D][PV_W];
         uint8_t present_chiplets = 0;
         uint32_t valid_pdv_points = 0;
-
-        //Variables for Loadline, Distribution loss and offset
-        SysPowerDistParms l_vdd_sysparm;
-        memset(&l_vdd_sysparm,0x00,sizeof(SysPowerDistParms));
-
-        SysPowerDistParms l_vcs_sysparm;
-        memset(&l_vcs_sysparm,0x00,sizeof(SysPowerDistParms));
-
-        SysPowerDistParms l_vdn_sysparm;
-        memset(&l_vdn_sysparm,0x00,sizeof(SysPowerDistParms));
 
         // Local IDDQ table variable
         IddqTable l_iddqt;
         memset( & l_iddqt, 0x00, sizeof(IddqTable));
-
-        // Frequency step variable
-        double l_frequency_step_khz;
 
         //VDM Parm block
         GP_VDMParmBlock l_gp_vdmpb;
@@ -328,6 +413,9 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         FAPI_TRY(proc_get_attributes(i_target, &attr), "Get attributes function failed");
 
+        // Put attr driven content into GPPB
+        load_gppb_attrs(&attr, &l_globalppb);
+
         //if PSTATES_MODE is off then we dont need to execute further to collect
         //the data.
         if (attr.attr_pstate_mode == fapi2::ENUM_ATTR_SYSTEM_PSTATES_MODE_OFF)
@@ -346,16 +434,28 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         FAPI_IMP("Getting #V Data");
         uint8_t l_poundv_bucketId = 0;
 
-        // clear MVPD array
-        memset(attr_mvpd_voltage_control, 0, sizeof(attr_mvpd_voltage_control));
+        // clear MVPD arrays
+        memset(attr_mvpd_poundv, 0, sizeof(attr_mvpd_poundv));
+        memset(attr_mvpd_poundv_biased, 0, sizeof(attr_mvpd_poundv_biased));
         fapi2::voltageBucketData_t l_poundv_data;
 
-        FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_voltage_control,
+        FAPI_TRY(proc_get_mvpd_data(i_target, attr_mvpd_poundv,
                                     &valid_pdv_points,
                                     &present_chiplets,
                                     l_poundv_bucketId,
                                     &l_poundv_data, &l_state),
                  "proc_get_mvpd_data function failed to retrieve pound V data");
+
+        for (int i = 0; i <= NUM_OP_POINTS - 1; i++)
+        {
+            FAPI_DBG("Raw #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
+                 pv_op_str[pv_op_order[i]],
+                 attr_mvpd_poundv[pv_op_order[i]][0],
+                 attr_mvpd_poundv[pv_op_order[i]][1],
+                 attr_mvpd_poundv[pv_op_order[i]][2],
+                 attr_mvpd_poundv[pv_op_order[i]][3],
+                 attr_mvpd_poundv[pv_op_order[i]][4]);
+        }
 
         if (!present_chiplets)
         {
@@ -373,18 +473,14 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         }
 
         FAPI_DBG("Pstate Base Frequency - Raw %X (%d)",
-                 attr_mvpd_voltage_control[ULTRA][0] * 1000,
-                 attr_mvpd_voltage_control[ULTRA][0] * 1000);
-
-        //Calculate freq step value
-        l_frequency_step_khz = (attr.attr_freq_proc_refclock_khz /
-                                attr.attr_proc_dpll_divider);
+                 attr_mvpd_poundv[ULTRA][0] * 1000,
+                 attr_mvpd_poundv[ULTRA][0] * 1000);
 
         VpdOperatingPoint l_raw_operating_points[NUM_OP_POINTS];
         FAPI_INF("Load RAW VPD");
-        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control,
+        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv,
                                            l_raw_operating_points,
-                                           l_frequency_step_khz),
+                                           revle32(l_globalppb.frequency_step_khz)),
                  "Loading MVPD operating point failed");
 
         // ---------------------------------------------
@@ -392,7 +488,26 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // ---------------------------------------------
         FAPI_IMP("Apply Biasing to #V");
 
-        FAPI_TRY(proc_get_extint_bias(attr_mvpd_voltage_control,
+        // Copy to Bias array
+        for (int i = 0; i <= NUM_OP_POINTS - 1; i++)
+        {
+            for (int d = 0; d < PV_D; ++d)
+            {
+                for (int w = 0; w < PV_W; ++w)
+                {
+                    attr_mvpd_poundv_biased[d][w] = attr_mvpd_poundv[d][w];
+                }
+            }
+            FAPI_DBG("Biased #V operating point (%s) f=%u v=%u i=%u v=%u i=%u",
+                 pv_op_str[pv_op_order[i]],
+                 attr_mvpd_poundv_biased[pv_op_order[i]][0],
+                 attr_mvpd_poundv_biased[pv_op_order[i]][1],
+                 attr_mvpd_poundv_biased[pv_op_order[i]][2],
+                 attr_mvpd_poundv_biased[pv_op_order[i]][3],
+                 attr_mvpd_poundv_biased[pv_op_order[i]][4]);
+        }
+
+        FAPI_TRY(proc_get_extint_bias(attr_mvpd_poundv_biased,
                                       &attr,
                                       l_vpdbias),
                  "Bias application function failed");
@@ -401,33 +516,15 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         FAPI_INF("Validate Biasd Voltage and Frequency values");
 
         FAPI_TRY(proc_chk_valid_poundv( i_target,
-                                        attr_mvpd_voltage_control,
+                                        attr_mvpd_poundv_biased,
                                         &valid_pdv_points,
                                         i_target.getChipletNumber(),
                                         l_poundv_bucketId,
                                         &l_state,true));
 
         FAPI_DBG("Pstate Base Frequency - after bias %X (%d)",
-                 attr_mvpd_voltage_control[ULTRA][0] * 1000,
-                 attr_mvpd_voltage_control[ULTRA][0] * 1000);
-
-        // -----------------------------------------------
-        // System power distribution parameters
-        // -----------------------------------------------
-        // VDD rail
-        l_vdd_sysparm.loadline_uohm = revle32(attr.attr_proc_r_loadline_vdd_uohm);
-        l_vdd_sysparm.distloss_uohm = revle32(attr.attr_proc_r_distloss_vdd_uohm);
-        l_vdd_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vdd_uv);
-
-        // VCS rail
-        l_vcs_sysparm.loadline_uohm = revle32(attr.attr_proc_r_loadline_vcs_uohm);
-        l_vcs_sysparm.distloss_uohm = revle32(attr.attr_proc_r_distloss_vcs_uohm);
-        l_vcs_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vcs_uv);
-
-        // VDN rail
-        l_vdn_sysparm.loadline_uohm = revle32(attr.attr_proc_r_loadline_vdn_uohm);
-        l_vdn_sysparm.distloss_uohm = revle32(attr.attr_proc_r_distloss_vdn_uohm);
-        l_vdn_sysparm.distoffset_uv = revle32(attr.attr_proc_vrm_voffset_vdn_uv);
+                 attr_mvpd_poundv_biased[ULTRA][0] * 1000,
+                 attr_mvpd_poundv_biased[ULTRA][0] * 1000);
 
         //if wof is disabled.. don't call IQ function
         if (is_wof_enabled(i_target,&l_state))
@@ -505,28 +602,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // frequency point.
         // FIXME this should be the l_operating_points[VPD_PT_SET_BIASED][ULTRA].
         // frequency_mhz value with p9_pstate_compute_vpd_pts ahead of this!!!!
-        l_globalppb.reference_frequency_khz =
-                revle32((attr_mvpd_voltage_control[ULTRA][0] * 1000));
-
-        FAPI_INF("Pstate Base Frequency %X (%d)",
-                 revle32(l_globalppb.reference_frequency_khz),
-                 revle32(l_globalppb.reference_frequency_khz));
-
-        // frequency_step_khz
-        l_globalppb.frequency_step_khz = revle32(l_frequency_step_khz);
-        l_globalppb.nest_frequency_mhz = revle32(attr.attr_nest_frequency_mhz);
-
-        // External VRM parameters
-        l_globalppb.ext_vrm_transition_start_ns =
-                revle32(attr.attr_ext_vrm_transition_start_ns);
-        l_globalppb.ext_vrm_transition_rate_inc_uv_per_us =
-                revle32(attr.attr_ext_vrm_transition_rate_inc_uv_per_us);
-        l_globalppb.ext_vrm_transition_rate_dec_uv_per_us =
-                revle32(attr.attr_ext_vrm_transition_rate_dec_uv_per_us);
-        l_globalppb.ext_vrm_stabilization_time_us =
-                revle32(attr.attr_ext_vrm_stabilization_time_us);
-        l_globalppb.ext_vrm_step_size_mv =
-                revle32(attr.attr_ext_vrm_step_size_mv);
+//        l_globalppb.reference_frequency_khz =
+//                revle32((attr_mvpd_poundv_biased[ULTRA][0] * 1000));
 
         // -----------------------------------------------
         // populate VpdOperatingPoint with biased MVPD attributes
@@ -534,10 +611,38 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
         FAPI_INF("Load VPD");
         // VPD operating point
-        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control,
+        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv,
                                            l_globalppb.operating_points,
-                                           l_frequency_step_khz),
+                                           revle32(l_globalppb.frequency_step_khz)),
                  "Loading MVPD operating point failed");
+
+        VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS];
+        // Compute VPD pointsp9_pstate_compute_PStateV_slope
+        p9_pstate_compute_vpd_pts(l_operating_points,
+                                  &l_globalppb,
+                                  l_raw_operating_points);
+
+        memcpy(l_globalppb.operating_points_set,
+               l_operating_points,
+               sizeof(l_operating_points));
+
+        FAPI_INF("Pstate Base Frequency %X (%d)",
+                 revle32(l_globalppb.reference_frequency_khz),
+                 revle32(l_globalppb.reference_frequency_khz));
+        // VpdBias External and Internal Biases for Global and Local parameter
+
+        // block
+        for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
+        {
+            l_globalppb.ext_biases[i] = l_vpdbias[i];
+            l_globalppb.int_biases[i] = l_vpdbias[i];
+
+            l_localppb.ext_biases[i]  = l_vpdbias[i];
+            l_localppb.int_biases[i]  = l_vpdbias[i];
+        }
+
+
+
 
         // VpdBias External and Internal Biases for Global and Local parameter
         // block
@@ -549,10 +654,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
             l_localppb.ext_biases[i]  = l_vpdbias[i];
             l_localppb.int_biases[i]  = l_vpdbias[i];
         }
-
-        l_globalppb.vdd_sysparm = l_vdd_sysparm;
-        l_globalppb.vcs_sysparm = l_vcs_sysparm;
-        l_globalppb.vdn_sysparm = l_vdn_sysparm;
 
         // safe_voltage_mv
         l_globalppb.safe_voltage_mv = revle32(attr.attr_pm_safe_voltage_mv);
@@ -569,16 +670,6 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         // vrm_stepdelay_range -@todo RTC 161279 potential attributes to be defined
 
         // vrm_stepdelay_value -@todo RTC 161279 potential attributes to be defined
-
-        VpdOperatingPoint l_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS];
-        // Compute VPD points
-        p9_pstate_compute_vpd_pts(l_operating_points,
-                                  &l_globalppb,
-                                  l_raw_operating_points);
-
-        memcpy(l_globalppb.operating_points_set,
-               l_operating_points,
-               sizeof(l_operating_points));
 
         // ----------------
         // get Resonant clocking attributes
@@ -622,7 +713,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 revle32(revle32(l_globalppb.reference_frequency_khz)  /
                         revle32(l_globalppb.frequency_step_khz));
 
-        FAPI_INF("l_globalppb.dpll_pstate0_value %X",
+        FAPI_INF("l_globalppb.dpll_pstate0_value %X (%d)",
+                revle32(l_globalppb.dpll_pstate0_value),
                 revle32(l_globalppb.dpll_pstate0_value));
 
         // -----------------------------------------------
@@ -631,12 +723,12 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_localppb.magic = revle64(LOCAL_PARMSBLOCK_MAGIC);
 
         // VPD operating point
-        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control,
+        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv_biased,
                                            l_localppb.operating_points,
-                                           l_frequency_step_khz),
+                                           revle32(l_globalppb.frequency_step_khz)),
                  "Loading MVPD operating point failed");
 
-        l_localppb.vdd_sysparm = l_vdd_sysparm;
+        l_localppb.vdd_sysparm = l_globalppb.vdd_sysparm;
 
         // IvrmParmBlock
         l_localppb.ivrm = l_ivrmpb;
@@ -648,7 +740,8 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 revle32(revle32(l_globalppb.reference_frequency_khz)  /
                         revle32(l_globalppb.frequency_step_khz));
 
-        FAPI_INF("l_localppb.dpll_pstate0_value %X",
+        FAPI_INF("l_localppb.dpll_pstate0_value  %X (%d)",
+                revle32(l_localppb.dpll_pstate0_value),
                 revle32(l_localppb.dpll_pstate0_value));
 
         uint8_t l_biased_pstate[NUM_OP_POINTS];
@@ -674,7 +767,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
            p9_pstate_compute_PsVDMJumpSlopes (&l_localppb, l_biased_pstate);
 
 
-           //Initializing threshold values for GPPB
+           //Initializing threshold and jump values for GPPB
            memcpy ( l_globalppb.vid_point_set,
                     l_localppb.vid_point_set,
                     sizeof(l_localppb.vid_point_set));
@@ -682,6 +775,10 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
            memcpy ( l_globalppb.threshold_set,
                     l_localppb.threshold_set,
                     sizeof(l_localppb.threshold_set));
+
+           memcpy ( l_globalppb.jump_value_set,
+                    l_localppb.jump_value_set,
+                    sizeof(l_localppb.jump_value_set));
 
            memcpy ( l_globalppb.PsVIDCompSlopes,
                     l_localppb.PsVIDCompSlopes,
@@ -701,21 +798,24 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
         l_occppb.magic = revle64(OCC_PARMSBLOCK_MAGIC);
 
         // VPD operating point
-        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_voltage_control, l_occppb.operating_points, l_frequency_step_khz),
+        FAPI_TRY(load_mvpd_operating_point(attr_mvpd_poundv_biased,
+                                           l_occppb.operating_points,
+                                           l_globalppb.frequency_step_khz),
                  "Loading MVPD operating point failed");
 
-        l_occppb.vdd_sysparm = l_vdd_sysparm;
-        l_occppb.vcs_sysparm = l_vcs_sysparm;
-        l_occppb.vdn_sysparm = l_vdn_sysparm;
+        l_occppb.vdd_sysparm = l_globalppb.vdd_sysparm;
+        l_occppb.vcs_sysparm = l_globalppb.vcs_sysparm;
+        l_occppb.vdn_sysparm = l_globalppb.vdn_sysparm;
 
-        // frequency_min_khz - Value from Power save operating point after biases
-        l_occppb.frequency_min_khz = revle32(attr_mvpd_voltage_control[VPD_PV_POWERSAVE][0] * 1000);
+        // frequency_min_khz - Value from Power safe operating point after biases
+
+        l_occppb.frequency_min_khz = revle32(attr.attr_pm_safe_frequency_mhz * 1000);
 
         // frequency_max_khz - Value from Ultra Turbo operating point after biases
-        l_occppb.frequency_max_khz = revle32(attr_mvpd_voltage_control[VPD_PV_ULTRA][0] * 1000);
+        l_occppb.frequency_max_khz = l_globalppb.reference_frequency_khz;
 
         // frequency_step_khz
-        l_occppb.frequency_step_khz = revle32(l_frequency_step_khz);
+        l_occppb.frequency_step_khz = l_globalppb.frequency_step_khz;
 
         //Power bus nest freq
         uint16_t l_pbus_nest_freq = revle16(l_poundv_data.pbFreq);
@@ -746,7 +846,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
 
             //Power bus vdn voltage
             uint16_t l_vpd_vdn_mv = revle16(l_poundv_data.VdnPbVltg);
-            FAPI_INF("l_vpd_vdn_mv %x", (l_vpd_vdn_mv));
+            FAPI_INF("l_vpd_vdn_mv 0x%x (%d)", l_vpd_vdn_mv, l_vpd_vdn_mv);
 
             uint8_t l_nest_leakage_for_occ = 75;
             uint16_t l_iac_tdp_vdn = get_iac_vdn_value ( l_vpd_vdn_mv,
@@ -806,7 +906,7 @@ p9_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                                          o_buf,
                                          io_size,
                                          &l_state,
-                                         attr_mvpd_voltage_control[VPD_PV_ULTRA][0]);
+                                         attr_mvpd_poundv_biased[VPD_PV_ULTRA][0]);
         }
         else
         {
@@ -1116,6 +1216,30 @@ FAPI_INF("%-60s = 0x%08x %d", #attr_name, io_attr->attr_assign, io_attr->attr_as
 
     DATABLOCK_GET_ATTR(ATTR_NEST_LEAKAGE_PERCENT, FAPI_SYSTEM, attr_nest_leakage_percent);
 
+    // AVSBus ... needed by p9_setup_evid
+    DATABLOCK_GET_ATTR(ATTR_VDD_AVSBUS_BUSNUM,        i_target,vdd_bus_num);
+    DATABLOCK_GET_ATTR(ATTR_VDD_AVSBUS_RAIL,          i_target,vdd_rail_select);
+    DATABLOCK_GET_ATTR(ATTR_VDN_AVSBUS_BUSNUM,        i_target,vdn_bus_num);
+    DATABLOCK_GET_ATTR(ATTR_VDN_AVSBUS_RAIL,          i_target,vdn_rail_select);
+    DATABLOCK_GET_ATTR(ATTR_VCS_AVSBUS_BUSNUM,        i_target,vcs_bus_num);
+    DATABLOCK_GET_ATTR(ATTR_VCS_AVSBUS_RAIL,          i_target,vcs_rail_select);
+    DATABLOCK_GET_ATTR(ATTR_VCS_BOOT_VOLTAGE,         i_target,vcs_voltage_mv);
+    DATABLOCK_GET_ATTR(ATTR_VDD_BOOT_VOLTAGE,         i_target,vdd_voltage_mv);
+    DATABLOCK_GET_ATTR(ATTR_VDN_BOOT_VOLTAGE,         i_target,vdn_voltage_mv);
+
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDD_UOHM, i_target,r_loadline_vdd_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VDD_UOHM, i_target,r_distloss_vdd_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VDD_UV,  i_target,vrm_voffset_vdd_uv );
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VDN_UOHM, i_target,r_loadline_vdn_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VDN_UOHM, i_target,r_distloss_vdn_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VDN_UV,  i_target,vrm_voffset_vdn_uv );
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_LOADLINE_VCS_UOHM, i_target,r_loadline_vcs_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_R_DISTLOSS_VCS_UOHM, i_target,r_distloss_vcs_uohm);
+    DATABLOCK_GET_ATTR(ATTR_PROC_VRM_VOFFSET_VCS_UV,  i_target,vrm_voffset_vcs_uv);
+    DATABLOCK_GET_ATTR(ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, freq_proc_refclock_khz);
+    DATABLOCK_GET_ATTR(ATTR_PROC_DPLL_DIVIDER,        i_target, proc_dpll_divider);
+    // AVSBus ... needed by p9_setup_evid
+
     io_attr->attr_ext_vrm_transition_start_ns =
         (io_attr->attr_ext_vrm_transition_start_ns) ? io_attr->attr_ext_vrm_transition_start_ns : EXT_VRM_TRANSITION_START_NS;
 
@@ -1389,8 +1513,8 @@ double
 calc_bias(const int8_t i_value)
 {
     double temp = 1.0 + ((BIAS_PCT_UNIT/100) * (double)i_value);
-    FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; biased multiplier = %f",
-                i_value, temp);
+    FAPI_DBG("    calc_bias: input bias (in 1/2 percent) = %d; percent = %4.1f%% biased multiplier = %6.3f",
+                i_value, (i_value*BIAS_PCT_UNIT), temp);
     return temp;
 }
 
@@ -1906,6 +2030,35 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
     return fapi2::FAPI2_RC_SUCCESS;
 } // end load_mvpd_operating_point
 
+/// ------------------------------------------------------------
+/// @brief Copy out of operating point set into a destination operating point
+/// @param[in]  &i_op_pt_set          => reference to array of VpdOperatingPoint sets
+/// @param[out] *dest[NUM_OP_POINTS]  => pointer to destination VpdOperatingPoint structure
+/// @param[in]  i_frequency_step_khz  => Base frequency value for pstate calculation
+/// ------------------------------------------------------------
+fapi2::ReturnCode
+get_operating_point ( const VpdOperatingPoint  i_op_pt_set[NUM_VPD_PTS_SET][NUM_OP_POINTS],
+                      uint32_t                 i_set,
+                      VpdOperatingPoint*       o_op_pt)
+{
+    FAPI_DBG(">> get_operating_point");
+
+    for (uint32_t i = 0; i < NUM_OP_POINTS; i++)
+    {
+        o_op_pt[i].frequency_mhz  = i_op_pt_set[i_set][i].frequency_mhz;
+        o_op_pt[i].vdd_mv         = i_op_pt_set[i_set][i].vdd_mv;
+        o_op_pt[i].idd_100ma      = i_op_pt_set[i_set][i].idd_100ma;
+        o_op_pt[i].vcs_mv         = i_op_pt_set[i_set][i].vcs_mv;
+        o_op_pt[i].ics_100ma      = i_op_pt_set[i_set][i].ics_100ma;
+        o_op_pt[i].pstate         = i_op_pt_set[i_set][i].pstate;
+    }
+
+    FAPI_DBG("<< get_operating_point");
+    return fapi2::FAPI2_RC_SUCCESS;
+} // end load_mvpd_operating_point
+
+
+
 fapi2::ReturnCode
 proc_get_vdm_parms (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     const AttributeList* i_attr,
@@ -2028,7 +2181,7 @@ proc_res_clock_setup ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_targ
         o_resclk_setup->resclk_freq[i] = pstate;
         o_resclk_setup->resclk_index[i] = idx;
 
-        FAPI_DBG("Resclk:  pstate = %d; idx = %d", pstate, idx);
+        FAPI_DBG("Resclk: freq = %d kHz; pstate = %d; idx = %d", freq_khz, pstate, idx);
     }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_RESCLK_L3_VALUE, i_target,
@@ -2117,13 +2270,26 @@ sysparm_uplift(const uint32_t i_vpd_mv,
                const uint32_t i_distloss_uohm,
                const uint32_t i_distoffset_uohm)
 {
-    return  revle32(i_vpd_mv +  // mV
-                    (
-                                // mA*uOhm/1000 -> uV
-                      ((i_vpd_ma * (i_loadline_uohm + i_distloss_uohm)) / 1000 +
-                                // uv
-                      i_distoffset_uohm)
-                    ) / 1000);  // uV -> mV
+
+   double l_mv = ((double)i_vpd_mv +  // mV
+                 (
+                             // mA*uOhm/1000 -> uV
+                   ((double)(i_vpd_ma * (i_loadline_uohm + i_distloss_uohm)) / 1000 +
+                             // uv
+                   (double)i_distoffset_uohm)
+                 ) / 1000);  // uV -> mV
+   uint32_t l_result = (uint32_t)l_mv;
+   FAPI_DBG("  system_uplift_mv: i_vpd_mv=%d; i_vpd_ma=%d; i_loadline_uohm=%d "
+            "i_distloss_uohm = %d i_distoffset_uohm = %d l_mv = %5.3f l_result = %d" ,
+            i_vpd_mv,
+            i_vpd_ma,
+            i_loadline_uohm,
+            i_distloss_uohm,
+            i_distoffset_uohm,
+            l_mv,
+            l_result);
+
+    return  revle32(l_result);
 }
 
 // Bias Adjust a voltage data value using a 1/2 percent bias amount.  Value
@@ -2134,11 +2300,15 @@ bias_adjust_mv(const uint32_t i_value,
 {
     double l_mult = calc_bias(i_bias_0p5pct);
     double l_biased_value = (double)i_value * l_mult;
-    FAPI_DBG("  bias_adjust_mv:  i_value=%d; mult=%f; biased value=%f",
-                i_value,
-                l_mult,
-                l_biased_value);
-    return revle32((uint32_t)internal_ceil(l_biased_value));
+    double l_ceiling = internal_ceil(l_biased_value);
+    uint32_t l_result = (uint32_t)l_ceiling;
+    FAPI_DBG("  bias_adjust_mv:  i_value=%d; mult=%5.3f; biased value=%3.0f ceiling = %3.0f result = %d",
+            i_value,
+            l_mult,
+            l_biased_value,
+            l_ceiling,
+            l_result);
+    return revle32(l_result);
 }
 
 // Bias Adjust a frequency data value using a 1/2 percent bias amount.  Value
@@ -2149,7 +2319,7 @@ bias_adjust_mhz(const uint32_t i_value,
 {
     double l_mult = calc_bias(i_bias_0p5pct);
     double l_biased_value = (double)i_value * l_mult;
-    FAPI_DBG("  bias_adjust_mhz: i_value=%d; mult=%f; biased value=%f",
+    FAPI_DBG("  bias_adjust_mhz: i_value=%d; mult=%5.3f; biased value=%3.0f",
                 i_value,
                 l_mult,
                 l_biased_value);
@@ -2240,20 +2410,30 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
         uint32_t l_vcs_mv = revle32(i_gppb->operating_points[p].vcs_mv);
 
         o_operating_points[VPD_PT_SET_BIASED][p].vdd_mv =
-                    bias_adjust_mv(l_vdd_mv, revle32(i_gppb->ext_biases[p].vdd_ext_hp));
+                    bias_adjust_mv(l_vdd_mv, i_gppb->ext_biases[p].vdd_ext_hp);
 
         o_operating_points[VPD_PT_SET_BIASED][p].vcs_mv =
-                    bias_adjust_mv(l_vcs_mv, revle32(i_gppb->ext_biases[p].vcs_ext_hp));
+                    bias_adjust_mv(l_vcs_mv, i_gppb->ext_biases[p].vcs_ext_hp);
 
         o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz =
-                    bias_adjust_mhz(l_frequency_mhz, revle32(i_gppb->ext_biases[p].frequency_hp));
+                    bias_adjust_mhz(l_frequency_mhz, i_gppb->ext_biases[p].frequency_hp);
 
         o_operating_points[VPD_PT_SET_BIASED][p].idd_100ma =
                     i_gppb->operating_points[p].idd_100ma;
         o_operating_points[VPD_PT_SET_BIASED][p].ics_100ma =
                     i_gppb->operating_points[p].ics_100ma;
-
     }
+
+    // As this is memory to memory, Endianess correction is not necessary.
+    uint32_t l_ref_freq_khz =
+        revle32(o_operating_points[VPD_PT_SET_BIASED][ULTRA].frequency_mhz) * 1000;
+    i_gppb->reference_frequency_khz = revle32(l_ref_freq_khz);
+
+    FAPI_DBG("Reference into GPPB: LE local Freq=%X (%d);  Freq=%X (%d)",
+                l_ref_freq_khz,
+                l_ref_freq_khz,
+                revle32(i_gppb->reference_frequency_khz),
+                revle32(i_gppb->reference_frequency_khz));
 
     // Now that the ULTRA frequency is known, Pstates can be calculated
     for (p = 0; p < NUM_OP_POINTS; p++)
@@ -2264,7 +2444,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
              revle32(i_gppb->frequency_step_khz));
 
         FAPI_DBG("Bi: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d), UT Freq=%3X (%4d) Step Freq=%5d",
-                    VPD_PT_SET_RAW, p,
+                    VPD_PT_SET_BIASED, p,
                     o_operating_points[VPD_PT_SET_BIASED][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz),
                     revle32(o_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz),
@@ -2309,7 +2489,7 @@ void p9_pstate_compute_vpd_pts(VpdOperatingPoint (*o_operating_points)[NUM_OP_PO
                     o_operating_points[VPD_PT_SET_BIASED][p].pstate;
 
         FAPI_DBG("BS: OpPoint=[%d][%d], PS=%3d, Freq=%3X (%4d), Vdd=%3X (%4d)",
-                    VPD_PT_SET_RAW, p,
+                    VPD_PT_SET_BIASED_SYSP, p,
                     o_operating_points[VPD_PT_SET_SYSP][p].pstate,
                     revle32(o_operating_points[VPD_PT_SET_SYSP][p].frequency_mhz),
                     revle32(o_operating_points[VPD_PT_SET_SYSP][p].frequency_mhz),
@@ -3254,7 +3434,8 @@ iddq_print(IddqTable* i_iddqt)
 int
 freq2pState (const GlobalPstateParmBlock* gppb,
              const uint32_t freq_khz,
-             Pstate* pstate)
+             Pstate* pstate,
+             const FREQ2PSTATE_ROUNDING i_round)
 {
     int rc = 0;
     float pstate32 = 0;
@@ -3270,8 +3451,12 @@ freq2pState (const GlobalPstateParmBlock* gppb,
     // As higher Pstate numbers represent lower frequencies, the pstate must be
     // snapped to the nearest *higher* integer value for safety.  (e.g. slower
     // frequencies are safer).
-    //*pstate  = (Pstate)internal_ceil(pstate32);
-    *pstate  = (Pstate)pstate32;
+    if ((i_round ==  ROUND_SLOW) && (freq_khz))
+        *pstate  = (Pstate)internal_ceil(pstate32);
+    else
+    {
+        *pstate  = (Pstate)pstate32;
+    }
 
     // ------------------------------
     // perform pstate bounds checking
@@ -3523,10 +3708,14 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             break;
         }
 
-        FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
-        FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
-        FAPI_INF("TURBO.vdm_vid_compare_ivid %d",o_data->poundw[TURBO].vdm_vid_compare_ivid);
-        FAPI_INF("ULTRA_TURBO.vdm_vid_compare_ivid %d",o_data->poundw[ULTRA].vdm_vid_compare_ivid);
+        for (int i = 0; i < NUM_OP_POINTS; ++i)
+        {
+            uint32_t l_mv = 512 + (o_data->poundw[i].vdm_vid_compare_ivid << 2);
+            FAPI_INF("%10s vdm_vid_compare_ivid %3d  => %d mv",
+                pv_op_str[i],
+                o_data->poundw[i].vdm_vid_compare_ivid,
+                l_mv);
+        }
 
         //Validation of VPD Data
         //
@@ -3566,11 +3755,6 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
             break;
         }
 
-        FAPI_INF("POWERSAVE.vdm_vid_compare_ivid %d",o_data->poundw[POWERSAVE].vdm_vid_compare_ivid);
-        FAPI_INF("NOMINAL.vdm_vid_compare_ivid %d",o_data->poundw[NOMINAL].vdm_vid_compare_ivid);
-        FAPI_INF("TURBO.vdm_vid_compare_ivid %d",o_data->poundw[TURBO].vdm_vid_compare_ivid);
-        FAPI_INF("ULTRA_TURBO.vdm_vid_compare_ivid %d",o_data->poundw[ULTRA].vdm_vid_compare_ivid);
-
         // validate vid values
         bool l_compare_vid_value_state = 1;
         VALIDATE_VID_VALUES (o_data->poundw[POWERSAVE].vdm_vid_compare_ivid,
@@ -3600,9 +3784,9 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         for (uint8_t p = 0; p < NUM_OP_POINTS; ++p)
         {
             FAPI_INF("o_data->poundw[%d].vdm_overvolt_thresholds 0x%X",p,(o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_small_thresholds 0x%X",p,(o_data->poundw[p].vdm_overvolt_small_thresholds ) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_large_thresholds 0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F);
-            FAPI_INF("o_data->poundw[%d].vdm_extreme_thresholds 0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_small_thresholds    0x%X",p,(o_data->poundw[p].vdm_overvolt_small_thresholds ) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_large_thresholds    0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F);
+            FAPI_INF("o_data->poundw[%d].vdm_extreme_thresholds  0x%X",p,(o_data->poundw[p].vdm_large_extreme_thresholds) & 0x0F);
             VALIDATE_THRESHOLD_VALUES(((o_data->poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F), // overvolt
                                       ((o_data->poundw[p].vdm_overvolt_small_thresholds) & 0x0F), //small
                                       ((o_data->poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F), //large
@@ -3632,15 +3816,15 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
         {
             // These fields are 4 bits wide, and stored in a uint8, hence the shifting
             // N_S, N_L, L_S, S_N
-            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_S = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F));
-            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP N_L = %d", p, ((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F));
-            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP L_S = %d", p, ((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F));
-            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP S_N = %d", p, ((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP   N_S = %d", p, ((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_DROP   N_L = %d", p, ((o_data->poundw[p].vdm_normal_freq_drop) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_RETURN L_S = %d", p, ((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F));
+            FAPI_INF("o_data->poundw[%d] VDM_FREQ_RETURN S_N = %d", p, ((o_data->poundw[p].vdm_normal_freq_return) & 0x0F));
 
-            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_small_large_normal_freq) & 0x0F), //N_L
-                                           ((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F), // N_S
-                                           ((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F), //L_S
-                                           ((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F), //S_N
+            VALIDATE_FREQUENCY_DROP_VALUES(((o_data->poundw[p].vdm_normal_freq_drop) & 0x0F), //N_L
+                                           ((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F), // N_S
+                                           ((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F), // L_S
+                                           ((o_data->poundw[p].vdm_normal_freq_return) & 0x0F), //S_N
                                            l_frequency_value_state);
 
             if (!l_frequency_value_state)
@@ -3650,10 +3834,10 @@ proc_get_mvpd_poundw(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target
                                    fapi2::PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                                    .set_CHIP_TARGET(i_target)
                                    .set_OP_POINT_TYPE(p)
-                                   .set_VDM_NORMAL_SMALL((o_data->poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F)
-                                   .set_VDM_NORMAL_LARGE(o_data->poundw[p].vdm_small_large_normal_freq & 0x0F)
-                                   .set_VDM_LARGE_SMALL((o_data->poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F)
-                                   .set_VDM_SMALL_NORMAL((o_data->poundw[p].vdm_large_small_normal_freq) & 0x0F),
+                                   .set_VDM_NORMAL_SMALL((o_data->poundw[p].vdm_normal_freq_drop >> 4) & 0x0F)
+                                   .set_VDM_NORMAL_LARGE(o_data->poundw[p].vdm_normal_freq_drop & 0x0F)
+                                   .set_VDM_LARGE_SMALL((o_data->poundw[p].vdm_normal_freq_return >> 4) & 0x0F)
+                                   .set_VDM_SMALL_NORMAL((o_data->poundw[p].vdm_normal_freq_return) & 0x0F),
                                    "Pstate Parameter Block #W VDM frequency drop data are invalid");
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                 break;
@@ -4110,19 +4294,19 @@ void p9_pstate_compute_vdm_threshold_pts(PoundW_data i_data,
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
         // overvolt threshold
-        io_lppb->threshold_set[p][0] = g_GreyCodeIndexMapping[(i_data.poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F];
+        io_lppb->threshold_set[p][VDM_OVERVOLT_INDEX] = g_GreyCodeIndexMapping[(i_data.poundw[p].vdm_overvolt_small_thresholds >> 4) & 0x0F];
 
         FAPI_INF("Bi: OV TSHLD =%d", io_lppb->threshold_set[p][0]);
         // small threshold
-        io_lppb->threshold_set[p][1] = (g_GreyCodeIndexMapping[i_data.poundw[p].vdm_overvolt_small_thresholds  & 0x0F]);
+        io_lppb->threshold_set[p][VDM_SMALL_INDEX] = (g_GreyCodeIndexMapping[i_data.poundw[p].vdm_overvolt_small_thresholds  & 0x0F]);
 
         FAPI_INF("Bi: SM TSHLD =%d", io_lppb->threshold_set[p][1]);
         // large threshold
-        io_lppb->threshold_set[p][2] =  (g_GreyCodeIndexMapping[(i_data.poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F]);
+        io_lppb->threshold_set[p][VDM_LARGE_INDEX] =  (g_GreyCodeIndexMapping[(i_data.poundw[p].vdm_large_extreme_thresholds >> 4) & 0x0F]);
 
         FAPI_INF("Bi: LG TSHLD =%d", io_lppb->threshold_set[p][2]);
         // extreme threshold
-        io_lppb->threshold_set[p][3] =  (g_GreyCodeIndexMapping[i_data.poundw[p].vdm_large_extreme_thresholds & 0x0F]);
+        io_lppb->threshold_set[p][VDM_XTREME_INDEX] =  (g_GreyCodeIndexMapping[i_data.poundw[p].vdm_large_extreme_thresholds & 0x0F]);
 
         FAPI_INF("Bi: EX TSHLD =%d", io_lppb->threshold_set[p][3]);
 
@@ -4131,19 +4315,19 @@ void p9_pstate_compute_vdm_threshold_pts(PoundW_data i_data,
     for (p = 0; p < NUM_OP_POINTS; p++)
     {
         // N_L value
-        io_lppb->jump_value_set[p][0] = (i_data.poundw[p].vdm_small_large_normal_freq >> 4) & 0x0F;
+        io_lppb->jump_value_set[p][VDM_N_S_INDEX] = (i_data.poundw[p].vdm_normal_freq_drop >> 4) & 0x0F;
 
         FAPI_INF("Bi: N_S =%d", io_lppb->jump_value_set[p][0]);
         // N_S value
-        io_lppb->jump_value_set[p][1] = i_data.poundw[p].vdm_small_large_normal_freq & 0x0F;
+        io_lppb->jump_value_set[p][VDM_N_L_INDEX] = i_data.poundw[p].vdm_normal_freq_drop & 0x0F;
 
         FAPI_INF("Bi: N_L =%d", io_lppb->jump_value_set[p][1]);
         // L_S value
-        io_lppb->jump_value_set[p][2] =  (i_data.poundw[p].vdm_large_small_normal_freq >> 4) & 0x0F;
+        io_lppb->jump_value_set[p][VDM_L_S_INDEX] =  (i_data.poundw[p].vdm_normal_freq_return >> 4) & 0x0F;
 
         FAPI_INF("Bi: L_S =%d", io_lppb->jump_value_set[p][2]);
         // S_L value
-        io_lppb->jump_value_set[p][3] =  i_data.poundw[p].vdm_large_small_normal_freq & 0x0F;
+        io_lppb->jump_value_set[p][VDM_S_N_INDEX] =  i_data.poundw[p].vdm_normal_freq_return & 0x0F;
 
         FAPI_INF("Bi: S_L =%d", io_lppb->jump_value_set[p][3]);
     }
@@ -4404,44 +4588,51 @@ fapi_try_exit:
 }
 
 //large_jump_interpolate
-uint32_t large_jump_interpolate (const Pstate i_pstate,const uint32_t i_attr_mvpd_data[PV_D][PV_W],
-                                 const uint32_t i_step_frequency, const Pstate i_ps_pstate,
-                                 const PoundW_data i_data)
+uint32_t
+large_jump_interpolate(const Pstate i_pstate,
+                       const VpdOperatingPoint i_operating_points[NUM_OP_POINTS],
+                       const uint32_t i_step_frequency,
+                       const Pstate i_ps_pstate,
+                       const PoundW_data i_data)
 {
-    VpdOperatingPoint operating_points[NUM_OP_POINTS];
-    load_mvpd_operating_point(i_attr_mvpd_data, operating_points, i_step_frequency);
-    uint8_t l_jump_value_set_ps = (i_data.poundw[POWERSAVE].vdm_small_large_normal_freq >> 4) & 0x0F;
-    uint8_t l_jump_value_set_nom = (i_data.poundw[NOMINAL].vdm_small_large_normal_freq >> 4) & 0x0F;
 
-    uint32_t l_slope_value = compute_slope_thresh(l_jump_value_set_nom,l_jump_value_set_ps,
-                                                  operating_points[POWERSAVE].pstate,
-                                                  operating_points[NOMINAL].pstate);
+    uint8_t l_jump_value_set_ps  =
+            i_data.poundw[POWERSAVE].vdm_normal_freq_drop & 0x0F;
+    uint8_t l_jump_value_set_nom =
+            i_data.poundw[NOMINAL].vdm_normal_freq_drop & 0x0F;
 
-    uint32_t l_vdm_jump_value = (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value *
-                                (i_ps_pstate - i_pstate)) >> THRESH_SLOPE_FP_SHIFT));
+    uint32_t l_slope_value =
+            compute_slope_thresh(l_jump_value_set_nom,
+                                 l_jump_value_set_ps,
+                                 i_operating_points[POWERSAVE].pstate,
+                                 i_operating_points[NOMINAL].pstate);
+
+    uint32_t l_vdm_jump_value =
+            (uint32_t)((int32_t)l_jump_value_set_ps + (((int32_t)l_slope_value *
+                       (i_ps_pstate - i_pstate)) >> THRESH_SLOPE_FP_SHIFT));
    return l_vdm_jump_value;
 }
 
-//pstate2voltage
-uint32_t pstate2voltage(const Pstate i_pstate,
-                        const uint32_t i_attr_mvpd_data[PV_D][PV_W],
-                        const uint32_t i_step_frequency)
+
+//ps2v_mv - Pstate to External Voltage in mV
+uint32_t ps2v_mv(const Pstate i_pstate,
+                 const VpdOperatingPoint i_operating_points[NUM_OP_POINTS],
+                 const uint32_t i_step_frequency)
 {
-    VpdOperatingPoint operating_points[NUM_OP_POINTS];
-    load_mvpd_operating_point(i_attr_mvpd_data, operating_points, i_step_frequency);
+
     uint32_t region_start, region_end;
     const char* pv_op_str[NUM_OP_POINTS] = PV_OP_ORDER_STR;
 
     FAPI_DBG("i_pstate = 0x%x, (%d)", i_pstate, i_pstate);
 
     // Determine the VPD region
-    if(i_pstate > operating_points[NOMINAL].pstate)
+    if(i_pstate > i_operating_points[NOMINAL].pstate)
     {
         region_start = POWERSAVE;
         region_end = NOMINAL;
         FAPI_DBG("Region POWERSAVE_NOMINAL detected");
     }
-    else if(i_pstate > operating_points[TURBO].pstate)
+    else if(i_pstate > i_operating_points[TURBO].pstate)
     {
         region_start = NOMINAL;
         region_end = TURBO;
@@ -4455,50 +4646,50 @@ uint32_t pstate2voltage(const Pstate i_pstate,
     }
 
     uint32_t l_SlopeValue =
-        compute_slope_4_12(revle32(operating_points[region_end].vdd_mv),
-                           revle32(operating_points[region_start].vdd_mv),
-                           operating_points[region_start].pstate,
-                           operating_points[region_end].pstate);
+        compute_slope_4_12(revle32(i_operating_points[region_end].vdd_mv),
+                           revle32(i_operating_points[region_start].vdd_mv),
+                           i_operating_points[region_start].pstate,
+                           i_operating_points[region_end].pstate);
 
-    FAPI_INF("l_globalppb.operating_points[%s].vdd_mv 0x%-3x (%d)",
+    FAPI_INF("l_globalppb.i_operating_points[%s].vdd_mv 0x%-3x (%d)",
         pv_op_str[region_end],
-        revle32(operating_points[region_end].vdd_mv),
-        revle32(operating_points[region_end].vdd_mv));
-    FAPI_INF("l_globalppb.operating_points[%s].vdd_mv 0x%-3x (%d)",
+        revle32(i_operating_points[region_end].vdd_mv),
+        revle32(i_operating_points[region_end].vdd_mv));
+    FAPI_INF("l_globalppb.i_operating_points[%s].vdd_mv 0x%-3x (%d)",
         pv_op_str[region_start],
-        revle32(operating_points[region_start].vdd_mv),
-        revle32(operating_points[region_start].vdd_mv));
-    FAPI_INF("l_globalppb.operating_points[%s].pstate 0x%-3x (%d)",
+        revle32(i_operating_points[region_start].vdd_mv),
+        revle32(i_operating_points[region_start].vdd_mv));
+    FAPI_INF("l_globalppb.i_operating_points[%s].pstate 0x%-3x (%d)",
         pv_op_str[region_end],
-        operating_points[region_end].pstate,
-        operating_points[region_end].pstate);
-    FAPI_INF("l_globalppb.operating_points[%s].pstate 0x%-3x (%d)",
+        i_operating_points[region_end].pstate,
+        i_operating_points[region_end].pstate);
+    FAPI_INF("l_globalppb.i_operating_points[%s].pstate 0x%-3x (%d)",
         pv_op_str[region_start],
-        operating_points[region_start].pstate,
-        operating_points[region_start].pstate);
+        i_operating_points[region_start].pstate,
+        i_operating_points[region_start].pstate);
 
     FAPI_INF ("l_SlopeValue %x",l_SlopeValue);
 
 
-    uint32_t x = (l_SlopeValue * (-i_pstate + operating_points[region_start].pstate));
+    uint32_t x = (l_SlopeValue * (-i_pstate + i_operating_points[region_start].pstate));
     uint32_t y = x >> VID_SLOPE_FP_SHIFT_12;
 
     uint32_t l_vdd =
-        (((l_SlopeValue * (-i_pstate + operating_points[region_start].pstate)) >> VID_SLOPE_FP_SHIFT_12)
-           + revle32(operating_points[region_start].vdd_mv));
+        (((l_SlopeValue * (-i_pstate + i_operating_points[region_start].pstate)) >> VID_SLOPE_FP_SHIFT_12)
+           + revle32(i_operating_points[region_start].vdd_mv));
 
     // Round up
     l_vdd = (l_vdd << 1) + 1;
     l_vdd = l_vdd >> 1;
 
     FAPI_DBG("i_pstate = %d "
-             "operating_points[%s].pstate) = %d "
-             "operating_points[%s].vdd_mv  = %d "
+             "i_operating_points[%s].pstate) = %d "
+             "i_operating_points[%s].vdd_mv  = %d "
              "VID_SLOPE_FP_SHIFT_12 = %X "
              "x = %x  (%d) y = %x (%d)",
              i_pstate,
-             pv_op_str[region_start], operating_points[region_start].pstate,
-             pv_op_str[region_start], revle32(operating_points[region_start].vdd_mv),
+             pv_op_str[region_start], i_operating_points[region_start].pstate,
+             pv_op_str[region_start], revle32(i_operating_points[region_start].vdd_mv),
              VID_SLOPE_FP_SHIFT_12,
              x, x,
              y, y);
@@ -4512,7 +4703,7 @@ uint32_t pstate2voltage(const Pstate i_pstate,
 //p9_pstate_safe_mode_computation
 fapi2::ReturnCode
 p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                                const VpdOperatingPoint i_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS],
                                 const uint32_t i_reference_freq,
                                 const uint32_t i_step_frequency,
                                 const Pstate i_ps_pstate,
@@ -4523,7 +4714,13 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type l_safe_mode_mv;
+    fapi2::ATTR_VDD_BOOT_VOLTAGE_Type l_boot_mv;
     uint32_t l_safe_mode_op_ps2freq_mhz;
+
+    VpdOperatingPoint l_operating_point[NUM_OP_POINTS];
+    get_operating_point(i_operating_points,
+                        VPD_PT_SET_BIASED_SYSP,
+                        l_operating_point);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
                            FAPI_SYSTEM,
@@ -4533,18 +4730,26 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     // if not log an error
     if ((l_safe_mode_values.safe_op_freq_mhz*1000) > i_reference_freq)
     {
-        FAPI_ERR("Core floor frequency value %08x is greater than ultra turbo freq %08x",
+        FAPI_ERR("Core floor frequency %08x is greater than UltraTurbo frequency %08x",
                   (l_safe_mode_values.safe_op_freq_mhz*1000), i_reference_freq);
         FAPI_ASSERT(false,
                     fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_UT_FREQ()
                     .set_CHIP_TARGET(i_target)
                     .set_CORE_FLOOR_FREQ(l_safe_mode_values.safe_op_freq_mhz*1000)
                     .set_UT_FREQ(i_reference_freq),
-                    "Core floor freq is greater than UT freq");
+                    "Core floor freqency is greater than UltraTurbo frequency");
     }
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_safe_mode_freq_mhz));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_mv));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDD_BOOT_VOLTAGE, i_target, l_boot_mv));
+
+    FAPI_DBG ("l_safe_mode_freq_mhz 0%08x (%d)",
+                l_safe_mode_freq_mhz, l_safe_mode_freq_mhz);
+    FAPI_DBG ("l_safe_mode_mv 0%08x (%d)",
+                l_safe_mode_mv, l_safe_mode_mv);
+    FAPI_DBG ("l_boot_mv 0%08x (%d)",
+                l_boot_mv, l_boot_mv);
 
     FAPI_INF ("l_safe_mode_values.safe_op_freq_mhz 0%08x (%d)",
                 l_safe_mode_values.safe_op_freq_mhz,
@@ -4572,12 +4777,15 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     }
 
     // Calculate safe jump value for large frequency
-    l_safe_mode_values.safe_vdm_jump_value = large_jump_interpolate
-                                            (l_safe_mode_values.safe_op_ps,
-                                             i_attr_mvpd_data, i_step_frequency,
-                                             i_ps_pstate, i_poundw_data);
-    FAPI_INF ("l_safe_mode_values.safe_vdm_jump_value %x",
-                    l_safe_mode_values.safe_vdm_jump_value);
+    l_safe_mode_values.safe_vdm_jump_value =
+            large_jump_interpolate(l_safe_mode_values.safe_op_ps,
+                                   l_operating_point,
+                                   i_step_frequency,
+                                   i_ps_pstate,
+                                   i_poundw_data);
+    FAPI_INF ("l_safe_mode_values.safe_vdm_jump_value %x -> %5.2f %%",
+                    l_safe_mode_values.safe_vdm_jump_value,
+                    ((float)l_safe_mode_values.safe_vdm_jump_value/32)*100);
 
     // Calculate safe mode frequency - Round up to nearest MHz
     // The uplifted frequency is based on the fact that the DPLL percentage is a
@@ -4590,16 +4798,33 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
     if (l_safe_mode_freq_mhz)
     {
         l_safe_mode_values.safe_mode_freq_mhz = l_safe_mode_freq_mhz;
-        FAPI_INF("Applying override safe mode freq value");
+        FAPI_INF("Applying override safe mode freq value of %d MHz",
+            l_safe_mode_freq_mhz);
     }
     else
     {
+        FAPI_INF("Setting safe mode frequency to %d MHz (0x%x)",
+                    l_safe_mode_values.safe_mode_freq_mhz,
+                    l_safe_mode_values.safe_mode_freq_mhz);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_safe_mode_values.safe_mode_freq_mhz));
     }
     FAPI_INF ("l_safe_mode_values.safe_mode_freq_mhz 0x%0x (%d)",
                 l_safe_mode_values.safe_mode_freq_mhz,
                 l_safe_mode_values.safe_mode_freq_mhz);
 
+    // Safe frequency must be less than ultra turbo freq.
+    // if not log an error
+    if ((l_safe_mode_values.safe_mode_freq_mhz*1000) > i_reference_freq)
+    {
+        FAPI_ERR("Safe mode frequency %08x is greater than UltraTurbo frequency %08x",
+                  (l_safe_mode_values.safe_op_freq_mhz*1000), i_reference_freq);
+        FAPI_ASSERT(false,
+                    fapi2::PSTATE_PB_SAFE_FREQ_GT_UT_FREQ()
+                    .set_CHIP_TARGET(i_target)
+                    .set_SAFE_FREQ(l_safe_mode_values.safe_mode_freq_mhz*1000)
+                    .set_UT_FREQ(i_reference_freq),
+                    "Safe mode freqency is greater than UltraTurbo frequency");
+    }
 
     l_safe_mode_values.safe_mode_ps = ((float)(i_reference_freq) -
                                        (float)(l_safe_mode_values.safe_mode_freq_mhz * 1000)) /
@@ -4610,21 +4835,27 @@ p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
                 l_safe_mode_values.safe_mode_ps);
 
     // Calculate safe mode voltage
-    l_safe_mode_values.safe_mode_mv = pstate2voltage(l_safe_mode_values.safe_mode_ps,
-                                                     i_attr_mvpd_data,
-                                                     i_step_frequency);
+    // Use the biased with system parms operating points
+
+    l_safe_mode_values.safe_mode_mv = ps2v_mv(l_safe_mode_values.safe_mode_ps,
+                                              l_operating_point,
+                                              i_step_frequency);
 
     if (l_safe_mode_mv)
     {
         l_safe_mode_values.safe_mode_mv = l_safe_mode_mv;
-        FAPI_INF("Applying override safe mode voltage value");
+        FAPI_INF("Applying override safe mode voltage value of %d mV",
+                l_safe_mode_mv);
     }
     else
     {
+        FAPI_INF("Setting safe mode voltage to %d mv (0x%x)",
+                    l_safe_mode_values.safe_mode_mv,
+                    l_safe_mode_values.safe_mode_mv);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV, i_target, l_safe_mode_values.safe_mode_mv));
     }
 
-    FAPI_INF ("l_safe_mode_values.safe_mode_mv %x",
+    FAPI_INF ("l_safe_mode_values.safe_mode_mv 0x%x (%d)",
         l_safe_mode_values.safe_mode_mv,
         l_safe_mode_values.safe_mode_mv);
 
