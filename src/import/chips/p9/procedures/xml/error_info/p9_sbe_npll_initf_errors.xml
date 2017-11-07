@@ -27,8 +27,20 @@
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
-    <rc>RC_P9_SBE_NPLL_INITF_UNSUPPORTED_BUCKET</rc>
+    <rc>RC_P9_SBE_NPLL_INITF_UNSUPPORTED_NPLL_BUCKET</rc>
     <description>Unsupported Nest PLL bucket value</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUCKET_INDEX</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_SBE_NPLL_INITF_UNSUPPORTED_FPLL_BUCKET</rc>
+    <description>Unsupported Filter PLL bucket value</description>
     <ffdc>TARGET</ffdc>
     <ffdc>BUCKET_INDEX</ffdc>
     <callout>
