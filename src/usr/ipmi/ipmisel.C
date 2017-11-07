@@ -306,7 +306,8 @@ void send_esel(eselInitData * i_data,
         // copy in the SEL event record data
         memcpy(&data[PARTIAL_ADD_ESEL_REQ], i_data->eSel,
                 sizeof(selRecord));
-        // update to make this what AMI eSEL wants
+
+        // add record type for this eSEL
         if (i_infoCallHome)
         {
             data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] =
@@ -317,6 +318,7 @@ void send_esel(eselInitData * i_data,
             data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,record_type)] =
                 record_type_ami_esel;
         }
+
         data[PARTIAL_ADD_ESEL_REQ + offsetof(selRecord,event_data1)] =
             event_data1_ami;
 

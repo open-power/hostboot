@@ -630,6 +630,7 @@ void cmd_putscom( char*& o_output,
  * @param[in] i_word1  Userdata 1 & 2
  * @param[in] i_word2  Userdata 3 & 4
  * @param[in] i_callout  HUID of target to callout (zero if none)
+ * @param[in] i_ffdcLength  Additional ffdc data bytes to add to the error log
  */
 void cmd_errorlog( char*& o_output,
                    uint64_t i_word1,
@@ -659,34 +660,36 @@ void cmd_errorlog( char*& o_output,
 
     if (i_ffdcLength > 0)
     {
-        uint8_t data[256];
-
         uint8_t l_count = 0;
-        uint16_t l_ffdc_length = 256; // break into 256 byte additions
+        uint16_t l_packet_size = 256; // break i_ffdcLength into packets
+        uint8_t data[l_packet_size];
+
         do {
-            if (i_ffdcLength > l_ffdc_length)
+            if (i_ffdcLength > l_packet_size)
             {
-                i_ffdcLength -= l_ffdc_length;
+                i_ffdcLength -= l_packet_size;
             }
             else
             {
-                l_ffdc_length = i_ffdcLength;
+                l_packet_size = i_ffdcLength;
                 i_ffdcLength = 0;
             }
-            memset(data, l_count, l_ffdc_length);
+            memset(data, l_count, l_packet_size);
 
             l_err->addFFDC(UTIL_COMP_ID,
                          &data,
-                         l_ffdc_length,
+                         l_packet_size,
                          0,         // Version
                          ERRORLOG::ERRL_UDT_NOFORMAT,   // parser ignores data
                          false );   // merge
             l_count++;
         } while (i_ffdcLength > 0);
 
+        // Change the default eSEL type if i_word1 is equal to 1
         if (i_word1 == 1)
         {
-            // mark error as dd type
+            // mark error as callhome information eSEL 'dd' type
+            // Mimics error passed down by the OCC
             l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             l_err->setEselCallhomeInfoEvent(true);
         }
