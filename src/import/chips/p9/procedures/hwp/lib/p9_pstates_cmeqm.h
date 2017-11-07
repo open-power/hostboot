@@ -172,8 +172,8 @@ typedef struct
     uint16_t ivdd_tdp_dc_current_10ma;
     uint8_t  vdm_overvolt_small_thresholds;
     uint8_t  vdm_large_extreme_thresholds;
-    uint8_t  vdm_small_large_normal_freq;
-    uint8_t  vdm_large_small_normal_freq;
+    uint8_t  vdm_normal_freq_drop;   // N_S and N_L Drop
+    uint8_t  vdm_normal_freq_return; // L_S and S_N Return
     uint8_t  vdm_vid_compare_ivid;
     uint8_t  vdm_spare;
 } poundw_entry_t;
