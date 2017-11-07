@@ -94,6 +94,32 @@
 #define NUM_JUMP_VALUES 4
 #define NUM_THRESHOLD_POINTS 4
 
+// @todo RTC 181607
+// This is synchronization work-around to avoid a co-req update between CME Hcode
+// and the Pstate Parameter Block.  The CME uses "IDX" while these use "INDEX".
+// In the future, these should be common between the two platforms.
+//
+// As this file is included in both platforms, the definition below can be used
+// in the CME Hcode and the "IDX" versions deprecated once this file version
+// is included in both platforms.
+#ifndef __ASSEMBLER__
+typedef enum
+{
+    VDM_OVERVOLT_INDEX = 0,
+    VDM_SMALL_INDEX    = 1,
+    VDM_LARGE_INDEX    = 2,
+    VDM_XTREME_INDEX   = 3
+} VDM_THRESHOLD_INDEX;
+
+typedef enum
+{
+    VDM_N_S_INDEX = 0,
+    VDM_N_L_INDEX = 1,
+    VDM_L_S_INDEX = 2,
+    VDM_S_N_INDEX = 3
+} VDM_JUMP_VALUE_INDEX;
+#endif
+
 #define NUM_OP_POINTS      4
 #define NUM_PV_POINTS      5
 #define VPD_PV_POWERSAVE   1
