@@ -141,6 +141,16 @@
 </attribute>
 
 <attribute>
+  <id>ATTR_FILTER_PLL_BUCKET</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>Select Filter PLL BGoffset programming</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <writeable/>
+  <initToZero/>
+</attribute>
+
+<attribute>
   <id>ATTR_OB0_PLL_BUCKET</id>
   <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Select OBUS0 pll setting from one of the supported frequencies</description>
