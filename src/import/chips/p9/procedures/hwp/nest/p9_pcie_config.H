@@ -49,6 +49,14 @@
 typedef fapi2::ReturnCode (*p9_pcie_config_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
 
+//-----------------------------------------------------------------------------------
+// Constant definitions
+//-----------------------------------------------------------------------------------
+
+// PBCQ Hardware Configuration Register Cache Inject Rate enablement
+const uint8_t PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE = 46;
+const uint8_t PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN = 3;
+
 //------------------------------------------------------------------------------
 // Function prototype
 //------------------------------------------------------------------------------
