@@ -167,12 +167,18 @@ fapi2::ReturnCode reset_timing1( const fapi2::Target<TARGET_TYPE_MCA>& i_target 
     // TWRMRD_CYCLES tWLMRD
 
     uint64_t l_tzqint = std::max( mss::tzqinit(), mss::tzqoper() );
+    uint8_t l_twldqsen = 0;
+    FAPI_TRY( mss::twldqsen(i_target, l_twldqsen), "%s Failed to calculate tWLDQSEN", mss::c_str(i_target) );
+
     l_data.insertFromRight<TT::TZQINIT_CYCLES, TT::TZQINIT_CYCLES_LEN>( exp_helper(l_tzqint) );
     l_data.insertFromRight<TT::TZQCS_CYCLES, TT::TZQCS_CYCLES_LEN>( exp_helper(mss::tzqcs()) );
-    l_data.insertFromRight<TT::TWLDQSEN_CYCLES, TT::TWLDQSEN_CYCLES_LEN>( exp_helper(mss::twldqsen()) );
+    l_data.insertFromRight<TT::TWLDQSEN_CYCLES, TT::TWLDQSEN_CYCLES_LEN>( exp_helper(l_twldqsen) );
     l_data.insertFromRight<TT::TWRMRD_CYCLES, TT::TWRMRD_CYCLES_LEN>( exp_helper(mss::twlmrd()) );
 
-    return mss::putScom(i_target, TT::SEQ_TIMING1_REG, l_data);
+    FAPI_TRY( mss::putScom(i_target, TT::SEQ_TIMING1_REG, l_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
