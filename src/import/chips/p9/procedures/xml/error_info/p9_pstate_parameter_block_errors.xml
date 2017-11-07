@@ -439,4 +439,19 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_PB_SAFE_FREQ_GT_UT_FREQ</rc>
+    <description>The calculated Save Mode frequency, after uplifting to
+    account for VDM droop events, is above the UltraTurbo frequency of
+    the part.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>SAFE_FREQ</ffdc>
+    <ffdc>UT_FREQ</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
