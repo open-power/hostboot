@@ -79,6 +79,7 @@ typedef struct
 
 } OperatingPoint;
 
+
 typedef struct
 {
     bool iv_pstates_enabled;
@@ -110,7 +111,6 @@ typedef struct
 
 typedef struct
 {
-
     uint32_t reference_frequency_khz;
     uint32_t frequency_step_khz;   // This is the reference frequency / DPPL_DIVIDER
     // Load line parameters, This is also called Rloadline
@@ -174,7 +174,7 @@ typedef struct
 
     uint32_t attr_freq_core_ceiling_mhz;
 
-// Loadline, Distribution loss and Distribution offset attributes
+// Loadline, Distribution loss and Distribution offset attVpdOpributes
     uint32_t attr_proc_r_loadline_vdd_uohm;
     uint32_t attr_proc_r_distloss_vdd_uohm;
     uint32_t attr_proc_vrm_voffset_vdd_uv;
@@ -247,6 +247,28 @@ typedef struct
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_vdm_not_supported;
     uint8_t attr_pstate_mode;
+
+// AVSBus attributes
+    uint8_t vdd_bus_num;
+    uint8_t vdd_rail_select;
+    uint8_t vdn_bus_num;
+    uint8_t vdn_rail_select;
+    uint8_t vcs_bus_num;
+    uint8_t vcs_rail_select;
+    uint32_t vcs_voltage_mv;
+    uint32_t vdd_voltage_mv;
+    uint32_t vdn_voltage_mv;
+    uint32_t r_loadline_vdd_uohm;
+    uint32_t r_distloss_vdd_uohm;
+    uint32_t vrm_voffset_vdd_uv;
+    uint32_t r_loadline_vdn_uohm;
+    uint32_t r_distloss_vdn_uohm;
+    uint32_t vrm_voffset_vdn_uv;
+    uint32_t r_loadline_vcs_uohm;
+    uint32_t r_distloss_vcs_uohm;
+    uint32_t vrm_voffset_vcs_uv;
+    uint32_t freq_proc_refclock_khz;
+    uint32_t proc_dpll_divider;
 
 } AttributeList;
 
@@ -363,6 +385,33 @@ fapi2::ReturnCode
 proc_get_attributes ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                       AttributeList* io_attr);
 
+
+/// -----------------------------------------------------------------------
+/// @brief Load attribute content into the Global Parameter Block
+/// @param[in] i_attr               => Reference to attribute list structure
+/// @param[out] o_globalppb         => Pointer to Global Parameter Block
+/// -----------------------------------------------------------------------
+void
+load_gppb_attrs(const AttributeList*   i_attr,
+                GlobalPstateParmBlock* o_globalppb);
+
+//
+/// -----------------------------------------------------------------------
+/// @brief Apply system parameters to a VPD value
+/// @param[in] i_vpd_mv             => Reference to attribute list structure
+/// @param[in] i_vpd_ma             = Reference to attribute list structure
+/// @param[in] i_loadline_uohm      => Reference to attribute list structure
+/// @param[in] i_distloss_uohm      => Reference to attribute list structure
+/// @param[in] i_distoffset_uohm    => Reference to attribute list structure
+/// @return[out] uplifted voltage with system parameters added
+/// -----------------------------------------------------------------------
+uint32_t
+sysparm_uplift(const uint32_t i_vpd_mv,
+               const uint32_t i_vpd_ma,
+               const uint32_t i_loadline_uohm,
+               const uint32_t i_distloss_uohm,
+               const uint32_t i_distoffset_uohm);
+
 /// ---------------------------------------------------------------------------
 /// @brief Check and process #V bias attributes for external and internal
 /// @param[in/out]  io_attr_mvpd_data       => 5x5 array to hold the #V data
@@ -444,6 +493,17 @@ load_mvpd_operating_point ( const uint32_t i_src[PV_D][PV_W],
                             VpdOperatingPoint* o_dest,
                             uint32_t i_frequency_step_khz);
 
+/// ------------------------------------------------------------
+/// @brief Copy out of operating point set into a destination operating point
+/// @param[in]  &i_op_pt_set          => reference to array of VpdOperatingPoint sets
+/// @param[out] *dest[NUM_OP_POINTS]  => pointer to destination VpdOperatingPoint structure
+/// @param[in]  i_frequency_step_khz  => Base frequency value for pstate calculation
+/// ------------------------------------------------------------
+fapi2::ReturnCode
+get_operating_point ( const VpdOperatingPoint  i_op_pt_set[NUM_VPD_PTS_SET][NUM_OP_POINTS],
+                      uint32_t                 i_set,
+                      VpdOperatingPoint*       o_op_pt);
+
 /// ----------------------------------------------------------------
 /// @brief Get VDM parameters from attributes
 /// @param[in]    i_target          => Proc Target
@@ -495,7 +555,6 @@ fapi2::ReturnCode
 proc_set_resclk_table_attrs(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                             PSTATE_attribute_state* o_state);
 
-//
 /// -------------------------------------------------------------------
 /// @brief  Compute VPD points for different regions
 /// @param[out]    o_operating_points =>  VPD operating points
@@ -568,16 +627,28 @@ oppb_print(OCCPstateParmBlock* i_oppb);
 void
 iddq_print(IddqTable* i_iddqt);
 
+
+
+enum FREQ2PSTATE_ROUNDING
+{
+    ROUND_FAST,
+    ROUND_SLOW
+};
+
+
 /// -------------------------------------------------------------------
 /// @brief Convert frequency to Pstate number
 /// @param[in]     i_gppb     The Global Pstate Parameter Block
 /// @param[in]     i_freq_khz Input frequency to convert
 /// @param[out]    o_pstate   Computed Pstate
+/// @param[out]    i_round    Pstate rounding (ROUND_FAST, ROUND_SLOW)
 // @return  pstate state value whether it's lesser than min or greater than max
 /// -------------------------------------------------------------------
+
 int freq2pState (const GlobalPstateParmBlock* i_gppb,
-                 const uint32_t i_freq_khz,
-                 Pstate*        o_pstate);
+                 const uint32_t             i_freq_khz,
+                 Pstate*                    o_pstate,
+                 const FREQ2PSTATE_ROUNDING i_round = ROUND_SLOW);
 
 /// -------------------------------------------------------------------
 /// @brief Convert Pstate number to frequency
@@ -723,7 +794,7 @@ void p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
 /// @return FAPI2::SUCCESS
 fapi2::ReturnCode
 p9_pstate_safe_mode_computation(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-                                const uint32_t i_attr_mvpd_data[PV_D][PV_W],
+                                const VpdOperatingPoint i_operating_points[NUM_VPD_PTS_SET][NUM_OP_POINTS],
                                 const uint32_t i_reference_freq,
                                 const uint32_t i_step_frequency,
                                 const Pstate i_ps_pstate,
@@ -749,11 +820,23 @@ uint32_t pstate2voltage(const Pstate i_pstate,
 /// @param[in] i_ps_pstate power save pstate
 /// @paramgin] i_data  Pound W vpd data
 /// @return uint32_t jump value
-uint32_t large_jump_interpolate (const Pstate i_pstate, const uint32_t i_attr_mvpd_data[PV_D][PV_W],
-                                 const uint32_t i_step_frequency, Pstate i_ps_pstate,
-                                 const PoundW_data i_data);
+uint32_t large_jump_interpolate(const Pstate i_pstate,
+                                const VpdOperatingPoint i_operating_points[NUM_OP_POINTS],
+                                const uint32_t i_step_frequency,
+                                Pstate i_ps_pstate,
+                                const PoundW_data i_data);
 
-
+/// -------------------------------------------------------------------
+/// @brief Interpolate the currents based on frequency
+/// @param[in]      i_biased_vpd - Data to interpolate
+/// @param[in]      i_freq_mhz   - Index grequency
+/// @param[out]     o_current_ma - Interpolated Current
+/// @return true or false
+///
+void
+interpolate_current( const uint32_t i_biased_vpd[PV_D][PV_W],
+                     const uint32_t i_freq_mhz,
+                     uint32_t*      o_current_ma);
 
 // p9_pstate_set_global_feature_attributes
 /// -------------------------------------------------------------------
