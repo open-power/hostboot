@@ -135,7 +135,7 @@ errlHndl_t verifyComponent(
         stringSet.add("Expected ID (truncated)",pTruncatedComponentId);
         stringSet.add("Expected ID (full)",i_pComponentId);
         stringSet.addToLog(pError);
-
+        pError->collectTrace(PNOR_COMP_NAME,ERROR_TRACE_SIZE);
         pError->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
     }
 
@@ -453,7 +453,7 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
                                          true /*Add HB Software Callout*/ );
             // Callout code to force a rewrite of the contents
             //@todo RTC:93870 - Define new callout for verification fail
-
+            l_errl->collectTrace(PNOR_COMP_NAME,ERROR_TRACE_SIZE);
             l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
             break;
 
