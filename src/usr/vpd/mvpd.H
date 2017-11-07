@@ -135,6 +135,7 @@ namespace MVPD
         { L7, "L7" },
         { L8, "L8" },
         { pdW, "#W" },
+        { AW, "AW" },
 
         // -------------------------------------------------------------------
         // DO NOT USE!!  This is for test purposes ONLY!

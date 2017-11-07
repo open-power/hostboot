@@ -74,6 +74,8 @@ enum ChipPosIdentifier
     EC_POSITION               = 0x00800000
 };
 
+const uint8_t MAX_FILTER_PLL_BUCKETS = 4;
+
 typedef struct
 {
     //Read as:0000 0000 000X 000X 000X 000X 000X 000X (binary;X=[0,1]) EQ:[0:05]
@@ -167,32 +169,27 @@ fapi2::ReturnCode writeMboxRegs (
     // for backwards compatiblity with images that don't contain
     // the OB/MC PLL bucket attributes, ensure that the item exists
     // prior to attempting an update which would otherwise fail
-    if (p9_xip_find(i_image, "ATTR_OB0_PLL_BUCKET", &l_item) !=
-        P9_XIP_ITEM_NOT_FOUND)
+    if (!p9_xip_find(i_image, "ATTR_OB0_PLL_BUCKET", &l_item))
     {
         MBOX_ATTR_WRITE(ATTR_OB0_PLL_BUCKET, i_procTarget, i_image);
     }
 
-    if (p9_xip_find(i_image, "ATTR_OB1_PLL_BUCKET", &l_item) !=
-        P9_XIP_ITEM_NOT_FOUND)
+    if (!p9_xip_find(i_image, "ATTR_OB1_PLL_BUCKET", &l_item))
     {
         MBOX_ATTR_WRITE(ATTR_OB1_PLL_BUCKET, i_procTarget, i_image);
     }
 
-    if (p9_xip_find(i_image, "ATTR_OB2_PLL_BUCKET", &l_item) !=
-        P9_XIP_ITEM_NOT_FOUND)
+    if (!p9_xip_find(i_image, "ATTR_OB2_PLL_BUCKET", &l_item))
     {
         MBOX_ATTR_WRITE(ATTR_OB2_PLL_BUCKET, i_procTarget, i_image);
     }
 
-    if (p9_xip_find(i_image, "ATTR_OB3_PLL_BUCKET", &l_item) !=
-        P9_XIP_ITEM_NOT_FOUND)
+    if (!p9_xip_find(i_image, "ATTR_OB3_PLL_BUCKET", &l_item))
     {
         MBOX_ATTR_WRITE(ATTR_OB3_PLL_BUCKET, i_procTarget, i_image);
     }
 
-    if (p9_xip_find(i_image, "ATTR_MC_PLL_BUCKET", &l_item) !=
-        P9_XIP_ITEM_NOT_FOUND)
+    if (!p9_xip_find(i_image, "ATTR_MC_PLL_BUCKET", &l_item))
     {
         MBOX_ATTR_WRITE(ATTR_MC_PLL_BUCKET, FAPI_SYSTEM, i_image);
     }
@@ -2012,12 +2009,79 @@ ReturnCode p9_xip_customize (
     FAPI_DBG("Input image size: %d", l_inputImageSize);
 
 
+#ifndef WIN32
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CUSTOMIZE item:     Update Filter PLL attribute from MVPD AW keyword
+    // System phase:       HB_SBE
+    ///////////////////////////////////////////////////////////////////////////
+
+    if (i_sysPhase == SYSPHASE_HB_SBE)
+    {
+        uint8_t    l_filterPllBucket = 0;
+        uint32_t   l_sizeMvpdFieldExpected = 4;
+        uint32_t   l_sizeMvpdField = 0;
+        uint8_t*   l_bufMvpdField = (uint8_t*)i_ringBuf1;
+        P9XipItem  l_item;
+
+        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                               MVPD_KEYWORD_AW,
+                               i_procTarget,
+                               NULL,
+                               l_sizeMvpdField),
+                  "getMvpdField(NULL buffer) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        FAPI_ASSERT( l_sizeMvpdField == l_sizeMvpdFieldExpected,
+                     fapi2::XIPC_MVPD_FIELD_SIZE_MESS().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_MVPD_FIELD_SIZE(l_sizeMvpdField).
+                     set_EXPECTED_SIZE(l_sizeMvpdFieldExpected),
+                     "MVPD field size bug:\n"
+                     "  Returned MVPD field size of AW keyword = %d\n"
+                     "  Anticipated MVPD field size = %d",
+                     l_sizeMvpdField,
+                     l_sizeMvpdFieldExpected );
+
+        FAPI_TRY( getMvpdField(MVPD_RECORD_CP00,
+                               MVPD_KEYWORD_AW,
+                               i_procTarget,
+                               l_bufMvpdField,
+                               l_sizeMvpdField),
+                  "getMvpdField(valid buffer) failed w/rc=0x%08x",
+                  (uint64_t)fapi2::current_err );
+
+        // extract data
+        l_filterPllBucket = (uint8_t)(*l_bufMvpdField);
+
+        FAPI_ASSERT( l_filterPllBucket <= MAX_FILTER_PLL_BUCKETS,
+                     fapi2::XIPC_MVPD_AW_FIELD_VALUE_ERR().
+                     set_CHIP_TARGET(i_procTarget).
+                     set_MVPD_VALUE(l_filterPllBucket),
+                     "MVPD AW field bug:\n"
+                     "  Value of filter PLL bucket select = %d\n"
+                     "  Anticipated range = 0..%d\n",
+                     l_filterPllBucket,
+                     MAX_FILTER_PLL_BUCKETS );
+
+        // set FAPI attribute
+        FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_FILTER_PLL_BUCKET,
+                                i_procTarget,
+                                l_filterPllBucket ),
+                 "Error from FAPI_ATTR_SET (ATTR_FILTER_PLL_BUCKET)" );
+
+        // customize attribute in SBE image, if field exists
+        if (!p9_xip_find(io_image, "ATTR_FILTER_PLL_BUCKET", &l_item))
+        {
+            MBOX_ATTR_WRITE(ATTR_FILTER_PLL_BUCKET, i_procTarget, io_image);
+        }
+    }
+
+
     ///////////////////////////////////////////////////////////////////////////
     // CUSTOMIZE item:     Write mailbox attributes
     // System phase:       HB_SBE
     ///////////////////////////////////////////////////////////////////////////
-
-#ifndef WIN32
 
     if (i_sysPhase == SYSPHASE_HB_SBE)
     {

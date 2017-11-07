@@ -124,6 +124,7 @@ enum mvpdKeyword
     L7          = 0x29,
     L8          = 0x2A,
     pdW         = 0x2B,
+    AW          = 0x2C,
 
     // Last Keyword
     MVPD_LAST_KEYWORD,
