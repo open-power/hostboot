@@ -48,4 +48,12 @@
     <ffdc>OB3_BUCKET_INDEX</ffdc>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_P9_SBE_CHIPLET_PLL_INITF_UNSUPPORTED_MC_BUCKET</rc>
+    <description>Unsupported MC PLL bucket select</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BUCKET_INDEX</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>
