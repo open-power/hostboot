@@ -394,16 +394,6 @@ constexpr uint64_t tzqcs()
 }
 
 ///
-/// @brief DQS_t/DQS_n delay after write leveling mode is programmed
-/// @return constexpr value of 25 clocks
-///
-constexpr uint64_t twldqsen()
-{
-    // Per DDR4 Full spec update (79-4A) - timing requirements
-    return 25;
-}
-
-///
 /// @brief First DQS_t/DQS_n rising edge after write leveling mode is programmed
 /// @return constexpr value of 40 clocks
 ///
@@ -437,6 +427,45 @@ inline uint64_t tmod( const fapi2::Target<T>& i_target )
 }
 
 ///
+/// @brief RTT change skew
+/// @return constexpr value of 1 clock
+///
+constexpr uint8_t tadc()
+{
+    // Per DDR4 spec, this value is between 0.3 and 0.7, so round up to 1 clk
+    return 1;
+}
+
+///
+/// @brief DQS_t/DQS_n delay after write leveling mode is programmed
+/// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
+/// @param[in] i_target the target used to get tMOD clocks
+/// @param[out] o_twldqsen *in clocks*
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+inline fapi2::ReturnCode twldqsen( const fapi2::Target<T>& i_target, uint8_t& o_twldqsen )
+{
+    const uint8_t l_tadc = tadc();
+    const auto l_tmod = tmod(i_target);
+    uint8_t l_ca_parity_latency = 0;
+    uint8_t l_al = 0;
+    uint8_t l_cwl = 0;
+
+    FAPI_TRY( mss::eff_ca_parity_latency(i_target, l_ca_parity_latency) );
+    FAPI_TRY( mss::eff_dram_al(i_target, l_al) );
+    FAPI_TRY( mss::eff_dram_cwl(i_target, l_cwl) );
+
+    // tWLDQSEN >= tMOD + WL + tADC
+    // WL = CWL + AL + PL
+    o_twldqsen = l_tmod + l_cwl + l_al + l_ca_parity_latency + l_tadc;
+    FAPI_INF("twldqsen %d for %s", o_twldqsen, mss::c_str(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Calculate TWLO_TWLOE
 /// @tparam T fapi2::TargetType of the target used to calculate cycles from ns
 /// @param[in] i_target the target used to get DIMM clocks
@@ -454,12 +483,14 @@ inline uint64_t twlo_twloe(const fapi2::Target<T>& i_target)
     uint8_t l_wlo_ck = 0;
     uint64_t l_wloe_ck = mss::ns_to_cycles(i_target, 2);
     uint64_t l_twlo_twloe = 0;
+    uint8_t l_twldqsen = 0;
 
     FAPI_TRY( mss::vpd_mr_dphy_wlo(i_target, l_wlo_ck) );
+    FAPI_TRY( mss::twldqsen(i_target, l_twldqsen) );
 
     // TODO RTC:160356 This changes if wlo is signed, which it's not but I wonder if it should
     // be ... (the PHY register is.) It changes because we need to round up to 0 if needed.
-    l_twlo_twloe = 12 + std::max( (twldqsen() + tmod(i_target)), (l_wlo_ck + l_wloe_ck) ) + l_dq_ck + l_dqs_ck;
+    l_twlo_twloe = 12 + std::max( (l_twldqsen + tmod(i_target)), (l_wlo_ck + l_wloe_ck) ) + l_dq_ck + l_dqs_ck;
     FAPI_INF("twlo_twloe %d for %s", l_twlo_twloe, mss::c_str(i_target));
     return l_twlo_twloe;
 
