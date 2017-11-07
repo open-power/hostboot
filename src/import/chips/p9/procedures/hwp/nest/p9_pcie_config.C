@@ -59,6 +59,7 @@ const uint8_t PEC_PBCQ_HWCFG_HANG_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_DATA_POLL_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_HANG_PE_SCALE = 0x1;
 const uint8_t PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE = 0x3;
+const uint8_t PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE = 0x3;
 
 // PCI AIB Hardware Configuration Register field definitions
 const uint8_t PEC_AIB_HWCFG_OSBM_HOL_BLK_CNT = 0x7;
@@ -84,6 +85,7 @@ fapi2::ReturnCode p9_pcie_config(
     fapi2::ATTR_PROC_PCIE_REGISTER_BAR_BASE_ADDR_OFFSET_Type l_register_bar_offsets;
     fapi2::ATTR_PROC_PCIE_BAR_SIZE_Type l_bar_sizes;
     fapi2::ATTR_CHIP_EC_FEATURE_HW363246_Type l_hw363246;
+    fapi2::ATTR_CHIP_EC_FEATURE_HW410503_Type l_hw410503;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     fapi2::buffer<uint64_t> l_buf = 0;
@@ -115,6 +117,7 @@ fapi2::ReturnCode p9_pcie_config(
                            l_bar_sizes),
              "Error from FAPI_ATTR_GET (ATTR_PROC_PCIE_BAR_SIZE)");
 
+
     // determine base address of chip MMIO range
     FAPI_TRY(p9_fbc_utils_get_chip_base_address(i_target,
              EFF_FBC_GRP_CHIP_IDS,
@@ -123,6 +126,12 @@ fapi2::ReturnCode p9_pcie_config(
              l_base_addr_m,
              l_base_addr_mmio),
              "Error from p9_fbc_utils_get_chip_base_address");
+
+    // determine chip ec level for defect HW410503 and HW363246
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW410503,
+                           i_target,
+                           l_hw410503),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW410503)");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW363246,
                            i_target,
@@ -147,11 +156,13 @@ fapi2::ReturnCode p9_pcie_config(
         // Phase2 init step 1
         // NestBase+0x00
         // Set bits 00:03 = 0b0001 Set hang poll scale
-        // Set bits 04:07 = 0b0010 Set data scale
+        // Set bits 04:07 = 0b0001 Set data scale
         // Set bits 08:11 = 0b0001 Set hang pe scale
+        // Set bit 22 = 0b1 Disable out­of­order store behavior
         // Set bit 33 = 0b1 Enable Channel Tag streaming behavior
         // Set bits 34:35 = 0b11 Set P9 Style cache-inject behavior
-        // Set bit 60 = 0b1 only if PEC is not used at a x16 unit.
+        // Set bits 46:48 = 0b011 Set P9 Style cache-inject rate, 1/16 cycles
+        // Set bit 60 = 0b1 only if PEC is bifurcated or trifurcated.
         FAPI_TRY(fapi2::getScom(l_pec_chiplet, PEC_PBCQHWCFG_REG, l_buf),
                  "Error from getScom (PEC_PBCQHWCFG_REG)");
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_POLL_SCALE,
@@ -160,12 +171,20 @@ fapi2::ReturnCode p9_pcie_config(
                               PEC_PBCQHWCFG_REG_HANG_DATA_SCALE_LEN>(PEC_PBCQ_HWCFG_DATA_POLL_SCALE);
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_HANG_PE_SCALE,
                               PEC_PBCQHWCFG_REG_HANG_PE_SCALE_LEN>(PEC_PBCQ_HWCFG_HANG_PE_SCALE);
+        l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_OOO_MODE>();
         l_buf.setBit<PEC_PBCQHWCFG_REG_PE_CHANNEL_STREAMING_EN>();
         l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE,
                               PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_MODE_LEN>(
                                   PEC_PBCQ_HWCFG_P9_CACHE_INJ_MODE);
 
-        if (l_attr_proc_pcie_iovalid_enable > 0x1)
+        if (l_hw410503)
+        {
+            l_buf.insertFromRight<PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE,
+                                  PEC_PBCQHWCFG_REG_PE_WR_CACHE_INJECT_RATE_LEN>(
+                                      PEC_PBCQ_HWCFG_P9_CACHE_INJ_RATE);
+        }
+
+        if (( l_pec_id == 1) || ((l_pec_id == 2) && (l_attr_proc_pcie_iovalid_enable != 0x4)))
         {
             l_buf.setBit<PEC_PBCQHWCFG_REG_PE_DISABLE_TCE_ARBITRATION>();
         }
