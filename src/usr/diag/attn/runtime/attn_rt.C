@@ -35,6 +35,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errno.h>
+#include <prdf/common/prdfMain_common.H>
 
 using namespace std;
 using namespace TARGETING;
@@ -53,12 +54,30 @@ namespace ATTN_RT
 
         int rc = 0;
         errlHndl_t err = NULL;
-        err = Singleton<Service>::instance().enableAttns();
-        if(err)
+
+        do
         {
-            errlCommit(err, ATTN_COMP_ID);
-            rc = -1;
-        }
+            err = initialize();
+            if ( nullptr != err )
+            {
+                ATTN_ERR( "ATTN_RT::enableAttns: Failed to initialize PRD" );
+
+                // Ensure the error log is visible.
+                if ( err->sev() < ERRORLOG::ERRL_SEV_PREDICTIVE )
+                    err->setSev( ERRORLOG::ERRL_SEV_PREDICTIVE );
+
+                errlCommit(err, ATTN_COMP_ID);
+                rc = -1;
+                break;
+            }
+
+            err = Singleton<Service>::instance().enableAttns();
+            if(err)
+            {
+                errlCommit(err, ATTN_COMP_ID);
+                rc = -1;
+            }
+        }while(0);
 
         ATTN_SLOW(EXIT_MRK"ATTN_RT::enableAttns rc: %d", rc);
 
