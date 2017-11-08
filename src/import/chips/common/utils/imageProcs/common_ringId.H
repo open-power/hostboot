@@ -168,6 +168,7 @@ typedef enum RingClass
     EKB_FSM_RING,
     EKB_STUMPED_RING,
     EKB_CMSK_RING,
+    EKB_NONFLUSH_RING,
     VPD_RING,
     CEN_RING,
     NUM_RING_CLASSES
@@ -204,7 +205,7 @@ enum RingVariant
     CC       = 0x01,
     RL       = 0x02,
     OVERRIDE = 0x03,
-    OVERLAY  = 0x04,   //@FIXME Not supported.
+    OVERLAY  = 0x04,
     NUM_RING_VARIANTS = 0x05,
     NOT_VALID = 0xff
 };
