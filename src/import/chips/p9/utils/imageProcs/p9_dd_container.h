@@ -59,6 +59,8 @@ struct p9_dd_cont
     struct p9_dd_block iv_blocks[0];
 };
 
+typedef struct p9_dd_cont DdContHeader_t;
+
 // iterator that can be used to iterate through all dd level blocks
 struct p9_dd_iter
 {
