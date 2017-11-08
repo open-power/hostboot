@@ -356,6 +356,12 @@ enum RingID
     // CMSK ring
     ec_cmsk = 252,
 
+    // Perv PLL filter override rings
+    perv_pll_bndy_flt_1   = 253, //0xFD
+    perv_pll_bndy_flt_2   = 254, //0xFE
+    perv_pll_bndy_flt_3   = 255, //0xFF
+    perv_pll_bndy_flt_4   = 256, //0x100
+
     //***************************
     // Rings needed for SBE - End
     //***************************

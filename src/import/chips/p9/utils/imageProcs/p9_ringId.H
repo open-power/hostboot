@@ -42,6 +42,7 @@ enum RingClass
     EKB_FSM_RING,
     EKB_STUMPED_RING,
     EKB_CMSK_RING,
+    EKB_NONFLUSH_RING,
     VPD_RING,
     NUM_RING_CLASSES
 };
@@ -275,6 +276,10 @@ enum RingOffset
     perv_pll_bndy_bucket_4 = 12,
     perv_pll_bndy_bucket_5 = 13,
     perv_pll_func   = 14,
+    perv_pll_bndy_flt_1 = 15,
+    perv_pll_bndy_flt_2 = 16,
+    perv_pll_bndy_flt_3 = 17,
+    perv_pll_bndy_flt_4 = 18,
     // Instance Rings
     perv_repr     = (0 | INSTANCE_RING_MARK),
     occ_repr      = (1 | INSTANCE_RING_MARK),
@@ -283,7 +288,7 @@ enum RingOffset
 static const CHIPLET_DATA g_pervData =
 {
     1,  // Pervasive Chiplet ID is 1
-    15, // 15 common rings for pervasive chiplet
+    19, // 19 common rings for pervasive chiplet
     2,  // 2 instance specific rings for pervasive chiplet
     2
 };
@@ -1154,6 +1159,10 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_inex_bucket_3               , "eq_inex_bucket_3"            , EQ_TYPE    }, // 250
     { EQ::eq_inex_bucket_4               , "eq_inex_bucket_4"            , EQ_TYPE    }, // 251
     { EC::ec_cmsk                        , "ec_cmsk"                     , EC_TYPE    }, // 252
+    { PERV::perv_pll_bndy_flt_1          , "perv_pll_bndy_flt_1"         , PERV_TYPE  }, // 253
+    { PERV::perv_pll_bndy_flt_2          , "perv_pll_bndy_flt_2"         , PERV_TYPE  }, // 254
+    { PERV::perv_pll_bndy_flt_3          , "perv_pll_bndy_flt_3"         , PERV_TYPE  }, // 255
+    { PERV::perv_pll_bndy_flt_4          , "perv_pll_bndy_flt_4"         , PERV_TYPE  }, // 256
 };
 #endif
 #ifdef __PPE__
@@ -1412,6 +1421,10 @@ static const ringProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { EQ::eq_inex_bucket_3               , EQ_TYPE    }, // 250
     { EQ::eq_inex_bucket_4               , EQ_TYPE    }, // 251
     { EC::ec_cmsk                        , EC_TYPE    }, // 252
+    { PERV::perv_pll_bndy_flt_1          , PERV_TYPE  }, // 253
+    { PERV::perv_pll_bndy_flt_2          , PERV_TYPE  }, // 254
+    { PERV::perv_pll_bndy_flt_3          , PERV_TYPE  }, // 255
+    { PERV::perv_pll_bndy_flt_4          , PERV_TYPE  }, // 256
 };
 #endif
 

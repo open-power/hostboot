@@ -45,11 +45,15 @@ const GenRingIdList RING_ID_LIST_COMMON[] =
     {"perv_pll_bndy_bucket_4", 0x0c, 0x01, 0x01, EKB_RING    , 0x01030018},
     {"perv_pll_bndy_bucket_5", 0x0d, 0x01, 0x01, EKB_RING    , 0x01030018},
     {"perv_pll_func"         , 0x0e, 0x01, 0x01, EKB_RING    , 0x01030010},
+    {"perv_pll_bndy_flt_1"   , 0x0f, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
+    {"perv_pll_bndy_flt_2"   , 0x10, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
+    {"perv_pll_bndy_flt_3"   , 0x11, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
+    {"perv_pll_bndy_flt_4"   , 0x12, 0x01, 0x01, EKB_NONFLUSH_RING, 0x01030018},
 };
 const GenRingIdList RING_ID_LIST_INSTANCE[] =
 {
-    {"perv_repr"             , 0x0f, 0x01, 0x01, VPD_RING    , 0x01034006},
-    {"occ_repr"              , 0x10, 0x01, 0x01, VPD_RING    , 0x01030806},
+    {"perv_repr"             , 0x13, 0x01, 0x01, VPD_RING    , 0x01034006},
+    {"occ_repr"              , 0x14, 0x01, 0x01, VPD_RING    , 0x01030806},
 };
 const RingVariantOrder RING_VARIANT_ORDER[] = { BASE, RL, NOT_VALID };
 };
