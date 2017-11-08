@@ -490,6 +490,9 @@ void* call_host_activate_master (void *io_pArgs)
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
+    // Flush the console to correct the timestamp on istep 16.2
+    CONSOLE::flush();
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_master exit" );
     // end task, returning any errorlogs to IStepDisp
