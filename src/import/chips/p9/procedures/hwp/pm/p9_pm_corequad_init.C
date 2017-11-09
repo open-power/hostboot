@@ -371,10 +371,22 @@ fapi2::ReturnCode pm_corequad_reset(
     uint64_t l_address = 0;
     uint32_t l_errMask = 0;
 
-    bool l_l2_is_scanable = false;
-    bool l_l3_is_scanable = false;
-    bool l_l2_is_scomable = false;
-    bool l_l3_is_scomable = false;
+    bool l_l2_is_scanable[MAX_L2_PER_QUAD];
+    bool l_l2_is_scomable[MAX_L2_PER_QUAD];
+    bool l_l3_is_scanable[MAX_L3_PER_QUAD];
+    bool l_l3_is_scomable[MAX_L3_PER_QUAD];
+
+    for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+    {
+        l_l2_is_scomable[cnt] = false;
+        l_l2_is_scanable[cnt] = false;
+    }
+
+    for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+    {
+        l_l3_is_scanable[cnt] = false;
+        l_l3_is_scomable[cnt] = false;
+    }
 
     auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
@@ -446,12 +458,6 @@ fapi2::ReturnCode pm_corequad_reset(
         FAPI_TRY(l_rc, "ERROR: failed to query cache access state for EQ %d",
                  l_chpltNumber);
 
-        if(!l_l3_is_scomable)
-        {
-            //Skip all of the scoms for this EQ if its not scommable
-            continue;
-        }
-
         auto l_exChiplets = l_quad_chplt.getChildren<fapi2::TARGET_TYPE_EX>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
 
@@ -465,6 +471,12 @@ fapi2::ReturnCode pm_corequad_reset(
                      "ERROR: Failed to get the position of the EX:0x%08X",
                      l_ex_chplt);
             FAPI_DBG("EX number = %d", l_chpltNumber);
+
+            if ((!(l_l2_is_scomable[l_chpltNumber % 2]) &&
+                 !(l_l3_is_scomable[l_chpltNumber % 2])))
+            {
+                continue;
+            }
 
             // @todo RTC 179967 PM FFDC HWP update
             // If CME is already halted, create error log and and mark the FFDC
