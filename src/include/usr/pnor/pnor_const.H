@@ -72,6 +72,7 @@ enum SectionId
     SBKT,           /**< SecureBoot Key Transition */
     HB_VOLATILE,    /**< Semi volatile partition for reconfig */
     MEMD,           /**< Memory configuration data */
+    TESTLOAD,       /**< Secureboot test load */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 

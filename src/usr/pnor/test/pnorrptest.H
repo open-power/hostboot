@@ -820,113 +820,99 @@ class PnorRpTest : public CxxTest::TestSuite
     /**
      *  @brief Tests loading and unloading a secure section
      */
-    // TODO RTC: 181598 Test case cannot used MEMD to test loads and unloads.
-    //  This test should use its own special pnor section to test this functionality.
-//     void test_loadUnloadSecureSection()
-//     {
-//         // @RTC 156118 Right now these tests just ensure the
-//         // APIs are callable; they should return success always
-//         // until 156118 implements the real support.  At that time
-//         // this testcase should be updated.
-// #ifdef CONFIG_SECUREBOOT
-//         errlHndl_t pError=NULL;
-//         do {
-//
-//         if (!PNOR::isEnforcedSecureSection(PNOR::MEMD))
-//         {
-//             break;
-//         }
-//
-//         pError = PNOR::loadSecureSection(PNOR::MEMD);
-//         if(pError != NULL)
-//         {
-//             TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                 "loadSecureSection returned an error");
-//             ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-//             break;
-//         }
-//
-//         pError = PNOR::unloadSecureSection(PNOR::MEMD);
-//         if(pError != NULL)
-//         {
-//             TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                 "unloadSecureSection returned an error");
-//             ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-//             break;
-//         }
-//
-//         // try loading MEMD a few times
-//         for (int i=0; i<10; i++)
-//         {
-//             pError = PNOR::loadSecureSection(PNOR::MEMD);
-//             if(pError != nullptr)
-//             {
-//                 TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                     "loadSecureSection returned an error on MEMD section load attempt %i",i);
-//                 break;
-//             }
-//         }
-//         if (pError != nullptr)
-//         {
-//             ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-//             break;
-//         }
-//
-//
-//         // try unloading MEMD the exact same number of times we loaded it
-//         for (int i=0; i<10; i++)
-//         {
-//             pError = PNOR::unloadSecureSection(PNOR::MEMD);
-//             if(pError != nullptr)
-//             {
-//                 TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                     "loadSecureSection returned an error on MEMD section unload attempt %i", i);
-//                 break;
-//             }
-//         }
-//         if (pError != nullptr)
-//         {
-//             ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
-//             break;
-//         }
-//
-//         // TODO RTC 181272
-//         // In order for the below test to work, we need to make sure that
-//         // MEMD is never actually being loaded or unloaded during this test.
-//         // Since all of the tests run in parallel, we can't really
-//         // guarantee this completely if someone decides to write a test for
-//         // MEMD, so ideally we would need some kind of mutex to prevent this.
-//
-//         // Try to unload the secure section one extra time
-//         // We expect to see an error log
-//         pError = PNOR::unloadSecureSection(PNOR::MEMD);
-//         if(pError == nullptr)
-//         {
-//             TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                 "unloadSecureSection failed to return error on extra invoke");
-//             break;
-//         }
-//         else
-//         {
-//             if(pError->reasonCode() != PNOR::RC_EXTERNAL_ERROR ||
-//                pError->moduleId() != PNOR::MOD_PNORRP_LOADUNLOADSECURESECTION)
-//             {
-//                 ERRORLOG::errlCommit(pError, PNOR_COMP_ID);
-//                 TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
-//                     "unloadSecureSection return an unexpected error");
-//                 break;
-//             }
-//             else
-//             {
-//                 // passed the test
-//                 delete pError;
-//                 pError = nullptr;
-//             }
-//         }
-//
-//         } while (0);
-// #endif
-//     }
+    void test_loadUnloadSecureSection()
+    {
+#ifdef CONFIG_SECUREBOOT
+        errlHndl_t pError=NULL;
+        do {
+
+        if (!PNOR::isEnforcedSecureSection(PNOR::TESTLOAD))
+        {
+            break;
+        }
+
+        pError = PNOR::loadSecureSection(PNOR::TESTLOAD);
+        if(pError != NULL)
+        {
+            TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                "loadSecureSection returned an error");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        pError = PNOR::unloadSecureSection(PNOR::TESTLOAD);
+        if(pError != NULL)
+        {
+            TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                "unloadSecureSection returned an error");
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        // try loading the TESTLOAD section a few times
+        for (int i=0; i<10; i++)
+        {
+            pError = PNOR::loadSecureSection(PNOR::TESTLOAD);
+            if(pError != nullptr)
+            {
+                TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                    "loadSecureSection returned an error on TESTLOAD section load attempt %i",i);
+                break;
+            }
+        }
+        if (pError != nullptr)
+        {
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        // try unloading TESTLOAD the exact same number of times we loaded it
+        for (int i=0; i<10; i++)
+        {
+            pError = PNOR::unloadSecureSection(PNOR::TESTLOAD);
+            if(pError != nullptr)
+            {
+                TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                    "loadSecureSection returned an error on TESTLOAD section unload attempt %i", i);
+                break;
+            }
+        }
+        if (pError != nullptr)
+        {
+            ERRORLOG::errlCommit(pError,PNOR_COMP_ID);
+            break;
+        }
+
+        // Try to unload the secure section one extra time
+        // We expect to see an error log
+        pError = PNOR::unloadSecureSection(PNOR::TESTLOAD);
+        if(pError == nullptr)
+        {
+            TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                "unloadSecureSection failed to return error on extra invoke");
+            break;
+        }
+        else
+        {
+            if(pError->reasonCode() != PNOR::RC_EXTERNAL_ERROR ||
+               pError->moduleId() != PNOR::MOD_PNORRP_LOADUNLOADSECURESECTION)
+            {
+                ERRORLOG::errlCommit(pError, PNOR_COMP_ID);
+                TS_FAIL("PnorRpTest::test_loadUnloadSecureSection: "
+                    "unloadSecureSection return an unexpected error");
+                break;
+            }
+            else
+            {
+                // passed the test
+                delete pError;
+                pError = nullptr;
+            }
+        }
+
+        } while (0);
+#endif
+     }
 };
 
 
