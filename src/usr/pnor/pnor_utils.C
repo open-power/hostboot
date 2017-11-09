@@ -395,7 +395,8 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == HB_RUNTIME ||
                i_section == WOFDATA ||
                i_section == MEMD ||
-               i_section == CAPP;
+               i_section == CAPP ||
+               i_section == TESTLOAD;
     #endif
 #else
     return false;
@@ -463,6 +464,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "SBKT",        /**< PNOR::SBKT           : SecureBoot Key Transition */
         "HB_VOLATILE", /**< PNOR::HB_VOLATILE    : Semi volatile partition */
         "MEMD",        /**< PNOR::MEMD           : Memory configuration data */
+        "TESTLOAD",    /**< PNOR::TESTLOAD       : Secureboot Test Load */
 #endif
     };
 

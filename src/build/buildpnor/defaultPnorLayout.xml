@@ -279,4 +279,13 @@ Layout Description
         <sha512Version/>
         <ecc/>
     </section>
+    <section>
+        <description>Secureboot Test Load (12K)</description>
+        <eyeCatch>TESTLOAD</eyeCatch>
+        <physicalOffset>0x39DB000</physicalOffset>
+        <physicalRegionSize>0x3000</physicalRegionSize>
+        <side>sideless</side>
+        <sha512Version/>
+        <ecc/>
+    </section>
 </pnor>
