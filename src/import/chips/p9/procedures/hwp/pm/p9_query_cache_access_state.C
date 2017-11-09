@@ -70,17 +70,14 @@ const uint32_t SSH_REG_STOP_GATED = 0;
 fapi2::ReturnCode
 p9_query_cache_access_state(
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-    bool& o_l2_is_scomable,
-    bool& o_l2_is_scannable,
-    bool& o_l3_is_scomable,
-    bool& o_l3_is_scannable)
+    bool o_l2_is_scomable[MAX_L2_PER_QUAD],
+    bool o_l2_is_scannable[MAX_L2_PER_QUAD],
+    bool o_l3_is_scomable[MAX_L3_PER_QUAD],
+    bool o_l3_is_scannable[MAX_L3_PER_QUAD])
 {
     fapi2::buffer<uint64_t> l_qsshsrc;
     uint32_t l_quadStopLevel = 0;
     fapi2::buffer<uint64_t> l_data64;
-    bool l_is_scomable = 1;
-    uint8_t l_chpltNumber = 0;
-    uint32_t l_exPos = 0;
     uint8_t l_execution_platform = 0;
     uint32_t l_stop_state_reg = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -92,7 +89,7 @@ p9_query_cache_access_state(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXECUTION_PLATFORM, FAPI_SYSTEM, l_execution_platform),
              "Error: Failed to get platform");
 
-    if (l_execution_platform == 0x02)
+    if (l_execution_platform == fapi2::ENUM_ATTR_EXECUTION_PLATFORM_FSP)
     {
         l_stop_state_reg =  EQ_PPM_SSHFSP;
     }
@@ -114,71 +111,88 @@ p9_query_cache_access_state(
 
     FAPI_DBG("EQ Stop State: EQ(%d)", l_quadStopLevel);
 
-    //Set all attributes to 1, then clear them based on the stop state
-    o_l2_is_scomable = 1;
-    o_l2_is_scannable = 1;
-    o_l3_is_scomable = 1;
-    o_l3_is_scannable = 1;
+    //Set all attributes to 1, then clear them based on the clock state
+    for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+    {
+        o_l2_is_scomable[cnt] = 1;
+        o_l2_is_scannable[cnt] = 1;
+    }
+
+    for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+    {
+        o_l3_is_scomable[cnt] = 1;
+        o_l3_is_scannable[cnt] = 1;
+    }
 
     //Looking at the stop states is only valid if quad is stop gated -- else it is fully running
     if (l_qsshsrc.getBit(SSH_REG_STOP_GATED))
     {
-        // STOP8 - Half Quad Deep Sleep
-        //   VSU, ISU are powered off
-        //   IFU, LSU are powered off
-        //   PC, Core EPS are powered off
-        //   L20-EX0 is clocked off if both cores are >= 8
-        //   L20-EX1 is clocked off if both cores are >= 8
-        if (l_quadStopLevel >= 8)
-        {
-            o_l2_is_scomable = 0;
-        }
 
-        // STOP9 - Fast Winkle (lab use only)
-        // Both cores and cache are clocked off
-        if (l_quadStopLevel >= 9)
-        {
-            o_l3_is_scomable = 0;
-        }
-
-        // STOP11 - Deep Winkle
+        // STOP11
         // Both cores and cache are powered off
         if (l_quadStopLevel >= 11)
         {
-            o_l2_is_scannable = 0;
-            o_l3_is_scannable = 0;
+            //Set all attributes to 0, because in stop 11 nad greater.. can't
+            //access any quad chiplet and it's units
+            for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+            {
+                o_l2_is_scomable[cnt]  = 0;
+                o_l2_is_scannable[cnt] = 0;
+            }
+
+            for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+            {
+                o_l3_is_scomable[cnt]  = 0;
+                o_l3_is_scannable[cnt] = 0;
+            }
         }
         else
         {
             //Read clock status to confirm stop state history is accurate
             //If we trust the stop state history, this could be removed to save on code size
             //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
-
-            FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, i_target, l_chpltNumber),
-                     "Error: Failed to get the position of the EX:0x%08X", i_target);
-            l_exPos = l_chpltNumber % 2;
-
-            l_is_scomable = !l_data64.getBit(eq_clk_l2_pos[l_exPos]);
-
-            if (o_l2_is_scomable != l_is_scomable)
-            {
-                FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-                o_l2_is_scomable = l_is_scomable;
-            }
-
-            l_is_scomable = !l_data64.getBit(eq_clk_l3_pos[l_exPos]);
-
-            if (o_l3_is_scomable != l_is_scomable)
-            {
-                FAPI_INF("Clock status didn't match stop state, overriding is_scomable status");
-                o_l3_is_scomable = l_is_scomable;
-            }
+            FAPI_TRY(p9_query_cache_clock_state(i_target, o_l2_is_scomable, o_l3_is_scomable), "Error querying clock state");
         }
+    }
+    else
+    {
+        //Read clock state if stop state history register doesn't have stop
+        //gated info
+        FAPI_TRY(p9_query_cache_clock_state(i_target, o_l2_is_scomable, o_l3_is_scomable), "Error querying clock state");
     }
 
 fapi_try_exit:
     FAPI_INF("< p9_query_cache_access_state...");
     return fapi2::current_err;
+}
+
+fapi2::ReturnCode
+p9_query_cache_clock_state(
+    const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+    bool o_l2_is_scomable[MAX_L2_PER_QUAD],
+    bool o_l3_is_scomable[MAX_L3_PER_QUAD])
+{
+    FAPI_INF("< p9_query_cache_clock_state...");
+    fapi2::buffer<uint64_t> l_data64;
+    //Read clock status to confirm stop state history is accurate
+    //If we trust the stop state history, this could be removed to save on code size
+    //Compare Hardware status vs stop state status. If there is a mismatch the HW value overrides the stop state
+
+    FAPI_TRY(fapi2::getScom(i_target, EQ_CLOCK_STAT_SL, l_data64), "Error reading data from EQ_CLOCK_STAT_SL");
+
+    // Need to look for both l20(ex0),l21(ex1) and l30,l31 bits info
+    for (auto l_l2Pos = 0; l_l2Pos < MAX_L2_PER_QUAD; l_l2Pos++)
+    {
+        o_l2_is_scomable[l_l2Pos] = !l_data64.getBit(eq_clk_l2_pos[l_l2Pos]);
+    }
+
+    for (auto l_l3Pos = 0; l_l3Pos < MAX_L3_PER_QUAD; l_l3Pos++)
+    {
+        o_l3_is_scomable[l_l3Pos] = !l_data64.getBit(eq_clk_l3_pos[l_l3Pos]);
+    }
+
+fapi_try_exit:
+    FAPI_INF("< p9_query_cache_clock_state...");
+    return fapi2::current_err;
+
 }
