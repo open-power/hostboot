@@ -48,14 +48,15 @@
 //------------------------------------------------------------------------------
 // Constant definitions
 //------------------------------------------------------------------------------
-
+#define MAX_L2_PER_QUAD 2 //shared by the core/ex
+#define MAX_L3_PER_QUAD 2 //shared by the core/ex
 // function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_query_cache_access_state_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_EQ>&,
-    bool&,
-    bool&,
-    bool&,
-    bool&);
+    bool*,
+    bool*,
+    bool*,
+    bool*);
 
 extern "C"
 {
@@ -68,8 +69,10 @@ extern "C"
 ///
 /// @param[in] i_target        EX target
 ///
-/// @param[out] o_l2_is_scomable  L2 cache has clocks running and is scomable
-/// @param[out[ o_l2_is_scannable L2 cache is powered up and has valid latch state
+/// @param[out] o_l2_is_scomable[MAX_L2_PER_QUAD]
+//                           L2 cache has clocks running and is scomable
+/// @param[out[ o_l2_is_scannable[MAX_L2_PER_QUAD]
+//                           L2 cache is powered up and has valid latch state
 /// @param[out] o_l3_is_scomable  L3 cache has clocks running and is scomable
 /// @param[out[ o_l2_is_scannable L3 cache is powered up and has valid latch state
 ///
@@ -78,10 +81,26 @@ extern "C"
     fapi2::ReturnCode
     p9_query_cache_access_state(
         const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
-        bool& o_l2_is_scomable,
-        bool& o_l2_is_scannable,
-        bool& o_l3_is_scomable,
-        bool& o_l3_is_scannable);
+        bool  o_l2_is_scomable[MAX_L2_PER_QUAD],
+        bool  o_l2_is_scannable[MAX_L2_PER_QUAD],
+        bool  o_l3_is_scomable[MAX_L3_PER_QUAD],
+        bool  o_l3_is_scannable[MAX_L3_PER_QUAD]);
+
+/// @brief Check the stop level for the EX caches and sets boolean scomable parameters
+///
+/// @param[in] i_target        EX target
+///
+/// @param[out] o_l2_is_scomable[MAX_L2_PER_QUAD]
+//                           L2 cache has clocks running and is scomable
+/// @param[out] o_l3_is_scomable  L3 cache has clocks running and is scomable
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code.
+
+    fapi2::ReturnCode
+    p9_query_cache_clock_state(
+        const fapi2::Target<fapi2::TARGET_TYPE_EQ>& i_target,
+        bool  o_l2_is_scomable[MAX_L2_PER_QUAD],
+        bool  o_l3_is_scomable[MAX_L3_PER_QUAD]);
 
 } // extern "C"
 
