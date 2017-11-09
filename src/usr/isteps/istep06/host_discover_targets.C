@@ -328,10 +328,22 @@ errlHndl_t powerDownSlaveQuads()
 
         do
         {
-            bool l_l2IsScomable = false;
-            bool l_l2IsScanable = false;
-            bool l_l3IsScomable = false;
-            bool l_l3IsScanable = false;
+            bool l_l2IsScanable[MAX_L2_PER_QUAD];
+            bool l_l2IsScomable[MAX_L2_PER_QUAD];
+            bool l_l3IsScanable[MAX_L3_PER_QUAD];
+            bool l_l3IsScomable[MAX_L3_PER_QUAD];
+            bool isScomable = false;
+
+            for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+            {
+                l_l2IsScanable[cnt] = false;
+                l_l2IsScomable[cnt] = false;
+            }
+            for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+            {
+                l_l3IsScanable[cnt] = false;
+                l_l3IsScomable[cnt] = false;
+            }
 
             //Same thing with cache, need to check if any clocks are running
             FAPI_INVOKE_HWP(l_err,
@@ -350,8 +362,20 @@ errlHndl_t powerDownSlaveQuads()
                 break;
             }
 
-            //If the l3 is scommable then the clocks are running and we need to stop them
-            if(l_l3IsScomable)
+            //Check if any of the L3's are scommable
+            for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+            {
+                if ( l_l3IsScomable[cnt])
+                {
+                   isScomable = true;
+                   break;
+                }
+            }
+
+            //either l3 cache on the quad is scommable then the clocks are running and we need to stop them
+            // It's ok to send BOTH_EX..for procedure p9_hcd_cache_stopclocks..
+            // as it handles iternally
+            if(isScomable)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                         "Stopping even ex for eq %d", l_eq_target->getAttr<TARGETING::ATTR_CHIP_UNIT>());
