@@ -54,17 +54,10 @@ using namespace fapi2;
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode mnfgCheckFieldVPD(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup);
 
 
@@ -96,17 +89,10 @@ fapi2::ReturnCode mnfgCheckFieldVPD(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode getVerifiedRepairLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_endp1_txFaillanes,
     std::vector<uint8_t>& o_endp1_rxFaillanes,
@@ -149,12 +135,9 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t>& io_endp1_txFaillanes,
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode geteRepairThreshold(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const bool         i_mfgModeIPL,
     uint8_t&            o_threshold);
 
@@ -180,12 +163,9 @@ fapi2::ReturnCode geteRepairThreshold(
  *
  * @return void
  */
+template<fapi2::TargetType K>
 void getCornerTestingLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_tgtType,
+    const fapi2::Target < K >&          i_tgtType,
     std::vector<uint8_t>& o_endp1_txFailLanes,
     std::vector<uint8_t>& o_endp1_rxFailLanes,
     std::vector<uint8_t>& o_endp2_txFailLanes,
@@ -212,17 +192,10 @@ void combineFieldandMnfgLanes(std::vector<uint8_t>& i_mnfgFaillanes,
 
 /***** Function definitions *****/
 
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode erepairGetRestoreLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>&             o_endp1_txFaillanes,
     std::vector<uint8_t>&             o_endp1_rxFaillanes,
@@ -512,6 +485,16 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template ReturnCode erepairGetRestoreLanes<TARGET_TYPE_XBUS, TARGET_TYPE_XBUS>(
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&          i_endp1_target,
+    const fapi2::Target < fapi2::TARGET_TYPE_XBUS >&          i_endp2_target,
+    const uint8_t                     i_clkGroup,
+    std::vector<uint8_t>&             o_endp1_txFaillanes,
+    std::vector<uint8_t>&             o_endp1_rxFaillanes,
+    std::vector<uint8_t>&             o_endp2_txFaillanes,
+    std::vector<uint8_t>&             o_endp2_rxFaillanes);
+
+
 void combineFieldandMnfgLanes(std::vector<uint8_t>& i_mnfgFaillanes,
                               std::vector<uint8_t>& i_fieldFaillanes,
                               std::vector<uint8_t>& o_allFaillanes)
@@ -539,12 +522,9 @@ void combineFieldandMnfgLanes(std::vector<uint8_t>& i_mnfgFaillanes,
 
 }
 
+template<fapi2::TargetType K>
 void getCornerTestingLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_tgtType,
+    const fapi2::Target < K >&          i_tgtType,
     std::vector<uint8_t>& o_endp1_txFaillanes,
     std::vector<uint8_t>& o_endp1_rxFaillanes,
     std::vector<uint8_t>& o_endp2_txFaillanes,
@@ -639,12 +619,9 @@ fapi_try_exit:
     return;
 }
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode geteRepairThreshold(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const bool         i_mfgModeIPL,
     uint8_t&            o_threshold)
 {
@@ -722,17 +699,10 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode mnfgCheckFieldVPD(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -794,17 +764,10 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode getVerifiedRepairLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_endp1_txFaillanes,
     std::vector<uint8_t>& o_endp1_rxFaillanes,
@@ -814,14 +777,10 @@ fapi2::ReturnCode getVerifiedRepairLanes(
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    getLanes_t l_getLanes = NULL;
-    setLanes_t l_setLanes = NULL;
+    getLanes_t<K> l_getLanes = NULL;
+    setLanes_t<K> l_setLanes = NULL;
 
-    fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS > l_target[2] = {i_endp1_target, i_endp2_target};
+    fapi2::Target < K > l_target[2] = {i_endp1_target, i_endp2_target};
     bool         l_invalidFails_inTx_OfTgt[2] = {false, false};
     bool         l_invalidFails_inRx_OfTgt[2] = {false, false};
     uint8_t      l_tgtIndx = 0;
@@ -1020,12 +979,9 @@ void invalidateNonMatchingFailLanes(std::vector<uint8_t>& io_endp1_txFaillanes,
 }
 
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes)
@@ -1071,12 +1027,16 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template fapi2::ReturnCode erepairGetFailedLanes<TARGET_TYPE_XBUS>(
+    const fapi2::Target < TARGET_TYPE_XBUS >&          i_endp_target,
+    const uint8_t                     i_clkGroup,
+    std::vector<uint8_t>& o_txFailLanes,
+    std::vector<uint8_t>& o_rxFailLanes);
+
+
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetFieldFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes)
@@ -1100,12 +1060,9 @@ fapi_try_exit:
 }
 
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetMnfgFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes)
@@ -1128,17 +1085,10 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode erepairSetFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_txEndp_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_rxEndp_target,
+    const fapi2::Target < K >&          i_txEndp_target,
+    const fapi2::Target < J >&          i_rxEndp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_rxFailLanes,
     bool&                       o_thresholdExceed)
@@ -1147,8 +1097,8 @@ fapi2::ReturnCode erepairSetFailedLanes(
     uint64_t         l_allMnfgFlags    = 0;
     bool             l_mnfgModeIPL     = false;
     uint8_t          l_threshold       = 0;
-    setLanes_t       l_setLanes        = NULL;
-    getLanes_t       l_getLanes        = NULL;
+    setLanes_t<K>       l_setLanes        = NULL;
+    getLanes_t<K>       l_getLanes        = NULL;
     std::vector<uint8_t> l_txFaillanes;
     std::vector<uint8_t> l_rxFaillanes;
     std::vector<uint8_t> l_emptyVector;
@@ -1273,12 +1223,17 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template ReturnCode erepairSetFailedLanes<TARGET_TYPE_XBUS, TARGET_TYPE_XBUS>(
+    const fapi2::Target < TARGET_TYPE_XBUS >&          i_txEndp_target,
+    const fapi2::Target < TARGET_TYPE_XBUS >&          i_rxEndp_target,
+    const uint8_t                     i_clkGroup,
+    const std::vector<uint8_t>& i_rxFailLanes,
+    bool&                       o_thresholdExceed);
+
+
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairSetFieldFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_txFailLanes,
     const std::vector<uint8_t>& i_rxFailLanes)
@@ -1299,12 +1254,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairSetMnfgFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_txFailLanes,
     const std::vector<uint8_t>& i_rxFailLanes)

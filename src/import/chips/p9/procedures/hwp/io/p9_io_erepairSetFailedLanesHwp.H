@@ -41,48 +41,39 @@
 #include <fapi2.H>
 #include <p9_io_erepairConsts.H>
 
-typedef fapi2::ReturnCode (*p9_io_erepairSetFailedLanesHwp_FP_t)(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+template<fapi2::TargetType K>
+using p9_io_erepairSetFailedLanesHwp_FP_t = fapi2::ReturnCode (*)(
+            const fapi2::Target < K >&         i_target,
+            EREPAIR::erepairVpdType            i_vpdType,
+            const uint8_t                      i_clkGroup,
+            const std::vector<uint8_t>&        i_txFailLanes,
+            const std::vector<uint8_t>&        i_rxFailLanes);
+
+
+/**
+ * @brief FW Team HWP that writes the eRepair fail lanes to the VPD.
+ *        The fail lanes will be written to either the P9 MVPD or the
+ *        Centaur FRU VPD depending on the passed target type.
+ *
+ * @param[in] i_target      Reference to X-Bus or O-Bus or MCS or memBuf Target
+ * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
+ * @param[in] i_clkGroup    Specifies clock group 0:[XOA, X1A,..] 1:[X0B, X1B,..]
+ * @param[in] i_txFailLanes Reference to a vector that has the Tx side
+ *                          (of i_tgtHandle) fail lane numbers that need
+ *                          to be written to the VPD
+ * @param[in] i_rxFailLanes Reference to a vector that has the Rx side
+ *                          (of i_tgtHandle) fail lane numbers that need
+ *                          to be written to the VPD
+ *
+ * @return ReturnCode
+ *
+ */
+template<fapi2::TargetType K>
+fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
+    const fapi2::Target < K >&         i_target,
     EREPAIR::erepairVpdType            i_vpdType,
     const uint8_t                      i_clkGroup,
     const std::vector<uint8_t>&        i_txFailLanes,
     const std::vector<uint8_t>&        i_rxFailLanes);
-
-extern "C"
-{
-
-    /**
-     * @brief FW Team HWP that writes the eRepair fail lanes to the VPD.
-     *        The fail lanes will be written to either the P9 MVPD or the
-     *        Centaur FRU VPD depending on the passed target type.
-     *
-     * @param[in] i_target      Reference to X-Bus or O-Bus or MCS or memBuf Target
-     * @param[in] i_vpdType     Specifies which VPD (MNFG or Field) to access.
-     * @param[in] i_clkGroup    Specifies clock group 0:[XOA, X1A,..] 1:[X0B, X1B,..]
-     * @param[in] i_txFailLanes Reference to a vector that has the Tx side
-     *                          (of i_tgtHandle) fail lane numbers that need
-     *                          to be written to the VPD
-     * @param[in] i_rxFailLanes Reference to a vector that has the Rx side
-     *                          (of i_tgtHandle) fail lane numbers that need
-     *                          to be written to the VPD
-     *
-     * @return ReturnCode
-     *
-     */
-    fapi2::ReturnCode p9_io_erepairSetFailedLanesHwp(
-        const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-        fapi2::TARGET_TYPE_OBUS |
-        fapi2::TARGET_TYPE_MEMBUF_CHIP |
-        fapi2::TARGET_TYPE_MCS_CHIPLET |
-        fapi2::TARGET_TYPE_MCS >           &i_target,
-        EREPAIR::erepairVpdType            i_vpdType,
-        const uint8_t                      i_clkGroup,
-        const std::vector<uint8_t>&        i_txFailLanes,
-        const std::vector<uint8_t>&        i_rxFailLanes);
-}// end of extern C
 
 #endif

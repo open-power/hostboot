@@ -64,12 +64,9 @@ using namespace fapi2;
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode retrieveRepairData(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     erepairVpdType                     i_vpdType,
     const uint8_t                      i_clkGroup,
     std::vector<uint8_t>&              o_txFailLanes,
@@ -94,12 +91,9 @@ fapi2::ReturnCode retrieveRepairData(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode determineRepairLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t*                           i_buf,
     uint32_t                           i_bufSz,
     const uint8_t                      i_clkGroup,
@@ -115,12 +109,9 @@ fapi2::ReturnCode determineRepairLanes(
  *                                      or ENUM_ATTR_EFF_CUSTOM_DIMM_YES
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode getDimmType(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t&                           o_customDimm);
 
 
@@ -140,12 +131,9 @@ fapi2::ReturnCode getDimmType(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode decodeFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t                            i_busInterface,
     uint32_t                           i_failBit,
     std::vector<uint8_t>&              o_FailLanes);
@@ -154,12 +142,9 @@ fapi2::ReturnCode decodeFailedLanes(
  * Accessor HWP
  *****************************************************************************/
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode p9_io_erepairGetFailedLanesHwp(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_target,
+    const fapi2::Target < K >&          i_target,
     erepairVpdType                    i_vpdType,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>&             o_txFailLanes,
@@ -186,12 +171,16 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template ReturnCode p9_io_erepairGetFailedLanesHwp<TARGET_TYPE_XBUS>(
+    const fapi2::Target <TARGET_TYPE_XBUS>&          i_target,
+    erepairVpdType                    i_vpdType,
+    const uint8_t                     i_clkGroup,
+    std::vector<uint8_t>&             o_txFailLanes,
+    std::vector<uint8_t>&             o_rxFailLanes);
+
+template<fapi2::TargetType K>
 fapi2::ReturnCode retrieveRepairData(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >         &i_target,
+    const fapi2::Target < K >&         i_target,
     erepairVpdType                   i_vpdType,
     const uint8_t                    i_clkGroup,
     std::vector<uint8_t>&            o_txFailLanes,
@@ -273,7 +262,7 @@ fapi2::ReturnCode retrieveRepairData(
     else
     {
         // Determine the Processor target
-        l_procTarget = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+        l_procTarget = i_target.template getParent<TARGET_TYPE_PROC_CHIP>();
 
         fapi2::MvpdRecord l_vpdRecord = fapi2::MVPD_RECORD_VWML;
 
@@ -344,12 +333,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode determineRepairLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t*                           i_buf,
     uint32_t                           i_bufSz,
     const uint8_t                      i_clkGroup,
@@ -379,7 +365,7 @@ fapi2::ReturnCode determineRepairLanes(
     l_tgtType = i_target.getType();
 
     // Get the parent chip target
-    l_chipTarget = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+    l_chipTarget = i_target.template getParent<TARGET_TYPE_PROC_CHIP>();
 
     // Get the chip position
     uint32_t l_chipPosition;
@@ -593,12 +579,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode getDimmType(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t&                                                 o_customDimm)
 {
     fapi2::ReturnCode                                          l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -644,12 +627,9 @@ fapi_try_exit:
     return l_rc;
 }
 
+template<fapi2::TargetType K>
 fapi2::ReturnCode decodeFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >           &i_target,
+    const fapi2::Target < K >&           i_target,
     uint8_t                                                  i_busInterface,
     uint32_t                                                 i_failBit,
     std::vector<uint8_t>&                                    o_FailLanes)
