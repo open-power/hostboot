@@ -92,6 +92,15 @@ namespace dll
 {
 
 ///
+/// @brief Check if workaround is needed
+/// @param[in] i_target the MCA target
+/// @param[in,out] io_run_workaround set to true if workaround is needed
+/// @return FAPI2_RC_SUCCESS if the scoms don't fail
+///
+fapi2::ReturnCode needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                          bool& io_run_workaround );
+
+///
 /// @brief Clears the DLL firs
 /// @param[in] i_target the MCA target
 /// @return returns true unless if scom errors
@@ -99,11 +108,16 @@ namespace dll
 fapi2::ReturnCode clear_dll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target  );
 
 ///
-/// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set
+/// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set, or if VREG is '1'
+/// @param[in] i_target the fapi2 target
 /// @param[in] i_dll_cntrl_data DLL CNTRL data
-/// @return bool
+/// @param[in] i_map dll map of DLLs to log errors from
+/// @param[out] o_failed set to true if DLL cal failed
 ///
-bool did_cal_fail( const fapi2::buffer<uint64_t>& i_dll_cntrl_data );
+fapi2::ReturnCode did_cal_fail( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const mss::dll_map& i_map,
+                                const fapi2::buffer<uint64_t>& i_dll_cntrl_data,
+                                bool& o_failed );
 
 ///
 /// @brief Logs DLL error mappings from failed DLLs
