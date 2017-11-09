@@ -37,25 +37,20 @@
 
 const uint8_t EREPAIR_MAX_CENTAUR_PER_MCS = 1;
 
-typedef fapi2::ReturnCode (*getLanes_t)(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_tgtHandle,
-    const uint8_t                     i_clkGroup,
-    std::vector<uint8_t>& o_txFailLanes,
-    std::vector<uint8_t>& o_rxFailLanes);
+template<fapi2::TargetType K>
+using getLanes_t = fapi2::ReturnCode (*)(
+                       const fapi2::Target < K >& i_tgtHandle,
+                       const uint8_t i_clkGroup,
+                       std::vector<uint8_t>& o_txFailLanes,
+                       std::vector<uint8_t>& o_rxFailLanes);
 
-typedef fapi2::ReturnCode (*setLanes_t)(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_tgtHandle,
-    const uint8_t                     i_clkGroup,
-    const std::vector<uint8_t>& i_txFailLanes,
-    const std::vector<uint8_t>& i_rxFailLanes);
+template<fapi2::TargetType K>
+using setLanes_t = fapi2::ReturnCode (*)(
+                       const fapi2::Target < K >& i_tgtHandle,
+                       const uint8_t i_clkGroup,
+                       const std::vector<uint8_t>& o_txFailLanes,
+                       const std::vector<uint8_t>& o_rxFailLanes);
+
 
 /**
  * @brief FW Team Utility function that gets eRepair data from the VPD
@@ -71,13 +66,10 @@ typedef fapi2::ReturnCode (*setLanes_t)(
  * @return ReturnCode
  *
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
-    const uint8_t                     i_clkGroup,
+    const fapi2::Target < K >& i_endp_target,
+    const uint8_t i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes);
 
@@ -96,12 +88,9 @@ fapi2::ReturnCode erepairGetFailedLanes(
  * @return ReturnCode
  *
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetFieldFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes);
@@ -121,12 +110,9 @@ fapi2::ReturnCode erepairGetFieldFailedLanes(
  * @return ReturnCode
  *
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairGetMnfgFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_txFailLanes,
     std::vector<uint8_t>& o_rxFailLanes);
@@ -153,17 +139,10 @@ fapi2::ReturnCode erepairGetMnfgFailedLanes(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode erepairSetFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_txEndp_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_rxEndp_target,
+    const fapi2::Target < K >&          i_txEndp_target,
+    const fapi2::Target < J >&          i_rxEndp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_rxFailLanes,
     bool&                       o_thresholdExceed);
@@ -183,12 +162,9 @@ fapi2::ReturnCode erepairSetFailedLanes(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairSetFieldFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_txFailLanes,
     const std::vector<uint8_t>& i_rxFailLanes);
@@ -208,12 +184,9 @@ fapi2::ReturnCode erepairSetFieldFailedLanes(
  *
  * @return ReturnCode
  */
+template<fapi2::TargetType K>
 fapi2::ReturnCode erepairSetMnfgFailedLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp_target,
+    const fapi2::Target < K >&          i_endp_target,
     const uint8_t                     i_clkGroup,
     const std::vector<uint8_t>& i_txFailLanes,
     const std::vector<uint8_t>& i_rxFailLanes);
@@ -255,18 +228,10 @@ fapi2::ReturnCode erepairSetMnfgFailedLanes(
  * @return ReturnCode
  *
  */
-
+template<fapi2::TargetType K, fapi2::TargetType J>
 fapi2::ReturnCode erepairGetRestoreLanes(
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp1_target,
-    const fapi2::Target < fapi2::TARGET_TYPE_XBUS |
-    fapi2::TARGET_TYPE_OBUS |
-    fapi2::TARGET_TYPE_MEMBUF_CHIP |
-    fapi2::TARGET_TYPE_MCS_CHIPLET |
-    fapi2::TARGET_TYPE_MCS >          &i_endp2_target,
+    const fapi2::Target < K >&          i_endp1_target,
+    const fapi2::Target < J >&          i_endp2_target,
     const uint8_t                     i_clkGroup,
     std::vector<uint8_t>& o_endp1_txFaillanes,
     std::vector<uint8_t>& o_endp1_rxFaillanes,
