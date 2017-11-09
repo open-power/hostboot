@@ -37,6 +37,7 @@
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/phy/dp16.H>
 #include <lib/fir/fir.H>
+#include <lib/phy/phy_cntrl.H>
 #include <lib/shared/mss_const.H>
 #include <lib/utils/conversions.H>
 
@@ -142,12 +143,68 @@ namespace dll
 {
 
 ///
+/// @brief Check if workaround is needed
+/// @param[in] i_target the MCA target
+/// @param[in,out] io_run_workaround set to true if workaround is needed
+/// @return FAPI2_RC_SUCCESS if the scoms don't fail
+///
+fapi2::ReturnCode needed( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                          bool& io_run_workaround )
+{
+    constexpr uint64_t l_dll_status_reg = mss::pcTraits<fapi2::TARGET_TYPE_MCA>::PC_DLL_ZCAL_CAL_STATUS_REG;
+    constexpr uint64_t BAD_VREG_VALUE = 1;
+
+    // VREG_COARSE registers. If any of these have a value of '1' after calibration, the workaround
+    // will need to be triggered, since Vreg=1 is not a good value for any process window.
+    // Note these are the same registers that are used in the workaround.
+    static const std::vector<uint64_t> DLL_VREG =
+    {
+        MCA_DDRPHY_ADR_DLL_VREG_COARSE_P0_ADR32S0,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_1,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_2,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_3,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_4,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_0,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_1,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_2,
+        MCA_DDRPHY_DP16_DLL_VREG_COARSE1_P0_3,
+    };
+
+    fapi2::buffer<uint64_t> l_cal_status;
+    std::vector<fapi2::buffer<uint64_t>> l_vreg_values;
+
+    // For all Nimbus parts we want to run DLL workaround so
+    // Instead of using FAPI_ASSERT or returning an error
+    // We'll use a bool to tell if we need to run the workaround
+    // First check the DLL cal status - if it failed, we run the workaround
+    FAPI_TRY( mss::getScom(i_target, l_dll_status_reg, l_cal_status) );
+    io_run_workaround |= (mss::pc::get_dll_cal_status(l_cal_status) != mss::YES);
+
+    // Next check if any Vreg got set to the value '1' - if we see any, run the workaround
+    FAPI_TRY( mss::scom_suckah(i_target, DLL_VREG, l_vreg_values) );
+
+    for (const auto l_buf : l_vreg_values)
+    {
+        uint64_t l_vreg_value = 0;
+
+        // Note that the fields are the same for the ADR and DP16 registers
+        l_buf.extractToRight< MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0_01_REGS_RXDLL_DAC_COARSE, MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0_01_REGS_RXDLL_DAC_COARSE_LEN >
+        (l_vreg_value);
+        io_run_workaround |= (l_vreg_value == BAD_VREG_VALUE);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Clears the DLL firs
 /// @param[in] i_target the MCA target
 /// @return FAPI2_RC_SUCCESS if the scoms don't fail
 /// @note Need to clear the DLL firs when we notice a DLL fail for workarounds
 ///
-fapi2::ReturnCode clear_dll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target  )
+fapi2::ReturnCode clear_dll_fir( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
 {
     fapi2::buffer<uint64_t> l_phyfir_data;
 
@@ -169,19 +226,41 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set
+/// @brief Checks if CAL_ERROR and CAL_ERROR_FINE bits are set, or if VREG is '1'
+/// @param[in] i_target the fapi2 target
 /// @param[in] i_dll_cntrl_data DLL CNTRL data
-/// @return true if DLL cal failed, false otherwiae
+/// @param[in] i_map dll map of DLLs to log errors from
+/// @param[out] o_failed set to true if DLL cal failed
 ///
-bool did_cal_fail( const fapi2::buffer<uint64_t>& i_dll_cntrl_data )
+fapi2::ReturnCode did_cal_fail( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const mss::dll_map& i_map,
+                                const fapi2::buffer<uint64_t>& i_dll_cntrl_data,
+                                bool& o_failed )
 {
+    constexpr uint64_t BAD_VREG_VALUE = 1;
+
+    fapi2::buffer<uint64_t> l_dll_dac_data;
+    uint64_t l_dac_coarse = 0;
+
     FAPI_DBG("DLL_CNTL data 0x%016llx, CAL_ERROR %d, CAL_ERROR_FINE %d",
              i_dll_cntrl_data,
              i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR>(),
              i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR_FINE>());
 
-    return i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR>() ||
-           i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR_FINE>();
+    o_failed = i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR>() ||
+               i_dll_cntrl_data.getBit<mss::dll_map::DLL_CNTL_CAL_ERROR_FINE>();
+
+    // Read DAC coarse from DLL, and set failed if value is '1'
+    FAPI_TRY( mss::getScom(i_target, i_map.iv_vreg_coarse_same_dll, l_dll_dac_data),
+              "Failed getScom() operation on %s reg 0x%016llx",
+              mss::c_str(i_target), i_map.iv_vreg_coarse_same_dll );
+
+    l_dll_dac_data.extractToRight< MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0_01_REGS_RXDLL_DAC_COARSE, MCA_DDRPHY_DP16_DLL_VREG_COARSE0_P0_0_01_REGS_RXDLL_DAC_COARSE_LEN >
+    (l_dac_coarse);
+    o_failed |= (l_dac_coarse == BAD_VREG_VALUE);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -200,6 +279,8 @@ fapi2::ReturnCode log_fails(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
                             std::map< fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> >& io_failed_dll_dac)
 {
     fapi2::buffer<uint64_t> l_dll_cntrl_data;
+    bool l_failed = false;
+
     FAPI_TRY( mss::getScom(i_target, i_map.iv_cntrl, l_dll_cntrl_data),
               "Failed getScom() operation on %s reg 0x%016llx",
               mss::c_str(i_target), i_map.iv_cntrl);
@@ -207,7 +288,9 @@ fapi2::ReturnCode log_fails(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_targe
     FAPI_DBG("%s Read DLL_CNTRL reg 0x%016llx, with data 0x%016llx",
              mss::c_str(i_target), i_map.iv_cntrl, l_dll_cntrl_data);
 
-    if( did_cal_fail(l_dll_cntrl_data) )
+    FAPI_TRY( did_cal_fail(i_target, i_map, l_dll_cntrl_data, l_failed) );
+
+    if( l_failed )
     {
         fapi2::buffer<uint64_t> l_dll_dac_data;
         uint64_t l_neighbor_dac_coarse = 0;
@@ -265,11 +348,19 @@ fapi2::ReturnCode check_status(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_ta
 
         FAPI_DBG("Checking status on %s, DLL CNTRL reg 0x%016llx", mss::c_str(i_target), reg);
 
-        FAPI_ASSERT( did_cal_fail(l_dll_cntrl_data) == false,
-                     fapi2::MSS_DLL_FAILED_TO_CALIBRATE()
-                     .set_MCA_IN_ERROR(i_target),
-                     "%s DLL failed to calibrate",
-                     mss::c_str(i_target) )
+        for( const auto& map : DLL_REGS )
+        {
+            bool l_failed = false;
+            FAPI_TRY( did_cal_fail(i_target, map, l_dll_cntrl_data, l_failed) );
+
+            FAPI_ASSERT( l_failed == false,
+                         fapi2::MSS_DLL_FAILED_TO_CALIBRATE()
+                         .set_MCA_IN_ERROR(i_target)
+                         .set_CNTRL_REG(map.iv_cntrl)
+                         .set_VREG_COARSE_REG(map.iv_vreg_coarse_same_dll),
+                         "%s DLL failed to calibrate",
+                         mss::c_str(i_target) );
+        }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
