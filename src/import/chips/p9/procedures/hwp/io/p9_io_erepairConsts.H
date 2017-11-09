@@ -85,15 +85,10 @@ const uint8_t DMIBUS_MAXSPARES_IN_HW              = 2;
 const uint8_t DMIBUS_UPSTREAM_MAX_LANE_WIDTH      = 21;
 const uint8_t DMIBUS_DNSTREAM_MAX_LANE_WIDTH      = 14;
 
-#ifdef P9_CUMULUS
-    const uint32_t EREPAIR_P9_MODULE_VPD_FIELD_SIZE       = 0x10E; // 270 bytes
-    const uint32_t EREPAIR_P9_MODULE_VPD_MNFG_SIZE        = 0x10E; // 270 bytes
-    const uint32_t EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR = 0x36;  // 54 bytes
-    const uint32_t EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR  = 0x36;  // 54 bytes
-#else // Nimbus
-    const uint32_t EREPAIR_P9_MODULE_VPD_FIELD_SIZE       = 0x66; // 102 bytes
-    const uint32_t EREPAIR_P9_MODULE_VPD_MNFG_SIZE        = 0x66; // 102 bytes
-#endif
+const uint32_t EREPAIR_P9_MODULE_VPD_FIELD_SIZE       = 0x10E; // 270 bytes
+const uint32_t EREPAIR_P9_MODULE_VPD_MNFG_SIZE        = 0x10E; // 270 bytes
+const uint32_t EREPAIR_MEM_FIELD_VPD_SIZE_PER_CENTAUR = 0x36;  // 54 bytes
+const uint32_t EREPAIR_MEM_MNFG_VPD_SIZE_PER_CENTAUR  = 0x36;  // 54 bytes
 
 //TODO:
 enum busType
