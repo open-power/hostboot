@@ -66,9 +66,7 @@ extern trace_desc_t* g_trac_sbeio;
 */
 #define READ_BUFFER_SIZE 2048
 
-// @TODO RTC 181067 Disable blacklist violation tolerance once all existing
-// violations have been fixed
-#define TOLERATE_BLACKLIST_ERRS 1
+#define TOLERATE_BLACKLIST_ERRS 0
 
 using namespace ERRORLOG;
 
