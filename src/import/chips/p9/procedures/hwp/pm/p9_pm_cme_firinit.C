@@ -240,10 +240,23 @@ fapi2::ReturnCode pm_cme_fir_reset(
         //query_cache_state to safely determine if we can scom
         //the ex targets
         fapi2::ReturnCode l_rc;
-        bool l_l2_is_scanable = false;
-        bool l_l3_is_scanable = false;
-        bool l_l2_is_scomable = false;
-        bool l_l3_is_scomable = false;
+        bool l_l2_is_scanable[MAX_L2_PER_QUAD];
+        bool l_l2_is_scomable[MAX_L2_PER_QUAD];
+        bool l_l3_is_scanable[MAX_L3_PER_QUAD];
+        bool l_l3_is_scomable[MAX_L3_PER_QUAD];
+
+        for (auto cnt = 0; cnt < MAX_L2_PER_QUAD; ++cnt)
+        {
+            l_l2_is_scomable[cnt] = false;
+            l_l2_is_scanable[cnt] = false;
+        }
+
+        for (auto cnt = 0; cnt < MAX_L3_PER_QUAD; ++cnt)
+        {
+            l_l3_is_scanable[cnt] = false;
+            l_l3_is_scomable[cnt] = false;
+        }
+
         uint8_t l_chip_unit_pos;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
@@ -256,17 +269,25 @@ fapi2::ReturnCode pm_cme_fir_reset(
         FAPI_TRY(l_rc, "ERROR: failed to query cache access state for EQ %d",
                  l_chip_unit_pos);
 
-        //If this cache isnt scommable continue to the next EQ
-        if(!l_l3_is_scomable)
-        {
-            continue;
-        }
 
         auto l_exChiplets = l_eq_chplt.getChildren<fapi2::TARGET_TYPE_EX>
                             (fapi2::TARGET_STATE_FUNCTIONAL);
 
         for(auto l_ex_chplt : l_exChiplets)
         {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                   l_ex_chplt, l_chip_unit_pos),
+                     "ERROR: Failed to get the chip unit pos attribute from the ex");
+
+            //look ex is scommable
+            l_chip_unit_pos = l_chip_unit_pos % 2;
+
+            if ((!(l_l2_is_scomable[l_chip_unit_pos]) &&
+                 !(l_l3_is_scomable[l_chip_unit_pos])))
+            {
+                continue;
+            }
+
             p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
 
             if (l_firinit_done_flag == 1)
