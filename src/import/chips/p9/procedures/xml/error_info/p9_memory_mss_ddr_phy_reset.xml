@@ -267,6 +267,8 @@
   <description>
     DLL failed to calibrate
   </description>
+  <ffdc>CNTRL_REG</ffdc>
+  <ffdc>VREG_COARSE_REG</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_DLL_REGS</id>
     <target>MCA_IN_ERROR</target>

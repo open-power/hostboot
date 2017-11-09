@@ -52,6 +52,7 @@
 #include <lib/workarounds/wr_vref_workarounds.H>
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/workarounds/seq_workarounds.H>
+#include <lib/workarounds/dll_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
 #include <lib/phy/mss_training.H>
 
@@ -1515,14 +1516,7 @@ fapi2::ReturnCode dll_calibration( const fapi2::Target<fapi2::TARGET_TYPE_MCBIST
 
     for (const auto& p : l_mca)
     {
-        fapi2::buffer<uint64_t> l_read;
-        FAPI_TRY( mss::getScom(p, l_dll_status_reg, l_read) );
-
-        // For all Nimbus parts we want to run DLL workaround so
-        // Instead of using FAPI_ASSERT or returning an error
-        // We'll use a bool to tell if we need to run the workaround
-        o_run_workaround |= (mss::pc::get_dll_cal_status(l_read) != mss::YES);
-
+        FAPI_TRY( mss::workarounds::dll::needed(p, o_run_workaround) );
     }// mca
 
 fapi_try_exit:
