@@ -127,7 +127,6 @@ COPY_RENAME_FILES = \
     target_types_openpower.xml:src/usr/targeting/common/xmltohb/target_types_empty.xml:openpower \
     makefile:src/build/mkrules/hbfw/makefile:fsp \
     img/makefile:src/build/mkrules/hbfw/img/makefile:fsp \
-    img/editimgid:src/build/tools/editimgid:fsp \
     hbicore.bin:img/hbicore$(UNDERSCORE_TEST).bin:vpo \
     img/hostboot_bootloader.bin:img/hbibl.bin:fsp,openpower,vpo \
     img/hostboot_securerom.bin:img/securerom.bin:fsp,openpower,vpo \
@@ -289,6 +288,7 @@ fsp.tar_CONTENTS = \
     src/include/kernel/hbdescriptor.H \
     src/include/kernel/hbterminatetypes.H \
     src/build/tools/hwp_id.pl \
+    src/build/tools/editimgid \
     obj/genfiles/plugins/makefile:plugins/ \
     obj/genfiles/plugins/hbfwUdIds.H:plugins/ \
     src/include/usr/hbotcompid.H \

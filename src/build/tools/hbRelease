@@ -430,7 +430,6 @@ sub execute_pre_release
     {
         $CMVC_FILES .= "src/hbfw/img/hostboot_bootloader.bin ";
         $CMVC_FILES .= "src/hbfw/img/hostboot_securerom.bin ";
-        $CMVC_FILES .= "src/hbfw/img/editimgid ";
     }
 
 
