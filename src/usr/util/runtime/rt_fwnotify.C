@@ -5,6 +5,29 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
+/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
+/*                                                                        */
+/* Licensed under the Apache License, Version 2.0 (the "License");        */
+/* you may not use this file except in compliance with the License.       */
+/* You may obtain a copy of the License at                                */
+/*                                                                        */
+/*     http://www.apache.org/licenses/LICENSE-2.0                         */
+/*                                                                        */
+/* Unless required by applicable law or agreed to in writing, software    */
+/* distributed under the License is distributed on an "AS IS" BASIS,      */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        */
+/* implied. See the License for the specific language governing           */
+/* permissions and limitations under the License.                         */
+/*                                                                        */
+/* IBM_PROLOG_END_TAG                                                     */
+/* This is an automatically generated prolog.                             */
+/*                                                                        */
+/* $Source: src/usr/util/runtime/rt_fwnotify.C $                          */
+/*                                                                        */
+/* OpenPOWER HostBoot Project                                             */
+/*                                                                        */
 /* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,7 +46,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-//#include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
+#include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
 #include <runtime/interface.h>             // firmware_notify
 #include <runtime/runtime_reasoncodes.H>   // MOD_RT_FIRMWARE_NOTIFY, etc
 #include <errl/errlentry.H>                // ErrlEntry
@@ -34,7 +57,7 @@ using namespace TARGETING;
 using namespace RUNTIME;
 using namespace ERRORLOG;
 using namespace MBOX;
-//using namespace SBEIO;
+using namespace SBEIO;
 
 trace_desc_t* g_trac_hwsv = nullptr;
 TRAC_INIT(&g_trac_hwsv, "HWSV_TRACE", 4*KILOBYTE);
@@ -79,7 +102,7 @@ uint16_t SeqId_t::getCurrentSeqId()
 
 /**
  *  @brief Attempt an SBE recovery after an SBE error
- *  @param[in] uint64_t i_data Contains and plid (in the first 4 bytes)
+ *  @param[in] uint64_t i_data Contains a plid (in the first 4 bytes)
  *                             and a HUID (in the last 4 bytes)
  *  @platform FSP, OpenPOWER
  **/
@@ -99,8 +122,12 @@ void sbeAttemptRecovery(uint64_t i_data)
         } PACKED ;
 
         sbeErrorData_t *l_sbeErrorDataReq = (sbeErrorData_t*)(&i_data);
+
+        // Extract the target from the given HUID
         TargetHandle_t l_target =
                         Target::getTargetFromHuid(l_sbeErrorDataReq->huid);
+
+        // If HUID invalid, log error and quit
         if (nullptr == l_target)
         {
              TRACFCOMP( g_trac_hwsv, "firmware_notify: No target assoicated "
@@ -124,20 +151,13 @@ void sbeAttemptRecovery(uint64_t i_data)
 
         // Make the call to SbeExtractDD to attempt SBE recovery
         // Get the SBE Retry Handler
-        //SbeRetryHandler l_SBEobj = SbeRetryHandler();
-
-        // Need to set the Plid from SbeRetryHandler (still being debated)
-        // to l_sbeErrorDataReq->plid;
+        SbeRetryHandler l_SBEobj = SbeRetryHandler();
 
         // Retry the recovery of the SBE
-        //l_SBEobj.main_sbe_handler(l_target, false);
+        l_SBEobj.main_sbe_handler(l_target, false);
 
         // Get the recovery results
-        // NOTE: This method is not in place yet
-        //bool l_recoverySuccessful = l_SBEobj.isSbeRestarted();
-
-        // Set to TRUE for now
-        bool l_recoverySuccessful = true;
+        bool l_recoverySuccessful = l_SBEobj.getSbeRestart();
 
         if (nullptr == g_hostInterfaces ||
             nullptr == g_hostInterfaces->firmware_request)
@@ -206,7 +226,8 @@ void sbeAttemptRecovery(uint64_t i_data)
         // with the HWSV code on the FSP.
         if ((hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
                                                   == l_resp_fw_msg.io_type) &&
-           (0 != l_sbeErrorDataResp->plid) )
+            (GFMM_ERROR_ONLY == l_resp_fw_msg.generic_msg.__onlyError) &&
+            (0 != l_sbeErrorDataResp->plid) )
         {
             l_errPlid = l_sbeErrorDataResp->plid;
         }

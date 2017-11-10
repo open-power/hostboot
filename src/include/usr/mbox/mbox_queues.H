@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -65,12 +67,13 @@ namespace MBOX
         FSP_PROGRESS_CODES_MSGQ = 0x80000003,
         FSP_ERROR_MSGQ          = 0x80000004,
         FSP_VDDR_MSGQ           = 0x80000005,
-        IPL_SERVICE_QUEUE       = 0x80000008, 
+        IPL_SERVICE_QUEUE       = 0x80000008,
         FSP_ATTR_SYNC_MSGQ      = 0x80000009,
         FSP_DUMP_MSGQ_ID        = 0x8000000A,
         FSP_HWPF_ATTR_MSGQ      = 0x8000000B, // HWPF Attribute override/sync
         FSP_VPD_MSGQ            = 0x8000000C,
         FSP_PRD_SYNC_MSGQ_ID    = 0x8000000D,
+        FSP_SBE_SYNC_MSGQ_ID    = 0x8000000F,
         FSP_LID_MSGQ            = FSP_ATTR_SYNC_MSGQ,
 
 
