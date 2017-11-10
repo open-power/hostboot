@@ -77,6 +77,7 @@ mvpdTestData mvpdData[] =
     { MVPD::CP00, MVPD::pdV },
     { MVPD::CP00, MVPD::SB },
     { MVPD::CP00, MVPD::PB },
+    { MVPD::CP00, MVPD::AW },
     { MVPD::LRP0, MVPD::VD },
     { MVPD::LRP0, MVPD::pdV },
     { MVPD::LRP0, MVPD::pdM },
@@ -497,7 +498,7 @@ class MVPDTest: public CxxTest::TestSuite
 
                 // first figure out how big the keyword is
                 cmds++;
-                size_t theSize = 0;                
+                size_t theSize = 0;
                 err = deviceRead( theTarget,
                                   testData,
                                   theSize,
@@ -559,7 +560,7 @@ class MVPDTest: public CxxTest::TestSuite
                     errlCommit( err,
                                 VPD_COMP_ID );
                     continue;
-                } 
+                }
 
                 // verify the data got written
                 cmds++;
