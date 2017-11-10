@@ -1890,15 +1890,15 @@
     <id>ATTR_CHIP_EC_FEATURE_HW424691</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      Cumulus DD1.0: enable workarounds for HW424691 in FBC initfile
-      Set alink token inits via scan for dd1.0 to avoid serial scom conflict
+      Cumulus DDx.x: enable workarounds for HW424691 in FBC initfile
+      Set alink token inits via scan for p9c to avoid serial scom conflict
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
           <value>0x10</value>
-          <test>LESS_THAN_OR_EQUAL</test>
+          <test>GREATER_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
