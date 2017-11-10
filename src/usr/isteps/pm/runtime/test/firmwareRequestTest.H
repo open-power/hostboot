@@ -246,7 +246,7 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                       0x0000FFFF & l_req_fw_msg.generic_msg.data);
 
             hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-            size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+            uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
             memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
             size_t rc = g_hostInterfaces->firmware_request(
                                      sizeof(l_req_fw_msg), &l_req_fw_msg,
