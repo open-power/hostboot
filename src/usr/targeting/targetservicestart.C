@@ -64,6 +64,7 @@
 #include <lpc/lpcif.H>
 #include <xscom/xscomif.H>
 #include <bootloader/bootloaderif.H>
+#include <sbeio/sbeioif.H>
 
 #ifdef CONFIG_DRTM
 #include <secureboot/drtm.H>
@@ -378,6 +379,30 @@ static void initializeAttributes(TargetService& i_targetService,
             //Clear out some attributes that could have stale data
             l_pTopLevel->setAttr<ATTR_HB_RSV_MEM_NEXT_SECTION>(0);
             l_pTopLevel->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(1);
+
+            //It is possible that the hypervisor moved the HRMOR
+            //The SBE should have read the HRMOR value from the master
+            //core prior to stopping its clocks and passed that
+            //value to the bootloader. The bootloader passes this to
+            //HB via the BlToHbDataManager
+            // Setup physical TOC address
+            uint64_t l_hyp_hrmor = 0;
+
+            Bootloader::keyAddrPair_t l_keyAddrPairs =
+            g_BlToHbDataManager.getKeyAddrPairs();
+
+            for (uint8_t keyIndex = 0; keyIndex < MAX_ROW_COUNT; keyIndex++)
+            {
+                if(l_keyAddrPairs.key[keyIndex] == SBEIO::HYPERVISOR_HRMOR)
+                {
+                    l_hyp_hrmor = l_keyAddrPairs.addr[keyIndex];
+                }
+            }
+
+            if(l_hyp_hrmor)
+            {
+                l_pTopLevel->setAttr<ATTR_PAYLOAD_BASE>(l_hyp_hrmor);
+            }
 
             TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
             TARGETING::PredicateIsFunctional l_functional;

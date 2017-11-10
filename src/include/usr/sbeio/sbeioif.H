@@ -32,6 +32,7 @@ namespace SBEIO
     enum KeyAddrStashKeys
     {
         RSV_MEM_ATTR_ADDR = 0x01,  //Start at non-zero
+        HYPERVISOR_HRMOR  = 0x02,
         //On SBE side struct is defaulted so that
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
         //So a key w/ FF means its empty or at its default val
