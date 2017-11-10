@@ -46,6 +46,9 @@ class TCETest: public CxxTest::TestSuite
 {
   public:
 
+// TODO RTC 168745 - reenable helper functions
+#if 0
+
     // This helper functions retrieves the private member variable
     // iv_allocatedAddrs from the Singleton UtilTceMgr class
     std::map<uint64_t, uint32_t> getAllocatedAddrsMap(void)
@@ -82,11 +85,14 @@ class TCETest: public CxxTest::TestSuite
 
         return o_pos;
     }
-
+#endif
 
 
     void testTCE(void)
     {
+// TODO RTC 168745 - reenable testcase
+#if 0
+
         TRACFCOMP( g_trac_tce, ENTER_MRK"testTCE> start" );
 
         errlHndl_t errhdl = nullptr;
@@ -356,7 +362,7 @@ class TCETest: public CxxTest::TestSuite
         }
 
         TRACFCOMP(g_trac_tce, EXIT_MRK"testTCE> complete - %d/%d fails", fails, total);
-
+#endif
     }
 
 };

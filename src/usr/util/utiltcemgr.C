@@ -78,10 +78,12 @@ namespace TCE
 //
 /************************************************************************/
 errlHndl_t utilAllocateTces(const uint64_t i_startingAddress,
-                            const size_t   i_size)
+                            const size_t   i_size,
+                            uint32_t&      o_startingToken)
 {
     return Singleton<UtilTceMgr>::instance().allocateTces(i_startingAddress,
-                                                          i_size);
+                                                          i_size,
+                                                          o_startingToken);
 };
 
 /************************************************************************/
@@ -90,10 +92,10 @@ errlHndl_t utilAllocateTces(const uint64_t i_startingAddress,
 //     Responsible for deallocating TCEs
 //
 /************************************************************************/
-errlHndl_t utilDeallocateTces(const uint64_t i_startingAddress,
+errlHndl_t utilDeallocateTces(const uint32_t i_startingToken,
                               const size_t   i_size)
 {
-    return Singleton<UtilTceMgr>::instance().deallocateTces(i_startingAddress,
+    return Singleton<UtilTceMgr>::instance().deallocateTces(i_startingToken,
                                                             i_size);
 };
 
@@ -143,6 +145,7 @@ errlHndl_t utilSetupPayloadTces(void)
 
     uint64_t addr=0x0;
     size_t   size=0x0;
+    uint32_t token=0x0;
 
     do{
 
@@ -155,9 +158,7 @@ errlHndl_t utilSetupPayloadTces(void)
         break;
     }
 
-    // @TODO RTC 168745 - Update Interface to Return Table Position/aka Token
-    uint32_t token = 0;
-    errl = utilAllocateTces(addr, size);
+    errl = utilAllocateTces(addr, size, token);
     if (errl)
     {
         TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() using addr=0x%.16llX, size=0x%llX", addr, size);
@@ -175,7 +176,7 @@ errlHndl_t utilSetupPayloadTces(void)
 
     } while(0);
 
-    TRACFCOMP(g_trac_tce,EXIT_MRK"utilSetupPayloadTces(): Address=0x%.16llX, size=0x%X, errl_rc=0x%X", addr, size, ERRL_GETRC_SAFE(errl));
+    TRACFCOMP(g_trac_tce,EXIT_MRK"utilSetupPayloadTces(): Address=0x%.16llX, size=0x%X, token=0x%.8X, errl_rc=0x%X", addr, size, token, ERRL_GETRC_SAFE(errl));
 
     return errl;
 }
@@ -186,11 +187,13 @@ errlHndl_t utilClosePayloadTces(void)
 
     uint64_t addr=0x0;
     size_t   size=0x0;
+    uint32_t token=0x0;
 
     do{
 
     TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces(): get Address and Size");
 
+    // Get Payload Address and Size
     errl = getPayloadAddrAndSize(addr, size);
     if (errl)
     {
@@ -198,16 +201,25 @@ errlHndl_t utilClosePayloadTces(void)
         break;
     }
 
-    errl = utilDeallocateTces(addr, size);
+    // Get Starting Payload Token
+    // Get Target Service and the system target to set TCE_START_TOKEN_FOR_PAYLOAD
+    TARGETING::TargetService& tS = TARGETING::targetService();
+    TARGETING::Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys, "utilSetupPayloadTces() system target is NULL");
+
+    token = sys->getAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>();
+
+    errl = utilDeallocateTces(token, size);
     if (errl)
     {
-        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from utilDeallocateTces() using addr=0x%.16llX, size=0x%llX", addr, size);
+        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from utilDeallocateTces() using token=0x%.8X, size=0x%llX", token, size);
         break;
     }
 
     } while(0);
 
-    TRACFCOMP(g_trac_tce,EXIT_MRK"utilClosePayloadTces(): Address=0x%.16llX, size=0x%X, errl_rc=0x%X", addr, size, ERRL_GETRC_SAFE(errl));
+    TRACFCOMP(g_trac_tce,EXIT_MRK"utilClosePayloadTces(): token=0x%.8X, size=0x%X, errl_rc=0x%X", token, size, ERRL_GETRC_SAFE(errl));
 
     return errl;
 }
@@ -520,10 +532,12 @@ errlHndl_t UtilTceMgr::initTceInHdw()
 //
 /************************************************************************/
 errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
-                                    const size_t   i_size)
+                                    const size_t   i_size,
+                                    uint32_t&      o_startingToken)
 {
     errlHndl_t errl = nullptr;
     uint32_t numTcesNeeded = 0;
+    o_startingToken = 0;
 
     TceEntry_t *tablePtr = nullptr;
 
@@ -597,12 +611,23 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
 
         // Check to see if we've already allocated TCEs associated with
         // this starting address
-        std::map<uint64_t, uint32_t>::iterator map_itr
-                 = iv_allocatedAddrs.find(i_startingAddress);
-        if(map_itr != iv_allocatedAddrs.end())
+        bool previouslyAllocated = false;
+        uint32_t pos = 0;
+        for ( auto const& map_itr : iv_allocatedAddrs )
+        {
+           if (map_itr.second.start_addr == i_startingAddress)
+           {
+               // found the starting address
+               previouslyAllocated = true;
+               pos = map_itr.first;
+               break;
+           }
+        }
+
+        if(previouslyAllocated)
         {
             // This starting address has already had TCEs allocated for it
-            TRACFCOMP(g_trac_tce,"UtilTceMgr::allocateTces: ERROR - This starting address 0x%.16llX already has TCEs allocated (pos=0x%X)", i_startingAddress, map_itr->second);
+            TRACFCOMP(g_trac_tce,"UtilTceMgr::allocateTces: ERROR - This starting address 0x%.16llX already has TCEs allocated (pos=0x%X)", i_startingAddress, pos);
 
             /*@
              * @errortype
@@ -617,13 +642,12 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
                                            Util::UTIL_TCE_ALLOCATE,
                                            Util::UTIL_TCE_PREVIOUSLY_ALLOCATED,
                                            i_startingAddress,
-                                           map_itr->second,
+                                           pos,
                                            true /*Add HB SW Callout*/);
 
             errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
             break;
         }
-        // Will set map_itr->second with TCE table position later
 
         // Check to see if createTceTable ran before allocate.  If not we
         // need to create the table and make sure it is mapped.
@@ -743,7 +767,9 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
                 TRACDCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::allocateTces: TCE Entry/Token[%d] (hex) = %llX", index, tablePtr[index]);
             }
 
-            iv_allocatedAddrs[i_startingAddress] = startingIndex;
+            iv_allocatedAddrs[startingIndex].start_addr = i_startingAddress;
+            iv_allocatedAddrs[startingIndex].size = i_size;
+            o_startingToken = startingIndex;
 
             TRACFCOMP(g_trac_tce,"UtilTceMgr::allocateTces: SUCCESSFUL: addr = 0x%.16llX, size = 0x%llX, starting entry=0x%X",i_startingAddress, i_size, startingIndex);
         }
@@ -789,69 +815,42 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
 //     Responsible for deallocating TCE Entries
 //
 /*************************************************************************/
-errlHndl_t UtilTceMgr::deallocateTces(const uint64_t i_startingAddress,
+errlHndl_t UtilTceMgr::deallocateTces(const uint32_t i_startingToken,
                                       const size_t   i_size)
 {
 
     errlHndl_t errl = nullptr;
     bool isContiguous = true;
-    uint32_t startingIndex = 0;
+    uint32_t startingIndex = 0x0;
+    uint64_t startingAddress = 0x0;
 
     TceEntry_t *tablePtr = nullptr;
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"UtilTceMgr::deallocateTces: Address = 0x%.16llX for size = 0x%X",i_startingAddress, i_size);
+    TRACFCOMP(g_trac_tce,ENTER_MRK"UtilTceMgr::deallocateTces: Token = 0x%.8X for size = 0x%X", i_startingToken, i_size);
 
     do
     {
-
         // Assert if i_size is not greater than zero
         assert(i_size > 0, "UtilTceMgr::deallocateTces: i_size = %d, not greater than zero", i_size);
-
-        // Expecting a page-aligned starting address
-        if (i_startingAddress % PAGESIZE)
-        {
-            TRACFCOMP(g_trac_tce,ERR_MRK"UtilTceMgr::deallocateTces: ERROR-Address 0x%.16llX not page aligned", i_startingAddress);
-
-            /*@
-             * @errortype
-             * @moduleid     Util::UTIL_TCE_DEALLOCATE
-             * @reasoncode   Util::UTIL_TCE_ADDR_NOT_ALIGNED
-             * @userdata1    Address to start TCE
-             * @userdata2    Size of the address space trying to get TCEs
-             *               for.
-             * @devdesc      The Physical Address for the TCE entry is not
-             *               page aligned.
-             * @custdesc     A problem occurred during the IPL of the system
-             */
-            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                           Util::UTIL_TCE_DEALLOCATE,
-                                           Util::UTIL_TCE_ADDR_NOT_ALIGNED,
-                                           i_startingAddress,
-                                           i_size,
-                                           true /*Add HB SW Callout*/);
-
-            errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
-            break;
-        }
-
 
         // Get number of TCEs needed - rounding up
         uint32_t numTcesNeeded = ALIGN_PAGE(i_size)/PAGESIZE;
 
-        std::map<uint64_t, uint32_t>::iterator map_itr
-                 = iv_allocatedAddrs.find(i_startingAddress);
+        std::map<uint32_t, TceEntryInfo_t>::iterator map_itr
+                 = iv_allocatedAddrs.find(i_startingToken);
         if( map_itr == iv_allocatedAddrs.end() )
         {
-            // Can't find this starting address. Trace that nothing happens,
+            // Can't find this starting token. Trace that nothing happens,
             // but do not create an error log
-            TRACFCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::deallocateTces: Can't find match of Starting Address = 0x%.16llX (size = 0x%X)",i_startingAddress, i_size);
+            TRACFCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::deallocateTces: Can't find match of Starting Token = 0x%.16llX (size = 0x%X)", i_startingToken, i_size);
             break;
         }
         else
         {
-            startingIndex = map_itr->second;
+            startingIndex = map_itr->first;
+            startingAddress = map_itr->second.start_addr;
         }
-        TRACUCOMP(g_trac_tce,"UtilTceMgr::deallocateTces: numTcesNeeded=0x%X, startingAddress = 0x%X", numTcesNeeded, i_startingAddress);
+        TRACUCOMP(g_trac_tce,"UtilTceMgr::deallocateTces: numTcesNeeded=0x%X, startingAddress = 0x%X", numTcesNeeded, startingAddress);
 
         // @TODO RTC 168745 additional error checking when iv_allocatedAddrs
         //       will be updated to keep track of size, too
@@ -862,7 +861,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint64_t i_startingAddress,
         if (startingIndex > iv_tceEntryCount ||
             startingIndex+numTcesNeeded > iv_tceEntryCount)
         {
-            TRACFCOMP(g_trac_tce,ERR_MRK"UtilTceMgr::deallocateTces:  Invalid startingAddress=0x%X and/or numTcesNeeded=0x%X for table with iv_tceEntryCount=0x%X, No deallocate.", i_startingAddress, numTcesNeeded, iv_tceEntryCount);
+            TRACFCOMP(g_trac_tce,ERR_MRK"UtilTceMgr::deallocateTces:  Invalid startingAddress=0x%X and/or numTcesNeeded=0x%X for table with iv_tceEntryCount=0x%X (startingIndex=0x%X), No deallocate.", startingAddress, numTcesNeeded, iv_tceEntryCount, startingIndex);
 
             /*@
              * @errortype
@@ -919,7 +918,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint64_t i_startingAddress,
         }
 
         // Remove the entry from iv_allocatedAddrs even if 'isContiguous' issue
-        iv_allocatedAddrs.erase(i_startingAddress);
+        iv_allocatedAddrs.erase(startingIndex);
 
         if (!isContiguous)
         {
@@ -941,7 +940,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint64_t i_startingAddress,
             errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                            Util::UTIL_TCE_DEALLOCATE,
                                            Util::UTIL_TCE_ENTRY_NOT_CONTIGUOUS,
-                                           i_startingAddress,
+                                           startingAddress,
                                            i_size,
                                            true /*Add HB SW Callout*/);
             errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
@@ -953,7 +952,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint64_t i_startingAddress,
 
     }while(0);
 
-    TRACFCOMP(g_trac_tce,"UtilTceMgr::deallocateTces: COMPLETE for Addr = 0x%.16llX for size = 0x%X, errl=0x%X",i_startingAddress, i_size, ERRL_GETRC_SAFE(errl));
+    TRACFCOMP(g_trac_tce,"UtilTceMgr::deallocateTces: COMPLETE for Token = 0x%.8X, Addr = 0x%.16llX for size = 0x%X, errl=0x%X",i_startingToken, startingAddress, i_size, ERRL_GETRC_SAFE(errl));
     printIvMap(); //Debug
 
     return errl;
@@ -1129,9 +1128,9 @@ void UtilTceMgr::printIvMap(void) const
 {
     TRACUCOMP(g_trac_tce,"UtilTceMgr::printIvMap: size=%d", iv_allocatedAddrs.size());
 
-    for ( auto map_itr : iv_allocatedAddrs )
+    for ( auto const& map_itr : iv_allocatedAddrs )
     {
-        TRACUCOMP(g_trac_tce,"UtilTceMgr: printIvMap: addr=0x%.16llX, pos=0x%X", map_itr.first, map_itr.second);
+        TRACUCOMP(g_trac_tce,"UtilTceMgr: printIvMap: token=0x%.8X, addr=0x%.16llX, size=0x%X", map_itr.first, map_itr.second.start_addr, map_itr.second.size);
     }
 
 }

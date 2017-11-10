@@ -25,6 +25,7 @@
 
 #include <util/utillidmgr.H>
 #include <util/util_reasoncodes.H>
+#include <util/utiltce.H>
 #include <vfs/vfs.H>
 #include <stdio.h>
 #include <assert.h>
@@ -352,6 +353,8 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     uint8_t* dataPtr = nullptr;
     void* copyOffset = nullptr;
     bool img_in_pnor = false;
+    bool tces_allocated = false;
+    uint32_t tceToken = 0;
 
     do{
         //////////////////////////////////////////////////
@@ -368,6 +371,21 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
         //Image not in PNOR, request from FSP.
         if(iv_spBaseServicesEnabled)
         {
+            // If using TCEs, setup TCE Table for FSP to use
+            if (TCE::utilUseTcesForDmas())
+            {
+                // Use Preverification Location and Size
+                errl = TCE::utilAllocateTces(MCL_TMP_ADDR,
+                                             MCL_TMP_SIZE,
+                                             tceToken);
+                if(errl)
+                {
+                    UTIL_FT(ERR_MRK"getLid: Error while allocating TCEs.");
+                    break;
+                }
+                tces_allocated = true;
+            }
+
             errl = createMsgQueue();
             if(errl)
             {
@@ -384,8 +402,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
             UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
             UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
-            //change to use TCE Window for improved performance.  RTC: 68295
-            UTILLID_ADD_TCE_TOKEN( 0 ,  l_pMsg->data[1] );
+            UTILLID_ADD_TCE_TOKEN( tceToken ,  l_pMsg->data[1] );
 
             errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
             if(errl)
@@ -546,12 +563,38 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                 }
 
             }while(transferred_data < iv_lidSize);
+
         }
         if(errl)
         {
             break;
         }
     }while(0);
+
+    // If TCEs were allocated previously, deallocate them here
+    if (tces_allocated)
+    {
+        // Use Preverification Location and Size
+        auto tce_errl = TCE::utilDeallocateTces(tceToken,
+                                                MCL_TMP_SIZE);
+
+        if(tce_errl)
+        {
+            UTIL_FT(ERR_MRK"getLid: Error while deallocating TCEs.");
+
+            if (errl)
+            {
+                // Commit tce_errl here and original error will be passed back
+                tce_errl->collectTrace(UTIL_COMP_NAME);
+                errlCommit( tce_errl, UTIL_COMP_ID );
+            }
+            else
+            {
+                // Set errl to tce_errl
+                errl = tce_errl;
+            }
+        }
+    }
 
     if (iv_spBaseServicesEnabled)
     {
