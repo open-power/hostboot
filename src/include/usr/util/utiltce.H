@@ -45,9 +45,15 @@ namespace TCE
  * @param[in] i_startingAddress - Starting physical address that the allocated
  *                                TCEs will map to.
  *                                Needs to be Page-Aligned or will fail.
+ *
  * @param[in] i_size - Size of the address space that TCEs map to.
  *                     Size must be less than (512K * PAGESIZE) or will fail.
  *                     Assert if not greater than zero.
+ *
+ * @param[out] o_startingToken - Starting Entry into the table.
+ *                               (This is an offset into the array based on the
+ *                                TCE index * PAGESIZE.  Each TCE entry maps to
+ *                                a pagesize of memory)
  *
  * Note:  First time this is called will cause TCE Table to be created and
  *        the Processors to be setup to point at the TCE Table
@@ -55,24 +61,24 @@ namespace TCE
  * @return errlHndl_t - Return Error Handle if failed
  *
  */
-errlHndl_t utilAllocateTces(uint64_t i_startingAddress,
-                            size_t i_size);
+errlHndl_t utilAllocateTces(uint64_t  i_startingAddress,
+                            size_t    i_size,
+                            uint32_t& o_startingToken);
 
 /**
  * @brief Responsible for deallocating TCEs
  *
- * @param[in] i_startingAddress  Starting physical address of the TCEs that
- *                               are to be deallocated from the TCE Table.
- *                               Needs to be page-aligned or will fail.
- * @param[in] i_size - Size of address space that the TCEs that are to
- *                     be deallocated map to.
+ * @param[in] i_startingToken  Token indicating the starting entry of the
+ *                             TCE Table to remove
+ *
+ * @param[in] i_size - Size of memory space to remove associated TCE entries
  *                     Size must be less than (512K * PAGESIZE) or will fail.
  *                     Assert if not greater than zero.
  *
  * @return errlHndl_t - Return Error Handle if failed
  *
  */
-errlHndl_t utilDeallocateTces(uint64_t i_startingAddress,
+errlHndl_t utilDeallocateTces(uint32_t i_startingToken,
                               size_t i_size);
 
 

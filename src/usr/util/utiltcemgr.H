@@ -83,6 +83,16 @@ struct TarTceAddrRegister_t
 
 };
 
+struct TceEntryInfo_t
+{
+    uint64_t start_addr;
+    size_t size;
+
+    // Constructor to default to zero
+    TceEntryInfo_t() :
+        start_addr(0x0), size(0) {};
+};
+
 
 /** @class UtilTceMgr
  *  @brief   Responsible for managing the TCE entries
@@ -111,17 +121,16 @@ class UtilTceMgr
     size_t iv_tceTableSize;
 
     /* Cache of starting addresses of allocated TCEs and their
-     *  starting entry in the TCE Table
-     * Indexed by starting address, returns position of first entry
-     *  in the TCE table associated with this starting address
-     * @TODO RTC 168745 update this to a vector of structs that keeps track of
-     *       starting address, first entry, and size of memory covered for
-     *       better error handling
+     *  tokens (starting entry in the TCE Table) and size
+     * Indexed by token - the position of the first entry of the TCE Table
+     * Returns the starting address and size of the memory allocated by the
+     *  entries in the TCE Table
      */
-    std::map<uint64_t, uint32_t> iv_allocatedAddrs;
+    std::map<uint32_t, TceEntryInfo_t> iv_allocatedAddrs;
 
     /* For Debug purposes */
     void printIvMap() const;
+
 
     /** Max TCE Entries and Size for the TCE Table */
     enum
@@ -230,6 +239,10 @@ class UtilTceMgr
      * @param[in] i_size - Size of the address space that TCEs map to
      *                     Size must be less than (512K * PAGESIZE) or will fail
      *                     Assert if not greater than zero
+     * @param[out] o_startingToken - Starting Entry into the table.
+     *                               (This is an offset into the array based on
+     *                                the TCE index * PAGESIZE.  Each TCE entry
+     *                                maps to a  pagesize of memory)
      *
      * Note:  First time this is called will cause TCE table to be created and
      *        the Processors to be setup to point at the TCE table
@@ -237,24 +250,23 @@ class UtilTceMgr
      * @return errl - Return Error Handle if failed.
      *
      */
-    errlHndl_t allocateTces(uint64_t i_startingAddress,
-                            size_t   i_size);
+    errlHndl_t allocateTces(uint64_t  i_startingAddress,
+                            size_t    i_size,
+                            uint32_t& o_startingToken);
 
     /**
      * @brief Responsible for deallocating TCEs
      *
-     * @param[in] i_startingAddress  Starting Address that the TCEs that
-     *                               are to be deallocated map to
-     *                               Address needs to be page-aligned.
-     * @param[in] i_size - Size of address space that the TCEs that are to
-     *                     be deallocated map to
+     * @param[in] i_startingToken  Token indicating the starting entry of the
+     *                             TCE Table to remove
+     * @param[in] i_size - Size of memory space to remove associated TCE entries
      *                     Size must be less than (512K * PAGESIZE) or will fail
      *                     Assert if not greater than zero
      *
      * @return errl - Return Error Handle if fatal failure occurred.
      *
      */
-    errlHndl_t deallocateTces(uint64_t i_startingAddress,
+    errlHndl_t deallocateTces(uint32_t i_startingToken,
                               size_t   i_size);
 
     /**
