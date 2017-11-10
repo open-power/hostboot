@@ -59,7 +59,6 @@ SBEI_OBJPATH  = ${HBFW_OBJPATH:S/hbfw\/img/sbei\/sbfw\/img/g}
 ENGD_WOFPATH  = ${HBFW_OBJPATH:S/hbfw\/img/engd\/wofdata/g}
 ENGD_MEMDPATH = ${HBFW_OBJPATH:S/hbfw\/img/engd\/memd/g}
 HBFW_SIMPATH  = ${HBFW_OBJPATH:S/img/simics/g}
-HBFW_IMGPATH  = ${.PATH:M*img*}
 #################################################
 # Copy Hostboot binary images to obj dir to be grabbed
 # during build flash pass and consumption by HWSV.
@@ -74,7 +73,7 @@ hostboot_runtime_SYMS=hbirt.syms
 hostboot_securerom_SYMS=securerom.syms
 hostboot_bootloader_SYMS=hbibl.syms
 
-IMAGE_EDIT_PROGRAM=editimgid
+IMAGE_EDIT_PROGRAM = ${editimgid:P}
 
 # Input default images
 BOOTLDR_IMG = hostboot_bootloader.bin
@@ -202,7 +201,7 @@ BUILD_TYPE_PARAMS = --build-type fspbuild
 # rule to update hostboot image tags for custom CFM image, only enabled
 # when the enviroment variable CFM_TEST_IMAGE is populated
 update_image_id: cp_hbfiles validate_cfm_image_name
-	${HBFW_IMGPATH:F${IMAGE_EDIT_PROGRAM}} --binFile=${CFM_TEST_IMAGE:p} \
+	${IMAGE_EDIT_PROGRAM} --binFile=${CFM_TEST_IMAGE:p} \
         --symsFile=${HBFW_SIMPATH:F${${CFM_TEST_IMAGE:R}_SYMS}}
 
 # make sure the files exist - the perl script isnt all that smart
