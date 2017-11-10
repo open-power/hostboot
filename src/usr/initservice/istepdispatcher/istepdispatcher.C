@@ -2179,12 +2179,12 @@ void IStepDispatcher::handlePerstMsg(msg_t * & io_pMsg)
           ( iv_p9_phbPerstLibLoaded == false )
         {
             // load the libraries
-            l_errl = VFS::module_load( "p9_phbPerst.so" );
+            l_errl = VFS::module_load( "libp9_phbPerst.so" );
 
             if (l_errl)
             {
                 TRACFCOMP( g_trac_initsvc,
-                           "handlePerstMsg: Error loading p9_phbPerst, "
+                           "handlePerstMsg: Error loading libp9_phbPerst, "
                            "PLID = 0x%x",
                            l_errl->plid() );
 
