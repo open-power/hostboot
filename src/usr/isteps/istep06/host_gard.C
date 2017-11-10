@@ -224,24 +224,10 @@ void* host_gard( void *io_pArgs )
         core_msg->data[0] = TARGETING::get_huid(l_masterCore);
         core_msg->extra_data = NULL;
 
-        // TODO RTC 149318 Once HWSV is updated to take the master core
-        // from data[0], stop sending the EX in data[1].
-        // Set data[1] to 0 instead of the following.
-        {
-            // Get the EX chip associated with the master core as that is the
-            // chip that has the MASTER_EX attribute associated with it
-            TARGETING::TargetHandleList targetList;
-            getParentAffinityTargets(targetList,
-                             l_masterCore,
-                             TARGETING::CLASS_UNIT,
-                             TARGETING::TYPE_EX);
-            assert(targetList.size() == 1,
-             "host_gard: Incorrect EX chip(s) associated with masterCore");
-            core_msg->data[1] = TARGETING::get_huid( targetList[0] );
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
-                  "Sending MSG_MASTER_CORE message with EX HUID %08x",
-                  core_msg->data[1]);
-        }
+        //data[1] is unused
+        core_msg->data[1] = 0;
+
+
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,"host_gard: "
               "Sending MSG_MASTER_CORE message with HUID %08x",
               core_msg->data[0]);
