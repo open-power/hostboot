@@ -322,22 +322,6 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                      attrs->proc_dpll_divider )
                     / 1000;
 
-                uint32_t l_reference_freq_khz = revle32(l_globalppb->frequency_step_khz);
-
-                // The Boot frequency must be less than ultra turbo frequency
-                // if not log an error
-                if ((l_boot_freq_mhz * 1000) > l_reference_freq_khz)
-                {
-                    FAPI_ERR("Boot frequency %d kHz is greater than UltraTurbo frequency %d kHz",
-                             (l_boot_freq_mhz * 1000), l_reference_freq_khz);
-                    FAPI_ASSERT(false,
-                                fapi2::PM_EVID_BOOT_FREQ_GT_UT()
-                                .set_CHIP_TARGET(i_target)
-                                .set_BOOT_FREQ(l_boot_freq_mhz * 1000)
-                                .set_UT_FREQ(l_reference_freq_khz),
-                                "Safe mode freqency is greater than UltraTurbo frequency");
-                }
-
                 FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
                                        i_target,
                                        l_boot_freq_mhz));
