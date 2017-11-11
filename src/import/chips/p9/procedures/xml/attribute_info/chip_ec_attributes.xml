@@ -2113,6 +2113,54 @@
   </attribute>
   <!-- ******************************************************************** -->
   <attribute>
+      <id>ATTR_CHIP_EC_FEATURE_HW425038</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW425038 for INT initfile on Coral and Cumulus systems. Clockgate disable workaround for INT ARX timeout issue
+  </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+      <id>ATTR_CHIP_EC_FEATURE_HW426891</id>
+    <targetType>TARGET_TYPE_PROC_CHIP,TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW426891 for INT initfile on Coral and Cumulus systems for ship mode
+  </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW397255</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
