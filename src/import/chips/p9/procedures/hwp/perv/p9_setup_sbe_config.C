@@ -119,23 +119,53 @@ fapi2::ReturnCode p9_setup_sbe_config(const
     fapi2::buffer<uint32_t> l_read_5 = 0;
     fapi2::buffer<uint32_t> l_read_6 = 0;
     fapi2::buffer<uint32_t> l_data32_cbs_cs;
+    fapi2::buffer<uint64_t> l_data64_cbs_cs;
     fapi2::buffer<uint8_t> l_attr_read;
+    fapi2::buffer<uint8_t> l_accessViaScom;
+    fapi2::buffer<uint64_t> l_data64_scratchreg8 = 0;
+    fapi2::buffer<uint64_t> l_data64_scratchreg = 0;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_OPTICS_CONFIG_MODE_Type l_optics_cfg_mode;
     FAPI_INF("p9_setup_sbe_config::  Entering ...");
 
+    l_accessViaScom = 0;
+#ifdef __HOSTBOOT_MODULE
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip,   l_accessViaScom));
+#endif
+
+
     FAPI_DBG("Read Scratch8 for validity of Scratch register");
-    //Getting SCRATCH_REGISTER_8 register value
-    FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
-                                    l_read_scratch8)); //l_read_scratch8 = CFAM.SCRATCH_REGISTER_8
+
+    if ( l_accessViaScom )
+    {
+        FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM,
+                                l_data64_scratchreg8));
+        l_data64_scratchreg8.extractToRight< 0, 32 >(l_read_scratch8);
+    }
+    else
+    {
+        //Getting SCRATCH_REGISTER_8 register value
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
+                                        l_read_scratch8)); //l_read_scratch8 = CFAM.SCRATCH_REGISTER_8
+    }
 
     //set_scratch1_reg
     {
 
         FAPI_DBG("Read Scratch_reg1");
-        //Getting SCRATCH_REGISTER_1 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_1_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_1
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_1_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_1 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_1_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_1
+        }
 
         FAPI_DBG("Reading ATTR_EQ_GARD, ATTR_EC_GARD");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EQ_GARD, i_target_chip, l_read_1));
@@ -148,10 +178,21 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.insertFromRight< ATTR_EC_GARD_STARTBIT, ATTR_EC_GARD_LENGTH >(l_read_6);
 
         FAPI_DBG("Setting up value of Scratch_reg1");
-        //Setting SCRATCH_REGISTER_1 register value
-        //CFAM.SCRATCH_REGISTER_1 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_1_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_1_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_1 register value
+            //CFAM.SCRATCH_REGISTER_1 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_1_FSI,
+                                            l_read_scratch_reg));
+        }
+
 
         l_read_scratch8.setBit<0>();
     }
@@ -163,9 +204,19 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_ob3_pll_bucket;
 
         FAPI_DBG("Reading Scratch_reg2");
-        //Getting SCRATCH_REGISTER_2 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_2
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_2 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_2
+        }
 
         FAPI_DBG("Reading ATTR_I2C_BUS_DIV_REF");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_I2C_BUS_DIV_REF, i_target_chip, l_read_4));
@@ -226,19 +277,39 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.insertFromRight<ATTR_OB3_PLL_BUCKET_STARTBIT, ATTR_OB3_PLL_BUCKET_LENGTH>(l_ob3_pll_bucket);
 
         FAPI_DBG("Setting up value of Scratch_reg2");
-        //Setting SCRATCH_REGISTER_2 register value
-        //CFAM.SCRATCH_REGISTER_2 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_2 register value
+            //CFAM.SCRATCH_REGISTER_2 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI,
+                                            l_read_scratch_reg));
+        }
 
         l_read_scratch8.setBit<1>();
     }
     //set_scratch3_reg
     {
         FAPI_DBG("Reading Scratch_reg3");
-        //Getting SCRATCH_REGISTER_3 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_3_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_3
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_3_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_3 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_3_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_3
+        }
 
         FAPI_DBG("Reading the BOOT_FLAGS");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BOOT_FLAGS, FAPI_SYSTEM, l_read_5));
@@ -246,10 +317,20 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.insertFromRight< ATTR_BOOT_FLAGS_STARTBIT, ATTR_BOOT_FLAGS_LENGTH >(l_read_5);
 
         FAPI_DBG("Setting up value of Scratch_reg3");
-        //Setting SCRATCH_REGISTER_3 register value
-        //CFAM.SCRATCH_REGISTER_3 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_3_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_3_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_3 register value
+            //CFAM.SCRATCH_REGISTER_3 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_3_FSI,
+                                            l_read_scratch_reg));
+        }
 
         l_read_scratch8.setBit<2>();
     }
@@ -263,9 +344,19 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_attr_obus_ratio = 0;
 
         FAPI_DBG("Reading Scratch_reg4");
-        //Getting SCRATCH_REGISTER_4 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_4_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_4
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_4_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_4 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_4_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_4
+        }
 
         FAPI_DBG("Reading PLL bypass attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CP_FILTER_BYPASS, i_target_chip, l_cp_filter_bypass),
@@ -298,10 +389,20 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.writeBit<ATTR_OBUS_RATIO_VALUE_BIT>(l_attr_obus_ratio & 0x1);
 
         FAPI_DBG("Setting up value of Scratch_reg4");
-        //Setting SCRATCH_REGISTER_4 register value
-        //CFAM.SCRATCH_REGISTER_4 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_4_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_4_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_4 register value
+            //CFAM.SCRATCH_REGISTER_4 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_4_FSI,
+                                            l_read_scratch_reg));
+        }
 
         l_read_scratch8.setBit<3>();
     }
@@ -316,9 +417,19 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_slow_pci_ref_clock;
 
         FAPI_DBG("Reading Scratch_reg5");
-        //Getting SCRATCH_REGISTER_5 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_5_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_5
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_5_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_5 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_5_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_5
+        }
 
         FAPI_DBG("Reading control flag attributes");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IPL_PHASE, FAPI_SYSTEM, l_system_ipl_phase));
@@ -394,10 +505,20 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         l_read_scratch_reg.insert<ATTR_PLL_MUX_STARTBIT, ATTR_PLL_MUX_LENGTH, 0>(l_pll_mux);
 
         FAPI_DBG("Setting up value of Scratch_reg5");
-        //Setting SCRATCH_REGISTER_5 register value
-        //CFAM.SCRATCH_REGISTER_5 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_5_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_5_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_5 register value
+            //CFAM.SCRATCH_REGISTER_5 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_5_FSI,
+                                            l_read_scratch_reg));
+        }
 
         l_read_scratch8.setBit<4>();
     }
@@ -406,9 +527,19 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         uint8_t l_pump_mode;
 
         FAPI_DBG("Reading Scratch_reg6");
-        //Getting SCRATCH_REGISTER_6 register value
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_6_FSI,
-                                        l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_6
+
+        if ( l_accessViaScom )
+        {
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_6_SCOM,
+                                    l_data64_scratchreg));
+            l_data64_scratchreg.extractToRight< 0, 32 >(l_read_scratch_reg);
+        }
+        else
+        {
+            //Getting SCRATCH_REGISTER_6 register value
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_6_FSI,
+                                            l_read_scratch_reg)); //l_read_scratch_reg = CFAM.SCRATCH_REGISTER_6
+        }
 
         FAPI_DBG("Reading attribute for Hostboot slave bit");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target_chip,
@@ -458,32 +589,68 @@ fapi2::ReturnCode p9_setup_sbe_config(const
         (l_read_2);
 
         FAPI_DBG("Setting up value of Scratch_reg6");
-        //Setting SCRATCH_REGISTER_6 register value
-        //CFAM.SCRATCH_REGISTER_6 = l_read_scratch_reg
-        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_6_FSI,
-                                        l_read_scratch_reg));
+
+        if ( l_accessViaScom )
+        {
+            l_data64_scratchreg.insertFromRight< 0, 32 >(l_read_scratch_reg);
+            FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_6_SCOM,
+                                    l_data64_scratchreg));
+        }
+        else
+        {
+            //Setting SCRATCH_REGISTER_6 register value
+            //CFAM.SCRATCH_REGISTER_6 = l_read_scratch_reg
+            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_6_FSI,
+                                            l_read_scratch_reg));
+        }
 
         l_read_scratch8.setBit<5>();
     }
+
     FAPI_DBG("Setting Scratch8 for validity of Scratch register");
-    //Setting SCRATCH_REGISTER_8 register value
-    //CFAM.SCRATCH_REGISTER_8 = l_read_scratch8
-    FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
-                                    l_read_scratch8));
+
+    if ( l_accessViaScom )
+    {
+        l_data64_scratchreg8.insertFromRight< 0, 32 >(l_read_scratch8);
+        FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_8_SCOM,
+                                l_data64_scratchreg8));
+    }
+    else
+    {
+        //Setting SCRATCH_REGISTER_8 register value
+        //CFAM.SCRATCH_REGISTER_8 = l_read_scratch8
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_8_FSI,
+                                        l_read_scratch8));
+    }
 
     //Reading SECURITY_MODE attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_MODE, FAPI_SYSTEM, l_attr_read));
 
     if(l_attr_read.getBit<7>() == 0)
     {
-        FAPI_DBG("Reading CBS Control Status register");
-        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
-
-        if(!l_data32_cbs_cs.getBit<PERV_CBS_CS_SAMPLED_SMD_PIN>()) //SMD=0 indicate chip is in secure mode
+        if ( l_accessViaScom )
         {
-            FAPI_DBG("Changing SAB bit to unsecure mode");
-            l_data32_cbs_cs.clearBit<PERV_CBS_CS_SECURE_ACCESS_BIT>();
-            FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
+            FAPI_DBG("Reading CBS Control Status register");
+            FAPI_TRY(fapi2::getScom(i_target_chip, PERV_CBS_CS_SCOM, l_data64_cbs_cs));
+
+            if(!l_data64_cbs_cs.getBit<PERV_CBS_CS_SAMPLED_SMD_PIN>()) //SMD=0 indicate chip is in secure mode
+            {
+                FAPI_DBG("Changing SAB bit to unsecure mode");
+                l_data64_cbs_cs.clearBit<PERV_CBS_CS_SECURE_ACCESS_BIT>();
+                FAPI_TRY(fapi2::putScom(i_target_chip, PERV_CBS_CS_SCOM, l_data64_cbs_cs));
+            }
+        }
+        else
+        {
+            FAPI_DBG("Reading CBS Control Status register");
+            FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
+
+            if(!l_data32_cbs_cs.getBit<PERV_CBS_CS_SAMPLED_SMD_PIN>()) //SMD=0 indicate chip is in secure mode
+            {
+                FAPI_DBG("Changing SAB bit to unsecure mode");
+                l_data32_cbs_cs.clearBit<PERV_CBS_CS_SECURE_ACCESS_BIT>();
+                FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_CBS_CS_FSI, l_data32_cbs_cs));
+            }
         }
     }
 
