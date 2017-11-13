@@ -147,14 +147,6 @@ struct hdatSMPLinkInfo_t
 
 }__attribute__ ((packed));
 
-/** NV Keyword header struct */
-typedef struct{
-    uint32_t magic;     // = "NV00"
-    uint8_t  version;   // Version of the structure = 0x01 start
-    uint8_t  config;    // Configuration specifier : redbud=0x01,sequoia=0x02
-    uint8_t  reserved[249];  // keyword is 255 bytes long
-}__attribute__ ((packed)) hdatNVKwdStruct_t;
-
 enum hdatSMPLinkUsage
 {
     HDAT_SMP_LINK_USAGE_SMP         = 0,
@@ -389,7 +381,7 @@ errlHndl_t hdatGetAsciiKwdForPvpd(
 /**
  * @brief  Get the Full MVPD records post adding start/end tag.
  *         We need to add the tag back, since HB is stripping them off before
- *         storing the vpd records in pnor cache. 
+ *         storing the vpd records in pnor cache.
  *
  * @param[in] i_target input target pointer
  * @param[out]o_kwdSize: keyword size
@@ -410,7 +402,7 @@ errlHndl_t hdatGetMvpdFullRecord(
 /**
  * @brief  Get the Full PVPD records post adding start/end tag.
  *         We need to add the tag back, since HB is stripping them off before
- *         storing the vpd records in pnor cache. 
+ *         storing the vpd records in pnor cache.
  * @param[out]o_kwdSize: keyword size
  * @param[out]o_kwd: key word array
  * @param[in] i_fetchVpd: relevant structure to be read to fetch the VPD

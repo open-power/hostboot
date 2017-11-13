@@ -239,6 +239,14 @@ enum hdatRhbPermType : uint8_t
     RHB_READ_WRITE = RHB_READ_ONLY | RHB_WRITE_ONLY,
 };
 
+/** NV Keyword header struct */
+typedef struct{
+    uint32_t magic;     // = "NV00"
+    uint8_t  version;   // Version of the structure = 0x01 start
+    uint8_t  config;    // Configuration specifier : redbud=0x01,sequoia=0x02
+    uint8_t  reserved[249];  // keyword is 255 bytes long
+}__attribute__ ((packed)) hdatNVKwdStruct_t;
+
 /* vpd constants
  *      Defining vpd constants
  */
