@@ -4083,7 +4083,7 @@ uint16_t get_iac_vdn_value (uint16_t i_vpd_vdn_mv,
     const uint8_t MIN_IDDQ_VALUE = 6; //considering 0.6 as 6 here for easy math
     const uint16_t IDDQ_MIN_VOLT_LEVEL = 600;
     uint8_t l_measured_temp_C[2] = {0};
-    uint8_t l_Ivdnq_5ma[2] = {0};
+    uint16_t l_Ivdnq_5ma[2] = {0};
     float l_scaled_leakage_ma[2] = {0};
     uint16_t l_Ivdnq_vpd_ma = 0;
     uint8_t i = 0;
