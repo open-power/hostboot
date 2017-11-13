@@ -38,6 +38,7 @@
 #include <endian.h>
 #include <vpd/pvpdenums.H>
 #include <devicefw/userif.H>
+#include <hdat/hdat.H>
 
 
 extern trace_desc_t * g_trac_ipmi;
@@ -1408,21 +1409,44 @@ namespace SENSOR
                                     DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
             if (!l_err)
             {
-                uint8_t l_kwd[l_nvKwdSize] = {0};
-                // now read the keyword
-                l_err = deviceRead(l_nodeTargets[0],l_kwd,l_nvKwdSize,
-                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
-                if (!l_err)
+                if (l_nvKwdSize == sizeof(HDAT::hdatNVKwdStruct_t))
                 {
-                    uint8_t cfgID = l_kwd[l_nvKwdSize-1];
-                    if (cfgID < 16) // maximum setting (bits 0-15)
+                    uint8_t l_kwd[l_nvKwdSize] = {0};
+                    // now read the keyword
+                    l_err = deviceRead(l_nodeTargets[0],l_kwd,l_nvKwdSize,
+                                    DEVICE_PVPD_ADDRESS(l_Record,l_KeyWord));
+                    if (!l_err)
                     {
-                        L_NV_bits = 0x0001 << cfgID;
+                        HDAT::hdatNVKwdStruct_t * NVptr =
+                            reinterpret_cast<HDAT::hdatNVKwdStruct_t*>(l_kwd);
+
+                        // Valid NV keyword config has NV00 as magic header
+                        if ( !memcmp((char*)&(NVptr->magic),"NV00", 4) )
+                        {
+                            uint8_t cfgID = NVptr->config;
+                            if (cfgID < 16) // maximum setting (bits 0-15)
+                            {
+                                L_NV_bits = 0x0001 << cfgID;
+                            }
+                            else
+                            {
+                                TRACFCOMP(g_trac_ipmi,"getNVCfgIDBit(): Invalid NV config 0x%02X", cfgID);
+                            }
+                        }
+                        else
+                        {
+                            TRACFCOMP(g_trac_ipmi, "Invalid NV magic header: 0x%.8X", NVptr->magic);
+                            TRACFBIN(g_trac_ipmi, "NV KEYWORD", l_kwd, l_nvKwdSize);
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record data",l_err->eid());
                     }
                 }
                 else
                 {
-                    TRACFCOMP(g_trac_ipmi,ERR_MRK"%.8X Error getting VNDR record data",l_err->eid());
+                    TRACFCOMP(g_trac_ipmi,"Invalid NV keyword size: %d, expected %d",l_nvKwdSize,sizeof(HDAT::hdatNVKwdStruct_t));
                 }
             }
             else
