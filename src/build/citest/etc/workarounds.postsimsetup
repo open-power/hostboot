@@ -33,8 +33,5 @@
 #cp $BACKING_BUILD/src/simu/data/cec-chip/base_cec_chip_file $sb/simu/data/cec-chip
 #patch -p0 $sb/simu/data/cec-chip/base_cec_chip_file $PROJECT_ROOT/src/build/citest/etc/patches/my_patch_File
 
-
-
-echo "Switch to simulating P9N DD2.0 by default"
-sbex -t 1034628
-
+#Simulation stalls while running Hostboot standalone simics
+sbex -t 1038850
