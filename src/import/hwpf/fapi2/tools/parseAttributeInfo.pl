@@ -31,17 +31,26 @@ use Getopt::Long;
 # Print Command Line Help
 #------------------------------------------------------------------------------
 my $arg_output_dir = undef;
+my $parse_defaults = '';
 
 # Get the options from the command line - the rest of @ARGV will
 # be filenames
-GetOptions( "output-dir=s" => \$arg_output_dir );
+GetOptions(
+    "output-dir=s"   => \$arg_output_dir,
+    "parse_defaults" => \$parse_defaults
+);
 
 my $numArgs = $#ARGV + 1;
 if ( ( $numArgs < 1 ) || ( $arg_output_dir eq undef ) )
 {
-    print("Usage: parseAttributeInfo.pl --output-dir=<output dir> <attr-xml-file1> [<attr-xml-file2> ...]\n");
+    print(
+        "Usage: parseAttributeInfo.pl --output-dir=<output dir> [--parse_defaults] <attr-xml-file1> [<attr-xml-file2> ...]\n"
+    );
     print("  This perl script will parse attribute XML files and create the following files:\n");
     print("  - attribute_ids.H.          Contains IDs, type, value enums and other information\n");
+    print(
+        "                              When --parse_defaults is specified, default tags are handled and added to this file too.\n"
+    );
     print("  - fapi2_chip_ec_feature.H   Contains a function to query chip EC features\n");
     print("  - attribute_plat_check.H    Contains compile time checks that all attributes are\n");
     print("                              handled by the platform\n");
@@ -584,6 +593,85 @@ foreach my $argnum ( 0 .. $#ARGV )
             }
 
             print AIFILE "};\n";
+        }
+
+        #----------------------------------------------------------------------
+        # Print if the attribute has a default value
+        #----------------------------------------------------------------------
+        if ( $parse_defaults == 1 )
+        {
+            if ( exists $attr->{default} )
+            {
+                print AIFILE "const bool $attr->{id}_hasDefault = true;\n";
+
+                #----------------------------------------------------------------
+                # Handle default attribute values and printing
+                #----------------------------------------------------------------
+
+                # Need to look for and convert ENUM values.
+                # Need to add ULL/LL to 64 bit values
+                # Need to handle array inits
+                my $defaultVal   = $attr->{default};
+                my @defaultVals  = split( ',', $defaultVal );
+                my @defaultArray = ();
+
+                foreach my $defVal (@defaultVals)
+                {
+                    # Remove leading/trailing whitespace
+                    $defVal =~ s/^\s+//;
+                    $defVal =~ s/\s+$//;
+
+                    # Determine if this is an enum.  If it contains a character, and it doesn't start with "0x"
+                    # then assume it's an enum
+                    my $defaultIsEnum = ( ( $defVal =~ /[[:alpha:]]/ ) && ( substr( $defVal, 0, 2 ) ne "0x" ) );
+                    if ( $defaultIsEnum && ( exists $attr->{enum} ) )
+                    {
+                        $defaultVal = "fapi2::ENUM_$attr->{id}_$defVal";
+                    }
+                    else
+                    {
+                        $defaultVal = $defVal;
+                        if ( $attr->{valueType} eq 'uint64' )
+                        {
+                            $defaultVal = $defaultVal . "ULL";
+                        }
+                        elsif ( $attr->{valueType} eq 'int64' )
+                        {
+                            $defaultVal = $defaultVal . "LL";
+                        }
+                    }
+                    if ( $attr->{array} )
+                    {
+                        push @defaultArray, $defaultVal;
+                    }
+                }
+
+                if ( $attr->{array} )
+                {
+                    for my $idx ( 0 .. $#defaultArray )
+                    {
+                        if ( $idx == 0 )
+                        {
+                            $defaultVal = "{" . @defaultArray[$idx];
+                        }
+                        else
+                        {
+                            $defaultVal = $defaultVal . "," . @defaultArray[$idx];
+                        }
+
+                    }
+                    $defaultVal = $defaultVal . "}";
+
+                }
+
+                print AIFILE "const $attr->{id}_Type $attr->{id}_Default = $defaultVal;\n";
+
+            }
+            else
+            {
+                print AIFILE "const bool $attr->{id}_hasDefault = false;\n";
+            }
+
         }
 
         #----------------------------------------------------------------------
