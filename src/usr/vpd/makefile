@@ -26,7 +26,7 @@ ROOTPATH = ../../..
 MODULE = vpd
 
 #include configuration defines
-include $(ROOTPATH)/obj/genfiles/config.mk
+include $(ROOTPATH)/config.mk
 
 #include common objects between hb and runtime
 include vpd.mk
