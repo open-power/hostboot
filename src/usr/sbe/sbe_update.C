@@ -1887,6 +1887,8 @@ namespace SBE
 
             // If the current seeprom is side 0 and is on master proc,
             // then attempt read via chipOp
+            // TODO RTC: 182266 Remove is_master conditional once we figure out
+            //      how we can write to master cache from slave SBE
             if (l_sideZeroIsActive && io_sbeState.target_is_master)
             {
                 err = getSeepromSideVersionViaChipOp(io_sbeState.target,
@@ -1923,6 +1925,8 @@ namespace SBE
 
             //If side 0 is not active, or this is a slave proc, or there was
             //an error trying to read the primary via chipOp, then try reading via I2C
+            // TODO RTC: 182266 Remove is_master conditional once we figure out
+            //      how we can write to master cache from slave SBE
             if(!l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
                 l_errFoundDuringChipOp|| !io_sbeState.target_is_master)
             {
@@ -1955,6 +1959,8 @@ namespace SBE
             //If side 1 is active and this is master, then attempt read via chipOp
             //Note that there is no reason to attempt chipOp on backup if it failed
             //on the primary.
+            // TODO RTC: 182266 Remove is_master conditional once we figure out
+            //      how we can write to master cache from slave SBE
             if (!l_sideZeroIsActive && l_sbeSupportedSeepromReadOp &&
                 !l_errFoundDuringChipOp && io_sbeState.target_is_master)
             {
@@ -1992,6 +1998,8 @@ namespace SBE
 
             //If side 1 is not active, or this is a slave proc,  or there was
             //an error trying to read the primary via chipOp, then try reading via I2C
+            // TODO RTC: 182266 Remove is_master conditional once we figure out
+            //      how we can write to master cache from slave SBE
             if(l_sideZeroIsActive || !l_sbeSupportedSeepromReadOp ||
                 l_errFoundDuringChipOp || !io_sbeState.target_is_master)
             {
