@@ -597,6 +597,19 @@ sub manipulateImages
         my $componentId = convertEyecatchToCompId($eyeCatch);
         $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
 
+        # @TODO RTC 182358
+        # This is a tactical workaround for the signing tooling not being
+        # able to handle muliple different platform binary contents for the same
+        # component ID.  The signing tooling should be modified to tolerate this
+        # scenario, at which point the workaround can be removed.
+        if ($buildType eq "fspbuild")
+        {
+            my @signatureFiles=
+                glob("$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw");
+            print "Deleting @signatureFiles\n";
+            unlink @signatureFiles;
+        }
+
         # Used for corrupting partitions. By default all protected offsets start
         # immediately after the container header which is size = PAGE_SIZE.
         # *Note: this is before ECC.
