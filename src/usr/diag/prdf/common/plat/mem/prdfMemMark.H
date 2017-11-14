@@ -80,6 +80,15 @@ class MemMark
     /** @return The Galois field representing this mark. */
     uint8_t getGalois() const { return iv_galois; }
 
+    /** @return The Galois field associated with the chip this mark is in.
+     *  Will correspond to the rightmost/least index symbol in the chip. You
+     *  must check for a valid symbol before calling this function. */
+    uint8_t getChipGalois() const
+    {
+        PRDF_ASSERT( iv_symbol.isValid() );
+        return symbol2Galois[(iv_symbol.getSymbol()/4)*4];
+    }
+
     /** @return The symbol representing this mark. */
     MemSymbol getSymbol() const { return iv_symbol; }
 

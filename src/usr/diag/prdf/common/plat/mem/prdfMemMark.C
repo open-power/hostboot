@@ -123,7 +123,7 @@ uint32_t writeChipMark<TYPE_MCA>( ExtensibleChip * i_chip,
     SCAN_COMM_REGISTER_CLASS * hwms = i_chip->getRegister( msName );
 
     // HWMSx[0:7] set this to the Galois field.
-    hwms->SetBitFieldJustified( 0, 8, i_mark.getGalois() );
+    hwms->SetBitFieldJustified( 0, 8, i_mark.getChipGalois() );
 
     // HWMSx[8] confirmed with the hardware team that this will not trigger
     //          another MPE attention and that they want this set to 1.
