@@ -31,6 +31,12 @@
 
 .include <${RULES_MK}>
 
+# TODO RTC 182358
+# It's not clear that the open source signing tooling can tolerate parallelism
+# when building the signature cache, so force sequential mode until that aspect
+# is 100% verified
+.NOTPARALLEL:
+
 .if($(CONTEXT:R) == "ppc")
 
 VPATH += ../fsp
