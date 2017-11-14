@@ -37,7 +37,7 @@
 // *HWP HWP Owner       : Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Prem S Jha <premjha2@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 1
+// *HWP Level           : 2
 // *HWP Consumed by     : HB
 //----------------------------------------------------------------------------
 
@@ -68,7 +68,11 @@ struct StopErrLogSectn
 
 enum RasAction
 {
-    PROC_CHIP_CALLOUT    =   0,
+    NO_CALLOUT           =   0,
+    FW_CALLOUT           =   1,
+    CORE_CALLOUT         =   2,
+    PROC_CHIP_CALLOUT    =   3,
+    MEMORY_CALLOUT       =   4,
 };
 
 // function pointer typedef definition for HWP call support
@@ -77,7 +81,7 @@ typedef fapi2::ReturnCode (*p9_pm_callout_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTgt,
     fapi2::buffer <uint32_t>& o_deadCores,
     std::vector < StopErrLogSectn >& o_ffdcList,
-    RasAction&   i_rasAction );
+    RasAction&   o_rasAction );
 
 extern "C"
 {
@@ -86,7 +90,7 @@ extern "C"
     /// @param[in]  i_procChipTgt       fapi2 target for P9 chip.
     /// @param[out] o_deadCores         bit vector of dead cores which needs to be runtime deconfigured
     /// @param[out] o_ffdcList          points to a list of STOP FFDC summary sub-sections.
-    /// @param[in]  i_rasAction         RAS action specified for FW.
+    /// @param[out] o_rasAction         RAS action specified for FW.
     /// @return     fapi2 return code.
     /// @note       caller is expected to pass an empty vector. HWP will
     ///             populate a vector with a list pointers to various parts of
@@ -102,6 +106,6 @@ extern "C"
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTgt,
         fapi2::buffer <uint32_t>& o_deadCores,
         std::vector < StopErrLogSectn >& o_ffdcList,
-        RasAction&   i_rasAction  );
+        RasAction&   o_rasAction  );
 }
 #endif //__P9_PM_CALLOUT
