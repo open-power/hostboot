@@ -40,6 +40,8 @@
 #include <p9_pm_hcd_flags.h>
 #include <p9_ppe_defs.H>
 #include <p9_ppe_utils.H>
+#include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 #include <vector>
 
 // -----------------------------------------------------------------------------
@@ -241,6 +243,32 @@ fapi2::ReturnCode pstate_gpe_init(
                                    .set_CHIP(i_target),
                                    "Pstate GPE Protocol Auto Start timeout");
             }
+        }
+
+        //Update QPPM_QPMMR_FSAFE
+        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+        auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
+                            (fapi2::TARGET_STATE_FUNCTIONAL);
+        fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_attr_safe_mode_freq_mhz;
+        fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ_Type l_ref_clock_freq_khz;
+        fapi2::ATTR_PROC_DPLL_DIVIDER_Type l_proc_dpll_divider;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ, i_target, l_attr_safe_mode_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PROC_REFCLOCK_KHZ, FAPI_SYSTEM, l_ref_clock_freq_khz));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_DPLL_DIVIDER, i_target, l_proc_dpll_divider));
+        // Convert frequency value to a format that needs to be written to the
+        // register
+        uint32_t l_safe_mode_freq = ((l_attr_safe_mode_freq_mhz * 1000) * l_proc_dpll_divider) /
+                                    l_ref_clock_freq_khz;
+
+        for (auto l_eq_chplt : l_eqChiplets)
+        {
+            FAPI_TRY(getScom(l_eq_chplt, EQ_QPPM_QPMMR, l_data64));
+            //FSAFE
+            l_data64.insertFromRight<EQ_QPPM_QPMMR_FSAFE,
+                                     EQ_QPPM_QPMMR_FSAFE_LEN>(l_safe_mode_freq);
+
+            FAPI_TRY(fapi2::putScom(l_eq_chplt, EQ_QPPM_QPMMR, l_data64),
+                     "ERROR:Failed to write for EQ_QPPM_QPMMR");
         }
     }
     else
