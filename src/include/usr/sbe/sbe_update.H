@@ -753,5 +753,21 @@ namespace SBE
      */
     errlHndl_t secureKeyTransition();
 
+    /**
+     * @brief locate the hbbl ID string buffer
+     *
+     * @param[in] i_pSourceBfr         Ptr to buffer to search
+     *
+     * @param[in] i_SourceBfrSize      length (in bytes) of source buffer
+     *
+     * @param[out] o_pHbblIdStringBfr  Ptr to Hbbl ID String
+     *                                   NULL if not found
+     *
+     * @return errlHndl_t              Error log handle on failure.
+     */
+    errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
+                                      uint32_t i_SourceBfrLen,
+                                      void * & o_pHbblIdStringBfr );
+
 } //end namespace SBE
 #endif

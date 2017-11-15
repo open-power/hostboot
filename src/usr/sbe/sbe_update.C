@@ -2231,12 +2231,14 @@ namespace SBE
                 break;
             }
 
+
+            void * pCustomizedBfr = reinterpret_cast<void*>(SBE_IMG_VADDR);
+
             err = procCustomizeSbeImg(io_sbeState.target,
                                       l_hCodeAddr,    // HCODE in memory
                                       sbeHbblImgPtr,  //SBE, HBBL in memory
                                       sbeHbblImgSize,
-                                      reinterpret_cast<void*>
-                                          (SBE_IMG_VADDR),  //destination
+                                      pCustomizedBfr,  //destination
                                       sbeImgSize);
 
             if(err)
@@ -2249,15 +2251,12 @@ namespace SBE
                 break;
             }
 
-
-
             // Verify that HW Key Hash is included in customized image
             SHA512_t hash = {0};
             err = getHwKeyHashFromSbeImage(io_sbeState.target,  // ignored
                                            EEPROM::SBE_PRIMARY, // ignored
                                            hash,
-                                           reinterpret_cast<void*>
-                                             (SBE_IMG_VADDR));
+                                           pCustomizedBfr);
 
             if(err)
             {
@@ -2305,11 +2304,41 @@ namespace SBE
                 break;
             }
 
+
+            // save off the hbbl id and remove it from the image
+            void * pSearchBfr = pCustomizedBfr;
+            uint32_t searchSize = sbePnorImageSize;
+            void * pHbblIdStringBfr;
+
+            err = locateHbblIdStringBfr( pSearchBfr,
+                                         searchSize,
+                                         pHbblIdStringBfr );
+            if(err)
+            {
+                //If string search failure, commit the error and move
+                //   to the next proc
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Error searhing for HBBL ID string, "
+                           "RC=0x%X, PLID=0x%lX",
+                           ERRL_GETRC_SAFE(err),
+                           ERRL_GETPLID_SAFE(err));
+                break;
+            }
+
+            // save off the hbbl ID string and clear the source
+            uint8_t tempHbblStringIdBfr[128];
+            memcpy( &tempHbblStringIdBfr[0],
+                    pHbblIdStringBfr,
+                    sizeof(tempHbblStringIdBfr) );
+
+            memset( pHbblIdStringBfr,
+                    0,
+                    sizeof(tempHbblStringIdBfr) );
+
             // Calculate Data CRC
             io_sbeState.customizedImage_size = sbeImgSize;
             io_sbeState.customizedImage_crc =
-                            Util::crc32_calc(reinterpret_cast<void*>
-                                             (SBE_IMG_VADDR),
+                            Util::crc32_calc(pCustomizedBfr,
                                              sbeImgSize) ;
 
             TRACFCOMP( g_trac_sbe, "getSbeInfoState() - procCustomizeSbeImg(): "
@@ -2317,6 +2346,10 @@ namespace SBE
                        MAX_SEEPROM_IMAGE_SIZE, sbeImgSize,
                        io_sbeState.customizedImage_crc);
 
+            // restore the hbbl ID string
+            memcpy( pHbblIdStringBfr,
+                    &tempHbblStringIdBfr[0],
+                    sizeof(tempHbblStringIdBfr) );
 
             /*******************************************/
             /*  Get MVPD SBE Version Information       */
@@ -5762,4 +5795,75 @@ errlHndl_t secureKeyTransition()
     return l_errl;
 }
 
+/////////////////////////////////////////////////////////////////////
+
+errlHndl_t locateHbblIdStringBfr( void * i_pSourceBfr,
+                                  uint32_t i_SourceBfrLen,
+                                  void * & o_pHbblIdStringBfr )
+{
+    errlHndl_t l_errl = NULL;
+    o_pHbblIdStringBfr = NULL;
+
+
+    // packing of ID string is defined in bl_start.S
+    //   - 16 byte aligned : note, after customize, this may only be
+    //                              8 byte aligned
+    //   - 128 bytes long
+    //   - resides in .data at end of binary
+
+    //  start near end of bfr, minimum of 128 bytes from overflow,
+    //    aligned on 16 byte boundary
+    uint64_t sourceBfrAddr = reinterpret_cast<uint64_t>(i_pSourceBfr);
+    uint64_t bfrOverflowAddr = sourceBfrAddr + i_SourceBfrLen;
+    uint64_t startSearchAddr = ALIGN_DOWN_8(bfrOverflowAddr - 128);
+
+    uint64_t * pBfrUnderflow = reinterpret_cast<uint64_t *>(sourceBfrAddr);
+    uint64_t * pStartSearch = reinterpret_cast<uint64_t *>(startSearchAddr);
+
+    // 'HBBL ID '
+#define SBE_HBBL_ID_MARKER0  0x4842424c20494420ull
+    // 'STRING ='
+#define SBE_HBBL_ID_MARKER1  0x535452494e47203dull
+
+    TRACFCOMP( g_trac_sbe,
+               INFO_MRK"locateHbblIdStringBfr() : start search "
+               "pBfr=0x%X, BfrLen=0x%X, pSearchStart=0x%X",
+               sourceBfrAddr, i_SourceBfrLen, pStartSearch );
+
+    do
+    {
+        for // search for the string, starting from the end of the bfr
+          ( uint64_t * pCurTestPosn = pStartSearch;
+            pCurTestPosn >= pBfrUnderflow;
+            pCurTestPosn-=(8/8) )  // backup 8 bytes, 8-byte ptr math
+        {
+            if // current position is hbbl id marker
+              ( ((*(pCurTestPosn)) == SBE_HBBL_ID_MARKER0) &&
+                ((*(pCurTestPosn+1)) == SBE_HBBL_ID_MARKER1) )
+            {
+                // found the string eye catcher, all done
+                //  note : step over 16 byte hdr using 8-byte ptr math
+                o_pHbblIdStringBfr = pCurTestPosn + (16/8);
+
+                TRACFCOMP( g_trac_sbe,
+                           INFO_MRK"locateHbblIdStringBfr() : string found "
+                           "pString=0x%X",
+                           o_pHbblIdStringBfr );
+
+                TRACFBIN( g_trac_sbe,
+                          INFO_MRK"locateHbblIdStringBfr() : "
+                                  "Eye Catcher + string Bfr = ",
+                          pCurTestPosn,
+                          (16+128) );
+
+                break;
+            }
+        } // end reverse bfr search
+
+    } while(0);
+
+    return l_errl;
+}
+
 } //end SBE Namespace
+
