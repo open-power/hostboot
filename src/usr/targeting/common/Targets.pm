@@ -648,6 +648,11 @@ sub buildAffinity
             $self->setAttribute($target, "FAPI_POS",      $pos);
             $self->setAttribute($target, "PHYS_PATH",     $node_phys);
             $self->setAttribute($target, "AFFINITY_PATH", $node_aff);
+
+            if($pos > 0) #to handle control node in Fleetwood
+            {
+                $pos = $pos - 1;
+            }
             $self->setAttribute($target, "ORDINAL_ID",    $pos);
 
         }
