@@ -606,7 +606,7 @@ sub manipulateImages
         if ($buildType eq "fspbuild")
         {
             my @signatureFiles=
-                glob("$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw");
+                glob("$bin_dir/SIGNTOOL_*/$componentId/*sig_p.raw $bin_dir/SIGNTOOL_*/$componentId/*key_p.sig");
             print "Deleting @signatureFiles\n";
             unlink @signatureFiles;
         }
