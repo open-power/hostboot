@@ -69,6 +69,7 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         uint64_t l_def_ENABLE_DYNAMIC_64_128B_READS = literal_0;
         uint64_t l_def_ENABLE_ECRESP = literal_1;
         uint64_t l_def_ENABLE_AMO_CACHING = literal_1;
+        uint64_t l_def_ENABLE_HWFM = literal_1;
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
@@ -218,6 +219,26 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             if ((l_def_ENABLE_AMO_CACHING == literal_1))
             {
                 l_scom_buffer.insert<24, 16, 48, uint64_t>(literal_0b0000000000001000 );
+            }
+
+            if ((l_def_ENABLE_HWFM == literal_1))
+            {
+                l_scom_buffer.insert<47, 6, 58, uint64_t>(literal_1 );
+            }
+            else if ((l_def_ENABLE_HWFM == literal_0))
+            {
+                l_scom_buffer.insert<47, 6, 58, uint64_t>(literal_0 );
+            }
+
+            if ((l_def_ENABLE_HWFM == literal_1))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_ON = 0x1;
+                l_scom_buffer.insert<46, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_ON );
+            }
+            else if ((l_def_ENABLE_HWFM == literal_0))
+            {
+                constexpr auto l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_OFF = 0x0;
+                l_scom_buffer.insert<46, 1, 63, uint64_t>(l_MC01_PBI01_SCOMFIR_MCMODE2_MCHWFM_ENABLE_OFF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x5010813ull, l_scom_buffer));
