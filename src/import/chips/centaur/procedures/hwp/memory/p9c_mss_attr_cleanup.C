@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,14 +118,15 @@ enum factory_byte_offset
     MODULE_ID_MODULE_SERIAL_NUMBER_BYTE3 = 327,
     MODULE_ID_MODULE_SERIAL_NUMBER_BYTE4 = 328,
     MODULE_PART_NUMBER = 329,    // 329-348
+    MODULE_PART_NUMBER_LENGTH_IN_BYTES = 20,
 
     MODULE_REVISION_CODE = 349,
     DRAM_MANUFACTURER_JEDEC_ID_CODE_LSB = 350,
     DRAM_MANUFACTURER_JEDEC_ID_CODE_MSB = 351,
     DRAM_STEPPING_DDR4 = 352,
 
-    DRAM_STEPPING_DDR4_LSB = 382,
-    DRAM_STEPPING_DDR4_MSB = 383
+    CRC_MNFG_SEC_DDR4_LSB = 382,
+    CRC_MNFG_SEC_DDR4_MSB = 383
 };
 
 //------------------------------------------------------------------------------
@@ -152,6 +153,7 @@ p9c_mss_attr_cleanup(const fapi2::Target<TARGET_TYPE_DIMM>& i_dimm)
     uint8_t l_spd_byte4 = 0;
     uint8_t l_work_byte = 0;
     uint8_t l_work2_byte = 0;
+    uint8_t l_module_pn[MODULE_PART_NUMBER_LENGTH_IN_BYTES] = {0};
     uint32_t l_work_word = 0;
     // DQ SPD Attribute
     uint8_t l_dqData[DIMM_DQ_SPD_DATA_SIZE] {0};
@@ -435,16 +437,101 @@ p9c_mss_attr_cleanup(const fapi2::Target<TARGET_TYPE_DIMM>& i_dimm)
             FAPI_INF("Set ATTR_CEN_SPD_FINE_OFFSET_TAAMIN 0x%X ", l_spd_byte1);
 
             // FINE_OFFSET_TCKMAX_DDR4 = 124
+            l_spd_byte1 = l_spd[FINE_OFFSET_TCKMAX_DDR4];
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_FINE_OFFSET_TCKMAX_DDR4, i_dimm, l_spd_byte1),
+                      "Failed to set ATTR_CEN_SPD_FINE_OFFSET_TCKMAX_DDR4" );
+            FAPI_INF("Set ATTR_CEN_SPD_FINE_OFFSET_TCKMAX_DDR4 0x%X ", l_spd_byte1);
+
             // FINE_OFFSET_TCKMIN = 125
             l_spd_byte1 = l_spd[FINE_OFFSET_TCKMIN];
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_FINE_OFFSET_TCKMIN, i_dimm, l_spd_byte1),
                       "Failed to set ATTR_CEN_SPD_FINE_OFFSET_TCKMIN" );
             FAPI_INF("Set ATTR_CEN_SPD_FINE_OFFSET_TCKMIN 0x%X ", l_spd_byte1);
 
+            //ADDR_MAP_REG_TO_DRAM = 136
             l_spd_byte1 = l_spd[ADDR_MAP_REG_TO_DRAM];
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM, i_dimm, l_spd_byte1),
                      "Failed to set ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM");
             FAPI_INF("Set ATTR_CEN_SPD_ADDR_MAP_REG_TO_DRAM 0x%X ", l_spd_byte1);
+
+            //MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE_LOW = 320
+            //MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE_HIGH = 321
+            l_spd_byte1 = l_spd[MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE_HIGH];
+            l_spd_byte2 = l_spd[MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE_LOW];
+            l_work_word = (l_spd_byte1 << 8) | l_spd_byte2;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE, i_dimm, l_work_word),
+                     "Failed to set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE 0x%X ", l_spd_byte1);
+
+            //MODULE_ID_MODULE_MANUFACTURING_LOCATION = 322
+            l_spd_byte1 = l_spd[MODULE_ID_MODULE_MANUFACTURING_LOCATION];
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION, i_dimm, l_spd_byte1),
+                     "Failed to set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION 0x%X ", l_spd_byte1);
+
+            //MODULE_ID_MODULE_MANUFACTURING_DATE_YEAR = 323
+            //MODULE_ID_MODULE_MANUFACTURING_DATE_WEEK = 324 (LSB)
+            l_spd_byte1 = l_spd[MODULE_ID_MODULE_MANUFACTURING_DATE_YEAR];
+            l_spd_byte2 = l_spd[MODULE_ID_MODULE_MANUFACTURING_DATE_WEEK];
+            l_work_word = (l_spd_byte1 << 8) | l_spd_byte2;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE, i_dimm, l_work_word),
+                     "Failed to set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE 0x%X ", l_work_word);
+
+            //MODULE_ID_MODULE_SERIAL_NUMBER_BYTE1 = 325 (LSB)
+            //MODULE_ID_MODULE_SERIAL_NUMBER_BYTE2 = 326
+            //MODULE_ID_MODULE_SERIAL_NUMBER_BYTE3 = 327
+            //MODULE_ID_MODULE_SERIAL_NUMBER_BYTE4 = 328
+            l_spd_byte1 = l_spd[MODULE_ID_MODULE_SERIAL_NUMBER_BYTE1];
+            l_spd_byte2 = l_spd[MODULE_ID_MODULE_SERIAL_NUMBER_BYTE2];
+            l_spd_byte3 = l_spd[MODULE_ID_MODULE_SERIAL_NUMBER_BYTE3];
+            l_spd_byte4 = l_spd[MODULE_ID_MODULE_SERIAL_NUMBER_BYTE4];
+            l_work_word = (l_spd_byte4 << 24) | (l_spd_byte3 << 16) | (l_spd_byte2 << 8) | l_spd_byte1;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_ID_MODULE_SERIAL_NUMBER, i_dimm, l_work_word),
+                     "Failed to set ATTR_CEN_SPD_MODULE_ID_MODULE_SERIAL_NUMBER");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_ID_MODULE_SERIAL_NUMBER 0x%X ", l_work_word);
+
+            //MODULE_PART_NUMBER = 329:348
+            for (uint16_t l_byte = 0; l_byte < MODULE_PART_NUMBER_LENGTH_IN_BYTES; l_byte++)
+            {
+                l_module_pn[l_byte] = l_spd[l_byte + MODULE_PART_NUMBER];
+            }
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_PART_NUMBER, i_dimm, l_module_pn),
+                     "Failed to set ATTR_CEN_SPD_MODULE_PART_NUMBER");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_PART_NUMBER 0x%X ", l_module_pn[0]);
+
+
+            //MODULE_REVISION_CODE = 349
+            l_spd_byte1 = l_spd[MODULE_REVISION_CODE];
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR4, i_dimm, l_spd_byte1),
+                     "Failed to set ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR4");
+            FAPI_INF("Set ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR4 0x%X ", l_spd_byte1);
+
+
+            //DRAM_MANUFACTURER_JEDEC_ID_CODE_LSB = 350
+            //DRAM_MANUFACTURER_JEDEC_ID_CODE_MSB = 351
+            l_spd_byte1 = l_spd[DRAM_MANUFACTURER_JEDEC_ID_CODE_LSB];
+            l_spd_byte2 = l_spd[DRAM_MANUFACTURER_JEDEC_ID_CODE_MSB];
+            l_work_word = (l_spd_byte2 << 8) | l_spd_byte1;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE, i_dimm, l_work_word),
+                     "Failed to set ATTR_CEN_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE");
+            FAPI_INF("Set ATTR_CEN_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE 0x%X ", l_work_word);
+
+            //DRAM_STEPPING_DDR4 = 352
+            l_spd_byte1 = l_spd[DRAM_STEPPING_DDR4];
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_DRAM_STEPPING_DDR4, i_dimm, l_spd_byte1),
+                     "Failed to set ATTR_CEN_SPD_DRAM_STEPPING_DDR4");
+            FAPI_INF("Set ATTR_CEN_SPD_DRAM_STEPPING_DDR4 0x%X ", l_spd_byte1);
+
+            //CRC_MNFG_SEC_DDR4_LSB = 382
+            //CRC_MNFG_SEC_DDR4_MSB = 383
+            l_spd_byte1 = l_spd[CRC_MNFG_SEC_DDR4_LSB];
+            l_spd_byte2 = l_spd[CRC_MNFG_SEC_DDR4_MSB];
+            l_work_word = (l_spd_byte2 << 8) | l_spd_byte1;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_CRC_MNFG_SEC_DDR4, i_dimm, l_work_word),
+                     "Failed to set ATTR_CEN_SPD_CRC_MNFG_SEC_DDR4");
+            FAPI_INF("Set ATTR_CEN_SPD_CRC_MNFG_SEC_DDR4 0x%X ", l_work_word);
 
             // Reset ATTR_CEN_SPD_BAD_DQ_DATA
             FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_CEN_SPD_BAD_DQ_DATA, i_dimm, l_dqData),

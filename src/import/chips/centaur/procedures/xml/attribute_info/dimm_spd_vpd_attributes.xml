@@ -493,7 +493,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURERS_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -505,9 +504,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_LOCATION</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -519,9 +516,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_MANUFACTURING_DATE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -533,9 +528,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_ID_MODULE_SERIAL_NUMBER</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -547,7 +540,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
 <!--
 <attribute>
@@ -561,8 +553,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <writeable/>
 </attribute>
 -->
-
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_PART_NUMBER</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -572,12 +562,10 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
         Located in DDR4 SPD bytes 329 - 348.
     </description>
     <valueType>uint8</valueType>
-    <array>18</array>
+    <array>20</array>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_REVISION_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -592,9 +580,7 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_DRAM_MANUFACTURER_JEDEC_ID_CODE</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -606,7 +592,6 @@ The following attributes can be queried from both DDR3 and DDR4 DIMMs
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_SPD_BAD_DQ_DATA</id>
@@ -1104,7 +1089,6 @@ The following attributes can be queried from DDR4 DIMMs only
 Querying them from DDR3 DIMMs will result in an error
 *******************************************************************************
 -->
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_SDRAM_BANKGROUPS_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1116,7 +1100,6 @@ Querying them from DDR3 DIMMs will result in an error
     <enum>BG0 = 0x00, BG2 = 0x01, BG4 = 0x02</enum>
     <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_SPD_TIMEBASE_MTB_DDR4</id>
@@ -1235,7 +1218,6 @@ Querying them from DDR3 DIMMs will result in an error
     <writeable/>
 </attribute>
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TCCDLMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1249,9 +1231,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TRRDLMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1265,9 +1245,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TRRDSMIN_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1281,9 +1259,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_FINE_OFFSET_TCKMAX_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1294,9 +1270,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_CRC_BASE_CONFIG_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1307,9 +1281,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_DRAM_STEPPING_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1323,9 +1295,7 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_CRC_MNFG_SEC_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1336,7 +1306,6 @@ Querying them from DDR3 DIMMs will result in an error
     <valueType>uint32</valueType>
     <writeable/>
 </attribute>
--->
 
 <attribute>
     <id>ATTR_CEN_VPD_VERSION</id>
@@ -1831,7 +1800,6 @@ that handles the DDR neutral attribute.
 </attribute>
 -->
 
-<!--
 <attribute>
     <id>ATTR_CEN_SPD_MODULE_REVISION_CODE_DDR4</id>
     <targetType>TARGET_TYPE_DIMM</targetType>
@@ -1844,7 +1812,6 @@ that handles the DDR neutral attribute.
     <valueType>uint8</valueType>
     <writeable/>
 </attribute>
--->
 
 <!--
 *******************************************************************************
