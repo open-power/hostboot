@@ -952,6 +952,8 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
     FAPI_DBG(">> WOF initialization");
 
     fapi2::ReturnCode l_rc = 0;
+    uint16_t l_vdd_size = 0;
+    uint16_t l_vdn_size = 0;
 
     //this structure has VFRT header + data
     HomerVFRTLayout_t l_vfrt;
@@ -985,13 +987,21 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
             WofTablesHeader_t* p_wfth;
             p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
             FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
+            l_vdn_size = p_wfth->vdn_size;
+            l_vdd_size = p_wfth->vdd_size;
 
+            if (l_sys_vfrt_static_data == fapi2::ENUM_ATTR_SYS_VFRT_STATIC_DATA_ENABLE_VDN_STEP_OFF)
+            {
+                l_vdn_size = 1;
+            }
+
+            FAPI_INF("STATIC WOF: l_vdn_size %04x, l_vdd_size %04x",l_vdn_size,l_vdd_size);
             memcpy(&l_vfrt, &g_sysvfrtData, sizeof (g_sysvfrtData));
 
-            for (uint32_t vdn = 0; vdn < CEF_VDN_INDEX; ++vdn)
+            for (uint32_t vdn = 0; vdn < l_vdn_size; ++vdn)
             {
                 l_vfrt.vfrtHeader.res_vdnId = vdn;
-                for (uint32_t vdd = 0; vdd < CEF_VDD_INDEX; ++vdd)
+                for (uint32_t vdd = 0; vdd < l_vdd_size; ++vdd)
                 {
                     for (uint32_t qid = 0; qid < ACTIVE_QUADS; ++qid)
                     {
@@ -1066,9 +1076,14 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
 
         }
 
+        l_vdn_size = p_wfth->vdn_size ? p_wfth->vdn_size : 1;
+        l_vdd_size = p_wfth->vdd_size ? p_wfth->vdd_size : 1;
+
+        FAPI_INF("WOF: l_vdn_size %04x, l_vdd_size %04x",l_vdn_size,l_vdd_size);
+
         // Convert system vfrt to homer vfrt
-        for (uint32_t vfrt_index = 0;
-             vfrt_index < (CEF_VDN_INDEX * CEF_VDD_INDEX * ACTIVE_QUADS);
+        for (auto vfrt_index = 0;
+             vfrt_index < (l_vdn_size * l_vdd_size * ACTIVE_QUADS);
              ++vfrt_index)
         {
 
