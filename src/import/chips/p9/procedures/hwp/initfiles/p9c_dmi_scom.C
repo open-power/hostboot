@@ -94,6 +94,7 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MCA_MHZ, TGT1, l_TGT1_ATTR_FREQ_MCA_MHZ));
         uint64_t l_def_MCA_FREQ = l_TGT1_ATTR_FREQ_MCA_MHZ;
         uint64_t l_def_MN_FREQ_RATIO = ((literal_1000 * l_def_MCA_FREQ) / l_TGT1_ATTR_FREQ_PB_MHZ);
+        uint64_t l_def_ENABLE_HWFM = literal_1;
         fapi2::buffer<uint64_t> l_scom_buffer;
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010823ull, l_scom_buffer ));
@@ -326,6 +327,20 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
 
             l_scom_buffer.insert<4, 1, 63, uint64_t>(literal_0b0 );
             l_scom_buffer.insert<5, 1, 63, uint64_t>(literal_0b0 );
+
+            if ((l_def_ENABLE_HWFM == literal_1))
+            {
+                constexpr auto l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_UE_4_FORCE_MIRROR_MODE_ON = 0x1;
+                l_scom_buffer.insert<39, 1, 63, uint64_t>(l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_UE_4_FORCE_MIRROR_MODE_ON );
+            }
+            else if ((l_def_ENABLE_HWFM == literal_0))
+            {
+                constexpr auto l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_UE_4_FORCE_MIRROR_MODE_OFF = 0x0;
+                l_scom_buffer.insert<39, 1, 63, uint64_t>(l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_UE_4_FORCE_MIRROR_MODE_OFF );
+            }
+
+            constexpr auto l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_SUE_4_FORCE_MIRROR_MODE_OFF = 0x0;
+            l_scom_buffer.insert<40, 1, 63, uint64_t>(l_MCP_CHAN0_CHI_MCICFG1Q_CFG_SEL_SUE_4_FORCE_MIRROR_MODE_OFF );
             FAPI_TRY(fapi2::putScom(TGT0, 0x701090eull, l_scom_buffer));
         }
         {
