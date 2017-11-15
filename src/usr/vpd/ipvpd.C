@@ -1786,6 +1786,20 @@ errlHndl_t IpVpdFacade::findKeywordAddr ( const char * i_keywordName,
                          record,
                          i_target,
                          i_args.location );
+
+        // If we were looking for the Record Type (RT) keyword, we are done.
+        if (memcmp( i_keywordName, "RT", KEYWORD_BYTE_SIZE ) == 0) {
+            // send back the relevant data
+            o_keywordSize = RECORD_BYTE_SIZE;
+            o_byteAddr = offset - i_offset; //make address relative
+
+            // found our match, break out
+            matchesFound++;
+            if ( matchesFound == i_index + 1 ) {
+                break;
+            }
+        }
+
         offset += RECORD_BYTE_SIZE;
 
         if( err )
