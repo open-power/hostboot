@@ -386,6 +386,13 @@ switchToHBB:
 
 .section .data
 
+    .balign 16
+    .byte 'H', 'B', 'B', 'L', ' ', 'I', 'D', ' '
+    .byte 'S', 'T', 'R', 'I', 'N', 'G', ' ', '='
+.global hbi_ImageId
+hbi_ImageId:
+    .space 128
+
 .global bootloader_end_address
 bootloader_end_address:
     .quad HBBL_END_ADDRESS
