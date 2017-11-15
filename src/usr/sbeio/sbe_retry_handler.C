@@ -58,12 +58,9 @@
 #include <../../usr/sbeio/sbe_fifo_buffer.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include "sbe_threshold_fsm.H"
+#include <sbeio/sbe_retry_handler.H>
 
 #include <devicefw/driverif.H>
-
-/* Global switch sides count */
-static uint8_t g_switch_sides_count = 0;
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -76,6 +73,8 @@ extern trace_desc_t* g_trac_sbeio;
     TRACFBIN(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
 #define SBE_TRACDBIN(printf_string,args...) \
     TRACDBIN(g_trac_sbeio,"sbe_retry_handler.C: " printf_string,##args)
+
+using namespace ERRORLOG;
 
 namespace SBEIO
 {
@@ -90,8 +89,11 @@ SbeRetryHandler& SbeRetryHandler::getInstance()
 
 SbeRetryHandler::SbeRetryHandler()
 : iv_sbeRestarted(false)
-, iv_sbeOtherSide(false)
+, iv_sbeSide(0)
 , iv_sbeErrorLogged(false)
+, iv_switchSidesCount(0)
+, iv_currentSBEState(SBE_REG_RETURN::SBE_FAILED_TO_BOOT)
+, iv_retriggeredMain(false)
 {
     SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
 
@@ -103,244 +105,183 @@ SbeRetryHandler::~SbeRetryHandler()
 
 }
 
-void SbeRetryHandler::proc_extract_sbe_handler( TARGETING::Target * i_target,
-                               uint8_t i_current_error,
-                               SBE_REG_RETURN * o_regReturn)
+void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target,
+                                        bool i_actionSet)
 {
-    SBE_TRACF(ENTER_MRK "proc_extract_sbe_handler error: %x",
-                    i_current_error);
+    SBE_TRACF(ENTER_MRK "main_sbe_handler()");
 
-    errlHndl_t l_errl = NULL;
-
-    /*@
-     * @errortype
-     * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
-     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-     * @reasoncode SBEIO_EXTRACT_RC_ERROR
-     * @userdata1  HUID of proc that had the SBE timeout
-     * @userdata2  SBE failing code
-     *
-     * @devdesc SBE did not start, this function is looking at
-     *          the error to determine next course of action
-     *
-     * @custdesc The SBE did not start, we will attempt a reboot if possible
-     */
-    l_errl = new ERRORLOG::ErrlEntry(
-            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-            SBEIO_EXTRACT_RC_HANDLER,
-            SBEIO_EXTRACT_RC_ERROR,
-            TARGETING::get_huid(i_target),
-            i_current_error);
-
-    l_errl->collectTrace("ISTEPS_TRACE",256);
-
-    // Commit error and continue
-    errlCommit(l_errl, ISTEP_COMP_ID);
-
-    switch(i_current_error)
+    do
     {
-        case P9_EXTRACT_SBE_RC::RESTART_SBE:
-        case P9_EXTRACT_SBE_RC::RESTART_CBS:
-        {
-            SBE_TRACF("proc_extract_sbe_handler(): case RESTART_SBE");
-            // Note: These two are only going to have the same handling until
-            //       we have runtime handling in place.
+        errlHndl_t l_errl = NULL;
 
-            SBE_TRACF("Running p9_start_cbs HWP on processor target %.8X",
-                       TARGETING::get_huid(i_target));
-            this->handle_sbe_restart(i_target, false,
-                            P9_EXTRACT_SBE_RC::RESTART_SBE);
-            break;
-        }
-        case P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM:
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                        const_cast<TARGETING::Target*> (i_target));
+
+        bool l_retry = false;
+
+        // Check the sbe register
+        this->get_sbe_reg(i_target);
+
+        if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
+           !(i_actionSet))
         {
-            SBE_TRACF("proc_extract_sbe_handler(): case REIPL_BKP_SEEPROM");
-            // Log additional error on proc.
+            // return, false if no boot is needed, true if boot is needed.
+            l_retry = this->sbe_boot_fail_handler(i_target);
+        }
+        else if(i_actionSet)
+        {
+            l_retry = true;
+        }
+
+        while((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && l_retry)
+        {
+
+            SBE_TRACF("main_sbe_handler(): current SBE state is %d, retry is %d "
+                      "current SBE action is %d",
+                      this->iv_sbeRegister.currState,
+                      l_retry, this->iv_currentAction);
+
             /*@
-             * @errortype  ERRL_SEV_INFORMATIONAL
+             * @errortype
+             * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
              * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-             * @reasoncode SBEIO_BOOT_FROM_BKP_SEEPROM
-             * @userdata1  SBE return code
-             * @userdata2  HUID current side
-             * @devdesc    Attempting to boot from backup SEEPROM
+             * @reasoncode SBEIO_EXTRACT_RC_ERROR
+             * @userdata1  HUID of proc that had the SBE timeout
+             * @userdata2  SBE failing code
+             *
+             * @devdesc SBE did not start, this function is looking at
+             *          the error to determine next course of action
+             *
+             * @custdesc The SBE did not start, we will attempt a reboot
+             *           if possible
              */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_BOOT_FROM_BKP_SEEPROM,
-                            i_current_error,
-                            get_huid(i_target));
+                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                    SBEIO_EXTRACT_RC_HANDLER,
+                    SBEIO_EXTRACT_RC_ERROR,
+                    TARGETING::get_huid(i_target),
+                    this->iv_currentAction);
+
             l_errl->collectTrace("ISTEPS_TRACE",256);
+
+            // Commit error and continue
             errlCommit(l_errl, ISTEP_COMP_ID);
 
-            l_errl = this->switch_sbe_sides(i_target);
-            if(l_errl)
+            // if no recovery action, fail out.
+            if(this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
             {
-                errlCommit(l_errl,ISTEP_COMP_ID);
-                break;
-            }
-
-            // Run HWP, but from the other side.
-                // if it passes make a note that we booted from
-                //    an unexpected side
-                // if it fails, call the threshold handler
-            SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
-                   TARGETING::get_huid(i_target));
-
-            this->handle_sbe_restart(i_target, false,
-                   P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
-
-            if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>())
-            {
-                // Make a note that we booted from an unexpected side
+                // There is no action possible. Gard and Callout the proc
                 /*@
-                 * @errortype   ERRL_SEV_INFORMATIONAL
-                 * @moduleid    SBEIO_EXTRACT_RC_HANDLER
-                 * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE_BKP
-                 * @userdata1   0
-                 * @userdata2   HUID of working proc
-                 * @devdesc     SBE booted from unexpected side.
+                 * @errortype  ERRL_SEV_UNRECOVERABLE
+                 * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                 * @reasoncode SBEIO_NO_RECOVERY_ACTION
+                 * @userdata1  SBE current error
+                 * @userdata2  HUID of proc
+                 * @devdesc    There is no recovery action on the SBE.
+                 *             We're garding this proc
                  */
                 l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_BOOTED_UNEXPECTED_SIDE_BKP,
-                            0,TARGETING::get_huid(i_target));
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-                errlCommit(l_errl, ISTEP_COMP_ID);
-            }
-
-            break;
-        }
-        case P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM:
-        {
-            SBE_TRACF("proc_extract_sbe_handler(): case REIPL_UPD_SEEPROM");
-
-            l_errl = this->switch_sbe_sides(i_target);
-            if(l_errl)
-            {
-                errlCommit(l_errl,ISTEP_COMP_ID);
-                break;
-            }
-
-            // Run HWP, but from the other side.
-                // if it passes make a note that we booted from an
-                //   unexpected side
-                // if it fails, escalate to RE_IPL_SEEPROM and call
-                //   this function again.
-            SBE_TRACF( "Running p9_start_cbs HWP on processor target %.8X",
-                   TARGETING::get_huid(i_target));
-
-            this->handle_sbe_restart(i_target, false,
-                    P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM);
-
-            if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>())
-            {
-                // Make a note that we booted from an unexpected side
-                /*@
-                 * @errortype   ERRL_SEV_INFORMATIONAL
-                 * @moduleid    SBEIO_EXTRACT_RC_HANDLER
-                 * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE_UPD
-                 * @userdata1   0
-                 * @userdata2   HUID of proc
-                 * @devdesc     SBE booted from unexpected side.
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_BOOTED_UNEXPECTED_SIDE_UPD,
-                            0,TARGETING::get_huid(i_target));
-                l_errl->collectTrace("ISTEPS_TRACE",256);
-                errlCommit(l_errl, ISTEP_COMP_ID);
-            }
-
-            break;
-        }
-        case P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION:
-        {
-            SBE_TRACF("proc_extract_sbe_handler(): case NO_RECOVERY_ACTION");
-            // There is no action possible. Gard and Callout the proc
-            /*@
-             * @errortype  ERRL_SEV_UNRECOVERABLE
-             * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-             * @reasoncode SBEIO_NO_RECOVERY_ACTION
-             * @userdata1  SBE current error
-             * @userdata2  HUID of proc
-             * @devdesc    There is no recovery action on the SBE.
-             *             We're garding this proc
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                             SBEIO_EXTRACT_RC_HANDLER,
                             SBEIO_NO_RECOVERY_ACTION,
                             P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
                             TARGETING::get_huid(i_target));
-            l_errl->collectTrace( "ISTEPS_TRACE", 256);
-            l_errl->addHwCallout( i_target,
-                                  HWAS::SRCI_PRIORITY_HIGH,
-                                  HWAS::DECONFIG,
-                                  HWAS::GARD_NULL );
-            errlCommit(l_errl, ISTEP_COMP_ID);
+                l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                l_errl->addHwCallout( i_target,
+                                      HWAS::SRCI_PRIORITY_HIGH,
+                                      HWAS::DECONFIG,
+                                      HWAS::GARD_NULL );
+                errlCommit(l_errl, ISTEP_COMP_ID);
 
-            // Set register return to indicate Gard and Callout of proc
-            if(o_regReturn)
-            {
-                SBE_TRACF("proc_extract_sbe_handler(): updating return value "
+                SBE_TRACF("main_sbe_handler(): updating return value "
                           "to indicate that we have deconfigured the proc");
-                *o_regReturn = SBE_REG_RETURN::PROC_DECONFIG;
+                this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
+                this->iv_sbeErrorLogged = true;
+                this->iv_errorLogPLID = l_errl->plid();
+
+                break;
             }
 
-            break;
+            // if the bkp_seeprom or upd_seeprom, attempt to switch sides.
+            // This is also dependent on the iv_switchSideCount.
+            if(this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
+               this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)
+            {
+                l_errl = this->switch_sbe_sides(i_target);
+                if(l_errl)
+                {
+                    errlCommit(l_errl, ISTEP_COMP_ID);
+                    break;
+                }
+            }
+
+            SBE_TRACF("Invoking p9_start_cbs HWP");
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                  l_fapi2_proc_target (i_target);
+
+            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
+            if(l_errl)
+            {
+                SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x", l_errl->plid() );
+                l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+
+                errlCommit( l_errl, ISTEP_COMP_ID);
+            }
+
+            // Get the sbe register
+            this->get_sbe_reg(i_target);
+
+            if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME))
+            {
+                // return, false if no boot is needed, true if boot is needed.
+                l_retry = this->sbe_boot_fail_handler(i_target);
+            }
         }
-        default:
+
+        this->handle_sbe_reg_value(i_target);
+
+        // if we have started the sbe, and the current action is upd_seeprom
+        // or bkp_seeprom, note that we started on an unexpected side
+        if(i_target->getAttr<TARGETING::ATTR_SBE_IS_STARTED>() &&
+           (this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
+            this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM) )
         {
-            //Error out, unexpected enum value returned.
             /*@
              * @errortype   ERRL_SEV_INFORMATIONAL
              * @moduleid    SBEIO_EXTRACT_RC_HANDLER
-             * @reasoncode  SBEIO_INCORRECT_FCN_CALL
-             * @userdata1   SBE current error
-             * @userdata2   HUID of proc
-             * @devdesc     This function was called incorrectly or
-             *              there is a new enum that is not handled yet.
+             * @reasoncode  SBEIO_BOOTED_UNEXPECTED_SIDE
+             * @userdata1   0
+             * @userdata2   HUID of working proc
+             * @devdesc     SBE booted from unexpected side.
              */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_INCORRECT_FCN_CALL,
-                            i_current_error,
-                            TARGETING::get_huid(i_target));
-            l_errl->collectTrace( "ISTEPS_TRACE",256);
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        SBEIO_EXTRACT_RC_HANDLER,
+                        SBEIO_BOOTED_UNEXPECTED_SIDE,
+                        0,TARGETING::get_huid(i_target));
+            l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl, ISTEP_COMP_ID);
-
-            break;
         }
-    }
 
-    SBE_TRACF(EXIT_MRK "proc_extract_sbe_handler");
+    }while(0);
 
-    return;
+    SBE_TRACF(EXIT_MRK "main_sbe_handler()");
 }
 
-SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
-                TARGETING::Target * i_target)
+void SbeRetryHandler::get_sbe_reg(TARGETING::Target * i_target)
 {
-    SBE_TRACF(ENTER_MRK "check_sbe_reg");
+    SBE_TRACF(ENTER_MRK "get_sbe_reg()");
 
     errlHndl_t l_errl = nullptr;
-    SbeRetryHandler::SBE_REG_RETURN l_ret =
-            SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
     do
     {
-        sbeMsgReg_t l_sbeReg;
+        l_errl = this->sbe_timeout_handler(i_target);
 
-        l_errl = this->sbe_timeout_handler(&l_sbeReg,i_target,&l_ret);
-
-        if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
+        if((!l_errl) && (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME))
         {
             // See if async FFDC bit is set in SBE register
-            if(l_sbeReg.asyncFFDC)
+            if(this->iv_sbeRegister.asyncFFDC)
             {
                 bool l_flowCtrl = this->sbe_get_ffdc_handler(i_target);
 
@@ -349,13 +290,10 @@ SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
                     break;
                 }
             }
-
-            // Handle that SBE failed to boot in the allowed time
-            this->sbe_boot_fail_handler(i_target,l_sbeReg,&l_ret);
         }
         else if (l_errl)
         {
-            SBE_TRACF("ERROR: call check_sbe_reg, PLID=0x%x", l_errl->plid() );
+            SBE_TRACF("ERROR: call get_sbe_reg, PLID=0x%x", l_errl->plid() );
 
             // capture the target data in the elog
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
@@ -368,57 +306,53 @@ SbeRetryHandler::SBE_REG_RETURN SbeRetryHandler::check_sbe_reg(
         {
             // Set attribute indicating that SBE is started
             i_target->setAttr<TARGETING::ATTR_SBE_IS_STARTED>(1);
+            this->iv_sbeRestarted = true;
 
-            SBE_TRACF("SUCCESS: check_sbe_reg completed okay for proc 0x%.8X",
+            SBE_TRACF("SUCCESS: get_sbe_reg completed okay for proc 0x%.8X",
                       TARGETING::get_huid(i_target));
         }
         //@TODO-RTC:100963 - this should match the logic in
         //call_proc_check_slave_sbe_seeprom.C
     } while(0);
 
-    SBE_TRACF(EXIT_MRK "check_sbe_reg");
-    return l_ret;
+    SBE_TRACF(EXIT_MRK "get_sbe_reg()");
 
 }
 
-P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
-                TARGETING::Target * i_target,
-                SbeRetryHandler::SBE_REG_RETURN i_sbe_reg,
-                P9_EXTRACT_SBE_RC::RETURN_ACTION i_current_sbe_error,
-                bool i_fromStateMachine)
+void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
 {
     errlHndl_t l_errl = NULL;
-    P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
-            P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
 
     SBE_TRACF(ENTER_MRK "handle_sbe_reg_value()");
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(i_target);
 
-    switch(i_sbe_reg)
+    switch(this->iv_currentSBEState)
     {
         case SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR:
         {
             SBE_TRACF("handle_sbe_reg_value(): case FUNCTION_ERROR");
             // There has been a failure getting the SBE register
             // We cannot continue any further, return failure.
-            l_ret = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            this->iv_currentAction = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             break;
         }
         case SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME:
         {
             SBE_TRACF("handle_sbe_reg_value(): case SBE_AT_RUNTIME");
             // The SBE has successfully booted at runtime
-            l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+            this->iv_currentAction = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
             break;
         }
         case SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT:
         {
             SBE_TRACF("handle_sbe_reg_value(): case SBE_FAILED_TO_BOOT");
-            if((!i_fromStateMachine) &&
-               (i_current_sbe_error == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM))
+            if((this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)
+                && (!iv_retriggeredMain))
+
             {
+                iv_retriggeredMain = true;
 #ifdef CONFIG_BMC_IPMI
                 // This could potentially take awhile, reset watchdog
                 l_errl = IPMIWATCHDOG::resetWatchDogTimer();
@@ -434,18 +368,23 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                    "REIPL_UPD_SEEPROM failed. Recalling with BKP_SEEPROM");
                 // If we were trying to reipl and hit the error, we need
                 // to start with a new seeprom before hitting the threshold
-                proc_extract_sbe_handler(i_target,
-                                         P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM);
-                l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
+                this->iv_currentAction =
+                      P9_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_BKP_SEEPROM;
+                main_sbe_handler(i_target, true);
                 break;
             }
 
+            // Failed to boot, setting the final action for debugging.
             SBE_TRACF("Inside handle_sbe_reg_value, calling p9_extract_sbe_rc HWP");
             // Get SBE extract rc
             P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
             FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
                     l_fapi2_proc_target, l_rcAction);
+            this->iv_currentAction = l_rcAction;
+
+            SBE_TRACF("handle_sbe_reg_value(): SBE failed to boot. Final "
+                      "action is %llx", l_rcAction);
 
             if(l_errl)
             {
@@ -459,30 +398,6 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                 errlCommit( l_errl, HWPF_COMP_ID );
             }
 
-            if(i_fromStateMachine)
-            {
-                l_ret = l_rcAction;
-                break;
-            }
-
-            uint8_t l_prevError = (i_target)->getAttr<
-                    TARGETING::ATTR_PREVIOUS_SBE_ERROR>();
-            (i_target)->setAttr<TARGETING::ATTR_PREVIOUS_SBE_ERROR>(
-                            l_rcAction);
-
-            if(i_current_sbe_error == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM)
-            {
-                // Call sbe_threshold handler on the opposite side
-                SBE_FSM::sbe_threshold_handler(false, i_target, l_rcAction,
-                                l_prevError, this);
-            }
-            else
-            {
-                // Call sbe_threshold handler on the same side
-                SBE_FSM::sbe_threshold_handler(true, i_target, l_rcAction,
-                                l_prevError, this);
-            }
-            l_ret = P9_EXTRACT_SBE_RC::ERROR_RECOVERED;
             break;
         }
         default:
@@ -495,7 +410,7 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
              * @moduleid    SBEIO_HANDLE_SBE_REG_VALUE
              * @reasoncode  SBEIO_INCORRECT_FCN_CALL
              * @userdata1   HUID of target
-             * @userdata2   check_sbe_reg return value
+             * @userdata2   SBE current state
              * @devdesc     This function was called incorrectly or
              *              there is a new enum that is not handled yet.
              */
@@ -503,57 +418,24 @@ P9_EXTRACT_SBE_RC::RETURN_ACTION  SbeRetryHandler::handle_sbe_reg_value(
                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
                             SBEIO_HANDLE_SBE_REG_VALUE,
                             SBEIO_INCORRECT_FCN_CALL,
-                            get_huid(i_target),i_sbe_reg);
+                            get_huid(i_target),this->iv_currentSBEState);
             l_errl->collectTrace("ISTEPS_TRACE",256);
             errlCommit(l_errl, ISTEP_COMP_ID);
-            l_ret = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+            this->iv_currentAction = P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             break;
         }
     }
-
     SBE_TRACF(EXIT_MRK "handle_sbe_reg_value()");
-    return l_ret;
 }
 
-P9_EXTRACT_SBE_RC::RETURN_ACTION SbeRetryHandler::handle_sbe_restart(
-            TARGETING::Target * i_target,
-            bool i_fromStateMachine,
-            P9_EXTRACT_SBE_RC::RETURN_ACTION i_current_condition)
-{
-    SBE_TRACF(ENTER_MRK "handle_sbe_restart()");
-
-    errlHndl_t l_errl = NULL;
-
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-            l_fapi2_proc_target (i_target);
-
-    FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
-    if(l_errl)
-    {
-        SBE_TRACF("ERROR: call p9_start_cbs, "
-                 "PLID=0x%x", l_errl->plid() );
-        l_errl->collectTrace( "ISTEPS_TRACE", 256);
-
-        errlCommit(l_errl, ISTEP_COMP_ID);
-    }
-
-    SbeRetryHandler::SBE_REG_RETURN l_checkSBE = check_sbe_reg(i_target);
-    P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret = handle_sbe_reg_value(i_target,
-                    l_checkSBE, i_current_condition, i_fromStateMachine);
-
-    SBE_TRACF(EXIT_MRK "handle_sbe_restart()");
-    return l_ret;
-}
-
-errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
-                TARGETING::Target * i_target,
-                SbeRetryHandler::SBE_REG_RETURN * o_returnAction)
+errlHndl_t SbeRetryHandler::sbe_timeout_handler(TARGETING::Target * i_target)
 {
     SBE_TRACF(ENTER_MRK "sbe_timeout_handler()");
 
     errlHndl_t l_errl = NULL;
 
-    (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
+    this->iv_currentSBEState =
+            SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(i_target);
@@ -574,31 +456,36 @@ errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
 
     for( uint64_t l_loops = 0; l_loops < SBE_NUM_LOOPS; l_loops++ )
     {
-        (*o_sbeReg).reg = 0;
+        sbeMsgReg_t l_reg;
         FAPI_INVOKE_HWP(l_errl, p9_get_sbe_msg_register,
-                        l_fapi2_proc_target, (*o_sbeReg));
+                        l_fapi2_proc_target, l_reg);
+        this->iv_sbeRegister = l_reg;
         if (l_errl)
         {
             SBE_TRACF("ERROR : call p9_get_sbe_msg_register, PLID=0x%x, "
                       "on loop %d",
                       l_errl->plid(),
                       l_loops );
-            (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR;
+            this->iv_currentSBEState =
+                    SbeRetryHandler::SBE_REG_RETURN::HWP_ERROR;
             break;
         }
-        else if ((*o_sbeReg).currState == SBE_STATE_RUNTIME)
+        else if ((this->iv_sbeRegister).currState == SBE_STATE_RUNTIME)
         {
-            SBE_TRACF("SBE 0x%.8X booted and at runtime, o_sbeReg=0x%.8X, "
-                      "on loop %d",
-                      TARGETING::get_huid(i_target), (*o_sbeReg).reg,
+            SBE_TRACF("SBE 0x%.8X booted and at runtime, "
+                      "iv_sbeRegister=0x%.8X, on loop %d",
+                      TARGETING::get_huid(i_target),
+                      (this->iv_sbeRegister).reg,
                       l_loops);
-            (*o_returnAction) = SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME;
+            this->iv_currentSBEState =
+                  SbeRetryHandler::SBE_REG_RETURN::SBE_AT_RUNTIME;
             break;
         }
-        else if ((*o_sbeReg).asyncFFDC)
+        else if ((this->iv_sbeRegister).asyncFFDC)
         {
-            SBE_TRACF("SBE 0x%.8X has async FFDC bit set, o_sbeReg=0x%.8X",
-                      TARGETING::get_huid(i_target), (*o_sbeReg).reg);
+            SBE_TRACF("SBE 0x%.8X has async FFDC bit set, "
+                      "iv_sbeRegister=0x%.8X",TARGETING::get_huid(i_target),
+                      (this->iv_sbeRegister).reg);
             // Async FFDC is indicator that SBE is failing to boot, and if
             // in DUMP state, that SBE is done dumping, so leave loop
             break;
@@ -607,16 +494,17 @@ errlHndl_t SbeRetryHandler::sbe_timeout_handler(sbeMsgReg_t * o_sbeReg,
         {
             if( !(l_loops % 10) )
             {
-                SBE_TRACF("%d> SBE 0x%.8X NOT booted yet, o_sbeReg=0x%.8X",
-                           l_loops, TARGETING::get_huid(i_target),
-                           (*o_sbeReg).reg);
+                SBE_TRACF("%d> SBE 0x%.8X NOT booted yet, "
+                          "iv_sbeRegister=0x%.8X", l_loops,
+                          TARGETING::get_huid(i_target),
+                           (this->iv_sbeRegister).reg);
             }
             l_loops++;
             nanosleep(0,SBE_WAIT_SLEEP);
         }
     }
 
-    if ((*o_sbeReg).currState != SBE_STATE_RUNTIME)
+    if ((this->iv_sbeRegister).currState != SBE_STATE_RUNTIME)
     {
         // Switch to using FSI SCOM
         TARGETING::ScomSwitches l_switches =
@@ -775,8 +663,9 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             l_action = action_for_ffdc_rc(l_rc);
 
             // Handle that action
-            proc_extract_sbe_handler(i_target,
-                                     l_action);
+            this->iv_currentAction = l_action;
+            this->iv_retriggeredMain = true;
+            main_sbe_handler(i_target, true);
         }
 
         // If there are FFDC packages, commit the log
@@ -801,16 +690,15 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
     return l_flowCtrl;
 }
 
-void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
-                           sbeMsgReg_t i_sbeReg,
-                           SBE_REG_RETURN * o_regReturn)
+bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
 {
     SBE_TRACF(ENTER_MRK "sbe_boot_fail_handler()");
 
     errlHndl_t l_errl = nullptr;
+    bool o_needRetry = false;
 
     SBE_TRACF("SBE 0x%.8X never started, sbeReg=0x%.8X",
-               TARGETING::get_huid(i_target),i_sbeReg.reg );
+               TARGETING::get_huid(i_target),(this->iv_sbeRegister).reg );
     /*@
      * @errortype
      * @reasoncode  SBEIO_SLAVE_TIMEOUT
@@ -828,7 +716,7 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
                                      SBEIO_EXTRACT_RC_HANDLER,
                                      SBEIO_SLAVE_TIMEOUT,
                                      TARGETING::get_huid(i_target),
-                                     i_sbeReg.reg);
+                                     (this->iv_sbeRegister).reg);
 
     l_errl->collectTrace( "ISTEPS_TRACE", KILOBYTE/4);
 
@@ -841,23 +729,21 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
     // Setup for the HWP
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                         const_cast<TARGETING::Target*> (i_target));
-    P9_EXTRACT_SBE_RC::RETURN_ACTION l_rcAction =
-            P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+
+    P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+                     P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
     FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
-                    l_fapi2ProcTarget, l_rcAction);
+                    l_fapi2ProcTarget, l_ret);
+    this->iv_currentAction = l_ret;
 
-    //TODO:RTC 180961 handle error. ^^
-
-
-    if(l_rcAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
+    if(this->iv_currentAction != P9_EXTRACT_SBE_RC::ERROR_RECOVERED)
     {
 
-        if(l_errl) //TODO:RTC 180961 handle error ^^
+        if(l_errl)
         {
-            SBE_TRACF("Error found from p9_extract_sbe, fixing later");
             SBE_TRACF("p9_extract_sbe_rc HWP returned action %d and errorlog "
-                      "PLID=0x%x, rc=0x%.4X", l_rcAction, l_errl->plid(),
-                      l_errl->reasonCode() );
+                      "PLID=0x%x, rc=0x%.4X", this->iv_currentAction,
+                      l_errl->plid(), l_errl->reasonCode() );
             delete l_errl;
             l_errl = nullptr;
         }
@@ -871,8 +757,6 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
                                 TARGETING::get_huid(i_target));
         }
 
-        // Save the current rc error
-        (i_target)->setAttr<TARGETING::ATTR_PREVIOUS_SBE_ERROR>(l_rcAction);
 #ifdef CONFIG_BMC_IPMI
         // This could potentially take awhile, reset watchdog
         l_errl = IPMIWATCHDOG::resetWatchDogTimer();
@@ -884,27 +768,29 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
 #endif
-
-        // Only attempt to recover twice before erroring out
-        if((l_rcAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION) &&
-           (g_switch_sides_count < 2))
+        SBE_TRACF("sbe_boot_fail_handler. iv_switchSides count is %llx",
+                   iv_switchSidesCount);
+        if((this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION) &&
+           (iv_switchSidesCount < MAX_SWITCH_SIDE_COUNT))
         {
-            // Change action to attempt coming up from backup SEEPROM
-            l_rcAction = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+            this->iv_currentAction = P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM;
+            o_needRetry = true;
+        }
+        else if(iv_switchSidesCount >= MAX_SWITCH_SIDE_COUNT)
+        {
+            o_needRetry = false;
+        }
+        else
+        {
+            o_needRetry = true;
         }
 
-        // Handle the p9_extract_sbe_rc results (as modified)
-        // Pass o_regReturn back through call chain.
-        proc_extract_sbe_handler( i_target,
-                                  l_rcAction,
-                                  o_regReturn);
     }
-
     if(l_errl)
     {
         SBE_TRACF("Error: sbe_boot_fail_handler : p9_extract_sbe_rc HWP "
                   " returned action %d and errorlog PLID=0x%x, rc=0x%.4X",
-                  l_rcAction, l_errl->plid(), l_errl->reasonCode());
+                  this->iv_currentAction, l_errl->plid(), l_errl->reasonCode());
 
         // Capture the target data in the elog
         ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog( l_errl );
@@ -913,8 +799,9 @@ void SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target,
         errlCommit( l_errl, HWPF_COMP_ID );
     }
 
-    SBE_TRACF(EXIT_MRK "sbe_boot_fail_handler()");
-    return;
+    SBE_TRACF(EXIT_MRK "sbe_boot_fail_handler() current action is %llx",
+                        this->iv_currentAction);
+    return o_needRetry;
 }
 
 errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
@@ -952,22 +839,25 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(TARGETING::Target * i_target)
         {
             // Set Boot Side 0 by clearing bit for side 1
             SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 0 for HUID 0x%08X",
-                       g_switch_sides_count,
+                       iv_switchSidesCount,
                        TARGETING::get_huid(i_target));
             l_read_reg &= ~l_sbeBootSelectMask;
+            this->iv_sbeSide = 1;
         }
         else // Currently set for Boot Side 0
         {
             // Set Boot Side 1 by setting bit for side 1
             SBE_TRACF( "switch_sbe_sides #%d: Set Boot Side 1 for HUID 0x%08X",
-                       g_switch_sides_count,
+                       iv_switchSidesCount,
                        TARGETING::get_huid(i_target));
             l_read_reg |= l_sbeBootSelectMask;
+            this->iv_sbeSide = 0;
         }
 
+        SBE_TRACF("switch_sbe_sides(): iv_switchSidesCount is %llx",
+                   iv_switchSidesCount);
         // Increment switch sides count
-        ++g_switch_sides_count;
-        this->iv_sbeOtherSide = true;
+        ++iv_switchSidesCount;
 
         // Write updated PERV_SB_CS_FSI 0x2820 back into target proc
         l_errl = DeviceFW::deviceOp(

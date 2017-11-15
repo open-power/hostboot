@@ -124,54 +124,17 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                             const_cast<TARGETING::Target*> (l_cpu_target));
 
-        sbeMsgReg_t l_sbeReg;
-
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "Running p9_get_sbe_msg_register HWP"
                    " on processor target %.8X",
                    TARGETING::get_huid(l_cpu_target));
 
-        SBEIO::SbeRetryHandler::SBE_REG_RETURN l_ret =
-                SBEIO::SbeRetryHandler::SBE_REG_RETURN::SBE_FAILED_TO_BOOT;
+        SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler();
 
-        l_errl = SBEIO::SbeRetryHandler::getInstance().sbe_timeout_handler(
-                        &l_sbeReg,l_cpu_target,&l_ret);
+        l_SBEobj.main_sbe_handler(l_cpu_target,false);
 
-        if((!l_errl) && (l_sbeReg.currState != SBE_STATE_RUNTIME))
-        {
-            // See if async FFDC bit is set in SBE register
-            if(l_sbeReg.asyncFFDC)
-            {
-                bool l_flowCtrl = SBEIO::SbeRetryHandler::getInstance().
-                        sbe_get_ffdc_handler(l_cpu_target);
-
-                if(l_flowCtrl)
-                {
-                    continue;
-                }
-            }
-
-            // Handle that SBE failed to boot in the allowed time
-            SBEIO::SbeRetryHandler::getInstance().sbe_boot_fail_handler(
-                            l_cpu_target,l_sbeReg);
-        }
-        else if (l_errl)
-        {
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                    "ERROR : call p9_check_slave_sbe_seeprom_complete, "
-                    "PLID=0x%x", l_errl->plid()  );
-
-            // capture the target data in the elog
-            ErrlUserDetailsTarget(l_cpu_target).addToLog( l_errl );
-
-            // Create IStep error log and cross reference to error
-            l_stepError.addErrorDetails( l_errl );
-
-            // Commit error log
-            errlCommit( l_errl, HWPF_COMP_ID );
-        }
         // No error and still functional
-        else if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
+        if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)
         {
             // Set attribute indicating that SBE is started
             l_cpu_target->setAttr<ATTR_SBE_IS_STARTED>(1);

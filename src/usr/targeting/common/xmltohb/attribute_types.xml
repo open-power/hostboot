@@ -7396,20 +7396,6 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 </attribute>
 
 <attribute>
-    <id>PREVIOUS_SBE_ERROR</id>
-    <description>
-        Keeps track of the previous SBE error. We need to know
-        what last occurred to know what action we need to take.
-    </description>
-    <simpleType>
-        <uint8_t><default>0</default></uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
     <id>MC_PLL_BUCKET</id>
     <description>
         MC pll bucket selection in async mode for Cumulus
