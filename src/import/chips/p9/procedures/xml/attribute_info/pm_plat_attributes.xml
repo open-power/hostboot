@@ -2086,7 +2086,7 @@
      <targetType>TARGET_TYPE_SYSTEM</targetType>
      <valueType>uint8</valueType>
      <enum>
-        OFF = 0x00, ON = 0x01
+        OFF = 0x00, ON = 0x01, VDN_STEP_OFF = 0x02
     </enum>
     <initToZero/>
     <platInit/>
