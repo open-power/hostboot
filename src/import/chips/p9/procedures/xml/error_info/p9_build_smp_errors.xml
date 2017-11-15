@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -169,8 +169,6 @@
     <description>
       Status mismatch detected on ADU operation execution for SMP configuration.
     </description>
-    <ffdc>TARGET</ffdc>
-    <ffdc>ADU_NUM_POLLS</ffdc>
     <ffdc>CHIP_DATA_VALID</ffdc>
     <ffdc>GROUP_IDS</ffdc>
     <ffdc>CHIP_IDS</ffdc>

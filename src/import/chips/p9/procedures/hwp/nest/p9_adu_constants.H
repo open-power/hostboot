@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,9 @@ extern "C"
         // 0b010: PB disable op
         // 0b011: PMISC op
         // 0b100: PB enable op
+        // 0b101: pre-switch CD setup
+        // 0b110: pre-switch AB setup
+        // 0b111: post-switch AB/CD cleanup
         FLAG_ADU_TTYPE = 0xE0000000ull,                        // Bits 0:2
 
         // Utilize ADU HW auto-increment function
