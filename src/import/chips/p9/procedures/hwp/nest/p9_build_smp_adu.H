@@ -51,7 +51,8 @@ enum p9_build_smp_adu_action
 {
     SWITCH_AB = 1,
     SWITCH_CD = 2,
-    QUIESCE   = 4
+    QUIESCE   = 4,
+    RESET_SWITCH = 8
 };
 
 
