@@ -149,6 +149,10 @@ GEN_PNOR_IMAGE_SCRIPT = ${genPnorImages.pl:P}
 #     [a-zA-Z0-9,._+:@%/-]
 RH_DIR%=${DUMMY:!sed "s/\^.\*release \\\(\[0-9\]\*\\\)\..\*\$/rh\\1/\" /etc/redhat-release!e}
 
+# Use Secure Boot development signing if not specified in the environment
+BR2_OPENPOWER_SECUREBOOT_SIGN_MODE?=development
+SIGN_MODE_ARG=--sign-mode ${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}
+
 # Concatenate the base path, Redhat specific dir, and tool subdir to form the
 # complete signing tools path
 SIGNING_DIR%=${SIGNING_BASE_DIR}/${RH_DIR}/${SIGNING_UTILS_DIR}
@@ -159,7 +163,7 @@ SIGNING_LIBS%=${SIGNING_DIR}/libssl.so:${SIGNING_DIR}/libcrypto.so
 # Put signing tool dir in the path so child programs can be located.
 # Additionally, put /usr/bin at the front to prevent certain CI situations from
 # using old openssl binaries.
-PATH%=/usr/bin:${SIGNING_DIR}:${PATH}
+PATH%=/usr/bin:${SIGNING_DIR}:${SIGNING_DIR}/../sb-signing-framework/sb-signing-framework/src/client:${PATH}
 
 # Dump information about the Secure Boot configuration
 dump-secureboot-config : .FORCEBLD
@@ -171,6 +175,7 @@ Secure Boot Signing Config:\n\
     Final signing dir    [${SIGNING_DIR}]\n\
     Development key dir  [${DEV_KEY_DIR}]\n\
     Signing edition      [${SIGNING_TOOL_EDITION}]\n\
+    Signing mode         [${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}]\n\
     Compile secureboot?  [${CONFIG_SECUREBOOT}]\n\
     Libs to preload      [${SIGNING_LIBS}]\n\
     Path                 [${PATH}]\n\n"
@@ -243,7 +248,7 @@ gen_default_images: ${GEN_DEFAULT_IMAGES_DEPS}
     # result [hbbl][pad:8:if-applicable][securerom-size:8][securerom]
 
 	# Call script to generate final bin files for default images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
 
 clobber_cp_hbfiles:
 	rm -f ${ALL_DEFAULT_IMAGES}
@@ -396,7 +401,7 @@ ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
 
 gen_system_specific_images_bypass_cache : dump-secureboot-config
 	# Call script to generate final bin file for chip/system specific images
-	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS}
+	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
 
 	#for NIMBUS fake pnor skip version header
 	.if(${FAKEPNOR} != "")
