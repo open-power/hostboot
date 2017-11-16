@@ -193,10 +193,6 @@ bool CsRootCauseFilter::Apply( BitKey & io_bitList,
 
     do
     {
-
-        // This filter should only be applied on the primary pass.
-        if ( !io_sdc.service_data->isPrimaryPass() ) break;
-
         // This filter should only be applied if the primary attention type is
         // CHECK_STOP
         if ( CHECK_STOP != io_sdc.service_data->getPrimaryAttnType() ) break;
