@@ -1092,8 +1092,10 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
             break;
         }
 
-        // Load lids from Master Container Lid Container provided by FSP
-        if (INITSERVICE::spBaseServicesEnabled())
+        // Load lids from Master Container Lid Container provided by FSP and
+        // in POWERVM mode
+        if (INITSERVICE::spBaseServicesEnabled() &&
+            TARGETING::is_phyp_load())
         {
             MCL::MasterContainerLidMgr l_mcl;
             l_elog = l_mcl.processComponents();
