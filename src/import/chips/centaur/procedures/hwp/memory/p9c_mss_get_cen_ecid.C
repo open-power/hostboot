@@ -125,7 +125,7 @@ extern "C" {
         ecid[0] = ecid_struct.io_ecid[0];
         ecid[1] = ecid_struct.io_ecid[1];
 
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_CEN_ECID, i_target,  ecid), "mss_get_cen_ecid: Could not set ATTR_ECID" );
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target,  ecid), "mss_get_cen_ecid: Could not set ATTR_ECID" );
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_CHECK_L4_CACHE_ENABLE_UNKNOWN,
                                i_target, l_checkL4CacheEnableUnknown),
