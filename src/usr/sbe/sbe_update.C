@@ -4945,12 +4945,14 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                         err->collectTrace(SBE_COMP_NAME);
 
-                        err->addPartCallout(
-                                           io_sbeStates_v[i].target,
-                                           HWAS::SBE_SEEPROM_PART_TYPE,
-                                           HWAS::SRCI_PRIORITY_HIGH,
-                                           HWAS::NO_DECONFIG,
-                                           HWAS::GARD_NULL );
+                        err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                                 HWAS::SRCI_PRIORITY_HIGH);
+
+                        err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                                HWAS::SRCI_PRIORITY_MED);
+
+                        err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                                 HWAS::SRCI_PRIORITY_LOW);
 
                         ErrlUserDetailsTarget(io_sbeStates_v[mP].target,
                                               "Master Target").addToLog(err);
@@ -5027,7 +5029,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                      * @userdata2[32:63]    Original Error Reason Code
                      * @devdesc      Error Associated with Updating this Target
                      */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_ERROR_ON_UPDATE,
                                         TWO_UINT32_TO_UINT64(
@@ -5097,7 +5099,7 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                      * @custdesc     Self Boot Engine (SBE) Version Miscompare
                      *               with Master Target
                      */
-                    err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    err = new ErrlEntry(ERRL_SEV_PREDICTIVE,
                                         SBE_MASTER_VERSION_COMPARE,
                                         SBE_MISCOMPARE_WITH_MASTER_VERSION,
                                         TARGETING::get_huid(
@@ -5156,12 +5158,15 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                 {
                     // Add FFDC and Commit the error log created here
                     err->collectTrace(SBE_COMP_NAME);
-                    err->addPartCallout(
-                                       io_sbeStates_v[i].target,
-                                       HWAS::SBE_SEEPROM_PART_TYPE,
-                                       HWAS::SRCI_PRIORITY_HIGH,
-                                       HWAS::NO_DECONFIG,
-                                       HWAS::GARD_NULL );
+
+                    err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                             HWAS::SRCI_PRIORITY_HIGH);
+
+                    err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                             HWAS::SRCI_PRIORITY_MED);
+
+                    err->addProcedureCallout(HWAS::EPUB_PRC_SP_CODE,
+                                             HWAS::SRCI_PRIORITY_LOW);
 
                     ErrlUserDetailsTarget(io_sbeStates_v[mP].target,
                                           "Master Target").addToLog(err);
