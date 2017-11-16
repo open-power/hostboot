@@ -278,6 +278,43 @@ void ErrlEntry::removeBackTrace()
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+/*
+ * @brief  Safely retrieves the EntityPath for the target or the SENTINEL
+ *         pointer if appropriate
+ * @param[in]  i_target  Target to evaluate
+ * @param[out]  o_ePath  Pointer to new EntityPath if applicable, if this
+ *     comes back non-NULL, caller must delete the memory
+ * @param[out]  o_dataPtr  Pointer to target data
+ * @param[out]  o_dataSize  Size of target data
+ */
+void getTargData( const TARGETING::Target *i_target,
+                  TARGETING::EntityPath*& o_ePath,
+                  const void*& o_dataPtr,
+                  uint32_t& o_dataSize )
+{
+    o_ePath = nullptr;
+    o_dataPtr = nullptr;
+    o_dataSize = 0;
+    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+    {
+        o_dataSize = sizeof(HWAS::TARGET_IS_SENTINEL);
+        o_dataPtr = &HWAS::TARGET_IS_SENTINEL;
+    }
+    else
+    {   // we got a non MASTER_SENTINEL target, therefore the targeting
+        // module is loaded, therefore we can make this call.
+        o_ePath = new TARGETING::EntityPath;
+        *o_ePath = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
+        // size is total EntityPath size minus unused path elements
+        o_dataSize = sizeof(*o_ePath) -
+          (TARGETING::EntityPath::MAX_PATH_ELEMENTS - o_ePath->size()) *
+          sizeof(TARGETING::EntityPath::PathElement);
+        o_dataPtr = o_ePath;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
                         const HWAS::clockTypeEnum i_clockType,
                         const HWAS::callOutPriority i_priority,
@@ -287,25 +324,10 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
     TRACFCOMP(g_trac_errl, ENTER_MRK"addClockCallout(%p, %d, 0x%x)",
                 i_target, i_clockType, i_priority);
 
-    TARGETING::EntityPath ep;
-    const void *pData;
-    uint32_t size;
-
-    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        size = sizeof(HWAS::TARGET_IS_SENTINEL);
-        pData = &HWAS::TARGET_IS_SENTINEL;
-    }
-    else
-    {   // we got a non MASTER_SENTINEL target, therefore the targeting
-        // module is loaded, therefore we can make this call.
-        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        // size is total EntityPath size minus unused path elements
-        size = sizeof(ep) -
-                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
-                        sizeof(TARGETING::EntityPath::PathElement);
-        pData = &ep;
-    }
+    const void* pData = nullptr;
+    uint32_t size = 0;
+    TARGETING::EntityPath* ep = nullptr;
+    getTargData( i_target, ep, pData, size );
 
     ErrlUserDetailsCallout( pData, size, i_clockType,
             i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
@@ -319,6 +341,10 @@ void ErrlEntry::addClockCallout(const TARGETING::Target *i_target,
         setDeconfigBit();
     }
 
+    if( ep )
+    {
+        delete ep;
+    }
 } // addClockCallout
 
 
@@ -343,25 +369,10 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
     TRACFCOMP(g_trac_errl, ENTER_MRK"addPartCallout(%p, %d, 0x%x)",
                 i_target, i_partType, i_priority);
 
-    TARGETING::EntityPath ep;
-    const void *pData;
-    uint32_t size;
-
-    if (i_target == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        size = sizeof(HWAS::TARGET_IS_SENTINEL);
-        pData = &HWAS::TARGET_IS_SENTINEL;
-    }
-    else
-    {   // we got a non MASTER_SENTINEL target, therefore the targeting
-        // module is loaded, therefore we can make this call.
-        ep = i_target->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        // size is total EntityPath size minus unused path elements
-        size = sizeof(ep) -
-                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep.size()) *
-                        sizeof(TARGETING::EntityPath::PathElement);
-        pData = &ep;
-    }
+    const void* pData = nullptr;
+    uint32_t size = 0;
+    TARGETING::EntityPath* ep = nullptr;
+    getTargData( i_target, ep, pData, size );
 
     ErrlUserDetailsCallout( pData, size, i_partType,
             i_priority, i_deconfigState, i_gardErrorType).addToLog(this);
@@ -375,6 +386,10 @@ void ErrlEntry::addPartCallout(const TARGETING::Target *i_target,
         setDeconfigBit();
     }
 
+    if( ep )
+    {
+        delete ep;
+    }
 } // addPartCallout
 
 ////////////////////////////////////////////////////////////////////////////
@@ -387,45 +402,28 @@ void ErrlEntry::addBusCallout(const TARGETING::Target *i_target_endp1,
     TRACFCOMP(g_trac_errl, ENTER_MRK"addBusCallout(%p, %p, %d, 0x%x)",
                 i_target_endp1, i_target_endp2, i_busType, i_priority);
 
-    TARGETING::EntityPath ep1, ep2;
-    const void *pData1, *pData2;
-    uint32_t size1, size2;
+    const void* pData1 = nullptr;
+    uint32_t size1 = 0;
+    TARGETING::EntityPath* ep1 = nullptr;
+    getTargData( i_target_endp1, ep1, pData1, size1 );
 
-    if (i_target_endp1 == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        size1 = sizeof(HWAS::TARGET_IS_SENTINEL);
-        pData1 = &HWAS::TARGET_IS_SENTINEL;
-    }
-    else
-    {   // we got a non MASTER_SENTINEL target, therefore the targeting
-        // module is loaded, therefore we can make this call.
-        ep1 = i_target_endp1->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        // size is total EntityPath size minus unused path elements
-        size1 = sizeof(ep1) -
-                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep1.size()) *
-                        sizeof(TARGETING::EntityPath::PathElement);
-        pData1 = &ep1;
-    }
+    const void* pData2 = nullptr;
+    uint32_t size2 = 0;
+    TARGETING::EntityPath* ep2 = nullptr;
+    getTargData( i_target_endp2, ep2, pData2, size2 );
 
-    if (i_target_endp2 == TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
-    {
-        size2 = sizeof(HWAS::TARGET_IS_SENTINEL);
-        pData2 = &HWAS::TARGET_IS_SENTINEL;
-    }
-    else
-    {   // we got a non MASTER_SENTINEL target, therefore the targeting
-        // module is loaded, therefore we can make this call.
-        ep2 = i_target_endp2->getAttr<TARGETING::ATTR_PHYS_PATH>();
-        // size is total EntityPath size minus unused path elements
-        size2 = sizeof(ep2) -
-                    (TARGETING::EntityPath::MAX_PATH_ELEMENTS - ep2.size()) *
-                        sizeof(TARGETING::EntityPath::PathElement);
-        pData2 = &ep2;
-    }
 
     ErrlUserDetailsCallout( pData1, size1, pData2, size2, i_busType,
                             i_priority).addToLog(this);
 
+    if( ep1 )
+    {
+        delete ep1;
+    }
+    if( ep2 )
+    {
+        delete ep2;
+    }
 } // addBusCallout
 
 
