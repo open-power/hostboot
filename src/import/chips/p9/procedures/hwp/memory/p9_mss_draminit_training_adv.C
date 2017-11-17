@@ -106,7 +106,7 @@ extern "C"
             l_cal_steps_enabled.setBit<mss::INITIAL_PAT_WR>().setBit<mss::TRAINING_ADV>();
 
             // Gets the training steps to calibrate
-            l_steps = mss::training::steps_factory(l_cal_steps_enabled);
+            l_steps = mss::training::steps_factory(l_cal_steps_enabled, l_sim);
 
             // Keep track of the last error seen by a rank pair
             fapi2::ReturnCode l_rank_pair_error(fapi2::FAPI2_RC_SUCCESS);
