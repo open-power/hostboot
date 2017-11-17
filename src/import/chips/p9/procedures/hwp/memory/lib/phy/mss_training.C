@@ -655,9 +655,10 @@ uint64_t custom_read_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TY
 ///
 /// @brief Creates the vector of training steps to loop over
 /// @param[in] i_cal_steps - the bit mask of calibration steps
+/// @param[in] i_sim - simulation mode or not
 /// @return a vector of the calibration steps to run
 ///
-std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps)
+std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps, const bool i_sim)
 {
     std::vector<std::shared_ptr<step>> l_steps;
 
@@ -669,10 +670,16 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     }
 
     // INITIAL_PAT_WR
-    if(i_cal_steps.getBit<mss::cal_steps::INITIAL_PAT_WR>())
+    // Note: simulation contains a bug where the DDR4 model does not match the DDR4 hardware
+    // As such, if the simulation IPW bug is set, do not create a step for initial pattern write
+    if(!i_sim && i_cal_steps.getBit<mss::cal_steps::INITIAL_PAT_WR>())
     {
         FAPI_INF("Initial pattern write is enabled");
         l_steps.push_back(std::make_shared<initial_pattern_write>());
+    }
+    else if(i_sim)
+    {
+        FAPI_INF("Initial pattern write was requested, but the simulation for it is bugged! Skipping IPW");
     }
 
     // DQS_ALIGN
