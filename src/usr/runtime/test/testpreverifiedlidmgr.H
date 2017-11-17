@@ -98,14 +98,17 @@ class PreVerifiedLidMgrTest : public CxxTest::TestSuite
             break;
         }
 
-        // Each section has 2 lids each (Header, Content) except the RINGOVD
-        // section. It only has 1 or is inhibited in secure mode
+        // Each section has 2 lids each (Header, Content)
+        // Note: even the RINGOVD section adds a Header element, although it is
+        //       INVALID_LID
+        // See runtime_utils.C for full list of PNOR sections and utillidpnor.C
+        //     for the mappings (PnorToLidsMap)
         size_t l_numSections = RUNTIME::preVerifiedPnorSections.size();
-        // See utillidpnor.C for more info on num of lids
         size_t l_expectedLids = (2 * l_numSections);
         if (SECUREBOOT::enabled())
         {
-            // RINGOVD not permitted in secure mode
+            // RINGOVD not permitted in secure mode. Meaning the Header and
+            // Content lid will be missing.
             l_expectedLids -= 2;
         }
 

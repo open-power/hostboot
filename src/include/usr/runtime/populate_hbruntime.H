@@ -70,13 +70,13 @@ errlHndl_t unmapVirtAddr(uint64_t i_addr);
  *  @brief Pre verify Pnor sections and load into HB reserved memory
  *
  *  @param[in] i_sec - pnor section to pre-verify and load
- *  @param[in] i_verified - Indicates if pnor section is expected to have a
- *                          secure header.
- *                          e.g. RINGOVD currently never has a secure header
+ *  @param[in] i_secHdrExpected - Indicates if pnor section is expected to have
+ *                                a secure header.
+ *                              e.g. RINGOVD currently never has a secure header
  *
  *  @return Error handle if error
  */
 errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
-                                    const bool i_verified);
+                                    const bool i_secHdrExpected);
 
 } // End of Namespace
