@@ -160,49 +160,6 @@ void* call_mss_scominit (void *io_pArgs)
             break;
         }
 
-        // Run proc throttle sync
-        // Get all functional proc chip targets
-        TARGETING::TargetHandleList l_cpuTargetList;
-        getAllChips(l_cpuTargetList, TYPE_PROC);
-
-        for (const auto & l_procChip: l_cpuTargetList)
-        {
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                l_fapi_cpu_target(l_procChip);
-
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Running p9_throttle_sync HWP on "
-                   "target HUID %.8X", TARGETING::get_huid(l_procChip));
-
-            // Call proc_throttle_sync
-            FAPI_INVOKE_HWP( l_err, p9_throttle_sync, l_fapi_cpu_target );
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "ERROR 0x%.8X: p9_throttle_sync HWP returns error",
-                          l_err->reasonCode());
-
-                // Capture the target data in the elog
-                ErrlUserDetailsTarget(l_procChip).addToLog(l_err);
-
-                // Create IStep error log and cross reference
-                // to error that occurred
-                l_stepError.addErrorDetails( l_err );
-
-                // Commit Error
-                errlCommit( l_err, HWPF_COMP_ID );
-
-                break;
-            }
-            else
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "SUCCESS running p9_throttle_sync HWP on "
-                           "target HUID %.8X", TARGETING::get_huid(l_procChip));
-            }
-        }
-
     } while (0);
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_scominit exit" );

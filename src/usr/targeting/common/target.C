@@ -501,6 +501,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             }
             else if ((l_element.type == TYPE_L4) ||
                      (l_element.type == TYPE_MBA) ||
+                     (l_element.type == TYPE_MC) ||
                      (l_element.type == TYPE_XBUS) ||
                      (l_element.type == TYPE_ABUS) ||
                      (l_element.type == TYPE_EQ) ||

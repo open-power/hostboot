@@ -406,17 +406,17 @@ errlHndl_t configureHbrtHypIds(const bool i_configForPhyp)
                 getParentAffinityTargets(targetList,
                                          (*pIt),
                                          TARGETING::CLASS_UNIT,
-                                         TARGETING::TYPE_MCS);
+                                         TARGETING::TYPE_DMI, false);
                 assert( !targetList.empty() );
 
-                auto mcs_target = targetList[0];
-                auto pos = mcs_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+                auto dmi_target = targetList[0];
+                auto pos = dmi_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
                 targetList.clear();
                 getParentAffinityTargets(targetList,
-                                         mcs_target,
+                                         dmi_target,
                                          TARGETING::CLASS_CHIP,
-                                         TARGETING::TYPE_PROC);
+                                         TARGETING::TYPE_PROC, false);
                 assert( !targetList.empty() );
 
                 auto procTarget = targetList[0];

@@ -787,9 +787,13 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
 
         for(size_t i = 0; i < l_elems; i++)
         {
+            //#@TODO RTC: 182602 -- Need to scrub through attributes for dimm target
+            //For now, just skipping over BAD_DQ_BITMAP as it does not have a valid
+            //lookup for cumulus
             //Look for specific ATTR
-            if((i_attrHash!= 0x0) &&  //looking for specific ATTR
-               (i_attrHash != l_attrs[i].iv_attrId))
+            if(((i_attrHash!= 0x0) &&  //looking for specific ATTR
+               (i_attrHash != l_attrs[i].iv_attrId)) ||
+               (l_attrs[i].iv_attrId == fapi2::ATTR_BAD_DQ_BITMAP))
             {
                 continue;
             }
@@ -806,7 +810,7 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
             if(l_bytes > KILOBYTE)
             {
                 FAPI_INF("triggerAttrSync: ATTR %x bigger [%x] than 1K... skipping",
-                         l_bytes);
+                         l_attrs[i].iv_attrId, l_bytes);
                 continue;
             }
             l_buf = reinterpret_cast<uint8_t *>(realloc(l_buf, l_bytes));
