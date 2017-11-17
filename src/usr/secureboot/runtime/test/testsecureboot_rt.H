@@ -191,11 +191,18 @@ class SecurebootRtTestSuite: public CxxTest::TestSuite
             }
             else
             {
-                TS_FAIL("testAccessSecurePnorSection: unexpected reason code for Secure Section %s. Expected RC 0x%.4X Actual RC 0x%.4X",
-                        PNOR::SectionIdToString(i_id),
-                        PNOR::RC_RTPNOR_INVALID_SECTION,
-                        l_errl->reasonCode());
-                errlCommit(l_errl, SECURE_COMP_ID);
+                if (l_errl)
+                {
+                    TS_FAIL("testAccessSecurePnorSection: unexpected reason code for Secure Section %s. Expected RC 0x%.4X Actual RC 0x%.4X",
+                            PNOR::SectionIdToString(i_id),
+                            PNOR::RC_RTPNOR_INVALID_SECTION,
+                            l_errl->reasonCode());
+                    errlCommit(l_errl, SECURE_COMP_ID);
+                }
+                else
+                {
+                    TS_FAIL("testAccessSecurePnorSection: no error found when one was expected");
+                }
             }
         }
         else if(l_errl)

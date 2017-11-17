@@ -29,7 +29,10 @@
 namespace RUNTIME
 {
 
+// Pair indicating if a PNOR section is expected to have a secure header
+// regardless of the compiler options
 typedef std::pair<PNOR::SectionId, bool> PreVerifyPair;
+// A vector of all PNOR sections that are pre-verified for runtime
 typedef std::vector<PreVerifyPair> PreVerifyVector;
 
 // PNOR sections that will be pre-verified and loaded into HB reserved memory

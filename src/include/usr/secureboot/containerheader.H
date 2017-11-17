@@ -63,7 +63,7 @@ class ContainerHeader
         };
 
         /**
-         * @brief ContainerHeader
+         * @brief ContainerHeader - generate fake header
          *
          * This constructor generates a fake header with minimal information
          *

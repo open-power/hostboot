@@ -27,11 +27,11 @@
 namespace RUNTIME
 {
 
-// -- Verified Images
+// -- Images expected to have secure headers
 //   -- OCC
 //   -- WOFDATA
 //   -- HCODE
-// -- Non-verified Images
+// -- Images that never have secure headers
 ///  -- RINGOVD
 const PreVerifyVector preVerifiedPnorSections {
     {PNOR::OCC, true},

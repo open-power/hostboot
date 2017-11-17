@@ -557,7 +557,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
 }
 
 errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
-                                    bool i_verified)
+                                    const bool i_secHdrExpected)
 {
     TRACFCOMP( g_trac_runtime,ENTER_MRK"hbResvloadSecureSection() sec %s",
               PNOR::SectionIdToString(i_sec));
@@ -603,16 +603,21 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
         auto l_pnorVaddr = l_info.vaddr;
         auto l_imgSize = l_info.size;
 
-        // If section is signed, only the protected size was loaded into memory
-        if (i_verified)
+        // Check if the section is expected to have a secure header regardless
+        // of compile options
+        if (i_secHdrExpected)
         {
 #ifdef CONFIG_SECUREBOOT
+            // If section is signed, only the protected size was loaded into memory
             l_imgSize = l_info.secureProtectedPayloadSize;
             // Include secure header
+            // NOTE: we do not preserve the header in virtual memory when SB
+            // is compiled out. So "-PAGESIZE" only works when SB is compiled in
             l_pnorVaddr -= PAGESIZE;
 #endif
             // Add size for secure header.
-            // NOTE: if SB compiled out, a header will be injected later
+            // NOTE: if SB compiled out, a header will be injected later so
+            // preserve space for the header.
             l_imgSize += PAGESIZE;
         }
 
