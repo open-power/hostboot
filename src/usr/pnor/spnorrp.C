@@ -609,7 +609,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections there was an error");
         if (failedVerify)
         {
-            SECUREBOOT::handleSecurebootFailure(l_errhdl,false);
+            SECUREBOOT::handleSecurebootFailure(l_errhdl, false, true);
         }
         else
         {

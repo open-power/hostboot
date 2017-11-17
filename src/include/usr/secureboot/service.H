@@ -284,9 +284,15 @@ namespace SECUREBOOT
      *     never return from this call) or not (and return from this call).
      *     In general, code should wait for shutdown unless early in boot before
      *     basic services are up, or in a resource provider path.
+     * @param[in] i_calledByRP Indicates that this function is being called from
+     *     within a resource provider message handler, which lets the
+     *     implementation know that it needs to take precautionary measures to
+     *     avoid deadlock scenarios. If called by a resource provider pass true.
+     *     If not, false.
      */
-    void handleSecurebootFailure(
-        errlHndl_t &io_err, bool i_waitForShutdown = true);
+    void handleSecurebootFailure(errlHndl_t &io_err,
+                                 bool i_waitForShutdown = true,
+                                 bool i_calledByRP = false);
 
     /**
      *  @brief Adds the values of the Security Registers of the processors in
@@ -297,18 +303,23 @@ namespace SECUREBOOT
      *                         NOTE:  The state of the system/processors
      *                         (ie, SCOM vs FSI) determines which registers can
      *                         be included.
-     *
+     *  @param[in] i_calledByRP See the handleSecurebootFailure function's
+     *                         "called by resource provider" option.
      *  @return N/A
      */
-    void addSecurityRegistersToErrlog(errlHndl_t & io_err);
+    void addSecurityRegistersToErrlog(errlHndl_t & io_err,
+                                      bool i_calledByRP = false);
 
     /**
      * @brief Common handler for adding all relevant secureboot information to
      *        the user details section of an error log
      * @param[in/out] io_err  Error Log to add secure info to.
      *                        Must not be nullptr.
+     * @param[in] i_calledByRP See the handleSecurebootFailure function's
+     *                        "called by resource provider" option.
      */
-    void addSecureUserDetailsToErrolog(errlHndl_t & io_err);
+    void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
+                                      bool i_calledByRP = false);
 
     /*
      *  @brief Determines if Attribute Overrides are Allowed

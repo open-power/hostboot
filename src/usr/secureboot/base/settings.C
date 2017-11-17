@@ -285,7 +285,7 @@ namespace SECUREBOOT
                 TO_UINT64(get_huid(i_pTarget)),
                 true);
             pError->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
-            addSecureUserDetailsToErrolog(pError);
+            addSecureUserDetailsToErrlog(pError);
             break;
         }
 
@@ -356,7 +356,7 @@ namespace SECUREBOOT
                                          TO_UINT64(get_huid(i_pProc)),
                                          true /* Add HB Software Callout */ );
             l_errl->collectTrace(SECURE_COMP_NAME, ERROR_TRACE_SIZE);
-            addSecureUserDetailsToErrolog(l_errl);
+            addSecureUserDetailsToErrlog(l_errl);
             break;
         }
 

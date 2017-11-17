@@ -365,7 +365,7 @@ void VfsRp::msgHandler()
                             {
                                 msg->data[1] = -EACCES;
                                 SECUREBOOT::handleSecurebootFailure(
-                                    l_errl,false);
+                                    l_errl, false, true);
                                 break;
                             }
                         }

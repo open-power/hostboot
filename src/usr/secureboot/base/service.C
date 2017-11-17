@@ -86,133 +86,27 @@ struct SecureRegisterValues
 uint8_t g_sbeSecurityMode = 1;
 
 /**
- *  @brief Retrieve values of Security Registers of the processors in the system
+ * @brief Retrieve values of Security Registers of the processors in the
+ *        system
  *
- *  @param[out] o_regs  Vector of SecureRegisterValue structs that contain
- *                      processor security register values
- *                      NOTE:  The state of the system/processors (ie, SCOM vs
- *                      FSI) determines which registers can be included
+ * @param[out] o_regs       Vector of SecureRegisterValue structs that contain
+ *                          processor security register values
+ *                          NOTE:  The state of the system/processors (ie, SCOM vs
+ *                          FSI) determines which registers can be included
+ * @param[out] i_calledByRP See the handleSecurebootFailure function's
+ *                          "called by resource provider" option.
  *
  * @return errlHndl_t  nullptr on success, else pointer to error log
  */
-errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs);
-
-void* initializeBase(void* unused)
+errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
+                                   const bool i_calledByRP = false)
 {
-    errlHndl_t l_errl = NULL;
+    // Note: If you add code to this function that calls into the extended
+    // image then it could cause a deadlock. Protect any such code with
+    // logic that checks if i_calledByRP is false before doing so.
 
-    do
-    {
-        // SecureROM manager verifies if the content necessary for secureboot in
-        // the BltoHbData is valid or not. So initialize before anything else.
-        // Don't enable SecureRomManager in VPO
-#ifndef CONFIG_P9_VPO_COMPILE
-
-        // Initialize the Secure ROM
-        l_errl = initializeSecureRomManager();
-        if (l_errl)
-        {
-            break;
-        }
-#endif
-
-        // Load original secureboot header.
-        if (enabled())
-        {
-            Singleton<Header>::instance().loadSecurely();
-        }
-    } while(0);
-
-    return l_errl;
-}
-
-#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
-bool enabled()
-{
-    return Singleton<Settings>::instance().getEnabled();
-}
-#endif
-
-bool bestEffortPolicy()
-{
-    return Singleton<Settings>::instance().getBestEffortPolicy();
-}
-
-errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
-{
-    return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,
-                                                                       i_pProc);
-}
-
-errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
-    TARGETING::Target* i_pProc)
-{
-    return Singleton<Settings>::instance().getProcCbsControlRegister(o_regValue,
-        i_pProc);
-}
-
-errlHndl_t getJumperState(SecureJumperState& o_state,
-                                                    TARGETING::Target* i_pProc)
-{
-    return Singleton<Settings>::instance().getJumperState(o_state, i_pProc);
-}
-
-errlHndl_t clearSecuritySwitchBits(
-    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
-          TARGETING::Target* const               i_pTarget)
-{
-    return Singleton<Settings>::instance().clearSecuritySwitchBits(
-        i_bits, i_pTarget);
-}
-
-errlHndl_t setSecuritySwitchBits(
-    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
-          TARGETING::Target* const               i_pTarget)
-{
-    return Singleton<Settings>::instance().setSecuritySwitchBits(
-        i_bits, i_pTarget);
-}
-
-void handleSecurebootFailure(errlHndl_t &io_err, bool i_waitForShutdown)
-{
-    TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
-
-    assert(io_err != NULL, "Secureboot Failure has a NULL error log")
-
-    // Grab errlog reason code before committing.
-    uint16_t l_rc = io_err->reasonCode();
-
-#ifdef CONFIG_CONSOLE
-    CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
-                      io_err->plid(), l_rc);
-#endif
-    printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
-           io_err->plid(),l_rc);
-
-    // Add Verification callout
-    io_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
-                               HWAS::SRCI_PRIORITY_HIGH);
-
-    // Add Security related user details
-    // @TODO RTC: 176134 A chain of calls leads to a portion of code in the ext
-    //                   img. If we get an HBI page verify failure and the ext
-    //                   image is corrupted, we will hang.
-    addSecureUserDetailsToErrolog(io_err);
-
-    io_err->collectTrace(SECURE_COMP_NAME,MAX_ERROR_TRACE_SIZE);
-    io_err->collectTrace(TRBOOT_COMP_NAME,MAX_ERROR_TRACE_SIZE);
-
-    errlCommit(io_err, SECURE_COMP_ID);
-
-    // Shutdown with Secureboot error status
-    INITSERVICE::doShutdown(l_rc, !i_waitForShutdown);
-}
-
-
-errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
-{
-    SB_ENTER("getAllSecurityRegisters: isTargetingLoaded=%d",
-             Util::isTargetingLoaded());
+    SB_ENTER("getAllSecurityRegisters: isTargetingLoaded=%d calledByRP=%d",
+             Util::isTargetingLoaded(), i_calledByRP);
     errlHndl_t err = nullptr;
 
     // Clear output vector
@@ -226,7 +120,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
     TARGETING::TargetHandleList procList;
     TARGETING::Target* masterProcChipTargetHandle = nullptr;
 
-    if ( Util::isTargetingLoaded()  )
+    if ( Util::isTargetingLoaded() && !i_calledByRP )
     {
         // Try to get a list of functional processors
 
@@ -234,6 +128,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
         TargetService& tS = targetService();
         TARGETING::Target* sys = nullptr;
         (void) tS.getTopLevelTarget( sys );
+
         assert(sys, "getAllSecurityRegisters() system target is nullptr");
 
         TARGETING::getAllChips(procList,
@@ -269,7 +164,6 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
         size_t   op_actual_size = 0x0;
         uint64_t op_addr  = 0x0;
 
-
         for( auto procTgt : procList )
         {
             SB_DBG("getAllSecurityRegisters: procTgt=0x%X: useXscom=%d",
@@ -286,7 +180,6 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
                 l_secRegValues.addr=static_cast<uint32_t>(ProcSecurity::SwitchRegister);
                 err = getSecuritySwitch(l_secRegValues.data,
                                         l_secRegValues.tgt);
-
                 if( err )
                 {
                     // Something failed on the read.  Commit the error
@@ -391,9 +284,7 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
         }
         o_regs.push_back(l_secRegValues);
 
-
     } // using MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
-
 
     } while(0);
 
@@ -403,6 +294,114 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs)
             o_regs.size());
 
     return err;
+}
+
+void* initializeBase(void* unused)
+{
+    errlHndl_t l_errl = NULL;
+
+    do
+    {
+        // SecureROM manager verifies if the content necessary for secureboot in
+        // the BltoHbData is valid or not. So initialize before anything else.
+        // Don't enable SecureRomManager in VPO
+#ifndef CONFIG_P9_VPO_COMPILE
+
+        // Initialize the Secure ROM
+        l_errl = initializeSecureRomManager();
+        if (l_errl)
+        {
+            break;
+        }
+#endif
+
+        // Load original secureboot header.
+        if (enabled())
+        {
+            Singleton<Header>::instance().loadSecurely();
+        }
+    } while(0);
+
+    return l_errl;
+}
+
+#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
+bool enabled()
+{
+    return Singleton<Settings>::instance().getEnabled();
+}
+#endif
+
+bool bestEffortPolicy()
+{
+    return Singleton<Settings>::instance().getBestEffortPolicy();
+}
+
+errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
+{
+    return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,
+                                                                       i_pProc);
+}
+
+errlHndl_t getProcCbsControlRegister(uint64_t& o_regValue,
+    TARGETING::Target* i_pProc)
+{
+    return Singleton<Settings>::instance().getProcCbsControlRegister(o_regValue,
+        i_pProc);
+}
+
+errlHndl_t getJumperState(SecureJumperState& o_state,
+                                                    TARGETING::Target* i_pProc)
+{
+    return Singleton<Settings>::instance().getJumperState(o_state, i_pProc);
+}
+
+errlHndl_t clearSecuritySwitchBits(
+    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+          TARGETING::Target* const               i_pTarget)
+{
+    return Singleton<Settings>::instance().clearSecuritySwitchBits(
+        i_bits, i_pTarget);
+}
+
+errlHndl_t setSecuritySwitchBits(
+    const std::vector<SECUREBOOT::ProcSecurity>& i_bits,
+          TARGETING::Target* const               i_pTarget)
+{
+    return Singleton<Settings>::instance().setSecuritySwitchBits(
+        i_bits, i_pTarget);
+}
+
+void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown,
+                                                 const bool i_calledByRP)
+{
+    TRACFCOMP( g_trac_secure, ENTER_MRK"handleSecurebootFailure()");
+
+    assert(io_err != NULL, "Secureboot Failure has a NULL error log")
+
+    // Grab errlog reason code before committing.
+    uint16_t l_rc = io_err->reasonCode();
+
+#ifdef CONFIG_CONSOLE
+    CONSOLE::displayf(SECURE_COMP_NAME, "Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+                      io_err->plid(), l_rc);
+#endif
+    printk("Secureboot Failure plid = 0x%08X, rc = 0x%04X\n",
+           io_err->plid(),l_rc);
+
+    // Add Verification callout
+    io_err->addProcedureCallout(HWAS::EPUB_PRC_FW_VERIFICATION_ERR,
+                               HWAS::SRCI_PRIORITY_HIGH);
+
+    addSecureUserDetailsToErrlog(io_err, i_calledByRP);
+
+    io_err->collectTrace(SECURE_COMP_NAME,MAX_ERROR_TRACE_SIZE);
+    io_err->collectTrace(TRBOOT_COMP_NAME,MAX_ERROR_TRACE_SIZE);
+
+    errlCommit(io_err, SECURE_COMP_ID);
+
+    // Shutdown with Secureboot error status
+    INITSERVICE::doShutdown(l_rc, !i_waitForShutdown);
 }
 
 errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
@@ -505,7 +504,8 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
 }
 
 
-void addSecurityRegistersToErrlog(errlHndl_t & io_err)
+void addSecurityRegistersToErrlog(errlHndl_t & io_err,
+                                  const bool i_calledByRP)
 {
     SB_ENTER("addSecurityRegistersToErrlog(): io_err rc=0x%X, plid=0x%X",
              ERRL_GETRC_SAFE(io_err), ERRL_GETPLID_SAFE(io_err));
@@ -518,7 +518,7 @@ void addSecurityRegistersToErrlog(errlHndl_t & io_err)
     do
     {
 
-    new_err = getAllSecurityRegisters(registerList);
+    new_err = getAllSecurityRegisters(registerList, i_calledByRP);
 
     if (new_err)
     {
@@ -564,13 +564,14 @@ void addSecurityRegistersToErrlog(errlHndl_t & io_err)
     return;
 }
 
-void addSecureUserDetailsToErrolog(errlHndl_t & io_err)
+void addSecureUserDetailsToErrlog(errlHndl_t & io_err,
+                                   const bool i_calledByRP)
 {
     // Add Security Settings
     UdSecuritySettings().addToLog(io_err);
 
     // Add security register values
-    addSecurityRegistersToErrlog(io_err);
+    addSecurityRegistersToErrlog(io_err, i_calledByRP);
 
     // Add System HW Keys' Hash
     SHA512_t hash = {0};

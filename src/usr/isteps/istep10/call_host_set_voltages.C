@@ -242,7 +242,7 @@ void handleProcessorSecurityError(TARGETING::Target* i_pProc,
     ERRORLOG::ErrlUserDetailsTarget(i_pProc).addToLog(err);
 
     // Add Security related user details
-    SECUREBOOT::addSecureUserDetailsToErrolog(err);
+    SECUREBOOT::addSecureUserDetailsToErrlog(err);
 
     // add hashes to log and traces
     for(auto& hsh : i_hashes)
