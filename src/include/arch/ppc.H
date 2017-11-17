@@ -364,6 +364,13 @@ inline uint64_t getHID()
 }
 
 ALWAYS_INLINE
+inline void setHID(uint64_t _hid)
+{
+    register uint64_t hid = _hid;
+    asm volatile("mtspr 1008, %0; isync" :: "r" (hid));
+}
+
+ALWAYS_INLINE
 inline size_t getCacheLineBytes()
 {
     return 128;

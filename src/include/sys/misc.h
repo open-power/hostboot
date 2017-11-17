@@ -202,6 +202,13 @@ enum CpuSprNames
  */
 uint64_t cpu_spr_value(CpuSprNames spr);
 
+/** @fn cpu_spr_set
+ *  @brief Writes an SPR.
+ *
+ *  @return rc: true = success,  false = unsupported SPR.
+ */
+uint64_t cpu_spr_set(CpuSprNames spr, uint64_t newValue );
+
 /** @fn cpu_master_winkle
  *  @brief Winkle the master core so runtime SLW image can be applied.
  *
