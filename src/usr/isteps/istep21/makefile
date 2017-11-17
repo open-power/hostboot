@@ -25,6 +25,7 @@
 ROOTPATH = ../../../..
 MODULE = istep21
 
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/pm/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc/

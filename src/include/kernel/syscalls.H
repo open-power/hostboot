@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2014                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,8 @@ namespace Systemcalls
         MISC_CPUSTARTCORE,
             /** cpu_spr_value() */
         MISC_CPUSPRVALUE,
+            /** cpu_spr_set() */
+        MISC_CPUSPRSET,
             /** cpu_nap() - Hidden syscall */
         MISC_CPUNAP,
             /** cpu_master_winkle() */

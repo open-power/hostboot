@@ -93,6 +93,14 @@ uint64_t cpu_spr_value(CpuSprNames spr)
         _syscall1(MISC_CPUSPRVALUE, reinterpret_cast<void*>(spr)));
 }
 
+uint64_t cpu_spr_set(CpuSprNames spr, uint64_t newValue)
+{
+    return reinterpret_cast<uint64_t>(
+        _syscall2( MISC_CPUSPRSET,
+                   reinterpret_cast<void*>(spr),
+                   reinterpret_cast<void*>(newValue) ));
+}
+
 int cpu_master_winkle(bool  i_fusedCores)
 {
     task_affinity_pin();

@@ -125,6 +125,7 @@ namespace ISTEP
         RC_RETURNED_FFDC                         = ISTEP_COMP_ID | 0x34,
         RC_P9N_DD1_NOT_SUPPORTED                 = ISTEP_COMP_ID | 0x35,
         RC_PREVENT_REBOOT_IN_MFG_TERM_MODE       = ISTEP_COMP_ID | 0x36,
+        RC_FAILED_WRITE_SPR                      = ISTEP_COMP_ID | 0x37,
     };
 
 };

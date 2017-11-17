@@ -119,6 +119,7 @@ namespace Systemcalls
     void CpuDDLevel(task_t *t);
     void CpuStartCore(task_t *t);
     void CpuSprValue(task_t *t);
+    void CpuSprSet(task_t *t);
     void CpuNap(task_t *t);
     void CpuWinkle(task_t *t);
     void MmAllocBlock(task_t *t);
@@ -160,6 +161,7 @@ namespace Systemcalls
         &CpuDDLevel,  // MISC_CPUDDLEVEL
         &CpuStartCore, // MISC_CPUSTARTCORE
         &CpuSprValue, // MISC_CPUSPRVALUE
+        &CpuSprSet,   // MISC_CPUSPRSET
         &CpuNap, // MISC_CPUNAP
         &CpuWinkle,   // MISC_CPUWINKLE
 
@@ -741,6 +743,26 @@ namespace Systemcalls
 
             default:
                 TASK_SETRTN(t, -1);
+                break;
+        }
+    };
+
+    /** Set SPR values. */
+    void CpuSprSet(task_t *t)
+    {
+        uint64_t spr = TASK_GETARG0(t);
+        uint64_t newValue = TASK_GETARG1(t);
+
+        switch (spr)
+        {
+            case CPU_SPR_HID:
+                setHID( newValue );
+                TASK_SETRTN(t, true);
+                break;
+
+            default:
+                // unsupported SPR for write
+                TASK_SETRTN(t, false);
                 break;
         }
     };

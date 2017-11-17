@@ -50,6 +50,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_cpu_special_wakeup.H>
+#include <p9n2_quad_scom_addresses_fld.H>
 #include <ipmi/ipmiwatchdog.H>
 #include <config.h>
 #include <errno.h>
@@ -464,6 +465,56 @@ errlHndl_t callShutdown ( uint64_t i_masterInstance,
             {
                 break;
             }
+        }
+
+        if ( is_sapphire_load() )
+        {
+            // opal load, Set the ATTN enable bit in the HID register
+            uint64_t  l_enblAttnMask =
+                    0x8000000000000000ull >> P9N2_C_HID_EN_ATTN;
+
+            uint64_t l_curHidVal =  cpu_spr_value( CPU_SPR_HID );
+            uint64_t l_newHidVal = l_curHidVal | l_enblAttnMask;
+
+            uint64_t rc = cpu_spr_set( CPU_SPR_HID, l_newHidVal);
+
+            if ( rc == false )
+            {
+                // Error writing the SPR or
+                // SPR is unsupported/restricted from being written
+                // We will create an error to be passed back.
+                // This will cause the istep to fail.
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           ERR_MRK"call_host_start_payload()::"
+                                  "callShutdown() -"
+                                  " Write of HID SPR failed" );
+
+                /*@
+                 * @errortype
+                 * @reasoncode       RC_FAILED_WRITE_SPR
+                 * @severity         ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM
+                 * @moduleid         MOD_START_PAYLOAD_CALL_SHUTDOWN
+                 * @userdata1        current value of HID
+                 * @userdata2        write value attempted to HID
+                 * @devdesc          Write of HID SPR failed
+                 * @custdesc         A problem occurred during the IPL
+                 *                   of the system.
+                 */
+                err =
+                  new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                           MOD_START_PAYLOAD_CALL_SHUTDOWN,
+                                           RC_FAILED_WRITE_SPR,
+                                           l_curHidVal,
+                                           l_newHidVal );
+
+                err->collectTrace(ISTEP_COMP_NAME);
+
+                break;
+            }
+        } // end opal load
+        else
+        {
+            // PHYP load, do not enable ATTN
         }
 
         // do the shutdown.
