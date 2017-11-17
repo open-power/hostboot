@@ -690,9 +690,10 @@ class custom_read_ctr : public phy_step
 ///
 /// @brief Creates the vector of training steps to loop over
 /// @param[in] i_cal_steps - the bit mask of calibration steps
+/// @param[in] i_sim - simulation mode or not
 /// @return a vector of the calibration steps to run
 ///
-std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps);
+std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& i_cal_steps, const bool i_sim);
 
 } // ns training
 
