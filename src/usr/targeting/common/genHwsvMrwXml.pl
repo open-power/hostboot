@@ -366,11 +366,11 @@ push @systemAttr,
 
 if ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE')
 {
-    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 0];
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 1];
 }
 elsif ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'DOUBLE')
 {
-    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 1];
+    push @systemAttr, ['MSS_MRW_REFRESH_RATE_REQUEST', 0];
 }
 elsif ($reqPol->{'mss_mrw_refresh_rate_request'} eq 'SINGLE_10_PERCENT_FASTER')
 {
