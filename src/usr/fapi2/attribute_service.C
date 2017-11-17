@@ -588,16 +588,6 @@ ReturnCode __getMcsAndPortSlct( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                 break;
             }
 
-            // Get the MCS.
-            TARGETING::TargetHandleList l_memBufList;
-            getParentAffinityTargets( l_memBufList, l_port,
-                TARGETING::CLASS_CHIP, TARGETING::TYPE_MEMBUF );
-
-            TARGETING::TargetHandleList l_mcsList;
-            getParentAffinityTargets( l_mcsList, l_memBufList[0],
-                TARGETING::CLASS_UNIT, TARGETING::TYPE_MCS );
-            o_mcsTarget = l_mcsList[0];
-
         }
         // If the proc is Nimbus, we need to get the MCA.
         else
@@ -1684,9 +1674,6 @@ ReturnCode platGetMBvpdAttr(
                            const size_t i_valSize
                            )
 {
-    FAPI_INF("platGetMBvpdAttr: Enter");
-    FAPI_INF("platGetMBvpdAttr: Attr: 0x%08X", i_attr);
-
     ReturnCode rc;
     constexpr bool hbSwError{true};
 

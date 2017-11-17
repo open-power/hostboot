@@ -143,12 +143,11 @@ void* call_mss_memdiag (void* io_pArgs)
         }
         else if ( MODEL_CUMULUS == procType )
         {
-//@TODO RTC:175770
-//            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
-//
-//            // Start Memory Diagnostics
-//            errl = __runMemDiags( trgtList );
-//            if ( nullptr != errl ) break;
+            TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
+
+            // Start Memory Diagnostics
+            errl = __runMemDiags( trgtList );
+            if ( nullptr != errl ) break;
 
             // No need to unmask or turn off FIFO. That is already contained
             // within the other Centaur HWPs.

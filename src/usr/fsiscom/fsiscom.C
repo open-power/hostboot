@@ -191,6 +191,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
     bool need_unlock = false;
     size_t op_size = sizeof(uint32_t);
     mutex_t* l_mutex = NULL;
+    uint32_t l_any_error_bits = ANY_ERROR_BIT;
 
     do{
 
@@ -246,6 +247,13 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
         }
 
         l_command = static_cast<uint32_t>(l_scomAddr & 0x000000007FFFFFFF);
+
+        if (i_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_MEMBUF)
+        {
+            //Protection bit is irrelevant for membuf chips
+            l_any_error_bits &= ~PROTECTION_CHECK;
+        }
+
 
         // use the chip-specific mutex attribute
         l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_FSI_SCOM_MUTEX>();
@@ -309,7 +317,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             }
 
             // Check the status reg for errors
-            if( l_status & ANY_ERROR_BIT )
+            if( l_status & l_any_error_bits )
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Write: PCB/PIB error received: l_status=0x%X)", l_status);
                 /*@
@@ -375,7 +383,7 @@ errlHndl_t fsiScomPerformOp(DeviceFW::OperationType i_opType,
             }
 
             // Check the status reg for errors
-            if( l_status & ANY_ERROR_BIT )
+            if( l_status & l_any_error_bits )
             {
                 TRACFCOMP( g_trac_fsiscom, ERR_MRK"fsiScomPerformOp:Read: PCB/PIB error received: l_status=0x%0.8X)", l_status);
 

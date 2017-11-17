@@ -146,6 +146,7 @@ void print_system_info(void)
 
     //Add all the target types that you want to see in the output to this vector
     types_to_print.push_back(TARGETING::TYPE_PROC);
+    types_to_print.push_back(TARGETING::TYPE_MEMBUF);
     types_to_print.push_back(TARGETING::TYPE_MCS);
     types_to_print.push_back(TARGETING::TYPE_MCA);
     types_to_print.push_back(TARGETING::TYPE_MCBIST);
