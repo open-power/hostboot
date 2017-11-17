@@ -82,6 +82,8 @@ extern "C"
 
         uint8_t l_reset_disable = 0;
         uint8_t l_cal_abort_on_error = i_abort_on_error;
+        uint8_t l_sim = 0;
+        FAPI_TRY( mss::is_simulation (l_sim) );
         FAPI_TRY( mss::mrw_reset_delay_before_cal(l_reset_disable), "%s Error in p9_mss_draminit_training",
                   mss::c_str(i_target) );
         // Flag to abort on error
@@ -179,7 +181,7 @@ extern "C"
                 bool l_cal_fail = false;
                 FAPI_INF("Execute cal on rp %d %s", rp, mss::c_str(p));
 
-                for(const auto& l_step : mss::training::steps_factory(l_cal_steps_enabled))
+                for(const auto& l_step : mss::training::steps_factory(l_cal_steps_enabled, l_sim))
                 {
                     FAPI_TRY( l_step->execute( p, rp, l_cal_abort_on_error) );
                 }
