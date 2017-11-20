@@ -899,28 +899,28 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 
             case RESTORE_DRAM_REPAIRS:
             {
-                //TargetHandle_t target = getTarget( *i_wfp);
-                //TYPE trgtType = target->getAttr<ATTR_TYPE>();
+                TargetHandle_t target = getTarget( *i_wfp);
+                TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
-                //// MBA target
-                //if ( TYPE_MBA == trgtType )
-                //{
-                //    rc = PRDF::restoreDramRepairs<TYPE_MBA>( target );
-                //}
-                //// MCBIST target
-                //else
-                //{
-                //    // Get the connected MCAs.
-                //    TargetHandleList mcaList;
-                //    getChildAffinityTargets( mcaList, target, CLASS_UNIT,
-                //                             TYPE_MCA );
-                //    for ( auto & mca : mcaList )
-                //    {
-                //        MDIA_SLOW( "sm: restoreDramRepairs(0x%08x)",
-                //                   get_huid(mca) );
-                //        rc = PRDF::restoreDramRepairs<TYPE_MCA>( mca );
-                //    }
-                //}
+                // MBA target
+                if ( TYPE_MBA == trgtType )
+                {
+                    rc = PRDF::restoreDramRepairs<TYPE_MBA>( target );
+                }
+                // MCBIST target
+                else
+                {
+                    // Get the connected MCAs.
+                    TargetHandleList mcaList;
+                    getChildAffinityTargets( mcaList, target, CLASS_UNIT,
+                                             TYPE_MCA );
+                    for ( auto & mca : mcaList )
+                    {
+                        MDIA_SLOW( "sm: restoreDramRepairs(0x%08x)",
+                                   get_huid(mca) );
+                        rc = PRDF::restoreDramRepairs<TYPE_MCA>( mca );
+                    }
+                }
 
                 break;
             }
