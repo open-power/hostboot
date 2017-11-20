@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -190,20 +190,6 @@ void* call_proc_build_smp (void *io_pArgs)
         {
             TARGETING::Target*  l_proc_target = *curproc;
 
-
-            if (l_proc_target != l_masterProc)
-            {
-                //Enable PSIHB Interrupts for slave proc -- moved from above
-                l_errl = INTR::enablePsiIntr(l_proc_target);
-                if(l_errl)
-                {
-                    // capture the target data in the elog
-                    ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
-                    break;
-                }
-            }
-
-
             // If the proc chip supports xscom..
             if (l_proc_target->getAttr<ATTR_PRIMARY_CAPABILITIES>()
                 .supportsXscom)
@@ -234,6 +220,18 @@ void* call_proc_build_smp (void *io_pArgs)
                         errlCommit( l_errl, HWPF_COMP_ID );
                         break;
                     }
+                }
+            }
+
+            if (l_proc_target != l_masterProc)
+            {
+                //Enable PSIHB Interrupts for slave proc -- moved from above
+                l_errl = INTR::enablePsiIntr(l_proc_target);
+                if(l_errl)
+                {
+                    // capture the target data in the elog
+                    ErrlUserDetailsTarget(l_proc_target).addToLog( l_errl );
+                    break;
                 }
             }
 
