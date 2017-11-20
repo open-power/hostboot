@@ -1123,57 +1123,6 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
-    <id>OVERSUB_N_PER_MBA</id>
-    <description>
-        Static per MBA numerator setting when in oversubscription.
-        Calculated based on MRW oversubscription memory power.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OVERSUB_N_PER_CHIP</id>
-    <description>
-        Static per chip numerator setting when in oversubscription.
-    </description>
-    <simpleType>
-        <uint16_t>
-            <default>0,0</default>
-        </uint16_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-<attribute>
-    <id>OVERSUB_MEM_POWER</id>
-    <description>
-        Maximum memory power in centiWatts with throttle
-        set to oversubscription.
-    </description>
-    <simpleType>
-        <uint32_t>
-            <default>0,0</default>
-        </uint32_t>
-        <array>2</array>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-</attribute>
-
-
-<attribute>
     <id>POWERCAP_N_PER_MBA</id>
     <description>
         Static per slot numerator setting when power is being capped.
