@@ -509,6 +509,33 @@ void captureDramRepairsVpd<TYPE_MBA>(TargetHandle_t i_trgt, CaptureData & io_cd)
 //------------------------------------------------------------------------------
 
 template<>
+void captureIueCounts<McaDataBundle*>( TARGETING::TargetHandle_t i_trgt,
+                                       McaDataBundle * i_db,
+                                       CaptureData & io_cd )
+{
+    #ifdef __HOSTBOOT_MODULE
+
+    uint8_t sz_capData = i_db->iv_iueTh.size()*2;
+    uint8_t capData[sz_capData] = {};
+    uint8_t idx = 0;
+
+    for ( auto & th_pair : i_db->iv_iueTh )
+    {
+        capData[idx]   = th_pair.first;
+        capData[idx+1] = th_pair.second.getCount();
+        idx += 2;
+    }
+
+    // Add data to capture data.
+    BitString bs ( sz_capData*8, (CPU_WORD *) &capData );
+    io_cd.Add( i_trgt, Util::hashString("IUE_COUNTS"), bs );
+
+    #endif
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
                            STEP_CODE_DATA_STRUCT & io_sc )
 {
@@ -524,6 +551,9 @@ void addEccData<TYPE_MCA>( ExtensibleChip * i_chip,
 
     // Add DRAM repairs data from VPD.
     captureDramRepairsVpd<TYPE_MCA>( trgt, cd );
+
+    // Add IUE counts to capture data.
+    captureIueCounts<McaDataBundle*>( trgt, db, cd );
 
     // Add CE table to capture data.
     db->iv_ceTable.addCapData( cd );
