@@ -1329,18 +1329,22 @@ sub processMc
                         $self->setAttribute($membuf, "POSITION", $membufnum);
                         $self->setAttribute($membuf, "VPD_REC_NUM", $membufnum);
 
+                        # It's okay to hard code these here because the code fixes it as needed
+                        # This is hardcoded for proc target as well.
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useSbeScom","0");
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useFsiScom","1");
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "reserved",   "0");
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useInbandScom", "0");
+                        $self->setAttributeField($membuf, "SCOM_SWITCHES", "useXscom", "0");
+
                         ## get the dmi bus
                         my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
 
                         # copy DMI bus attributes to membuf
                         $self->setAttribute($dmi, "EI_BUS_TX_LANE_INVERT",
                             $dmi_bus->{bus_attribute}->{PROC_TX_LANE_INVERT}->{default});
-                        $self->setAttribute($dmi, "EI_BUS_TX_MSBSWAP",
-                            $dmi_bus->{bus_attribute}->{PROC_TX_MSBSWAP}->{default});
                         $self->setAttribute($membuf, "EI_BUS_TX_LANE_INVERT",
                             $dmi_bus->{bus_attribute}->{MEMBUF_TX_LANE_INVERT}->{default});
-                        $self->setAttribute($membuf, "EI_BUS_TX_MSBSWAP",
-                            $dmi_bus->{bus_attribute}->{MEMBUF_TX_MSBSWAP}->{default});
 
                         ## auto setup FSI assuming schematic symbol.  If FSI busses are
                         ## defined in serverwiz2, this will be overridden
@@ -1351,18 +1355,6 @@ sub processMc
                             $self->{targeting}->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{KEY};
                         my $proc_path = $self->getAttribute($proc_key,"PHYS_PATH");
                         $self->setFsiAttributes($membuf,"FSICM",0,$proc_path,$fsi_port,0);
-                        $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$fsi_port);
-                        my $dmi_swizzle = "";
-                        if( $self->isBusAttributeDefined($dmi,0,"DMI_REFCLOCK_SWIZZLE"))
-                        {
-                           $dmi_swizzle =
-                             $self->getBusAttribute($dmi,0,"DMI_REFCLOCK_SWIZZLE");
-                        }
-                        if ($dmi_swizzle ne "")
-                        {
-                            $self->setAttribute($dmi, "DMI_REFCLOCK_SWIZZLE",$dmi_swizzle);
-                        }
-
                         $self->setHuid($membuf, $sys, $node);
                         $self->{targeting}
                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc]{MC}[$mc]{MI}[$mi]
@@ -1454,15 +1446,15 @@ sub processMc
                                         if (!$self->isBadAttribute($ddr, "CEN_MBA_PORT"))
                                         {
                                             $port_num = $self->getAttribute($ddr,"CEN_MBA_PORT");
-                                            $self->setAttribute($dimm,"CEN_MBA_PORT",$port_num);
-
                                         }
+
                                         if (!$self->isBadAttribute($ddr, "CEN_MBA_DIMM"))
                                         {
                                             $dimm_num = $self->getAttribute($ddr,"CEN_MBA_DIMM");
-                                            $self->setAttribute($dimm,"CEN_MBA_DIMM",$dimm_num);
-
                                         }
+
+                                        $self->setAttribute($dimm,"CEN_MBA_PORT",$port_num);
+                                        $self->setAttribute($dimm,"CEN_MBA_DIMM",$dimm_num);
 
                                         my $aff_pos = DIMMS_PER_PROC*$proc+
                                                       DIMMS_PER_DMI*$dmi_num+
