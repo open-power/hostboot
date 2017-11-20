@@ -315,11 +315,8 @@ void* initializeBase(void* unused)
         }
 #endif
 
-        // Load original secureboot header.
-        if (enabled())
-        {
-            Singleton<Header>::instance().loadSecurely();
-        }
+        // Load original header.
+        Singleton<Header>::instance().loadHeader();
     } while(0);
 
     return l_errl;
@@ -331,11 +328,6 @@ bool enabled()
     return Singleton<Settings>::instance().getEnabled();
 }
 #endif
-
-bool bestEffortPolicy()
-{
-    return Singleton<Settings>::instance().getBestEffortPolicy();
-}
 
 errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
 {

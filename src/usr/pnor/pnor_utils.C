@@ -321,42 +321,21 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
                                 ((io_TOC[secId].size * 8 ) / 9);
         }
 
-        // @TODO RTC 173489
-        // Remove once FSP fully supports signing of PNOR sections that did
-        // not previously have a sha512 header.  Until then, turn off the SHA512
-        // bit if it doesn't match known header types
-#ifndef BOOTLOADER
-        if(io_TOC[secId].version & FFS_VERS_SHA512)
-        {
-            bool hasKnownHeader = true;
-            l_errhdl = PNOR::hasKnownHeader(static_cast<SectionId>(secId),
-                io_TOC[secId],hasKnownHeader);
-            if(l_errhdl)
-            {
-                break;
-            }
-
-            if(!hasKnownHeader)
-            {
-                io_TOC[secId].version &= ~FFS_VERS_SHA512;
-            }
-        }
-#endif
-
-#ifdef BOOTLOADER
+        // isEnforcedSecureSection should always handle SB compiled in or not,
+        // but if that ever changes, force flag to false in PNOR TOC.
+#ifdef CONFIG_SECUREBOOT
         io_TOC[secId].secure = PNOR::isEnforcedSecureSection(secId);
 #else
-        // Check if PNOR section has a secureHeader or not.
-        l_errhdl = PNOR::setSecure(secId, io_TOC);
-        if (l_errhdl)
-        {
-            break;
-        }
+        io_TOC[secId].secure = false;
 #endif
 
-        if (PNOR::hasNonSecureHeader(io_TOC[secId]))
+        // If secureboot is compiled in, skip header if not a secure section
+        // Otherwise always skip header as the secure flag is always false and
+        // SpnorRp will not handle skipping the header if one is indicated in PNOR
+        if ( (io_TOC[secId].version & FFS_VERS_SHA512)
+              && !io_TOC[secId].secure)
         {
-              //increment flash addr for sha header
+            //increment flash addr for sha header
             if (io_TOC[secId].integrity == FFS_INTEG_ECC_PROTECT)
             {
                 io_TOC[secId].flashAddr += PAGESIZE_PLUS_ECC ;
@@ -370,6 +349,7 @@ PNOR::parseEntries (ffs_hdr* i_ffs_hdr,
             // adjust the size to reflect that
             io_TOC[secId].size -= PAGESIZE;
         }
+
     } // For TOC Entries
 
 #ifndef BOOTLOADER
@@ -509,10 +489,4 @@ bool PNOR::cmpSecurebootMagicNumber(const uint8_t* i_vaddr)
     );
 
     return memcmp(&ROM_MAGIC_NUMBER, i_vaddr, sizeof(ROM_MAGIC_NUMBER))==0;
-}
-
-bool PNOR::hasNonSecureHeader(const PNOR::SectionData_t& i_secInfo)
-{
-    return (i_secInfo.version & FFS_VERS_SHA512) &&
-           !i_secInfo.secure;
 }

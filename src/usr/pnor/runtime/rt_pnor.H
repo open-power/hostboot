@@ -131,25 +131,12 @@ class RtPnor
          *
          * @return Error from device
          */
-        // @TODO RTC 173489
-        // Remove static once FSP fully supports signing of PNOR sections that
-        // did not previously have a sha512 header.  Also add the const method
-        // qualifier back in
-        static errlHndl_t readFromDevice (uint64_t i_procId,
+         errlHndl_t readFromDevice (uint64_t i_procId,
                                    PNOR::SectionId i_section,
                                    uint64_t i_offset,
                                    size_t i_size,
                                    bool i_ecc,
-                                   void* o_data);
-
-        // @TODO RTC 173489
-        // Remove API once FSP fully supports signing of PNOR sections that did
-        // not previously have a sha512 header
-        friend errlHndl_t PNOR::readHeaderMagic(
-                  PNOR::SectionId      i_secId,
-            const PNOR::SectionData_t& i_TOC,
-                  size_t               i_size,
-                  void* const          o_pData);
+                                   void* o_data) const;
 
         /**
          * @brief  Write data back to the PNOR device

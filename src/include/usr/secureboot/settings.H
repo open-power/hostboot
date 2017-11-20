@@ -90,8 +90,7 @@ namespace SECUREBOOT
     class Settings
     {
         public:
-            Settings() : iv_enabled(false),
-                         iv_bestEffortPolicy(false) { _init(); };
+            Settings() : iv_enabled(false) { _init(); };
             ~Settings() {};
 
             /** @brief Determine if Secureboot is enabled. */
@@ -135,13 +134,6 @@ namespace SECUREBOOT
             errlHndl_t getJumperState(SecureJumperState& o_state,
                 TARGETING::Target* i_pProc
                     = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) const;
-
-            /** @brief Determines if the Secureboot best effort policy is
-             *         enabled. Uses knowledge of compile config options and
-             *         secure mode enabled
-             * @return bool - True if enabled, false otherwise
-             */
-            bool getBestEffortPolicy() const;
 
         private:
             void _init();
@@ -192,7 +184,6 @@ namespace SECUREBOOT
 
             /** Cached secure boot enabled value */
             bool iv_enabled;
-            bool iv_bestEffortPolicy;
     };
 }
 

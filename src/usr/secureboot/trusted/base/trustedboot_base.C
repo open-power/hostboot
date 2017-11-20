@@ -436,18 +436,6 @@ errlHndl_t extendBaseImage()
     TRACDBIN(g_trac_trustedboot,"Base Header",pHbbHeader,
         TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
 
-    // TODO: RTC 168021
-    // Need to remove this when HBB has a secure header across all platforms
-    // -or- a more general compatibility mechanism has been created allowing
-    // some platforms to stage in support
-    if(!PNOR::cmpSecurebootMagicNumber(
-           reinterpret_cast<const uint8_t*>(pHbbHeader)))
-    {
-        TRACDCOMP(g_trac_trustedboot, INFO_MRK " HBB header is not a secure "
-            "header; inhibiting extending base image measurement");
-        break;
-    }
-
     // Build a container header object from the raw header
     SECUREBOOT::ContainerHeader hbbContainerHeader;
     pError = hbbContainerHeader.setHeader(pHbbHeader);
@@ -457,33 +445,27 @@ errlHndl_t extendBaseImage()
         break;
     }
 
-    const void* pHbbVa = nullptr;
-    if(!SECUREBOOT::enabled())
+    // TPM extension of PNOR sections operates differently when SecureMode is
+    // enabled/disabled.  Provide all possible info and let TPM code handle
+    // the logic
+    PNOR::SectionInfo_t l_info;
+    pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
+    if(pError)
     {
-        PNOR::SectionInfo_t l_info;
-
-        // @TODO RTC 168021 Remove this path since header will always be
-        // cached
-        pError = getSectionInfo(PNOR::HB_BASE_CODE, l_info);
-        if(pError)
-        {
-            TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
-                "getSectionInfo for HBB section");
-            break;
-        }
-
-        if(l_info.vaddr == 0)
-        {
-            assert(false,"BUG! In extendBaseImage(), HBB virtual address "
-                "was 0");
-        }
-
-        pHbbVa = reinterpret_cast<const void*>(
-            l_info.vaddr);
-
-        TRACDBIN(g_trac_trustedboot,"PNOR Base Code",pHbbVa,
-            TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK "Failed in call to "
+            "getSectionInfo for HBB section");
+        break;
     }
+
+    if(l_info.vaddr == 0)
+    {
+        assert(false,"BUG! In extendBaseImage(), HBB virtual address was 0");
+    }
+
+    const void* pHbbVa = reinterpret_cast<const void*>(l_info.vaddr);
+
+    TRACDBIN(g_trac_trustedboot,"PNOR Base Code",pHbbVa,
+             TRUSTEDBOOT::DEFAULT_BIN_TRACE_SIZE);
 
     // Extend the HBB measurement to the TPM
     pError = extendPnorSectionHash(

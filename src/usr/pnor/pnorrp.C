@@ -160,36 +160,6 @@ errlHndl_t PNOR::fixECC(PNOR::SectionId i_section)
     return Singleton<PnorRP>::instance().fixECC(i_section);
 }
 
-// @TODO RTC 173489
-// Remove API once FSP fully supports signing of PNOR sections that did not
-// previously have a sha512 header
-errlHndl_t PNOR::readHeaderMagic(
-    const PNOR::SectionId      i_secId,
-    const PNOR::SectionData_t& i_TOC,
-    const size_t               i_size,
-          void* const          o_pData)
-{
-    errlHndl_t pError = nullptr;
-    assert(o_pData != nullptr,"Output buffer pointer was nullptr");
-
-    do {
-
-    size_t size = i_size;
-    auto pTarget = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-    // Read first <=8 bytes of section data from the PNOR DD
-    // Note: Do not need to worry about ECC as the 9th byte is the first
-    //       ECC byte.
-    pError = DeviceFW::deviceRead(pTarget, o_pData, size,
-                         DEVICE_PNOR_ADDRESS(0,i_TOC.flashAddr));
-    if (pError)
-    {
-        break;
-    }
-
-    } while(0);
-
-    return pError;
-}
 
 /**
  * STATIC
@@ -368,55 +338,6 @@ void PnorRP::initDaemon()
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
             break;
         }
-
-        // @TODO RTC 178520 Remove the non-secure extension path and
-        // always used the converged HBB extension path.
-
-        // If secured, extend base image (HBB) when Hostboot first starts.
-        // Since HBB is never re-loaded, inhibit extending this image in
-        // runtime code.
-        #ifndef __HOSTBOOT_RUNTIME
-        #ifdef CONFIG_SECUREBOOT
-        if(!SECUREBOOT::enabled())
-        {
-            // If compliant bootloader was present, it saved the HBB header
-            // to a known location accessible to HBB.  Until that bootloader
-            // is widely distributed, when in non-secure mode in lab,
-            // manufacturing, etc., read the header directly from PNOR.
-            PNOR::SideInfo_t pnorInfo = {PNOR::WORKING};
-            l_errhdl = PnorRP::getSideInfo(PNOR::WORKING, pnorInfo);
-            if(l_errhdl != nullptr)
-            {
-                break;
-            }
-
-            const SectionData_t* const pHbb = &iv_TOC[PNOR::HB_BASE_CODE];
-            const bool ecc = (pHbb->integrity == FFS_INTEG_ECC_PROTECT) ?
-                true :false;
-
-            uint8_t pHeader[PAGESIZE] = {0};
-            uint64_t fatalError = 0;
-            l_errhdl = readFromDevice(
-                    pnorInfo.hbbAddress,
-                    pHbb->chip,
-                    ecc,
-                    pHeader,
-                    fatalError);
-
-            // If fatalError != 0 there is an uncorrectable ECC error (UE).
-            // In that case, continue on with inaccurate data, as
-            // readFromDevice API will initiate a shutdown
-            if(l_errhdl != nullptr)
-            {
-                break;
-            }
-
-            // Cache the header
-            (void)SECUREBOOT::baseHeader().setNonSecurely(
-                pHeader);
-        }
-        #endif
-        #endif
 
         // start task to wait on the queue
         task_create( wait_for_message, NULL );

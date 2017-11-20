@@ -237,16 +237,6 @@ bool isEnforcedSecureSection(const uint32_t i_section);
  */
 bool isCoreRootOfTrustSection(const PNOR::SectionId i_section);
 
-/**
- * @brief Determines if a section has a Header and that it is not a Secure Header
- *
- * @param[out] i_secInfo  PNOR information of section
- *
- * @return True if it appears to not have a secure header
- *         False otherwise
- */
-bool hasNonSecureHeader(const PNOR::SectionData_t& i_secInfo);
-
 }  // End namespace PNOR
 
 

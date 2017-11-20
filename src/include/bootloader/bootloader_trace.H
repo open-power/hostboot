@@ -68,11 +68,7 @@ enum BootloaderTraces
     /** Bootloader main copy HBB to running location done */
     BTLDR_TRC_MAIN_COPY_HBB_DONE             = 0x16,
 
-    /** Bootloader main verifyContainer skip verification - no eyecatch */
-    BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH           = 0x17,
-
-    /** Bootloader main verifyContainer skip verification - no magic number */
-    BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM          = 0x18,
+    /** Unused hole from previously used traces */
 
     /** Bootloader main verifyContainer skip verification - SAB unset */
     BTLDR_TRC_MAIN_VERIFY_SAB_UNSET          = 0x19,

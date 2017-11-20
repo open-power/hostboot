@@ -66,11 +66,6 @@ errlHndl_t initializeSecureRomManager(void)
     return Singleton<SecureRomManager>::instance().initialize();
 }
 
-bool secureRomValidPolicy()
-{
-    return Singleton<SecureRomManager>::instance().secureRomValidPolicy();
-}
-
 /**
  * @brief Verify Signed Container
  */
@@ -78,11 +73,8 @@ errlHndl_t verifyContainer(void * i_container, const SHA512_t* i_hwKeyHash)
 {
     errlHndl_t l_errl = nullptr;
 
-    if(Singleton<SecureRomManager>::instance().secureRomValidPolicy())
-    {
-        l_errl = Singleton<SecureRomManager>::instance().
+    l_errl = Singleton<SecureRomManager>::instance().
                                        verifyContainer(i_container,i_hwKeyHash);
-    }
 
     return l_errl;
 }
@@ -148,15 +140,8 @@ errlHndl_t verifyComponentId(
  */
 void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf)
 {
-    if(Singleton<SecureRomManager>::instance().secureRomValidPolicy())
-    {
-        return Singleton<SecureRomManager>::instance().
+    return Singleton<SecureRomManager>::instance().
                                                hashBlob(i_blob, i_size, o_buf);
-    }
-    else
-    {
-        memset(o_buf, 0, sizeof(SHA512_t));
-    }
 }
 
 /**
@@ -165,11 +150,8 @@ void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf)
  */
 void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
 {
-    if(Singleton<SecureRomManager>::instance().secureRomValidPolicy())
-    {
         return Singleton<SecureRomManager>::instance().
                                                 hashConcatBlobs(i_blobs, o_buf);
-    }
 }
 
 /*
@@ -177,11 +159,7 @@ void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
  */
 void getHwKeyHash(SHA512_t o_hash)
 {
-    // @TODO RTC:170136 remove isValid check
-    if(Singleton<SecureRomManager>::instance().secureRomValidPolicy())
-    {
-        return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
-    }
+    return Singleton<SecureRomManager>::instance().getHwKeyHash(o_hash);
 }
 
 sbFuncVer_t getSecRomFuncVersion(const sbFuncType_t i_funcType)
@@ -219,43 +197,27 @@ errlHndl_t SecureRomManager::initialize()
     do{
         // Check if bootloader to hostboot data is valid.
         iv_secureromValid = g_BlToHbDataManager.isValid();
-
+        // Enforce that the securerom is valid
         if (!iv_secureromValid)
         {
-            // Allow skipping functionality if secure rom is invalid if best
-            // effort policy enabled
-            if(SECUREBOOT::bestEffortPolicy())
-            {
-                TRACFCOMP(g_trac_secure,INFO_MRK"SecureRomManager::initialize(): SecureROM invalid, skipping functionality");
+            TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize(): SecureROM invalid");
 #ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(SECURE_COMP_NAME, "SecureROM invalid - skipping functionality");
+            CONSOLE::displayf(SECURE_COMP_NAME, ERR_MRK"SecureROM invalid");
 #endif
-                printk("SecureRomManager SecureROM invalid -- skipping functionality\n");
-                // Can skip the rest of this function
-                break;
-            }
-            // Otherwise enforce securerom to be valid.
-            else
-            {
-                TRACFCOMP(g_trac_secure,ERR_MRK"SecureRomManager::initialize(): SecureROM invalid");
-#ifdef CONFIG_CONSOLE
-                CONSOLE::displayf(SECURE_COMP_NAME, ERR_MRK"SecureROM invalid");
-#endif
-                printk("ERR> SecureRomManager SecureROM invalid\n");
-                /*@
-                 * @errortype
-                 * @moduleid     SECUREBOOT::MOD_SECURE_ROM_INIT
-                 * @reasoncode   SECUREBOOT::RC_SECROM_INVALID
-                 * @devdesc      Valid securerom not present
-                 * @custdesc     Security failure occurred during the IPL of
-                 *               the system.
-                 */
-                l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                  SECUREBOOT::MOD_SECURE_ROM_INIT,
-                                                  SECUREBOOT::RC_SECROM_INVALID);
-                l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
-                break;
-            }
+            printk("ERR> SecureRomManager SecureROM invalid\n");
+            /*@
+             * @errortype
+             * @moduleid     SECUREBOOT::MOD_SECURE_ROM_INIT
+             * @reasoncode   SECUREBOOT::RC_SECROM_INVALID
+             * @devdesc      Valid securerom not present
+             * @custdesc     Security failure occurred during the IPL of
+             *               the system.
+             */
+            l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                              SECUREBOOT::MOD_SECURE_ROM_INIT,
+                                              SECUREBOOT::RC_SECROM_INVALID);
+            l_errl->collectTrace(SECURE_COMP_NAME,ERROR_TRACE_SIZE);
+            break;
         }
 
         TRACFCOMP(g_trac_secure,"SecureRomManager::initialize(): SecureROM valid, enabling functionality");
@@ -366,12 +328,6 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
 
     do{
 
-        // Check if secureboot data is valid.
-        if (!secureRomValidPolicy())
-        {
-            // Can skip the rest of this function
-            break;
-        }
         // Check to see if ROM has already been initialized
         // This should have been done early in IPL so assert if this
         // is not the case as system is in a bad state
@@ -477,29 +433,25 @@ void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_b
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::hashBlob()");
 
-    // Check if secureboot data is valid.
-    if (secureRomValidPolicy())
-    {
-        // Check to see if ROM has already been initialized
-        // This should have been done early in IPL so assert if this
-        // is not the case as system is in a bad state
-        assert(iv_securerom != nullptr);
+    // Check to see if ROM has already been initialized
+    // This should have been done early in IPL so assert if this
+    // is not the case as system is in a bad state
+    assert(iv_securerom != nullptr);
 
-        // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
-        uint64_t l_rom_SHA512_startAddr =
-                                    reinterpret_cast<uint64_t>(iv_securerom) +
-                                    getSecRomFuncOffset(SB_FUNC_TYPES::SHA512);
+    // Set startAddr to ROM_SHA512() function at an offset of Secure ROM
+    uint64_t l_rom_SHA512_startAddr =
+                                reinterpret_cast<uint64_t>(iv_securerom) +
+                                getSecRomFuncOffset(SB_FUNC_TYPES::SHA512);
 
-        call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
-                        reinterpret_cast<const sha2_byte*>(i_blob),
-                        i_size,
-                        reinterpret_cast<SHA512_t*>(o_buf));
+    call_rom_SHA512(reinterpret_cast<void*>(l_rom_SHA512_startAddr),
+                    reinterpret_cast<const sha2_byte*>(i_blob),
+                    i_size,
+                    reinterpret_cast<SHA512_t*>(o_buf));
 
-        TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
-                  "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
-                   i_blob, i_size, l_rom_SHA512_startAddr,
-                   iv_securerom);
-    }
+    TRACUCOMP(g_trac_secure,"SecureRomManager::hashBlob(): "
+              "call_rom_SHA512: blob=%p size=0x%X addr=%p (iv_d_p=%p)",
+               i_blob, i_size, l_rom_SHA512_startAddr,
+               iv_securerom);
 
     TRACDCOMP(g_trac_secure,EXIT_MRK"SecureRomManager::hashBlob()");
 }
@@ -510,42 +462,18 @@ void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_b
 void SecureRomManager::hashConcatBlobs(const blobPair_t &i_blobs,
                                       SHA512_t o_buf) const
 {
-    // Check if secureboot data is valid.
-    if (secureRomValidPolicy())
+    std::vector<uint8_t> concatBuf;
+    for (const auto &it : i_blobs)
     {
-        std::vector<uint8_t> concatBuf;
-        for (const auto &it : i_blobs)
-        {
-            assert(it.first != nullptr, "BUG! In SecureRomManager::hashConcatBlobs(), "
-                "User passed in nullptr blob pointer");
-            const uint8_t* const blob =  static_cast<const uint8_t*>(it.first);
-            const auto blobSize = it.second;
-            concatBuf.insert(concatBuf.end(), blob, blob + blobSize);
-        }
-
-        // Call hash blob on new concatenated buffer
-        hashBlob(concatBuf.data(),concatBuf.size(),o_buf);
-    }
-}
-
-bool SecureRomManager::secureRomValidPolicy() const
-{
-    bool l_policy = true;
-    if (bestEffortPolicy())
-    {
-        // Set policy based on secure ROM status
-        l_policy = iv_secureromValid;
-    }
-    else
-    {
-        // Assert secure rom is valid in this mode.
-        // The initialize function should have created an error log already if
-        // this case is false, so this code path should not be hit.
-        assert(iv_secureromValid==true, "SecureRomManager cannot operate with invalid secure rom");
-        l_policy = true;
+        assert(it.first != nullptr, "BUG! In SecureRomManager::hashConcatBlobs(), "
+            "User passed in nullptr blob pointer");
+        const uint8_t* const blob =  static_cast<const uint8_t*>(it.first);
+        const auto blobSize = it.second;
+        concatBuf.insert(concatBuf.end(), blob, blob + blobSize);
     }
 
-    return l_policy;
+    // Call hash blob on new concatenated buffer
+    hashBlob(concatBuf.data(),concatBuf.size(),o_buf);
 }
 
 /********************
@@ -557,12 +485,8 @@ bool SecureRomManager::secureRomValidPolicy() const
  */
 void SecureRomManager::getHwKeyHash()
 {
-    // Check if secureboot data is valid.
-    if (secureRomValidPolicy())
-    {
-        iv_key_hash  = reinterpret_cast<const SHA512_t*>(
+    iv_key_hash  = reinterpret_cast<const SHA512_t*>(
                                            g_BlToHbDataManager.getHwKeysHash());
-    }
 }
 
 /**
@@ -570,11 +494,7 @@ void SecureRomManager::getHwKeyHash()
  */
 void SecureRomManager::getHwKeyHash(SHA512_t o_hash)
 {
-    // Check if secureboot data is valid.
-    if (secureRomValidPolicy())
-    {
-        memcpy(o_hash, iv_key_hash, sizeof(SHA512_t));
-    }
+    memcpy(o_hash, iv_key_hash, sizeof(SHA512_t));
 }
 
 const SecureRomManager::SecRomFuncTypeOffsetMap_t
