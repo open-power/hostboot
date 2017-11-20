@@ -166,9 +166,6 @@
     <attribute><id>N_PLUS_ONE_N_PER_MBA</id></attribute>
     <attribute><id>N_PLUS_ONE_N_PER_CHIP</id></attribute>
     <attribute><id>N_PLUS_ONE_MEM_POWER</id></attribute>
-    <attribute><id>OVERSUB_N_PER_MBA</id></attribute>
-    <attribute><id>OVERSUB_N_PER_CHIP</id></attribute>
-    <attribute><id>OVERSUB_MEM_POWER</id></attribute>
     <attribute><id>POWERCAP_N_PER_MBA</id></attribute>
     <attribute><id>POWERCAP_N_PER_CHIP</id></attribute>
     <attribute><id>POWERCAP_MEM_POWER</id></attribute>
