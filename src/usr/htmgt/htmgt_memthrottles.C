@@ -361,25 +361,9 @@ errlHndl_t memPowerThrottlePowercap(
             mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_MBA>(l_slot_redun);
             mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_N_PER_CHIP>(l_port_redun);
             mcs_target->tryGetAttr<ATTR_N_PLUS_ONE_MEM_POWER>(l_power_redun);
-            ATTR_OVERSUB_N_PER_MBA_type l_slot_oversub = {0};
-            ATTR_OVERSUB_N_PER_CHIP_type l_port_oversub = {0};
-            ATTR_OVERSUB_MEM_POWER_type l_power_oversub = {0};
-            mcs_target->tryGetAttr<ATTR_OVERSUB_N_PER_MBA>(l_slot_oversub);
-            mcs_target->tryGetAttr<ATTR_OVERSUB_N_PER_CHIP>(l_port_oversub);
-            mcs_target->tryGetAttr<ATTR_OVERSUB_MEM_POWER>(l_power_oversub);
             unsigned int mca_index;
             for (mca_index = 0; mca_index < TMGT_MAX_MCA_PER_MCS; ++mca_index)
             {
-                if (l_slot[mca_index] > l_slot_oversub[mca_index])
-                {
-                    TMGT_INF("memPowerThrottlePowercap: MCS%d/MCA%d"
-                             " oversub throttle (%d) < pcap throttle (%d)",
-                             mcs_unit, mca_index,
-                             l_slot_oversub[mca_index], l_slot[mca_index]);
-                    l_slot[mca_index] = l_slot_oversub[mca_index];
-                    l_port[mca_index] = l_port_oversub[mca_index];
-                    l_power[mca_index] = l_power_oversub[mca_index];
-                }
                 if (l_slot[mca_index] > l_slot_redun[mca_index])
                 {
                     TMGT_INF("memPowerThrottlePowercap: MCS%d/MCA%d - "

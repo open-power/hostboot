@@ -149,17 +149,17 @@ public:
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            (*mba)->tryGetAttr<ATTR_OVERSUB_N_PER_MBA>(n);
+            (*mba)->tryGetAttr<ATTR_POWERCAP_N_PER_MBA>(n);
             if ((0 == n[0]) && (0 == n[1]))
             {
-                TS_FAIL("MBA 0x%X has value of zero for OVERSUB_N_PER_MBA",
+                TS_FAIL("MBA 0x%X has value of zero for POWERCAP_N_PER_MBA",
                         (*mba)->getAttr<ATTR_HUID>());
             }
 
-            (*mba)->tryGetAttr<ATTR_OVERSUB_N_PER_CHIP>(n);
+            (*mba)->tryGetAttr<ATTR_POWERCAP_N_PER_CHIP>(n);
             if ((0 == n[0]) && (0 == n[1]))
             {
-                TS_FAIL("MBA 0x%X has value of zero for OVERSUB_N_PER_CHIP",
+                TS_FAIL("MBA 0x%X has value of zero for POWERCAP_N_PER_CHIP",
                         (*mba)->getAttr<ATTR_HUID>());
             }
         }
