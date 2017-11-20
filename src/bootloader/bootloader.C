@@ -284,9 +284,6 @@ namespace Bootloader{
         // Terminate if a valid securerom is not present
         else if ( !g_blData->secureRomValid )
         {
-#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_EYECATCH);
-#else
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_INVALID_SECROM);
             /*@
              * @errortype
@@ -301,15 +298,7 @@ namespace Bootloader{
              */
             bl_terminate(Bootloader::MOD_BOOTLOADER_VERIFY,
                          SECUREBOOT::RC_SECROM_INVALID);
-#endif
         }
-#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-        else if ( !PNOR::cmpSecurebootMagicNumber(
-                    reinterpret_cast<const uint8_t*>(i_pContainer)))
-        {
-            BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_NO_MAGIC_NUM);
-        }
-#endif
         else
         {
             // Set startAddr to ROM_verify() function at an offset of Secure ROM

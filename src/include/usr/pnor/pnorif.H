@@ -36,9 +36,6 @@
 namespace PNOR
 {
 
-// @TODO RTC:155374 Remove this in the future
-extern const size_t BEST_EFFORT_NUM_BYTES;
-
 /**
  * Information about a side of PNOR
  */
@@ -227,48 +224,6 @@ const char * SectionIdToString( uint32_t i_secIdIndex );
  *                 match. False otherwise.
  */
 bool cmpSecurebootMagicNumber(const uint8_t* i_vaddr);
-
-// @TODO RTC 173489
-// Remove API once FSP fully supports signing of PNOR sections that did not
-// previously have a sha512 header
-/**
- *  @brief Determines whether requested PNOR section has a recognized header
- *
- *  @param[in] i_secId ID of requested section
- *  @param[in] i_TOC TOC entry for requested section
- *  @param[out] o_knownHeader Whether header was recognized or not
- *
- *  @return errlHndl_t Error log handle
- *  @retval nullptr Success! Output parameter valid
- *  @retval !nullptr Error log pointer; output parameter invalid
- */
-errlHndl_t hasKnownHeader(
-          PNOR::SectionId      i_secId,
-    const PNOR::SectionData_t& i_TOC,
-          bool&                o_knownHeader);
-
-// @TODO RTC 173489
-// Remove API once FSP fully supports signing of PNOR sections that did not
-// previously have a sha512 header
-/**
- *  @brief Read first few bytes of requested section's "potential" header
- *
- *  @param[in] i_secId ID of requested section
- *  @param[in] i_TOC TOC entry for requested section
- *  @param[in] i_size Number of bytes to read from the beginning of the
- *    requested section
- *  @param[in] o_pData Pointer to a buffer of at least "i_size" bytes to
- *    hold the returned data.  Asserts if nullptr
- *
- *  @return errlHndl_t Error log handle
- *  @retval nullptr Success!  Requested bytes read to output buffer
- *  @retval !nullptr Error log pointer; output buffer invalid
- */
-errlHndl_t readHeaderMagic(
-          PNOR::SectionId      i_secId,
-    const PNOR::SectionData_t& i_TOC,
-          size_t               i_size,
-          void*                o_pData);
 
 /**
  * @brief  Determine if a PNOR section is empty by checking if first PAGE

@@ -59,34 +59,14 @@ namespace SECUREBOOT
                 iv_data=NULL;
             }
 
-            // @TODO RTC 178520 Converge to single method of reading
-            // secure header
-
             /**
              *  @brief Extracts base image (HBB) header (ECC removed) from
-             *      security area preserved across the bootloader to HBB
-             *      handoff to support extending HBB measurements to TPM in
-             *      secure mode.
+             *      area preserved across the bootloader to HBB handoff to
+             *      support extending HBB measurements to TPM
              *
              *  @warning Asserts if header is already cached (code bug)
              */
-            void loadSecurely();
-
-            // @TODO RTC 178520 Converge to single method of reading
-            // secure header
-
-            /**
-             *  @brief Caches non-secure PNOR copy of the base image (HBB)
-             *      header (ECC removed) to support extending HBB measurements
-             *      to TPM in non-secure mode.
-             *
-             *  @param[in] i_pHeader Pointer to non-secure 4k HBB header
-             *      extracted from PNOR.
-             *
-             *  @warning Carries all the same warnings as _set
-             */
-            void setNonSecurely(
-                const void* i_pHeader);
+            void loadHeader();
 
             /**
              *  @brief Return pointer to base image (HBB) header.

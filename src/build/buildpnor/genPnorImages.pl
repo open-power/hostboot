@@ -234,7 +234,6 @@ if ($secureboot)
     }
 }
 
-# @TODO RTC: 155374 add official signing support including up to 3 sw keys
 # Signing and Dev key directory location set via env vars
 my $SIGNING_DIR = $ENV{'SIGNING_DIR'};
 my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
@@ -672,7 +671,6 @@ sub manipulateImages
                 {
                     $eccless_prefix.=".header";
                     # Add secure container header
-                    # @TODO RTC:155374 Remove when official signing supported
                     if ($secureboot && $isSpecialSecure)
                     {
                         $callerHwHdrFields{configure} = 1;
@@ -727,7 +725,7 @@ sub manipulateImages
                             }
                             else
                             {
-                                # @TODO RTC:155374 Remove when official signing
+                                # @TODO RTC:183183 Remove when official signing
                                 # supported
                                 run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
                             }
@@ -745,7 +743,7 @@ sub manipulateImages
                             }
                             else
                             {
-                                # @TODO RTC:155374 Remove when official signing
+                                # @TODO RTC:183183 Remove when official signing
                                 # supported
                                 run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
                             }
@@ -765,7 +763,7 @@ sub manipulateImages
                             }
                             else
                             {
-                                # @TODO RTC:155374 Remove when official signing
+                                # @TODO RTC:183183 Remove when official signing
                                 # supported
                                 run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
                             }
@@ -804,7 +802,7 @@ sub manipulateImages
                         }
                         else
                         {
-                            # @TODO RTC:155374 Remove when official signing
+                            # @TODO RTC:183183 Remove when official signing
                             # supported
                             run_command("$SIGNING_DIR/build -good -if "
                                 . "$secureboot_hdr -of $tempImages{HDR_PHASE} -bin "
@@ -821,6 +819,7 @@ sub manipulateImages
                                 . "--protectedPayload $bin_file "
                                 . "--out $tempImages{HDR_PHASE}");
                         }
+                        # @TODO RTC:183183 Remove when official signing supported
                         else # attach the legacy header
                         {
                             run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
@@ -924,7 +923,7 @@ sub manipulateImages
                             }
                             else
                             {
-                                # @TODO RTC:155374 Remove when official signing
+                                # @TODO RTC:183183 Remove when official signing
                                 # supported
                                 run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
                             }
@@ -941,6 +940,7 @@ sub manipulateImages
                                     . "--protectedPayload $tempImages{TEMP_BIN} "
                                     . "--out $tempImages{PAD_PHASE}");
                             }
+                            # @TODO RTC:183183 Remove when official signing supported
                             else # Attach legacy header
                             {
                                 run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");

@@ -36,28 +36,15 @@ namespace SECUREBOOT
         return Singleton<Header>::instance();
     }
 
-    // @TODO RTC 178520 Converge on a single method of reading the secure
-    // header
-    void Header::loadSecurely()
+    void Header::loadHeader()
     {
-        const void* const pSecureHeader = g_BlToHbDataManager.getHbbHeader();
+        const void* const pHeader = g_BlToHbDataManager.getHbbHeader();
 
         // Fatal code bug if called with nullptr pointer
-        assert(pSecureHeader != nullptr,
-            "BUG! In Header::loadSecurely(), expected valid address for base "
-            "image header in secure mode, but got nullptr.");
-        _set(pSecureHeader);
-    }
-
-    // @TODO RTC 178520 Converge on a single method of reading the secure
-    // header
-    void Header::setNonSecurely(
-        const void* const i_pHeader)
-    {
-        // Fatal code bug if called with nullptr pointer
-        assert(i_pHeader != nullptr,"BUG! In Header::setNonSecurely(), "
-            "caller passed a nullptr header address.");
-        _set(i_pHeader);
+        assert(pHeader != nullptr,
+            "BUG! In Header::loadHeader(), expected valid address for base "
+            "image header, but got nullptr.");
+        _set(pHeader);
     }
 
     void Header::_set(

@@ -303,32 +303,6 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
                               cur_entry->name);
 
             }
-
-#ifndef __HOSTBOOT_RUNTIME
-            if (PNOR::hasNonSecureHeader(o_TOC[l_secId]))
-            {
-                // Never extend the base image through this path, it will be
-                // handled elsewhere
-                if(l_secId != PNOR::HB_BASE_CODE)
-                {
-                    // For non-secure sections with a SHA512 header, the
-                    // flash address has incremented past the header, so
-                    // back up by the header size (accounting for ECC) in order
-                    // to extend the header
-                    auto addr = o_TOC[l_secId].flashAddr;
-                    size_t headerSize =
-                       (o_TOC[l_secId].integrity == FFS_INTEG_ECC_PROTECT) ?
-                       PAGESIZE_PLUS_ECC : PAGESIZE;
-                    addr -= headerSize;
-
-                    l_errhdl = PNOR::extendHash(addr, headerSize, l_secId);
-                    if (l_errhdl)
-                    {
-                        break;
-                    }
-                }
-            }
-#endif
         }
 
         for(int tmpId = 0;
@@ -345,50 +319,6 @@ errlHndl_t PNOR::parseTOC( uint8_t* i_tocBuffer,SectionData_t * o_TOC)
     TRACUCOMP(g_trac_pnor, "< PNOR::parseTOC" );
     return l_errhdl;
 }
-
-#ifndef __HOSTBOOT_RUNTIME
-errlHndl_t PNOR::extendHash(uint64_t i_addr, size_t i_size,
-                            const PNOR::SectionId i_sectionId)
-{
-    errlHndl_t l_errhdl = NULL;
-
-    do {
-
-    const char* l_name = PNOR::SectionIdToString(i_sectionId);
-
-    // Read data from the PNOR DD
-    uint8_t* l_buf = new uint8_t[i_size]();
-    TARGETING::Target* l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-    l_errhdl = DeviceFW::deviceRead(l_target, l_buf, i_size,
-                                    DEVICE_PNOR_ADDRESS(0,i_addr));
-    if (l_errhdl)
-    {
-        break;
-    }
-
-    SHA512_t l_hash = {0};
-    SECUREBOOT::hashBlob(l_buf, i_size, l_hash);
-    l_errhdl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_0,
-        PNOR::PAYLOAD == i_sectionId?
-            TRUSTEDBOOT::EV_COMPACT_HASH:
-            (PNOR::isCoreRootOfTrustSection(i_sectionId)?
-                TRUSTEDBOOT::EV_S_CRTM_CONTENTS:
-                TRUSTEDBOOT::EV_POST_CODE),
-        l_hash,
-        sizeof(SHA512_t),
-        l_name);
-    delete[] l_buf;
-
-    if (l_errhdl)
-    {
-        break;
-    }
-
-    } while(0);
-
-    return l_errhdl;
-}
-#endif
 
 bool PNOR::isInhibitedSection(const uint32_t i_section)
 {
@@ -442,95 +372,6 @@ bool PNOR::isInhibitedSection(const uint32_t i_section)
 #else
     return false;
 #endif
-}
-
-
-errlHndl_t PNOR::setSecure(const uint32_t i_secId,
-                           PNOR::SectionData_t* io_TOC)
-{
-    errlHndl_t l_errhdl = nullptr;
-
-    assert(io_TOC != nullptr, "PNOR::setSecure received a NULL toc to modify");
-
-    do {
-
-    // Set secure field based on enforced policy
-    io_TOC[i_secId].secure = PNOR::isEnforcedSecureSection(i_secId);
-
-    // HBRT does not support best effort policy. Use enforced secure policy only.
-#ifndef __HOSTBOOT_RUNTIME
-    if(SECUREBOOT::bestEffortPolicy())
-    {
-        if (io_TOC[i_secId].secure)
-        {
-            // Apply best effort policy by checking if the section appears to have a
-            // secure header
-            size_t l_size = sizeof(ROM_MAGIC_NUMBER);
-            uint8_t l_buf[l_size] = {0};
-            auto l_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
-            // Read first 4 bytes of section data from the PNOR DD
-            // Note: Do not need to worry about ECC as the 9th byte is the first
-            //       ECC byte.
-            l_errhdl = DeviceFW::deviceRead(l_target, l_buf, l_size,
-                              DEVICE_PNOR_ADDRESS(0,io_TOC[i_secId].flashAddr));
-            if (l_errhdl)
-            {
-                break;
-            }
-
-            // Check if first 4 bytes match the Secureboot Magic Number
-            io_TOC[i_secId].secure &= PNOR::cmpSecurebootMagicNumber(l_buf);
-        }
-    }
-#endif
-
-    } while (0);
-
-    return l_errhdl;
-}
-
-// @TODO RTC 173489
-// Remove API once FSP fully supports signing of PNOR sections that did not
-// previously have a sha512 header
-errlHndl_t PNOR::hasKnownHeader(
-    const PNOR::SectionId      i_secId,
-    const PNOR::SectionData_t& i_TOC,
-          bool&                o_knownHeader)
-{
-    errlHndl_t pError = nullptr;
-    bool knownHeader = true;
-
-    do {
-
-    // Left symbolic constant defined in the function so it's easier to strip
-    // out later and nothing becomes dependent on it
-    const char VERSION_MAGIC[] = "VERSION";
-    const auto versionMagicSize = sizeof(VERSION_MAGIC);
-    const auto secureMagicSize = sizeof(ROM_MAGIC_NUMBER);
-    auto size = std::max(versionMagicSize,secureMagicSize);
-    assert(size <= sizeof(uint64_t),"non-ECC request size exceeded. "
-        "Expected size of <= %d but got %d",sizeof(uint64_t),size);
-    uint8_t buf[size] = {0};
-
-    pError = readHeaderMagic(i_secId,i_TOC,size,buf);
-    if(pError)
-    {
-        break;
-    }
-
-    auto secureHeader = PNOR::cmpSecurebootMagicNumber(buf);
-    decltype(secureHeader) versionHeader =
-        (memcmp(buf,VERSION_MAGIC,versionMagicSize) == 0);
-    if(!secureHeader && !versionHeader)
-    {
-        knownHeader = false;
-    }
-
-    o_knownHeader = knownHeader;
-
-    } while (0);
-
-    return pError;
 }
 
 bool PNOR::isSectionEmpty(const PNOR::SectionId i_section)

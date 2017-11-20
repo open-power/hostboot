@@ -97,15 +97,6 @@ class SecureRomManager
         void hashConcatBlobs (const blobPair_t &i_blobs, SHA512_t o_buf) const;
 
         /*
-         * @brief Determines if best effort policy is enabled and allowed when
-         *        SecureROM is invalid.
-         *        Asserts secure rom is valid if bestEffortPolicy is false
-         *
-         * @return bool - True if enabled, false otherwise
-         */
-        bool secureRomValidPolicy() const;
-
-        /*
          * @brief Get offset of function from the start of the SecureROM
          *
          * @param[in]  i_funcType   Secure Boot function type to get version of

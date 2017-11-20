@@ -101,31 +101,11 @@ namespace SECUREBOOT
                 securitySwitchValue,cbsValue);
         }
         #endif
-
-#ifdef CONFIG_SECUREBOOT_BEST_EFFORT
-        iv_bestEffortPolicy = true;
-#else
-        if (iv_enabled)
-        {
-            iv_bestEffortPolicy = false;
-        }
-        else
-        {
-            iv_bestEffortPolicy = true;
-        }
-#endif
-        SB_INF("getBestEffortPolicy() state:%i",iv_bestEffortPolicy);
-        printk("SECUREBOOT::bestEffortPolicy() state:%i\n", iv_bestEffortPolicy);
     }
 
     bool Settings::getEnabled() const
     {
         return iv_enabled;
-    }
-
-    bool Settings::getBestEffortPolicy() const
-    {
-        return iv_bestEffortPolicy;
     }
 
     errlHndl_t Settings::getJumperState(SecureJumperState& o_state,

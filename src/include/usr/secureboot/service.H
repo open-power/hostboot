@@ -330,12 +330,6 @@ namespace SECUREBOOT
      */
     bool allowAttrOverrides();
 
-    /* Definition in settings.H */
-    bool bestEffortPolicy();
-
-    /* Definition in securerommgr.H */
-    bool secureRomValidPolicy();
-
     /*
      *  @brief Gets the current SBE security mode value from the secureboot
      *         subsystem

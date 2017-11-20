@@ -328,38 +328,30 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
         if (!l_info.secure)
         {
-            if(SECUREBOOT::bestEffortPolicy())
-            {
-                TRACFCOMP(g_trac_pnor,"PNOR::verifySections> called on unsecured section - Best effort policy skipping");
-                break;
-            }
-            else
-            {
-                TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::verifySections> called on "
+            TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::verifySections> called on "
                     "unsecured section");
 
-                /*@
-                 * @errortype
-                 * @severity     ERRL_SEV_CRITICAL_SYS_TERM
-                 * @moduleid     PNOR::MOD_SPNORRP_VERIFYSECTIONS
-                 * @reasoncode   PNOR::RC_UNSIGNED_PNOR_SECTION
-                 * @userdata1    PNOR section requested to verify
-                 * @userdata2    0
-                 * @devdesc      Cannot verify unsigned PNOR section
-                 * @custdesc     Security failure: unable to securely load
-                 *               requested firmware.
-                 */
-                l_errhdl = new ERRORLOG::ErrlEntry(
-                                       ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
-                                       PNOR::MOD_SPNORRP_VERIFYSECTIONS,
-                                       PNOR::RC_UNSIGNED_PNOR_SECTION,
-                                       TO_UINT64(i_id),
-                                       0,
-                                       true /*Add HB SW Callout*/);
-                l_errhdl->collectTrace(PNOR_COMP_NAME);
-                l_errhdl->collectTrace(SECURE_COMP_NAME);
-                break;
-            }
+            /*@
+             * @errortype
+             * @severity     ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid     PNOR::MOD_SPNORRP_VERIFYSECTIONS
+             * @reasoncode   PNOR::RC_UNSIGNED_PNOR_SECTION
+             * @userdata1    PNOR section requested to verify
+             * @userdata2    0
+             * @devdesc      Cannot verify unsigned PNOR section
+             * @custdesc     Security failure: unable to securely load
+             *               requested firmware.
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                                   ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                   PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                                   PNOR::RC_UNSIGNED_PNOR_SECTION,
+                                   TO_UINT64(i_id),
+                                   0,
+                                   true /*Add HB SW Callout*/);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            l_errhdl->collectTrace(SECURE_COMP_NAME);
+            break;
         }
         else
         {
@@ -881,16 +873,8 @@ void SPnorRP::waitForMessage()
 
                             size_t l_sizeWithHdr = PAGESIZE + l_rec->textSize;
 
-                            bool l_wasLoadedAsBestEffort = false;
-                            if (l_rec->textSize == 0 &&
-                                SECUREBOOT::bestEffortPolicy())
-                            {
-                                // indicate that this section had been loaded
-                                // as "best effort"
-                                l_wasLoadedAsBestEffort = true;
-                            }
                             // if the section has an unsecured portion
-                            else if (l_sizeWithHdr != l_rec->infoSize)
+                            if (l_sizeWithHdr != l_rec->infoSize)
                             {
                                 TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload an unsupported section: 0x%X textsize+hdr: 0x%llX infosize: 0x%llX (the two sizes must be equal)", l_id, l_sizeWithHdr, l_rec->infoSize);
                                 /*@
@@ -919,15 +903,6 @@ void SPnorRP::waitForMessage()
                                  // normal operation, no error
                                  // no need to do anything if refcount is
                                  // 2 or more
-                                break;
-                            }
-
-                            if (l_wasLoadedAsBestEffort)
-                            {
-                                l_rec->secAddr = nullptr;
-                                l_rec->textSize = 0;
-                                l_rec->infoSize = 0;
-                                l_rec->refCount = 0;
                                 break;
                             }
 

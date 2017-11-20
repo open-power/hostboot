@@ -86,24 +86,6 @@ errlHndl_t PNOR::clearSection(PNOR::SectionId i_section)
     return Singleton<RtPnor>::instance().clearSection(i_section);
 }
 
-// @TODO RTC 173489
-// Remove API once FSP fully supports signing of PNOR sections that did not
-// previously have a sha512 header
-errlHndl_t PNOR::readHeaderMagic(
-    const PNOR::SectionId      i_secId,
-    const PNOR::SectionData_t& i_TOC,
-    const size_t               i_size,
-          void* const          o_pData)
-{
-    errlHndl_t pError = RtPnor::readFromDevice (RtPnor::iv_masterProcId,
-                                                i_secId,
-                                                0,
-                                                i_size,
-                                                false,
-                                                o_pData);
-    return pError;
-}
-
 void PNOR::getPnorInfo( PnorInfo_t& o_pnorInfo )
 {
     o_pnorInfo.mmioOffset = LPC_SFC_MMIO_OFFSET | LPC_FW_SPACE;
@@ -409,7 +391,7 @@ errlHndl_t RtPnor::readFromDevice (uint64_t i_procId,
                                    uint64_t i_offset,
                                    size_t i_size,
                                    bool i_ecc,
-                                   void* o_data)
+                                   void* o_data) const
 {
     TRACFCOMP(g_trac_pnor, ENTER_MRK"RtPnor::readFromDevice: i_offset=0x%X, "
            "i_procId=%d sec=%d size=0x%X ecc=%d", i_offset, i_procId, i_section,

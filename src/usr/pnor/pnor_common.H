@@ -73,24 +73,6 @@ namespace PNOR {
      void physicalToMmioOffset(uint64_t  i_hbbAddress,
                                uint64_t& o_mmioOffset);
 
-    // @TODO RTC 178520 Remove legacy extensions when all secure sections
-    // are supported
-    /**
-     * @brief Reads version header of section, hashes it, and extends to tpm
-     *        buffer list.
-     *
-     * @parm i_addr       Offset into flash to read
-     * @parm i_size       Number of bytes to read
-     * @parm i_sectionId  Section ID of PNOR section
-     *
-     * @return Error from operation
-     */
-#ifndef __HOSTBOOT_RUNTIME
-    errlHndl_t extendHash(uint64_t i_addr,
-                          size_t i_size,
-                          const PNOR::SectionId i_sectionId);
-#endif
-
 }
 
 #endif
