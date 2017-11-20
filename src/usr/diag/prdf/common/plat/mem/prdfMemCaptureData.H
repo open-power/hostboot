@@ -90,6 +90,17 @@ template<TARGETING::TYPE T>
 void captureDramRepairsVpd( TARGETING::TargetHandle_t i_trgt,
                             CaptureData & io_cd );
 
+/**
+ * @brief Queries the IUE threshold variable for the IUE counts and adds them
+ *        to the capture data.
+ * @param i_trgt An MBA or MCA target.
+ * @param i_db The MCA or MBA data bundle.
+ * @param io_cd  Capture data struct.
+ */
+template<typename D>
+void captureIueCounts( TARGETING::TargetHandle_t i_trgt, D i_db,
+                       CaptureData & io_cd );
+
 } // end namespace MemCaptureData
 
 } // end namespace PRDF

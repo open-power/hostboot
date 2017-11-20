@@ -3192,6 +3192,43 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
 
 //------------------------------------------------------------------------------
 
+bool parseIueCounts( uint8_t  * i_buffer, uint32_t i_buflen,
+                     ErrlUsrParser & i_parser )
+{
+    bool rc = true;
+    // 2 bytes per entry
+    const uint32_t entries = i_buflen / 2;
+
+    i_parser.PrintNumber( " IUE COUNTS", "%d", entries );
+
+    const char * hh = "Rank ";
+    const char * hd = "Count";
+    i_parser.PrintString( hh, hd );
+    hh = "---- ";
+    hd = "-----";
+    i_parser.PrintString( hh, hd );
+
+    for ( uint32_t i = 0; i < entries; i++ )
+    {
+        uint8_t idx = i*2;
+
+        uint8_t rank  = i_buffer[idx];
+        uint8_t count = i_buffer[idx+1];
+
+        char header[HEADER_SIZE] = { '\0' };
+        snprintf( header, DATA_SIZE, "%d    ", rank );
+
+        char data[DATA_SIZE] = { '\0' };
+        snprintf( header, DATA_SIZE, "%d", count );
+
+        i_parser.PrintString( header, data );
+    }
+
+    return rc;
+}
+
+//------------------------------------------------------------------------------
+
 /* TODO RTC 157888
 bool parseMemRceTable( uint8_t  * i_buffer, uint32_t i_buflen,
                        ErrlUsrParser & i_parser )

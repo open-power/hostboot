@@ -88,6 +88,15 @@ bool parseMemCeTable( uint8_t * i_buffer, uint32_t i_buflen,
                       ErrlUsrParser & i_parser );
 
 /**
+ * @brief Parses IUE threshold counts.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ */
+bool parseIueCounts( uint8_t * i_buffer, uint32_t i_buflen,
+                     ErrlUsrParser & i_parser );
+
+/**
  * @brief Parses Memory RCE table.
  * @param i_buffer The data buffer.
  * @param i_buflen The buffer length.
