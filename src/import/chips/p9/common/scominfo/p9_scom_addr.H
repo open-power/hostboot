@@ -208,6 +208,7 @@ extern "C"
         N3_INT_0_RING_ID = 0xc,     ///< INT_0
         N3_PB_4_RING_ID = 0xd,      ///< PB_4
         N3_PB_5_RING_ID = 0xe,      ///< PB_5
+        N3_NPU_2_RING_ID = 0xf,     ///< NPU_2
     } p9_n3_ring_id_t;
 
 
