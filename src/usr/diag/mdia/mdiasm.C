@@ -897,12 +897,32 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
             // do the appropriate thing based on the phase for this target
 
             case RESTORE_DRAM_REPAIRS:
+            {
+                TargetHandle_t target = getTarget( *i_wfp);
+                TYPE trgtType = target->getAttr<ATTR_TYPE>();
 
-                //TODO RTC 136126
-                //rc = PRDF::restoreDramRepairs(getTarget(*i_wfp));
+                // MBA target
+                if ( TYPE_MBA == trgtType )
+                {
+                    rc = PRDF::restoreDramRepairs<TYPE_MBA>( target );
+                }
+                // MCBIST target
+                else
+                {
+                    // Get the connected MCAs.
+                    TargetHandleList mcaList;
+                    getChildAffinityTargets( mcaList, target, CLASS_UNIT,
+                                             TYPE_MCA );
+                    for ( auto & mca : mcaList )
+                    {
+                        MDIA_SLOW( "sm: restoreDramRepairs(0x%08x)",
+                                   get_huid(mca) );
+                        rc = PRDF::restoreDramRepairs<TYPE_MCA>( mca );
+                    }
+                }
 
                 break;
-
+            }
             case START_PATTERN_0:
             case START_PATTERN_1:
             case START_PATTERN_2:
