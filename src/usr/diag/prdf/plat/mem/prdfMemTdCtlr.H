@@ -64,6 +64,12 @@ class MemTdCtlr
         iv_stoppedRank( i_chip, MemRank(0) )
     {
         PRDF_ASSERT( T == iv_chip->getType() );
+        if ( TARGETING::TYPE_MCBIST == i_chip->getType() )
+        {
+            ExtensibleChip * mcaChip =
+                PlatServices::getConnectedChild(i_chip, TARGETING::TYPE_MCA, 0);
+            iv_stoppedRank = TdRankListEntry( mcaChip, MemRank(0) );
+        }
     }
 
     /**
