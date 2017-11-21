@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2016
+# Contributors Listed Below - COPYRIGHT 2013,2017
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -221,7 +221,8 @@ my $resident_modules = {
     "libsbeio.so"               => '1',
     "libvpd.so"                 => '1',
     "libsecureboot_trusted.so"  => '1',
-    "libsecureboot_base.so"  => '1',
+    "libsecureboot_base.so"     => '1',
+    "libscom.so"                => '1',
 };
 
 # A list of the dependent libraries in each istep.
