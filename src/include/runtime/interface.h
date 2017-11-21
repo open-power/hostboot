@@ -503,7 +503,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_RESP_NOP = 1,
        HBRT_FW_MSG_TYPE_RESP_GENERIC = 2,
        HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE = 3,
-       HBRT_FW_MSG_HBRT_FSP = 4,
+       HBRT_FW_MSG_HBRT_FSP_REQ = 4,
        HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
        HBRT_FW_MSG_HBRT_FSP_RESP = 6,
     };
@@ -550,21 +550,17 @@ typedef struct hostInterfaces
           } __attribute__ ((packed)) error_log;
 
           // This struct is sent from HBRT with
-          // io_type set to HBRT_FW_MSG_HBRT_FSP
-          // This struct sends an MBox message to the FSP
-          struct GenericFspMboxMessage_t generic_message;
-
-          // This struct is sent from FSP with
-          // io_type set to HBRT_FW_MSG_HBRT_FSP_RESP
-          // This struct receives a message from the FSP
-          struct GenericFspRspMessage_t generic_message_resp;
-
+          // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
+          // HBRT_FW_MSG_HBRT_FSP_RESP
+          // This struct sends/receives an MBox message to the FSP
+          struct GenericFspMboxMessage_t generic_msg;
        }; // end union
     };  // end struct hbrt_fw_msg
 
     // Created a static constexpr to return the base size of hbrt_fw_msg
     // Can't do #define - sizeof not allowed to be used in #defines
-    static constexpr size_t HBRT_FW_MSG_BASE_SIZE = sizeof(uint64_t);
+    static constexpr size_t HBRT_FW_MSG_BASE_SIZE =
+                                            sizeof(hbrt_fw_msg::io_type);
 
     /**
      * @brief Send a request to firmware, and receive a response

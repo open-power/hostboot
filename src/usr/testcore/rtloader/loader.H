@@ -194,7 +194,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             if (cv_hb_data_addr != 0)
             {
                 // unmap virtual memory
-                TRACFCOMP( g_trac_hbrt, "tearDown(): unmap hb_data virt addr %p",
+                TRACFCOMP(g_trac_hbrt,
+                          "tearDown(): unmap hb_data virt addr %p",
                        reinterpret_cast<void*>(cv_hb_data_addr));
 
                 int l_rc = mm_block_unmap(
@@ -212,7 +213,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
             else
             {
-                TRACFCOMP( g_trac_hbrt, "tearDown(): skipping unmap hb_data virt addr");
+                TRACFCOMP( g_trac_hbrt,
+                           "tearDown(): skipping unmap hb_data virt addr");
             }
         }
 
@@ -399,7 +401,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
         static uint64_t rt_get_hb_data(uint32_t i_instance)
         {
-            TRACFCOMP( g_trac_hbrt, ENTER_MRK"rt_get_hb_data> i_instance=%d", i_instance );
+            TRACFCOMP( g_trac_hbrt,
+                       ENTER_MRK"rt_get_hb_data> i_instance=%d", i_instance );
 
             uint64_t l_totalSize = 0;
             uint64_t l_vAddr = 0;
@@ -510,7 +513,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 l_err = PNOR::getSectionInfo(l_id, l_info);
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_hbrt, "rt_pnor_read: getSectionInfo errored");
+                    TRACFCOMP(g_trac_hbrt,
+                              "rt_pnor_read: getSectionInfo errored");
                     break;
                 }
 
@@ -532,7 +536,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                         " deviceRead: offset:0x%X, flashAddr:0x%X, size:0x%X",
                         i_offset, l_flashAddr, l_bytes_to_read);
 
-                l_err = DeviceFW::deviceRead (pnor_target, o_data, l_bytes_to_read,
+                l_err = DeviceFW::deviceRead (pnor_target, o_data,
+                                     l_bytes_to_read,
                                      DEVICE_PNOR_ADDRESS(i_proc, l_flashAddr));
                 if (l_err)
                 {
@@ -582,7 +587,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 l_err = PNOR::getSectionInfo(l_id, l_info);
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_hbrt, "rt_pnor_write: getSectionInfo errored");
+                    TRACFCOMP(g_trac_hbrt,
+                              "rt_pnor_write: getSectionInfo errored");
                     break;
                 }
 
@@ -601,7 +607,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                                       DEVICE_PNOR_ADDRESS(i_proc, l_flashAddr));
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_hbrt, "rt_pnor_write: deviceWrite errored");
+                    TRACFCOMP(g_trac_hbrt,
+                              "rt_pnor_write: deviceWrite errored");
                     break;
                 }
             } while (0);
@@ -716,7 +723,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         static int rt_firmware_request(uint64_t i_reqLen, void *i_req,
                              uint64_t* o_respLen, void *o_resp  )
         {
-            int retVal = 0;
+            size_t retVal = 0;
             do
             {
                if (i_req == nullptr ||
@@ -732,18 +739,18 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                hostInterfaces::hbrt_fw_msg* l_resp_fw_msg =
                                 (hostInterfaces::hbrt_fw_msg*) o_resp;
 
-               if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                             sizeof(l_resp_fw_msg->resp_generic)))
-               {
-                  retVal = -EINVAL;
-                  break;
-               }
-
                if (hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE
                                               == l_req_fw_msg->io_type)
                {
                   if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
                                 sizeof(l_req_fw_msg->req_hcode_update)))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
+
+                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                   sizeof(l_resp_fw_msg->resp_generic)))
                   {
                      retVal = -EINVAL;
                      break;
@@ -786,6 +793,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                      break;
                   }
 
+                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                   sizeof(l_resp_fw_msg->resp_generic)))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
 
                   TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request for error log: "
@@ -803,41 +816,86 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
                   retVal = 0;  // just return 0 for testing
                }
-               else if (hostInterfaces::HBRT_FW_MSG_HBRT_FSP
+               else if (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ
                                                    == l_req_fw_msg->io_type)
                {
                   if (i_reqLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                             sizeof(l_req_fw_msg->generic_message)))
+                             sizeof(l_req_fw_msg->generic_msg)))
                   {
                       retVal = -EINVAL;
                       break;
                   }
 
-                  TRACFCOMP(g_trac_hbrt,
-                      "rt_firmware_request for VPD Write Msg: "
-                      "type:0x%.8X, msgq:0x%.8X, VPD type:0x%.8X, data:0x%X",
-                      l_req_fw_msg->io_type,
-                      l_req_fw_msg->generic_message.msgq,
-                      l_req_fw_msg->generic_message.msgType,
-                      l_req_fw_msg->generic_message.data);
+                  if (*o_respLen < (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                   sizeof(l_resp_fw_msg->generic_msg)))
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
 
-                  l_resp_fw_msg->io_type =
-                          hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP;
+                  uint32_t* l_data =
+                             (uint32_t*) &(l_req_fw_msg->generic_msg.data);
+                  TRACFCOMP(g_trac_hbrt,
+                      "rt_firmware_request for VPD Write Msg request: "
+                      "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
+                      "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
+                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X",
+                      l_req_fw_msg->io_type,
+                      l_req_fw_msg->generic_msg.magic,
+                      l_req_fw_msg->generic_msg.dataSize,
+                      l_req_fw_msg->generic_msg.structVer,
+                      l_req_fw_msg->generic_msg.seqnum,
+                      l_req_fw_msg->generic_msg.msgq,
+                      l_req_fw_msg->generic_msg.msgType,
+                      l_req_fw_msg->generic_msg.__req,
+                      l_req_fw_msg->generic_msg.__onlyError,
+                      l_req_fw_msg->generic_msg.data,
+                      l_data[0],
+                      l_data[1]);
 
                   // random testing data
-                  l_resp_fw_msg->generic_message_resp.msgq = 0x800;
-                  l_resp_fw_msg->generic_message_resp.msgType = 0x900;
-                  l_resp_fw_msg->generic_message_resp.errPlid = 0xA00;
-                  retVal = 0;
+                  struct
+                  {
+                     uint32_t plid;
+                     uint32_t huid;
+                  } l_resp_data;
+                  l_resp_fw_msg->io_type =
+                                     hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP;
+                  l_resp_fw_msg->generic_msg.magic = 0x10;
+                  l_resp_fw_msg->generic_msg.dataSize =
+                                     sizeof(l_resp_fw_msg->generic_msg);
+                  l_resp_fw_msg->generic_msg.structVer = 0x2;
+                  l_resp_fw_msg->generic_msg.seqnum = 0x30;
+                  l_resp_fw_msg->generic_msg.msgq = 0x40;
+                  l_resp_fw_msg->generic_msg.msgType = 0x50;
+                  l_resp_fw_msg->generic_msg.__req = GFMM_RESPONSE;
+                  l_resp_fw_msg->generic_msg.__onlyError =
+                                                          GFMM_NOT_ERROR_ONLY;
+                  l_resp_data.plid = 0x60;
+                  l_resp_data.huid = 0x70;
+                  memcpy(&(l_resp_fw_msg->generic_msg.data),
+                         &(l_resp_data),
+                         sizeof(l_resp_fw_msg->generic_msg.data));
+                  retVal = 5;
 
                   TRACFCOMP(g_trac_hbrt,
                       "rt_firmware_request for VPD Write Msg response: "
-                      "type:0x%.8X, msgq:0x%.8X, msgType:0x%.8X,"
-                      " errPlid:0x%X, retVal=%d",
+                      "type:%d, magic:0x%.8X, dataSize:%d, structVer:0x%.8X, "
+                      "seqnum:%d, msgq:0x%.8X, msgType:0x%.8X, __req:%d, "
+                      "__onlyError:%d, data:0x%.8X, plid:0x%.8X, huid:0x%.8X, "
+                      "retVal=%d",
                       l_resp_fw_msg->io_type,
-                      l_resp_fw_msg->generic_message_resp.msgq,
-                      l_resp_fw_msg->generic_message_resp.msgType,
-                      l_resp_fw_msg->generic_message_resp.errPlid,
+                      l_resp_fw_msg->generic_msg.magic,
+                      l_resp_fw_msg->generic_msg.dataSize,
+                      l_resp_fw_msg->generic_msg.structVer,
+                      l_resp_fw_msg->generic_msg.seqnum,
+                      l_resp_fw_msg->generic_msg.msgq,
+                      l_resp_fw_msg->generic_msg.msgType,
+                      l_resp_fw_msg->generic_msg.__req,
+                      l_resp_fw_msg->generic_msg.__onlyError,
+                      l_resp_fw_msg->generic_msg.data,
+                      l_resp_fw_msg->generic_msg.data >> 32,
+                      0x0000FFFF & l_resp_fw_msg->generic_msg.data,
                       retVal);
                }
                else
@@ -863,8 +921,5 @@ std::map<void*, UtilLidMgr*> RuntimeLoaderTest::cv_loadedLids;
 uint64_t RuntimeLoaderTest::cv_hb_data_addr = 0;
 uint64_t RuntimeLoaderTest::cv_comm_addr = 0;
 uint64_t RuntimeLoaderTest::cv_comm_phys_addr = 0;
-
-
-
 
 #endif

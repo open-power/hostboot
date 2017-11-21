@@ -60,6 +60,7 @@ namespace RUNTIME
         MOD_FILL_RSVMEM_HBDATA           = 0x20,  /**< populate_hbruntime.C */
         MOD_ATTR_RUNTIME_CHECK_PREP_FAIL = 0x21,  /**< populate_hbruntime.C */
         MOD_PM_RT_FIRMWARE_REQUEST       = 0x22,  /**< rt_pm.C */
+        MOD_RT_FIRMWARE_NOTIFY           = 0x23,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -114,6 +115,11 @@ namespace RUNTIME
         RC_TPM_HDAT_BAD_NUM_I2C        = RUNTIME_COMP_ID | 0x2F,
         RC_INVALID_LID                 = RUNTIME_COMP_ID | 0x30,
         RC_PREVER_INVALID_SIZE         = RUNTIME_COMP_ID | 0x31,
+        RC_FW_NOTIFY_RT_INVALID_MSG    = RUNTIME_COMP_ID | 0x32,
+        RC_FW_NOTIFY_RT_INVALID_MSG_TYPE = RUNTIME_COMP_ID | 0x33,
+        RC_FW_REQUEST_RT_NULL_PTR      = RUNTIME_COMP_ID | 0x34,
+        RC_SBE_RT_INVALID_HUID         = RUNTIME_COMP_ID | 0x35,
+        RC_SBE_RT_RECOVERY_ERR         = RUNTIME_COMP_ID | 0x36,
     };
 
     enum UserDetailsTypes
