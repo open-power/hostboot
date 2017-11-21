@@ -345,7 +345,10 @@ void PnorRP::initDaemon()
 
         //Find and read the TOC in the PNOR to compute the sections and set
         //their correct permissions
-        l_errhdl = findTOC();
+
+        size_t l_sizeOfToc = 0;
+
+        l_errhdl = findTOC(l_sizeOfToc);
         if( l_errhdl )
         {
             TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to findTOC");
@@ -353,13 +356,13 @@ void PnorRP::initDaemon()
             INITSERVICE::doShutdown(PNOR::RC_FINDTOC_FAILED);
         }
 
-        l_errhdl = readTOC();
+        l_errhdl = readTOC(l_sizeOfToc);
         if( l_errhdl )
         {
             TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::initDaemon: Failed to readTOC");
             break;
         }
-        l_errhdl =  setSideInfo ();
+        l_errhdl =  setSideInfo (l_sizeOfToc);
         if(l_errhdl)
         {
             TRACFCOMP(g_trac_pnor, "PnorRP::initDaemon> setSideInfo failed");
@@ -671,10 +674,11 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
 /*
  * @brief Finds the toc locations based on hostboot base address
  */
-errlHndl_t PnorRP::findTOC()
+errlHndl_t PnorRP::findTOC(size_t & o_tocSize)
 {
     TRACDCOMP(g_trac_pnor, ENTER_MRK"PnorRP::findTOC...");
     errlHndl_t l_err             = NULL;
+    uint8_t *realTocBuffer  = nullptr;
     do {
         const uint32_t l_shiftAmount = 32;
         uint64_t l_chip         = 0;
@@ -683,7 +687,7 @@ errlHndl_t PnorRP::findTOC()
         uint64_t l_toc          = PNOR::PNOR_SIZE - 1;
         ffs_hdr* l_ffs_hdr      = 0;
         uint64_t l_hbbAddr      = 0;
-        uint8_t l_tocBuffer [PAGESIZE];
+        uint8_t l_tmpTocBuffer [PAGESIZE];
 
         //get the HBB Address we booted from
         l_err =  PNOR::mmioToPhysicalOffset(l_hbbAddr);
@@ -703,7 +707,7 @@ errlHndl_t PnorRP::findTOC()
         {
             //Align HBB down -- looking at 0x0 or 0x2000000
             l_toc = ALIGN_DOWN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
-            l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+            l_err = readFromDevice(l_toc, l_chip, false, l_tmpTocBuffer,
                     l_fatalError);
             if(l_err)
             {
@@ -712,7 +716,7 @@ errlHndl_t PnorRP::findTOC()
                 break;
             }
 
-            l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+            l_ffs_hdr  = (ffs_hdr*)l_tmpTocBuffer;
             l_foundTOC = ((l_ffs_hdr->magic == FFS_MAGIC) &&
                         (PNOR::pnor_ffs_checksum(l_ffs_hdr,FFS_HDR_SIZE) == 0));
             if (!l_foundTOC)
@@ -720,7 +724,7 @@ errlHndl_t PnorRP::findTOC()
                 //If TOC not found at 0x0 or 0x2000000
                 //Align HBB down + 8000 -- looking at 0x8000 or 0x2008000
                 l_toc += TOC_SIZE;
-                l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+                l_err = readFromDevice(l_toc, l_chip, false, l_tmpTocBuffer,
                     l_fatalError);
                 if(l_err)
                 {
@@ -729,7 +733,7 @@ errlHndl_t PnorRP::findTOC()
                     break;
                 }
 
-                l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+                l_ffs_hdr  = (ffs_hdr*)l_tmpTocBuffer;
                 l_foundTOC =
                     ((l_ffs_hdr->magic == FFS_MAGIC) &&
                      (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
@@ -742,7 +746,7 @@ errlHndl_t PnorRP::findTOC()
                 // -- looking at 0x1FF8000 or 0x3FF8000
                 l_toc = ALIGN_X(l_tempHBB, l_shiftAmount*MEGABYTE);
                 l_toc -= TOC_SIZE;
-                l_err = readFromDevice(l_toc, l_chip, false, l_tocBuffer,
+                l_err = readFromDevice(l_toc, l_chip, false, l_tmpTocBuffer,
                     l_fatalError);
                 if(l_err)
                 {
@@ -751,7 +755,7 @@ errlHndl_t PnorRP::findTOC()
                     break;
                 }
 
-                l_ffs_hdr  = (ffs_hdr*)l_tocBuffer;
+                l_ffs_hdr  = (ffs_hdr*)l_tmpTocBuffer;
                 l_foundTOC =
                     ((l_ffs_hdr->magic == FFS_MAGIC) &&
                      (PNOR::pnor_ffs_checksum(l_ffs_hdr, FFS_HDR_SIZE) == 0));
@@ -771,6 +775,21 @@ errlHndl_t PnorRP::findTOC()
         if(l_foundTOC)
         {
             TRACDCOMP(g_trac_pnor, "findTOC> found at least one toc at 0x%X", l_toc);
+
+            //TOC might be greater than one page (4k), so need to check hdr if we need
+            //to increase the size of the buffer
+            o_tocSize = l_ffs_hdr->block_size * l_ffs_hdr->size;
+            realTocBuffer = new uint8_t[o_tocSize];
+            TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
+            l_err = DeviceFW::deviceRead(pnor_target, realTocBuffer, o_tocSize,
+                                         DEVICE_PNOR_ADDRESS(0,l_toc));
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_pnor,"findTOC:failed trying to copy TOC from the device into a buffer");
+                break;
+            }
+
+            l_ffs_hdr = (ffs_hdr*)realTocBuffer;
 
             //look for BACKUP_PART and read it
             uint64_t l_backupTOC = INVALID_OFFSET;
@@ -914,8 +933,8 @@ errlHndl_t PnorRP::findTOC()
         }
         else
         {
-            printk("no valid toc - l_foundTOC=%d, l_toc=%lX, l_tocBuffer=%p\n",
-                   l_foundTOC, l_toc, l_tocBuffer);
+            printk("no valid toc - l_foundTOC=%d, l_toc=%lX, l_tmpTocBuffer=%p\n",
+                   l_foundTOC, l_toc, l_tmpTocBuffer);
             sync();
             //no valid TOC found
             TRACFCOMP(g_trac_pnor, "No valid TOC found");
@@ -927,6 +946,11 @@ errlHndl_t PnorRP::findTOC()
         }
     } while (0);
 
+    if(realTocBuffer != nullptr)
+    {
+        delete[] realTocBuffer;
+    }
+
     TRACDCOMP(g_trac_pnor, EXIT_MRK"findTOC");
     return l_err;
 }
@@ -934,28 +958,30 @@ errlHndl_t PnorRP::findTOC()
 /**
  * @brief Read the TOC and store section information
  */
-errlHndl_t PnorRP::readTOC()
+errlHndl_t PnorRP::readTOC(size_t i_tocSize)
 {
     TRACUCOMP(g_trac_pnor, "PnorRP::readTOC>" );
     errlHndl_t l_errhdl = nullptr;
     errlHndl_t l_primary_errhdl = nullptr;
     errlHndl_t l_secondary_errhdl = nullptr;
+    TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
 
-    uint8_t* toc0Buffer = new uint8_t[PAGESIZE];
-    uint8_t* toc1Buffer = new uint8_t[PAGESIZE];
+    uint8_t* toc0Buffer = new uint8_t[i_tocSize];
+    uint8_t* toc1Buffer = new uint8_t[i_tocSize];
+
     PNOR::SectionData_t l_secondary_TOC[PNOR::NUM_SECTIONS+1];
-    uint64_t fatal_error = 0;
+
     do {
-        //Initialize toc bufferes to invalid value
+        //Initialize toc buffers to invalid value
         //If these buffers are not read from device,
         //then parseTOC will see invalid data
-        memset(toc0Buffer, 0xFF, PAGESIZE);
-        memset(toc1Buffer, 0xFF, PAGESIZE);
+        memset(toc0Buffer, 0xFF, i_tocSize);
+        memset(toc1Buffer, 0xFF, i_tocSize);
         //If the first toc is at a valid offset try to read and parse it
         if (iv_TocOffset[WORKING].first != INVALID_OFFSET)
         {
-            l_errhdl = readFromDevice(iv_TocOffset[WORKING].first, 0, false,
-                                    toc0Buffer, fatal_error );
+            l_errhdl = DeviceFW::deviceRead(pnor_target, toc0Buffer, i_tocSize,
+                                            DEVICE_PNOR_ADDRESS(0,iv_TocOffset[WORKING].first));
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC0");
@@ -969,8 +995,8 @@ errlHndl_t PnorRP::readTOC()
         //If the second toc is at a valid offset try to read and parse it
         if (iv_TocOffset[WORKING].second != INVALID_OFFSET)
         {
-            l_errhdl = readFromDevice(iv_TocOffset[WORKING].second, 0, false,
-                                       toc1Buffer, fatal_error );
+            l_errhdl = DeviceFW::deviceRead(pnor_target, toc1Buffer, i_tocSize,
+                                            DEVICE_PNOR_ADDRESS(0,iv_TocOffset[WORKING].second));
             if (l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor,"readTOC:readFromDevice failed for TOC1");
@@ -1041,13 +1067,12 @@ errlHndl_t PnorRP::readTOC()
     return l_errhdl;
 }
 
-errlHndl_t PnorRP::setSideInfo ()
+errlHndl_t PnorRP::setSideInfo (size_t i_tocSize)
 {
-    uint64_t l_chip       = 0;
-    uint64_t l_fatalError = 0;
-    uint8_t* l_tocBuffer  = new uint8_t [PAGESIZE];
+    uint8_t* l_tocBuffer  = new uint8_t [i_tocSize];
     ffs_hdr* l_ffs_hdr    = 0;
     errlHndl_t l_err      = NULL;
+    TARGETING::Target* pnor_target = TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL;
     for (SideId i = FIRST_SIDE; i < NUM_SIDES; i = (SideId)(i+1))
     {
         //id
@@ -1102,8 +1127,9 @@ errlHndl_t PnorRP::setSideInfo ()
         iv_side[i].primaryTOC = l_primaryTOC;
         iv_side[i].backupTOC  = l_backupTOC;
 
-        l_err = readFromDevice(l_validTOC,l_chip,
-                    false, l_tocBuffer,l_fatalError);
+
+        l_err = DeviceFW::deviceRead(pnor_target, l_tocBuffer, i_tocSize,
+                                        DEVICE_PNOR_ADDRESS(0,l_validTOC));
         if(l_err)
         {
             TRACFCOMP(g_trac_pnor, "setSideInfo: readFromDevice failed"
@@ -1146,7 +1172,7 @@ errlHndl_t PnorRP::setSideInfo ()
         //char side
         iv_side[i].side =(ALIGN_DOWN_X(l_secOffset,32*MEGABYTE) == 0) ? 'A':'B';
 
-        TRACDCOMP(g_trac_pnor, "setSideInfo: sideId:%d, isGolden:%d, "
+        TRACFCOMP(g_trac_pnor, "setSideInfo: sideId:%d, isGolden:%d, "
               "isGuardPresent:%d, hasOtherSide:%d, primaryTOC: 0x%x, backupTOC"
               ":0x%X, HBB:0x%X, MMIO:0x%X",i, iv_side[i].isGolden,
               iv_side[i].isGuardPresent,iv_side[i].hasOtherSide,
