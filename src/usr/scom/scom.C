@@ -48,7 +48,7 @@
 #include <hw_access_def.H>
 #include <p9_scom_addr.H>
 #include <targeting/common/utilFilter.H>
-
+#include <targeting/namedtarget.H>
 
 
 // Trace definition
@@ -58,6 +58,31 @@ TRAC_INIT(&g_trac_scom, SCOM_COMP_NAME, KILOBYTE, TRACE::BUFFER_SLOW); //1K
 
 namespace SCOM
 {
+#ifndef __HOSTBOOT_RUNTIME
+/**
+ * Keep track of system state to handle the multicast workaround
+ *  more cleanly
+ */
+bool g_useSlaveCores = false;
+bool g_useMemChiplets = false;
+
+/**
+ * @brief Enable scoms to all cores for multicast workaround
+ */
+void enableSlaveCoreMulticast( void )
+{
+    g_useSlaveCores = true;
+};
+
+/**
+ * @brief Enable scoms to the memory chiplets for multicast workaround
+ */
+void enableMemChipletMulticast( void )
+{
+    g_useMemChiplets = true;
+};
+#endif
+
 /**
  * @brief Add any additional FFDC for this specific type of scom
  *
@@ -1187,6 +1212,16 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
     constexpr uint64_t MULTICAST_OP = 0x38000000;
     constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
 
+#ifndef __HOSTBOOT_RUNTIME
+    // Some P9-specific chiplet values to make things more efficient
+    constexpr uint64_t P9_FIRST_MC   = 0x07;
+    constexpr uint64_t P9_LAST_MC    = 0x08;
+    constexpr uint64_t P9_FIRST_EQ   = 0x10;
+    constexpr uint64_t P9_LAST_EQ    = 0x1F;
+    constexpr uint64_t P9_FIRST_EC   = 0x20;
+    constexpr uint64_t P9_LAST_EC    = 0x2F;
+#endif
+
     // Skip calls to the SENTINEL since we don't have the
     //  ability to find its children
     if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL
@@ -1224,13 +1259,53 @@ errlHndl_t doMulticastWorkaround( DeviceFW::OperationType i_opType,
         uint64_t l_data = 0;
         uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
         uint64_t l_unit = l_chiplet->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+
+#ifndef __HOSTBOOT_RUNTIME
+        // filter out some chiplets that aren't running yet
+        if( !g_useSlaveCores
+            && (((l_unit >= P9_FIRST_EQ) && (l_unit <= P9_LAST_EQ))
+                || ((l_unit >= P9_FIRST_EC) && (l_unit <= P9_LAST_EC))
+                )
+            )
+        {
+            // Only access the master ec/eq
+            static const TARGETING::Target* l_masterCore =
+              TARGETING::getMasterCore();
+            uint64_t l_ecNum =
+              l_masterCore->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+            bool l_fused = TARGETING::is_fused_mode();
+            if( !((l_unit == l_ecNum)  //master
+                  || (l_fused && (l_unit == l_ecNum+1))) )  //fused-pair
+            {
+                continue;
+            }
+            auto l_eqNum = 0x10 + l_ecNum/4;
+            if( l_unit == l_eqNum )
+            {
+                continue;
+            }
+        }
+        if( !g_useMemChiplets
+            && ((l_unit >= P9_FIRST_MC) && (l_unit <= P9_LAST_MC)) )
+        {
+            // Only access the mem chiplets if we're not in async mode
+            //  because we don't start clocks until later on in that case
+            auto l_syncMode =
+              i_target->getAttr<TARGETING::ATTR_MC_SYNC_MODE>();
+            if( l_syncMode )
+            {
+                continue;
+            }
+        }
+#endif
+
         l_addr |= (l_unit << 24);
         io_buflen = sizeof(uint64_t);
         l_err = deviceOp(i_opType,
                          i_target,
                          &l_data,
                          io_buflen,
-                         DEVICE_XSCOM_ADDRESS(l_addr));
+                         DEVICE_XSCOM_ADDRESS_NO_ERROR(l_addr));
         // just ignore any errors, we expect they will happen
         if( l_err )
         {

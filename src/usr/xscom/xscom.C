@@ -458,7 +458,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         {
             // print a trace message.. for debug purposes
             // incase we are stuck in a retry loop.
-            TRACFCOMP(g_trac_xscom,"xscomPerformOp - RESOURCE OCCUPIED LOOP Cntr = %d: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX, HMER=%.16X", l_retryCtr, static_cast<uint64_t>(i_opType), i_xscomAddr, static_cast<uint64_t>(l_mmioAddr), io_hmer.mRegister );
+            TRACFCOMP(g_trac_xscom,"xscomDoOp - RESOURCE OCCUPIED LOOP Cntr = %d: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX, HMER=%.16X", l_retryCtr, static_cast<uint64_t>(i_opType), i_xscomAddr, static_cast<uint64_t>(l_mmioAddr), io_hmer.mRegister );
 
             // we don't want to hang forever so break out after
             //  an obscene amount of time
@@ -471,17 +471,17 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
     } while (io_hmer.mXSComStatus == PIB::PIB_RESOURCE_OCCUPIED);
 
 
-    TRACDCOMP(g_trac_xscom,"xscomPerformOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX", static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
+    TRACDCOMP(g_trac_xscom,"xscomDoOp: OpType 0x%.16llX, Address 0x%llX, MMIO Address 0x%llX", static_cast<uint64_t>(i_opType),i_xscomAddr,static_cast<uint64_t>(l_mmioAddr));
 
-    TRACDCOMP(g_trac_xscom, "xscomPerformOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",l_offset,i_virtAddr,i_virtAddr + l_offset);
+    TRACDCOMP(g_trac_xscom, "xscomDoOp: l_offset 0x%.16llX; VirtAddr %p; i_virtAddr+l_offset %p",l_offset,i_virtAddr,i_virtAddr + l_offset);
 
     if (i_opType == DeviceFW::READ)
     {
-        TRACDCOMP(g_trac_xscom, "xscomPerformOp: Read data: %.16llx", l_data);
+        TRACDCOMP(g_trac_xscom, "xscomDoOp: Read data: %.16llx", l_data);
     }
     else
     {
-        TRACDCOMP(g_trac_xscom, "xscomPerformOp: Write data: %.16llx", l_data);
+        TRACDCOMP(g_trac_xscom, "xscomDoOp: Write data: %.16llx", l_data);
     }
 
     do
@@ -490,6 +490,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
         if (io_hmer.mXSComStatus != PIB::PIB_NO_ERROR)
         {
             uint64_t l_hmerVal = io_hmer;
+            uint64_t l_fullAddr = mm_virt_to_phys(i_virtAddr + l_offset);
 
             TRACFCOMP(g_trac_xscom,ERR_MRK "XSCOM status error HMER: %.16llx ,XSComStatus = %llx, Addr=%llx",l_hmerVal,io_hmer.mXSComStatus, i_xscomAddr );
             /*@
@@ -504,7 +505,7 @@ errlHndl_t  xScomDoOp(DeviceFW::OperationType i_opType,
                                             XSCOM_DO_OP,
                                             XSCOM_STATUS_ERR,
                                             io_hmer,
-                                            l_mmioAddr);
+                                            l_fullAddr);
             //Note: Callouts are added by the caller if needed
         }
     }
@@ -746,6 +747,7 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
     HMER l_hmer;
     mutex_t* l_XSComMutex = NULL;
     uint64_t l_addr = va_arg(i_args,uint64_t);
+    uint64_t l_noErrors = va_arg(i_args,uint64_t);
 
     do
     {
@@ -793,7 +795,20 @@ errlHndl_t xscomPerformOp(DeviceFW::OperationType i_opType,
                           l_hmer);
 
         // If we got a scom error.
-        if (l_err)
+        if (l_err && l_noErrors)
+        {
+            // ignoring errors because the caller doesn't care
+            //  just return all zero data
+            delete l_err;
+            l_err = nullptr;
+            io_buflen = XSCOM_BUFFER_SIZE;
+            memset( io_buffer, 0, io_buflen );
+
+            // still need to reset the scomEngine.
+            resetScomEngine(i_target,
+                            l_virtAddr);
+        }
+        else if (l_err)
         {
             // Call XscomCollectFFDC..
             collectXscomFFDC(i_target,

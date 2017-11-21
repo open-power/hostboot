@@ -43,6 +43,17 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
                          bool & o_needsWakeup,
                          uint64_t i_opMode = 0);
 
+#ifndef __HOSTBOOT_RUNTIME
+/**
+ * @brief Enable scoms to all cores for multicast workaround
+ */
+void enableSlaveCoreMulticast( void );
+
+/**
+ * @brief Enable scoms to the memory chiplets for multicast workaround
+ */
+void enableMemChipletMulticast( void );
+#endif
 
 };  // end namespace SCOM
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 //From Import Directory (EKB Repository)
 #include <p9_mem_startclocks.H>
 
+#include    <scom/scomif.H>
 
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
@@ -99,6 +100,10 @@ void* call_mem_startclocks (void *io_pArgs)
                        "target HUID %.8X", TARGETING::get_huid(l_procChip));
         }
     }
+
+    // Now that the memory chiplets are turned on, we need to include them in
+    //  multicast scom operations
+    SCOM::enableMemChipletMulticast();
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_mem_startclocks exit" );

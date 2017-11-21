@@ -49,6 +49,8 @@
   #include <isteps/pm/occCheckstop.H>
 #endif
 
+#include    <scom/scomif.H>
+
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
@@ -255,6 +257,10 @@ void* call_host_activate_slave_cores (void *io_pArgs)
         }
     }
 #endif
+
+    // Now that the slave cores are running, we need to include them in
+    //  multicast scom operations
+    SCOM::enableSlaveCoreMulticast();
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_host_activate_slave_cores exit" );

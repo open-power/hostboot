@@ -93,7 +93,14 @@ namespace DeviceFW
      *  @param[in] i_address - XSCom address to operate on.
      */
     #define DEVICE_XSCOM_ADDRESS(i_address) \
-        DeviceFW::XSCOM, static_cast<uint64_t>((i_address))
+        DeviceFW::XSCOM, static_cast<uint64_t>((i_address)), 0ull
+
+    /** Construct the device addressing parameters for XSCOM device ops
+     *    when no error handling is required.
+     *  @param[in] i_address - XSCom address to operate on.
+     */
+    #define DEVICE_XSCOM_ADDRESS_NO_ERROR(i_address) \
+        DeviceFW::XSCOM, static_cast<uint64_t>((i_address)), 1ull
 
     /** Construct the device addressing parameters for IBSCOM (inband scom)
      *  device ops.
