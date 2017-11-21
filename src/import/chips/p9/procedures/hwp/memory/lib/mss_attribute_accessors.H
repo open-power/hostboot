@@ -20566,9 +20566,9 @@ fapi_try_exit:
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 /// @note  Machine Readable Workbook Thermal Memory Power Limit Used to calculate throttles
 /// to be at or under the power limit Per DIMM basis KEY (0-19): In order DIMM_SIZE
-/// = bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-9, DIMM_DENSITY =
-/// 10-12, DIMM_STACK_TYPE = 13-14, DRAM_MFGID = 15-16, DIMMS_PER_PORT = 17-18, Bits
-/// 19-32: Not used VALUE (bits 32-63) in cW: VMEM+VPP thermal power limit per DIMM
+/// = bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-10, DIMM_DENSITY =
+/// 11-13, DIMM_STACK_TYPE = 14-15, DRAM_MFGID = 16-18, DIMMS_PER_PORT = 19-20, Bits
+/// 21-32: Not used VALUE (bits 32-63) in cW: VMEM+VPP thermal power limit per DIMM
 /// = 32-63 Consumers: eff_config_thermal and
 /// bulk_pwr_throttles
 ///
@@ -20595,9 +20595,9 @@ fapi_try_exit:
 /// @note  Machine Readable Workbook Power Curve Intercept for DIMM Used to get the VDDR
 /// and VDDR+VPP power curve for each DIMM Decoded and used to set
 /// ATTR_MSS_TOTAL_PWR_INTERCEPT Key Value pair KEY (0-19): In order DIMM_SIZE =
-/// bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-9, DIMM_DENSITY =
-/// 10-12, DIMM_STACK_TYPE = 13-14, DRAM_MFGID = 15-16, DIMMS_PER_PORT = 17-18, Bits
-/// 19-32: Not used VALUE (bits 32-63) in cW: VMEM power curve = 32-47 VMEM+VPP
+/// bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-10, DIMM_DENSITY =
+/// 11-13, DIMM_STACK_TYPE = 14-15, DRAM_MFGID = 16-18, DIMMS_PER_PORT = 19-20, Bits
+/// 21-32: Not used VALUE (bits 32-63) in cW: VMEM power curve = 32-47 VMEM+VPP
 /// power curve = 48-63 Consumers:
 /// eff_config_thermal
 ///
@@ -20623,9 +20623,9 @@ fapi_try_exit:
 /// @note  Machine Readable Workbook Power Curve Slope for DIMM Used to get the VDDR and
 /// VDDR+VPP power curve for each DIMM Decoded and used to set
 /// ATTR_MSS_TOTAL_PWR_INTERCEPT Key Value pair KEY (0-19): In order DIMM_SIZE =
-/// bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-9, DIMM_DENSITY =
-/// 10-12, DIMM_STACK_TYPE = 13-14, DRAM_MFGID = 15-16, DIMMS_PER_PORT = 17-18, Bits
-/// 19-32: Not used VALUE (bits 32-63) in cW: VMEM power curve = 32-47 VMEM+VPP
+/// bits 0-3, DIMM_GEN = 4-5, DIMM_TYPE = 6-7, DIMM_WIDTH = 8-10, DIMM_DENSITY =
+/// 11-13, DIMM_STACK_TYPE = 14-15, DRAM_MFGID = 16-18, DIMMS_PER_PORT = 19-20, Bits
+/// 21-32: Not used VALUE (bits 32-63) in cW: VMEM power curve = 32-47 VMEM+VPP
 /// power curve = 48-63 Consumers:
 /// eff_config_thermal
 ///
