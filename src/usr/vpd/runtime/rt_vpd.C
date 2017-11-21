@@ -419,9 +419,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         }
 
         // Get an accurate size of memory actually needed to transport the data
+        size_t l_generic_msg_size =
+                 sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) +
+                 i_numBytes -
+                 sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data);
         size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                 sizeof(hostInterfaces::hbrt_fw_msg::generic_message) +
-                 i_numBytes;
+                                   l_generic_msg_size;
 
         //create the firmware_request structure to carry the vpd write msg data
         l_req_fw_msg =
@@ -429,10 +432,14 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         memset(l_req_fw_msg, 0, l_req_fw_msg_size);
 
         // populate the firmware_request structure with given data
-        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP;
-        l_req_fw_msg->generic_message.msgq = MBOX::FSP_VPD_MSGQ;
-        l_req_fw_msg->generic_message.msgType = i_type;
-        memcpy(&l_req_fw_msg->generic_message.data, i_data, i_numBytes);
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
+        l_req_fw_msg->generic_msg.initialize();
+        l_req_fw_msg->generic_msg.dataSize = l_generic_msg_size;
+        l_req_fw_msg->generic_msg.msgq = MBOX::FSP_VPD_MSGQ;
+        l_req_fw_msg->generic_msg.msgType = i_type;
+        l_req_fw_msg->generic_msg.__req = GFMM_REQUEST;
+        l_req_fw_msg->generic_msg.__onlyError = GFMM_NOT_ERROR_ONLY;
+        memcpy(&l_req_fw_msg->generic_msg.data, i_data, i_numBytes);
 
         // set up the response struct, note that for messages to the FSP
         //  the response size must match the request size
@@ -447,7 +454,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
                   l_req_fw_msg,
                   hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                  sizeof(hostInterfaces::hbrt_fw_msg::generic_message) );
+                  sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) );
         size_t rc = g_hostInterfaces->firmware_request(l_req_fw_msg_size,
                                                        l_req_fw_msg,
                                                        &l_resp_fw_msg_size,
@@ -457,13 +464,15 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         // Capture the err log id if any
         // The return code (rc) may return OK, but there still may be an issue
         // with the HWSV code on the FSP.
-        if ((l_resp_fw_msg_size >= (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                              sizeof(l_resp_fw_msg->generic_message_resp)))  &&
-           (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
-                                                  == l_resp_fw_msg->io_type) &&
-           (0 != l_resp_fw_msg->generic_message_resp.errPlid) )
+        // Only checking for a PLID regardless of what the flag __onlyError is
+        // set to.  I am not expecting any extra data and not sure what to do
+        // with it if I get it.
+        if ( (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP ==
+                                                   l_resp_fw_msg->io_type) &&
+             (0 != l_resp_fw_msg->generic_msg.data >> 32) )
         {
-            l_userData2 = l_resp_fw_msg->generic_message_resp.errPlid;
+            // extract the plid from the first 32 bits
+            l_userData2 = l_resp_fw_msg->generic_msg.data >> 32;
         }
 
         // gather up the error data and create an err log out of it
@@ -471,10 +480,11 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         {
             TRACFCOMP(g_trac_vpd,
                       ERR_MRK"firmware request: "
-                      "firmware request for FSP VPD write message rc 0x%X, "
-                      "target 0x%llX, VPD type %.8X, record %d, offset 0x%X",
-                       rc, get_huid(i_target), i_type, i_record.rec_num,
-                       i_record.offset );
+                      "firmware request for FSP VPD write message rc: 0x%X, "
+                      "HUID:0x%llX, plid:%.8X, VPD type:%.8X, "
+                      "record:%d, offset:0x%X, ",
+                       rc, get_huid(i_target), l_userData2,
+                       i_type, i_record.rec_num, i_record.offset );
 
             /*@
              * @errortype
