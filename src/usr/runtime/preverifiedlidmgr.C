@@ -434,8 +434,13 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
     if(cv_addFakeHdrs)
     {
         TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage fake header load");
-        SECUREBOOT::ContainerHeader l_fakeHdr(i_imgSize,
-                                            SectionIdToString(cv_curPnorSecId));
+        SECUREBOOT::ContainerHeader l_fakeHdr;
+        l_errl = l_fakeHdr.setFakeHeader(i_imgSize,
+                                      PNOR::SectionIdToString(cv_curPnorSecId));
+        if(l_errl)
+        {
+            break;
+        }
         // Inject Fake header into reserved memory
         memcpy(reinterpret_cast<void*>(l_tmpVaddr),
                l_fakeHdr.fakeHeader(),

@@ -30,6 +30,9 @@
 #include <securerom/ROM.H>
 #include <limits.h>
 #include <array>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <initservice/initserviceif.H>
 
 // Forward Declaration
 class SecureRomManagerTest;
@@ -45,38 +48,36 @@ class ContainerHeader
     public:
 
         /**
-         * @brief ContainerHeader
-         *
-         * This constructor parses the input container header and sets values
-         * accordingly so they can be retrieved later.
-         *
-         * @param[in] i_header  Secure container header to parse.
-         *                      NULL input will assert
+         * @brief Default Constructor
          */
-        ContainerHeader(const void* i_header):
-            iv_isValid(false),iv_hdrBytesRead(0)
-        {
-            assert(i_header != nullptr);
-            iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
-            initVars();
-            parse_header(i_header);
-        };
+        ContainerHeader():
+            iv_componentId{}, iv_headerInfo{}, iv_isValid(false),
+            iv_pHdrStart(nullptr), iv_hdrBytesRead(0), iv_totalSwKeysSize(0),
+            iv_sbFlags{}, iv_hwKeyHash{}, iv_fakeHeader{}
+        {}
 
         /**
-         * @brief ContainerHeader - generate fake header
+         * @brief Sets Container header from virtual address provided and parses
+         *        to set values accordingly so they can be retrieved later.
          *
-         * This constructor generates a fake header with minimal information
+         * @param[in] i_header  virtual address pointing to a secure container
+         *                      header to parse.
+         *                      nullptr input will assert
+         * @return Error handle if error; otherwise nullptr
+         */
+        errlHndl_t setHeader(const void* i_header);
+
+        /**
+         * @brief  Same as setHeader(), but generates a fake header from
+         *         minimal input and then parses the header
          *
          * @param[in] i_totalSize   Total Container Size
          * @param[in] i_compId      Component ID
+         *
+         * @return Error handle if error; otherwise nullptr
          */
-        ContainerHeader(const size_t i_totalSize,
-                        const char* i_compId):
-            iv_isValid(false),iv_hdrBytesRead(0),iv_fakeHeader{}
-        {
-            initVars();
-            genFakeHeader(i_totalSize, i_compId);
-        };
+        errlHndl_t setFakeHeader(const size_t i_totalSize,
+                                 const char* i_compId);
 
         /**
          * @brief Initialize internal variables
@@ -187,11 +188,6 @@ class ContainerHeader
         const uint8_t* fakeHeader() const;
 
     private:
-        /**
-         * @brief Default Constructor in private to prevent being instantiated
-         *        by non friend/children derivatives.
-         */
-        ContainerHeader(){};
 
         /**
          *  @brief Complete container header structure based on ROM structures
@@ -253,8 +249,9 @@ class ContainerHeader
         /**
          * @brief Weak check to determine if secureboot header looks right.
          *        Also sets iv_isValid private member
+         * @return Error handle if error; otherwise nullptr
          */
-        void validate();
+        errlHndl_t validate();
 
         /**
          * @brief Print out useful sections of the container header
@@ -266,32 +263,35 @@ class ContainerHeader
          *
          * Parses a secure container header defined by ROM structures and set
          * internal header structure.
+         * Note: nullptr header will assert
          *
-         * @param[in] i_containerHdr    Secure container header to parse
-         *                              NULL input will assert
+         * @return Error handle if error; otherwise nullptr
          */
-        void parse_header(const void* i_header);
+        errlHndl_t parse_header();
 
         /**
          * @brief Checks bounds of parsing before mempy and increments pointer
          *
          * Ensures that we don't memcpy more bytes than the max size of a
-         * secure container header. Asserts on out of bounds memcpy.
+         * secure container header. Error log created on out of bounds memcpy.
          *
          * @param[in] i_dest   Pointer to the memory location to copy to
-         *                     NULL input will assert
+         *                     nullptr input will assert
          * @param[in] io_hdr   Pointer to current location of container header
-         *                     NULL input will assert
+         *                     nullptr input will assert
          * @param[in] i_size   Number of bytes to copy
+         *
+         * @return Error handle if error; otherwise nullptr
          */
-        void safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
-                              const size_t i_size);
+        errlHndl_t safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
+                                    const size_t i_size);
 
         // Pointer to fake header generated
         std::array<uint8_t,PAGE_SIZE> iv_fakeHeader;
 
         /**
-         * @brief Generate fake header with limited information
+         * @brief Generate fake header with minimal information and stores in
+         *        instance variable
          *
          * @param[in] i_totalSize   Total container size
          * @param[in] i_compId      Component ID

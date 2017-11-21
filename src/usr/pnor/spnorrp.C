@@ -423,7 +423,14 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         memcpy(l_tempAddr, l_unsecuredAddr, l_info.secureProtectedPayloadSize
                                           + PAGESIZE); // plus header size
 
-        SECUREBOOT::ContainerHeader l_conHdr(l_tempAddr);
+        SECUREBOOT::ContainerHeader l_conHdr;
+        l_errhdl = l_conHdr.setHeader(l_tempAddr);
+        if (l_errhdl)
+        {
+            TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::verifySections> setheader failed");
+            break;
+        }
+
         size_t l_totalContainerSize = l_conHdr.totalContainerSize();
         auto l_prefixHdrFlags = l_conHdr.prefixHeaderFlags();
 
@@ -1195,6 +1202,7 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
     errlHndl_t l_errl = NULL;
     assert(i_vaddr != NULL);
 
+    do {
     // Check if measured and build time hashes of HBB sw signatures match.
     // Query the HBB header
     const void* l_pHbbHeader = NULL;
@@ -1202,7 +1210,13 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
     // Fatal code bug if either address is NULL
     assert(l_pHbbHeader!=NULL,"ERORR: Cached header address is NULL");
     // Build a container header object from the raw header
-    SECUREBOOT::ContainerHeader l_hbbContainerHeader(l_pHbbHeader);
+    SECUREBOOT::ContainerHeader l_hbbContainerHeader;
+    l_errl = l_hbbContainerHeader.setHeader(l_pHbbHeader);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::baseExtVersCheck> setheader failed");
+        break;
+    }
 
     // Calculate hash of HBB's sw signatures
     SHA512_t l_hashSwSigs = {0};
@@ -1251,7 +1265,10 @@ errlHndl_t SPnorRP::baseExtVersCheck(const uint8_t *i_vaddr) const
             TO_UINT64(*reinterpret_cast<const uint64_t*>(l_hashPageTableSaltEntry)));
         l_errl->collectTrace(PNOR_COMP_NAME);
         l_errl->collectTrace(SECURE_COMP_NAME);
+        break;
     }
+
+    } while(0);
 
     return l_errl;
 }
@@ -1263,7 +1280,13 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     do {
     // Check if the header flags have the key transition bit set
-    SECUREBOOT::ContainerHeader l_outerConHdr(i_vaddr);
+    SECUREBOOT::ContainerHeader l_outerConHdr;
+    l_errl = l_outerConHdr.setHeader(i_vaddr);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck> outer setheader failed");
+        break;
+    }
     if (!l_outerConHdr.sb_flags()->hw_key_transition)
     {
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - Key transition flag not set");
@@ -1290,7 +1313,14 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     // Validate nested container is properly signed using new hw keys
     uint8_t * l_nestedVaddr = const_cast<uint8_t*>(i_vaddr) + PAGESIZE;
-    SECUREBOOT::ContainerHeader l_nestedConHdr(l_nestedVaddr);
+    SECUREBOOT::ContainerHeader l_nestedConHdr;
+    l_errl = l_nestedConHdr.setHeader(l_nestedVaddr);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck> nested setheader failed");
+        break;
+    }
+
     l_errl = SECUREBOOT::verifyContainer(l_nestedVaddr,
                                          l_nestedConHdr.hwKeyHash());
     if (l_errl)
@@ -1298,6 +1328,7 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - failed verifyContainer");
         break;
     }
+
     }while(0);
 
     return l_errl;

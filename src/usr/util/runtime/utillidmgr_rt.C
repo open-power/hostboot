@@ -163,43 +163,17 @@ errlHndl_t UtilLidMgr::loadLid()
             {
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section found");
 
-                // Ensure Section has a Secure Header
-                if (!PNOR::cmpSecurebootMagicNumber(
-                        reinterpret_cast<uint8_t*>(iv_lidBuffer)))
+                // Build a container header object to parse protected size
+                SECUREBOOT::ContainerHeader l_conHdr;
+                l_errl = l_conHdr.setHeader(iv_lidBuffer);
+                if (l_errl)
                 {
-                    UTIL_FT(ERR_MRK"UtilLidMgr::loadLid: currently don't support "
-                        "a reserved memory area without a secure header. Section = %s",
-                        PNOR::SectionIdToString(pnorSectionId));
-
-                    uint64_t l_actualBytes = 0;
-                    memcpy(&l_actualBytes,
-                           iv_lidBuffer,
-                           sizeof(ROM_MAGIC_NUMBER));
-
-                    /*@
-                     * @errortype       ERRL_SEV_INFORMATIONAL
-                     * @moduleid        Util::UTIL_LIDMGR_RT
-                     * @reasoncode      PNOR::RC_BAD_SECURE_MAGIC_NUM
-                     * @userdata1       Section attempting to be loaded
-                     * @userdata2       First 4 bytes of vaddr
-                     * @devdesc         Error loading lid from reserved memory without secure header
-                     * @custdesc        Firmware Error
-                     */
-                    l_errl = new ERRORLOG::ErrlEntry(
-                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                        Util::UTIL_LIDMGR_RT,
-                        PNOR::RC_BAD_SECURE_MAGIC_NUM,
-                        pnorSectionId,
-                        l_actualBytes,
-                        true/*SW Error*/);
+                    UTIL_FT(ERR_MRK"UtilLidMgr::loadLid - setheader failed");
                     break;
                 }
+                iv_lidSize = l_conHdr.payloadTextSize();
 
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section has secure header");
-
-                // Build a container header object to parse protected size
-                SECUREBOOT::ContainerHeader l_conHdr(iv_lidBuffer);
-                iv_lidSize = l_conHdr.payloadTextSize();
 
                 // Increment by page size to not expose secure header
                 iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +

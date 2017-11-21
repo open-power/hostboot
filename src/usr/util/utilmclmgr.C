@@ -619,7 +619,13 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         }
 
         // Parse Container Header
-        SECUREBOOT::ContainerHeader l_conHdr(iv_pVaddr);
+        SECUREBOOT::ContainerHeader l_conHdr;
+        l_errl = l_conHdr.setHeader(iv_pVaddr);
+        if (l_errl)
+        {
+            UTIL_FT(ERR_MRK"MasterContainerLidMgr::verifyExtend - setheader failed");
+            break;
+        }
 
         // Cache size stats into comp info cache
         io_compInfo.totalSize = l_conHdr.totalContainerSize();

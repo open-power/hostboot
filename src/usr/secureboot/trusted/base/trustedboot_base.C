@@ -445,7 +445,13 @@ errlHndl_t extendBaseImage()
     }
 
     // Build a container header object from the raw header
-    const SECUREBOOT::ContainerHeader hbbContainerHeader(pHbbHeader);
+    SECUREBOOT::ContainerHeader hbbContainerHeader;
+    pError = hbbContainerHeader.setHeader(pHbbHeader);
+    if (pError)
+    {
+        TRACFCOMP(g_trac_trustedboot, ERR_MRK"extendBaseImage() setheader failed");
+        break;
+    }
 
     const void* pHbbVa = nullptr;
     if(!SECUREBOOT::enabled())

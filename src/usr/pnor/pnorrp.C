@@ -599,37 +599,16 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                 // Do an existence check on the container to see if it's non-empty
                 // and has valid beginning bytes. For optional Secure PNOR sections.
 
-                if (PNOR::cmpSecurebootMagicNumber(l_vaddr))
+                SECUREBOOT::ContainerHeader l_conHdr;
+                l_errhdl = l_conHdr.setHeader(l_vaddr);
+                if (l_errhdl)
                 {
-                    SECUREBOOT::ContainerHeader l_conHdr(l_vaddr);
-                    payloadTextSize = l_conHdr.payloadTextSize();
-                    assert(payloadTextSize > 0,"Non-zero payload text size expected.");
-                }
-                else
-                {
-                    uint32_t l_badMagicHeader = 0;
-                    memcpy(&l_badMagicHeader, l_vaddr, sizeof(ROM_MAGIC_NUMBER));
-                    TRACFCOMP( g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: magic number not valid to parse container for section = %s magic number = 0x%X",
-                               o_info.name, l_badMagicHeader);
-                    /*@
-                     * @errortype
-                     * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                     * @moduleid     PNOR::MOD_PNORRP_GETSECTIONINFO
-                     * @reasoncode   PNOR::RC_BAD_SECURE_MAGIC_NUM
-                     * @userdata1    Requested Section
-                     * @userdata2    Bad magic number
-                     * @devdesc      PNOR section does not have the known secureboot magic number
-                     * @custdesc     Corrupted flash image or firmware error during system boot
-                     */
-                    l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                       PNOR::MOD_PNORRP_GETSECTIONINFO,
-                                                       PNOR::RC_BAD_SECURE_MAGIC_NUM,
-                                                       TO_UINT64(i_section),
-                                                       TO_UINT64(l_badMagicHeader),
-                                                       true /*Add HB SW Callout*/);
-                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: setheader failed");
                     break;
                 }
+                payloadTextSize = l_conHdr.payloadTextSize();
+                assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+
                 // skip secure header for secure sections at this point in time
                 o_info.vaddr += PAGESIZE;
                 // now that we've skipped the header we also need to adjust the

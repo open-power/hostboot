@@ -41,6 +41,9 @@ namespace SECUREBOOT
         MOD_SECURE_WRITE_REG            = 0x07,
         MOD_SECURE_SETTINGS_INIT        = 0x08,
         MOD_SECURE_VERIFY_COMPONENT     = 0x09,
+        MOD_SECURE_CONT_HDR_PARSE       = 0x0A,
+        MOD_SECURE_CONT_HDR_CPY_INC     = 0x0B,
+        MOD_SECURE_CONT_VALIDATE        = 0x0C,
    };
 
     enum SECUREReasonCode
@@ -56,6 +59,8 @@ namespace SECUREBOOT
         RC_SECURE_BAD_TARGET            = SECURE_COMP_ID | 0x09,
         RC_SECURE_BOOT_DISABLED         = SECURE_COMP_ID | 0x0A,
         RC_SECROM_INVALID               = SECURE_COMP_ID | 0x0B,
+        RC_CONT_HDR_NO_SPACE            = SECURE_COMP_ID | 0x0C,
+        RC_CONT_HDR_INVALID             = SECURE_COMP_ID | 0x0D,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };
