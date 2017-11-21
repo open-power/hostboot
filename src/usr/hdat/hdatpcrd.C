@@ -136,6 +136,9 @@ static errlHndl_t hdatSetPcrdHdrs(hdatSpPcrd_t *i_pcrd)
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset = 0;
     i_pcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize   = 0;
 
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_FEATURE_FLAGS].hdatOffset = 0;
+    i_pcrd->hdatPcrdIntData[HDAT_PCRD_DA_FEATURE_FLAGS].hdatSize   = 0;
+
 
 
   return l_errlHndl;
@@ -674,6 +677,77 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                                             (sizeof(hdatSMPLinkInfo_t) * HDAT_PCRD_MAX_SMP_LINK);
             this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatSize = l_pcrdECLvlTotalSize;
             this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdECLvlTotalSize;
+
+            //populating the feature flag settings
+            //as of now all values are initialized with 0s
+
+            //Get the the EQ(Quad id) targets
+            TARGETING::TargetHandleList l_eqList;
+            TARGETING::PredicateCTM
+                    l_eqFilter(TARGETING::CLASS_UNIT, TARGETING::TYPE_EQ);
+
+            TARGETING::PredicateHwas l_predEqPresent;
+            l_predEqPresent.present(true);
+
+            TARGETING::PredicatePostfixExpr l_presentEq;
+            l_presentEq.push(&l_eqFilter).push(&l_predEqPresent).And();
+
+            TARGETING::targetService().getAssociated(
+                          l_eqList,
+                          l_pProcTarget,
+                          TARGETING::TargetService::CHILD,
+                          TARGETING::TargetService::ALL,
+                          &l_presentEq);
+
+            hdatPcrdFeatureFlagString *l_FeatureFlagStringPtr = NULL;
+ 
+            l_FeatureFlagStringPtr = reinterpret_cast<hdatPcrdFeatureFlagString *>
+                         ((uint8_t *)l_ECLvlInfoPcrdHdrPtr + sizeof(hdatHDIFDataArray_t) +
+                         sizeof(hdatEcLvl_t));
+ 
+            memset(l_FeatureFlagStringPtr, 0x00, sizeof(hdatPcrdFeatureFlagString));
+            memcpy(l_FeatureFlagStringPtr,FFSTRING,sizeof(FFSTRING));
+
+            hdatHDIFDataArray_t *l_FeatureFlagsPcrdHdrPtr = NULL;
+
+            l_FeatureFlagsPcrdHdrPtr = reinterpret_cast<hdatHDIFDataArray_t *>
+                         ((uint8_t *)l_FeatureFlagStringPtr + sizeof(hdatPcrdFeatureFlagString));
+
+
+
+            l_FeatureFlagsPcrdHdrPtr->hdatOffset = 0x0010;
+            l_FeatureFlagsPcrdHdrPtr->hdatArrayCnt = l_eqList.size();
+            l_FeatureFlagsPcrdHdrPtr->hdatAllocSize = sizeof(hdatPcrdFeatureFlagSetting);
+            l_FeatureFlagsPcrdHdrPtr->hdatActSize =  sizeof(hdatPcrdFeatureFlagSetting);
+
+            hdatPcrdFeatureFlagSetting *l_hdatFeatureFlagSettPtr = reinterpret_cast<hdatPcrdFeatureFlagSetting *>
+                                                ((uint8_t *)l_FeatureFlagsPcrdHdrPtr + sizeof(hdatHDIFDataArray_t));
+
+
+            uint32_t l_EQOrdId  = 0;
+            for(uint32_t l_eqIdx = 0; l_eqIdx < l_eqList.size();++l_eqIdx)
+            {
+                TARGETING::Target* l_pTarget = l_eqList[l_eqIdx];
+                l_EQOrdId = l_pTarget->getAttr<TARGETING::ATTR_ORDINAL_ID>();
+
+                l_hdatFeatureFlagSettPtr->hdatPcrdFFCurrentSetting = 0;
+                l_hdatFeatureFlagSettPtr->hdatPcrdFFDynChgCapability =0;
+                l_hdatFeatureFlagSettPtr->hdatPcrdEqOrdId = l_EQOrdId;
+
+                l_hdatFeatureFlagSettPtr++;
+            }
+
+            uint32_t l_pcrdFeatureFlagTotalSize = sizeof(hdatPcrdFeatureFlagString) + sizeof(hdatHDIFDataArray_t) +
+                                               sizeof(hdatPcrdFeatureFlagSetting) * MAX_EQ_PER_PROC;
+
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_FEATURE_FLAGS].hdatOffset =
+               this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_CHIP_EC_LVL].hdatOffset + sizeof(hdatHDIFDataArray_t) +
+               sizeof(hdatEcLvl_t);
+
+            this->iv_spPcrd->hdatPcrdIntData[HDAT_PCRD_DA_FEATURE_FLAGS].hdatSize = l_pcrdFeatureFlagTotalSize;
+
+            this->iv_spPcrd->hdatHdr.hdatSize += l_pcrdFeatureFlagTotalSize;
+
 
             if( NULL != l_errl)
             {
