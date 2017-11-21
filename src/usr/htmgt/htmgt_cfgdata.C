@@ -636,10 +636,10 @@ void getOCCRoleMessageData(bool i_master, bool i_firMaster,
 }
 
 
-uint16_t getMaxPowerCap(Target *i_sys)
+uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
 {
     uint16_t o_maxPcap = 0;
-    bool useDefaultLimit = true;
+    o_is_redundant = true;
 
 #ifdef CONFIG_BMC_IPMI
     // Check if HPC limit was found
@@ -663,7 +663,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
                     // non-redundant policy allows higher bulk power limit
                     // with the potential impact of OCC not being able to
                     // lower power fast enough
-                    useDefaultLimit = false;
+                    o_is_redundant = false;
                     TMGT_INF("getMaxPowerCap: maximum power cap = %dW"
                              " (HPC/non-redundant PS bulk power limit)",
                              hpc_pcap);
@@ -685,7 +685,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
     // else HPC limit not found, use default
 #endif
 
-    if (useDefaultLimit)
+    if (o_is_redundant)
     {
         // Read the default N+1 bulk power limit (redundant PS policy)
         o_maxPcap = i_sys->
@@ -732,7 +732,8 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     index += 2;
 
     // System Maximum Power Cap
-    const uint16_t max_pcap = getMaxPowerCap(sys);
+    bool is_redundant;
+    const uint16_t max_pcap = getMaxPowerCap(sys, is_redundant);
     UINT16_PUT(&o_data[index], max_pcap);
     index += 2;
 
@@ -762,11 +763,23 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     uint16_t sensor = 0;
     assert(o_data != nullptr);
 
+    TargetHandle_t sys = nullptr;
+    TargetHandleList nodes;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG;
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
 
     //System Type
-    o_data[index++] = G_opalMode;
+    bool is_redundant;
+    getMaxPowerCap(sys, is_redundant);
+    uint8_t system_type = G_opalMode;
+    if (is_redundant == false)
+    {
+        system_type |= OCC_CFGDATA_NON_REDUNDANT_PS;
+    }
+    o_data[index++] = system_type;
 
     //processor sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);
@@ -806,13 +819,13 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
         index += 4;
     }
 
-    TargetHandle_t sys = nullptr;
-    TargetHandleList nodes;
-    targetService().getTopLevelTarget(sys);
-    assert(sys != nullptr);
     getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
     assert(!nodes.empty());
     TargetHandle_t node = nodes[0];
+
+    TMGT_INF("getSystemConfigMessageData: systemType: 0x%02X, "
+             "procSensor: 0x%04X, %d cores, %d nodes",
+             system_type, sensor, cores.size(), nodes.size());
 
 
     //Backplane sensor ID

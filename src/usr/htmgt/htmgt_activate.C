@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -211,8 +211,9 @@ namespace HTMGT
             if (active)
             {
                 //Make sure this value is between the min & max allowed
+                bool is_redundant;
                 min = sys->getAttr<ATTR_OPEN_POWER_MIN_POWER_CAP_WATTS>();
-                max = getMaxPowerCap(sys);
+                max = getMaxPowerCap(sys, is_redundant);
                 if ((limit != 0) && (limit < min))
                 {
                     TMGT_INF("sendOccUserPowerCap:  User power cap %d is below"
