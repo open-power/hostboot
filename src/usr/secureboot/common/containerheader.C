@@ -24,6 +24,8 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <secureboot/containerheader.H>
 #include "../common/securetrace.H"
+#include <secureboot/secure_reasoncodes.H>
+#include <pnor/pnor_reasoncodes.H>
 
 // Quick change for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
@@ -32,52 +34,111 @@
 namespace SECUREBOOT
 {
 
-void ContainerHeader::parse_header(const void* i_header)
+errlHndl_t ContainerHeader::parse_header()
 {
-    assert(i_header != nullptr);
-    const uint8_t* l_hdr = reinterpret_cast<const uint8_t*>(i_header);
+    assert(iv_pHdrStart != nullptr, "Cannot parse header that is nullptr");
+    const uint8_t* l_hdr = reinterpret_cast<const uint8_t*>(iv_pHdrStart);
 
+    errlHndl_t l_errl = nullptr;
+
+    do {
     /*---- Parse ROM_container_raw ----*/
     // The rom code has a placeholder for the prefix in the first struct
     size_t l_size = offsetof(ROM_container_raw, prefix);
-    safeMemCpyAndInc(&iv_headerInfo.hw_hdr, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_hdr, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     // Early check if magic number is valid, as a quick check to try and prevent
     // any storage exceptions while parsing header.
-    assert(iv_headerInfo.hw_hdr.magic_number == ROM_MAGIC_NUMBER,
-           "ContainerHeader: magic number = 0x%08X not valid",
-           iv_headerInfo.hw_hdr.magic_number);
+    if(iv_headerInfo.hw_hdr.magic_number != ROM_MAGIC_NUMBER)
+    {
+        TRACFCOMP(g_trac_secure,ERR_MRK"ContainerHeader::parse_header() Magic Number = 0x%X not valid to parse Container Header",
+                  iv_headerInfo.hw_hdr.magic_number);
+
+        /*@
+         * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE
+         * @reasoncode      PNOR::RC_BAD_SECURE_MAGIC_NUM
+         * @userdata1       Actual magic number
+         * @userdata2       Expected magic number
+         * @devdesc         Error parsing secure header
+         * @custdesc        Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        SECUREBOOT::MOD_SECURE_CONT_HDR_PARSE,
+                        PNOR::RC_BAD_SECURE_MAGIC_NUM,
+                        iv_headerInfo.hw_hdr.magic_number,
+                        ROM_MAGIC_NUMBER,
+                        true/*SW Error*/);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+        break;
+    }
 
     /*---- Parse ROM_prefix_header_raw ----*/
     l_size = offsetof(ROM_prefix_header_raw, ecid);
-    safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     // Get ECID array
     l_size = iv_headerInfo.hw_prefix_hdr.ecid_count * ECID_SIZE;
-    safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr.ecid, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_hdr.ecid, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     /*---- Parse ROM_prefix_data_raw ----*/
     l_size = offsetof(ROM_prefix_data_raw, sw_pkey_p);
-    safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     // Get SW keys
     l_size = iv_headerInfo.hw_prefix_hdr.sw_key_count * sizeof(ecc_key_t);
     // Cache total software keys size
     iv_totalSwKeysSize = l_size;
-    safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.sw_pkey_p, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.hw_prefix_data.sw_pkey_p, l_hdr,
+                              l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     /*---- Parse ROM_sw_header_raw ----*/
     l_size = offsetof(ROM_sw_header_raw, ecid);
-    safeMemCpyAndInc(&iv_headerInfo.sw_hdr, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_hdr, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
     strncpy(iv_componentId,iv_headerInfo.sw_hdr.component_id,
         sizeof(iv_headerInfo.sw_hdr.component_id));
 
     // Get ECID array
     l_size = iv_headerInfo.sw_hdr.ecid_count * ECID_SIZE;
-    safeMemCpyAndInc(&iv_headerInfo.sw_hdr.ecid, l_hdr, l_size);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_hdr.ecid, l_hdr, l_size);
+    if(l_errl)
+    {
+        break;
+    }
 
     /*---- Parse ROM_sw_sig_raw ----*/
-    safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr, iv_totalSwKeysSize);
+    l_errl = safeMemCpyAndInc(&iv_headerInfo.sw_sig.sw_sig_p, l_hdr,
+                              iv_totalSwKeysSize);
+    if(l_errl)
+    {
+        break;
+    }
 
     // Parse hw and sw flags
     parseFlags();
@@ -88,10 +149,18 @@ void ContainerHeader::parse_header(const void* i_header)
 #endif
 
     // After parsing check if header is valid, do some quick bound checks
-    validate();
+    l_errl = validate();
+    if(l_errl)
+    {
+        break;
+    }
 
     // Debug printing
     print();
+
+    } while(0);
+
+    return l_errl;
 }
 
 void ContainerHeader::initVars()
@@ -153,7 +222,6 @@ void ContainerHeader::genFakeHeader(const size_t i_totalSize,
     // No-op already zeroed out
 
     iv_pHdrStart = reinterpret_cast<const uint8_t*>(iv_fakeHeader.data());
-    parse_header(iv_fakeHeader.data());
 }
 
 void ContainerHeader::print() const
@@ -264,8 +332,10 @@ const SHA512_t* ContainerHeader::hwKeyHash() const
     return &iv_hwKeyHash;
 }
 
-void ContainerHeader::validate()
+errlHndl_t ContainerHeader::validate()
 {
+    errlHndl_t l_errl = nullptr;
+
     iv_isValid = (iv_hdrBytesRead <= MAX_SECURE_HEADER_SIZE)
         && (iv_headerInfo.hw_hdr.magic_number == ROM_MAGIC_NUMBER)
         && (iv_headerInfo.hw_hdr.version == ROM_VERSION)
@@ -275,24 +345,85 @@ void ContainerHeader::validate()
         && (iv_headerInfo.hw_prefix_hdr.sw_key_count >= SW_KEY_COUNT_MIN)
         && (iv_headerInfo.hw_prefix_hdr.sw_key_count <= SW_KEY_COUNT_MAX)
         && (iv_headerInfo.sw_hdr.payload_size != 0);
+
+    if(!iv_isValid)
+    {
+        TRACFCOMP(g_trac_secure,ERR_MRK"ContainerHeader::validate() failed weak header verification");
+        /*@
+         * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_SECURE_CONT_VALIDATE
+         * @reasoncode      SECUREBOOT::RC_CONT_HDR_INVALID
+         * @userdata1[0::31]  Magic Number
+         * @userdata1[32::63] ROM version
+         * @userdata2[0:15]   Algorithm version
+         * @userdata2[16:31]  Hash algorithm
+         * @userdata2[32:47]  Signature algorithm
+         * @userdata2[48:63]  SW key count
+         * @devdesc         Error parsing secure header
+         * @custdesc        Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            SECUREBOOT::MOD_SECURE_CONT_VALIDATE,
+            SECUREBOOT::RC_CONT_HDR_INVALID,
+            TWO_UINT32_TO_UINT64(iv_headerInfo.hw_hdr.magic_number,
+                                 iv_headerInfo.hw_hdr.version),
+            FOUR_UINT16_TO_UINT64(iv_headerInfo.hw_prefix_hdr.ver_alg.version,
+                                  iv_headerInfo.hw_prefix_hdr.ver_alg.hash_alg,
+                                  iv_headerInfo.hw_prefix_hdr.ver_alg.sig_alg,
+                                  iv_headerInfo.hw_prefix_hdr.sw_key_count),
+            true/*SW Error*/);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+    }
+
+    return l_errl;
 }
 
-void ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
+errlHndl_t ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hdr,
                                        const size_t i_size)
 {
-    assert(i_dest != nullptr, "ContainerHeader: dest ptr NULL");
-    assert(io_hdr != nullptr, "ContainerHeader: current header location ptr NULL");
-    assert(iv_pHdrStart != nullptr, "ContainerHeader: start of header ptr NULL");
+    assert(i_dest != nullptr, "ContainerHeader: dest nullptr");
+    assert(io_hdr != nullptr, "ContainerHeader: current header location nullptr");
+    assert(iv_pHdrStart != nullptr, "ContainerHeader: start of header nullptr");
 
     TRACDCOMP(g_trac_secure,"dest: 0x%X src: 0x%X size: 0x%X",i_dest, io_hdr, i_size);
+    errlHndl_t l_errl = nullptr;
 
+    do {
     // Determine if the memcpy is within the bounds of the container header
     iv_hdrBytesRead = io_hdr - iv_pHdrStart;
-    assert( (iv_hdrBytesRead + i_size) <= MAX_SECURE_HEADER_SIZE,
-            "ContainerHeader: memcpy is out of bounds of max header size");
+    if((iv_hdrBytesRead + i_size) > MAX_SECURE_HEADER_SIZE)
+    {
+        TRACFCOMP(g_trac_secure,ERR_MRK"ContainerHeader::safeMemCpyAndInc parsed header is out of bounds of max header size of 0x%X",
+                  MAX_SECURE_HEADER_SIZE);
+        /*@
+         * @errortype       ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC
+         * @reasoncode      SECUREBOOT::RC_CONT_HDR_NO_SPACE
+         * @userdata1       Size needed
+         * @userdata2       Max secure header size
+         * @devdesc         Error parsing secure header
+         * @custdesc        Firmware Error
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    SECUREBOOT::MOD_SECURE_CONT_HDR_CPY_INC,
+                                    SECUREBOOT::RC_CONT_HDR_NO_SPACE,
+                                    iv_hdrBytesRead + i_size,
+                                    MAX_SECURE_HEADER_SIZE,
+                                    true/*SW Error*/);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+        break;
+    }
 
     memcpy(i_dest, io_hdr, i_size);
     io_hdr += i_size;
+
+    } while(0);
+
+    return l_errl;
 }
 
 bool ContainerHeader::isValid() const
@@ -332,5 +463,23 @@ const uint8_t* ContainerHeader::fakeHeader() const
     assert(iv_fakeHeader.data() != nullptr, "Fake header should not be nullptr");
     return iv_fakeHeader.data();
 }
+
+errlHndl_t ContainerHeader::setHeader(const void* i_header)
+{
+    assert(i_header != nullptr, "Cannot set header to nullptr");
+    iv_pHdrStart = reinterpret_cast<const uint8_t*>(i_header);
+    initVars();
+    return parse_header();
+}
+
+
+errlHndl_t ContainerHeader::setFakeHeader(const size_t i_totalSize,
+                                          const char* i_compId)
+{
+    initVars();
+    genFakeHeader(i_totalSize, i_compId);
+    return parse_header();
+}
+
 
 }; //end of SECUREBOOT namespace

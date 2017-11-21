@@ -5779,7 +5779,13 @@ errlHndl_t secureKeyTransition()
 
         // Get new verified HW key hash
         const void* l_pVaddr = reinterpret_cast<void*>(l_secInfo.vaddr);
-        SECUREBOOT::ContainerHeader l_nestedConHdr(l_pVaddr);
+        SECUREBOOT::ContainerHeader l_nestedConHdr;
+        l_errl = l_nestedConHdr.setHeader(l_pVaddr);
+        if(l_errl)
+        {
+             TRACFCOMP( g_trac_sbe, ERR_MRK"secureKeyTransition() - setheader failed");
+            break;
+        }
         // Get pointer to first element of hwKeyHash from header.
         const uint8_t* l_hwKeyHash = l_nestedConHdr.hwKeyHash()[0];
         // Update global variable with hw keys hash to transition to.

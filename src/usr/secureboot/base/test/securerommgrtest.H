@@ -244,7 +244,14 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         /*******************************************************************/
         /* Parse Secure Container Header                                   */
         /*******************************************************************/
-        SECUREBOOT::ContainerHeader l_conHdr(signedFile_pageAddr);
+        SECUREBOOT::ContainerHeader l_conHdr;
+        l_errl = l_conHdr.setHeader(signedFile_pageAddr);
+        if (l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_parse_container_header: failed to parse Container Header");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
 
         // Check if container header seems valid
         if (!l_conHdr.iv_isValid)
@@ -321,7 +328,14 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         /* Parse Secure Container Header                                   */
         /*******************************************************************/
 
-        SECUREBOOT::ContainerHeader l_conHdr(signedFile_pageAddr);
+        SECUREBOOT::ContainerHeader l_conHdr;
+        l_errl = l_conHdr.setHeader(signedFile_pageAddr);
+        if (l_errl)
+        {
+            TS_FAIL("SecureRomManagerTest::test_hash_page_table_verify: failed to parse Container Header");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
+        }
         size_t l_payloadTextSize = l_conHdr.payloadTextSize();
         TRACUCOMP(g_trac_secure, "SecureRomManagerTest::test_hash_page_table_verify ContainerHeader payload_size = 0x%X",
                   l_payloadTextSize);
@@ -447,6 +461,8 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             break;
         }
 
+        // Could replace with SECUREBOOT::ContainerHeader ability to generate
+        // fake headers
         char pHeader[MAX_SECURE_HEADER_SIZE]={0};
         memcpy(pHeader,signedFile_pageAddr,sizeof(pHeader));
 
@@ -462,7 +478,15 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         {
             memset(pCompIdInContainer,0x00,compIdSize);
             strncpy(pCompIdInContainer,test.pActualCompId,compIdSize);
-            SECUREBOOT::ContainerHeader containerHeader(pHeader);
+            SECUREBOOT::ContainerHeader containerHeader;
+            pError = containerHeader.setHeader(pHeader);
+            if (pError)
+            {
+                errlCommit(pError, SECURE_COMP_ID);
+                TS_FAIL("SecureRomManagerTest::test_verifyContainer: failed to parse Container Header");
+                break;
+            }
+
 
             pError = SECUREBOOT::verifyComponent(
                 containerHeader,
@@ -536,20 +560,24 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         // otherwise strncmp below needs a different size
         const char* l_compId = "FAKEHEADERTEST";
 
+        do {
         // Simple call constructor to create fake header and make sure it
         // does not cause an error
-        SECUREBOOT::ContainerHeader l_fakeHdr(l_totalContainerSize, l_compId);
-
-        // Check if Header is mising
-        if (!PNOR::cmpSecurebootMagicNumber(l_fakeHdr.fakeHeader()))
+        SECUREBOOT::ContainerHeader l_fakeHdr;
+        errlHndl_t l_errl = l_fakeHdr.setFakeHeader(l_totalContainerSize,
+                                                    l_compId);
+        if (l_errl)
         {
-            TS_FAIL("SecureRomManagerTest::test_fakeHeader: missing magic number");
+            TS_FAIL("SecureRomManagerTest::test_fakeHeader: failed to parse Container Header");
+            errlCommit(l_errl, SECURE_COMP_ID);
+            break;
         }
 
         // Payload Text Size should be the total container size minus the header
         if(l_fakeHdr.payloadTextSize() != (l_totalContainerSize - PAGE_SIZE))
         {
             TS_FAIL("SecureRomManagerTest::test_fakeHeader: payload text size was not parsed correctly");
+            break;
         }
 
         // Ensure the parsed component ID matches what was passed in through
@@ -558,7 +586,9 @@ class SecureRomManagerTest : public CxxTest::TestSuite
                    SW_HDR_COMP_ID_SIZE_BYTES) != 0)
         {
             TS_FAIL("SecureRomManagerTest::test_fakeHeader: component ID was not parsed correctly");
+            break;
         }
+        } while(0);
     }
 };
 
