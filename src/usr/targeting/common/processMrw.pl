@@ -1382,7 +1382,7 @@ sub processFsi
         my $proc_path = $targetObj->getAttribute($parentTarget,"PHYS_PATH");
         my $fsi_child_target = $targetObj->getTargetParent($fsi_child_conn);
         $targetObj->setFsiAttributes($fsi_child_target,
-                    $type,$cmfsi,$proc_path,$fsi_port,$flip_port);
+                    $type,$cmfsi,$proc_path,$fsi_link,$flip_port);
     }
 }
 
