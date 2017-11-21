@@ -188,25 +188,34 @@ class PnorRP
     /**
      * @brief Determine the TOC offsets based on the HBB address
      *        System does a shutdown if any errors detected
+     *
+     * @param[out] o_tocSize The size of the table of content of PNOR in bytes
+     *
      * @return Error from device
      */
-    errlHndl_t  findTOC();
+    errlHndl_t  findTOC(size_t & o_tocSize);
 
     /*
      * @brief determines the sides information and fills the class variable
      *          iv_side
+     *
+     * @param[in] i_tocSize The size of the table of content of PNOR in bytes
+     *
      * @return Error
      */
-    errlHndl_t setSideInfo();
+    errlHndl_t setSideInfo(size_t i_tocSize);
 
     /**
      * @brief Verify both TOC's and store section information from one of the
      *        verified TOC's. Additionally set each section permissions
      *        (e.g. readOnly)
      *
+     * @param[in] i_tocSize The size of the table of content of PNOR in bytes
+     *
+     *
      * @return Error from device
      */
-    errlHndl_t readTOC();
+    errlHndl_t readTOC(size_t i_tocSize);
 
     /**
      * @brief  Message receiver

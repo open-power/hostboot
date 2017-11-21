@@ -563,8 +563,9 @@ class PnorRpTest : public CxxTest::TestSuite
             PnorRP::getInstance().writeToDevice( offset, 0, false,
                                                  corruptBuffer );
 
+            size_t tocSize = PAGESIZE;
             // Check if cur_TOC failed that other TOC is used
-            PnorRP::getInstance().readTOC();
+            PnorRP::getInstance().readTOC(tocSize);
             TOC_used = PnorRP::getInstance().iv_TOC_used;
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Header, Toc_used = %d", cur_TOC, TOC_used);
 
@@ -598,7 +599,7 @@ class PnorRpTest : public CxxTest::TestSuite
 
             // Check if cur_TOC failed that other TOC is used
             TOC_used = cur_TOC;
-            PnorRP::getInstance().readTOC();
+            PnorRP::getInstance().readTOC(tocSize);
             TOC_used = PnorRP::getInstance().iv_TOC_used;
             TRACFCOMP(g_trac_pnor, "PnorRpTest::test_TOC : TOC %d Corrupt Entry, Toc_used = %d", cur_TOC, TOC_used);
 
@@ -612,7 +613,7 @@ class PnorRpTest : public CxxTest::TestSuite
             PnorRP::getInstance().writeToDevice( offset + FFS_HDR_SIZE, 0,
                                                  false, tocEntry );
             //Read the corrected entry into iv_TOC
-            PnorRP::getInstance().readTOC();
+            PnorRP::getInstance().readTOC(tocSize);
 
         }
 
