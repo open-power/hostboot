@@ -86,7 +86,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
     bool l_prot_error = false;
     int i;
 
-    TRACFCOMP( g_trac_pnor, ENTER_MRK"astMboxDD::doMessage(0x%02x)",
+    TRACDCOMP( g_trac_pnor, ENTER_MRK"astMboxDD::doMessage(0x%02x)",
                io_msg.iv_cmd );
     io_msg.iv_seq = iv_mboxMsgSeq++;
 
@@ -119,7 +119,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
             break;
         }
 
-        TRACFCOMP( g_trac_pnor, "Command sent, waiting for response...");
+        TRACDCOMP( g_trac_pnor, "Command sent, waiting for response...");
 
         /* Wait for response */
         while ( l_loops++ < MBOX_MAX_RESP_WAIT_US && !l_err )
@@ -215,7 +215,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
         uint8_t old_cmd = io_msg.iv_cmd;
 
         // Read response
-        TRACFCOMP( g_trac_pnor, "Reading response data...");
+        TRACDCOMP( g_trac_pnor, "Reading response data...");
 
         for (i = 0; i < BMC_MBOX_DATA_REGS && !l_err; i++)
         {
@@ -228,7 +228,7 @@ errlHndl_t astMbox::doMessage(mboxMessage& io_msg)
             break;
         }
 
-        TRACFCOMP( g_trac_pnor, "Message: cmd:%02x seq:%02x a:%02x %02x %02x %02x %02x..resp:%02x",
+        TRACDCOMP( g_trac_pnor, "Message: cmd:%02x seq:%02x a:%02x %02x %02x %02x %02x..resp:%02x",
                    io_msg.iv_cmd, io_msg.iv_seq, io_msg.iv_args[0],
                     io_msg.iv_args[1], io_msg.iv_args[2], io_msg.iv_args[3],
                     io_msg.iv_args[4], io_msg.iv_resp);
