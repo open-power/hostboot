@@ -37,6 +37,8 @@
 #include "p9_sbe_hreset.H"
 #include <p9_perv_scom_addresses.H>
 #include <p9_perv_scom_addresses_fld.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_frequency_buckets.H>
 
 // ----------------
 // Constants
@@ -46,7 +48,52 @@
 #define SCRATCH_3_REG_IPL_MODE_BIT       0
 #define SCRATCH_3_REG_RUNTIME_MODE_BIT   1
 
-// See doxyten in header file
+
+fapi2::ReturnCode p9_sbe_i2c_bit_rate_divisor_setting(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target_chip,
+    bool i_masterProc)
+{
+    uint8_t l_attr_nest_pll_bucket = 0;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::buffer<uint16_t> l_mb_bit_rate_divisor;
+    fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint32_t> l_data32;
+
+    FAPI_INF("Entering p9_sbe_i2c_bit_rate_divisor_setting...");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_NEST_PLL_BUCKET, FAPI_SYSTEM,
+                           l_attr_nest_pll_bucket));
+    FAPI_INF("ATTR_NEST_PLL_BUCKET value: %d", l_attr_nest_pll_bucket);
+    l_mb_bit_rate_divisor = NEST_PLL_FREQ_I2CDIV_LIST[l_attr_nest_pll_bucket - 1];
+    FAPI_INF("Bit_rate_divisor value: %d", l_mb_bit_rate_divisor);
+
+    FAPI_DBG("Adjust I2C bit rate divisor setting in I2CM B Mode Reg");
+    FAPI_TRY(fapi2::getScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
+    l_data64.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
+    FAPI_TRY(fapi2::putScom(i_target_chip, PU_MODE_REGISTER_B, l_data64));
+
+    FAPI_INF("Writing I2C bit rate divisor into mailbox_reg_2");
+
+    if (i_masterProc)
+    {
+        FAPI_TRY(fapi2::getScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM, l_data64));
+        l_data64.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Master proc Scratch2 0x%.16llX", l_data64);
+        FAPI_TRY(fapi2::putScom(i_target_chip, PERV_SCRATCH_REGISTER_2_SCOM, l_data64));
+    }
+    else
+    {
+        FAPI_TRY(fapi2::getCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI, l_data32));
+        l_data32.insertFromRight< 0, 16 >(l_mb_bit_rate_divisor);
+        FAPI_INF("p9_sbe_i2c_bit_rate_divisor_setting - Slave proc Scratch2 0x%.8X", l_data32);
+        FAPI_TRY(fapi2::putCfamRegister(i_target_chip, PERV_SCRATCH_REGISTER_2_FSI, l_data32));
+    }
+
+fapi_try_exit:
+    FAPI_INF("Exiting p9_sbe_i2c_bit_rate_divisor_setting...");
+    return fapi2::current_err;
+}
+
+// See doxygen in header file
 fapi2::ReturnCode p9_sbe_hreset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     const bool i_restart_ipl)
@@ -65,6 +112,10 @@ fapi2::ReturnCode p9_sbe_hreset(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_SBE_MASTER_CHIP, i_target,
                            l_masterProc),
              "Error from FAPI_ATTR_GET (ATTR_PROC_SBE_MASTER_CHIP)");
+
+    // Set I2C bit rate in scratch2 register
+    FAPI_TRY(p9_sbe_i2c_bit_rate_divisor_setting(i_target, l_masterProc),
+             "Error from p9_sbe_i2c_bit_rate_divisor_setting()");
 
     // Setup correct bit positions depending on SBE restart mode
     if (i_restart_ipl == true)
@@ -85,6 +136,11 @@ fapi2::ReturnCode p9_sbe_hreset(
     // Must do SCOM access for master; CFAM access for slaves
     if (l_masterProc)
     {
+        // Clear Self Boot message reg
+        l_data64.flush<0>();
+        FAPI_TRY(fapi2::putScom(i_target, PERV_SB_MSG_SCOM, l_data64),
+                 "Error from putScom to PERV_SB_MSG_SCOM");
+
         // Set MBOX scratch_3 register to indicate IPL/Runtime
         FAPI_TRY(fapi2::getScom(i_target, PERV_SCRATCH_REGISTER_3_SCOM, l_data64),
                  "Error from getScom to PERV_SCRATCH_REGISTER_3_SCOM");
@@ -111,6 +167,10 @@ fapi2::ReturnCode p9_sbe_hreset(
     }
     else
     {
+        // Clear Self Boot message reg
+        l_data32.flush<0>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target, PERV_SB_MSG_FSI, l_data32));
+
         // Set MBOX scratch_3 register to indicate IPL/Runtime
         FAPI_TRY(fapi2::getCfamRegister(i_target, PERV_SCRATCH_REGISTER_3_FSI,
                                         l_data32));
