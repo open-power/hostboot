@@ -159,20 +159,17 @@ extern "C" int strncmp(const char* a, const char* b, size_t l)
 extern "C" char* strncpy(char* d, const char* s, size_t l)
 {
     char* d1 = d;
-    size_t len = 0;
-
-    do
+    while ( (l > 0) && (*s != '\0') )
     {
-        if (len++ >= l) break;
-        *d1 = *s;
-        if (*s == '\0') break;
-        d1++; s++;
-    } while(1);
+        *d1++ = *s++;
+        --l;
+    }
 
     // pad the remainder
-    while( len < l )
+    while (l > 0)
     {
-        d1[len++] = '\0';
+        *d1++ = '\0';
+        --l;
     }
 
     return d;
