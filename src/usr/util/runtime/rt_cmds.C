@@ -32,6 +32,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/predicates/predicateattrval.H>
 #include <targeting/common/iterators/rangefilter.H>
+#include <targeting/common/utilFilter.H>
 #include <pnor/pnorif.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
@@ -39,6 +40,18 @@
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
 #include <vector>
+#include <isteps/pm/pm_common_ext.H>
+#include <p9_hcd_memmap_base.H>  // for reload_pm_complex
+#include <p9_stop_data_struct.H> // for reload_pm_complex
+
+// need this here so compile works, linker will later find this
+namespace RTPM
+{
+    int load_pm_complex( uint64_t i_chip,
+                         uint64_t i_homer_addr,
+                         uint64_t i_occ_common_addr,
+                         uint32_t i_mode );
+}
 
 namespace Util
 {
@@ -741,6 +754,182 @@ void cmd_sbemsg( char*& o_output,
                        "rc 0x%.8X", i_chipId, rc );
 }
 
+int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
+{
+    // NOTE: this is running in a 32K hbrt -exec stack instead of
+    //       the normal 64K hbrt stack
+    o_output = new char[100*8];
+    char l_tmpstr[100];
+    int rc = 0;
+
+    sprintf(o_output, "cmd_reload_pm_complex >>\n");
+    UTIL_FT("cmd_reload_pm_complex >>");
+    uint64_t l_chip;
+    uint64_t l_occ_common_addr;
+    uint64_t l_homerPhysAddr;
+    uint32_t l_mode = HBRT_PM_RELOAD;
+
+    stopImageSection::SprRestoreArea_t * coreThreadRestoreBEFORE =
+        (stopImageSection::SprRestoreArea_t *) new stopImageSection::SprRestoreArea_t[MAX_CORES_PER_CHIP][MAX_THREADS_PER_CORE];
+    uint64_t coreThreadRestoreSize = sizeof(stopImageSection::SprRestoreArea_t)*MAX_CORES_PER_CHIP*MAX_THREADS_PER_CORE;
+
+    TARGETING::Target* l_sys = nullptr;
+    TARGETING::targetService().getTopLevelTarget(l_sys);
+    assert(l_sys != nullptr);
+    l_occ_common_addr = l_sys->getAttr<TARGETING::ATTR_OCC_COMMON_AREA_PHYS_ADDR>();
+
+    TARGETING::TargetHandleList l_procChips;
+    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+
+    // auto run through processor chips using attribute settings
+    for (const auto & l_procChip: l_procChips)
+    {
+        // This attr was set during istep15 HCODE build
+        l_homerPhysAddr = l_procChip->
+                getAttr<TARGETING::ATTR_HOMER_PHYS_ADDR>();
+        l_chip = l_procChip->getAttr<TARGETING::ATTR_POSITION>();
+
+        // GET BEFORE SNAPSHOT OF MEMORY
+        // Use this function as the virtual address gets reset to 0
+        void* l_homerVAddr = HBPM::convertHomerPhysToVirt(l_procChip,
+                                                    l_homerPhysAddr);
+        if(nullptr == l_homerVAddr)
+        {
+            UTIL_FT(ERR_MRK"cmd_reload_pm_complex: "
+                       "convertHomerPhysToVirt failed! "
+                       "HOMER_Phys=0x%0lX", l_homerPhysAddr );
+            break;
+        }
+
+
+        UTIL_FT("Get BEFORE snapshot of memory");
+        stopImageSection::HomerSection_t *l_virt_addr =
+              reinterpret_cast<stopImageSection::HomerSection_t*>(l_homerVAddr);
+
+        if (l_virt_addr == nullptr)
+        {
+            sprintf(o_output, "ATTR_HOMER_VIRT_ADDR for %d chip returned 0\n",
+                    l_chip);
+            break;
+        }
+
+        UTIL_FT("%d: memcpy(%p, %p, %ld)", l_chip, coreThreadRestoreBEFORE,
+            l_virt_addr->coreThreadRestore, coreThreadRestoreSize);
+        sprintf( l_tmpstr, "%d: memcpy(%p, %p, %ld)\n", l_chip,
+            coreThreadRestoreBEFORE, l_virt_addr->coreThreadRestore,
+            coreThreadRestoreSize );
+        strcat( o_output, l_tmpstr );
+        if (stopAt == 1)
+        {
+            break;
+        }
+        memcpy( coreThreadRestoreBEFORE,
+                l_virt_addr->coreThreadRestore,
+                coreThreadRestoreSize);
+
+        // RUN LOAD_PM_COMPLEX
+        UTIL_FT("Calling reload_pm_complex(%d, 0x%16llX, 0x%16llX, %s)",
+                l_chip, l_homerPhysAddr, l_occ_common_addr,
+                (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD");
+        sprintf( l_tmpstr,
+                "Calling reload_pm_complex(%d, 0x%16llX, 0x%16llX, %s)\n",
+                l_chip, l_homerPhysAddr, l_occ_common_addr,
+                (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD");
+        strcat( o_output, l_tmpstr );
+        if (stopAt == 2)
+        {
+            break;
+        }
+        rc = RTPM::load_pm_complex( l_chip, l_homerPhysAddr,
+                                    l_occ_common_addr, l_mode );
+        if (rc)
+        {
+            sprintf( l_tmpstr,
+             "FAILURE: reload_pm_complex(%x, 0x%llx, 0x%llx, %x) returned %d\n",
+             l_chip, l_homerPhysAddr, l_occ_common_addr, l_mode, rc );
+            strcat( o_output, l_tmpstr );
+            break;
+        }
+
+        // GET AFTER SNAPSHOT OF MEMORY
+        UTIL_FT("Get AFTER snapshot of memory");
+        if (stopAt == 3)
+        {
+            break;
+        }
+
+        // NOW COMPARE THE TWO SNAPSHOTS
+        uint8_t lastMatch = memcmp(coreThreadRestoreBEFORE,
+                                   l_virt_addr->coreThreadRestore,
+                                   coreThreadRestoreSize);
+        // Both sections should be equal as
+        // hostboot should NOT touch this section of memory
+        if (lastMatch == 0)
+        {
+            // Verify non-zero exists
+            stopImageSection::SprRestoreArea_t zeroedSprArea;
+            memset(&zeroedSprArea, 0x00, sizeof(zeroedSprArea));
+            bool foundNonZero = false;
+
+            for (int x = 0; x < MAX_CORES_PER_CHIP; x++)
+            {
+                for (int y = 0; y < MAX_THREADS_PER_CORE; y++)
+                {
+                    // Check for non-zero threadArea
+                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->threadArea),
+                                &zeroedSprArea.threadArea,
+                                sizeof(zeroedSprArea.threadArea)))
+                    {
+                        UTIL_FT("Found non-zero value in row %d, column %d threadArea", x, y);
+                        UTIL_FBIN("Thread Area",
+                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->threadArea),
+                            sizeof(zeroedSprArea.threadArea));
+                        foundNonZero = true;
+                    }
+                    // Check for non-zero coreArea
+                    if ( 0 != memcmp(&(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->coreArea),
+                                &zeroedSprArea.coreArea,
+                                sizeof(zeroedSprArea.coreArea)))
+                    {
+                        UTIL_FT("Found non-zero value in row %d, column %d coreArea", x, y);
+                        UTIL_FBIN("Core Area",
+                            &(((stopImageSection::SprRestoreArea_t*)((char*)coreThreadRestoreBEFORE + (sizeof(zeroedSprArea)*x + sizeof(zeroedSprArea)*y)))->coreArea),
+                            sizeof(zeroedSprArea.coreArea));
+                        foundNonZero = true;
+                    }
+                }
+            }
+            if (foundNonZero)
+            {
+                UTIL_FT("SUCCESS: reload_pm_complex in %s mode: CHIP %d worked", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip);
+                sprintf( l_tmpstr, "SUCCESS: reload_pm_complex in %s mode: CHIP %d worked\n", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip);
+                strcat( o_output, l_tmpstr );
+            }
+            else
+            {
+                UTIL_FT("CONDITIONAL SUCCESS: reload_pm_complex in %s mode: CHIP %d worked with zeroed area", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip);
+                sprintf( l_tmpstr, "CONDITIONAL SUCCESS: reload_pm_complex in %s mode: CHIP %d worked with zeroed area\n", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip);
+                strcat( o_output, l_tmpstr );
+            }
+        }
+        else
+        {
+            UTIL_FT("FAILURE: reload_pm_complex in %s mode: CHIP %d, first mismatch at %d", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip, lastMatch);
+            sprintf( l_tmpstr, "FAILURE: reload_pm_complex in %s mode: CHIP %d, first mismatch at %d\n", (HBPM::PM_LOAD == l_mode) ? "LOAD" : "RELOAD", l_chip, lastMatch);
+            strcat( o_output, l_tmpstr );
+
+            UTIL_FBIN("BEFORE coreThreadRestore", &coreThreadRestoreBEFORE, coreThreadRestoreSize);
+            UTIL_FBIN("AFTER  coreThreadRestore", l_virt_addr->coreThreadRestore, coreThreadRestoreSize);
+        }
+    }
+    delete coreThreadRestoreBEFORE;
+
+    sprintf(l_tmpstr, "<< cmd_reload_pm_complex\n");
+    strcat(o_output, l_tmpstr);
+    UTIL_FT("<< cmd_reload_pm_complex");
+
+    return rc;
+}
 
 /**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
@@ -951,9 +1140,18 @@ int hbrtCommand( int argc,
             sprintf( *l_output, "ERROR: sbemsg <chipid>\n" );
         }
     }
+    else if( !strcmp( argv[0], "reload_pm_complex" ) )
+    {
+        uint64_t breakPoint = 0;
+        if (argc == 2)
+        {
+            breakPoint = strtou64( argv[1], NULL, 16 );
+        }
+        rc = cmd_reload_pm_complex(*l_output, breakPoint);
+    }
     else
     {
-        *l_output = new char[50+100*6];
+        *l_output = new char[50+100*10];
         char l_tmpstr[100];
         sprintf( *l_output, "HBRT Commands:\n" );
         sprintf( l_tmpstr, "testRunCommand <args...>\n" );
@@ -973,6 +1171,8 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "readvpd <huid> <keyword> [record]\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "reload_pm_complex [<breakPoint>]\n");
         strcat( *l_output, l_tmpstr );
     }
 
