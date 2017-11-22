@@ -51,6 +51,7 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
+    BYTES_PER_DP = 2,
     NIBBLES_PER_DP = 4,
     NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
