@@ -184,8 +184,10 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     attrs->proc_dpll_divider = 8;
                 }
 
-                // Read the Biased attribute data
-//                FAPI_TRY(proc_get_attributes(i_target, attrs), "Get attributes function failed");
+                // Apply Bias values
+                FAPI_TRY(proc_get_extint_bias(attr_mvpd_poundv,
+                                              attrs, l_vpdbias),
+                         "Bias application function failed");
 
                 VpdOperatingPoint l_raw_operating_points[NUM_OP_POINTS];
                 FAPI_INF("Load RAW VPD");
@@ -264,19 +266,27 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 else
                 {
                     FAPI_INF("VCS boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_ext_vcs_mv = revle32(l_operating_points[VPD_PT_SET_BIASED_SYSP][ULTRA].vcs_mv);
-                    uint32_t l_int_vcs_mv = revle32(l_operating_points[VPD_PT_SET_BIASED][ULTRA].vcs_mv);
-                    uint32_t l_ics_ma = revle32(l_operating_points[VPD_PT_SET_BIASED][ULTRA].ics_100ma) * 100;
+                    uint32_t l_int_vcs_mv = (attr_mvpd_poundv[POWERSAVE][VPD_PV_VCS_MV]);
+                    uint32_t l_ics_ma = (attr_mvpd_poundv[POWERSAVE][VPD_PV_ICS_100MA]) * 100;
+
+                    uint32_t l_ext_vcs_mv = sysparm_uplift(l_int_vcs_mv,
+                                                           l_ics_ma,
+                                                           attrs->r_loadline_vcs_uohm,
+                                                           attrs->r_distloss_vcs_uohm,
+                                                           attrs->vrm_voffset_vcs_uv);
+
 
                     FAPI_INF("VCS VPD voltage %d mV; Corrected voltage: %d mV; ICS: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
                              l_int_vcs_mv,
-                             l_ext_vcs_mv,
+                             revle32(l_ext_vcs_mv),
                              l_ics_ma,
                              attrs->r_loadline_vcs_uohm,
                              attrs->r_distloss_vcs_uohm,
                              attrs->vrm_voffset_vcs_uv);
 
-                    attrs->vcs_voltage_mv = l_ext_vcs_mv;
+
+                    attrs->vcs_voltage_mv = revle32(l_ext_vcs_mv);
+
                 }
 
                 // set VDN voltage to PowerSave Voltage from MVPD data (if no override)
@@ -287,8 +297,8 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                 else
                 {
                     FAPI_INF("VDN boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                    uint32_t l_int_vdn_mv = revle32(attr_mvpd_poundv[POWERBUS][VPD_PV_VDN_MV]);
-                    uint32_t l_idn_ma = revle32(attr_mvpd_poundv[POWERBUS][VPD_PV_IDN_100MA]) * 100;
+                    uint32_t l_int_vdn_mv = (attr_mvpd_poundv[POWERBUS][VPD_PV_VDN_MV]);
+                    uint32_t l_idn_ma = (attr_mvpd_poundv[POWERBUS][VPD_PV_IDN_100MA]) * 100;
                     // Returns revle32
                     uint32_t l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
                                                            l_idn_ma,
@@ -297,14 +307,14 @@ compute_boot_safe(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                                            attrs->vrm_voffset_vdn_uv);
 
                     FAPI_INF("VDN VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                             revle32(l_int_vdn_mv),
-                             l_ext_vdn_mv,
-                             revle32(l_idn_ma),
+                             l_int_vdn_mv,
+                             revle32(l_ext_vdn_mv),
+                             l_idn_ma,
                              attrs->r_loadline_vdn_uohm,
                              attrs->r_distloss_vdn_uohm,
                              attrs->vrm_voffset_vdn_uv);
 
-                    attrs->vdn_voltage_mv = l_ext_vdn_mv;
+                    attrs->vdn_voltage_mv = revle32(l_ext_vdn_mv);
                 }
             }
             else
