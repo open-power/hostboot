@@ -35,3 +35,9 @@
 
 #Simulation stalls while running Hostboot standalone simics
 sbex -t 1038850
+
+#pull-in SBE makefile change for DD2.2
+sbex -t 1039677
+cd $sb/sbei/sbfw/
+mk -a && mk install_all
+cd -
