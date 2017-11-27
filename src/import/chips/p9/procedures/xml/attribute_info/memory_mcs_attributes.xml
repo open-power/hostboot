@@ -3281,4 +3281,17 @@
         <mssAccessorName>phy_seq_refresh</mssAccessorName>
     </attribute>
 
+    <attribute>
+      <id>ATTR_MSS_WR_VREF_OFFSET</id>
+      <targetType>TARGET_TYPE_MCBIST</targetType>
+      <description>
+        Offsets the WR VREF value from the VPD when creating the eff config WR VREF attributes.
+      </description>
+      <default>0</default>
+      <valueType>int8</valueType>
+      <writeable/>
+      <platInit/>
+      <mssAccessorName>wr_vref_offset</mssAccessorName>
+    </attribute>
+
 </attributes>
