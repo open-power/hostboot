@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -305,6 +305,10 @@
     <scomRegister>EX_CME_SCOM_PSCRS11_SCOM</scomRegister>
     <scomRegister>EX_CME_SCOM_PSCRS12_SCOM</scomRegister>
     <scomRegister>EX_CME_SCOM_PSCRS13_SCOM</scomRegister>
+    <scomRegister>EX_CME_SCOM_VDSR_SCOM</scomRegister>
+    <scomRegister>EX_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>EX_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>EX_PPE_XIDBGPRO</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
@@ -336,6 +340,40 @@
     <scomRegister>EQ_QPPM_QACCR</scomRegister>
     <scomRegister>EQ_CPLT_CTRL0</scomRegister>
     <scomRegister>EQ_CPLT_CTRL1</scomRegister>
+    <scomRegister>PERV_EP00_QPPM_QACSR</scomRegister>
+    <scomRegister>PERV_EP00_QPPM_EXCGCR</scomRegister>
+    <scomRegister>EQ_QPPM_VDMCFGR</scomRegister>
+    <scomRegister>EQ_0_PPM_VDMCR</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBMD0</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBMD1</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBMI0</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBMI1</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBQ0</scomRegister>
+    <scomRegister>EQ_CME_SCOM_XIPCBQ1</scomRegister>
+    <scomRegister>EQ_CPLT_CTRL0</scomRegister>
+    <scomRegister>EQ_CPLT_CTRL1</scomRegister>
+    <scomRegister>EQ_CPLT_STAT0</scomRegister>
+    <scomRegister>EQ_SYNC_CONFIG</scomRegister>
+    <scomRegister>EQ_OPCG_ALIGN</scomRegister>
+    <scomRegister>EQ_OPCG_ALIGN</scomRegister>
+    <scomRegister>EQ_OPCG_REG0</scomRegister>
+    <scomRegister>EQ_OPCG_REG1</scomRegister>
+    <scomRegister>EQ_OPCG_REG2</scomRegister>
+    <scomRegister>EQ_SCAN_REGION_TYPE</scomRegister>
+    <scomRegister>EQ_CLK_REGION</scomRegister>
+    <scomRegister>EQ_CLOCK_STAT_SL</scomRegister>
+    <scomRegister>EQ_CLOCK_STAT_NSL</scomRegister>
+    <scomRegister>EQ_CLOCK_STAT_ARY</scomRegister>
+    <scomRegister>EQ_CLOCK_STAT_ARY</scomRegister>
+    <scomRegister>EQ_BIST</scomRegister>
+    <scomRegister>EQ_XSTOP1</scomRegister>
+    <scomRegister>EQ_XSTOP2</scomRegister>
+    <scomRegister>EQ_XSTOP3</scomRegister>
+    <scomRegister>EQ_ERROR_STATUS</scomRegister>
+    <scomRegister>EQ_OPCG_CAPT1</scomRegister>
+    <scomRegister>EQ_OPCG_CAPT2</scomRegister>
+    <scomRegister>EQ_OPCG_CAPT3</scomRegister>
+    <scomRegister>EQ_DBG_CBS_CC</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
@@ -368,16 +406,23 @@
     <scomRegister>C_CPPM_CMEDB3</scomRegister>
     <scomRegister>C_CPLT_CTRL0</scomRegister>
     <scomRegister>C_CPLT_CTRL1</scomRegister>
+    <scomRegister>C_CPPM_CACSR</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
     <id>PM_CME_FIR_REGISTERS</id>
     <scomRegister>EX_CME_SCOM_LFIR</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRACT0</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRACT1</scomRegister>
+    <scomRegister>EX_CME_SCOM_LFIRMASK</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
   <registerFfdc>
     <id>PM_FIR_REGISTERS</id>
     <scomRegister>PERV_TP_OCC_SCOM_OCCLFIR</scomRegister>
+    <scomRegister>PERV_TP_OCC_SCOM_OCCLFIRMASK</scomRegister>
+    <scomRegister>PERV_TP_OCC_SCOM_OCCLFIRACT0</scomRegister>
+    <scomRegister>PERV_TP_OCC_SCOM_OCCLFIRACT1</scomRegister>
     <scomRegister>PU_PBAFIR</scomRegister>
   </registerFfdc>
   <!-- *********************************************************************** -->
@@ -419,9 +464,6 @@
     <scomRegister>PU_OCB_PIB_OCBESR1</scomRegister>
     <scomRegister>PU_OCB_PIB_OCBESR2</scomRegister>
     <scomRegister>PU_OCB_PIB_OCBESR3</scomRegister>
-    <scomRegister>PU_OCB_PIB_OCBDR0</scomRegister>
-    <scomRegister>PU_OCB_PIB_OCBDR1</scomRegister>
-    <scomRegister>PU_OCB_PIB_OCBDR2</scomRegister>
     <scomRegister>PU_OCB_PIB_OCBDR3</scomRegister>
     <scomRegister>PU_OCB_OCI_OPIT0C0_SCOM</scomRegister>
     <scomRegister>PU_OCB_OCI_OPIT0C1_SCOM</scomRegister>
@@ -584,5 +626,38 @@
     <scomRegister>PU_PBASLVCTL1_SCOM</scomRegister>
     <scomRegister>PU_PBASLVCTL2_SCOM</scomRegister>
     <scomRegister>PU_PBASLVCTL3_SCOM</scomRegister>
+    <scomRegister>PU_GPE0_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE1_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE3_GPEIVPR_SCOM</scomRegister>
+    <scomRegister>PU_GPE2_GPEDBG_OCI</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE0_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE1_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE2_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMDBG</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIRAMEDR</scomRegister>
+    <scomRegister>PU_GPE3_PPE_XIDBGPRO</scomRegister>
+    <scomRegister>PU_OCB_OCI_OINKR0_SCOM</scomRegister> 
+    <scomRegister>PU_OCB_OCI_OINKR1_SCOM</scomRegister> 
+    <scomRegister>P9N2_PU_OCB_OCI_OCCFLG2_SCOM</scomRegister> 
+    <scomRegister>PU_OCB_OCI_G0ISR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G1ISR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G2ISR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G3ISR0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G0ISR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G1ISR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G2ISR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_G3ISR1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCCS0_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCCS1_SCOM</scomRegister>
+    <scomRegister>PU_OCB_OCI_OCCS2_SCOM</scomRegister>
   </registerFfdc>
+
+  <!-- ******************************************************************** -->
 </hwpErrors>

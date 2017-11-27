@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 // Includes
 //--------------------------------------------------------------------------
 
+#include <p9_quad_scom_addresses.H>
 #include <p9_pm_recovery_ffdc_cppm.H>
 #include <collect_reg_ffdc.H>
 #include <stddef.h>
@@ -50,6 +51,16 @@
     CppmRegs::CppmRegs( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt )
       : PlatPmComplex ( i_procChipTgt, PLAT_CPPM )
     { }
+
+    //----------------------------------------------------------------------
+
+    void CppmRegs::initRegList()
+    {
+        std::vector < uint32_t> l_scomRegList;
+        l_scomRegList.push_back( C_PPM_SSHSRC );
+        l_scomRegList.push_back( C_PPM_VDMCR );
+        PlatPmComplex::updateSummaryList( l_scomRegList );
+    }
 
     //----------------------------------------------------------------------
 
@@ -134,6 +145,12 @@
                                "Failed To Update Quad FFDC Header for EQ 0x%0d", l_quadPos );
 
             setPmFfdcSectionValid ( i_pHomerBuf, (PM_FFDC_QUAD0_VALID << l_quadPos), l_quadFfdcValid);
+
+        }
+
+        if( !(i_ffdcType & INIT) )
+        {
+            generateSummary( i_pHomerBuf );
         }
 
     fapi_try_exit:
@@ -143,7 +160,7 @@
 
     //-----------------------------------------------------------------------
 
-    fapi2::ReturnCode CppmRegs::updateCppmFfdcHeader( uint8_t* i_pHomerBuf,
+    fapi2::ReturnCode CppmRegs::updateCppmFfdcHeader( uint8_t * i_pHomerBuf,
                                                       const uint8_t i_corePos,
                                                       const uint16_t i_ffdcValid)
     {
@@ -151,8 +168,8 @@
 
         PpmFfdcHeader * l_CppmFfdcHdr       =   (PpmFfdcHeader *) i_pHomerBuf ;
         l_CppmFfdcHdr->iv_ppmMagicWord      =  htobe32(FFDC_CPPM_MAGIC_NUM);
-        l_CppmFfdcHdr->iv_versionMajor = 1;
-        l_CppmFfdcHdr->iv_versionMinor = 0;
+        l_CppmFfdcHdr->iv_versionMajor      =  1;
+        l_CppmFfdcHdr->iv_versionMinor      =  0;
         l_CppmFfdcHdr->iv_Instance          =  i_corePos; // CHIP_UNIT_POS
         l_CppmFfdcHdr->iv_ppmHeaderSize     =  htobe16 (sizeof(PpmFfdcHeader));
         l_CppmFfdcHdr->iv_sectionSize       =  htobe16 (FFDC_CPPM_REGION_SIZE);
@@ -197,6 +214,49 @@
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode CppmRegs::generateSummary( void * i_pHomer )
+    {
+        HomerFfdcRegion * l_pHomerFfdc =
+                ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
+        uint8_t* l_pCppmFfdcLoc    = NULL;
+        PpmFfdcHeader * l_pCppmHdr = NULL;
+        uint8_t * l_pCppmSummary   = NULL;
+        uint8_t l_quadPos          = 0;
+        uint8_t l_relCorePos       = 0;
+
+        initRegList();
+        uint32_t l_sizeLimit = FFDC_CPPM_REGION_SIZE - sizeof( PpmFfdcHeader );
+
+        for( uint8_t l_ppmPos = 0; l_ppmPos < MAX_CORES_PER_CHIP; l_ppmPos++ )
+        {
+            l_relCorePos    =   l_ppmPos % MAX_CORES_PER_QUAD;
+            l_quadPos       =   l_ppmPos >> 2;
+            l_pCppmFfdcLoc  =
+                &l_pHomerFfdc->iv_quadFfdc[l_quadPos].iv_quadCppmRegion[l_relCorePos][0];
+            l_pCppmSummary  =   &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cpmmRegSummary[l_ppmPos][FFDC_SUMMARY_SEC_HDR_SIZE];
+            l_pCppmHdr      =   ( PpmFfdcHeader *) &l_pHomerFfdc->iv_quadFfdc[l_quadPos].iv_quadCppmRegion[l_relCorePos][0];
+            FfdcSummSubSectHdr * l_pCppmSummaryHdr   =
+                        (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cpmmRegSummary[l_ppmPos][0];
+            l_pCppmSummaryHdr->iv_subSectnId    =   PLAT_CPPM;
+            l_pCppmSummaryHdr->iv_majorNum      =   1;
+            l_pCppmSummaryHdr->iv_minorNum      =   0;
+            l_pCppmSummaryHdr->iv_secValid      =   htobe16( l_pCppmHdr->iv_ffdcValid );
+
+            if( !l_pCppmSummaryHdr->iv_secValid )
+            {
+                continue;
+            }
+
+            PlatPmComplex::extractScomSummaryReg( l_pCppmFfdcLoc + sizeof(PpmFfdcHeader),
+                                                  l_sizeLimit, l_pCppmSummary );
+        }
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    //-----------------------------------------------------------------------
 
 extern "C"
 {

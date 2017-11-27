@@ -43,6 +43,7 @@
 #include <p9_pm_recovery_ffdc_sgpe.H>
 #include <p9_hcd_memmap_occ_sram.H>
 #include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
 #include <stddef.h>
 #include <endian.h>
 
@@ -158,6 +159,11 @@
         else
             setPmFfdcSectionValid ( i_pHomerBuf, PM_FFDC_SGPE_VALID );
 
+        if( !(i_ffdcType & INIT) )
+        {
+            generateSummary( i_pHomerBuf );
+        }
+
     fapi_try_exit:
         FAPI_DBG("<< PlatSgpe::collectFfdc: 0x%02X", l_ffdcValdityVect);
         return fapi2::current_err;
@@ -221,13 +227,29 @@
         PpeFfdcLayout * l_pSgpeFfdc = ( PpeFfdcLayout *) ( i_pTraceBuf );
 
         uint8_t * l_pTraceLoc = &l_pSgpeFfdc->iv_ppeTraces[0];
+        uint64_t l_traceBufHdr      =   0;
+        uint32_t l_traceBufAddress  =   0;
+        uint32_t l_doubleWordsRead  =   0;
 
-        FAPI_TRY( PlatPmComplex::collectSramInfo
-                    ( PlatPmComplex::getProcChip(),
-                      l_pTraceLoc,
-                      TRACES,
-                      FFDC_PPE_TRACES_SIZE ),
-                  "Trace Collection Failed" );
+        FAPI_TRY( PlatPmComplex::readSramInfo(  PlatPmComplex::getProcChip(),
+                                                getTraceBufAddr(),
+                                                (uint8_t*)&l_traceBufHdr,
+                                                8,
+                                                l_doubleWordsRead ),
+                  "Trace Buf Ptr Collection Failed" );
+
+        l_traceBufHdr       =   htobe64(l_traceBufHdr);
+        l_traceBufAddress   =   (uint32_t) l_traceBufHdr;
+
+        FAPI_DBG( "Trace Buf Address 0x%08x", l_traceBufAddress );
+
+        FAPI_TRY( PlatPmComplex::readSramInfo(  PlatPmComplex::getProcChip(),
+                                                l_traceBufAddress,
+                                                l_pTraceLoc,
+                                                FFDC_PPE_TRACES_SIZE,
+                                                l_doubleWordsRead ),
+                  "Trace Bin Collection Failed" );
+
 
         fapi_try_exit:
         FAPI_DBG("<< PlatSgpe::collectTrace" );
@@ -299,6 +321,39 @@
         FAPI_DBG("<< updateSgpeFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatSgpe::generateSummary( void * i_pHomer )
+    {
+       HomerFfdcRegion * l_pHomerFfdc =
+                ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
+       PpeFfdcLayout * l_pSgpeLayout    =   ( PpeFfdcLayout * ) &l_pHomerFfdc->iv_sgpeFfdcRegion;
+       uint8_t * l_pSgpeXirReg          =   &l_pSgpeLayout->iv_ppeXirReg[0];
+       uint8_t * l_pSgpeSummary         =   &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeSummary[FFDC_SUMMARY_SEC_HDR_SIZE];
+       PpeFfdcHeader* l_pSgpeFfdcHdr    =   ( PpeFfdcHeader* )&l_pHomerFfdc->iv_sgpeFfdcRegion;
+       FfdcSummSubSectHdr * l_pSgpeSummaryHdr   =   (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeSummary[0];
+       l_pSgpeSummaryHdr->iv_subSectnId =   PLAT_SGPE;
+       l_pSgpeSummaryHdr->iv_majorNum   =   1;
+       l_pSgpeSummaryHdr->iv_minorNum   =   0;
+       l_pSgpeSummaryHdr->iv_secValid   =   l_pSgpeFfdcHdr->iv_sectionsValid;
+
+       if( l_pSgpeSummaryHdr->iv_secValid )
+       {
+           PlatPmComplex::initRegList();
+           PlatPmComplex::extractPpeSummaryReg( l_pSgpeXirReg, FFDC_PPE_XIR_SIZE, l_pSgpeSummary );
+
+           //Populating the Extended FFDC summary
+           l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataPtr      =  &l_pSgpeLayout->iv_ppeGlobals[0];
+           l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataSize     =  FFDC_PPE_SCORE_BOARD_SIZE;
+
+           FAPI_DBG( "Dash Board Size       :   0x%08x ",
+                      l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sgpeScoreBoard.iv_dataSize );
+       }
+
+       return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     //-----------------------------------------------------------------------
 
 extern "C"

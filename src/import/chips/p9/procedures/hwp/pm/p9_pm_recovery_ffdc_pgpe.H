@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,11 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectFfdc( void*   i_pHomerBuf,
                                            uint8_t i_ffdcType = ALL );
 
+            /// @brief      generates summary of FFDC pertaining to a given platform.
+            /// @param[in]  i_pHomer    points to Homer base.
+            /// @return     fapi2 return code
+            fapi2::ReturnCode generateSummary( void * i_pHomer );
+
         private:
             /// @brief      collects trace info from PGPE's SRAM buffer.
             /// @param[in]  i_pHomerBuf     points to location of HOMER meant for PGPE Trace info.
@@ -103,15 +108,34 @@ namespace p9_stop_recov_ffdc
             ///@brief returns type of platform
             PmComplexPlatId getPlatType() { return iv_plat; }
 
+            ///@brief initializes a list of register for generation of FFDC summary.
+            void initRegList();
+
         private:
             PmComplexPlatId iv_plat;
     };
 
-extern "C"
-{
+    //---------------------------------------------------------------------------------------------
+    // function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_pgpe_FP_t )
             ( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > & i_procChipTgt,
               void * i_pgpeFfdcBuf );
+extern "C"
+{
+    // -----------------------------------------------------------------------------
+    // Function prototypes
+    // -----------------------------------------------------------------------------
+    ///
+    /// @brief Populates the PGPE FFDC section with FFDC collected from PGPE.
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_pgpe
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
 }
 
 } //namespace p9_stop_recov_ffdc ends

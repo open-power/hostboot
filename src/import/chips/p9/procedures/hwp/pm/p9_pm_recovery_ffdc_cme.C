@@ -42,13 +42,16 @@
 
 #include <p9_pm_recovery_ffdc_cme.H>
 #include <p9_hcd_memmap_cme_sram.H>
+#include <p9_quad_scom_addresses.H>
 #include <collect_reg_ffdc.H>
 #include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
 #include <stddef.h>
 #include <endian.h>
 
  namespace p9_stop_recov_ffdc
  {
+
     PlatCme::PlatCme( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > i_procChipTgt )
       : PlatPmComplex( i_procChipTgt,
                        PLAT_CME,
@@ -86,6 +89,7 @@
         uint8_t* l_pFirFfdcLoc = NULL;
         HomerFfdcRegion * l_pHomerFfdc =
                 ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
+
 
         for( auto ex : l_exList )
         {
@@ -220,6 +224,11 @@
 
         }
 
+        if( !(i_ffdcType & INIT ) )
+        {
+            generateSummary( i_pHomerBuf );
+        }
+
     fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectFfdc");
         return fapi2::current_err;
@@ -281,16 +290,30 @@
                                              const fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt  )
     {
         FAPI_DBG(">> PlatCme::collectTrace" );
-        PpeFfdcLayout * l_pCmeFfdc = ( PpeFfdcLayout *) ( i_pTraceBuf );
+        PpeFfdcLayout * l_pCmeFfdc  =   ( PpeFfdcLayout *) ( i_pTraceBuf );
+        uint8_t * l_pTraceLoc       =   &l_pCmeFfdc->iv_ppeTraces[0];
+        uint64_t l_traceBufHdr      =   0;
+        uint32_t l_traceBufAddress  =   0;
+        uint32_t l_doubleWordsRead  =   0;
 
-        uint8_t * l_pTraceLoc = &l_pCmeFfdc->iv_ppeTraces[0];
+        FAPI_TRY( PlatPmComplex::readSramInfo(  i_exTgt,
+                                                getTraceBufAddr(),
+                                                (uint8_t *)&l_traceBufHdr,
+                                                8,
+                                                l_doubleWordsRead ),
+                  "Trace Buf Ptr Collection Failed" );
 
-        FAPI_TRY( PlatPmComplex::collectSramInfo
-                    ( i_exTgt,
-                      l_pTraceLoc,
-                      TRACES,
-                      FFDC_PPE_TRACES_SIZE ),
-                  "Trace Collection Failed" );
+        l_traceBufHdr       =   htobe64(l_traceBufHdr);
+        l_traceBufAddress   =   (uint32_t) l_traceBufHdr;
+
+        FAPI_DBG( "Trace Buf Address 0x%08x Double Word 0x%016lx", l_traceBufAddress, l_traceBufHdr );
+
+        FAPI_TRY( PlatPmComplex::readSramInfo(  i_exTgt,
+                                                l_traceBufAddress,
+                                                l_pTraceLoc,
+                                                FFDC_PPE_TRACES_SIZE,
+                                                l_doubleWordsRead ),
+                  "Trace Bin Collection Failed" );
 
     fapi_try_exit:
         FAPI_DBG("<< PlatCme::collectTrace" );
@@ -378,6 +401,60 @@
         FAPI_DBG("<< updateCmeFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatCme::generateSummary( void * i_pHomerBuf )
+    {
+        FAPI_DBG(">> PlatCme::generateSummary" );
+
+        HomerFfdcRegion * l_pHomerFfdc =
+                ( HomerFfdcRegion *)( (uint8_t *)i_pHomerBuf + FFDC_REGION_HOMER_BASE_OFFSET );
+
+        PlatPmComplex::initRegList();
+
+        for( uint32_t l_exPos = 0; l_exPos < MAX_CMES_PER_CHIP; l_exPos++ )
+        {
+            uint8_t l_quadPos       =   l_exPos >> 1;
+            uint8_t l_relativeExPos =   l_exPos & 0x01;
+            PpeFfdcLayout * l_pCmeLayout  =
+                    ( PpeFfdcLayout *)&l_pHomerFfdc->iv_quadFfdc[l_quadPos].iv_quadCmeBlock[l_relativeExPos][0];
+            uint8_t *l_pCmeXir      =   &l_pCmeLayout->iv_ppeXirReg[0];
+            uint8_t *l_pCmeSummary  =   &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeSummary[l_exPos][FFDC_SUMMARY_SEC_HDR_SIZE];
+            FfdcScomEntry * l_pCmeLfirEntry  =
+                        ( FfdcScomEntry* )&l_pHomerFfdc->iv_firFfdcRegion.iv_firCmeBlock[l_exPos][0];
+            SysState * l_pSysState = &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sysState;
+
+            FfdcSummSubSectHdr * l_pCmeSummaryHdr   =
+                                       ( FfdcSummSubSectHdr *) &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeSummary[l_exPos][0];
+            l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeScoreBoard[l_exPos].iv_dataPtr     =   &l_pCmeLayout->iv_ppeGlobals[0];
+            l_pHomerFfdc->iv_ffdcSummaryRegion.iv_cmeScoreBoard[l_exPos].iv_dataSize    =   FFDC_PPE_SCORE_BOARD_SIZE;
+
+            l_pCmeSummaryHdr->iv_subSectnId     =   PLAT_CME;
+            l_pCmeSummaryHdr->iv_majorNum       =   1;
+            l_pCmeSummaryHdr->iv_minorNum       =   0;
+            l_pCmeSummaryHdr->iv_secValid       =   l_pCmeLayout->iv_ppeFfdcHdr.iv_ppeFfdcHdr.iv_sectionsValid;
+
+            if( !l_pCmeSummaryHdr->iv_secValid )
+            {
+                FAPI_DBG("Skipping CME %d For Summary", l_exPos );
+                continue;
+            }
+
+            memcpy( &l_pSysState->iv_cmeFirs[l_exPos][0],
+                    &l_pCmeLfirEntry->iv_scomData,
+                    FFDC_SUMMARY_SCOM_REG_SIZE );
+
+            PlatPmComplex::extractPpeSummaryReg( l_pCmeXir,
+                                                 FFDC_PPE_XIR_SIZE,
+                                                 l_pCmeSummary );
+        }
+
+        FAPI_DBG("<< PlatCme::generateSummary" );
+
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     //-----------------------------------------------------------------------
 
 extern "C"

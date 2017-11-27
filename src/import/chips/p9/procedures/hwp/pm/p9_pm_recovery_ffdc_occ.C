@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,10 @@
 
 #include <p9_pm_recovery_ffdc_occ.H>
 #include <p9_hcd_memmap_occ_sram.H>
+#include <p9_perv_scom_addresses.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9n2_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fixes.H>
 #include <p9_ppe_defs.H>
 #include <stddef.h>
 #include <endian.h>
@@ -64,6 +68,20 @@ namespace p9_stop_recov_ffdc
     fapi_try_exit:
         FAPI_DBG ("<< PlatOcc::init" );
         return fapi2::current_err;
+    }
+
+    //----------------------------------------------------------------------
+
+    void PlatOcc::initRegList()
+    {
+        FAPI_DBG (">> PlatOcc::initRegList" );
+        std::vector < uint32_t> l_scomRegList;
+        iv_occSummaryReg.push_back( PU_OCB_OCI_CCSR_SCOM );
+        iv_occSummaryReg.push_back( PU_OCB_OCI_QSSR_SCOM );
+        iv_occSummaryReg.push_back( P9N2_PU_OCB_OCI_OCCFLG_SCOM );
+        iv_occSummaryReg.push_back( P9N2_PU_OCB_OCI_OCCFLG2_SCOM );
+        PlatPmComplex::updateSummaryList( l_scomRegList );
+        FAPI_DBG ("<< PlatOcc::initRegList" );
     }
 
     //----------------------------------------------------------------------
@@ -196,6 +214,11 @@ namespace p9_stop_recov_ffdc
 
         FAPI_TRY( updateOccFfdcHeader( l_pFfdcLoc, l_ffdcValid ),
                           "Failed To Update OCC FFDC Header for OCC" );
+
+        if( !(i_ffdcType & INIT ) )
+        {
+            generateSummary( i_pHomerBuf );
+        }
 
     fapi_try_exit:
         FAPI_DBG("<< PlatOcc::collectFfdc");
@@ -439,7 +462,50 @@ namespace p9_stop_recov_ffdc
         FAPI_DBG("<< updateOccFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
     //--------------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatOcc::generateSummary( void * i_pHomer )
+    {
+       HomerFfdcRegion * l_pHomerFfdc   =
+                ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
+       OccFfdcRegion * l_pOccLayout     =   ( OccFfdcRegion * ) &l_pHomerFfdc->iv_occFfdcRegion;
+       uint8_t * l_pOccReg              =   &l_pOccLayout->iv_occRegs[0];
+       FfdcScomEntry * l_pFirEntry      =   (FfdcScomEntry *)&l_pHomerFfdc->iv_firFfdcRegion.iv_OccPbaBlock[0];
+       SysState * l_pSysConfig          =   &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_sysState;
+       OccFfdcHeader* l_pOccFfdcHdr     =   (OccFfdcHeader*) ( &l_pHomerFfdc->iv_occFfdcRegion );
+
+       FfdcSummSubSectHdr * l_pSysConfigHdr   =
+                    (FfdcSummSubSectHdr *)&l_pSysConfig->iv_subSecHdr;
+       l_pSysConfigHdr->iv_subSectnId   =   PLAT_OCC;
+       l_pSysConfigHdr->iv_majorNum     =   1;
+       l_pSysConfigHdr->iv_minorNum     =   0;
+       l_pSysConfigHdr->iv_secValid     =   l_pOccFfdcHdr->iv_sectionsValid;
+
+       if( l_pSysConfigHdr->iv_secValid )
+       {
+           initRegList();
+           memcpy( &l_pSysConfig->iv_occPbaFir[0],
+                   &l_pFirEntry->iv_scomData,
+                   FFDC_SUMMARY_SCOM_REG_SIZE ) ; //copying first FIR value
+
+                   l_pFirEntry++;
+
+           memcpy( &l_pSysConfig->iv_occPbaFir[FFDC_SUMMARY_SCOM_REG_SIZE],
+                   &l_pFirEntry->iv_scomData,
+                   FFDC_SUMMARY_SCOM_REG_SIZE ); //copying second FIR value
+
+
+           PlatPmComplex::extractScomSummaryReg( l_pOccReg,
+                                                 FFDC_OCC_REGS_SIZE,
+                                                 &l_pSysConfig->iv_configReg[0] );
+       }
+
+       return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    //--------------------------------------------------------------------------
+
 
 extern "C"
 {

@@ -78,6 +78,10 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectPartialFfdc( void * i_pBuf, FfdcDataType i_dataType,
                                                   fapi2::Target<fapi2::TARGET_TYPE_EX >& i_exTgt,
                                                   uint32_t & o_ffdcLength );
+            /// @brief      generates summary of FFDC pertaining to a given platform.
+            /// @param[in]  i_pHomer    points to Homer base.
+            /// @return     fapi2 return code
+            fapi2::ReturnCode generateSummary( void * i_pHomer );
 
         private:
             /// @brief      collects trace info from a given CME SRAM buffer.
@@ -113,13 +117,31 @@ namespace p9_stop_recov_ffdc
             ///@return      fapi2 return code.
             fapi2::ReturnCode updateCmeFfdcHeader( uint8_t* i_pHomerBuf, uint8_t i_cmePos,
                                                    uint16_t i_sectionsValid );
+
     };
 
-extern "C"
-{
+    //---------------------------------------------------------------------------------------------
+    // function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_cme_FP_t )
             ( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > & i_procChipTgt,
               void * i_cmeFfdcBuf );
+extern "C"
+{
+
+    // -----------------------------------------------------------------------------
+    // Function prototypes
+    // -----------------------------------------------------------------------------
+    ///
+    /// @brief Populates the PM FFDC section with FFDC collected from CME.
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_cme
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
 }
 
 } //namespace p9_stop_recov_ffdc ends

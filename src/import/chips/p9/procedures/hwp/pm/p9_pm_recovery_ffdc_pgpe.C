@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <p9_pm_recovery_ffdc_pgpe.H>
 #include <p9_hcd_memmap_occ_sram.H>
 #include <p9_ppe_defs.H>
+#include <p9_ppe_utils.H>
 #include <stddef.h>
 #include <endian.h>
 
@@ -84,6 +85,7 @@
         uint8_t* l_pFfdcLoc = (uint8_t *)(&l_pHomerFfdc->iv_pgpeFfdcRegion);
         PpeFfdcHeader* l_pPgpeFfdcHdr = (PpeFfdcHeader*) l_pFfdcLoc;
         uint16_t l_ffdcValdityVect = l_pPgpeFfdcHdr->iv_sectionsValid;
+
 
         if ( i_ffdcType & INIT )
         {   // overwrite on init
@@ -159,6 +161,11 @@
         else
             setPmFfdcSectionValid ( i_pHomerBuf, PM_FFDC_PGPE_VALID );
 
+        if( !(i_ffdcType & INIT) )
+        {
+            generateSummary( i_pHomerBuf );
+        }
+
     fapi_try_exit:
         FAPI_DBG("<< PlatPgpe::collectFfdc");
         return fapi2::current_err;
@@ -172,13 +179,29 @@
         PpeFfdcLayout * l_pPgpeFfdc = ( PpeFfdcLayout *) ( i_pTraceBuf );
 
         uint8_t * l_pTraceLoc = &l_pPgpeFfdc->iv_ppeTraces[0];
+        uint64_t l_traceBufHdr      =   0;
+        uint32_t l_traceBufAddress  =   0;
+        uint32_t l_doubleWordsRead  =   0;
 
-        FAPI_TRY( PlatPmComplex::collectSramInfo
-                    ( PlatPmComplex::getProcChip(),
-                      l_pTraceLoc,
-                      TRACES,
-                      FFDC_PPE_TRACES_SIZE ),
-                  "Trace Collection Failed" );
+        FAPI_TRY( PlatPmComplex::readSramInfo(  PlatPmComplex::getProcChip(),
+                                                getTraceBufAddr(),
+                                                (uint8_t *)&l_traceBufHdr,
+                                                8,
+                                                l_doubleWordsRead ),
+                  "Trace Buf Ptr Collection Failed" );
+
+        l_traceBufHdr       =  htobe64( l_traceBufHdr );
+        l_traceBufAddress   =  (uint32_t) l_traceBufHdr;
+
+        FAPI_DBG( "Trace Buf Address 0x%08x", l_traceBufAddress );
+
+        FAPI_TRY( PlatPmComplex::readSramInfo(  PlatPmComplex::getProcChip(),
+                                                l_traceBufAddress,
+                                                l_pTraceLoc,
+                                                FFDC_PPE_TRACES_SIZE,
+                                                l_doubleWordsRead ),
+                  "Trace Bin Collection Failed" );
+
 
     fapi_try_exit:
         FAPI_DBG("<< PlatPgpe::collectTrace" );
@@ -248,6 +271,40 @@
         FAPI_DBG("<< updatePgpeFfdcHeader" );
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    //-----------------------------------------------------------------------
+
+    fapi2::ReturnCode PlatPgpe::generateSummary( void * i_pHomer )
+    {
+       FAPI_DBG(">> PlatPgpe::generateSummary" );
+
+       HomerFfdcRegion * l_pHomerFfdc =
+                ( HomerFfdcRegion *)( (uint8_t *)i_pHomer + FFDC_REGION_HOMER_BASE_OFFSET );
+       PpeFfdcLayout * l_pPgpeLayout    =   ( PpeFfdcLayout * ) &l_pHomerFfdc->iv_pgpeFfdcRegion;
+       uint8_t * l_pPgpeXirReg          =   &l_pPgpeLayout->iv_ppeXirReg[0];
+       uint8_t * l_pPgpeSummary         =   &l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeSummary[FFDC_SUMMARY_SEC_HDR_SIZE];
+       PpeFfdcHeader* l_pPgpeFfdcHdr    =   (PpeFfdcHeader*) &l_pHomerFfdc->iv_pgpeFfdcRegion;
+
+       FfdcSummSubSectHdr * l_pPgpeSummaryHdr   =   (FfdcSummSubSectHdr *)&l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeSummary[0];
+       l_pPgpeSummaryHdr->iv_subSectnId =   PLAT_PGPE;
+       l_pPgpeSummaryHdr->iv_majorNum   =   1;
+       l_pPgpeSummaryHdr->iv_minorNum   =   0;
+       l_pPgpeSummaryHdr->iv_secValid   =   l_pPgpeFfdcHdr->iv_sectionsValid;
+
+       if( l_pPgpeSummaryHdr->iv_secValid )
+       {
+           PlatPmComplex::initRegList();
+           PlatPmComplex::extractPpeSummaryReg( l_pPgpeXirReg, FFDC_PPE_XIR_SIZE, l_pPgpeSummary );
+
+           //Populating the Extended FFDC summary
+           l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeScoreBoard.iv_dataPtr      =   &l_pPgpeLayout->iv_ppeGlobals[0];
+           l_pHomerFfdc->iv_ffdcSummaryRegion.iv_pgpeScoreBoard.iv_dataSize     =   FFDC_PPE_SCORE_BOARD_SIZE;
+       }
+
+       FAPI_DBG("<< PlatPgpe::generateSummary" );
+       return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     //-----------------------------------------------------------------------
 
 extern "C"

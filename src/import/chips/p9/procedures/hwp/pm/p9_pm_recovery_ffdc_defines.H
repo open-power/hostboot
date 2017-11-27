@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -163,6 +163,14 @@ enum PpeHaltCondition
     PPE_HALT_COND_UNKNOWN = 0xFF  // Could not read or interpret XSR
 };
 
+/**
+ * @brief enumberates FFDC validity status.
+ */
+enum
+{
+    FFDC_SUMMARY_SUB_SEC_VALID      =   1,
+    FFDC_SUMMARY_SUB_SEC_INVALID    =   0,
+};
 
 /**
  * @brief   Top level header of the PM Complex FFDC in HOMER
@@ -267,6 +275,15 @@ enum OccFfdcValidStatus
 const uint16_t PM_FFDC_FIR_VALID_POS_0 = 0x8000;
 const uint8_t PM_FFDC_FIR_VALID_POS_MAX = 13;
 const uint8_t PM_FFDC_FIR_VALID_POS_OCC = 12;
+
+/**
+ * @brief Models a SCOM register entry in FFDC
+ */
+struct __attribute__((packed)) FfdcScomEntry
+{
+    uint32_t iv_scomAddress;
+    uint64_t iv_scomData;
+};
 
 struct __attribute__((packed)) FirFfdcHeader
 {
@@ -396,6 +413,54 @@ struct __attribute__((packed)) FirFfdcRegion
 };
 
 /**
+ * @brief   models the header for FFDC summary sub-section .
+ */
+struct __attribute__((packed)) FfdcSummSubSectHdr
+{
+    uint8_t  iv_subSectnId;
+    uint8_t  iv_majorNum;
+    uint8_t  iv_minorNum;
+    uint8_t  iv_secValid;
+};
+
+/**
+ * @brief   models the FFDC Summary sub-region containing system config and error info.
+ */
+struct __attribute__((packed)) SysState
+{
+    FfdcSummSubSectHdr iv_subSecHdr;
+    uint8_t  iv_cmeFirs[MAX_CMES_PER_CHIP][FFDC_SUMMARY_SCOM_REG_SIZE];
+    uint8_t  iv_occPbaFir[FFDC_SUMMARY_OCC_PBA_FIR_SIZE];
+    uint8_t  iv_configReg[FFDC_SUMMARY_SIZE_SYS_CONFIG];
+};
+
+/**
+ * @brief points to a block of FFDC sub-region.
+ */
+struct __attribute__((packed)) FfdcBlock
+{
+    uint8_t*  iv_dataPtr;
+    uint32_t  iv_dataSize;
+};
+
+/**
+ * models FFDC summary section in HOMER.
+ */
+struct  __attribute__((packed)) FfdcSummary
+{
+    uint32_t    iv_summaryMagicWord;
+    SysState    iv_sysState;
+    uint8_t     iv_sgpeSummary[FFDC_SUMMARY_SIZE_SGPE];
+    uint8_t     iv_pgpeSummary[FFDC_SUMMARY_SIZE_PGPE];
+    uint8_t     iv_cmeSummary[MAX_CMES_PER_CHIP][FFDC_SUMMARY_SIZE_CME];
+    uint8_t     iv_qpmmRegSummary[MAX_QUADS_PER_CHIP][FFDC_SUMMARY_SIZE_QPPM_REG];
+    uint8_t     iv_cpmmRegSummary[MAX_CORES_PER_CHIP][FFDC_SUMMARY_SIZE_CPPM_REG];
+    FfdcBlock   iv_sgpeScoreBoard;
+    FfdcBlock   iv_pgpeScoreBoard;
+    FfdcBlock   iv_cmeScoreBoard[MAX_CMES_PER_CHIP];
+};
+
+/**
  * @brief   models full FFDC region of HOMER.
  */
 struct  __attribute__((packed)) HomerFfdcRegion
@@ -406,6 +471,7 @@ struct  __attribute__((packed)) HomerFfdcRegion
     PpeFfdcLayout       iv_sgpeFfdcRegion;
     PpeFfdcLayout       iv_pgpeFfdcRegion;
     OccFfdcRegion       iv_occFfdcRegion;
+    FfdcSummary         iv_ffdcSummaryRegion;
 };
 
 }   //namespace p9_stop_recov_ffdc ends

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,14 +67,22 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectFfdc ( void*    i_pHomerBuf,
                                             uint8_t  i_ffdcType = ALL );
 
+            /// @brief      generates summary of FFDC pertaining to a given platform.
+            /// @param[in]  i_pHomer    points to Homer base.
+            /// @return     fapi2 return code
+            fapi2::ReturnCode generateSummary( void * i_pHomer );
         private:
+
+            ///@brief initializes a list of register for generation of FFDC summary.
+            void initRegList();
+
             /// @brief updates the CPPM FFDC Header
             ///@param[in]   i_pHomerBuf     points to a location in HOMER meant for CPPM Header
             ///@param[in]   i_CppmInstance  CPPM instance
             ///@param[in]   i_ffdcValid     non-zero indicates the CPPM FFDC is valid
             ///@return      fapi2 return code.
 
-            fapi2::ReturnCode updateCppmFfdcHeader( uint8_t * i_pHomerBuf, 
+            fapi2::ReturnCode updateCppmFfdcHeader( uint8_t * i_pHomerBuf,
                                                     const uint8_t i_cppmInstance,
                                                     const uint16_t i_ffdcValid);
             /// @brief updates the QUAD FFDC Header
@@ -83,16 +91,34 @@ namespace p9_stop_recov_ffdc
             ///@param[in]   i_ffdcValid     non-zero indicates the Quad FFDC is valid
             ///@return      fapi2 return code.
 
-            fapi2::ReturnCode updateQuadFfdcHeader( uint8_t * i_pHomerBuf, 
+            fapi2::ReturnCode updateQuadFfdcHeader( uint8_t * i_pHomerBuf,
                                                     const uint8_t i_quadInstance,
                                                     const uint16_t i_ffdcValid);
+        private:
+            std::vector<uint32_t> iv_cppmSummaryReg;
     };
 
-extern "C"
-{
+    //---------------------------------------------------------------------------------------------
+    // function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_cppm_FP_t )
             ( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > & i_procChipTgt,
               void * i_cppmFfdcBuf );
+extern "C"
+{
+    // -----------------------------------------------------------------------------
+    // Function prototypes
+    // -----------------------------------------------------------------------------
+    ///
+    /// @brief Populates the PM FFDC section with FFDC collected from CPPM
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_cppm
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
 }
 
 } //namespace p9_stop_recov_ffdc ends

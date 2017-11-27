@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017
+# Contributors Listed Below - COPYRIGHT 2017,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -25,6 +25,7 @@
 PROCEDURE=p9_pm_recovery_ffdc_cme
 CME_FFDC_INC=$(ROOTPATH)/chips/p9/procedures/hwp/pm/
 CME_FFDC_INC+=$(ROOTPATH)/chips/p9/procedures/hwp/lib
+CME_FFDC_INC+=$(ROOTPATH)/chips/p9/common/pmlib/include/registers
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_recovery_ffdc_base
 lib$(PROCEDURE)_DEPLIBS+=p9_pm_ocb_indir_setup_linear
 lib$(PROCEDURE)_DEPLIBS+=p9_cme_sram_access

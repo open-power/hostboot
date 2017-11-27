@@ -52,16 +52,16 @@ namespace p9_stop_recov_ffdc
     {
         public:
             /// @brief  constructor
-            /// @param[in]  i_procChipTgt       fapi2 target for P9 chip
-            /// @param[in]  i_plat              platform id
-            /// @param[in]  i_imageHdrBaseAddr  sram address of start of image header
-            /// @param[in]  i_traceBufBaseAddr  sram address of start of trace buffer
-            /// @param[in]  i_globalBaseAddr    sram address of start of global variables
+            /// @param[in]  i_procChipTgt           fapi2 target for P9 chip
+            /// @param[in]  i_plat                  platform id
+            /// @param[in]  i_imageHdrBaseAddr      sram address of start of image header
+            /// @param[in]  i_traceBufBaseAddress   address of pointer to trace buffer and size
+            /// @param[in]  i_globalBaseAddr        sram address of start of global variables
             PlatPmComplex( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP >
                                     i_procChipTgt,
                            PmComplexPlatId i_plat = PLAT_NONE,
                            uint32_t i_imageHdrBaseAddr = 0,
-                           uint32_t i_traceBufBaseAddr = 0,
+                           uint32_t i_traceBufBaseAddress = 0,
                            uint32_t i_globalBaseAddr = 0 );
 
             /// @brief  destructor
@@ -108,10 +108,37 @@ namespace p9_stop_recov_ffdc
             void setTraceBufAddr (uint32_t i_addr)
             { iv_traceBufBaseAddress = i_addr; }
 
+            ///@brief returns trace buffer/ptr  address
+            uint32_t getTraceBufAddr() { return iv_traceBufBaseAddress; };
+
             ///@brief returns instance id.
             PmComplexPlatId getPlatId() { return iv_plat ; }
 
+            /// @brief      generates summary of FFDC pertaining to a given platform.
+            /// @param[in]  i_pHomer    points to Homer base.
+            /// @return     fapi2 return code
+            virtual fapi2::ReturnCode generateSummary( void * i_pHomer );
+
+            ///@brief initializes a list of register for generation of FFDC summary.
+            void initRegList();
+
         protected:
+
+            /// @brief  parses a region of HOMER to extract PPE registers
+            /// @param[in]  i_pHomerBuf     points to HOMER base
+            /// @param[in]  i_regionLimit   size of memory region in which register is to be looked up.
+            /// @param[in]  o_ffdcSummary   location in the FFDC summary region
+            /// @return     SUCCESS on success else an error code
+            uint32_t extractPpeSummaryReg( uint8_t * i_pHomerBuf, const uint32_t i_regionLimit,
+                                           uint8_t * o_ffdcSummary );
+
+            /// @brief  parses a region of HOMER to extract SCOM registers
+            /// @param[in]  i_pHomerBuf     points to HOMER base
+            /// @param[in]  i_regionLimit   size of memory region in which register is to be looked up.
+            /// @param[in]  o_ffdcSummary   location in the FFDC summary region
+            /// @return     SUCCESS on success else an error code
+            uint32_t extractScomSummaryReg( uint8_t * i_pHomerBuf, const uint32_t i_regionLimit,
+                                            uint8_t * o_ffdcSummary );
 
            ///@brief sets the validity of a section in the PmFfdcHeader
            ///@param[in]    i_pHomerBuf Base address of PM FFDC in HOMER
@@ -185,6 +212,37 @@ namespace p9_stop_recov_ffdc
             fapi2::ReturnCode collectRegisterData( const fapi2::Target<T>& i_chipletTarget,
                                                    uint8_t* o_pHomerBuf,
                                                    fapi2::HwpFfdcId i_ffdcId);
+
+            ///@brief   reads info from OCC SRAM.
+            ///@param[in]   i_procChip          fapi2 target for proc chip
+            ///@param[in]   i_pSramAddress      start address for reading SRAM
+            ///@param[in]   i_pSramData         pointer to data to be read from SRAM
+            ///@param[in]   i_sramLen           length of data read from SRAM.
+            ///@param[in]   o_doubleWordRead    number of double word actually read from SRAM.
+            ///@return      fapi2 return code
+            fapi2::ReturnCode readSramInfo(  const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP >& i_procChip,
+                                             uint32_t  i_sramAddress,
+                                             uint8_t * i_pSramData,
+                                             uint32_t  i_sramLen,
+                                             uint32_t &o_doubleWordRead );
+
+            ///@brief   reads info from CME SRAM.
+            ///@param[in]   i_exTgt             fapi2 target for ex Chiplet
+            ///@param[in]   i_pSramAddress      start address for reading SRAM
+            ///@param[in]   i_pSramData         pointer to data read from SRAM
+            ///@param[in]   i_sramLen           length of data to be read from SRAM.
+            ///@param[in]   o_doubleWordRead    number of double word actually read from SRAM.
+            ///@return      fapi2 return code
+            fapi2::ReturnCode readSramInfo(  const fapi2::Target< fapi2::TARGET_TYPE_EX >& i_exTgt,
+                                             uint32_t  i_sramAddress,
+                                             uint8_t * i_pSramData,
+                                             uint32_t  i_sramLen,
+                                             uint32_t  &o_doubleWordRead );
+
+            ///@brief overrides the list of register addresses used for summary generation.
+            ///@brief   i_regAddrList[in]   new list of register addresses for summary.
+            void updateSummaryList( const std::vector<uint32_t> & i_regAddrList ) { iv_summaryReg = i_regAddrList; }
+
             #ifndef __HOSTBOOT_MODULE
             ///@brief to debug FFDC contents collected from SRAM.
             ///param[in]    i_pSram     points to location of SRAM info in HOMER.
@@ -199,6 +257,7 @@ namespace p9_stop_recov_ffdc
             uint32_t iv_traceBufBaseAddress;        // base address of platforms's trace buffer
             uint32_t iv_globalBaseAddress;          // base address of platform's global variables
             PmComplexPlatId iv_plat;
+            std::vector<uint32_t> iv_summaryReg;
     };
 
     //---------------------------------------------------------------------------------------------

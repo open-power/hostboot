@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -413,6 +413,8 @@ REG64( PU_BCDE_OCIBAR_SCOM, RULL(0x00068014), SH_UNT, SH_ACS_SCOM_RW);
 REG64( PU_BCDE_STAT_SCOM, RULL(0x00068012), SH_UNT, SH_ACS_SCOM_RO);
 //WARNING: This register is not defined anymore in the figtree.
 REG64( PU_PBAXCFG_SCOM, RULL(0x00068021), SH_UNT, SH_ACS_SCOM);
+REG64( PU_OCB_OCI_OINKR0_SCOM, RULL(0x0006C010), SH_UNT, SH_ACS_SCOM_RO);
+REG64( PU_OCB_OCI_OINKR1_SCOM, RULL(0x0006C030), SH_UNT, SH_ACS_SCOM_RO);
 
 REG64( PEC_PCS_RX_CONFIG_MODE_REG                              , RULL(0x800004800D010C3F), SH_UNT_PEC      ,
        SH_ACS_SCOM      );

@@ -69,6 +69,10 @@ namespace p9_stop_recov_ffdc
 
             virtual fapi2::ReturnCode collectPartialFfdc( void * i_pHomerBuf, FfdcDataType i_ffdcType ,
                                                           uint32_t & o_ffdcLength );
+            /// @brief      generates summary of FFDC pertaining to a given platform.
+            /// @param[in]  i_pHomer    points to Homer base.
+            /// @return     fapi2 return code
+            fapi2::ReturnCode generateSummary( void * i_pHomer );
 
         private:
             /// @brief      collects trace info from SGPE's SRAM buffer.
@@ -101,15 +105,34 @@ namespace p9_stop_recov_ffdc
             ///@brief returns type of platform
             PmComplexPlatId getPlatType() { return iv_plat; }
 
+            void initRegList();
+
         private:
             PmComplexPlatId iv_plat;
     };
 
-extern "C"
-{
+    //---------------------------------------------------------------------------------------------
+
+    // function pointer typedef definition for HWP call support
     typedef fapi2::ReturnCode( *p9_pm_recovery_ffdc_sgpe_FP_t )
             ( const fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > & i_procChipTgt,
               void * i_sgpeFfdcBuf );
+extern "C"
+{
+    // -----------------------------------------------------------------------------
+    // Function prototypes
+    // -----------------------------------------------------------------------------
+    ///
+    /// @brief Populatess the SGPE FFDC section with FFDC collected from SGPE.
+    ///
+    /// @param[in] i_procChipTarget Proc Chip target
+    /// @param[in] i_pHomerImage    Pointer to the base of the chip HOMER region
+    ///
+    /// @return FAPI2_RC_SUCCESS on success or error return code
+    ///
+        fapi2::ReturnCode p9_pm_recovery_ffdc_sgpe
+        ( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procChipTarget,
+          void* i_pHomerImage );
 }
 
 } //namespace p9_stop_recov_ffdc ends
