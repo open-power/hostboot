@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -219,6 +219,7 @@ print EDISFILE "#define HBFWERRDISPLAYPLATHWPFFDC_H_\n\n";
 print EDISFILE "#include <stdio.h>\n\n";
 print EDISFILE "#include <p9_mc_scom_addresses.H>\n";
 print EDISFILE "#include <p9_misc_scom_addresses.H>\n";
+print EDISFILE "#include <p9n2_misc_scom_addresses.H>\n";
 print EDISFILE "#include <p9_obus_scom_addresses.H>\n";
 print EDISFILE "#include <p9_perv_scom_addresses.H>\n";
 print EDISFILE "#include <p9_quad_scom_addresses.H>\n";
