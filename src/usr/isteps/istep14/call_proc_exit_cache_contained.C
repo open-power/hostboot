@@ -326,40 +326,6 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
                 }
             }
 
-            //Set PSI and FSP BARs, activate the PSI link BAR
-            //TODO RTC 150260 Re-evaluate if this should be deleted or enabled
-//            uint64_t psi = l_masterProc->getAttr<ATTR_PSI_BRIDGE_BASE_ADDR>();
-            uint64_t fsp = l_masterProc->getAttr<ATTR_FSP_BASE_ADDR>();
-//            psi |= 0x1; //turn on enable bit for PSI, FSP is in PSI Init HWP
-
-//            l_errl = deviceWrite( l_masterProc,
-//                                  &psi,
-//                                  scom_size,
-//                                  DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_BAR_REG) );
-            if ( l_errl )
-            {
-                // Create IStep error log and cross reference to error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-
-            l_errl = deviceWrite( l_masterProc,
-                                  &fsp,
-                                  scom_size,
-                                  DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_FSP_BAR_REG) );
-            if ( l_errl )
-            {
-                // Create IStep error log and cross reference to error that
-                // occurred
-                l_stepError.addErrorDetails( l_errl );
-
-                // Commit Error
-                errlCommit( l_errl, HWPF_COMP_ID );
-            }
-
             // Call the function to extend VMM to 48MEG
             int rc = mm_extend();
 

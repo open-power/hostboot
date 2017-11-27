@@ -596,6 +596,22 @@ namespace INTR
             errlHndl_t handlePsuInterrupt(ext_intr_t i_type,
                                           intr_hdlr_t* i_proc,
                                           PIR_t& i_pir);
+            /**
+             *  @brief Set the FSP BAR
+             *
+             *  @param[in] i_pProcIntrHdlr Pointer to processor interrupt
+             *      handler structure; must not be nullptr or function will
+             *      assert.  Referenced proc target must also not be nullptr, or
+             *      same consequence.
+             *  @param[in] i_enable Whether to enable/disable the BAR (disable
+             *      request is no-op for this BAR)
+             *
+             *  @return errlHndl_t Error log handle on failure, nullptr on
+             *      success
+             */
+            errlHndl_t setFspBAR(
+                const intr_hdlr_t* i_pProcIntrHdlr,
+                      bool         i_enable);
 
             /**
              * Set the PSI Host Bridge BAR scom register

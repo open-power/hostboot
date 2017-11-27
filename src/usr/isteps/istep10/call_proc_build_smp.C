@@ -71,85 +71,13 @@ void* call_proc_build_smp (void *io_pArgs)
 
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>> l_procList;
 
-    // Loop through all proc chips
+    // Loop through all proc chips and convert them to FAPI targets
     for (const auto & curproc: l_cpuTargetList)
     {
-        if (curproc != l_masterProc)
-        {
-            //---PHBBAR - PSI Host Bridge Base Address Register
-            //Get base BAR Value from attribute
-            uint64_t l_baseBarValue = curproc->
-              getAttr<TARGETING::ATTR_PSI_BRIDGE_BASE_ADDR>();
-
-            uint64_t l_barValue = l_baseBarValue;
-            uint64_t size = sizeof(l_barValue);
-            l_errl = deviceWrite(curproc,
-                                 &l_barValue,
-                                 size,
-                                 DEVICE_SCOM_ADDRESS(0x0501290A));
-
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                          "Unable to set PSI BRIDGE BAR Address");
-                break;
-            }
-
-            //Now set the enable bit
-            l_barValue += 0x0000000000000001ULL; //PSI BRIDGE BAR ENABLE Bit
-            size = sizeof(l_barValue);
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Setting PSI BRIDGE Bar enable value for Target with "
-                      "huid: 0x%x, PSI BRIDGE BAR value: 0x%016lx",
-                      TARGETING::get_huid(curproc),l_barValue);
-
-            l_errl = deviceWrite(curproc,
-                                 &l_barValue,
-                                 size,
-                                 DEVICE_SCOM_ADDRESS(0x0501290A));
-
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Error enabling FSP BAR");
-                break;
-            }
-
-            //---FSPBAR - FSP Base Address Register
-            //Get base BAR Value from attribute
-            l_baseBarValue = curproc->
-              getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
-
-            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                      "Setting FSP Bar enable value for Target with "
-                      "huid: 0x%x, FSP BAR value: 0x%016lx",
-                      TARGETING::get_huid(curproc),l_baseBarValue);
-
-            l_errl = deviceWrite(curproc,
-                                 &l_baseBarValue,
-                                 size,
-                                 DEVICE_SCOM_ADDRESS(0x0501290B));
-
-            if(l_errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Error enabling FSP BAR");
-                break;
-            }
-
-        }
-
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                 l_fapi2_proc_target (curproc);
         l_procList.push_back(l_fapi2_proc_target);
     }
-    if(l_errl)
-    {
-        l_StepError.addErrorDetails( l_errl);
-        errlCommit( l_errl, ISTEP_COMP_ID );
-    }
-
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                "call_proc_build_smp entry" );
