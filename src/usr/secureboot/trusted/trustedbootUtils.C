@@ -93,6 +93,7 @@ errlHndl_t tpmCreateErrorLog(const uint8_t i_modId,
                                     i_user2,
                                     true /*Add HB SW Callout*/ );
     err->collectTrace( SECURE_COMP_NAME );
+    err->collectTrace(TRBOOT_COMP_NAME);
     return err;
 }
 

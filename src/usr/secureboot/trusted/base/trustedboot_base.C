@@ -57,7 +57,7 @@
 // ----------------------------------------------
 
 trace_desc_t* g_trac_trustedboot = nullptr;
-TRAC_INIT( & g_trac_trustedboot, "TRBOOT", KILOBYTE );
+TRAC_INIT( & g_trac_trustedboot, TRBOOT_COMP_NAME, KILOBYTE );
 
 namespace TRUSTEDBOOT
 {
@@ -156,6 +156,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
                                           0,
                                           true);
             err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
         }
         delete msg;
         msg = NULL;
@@ -180,6 +181,7 @@ errlHndl_t pcrExtendSeparator(bool i_sendAsync)
                                           0,
                                           true);
             err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
         }
     }
 
@@ -264,6 +266,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                                           0,
                                           true);
             err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
         }
         delete msg;
         msg = NULL;
@@ -288,6 +291,7 @@ errlHndl_t pcrExtend(TPM_Pcr i_pcr,
                                           0,
                                           true);
             err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
         }
     }
 

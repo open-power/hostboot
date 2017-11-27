@@ -56,7 +56,7 @@ class TPMLogMgrTest: public CxxTest::TestSuite
             if( NULL != err )
             {
                 TS_FAIL( "getTestLogMgr - Error detected" );
-                errlCommit( err, SECURE_COMP_ID );
+                errlCommit( err, TRBOOT_COMP_ID );
                 delete err;
                 err = NULL;
             }
@@ -157,7 +157,7 @@ class TPMLogMgrTest: public CxxTest::TestSuite
                         TS_FAIL( "testTPMLogMgrAllocate(%d) - "
                                  "Error detected adding event", idx);
                         errlCommit( err,
-                                    SECURE_COMP_ID );
+                                    TRBOOT_COMP_ID );
                         delete err;
                         err = NULL;
                         break;
@@ -223,7 +223,7 @@ class TPMLogMgrTest: public CxxTest::TestSuite
             {
                 TS_FAIL("addTestLogEvent - Failed to addEvent with message = %s",
                         i_logMsg);
-                errlCommit( err, SECURE_COMP_ID );
+                errlCommit( err, TRBOOT_COMP_ID );
                 delete err;
                 err = NULL;
             }

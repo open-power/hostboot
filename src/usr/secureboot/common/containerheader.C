@@ -76,6 +76,7 @@ errlHndl_t ContainerHeader::parse_header()
                         true/*SW Error*/);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
         break;
     }
 
@@ -375,6 +376,7 @@ errlHndl_t ContainerHeader::validate()
             true/*SW Error*/);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
     }
 
     return l_errl;
@@ -415,6 +417,7 @@ errlHndl_t ContainerHeader::safeMemCpyAndInc(void* i_dest, const uint8_t* &io_hd
                                     true/*SW Error*/);
         l_errl->collectTrace(SECURE_COMP_NAME);
         l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(TRBOOT_COMP_NAME);
         break;
     }
 

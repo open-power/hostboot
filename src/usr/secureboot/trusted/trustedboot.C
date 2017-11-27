@@ -535,7 +535,7 @@ void tpmInitialize(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     {
         tpmMarkFailed(i_pTpm);
         // Log this failure
-        errlCommit(err, SECURE_COMP_ID);
+        errlCommit(err, TRBOOT_COMP_ID);
     }
 
     TRACDCOMP( g_trac_trustedboot,
@@ -585,6 +585,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
                                         true /*Add HB SW Callout*/ );
 
             err->collectTrace( SECURE_COMP_NAME );
+            err->collectTrace(TRBOOT_COMP_NAME);
             break;
         }
 
@@ -619,7 +620,7 @@ void tpmReplayLog(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     if (err)
     {
         tpmMarkFailed(i_pTpm);
-        errlCommit(err, SECURE_COMP_ID);
+        errlCommit(err, TRBOOT_COMP_ID);
         delete err;
         err = nullptr;
     }
@@ -829,7 +830,7 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
         tpmMarkFailed(i_pTpm);
 
         // Log this failure
-        errlCommit(err, SECURE_COMP_ID);
+        errlCommit(err, TRBOOT_COMP_ID);
     }
 
     if (unlock)
@@ -951,7 +952,7 @@ void pcrExtendSeparator(TpmTarget* const i_pTpm)
         tpmMarkFailed(i_pTpm);
 
         // Log this failure
-        errlCommit(err, SECURE_COMP_ID);
+        errlCommit(err, TRBOOT_COMP_ID);
     }
 
     if (unlock)
@@ -1071,7 +1072,7 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
         ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
 
         // commit this error log first before creating the new one
-        errlCommit(l_err, SECURE_COMP_ID);
+        errlCommit(l_err, TRBOOT_COMP_ID);
 
        /*@
         * @errortype
@@ -1097,13 +1098,14 @@ void tpmMarkFailed(TpmTarget* const i_pTpm)
                             HWAS::GARD_NULL);
 
         l_err->collectTrace(SECURE_COMP_NAME);
+        l_err->collectTrace(TRBOOT_COMP_NAME);
 
         // pass on the plid from the previous error log to the new one
         l_err->plid(plid);
 
         ERRORLOG::ErrlUserDetailsTarget(l_proc).addToLog(l_err);
 
-        ERRORLOG::errlCommit(l_err, SECURE_COMP_ID);
+        ERRORLOG::errlCommit(l_err, TRBOOT_COMP_ID);
     }
     #endif
 }
@@ -1125,7 +1127,7 @@ void tpmVerifyFunctionalTpmExists()
         err = SECUREBOOT::getJumperState(l_state);
         if (err)
         {
-            errlCommit(err, SECURE_COMP_ID);
+            errlCommit(err, TRBOOT_COMP_ID);
 
             auto errPlid = err->plid();
 
@@ -1153,6 +1155,7 @@ void tpmVerifyFunctionalTpmExists()
                 err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                          HWAS::SRCI_PRIORITY_LOW);
                 err->collectTrace( SECURE_COMP_NAME );
+                err->collectTrace(TRBOOT_COMP_NAME);
                 uint32_t errPlid = err->plid();
 
                 // HW callout TPMs
@@ -1165,7 +1168,7 @@ void tpmVerifyFunctionalTpmExists()
                                       HWAS::NO_DECONFIG,
                                       HWAS::GARD_NULL);
                 }
-                errlCommit(err, SECURE_COMP_ID);
+                errlCommit(err, TRBOOT_COMP_ID);
                 // terminating the IPL with this fail
                 // Terminate IPL immediately
                 INITSERVICE::doShutdown(errPlid);
@@ -1314,9 +1317,10 @@ void* tpmDaemon(void* unused)
                                               0,
                                               true);
                 err->collectTrace(SECURE_COMP_NAME);
+                err->collectTrace(TRBOOT_COMP_NAME);
 
                 // Log this failure here since we can't reply to caller
-                errlCommit(err, SECURE_COMP_ID);
+                errlCommit(err, TRBOOT_COMP_ID);
 
             }
         }

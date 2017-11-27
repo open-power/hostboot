@@ -865,7 +865,7 @@ class TrustedBootTest: public CxxTest::TestSuite
                 fails++;
                 TS_FAIL( "testReadPCR: Error detected" );
                 errlCommit( err,
-                            SECURE_COMP_ID );
+                            TRBOOT_COMP_ID );
                 delete err;
                 err = nullptr;
                 break;

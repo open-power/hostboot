@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -378,6 +378,14 @@ const char SBEIO_COMP_NAME[] = "sbeio";
  */
 const compId_t OCCC_COMP_ID = 0x2A00;
 const char OCCC_COMP_NAME[] = "occc";
+//@}
+
+/** @name TRBOOT
+ *  Trusted Boot Support component
+ */
+//@{
+const compId_t TRBOOT_COMP_ID = 0x2B00;
+const char TRBOOT_COMP_NAME[] = "trboot";
 //@}
 
 /** @name RESERVED
