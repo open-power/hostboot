@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -175,6 +175,26 @@ inline bool spBaseServicesEnabled()
 
     return spBaseServicesEnabled;
 }
+
+
+/**
+ * @brief Save Istep Step and Substep for use by error logging
+ * @param[in] i_step, Istep Step
+ * @param[in] i_subStep, Istep subStep
+ * @return none
+ */
+void ShadowIstepData( uint8_t i_step,
+                      uint8_t i_subStep );
+
+/**
+ * @brief Extract Istep Step and Substep
+ * @param[out] o_step, Istep Step
+ * @param[out] o_subStep, Istep subStep
+ * @return none
+ */
+void GetIstepData( uint8_t & o_step,
+                   uint8_t & o_subStep );
+
 }
 
 
