@@ -50,7 +50,7 @@ void* call_host_update_master_tpm( void *io_pArgs )
     if (l_err)
     {
         l_stepError.addErrorDetails(l_err);
-        ERRORLOG::errlCommit( l_err, SECURE_COMP_ID );
+        ERRORLOG::errlCommit( l_err, TRBOOT_COMP_ID );
     }
 #endif
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,9 +82,10 @@ namespace TRUSTEDBOOT
                                           0,
                                           true);
             err->collectTrace(SECURE_COMP_NAME);
+            err->collectTrace(TRBOOT_COMP_NAME);
 
             // Log this failure here since we can't reply to caller
-            errlCommit(err, SECURE_COMP_ID);
+            errlCommit(err, TRBOOT_COMP_ID);
 
         }
     }
@@ -102,7 +103,7 @@ namespace TRUSTEDBOOT
             TRACFCOMP(g_trac_trustedboot,
                       ERR_MRK "AsyncMessage::respond with error log");
             // Since we can't pass back to the caller we will commit the log
-            errlCommit(iv_errl, SECURE_COMP_ID);
+            errlCommit(iv_errl, TRBOOT_COMP_ID);
 
             delete iv_errl;
             iv_errl = NULL;
