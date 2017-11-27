@@ -1615,6 +1615,13 @@ errlHndl_t IntrRp::setCommonInterruptBARs(intr_hdlr_t * i_proc,
 
     do {
 
+        l_err = setFspBAR(i_proc, i_enable);
+        if(l_err)
+        {
+            TRACFCOMP(g_trac_intr, "Error setting FSP BAR");
+            break;
+        }
+
         l_err = setPsiHbBAR(i_proc, i_enable);
         if (l_err)
         {
@@ -3230,6 +3237,52 @@ errlHndl_t INTR::disableExternalInterrupts()
             );
     }
     return err;
+}
+
+errlHndl_t IntrRp::setFspBAR(
+    const intr_hdlr_t* const i_pProcIntrHdlr,
+    const bool               i_enable)
+{
+    errlHndl_t pError = nullptr;
+
+    do
+    {
+
+    if (!i_enable)
+    {
+        // Noop on disable
+        break;
+    }
+
+    assert(i_pProcIntrHdlr != nullptr,"BUG! Input interrupt handler pointer "
+        "was nullptr");
+    auto * const pProc = i_pProcIntrHdlr->proc;
+    assert(pProc != nullptr,"BUG! proc target was nullptr");
+
+    uint64_t fspBAR =
+        pProc->getAttr<TARGETING::ATTR_FSP_BASE_ADDR>();
+
+    const size_t expSize = sizeof(fspBAR);
+    auto size = expSize;
+    pError = deviceWrite(
+                 pProc,
+                 &fspBAR,
+                 size,
+                 DEVICE_SCOM_ADDRESS(PU_PSI_BRIDGE_FSP_BAR_REG));
+    if(pError)
+    {
+        TRACFCOMP(g_trac_intr,ERR_MRK "Failed writing %d bytes of FSP BAR "
+            "address value (0x%016llX) to FSP BAR register for proc 0x%08X",
+            expSize,fspBAR,get_huid(pProc));
+        break;
+    }
+
+    assert(size == expSize,"Actual SCOM write size (%d) does not match "
+        "expected SCOM write size (%d)",size,expSize);
+
+    } while(0);
+
+    return pError;
 }
 
 errlHndl_t IntrRp::setPsiHbBAR(intr_hdlr_t *i_proc, bool i_enable)
