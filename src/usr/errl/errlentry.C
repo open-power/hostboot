@@ -44,6 +44,7 @@
 #include <errl/errludstring.H>
 #include <errl/errluserdetails.H>
 #include <errl/errludattribute.H>
+#include <errl/errludstate.H>
 #include <trace/interface.H>
 #include <arch/ppc.H>
 #include <hwas/common/hwasCallout.H>
@@ -99,6 +100,21 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Add the istep data to the vector of sections for this error log
+    ErrlUserDetailsSysState * l_pErrlUserDetailsSysState =
+            new ErrlUserDetailsSysState();
+
+    ErrlUD * l_pUdSection = new ErrlUD( l_pErrlUserDetailsSysState,
+                                        sizeof(ErrlUserDetailsSysState),
+                                        ERRL_COMP_ID,
+                                        1,
+                                        ERRL_UDT_SYSSTATE );
+
+    iv_SectionVector.push_back( l_pUdSection );
+#endif
+
     // Automatically add a software callout if asked
     if( i_hbSwError )
     {

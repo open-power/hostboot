@@ -610,7 +610,9 @@ InitService& InitService::getTheInstance( )
 
 
 InitService::InitService( ) :
-    iv_shutdownInProgress(false)
+    iv_shutdownInProgress(false),
+    iv_iStep( 0 ),
+    iv_iSubStep( 0 )
 {
     mutex_init(&iv_registryMutex);
 }
@@ -958,6 +960,27 @@ bool InitService::unregisterShutdownEvent(msg_q_t i_msgQ)
     return result;
 }
 
+
+void InitService::ShadowIstepData( uint8_t i_step,
+                                   uint8_t i_subStep )
+{
+    // save the inputs
+    iv_iStep = i_step;
+    iv_iSubStep = i_subStep;
+    return;
+}
+
+
+void InitService::GetIstepData( uint8_t & o_step,
+                                uint8_t & o_subStep )
+{
+    // extract the data
+    o_step = iv_iStep;
+    o_subStep = iv_iSubStep;
+    return;
+}
+
+
 /**
  * @see src/include/usr/initservice/initservicif.H
  */
@@ -975,5 +998,25 @@ bool unregisterShutdownEvent(msg_q_t i_msgQ)
 {
     return Singleton<InitService>::instance().unregisterShutdownEvent(i_msgQ);
 }
+
+
+void ShadowIstepData( uint8_t i_step,
+                      uint8_t i_subStep )
+{
+    Singleton<InitService>::instance().ShadowIstepData( i_step,
+                                                        i_subStep );
+    return;
+}
+
+
+void GetIstepData( uint8_t & o_step,
+                   uint8_t & o_subStep )
+{
+    Singleton<InitService>::instance().GetIstepData( o_step,
+                                                     o_subStep );
+
+    return;
+}
+
 
 } // namespace

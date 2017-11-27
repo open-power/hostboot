@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,6 +240,25 @@ public:
                       uint64_t i_masterHBInstance = 0xffffffffffffffffull,
                       uint32_t i_error_info = 0);
 
+    /**
+     * @brief Save Istep Step and Substep for use by error logging
+     * @param[in] i_step, Istep Step
+     * @param[in] i_subStep, Istep subStep
+     * @return none
+     */
+    void ShadowIstepData( uint8_t i_step,
+                          uint8_t i_subStep );
+
+    /**
+     * @brief Extract Istep Step and Substep
+     * @param[out] o_step, Istep Step
+     * @param[out] o_subStep, Istep subStep
+     * @return none
+     */
+    void GetIstepData( uint8_t & o_step,
+                       uint8_t & o_subStep );
+
+
 protected:
 
     /**
@@ -305,6 +324,9 @@ private:
 
     mutex_t iv_registryMutex;
     bool iv_shutdownInProgress;
+
+    uint8_t iv_iStep;     // shadow of current istep / substep
+    uint8_t iv_iSubStep;  //  for error logs
 
 };  //  class InitService
 

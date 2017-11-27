@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "errludcallout.H"
 #include "errludsensor.H"
 #include "errludbuild.H"
+#include "errludstate.H"
 
 namespace ERRORLOG
 {
@@ -67,7 +68,8 @@ public:
         registerParser<ErrlUserDetailsParserCallout>(ERRL_UDT_CALLOUT);
         registerParser<ErrlUserDetailsParserSensor>(ERRL_UDT_SENSOR);
         registerParser<ErrlUserDetailsParserBuild>(ERRL_UDT_BUILD);
-    }
+        registerParser<ErrlUserDetailsParserSysState>(ERRL_UDT_SYSSTATE);
+   }
 
 private:
 

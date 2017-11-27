@@ -46,6 +46,7 @@
 #include <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
 #include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
+#include <initservice/initserviceif.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/attrsync.H>
 #include <fapi2/plat_attr_override_sync.H>
@@ -837,6 +838,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
 {
     errlHndl_t err = NULL;
     o_doReconfig = false;
+
+    INITSERVICE::ShadowIstepData( static_cast<uint8_t>(i_istep),
+                                  static_cast<uint8_t>(i_substep) );
 
     // Get the Task Info for this step
     const TaskInfo * theStep = findTaskInfo(i_istep, i_substep);
