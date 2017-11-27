@@ -40,6 +40,17 @@ namespace mss
 {
 
 ///
+/// @brief Gets the JEDEC train and range values from the encoded VPD value
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[out] o_range - the JEDEC VREFDQ range
+/// @param[out] o_value - the JEDEC VREFDQ value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_vpd_wr_vref_range_and_value( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_range,
+        uint8_t& o_value );
+
+///
 /// @class mss::dimm::eff_dimm
 /// @brief A class made to perform eff_config functions based on the different dimm kinds (gen, type, buffer type)
 /// @note this is a base class
@@ -484,27 +495,23 @@ class eff_dimm
         ///
         /// @brief Determines & sets effective config for Output Buffer
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        /// @note The value and range attributes are combined as offsetting the WR VREF percentage can cause both the value and range to shift
+        /// The calculations would have to be done twice if the calculations were done separately. As such, they are combined below
         ///
         fapi2::ReturnCode output_buffer();
 
 
         ///
-        /// @brief Determines & sets effective config for Vref DQ Train Value
+        /// @brief Determines & sets effective config for Vref DQ Train Value and Range
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
-        fapi2::ReturnCode vref_dq_train_value();
+        fapi2::ReturnCode vref_dq_train_value_and_range();
 
         ///
         /// @brief Determines & sets effective config for Vref DQ Train Enable
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///
         fapi2::ReturnCode vref_dq_train_enable();
-
-        ///
-        /// @brief Determines & sets effective config for Vref DQ Train Range
-        /// @return fapi2::FAPI2_RC_SUCCESS if okay
-        ///
-        fapi2::ReturnCode vref_dq_train_range();
 
         ///
         /// @brief Determines & sets effective config for CA Parity Latency
