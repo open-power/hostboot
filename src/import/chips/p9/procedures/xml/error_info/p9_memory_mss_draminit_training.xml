@@ -805,4 +805,19 @@
   </callout>
 </hwpError>
 
+<hwpError>
+  <rc>RC_MSS_WR_VREF_DRAM_RECOVERY</rc>
+  <description>
+    An informational callout for the WR VREF bad DRAM recovery workaround
+  </description>
+  <ffdc>TARGET</ffdc>
+  <ffdc>RP</ffdc>
+  <ffdc>DRAM</ffdc>
+  <ffdc>IS_BAD</ffdc>
+  <callout>
+    <target>TARGET</target>
+    <priority>HIGH</priority>
+  </callout>
+</hwpError>
+
 </hwpErrors>
