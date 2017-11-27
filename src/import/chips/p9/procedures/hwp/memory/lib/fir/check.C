@@ -225,7 +225,7 @@ fapi2::ReturnCode during_draminit_training( const fapi2::Target<fapi2::TARGET_TY
                  .set_PHY_FIR(l_phyfir_masked)
                  .set_DIMM_TARGET(i_target)
                  .set_MCA_TARGET(l_mca),
-                 "Initial CAL failed: Reporting FIR bits set for %s ( phy: 0x%016lx",
+                 "Initial CAL failed: Reporting FIR bits set for %s ( phy: 0x%016lx )",
                  mss::c_str(i_target), l_phyfir_masked);
 
 fapi_try_exit:
