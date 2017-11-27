@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,7 @@
 #include <lib/utils/count_dimm.H>
 #include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
+#include <lib/dimm/ddr4/pda.H>
 
 namespace mss
 {
@@ -468,6 +469,38 @@ uint64_t read_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>
     return l_read_ctr_cycles + rc::vref_guess_time(i_target);
 }
 
+///
+/// @brief Sets up and runs the calibration step according to an external 1D vs 2D input
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @param[in] i_wr_vref - true IFF write VREF calibration needs to be run
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                  const uint64_t i_rp,
+                                  const uint8_t i_abort_on_error,
+                                  const bool i_wr_vref ) const
+{
+    typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
+    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
+
+    // Loops and sets or clears the 2D VREF bit on all DPs
+    for(auto& l_data : l_wr_vref_config)
+    {
+        // 0: Run only the VREF (2D) write centering algorithm
+        // 1: Run only the 1D
+        l_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!i_wr_vref);
+    }
+
+    FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
+
+    FAPI_TRY(phy_step::run(i_target, i_rp, i_abort_on_error));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Sets up and runs the calibration step
@@ -480,22 +513,216 @@ fapi2::ReturnCode write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i
                                   const uint64_t i_rp,
                                   const uint8_t i_abort_on_error ) const
 {
-    typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
-    std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
-    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
+    return run(i_target, i_rp, i_abort_on_error, iv_wr_vref);
+}
 
-    // Loops and sets or clears the 2D VREF bit on all DPs
-    for(auto& l_data : l_wr_vref_config)
+///
+/// @brief Executes the pre-cal step workaround
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode write_ctr::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error ) const
+{
+    iv_dram_to_check.clear();
+
+    // Only add DRAMs to check if:
+    // 1) WR VREF is enabled
+    // 2) the part is a DD2 or above
+    if(iv_wr_vref && (!mss::chip_ec_nimbus_lt_2_0(i_target)))
     {
-        // 0: Run only the VREF (2D) write centering algorithm
-        // 1: Run only the 1D
-        l_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!iv_wr_vref);
+        FAPI_INF("%s checking for clear DRAMs", mss::c_str(i_target));
+        uint64_t l_num_dram = 0;
+
+        uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+        FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+        l_num_dram = (l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? MAX_DRAMS_X8 : MAX_DRAMS_X4;
+
+        // Loops through all the DRAM and adds them to be checked if they are clean of any bad bits
+        // We only want to run the workaround on an entirely clean DRAM that goes bad
+        // If we have a DRAM that already has bad bit(s), there could be something else going on and the workaround will not help or could make matters worse
+        for(uint64_t l_dram = 0; l_dram < l_num_dram; l_dram++)
+        {
+            bool l_has_disables = false;
+
+            FAPI_TRY(mss::workarounds::dp16::wr_vref::dram_has_disables(i_target, i_rp, l_dram, l_has_disables));
+
+            FAPI_INF("%s RP%lu DRAM%lu Disables? %s", mss::c_str(i_target), i_rp, l_dram, l_has_disables ? "yes" : "no");
+
+            // If there are no disables, then we need to check the DRAM
+            if(!l_has_disables)
+            {
+                // Gets the starting WR DQ delay for the DRAM
+                uint64_t l_value = 0;
+
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::get_starting_wr_dq_delay(i_target, i_rp, l_dram, l_value));
+
+                iv_dram_to_check.push_back({l_dram, l_value});
+            }
+        }
+    }
+    else
+    {
+        FAPI_INF("%s workaround is not being run. WR VREF: %s chip version: %s", mss::c_str(i_target),
+                 iv_wr_vref ? "enabled" : "disabled", mss::chip_ec_nimbus_lt_2_0(i_target) ? "DD1" : "DD2");
     }
 
-    FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    FAPI_TRY(phy_step::run(i_target, i_rp, i_abort_on_error));
+///
+/// @brief Executes the post-cal step workaround
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode write_ctr::post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error ) const
+{
+    // Loops through the DRAMs to check and creates a vector of bad DRAMs and their associated starting delays
+    std::vector<std::pair<uint64_t, uint64_t>> l_bad_drams;
 
+    // Checking all of the DRAMs that had been good before WR VREF
+    // If any of them have gone bad, then note it and run the workaround
+    for(const auto l_pair : iv_dram_to_check)
+    {
+        const auto l_dram = l_pair.first;
+        const auto l_delay = l_pair.second;
+        bool l_is_bad = false;
+        FAPI_TRY(mss::workarounds::dp16::wr_vref::is_dram_disabled(i_target, i_rp, l_dram, l_is_bad));
+
+        // If we have a bad DRAM, note it and add it to the DRAM to test
+        if(l_is_bad)
+        {
+            FAPI_INF("%s RP%lu DRAM%lu is bad! Workaround will be run on it", mss::c_str(i_target), i_rp, l_dram);
+            l_bad_drams.push_back({l_dram, l_delay});
+        }
+    }
+
+    iv_dram_to_check.clear();
+
+    // Only run the rest of the workaround if we have any bad DRAMs
+    if(l_bad_drams.size() > 0)
+    {
+        fapi2::Target<fapi2::TARGET_TYPE_DIMM> l_dimm;
+        std::vector<uint64_t> l_ranks;
+
+        // Gets the ranks on which to latch the VREF's
+        FAPI_TRY(mss::rank::get_ranks_in_pair( i_target, i_rp, l_ranks));
+
+        // If the rank vector is empty log an error
+        FAPI_ASSERT(!l_ranks.empty(),
+                    fapi2::MSS_INVALID_RANK().
+                    set_MCA_TARGET(i_target).
+                    set_RANK(i_rp).
+                    set_FUNCTION(mss::ffdc_function_codes::WR_VREF_TRAINING_WORKAROUND),
+                    "%s rank pair is empty! %lu", mss::c_str(i_target), i_rp);
+
+        FAPI_ASSERT(l_ranks[0] != NO_RANK,
+                    fapi2::MSS_INVALID_RANK().
+                    set_MCA_TARGET(i_target).
+                    set_RANK(NO_RANK).
+                    set_FUNCTION(mss::ffdc_function_codes::WR_VREF_TRAINING_WORKAROUND),
+                    "%s rank pair has no ranks %lu", mss::c_str(i_target), i_rp);
+
+        // Ensures we get a valid DIMM target / rank combo
+        FAPI_TRY( mss::rank::get_dimm_target_from_rank(i_target, l_ranks[0], l_dimm),
+                  "%s Failed get_dimm_target_from_rank in write_ctr::post_workaround",
+                  mss::c_str(i_target));
+
+        // Assembles the PDA container and fixes the disables
+        {
+            mss::ddr4::pda::commands<mss::ddr4::mrs06_data> l_container;
+
+            // Loops through and sets up all the data needed the workaround
+            for(const auto& l_pair : l_bad_drams )
+            {
+                const auto l_dram = l_pair.first;
+                const auto l_delay = l_pair.second;
+
+                // Adds in the PDA necessary for the latching commands
+                fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+                mss::ddr4::mrs06_data l_mrs(l_dimm, l_rc);
+                FAPI_TRY(l_rc, "%s failed to create MRS06 data class", mss::c_str(l_dimm));
+
+                // Updates the MRS06 settings to have the proper VREF settings
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::modify_mrs_vref_to_vpd( l_dimm, l_mrs));
+
+                FAPI_TRY(l_container.add_command(l_dimm, l_ranks[0], l_mrs, l_dram));
+
+                // Updates the WR VREF value in the DP
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::configure_wr_vref_to_nominal( l_dimm, i_rp, l_dram));
+
+                // Restores the known good values for WR DQ delays
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::reset_wr_dq_delay( i_target, i_rp, l_dram, l_delay ));
+
+                // Clears the disable bits for PDA latching
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::clear_dram_disable_bits( i_target, i_rp, l_dram ));
+            }
+
+            // Latches the failing DRAM's originally good values out to the DRAMs with PDA
+            FAPI_TRY(mss::ddr4::pda::execute_wr_vref_latch(l_container));
+
+            // Disabling bits prior to PDA could cause issues with DRAM latching in the VREF values
+            // As such, we're setting disable bits after latching PDA
+            for(const auto& l_pair : l_bad_drams )
+            {
+                const auto l_dram = l_pair.first;
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::disable_bits( i_target, i_rp, l_dram));
+            }
+        }
+
+        FAPI_TRY(mss::workarounds::dp16::wr_vref::configure_skip_bits( i_target ));
+
+        // Re-runs WR VREF calibration
+        FAPI_TRY(run( i_target,
+                      i_rp,
+                      i_abort_on_error,
+                      true ));
+
+        // Clears the training FIR's
+        FAPI_TRY(mss::workarounds::dp16::wr_vref::clear_training_firs( i_target ));
+
+        // If the DRAM's are still bad, exit
+        for(const auto& l_pair : l_bad_drams )
+        {
+            bool l_is_bad = false;
+            const auto l_dram = l_pair.first;
+
+            FAPI_TRY(mss::workarounds::dp16::wr_vref::is_dram_disabled(i_target, i_rp, l_dram, l_is_bad));
+
+            if(l_is_bad)
+            {
+                FAPI_INF("%s RP%lu found DRAM%lu as bad after the second run of WR VREF! Exiting and letting ECC clean this up",
+                         mss::c_str(i_target), i_rp, l_dram);
+            }
+            else
+            {
+                FAPI_INF("%s RP%lu found DRAM%lu as recovered after the second run of WR VREF! Restoring disable bits and running WR CTR 1D calibration",
+                         mss::c_str(i_target), i_rp, l_dram);
+                FAPI_TRY(mss::workarounds::dp16::wr_vref::clear_dram_disable_bits( i_target, i_rp, l_dram ));
+            }
+
+            // Logs the results for this DRAM
+            // Note: always logged as recovered, as we want this to be informational
+            FAPI_TRY(mss::workarounds::dp16::wr_vref::log_dram_results(i_target, i_rp, l_dram, l_is_bad));
+        }
+
+        // Re-runs WR VREF
+        FAPI_TRY(run( i_target,
+                      i_rp,
+                      i_abort_on_error,
+                      false ));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }

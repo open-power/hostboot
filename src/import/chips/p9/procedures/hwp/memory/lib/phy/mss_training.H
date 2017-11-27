@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -580,6 +580,28 @@ class write_ctr : public phy_step
                                const uint8_t i_abort_on_error ) const override;
 
         ///
+        /// @brief Executes the pre-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                          const uint64_t i_rp,
+                                          const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Executes the post-cal step workaround
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                           const uint64_t i_rp,
+                                           const uint8_t i_abort_on_error ) const override;
+
+        ///
         /// @brief Calculates the number of cycles a given calibration step will take
         /// @param[in] i_target - the MCA target on which to operate
         /// @return l_cycles - the number of cycles a given calibration step wil take
@@ -597,6 +619,24 @@ class write_ctr : public phy_step
 
     private:
         bool iv_wr_vref;
+        // Contains all information related to any DRAMs that were disabled due to the WR VREF algorithm
+        // The pair contains the following information:
+        // first  -> the DRAM's number to test
+        // second -> the DRAM's starting write delay value
+        mutable std::vector<std::pair<uint64_t, uint64_t>> iv_dram_to_check;
+
+        ///
+        /// @brief Sets up and runs the calibration step according to an external 1D vs 2D input
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @param[in] i_wr_vref - true IFF write VREF calibration needs to be run
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error,
+                               const bool i_wr_vref ) const;
 };
 
 ///

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -511,6 +511,24 @@
     <ffdc>MAX</ffdc>
     <ffdc>ACTUAL</ffdc>
     <ffdc>KEYWORD</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>MCS_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_OFFSET_WR_VREF_OUT_OF_RANGE</rc>
+    <description>
+      The offset composite range is out of range
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>MAX</ffdc>
+    <ffdc>OFFSET</ffdc>
+    <ffdc>COMPOSITE</ffdc>
     <callout>
       <hw>
         <hwid>VPD_PART</hwid>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -708,7 +708,7 @@ fapi2::ReturnCode get_dimm_target_from_rank(const fapi2::Target<T>& i_target,
 /// @brief Given a target, get the rank pair assignments, based on DIMMs
 /// @tparam T the fapi2::TargetType
 /// @param[in] i_target the target (MCA or MBA?)
-/// @param[out] o_registers the regiter settings for the appropriate rank pairs
+/// @param[out] o_registers the register settings for the appropriate rank pairs
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< fapi2::TargetType T>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1069,6 +1069,349 @@ const std::vector< std::vector<uint64_t> > dp16Traits<TARGET_TYPE_MCA>::RDCLK_RE
         MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_2,
         MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_3,
         MCA_DDRPHY_DP16_DQS_RD_PHASE_SELECT_RANK_PAIR3_P0_4,
+    },
+};
+
+const std::vector< std::vector<uint64_t> > dp16Traits<TARGET_TYPE_MCA>::WR_DQ_DELAY_REG =
+{
+    // RP0
+    {
+        // DP0
+        MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_1_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_2_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_3_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_4_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_5_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_6_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_7_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_8_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_9_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_10_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_11_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_12_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_13_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_14_RP0_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_15_RP0_REG_P0_0,
+
+        // DP1
+        MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_1_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_2_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_3_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_4_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_5_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_6_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_7_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_8_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_9_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_10_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_11_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_12_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_13_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_14_RP0_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_15_RP0_REG_P0_1,
+
+        // DP2
+        MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_1_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_2_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_3_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_4_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_5_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_6_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_7_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_8_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_9_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_10_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_11_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_12_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_13_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_14_RP0_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_15_RP0_REG_P0_2,
+
+        // DP3
+        MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_1_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_2_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_3_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_4_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_5_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_6_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_7_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_8_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_9_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_10_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_11_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_12_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_13_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_14_RP0_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_15_RP0_REG_P0_3,
+
+        // DP4
+        MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_1_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_2_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_3_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_4_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_5_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_6_RP0_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_7_RP0_REG_P0_4,
+    },
+
+    // RP1
+    {
+        // DP0
+        MCA_DP16_WR_DELAY_VALUE_0_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_1_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_2_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_3_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_4_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_5_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_6_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_7_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_8_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_9_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_10_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_11_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_12_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_13_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_14_RP1_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_15_RP1_REG_P0_0,
+
+        // DP1
+        MCA_DP16_WR_DELAY_VALUE_0_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_1_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_2_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_3_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_4_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_5_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_6_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_7_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_8_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_9_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_10_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_11_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_12_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_13_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_14_RP1_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_15_RP1_REG_P0_1,
+
+        // DP2
+        MCA_DP16_WR_DELAY_VALUE_0_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_1_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_2_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_3_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_4_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_5_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_6_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_7_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_8_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_9_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_10_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_11_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_12_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_13_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_14_RP1_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_15_RP1_REG_P0_2,
+
+        // DP3
+        MCA_DP16_WR_DELAY_VALUE_0_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_1_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_2_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_3_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_4_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_5_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_6_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_7_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_8_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_9_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_10_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_11_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_12_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_13_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_14_RP1_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_15_RP1_REG_P0_3,
+
+        // DP4
+        MCA_DP16_WR_DELAY_VALUE_0_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_1_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_2_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_3_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_4_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_5_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_6_RP1_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_7_RP1_REG_P0_4,
+    },
+
+    // RP2
+    {
+        // DP0
+        MCA_DP16_WR_DELAY_VALUE_0_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_1_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_2_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_3_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_4_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_5_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_6_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_7_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_8_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_9_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_10_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_11_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_12_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_13_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_14_RP2_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_15_RP2_REG_P0_0,
+
+        // DP1
+        MCA_DP16_WR_DELAY_VALUE_0_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_1_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_2_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_3_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_4_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_5_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_6_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_7_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_8_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_9_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_10_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_11_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_12_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_13_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_14_RP2_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_15_RP2_REG_P0_1,
+
+        // DP2
+        MCA_DP16_WR_DELAY_VALUE_0_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_1_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_2_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_3_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_4_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_5_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_6_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_7_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_8_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_9_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_10_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_11_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_12_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_13_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_14_RP2_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_15_RP2_REG_P0_2,
+
+        // DP3
+        MCA_DP16_WR_DELAY_VALUE_0_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_1_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_2_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_3_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_4_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_5_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_6_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_7_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_8_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_9_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_10_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_11_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_12_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_13_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_14_RP2_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_15_RP2_REG_P0_3,
+
+        // DP4
+        MCA_DP16_WR_DELAY_VALUE_0_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_1_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_2_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_3_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_4_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_5_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_6_RP2_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_7_RP2_REG_P0_4,
+    },
+
+    // RP3
+    {
+        // DP0
+        MCA_DP16_WR_DELAY_VALUE_0_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_1_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_2_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_3_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_4_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_5_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_6_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_7_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_8_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_9_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_10_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_11_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_12_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_13_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_14_RP3_REG_P0_0,
+        MCA_DP16_WR_DELAY_VALUE_15_RP3_REG_P0_0,
+
+        // DP1
+        MCA_DP16_WR_DELAY_VALUE_0_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_1_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_2_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_3_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_4_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_5_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_6_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_7_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_8_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_9_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_10_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_11_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_12_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_13_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_14_RP3_REG_P0_1,
+        MCA_DP16_WR_DELAY_VALUE_15_RP3_REG_P0_1,
+
+        // DP2
+        MCA_DP16_WR_DELAY_VALUE_0_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_1_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_2_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_3_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_4_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_5_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_6_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_7_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_8_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_9_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_10_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_11_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_12_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_13_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_14_RP3_REG_P0_2,
+        MCA_DP16_WR_DELAY_VALUE_15_RP3_REG_P0_2,
+
+        // DP3
+        MCA_DP16_WR_DELAY_VALUE_0_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_1_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_2_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_3_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_4_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_5_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_6_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_7_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_8_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_9_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_10_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_11_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_12_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_13_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_14_RP3_REG_P0_3,
+        MCA_DP16_WR_DELAY_VALUE_15_RP3_REG_P0_3,
+
+        // DP4
+        MCA_DP16_WR_DELAY_VALUE_0_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_1_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_2_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_3_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_4_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_5_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_6_RP3_REG_P0_4,
+        MCA_DP16_WR_DELAY_VALUE_7_RP3_REG_P0_4,
     },
 };
 
@@ -2539,33 +2882,32 @@ fapi2::ReturnCode reset_wr_vref_config0( const fapi2::Target<TARGET_TYPE_MCA>& i
     // traits definition
     typedef dp16Traits<TARGET_TYPE_MCA> TT;
 
-    // builds up the base register value
+    // Builds up the base register value by field for clarity, using characterized values that lead to the best results
     fapi2::buffer<uint64_t> l_config0_data;
-    l_config0_data.clearBit<TT::WR_VREF_CONFIG0_FULL_1D>()
-    // TK putting hardcoded defaults here - revisit how to handle this (values should be obtained through characterization)
-    // smallest available step size - algorithm adds 1 so this is a 1 not a 0
+    l_config0_data.setBit<TT::WR_VREF_CONFIG0_FULL_1D>()
+    // Smallest available step size - algorithm adds 1 so this is a 1 not a 0
     .insertFromRight<TT::WR_VREF_CONFIG0_2D_SMALL_STEP_VAL, TT::WR_VREF_CONFIG0_2D_SMALL_STEP_VAL_LEN>(0b000)
-    // step size of 4 - algorithm adds 1 so this is a 4, not a 3
-    .insertFromRight<TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL, TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL_LEN>(0b0011)
-    // for intermediary bits, skip all 7, aka only run one bit on each DRAM for intermediary bits
-    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP, TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP_LEN>(0b111)
-    // run for two VREFs looking for an increase - this is register value + 1 to the algorithm, so it's a 1, not a 0
-    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP, TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP_LEN>(0b001);
+    //  Big step size of 2 - algorithm adds 1 so the register setting is a 1
+    .insertFromRight<TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL, TT::WR_VREF_CONFIG0_2D_BIG_STEP_VAL_LEN>(0b0001)
+    // For intermediary bits, skip all 7, aka only run one bit on each DRAM for intermediary bits
+    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP, TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP_LEN>(0b000)
+    // Run for the maximum number of VREFs looking for an increase
+    .insertFromRight<TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP, TT::WR_VREF_CONFIG0_NUM_NO_INC_COMP_LEN>(0b111);
 
     // Whether the 2D VREF is enabled or not varies by the calibration attribute
     fapi2::buffer<uint32_t> l_cal_steps_enabled;
     FAPI_TRY( mss::cal_step_enable(i_target, l_cal_steps_enabled) );
 
-    // adds the information to the buffer
+    // Adds the information to the buffer
     l_config0_data.writeBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>(!l_cal_steps_enabled.getBit<WRITE_CTR_2D_VREF>());
 
-    //blast out the scoms
+    // Blast out the scoms
     FAPI_TRY( mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_config0_data) );
 
-    // return success
+    // Return success
     return fapi2::FAPI2_RC_SUCCESS;
 
-    // handle errors
+    // Handle errors
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -3679,6 +4021,95 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace wr_vref
+{
+
+///
+/// @brief Gets the WR VREF range based upon the composite range
+/// @param[in] i_value the composite range value
+/// @return l_range the JEDEC WR VREF range
+///
+uint8_t get_range(const uint64_t i_value)
+{
+    // According to JEDEC range 1 uses a 0 and range 2 uses a 1
+    constexpr uint64_t RANGE1 = 0x00;
+    constexpr uint64_t RANGE2 = 0x01;
+    const uint8_t l_range = ((i_value >= WR_VREF_CROSSOVER_RANGE) ? RANGE1 : RANGE2);
+    return l_range;
+}
+
+///
+/// @brief Gets the WR VREF value based upon the composite range
+/// @param[in] i_value the composite range value
+/// @return l_range the JEDEC WR VREF value
+///
+uint8_t get_value(const uint64_t i_value)
+{
+    // Subtract out the crossover range if need be
+    // Remember, the JEDEC range overlaps for a number of VREFs
+    // The crossover range is used to offset the start of the JEDEC range that is higher than the other
+    const uint8_t l_value = ((i_value >= WR_VREF_CROSSOVER_RANGE) ?
+                             (i_value - WR_VREF_CROSSOVER_RANGE) : (i_value));
+    return l_value;
+}
+
+///
+/// @brief Gets the WR VREF value based upon the inputted values
+/// @param[in] i_range the JEDEC range to use
+/// @param[in] i_value the JEDED value to use
+/// @return l_range the JEDEC WR VREF value
+///
+uint64_t compute_composite_value(const uint64_t i_range, const uint64_t i_value)
+{
+    // Add in the crossover range if need be
+    // Remember, the JEDEC range overlaps for a number of VREFs
+    // The crossover range is used to offset the start of the JEDEC range that is higher than the other
+    constexpr uint64_t USE_CROSSOVER_RANGE = 0;
+    return i_value + ((i_range == USE_CROSSOVER_RANGE) ? WR_VREF_CROSSOVER_RANGE : 0);
+}
+
+///
+/// @brief Offsets the WR VREF train and range values based upon the offset attribute
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in,out] io_train_range - train range value to update
+/// @param[in,out] io_train_value - train range value to update
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode offset_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 uint8_t& io_train_range,
+                                 uint8_t& io_train_value )
+{
+    const auto& l_mcs = mss::find_target<fapi2::TARGET_TYPE_MCS>(i_target);
+    // Computing the composite range simplifies the logic for offsetting a WR VREF range and value
+    int64_t l_composite = compute_composite_value(io_train_range, io_train_value);
+
+    int8_t l_offset = 0;
+    FAPI_TRY( mss::wr_vref_offset(mss::find_target<fapi2::TARGET_TYPE_MCBIST>(i_target), l_offset) );
+    l_composite += l_offset;
+
+    // Check that the value is in range
+    FAPI_ASSERT( (l_composite >= 0) && (l_composite <= WR_VREF_MAX_COMPOSITE_RANGE),
+                 fapi2::MSS_OFFSET_WR_VREF_OUT_OF_RANGE()
+                 .set_TARGET(i_target)
+                 .set_MCS_TARGET(l_mcs)
+                 .set_MAX(WR_VREF_MAX_COMPOSITE_RANGE)
+                 .set_OFFSET(l_offset)
+                 .set_COMPOSITE(l_composite),
+                 "%s Offset composite range is out of bounds (%d - %d): %d offset is: %d",
+                 mss::c_str(i_target),
+                 0,
+                 WR_VREF_MAX_COMPOSITE_RANGE,
+                 l_composite,
+                 l_offset );
+
+    io_train_range = get_range(l_composite);
+    io_train_value = get_value(l_composite);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // close namespace wr_vref
 } // close namespace dp16
 } // close namespace mss
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@
 #include <lib/dimm/rank.H>
 #include <lib/utils/bit_count.H>
 #include <lib/fir/check.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
+#include <lib/dimm/eff_dimm.H>
 
 namespace mss
 {
@@ -1077,7 +1079,6 @@ fapi2::ReturnCode get_delay_data(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
             MCA_DDRPHY_DP16_READ_DELAY3_RANK_PAIR3_P0_4,
         },
     };
-
     // Bombs out if the rank pair is out of range
 
     FAPI_ASSERT( i_rank_pair < MAX_RANK_PAIRS,
@@ -1115,6 +1116,7 @@ fapi2::ReturnCode get_delay_data(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 ///
 /// @brief Finds the median and sorts the vector
 /// @param[in,out] io_reg_data register data
@@ -1127,21 +1129,17 @@ fapi2::ReturnCode find_median_and_sort(std::vector<delay_data>& io_reg_data, uin
     // The fapi_try is in an if statement, this ensures we have a good value
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // Bomb out if the vector is empty to avoid accessing a non-existant element
-    FAPI_ASSERT(!io_reg_data.empty(),
-                fapi2::MSS_RD_CTR_WORKAROUND_EMPTY_VECTOR(),
-                "Empty vector passed in to find_median_and_sort"
-               );
+    // Note: the null constructor is deleted
+    // We need to return the data value, so we're creating a temporary variable with 0's for it's values to get the median positon
+    // Below, we'll get the data and return it to o_median
+    delay_data l_temp(0, 0, 0);
 
     // Sorts first
     std::sort(io_reg_data.begin(), io_reg_data.end());
 
-    // TODO:RTC172759 Add generic median function - that can replace the below code
-    // Finding the median is simply a matter of finding the midway point and getting the data there
-    {
-        const auto l_median_it = io_reg_data.begin() + io_reg_data.size() / 2;
-        o_median = l_median_it->iv_data;
-    }
+    // Returns the median value
+    FAPI_TRY(find_median(io_reg_data, l_temp));
+    o_median = l_temp.iv_data;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -1557,6 +1555,644 @@ fapi2::ReturnCode setup_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Checks that the rank pair and DRAM are in bounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_function - the calling function to callout in FFDC
+///
+fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const ffdc_function_codes i_function )
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Checks inputs
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks for DRAM in bounds
+    {
+        const uint64_t MAX_NUM_DRAM = l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8 ? MAX_DRAMS_X8 : MAX_DRAMS_X4;
+        FAPI_ASSERT(i_dram < MAX_NUM_DRAM,
+                    fapi2::MSS_INVALID_INDEX_PASSED()
+                    .set_INDEX(i_dram)
+                    .set_FUNCTION(i_function),
+                    "%s Invalid DRAM index passed to check_for_dram_disabled (%d)",
+                    mss::c_str(i_target),
+                    i_dram);
+    }
+
+    // Checks for i_rp in bounds
+    FAPI_ASSERT(i_rp < MAX_RANK_PAIRS,
+                fapi2::MSS_INVALID_RANK().
+                set_MCA_TARGET(i_target).
+                set_RANK(i_rp).
+                set_FUNCTION(i_function),
+                "%s rank pair is out of bounds %lu", mss::c_str(i_target), i_rp);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the disable register and bit position for the DRAM
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_reg - the register to access from
+/// @param[out] o_bit_pos - the bit position in the register to access from
+/// @param[out] o_bit_len - the bit length to access
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_disable_reg_and_pos_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_reg,
+        uint64_t& o_bit_pos,
+        uint64_t& o_bit_len)
+{
+    // Gets the DRAM width
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks inputs
+    FAPI_TRY(check_rp_and_dram(i_target,
+                               i_rp,
+                               i_dram,
+                               ffdc_function_codes::GET_DRAM_DISABLE_REG_AND_POS));
+
+    // Get the register and bit positions
+    {
+        typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+        // Gets the DP associated with the DRAM and the DRAM's position in the DP
+        const auto l_dram_per_dp = (l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? BYTES_PER_DP : NIBBLES_PER_DP;
+        const auto l_dp = i_dram / l_dram_per_dp;
+        const auto l_dram_pos = i_dram % l_dram_per_dp;
+
+        // Bit position and length
+        o_bit_pos = TT::BIT_DISABLE + (l_dram_pos * l_width[0]);
+        o_bit_len = l_width[0];
+
+        // Gets the register address to read
+        o_reg = TT::BIT_DISABLE_REG[i_rp][l_dp].first;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the disables for a specific DRAM
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_disables - true if the whole DRAM is disabled
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_disables_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_disables)
+{
+    uint64_t l_reg = 0;
+    uint64_t l_bit_pos = 0;
+    uint64_t l_len = 0;
+    fapi2::buffer<uint64_t> l_data;
+    FAPI_TRY(get_disable_reg_and_pos_for_dram(i_target, i_rp, i_dram, l_reg, l_bit_pos, l_len));
+
+    // Reads
+    FAPI_TRY( mss::getScom(i_target, l_reg, l_data) );
+
+    // Gets the DRAM's data
+    FAPI_TRY(l_data.extractToRight(o_disables, l_bit_pos, l_len));
+
+    FAPI_INF("%s RP%lu DRAM%lu reg:0x%016lx reg_value:0x%016lx DRAM disables: 0x%lx", mss::c_str(i_target), i_rp, i_dram,
+             l_reg, l_data, o_disables);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Identifies if an inputted DRAM is wholely disabled
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_disabled - true if the whole DRAM is disabled
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_dram_disabled( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    const uint64_t i_dram,
+                                    bool& o_disabled)
+{
+    // Checks inputs
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    uint64_t l_disables = 0;
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Gets the disables for this DRAM
+    FAPI_TRY(get_disables_for_dram(i_target, i_rp, i_dram, l_disables));
+
+    // A DRAM is disabled if all of it's bits are disabled
+    {
+        const uint64_t l_disabled_value = (l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? 0xff : 0xf;
+        o_disabled = (l_disables == l_disabled_value);
+        FAPI_INF("%s RP%lu DRAM%lu DRAM disables: 0x%lx check value: 0x%lx %s disabled", mss::c_str(i_target), i_rp, i_dram,
+                 l_disables, l_disabled_value, o_disabled ? "is" : "isn't");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Identifies if an inputted DRAM has any disables
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_has_disables - true if the whole DRAM has any disables
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode dram_has_disables( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     bool& o_has_disables)
+{
+    // Checks inputs
+    uint64_t l_disables = 0;
+
+    // Gets the disables for this DRAM
+    FAPI_TRY(get_disables_for_dram(i_target, i_rp, i_dram, l_disables));
+
+    // A DRAM is disabled if all of it's bits are disabled
+    {
+        constexpr uint64_t CLEAR = 0;
+        o_has_disables = (CLEAR != l_disables);
+        FAPI_INF("%s RP%lu DRAM%lu DRAM disables: 0x%lx clear value: 0x%lx %s disables", mss::c_str(i_target), i_rp, i_dram,
+                 l_disables, CLEAR, o_has_disables ? "has" : "has no");
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Disables bits based upon RD VREF values that differ from the median significantly
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode disable_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const uint64_t i_rp,
+                                const uint64_t i_dram )
+{
+    // Gets the register for the disable bits
+    uint64_t l_reg = 0;
+    uint64_t l_dram_start_pos = 0;
+    uint64_t l_len = 0;
+    FAPI_TRY(get_disable_reg_and_pos_for_dram(i_target, i_rp, i_dram, l_reg, l_dram_start_pos, l_len));
+
+    // Sets up this DRAM's disable bits
+    {
+        // Gets the bit to test
+        uint64_t l_bit = 0;
+        fapi2::buffer<uint64_t> l_data;
+        std::vector<uint64_t> l_rd_vref_values;
+        FAPI_TRY(read_rd_vref_for_dram( i_target, i_rp, i_dram, l_rd_vref_values ));
+        FAPI_TRY(identify_first_good_rd_vref( i_target, i_rp, i_dram, l_rd_vref_values, l_bit ));
+
+        // Read...
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_data));
+
+        // Modify...
+        // First of all, disable all bits - for the workaround, we only want to run one bit in the DRAM
+        FAPI_TRY(l_data.setBit(l_dram_start_pos, l_len));
+        // Next, clear the bit (set it as good)
+        FAPI_TRY(l_data.clearBit(l_dram_start_pos + l_bit));
+
+        // Write...
+        FAPI_TRY(mss::putScom(i_target, l_reg, l_data));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears all disable bits for a recovered DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode clear_dram_disable_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram )
+{
+    // Gets the register for the disable bits
+    uint64_t l_reg = 0;
+    uint64_t l_bit_pos = 0;
+    uint64_t l_len = 0;
+    FAPI_TRY(get_disable_reg_and_pos_for_dram(i_target, i_rp, i_dram, l_reg, l_bit_pos, l_len));
+
+    // Restores the disabled bits
+    {
+        // Read...
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_data));
+
+        // Modify...
+        FAPI_TRY(l_data.clearBit(l_bit_pos, l_len));
+
+        // Write...
+        FAPI_TRY(mss::putScom(i_target, l_reg, l_data));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the WR VREF value of a DRAM to be the nominal values
+/// @param[in] i_target the fapi2 target type DIMM
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode configure_wr_vref_to_nominal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram)
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    const std::vector<std::vector< std::pair<uint64_t, uint64_t> >> REGS =
+    {
+        TT::WR_VREF_VALUE_RP0_REG,
+        TT::WR_VREF_VALUE_RP1_REG,
+        TT::WR_VREF_VALUE_RP2_REG,
+        TT::WR_VREF_VALUE_RP3_REG,
+    };
+
+    const auto& l_mca = mss::find_target<fapi2::TARGET_TYPE_MCA>(i_target);
+
+    uint8_t l_width = 0;
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+    FAPI_TRY(check_rp_and_dram(l_mca, i_rp, i_dram, ffdc_function_codes::CONFIGURE_WR_VREF_TO_NOMINAL));
+
+    // First gets the address
+    {
+        constexpr uint64_t NUM_DRAM_PER_REG = 2;
+        const auto l_dram_per_dp = (l_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? BYTES_PER_DP : NIBBLES_PER_DP;
+        const auto l_dp = i_dram / l_dram_per_dp;
+        const auto l_reg_num = (i_dram % l_dram_per_dp) / NUM_DRAM_PER_REG;
+        const auto l_dram_pos = i_dram % NUM_DRAM_PER_REG;
+        const auto l_range_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_RANGE_DRAM_EVEN : TT::WR_VREF_VALUE_RANGE_DRAM_ODD;
+        const auto l_value_pos = (l_dram_pos == 0) ? TT::WR_VREF_VALUE_VALUE_DRAM_EVEN : TT::WR_VREF_VALUE_VALUE_DRAM_ODD;
+
+        const auto l_reg = (l_reg_num == 0) ? REGS[i_rp][l_dp].first : REGS[i_rp][l_dp].second;
+
+        // Now for read modify write
+        fapi2::buffer<uint64_t> l_data;
+
+        // Gets the VPD JEDEC WR VREF information
+        fapi2::buffer<uint8_t> l_train_value;
+        fapi2::buffer<uint8_t> l_train_range;
+        FAPI_TRY(mss::get_vpd_wr_vref_range_and_value(i_target, l_train_range, l_train_value));
+
+        FAPI_TRY(mss::getScom(l_mca, l_reg, l_data));
+
+        // Sends the data
+        FAPI_TRY(l_data.writeBit(l_train_range, l_range_pos));
+        FAPI_TRY(l_data.insertFromRight(l_train_value, l_value_pos, TT::WR_VREF_VALUE_VALUE_DRAM_EVEN_LEN));
+
+        FAPI_TRY(mss::putScom(l_mca, l_reg, l_data));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configures the skip bits to be 0x7 for an entire port for the workaround
+/// @param[in] i_target the fapi2 target type DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode configure_skip_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    constexpr uint64_t SKIP_ALL = 0x7;
+
+    std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
+    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
+
+    // Loops and sets or clears the 2D VREF bit on all DPs
+    for(auto& l_data : l_wr_vref_config)
+    {
+        // Updates the skip bits to be skip all
+        l_data.insertFromRight<TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP, TT::WR_VREF_CONFIG0_NUM_BITS_TO_SKIP_LEN>(SKIP_ALL);
+    }
+
+    FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Modifies the WR VREF value in an MRS06 to have the VPD, not eff_config attribute values
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[in,out] io_mrs06 - the MRS data class to modify
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode modify_mrs_vref_to_vpd( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        mss::ddr4::mrs06_data& io_mrs06 )
+{
+    // Gets the VPD JEDEC WR VREF information
+    uint8_t l_train_value = 0;
+    uint8_t l_train_range = 0;
+    FAPI_TRY(mss::get_vpd_wr_vref_range_and_value(i_target, l_train_range, l_train_value));
+
+    FAPI_INF("%s setting MRS06 to have the correct VPD value from 0x%02lx to range: %lu value 0x%02lx from 0x%02x",
+             mss::c_str(i_target), io_mrs06.iv_vrefdq_train_range[0], l_train_range, io_mrs06.iv_vrefdq_train_value[0],
+             l_train_value);
+
+    for(uint64_t l_rank = 0; l_rank < MAX_RANK_PER_DIMM; ++l_rank)
+    {
+        io_mrs06.iv_vrefdq_train_value[l_rank] = l_train_value;
+        io_mrs06.iv_vrefdq_train_range[l_rank] = l_train_range;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Resets the WR DQ delays for a given DRAM to be a quarter clock before the DQS
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_delay - the write DQ delay value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode reset_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const uint64_t i_delay )
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // Gets the DRAM width
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks inputs
+    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::RESET_WR_DQ_DELAY));
+
+    // Restores the inputted delay values
+    {
+        const uint64_t l_start_bit = i_dram * l_width[0];
+        const uint64_t l_end_bit   = l_start_bit + l_width[0];
+
+        // And restore the good DQ values
+        for(uint64_t l_bit = l_start_bit; l_bit < l_end_bit; ++l_bit)
+        {
+            const auto l_dq_reg = TT::WR_DQ_DELAY_REG[i_rp][l_bit];
+            fapi2::buffer<uint64_t> l_data;
+            l_data.insertFromRight<TT::WR_DELAY, TT::WR_DELAY_LEN>(i_delay);
+
+            FAPI_INF("%s RP%lu DRAM %lu DQ reg 0x%016lx DQ val 0x%lx reg val 0x%016lx",
+                     mss::c_str(i_target), i_rp, i_dram, l_dq_reg, i_delay, l_data);
+            FAPI_TRY(mss::putScom(i_target, l_dq_reg, l_data));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads out the RD VREF values for a given DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[out] o_rd_vref_values - the RD VREF values for a given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode read_rd_vref_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        std::vector<uint64_t>& o_rd_vref_values )
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // Clears the output, just in case
+    o_rd_vref_values.clear();
+
+    // Gets the DRAM width
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks inputs
+    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::READ_RD_VREF_VALUES_FOR_DRAM));
+
+    // Gets the RD VREF values
+    {
+        // There are two RD VREF values stored per register
+        // One RD VREF value corresponds to one bit
+        // For a x4 DRAM, there are 4 bits per DRAM, meaning two registers need to be read
+        // For a x8 DRAM, there are 8 bits per DRAM, meaning four registers need to be read
+        constexpr uint64_t NUM_REGS_X4 = 2;
+        constexpr uint64_t NUM_REGS_X8 = 4;
+        const auto NUM_REGS = (l_width[0] == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ? NUM_REGS_X8 : NUM_REGS_X4;
+
+        // Computes the starting register's position
+        const uint64_t START_REG = i_dram * NUM_REGS;
+
+        // Loops through all of the registers
+        for(uint64_t l_reg = 0; l_reg < NUM_REGS; ++l_reg)
+        {
+            const auto l_reg_pos = l_reg + START_REG;
+            uint64_t l_value = 0;
+            fapi2::buffer<uint64_t> l_buff;
+
+            FAPI_TRY(mss::getScom(i_target, TT::DD2_RD_VREF_CNTRL_REG[l_reg_pos], l_buff));
+            l_buff.extractToRight<TT::RD_VREF_BYTE0_NIB0, TT::RD_VREF_BYTE0_NIB0_LEN>(l_value);
+            FAPI_INF("%s RP%lu DRAM%lu has RD VREF value of 0x%02lx", mss::c_str(i_target), i_rp, i_dram, l_value);
+            o_rd_vref_values.push_back(l_value);
+            l_buff.extractToRight<TT::RD_VREF_BYTE0_NIB1, TT::RD_VREF_BYTE0_NIB1_LEN>(l_value);
+            FAPI_INF("%s RP%lu DRAM%lu has RD VREF value of 0x%02lx", mss::c_str(i_target), i_rp, i_dram, l_value);
+            o_rd_vref_values.push_back(l_value);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Identifies the first good RD VREF bit
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_rd_vref_values - the RD VREF values for a given DRAM
+/// @param[out] o_bit - the bit for the first good RD VREF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode identify_first_good_rd_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        const std::vector<uint64_t>& i_rd_vref_values,
+        uint64_t& o_bit )
+{
+    constexpr uint64_t THRESHOLD = 3;
+    // Loop through all RD VREF values
+    uint64_t l_bit = 0;
+
+    // Gets the median value
+    uint64_t l_median = 0;
+    FAPI_TRY(rd_dq::find_median(i_rd_vref_values, l_median));
+
+    for(const auto l_value : i_rd_vref_values)
+    {
+        // Error case, continue on...
+        if((l_median > (l_value + THRESHOLD)) || (l_value > (l_median + THRESHOLD)))
+        {
+            FAPI_INF("%s RP%lu DRAM%lu bit: %lu with value of %lu is out of the median (%lu) +/- threshold range (%lu). Testing the next bit",
+                     mss::c_str(i_target), i_rp, i_dram, l_bit, l_value, l_median, THRESHOLD);
+        }
+        // The first bit inside the threshold is good, note it and exit out successfully
+        else
+        {
+            FAPI_INF("%s RP%lu DRAM%lu bit: %lu with value of %lu is inside of the median (%lu) +/- threshold range (%lu). Returning this as the bit to test",
+                     mss::c_str(i_target), i_rp, i_dram, l_bit, l_value, l_median, THRESHOLD);
+            o_bit = l_bit;
+            break;
+        }
+
+        ++l_bit;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads out the WR DQ delay value for a given DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[out] o_wr_dq_delay - the WR DQ delay value for a given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note At this point, WR CTR hasn't been run, so all WR DQ delays should be the same on the DRAM
+///
+fapi2::ReturnCode get_starting_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_wr_dq_delay )
+{
+    typedef dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+
+    // Gets the DRAM width
+    uint8_t l_width[MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY( mss::eff_dram_width(i_target, l_width) );
+
+    // Checks inputs
+    FAPI_TRY(check_rp_and_dram(i_target, i_rp, i_dram, ffdc_function_codes::GET_STARTING_WR_DQ_DELAY_VALUE));
+
+    // Gets the data
+    {
+        // Gets the register - we only want bit 0 of the DRAM
+        const auto l_first_bit = i_dram * l_width[0];
+        const auto l_reg = TT::WR_DQ_DELAY_REG[i_rp][l_first_bit];
+
+        // Gets the register
+        fapi2::buffer<uint64_t> l_data;
+        FAPI_TRY(mss::getScom(i_target, l_reg, l_data));
+
+        // Returns the data
+        o_wr_dq_delay = 0;
+        l_data.extractToRight<TT::WR_DELAY, TT::WR_DELAY_LEN>(o_wr_dq_delay);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Logs an informational callout detailing if we were able to recover
+/// @param[in] i_target - the MCA target under calibration
+/// @param[in] i_rp - the rank pair under calibration
+/// @param[in] i_dram - the DRAM in question
+/// @param[in] i_bad - true iff the DRAM failed to recover
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode log_dram_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    const uint64_t i_dram,
+                                    const bool i_bad )
+{
+    // Log this information for cronus, as the logs are normally supressed
+#ifndef __HOSTBOOT_MODULE
+    FAPI_ERR("%s WR VREF workaround recovery %s on RP%lu DRAM%lu",
+             mss::c_str(i_target), i_bad ? "failed" : "succeeded", i_rp, i_dram);
+#endif
+
+    // If we call this function, we have a fail
+    FAPI_ASSERT( true,
+                 fapi2::MSS_WR_VREF_DRAM_RECOVERY()
+                 .set_TARGET(i_target)
+                 .set_RP(i_rp)
+                 .set_DRAM(i_dram)
+                 .set_IS_BAD(i_bad),
+                 "%s WR VREF workaround recovery %s on RP%lu DRAM%lu",
+                 mss::c_str(i_target),
+                 i_bad ? "failed" : "succeeded",
+                 i_rp,
+                 i_dram
+               );
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+
+    // Log the error as recovered - we want this error to be informational
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::current_err;
+}
+
+///
+/// @brief Clears the PHY training FIRs for a given port
+/// @param[in] i_target - the MCA target under calibration
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode clear_training_firs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+
+    fapi2::buffer<uint64_t> l_phyfir_mask;
+    l_phyfir_mask.setBit<MCA_IOM_PHY0_DDRPHY_FIR_REG_ERROR_2>();
+
+    // Clear the PHY FIR ERROR 2 bit so we don't keep failing training and training advance on this port
+    FAPI_TRY( mss::putScom(i_target, MCA_IOM_PHY0_DDRPHY_FIR_REG_AND, l_phyfir_mask.invert()) );
+
+    FAPI_TRY( mss::getScom(i_target, MCA_IOM_PHY0_DDRPHY_FIR_REG, l_phyfir_mask));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 } // close namespace wr_vref
 } // close namespace dp16

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,6 +196,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP2_REG;
         static const std::vector< std::pair<uint64_t, uint64_t> > WR_VREF_VALUE_RP3_REG;
 
+        // WR DQ delay registers - in terms of rank pair, then bit
+        static const std::vector< std::vector<uint64_t> > WR_DQ_DELAY_REG;
+
         static const std::vector< uint64_t > RD_DIA_CONFIG5_REG;
         static const std::vector< uint64_t > DATA_BIT_ENABLE0_REG;
         static const std::vector< uint64_t > DATA_BIT_ENABLE1_REG;
@@ -378,6 +381,13 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
             WR_VREF_VALUE_RANGE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_RANGE_DRAM1 ,
             WR_VREF_VALUE_VALUE_DRAM_ODD      = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1 ,
             WR_VREF_VALUE_VALUE_DRAM_ODD_LEN  = MCA_DDRPHY_DP16_WR_VREF_VALUE0_RANK_PAIR0_P0_0_01_VALUE_DRAM1_LEN ,
+
+            // Write delay fields
+            WR_DELAY     = MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0_01_DELAYG,
+            WR_DELAY_LEN = MCA_DP16_WR_DELAY_VALUE_0_RP0_REG_P0_0_01_DELAYG_LEN,
+
+            // Bit disable field start
+            BIT_DISABLE = MCA_DDRPHY_DP16_DATA_BIT_DISABLE0_RP0_P0_0_01_DISABLE_15,
 
             // Read Delay fields.
             READ_OFFSET_LOWER = MCA_DDRPHY_DP16_READ_DELAY_OFFSET0_RANK_PAIR0_P0_0_01,
@@ -2316,6 +2326,42 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+namespace wr_vref
+{
+
+///
+/// @brief Gets the WR VREF range based upon the composite range
+/// @param[in] i_value the composite range value
+/// @return l_range the JEDEC WR VREF range
+///
+uint8_t get_range(const uint64_t i_value);
+
+///
+/// @brief Gets the WR VREF value based upon the composite range
+/// @param[in] i_value the composite range value
+/// @return l_range the JEDEC WR VREF value
+///
+uint8_t get_value(const uint64_t i_value);
+
+///
+/// @brief Gets the WR VREF value based upon the inputted values
+/// @param[in] i_range the JEDEC range to use
+/// @param[in] i_value the JEDED value to use
+/// @return l_range the JEDEC WR VREF value
+///
+uint64_t compute_composite_value(const uint64_t i_range, const uint64_t i_value);
+
+///
+/// @brief Offsets the WR VREF train and range values based upon the offset attribute
+/// @param[in] i_target the fapi2 target of the port
+/// @param[in,out] io_train_range - train range value to update
+/// @param[in,out] io_train_value - train range value to update
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode offset_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                 uint8_t& io_train_range,
+                                 uint8_t& io_train_value );
+} // close namespace wr_vref
 } // close namespace dp16
 } // close namespace mss
 

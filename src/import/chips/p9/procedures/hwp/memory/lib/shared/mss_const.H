@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,11 +51,12 @@ enum sizes
     MCBIST_PER_MC = 1,
     MAX_DIMM_PER_PORT = 2,
     MAX_RANK_PER_DIMM = 4,
-    BYTES_PER_DP = 2,
-    NIBBLES_PER_DP = 4,
     NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
     BITS_PER_BYTE = 8,
+    BITS_PER_DP = 16,
+    NIBBLES_PER_DP = BITS_PER_DP / BITS_PER_NIBBLE,
+    BYTES_PER_DP = BITS_PER_DP /  BITS_PER_BYTE,
     BITS_PER_DQS = 2,              ///< Differential clock pair
     MAX_RANKS_DIMM1 = 2,           ///< DIMM1 (inner DIMM) can't be a 4R DIMM
     MAX_PRIMARY_RANKS_PER_PORT = 4,
@@ -86,6 +87,14 @@ enum sizes
     WR_LVL_SMALL_STEP = 0b000,
     WR_LVL_PRE_DLY = 0b101010,
     WR_LVL_NUM_VALID_SAMPLES = 0x5,
+
+    // WR VREF JEDEC values - we're using em in multiple places, so let's define them in one
+    // Single range max is the maximum range for a single WR VREF range in JEDEC - 0b110010
+    WR_VREF_SINGLE_RANGE_MAX = 0b110010,
+    // Crossover range is where the top of Range 2 (the lower range) equals the bottom of Range 1 (the upper range)
+    WR_VREF_CROSSOVER_RANGE  = 0b011000,
+    // Max range is computed from single range max (50) + the crossover range (24)
+    WR_VREF_MAX_COMPOSITE_RANGE = WR_VREF_SINGLE_RANGE_MAX + WR_VREF_CROSSOVER_RANGE,
 
     // Attribute? BRS
     COARSE_CAL_STEP_SIZE = 0x4,
@@ -166,6 +175,14 @@ enum ffdc_function_codes
     PDA_WR_VREF_LATCH_CONTAINER = 80,
     PDA_WR_VREF_LATCH_VECTOR = 81,
     PDA_ADD_COMMAND = 82,
+
+    // WR VREF workaround functions
+    WR_VREF_TRAINING_WORKAROUND = 90,
+    CONFIGURE_WR_VREF_TO_NOMINAL = 91,
+    RESET_WR_DQ_DELAY = 92,
+    READ_RD_VREF_VALUES_FOR_DRAM = 93,
+    GET_DRAM_DISABLE_REG_AND_POS = 94,
+    GET_STARTING_WR_DQ_DELAY_VALUE = 95,
 };
 
 enum states

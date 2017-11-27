@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -830,6 +830,9 @@ struct mrs00_data
     ///
     mrs00_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
+    // Delete MRS00 default constructor
+    mrs00_data() = delete;
+
     ///
     /// @brief Less than operator
     /// @param[in] i_rhs right hand comparison operator
@@ -873,6 +876,16 @@ struct mrs00_data
         return iv_burst_length < i_rhs.iv_burst_length;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs00_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_burst_length;
     uint8_t iv_read_burst_type;
     uint8_t iv_dll_reset;
@@ -904,6 +917,9 @@ struct mrs01_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs01_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    // Delete MRS01 default constructor
+    mrs01_data() = delete;
 
     ///
     /// @brief Less than operator
@@ -958,6 +974,16 @@ struct mrs01_data
         return iv_dll_enable < i_rhs.iv_dll_enable;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs01_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_dll_enable;
     uint8_t iv_odic[MAX_RANK_PER_DIMM];
     uint8_t iv_additive_latency;
@@ -990,6 +1016,9 @@ struct mrs02_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs02_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    // Delete MRS02 default constructor
+    mrs02_data() = delete;
 
     ///
     /// @brief Less than operator
@@ -1024,6 +1053,16 @@ struct mrs02_data
         return iv_cwl < i_rhs.iv_cwl;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs02_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_lpasr;
     uint8_t iv_cwl;
     uint8_t iv_write_crc;
@@ -1054,6 +1093,9 @@ struct mrs03_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs03_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    // Delete MRS03 default constructor
+    mrs03_data() = delete;
 
     ///
     /// @brief Less than operator
@@ -1110,6 +1152,16 @@ struct mrs03_data
         return iv_mpr_page < i_rhs.iv_mpr_page;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs03_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_mpr_mode;
     uint8_t iv_mpr_page;
     uint8_t iv_geardown;
@@ -1143,6 +1195,9 @@ struct mrs04_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs04_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    // Delete MRS04 default constructor
+    mrs04_data() = delete;
 
     ///
     /// @brief Less than operator
@@ -1217,6 +1272,16 @@ struct mrs04_data
         return iv_max_pd_mode < i_rhs.iv_max_pd_mode;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs04_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_max_pd_mode;
     uint8_t iv_temp_refresh_range;
     uint8_t iv_temp_ref_mode;
@@ -1253,6 +1318,9 @@ struct mrs05_data
     /// @param[out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
     ///
     mrs05_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
+
+    // Delete MRS05 default constructor
+    mrs05_data() = delete;
 
     ///
     /// @brief Less than operator
@@ -1317,6 +1385,16 @@ struct mrs05_data
         return iv_ca_parity_latency < i_rhs.iv_ca_parity_latency;
     }
 
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs05_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
+    }
+
     uint8_t iv_ca_parity_latency;
     uint8_t iv_crc_error_clear;
     uint8_t iv_ca_parity_error_status;
@@ -1352,6 +1430,9 @@ struct mrs06_data
     ///
     mrs06_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& o_rc );
 
+    // Delete MRS06 default constructor
+    mrs06_data() = delete;
+
     ///
     /// @brief Less than operator
     /// @param[in] i_rhs right hand comparison operator
@@ -1386,6 +1467,16 @@ struct mrs06_data
         }
 
         return memcmp(iv_vrefdq_train_value, i_rhs.iv_vrefdq_train_value, sizeof(i_rhs.iv_vrefdq_train_value)) < MEMCMP_EQUAL;
+    }
+
+    ///
+    /// @brief Equal to operator
+    /// @param[in] i_rhs right hand comparison operator
+    /// @bool true if this object is equal to i_rhs
+    ///
+    bool operator==(const mss::ddr4::mrs06_data& i_rhs) const
+    {
+        return !((*this < i_rhs) || (i_rhs < *this));
     }
 
     uint8_t iv_vrefdq_train_value[MAX_RANK_PER_DIMM];

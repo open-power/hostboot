@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,8 @@
 #include <lib/dimm/mrs_load.H>
 #include <lib/shared/mss_kind.H>
 #include <generic/memory/lib/spd/common/dimm_module_decoder.H>
+#include <lib/phy/dp16.H>
+#include <lib/mss_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -221,6 +223,35 @@ enum invalid_timing_function_encoding
 /////////////////////////
 // Non-member function implementations
 /////////////////////////
+
+///
+/// @brief Gets the JEDEC train and range values from the encoded VPD value
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[out] o_range - the JEDEC VREFDQ range
+/// @param[out] o_value - the JEDEC VREFDQ value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_vpd_wr_vref_range_and_value( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t& o_range,
+        uint8_t& o_value )
+{
+    fapi2::buffer<uint8_t> l_vpd_value;
+    constexpr uint64_t VPD_TRAIN_RANGE_START = 1;
+    constexpr uint64_t VPD_TRAIN_VALUE_START = 2;
+    constexpr uint64_t VPD_TRAIN_VALUE_LEN   = 6;
+
+    FAPI_TRY(mss::vpd_mt_vref_dram_wr(i_target, l_vpd_value));
+
+    o_range = l_vpd_value.getBit<VPD_TRAIN_RANGE_START>() ?
+              fapi2::ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE2 :
+              fapi2::ENUM_ATTR_EFF_VREF_DQ_TRAIN_RANGE_RANGE1;
+    l_vpd_value.extractToRight<VPD_TRAIN_VALUE_START, VPD_TRAIN_VALUE_LEN>(o_value);
+
+    FAPI_INF("%s JEDEC range 0x%02x JEDEC value 0x%02x", mss::c_str(i_target), o_range, o_value);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief IBT helper - maps from VPD definition of IBT to the RCD control word bit fields
@@ -2449,25 +2480,24 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Determines & sets effective config for Vref DQ Train Value
+/// @brief Determines & sets effective config for Vref DQ Train Value and Range
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note The value and range attributes are combined as offsetting the WR VREF percentage can cause both the value and range to shift
+/// The calculations would have to be done twice if the calculations were done separately. As such, they are combined below
 ///
-fapi2::ReturnCode eff_dimm::vref_dq_train_value()
+fapi2::ReturnCode eff_dimm::vref_dq_train_value_and_range()
 {
-
-    uint8_t l_attrs_vref_dq_train_val[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    std::vector< uint64_t > l_ranks;
-
-    // value to set.
-    fapi2::buffer<uint8_t> l_vpd_value;
-    fapi2::buffer<uint8_t> l_train_value;
-    constexpr uint64_t VPD_TRAIN_VALUE_START = 2;
-    constexpr uint64_t VPD_TRAIN_VALUE_LEN   = 6;
     // Taken from DDR4 (this attribute is DDR4 only) spec MRS6 section VrefDQ training: values table
     constexpr uint8_t JEDEC_MAX_TRAIN_VALUE   = 0b00110010;
 
-    FAPI_TRY(mss::vpd_mt_vref_dram_wr(iv_dimm, l_vpd_value));
-    l_vpd_value.extractToRight<VPD_TRAIN_VALUE_START, VPD_TRAIN_VALUE_LEN>(l_train_value);
+    uint8_t l_attrs_vref_dq_train_val[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    uint8_t l_attrs_vref_dq_train_range[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
+    std::vector< uint64_t > l_ranks;
+
+    // Gets the JEDEC VREFDQ range and value
+    fapi2::buffer<uint8_t> l_train_value;
+    fapi2::buffer<uint8_t> l_train_range;
+    FAPI_TRY(mss::get_vpd_wr_vref_range_and_value(iv_dimm, l_train_range, l_train_value));
 
     FAPI_ASSERT(l_train_value <= JEDEC_MAX_TRAIN_VALUE,
                 fapi2::MSS_INVALID_VPD_VREF_DRAM_WR_RANGE()
@@ -2477,6 +2507,11 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_value()
                 "%s VPD DRAM VREF value out of range max 0x%02x value 0x%02x", mss::c_str(iv_dimm),
                 JEDEC_MAX_TRAIN_VALUE, l_train_value );
 
+    // Updates the training values and ranges
+    FAPI_TRY(mss::dp16::wr_vref::offset_values(iv_mca, l_train_range, l_train_value),
+             "Failed to offset VPD WR VREF values %s", mss::c_str(iv_mca));
+
+
     // Attribute to set num dimm ranks is a pre-requisite
     FAPI_TRY( eff_vref_dq_train_value(iv_mcs, &l_attrs_vref_dq_train_val[0][0][0]) );
     FAPI_TRY( mss::rank::ranks(iv_dimm, l_ranks) );
@@ -2484,10 +2519,14 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_value()
     for(const auto& l_rank : l_ranks)
     {
         l_attrs_vref_dq_train_val[iv_port_index][iv_dimm_index][index(l_rank)] = l_train_value;
+        l_attrs_vref_dq_train_range[iv_port_index][iv_dimm_index][index(l_rank)] = l_train_range;
     }
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_VALUE, iv_mcs, l_attrs_vref_dq_train_val),
               "Failed setting attribute for ATTR_EFF_VREF_DQ_TRAIN_VALUE");
+
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_RANGE, iv_mcs, l_attrs_vref_dq_train_range),
+              "Failed setting attribute for ATTR_EFF_VREF_DQ_TRAIN_RANGE");
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2515,40 +2554,6 @@ fapi2::ReturnCode eff_dimm::vref_dq_train_enable()
 
     FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_ENABLE, iv_mcs, l_attrs_vref_dq_train_enable),
               "Failed setting attribute for ATTR_EFF_VREF_DQ_TRAIN_ENABLE");
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Determines & sets effective config for Vref DQ Train Range
-/// @return fapi2::FAPI2_RC_SUCCESS if okay
-///
-fapi2::ReturnCode eff_dimm::vref_dq_train_range()
-{
-
-    // Attribute to set num dimm ranks is a pre-requisite
-    uint8_t l_attrs_vref_dq_train_range[PORTS_PER_MCS][MAX_DIMM_PER_PORT][MAX_RANK_PER_DIMM] = {};
-    std::vector< uint64_t > l_ranks;
-
-    // value to set.
-    fapi2::buffer<uint8_t> l_vpd_value;
-    fapi2::buffer<uint8_t> l_train_range;
-    constexpr uint64_t VPD_TRAIN_RANGE_START = 1;
-    FAPI_TRY(mss::vpd_mt_vref_dram_wr(iv_dimm, l_vpd_value));
-    l_train_range = l_vpd_value.getBit<VPD_TRAIN_RANGE_START>();
-
-    // gets the current value of train_range
-    FAPI_TRY( eff_vref_dq_train_range(iv_mcs, &l_attrs_vref_dq_train_range[0][0][0]) );
-    FAPI_TRY( mss::rank::ranks(iv_dimm, l_ranks) );
-
-    for(const auto& l_rank : l_ranks)
-    {
-        l_attrs_vref_dq_train_range[iv_port_index][iv_dimm_index][index(l_rank)] = l_train_range;
-    }
-
-    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EFF_VREF_DQ_TRAIN_RANGE, iv_mcs, l_attrs_vref_dq_train_range),
-              "Failed setting attribute for ATTR_EFF_VREF_DQ_TRAIN_RANGE");
 
 fapi_try_exit:
     return fapi2::current_err;

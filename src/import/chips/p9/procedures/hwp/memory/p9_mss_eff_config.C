@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,10 +209,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Failed write_level_enable for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->output_buffer(),
                   "Failed output_buffer for %s", mss::c_str(l_dimm) );
-        FAPI_TRY( l_eff_dimm->vref_dq_train_value(),
-                  "Failed vref_dq_train_value for %s", mss::c_str(l_dimm) );
-        FAPI_TRY( l_eff_dimm->vref_dq_train_range(),
-                  "Failed vref_dq_train_range for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->vref_dq_train_value_and_range(),
+                  "Failed vref_dq_train_value_and_range for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->vref_dq_train_enable(),
                   "Failed vref_dq_train_enable for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->ca_parity_latency(),

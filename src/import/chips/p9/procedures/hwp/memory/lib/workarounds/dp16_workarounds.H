@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include <p9_mc_scom_addresses_fld.H>
 #include <mss_attribute_accessors.H>
 #include <lib/phy/dp16.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 
 namespace mss
 {
@@ -497,6 +498,42 @@ fapi2::ReturnCode get_delay_data(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_
 
 ///
 /// @brief Finds the median and sorts the vector
+/// @tparam T the type of data to sort
+/// @param[in] i_data the data to find a median for
+/// @param[out] o_median the median value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+template < typename T >
+fapi2::ReturnCode find_median(const std::vector<T>& i_data, T& o_median)
+{
+
+    // The fapi_try is in an if statement, this ensures we have a good value
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Bomb out if the vector is empty to avoid accessing a non-existant element
+    FAPI_ASSERT(!i_data.empty(),
+                fapi2::MSS_RD_CTR_WORKAROUND_EMPTY_VECTOR(),
+                "Empty vector passed in to find_median_and_sort"
+               );
+    {
+        // Copies the data to make finding the median easier
+        auto l_data = i_data;
+
+        // Sorts first
+        std::sort(l_data.begin(), l_data.end());
+
+        // The only way to find the median, is to sort and find the mid point
+        const auto l_median_it = l_data.begin() + (l_data.size() / 2);
+        o_median = *l_median_it;
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Finds the median and sorts the vector
 /// @param[in,out] io_reg_data register data
 /// @param[out] o_median the median value
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
@@ -602,6 +639,203 @@ fapi2::ReturnCode setup_values( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_t
                                 const uint64_t i_rp,
                                 uint8_t& o_train_range,
                                 uint8_t& o_train_value);
+
+///
+/// @brief Gets the disable register and bit position for the DRAM
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_reg - the register to access from
+/// @param[out] o_bit_pos - the bit position in the register to access from
+/// @param[out] o_bit_len - the bit length to access
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_disable_reg_and_pos_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_reg,
+        uint64_t& o_bit_pos,
+        uint64_t& o_bit_len);
+
+///
+/// @brief Gets the disables for a specific DRAM
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_disables - true if the whole DRAM is disabled
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode get_disables_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_disables);
+
+///
+/// @brief Identifies if an inputted DRAM is wholely disabled
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_disabled - true if the whole DRAM is disabled
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode is_dram_disabled( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    const uint64_t i_dram,
+                                    bool& o_disabled);
+
+///
+/// @brief Identifies if an inputted DRAM has any disables
+/// @param[in] i_target the fapi2 target type MCA of the port
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM to be checked
+/// @param[out] o_has_disables - true if the whole DRAM has any disables
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode dram_has_disables( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     bool& o_has_disables);
+
+///
+/// @brief Disables bits based upon RD VREF values that differ from the median significantly
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode disable_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                const uint64_t i_rp,
+                                const uint64_t i_dram );
+
+///
+/// @brief Clears all disable bits for a recovered DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode clear_dram_disable_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram );
+
+///
+/// @brief Checks that the rank pair and DRAM are in bounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_function - the calling function to callout in FFDC
+///
+fapi2::ReturnCode check_rp_and_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const ffdc_function_codes i_function );
+
+///
+/// @brief Configures the WR VREF value of a DRAM to be the nominal values
+/// @param[in] i_target the fapi2 target type DIMM
+/// @param[in] i_rp - rank pair to check and modify
+/// @param[in] i_dram - the DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode configure_wr_vref_to_nominal( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram);
+
+///
+/// @brief Configures the skip bits to be 0x7 for an entire port for the workaround
+/// @param[in] i_target the fapi2 target type DIMM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode configure_skip_bits( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target);
+
+///
+/// @brief Modifies the WR VREF value in an MRS06 to have the VPD, not eff_config attribute values
+/// @param[in] i_target - the DIMM target on which to operate
+/// @param[in,out] io_mrs06 - the MRS data class to modify
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode modify_mrs_vref_to_vpd( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        mss::ddr4::mrs06_data& io_mrs06 );
+
+///
+/// @brief Resets the WR DQ delays for a given DRAM to be a quarter clock before the DQS
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_delay - the write DQ delay value
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode reset_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                     const uint64_t i_rp,
+                                     const uint64_t i_dram,
+                                     const uint64_t i_delay );
+
+///
+/// @brief Reads out the RD VREF values for a given DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[out] o_rd_vref_values - the RD VREF values for a given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode read_rd_vref_for_dram( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        std::vector<uint64_t>& o_rd_vref_values );
+
+///
+/// @brief Identifies the first good RD VREF bit
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[in] i_rd_vref_values - the RD VREF values for a given DRAM
+/// @param[out] o_bit - the bit for the first good RD VREF
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note The differing values can cause WR VREF fail, so the bit(s) that differ are disabled temporarily
+///
+fapi2::ReturnCode identify_first_good_rd_vref( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        const std::vector<uint64_t>& i_rd_vref_values,
+        uint64_t& o_bit );
+
+///
+/// @brief Reads out the WR DQ delay value for a given DRAM
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair on which to operate
+/// @param[in] i_dram - the DRAM that needs to have the workaround applied to it
+/// @param[out] o_wr_dq_delay - the WR DQ delay value for a given DRAM
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+/// @note At this point, WR CTR hasn't been run, so all WR DQ delays should be the same on the DRAM
+///
+fapi2::ReturnCode get_starting_wr_dq_delay( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint64_t i_dram,
+        uint64_t& o_wr_dq_delay );
+
+///
+/// @brief Logs an informational callout detailing if we were able to recover
+/// @param[in] i_target - the MCA target under calibration
+/// @param[in] i_rp - the rank pair under calibration
+/// @param[in] i_dram - the DRAM in question
+/// @param[in] i_bad - true iff the DRAM failed to recover
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode log_dram_results( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                    const uint64_t i_rp,
+                                    const uint64_t i_dram,
+                                    const bool i_bad );
+
+///
+/// @brief Clears the PHY training FIRs for a given port
+/// @param[in] i_target - the MCA target under calibration
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if ok
+///
+fapi2::ReturnCode clear_training_firs( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target );
 
 } // close namespace wr_vref
 } // close namespace dp16
