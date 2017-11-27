@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -38,4 +38,5 @@ OBJS += errludbacktrace.o
 OBJS += errludlogregister.o
 OBJS += errludcallout.o
 OBJS += errludsensor.o
+OBJS += errludstate.o
 OBJS += errlmanager_common.o
