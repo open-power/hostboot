@@ -567,7 +567,7 @@ class write_ctr : public phy_step
         ///
         write_ctr(const bool i_wr_vref) :
             phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WRITE_CTR>(),
-                      "write_ctr"),
+                      "WRITE_CTR"),
             iv_wr_vref(i_wr_vref)
         {}
 
@@ -726,6 +726,59 @@ class custom_read_ctr : public phy_step
         fapi2::ReturnCode post_workaround( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
                                            const uint64_t i_rp,
                                            const uint8_t i_abort_on_error ) const override;
+
+        ///
+        /// @brief Runs the backup pattern if need be
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @param[in] i_fails_on_rp - the fails taken from training advanced
+        /// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                              const uint64_t i_rp,
+                                              const uint8_t i_abort_on_error,
+                                              const std::vector<fapi2::ReturnCode>& i_fails_on_rp,
+                                              const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const;
+
+        ///
+        /// @brief Calculates the number of cycles a given calibration step will take
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @return l_cycles - the number of cycles a given calibration step wil take
+        ///
+        uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const override;
+};
+
+///
+/// @brief Custom read centering - can include initial pattern write
+///
+class custom_write_ctr : public phy_step
+{
+    public:
+        ///
+        /// @brief Base constructor
+        ///
+        custom_write_ctr() :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_CUSTOM_WR>(),
+                      "CUSTOM_WRITE_CTR")
+        {}
+
+        ///
+        /// @brief Default destructor
+        ///
+        ~custom_write_ctr() override = default;
+
+        ///
+        /// @brief Sets up and runs the calibration step
+        /// @param[in] i_target - the MCA target on which to operate
+        /// @param[in] i_rp - the rank pair
+        /// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+        ///
+        fapi2::ReturnCode run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                               const uint64_t i_rp,
+                               const uint8_t i_abort_on_error ) const override;
 
         ///
         /// @brief Calculates the number of cycles a given calibration step will take
