@@ -147,70 +147,21 @@ fapi2::ReturnCode pm_cme_fir_init(
 {
     FAPI_IMP("pm_cme_fir_init start");
 
-    uint8_t l_firinit_done_flag;
     auto l_exChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EX>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
-                           i_target, l_firinit_done_flag),
-             "ERROR: Failed to fetch the entry status of FIRINIT");
 
     for (auto l_ex_chplt : l_exChiplets)
     {
         p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
 
-        FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_ALL),
-                 "ERROR: Failed to get the CME FIR values");
-
-        /* Clear the FIR and action buffers */
+        /* Clear the FIR  Register */
         FAPI_TRY(l_cmeFir.clearAllRegBits(p9pmFIR::REG_FIR),
                  "ERROR: Failed to clear CME FIR");
-        FAPI_TRY(l_cmeFir.clearAllRegBits(p9pmFIR::REG_ACTION0),
-                 "ERROR: Failed to clear CME FIR");
-        FAPI_TRY(l_cmeFir.clearAllRegBits(p9pmFIR::REG_ACTION1),
-                 "ERROR: Failed to clear CME FIR");
 
-        /*  Set the action and mask for the CME LFIR bits */
-        FAPI_TRY(l_cmeFir.mask(PPE_INT_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_EXT_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_PROG_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_BRKPT_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_WATCHDOG), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_HALT), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(PPE_DBGTRG), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(CME_SRAM_UE),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(CME_SRAM_CE),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(SRAM_SCRUB_ERR),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.mask(BCE_ERR), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(CME_SPARE_11), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(CME_SPARE_12), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(C0_iVRM_DPOUT),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(C1_iVRM_DPOUT),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(CACHE_iVRM_DPOUT),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(EXTRM_DROOP_ERR),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(LARGE_DROOP_ERR),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(SMALL_DROOP_ERR),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.setRecvAttn(UNEXP_DROOP_ENCODE),
-                 FIR_REC_ATTN_ERROR);
-        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR_DUP), FIR_MASK_ERROR);
-        FAPI_TRY(l_cmeFir.mask(CME_FIR_PAR_ERR), FIR_MASK_ERROR);
-
-        //todo: Yet to confirm on the action for the following bits
-
-        if (l_firinit_done_flag)
-        {
-            FAPI_TRY(l_cmeFir.restoreSavedMask(),
-                     "ERROR: Failed to restore the CME mask saved");
-        }
+        // Always restore from the scan init values
+        FAPI_TRY(l_cmeFir.restoreSavedMask(),
+                 "ERROR: Failed to restore the CME mask saved");
 
         FAPI_TRY(l_cmeFir.put(),
                  "ERROR:Failed to write to the CME FIR MASK");
@@ -224,13 +175,8 @@ fapi2::ReturnCode pm_cme_fir_reset(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_IMP("pm_cme_fir_reset start");
-    uint8_t l_firinit_done_flag;
     auto l_eqChiplets = i_target.getChildren<fapi2::TARGET_TYPE_EQ>
                         (fapi2::TARGET_STATE_FUNCTIONAL);
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_FIRINIT_DONE_ONCE_FLAG,
-                           i_target, l_firinit_done_flag),
-             "ERROR: Failed to fetch the entry status of FIRINIT");
 
     for (auto l_eq_chplt : l_eqChiplets)
     {
@@ -290,15 +236,12 @@ fapi2::ReturnCode pm_cme_fir_reset(
 
             p9pmFIR::PMFir <p9pmFIR::FIRTYPE_CME_LFIR> l_cmeFir(l_ex_chplt);
 
-            if (l_firinit_done_flag == 1)
-            {
-                FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
-                         "ERROR: Failed to get the CME FIR MASK value");
+            FAPI_TRY(l_cmeFir.get(p9pmFIR::REG_FIRMASK),
+                     "ERROR: Failed to get the CME FIR MASK value");
 
-                /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
-                FAPI_TRY(l_cmeFir.saveMask(),
-                         "ERROR: Failed to save CME FIR Mask to the attribute");
-            }
+            /* Fetch the CME FIR MASK; Save it to HWP attribute; clear it */
+            FAPI_TRY(l_cmeFir.saveMask(),
+                     "ERROR: Failed to save CME FIR Mask to the attribute");
 
             FAPI_TRY(l_cmeFir.setAllRegBits(p9pmFIR::REG_FIRMASK),
                      "ERROR: Faled to set the CME FIR MASK");
