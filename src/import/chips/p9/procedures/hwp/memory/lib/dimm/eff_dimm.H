@@ -785,6 +785,13 @@ class eff_dimm
         fapi2::ReturnCode training_adv_backup_pattern();
 
         ///
+        /// @brief Determines and sets the ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN settings
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        /// @note overwrite the attribute to default values if it's set to 0
+        ///
+        fapi2::ReturnCode training_adv_wr_pattern();
+
+        ///
         /// @brief Determines and sets ATTR_MSS_PHY_SEQ_REFRESH_
         /// @return fapi2::FAPI2_RC_SUCCESS if okay
         ///

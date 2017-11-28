@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -408,6 +408,13 @@ fapi2::ReturnCode rank_pair_primary_to_dimm(const fapi2::Target<T>& i_target, co
 ///
 template<fapi2::TargetType T>
 fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<T>& i_target );
+///
+/// @brief Set the custom write pattern
+/// @param[in] i_target the port target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<fapi2::TargetType T>
+fapi2::ReturnCode configure_custom_wr_pattern( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Handle draminit_training cal fails

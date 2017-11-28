@@ -341,6 +341,8 @@ fapi2::ReturnCode p9_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MCS>
                   "Failed cal_step_enable for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->rdvref_enable_bit(),
                   "Failed rdvref_enable_bit for %s", mss::c_str(l_dimm) );
+        FAPI_TRY( l_eff_dimm->training_adv_wr_pattern(),
+                  "Failed training_adv_wr_pattern for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->training_adv_pattern(),
                   "Failed training_adv_pattern for %s", mss::c_str(l_dimm) );
         FAPI_TRY( l_eff_dimm->training_adv_backup_pattern(),

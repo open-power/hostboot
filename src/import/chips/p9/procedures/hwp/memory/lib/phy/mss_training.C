@@ -55,6 +55,7 @@
 #include <lib/dimm/rank.H>
 #include <lib/shared/mss_const.H>
 #include <lib/dimm/ddr4/pda.H>
+#include <lib/phy/seq.H>
 
 namespace mss
 {
@@ -222,6 +223,7 @@ uint64_t wr_lvl::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& 
 {
     const uint64_t TWLO_TWLOE = mss::twlo_twloe(i_target);
 
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // This step runs for approximately (80 + TWLO_TWLOE) x NUM_VALID_SAMPLES x (384/(BIG_STEP + 1) +
     // (2 x (BIG_STEP + 1))/(SMALL_STEP + 1)) + 20 memory clock cycles per rank.
 
@@ -313,6 +315,7 @@ fapi_try_exit:
 ///
 uint64_t dqs_align::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // This step runs for approximately 6 x 600 x 4 DRAM clocks per rank pair.
     const uint64_t l_dqs_align_cycles = 6 * 600 * 4;
 
@@ -369,6 +372,7 @@ fapi_try_exit:
 ///
 uint64_t rdclk_align::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // This step runs for approximately 24 x ((1024/COARSE_CAL_STEP_SIZE + 4 x COARSE_CAL_STEP_SIZE) x 4 + 32) DRAM
     // clocks per rank pair
     const uint64_t l_rdclk_align_cycles = 24 * ((1024 / COARSE_CAL_STEP_SIZE + 4 * COARSE_CAL_STEP_SIZE) * 4 + 32);
@@ -469,6 +473,7 @@ fapi_try_exit:
 ///
 uint64_t read_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // This step runs for approximately 6 x (512/COARSE_CAL_STEP_SIZE + 4 x (COARSE_CAL_STEP_SIZE +
     // 4 x CONSEQ_PASS)) x 24 DRAM clocks per rank pair.
 
@@ -749,6 +754,7 @@ fapi_try_exit:
 ///
 uint64_t write_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // 1000 + (NUM_VALID_SAMPLES * (FW_WR_RD + FW_RD_WR + 16) *
     // (1024/(SMALL_STEP +1) + 128/(BIG_STEP +1)) + 2 * (BIG_STEP+1)/(SMALL_STEP+1)) x 24 DRAM
     // clocks per rank pair.
@@ -790,6 +796,7 @@ fapi_try_exit:
 ///
 uint64_t coarse_wr_rd::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // The run length given here is the maximum run length for this calibration algorithm.
     // This step runs for approximately 40 DRAM clocks per rank pair.
     constexpr uint64_t COARSE_WR_CYCLES = 40;
@@ -824,8 +831,96 @@ fapi2::ReturnCode custom_read_ctr::pre_workaround( const fapi2::Target<fapi2::TA
         const uint8_t i_abort_on_error ) const
 {
     FAPI_DBG("%s Running Pre-Custom RD CTR workaround steps on RP%d", mss::c_str(i_target), i_rp);
-    // Turn off refresh
+
+    // Sets up the patterns to run
+    // Note: not technically a workaround
+    {
+        // Let's set the pattern to run
+        FAPI_TRY( mss::configure_custom_pattern(i_target) );
+
+        // Set staggered mode
+        FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
+
+        // Set custom read centering mode
+        FAPI_TRY( mss::dp16::setup_custom_read_centering_mode(i_target), "Error in p9_mss_draminit_training %s",
+                  mss::c_str(i_target) );
+    }
+
+    // Runs initial pattern write
+    {
+        const auto l_ipw = std::make_shared<initial_pattern_write>();
+
+        // Executes initial pattern write
+        FAPI_TRY(l_ipw->execute(i_target, i_rp, i_abort_on_error), "%s failed to execute IPW", mss::c_str(i_target));
+    }
+
+    // Turn off refresh - this is an actual workaround
     FAPI_TRY( mss::workarounds::dqs_align::turn_off_refresh(i_target) );
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Runs the backup pattern if need be
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @param[in] i_fails_on_rp - the fails taken from training advanced
+/// @param[in] i_original_settings - the settings to restore if we take a failure on the backup patterns
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode custom_read_ctr::backup_pattern_run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error,
+        const std::vector<fapi2::ReturnCode>& i_fails_on_rp,
+        const mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA>& i_original_settings ) const
+{
+    // If we got a fail, let's ignore the previous fails and run backup pattern
+    if (i_fails_on_rp.size() != 0)
+    {
+        std::vector<fapi2::ReturnCode> l_fails_on_rp;
+        bool l_cal_fail = false;
+        fapi2::buffer<uint32_t> l_backup;
+
+        // Clear the disable bits from last run.
+        // This function restores bad_bits to how the attribute has them
+        // (which was updated at the end of regular training)
+        // So we won't run on known bad bits, but will rerun on the iffy bits from last custom_pattern run
+        FAPI_TRY( mss::dp16::reset_bad_bits(i_target) );
+        FAPI_INF("%s rp%x running back up pattern for draminit_training_adv", mss::c_str(i_target), i_rp);
+
+        // Clear the cal errors so we can retry
+        FAPI_TRY( mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
+
+        FAPI_TRY( mss::custom_training_adv_backup_patterns(i_target, l_backup) );
+
+        // Put the backup into the registers
+        FAPI_TRY( mss::seq::setup_rd_wr_data(i_target, l_backup) );
+
+        // Runs initial pattern write
+        {
+            const auto l_ipw = std::make_shared<initial_pattern_write>();
+
+            // Executes initial pattern write
+            FAPI_TRY( l_ipw->execute(i_target, i_rp, i_abort_on_error), "%s failed to re-execute IPW", mss::c_str(i_target));
+        }
+
+        // Rerun the training for this rp
+        FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error), "%s failed re-running CUSTOM_RD_CTR", mss::c_str(i_target));
+
+        FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+
+        // If we got fails from the backup pattern, restore the pre-adv training settings for this rank pair
+        if (l_fails_on_rp.size() != 0)
+        {
+            l_fails_on_rp.clear();
+            FAPI_INF("%s rp%d draminit_training_adv failed. Restoring original settings", mss::c_str(i_target), i_rp);
+
+            // Restore pre-training_adv settings
+            FAPI_TRY( i_original_settings.restore() );
+        }
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -843,11 +938,28 @@ fapi2::ReturnCode custom_read_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_M
 {
     constexpr bool RUN_RD_CTR = true;
     constexpr bool SKIP_RD_VREF = false;
+
+    std::vector<fapi2::ReturnCode> l_fails_on_rp;
+    bool l_cal_fail = false;
+
+    // Save off registers in case adv training fails
+    mss::dp16::rd_ctr_settings<fapi2::TARGET_TYPE_MCA> l_original_settings(i_target, i_rp);
+
+    // Setup the initial settings
+    FAPI_TRY( l_original_settings.save() );
+
+    // Clear all of the errors before we start
+    FAPI_TRY(mss::clear_initial_cal_errors(i_target), "%s error resetting errors prior to init cal", mss::c_str(i_target));
+
     // Now lets set the actual read_vref_config. We want to write/ clear this every time we run so seperate function
     FAPI_TRY( setup_read_vref_config1(i_target, RUN_RD_CTR, SKIP_RD_VREF),
               "%s Failed setting the read_vref_config1", mss::c_str(i_target) );
 
-    FAPI_TRY(phy_step::run(i_target, i_rp, i_abort_on_error));
+    FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
+
+    // Runs the backup pattern if we took a fail here
+    FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+    FAPI_TRY( backup_pattern_run( i_target, i_rp, i_abort_on_error, l_fails_on_rp, l_original_settings ));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -865,6 +977,7 @@ fapi2::ReturnCode custom_read_ctr::post_workaround( const fapi2::Target<fapi2::T
         const uint8_t i_abort_on_error ) const
 {
     FAPI_DBG("%s Running Post-Custom RD CTR workaround steps on RP%d", mss::c_str(i_target), i_rp);
+
     // Turn refresh back on
     FAPI_TRY( mss::workarounds::dqs_align::turn_on_refresh(i_target) );
 
@@ -879,6 +992,7 @@ fapi_try_exit:
 ///
 uint64_t custom_read_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
 {
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
     // This step runs for approximately 6 x (512/COARSE_CAL_STEP_SIZE + 4 x (COARSE_CAL_STEP_SIZE +
     // 4 x CONSEQ_PASS)) x 24 DRAM clocks per rank pair.
 
@@ -892,6 +1006,104 @@ uint64_t custom_read_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TY
 
     // This calibration step could take up to read centering + RD VREF time, so let's just output that to make the math simpler
     return l_read_ctr_cycles;
+}
+
+///
+/// @brief Executes a cal step with workarounds
+/// @param[in] i_target - the MCA target on which to operate
+/// @param[in] i_rp - the rank pair
+/// @param[in] i_abort_on_error - whether or not we are aborting on cal error
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode custom_write_ctr::run( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const uint8_t i_abort_on_error ) const
+{
+    typedef mss::dp16Traits<fapi2::TARGET_TYPE_MCA> TT;
+    std::vector<fapi2::buffer<uint64_t>> l_wr_vref_config;
+    std::vector<fapi2::ReturnCode> l_fails_on_rp;
+    bool l_cal_fail = false;
+
+    // Save off registers in case adv training fails
+    mss::dp16::wr_ctr_settings<fapi2::TARGET_TYPE_MCA> l_original_settings(i_target, i_rp);
+
+    // Setup the initial settings
+    FAPI_TRY( l_original_settings.save() );
+
+    // Configure the WR config to only run the 1D algorithm
+    FAPI_TRY( mss::scom_suckah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config) );
+
+    // Loops ensures that only the 1D algorithm will run
+    for(auto& l_data : l_wr_vref_config)
+    {
+        // 1: Run only the 1D
+        l_data.setBit<TT::WR_VREF_CONFIG0_1D_ONLY_SWITCH>();
+    }
+
+    FAPI_TRY(mss::scom_blastah(i_target, TT::WR_VREF_CONFIG0_REG, l_wr_vref_config));
+
+    // Let's set the pattern to run
+    FAPI_TRY( mss::configure_custom_wr_pattern(i_target) );
+
+    // Set staggered mode
+    FAPI_TRY( mss::rc::change_staggered_pattern(i_target) );
+
+    FAPI_TRY( phy_step::run(i_target, i_rp, i_abort_on_error) );
+    FAPI_TRY( mss::find_and_log_cal_errors(i_target, i_rp, i_abort_on_error, l_cal_fail, l_fails_on_rp) );
+
+    // If we took a fail, restore those settings
+    if(!l_fails_on_rp.empty())
+    {
+        // TK yes, this shouldn't be here, but for now we need a way to note that we took an error.  We'll add in FFDC later on to fix this
+        // We'll want it to be informational to note "Hey, I saw an error here but could recover" we'll want the same thing in custom RD
+        FAPI_ERR("%s RP%lu took a fail in CUSTOM_WRITE_CTR!", mss::c_str(i_target), i_rp);
+        FAPI_TRY( l_original_settings.restore() );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Calculates the number of cycles a given calibration step will take
+/// @param[in] i_target - the MCA target on which to operate
+/// @return l_cycles - the number of cycles a given calibration step wil take
+///
+uint64_t custom_write_ctr::calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const
+{
+    // Note: the following equation is taken from the PHY workbook - leaving the naked numbers in for parity to the workbook
+    // 1000 + (NUM_VALID_SAMPLES * (FW_WR_RD + FW_RD_WR + 16) *
+    // (1024/(SMALL_STEP +1) + 128/(BIG_STEP +1)) + 2 * (BIG_STEP+1)/(SMALL_STEP+1)) x 24 DRAM
+    // clocks per rank pair.
+    constexpr uint64_t WR_CNTR_FW_WR_RD = mss::fw_wr_rd();
+    uint8_t l_fw_rd_wr = 0;
+    uint64_t l_cycles = 1;
+
+    FAPI_TRY( mss::fw_rd_wr(i_target, l_fw_rd_wr) );
+
+    l_cycles = 1000 + (WR_LVL_NUM_VALID_SAMPLES * (WR_CNTR_FW_WR_RD + l_fw_rd_wr + 16) *
+                       (1024 / (WR_LVL_SMALL_STEP + 1) + 128 / (WR_LVL_BIG_STEP + 1)) + 2 *
+                       (WR_LVL_BIG_STEP + 1) / (WR_LVL_SMALL_STEP + 1)) * 24;
+
+    FAPI_DBG("%s write_ctr_cycles: %lu(%luns) (%u, %u, %u, %u, %u)",
+             mss::c_str(i_target),
+             l_cycles,
+             mss::cycles_to_ns(i_target, l_cycles),
+             WR_LVL_NUM_VALID_SAMPLES,
+             WR_CNTR_FW_WR_RD,
+             l_fw_rd_wr,
+             WR_LVL_BIG_STEP,
+             WR_LVL_SMALL_STEP);
+
+    return l_cycles;
+
+fapi_try_exit:
+    // We had an error, let's exit
+    FAPI_ERR("%s had an error and is going to exit", mss::c_str(i_target));
+    fapi2::Assert(false);
+
+    // Error case, the return is to make the compiler happy
+    return l_cycles;
 }
 
 ///
@@ -980,11 +1192,18 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
         l_steps.push_back(std::make_shared<coarse_wr_rd>());
     }
 
-    // Training Advanced - aka custom pattern RD CTR
-    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV>())
+    // Training Advanced Read - aka custom pattern RD CTR
+    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_RD>())
     {
         FAPI_INF("Custom RD_CTR is enabled");
         l_steps.push_back(std::make_shared<custom_read_ctr>());
+    }
+
+    // Training Advanced Write - aka custom pattern WR CTR
+    if(i_cal_steps.getBit<mss::cal_steps::TRAINING_ADV_WR>())
+    {
+        FAPI_INF("Custom WR_CTR is enabled");
+        l_steps.push_back(std::make_shared<custom_write_ctr>());
     }
 
     return l_steps;

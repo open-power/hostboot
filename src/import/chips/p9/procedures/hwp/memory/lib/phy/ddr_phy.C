@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1543,6 +1543,49 @@ fapi2::ReturnCode configure_custom_pattern( const fapi2::Target<fapi2::TARGET_TY
     FAPI_INF("%s the patterns before swizzle are 0x%08x and after 0x%08x",
              mss::c_str(i_target),
              l_pattern,
+             l_swizzled);
+
+    FAPI_TRY( mss::seq::setup_rd_wr_data( i_target, l_swizzled) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Set the custom pattern
+/// @param[in] i_target the port target
+/// @return FAPI2_RC_SUCCESS iff setup was successful
+///
+template<>
+fapi2::ReturnCode configure_custom_wr_pattern( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target )
+{
+    // Pattern constexprs
+    constexpr uint64_t PATTERN_LEN = 8;
+    constexpr uint64_t PATTERN_COPY0_POS = 0;
+    constexpr uint64_t PATTERN_COPY1_POS = PATTERN_LEN + PATTERN_COPY0_POS;
+    constexpr uint64_t PATTERN_COPY2_POS = PATTERN_LEN + PATTERN_COPY1_POS;
+    constexpr uint64_t PATTERN_COPY3_POS = PATTERN_LEN + PATTERN_COPY2_POS;
+
+    uint8_t l_pattern = 0;
+    fapi2::buffer<uint32_t> l_buff;
+    uint32_t l_swizzled = 0;
+
+    // Set the custom patterns for training advance
+    // So first get the pattern from the attribute and then put it into the register
+    // The custom write pattern is only 8 bits wide
+    // We want to run it across all nibbles in the DP (one byte of a pattern per nibble in the DP)
+    // So, we need to copy it four times into the buffer
+
+    FAPI_TRY( mss::custom_training_adv_wr_pattern( i_target, l_pattern) );
+    l_buff.insertFromRight<PATTERN_COPY0_POS, PATTERN_LEN>(l_pattern)
+    .insertFromRight<PATTERN_COPY1_POS, PATTERN_LEN>(l_pattern)
+    .insertFromRight<PATTERN_COPY2_POS, PATTERN_LEN>(l_pattern)
+    .insertFromRight<PATTERN_COPY3_POS, PATTERN_LEN>(l_pattern);
+    FAPI_TRY( mss::seq::swizzle_mpr_pattern(l_buff, l_swizzled) );
+
+    FAPI_INF("%s the patterns before swizzle are 0x%08x and after 0x%08x",
+             mss::c_str(i_target),
+             l_buff,
              l_swizzled);
 
     FAPI_TRY( mss::seq::setup_rd_wr_data( i_target, l_swizzled) );

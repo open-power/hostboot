@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ fapi2::ReturnCode set_init_cal_refresh(const fapi2::Target<fapi2::TARGET_TYPE_MC
     mss::pc::set_snoop_dis(l_data, mss::LOW);
     mss::pc::set_refresh_interval(l_data, REF_INTERVAL);
 
-    FAPI_TRY( mss::pc::write_init_cal_config1(i_target, l_data) )
+    FAPI_TRY( mss::pc::write_init_cal_config1(i_target, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -102,7 +102,7 @@ fapi2::ReturnCode clear_init_cal_refresh(const fapi2::Target<fapi2::TARGET_TYPE_
 
     mss::pc::set_refresh_control(l_data, REF_CNTL);
 
-    FAPI_TRY( mss::pc::write_init_cal_config1(i_target, l_data) )
+    FAPI_TRY( mss::pc::write_init_cal_config1(i_target, l_data) );
 
 fapi_try_exit:
     return fapi2::current_err;

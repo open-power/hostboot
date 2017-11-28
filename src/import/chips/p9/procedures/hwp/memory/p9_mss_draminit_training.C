@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -128,7 +128,7 @@ extern "C"
             }
 
             // Clear the Training Advance bit because this is used in training_adv and not in training
-            l_cal_steps_enabled.clearBit<mss::TRAINING_ADV>();
+            l_cal_steps_enabled.clearBit<mss::TRAINING_ADV_RD>().clearBit<mss::TRAINING_ADV_WR>();
 
             FAPI_DBG("cal steps enabled: 0x%x special training: 0x%x", l_cal_steps_enabled, i_special_training);
 

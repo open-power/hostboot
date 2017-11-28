@@ -1951,8 +1951,9 @@
           [17] WRITE_CTR
           [18] COARSE_WR
           [19] COARSE_RD
-          [20] TRAINING_ADV Only set for DD2.* machines
-          [21]:[31] Reserved for future use
+          [20] TRAINING_ADV_RD Only set for DD2.* machines
+          [21] TRAINING_ADV_WR Only set for DD2.* machines
+          [22]:[31] Reserved for future use
 
           COARSE_WR and COARSE_RD  will be consumed together to form COARSE_LVL.
 
@@ -1973,7 +1974,7 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Special training pattern used in draminit_training_advance.
-            Used for custom pattern write
+            Used for custom pattern read
             There can be two patterns used here.
             This attribute is before swizzling for endianness of the registers.
             CODE WILL SWIZZLE FOR THE SYSTEM
@@ -1997,7 +1998,7 @@
         <targetType>TARGET_TYPE_MCS</targetType>
         <description>
             Special training backup pattern
-            Used for custom_pattern_write in draminit_training_advance.
+            Used for custom_pattern_read in draminit_training_advance.
             If the main patterns fail, the code will try running this pattern
             Used for read centering
             There can be two patterns used here.
@@ -2016,6 +2017,27 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>custom_training_adv_backup_patterns</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN</id>
+        <targetType>TARGET_TYPE_MCS</targetType>
+        <description>
+            Special training pattern used in draminit_training_advance.
+            Used for custom pattern write
+            Due to hardware limitations, only one 8-bit pattern can be used
+            This attribute is before swizzling for endianness of the registers.
+            CODE WILL SWIZZLE FOR THE SYSTEM
+            If this attribute is set to 0, using the default values of:
+            0x9A
+            Set to default in eff_config
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <enum>DEFAULT = 0x69</enum>
+        <writeable/>
+        <array>2</array>
+        <mssAccessorName>custom_training_adv_wr_pattern</mssAccessorName>
     </attribute>
 
     <attribute>
