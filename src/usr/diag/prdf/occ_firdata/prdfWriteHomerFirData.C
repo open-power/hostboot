@@ -205,20 +205,6 @@ void getAddresses( TrgtMap_t & io_targMap )
 
     io_targMap[TRGT_PEC][REG_REG] =
     {
-        // Chiplet FIRs
-        //   NOTE: This is slightly different from the PRD rule code. These
-        //         chiplet FIRs do exist on the PEC target, but PRD had to put
-        //         these chiplet FIRs on the PROC target because of the way the
-        //         PEC/PHB units are defined. However, that is not an issue when
-        //         gathering this data and it is safe to use the PEC targets.
-        //   NOTE: We cannot use these chiplet FIRs as global registers because
-        //         there is a PHB FIR that is defined on the N2 chiplet and we
-        //         don't want to skip collection of that FIR if there is nothing
-        //         in the PEC chiplete FIRs.
-        0x0D040000, // PCI_CHIPLET_CS_FIR
-        0x0D040001, // PCI_CHIPLET_RE_FIR
-        0x0D040002, // PCI_CHIPLET_FIR_MASK
-
         // PLL registers
         0x0D0F001E, // PCI_CONFIG_REG
         0x0D0F001F, // PCI_ERROR_REG
@@ -381,6 +367,17 @@ void getAddresses( TrgtMap_t & io_targMap )
         0x06040002, // XB_CHIPLET_FIR_MASK
         0x06040018, // XB_CHIPLET_UCS_FIR
         0x06040019, // XB_CHIPLET_UCS_FIR_MASK
+
+        // Chiplet FIRs
+        0x0D040000, // PCI0_CHIPLET_CS_FIR
+        0x0D040001, // PCI0_CHIPLET_RE_FIR
+        0x0D040002, // PCI0_CHIPLET_FIR_MASK
+        0x0E040000, // PCI1_CHIPLET_CS_FIR
+        0x0E040001, // PCI1_CHIPLET_RE_FIR
+        0x0E040002, // PCI1_CHIPLET_FIR_MASK
+        0x0F040000, // PCI2_CHIPLET_CS_FIR
+        0x0F040001, // PCI2_CHIPLET_RE_FIR
+        0x0F040002, // PCI2_CHIPLET_FIR_MASK
 
         // Misc registers needed for PRD analysis
         0x05011C2E, // PBEXTFIR (does not raise attn, used for fabric sorting)
