@@ -47,33 +47,18 @@ extern trace_desc_t *g_trac_hdat;
  */
 vpdData procVpdData[] =
 {
-    { MVPD::VINI, MVPD::DR },
-    { MVPD::VINI, MVPD::VZ },
-    { MVPD::VINI, MVPD::CC },
-    { MVPD::VINI, MVPD::CE },
-    { MVPD::VINI, MVPD::FN },
-    { MVPD::VINI, MVPD::PN },
-    { MVPD::VINI, MVPD::SN },
-    { MVPD::VINI, MVPD::PR },
-    { MVPD::VINI, MVPD::HE },
-    { MVPD::VINI, MVPD::CT },
-    { MVPD::VINI, MVPD::HW },
+    { MVPD::VRML, MVPD::RT },
+    { MVPD::VRML, MVPD::VD },
+    { MVPD::VRML, MVPD::PN },
+    { MVPD::VRML, MVPD::SN },
  };
 
 const HdatKeywordInfo l_mvpdKeywords[] =
 {
-    { MVPD::DR, "DR" },
-    { MVPD::VZ, "VZ" },
-    { MVPD::CC, "CC" },
-    { MVPD::CE, "CE" },
-    { MVPD::FN, "FN" },
+    { MVPD::RT, "RT" },
+    { MVPD::VD, "VD" },
     { MVPD::PN, "PN" },
     { MVPD::SN, "SN" },
-    { MVPD::PR, "PR" },
-    { MVPD::HE, "HE" },
-    { MVPD::CT, "CT" },
-    { MVPD::HW, "HW" },
-
 };
 
 /*******************************************************************************
