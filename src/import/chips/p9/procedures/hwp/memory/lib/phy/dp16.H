@@ -184,6 +184,9 @@ class dp16Traits<fapi2::TARGET_TYPE_MCA>
 
         static const std::vector<std::vector<std::pair<uint64_t, uint64_t>>> BIT_DISABLE_REG;
 
+        // WR delay register
+        static const std::vector<std::vector<uint64_t>> WR_DELAY_REG;
+
         // WR VREF registers
         static const std::vector< uint64_t > WR_VREF_CONFIG0_REG;
         static const std::vector< uint64_t > WR_VREF_CONFIG1_REG;
@@ -452,7 +455,7 @@ class rd_ctr_settings
         /// @brief Restore settings for a given rank pair
         /// @return FAPI2_RC_SUCCES iff ok
         ///
-        fapi2::ReturnCode restore();
+        fapi2::ReturnCode restore() const;
 
     private:
         const fapi2::Target<T> iv_target;
@@ -461,6 +464,46 @@ class rd_ctr_settings
         std::vector<fapi2::buffer<uint64_t>> iv_rdclk_delay;
         std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > iv_dq_disable;
         std::vector<fapi2::buffer<uint64_t>> iv_read_eye_size;
+};
+
+///
+/// @class wr_ctr_settings
+/// @brief Stores pre-training_adv WR_CTR PHY settings, so they can be restored if training_adv fails
+/// @tparam T target type representing a port
+///
+template< fapi2::TargetType T >
+class wr_ctr_settings
+{
+    public:
+        wr_ctr_settings() = delete;
+
+        ///
+        /// @brief rd_ctr_settings constructor
+        /// @param[in] i_target the port target
+        /// @param[in] i_rp the rank pair
+        ///
+        wr_ctr_settings( const fapi2::Target<T>& i_target, const uint64_t i_rp ):
+            iv_target(i_target), iv_rp(i_rp)
+        {
+        }
+
+        ///
+        /// @brief Save settings for a given rank pair
+        /// @return FAPI2_RC_SUCCES iff ok
+        ///
+        fapi2::ReturnCode save();
+
+        ///
+        /// @brief Restore settings for a given rank pair
+        /// @return FAPI2_RC_SUCCES iff ok
+        ///
+        fapi2::ReturnCode restore() const;
+
+    private:
+        const fapi2::Target<T> iv_target;
+        const uint64_t iv_rp;
+        std::vector<fapi2::buffer<uint64_t>> iv_write_delay;
+        std::vector<std::pair<fapi2::buffer<uint64_t>, fapi2::buffer<uint64_t> > > iv_dq_disable;
 };
 
 ///
