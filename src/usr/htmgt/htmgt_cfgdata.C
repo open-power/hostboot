@@ -638,8 +638,16 @@ void getOCCRoleMessageData(bool i_master, bool i_firMaster,
 
 uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
 {
+#if 0
     uint16_t o_maxPcap = 0;
     o_is_redundant = true;
+#else
+    uint16_t o_maxPcap = i_sys->
+        getAttr<ATTR_OPEN_POWER_N_PLUS_ONE_BULK_POWER_LIMIT_WATTS>();
+    o_is_redundant = false;
+    TMGT_INF("getMaxPowerCap: HARDCODING Power Supply Redundancy to DISABLED"
+             " (max cap = %dW)", o_maxPcap);
+#endif
 
 #ifdef CONFIG_BMC_IPMI
     // Check if HPC limit was found
