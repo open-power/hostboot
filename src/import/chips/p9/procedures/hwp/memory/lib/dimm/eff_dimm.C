@@ -5078,6 +5078,31 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Determines and sets the ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN settings
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note overwrite the attribute to default values if it's set to 0
+///
+fapi2::ReturnCode eff_dimm::training_adv_wr_pattern()
+{
+    uint8_t l_special_patterns [PORTS_PER_MCS] = {};
+    FAPI_TRY( custom_training_adv_wr_pattern( iv_mcs, &(l_special_patterns[0])) );
+
+    // Let's set the backup pattern as well
+    if ( l_special_patterns[mss::index(iv_mca)] == 0)
+    {
+        l_special_patterns[mss::index(iv_mca)] = fapi2::ENUM_ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN_DEFAULT;
+
+        FAPI_INF("%s setting training_adv_backup_pattern as 0x%02x", mss::c_str(iv_mca),
+                 l_special_patterns[mss::index(iv_mca)]);
+
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_CUSTOM_TRAINING_ADV_WR_PATTERN, iv_mcs, l_special_patterns) );
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines and sets the cal_step_enable values
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
@@ -5087,13 +5112,15 @@ fapi2::ReturnCode eff_dimm::cal_step_enable()
             RUN_CAL_SKIP_WR_RD_2D_VREF : RUN_ALL_CAL_STEPS);
 
     // We only run draminit training advance on DD2 modules
-    l_cal_step_value = l_cal_step_value.writeBit<mss::TRAINING_ADV>( !mss::chip_ec_nimbus_lt_2_0(iv_mcs) );
+    constexpr uint64_t NUM_TRAIN_ADV = 2;
+    l_cal_step_value = l_cal_step_value.writeBit<mss::TRAINING_ADV_RD, NUM_TRAIN_ADV>( !mss::chip_ec_nimbus_lt_2_0(
+                           iv_mcs) );
 
     FAPI_DBG("%s %s running HW VREF cal. cal_step value: 0x%08x VREF, running training advance %s",
              mss::c_str(iv_mcs),
              mss::chip_ec_feature_skip_hw_vref_cal(iv_mcs) ? "not" : "",
              l_cal_step_value,
-             l_cal_step_value.getBit<mss::TRAINING_ADV>() ? "yes" : "no");
+             l_cal_step_value.getBit<mss::TRAINING_ADV_RD>() ? "yes" : "no");
 
     // Sets up the vector
     std::vector<uint32_t> l_cal_step(PORTS_PER_MCS, l_cal_step_value);
