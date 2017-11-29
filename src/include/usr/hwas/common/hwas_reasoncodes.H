@@ -33,6 +33,7 @@ namespace HWAS
         MOD_PROCESS_CALLOUT       = 0x02,
         MOD_CHECK_MIN_HW          = 0x03,
         MOD_DECONFIG_TARGETS_FROM_GARD = 0x04,
+        MOD_VALIDATE_EC_LEVELS    = 0x05,
     };
 
     enum HwasReasonCode
@@ -55,6 +56,8 @@ namespace HWAS
         RC_SYSAVAIL_MISSING_CRITICAL_RESOURCE   = HWAS_COMP_ID | 0x0B,
         RC_SYSAVAIL_NO_MCAS_FUNC                = HWAS_COMP_ID | 0x0C,
         RC_SYSAVAIL_NO_NX_FUNC                  = HWAS_COMP_ID | 0x0E,
+        RC_EC_MISMATCH                          = HWAS_COMP_ID | 0x0F,
+        RC_FAILED_EC_VALIDATION                 = HWAS_COMP_ID | 0x10,
     };
 };
 

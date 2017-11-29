@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -55,6 +57,16 @@ void hwasErrorAddProcedureCallout(errlHndl_t                & io_errl,
 {
     io_errl->addProcedureCallout(i_procedure,
                                  i_priority);
+}
+
+void platHwasErrorAddHWCallout(errlHndl_t & io_errl,
+                           const TARGETING::ConstTargetHandle_t i_target,
+                           const HWAS::callOutPriority i_priority,
+                           const HWAS::DeconfigEnum i_deconfigState,
+                           const HWAS::GARD_ErrorType i_gardErrorType)
+{
+    io_errl->addHwCallout(i_target, i_priority,
+                          i_deconfigState, i_gardErrorType);
 }
 
 void hwasErrorUpdatePlid(errlHndl_t & io_errl,

@@ -445,9 +445,17 @@ errlHndl_t discoverTargets()
             }
         }
 
-        //Now that all proc's are created and functional, we need to
-        //calculate the system EFFECTIVE_EC
-        calculateEffectiveEC();
+        //Check all of the slave processor's EC levels to ensure they match master
+        //processor's EC level.
+        //function will return error log pointing to all error logs created
+        //by this function as this function could detect multiple procs w/
+        //bad ECs and will make a log for each
+        errl = validateProcessorEcLevels();
+        if (errl)
+        {
+            HWAS_ERR("discoverTargets: validateProcessorEcLevels failed");
+            break;
+        }
 
         // Potentially reduce the number of ec/core units that are present
         //  based on fused mode
@@ -2856,50 +2864,120 @@ void setChipletGardsOnProc(TARGETING::Target * i_procTarget)
     i_procTarget->setAttr<TARGETING::ATTR_EC_GARD>(l_ecGard);
 }//setChipletGardsOnProc
 
-void calculateEffectiveEC()
+errlHndl_t validateProcessorEcLevels()
 {
-    HWAS_INF("calculateEffectiveEC entry");
-
+    HWAS_INF("validateProcessorEcLevels entry");
+    errlHndl_t l_err = nullptr;
+    uint32_t l_commonPlid = 0;
+    TARGETING::ATTR_EC_type l_masterEc     = 0;
+    TARGETING::ATTR_EC_type l_ecToCompare  = 0;
+    TARGETING::ATTR_HUID_type l_masterHuid = 0;
+    TARGETING::TargetHandleList l_procChips;
+    Target* l_pMasterProc = NULL;
     do
     {
-        //true => FSP present. Only run this on non-FSP systems
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        TARGETING::SpFunctions spfuncs;
-        if( sys &&
-            sys->tryGetAttr<TARGETING::ATTR_SP_FUNCTIONS>(spfuncs) &&
-            spfuncs.baseServices )
+        //Get all functional chips
+        getAllChips(l_procChips, TYPE_PROC);
+
+        // check for functional Master Proc on this node
+        l_err = targetService().queryMasterProcChipTargetHandle(l_pMasterProc);
+
+        //queryMasterProcChipTargetHandle will check for null, make sure
+        //there was no problem finding the master proc
+        if(l_err)
         {
+            HWAS_ERR( "validateProcessorEcLevels:: Unable to find master proc");
+            //Don't commit the error just let it get returned from function
             break;
         }
 
-        //Get all functional chips
-        TARGETING::TargetHandleList l_procList;
-        getAllChips(l_procList, TYPE_PROC);
+        //Get master info and store it for comparing later
+        l_masterEc = l_pMasterProc->getAttr<TARGETING::ATTR_EC>();
+        l_masterHuid = get_huid(l_pMasterProc);
 
-        //Assume lowest EC among all functional processor chips is 0xFF
-        TARGETING::ATTR_EC_type l_lowestEC = 0xFF;
-
-        //Loop through all functional procs and find the lowest EC
-        for(TargetHandleList::const_iterator proc = l_procList.begin();
-            proc != l_procList.end(); ++proc)
+        //Loop through all functional procs and create error logs
+        //for any processors whose EC does not match the master
+        for(const auto & l_chip : l_procChips)
         {
-            if((*proc)->getAttr<TARGETING::ATTR_EC>() < l_lowestEC)
+            l_ecToCompare = l_chip->getAttr<TARGETING::ATTR_EC>();
+            if(l_ecToCompare != l_masterEc)
             {
-                l_lowestEC = (*proc)->getAttr<TARGETING::ATTR_EC>();
+                HWAS_ERR("validateProcessorEcLevels:: Slave Proc EC level not does not match master, "
+                        "this is an unrecoverable error.. system will shut down");
+
+                /*@
+                * @errortype
+                * @severity           ERRL_SEV_UNRECOVERABLE
+                * @moduleid           MOD_VALIDATE_EC_LEVELS
+                * @reasoncode         RC_EC_MISMATCH
+                * @devdesc            Found a slave processor whose EC level
+                *                     did not match the master
+                * @custdesc           Incompatible Processor Chip Levels
+                * @userdata1[00:31]   HUID of slave chip
+                * @userdata1[32:63]   EC level of slave chip
+                * @userdata2[00:31]   HUID of master chip
+                * @userdata2[32:63]   EC level of master chip
+                */
+                const uint64_t userdata1 =
+                (static_cast<uint64_t>(get_huid(l_chip)) << 32) | static_cast<uint64_t>(l_ecToCompare);
+                const uint64_t userdata2 =
+                (static_cast<uint64_t>(l_masterHuid) << 32) | static_cast<uint64_t>(l_masterEc);
+
+                l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                  MOD_VALIDATE_EC_LEVELS,
+                                  RC_EC_MISMATCH,
+                                  userdata1,
+                                  userdata2);
+
+                //  call out the procedure to find the deconfigured part.
+                //TODO SW410022 Add HWSV support for platHwasErrorAddHWCallout
+//                 platHwasErrorAddHWCallout( l_err,
+//                                        l_chip,
+//                                        SRCI_PRIORITY_HIGH,
+//                                        NO_DECONFIG,
+//                                        GARD_NULL);
+                //  if we already have an error, link this one to the earlier;
+                //  if not, set the common plid
+                hwasErrorUpdatePlid(l_err, l_commonPlid);
+                errlCommit(l_err, HWAS_COMP_ID);
+                //Do not break, we want to find all mismatches
             }
         }
-
-        HWAS_INF("Lowest functional proc chip EC = 0x%llx",l_lowestEC);
-
-        sys->setAttr<TARGETING::ATTR_EFFECTIVE_EC>(l_lowestEC);
-
     }while(0);
 
-    HWAS_INF("calculateEffectiveEC exit");
-    return;
+    if(l_commonPlid)
+    {
+        HWAS_ERR("validateProcessorEcLevels:: One or more slave processor's EC level did not match master, check error logs");
 
-} //calculateEffectiveEC
+        /*@
+        * @errortype
+        * @severity           ERRL_SEV_UNRECOVERABLE
+        * @moduleid           MOD_VALIDATE_EC_LEVELS
+        * @reasoncode         RC_FAILED_EC_VALIDATION
+        * @devdesc            Found one or more slave processor whose EC level
+        *                     did not match the master
+        * @custdesc           Incompatible Processor Chip Levels
+        * @userdata1[00:64]   Number of Procs
+        */
+        const uint64_t userdata1 =
+        static_cast<uint64_t>(l_procChips.size());
+        const uint64_t userdata2 =
+        (static_cast<uint64_t>(l_masterHuid) << 32) | static_cast<uint64_t>(l_masterEc);
+
+        l_err = hwasError(ERRL_SEV_UNRECOVERABLE,
+                            MOD_VALIDATE_EC_LEVELS,
+                            RC_FAILED_EC_VALIDATION,
+                            userdata1,
+                            userdata2);
+
+        //  link this error to the earlier errors;
+        hwasErrorUpdatePlid(l_err, l_commonPlid);
+    }
+
+    HWAS_INF("validateProcessorEcLevels exit");
+    return l_err;
+
+} //validateProccesorEcLevels
 
 errlHndl_t markDisabledMcas()
 {
