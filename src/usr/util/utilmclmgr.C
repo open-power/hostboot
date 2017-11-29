@@ -636,33 +636,10 @@ errlHndl_t MasterContainerLidMgr::verifyExtend(const ComponentID& i_compId,
         io_compInfo.unprotectedSize = l_conHdr.totalContainerSize() -
                                       l_conHdr.payloadTextSize();
 
-        // @TODO RTC:181848 re-enable when component id is supported in lids
-        if (0)// memcmp(l_conHdr.componentId(), i_compId.data(),
-              //        SW_HDR_COMP_ID_SIZE_BYTES) != 0 )
+        // Verify the component in the Secure Header matches the MCL
+        l_errl = SECUREBOOT::verifyComponentId(l_conHdr, iv_curCompIdStr);
+        if (l_errl)
         {
-            uint64_t l_secHdrCompId {};
-            uint64_t l_mclCompId {};
-            memcpy(&l_secHdrCompId, l_conHdr.componentId(), SW_HDR_COMP_ID_SIZE_BYTES);
-            memcpy(&l_mclCompId, i_compId.data(), SW_HDR_COMP_ID_SIZE_BYTES);
-
-            UTIL_FT(ERR_MRK"MasterContainerLidMgr::verifyExtend - ComponentID mismatch between secure header = %.16llX and master container lid %.16llX",
-                    l_secHdrCompId, l_mclCompId);
-            /*@
-             * @errortype
-             * @moduleid          Util::UTIL_MCL_VERIFY_EXT
-             * @reasoncode        Util::UTIL_MCL_COMPID_MISMATCH
-             * @userdata1         Secure Header Comp ID
-             * @userdata2         Master Container Lid Comp ID
-             * @devdesc           Error processing component for Mcl Mgr
-             * @custdesc          Firmware Error
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                           Util::UTIL_MCL_VERIFY_EXT,
-                           Util::UTIL_MCL_COMPID_MISMATCH,
-                           l_secHdrCompId,
-                           l_mclCompId,
-                           true); //software callout
             l_errl->collectTrace(UTIL_COMP_NAME);
             break;
         }

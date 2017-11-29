@@ -188,7 +188,7 @@ namespace Bootloader{
      *  @param[in] i_pComponentId Reference component ID to compare to.  Must
      *      not be nullptr or function will assert.
      */
-    void verifyComponent(
+    void verifyComponentId(
         const void* const i_pHeader,
         const char* const i_pComponentId)
     {
@@ -382,7 +382,7 @@ namespace Bootloader{
 
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SUCCESS);
 
-            verifyComponent(i_pContainer,
+            verifyComponentId(i_pContainer,
                             PNOR::SectionIdToString(PNOR::HB_BASE_CODE));
         }
 #endif

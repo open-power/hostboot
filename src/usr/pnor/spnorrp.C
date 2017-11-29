@@ -477,11 +477,11 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             }
 
             auto const * const pPnorString = PNOR::SectionIdToString(i_id);
-            l_errhdl = SECUREBOOT::verifyComponent(l_conHdr,pPnorString);
+            l_errhdl = SECUREBOOT::verifyComponentId(l_conHdr,pPnorString);
             if(l_errhdl)
             {
                 TRACFCOMP(g_trac_pnor, ERR_MRK"SPnorrRP::verifySections: "
-                    "Failed in call to SECUREBOOT::verifyComponent");
+                    "Failed in call to SECUREBOOT::verifyComponentId");
                 failedVerify = true;
                 break;
             }

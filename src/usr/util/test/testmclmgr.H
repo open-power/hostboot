@@ -48,6 +48,8 @@ const ComponentID COMP_TEST3 {"TEST3"};
 // ASCII: TESTMAXSIZEOFSTR
 const ComponentID COMP_TEST4 {0x54,0x45,0x53,0x54,0x4d,0x41,0x58,0x53,
                               0x49,0x5a,0x45,0x4f,0x46,0x53,0x54,0x52};
+// Comp ID for pnor section TESTRO
+const ComponentID COMP_TESTRO {"TESTRO"};
 
 // Define deault vectors to simplify syntax
 const std::vector<uint32_t> defaultLids {0xA1234567, 0x89ABCDEF, 0x13579246};
@@ -293,7 +295,7 @@ public:
 
         // Generate test MCL with Secure Lids
         TestMcl l_TestMcl { {Util::TEST_LIDID},
-                            {{COMP_TEST2,true}}
+                            {{COMP_TESTRO,true}}
                           };
 
         // Pass test MCL to MCL manager
@@ -338,7 +340,7 @@ public:
         // So we will get a mismatch between the Secure header's total container
         // size and what the UtilLidMgr reads out.
         TestMcl l_TestMcl { {Util::TEST_LIDID, Util::TEST_LIDID},
-                            {{COMP_TEST2,true}}
+                            {{COMP_TESTRO,true}}
                           };
 
         // Pass test MCL to MCL manager

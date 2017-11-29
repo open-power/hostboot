@@ -49,7 +49,7 @@ namespace Bootloader
         MOD_PNORACC_GETHBBSECT           = 0x04, /**< bl_pnorAccess.C : get HBB sect */
         MOD_BOOTLOADER_VERIFY            = 0x05, /**< bootloader.C : verifyContainer */
         MOD_BOOTLOADER_ASSERT            = 0x06, /**< bootloader.H assert */
-        MOD_BOOTLOADER_VERIFY_COMP_ID    = 0x07, /**< bootloader.C : verifyComponent */
+        MOD_BOOTLOADER_VERIFY_COMP_ID    = 0x07, /**< bootloader.C : verifyComponentId */
     };
 
 /**
