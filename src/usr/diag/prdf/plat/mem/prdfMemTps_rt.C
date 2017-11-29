@@ -364,18 +364,18 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         // At this point, we are done with the procedure.
         o_done = true;
 
-        // If iv_ban is true, then ban TPS on this rank.
-        if ( iv_ban )
-        {
-            // It doesn't matter what we set the value to, we just need to
-            // make sure the rank exists in the map.
-            getMcaDataBundle(iv_chip)->iv_tpsBans[iv_rank] = true;
-        }
-
         // Since TPS is complete, clear the CE table for this slave rank.
         getMcaDataBundle(iv_chip)->iv_ceTable.deactivateRank( iv_rank );
 
     }while(0);
+
+    // If iv_ban is true and this procedure is done, then ban TPS on this rank.
+    if ( iv_ban && o_done )
+    {
+        // It doesn't matter what we set the value to, we just need to
+        // make sure the rank exists in the map.
+        getMcaDataBundle(iv_chip)->iv_tpsBans[iv_rank] = true;
+    }
 
     return o_rc;
 
