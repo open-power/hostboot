@@ -87,7 +87,7 @@ errlHndl_t verifyContainer(void * i_container, const SHA512_t* i_hwKeyHash)
     return l_errl;
 }
 
-errlHndl_t verifyComponent(
+errlHndl_t verifyComponentId(
     const ContainerHeader& i_containerHeader,
     const char* const      i_pComponentId)
 {
@@ -105,7 +105,7 @@ errlHndl_t verifyComponent(
                 i_pComponentId,
                 sizeof(ROM_sw_header_raw::component_id));
 
-        TRACFCOMP(g_trac_secure,ERR_MRK"SECUREROM::verifyComponent: "
+        TRACFCOMP(g_trac_secure,ERR_MRK"SECUREROM::verifyComponentId: "
             "Secure Boot verification failure; container's component ID of "
             "[%s] does not match expected component ID of [%s] (truncated "
             "from [%s]",

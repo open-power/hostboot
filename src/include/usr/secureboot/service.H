@@ -238,7 +238,7 @@ namespace SECUREBOOT
      * @retval nullptr Component ID verification succeeded
      * @retval !nullptr Error; component ID verification failed
      */
-    errlHndl_t verifyComponent(
+    errlHndl_t verifyComponentId(
         const ContainerHeader& i_containerHeader,
         const char*            i_pComponentId);
 

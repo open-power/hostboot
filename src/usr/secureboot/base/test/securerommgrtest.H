@@ -414,7 +414,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         TRACFCOMP(g_trac_secure,EXIT_MRK"SecureRomManagerTest::test_hash_page_table_verify");
     }
 
-    void test_verifyComponent(void)
+    void test_verifyComponentId(void)
     {
         errlHndl_t pError = nullptr;
 
@@ -426,14 +426,14 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 
         do {
 
-        struct verifyComponentTest
+        struct verifyComponentIdTest
         {
             const char* pActualCompId;
             const char* pRefCompId;
             bool shouldPass;
         };
 
-        const std::vector<verifyComponentTest> tests =
+        const std::vector<verifyComponentIdTest> tests =
             { {"ABCD1234","ABCD12345", true },
               {"ABCD1234","ABCD1234" , true },
               {"ABCD1234","ABCD123"  , false},
@@ -455,7 +455,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
 
         if (pError)
         {
-            TS_FAIL("SecureRomManagerTest::test_verifyComponent: "
+            TS_FAIL("SecureRomManagerTest::test_verifyComponentId: "
                 "loadSignedFile() Failed");
             errlCommit(pError, SECURE_COMP_ID);
             break;
@@ -488,7 +488,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             }
 
 
-            pError = SECUREBOOT::verifyComponent(
+            pError = SECUREBOOT::verifyComponentId(
                 containerHeader,
                 test.pRefCompId);
             if(pError)
@@ -496,7 +496,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
                 if(test.shouldPass)
                 {
                     TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
-                        "Expected SECUREBOOT::verifyComponent to pass, but it "
+                        "Expected SECUREBOOT::verifyComponentId to pass, but it "
                         "failed.  Actual component ID was [%s], reference "
                         "component ID was [%s]",
                         test.pActualCompId,
@@ -512,7 +512,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
                            !=  SECUREBOOT::MOD_SECURE_VERIFY_COMPONENT))
                     {
                         TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
-                            "Expected SECUREBOOT::verifyComponent to fail with "
+                            "Expected SECUREBOOT::verifyComponentId to fail with "
                             "reason code of 0x%04X and module ID of 0x%02, but "
                             "failed with reason code of 0x%04X and module ID "
                             "of 0x%02X.  Actual component ID was [%s], "
@@ -535,7 +535,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             else if(!test.shouldPass)
             {
                 TS_FAIL("SecureRomManagerTest::test_verifyContainer: "
-                    "Expected SECUREBOOT::verifyComponent to fail, but it "
+                    "Expected SECUREBOOT::verifyComponentId to fail, but it "
                     "passed.  Actual component ID was [%s], reference "
                     "component ID was [%s]",
                     test.pActualCompId,
