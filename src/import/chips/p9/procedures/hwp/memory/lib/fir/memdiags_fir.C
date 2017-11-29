@@ -94,14 +94,20 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         .checkstop<MCA_FIR_MAINLINE_IAUE>()
         .recoverable_error<MCA_FIR_MAINLINE_IUE>();
 
+        l_cal_fir_reg.recoverable_error<MCA_MBACALFIRQ_PORT_FAIL>();
+
         // If ATTR_CHIP_EC_FEATURE_HW414700 is enabled set checkstops
         auto l_chip_target = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_chip_target, l_checkstop_flag) );
 
+        // If the system is running DD2 chips override some recoverable firs with checkstop
+        // Due to a known hardware defect with DD2 certain errors are not handled properly
+        // As a result, these firs are marked as checkstop for DD2 to avoid any mishandling
         if (l_checkstop_flag)
         {
             l_ecc64_fir_reg.checkstop<MCA_FIR_MAINLINE_UE>()
             .checkstop<MCA_FIR_MAINLINE_RCD>();
+            l_cal_fir_reg.checkstop<MCA_MBACALFIRQ_PORT_FAIL>();
         }
 
         // If MNFG FLAG Threshhold is enabled skip IUE unflagging
@@ -111,8 +117,6 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<TARGET_TYPE_MCBIST>& i_tar
         {
             l_ecc64_fir_reg.recoverable_error<MCA_FIR_MAINTENANCE_IUE>();
         }
-
-        l_cal_fir_reg.recoverable_error<MCA_MBACALFIRQ_PORT_FAIL>();
 
         FAPI_TRY(l_ecc64_fir_reg.write(), "unable to write fir::reg %d", MCA_FIR);
         FAPI_TRY(l_cal_fir_reg.write(), "unable to write fir::reg %d", MCA_MBACALFIRQ);
