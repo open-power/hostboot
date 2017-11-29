@@ -5524,7 +5524,7 @@
     </attribute>
         <attribute>
             <id>CHIP_UNIT</id>
-            <default>0</default>
+            <default>1</default>
         </attribute>
     <attribute>
         <id>FAPI_NAME</id><default>mba:k0:n0:s0:p00:c01</default>
@@ -5661,7 +5661,7 @@
     </attribute>
     <attribute>
         <id>FSI_MASTER_PORT</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FSI_MASTER_TYPE</id>
@@ -5744,7 +5744,7 @@
     </attribute>
     <attribute>
         <id>VPD_REC_NUM</id>
-        <default>1</default>
+        <default>0</default>
     </attribute>
 </targetInstance>
 <targetInstance>
@@ -5811,7 +5811,7 @@
     <attribute><id>HUID</id><default>0x000D0002</default></attribute>
         <attribute>
             <id>PHYS_PATH</id>
-            <default>physical:sys-0/node-0/membuf-0/mba-0</default>
+            <default>physical:sys-0/node-0/membuf-1/mba-0</default>
         </attribute>
     <attribute>
         <id>AFFINITY_PATH</id>
@@ -5913,7 +5913,7 @@
     </attribute>
     <attribute>
         <id>CHIP_UNIT</id>
-        <default>0</default>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>FAPI_NAME</id><default>mba:k0:n0:s0:p01:c01</default>
