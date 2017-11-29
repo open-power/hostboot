@@ -138,6 +138,17 @@ errlHndl_t checkMinimumHardware(
     bool *o_bootable = NULL);
 
 /**
+*  @brief  Loop through processors, make sure all have the same EC level
+*          create an error log for any slave processor that does not match
+*          the master's EC level
+*
+*
+*  @return  errlHndl_t   Error returned will be a summary of all errors that
+*                        occurred during the procedure, all PLIDs should match
+*/
+errlHndl_t validateProcessorEcLevels();
+
+/**
  * @brief  Struct representing a particular target.  Used by
  * invokePresentByAssoc to populate a vector of TargetInfo's for subsequent
  * use by deconfigPresentByAssoc

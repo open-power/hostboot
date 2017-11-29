@@ -348,6 +348,17 @@ void hwasErrorAddProcedureCallout(errlHndl_t & io_errl,
                                   const HWAS::callOutPriority i_priority);
 
 /**
+ * @brief wrapper function to add a procedure callout to an error log in a
+ *  platform-specific manner.
+ *
+ */
+void platHwasErrorAddHWCallout(errlHndl_t & io_errl,
+                           const TARGETING::ConstTargetHandle_t i_target,
+                           const HWAS::callOutPriority i_priority,
+                           const HWAS::DeconfigEnum i_deconfigState,
+                           const HWAS::GARD_ErrorType i_gardErrorType);
+
+/**
  * @brief wrapper function to update the plid in a platform-specific manner.
  *
  * If io_plid is non-zero then io_errl is updated with io_plid
