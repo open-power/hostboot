@@ -224,6 +224,22 @@ p9_setup_bars_mcd_enable(
     if (l_addr_extension_group_id ||
         l_addr_extension_chip_id)
     {
+        // adjust FIR setup for HW413218
+        l_fir_data = MCD_FIR_ACTION0;
+        l_fir_data.clearBit<PU_MCD1_MCD_FIR_MASK_REG_ARRAY_ECC_UE>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION0_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_ACTION0_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION0_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION0_REG)");
+
+        l_fir_data = MCD_FIR_ACTION1;
+        l_fir_data.clearBit<PU_MCD1_MCD_FIR_MASK_REG_ARRAY_ECC_UE>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_ACTION1_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_ACTION1_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_ACTION1_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_ACTION1_REG)");
+
+        // setup extended addressing
         l_mcd_vgc_data.setBit<P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_ENABLE>();
         l_mcd_vgc_data.insertFromRight<P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_MASK,
                                        P9N2_PU_BANK0_MCD_VGC_EXT_ADDR_FAC_MASK_LEN>((l_addr_extension_group_id << 3) |
@@ -1266,6 +1282,16 @@ p9_setup_bars(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
             FAPI_TRY(p9_setup_bars_mcd(i_target, FAPI_SYSTEM, l_chip_info),
                      "Error from p9_setup_bars_mcd");
         }
+    }
+    else
+    {
+        // mask MCD FIRs
+        fapi2::buffer<uint64_t> l_fir_data;
+        l_fir_data.flush<1>();
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD_FIR_MASK_REG, l_fir_data),
+                 "Error from putScom (PU_MCD_FIR_MASK_REG)");
+        FAPI_TRY(fapi2::putScom(i_target, PU_MCD1_MCD_FIR_MASK_REG, l_fir_data),
+                 "Error from putScom (PU_MCD1_MCD_FIR_MASK_REG)");
     }
 
     // INT
