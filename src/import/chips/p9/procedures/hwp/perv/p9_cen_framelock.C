@@ -1533,6 +1533,14 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     fapi2::buffer<uint64_t> l_mci_data;
     fapi2::buffer<uint64_t> l_writeMask;
 
+    // check EC feature to determine if special handling for UE/SUE errors
+    // should be engaged (HW414700)
+    uint8_t l_hw414700;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700,
+                           i_pu_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>(),
+                           l_hw414700),
+             "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW414700");
+
     // (Action0, Action1, Mask)
     // ------------------------
     // (0,0,0) = Checkstop Error
@@ -1562,7 +1570,7 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     l_action0_data.setBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>();
 
     // Recoverable errors
-    l_action1_data.setBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>()                     // Bit 0
+    l_action1_data.setBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>()       // Bit 0
     .setBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()             // Bit 1
     .setBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>()         // Bit 2
     .setBit<DATAPATH_FIR_DSRC_PERF_DEGRAD_BIT>()                 // Bit 3
@@ -1595,6 +1603,27 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     .setBit<DATAPATH_FIR_DBGWAT_PERR_BIT>()                      // Bit 60
     .setBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                    // Bit 61
 
+    // Checkstop errors
+    if (l_hw414700)
+    {
+        l_action0_data.clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();  // Bit 16
+
+        l_action1_data.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>() // Bit 2
+        .clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>()                       // Bit 4
+        .clearBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>()                   // Bit 5
+        .clearBit<DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT>()                 // Bit 6
+        .clearBit<DATAPATH_FIR_CRC_ERR_BIT>()                                // Bit 8
+        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                       // Bit 12
+        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>()                  // Bit 14
+        .clearBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>()                 // Bit 15
+        .clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>()                 // Bit 16
+        .clearBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>()                       // Bit 32
+        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>()           // Bit 40
+        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>()         // Bit 41
+        .clearBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>()                         // Bit 42
+        .clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                          // Bit 61
+    }
+
     // ----------------------------------
     // Set P9 DATAPATH FIR Mask
     // ----------------------------------
@@ -1607,15 +1636,30 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     // (1,1,0) = UNIT_CS
     l_dataPathFirMask = ~(l_action0_data | l_action1_data);
 
-    //TODO: To be removed, see SW413273
-    l_dataPathFirMask.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
-
     // Any bit that is clear in both ACTION0 & ACTION1 reg, but
     // we want to have a checkstop, we need to explicitly clear
     // the mask bit.
     // (0,0,0) = Checkstop Error
+    if (l_hw414700)
+    {
+        l_dataPathFirMask.clearBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>() // Bit 2
+        .clearBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>()                          // Bit 4
+        .clearBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>()                      // Bit 5
+        .clearBit<DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT>()                    // Bit 6
+        .clearBit<DATAPATH_FIR_CRC_ERR_BIT>()                                   // Bit 8
+        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                          // Bit 12
+        .clearBit<DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT>()                     // Bit 14
+        .clearBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>()                    // Bit 15
+        .clearBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>()                    // Bit 16
+        .clearBit<DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT>()                          // Bit 32
+        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>()              // Bit 40
+        .clearBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>()            // Bit 41
+        .clearBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>()                            // Bit 42
+        .clearBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                             // Bit 61
+    }
 
-    // None for now
+    //TODO: To be removed, see SW413273
+    l_dataPathFirMask.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
 
     // Write to ACTION0 reg
     l_writeMask = l_action0_data;
