@@ -354,6 +354,7 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
             {
                 iv_retriggeredMain = true;
 #ifdef CONFIG_BMC_IPMI
+#ifndef __HOSTBOOT_RUNTIME
                 // This could potentially take awhile, reset watchdog
                 l_errl = IPMIWATCHDOG::resetWatchDogTimer();
                 if(l_errl)
@@ -363,6 +364,7 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
                     l_errl->collectTrace("ISTEPS_TRACE",256);
                     errlCommit(l_errl,ISTEP_COMP_ID);
                 }
+#endif
 #endif
                 SBE_TRACF("handle_sbe_reg_value(): Attempting "
                    "REIPL_UPD_SEEPROM failed. Recalling with BKP_SEEPROM");
@@ -593,11 +595,12 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
 
     bool l_flowCtrl = false;
-    errlHndl_t l_errl = nullptr;
     uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE;
     uint32_t *l_pFifoResponse =
         reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 
+#ifndef __HOSTBOOT_RUNTIME
+    errlHndl_t l_errl = nullptr;
     l_errl = getFifoSBEFFDC(i_target,
                                    l_pFifoResponse,
                                    l_responseSize);
@@ -682,6 +685,7 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
 
         l_flowCtrl = true;
     }
+#endif
 
     free(l_pFifoResponse);
     l_pFifoResponse = nullptr;
@@ -750,14 +754,17 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
 
         if(INITSERVICE::spBaseServicesEnabled())
         {
+#ifndef __HOSTBOOT_RUNTIME
             // When we are on an FSP machine, we want to fail out of
             // hostboot and give control back to the FSP. They have
             // better diagnostics for this type of error.
             INITSERVICE::doShutdownWithError(SBEIO_HWSV_COLLECT_SBE_RC,
                                 TARGETING::get_huid(i_target));
+#endif
         }
 
 #ifdef CONFIG_BMC_IPMI
+#ifndef __HOSTBOOT_RUNTIME
         // This could potentially take awhile, reset watchdog
         l_errl = IPMIWATCHDOG::resetWatchDogTimer();
         if(l_errl)
@@ -767,6 +774,7 @@ bool SbeRetryHandler::sbe_boot_fail_handler(TARGETING::Target * i_target)
             l_errl->collectTrace("ISTEPS_TRACE",KILOBYTE/4);
             errlCommit(l_errl,ISTEP_COMP_ID);
         }
+#endif
 #endif
         SBE_TRACF("sbe_boot_fail_handler. iv_switchSides count is %llx",
                    iv_switchSidesCount);
