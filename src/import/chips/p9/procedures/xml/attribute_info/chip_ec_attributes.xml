@@ -56,7 +56,142 @@
       </chip>
     </chipEcFeature>
   </attribute>
-
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW420171</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Nimbus DD2.2 - Disable HW420171 Fix
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW413922</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Nimbus DD2.2 - Disable HW413922 Fix
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW414249_ROUND2</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Additional chickenswitch needed to mitigate HW414249
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW423358</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW423358 - NDD2.2 Only
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW415124</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW415124 - Nimbus DD2.2 only
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_LEGACYTMMODE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Legacy TM mode - Will be replaced with full solution after bringup
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW420489</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW420489 - NDD2.2 Only
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW419082</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW419082 - NDD2.2 Only
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW417233</id>
