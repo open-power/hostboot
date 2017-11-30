@@ -226,15 +226,75 @@ uint32_t maskMemPort<TYPE_MCA>( ExtensibleChip * i_chip )
 #ifdef __HOSTBOOT_RUNTIME
 
 template<>
-uint32_t iuePortFail<TYPE_MCA>( ExtensibleChip * i_chip,
-                                STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t triggerPortFail<TYPE_MCA>( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[MemEcc::iuePortFail<TYPE_MCA>] "
+    #define PRDF_FUNC "[MemEcc::triggerPortFail<TYPE_MCA>] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
 
     uint32_t o_rc = SUCCESS;
+
+    McaDataBundle * db = getMcaDataBundle( i_chip );
+
+    do
+    {
+        // trigger a port fail
+        // set FARB0[59] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_CONSTANT and
+        //     FARB0[40] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_ADDR5
+        SCAN_COMM_REGISTER_CLASS * farb0 = i_chip->getRegister("FARB0");
+
+        o_rc = farb0->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() FARB0 failed: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        farb0->SetBit(59);
+        farb0->SetBit(40);
+
+        o_rc = farb0->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() FARB0 failed: i_chip=0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // reset thresholds to prevent issuing multiple port failures on
+        // the same port
+        for ( auto & resetTh : db->iv_iueTh )
+        {
+            resetTh.second.reset();
+        }
+
+        db->iv_iuePortFail = true;
+
+        break;
+    }while(0);
+
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+#endif // __HOSTBOOT_RUNTIME
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+template<>
+bool queryIueTh<TYPE_MCA>( ExtensibleChip * i_chip,
+                           STEP_CODE_DATA_STRUCT & io_sc )
+{
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_MCA == i_chip->getType() );
+
+    bool iueAtTh = false;
 
     McaDataBundle * db = getMcaDataBundle( i_chip );
 
@@ -244,49 +304,14 @@ uint32_t iuePortFail<TYPE_MCA>( ExtensibleChip * i_chip,
         // If threshold reached
         if ( th.second.thReached(io_sc) )
         {
-            // trigger a port fail
-            // set FARB0[59] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_CONSTANT and
-            //     FARB0[40] - MBA_FARB0Q_CFG_INJECT_PARITY_ERR_ADDR5
-            SCAN_COMM_REGISTER_CLASS * farb0 = i_chip->getRegister("FARB0");
-
-            o_rc = farb0->Read();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Read() FARB0 failed: i_chip=0x%08x",
-                        i_chip->getHuid() );
-                continue;
-            }
-
-            farb0->SetBit(59);
-            farb0->SetBit(40);
-
-            o_rc = farb0->Write();
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "Write() FARB0 failed: i_chip=0x%08x",
-                        i_chip->getHuid() );
-                continue;
-            }
-
-            // reset thresholds to prevent issuing multiple port failures on
-            // the same port
-            for ( auto & resetTh : db->iv_iueTh )
-            {
-                resetTh.second.reset();
-            }
-
-            db->iv_iuePortFail = true;
-
-            break;
+            iueAtTh = true;
         }
     }
 
-    return o_rc;
-
-    #undef PRDF_FUNC
+    return iueAtTh;
 }
 
-#endif // __HOSTBOOT_RUNTIME
+#endif
 
 //------------------------------------------------------------------------------
 

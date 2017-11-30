@@ -181,17 +181,26 @@ uint32_t analyzeImpe( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 #ifdef __HOSTBOOT_RUNTIME
 
 /**
- * @brief  Will trigger a port fail if the number of IUEs is over threshold.
+ * @brief  Will trigger a port fail.
  * @param  i_chip MCA chip
- * @param  io_sc  The step code data struct.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise
  */
 template<TARGETING::TYPE T>
-uint32_t iuePortFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
+uint32_t triggerPortFail( ExtensibleChip * i_chip );
 
 #endif // __HOSTBOOT_RUNTIME
 
 #ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief  Will query the data bundle and return if the IUE threshold has been
+ *         reached.
+ * @param  i_chip MCA chip
+ * @param  io_sc  The step code data struct.
+ * @return True if IUE threshold is reached, false if not.
+ */
+template<TARGETING::TYPE T>
+bool queryIueTh( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Will mask off an entire memory port. At runtime will issue dynamic

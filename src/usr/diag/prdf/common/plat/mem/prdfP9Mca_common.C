@@ -216,13 +216,22 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeFetchUe );
  * @brief  MCAECCFIR[17] - Mainline read IUE.
  * @param  i_chip MCA chip.
  * @param  io_sc  The step code data struct.
- * @return SUCCESS
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
  */
 int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
                                  STEP_CODE_DATA_STRUCT & io_sc )
 {
+    int32_t rc = SUCCESS;
     MemEcc::analyzeMainlineIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
-    return SUCCESS; // nothing to return to rule code
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_MCA>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMainlineIue );
 
@@ -232,13 +241,22 @@ PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMainlineIue );
  * @brief  MCAECCFIR[37] - Maint IUE.
  * @param  i_chip MCA chip.
  * @param  io_sc  The step code data struct.
- * @return SUCCESS
+ * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
  */
 int32_t AnalyzeMaintIue( ExtensibleChip * i_chip,
                               STEP_CODE_DATA_STRUCT & io_sc )
 {
+    int32_t rc = SUCCESS;
     MemEcc::analyzeMaintIue<TYPE_MCA, McaDataBundle *>( i_chip, io_sc );
-    return SUCCESS; // nothing to return to rule code
+
+    #ifdef __HOSTBOOT_MODULE
+
+    if ( MemEcc::queryIueTh<TYPE_MCA>(i_chip, io_sc) )
+        rc = PRD_NO_CLEAR_FIR_BITS;
+
+    #endif
+
+    return rc; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( p9_mca, AnalyzeMaintIue );
 
