@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -299,6 +299,15 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::buffer<uint64_t> l_mbs_fir_action1;
 
     uint8_t l_dd2_fir_bit_defn_changes = 0;
+    uint8_t l_hw414700 = 0;
+
+    fapi2::Target<fapi2::TARGET_TYPE_DMI> l_attached_dmi_target = i_target.getParent<fapi2::TARGET_TYPE_DMI>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_attached_proc_target =
+        l_attached_dmi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    // Get attribute for HW414700 workaround
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
+             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
 
     // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES, i_target,
@@ -374,9 +383,20 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     l_mbs_fir_mask_or.setBit<9>();
 
     // 10    cache_srw_ue           recoverable         mask (until unmask_fetch_errors)
-    l_mbs_fir_action0.clearBit<10>();
-    l_mbs_fir_action1.setBit<10>();
-    l_mbs_fir_mask_or.setBit<10>();
+    //       hw414700               channel checkstop   mask (until unmask_fetch_errors)
+
+    if (l_hw414700)
+    {
+        l_mbs_fir_action0.clearBit<10>();
+        l_mbs_fir_action1.clearBit<10>();
+        l_mbs_fir_mask_or.setBit<10>();
+    }
+    else
+    {
+        l_mbs_fir_action0.clearBit<10>();
+        l_mbs_fir_action1.setBit<10>();
+        l_mbs_fir_mask_or.setBit<10>();
+    }
 
     // 11    cache_srw_sue          recoverable         mask (forever)
     l_mbs_fir_action0.clearBit<11>();
@@ -389,9 +409,19 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     l_mbs_fir_mask_or.setBit<12>();
 
     // 13    cache_co_ue            recoverable         mask (until unmask_fetch_errors)
-    l_mbs_fir_action0.clearBit<13>();
-    l_mbs_fir_action1.setBit<13>();
-    l_mbs_fir_mask_or.setBit<13>();
+    //       hw414700               channel checkstop   mask (until unmask_fetch_errors)
+    if (l_hw414700)
+    {
+        l_mbs_fir_action0.clearBit<13>();
+        l_mbs_fir_action1.clearBit<13>();
+        l_mbs_fir_mask_or.setBit<13>();
+    }
+    else
+    {
+        l_mbs_fir_action0.clearBit<13>();
+        l_mbs_fir_action1.setBit<13>();
+        l_mbs_fir_mask_or.setBit<13>();
+    }
 
     // 14    cache_co_sue           recoverable         mask (forever)
     l_mbs_fir_action0.clearBit<14>();
@@ -459,9 +489,9 @@ fapi2::ReturnCode mss_unmask_inband_errors(const fapi2::Target<fapi2::TARGET_TYP
     l_mbs_fir_action1.setBit<26>();
     l_mbs_fir_mask_or.setBit<26>();
 
-    // 27    srb_buffer_ue           recoverable         mask (until unmask_fetch_errors)
+    // 27    srb_buffer_ue           channel checkstop   mask (until unmask_fetch_errors)
     l_mbs_fir_action0.clearBit<27>();
-    l_mbs_fir_action1.setBit<27>();
+    l_mbs_fir_action1.clearBit<27>();
     l_mbs_fir_mask_or.setBit<27>();
 
     // 28    srb_buffer_sue          recoverable         mask (forever)
@@ -863,9 +893,19 @@ fapi2::ReturnCode mss_unmask_draminit_errors(const fapi2::Target<fapi2::TARGET_T
     uint8_t l_dd2_fir_bit_defn_changes = 0;
     fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_targetCentaur;
     uint8_t l_dimm_type = 0;
+    uint8_t l_hw414700 = 0;
 
     // Get Centaur target for the given MBA
     l_targetCentaur = i_target.getParent<fapi2::TARGET_TYPE_MEMBUF_CHIP>();
+
+    // Get DMI target for given Centaur, and processor for given DMI
+    fapi2::Target<fapi2::TARGET_TYPE_DMI> l_attached_dmi_target = l_targetCentaur.getParent<fapi2::TARGET_TYPE_DMI>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_attached_proc_target =
+        l_attached_dmi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    // Get attribute for HW414700 workaround
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
+             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
 
     // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES, l_targetCentaur,
@@ -954,9 +994,20 @@ fapi2::ReturnCode mss_unmask_draminit_errors(const fapi2::Target<fapi2::TARGET_T
     l_mbacalfir_mask_or.setBit<8>();
 
     // 9    mba_wrd ue                  recoverable         mask (until mainline traffic)
-    l_mbacalfir_action0.clearBit<9>();
-    l_mbacalfir_action1.setBit<9>();
-    l_mbacalfir_mask_or.setBit<9>();
+    //      hw414700                    channel checkstop   mask (until mainline traffic)
+
+    if (l_hw414700)
+    {
+        l_mbacalfir_action0.clearBit<9>();
+        l_mbacalfir_action1.clearBit<9>();
+        l_mbacalfir_mask_or.setBit<9>();
+    }
+    else
+    {
+        l_mbacalfir_action0.clearBit<9>();
+        l_mbacalfir_action1.setBit<9>();
+        l_mbacalfir_mask_or.setBit<9>();
+    }
 
     // 10   mba_wrd ce                  recoverable         mask (until mainline traffic)
     l_mbacalfir_action0.clearBit<10>();
@@ -964,9 +1015,19 @@ fapi2::ReturnCode mss_unmask_draminit_errors(const fapi2::Target<fapi2::TARGET_T
     l_mbacalfir_mask_or.setBit<10>();
 
     // 11   mba_maint ue                recoverable         mask (until after draminit_training_adv)
-    l_mbacalfir_action0.clearBit<11>();
-    l_mbacalfir_action1.setBit<11>();
-    l_mbacalfir_mask_or.setBit<11>();
+    //      hw414700                    channel checkstop   mask (until after draminit_training_adv)
+    if (l_hw414700)
+    {
+        l_mbacalfir_action0.clearBit<11>();
+        l_mbacalfir_action1.clearBit<11>();
+        l_mbacalfir_mask_or.setBit<11>();
+    }
+    else
+    {
+        l_mbacalfir_action0.clearBit<11>();
+        l_mbacalfir_action1.setBit<11>();
+        l_mbacalfir_mask_or.setBit<11>();
+    }
 
     // 12   mba_maint ce                recoverable         mask (until after draminit_training_adv)
     l_mbacalfir_action0.clearBit<12>();
@@ -984,9 +1045,19 @@ fapi2::ReturnCode mss_unmask_draminit_errors(const fapi2::Target<fapi2::TARGET_T
     l_mbacalfir_mask_or.setBit<14>();
 
     // 15   wrq_data_ue                 recoverable         mask (until mainline traffic)
-    l_mbacalfir_action0.clearBit<15>();
-    l_mbacalfir_action1.setBit<15>();
-    l_mbacalfir_mask_or.setBit<15>();
+    //      hw414700                    channel checkstop   mask (until mainline traffic)
+    if (l_hw414700)
+    {
+        l_mbacalfir_action0.clearBit<15>();
+        l_mbacalfir_action1.clearBit<15>();
+        l_mbacalfir_mask_or.setBit<15>();
+    }
+    else
+    {
+        l_mbacalfir_action0.clearBit<15>();
+        l_mbacalfir_action1.setBit<15>();
+        l_mbacalfir_mask_or.setBit<15>();
+    }
 
     // 16   wrq_data_sue                recoverable         mask (forever)
     l_mbacalfir_action0.clearBit<16>();
@@ -1421,6 +1492,15 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::buffer<uint64_t> l_mbeccfir_action1;
 
     uint8_t l_mbspa_0_fixed_for_dd2 = 0;
+    uint8_t l_hw414700 = 0;
+
+    fapi2::Target<fapi2::TARGET_TYPE_DMI> l_attached_dmi_target = i_target.getParent<fapi2::TARGET_TYPE_DMI>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_attached_proc_target =
+        l_attached_dmi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    // Get attribute for HW414700 workaround
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
+             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
 
     // Get attribute that tells us if mbspa 0 cmd complete attention is fixed for dd2
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_HW217608_MBSPA_0_CMD_COMPLETE_ATTN_FIXED, i_target,
@@ -1678,9 +1758,20 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
         l_mbeccfir_mask_or.setBit<18>();
 
         // 19   Memory UE                   recoverable         mask (until mainline traffic)
-        l_mbeccfir_action0.clearBit<19>();
-        l_mbeccfir_action1.setBit<19>();
-        l_mbeccfir_mask_or.setBit<19>();
+        //      hw414700                    channel checkstop   mask (until mainline traffic)
+
+        if (l_hw414700)
+        {
+            l_mbeccfir_action0.clearBit<19>();
+            l_mbeccfir_action1.clearBit<19>();
+            l_mbeccfir_mask_or.setBit<19>();
+        }
+        else
+        {
+            l_mbeccfir_action0.clearBit<19>();
+            l_mbeccfir_action1.setBit<19>();
+            l_mbeccfir_mask_or.setBit<19>();
+        }
 
         // 20:27    Maint MPE Rank 0:7      recoverable         mask (forever)
         // NOTE: FW wants to mask these and rely instead on detecting the
@@ -1743,9 +1834,19 @@ fapi2::ReturnCode mss_unmask_maint_errors(const fapi2::Target<fapi2::TARGET_TYPE
         l_mbeccfir_mask_or.setBit<43>();
 
         // 44   Memory RCD parity error     recoverable         mask (forever)
-        l_mbeccfir_action0.clearBit<44>();
-        l_mbeccfir_action1.setBit<44>();
-        l_mbeccfir_mask_or.setBit<44>();
+        //      hw414700                    channel checkstop   mask (until mainline traffic)
+        if (l_hw414700)
+        {
+            l_mbeccfir_action0.clearBit<44>();
+            l_mbeccfir_action1.clearBit<44>();
+            l_mbeccfir_mask_or.setBit<44>();
+        }
+        else
+        {
+            l_mbeccfir_action0.clearBit<44>();
+            l_mbeccfir_action1.setBit<44>();
+            l_mbeccfir_mask_or.setBit<44>();
+        }
 
         // 45   Maint RCD parity error.     recoverable         mask (forever)
         l_mbeccfir_action0.clearBit<45>();
@@ -1848,6 +1949,11 @@ fapi2::ReturnCode mss_unmask_fetch_errors(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::buffer<uint64_t> l_mba_dsm0;
     fapi2::buffer<uint64_t> l_mba_farb0;
 
+    uint8_t l_hw414700 = 0;
+
+    fapi2::Target<fapi2::TARGET_TYPE_DMI> l_attached_dmi_target = i_target.getParent<fapi2::TARGET_TYPE_DMI>();
+    fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_attached_proc_target =
+        l_attached_dmi_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
     //*************************
     //*************************
@@ -2091,6 +2197,10 @@ fapi2::ReturnCode mss_unmask_fetch_errors(const fapi2::Target<fapi2::TARGET_TYPE
     // here is unmask errors requiring mainline traffic which would be
     // considered valid after the mss_thermal_init procedure.
 
+    // Get attribute for HW414700 workaround
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW414700, l_attached_proc_target, l_hw414700),
+             "Error getting ATTR_CHIP_EC_FEATURE_HW414700");
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES, i_target,
                            l_dd2_fir_bit_defn_changes),
              "Error getting ATTR_CEN_CENTAUR_EC_FEATURE_DD2_FIR_BIT_DEFN_CHANGES");
@@ -2290,6 +2400,12 @@ fapi2::ReturnCode mss_unmask_fetch_errors(const fapi2::Target<fapi2::TARGET_TYPE
 
         // 43   Prefetch Memory UE          recoverable         unmask
         l_mbeccfir_mask_and.clearBit<43>();
+
+        // 44   Memory RCD Parity Error     channel checkstop   unmask (hw414700)
+        if (l_hw414700)
+        {
+            l_mbeccfir_mask_and.clearBit<44>();
+        }
 
         // Write mask AND
         FAPI_TRY(fapi2::putScom(i_target,
