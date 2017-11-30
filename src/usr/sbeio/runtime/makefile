@@ -27,14 +27,35 @@ HOSTBOOT_RUNTIME = 1
 
 ROOTPATH = ../../../..
 VPATH += ../
+PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p9/procedures
 
 MODULE = sbeio_rt
+
+
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/ffdc
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv
+
+EXTRAINCDIR += ${PROCEDURES_PATH}/hwp/sbe/
 
 ## Objects unique to HBRT
 OBJS += rt_sbeio.o
 OBJS += sbeio_attr_override.o
 OBJS += sbe_attn.o
+OBJS += sbe_retry_handler.o
 #@todo - RTC:180241 - Add in error handlers by creating common mk
+
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/
+VPATH += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/
+include ${ROOTPATH}/procedure.rules.mk
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/sbe/p9_get_sbe_msg_register.mk
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_extract_sbe_rc.mk
+include ${ROOTPATH}/src/import/chips/p9/procedures/hwp/perv/p9_start_cbs.mk
 
 SUBDIRS += test.d
 
