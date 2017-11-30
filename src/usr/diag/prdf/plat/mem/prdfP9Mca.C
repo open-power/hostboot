@@ -74,9 +74,13 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     // right away. Since PRD is running in the hypervisor, it is possible we
     // may not get the error log. To better our chances, we trigger the port
     // fail here after the error log has been committed.
-    if ( SUCCESS != MemEcc::iuePortFail<TYPE_MCA>(i_chip, io_sc) )
+    if ( MemEcc::queryIueTh<TYPE_MCA>(i_chip, io_sc) )
     {
-        PRDF_ERR( PRDF_FUNC "iuePortFail(0x%08x) failed", i_chip->getHuid() );
+        if ( SUCCESS != MemEcc::triggerPortFail<TYPE_MCA>(i_chip) )
+        {
+            PRDF_ERR( PRDF_FUNC "triggerPortFail(0x%08x) failed",
+            i_chip->getHuid() );
+        }
     }
 
     #endif // __HOSTBOOT_RUNTIME
