@@ -142,6 +142,23 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501380aull, l_scom_buffer ));
 
+            if (( ! l_def_OBUS0_FBC_ENABLED))
+            {
+                constexpr auto l_PB_IOO_SCOM_A0_MODE_BLOCKED = 0xf;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A0_MODE_BLOCKED );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A0_MODE_BLOCKED );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A0_MODE_BLOCKED );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A0_MODE_BLOCKED );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOO_SCOM_A0_MODE_NORMAL = 0x0;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A0_MODE_NORMAL );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A0_MODE_NORMAL );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A0_MODE_NORMAL );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A0_MODE_NORMAL );
+            }
+
             if (l_def_OBUS0_FBC_ENABLED)
             {
                 l_scom_buffer.insert<22, 2, 62, uint64_t>(literal_0x1 );
@@ -179,6 +196,23 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501380bull, l_scom_buffer ));
+
+            if (( ! l_def_OBUS1_FBC_ENABLED))
+            {
+                constexpr auto l_PB_IOO_SCOM_A1_MODE_BLOCKED = 0xf;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A1_MODE_BLOCKED );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A1_MODE_BLOCKED );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A1_MODE_BLOCKED );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A1_MODE_BLOCKED );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOO_SCOM_A1_MODE_NORMAL = 0x0;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A1_MODE_NORMAL );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A1_MODE_NORMAL );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A1_MODE_NORMAL );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A1_MODE_NORMAL );
+            }
 
             if (l_def_OBUS1_FBC_ENABLED)
             {
@@ -218,6 +252,23 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501380cull, l_scom_buffer ));
 
+            if (( ! l_def_OBUS2_FBC_ENABLED))
+            {
+                constexpr auto l_PB_IOO_SCOM_A2_MODE_BLOCKED = 0xf;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A2_MODE_BLOCKED );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A2_MODE_BLOCKED );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A2_MODE_BLOCKED );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A2_MODE_BLOCKED );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOO_SCOM_A2_MODE_NORMAL = 0x0;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A2_MODE_NORMAL );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A2_MODE_NORMAL );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A2_MODE_NORMAL );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A2_MODE_NORMAL );
+            }
+
             if (l_def_OBUS2_FBC_ENABLED)
             {
                 l_scom_buffer.insert<22, 2, 62, uint64_t>(literal_0x1 );
@@ -255,6 +306,23 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501380dull, l_scom_buffer ));
+
+            if (( ! l_def_OBUS3_FBC_ENABLED))
+            {
+                constexpr auto l_PB_IOO_SCOM_A3_MODE_BLOCKED = 0xf;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A3_MODE_BLOCKED );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A3_MODE_BLOCKED );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A3_MODE_BLOCKED );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A3_MODE_BLOCKED );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOO_SCOM_A3_MODE_NORMAL = 0x0;
+                l_scom_buffer.insert<20, 1, 60, uint64_t>(l_PB_IOO_SCOM_A3_MODE_NORMAL );
+                l_scom_buffer.insert<25, 1, 61, uint64_t>(l_PB_IOO_SCOM_A3_MODE_NORMAL );
+                l_scom_buffer.insert<52, 1, 62, uint64_t>(l_PB_IOO_SCOM_A3_MODE_NORMAL );
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOO_SCOM_A3_MODE_NORMAL );
+            }
 
             if (l_def_OBUS3_FBC_ENABLED)
             {
