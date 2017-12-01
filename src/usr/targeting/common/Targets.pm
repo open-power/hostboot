@@ -1300,7 +1300,6 @@ sub processMc
 
                     ## Find connected membufs
                     my $membuf_dmi = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{DEST}[0];
-
                     if (defined($membuf_dmi))
                     {
                         ## found membuf connected
@@ -1327,7 +1326,6 @@ sub processMc
                         $self->setAttribute($membuf, "ORDINAL_ID", $membuf_ordinal_id);
                         $self->setAttribute($membuf, "REL_POS", $membufnum);
                         $self->setAttribute($membuf, "POSITION", $membufnum);
-                        $self->setAttribute($membuf, "VPD_REC_NUM", $membufnum);
 
                         # It's okay to hard code these here because the code fixes it as needed
                         # This is hardcoded for proc target as well.
@@ -1336,6 +1334,10 @@ sub processMc
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "reserved",   "0");
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "useInbandScom", "0");
                         $self->setAttributeField($membuf, "SCOM_SWITCHES", "useXscom", "0");
+
+                        my $riser_card_conn = $self->getTargetParent($self->getTargetParent($membuf));
+                        my $riser_card_pos = $self->getAttribute($riser_card_conn,"POSITION");
+                        $self->setAttribute($membuf, "VPD_REC_NUM", $riser_card_pos);
 
                         ## get the dmi bus
                         my $dmi_bus = $self->{data}->{TARGETS}{$dmi}{CONNECTION}{BUS}[0];
