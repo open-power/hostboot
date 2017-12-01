@@ -41,7 +41,6 @@
 #include <lib/eff_config/timing.H>
 #include <lib/utils/poll.H>
 #include <lib/phy/read_cntrl.H>
-#include <lib/phy/mss_training.H>
 
 namespace mss
 {
