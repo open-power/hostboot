@@ -98,8 +98,7 @@ void* call_mss_power_cleanup (void *io_pArgs)
     // -- Cumulus only
     // Get a list of all present Centaurs
     TargetHandleList l_presCentaurs;
-    getChipResources(l_presCentaurs, TYPE_MEMBUF, UTIL_FILTER_PRESENT);
-
+    getAllChips(l_presCentaurs, TYPE_MEMBUF);
     // For each present Centaur
     for (TargetHandleList::const_iterator
             l_cenIter = l_presCentaurs.begin();
@@ -114,11 +113,7 @@ void* call_mss_power_cleanup (void *io_pArgs)
 
         // Find all present MBAs associated with this Centaur
         TARGETING::TargetHandleList l_presMbas;
-        getChildAffinityTargetsByState(l_presMbas,
-                                       l_pCentaur,
-                                       CLASS_UNIT,
-                                       TYPE_MBA,
-                                       UTIL_FILTER_PRESENT);
+        getChildChiplets(l_presMbas, l_pCentaur,TYPE_MBA);
 
         // If not at least two MBAs found
         if (l_presMbas.size() < 2)
