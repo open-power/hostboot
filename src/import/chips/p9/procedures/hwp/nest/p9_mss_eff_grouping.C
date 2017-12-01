@@ -2715,12 +2715,12 @@ fapi2::ReturnCode grouping_calcRegions(
 
     if (i_procAttrs.iv_memBaseAddr.size())
     {
-        l_max_nm_region_idx = i_procAttrs.iv_memBaseAddr.size() - 1;
+        l_max_nm_region_idx = i_procAttrs.iv_memBaseAddr.size();
     }
 
     if (i_procAttrs.iv_mirrorBaseAddr.size())
     {
-        l_max_m_region_idx = i_procAttrs.iv_mirrorBaseAddr.size() - 1;
+        l_max_m_region_idx = i_procAttrs.iv_mirrorBaseAddr.size();
     }
 
     // Calculate mirrored group sizes
