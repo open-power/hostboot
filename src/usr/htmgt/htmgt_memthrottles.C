@@ -58,7 +58,7 @@ namespace HTMGT
  * Run hardware procedure to determine throttle/numerator/number of commands
  * based on the specified utilization
  *
- * @param[in] i_utilization - Minimum utilization value required
+ * @param[in] i_utilization - Minimum utilization value required (in %)
  * @param[in] i_watt_target - power target required for bulk_pwr_throttles
  */
 errlHndl_t call_utils_to_throttle(
@@ -67,11 +67,14 @@ errlHndl_t call_utils_to_throttle(
                                   const uint32_t i_watt_target = 0)
 {
     errlHndl_t err = NULL;
-    uint32_t utilization[TMGT_MAX_MCA_PER_MCS] = { i_util, i_util };
+    // Convert to 1/100 % units for the HWP
+    const uint32_t util_hundredth_percent = i_util * 100;
+    uint32_t utilization[TMGT_MAX_MCA_PER_MCS] = {
+        util_hundredth_percent, util_hundredth_percent };
     uint32_t l_watt_targets[TMGT_MAX_MCA_PER_MCS][TMGT_MAX_DIMM_PER_MCA] =
         {i_watt_target, i_watt_target, i_watt_target, i_watt_target};
-    TMGT_INF("call_utils_to_throttle: utilization: 0x%04X, watt_target: "
-             "0x%04X", i_util, i_watt_target);
+    TMGT_INF("call_utils_to_throttle: utilization: %d, watt_target: %d",
+             i_util, i_watt_target);
 
     // Update input attributes for specified targets
     for(const auto & l_fapi_target : i_fapi_target_list)
@@ -484,16 +487,18 @@ errlHndl_t calcMemThrottles()
         sys->getAttr<ATTR_OPEN_POWER_MIN_MEM_UTILIZATION_THROTTLING>();
     if (min_utilization == 0)
     {
-        uint32_t l_safe_n_per_mba =
-        sys->getAttr<ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT>();
+        // Use SAFEMODE utilization
+        min_utilization = sys->getAttr
+            <ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT>();
         TMGT_INF("MIN_MEM_UTILIZATION_THROTTLING is 0, so reading "
                  "ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT:"
-                 " %d", l_safe_n_per_mba);
-        if (l_safe_n_per_mba == 0)
+                 " %d", min_utilization);
+        if (min_utilization == 0)
         {
-            l_safe_n_per_mba = 10;
+            // Use hardcoded utilization
+            min_utilization = 10;
             TMGT_ERR("ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT"
-                     " is 0!  Using %d", l_safe_n_per_mba);
+                     " is 0!  Using %d", min_utilization);
         }
     }
     const uint8_t efficiency =
