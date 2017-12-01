@@ -108,6 +108,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x20 );
             }
 
+            if (( ! l_def_X0_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP0_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP0_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP0_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP0_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X0_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP0_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP0_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP0_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP0_PRS_DISABLE_OFF );
+            }
+
             if ((l_def_X0_ENABLED && l_def_DD2X_PARTS))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
@@ -134,6 +156,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if (l_def_X0_ENABLED)
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x20 );
+            }
+
+            if (( ! l_def_X0_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP1_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP1_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP1_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP1_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X0_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP1_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP1_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP1_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP1_PRS_DISABLE_OFF );
             }
 
             if ((l_def_X0_ENABLED && l_def_DD2X_PARTS))
@@ -174,6 +218,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x20 );
             }
 
+            if (( ! l_def_X1_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP2_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP2_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP2_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP2_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X1_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP2_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP2_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP2_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP2_PRS_DISABLE_OFF );
+            }
+
             if ((l_def_X1_ENABLED && l_def_DD2X_PARTS))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
@@ -200,6 +266,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if (l_def_X1_ENABLED)
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x20 );
+            }
+
+            if (( ! l_def_X1_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP3_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP3_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP3_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP3_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X1_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP3_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP3_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP3_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP3_PRS_DISABLE_OFF );
             }
 
             if ((l_def_X1_ENABLED && l_def_DD2X_PARTS))
@@ -240,6 +328,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                 l_scom_buffer.insert<12, 8, 56, uint64_t>(literal_0x20 );
             }
 
+            if (( ! l_def_X2_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP4_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP4_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP4_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<20, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP4_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X2_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP4_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP4_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP4_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<25, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP4_PRS_DISABLE_OFF );
+            }
+
             if ((l_def_X2_ENABLED && l_def_DD2X_PARTS))
             {
                 l_scom_buffer.insert<4, 8, 56, uint64_t>((literal_0x15 - (l_def_DD2_LO_LIMIT_N / l_def_DD2_LO_LIMIT_D)) );
@@ -266,6 +376,28 @@ fapi2::ReturnCode p9_fbc_ioe_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
             if (l_def_X2_ENABLED)
             {
                 l_scom_buffer.insert<44, 8, 56, uint64_t>(literal_0x20 );
+            }
+
+            if (( ! l_def_X2_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP5_FMR_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP5_FMR_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP5_FMR_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<52, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP5_FMR_DISABLE_OFF );
+            }
+
+            if (( ! l_def_X2_ENABLED))
+            {
+                constexpr auto l_PB_IOE_SCOM_FP5_PRS_DISABLE_ON = 0x1;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP5_PRS_DISABLE_ON );
+            }
+            else if (literal_1)
+            {
+                constexpr auto l_PB_IOE_SCOM_FP5_PRS_DISABLE_OFF = 0x0;
+                l_scom_buffer.insert<57, 1, 63, uint64_t>(l_PB_IOE_SCOM_FP5_PRS_DISABLE_OFF );
             }
 
             if ((l_def_X2_ENABLED && l_def_DD2X_PARTS))
