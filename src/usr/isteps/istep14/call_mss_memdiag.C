@@ -145,48 +145,53 @@ void* call_mss_memdiag (void* io_pArgs)
         {
             //@FIXME SW405858 -- Remove this once the fix for this defect is in place
             //putscom pu.dmi -all 701090A 44 2 01 -ib -- enable host attentions
+
             uint64_t scom_data = 0;
             auto scom_size = sizeof(scom_data);
-            errl = deviceRead(masterproc, &scom_data, scom_size,
-                    DEVICE_SCOM_ADDRESS(0x701090A));
-            if (errl)
+            TARGETING::TargetHandleList l_dmiList; 
+            getAllChiplets(l_dmiList, TYPE_DMI);
+            for (auto l_dmi : l_dmiList)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to read 0x701090A");
-                break;
+                errl = deviceRead(l_dmi, &scom_data, scom_size,
+                        DEVICE_SCOM_ADDRESS(0x701090A));
+                if (errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to read 0x701090A");
+                    break;
+                }
+
+                //clear bit 44
+                scom_data &= 0xFFFFFFFFFFF7FFFF;
+
+                //set bit 45
+                scom_data |= 0x0000000000040000;
+
+                errl = deviceWrite(l_dmi, &scom_data, scom_size,
+                        DEVICE_SCOM_ADDRESS(0x701090A));
+                if (errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to write 0x701090A");
+                    break;
+                }
+
+                //putscom pu.dmi 07010903 FFFF63FFFFFFFFFF -pall -call -- mask CHIFIR bits
+                errl = deviceRead(l_dmi, &scom_data, scom_size,
+                        DEVICE_SCOM_ADDRESS(0x7010903));
+                if (errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to read 0x7010903");
+                    break;
+                }
+
+                scom_data &= 0xFFFF63FFFFFFFFFF;
+                errl = deviceWrite(l_dmi, &scom_data, scom_size,
+                        DEVICE_SCOM_ADDRESS(0x7010903));
+                if (errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to write 0x7010903");
+                    break;
+                }
             }
-
-            //clear bit 44
-            scom_data &= 0xFFFFFFFFFFF7FFFF;
-
-            //set bit 45
-            scom_data |= 0x0000000000040000;
-
-            errl = deviceWrite(masterproc, &scom_data, scom_size,
-                    DEVICE_SCOM_ADDRESS(0x701090A));
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to write 0x701090A");
-                break;
-            }
-
-            //putscom pu.dmi 07010903 FFFF63FFFFFFFFFF -pall -call -- mask CHIFIR bits
-            errl = deviceRead(masterproc, &scom_data, scom_size,
-                    DEVICE_SCOM_ADDRESS(0x7010903));
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to read 0x7010903");
-                break;
-            }
-
-            scom_data &= 0xFFFF63FFFFFFFFFF;
-            errl = deviceWrite(masterproc, &scom_data, scom_size,
-                    DEVICE_SCOM_ADDRESS(0x7010903));
-            if (errl)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_mss_memdiags: unable to write 0x7010903");
-                break;
-            }
-
             /**** end of FIXME *****/
 
             TargetHandleList trgtList; getAllChiplets( trgtList, TYPE_MBA );
