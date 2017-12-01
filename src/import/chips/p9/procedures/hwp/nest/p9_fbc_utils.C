@@ -352,8 +352,13 @@ fapi2::ReturnCode p9_fbc_utils_get_chip_base_address(
         {
             o_base_address_nm0.push_back(l_base_address_nm0 |
                                          l_alias_mask());
-            o_base_address_m.push_back(l_base_address_m |
-                                       l_alias_mask());
+            // first half
+            o_base_address_m.push_back((l_base_address_m |
+                                        l_alias_mask()) + 0);
+            // second half
+            o_base_address_m.push_back((l_base_address_m |
+                                        l_alias_mask()) +
+                                       (MAX_INTERLEAVE_GROUP_SIZE / 2));
         }
 
         // second non-mirrored msel region unusable with HW423589_OPTION2
