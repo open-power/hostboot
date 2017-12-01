@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,8 @@
 #include <p9_fbc_no_hp_scom.H>
 #include <p9_fbc_ioe_tl_scom.H>
 #include <p9_fbc_ioe_dl_scom.H>
+#include <p9_xbus_fir_utils.H>
+#include <p9_fbc_smp_utils.H>
 
 #include <p9_xbus_scom_addresses.H>
 #include <p9_xbus_scom_addresses_fld.H>
@@ -50,17 +52,6 @@
 #include <p9_obus_scom_addresses_fld.H>
 #include <p9_misc_scom_addresses.H>
 #include <p9_perv_scom_addresses.H>
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-const uint64_t FBC_IOE_TL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOE_TL_FIR_ACTION1 = 0x0000000000000000ULL;
-const uint64_t FBC_IOE_TL_FIR_MASK    = 0xFF6DF0303FFFFF1FULL;
-
-const uint64_t FBC_IOE_DL_FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FBC_IOE_DL_FIR_ACTION1 = 0x0303C00000001FFCULL;
-const uint64_t FBC_IOE_DL_FIR_MASK    = 0xFCFC3FFFFFFFE003ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -74,6 +65,7 @@ fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_T
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_XBUS>> l_xbus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
+    fapi2::buffer<uint64_t> l_fbc_cent_fir_data;
 
     fapi2::ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_Type l_fbc_optics_cfg_mode = { fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_SMP };
     FAPI_DBG("Start");
@@ -105,14 +97,64 @@ fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_T
 
     l_xbus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_XBUS>();
 
-    if (l_xbus_chiplets.size())
+    // configure TL FIR, only if not already setup by SBE
+    FAPI_TRY(fapi2::getScom(i_target, PU_PB_CENT_SM0_PB_CENT_FIR_REG, l_fbc_cent_fir_data),
+             "Error from getScom (PU_PB_CENT_SM0_PB_CENT_FIR_REG)");
+
+    if (!l_fbc_cent_fir_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_13>())
     {
         FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION0_REG, FBC_IOE_TL_FIR_ACTION0),
                  "Error from putScom (PU_PB_IOE_FIR_ACTION0_REG)");
         FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_ACTION1_REG, FBC_IOE_TL_FIR_ACTION1),
                  "Error from putScom (PU_PB_IOE_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_MASK_REG, FBC_IOE_TL_FIR_MASK),
-                 "Error from putScom (PU_PB_IOE_FIR_MASK_REG)");
+
+        fapi2::buffer<uint64_t> l_fir_mask = FBC_IOE_TL_FIR_MASK;
+
+        if (!l_xbus_chiplets.size())
+        {
+            // no valid links, mask
+            l_fir_mask.flush<1>();
+        }
+        else
+        {
+            bool l_x_functional[P9_FBC_UTILS_MAX_ELECTRICAL_LINKS] =
+            {
+                false,
+                false,
+                false
+            };
+            uint64_t l_x_non_functional_mask[P9_FBC_UTILS_MAX_ELECTRICAL_LINKS] =
+            {
+                FBC_IOE_TL_FIR_MASK_X0_NF,
+                FBC_IOE_TL_FIR_MASK_X1_NF,
+                FBC_IOE_TL_FIR_MASK_X2_NF
+            };
+
+            for (auto l_iter = l_xbus_chiplets.begin();
+                 l_iter != l_xbus_chiplets.end();
+                 l_iter++)
+            {
+                uint8_t l_unit_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                                       *l_iter,
+                                       l_unit_pos),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+                l_x_functional[l_unit_pos] = true;
+            }
+
+            for (uint8_t ll = 0;
+                 ll < P9_FBC_UTILS_MAX_ELECTRICAL_LINKS;
+                 ll++)
+            {
+                if (!l_x_functional[ll])
+                {
+                    l_fir_mask |= l_x_non_functional_mask[ll];
+                }
+            }
+
+            FAPI_TRY(fapi2::putScom(i_target, PU_PB_IOE_FIR_MASK_REG, l_fir_mask),
+                     "Error from putScom (PU_PB_IOE_FIR_MASK_REG)");
+        }
     }
 
     // setup IOE (XBUS FBC IO) DL SCOMs
@@ -131,13 +173,16 @@ fapi2::ReturnCode p9_chiplet_fabric_scominit(const fapi2::Target<fapi2::TARGET_T
             goto fapi_try_exit;
         }
 
-        // configure action registers & unmask
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION0_REG, FBC_IOE_DL_FIR_ACTION0),
-                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION1_REG, FBC_IOE_DL_FIR_ACTION1),
-                 "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK),
-                 "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
+        // configure DL FIR, only if not already setup by SBE
+        if (!l_fbc_cent_fir_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_13>())
+        {
+            FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION0_REG, FBC_IOE_DL_FIR_ACTION0),
+                     "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION0_REG)");
+            FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_IOEL_FIR_ACTION1_REG, FBC_IOE_DL_FIR_ACTION1),
+                     "Error from putScom (XBUS_LL0_IOEL_FIR_ACTION1_REG)");
+            FAPI_TRY(fapi2::putScom(*l_iter, XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK),
+                     "Error from putScom (XBUS_LL0_LL0_LL0_IOEL_FIR_MASK_REG)");
+        }
     }
 
     // set FBC optics config mode attribute

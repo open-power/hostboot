@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,9 @@ struct p9_fbc_link_ctl_t
 // link constants
 const uint32_t P9_FBC_UTILS_MAX_X_LINKS = 7;
 const uint32_t P9_FBC_UTILS_MAX_A_LINKS = 4;
+
+const uint32_t P9_FBC_UTILS_MAX_ELECTRICAL_LINKS = 3;
+const uint32_t P9_FBC_UTILS_MAX_OPTICAL_LINKS = 4;
 
 const p9_fbc_link_ctl_t P9_FBC_XBUS_LINK_CTL_ARR[P9_FBC_UTILS_MAX_X_LINKS] =
 {

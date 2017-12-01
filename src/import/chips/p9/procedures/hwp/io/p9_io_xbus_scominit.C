@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,25 +49,21 @@
 //------------------------------------------------------------------------------
 //  Includes
 //------------------------------------------------------------------------------
+#include <p9_xbus_fir_utils.H>
 #include <p9_io_regs.H>
 #include <p9_io_scom.H>
 #include <p9_io_xbus_scominit.H>
 #include <p9_xbus_g0_scom.H>
 #include <p9_xbus_g1_scom.H>
 #include <p9_xbus_scom_addresses.H>
+#include <p9_misc_scom_addresses.H>
+#include <p9_misc_scom_addresses_fld.H>
 
 enum
 {
     ENUM_ATTR_XBUS_GROUP_0,
     ENUM_ATTR_XBUS_GROUP_1
 };
-
-//------------------------------------------------------------------------------
-// Constant definitions
-//------------------------------------------------------------------------------
-const uint64_t FIR_ACTION0 = 0x0000000000000000ULL;
-const uint64_t FIR_ACTION1 = 0xFFFFFFFFFFFF0000ULL;
-const uint64_t FIR_MASK    = 0xDF9797FFFFFFC000ULL;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -219,20 +215,27 @@ fapi2::ReturnCode p9_io_xbus_scominit(
             break;
     }
 
-    // configure FIR
+    // configure PHY FIR, only if not already setup by SBE
     {
-        FAPI_TRY(fapi2::putScom(i_target,
-                                XBUS_FIR_ACTION0_REG,
-                                FIR_ACTION0),
-                 "Error from putScom (XBUS_FIR_ACTION0_REG)");
-        FAPI_TRY(fapi2::putScom(i_target,
-                                XBUS_FIR_ACTION1_REG,
-                                FIR_ACTION1),
-                 "Error from putScom (XBUS_FIR_ACTION1_REG)");
-        FAPI_TRY(fapi2::putScom(i_target,
-                                XBUS_FIR_MASK_REG,
-                                FIR_MASK),
-                 "Error from putScom (XBUS_FIR_MASK_REG)");
+        fapi2::buffer<uint64_t> l_scom_data;
+        FAPI_TRY(fapi2::getScom(l_proc, PU_PB_CENT_SM0_PB_CENT_FIR_REG, l_scom_data),
+                 "Error from getScom (PU_PB_CENT_SM0_PB_CENT_FIR_REG)");
+
+        if (!l_scom_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_13>())
+        {
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    XBUS_FIR_ACTION0_REG,
+                                    XBUS_PHY_FIR_ACTION0),
+                     "Error from putScom (XBUS_FIR_ACTION0_REG)");
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    XBUS_FIR_ACTION1_REG,
+                                    XBUS_PHY_FIR_ACTION1),
+                     "Error from putScom (XBUS_FIR_ACTION1_REG)");
+            FAPI_TRY(fapi2::putScom(i_target,
+                                    XBUS_FIR_MASK_REG,
+                                    XBUS_PHY_FIR_MASK),
+                     "Error from putScom (XBUS_FIR_MASK_REG)");
+        }
     }
 
     // mark HWP exit

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p9_chiplet_scominit.H>
+#include <p9_xbus_fir_utils.H>
 #include <p9_fbc_ioo_tl_scom.H>
 #include <p9_fbc_ioo_dl_scom.H>
 #include <p9n_mcs_scom.H>
@@ -50,6 +51,7 @@
 #include <p9_nx_scom.H>
 #include <p9_int_scom.H>
 #include <p9_vas_scom.H>
+#include <p9_fbc_smp_utils.H>
 #include <p9_xbus_scom_addresses.H>
 #include <p9_xbus_scom_addresses_fld.H>
 #include <p9_obus_scom_addresses.H>
@@ -72,17 +74,6 @@ const uint64_t FBC_IOO_DL_FIR_MASK    = 0xFCFC3FFFFCFF00F3ULL;
 // link 0,1 internal errors are a simulation artifact in dd1 so they need to be masked
 const uint64_t FBC_IOO_DL_FIR_MASK_SIM = 0xFCFC3FFFFCFF00FFULL;
 
-static const uint8_t OBRICK0_POS  = 0x0;
-static const uint8_t OBRICK1_POS  = 0x1;
-static const uint8_t OBRICK2_POS  = 0x2;
-static const uint8_t OBRICK9_POS  = 0x9;
-static const uint8_t OBRICK10_POS = 0xA;
-static const uint8_t OBRICK11_POS = 0xB;
-
-static const uint8_t PERV_OB_CPLT_CONF1_OBRICKA_IOVALID = 0x6;
-static const uint8_t PERV_OB_CPLT_CONF1_OBRICKB_IOVALID = 0x7;
-static const uint8_t PERV_OB_CPLT_CONF1_OBRICKC_IOVALID = 0x8;
-
 static const uint8_t N3_PG_NPU_REGION_BIT = 7;
 
 //------------------------------------------------------------------------------
@@ -96,16 +87,15 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
     char l_procTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     char l_chipletTargetStr[fapi2::MAX_ECMD_STRING_LEN];
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    uint8_t l_xbus_present[P9_FBC_UTILS_MAX_ELECTRICAL_LINKS] = {0};
+    uint8_t l_xbus_functional[P9_FBC_UTILS_MAX_ELECTRICAL_LINKS] = {0};
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_XBUS>> l_xbus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS>> l_obus_chiplets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MCS>> l_mcs_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MI>> l_mi_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_MC>> l_mc_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_DMI>> l_dmi_targets;
     std::vector<fapi2::Target<fapi2::TARGET_TYPE_CAPP>> l_capp_targets;
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_OBUS_BRICK>> l_obrick_targets;
-    fapi2::buffer<uint64_t> l_ob0data(0x0);
-    fapi2::buffer<uint64_t> l_ob3data(0x0);
-    uint8_t l_no_ndl_iovalid = 0;
     uint8_t l_is_simulation = 0;
     uint8_t l_nmmu_ndd1 = 0;
     uint32_t l_eps_write_cycles_t1 = 0;
@@ -114,8 +104,6 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
 
     FAPI_DBG("Start");
 
-    // Get attribute to check if NDL IOValids need to be set (dd2+)
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_P9_NO_NDL_IOVALID, i_target, l_no_ndl_iovalid));
     // Get simulation indicator attribute
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_is_simulation));
 
@@ -155,6 +143,7 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
                  "Error from FAPI_ATTR_SET (ATTR_PROC_NPU_ENABLED)");
     }
 
+    l_xbus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_XBUS>();
     l_obus_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_OBUS>();
     l_mcs_targets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>();
     l_mi_targets = i_target.getChildren<fapi2::TARGET_TYPE_MI>();
@@ -227,6 +216,114 @@ fapi2::ReturnCode p9_chiplet_scominit(const fapi2::Target<fapi2::TARGET_TYPE_PRO
         FAPI_INF("No MCS/MI targets found! Do nothing!");
     }
 
+    // read spare FBC FIR bit -- if set, SBE has configured XBUS FIR resources for all
+    // present units, and code here will be run to mask resources associated with
+    // non-functional units
+    FAPI_TRY(getScom(i_target, PU_PB_CENT_SM0_PB_CENT_FIR_REG, l_scom_data),
+             "Error from getScom (PU_PB_CENT_SM0_PB_CENT_FIR_REG)");
+
+    if (l_scom_data.getBit<PU_PB_CENT_SM0_PB_CENT_FIR_MASK_REG_SPARE_13>())
+    {
+        FAPI_DBG("Determine set of present XBUS regions on target %s...", l_procTargetStr);
+        {
+            for (auto& l_cplt_target : i_target.getChildren<fapi2::TARGET_TYPE_PERV>
+                 (static_cast<fapi2::TargetFilter>(fapi2::TARGET_FILTER_XBUS),
+                  fapi2::TARGET_STATE_FUNCTIONAL))
+            {
+                fapi2::buffer<uint16_t> l_attr_pg = 0;
+                // obtain partial good information to determine viable X links
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_cplt_target, l_attr_pg),
+                         "Error from FAPI_ATTR_GET (ATTR_PG)");
+
+                for (uint8_t ii = 0;
+                     ii < P9_FBC_UTILS_MAX_ELECTRICAL_LINKS;
+                     ii++)
+                {
+                    l_xbus_present[ii] = !l_attr_pg.getBit(X_PG_IOX0_REGION_BIT + ii) &&
+                                         !l_attr_pg.getBit(X_PG_PBIOX0_REGION_BIT + ii);
+                }
+            }
+        }
+
+        FAPI_DBG("Determine set of functional XBUS regions on target %s...", l_procTargetStr);
+        {
+            for (auto l_iter = l_xbus_chiplets.begin();
+                 l_iter != l_xbus_chiplets.end();
+                 l_iter++)
+            {
+                uint8_t l_unit_pos;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, *l_iter, l_unit_pos),
+                         "Error from FAPI_ATTR_GET (ATTR_CHIP_UNIT_POS)");
+                l_xbus_functional[l_unit_pos] = 1;
+            }
+        }
+
+        FAPI_DBG("Masking XBUS FIR resources for unused links on target %s...", l_procTargetStr);
+        {
+            if (l_xbus_present[0] && !l_xbus_functional[0])
+            {
+                // XBUS0 FBC DL
+                FAPI_TRY(putScom(i_target, XBUS_0_LL0_LL0_LL0_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK_NF),
+                         "Error from putScom (XBUS_0_LL0_IOEL_FIR_MASK_REG)");
+                // XBUS0 PHY
+                FAPI_TRY(putScom(i_target, XBUS_FIR_MASK_REG, XBUS_PHY_FIR_MASK_NF),
+                         "Error from putScom (XBUS_FIR_MASK_REG)");
+            }
+
+            if (!l_xbus_functional[0])
+            {
+                // XBUS0 FBC TL
+                FAPI_TRY(putScom(i_target, PU_PB_IOE_FIR_MASK_REG_OR, FBC_IOE_TL_FIR_MASK_X0_NF),
+                         "Error from putScom (PU_PB_IOE_FIR_MASK_REG, X0)");
+
+                // XBUS0 EXTFIR
+                FAPI_TRY(putScom(i_target, PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR, FBC_EXT_FIR_MASK_X0_NF),
+                         "Error from putScom (PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR)");
+            }
+
+            if (l_xbus_present[1] && !l_xbus_functional[1])
+            {
+                // XBUS1 FBC DL
+                FAPI_TRY(putScom(i_target, XBUS_1_LL1_LL1_LL1_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK_NF),
+                         "Error from putScom (XBUS_1_LL1_IOEL_FIR_MASK_REG)");
+                // XBUS1 PHY
+                FAPI_TRY(putScom(i_target, XBUS_1_FIR_MASK_REG, XBUS_PHY_FIR_MASK_NF),
+                         "Error from putScom (XBUS_1_FIR_MASK_REG)");
+            }
+
+            if (!l_xbus_functional[1])
+            {
+                // XBUS1 FBC TL
+                FAPI_TRY(putScom(i_target, PU_PB_IOE_FIR_MASK_REG_OR, FBC_IOE_TL_FIR_MASK_X1_NF),
+                         "Error from putScom (PU_PB_IOE_FIR_MASK_REG, X1)");
+
+                // XBUS1 EXTFIR
+                FAPI_TRY(putScom(i_target, PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR, FBC_EXT_FIR_MASK_X1_NF),
+                         "Error from putScom (PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR)");
+            }
+
+            if (l_xbus_present[2] && !l_xbus_functional[2])
+            {
+                // XBUS2 FBC DL
+                FAPI_TRY(putScom(i_target, XBUS_2_LL2_LL2_LL2_IOEL_FIR_MASK_REG, FBC_IOE_DL_FIR_MASK_NF),
+                         "Error from putScom (XBUS_2_LL2_IOEL_FIR_MASK_REG)");
+                // XBUS2 PHY
+                FAPI_TRY(fapi2::putScom(i_target, XBUS_2_FIR_MASK_REG, XBUS_PHY_FIR_MASK_NF),
+                         "Error from putScom (XBUS_2_FIR_MASK_REG)");
+            }
+
+            if (!l_xbus_functional[2])
+            {
+                // XBUS2 FBC TL
+                FAPI_TRY(putScom(i_target, PU_PB_IOE_FIR_MASK_REG_OR, FBC_IOE_TL_FIR_MASK_X2_NF),
+                         "Error from putScom (PU_PB_IOE_FIR_MASK_REG, X2)");
+
+                // XBUS2 EXTFIR
+                FAPI_TRY(putScom(i_target, PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR, FBC_EXT_FIR_MASK_X2_NF),
+                         "Error from putScom (PU_PB_CENT_SM1_EXTFIR_MASK_REG_OR)");
+            }
+        }
+    }
 
     FAPI_DBG("Invoking p9.fbc.ioo_tl.scom.initfile on target %s...", l_procTargetStr);
     FAPI_EXEC_HWP(l_rc, p9_fbc_ioo_tl_scom, i_target, FAPI_SYSTEM);
