@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
 
 #include    <isteps/hwpisteperror.H>
 #include    <initservice/isteps_trace.H>
-
+#include    <initservice/initserviceif.H>
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/util.H>
 #include    <targeting/common/utilFilter.H>
@@ -64,7 +64,13 @@ void* call_host_revert_sbe_mcs_setup( void *io_pArgs )
     fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_master_proc( l_masterProc );
 
     //Invode p9_revert_sbe_mcs_setup
-    FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup, l_fapi_master_proc );
+    // Pass in boolean describing if we are using the FSP or not
+    // If we are using the FSP then we will ask off the SBE fir
+    // bits on the TP Local Fir register as the FSP with handle
+    // SBE errors
+    FAPI_INVOKE_HWP( l_err, p9_revert_sbe_mcs_setup,
+                     l_fapi_master_proc,
+                     INITSERVICE::spBaseServicesEnabled());
 
     if (l_err)
     {
