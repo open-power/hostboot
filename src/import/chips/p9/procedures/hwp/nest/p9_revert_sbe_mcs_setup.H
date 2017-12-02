@@ -57,7 +57,8 @@
 
 /// function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode (*p9_revert_sbe_mcs_setup_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&);
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    bool);
 
 
 //------------------------------------------------------------------------------
@@ -72,10 +73,12 @@ extern "C"
 /// of hostboot execution
 ///
 /// @param[in] i_target Reference to processor chip target
+/// @param[in] i_maskPervSBEFirs tell func whether to mask SBE related pervasive fir bits
 /// @return fapi::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
 ///
     fapi2::ReturnCode p9_revert_sbe_mcs_setup(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        bool i_maskPervSbeFirs);
 
 } // extern "C"
 

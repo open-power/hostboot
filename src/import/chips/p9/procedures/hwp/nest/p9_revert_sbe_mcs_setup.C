@@ -196,13 +196,40 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+fapi2::ReturnCode
+p9_mask_sbe_perv_firs(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_INF("p9_mask_sbe_perv_firs:: masking tp_lfir (0x104000A) bits 22:30");
+    fapi2::buffer<uint64_t> l_tp_local_firmask;
+    constexpr uint64_t literal_0x000003FE00000000 =  0x000003FE00000000;
+    l_tp_local_firmask.insert<0, 64, 0, uint64_t>(literal_0x000003FE00000000);
+
+    FAPI_TRY(fapi2::putScom(i_target,
+                            PERV_TP_LOCAL_FIR_MASK_OR,
+                            l_tp_local_firmask),
+             "Error from performing putScom on address = 0x%lx with value "
+             "= 0x%lx", PERV_TP_LOCAL_FIR_MASK_OR, literal_0x000003FE00000000);
+
+fapi_try_exit:
+    FAPI_INF("p9_mask_sbe_perv_firs:: End");
+    return fapi2::current_err;
+
+}
+
 
 // HWP entry point
 fapi2::ReturnCode
 p9_revert_sbe_mcs_setup(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    bool i_maskPervSbeFirs)
 {
     FAPI_INF("Start");
+
+    if(i_maskPervSbeFirs)
+    {
+        p9_mask_sbe_perv_firs(i_target);
+    }
 
     fapi2::ATTR_SYSTEM_IPL_PHASE_Type l_ipl_phase;
     auto l_mcs_chiplets = i_target.getChildren<fapi2::TARGET_TYPE_MCS>(
