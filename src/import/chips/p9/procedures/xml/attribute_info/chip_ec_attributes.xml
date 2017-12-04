@@ -5731,6 +5731,23 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW415945</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Magenta Oatmeal -- disable ECC bypass
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_OBUS_HW419305</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
