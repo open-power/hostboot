@@ -43,7 +43,15 @@
 #include <p9_quad_scom_addresses.H>
 #include <p9_hcd_common.H>
 #include <p9_common_clk_ctrl_state.H>
-#include "p9_hcd_core_stopclocks.H"
+#include <p9_hcd_core_stopclocks.H>
+#include <p9_hcd_cache_stopclocks.H>
+#include <p9_eq_clear_atomic_lock.H>
+#ifdef __PPE__
+    #include <p9_sbe_ppe_utils.H>
+#else
+    #include <p9_ppe_utils.H>
+#endif
+#include <p9_ppe_defs.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -81,6 +89,9 @@ p9_hcd_core_stopclocks(
     auto  l_quad = i_target.getParent<fapi2::TARGET_TYPE_EQ>();
     auto  l_perv = i_target.getParent<fapi2::TARGET_TYPE_PERV>();
     auto  l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+
+    auto l_ex_vector = l_quad.getChildren<fapi2::TARGET_TYPE_EX>
+                       (fapi2::TARGET_STATE_FUNCTIONAL);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_SDISN_SETUP, l_chip,
                            l_attr_sdisn_setup));
@@ -132,8 +143,44 @@ p9_hcd_core_stopclocks(
 
         if (l_data64.getBit<4>() == 0 && l_temp64.getBit<4>() == 0)
         {
-            //halt cme(poll for halted, if timeout, print warnning keep going).
 
+#ifdef DD2
+            FAPI_DBG("Halting the PGPE ...");
+            l_rc = ppe_halt(l_chip, PGPE_BASE_ADDRESS);
+            FAPI_ASSERT_NOEXIT(!l_rc,
+                               fapi2::CORE_STOPCLKS_PGPE_HALT_TIMEOUT()
+                               .set_CHIP(l_chip),
+                               "PSTATE GPE Halt timeout");
+
+            FAPI_DBG("Halting the SGPE ...");
+            l_rc = ppe_halt(l_chip, SGPE_BASE_ADDRESS);
+            FAPI_ASSERT_NOEXIT(!l_rc,
+                               fapi2::CORE_STOPCLKS_SGPE_HALT_TIMEOUT()
+                               .set_CHIP(l_chip),
+                               "STOP GPE Halt timeout");
+
+            FAPI_DBG("Clear the atomic lock on EQ %d", l_attr_chip_unit_pos);
+            l_rc = p9_clear_atomic_lock(l_quad);
+            FAPI_ASSERT_NOEXIT(!l_rc,
+                               fapi2::CORE_STOPCLKS_ATOMIC_LOCK_FAIL()
+                               .set_EQ(l_quad),
+                               "EQ Atomic Halt timeout");
+
+            for ( auto& ex : l_ex_vector )
+            {
+                fapi2::ATTR_CHIP_UNIT_POS_Type  l_cme_id = 0;
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, ex, l_cme_id));
+
+                FAPI_DBG("Halting CME %d", l_cme_id );
+                uint64_t l_cme_base_address = getCmeBaseAddress (l_cme_id);
+                l_rc = ppe_halt(l_chip, l_cme_base_address);
+                FAPI_ASSERT_NOEXIT(!l_rc,
+                                   fapi2::CACHE_STOPCLKS_CME_HALT_TIMEOUT()
+                                   .set_EX(ex),
+                                   "CME Halt timeout");
+            }
+
+#endif
             FAPI_DBG("Assert Core-L2/CC Quiesces via CME_SCOM_SICR[6,8]/[7,9]");
             FAPI_TRY(putScom(l_quad,
                              (l_attr_chip_unit_pos < 2) ?
