@@ -182,4 +182,17 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_P9_BUILD_SMP_UNKNOWN_CD_HP_ERR</rc>
+    <description>
+      Program logic error -- attempted to run non-existent CD HP initfile
+    </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>CD_HP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

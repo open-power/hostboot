@@ -73,7 +73,9 @@ include ${ROOTPATH}/procedure.rules.mk
 #Include all the procedure makefiles
 include $(NEST_HWP_PATH)/p9_build_smp.mk
 include ${INITFILES_HWP_PATH}/p9_fbc_ab_hp_scom.mk
-include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp_scom.mk
+include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp1_scom.mk
+include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp2_scom.mk
+include ${INITFILES_HWP_PATH}/p9_fbc_cd_hp3_scom.mk
 include ${PERV_HWP_PATH}/p9_update_security_ctrl.mk
 
 # proc_chiplet_scominit : Scom inits to all chiplets (sans Quad)
