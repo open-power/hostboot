@@ -40,11 +40,18 @@
 //------------------------------------------------------------------------------
 #include <p9_misc_scom_addresses.H>
 #include <p9_quad_scom_addresses.H>
+#include <p9_quad_scom_addresses_fld.H>
 #include <p9_hcd_common.H>
 #include <p9_common_clk_ctrl_state.H>
 #include <p9_hcd_l2_stopclocks.H>
 #include <p9_hcd_cache_stopclocks.H>
-#include <p9_quad_scom_addresses_fld.H>
+#include <p9_eq_clear_atomic_lock.H>
+#ifdef __PPE__
+    #include <p9_sbe_ppe_utils.H>
+#else
+    #include <p9_ppe_utils.H>
+#endif
+#include <p9_ppe_defs.H>
 
 //------------------------------------------------------------------------------
 // Constant Definitions
@@ -87,6 +94,9 @@ p9_hcd_cache_stopclocks(
     auto l_chip = i_target.getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
     auto l_core_functional_vector =
         i_target.getChildren<fapi2::TARGET_TYPE_CORE>
+        (fapi2::TARGET_STATE_FUNCTIONAL);
+    auto l_ex_vector =
+        i_target.getChildren<fapi2::TARGET_TYPE_EX>
         (fapi2::TARGET_STATE_FUNCTIONAL);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL, l_sys, l_is_mpipl));
@@ -163,6 +173,45 @@ p9_hcd_cache_stopclocks(
     if (!l_data64.getBit<EQ_PPM_GPMMR_RESET_STATE_INDICATOR>())
     {
         FAPI_DBG("Gracefully turn off power management, if fail, continue anyways");
+
+#ifdef DD2
+        FAPI_DBG("Halting the PGPE ...");
+        l_rc = ppe_halt(l_chip, PGPE_BASE_ADDRESS);
+        FAPI_ASSERT_NOEXIT(!l_rc,
+                           fapi2::CACHE_STOPCLKS_PGPE_HALT_TIMEOUT()
+                           .set_CHIP(l_chip),
+                           "PSTATE GPE Halt timeout");
+
+        FAPI_DBG("Halting the SGPE ...");
+        l_rc = ppe_halt(l_chip, SGPE_BASE_ADDRESS);
+        FAPI_ASSERT_NOEXIT(!l_rc,
+                           fapi2::CACHE_STOPCLKS_SGPE_HALT_TIMEOUT()
+                           .set_CHIP(l_chip),
+                           "STOP GPE Halt timeout");
+
+        FAPI_DBG("Clear the atomic lock on EQ %d", l_attr_chip_unit_pos);
+        l_rc = p9_clear_atomic_lock(i_target);
+        FAPI_DBG("AFter the atomic lock %u", (uint32_t)l_rc);
+        FAPI_ASSERT_NOEXIT(!l_rc,
+                           fapi2::CACHE_STOPCLKS_ATOMIC_LOCK_FAIL()
+                           .set_EQ(i_target),
+                           "EQ Atomic Halt timeout");
+
+        for ( auto& ex : l_ex_vector )
+        {
+            fapi2::ATTR_CHIP_UNIT_POS_Type  l_cme_id = 0;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS, ex, l_cme_id));
+
+            FAPI_DBG("Halting CME %d", l_cme_id );
+            uint64_t l_cme_base_address = getCmeBaseAddress (l_cme_id);
+            l_rc = ppe_halt(l_chip, l_cme_base_address);
+            FAPI_ASSERT_NOEXIT(!l_rc,
+                               fapi2::CACHE_STOPCLKS_CME_HALT_TIMEOUT()
+                               .set_EX(ex),
+                               "CME Halt timeout");
+        }
+
+#endif
     }
 
     FAPI_DBG("Check cache clock controller status");
@@ -302,19 +351,6 @@ p9_hcd_cache_stopclocks(
         FAPI_TRY(putScom(l_chip, l_scom_addr, DATA_SET(7)));
     }
 
-//     // -------------------------------
-//     // Disable VDM
-//     // -------------------------------
-//
-//     if (l_attr_vdm_enabled == fapi2::ENUM_ATTR_VDM_ENABLED_TRUE)
-//     {
-//         FAPI_DBG("Clear Jump Protect Enable via DPLL_CTRL[1] (no need to poll DPLL_STAT)");
-//         FAPI_TRY(putScom(i_target, EQ_QPPM_DPLL_CTRL_CLEAR, MASK_SET(1)));
-//         FAPI_DBG("Set VDM Disable via QPPM_VDMCR[1]");
-//         FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_OR, MASK_SET(1)));
-//         FAPI_DBG("Drop VDM Poweron via QPPM_VDMCR[0]");
-//         FAPI_TRY(putScom(i_target, EQ_PPM_VDMCR_CLEAR, MASK_SET(0)));
-//     }
 
     // -------------------------------
     // Shutdown edram
