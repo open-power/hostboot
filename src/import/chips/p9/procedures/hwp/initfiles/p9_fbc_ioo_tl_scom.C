@@ -29,14 +29,9 @@
 
 using namespace fapi2;
 
-constexpr uint64_t literal_3 = 3;
-constexpr uint64_t literal_6 = 6;
-constexpr uint64_t literal_2 = 2;
-constexpr uint64_t literal_5 = 5;
-constexpr uint64_t literal_1 = 1;
-constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0 = 0;
-constexpr uint64_t literal_0xFFFFFFFFFFFFFFFF = 0xFFFFFFFFFFFFFFFF;
+constexpr uint64_t literal_3 = 3;
+constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x1 = 0x1;
 constexpr uint64_t literal_0x40 = 0x40;
 constexpr uint64_t literal_12 = 12;
@@ -44,11 +39,15 @@ constexpr uint64_t literal_10 = 10;
 constexpr uint64_t literal_154 = 154;
 constexpr uint64_t literal_0x36 = 0x36;
 constexpr uint64_t literal_0x37 = 0x37;
+constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_0x2A = 0x2A;
 constexpr uint64_t literal_0x2C = 0x2C;
+constexpr uint64_t literal_2 = 2;
+constexpr uint64_t literal_5 = 5;
 constexpr uint64_t literal_74 = 74;
 constexpr uint64_t literal_0x1B = 0x1B;
 constexpr uint64_t literal_0x1C = 0x1C;
+constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_95 = 95;
 constexpr uint64_t literal_0x22 = 0x22;
 constexpr uint64_t literal_0x24 = 0x24;
@@ -73,18 +72,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_Type l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG, TGT0,
                                l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG));
-        uint64_t l_def_OBUS3_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] !=
-                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] !=
-                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
-        uint64_t l_def_OBUS2_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5] !=
-                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_2] !=
-                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
-        uint64_t l_def_OBUS1_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4] !=
-                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
-                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1] !=
-                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
         uint64_t l_def_OBUS0_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_3] !=
                                              fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
                                             || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_0] !=
@@ -96,10 +83,22 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
         uint64_t l_def_LO_LIMIT_R = ((l_TGT1_ATTR_FREQ_PB_MHZ * literal_10) > (l_TGT1_ATTR_FREQ_A_MHZ * literal_12));
         uint64_t l_def_OBUS0_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS0_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_154);
+        uint64_t l_def_OBUS1_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_4] !=
+                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_1] !=
+                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
         uint64_t l_def_OBUS1_LO_LIMIT_D = l_TGT1_ATTR_FREQ_A_MHZ;
         uint64_t l_def_OBUS1_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_12);
+        uint64_t l_def_OBUS2_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_5] !=
+                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_2] !=
+                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
         uint64_t l_def_OBUS2_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS2_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_74);
+        uint64_t l_def_OBUS3_FBC_ENABLED = ((l_TGT0_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG[literal_6] !=
+                                             fapi2::ENUM_ATTR_PROC_FABRIC_X_ATTACHED_CHIP_CNFG_FALSE)
+                                            || (l_TGT0_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG[literal_3] !=
+                                                fapi2::ENUM_ATTR_PROC_FABRIC_A_ATTACHED_CHIP_CNFG_FALSE));
         uint64_t l_def_OBUS3_LO_LIMIT_D = (l_TGT1_ATTR_FREQ_A_MHZ * literal_10);
         uint64_t l_def_OBUS3_LO_LIMIT_N = (l_TGT1_ATTR_FREQ_PB_MHZ * literal_95);
         fapi2::ATTR_PROC_FABRIC_SMP_OPTICS_MODE_Type l_TGT1_ATTR_PROC_FABRIC_SMP_OPTICS_MODE;
@@ -129,16 +128,6 @@ fapi2::ReturnCode p9_fbc_ioo_tl_scom(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                         || ((l_TGT0_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE[literal_3] == fapi2::ENUM_ATTR_PROC_FABRIC_OPTICS_CONFIG_MODE_NV)
                                             && l_TGT0_ATTR_PROC_NPU_REGION_ENABLED));
         fapi2::buffer<uint64_t> l_scom_buffer;
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x5013803ull, l_scom_buffer ));
-
-            if ((((l_def_OBUS0_FBC_ENABLED || l_def_OBUS1_FBC_ENABLED) || l_def_OBUS2_FBC_ENABLED) || l_def_OBUS3_FBC_ENABLED))
-            {
-                l_scom_buffer.insert<0, 64, 0, uint64_t>(literal_0xFFFFFFFFFFFFFFFF );
-            }
-
-            FAPI_TRY(fapi2::putScom(TGT0, 0x5013803ull, l_scom_buffer));
-        }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x501380aull, l_scom_buffer ));
 
