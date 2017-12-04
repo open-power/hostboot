@@ -212,7 +212,7 @@ namespace HTMGT
                                 {
                                     TMGT_ERR("sendOccConfigData: OCC%d cfg "
                                              "format 0x%02X had bad rsp status"
-                                             " 0x%02X for sysConfig",
+                                             " 0x%02X",
                                              occInstance, format,
                                              cmd.getRspStatus());
                                 }
@@ -761,7 +761,15 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     uint64_t index = 0;
     uint32_t SensorID1 = 0;
     uint32_t SensorID2 = 0;
-        assert(o_data != nullptr);
+    assert(o_data != nullptr);
+
+    TargetHandle_t sys = nullptr;
+    TargetHandleList nodes;
+    targetService().getTopLevelTarget(sys);
+    assert(sys != nullptr);
+    getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
+    assert(!nodes.empty());
+    TargetHandle_t node = nodes[0];
 
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG;
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
@@ -780,6 +788,10 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     //this command will have to change.
     TargetHandleList cores;
     getChildChiplets(cores, proc, TYPE_CORE, false);
+
+    TMGT_INF("getSystemConfigMessageData: systemType: 0x%02X, "
+             "procSensor: 0x%04X, %d cores, %d nodes",
+             G_opalMode, SensorID1, cores.size(), nodes.size());
 
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
@@ -803,16 +815,6 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
         memcpy(&o_data[index], &SensorID2, 4);
         index += 4;
     }
-
-
-    TargetHandle_t sys = nullptr;
-    TargetHandleList nodes;
-    targetService().getTopLevelTarget(sys);
-    assert(sys != nullptr);
-    getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
-    assert(!nodes.empty());
-    TargetHandle_t node = nodes[0];
-
 
     //Backplane Callout Sensor ID
     SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
