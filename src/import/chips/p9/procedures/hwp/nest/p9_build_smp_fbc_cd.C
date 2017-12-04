@@ -39,7 +39,9 @@
 #include <p9_misc_scom_addresses.H>
 #include <p9_build_smp_fbc_cd.H>
 #include <p9_build_smp_adu.H>
-#include <p9_fbc_cd_hp_scom.H>
+#include <p9_fbc_cd_hp1_scom.H>
+#include <p9_fbc_cd_hp2_scom.H>
+#include <p9_fbc_cd_hp3_scom.H>
 
 
 //------------------------------------------------------------------------------
@@ -54,29 +56,57 @@ fapi2::ReturnCode p9_build_smp_set_fbc_cd(p9_build_smp_system& i_smp)
     fapi2::ReturnCode l_rc;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    for (auto g_iter = i_smp.groups.begin();
-         g_iter != i_smp.groups.end();
-         ++g_iter)
+    // iterate through application of three CD hotplug sequences, each with their
+    // own unique initfile
+    for (uint8_t ii = 1;
+         ii <= 3;
+         ii++)
     {
-        for (auto p_iter = g_iter->second.chips.begin();
-             p_iter != g_iter->second.chips.end();
-             ++p_iter)
+        // apply initfile on all chips
+        for (auto g_iter = i_smp.groups.begin();
+             g_iter != i_smp.groups.end();
+             ++g_iter)
         {
-            // initialize serial SCOM chains
-            FAPI_EXEC_HWP(l_rc, p9_fbc_cd_hp_scom, *(p_iter->second.target), FAPI_SYSTEM);
-
-            if (l_rc)
+            for (auto p_iter = g_iter->second.chips.begin();
+                 p_iter != g_iter->second.chips.end();
+                 ++p_iter)
             {
-                FAPI_ERR("Error from p9_fbc_cd_hp_scom");
-                fapi2::current_err = l_rc;
-                goto fapi_try_exit;
+                // initialize serial SCOM chains
+                switch (ii)
+                {
+                    case 1:
+                        FAPI_EXEC_HWP(l_rc, p9_fbc_cd_hp1_scom, *(p_iter->second.target), FAPI_SYSTEM);
+                        break;
+
+                    case 2:
+                        FAPI_EXEC_HWP(l_rc, p9_fbc_cd_hp2_scom, *(p_iter->second.target), FAPI_SYSTEM);
+                        break;
+
+                    case 3:
+                        FAPI_EXEC_HWP(l_rc, p9_fbc_cd_hp3_scom, *(p_iter->second.target), FAPI_SYSTEM);
+                        break;
+
+                    default:
+                        FAPI_ASSERT(false,
+                                    fapi2::P9_BUILD_SMP_UNKNOWN_CD_HP_ERR()
+                                    .set_TARGET(*(p_iter->second.target))
+                                    .set_CD_HP(ii),
+                                    "Code error -- attempted to run unsupported CD hotplug initfile");
+                }
+
+                if (l_rc)
+                {
+                    FAPI_ERR("Error from p9_fbc_cd_hp%d_scom", ii);
+                    fapi2::current_err = l_rc;
+                    goto fapi_try_exit;
+                }
             }
         }
-    }
 
-    // issue single switch CD to force all updates to occur
-    FAPI_TRY(p9_build_smp_sequence_adu(i_smp, SMP_ACTIVATE_PHASE1, SWITCH_CD),
-             "Error from p9_build_smp_sequence_adu (SWITCH_CD)");
+        // issue switch CD on all chips to force updates to occur
+        FAPI_TRY(p9_build_smp_sequence_adu(i_smp, SMP_ACTIVATE_PHASE1, SWITCH_CD),
+                 "Error from p9_build_smp_sequence_adu (SWITCH_CD, #%d)", ii);
+    }
 
 fapi_try_exit:
     FAPI_INF("End");
