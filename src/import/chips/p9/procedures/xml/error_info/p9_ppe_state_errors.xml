@@ -26,12 +26,14 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <rc>RC_P9_PPE_STATE_HALT_TIMEOUT_ERR</rc>
+    <rc>RC_PPE_STATE_HALT_TIMEOUT_ERR</rc>
     <description>
-      Procedure: p9_ppe_state
-      HALT Timedout.
+    A HALT operation to a PPE timed out. This is indicative of hardware error.
     </description>
     <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
   </hwpError>
+  <!-- Note: callout/deconfiguration is left to the caller as this depends  -->
+  <!-- on the scope of the PPE instance                                     -->
   <!-- ******************************************************************** -->
 </hwpErrors>
