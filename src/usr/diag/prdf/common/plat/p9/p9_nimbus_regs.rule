@@ -56,6 +56,14 @@
         capture     group PbCentMode;
     };
 
+    register TP_LFIR_AND
+    {
+        name        "EH.TPCHIP.TPC.LOCAL_FIR_AND";
+        scomaddr    0x0104000b;
+        capture     group never;
+        access      write_only;
+    };
+
     ############################################################################
     # Non-FIR Registers
     ############################################################################

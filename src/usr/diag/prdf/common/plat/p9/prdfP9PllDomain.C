@@ -189,9 +189,12 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
     } // end for each chip in domain
 
     // Remove all non-functional chips.
-    for (  auto i : nfchips )
+    if ( CHECK_STOP != serviceData.service_data->getPrimaryAttnType() )
     {
-        systemPtr->RemoveStoppedChips( i->getTrgt() );
+        for (  auto i : nfchips )
+        {
+            systemPtr->RemoveStoppedChips( i->getTrgt() );
+        }
     }
 
     // TODO: RTC 155673 - use attributes to callout active clock sources
@@ -310,6 +313,11 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
               PluginDef::bindParm<STEP_CODE_DATA_STRUCT&, uint32_t>
                   (serviceData, mskErrType));
     }
+
+    // Clear PLLs from this domain.
+    ExtensibleDomainFunction * l_clear = getExtensibleFunction("ClearPll");
+    (*l_clear)(this,
+               PluginDef::bindParm<STEP_CODE_DATA_STRUCT&>(serviceData));
 
     // Run PLL Post Analysis on any analyzed chips in this domain.
     for(auto l_chip : sysRefList)
