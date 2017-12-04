@@ -554,10 +554,6 @@ sub manipulateImages
         );
 
         my $size = $sectionHash{$layoutKey}{physicalRegionSize};
-        my $bin_file = $$i_binFilesRef{$eyeCatch};
-        # Check if bin file is system specific and prefix target to the front
-        my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch.bin":
-                                        "$bin_dir/$system_target.$eyeCatch.bin";
 
         # Get size of partition without ecc
         if ($sectionHash{$layoutKey}{ecc} eq "yes")
@@ -621,132 +617,191 @@ sub manipulateImages
         # *Note: this is before ECC.
         my $protectedOffset = PAGE_SIZE;
 
-        # Handle partitions that have an input binary.
-        if (-e $bin_file)
+        # Get bin file(s) associated with PNOR section
+        my $bin_files = $$i_binFilesRef{$eyeCatch};
+        # Check if bin file entry has multiple files (multi node)
+        my @binFilesArray = split /,/, $bin_files;
+
+        my $node_id = 0;
+        my $nodeIDstr = "";
+        foreach my $bin_file (@binFilesArray)
         {
-            # Track original name and whether file has a header or not in order
-            # to emit eccless outputs, if requested
-            my $eccless_file = $bin_file;
-            my $eccless_prefix = "";
-
-            # HBBL + ROM combination
-            if ($eyeCatch eq "HBBL")
+            # If there are more than 1 bin files per section, final name should
+            # have a node ID included.
+            if (scalar @binFilesArray > 1)
             {
-                # Ensure there is enough room at the end of the HBBL partition
-                # to store the HW keys' hash.
-                my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
-                print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
-                if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
-                {
-                    die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
-                }
-
-                # Pad HBBL to max size
-                run_command("cp $bin_file $tempImages{TEMP_BIN}");
-                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
-
-                # Add HW key hash to end of HBBL - 64 Bytes
-                my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
-                                      - HW_KEYS_HASH_SIZE;
-
-                # dd used with seek to add the hw keys' hash at the end of the hbbl
-                # padded bin file
-                run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($hwKeyHashStart))");
+                $nodeIDstr = "_NODE_$node_id";
             }
 
-            # Header Phase
-            if($sectionHash{$layoutKey}{sha512Version} eq "yes")
+            # Check if bin file is system specific and prefix target to the front
+            my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.bin":
+                                        "$bin_dir/$system_target.$eyeCatch$nodeIDstr.bin";
+
+            # Handle partitions that have an input binary.
+            if (-e $bin_file)
             {
-                $eccless_prefix.=".header";
-                # Add secure container header
-                # @TODO RTC:155374 Remove when official signing supported
-                if ($secureboot && $isSpecialSecure)
+                # Track original name and whether file has a header or not in order
+                # to emit eccless outputs, if requested
+                my $eccless_file = $bin_file;
+                my $eccless_prefix = "";
+
+                # HBBL + ROM combination
+                if ($eyeCatch eq "HBBL")
                 {
-                    $callerHwHdrFields{configure} = 1;
-                    if (exists $hashPageTablePartitions{$eyeCatch})
+                    # Ensure there is enough room at the end of the HBBL partition
+                    # to store the HW keys' hash.
+                    my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
+                    print "HBBL raw size (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
+                    if ($hbblRawSize > $MAX_HBBL_SIZE - HW_KEYS_HASH_SIZE)
                     {
-                        if ($eyeCatch eq "HBI")
+                        die "HBBL cannot fit HW Keys' Hash (64 bytes) at the end without overwriting real data";
+                    }
+
+                    # Pad HBBL to max size
+                    run_command("cp $bin_file $tempImages{TEMP_BIN}");
+                    run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
+
+                    # Add HW key hash to end of HBBL - 64 Bytes
+                    my $hwKeyHashStart = (-s $bin_file or die "Cannot get size of file $bin_file")
+                                          - HW_KEYS_HASH_SIZE;
+
+                    # dd used with seek to add the hw keys' hash at the end of the hbbl
+                    # padded bin file
+                    run_command("dd if=$hwKeyHashFile conv=notrunc of=$bin_file bs=1 seek=\$(($hwKeyHashStart))");
+                }
+
+                # Header Phase
+                if($sectionHash{$layoutKey}{sha512Version} eq "yes")
+                {
+                    $eccless_prefix.=".header";
+                    # Add secure container header
+                    # @TODO RTC:155374 Remove when official signing supported
+                    if ($secureboot && $isSpecialSecure)
+                    {
+                        $callerHwHdrFields{configure} = 1;
+                        if (exists $hashPageTablePartitions{$eyeCatch})
                         {
-                            # Pass HBB sw signatures as the salt entry.
-                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,
-                                                                    getBinDataFromFile($preReqImages{HBB_SW_SIG_FILE}));
+                            if ($eyeCatch eq "HBI")
+                            {
+                                # Pass HBB sw signatures as the salt entry.
+                                $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,
+                                                                        getBinDataFromFile($preReqImages{HBB_SW_SIG_FILE}));
+                            }
+                            else
+                            {
+                                $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch);
+                            }
+                        }
+                        # Add hash page table
+                        if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
+                        {
+                            trace(1,"Adding hash page table for $eyeCatch");
+                            my $hashPageTableSize = -s $tempImages{hashPageTable};
+                            die "hashPageTable size undefined: errno = $!" unless(defined $hashPageTableSize);
+                            # Move protected offset after hash page table.
+                            $protectedOffset += $hashPageTableSize;
+                            if ($eyeCatch eq "HBI")
+                            {
+                                # Add the VFS module table to the payload text section.
+                                run_command("dd if=$bin_file of=$tempImages{VFS_MODULE_TABLE} count=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
+                                # Remove VFS module table from bin file
+                                run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} skip=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
+                                run_command("cp $tempImages{TEMP_BIN} $bin_file");
+                                # Pad after hash page table to have the VFS module table end at a 4K boundary
+                                my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
+                                run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
+
+                                # Move protected offset after padding of hash page table.
+                                $protectedOffset += $padSize;
+
+                                # Payload text section
+                                run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
+                            }
+                            else
+                            {
+                                run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
+                            }
+
+                            if($openSigningTool)
+                            {
+                                run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
+                            }
+                            else
+                            {
+                                # @TODO RTC:155374 Remove when official signing
+                                # supported
+                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
+                            }
+
+                            run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
+                        }
+                        # Handle read-only protected payload
+                        elsif ($eyeCatch eq "HBD")
+                        {
+                            if($openSigningTool)
+                            {
+                                run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "--protectedPayload $bin_file.protected "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
+                            }
+                            else
+                            {
+                                # @TODO RTC:155374 Remove when official signing
+                                # supported
+                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
+                            }
+
+                            run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
                         }
                         else
                         {
-                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch);
+                            if($openSigningTool)
+                            {
+                                my $codeStartOffset = ($eyeCatch eq "HBB") ?
+                                    "--code-start-offset 0x00000180" : "";
+                                run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "$codeStartOffset "
+                                    . "--protectedPayload $bin_file "
+                                    . "--out $tempImages{HDR_PHASE}");
+                            }
+                            else
+                            {
+                                # @TODO RTC:155374 Remove when official signing
+                                # supported
+                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                            }
+                        }
+
+                        # Customize secureboot prefix header with container size,
+                        # target HRMOR, and stack address (8 bytes each), in that
+                        # order. Customization begins at offset 6 into the container
+                        # header.
+                        if($eyeCatch eq "HBB")
+                        {
+                            $callerHwHdrFields{totalContainerSize}
+                                = BASE_IMAGE_TOTAL_CONTAINER_SIZE;
+                            $callerHwHdrFields{targetHrmor}
+                                = BASE_IMAGE_TARGET_HRMOR;
+                            $callerHwHdrFields{instructionStartStackPointer}
+                                = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
+                            # Save off HBB sw signatures for use by HBI
+                            open (HBB_SW_SIG_FILE, ">",
+                            $preReqImages{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages{HBB_SW_SIG_FILE}: $!\n";
+                            binmode HBB_SW_SIG_FILE;
+                            print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
+                            die "Error writing to $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
+                            close HBB_SW_SIG_FILE;
+                            die "Error closing of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
                         }
                     }
-                    # Add hash page table
-                    if ($tempImages{hashPageTable} ne "" && -e $tempImages{hashPageTable})
+                    elsif($secureboot && $isNormalSecure)
                     {
-                        trace(1,"Adding hash page table for $eyeCatch");
-                        my $hashPageTableSize = -s $tempImages{hashPageTable};
-                        die "hashPageTable size undefined: errno = $!" unless(defined $hashPageTableSize);
-                        # Move protected offset after hash page table.
-                        $protectedOffset += $hashPageTableSize;
-                        if ($eyeCatch eq "HBI")
-                        {
-                            # Add the VFS module table to the payload text section.
-                            run_command("dd if=$bin_file of=$tempImages{VFS_MODULE_TABLE} count=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
-                            # Remove VFS module table from bin file
-                            run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} skip=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
-                            run_command("cp $tempImages{TEMP_BIN} $bin_file");
-                            # Pad after hash page table to have the VFS module table end at a 4K boundary
-                            my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
-                            run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
-
-                            # Move protected offset after padding of hash page table.
-                            $protectedOffset += $padSize;
-
-                            # Payload text section
-                            run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
-                        }
-                        else
-                        {
-                            run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
-                        }
-
+                        $callerHwHdrFields{configure} = 1;
                         if($openSigningTool)
                         {
                             run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
-                                . "--out $tempImages{PROTECTED_PAYLOAD}");
-                        }
-                        else
-                        {
-                            # @TODO RTC:155374 Remove when official signing
-                            # supported
-                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $tempImages{PAYLOAD_TEXT} $SIGN_BUILD_PARAMS");
-                        }
-
-                        run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
-                    }
-                    # Handle read-only protected payload
-                    elsif ($eyeCatch eq "HBD")
-                    {
-                        if($openSigningTool)
-                        {
-                            run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $bin_file.protected "
-                                . "--out $tempImages{PROTECTED_PAYLOAD}");
-                        }
-                        else
-                        {
-                            # @TODO RTC:155374 Remove when official signing
-                            # supported
-                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PROTECTED_PAYLOAD} -bin $bin_file.protected $SIGN_BUILD_PARAMS");
-                        }
-
-                        run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
-                    }
-                    else
-                    {
-                        if($openSigningTool)
-                        {
-                            my $codeStartOffset = ($eyeCatch eq "HBB") ?
-                                "--code-start-offset 0x00000180" : "";
-                            run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "$codeStartOffset "
                                 . "--protectedPayload $bin_file "
                                 . "--out $tempImages{HDR_PHASE}");
                         }
@@ -754,169 +809,10 @@ sub manipulateImages
                         {
                             # @TODO RTC:155374 Remove when official signing
                             # supported
-                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{HDR_PHASE} -bin $bin_file $SIGN_BUILD_PARAMS");
+                            run_command("$SIGNING_DIR/build -good -if "
+                                . "$secureboot_hdr -of $tempImages{HDR_PHASE} -bin "
+                                . "$bin_file $SIGN_BUILD_PARAMS");
                         }
-                    }
-
-                    # Customize secureboot prefix header with container size,
-                    # target HRMOR, and stack address (8 bytes each), in that
-                    # order. Customization begins at offset 6 into the container
-                    # header.
-                    if($eyeCatch eq "HBB")
-                    {
-                        $callerHwHdrFields{totalContainerSize}
-                            = BASE_IMAGE_TOTAL_CONTAINER_SIZE;
-                        $callerHwHdrFields{targetHrmor}
-                            = BASE_IMAGE_TARGET_HRMOR;
-                        $callerHwHdrFields{instructionStartStackPointer}
-                            = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
-                        # Save off HBB sw signatures for use by HBI
-                        open (HBB_SW_SIG_FILE, ">",
-                        $preReqImages{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages{HBB_SW_SIG_FILE}: $!\n";
-                        binmode HBB_SW_SIG_FILE;
-                        print HBB_SW_SIG_FILE getSwSignatures($tempImages{HDR_PHASE});
-                        die "Error writing to $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
-                        close HBB_SW_SIG_FILE;
-                        die "Error closing of $preReqImages{HBB_SW_SIG_FILE} failed" if $!;
-                    }
-                }
-                elsif($secureboot && $isNormalSecure)
-                {
-                    $callerHwHdrFields{configure} = 1;
-                    if($openSigningTool)
-                    {
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
-                            . "--protectedPayload $bin_file "
-                            . "--out $tempImages{HDR_PHASE}");
-                    }
-                    else
-                    {
-                        # @TODO RTC:155374 Remove when official signing
-                        # supported
-                        run_command("$SIGNING_DIR/build -good -if "
-                            . "$secureboot_hdr -of $tempImages{HDR_PHASE} -bin "
-                            . "$bin_file $SIGN_BUILD_PARAMS");
-                    }
-                }
-                # Add non-secure version header
-                else
-                {
-                    # Attach signature-less secure header for OpenPOWER builds
-                    if($openSigningTool)
-                    {
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
-                            . "--protectedPayload $bin_file "
-                            . "--out $tempImages{HDR_PHASE}");
-                    }
-                    else # attach the legacy header
-                    {
-                        run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
-                        run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
-                        run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
-                        run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
-                    }
-                }
-            }
-            else
-            {
-                run_command("cp $bin_file $tempImages{HDR_PHASE}");
-            }
-
-            setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
-
-            # Padding Phase
-            if ($eyeCatch eq "HBI" && $testRun)
-            {
-                # If "--test" flag set do not pad as the test HBI images is
-                # possibly larger than partition size and does not need to be
-                # fully padded. Size adjustments made in checkSpaceConstraints
-                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
-            }
-            # HBBL was already padded
-            elsif ($eyeCatch eq "HBBL")
-            {
-                run_command("cp $tempImages{HDR_PHASE} $tempImages{PAD_PHASE}");
-            }
-            else
-            {
-                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
-            }
-
-            # If so instructed, retain pre-ECC versions of the output files
-            # using the appropriate naming convention
-            if ($emitEccless)
-            {
-                my($file,$dirs,$suffix) = fileparse($eccless_file);
-                $file =~ s/(\.\w+)$/$eccless_prefix$1/;
-                run_command("cp $tempImages{PAD_PHASE} $bin_dir/$file");
-            }
-
-            # Corrupt section if user specified to do so, before ECC injection.
-            if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
-            {
-                # If no protected file ($tempImages{PAYLOAD_TEXT}) exists
-                # for this partition, then that means there is no unprotected
-                # section. A protected file is only created when there's a need
-                # to split up the partition for signing purposes.
-                corrupt_partition($eyeCatch, $protectedOffset,
-                                  $tempImages{PAYLOAD_TEXT},
-                                  $tempImages{PAD_PHASE});
-            }
-        }
-        # Handle partitions that have no input binary. Simply zero or random
-        # fill the partition.
-        elsif (!-e $bin_file)
-        {
-
-            if ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
-            {
-                $callerHwHdrFields{configure} = 1;
-                create_sb_key_transition_container($tempImages{PAD_PHASE});
-                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
-            }
-            else
-            {
-                # Test partitions have random data
-                if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
-                {
-                    run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
-                }
-                # Other partitions fill with FF's if no empty bin file provided
-                else
-                {
-                    run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
-                }
-
-                # Add secure container header
-                # Force TESTRO section to have a header
-                if( ($eyeCatch eq "TESTRO") ||
-                    (($sectionHash{$layoutKey}{sha512Version} eq "yes")
-                    && ($eyeCatch ne "SBKT")))
-                {
-                    # Remove PAGE_SIZE bytes from generated dummy content of
-                    # file to make room for the secure header
-                    my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
-                    die "fileSize undefined: errno = $!"
-                        unless(defined $fileSize);
-                    run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
-
-                    if ($secureboot && $secureSupported)
-                    {
-                        $callerHwHdrFields{configure} = 1;
-                        if($openSigningTool)
-                        {
-                            run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $tempImages{TEMP_BIN} "
-                                . "--out $tempImages{PAD_PHASE}");
-                        }
-                        else
-                        {
-                            # @TODO RTC:155374 Remove when official signing
-                            # supported
-                            run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
-                        }
-                        setCallerHwHdrFields(\%callerHwHdrFields,
-                                             $tempImages{PAD_PHASE});
                     }
                     # Add non-secure version header
                     else
@@ -925,50 +821,173 @@ sub manipulateImages
                         if($openSigningTool)
                         {
                             run_command("$CUR_OPEN_SIGN_REQUEST "
-                                . "--protectedPayload $tempImages{TEMP_BIN} "
-                                . "--out $tempImages{PAD_PHASE}");
+                                . "--protectedPayload $bin_file "
+                                . "--out $tempImages{HDR_PHASE}");
                         }
-                        else # Attach legacy header
+                        else # attach the legacy header
                         {
                             run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
-                            run_command("sha512sum $tempImages{TEMP_BIN} | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
-                            run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
-                            run_command("cat $tempImages{TEMP_BIN} >> $tempImages{PAD_PHASE}");
+                            run_command("sha512sum $bin_file | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
+                            run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{HDR_PHASE} ibs=4k conv=sync");
+                            run_command("cat $bin_file >> $tempImages{HDR_PHASE}");
                         }
                     }
                 }
+                else
+                {
+                    run_command("cp $bin_file $tempImages{HDR_PHASE}");
+                }
+
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+
+                # Padding Phase
+                if ($eyeCatch eq "HBI" && $testRun)
+                {
+                    # If "--test" flag set do not pad as the test HBI images is
+                    # possibly larger than partition size and does not need to be
+                    # fully padded. Size adjustments made in checkSpaceConstraints
+                    run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+                }
+                # HBBL was already padded
+                elsif ($eyeCatch eq "HBBL")
+                {
+                    run_command("cp $tempImages{HDR_PHASE} $tempImages{PAD_PHASE}");
+                }
+                else
+                {
+                    run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+                }
+
+                # If so instructed, retain pre-ECC versions of the output files
+                # using the appropriate naming convention
+                if ($emitEccless)
+                {
+                    my($file,$dirs,$suffix) = fileparse($eccless_file);
+                    $file =~ s/(\.\w+)$/$eccless_prefix$1/;
+                    run_command("cp $tempImages{PAD_PHASE} $bin_dir/$file");
+                }
+
+                # Corrupt section if user specified to do so, before ECC injection.
+                if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
+                {
+                    # If no protected file ($tempImages{PAYLOAD_TEXT}) exists
+                    # for this partition, then that means there is no unprotected
+                    # section. A protected file is only created when there's a need
+                    # to split up the partition for signing purposes.
+                    corrupt_partition($eyeCatch, $protectedOffset,
+                                      $tempImages{PAYLOAD_TEXT},
+                                      $tempImages{PAD_PHASE});
+                }
             }
-            if ($eyeCatch eq "SBKT" && $emitEccless)
+            # Handle partitions that have no input binary. Simply zero or random
+            # fill the partition.
+            elsif (!-e $bin_file)
             {
-                run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
+
+                if ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
+                {
+                    $callerHwHdrFields{configure} = 1;
+                    create_sb_key_transition_container($tempImages{PAD_PHASE});
+                    setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+                }
+                else
+                {
+                    # Test partitions have random data
+                    if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
+                    {
+                        run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
+                    }
+                    # Other partitions fill with FF's if no empty bin file provided
+                    else
+                    {
+                        run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+                    }
+
+                    # Add secure container header
+                    # Force TESTRO section to have a header
+                    if( ($eyeCatch eq "TESTRO") ||
+                        (($sectionHash{$layoutKey}{sha512Version} eq "yes")
+                        && ($eyeCatch ne "SBKT")))
+                    {
+                        # Remove PAGE_SIZE bytes from generated dummy content of
+                        # file to make room for the secure header
+                        my $fileSize = (-s $tempImages{PAD_PHASE}) - PAGE_SIZE;
+                        die "fileSize undefined: errno = $!"
+                            unless(defined $fileSize);
+                        run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
+
+                        if ($secureboot && $secureSupported)
+                        {
+                            $callerHwHdrFields{configure} = 1;
+                            if($openSigningTool)
+                            {
+                                run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "--protectedPayload $tempImages{TEMP_BIN} "
+                                    . "--out $tempImages{PAD_PHASE}");
+                            }
+                            else
+                            {
+                                # @TODO RTC:155374 Remove when official signing
+                                # supported
+                                run_command("$SIGNING_DIR/build -good -if $secureboot_hdr -of $tempImages{PAD_PHASE} -bin $tempImages{TEMP_BIN} $SIGN_BUILD_PARAMS");
+                            }
+                            setCallerHwHdrFields(\%callerHwHdrFields,
+                                                 $tempImages{PAD_PHASE});
+                        }
+                        # Add non-secure version header
+                        else
+                        {
+                            # Attach signature-less secure header for OpenPOWER builds
+                            if($openSigningTool)
+                            {
+                                run_command("$CUR_OPEN_SIGN_REQUEST "
+                                    . "--protectedPayload $tempImages{TEMP_BIN} "
+                                    . "--out $tempImages{PAD_PHASE}");
+                            }
+                            else # Attach legacy header
+                            {
+                                run_command("env echo -en VERSION\\\\0 > $tempImages{TEMP_SHA_IMG}");
+                                run_command("sha512sum $tempImages{TEMP_BIN} | awk \'{print \$1}\' | xxd -pr -r >> $tempImages{TEMP_SHA_IMG}");
+                                run_command("dd if=$tempImages{TEMP_SHA_IMG} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+                                run_command("cat $tempImages{TEMP_BIN} >> $tempImages{PAD_PHASE}");
+                            }
+                        }
+                    }
+                }
+                if ($eyeCatch eq "SBKT" && $emitEccless)
+                {
+                    run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
+                }
+
             }
 
-        }
+            # ECC Phase
+            if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
+            {
+                run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+            }
+            else
+            {
+                run_command("cp $tempImages{PAD_PHASE} $tempImages{ECC_PHASE}");
+            }
 
-        # ECC Phase
-        if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
-        {
-            run_command("ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
-        }
-        else
-        {
-            run_command("cp $tempImages{PAD_PHASE} $tempImages{ECC_PHASE}");
-        }
+            # Compression phase
+            if( ($sectionHash{$layoutKey}{compressed}{algorithm} eq "xz"))
+            {
+                # Placeholder for compression partitions
+            }
 
-        # Compression phase
-        if( ($sectionHash{$layoutKey}{compressed}{algorithm} eq "xz"))
-        {
-            # Placeholder for compression partitions
-        }
+            # Move content to final bin filename
+            run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
 
-        # Move content to final bin filename
-        run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
+            # Clean up temp images
+            foreach my $image (keys %tempImages)
+            {
+                system("rm -f $tempImages{$image}");
+                die "Failed deleting $tempImages{$image}" if ($?);
+            }
 
-        # Clean up temp images
-        foreach my $image (keys %tempImages)
-        {
-            system("rm -f $tempImages{$image}");
-            die "Failed deleting $tempImages{$image}" if ($?);
+            $node_id++;
         }
     }
 
@@ -1310,6 +1329,7 @@ print <<"ENDUSAGE";
                         build_all phase and avoid parallel call issues.
     --systemBinFiles    [SYSTEM:]<NAME=FILE,NAME=FILE> CSV of bin files to format. Multiple '--systemBinFiles' allowed
                             Optional prefix 'SYSTEM:' used to specify with system bin files are being built.
+                            If a section has multiple bin files associated with it, just have multiple NAME=FILENAME pairs
                             For sections <NAME> that simply require zero-filling, you can pass in EMPTY or
                                 any non-existing file. If a file DNE, the script will handle accordingly.
                             Example: HBI=hostboot_extended.bin,GUARD=EMPTY

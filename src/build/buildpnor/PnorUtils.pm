@@ -299,7 +299,15 @@ sub loadBinFiles
         # Format is 'BIN_NAME=FILENAME'
         my @arr = split('=', $binFile);
 
-        $$i_binFilesRef{$arr[0]} = $arr[1];
+        # If multiple bin files for a section, append to key with a comma
+        if( exists $$i_binFilesRef{$arr[0]} )
+        {
+            $$i_binFilesRef{$arr[0]} .= ",".$arr[1];
+        }
+        else
+        {
+            $$i_binFilesRef{$arr[0]} = $arr[1];
+        }
     }
 }
 
