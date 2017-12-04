@@ -270,6 +270,16 @@ errlHndl_t checkForCSAttentions()
         FileRegSvc fileRegs;
         fileRegs.installScomImpl();
 
+        TARGETING::Target   *l_sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != NULL);
+        // Indicate to PRD that we are doing chkstop analysis
+        // on saved FIR data so you can read regs without HW issues.
+        uint8_t l_iplAnalysis = CHKSTOP_ANALYSIS_ON_STARTUP_ANALYZING_CHECKSTOP;
+        bool l_set =
+             l_sys->trySetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_iplAnalysis);
+        ATTN_SLOW("Checkstop attribute set for PRD:%d", l_set);
+
         // Process the checkstop attention
         errl = Singleton<Service>::instance().processCheckstop();
         if ( NULL != errl )
@@ -277,6 +287,10 @@ errlHndl_t checkForCSAttentions()
             firData.addFfdc( errl );
             errlCommit( errl, ATTN_COMP_ID );
         }
+
+        // Ensure we don't leave analysis attribute set
+        l_iplAnalysis = CHKSTOP_ANALYSIS_ON_STARTUP_NOT_ANALYZING_DEFAULT;
+        l_sys->trySetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_iplAnalysis);
 
         // Uninstall File scom implementation.
         Singleton<ScomImpl>::instance().installScomImpl();
