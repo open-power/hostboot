@@ -932,6 +932,18 @@ ID for the sensor number returned with the elog. -->
 </attribute>
 
 <attribute>
+    <id>BMC_MAX_ERROR_LOG_SIZE</id>
+    <description>max size of error log that can be sent to BMC</description>
+    <simpleType>
+        <uint32_t>
+            <default>2048</default>
+        </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
     <id>BMC_MANUFACTURER</id>
     <description>The manufacturer of the BMC</description>
     <simpleType>
