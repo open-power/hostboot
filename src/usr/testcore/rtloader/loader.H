@@ -833,6 +833,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                      break;
                   }
 
+                  if (i_reqLen != *o_respLen)
+                  {
+                     retVal = -EINVAL;
+                     break;
+                  }
+
                   uint32_t* l_data =
                              (uint32_t*) &(l_req_fw_msg->generic_msg.data);
                   TRACFCOMP(g_trac_hbrt,
@@ -868,9 +874,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                   l_resp_fw_msg->generic_msg.seqnum = 0x30;
                   l_resp_fw_msg->generic_msg.msgq = 0x40;
                   l_resp_fw_msg->generic_msg.msgType = 0x50;
-                  l_resp_fw_msg->generic_msg.__req = GFMM_RESPONSE;
+                  l_resp_fw_msg->generic_msg.__req =
+                                        GenericFspMboxMessage_t::RESPONSE;
                   l_resp_fw_msg->generic_msg.__onlyError =
-                                                          GFMM_NOT_ERROR_ONLY;
+                                  GenericFspMboxMessage_t::NOT_ERROR_ONLY;
                   l_resp_data.plid = 0x60;
                   l_resp_data.huid = 0x70;
                   memcpy(&(l_resp_fw_msg->generic_msg.data),

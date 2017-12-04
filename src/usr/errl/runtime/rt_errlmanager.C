@@ -31,7 +31,8 @@
 #include <sys/task.h>
 #include <stdlib.h>
 #include <string.h>
-#include <runtime/interface.h>
+#include <runtime/interface.h>   // g_hostInterfaces
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <targeting/common/targetservice.H>
 #include <pnor/pnorif.H>
 #include <hwas/common/deconfigGard.H>
@@ -89,7 +90,8 @@ ErrlManager::ErrlManager() :
     }
     else
     {
-        TRACFCOMP( g_trac_errl, "Error log being created before TARGETING is ready..." );
+        TRACFCOMP( g_trac_errl, "Error log being created before "
+                                "TARGETING is ready..." );
     }
     if(sys)
     {
@@ -116,7 +118,8 @@ ErrlManager::ErrlManager() :
           spfn.baseServices))
     {
         iv_isSpBaseServices = false;
-        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, setting up to save to pnor" );
+        TRACFCOMP( g_trac_errl, INFO_MRK"no baseServices, setting "
+                                "up to save to pnor" );
         setupPnorInfo();
     }
     else
@@ -146,6 +149,10 @@ ErrlManager::~ErrlManager()
 ///////////////////////////////////////////////////////////////////////////////
 void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 {
+    // Put the handle to the firmware_request request struct
+    // out here so it is easier to free later
+    hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
+
     do
     {
         if (!iv_isSpBaseServices)
@@ -155,8 +162,8 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
             bool l_savedToPnor = saveErrLogToPnor(io_err);
             if (!l_savedToPnor)
             {
-                TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor didn't save 0x%X",
-                    io_err->eid());
+                TRACFCOMP( g_trac_errl, ENTER_MRK"saveErrLogToPnor "
+                           "didn't save 0x%X", io_err->eid());
             }
         }
 
@@ -186,8 +193,8 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
 
                 if(rc)
                 {
-                    TRACFCOMP(g_trac_errl, ERR_MRK
-                              "Failed sending error log to FSP via "
+                    TRACFCOMP(g_trac_errl,
+                              ERR_MRK"Failed sending error log to FSP via "
                               "sendErrorLog. rc: %d. plid: 0x%08x",
                               rc,
                               io_err->plid() );
@@ -197,43 +204,53 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
             }
             else if (g_hostInterfaces->firmware_request)
             {
-                // Get an accurate size of memory actually
-                // needed to transport the data
-                size_t l_req_fw_msg_size =
-                              hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                              sizeof(hostInterfaces::hbrt_fw_msg::error_log) +
-                              l_msgSize;
+                // Get an accurate size of memory needed to transport
+                // the data for the firmware_request request struct
+                uint64_t l_req_fw_msg_size =
+                         hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                         sizeof(hostInterfaces::hbrt_fw_msg::error_log) +
+                         l_msgSize -
+                         sizeof(hostInterfaces::hbrt_fw_msg::error_log.i_data);
 
-                // Create the firmware_request structure
-                // to carry the error log data
+                // Create the firmware_request request struct to send data
                 hostInterfaces::hbrt_fw_msg *l_req_fw_msg =
                       (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
-
                 memset(l_req_fw_msg, 0, l_req_fw_msg_size);
 
-                // Populate the firmware_request structure with given data
+                // Populate the firmware_request request struct with given data
                 l_req_fw_msg->io_type =
                                 hostInterfaces::HBRT_FW_MSG_TYPE_ERROR_LOG;
                 l_req_fw_msg->error_log.i_plid = io_err->plid();
                 l_req_fw_msg->error_log.i_errlSize = l_msgSize;
                 io_err->flatten (&(l_req_fw_msg->error_log.i_data), l_msgSize);
 
+                // Trace out firmware request info
+                TRACFCOMP(g_trac_errl,
+                          INFO_MRK"Error log firmware request info: "
+                          "io_type:%d, plid: 0x%08x, errlSize:%d",
+                          l_req_fw_msg->io_type,
+                          l_req_fw_msg->error_log.i_plid,
+                          l_req_fw_msg->error_log.i_errlSize);
+
+                TRACFBIN(g_trac_errl, "Error log firmware request data: ",
+                         &(l_req_fw_msg->error_log.i_data),
+                         l_req_fw_msg->error_log.i_errlSize);
+
+                // Create the firmware_request response struct to receive data
                 hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
                 uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
-                size_t rc = g_hostInterfaces->
-                          firmware_request(l_req_fw_msg_size, l_req_fw_msg,
-                                          &l_resp_fw_msg_size, &l_resp_fw_msg);
+                memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
 
-                if(rc)
-                {
-                    TRACFCOMP(g_trac_errl, ERR_MRK
-                              "Failed sending error log to FSP "
-                              "via firmware_request. rc: %d. plid: 0x%08x",
-                              rc,
-                              io_err->plid() );
-                }
 
-                free(l_req_fw_msg);
+                // Make the firmware_request call
+                errlHndl_t l_err = firmware_request_helper(l_req_fw_msg_size,
+                                                           l_req_fw_msg,
+                                                           &l_resp_fw_msg_size,
+                                                           &l_resp_fw_msg);
+
+                // Should not get an error log, but if it happens,
+                // just delete it.
+                delete l_err, l_err = nullptr;
             }
             else
             {
@@ -257,6 +274,10 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
         io_err = NULL;
 
     } while (0);
+
+    // Release the firmware_request request struct
+    free(l_req_fw_msg);
+    l_req_fw_msg = nullptr;
 
     TRACFCOMP( g_trac_errl, EXIT_MRK"sendToHypervisor()" );
     return;
@@ -341,7 +362,8 @@ bool rt_processCallout(errlHndl_t &io_errl,
 
             if (!l_err)
             {
-                errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord(pTarget,
+                errlHndl_t errl = HWAS::theDeconfigGard().platCreateGardRecord
+                       (pTarget,
                         io_errl->eid(),
                         pCalloutUD->gardErrorType);
                 if (errl)

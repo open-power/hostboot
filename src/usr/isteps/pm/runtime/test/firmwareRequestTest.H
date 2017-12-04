@@ -187,7 +187,8 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             hostInterfaces::hbrt_fw_msg l_req_fw_msg;
             l_req_fw_msg.generic_msg.initialize();
 
-            if (l_req_fw_msg.generic_msg.magic != GFMM_MAGIC_NUMBER)
+            if (l_req_fw_msg.generic_msg.magic !=
+                GenericFspMboxMessage_t::MAGIC_NUMBER)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
                         "magic was not properly initialized");
@@ -200,7 +201,8 @@ class FirmwareRequestTest : public CxxTest::TestSuite
                         "dataSize was not properly initialized");
             }
 
-            if (l_req_fw_msg.generic_msg.structVer != GFMM_VERSION)
+            if (l_req_fw_msg.generic_msg.structVer !=
+                GenericFspMboxMessage_t::STRUCT_VERSION_LATEST)
             {
                 TS_FAIL("FirmwareRequestTest::testFirmwareRequestHbrtToFsp: "
                         "structVer was not properly initialized");
@@ -220,8 +222,9 @@ class FirmwareRequestTest : public CxxTest::TestSuite
             l_req_fw_msg.generic_msg.seqnum = 0x300;
             l_req_fw_msg.generic_msg.msgq = 0x400;
             l_req_fw_msg.generic_msg.msgType = 0x500;
-            l_req_fw_msg.generic_msg.__req = GFMM_REQUEST;
-            l_req_fw_msg.generic_msg.__onlyError = GFMM_ERROR_ONLY;
+            l_req_fw_msg.generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
+            l_req_fw_msg.generic_msg.__onlyError =
+                                          GenericFspMboxMessage_t::ERROR_ONLY;
             uint32_t l_plid = 0x600;
             uint32_t l_huid = 0x700;
             l_req_fw_msg.generic_msg.data =

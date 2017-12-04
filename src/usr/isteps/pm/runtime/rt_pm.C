@@ -28,15 +28,18 @@
 #include <errl/errlmanager.H>
 #include <errno.h>
 #include <sys/misc.h>
+
 #include <trace/interface.H>
 #include <util/utillidmgr.H>
 
 #include <pm/pm_common.H>
 #include <isteps/pm/pm_common_ext.H>
 
-#include <runtime/interface.h>
+#include <runtime/interface.h>        // g_hostInterfaces
+#include <runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/rt_targeting.H>
 #include <runtime/runtime_reasoncodes.H>
+
 
 #include <initservice/isteps_trace.H>
 
@@ -49,6 +52,7 @@
 
 using namespace TARGETING;
 using namespace RUNTIME;
+using namespace ERRORLOG;
 
 namespace ISTEPS_TRACE
 {
@@ -342,6 +346,7 @@ namespace RTPM
                                  "/firmware_request interface not linked");
                 /*@
                 * @errortype
+                * @severity         ERRL_SEV_INFORMATIONAL
                 * @moduleid         MOD_PM_RT_HCODE_UPDATE
                 * @reasoncode       RC_PM_RT_INTERFACE_ERR
                 * @userdata1[0:31]  Target HUID
@@ -350,14 +355,13 @@ namespace RTPM
                 * @devdesc          HCODE scom update runtime
                 *                   interface not linked.
                 */
-                l_err= new ERRORLOG::ErrlEntry(
-                                              ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                              MOD_PM_RT_HCODE_UPDATE,
-                                              RC_PM_RT_INTERFACE_ERR,
-                                              TWO_UINT32_TO_UINT64(
-                                                 TARGETING::get_huid(i_target),
-                                                 i_section),
-                                              i_rel_scom_addr);
+                l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                     MOD_PM_RT_HCODE_UPDATE,
+                                     RC_PM_RT_INTERFACE_ERR,
+                                     TWO_UINT32_TO_UINT64(
+                                              TARGETING::get_huid(i_target),
+                                              i_section),
+                                     i_rel_scom_addr);
                 break;
             }
 
@@ -411,32 +415,37 @@ namespace RTPM
                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                             ERR_MRK"hcode_update: "
                             "HCODE scom update failed. "
-                            "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
-                            "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
+                            "rc: 0x%X, target: 0x%llX, chipId: 0x%llX, "
+                            "section: 0x%X, operation: 0x%X, scomAddr: 0x%llX, "
+                            "scomData: 0x%llX",
                             rc, get_huid(i_target), l_chipId, i_section,
                             i_operation, l_scomAddr, i_scom_data);
 
-                   // convert rc to error log
                    /*@
                    * @errortype
+                   * @severity     ERRL_SEV_INFORMATIONAL
                    * @moduleid     MOD_PM_RT_HCODE_UPDATE
                    * @reasoncode   RC_PM_RT_HCODE_UPDATE_ERR
                    * @userdata1    Hypervisor return code
                    * @userdata2    SCOM address
                    * @devdesc      HCODE SCOM update error
                    */
-                   l_err=new ERRORLOG::ErrlEntry(
-                                             ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                             MOD_PM_RT_HCODE_UPDATE,
-                                             RC_PM_RT_HCODE_UPDATE_ERR,
-                                             rc,
-                                             l_scomAddr);
+                   l_err = new ErrlEntry( ERRL_SEV_INFORMATIONAL,
+                                          MOD_PM_RT_HCODE_UPDATE,
+                                          RC_PM_RT_HCODE_UPDATE_ERR,
+                                          rc,
+                                          l_scomAddr);
                    break;
                }
             }
             else if (g_hostInterfaces->firmware_request != nullptr)
             {
+               // Create the firmware_request request struct to send data
                hostInterfaces::hbrt_fw_msg l_req_fw_msg;
+               uint64_t l_req_fw_msg_size = sizeof(l_req_fw_msg);
+               memset(&l_req_fw_msg, 0, l_req_fw_msg_size);
+
+               // Populate the firmware_request request struct with given data
                l_req_fw_msg.io_type =
                          hostInterfaces::HBRT_FW_MSG_TYPE_REQ_HCODE_UPDATE;
                l_req_fw_msg.req_hcode_update.i_chipId = l_chipId;
@@ -445,82 +454,35 @@ namespace RTPM
                l_req_fw_msg.req_hcode_update.i_scomAddr = l_scomAddr;
                l_req_fw_msg.req_hcode_update.i_scomData = i_scom_data;
 
+               // Trace out firmware request info
+               TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                         INFO_MRK"HCODE update firmware request info: "
+                         "io_type:%d, chipId:0x%llX, section:0x%X, "
+                         "operation:0x%X, scomAddr:0x%llX, scomData:0x%llX",
+                           l_req_fw_msg.io_type,
+                           l_req_fw_msg.req_hcode_update.i_chipId,
+                           l_req_fw_msg.req_hcode_update.i_section,
+                           l_req_fw_msg.req_hcode_update.i_operation,
+                           l_req_fw_msg.req_hcode_update.i_scomAddr,
+                           l_req_fw_msg.req_hcode_update.i_scomData);
+
+               // Create the firmware_request response struct to receive data
                hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
                uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
-               rc = g_hostInterfaces->firmware_request(sizeof(l_req_fw_msg),
-                       &l_req_fw_msg, &l_resp_fw_msg_size, &l_resp_fw_msg);
-               if(rc)
+               memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+                // Make the firmware_request call
+               l_err = firmware_request_helper(l_req_fw_msg_size,
+                                                &l_req_fw_msg,
+                                                &l_resp_fw_msg_size,
+                                                &l_resp_fw_msg);
+
+               if (l_err)
                {
-                   TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                            ERR_MRK"firmware request: "
-                            "firmware request for hcode scom update failed. "
-                            "rc 0x%X target 0x%llX chipId 0x%llX section 0x%X "
-                            "operation 0x%X scomAddr 0x%llX scomData 0x%llX",
-                            rc, get_huid(i_target), l_chipId, i_section,
-                            i_operation, l_scomAddr, i_scom_data);
-
-                   // convert rc to error log
-                   /*@
-                   * @errortype
-                   * @moduleid         MOD_PM_RT_FIRMWARE_REQUEST
-                   * @reasoncode       RC_PM_RT_HCODE_UPDATE_ERR
-                   * @userdata1[0:31]  Firmware Request return code
-                   * @userdata1[32:63] SCOM address
-                   * @userdata2[0:31]  Generic response code - if it exists
-                   * @userdata2[32:63] Firmware Response type
-                   * @devdesc          Firmware Request for
-                   *                   HCODE SCOM update error
-                   */
-                   //
-                   // Pack the generic response code if the response
-                   // is of type "RESP_GENERIC"
-                   // else just send the response type alone
-                   uint64_t l_userData2 = 0;
-                   if (l_resp_fw_msg_size >=
-                                        hostInterfaces::HBRT_FW_MSG_BASE_SIZE)
-                   {
-                      // just assign the response type for now
-                      l_userData2 = l_resp_fw_msg.io_type;
-
-                      // Pack the response code if it is available
-                      if ((l_resp_fw_msg_size >=
-                                     (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                                      sizeof(l_resp_fw_msg.resp_generic)))  &&
-                           hostInterfaces::HBRT_FW_MSG_TYPE_RESP_GENERIC ==
-                                      l_resp_fw_msg.io_type)
-                      {
-                         l_userData2 = TWO_UINT32_TO_UINT64
-                                       (l_resp_fw_msg.resp_generic.o_status,
-                                        l_resp_fw_msg.io_type);
-                      }
-                   }
-
-                   l_err=new ERRORLOG::ErrlEntry(
-                                          ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                          MOD_PM_RT_FIRMWARE_REQUEST,
-                                          RC_PM_RT_HCODE_UPDATE_ERR,
-                                          TWO_UINT32_TO_UINT64(rc, l_scomAddr),
-                                          l_userData2);
-
-                   if (l_resp_fw_msg_size > 0)
-                   {
-                      l_err->addFFDC( ISTEP_COMP_ID,
-                                      &l_resp_fw_msg,
-                                      l_resp_fw_msg_size,
-                                      0, 0, false );
-                   }
-
-                   if (sizeof(l_req_fw_msg) > 0)
-                   {
-                      l_err->addFFDC( ISTEP_COMP_ID,
-                                      &l_req_fw_msg,
-                                      sizeof(l_req_fw_msg),
-                                      0, 0, false );
-                   }
-
+                   // If error, break out of encompassing while loop
                    break;
                }
-            }
+            } // END else if (g_hostInterfaces->firmware_request != nullptr)
 
             // Disable special wakeup
             l_err = handleSpecialWakeup(i_target,false);
@@ -572,3 +534,4 @@ namespace RTPM
 
     registerPm g_registerPm;
 };
+

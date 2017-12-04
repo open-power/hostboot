@@ -53,6 +53,7 @@ OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
 OBJS += utilcommonattr.o
 OBJS += rt_fwnotify.o
+OBJS += rt_fwreq_helper.o
 
 SUBDIRS += test.d
 

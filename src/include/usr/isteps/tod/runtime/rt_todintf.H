@@ -44,14 +44,15 @@ namespace TOD
  *  @brief This interface creates a new backup TOD topology.  This request
  *         is sent to the FSP for resetting the backup topology.
  *
- *  @param[in] i_oscPos the ordinal ID of the failing OSC.  Value of
- *             0xFFFFFFFF means no OSC to avoid.
+ *  @param[in] i_oscPos the ordinal ID of the failing OSC (Oscillator).
+ *             Value of 0xFFFFFFFF means no OSC to avoid.
  *  @param[in] i_procOscTgt target of the processor with which the failing OSC
  *             is associated with. If ordinal ID is 0xFFFFFFFF then this should
  *             be NULL, otherwise provide a valid target. If ordinal ID is
  *             0xFFFFFFFF, i_procOscTgt is ignored regardless of it's validity.
- *  @param[in] i_badChipList input list of targets.
- *  @param[in] i_informPhyp flag to inform the PHYP that it won't have a
+ *  @param[in] i_badChipList list of oscillator targets that have been marked
+ *             by PRD as faulty.
+ *  @param[in] i_informPhyp flag to inform PHYP that it won't have a
  *             backup available for fail over while we are re-configuring it.
  *
  *  @return Error log handle indicating the status of the request

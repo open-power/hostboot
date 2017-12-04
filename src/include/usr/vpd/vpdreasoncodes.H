@@ -92,8 +92,7 @@ enum vpdModuleId
     VPD_RT_WRITE_PNOR                       = 0x81,
     VPD_BLD_RT_IMAGE                        = 0x82,
     VPD_SEND_MBOX_WRITE_MESSAGE             = 0x83,
-    VPD_RT_FIRMWARE_REQUEST                 = 0x84,
-
+    VPD_MOD_XXX                             = 0x84,
 };
 
 /**
@@ -141,7 +140,7 @@ enum vpdReasonCode
     VPD_CACHE_SIZE_EXCEEDED             = VPD_COMP_ID | 0x35,
     VPD_INVALID_LENGTH                  = VPD_COMP_ID | 0x36,
     VPD_RT_NULL_FIRMWARE_REQUEST_PTR    = VPD_COMP_ID | 0x37,
-    VPD_RT_WRITE_MSG_ERR                = VPD_COMP_ID | 0x38,
+    VPD_RC_XXX                          = VPD_COMP_ID | 0x38,
 };
 
 

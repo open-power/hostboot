@@ -147,6 +147,15 @@ enum MemoryError_t
 /* PHYP fixes */
 #define HBRT_CAPS_SET2_PHYP    2
 
+/* FSP failed due to a a reset/reload. Only applicable when
+ * hostInterfaces::hbrt_fw_msg::io_type is set to
+ * HBRT_FW_MSG_HBRT_FSP_REQ
+ */
+#define HBRT_RC_FSPDEAD       -8193    //0x2001
+
+/* FSP failed due to a a reset/reload */
+#define HBRT_FW_REQUEST_RETRIES  1
+
 
 /** @typedef hostInterfaces_t
  *  @brief Interfaces provided by the underlying environment (ex. Sapphire).
