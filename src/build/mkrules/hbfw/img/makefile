@@ -348,6 +348,9 @@ ZEPPELIN_MEMD_IMG = ${ENGD_MEMDPATH:Fzeppelin_memd_output.dat}
 FLEETWOOD_MEMD_IMG = ${ENGD_MEMDPATH:Ffleetwood_memd_output.dat}
 ZZ_HBD_IMG = ${HBFW_TARGPATH:FZZ_hb_targeting.bin}
 ZEPPELIN_HBD_IMG = ${HBFW_TARGPATH:FZEPPELIN_hb_targeting.bin}
+# Create list of images for each node (in node order)
+# genPnorImages will handle multiple HBD=binfile pairs
+FLEETWOOD_HBD_IMGS = HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FFLEETWOOD_node_3_hb_targeting.bin}:P}
 
 # Input fake images
 NIMBUS_VPO_HBD_IMG = vbu_NIMBUS_targeting.bin
@@ -371,8 +374,12 @@ ZEPPELIN_WOFDATA_FINAL_IMG = ZEPPELIN.WOFDATA.bin
 ZZ_MEMD_FINAL_IMG = ZZ.MEMD.bin
 ZEPPELIN_MEMD_FINAL_IMG = ZEPPELIN.MEMD.bin
 FLEETWOOD_MEMD_FINAL_IMG = FLEETWOOD.MEMD.bin
+# Fips has its own build process and will not use these, but rather what's
+# defined in fipsfs.db.
 ZZ_HBD_FINAL_IMG = ZZ.HBD.bin
 ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
+FLEETWOOD_HBD_FINAL_IMGS = FLEETWOOD.HBD_NODE_0.bin,FLEETWOOD.HBD_NODE_1.bin,FLEETWOOD.HBD_NODE_2.bin,FLEETWOOD.HBD_NODE_3.bin
+
 
 # Decide which PNOR to build
 .if(${FAKEPNOR} == "")
@@ -386,7 +393,7 @@ ZEPPELIN_HBD_FINAL_IMG = ZEPPELIN.HBD.bin
     .endif
     GEN_ZZ_BIN_FILES = ZZ:WOFDATA=${${ZZ_WOFDATA_IMG}:P},MEMD=${${ZZ_MEMD_IMG}:P},HBD=${${ZZ_HBD_IMG}:P}
     GEN_ZEPPELIN_BIN_FILES = ZEPPELIN:WOFDATA=${${ZEPPELIN_WOFDATA_IMG}:P},MEMD=${${ZEPPELIN_MEMD_IMG}:P},HBD=${${ZEPPELIN_HBD_IMG}:P}
-    GEN_FLEETWOOD_BIN_FILES = FLEETWOOD:WOFDATA=${${FLEETWOOD_WOFDATA_IMG}:P},MEMD=${${FLEETWOOD_MEMD_IMG}:P}
+    GEN_FLEETWOOD_BIN_FILES = FLEETWOOD:WOFDATA=${${FLEETWOOD_WOFDATA_IMG}:P},MEMD=${${FLEETWOOD_MEMD_IMG}:P},${FLEETWOOD_HBD_IMGS}
 
     SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
                              --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
