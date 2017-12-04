@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016
+# Contributors Listed Below - COPYRIGHT 2016,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_hcd_cache_stopclocks
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
-OBJS+=p9_hcd_cache_stopclocks.o
-OBJS+=p9_hcd_l2_stopclocks.o
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/ffdc)
+lib$(PROCEDURE)_DEPLIBS+=p9_hcd_l2_stopclocks
+lib$(PROCEDURE)_DEPLIBS+=p9_ppe_utils
+lib$(PROCEDURE)_DEPLIBS+=p9_eq_clear_atomic_lock
 $(call BUILD_PROCEDURE)

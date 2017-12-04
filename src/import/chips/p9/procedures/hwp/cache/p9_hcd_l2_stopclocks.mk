@@ -24,5 +24,4 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p9_hcd_l2_stopclocks
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p9/procedures/hwp/lib)
-OBJS+=p9_hcd_l2_stopclocks.o
 $(call BUILD_PROCEDURE)

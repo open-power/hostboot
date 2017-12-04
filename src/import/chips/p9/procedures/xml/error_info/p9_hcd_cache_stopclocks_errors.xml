@@ -140,4 +140,52 @@
     </gard>
   </hwpError>
   <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_CACHE_STOPCLKS_PGPE_HALT_TIMEOUT</rc>
+    <description>
+    A timeout occured while waiting the PGPE to halt
+    </description>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_CACHE_STOPCLKS_SGPE_HALT_TIMEOUT</rc>
+    <description>
+    A timeout occured while waiting the SGPE to halt
+    </description>
+    <ffdc>CHIP</ffdc>
+    <callout>
+      <target>CHIP</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_CACHE_STOPCLKS_ATOMIC_LOCK_FAIL</rc>
+    <description>
+    Failed attempt to clear the atomic lock to the cache chiplet
+    </description>
+    <ffdc>EQ</ffdc>
+    <callout>
+      <target>EQ</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
+  <hwpError>
+    <rc>RC_CACHE_STOPCLKS_CME_HALT_TIMEOUT</rc>
+    <description>
+    A timeout occured while waiting a CME to halt
+    </description>
+    <ffdc>EX</ffdc>
+    <callout>
+      <target>EX</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ********************************************************************* -->
 </hwpErrors>

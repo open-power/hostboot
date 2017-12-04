@@ -28,10 +28,10 @@
 ///
 /// *HWP HW Owner        : Ashish More <ashish.more.@in.ibm.com>
 /// *HWP HW Backup Owner : Brian Vanderpool <vanderp@us.ibm.com>
-/// *HWP FW Owner        : Sangeetha T S <sangeet2@in.ibm.com>
+/// *HWP FW Owner        : Amit Tendolkar <amit.tendolkar@in.ibm.com>
 /// *HWP Team            : PM
-/// *HWP Level           : 2
-/// *HWP Consumed by     : SBE, Cronus
+/// *HWP Level           : 3
+/// *HWP Consumed by     : Hostboot, FSP
 ///
 /// @verbatim
 ///
@@ -43,11 +43,8 @@
 #include <fapi2.H>
 #include <p9_ppe_utils.H>
 #include <p9_hcd_common.H>
+#include <p9_misc_scom_addresses_fld.H>
 #include <map>
-
-
-
-
 
 //// Vector defining the special acceess egisters
 //const std::map<uint16_t, std::string> v_ppe_special_num_name =
@@ -198,13 +195,15 @@ fapi2::ReturnCode ppe_pollHaltState(
     {
         FAPI_TRY(getScom(i_target, i_base_address + PPE_XIRAMDBG, l_data64), "Error in GETSCOM");
     }
-    while (! l_data64.getBit<0>() &&
+    while (! l_data64.getBit<PU_PPE_XIRAMDBG_XSR_HS>() &&
            --l_timeout_count != 0);
 
 
-    FAPI_ASSERT(l_data64.getBit<0>(), fapi2::P9_PPE_STATE_HALT_TIMEOUT_ERR(),
-                "PPE Halt Timeout");
-
+    FAPI_ASSERT ( l_data64.getBit<PU_PPE_XIRAMDBG_XSR_HS>(),
+                  fapi2::PPE_STATE_HALT_TIMEOUT_ERR()
+                  .set_TARGET(i_target)
+                  .set_ADDRESS(i_base_address),
+                  "PPE Halt Timeout" );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -218,12 +217,24 @@ fapi2::ReturnCode ppe_halt(
 {
     fapi2::buffer<uint64_t> l_data64;
 
-    FAPI_INF("   Send HALT command via XCR...");
-    l_data64.flush<0>().insertFromRight(p9hcd::HALT, 1, 3);
+    FAPI_TRY ( getScom ( i_target,
+                         i_base_address + PPE_XIRAMDBG,
+                         l_data64 ),
+               "Error reading PPE Halt State" );
 
-    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64), "Error in PUTSCOM in XCR to generate Halt condition");
+    // Halt the PPE only if it is not already halted
+    if (! l_data64.getBit<PU_PPE_XIRAMDBG_XSR_HS>())
+    {
+        FAPI_INF("   Send HALT command via XCR...");
+        l_data64.flush<0>().insertFromRight(p9hcd::HALT, PU_PPE_XIXCR_XCR,
+                                            PU_PPE_XIXCR_XCR_LEN);
 
-    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+        FAPI_TRY ( putScom ( i_target,
+                             i_base_address + PPE_XIXCR,
+                             l_data64 ),
+                   "Error in PUTSCOM in XCR to generate Halt condition" );
+        FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -236,13 +247,23 @@ fapi2::ReturnCode ppe_force_halt(
 {
     fapi2::buffer<uint64_t> l_data64;
 
-    FAPI_INF("   Send FORCE HALT command via XCR...");
-    l_data64.flush<0>().insertFromRight(p9hcd::FORCE_HALT, 1, 3);
+    FAPI_TRY ( getScom ( i_target,
+                         i_base_address + PPE_XIRAMDBG,
+                         l_data64 ),
+               "Error reading PPE Halt State" );
 
-    FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64),
-             "Error in PUTSCOM in XCR to generate Force Halt condition");
+    // Force Halt PPE only is it is not already Halted
+    if (! l_data64.getBit<PU_PPE_XIRAMDBG_XSR_HS>())
+    {
+        FAPI_INF("   Send FORCE HALT command via XCR...");
+        l_data64.flush<0>().insertFromRight(p9hcd::FORCE_HALT, PU_PPE_XIXCR_XCR,
+                                            PU_PPE_XIXCR_XCR_LEN);
 
-    FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+        FAPI_TRY(putScom(i_target, i_base_address + PPE_XIXCR, l_data64),
+                 "Error in PUTSCOM in XCR to generate Force Halt condition");
+
+        FAPI_TRY(ppe_pollHaltState(i_target, i_base_address));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
