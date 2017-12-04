@@ -665,13 +665,33 @@ void ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_sendSels)
         }
 
         // flatten into buffer, truncate to max eSEL size
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        uint32_t l_maxBmcErrLogSize;
+
+        if ( sys &&
+             sys->tryGetAttr<TARGETING::ATTR_BMC_MAX_ERROR_LOG_SIZE>( l_maxBmcErrLogSize ) )
+        {
+            // (value was extracted from attributes)
+        }
+        else
+        {
+            // use default value for max log size
+            l_maxBmcErrLogSize =  IPMISEL::ESEL_MAX_SIZE_DEFAULT;
+
+            TRACFCOMP( g_trac_errl, INFO_MRK
+                       "sendErrLogToBmc: "
+                       "Attribute ATTR_BMC_MAX_ERROR_LOG_SIZE not found, "
+                       "ESEL_MAX_SIZE_DEFAULT used" );
+        }
+
         uint32_t l_pelSize = io_err->flattenedSize();
-        if (l_pelSize > (IPMISEL::ESEL_MAX_SIZE - sizeof(IPMISEL::selRecord)))
+        if (l_pelSize > (l_maxBmcErrLogSize - sizeof(IPMISEL::selRecord)))
         {
             TRACFCOMP( g_trac_errl, INFO_MRK
                     "sendErrLogToBmc: msg size %d > %d, truncating.",
-                    l_pelSize, IPMISEL::ESEL_MAX_SIZE);
-            l_pelSize = IPMISEL::ESEL_MAX_SIZE - sizeof(IPMISEL::selRecord);
+                    l_pelSize, l_maxBmcErrLogSize);
+            l_pelSize = l_maxBmcErrLogSize - sizeof(IPMISEL::selRecord);
         }
 
         uint8_t *l_pelData = new uint8_t[l_pelSize];

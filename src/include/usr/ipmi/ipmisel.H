@@ -64,10 +64,8 @@ namespace IPMISEL
         // size of the partial_add_esel request (command) data
         PARTIAL_ADD_ESEL_REQ = 7,
 
-        // per MegaRAC SP-X spec
-        // The size of the eSEL is configurable via PRJ
-        //  it can be set to 2KB per eSEL packet.
-        ESEL_MAX_SIZE = 2 * KILOBYTE,
+        //  legacy default value per eSEL packet.
+        ESEL_MAX_SIZE_DEFAULT = 2 * KILOBYTE,
     };
 
     /**

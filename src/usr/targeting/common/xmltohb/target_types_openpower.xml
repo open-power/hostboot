@@ -63,6 +63,7 @@
     <attribute><id>APSS_GPIO_PORT_PINS</id></attribute>
     <attribute><id>IPMI_SENSORS</id></attribute>
     <attribute><id>IPMI_MAX_BUFFER_SIZE</id></attribute>
+    <attribute><id>BMC_MAX_ERROR_LOG_SIZE</id></attribute>
     <attribute><id>OP_TRACE_LITE</id></attribute>
     <attribute><id>OPEN_POWER_DIMM_THROTTLE_TEMP_DEG_C</id></attribute>
     <attribute><id>OPEN_POWER_DIMM_ERROR_TEMP_DEG_C</id></attribute>
