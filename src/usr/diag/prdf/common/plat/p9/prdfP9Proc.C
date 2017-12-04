@@ -322,11 +322,34 @@ PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, isHostAttnFirAccessible );
 
 int32_t isUcsFirAccessible(ExtensibleChip * i_chip, bool & o_isOkToAccess)
 {
-    o_isOkToAccess = (true == atRuntime()) ? true : false;
-
     // Host Processor side can always access the 'unitCS' reg
     // The FSP can not access it during IPL steps 15 thru 16.2
-    // We  don't really use unitCs at this time.
+    o_isOkToAccess = atRuntime();
+
+
+#ifdef CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+    if (false == o_isOkToAccess)
+    {
+        // For checkstop analysis (non-FSP systems), we
+        // already collected registers in FIRDATA. Hence, we
+        // can attempt reading the unit CS FIR from this data.
+        Target   *l_sys = NULL;
+        targetService().getTopLevelTarget( l_sys );
+        assert(l_sys != NULL);
+
+        // ATTN code sets an attribute to indicate we are
+        // doing the analysis of FIR data from prior failure.
+        uint8_t l_doingAnalysis =
+                           CHKSTOP_ANALYSIS_ON_STARTUP_NOT_ANALYZING_DEFAULT;
+        l_sys->tryGetAttr<ATTR_CHKSTOP_ANALYSIS_ON_STARTUP>(l_doingAnalysis);
+
+        if (CHKSTOP_ANALYSIS_ON_STARTUP_ANALYZING_CHECKSTOP == l_doingAnalysis)
+        {
+            o_isOkToAccess = true;
+        }
+    }
+#endif  // CONFIG_ENABLE_CHECKSTOP_ANALYSIS
+
 
     return SUCCESS;
 }
@@ -350,6 +373,40 @@ int32_t handleDeadmanTimer( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, handleDeadmanTimer );
 PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, handleDeadmanTimer );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Used when the chip has a CHECK_STOP to see if there
+ *         is also a UNIT_CS present
+ * @param  i_chip         A P9 chip.
+ * @param  o_hasUcs True if the chip has a UNIT CS attention.
+ * @return SUCCESS
+ */
+int32_t CheckForUnitCs( ExtensibleChip * i_chip,
+                        bool & o_hasUcs )
+{
+    o_hasUcs = false;
+
+    int32_t l_rc = SUCCESS;
+
+    SCAN_COMM_REGISTER_CLASS * l_gUcsR = i_chip->getRegister("GLOBAL_UCS_FIR");
+    l_rc = l_gUcsR->Read();
+
+    if ( SUCCESS != l_rc )
+    {
+        PRDF_ERR("[CheckForUnitCs] GLOBAL_UCS_FIR read failed"
+                 "for 0x%08x", i_chip->GetId());
+    }
+    else if ( 0 != l_gUcsR->GetBitFieldJustified(1,55) )
+    {
+        o_hasUcs = true;
+    }
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE_NS( p9_nimbus,  Proc, CheckForUnitCs );
+PRDF_PLUGIN_DEFINE_NS( p9_cumulus, Proc, CheckForUnitCs );
 
 //------------------------------------------------------------------------------
 
