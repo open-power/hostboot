@@ -57,6 +57,20 @@
 #define TMGT_CONSOLE(_fmt_, _args_...)
 #endif
 
+
+// Enable this to force all HTMGT traces to console (for debug)
+#if 0
+#if defined(CONFIG_CONSOLE) && !defined(__HOSTBOOT_RUNTIME)
+#undef TMGT_INF
+#define    TMGT_INF( _fmt_, _args_...) \
+               CONSOLE::displayf( HTMGT_COMP_NAME, _fmt_, ##_args_ )
+#undef TMGT_ERR
+#define    TMGT_ERR( _fmt_, _args_...) \
+               CONSOLE::displayf( HTMGT_COMP_NAME, "E>" _fmt_, ##_args_ )
+#endif
+#endif
+
+
 inline uint16_t UINT16_GET(const uint8_t * i_ptr)
 {
     return (*i_ptr) << 8 | *(i_ptr+1);

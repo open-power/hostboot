@@ -1021,6 +1021,51 @@ namespace HTMGT
                               HTMGT_RC_OCC_CRIT_FAILURE,
                               0, cv_safeReturnCode, 0, cv_safeOccInstance,
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+
+                    // Check if OCC already logged reason for safe mode
+                    // (add proc callout if non-OCC safe mode reason or
+                    //  the OCC hit an exception)
+                    TMGT_ERR("_resetOccs: Safe Mode (RC: 0x%04X OCC%d)",
+                             cv_safeReturnCode, cv_safeOccInstance);
+                    if (((cv_safeReturnCode & OCCC_COMP_ID) != OCCC_COMP_ID) ||
+                        ((cv_safeReturnCode & 0xE0) == 0xE0))
+                    {
+                        // Add processor callout
+                        TARGETING::ConstTargetHandle_t procTarget = nullptr;
+                        Occ *occPtr = _getOcc(cv_safeOccInstance);
+                        if (occPtr != nullptr)
+                        {
+                            procTarget =
+                                TARGETING::getParentChip(occPtr->getTarget());
+                        }
+                        else
+                        {
+                            TMGT_ERR("_resetOCCs: Unable to determine target, "
+                                     "using first proc");
+                            // Get all functional processors
+                            TARGETING::TargetHandleList pProcs;
+                            TARGETING::getChipResources(pProcs,
+                                                        TARGETING::TYPE_PROC,
+                                             TARGETING::UTIL_FILTER_FUNCTIONAL);
+                            procTarget = pProcs[0];
+                        }
+                        if (nullptr != procTarget)
+                        {
+                            const unsigned long huid =
+                                procTarget->getAttr<TARGETING::ATTR_HUID>();
+                            TMGT_ERR("_resetOCCs: Adding processor callout "
+                                     "(HUID=0x%0lX)", huid);
+                            err->addHwCallout(procTarget,
+                                              HWAS::SRCI_PRIORITY_MED,
+                                              HWAS::NO_DECONFIG,
+                                              HWAS::GARD_NULL);
+                        }
+                    }
+                    else
+                    {
+                        TMGT_INF("_resetOccs: OCC should have already logged "
+                                 "an error for safe mode");
+                    }
                 }
 
                 // Any error at this point means OCCs were not reactivated
@@ -1301,12 +1346,13 @@ namespace HTMGT
 
         // First add HTMGT specific data
         o_data[index++] = _getNumOccs();
-        o_data[index++] = (nullptr!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
+        o_data[index++] =
+            (nullptr!=iv_occMaster)?iv_occMaster->getInstance():0xFF;
         o_data[index++] = iv_state;
         o_data[index++] = iv_targetState;
         o_data[index++] = iv_sysResetCount;
         o_data[index++] = iv_normalPstateTables ? 0 : 1;
-        index += 1; // reserved for expansion
+        o_data[index++] = 0x00; // STATUS VERSION (for future expansion)
         o_data[index++] = safeMode;
         UINT32_PUT(&o_data[index], cv_safeReturnCode);
         index += 4;
@@ -1321,11 +1367,13 @@ namespace HTMGT
             o_data[index++] = occ->getRole();
             o_data[index++] = occ->iv_masterCapable;
             o_data[index++] = occ->iv_commEstablished;
-            index += 3; // reserved for expansion
+            o_data[index++] = 0; // reserved for expansion
+            o_data[index++] = 0; // reserved for expansion
+            o_data[index++] = 0; // reserved for expansion
             o_data[index++] = occ->iv_failed;
             o_data[index++] = occ->needsReset();
             o_data[index++] = occ->iv_resetReason;
-            o_data[index++] = occ->iv_resetCount;
+            o_data[index++] = (occ->iv_wofResetCount<<4)|occ->iv_resetCount;
             if (occ->iv_lastPollValid)
             {
                 memcpy(&o_data[index], occ->iv_lastPollResponse, 4);

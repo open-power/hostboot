@@ -212,7 +212,7 @@ namespace HTMGT
                                 {
                                     TMGT_ERR("sendOccConfigData: OCC%d cfg "
                                              "format 0x%02X had bad rsp status"
-                                             " 0x%02X for sysConfig",
+                                             " 0x%02X",
                                              occInstance, format,
                                              cmd.getRspStatus());
                                 }
@@ -774,13 +774,17 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
                                 uint64_t & o_size)
 {
     uint64_t index = 0;
-    uint16_t sensor = 0;
+    uint32_t SensorID1 = 0;
+    uint32_t SensorID2 = 0;
     assert(o_data != nullptr);
 
     TargetHandle_t sys = nullptr;
     TargetHandleList nodes;
     targetService().getTopLevelTarget(sys);
     assert(sys != nullptr);
+    getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
+    assert(!nodes.empty());
+    TargetHandle_t node = nodes[0];
 
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG;
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
@@ -795,61 +799,53 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     }
     o_data[index++] = system_type;
 
-    //processor sensor ID
+    //processor Callout Sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);
-    sensor = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
-    memcpy(&o_data[index], &sensor, 4);
+    SensorID1 = UTIL::getSensorNumber(proc, SENSOR_NAME_PROC_STATE);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
     //Next 12*4 bytes are for core sensors.
     //If a new processor with more cores comes along,
     //this command will have to change.
     TargetHandleList cores;
-    TargetHandleList::iterator coreIt;
     getChildChiplets(cores, proc, TYPE_CORE, false);
 
-    uint32_t tempSensor = 0;
-    uint32_t freqSensor = 0;
+    TMGT_INF("getSystemConfigMessageData: systemType: 0x%02X, "
+             "procSensor: 0x%04X, %d cores, %d nodes",
+             system_type, SensorID1, cores.size(), nodes.size());
+
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {
-        tempSensor = 0;
-        freqSensor = 0;
+        SensorID1 = 0;
+        SensorID2 = 0;
 
         if ( core < cores.size() )
         {
-            tempSensor = UTIL::getSensorNumber(cores[core],
+            SensorID1 = UTIL::getSensorNumber(cores[core],     //Temp Sensor
                                                SENSOR_NAME_CORE_TEMP);
 
-            freqSensor = UTIL::getSensorNumber(cores[core],
+            SensorID2 = UTIL::getSensorNumber(cores[core],     //Freq Sensor
                                                SENSOR_NAME_CORE_FREQ);
         }
 
         //Core Temp Sensor ID
-        memcpy(&o_data[index], &tempSensor, 4);
+        memcpy(&o_data[index], &SensorID1, 4);
         index += 4;
 
         //Core Frequency Sensor ID
-        memcpy(&o_data[index], &freqSensor, 4);
+        memcpy(&o_data[index], &SensorID2, 4);
         index += 4;
     }
 
-    getChildAffinityTargets(nodes, sys, CLASS_ENC, TYPE_NODE);
-    assert(!nodes.empty());
-    TargetHandle_t node = nodes[0];
-
-    TMGT_INF("getSystemConfigMessageData: systemType: 0x%02X, "
-             "procSensor: 0x%04X, %d cores, %d nodes",
-             system_type, sensor, cores.size(), nodes.size());
-
-
-    //Backplane sensor ID
-    sensor = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
-    memcpy(&o_data[index], &sensor, 4);
+    //Backplane Callout Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_BACKPLANE_FAULT);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
-    //APSS sensor ID
-    sensor = UTIL::getSensorNumber(sys, SENSOR_NAME_APSS_FAULT);
-    memcpy(&o_data[index], &sensor, 4);
+    //APSS Callout Sensor ID
+    SensorID1 = UTIL::getSensorNumber(node, SENSOR_NAME_APSS_FAULT);
+    memcpy(&o_data[index], &SensorID1, 4);
     index += 4;
 
     o_size = index;
@@ -1025,7 +1021,6 @@ void getThermalControlMessageData(uint8_t* o_data,
 
     o_data[l_numSetsOffset] = l_numSets;
     o_size = index;
-
 
 }
 
