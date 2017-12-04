@@ -189,6 +189,27 @@ uint32_t SYSTEM_DEBUG_CLASS::Reinitialize(const AttnList & i_attnList)
         {
             addChipToAttnList( (*i).targetHndl,(*i).attnType );
 
+            // We can have UNIT CHKSTOPs present along with a normal
+            // CheckStop.  We want to be sure we look at the UnitCs
+            // in this case as it may be the real issue -- example is
+            // OPAL forcing a checkstop since a Unit CS occurs which
+            // they can't handle.
+            if  ( (*i).attnType == CHECK_STOP )
+            {
+                bool l_ucsFound = false;
+                ExtensibleChip * l_chip =
+                    ( ExtensibleChip *) systemPtr->GetChip( (*i).targetHndl );
+                ExtensibleChipFunction * ef
+                           = l_chip->getExtensibleFunction("CheckForUnitCs");
+
+                (*ef)( l_chip, bindParm<bool &>( l_ucsFound ) );
+
+                if ( l_ucsFound )
+                {
+                    addChipToAttnList( (*i).targetHndl,UNIT_CS );
+                }
+            }
+
             // There can be a case where chip has both recoverable and Check
             // Stop. In that case chip shall report only Check Stop. In such a
             // case, we analyse the recoverable first and see if we can blame

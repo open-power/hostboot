@@ -74,6 +74,34 @@
 </enumerationType>
 
 <attribute>
+  <description>
+      Are we doing checkstop analysis on
+      systems as we are booting back up based
+      on information captured in FIRDATA section.
+  </description>
+  <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
+  <persistency>volatile-zeroed</persistency>
+  <readable></readable>
+  <simpleType>
+    <uint8_t></uint8_t>
+  </simpleType>
+  <writeable></writeable>
+</attribute>
+
+<enumerationType>
+  <description>Enum for CHKSTOP_ANALYSIS_ON_STARTUP</description>
+  <enumerator>
+    <name>NOT_ANALYZING_DEFAULT</name>
+    <value>0</value>
+  </enumerator>
+  <enumerator>
+    <name>ANALYZING_CHECKSTOP</name>
+    <value>1</value>
+  </enumerator>
+  <id>CHKSTOP_ANALYSIS_ON_STARTUP</id>
+</enumerationType>
+
+<attribute>
     <id>IS_MPIPL_HB</id>
     <description>1 = in Memory Preserving IPL mode. 0 = in normal IPL mode.</description>
     <simpleType>
