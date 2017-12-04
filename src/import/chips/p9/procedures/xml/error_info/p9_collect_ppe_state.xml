@@ -26,24 +26,61 @@
 <hwpErrors>
 <!--************************************************************************-->
     <hwpError>
+        <rc>RC_PPE_BASE_ADDR_XIXCR</rc>
+        <description>PPE Instance Base Address Used for Ramming</description>
+        <ffdc>PPE_BASE_ADDR</ffdc>
+    </hwpError>
+<!--************************************************************************-->
+    <hwpError>
         <rc>RC_PPE_STATE_DATA_SPR</rc>
         <description>PPE SPR Data</description>
-        <ffdc>PPE_REG_NR</ffdc>
-        <ffdc>PPE_REG_VAL</ffdc>
+        <ffdc>REG_MSR</ffdc>
+        <ffdc>REG_CR</ffdc>
+        <ffdc>REG_CTR</ffdc>
+        <ffdc>REG_LR</ffdc>
+        <ffdc>REG_ISR</ffdc>
+        <ffdc>REG_SRR0</ffdc>
+        <ffdc>REG_SRR1</ffdc>
+        <ffdc>REG_TCR</ffdc>
+        <ffdc>REG_TSR</ffdc>
+        <ffdc>REG_DACR</ffdc>
+        <ffdc>REG_DBCR</ffdc>
+        <ffdc>REG_DEC</ffdc>
+        <ffdc>REG_IVPR</ffdc>
+        <ffdc>REG_PIR</ffdc>
+        <ffdc>REG_PVR</ffdc>
+        <ffdc>REG_XER</ffdc>
     </hwpError>
 <!--************************************************************************-->
     <hwpError>
         <rc>RC_PPE_STATE_DATA_XIR</rc>
         <description>PPE XIR Data</description>
-        <ffdc>PPE_REG_NR</ffdc>
-        <ffdc>PPE_REG_VAL</ffdc>
+        <ffdc>REG_XSR</ffdc>
+        <ffdc>REG_IAR</ffdc>
+        <ffdc>REG_IR</ffdc>
+        <ffdc>REG_EDR</ffdc>
+        <ffdc>REG_SPRG0</ffdc>
     </hwpError>
 <!--************************************************************************-->
     <hwpError>
         <rc>RC_PPE_STATE_DATA_GPR</rc>
         <description>PPE GPR Data</description>
-         <ffdc>PPE_REG_NR</ffdc>
-         <ffdc>PPE_REG_VAL</ffdc>
+        <ffdc>REG_R0</ffdc>
+        <ffdc>REG_R1</ffdc>
+        <ffdc>REG_R2</ffdc>
+        <ffdc>REG_R3</ffdc>
+        <ffdc>REG_R4</ffdc>
+        <ffdc>REG_R5</ffdc>
+        <ffdc>REG_R6</ffdc>
+        <ffdc>REG_R7</ffdc>
+        <ffdc>REG_R8</ffdc>
+        <ffdc>REG_R9</ffdc>
+        <ffdc>REG_R10</ffdc>
+        <ffdc>REG_R13</ffdc>
+        <ffdc>REG_R28</ffdc>
+        <ffdc>REG_R29</ffdc>
+        <ffdc>REG_R30</ffdc>
+        <ffdc>REG_R31</ffdc>
     </hwpError>
 <!--************************************************************************-->
 </hwpErrors>
