@@ -59,8 +59,8 @@ namespace RUNTIME
         MOD_POPULATE_TPMINFOBYNODE       = 0x19,  /**< populate_hbruntime.C */
         MOD_FILL_RSVMEM_HBDATA           = 0x20,  /**< populate_hbruntime.C */
         MOD_ATTR_RUNTIME_CHECK_PREP_FAIL = 0x21,  /**< populate_hbruntime.C */
-        MOD_PM_RT_FIRMWARE_REQUEST       = 0x22,  /**< rt_pm.C */
         MOD_RT_FIRMWARE_NOTIFY           = 0x23,  /**< rt_fwnotify.C */
+        MOD_RT_FIRMWARE_REQUEST          = 0x24,  /**< rt_fwreq_helper.C */
     };
 
     enum RuntimeReasonCode
@@ -120,6 +120,9 @@ namespace RUNTIME
         RC_FW_REQUEST_RT_NULL_PTR      = RUNTIME_COMP_ID | 0x34,
         RC_SBE_RT_INVALID_HUID         = RUNTIME_COMP_ID | 0x35,
         RC_SBE_RT_RECOVERY_ERR         = RUNTIME_COMP_ID | 0x36,
+        RC_FW_REQUEST_HWSV_ERR         = RUNTIME_COMP_ID | 0x37,
+        RC_FW_REQUEST_RESET_RELOAD_ERR = RUNTIME_COMP_ID | 0x38,
+        RC_FW_REQUEST_ERR              = RUNTIME_COMP_ID | 0x39,
     };
 
     enum UserDetailsTypes

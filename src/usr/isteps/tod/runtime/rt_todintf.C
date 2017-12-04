@@ -28,8 +28,13 @@
 #include <TodUtils.H>      // GETHUID
 #include <TodSvcUtil.H>    // getMaxProcsOnSystem
 
-#include <runtime/interface.h>     // g_hostInterfaces
-#include <tod_init_reasoncodes.H>  // TOD_RT_TOPOLOGY_RESET_BACKUP, etc
+#include <runtime/interface.h>        // g_hostInterfaces
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
+#include <tod_init_reasoncodes.H>     // TOD_RT_TOPOLOGY_RESET_BACKUP, etc
+#include <errlmanager_common.C>       // errlCommit
+
+
+using namespace ERRORLOG;
 
 namespace TOD
 {
@@ -51,38 +56,42 @@ errlHndl_t resetBackupTopology(
     TOD_ENTER("resetBackupTopology");
     errlHndl_t l_err = nullptr;
 
-    // Put the handle to the firmware request out here
-    // so it is easier to free later
+    // Put the handle to the firmware_request request struct
+    // out here so it is easier to free later
     hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
+    hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
 
     do
     {
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
         {
+            TOD_ERR("resetBackupTopology: "
+                    "Hypervisor firmware_request interface not linked");
+
             /*@
              * @errortype
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid     TOD::TOD_RT_TOPOLOGY_RESET_BACKUP
-             * @reasoncode   TOD::TOD_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     TOD_RT_TOPOLOGY_RESET_BACKUP
+             * @reasoncode   TOD_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @userdata1    None
+             * @userdata2    None
              * @devdesc      Host interfaces are not initialized
-             * @custdesc     An internal error occurred. This will force the
-             *               Time of Day function to run with complete
-             *               redundancy.
+             * @custdesc     An internal error occurred. This will
+             *               force the Time of Day function to run
+             *               with complete redundancy.
              */
-            l_err = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   TOD::TOD_RT_TOPOLOGY_RESET_BACKUP,
-                                   TOD::TOD_RT_NULL_FIRMWARE_REQUEST_PTR,
+            l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                   TOD_RT_TOPOLOGY_RESET_BACKUP,
+                                   TOD_RT_NULL_FIRMWARE_REQUEST_PTR,
                                    0, 0, true);
 
             break;
         }
 
-        // First, I'll present the format of the data
-        // to help with the understanding of the code that follows
         // The format of the data to be sent, according to the document
         // "Handle PRD Request for resetting backup TOD topology" is as follows
+        // All data members below are 4 bytes long (32 bits)
         // Ordinal ID - 0xFFFFFFFF means no OSC to be avoided
         // HUID of the node - This field should be considered only if Ordinal
         //                    ID is NOT set to 0xFFFFFFFF otherwise it is set
@@ -90,82 +99,89 @@ errlHndl_t resetBackupTopology(
         // HUID of the first processor
         // HUID of the second processor, etc
 
+        // Check if we get conflicting data, if so send a Trace out
+        if ((0xFFFFFFFF == i_oscPos) && (nullptr != i_procOscTgt))
+        {
+           TOD_ERR("Conflicting input data, input oscillator position "
+                   "(i_oscPos) has value 0xFFFFFFFF, meaning no oscillator "
+                   "to be avoided but input oscillator target (i_procOscTgt) "
+                   "has a valid value" );
+        }
+        else if ((0xFFFFFFFF != i_oscPos) && (nullptr == i_procOscTgt))
+        {
+           TOD_ERR("Conflicting input data, input oscillator position "
+                   "(i_oscPos) has value 0x%X, meaning avoid oscillator "
+                   "but input oscillator target (i_procOscTgt) "
+                   "has a NULL value", i_oscPos);
+        }
         // Flag to determine if the OSC data will be added to the data
         bool l_addOscData = (0xFFFFFFFF != i_oscPos) &&
                             (nullptr != i_procOscTgt);
 
-        // Calculate the size of the data that is being added to the
-        // generic struct
-        size_t l_data_size = 0;
+        // Default the request data size to the size of the
+        // GenericFspMboxMessage_t minus the size of the
+        // GenericFspMboxMessage_t's data.  The size of the
+        // GenericFspMboxMessage_t's data will be added later
+        uint32_t l_req_data_size = sizeof(GenericFspMboxMessage_t) -
+                                   sizeof(GenericFspMboxMessage_t::data);
 
-        // Add to the size iff there is data needing to be passed
+        // Add to the request data size iff there is data needing to be passed
         if (i_badChipList.size() > 0)
         {
             // if the bad chip list has any items then increase size to
             // accommodate for an ordinal ID and a HUID, regardless if
             // they have relevant data or not, because they are expected
             // before the HUID list.
-            l_data_size += (MSG_OSC_SIZE_OF_DETAILS * sizeof(uint32_t)) +
-                           (i_badChipList.size() * sizeof(uint32_t));
+            l_req_data_size += (MSG_OSC_SIZE_OF_DETAILS * sizeof(uint32_t)) +
+                               (i_badChipList.size() * sizeof(uint32_t));
         }
         else if (l_addOscData)
         {
             // if there is a valid OSC then accommodate for an ordinal ID
             // and HUID of node, but don't need space for HUID list because,
             // if we are here, the list is empty
-            l_data_size += (MSG_OSC_SIZE_OF_DETAILS * sizeof(uint32_t));
+            l_req_data_size += (MSG_OSC_SIZE_OF_DETAILS * sizeof(uint32_t));
         }
 
-        // Update the data size with the size of the generic msg struct
-        if (l_data_size < sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data))
+        // The request data size must be at a minimum the size of the
+        // FSP generic message (sizeof(GenericFspMboxMessage_t))
+        if (l_req_data_size < sizeof(GenericFspMboxMessage_t))
         {
-            // If the current size of the data is less than the size of the
-            // data within the generic message (GenericFspMboxMessage_t.data),
-            // then default the data size to just the generic message because
-            // the size of the data to be passed in
-            // GenericFspMboxMessage_t.dataSize has be at the minimum - the
-            // size of the generic message (sizeof(GenericFspMboxMessage_t)).
-            l_data_size = sizeof(hostInterfaces::hbrt_fw_msg::generic_msg);
-        }
-        else
-        {
-            // If the current size of the data is greater than the size of the
-            // data within the generic message (GenericFspMboxMessage_t.data),
-            // then add the size of the generic message minus the size of
-            // generic message's data.
-            l_data_size += sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) -
-                         sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data);
+            l_req_data_size = sizeof(GenericFspMboxMessage_t);
         }
 
-        // At last.  Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg
-        // which means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
-        // the previous calculated data size
-        size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                                   l_data_size;
+        // Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg which
+        // means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
+        // the previous calculated request data size
+        uint64_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                     l_req_data_size;
 
-        // Create the firmware request structure to carry the TOD data
-        l_req_fw_msg =(hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
+        // Create the firmware_request request struct to send data
+        l_req_fw_msg =
+                   (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
 
-        // Set the data for the request
-        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
+        // Initialize the firmware_request request struct
         l_req_fw_msg->generic_msg.initialize();
-        l_req_fw_msg->generic_msg.dataSize = l_data_size;
+
+        // Populate the firmware_request request struct with given data
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
+        l_req_fw_msg->generic_msg.dataSize = l_req_data_size;
         l_req_fw_msg->generic_msg.msgq = MBOX::FSP_TOD_MSGQ;
         l_req_fw_msg->generic_msg.msgType = (false == i_informPhyp ?
-                           GFMM_MSG_TOD_BACKUP_RESET:
-                           GFMM_MSG_TOD_BACKUP_RESET_INFORM_PHYP);
-        l_req_fw_msg->generic_msg.__req = GFMM_REQUEST;
-        l_req_fw_msg->generic_msg.__onlyError = GFMM_NOT_ERROR_ONLY;
+                   GenericFspMboxMessage_t::MSG_TOD_BACKUP_RESET:
+                   GenericFspMboxMessage_t::MSG_TOD_BACKUP_RESET_INFORM_PHYP);
+        l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
 
         // A convenient way to populate the data
-        uint32_t* l_dataPtr = (uint32_t*)&(l_req_fw_msg->generic_msg.data);
+        uint32_t* l_dataPtr =
+                reinterpret_cast<uint32_t*>(&(l_req_fw_msg->generic_msg.data));
 
         if (i_badChipList.size() > 0)
         {
             // set the ordinal ID
             l_dataPtr[MSG_OSC_ORDINAL_ID_LOC] = i_oscPos;
 
-            // attach the HUIDs from bad chip list to end of structure
+            // attach the HUIDs from bad chip list to end of struct
             size_t i = MSG_OSC_HUIDS_LOC;
             for (auto l_target : i_badChipList)
             {
@@ -194,120 +210,59 @@ errlHndl_t resetBackupTopology(
             {
                 /*@
                  * @errortype
-                 * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid     TOD::TOD_RT_TOPOLOGY_RESET_BACKUP
-                 * @reasoncode   TOD::TOD_INVALID_TARGET
-                 * @devdesc      No parent for processor osc target
-                 * @custdesc     An internal error occurred. This will force
-                 *               the Time of Day function to run with complete
-                 *               redundancy.
+                 * @severity     ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     TOD_RT_TOPOLOGY_RESET_BACKUP
+                 * @reasoncode   TOD_INVALID_TARGET
+                 * @userdata1    The number of parents found osc target
+                 * @userdata2    None
+                 * @devdesc      No/Multiple parent(s) found for
+                 *               processor osc target
+                 * @custdesc     An internal error occurred. This will
+                 *               force the Time of Day function to run
+                 *               with complete redundancy.
                  */
-                l_err = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   TOD::TOD_RT_TOPOLOGY_RESET_BACKUP,
-                                   TOD::TOD_INVALID_TARGET,
-                                   0, 0, true);
+                l_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                      TOD_RT_TOPOLOGY_RESET_BACKUP,
+                                      TOD_INVALID_TARGET,
+                                      l_list.size(), 0, true);
 
                 break;
             }
         }
 
-        // No data is returning from the call, just capture any errors
-        hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-        size_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
+        // Create the firmware_request response struct to receive data
+        // NOTE: For messages to the FSP the response size must match
+        // the request size
+        uint64_t l_resp_fw_msg_size = l_req_fw_msg_size;
+        l_resp_fw_msg =
+                    (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
+        memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
 
-        // Clear the response structure
-        memset(&l_resp_fw_msg, 0, l_resp_fw_msg_size);
+        // Trace out the request structure
+        TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                 INFO_MRK"TOD::Sending firmware_request",
+                 l_req_fw_msg,
+                 l_req_fw_msg_size);
 
-        // Send the data via a firmware request
-        size_t rc = g_hostInterfaces->firmware_request(
-                                      l_req_fw_msg_size, l_req_fw_msg,
-                                      &l_resp_fw_msg_size, &l_resp_fw_msg);
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_req_fw_msg_size,
+                                        l_req_fw_msg,
+                                        &l_resp_fw_msg_size,
+                                        l_resp_fw_msg);
 
-        // Error log id
-        uint32_t l_errPlid(0);
-
-        // Create a useful structure to get to the PLID
-        // The PLID is expected to be in the first 4 bytes of the data
-        // if it exists
-        struct hbrtFspRespData_t
+        if (l_err)
         {
-            uint32_t plid;
-            uint32_t otherData;
-        } PACKED ;
-
-        hbrtFspRespData_t *l_hbrtFspRespData =
-                   (hbrtFspRespData_t*)&(l_resp_fw_msg.generic_msg.data);
-
-        // Capture the error log ID if any
-        // The return code (rc) may return OK, but there still may be an issue
-        // with the HWSV code on the FSP.
-        if ((hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
-                                                  == l_resp_fw_msg.io_type) &&
-           (GFMM_ERROR_ONLY == l_resp_fw_msg.generic_msg.__onlyError) &&
-           (0 != l_hbrtFspRespData->plid) )
-        {
-            l_errPlid = l_hbrtFspRespData->plid;
-        }
-
-        // Gather up the error data and create an error log out of it
-        if (rc || l_errPlid)
-        {
-            /*@
-             * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         TOD::TOD_RT_TOPOLOGY_RESET_BACKUP
-             * @reasoncode       TOD::TOD_RT_TOPOLOGY_RESET_BACKUP_ERR
-             * @userdata1[0..31] Hypervisor return code
-             * @userdata1[32:63] HWSV error log id (if any)
-             * @userdata2[0:31]  MBOX message type
-             * @userdata2[32:63] TOD message type
-             * @devdesc          TOD reset backup topology failed
-             * @custdesc         An internal error occurred. This will force
-             *                   the Time of Day function to run with complete
-             *                   redundancy.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   TOD::TOD_RT_TOPOLOGY_RESET_BACKUP,
-                                   TOD::TOD_RT_TOPOLOGY_RESET_BACKUP_ERR,
-                                   TWO_UINT32_TO_UINT64(rc, l_errPlid),
-                                   TWO_UINT32_TO_UINT64(
-                                   l_req_fw_msg->generic_msg.msgq,
-                                   l_req_fw_msg->generic_msg.msgType),
-                                   true);
-
-            l_err->addFFDC( ISTEP_COMP_ID,
-                            &l_resp_fw_msg,
-                            l_resp_fw_msg_size,
-                            0, 0, false );
-
-            if (sizeof(l_req_fw_msg) > 0)
-            {
-                l_err->addFFDC( ISTEP_COMP_ID,
-                                l_req_fw_msg,
-                                sizeof(l_req_fw_msg),
-                                0, 0, false );
-            }
-
-            l_err->collectTrace( "TOD", 256);
-
-            if (l_errPlid)
-            {
-                l_err->plid(l_errPlid);
-            }
-
             break;
         }
-    }
-    while (0);
+    } while (0);
 
-    // The firmware request message is no longer needed - free the data
+    // Release the firmware messages
     free(l_req_fw_msg);
+    free(l_resp_fw_msg);
+    l_req_fw_msg = l_resp_fw_msg = nullptr;
 
     TOD_EXIT("resetBackupTopology");
     return l_err;
-
 } // end resetBackupTopology
 
 
@@ -319,170 +274,100 @@ errlHndl_t readTodProcDataFromFile(TodChipDataContainer& o_todChipData)
     TOD_ENTER("readTodProcDataFromFile");
     errlHndl_t l_err = nullptr;
 
-    // Put the handle to the firmware response out here
+    // Put the handle to the firmware messages out here
     // so it is easier to free later
+    hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
     hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+
+    // clear the out data, regardless of the code to follow
+    o_todChipData.clear();
 
     do
     {
-        // clear the out data, regardless of the code to follow
-        o_todChipData.clear();
-
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
         {
+            TOD_ERR("readTodProcDataFromFile: "
+                    "Hypervisor firmware_request interface not linked");
+
             /*@
              * @errortype
-             * @severity     ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid     TOD::TOD_RT_TOPOLOGY_DATA
-             * @reasoncode   TOD::TOD_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @severity     ERRL_SEV_UNRECOVERABLE
+             * @moduleid     TOD_RT_TOPOLOGY_DATA
+             * @reasoncode   TOD_RT_NULL_FIRMWARE_REQUEST_PTR
              * @devdesc      Host interfaces are not initialized
-             * @custdesc     An internal error occurred. This will force the
-             *               Time of Day function to run with complete
-             *               redundancy.
+             * @custdesc     An internal error occurred. This will
+             *               force the Time of Day function to run
+             *               with complete redundancy.
              */
-            l_err = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   TOD::TOD_RT_TOPOLOGY_DATA,
-                                   TOD::TOD_RT_NULL_FIRMWARE_REQUEST_PTR,
+            l_err = new ErrlEntry( ERRL_SEV_UNRECOVERABLE,
+                                   TOD_RT_TOPOLOGY_DATA,
+                                   TOD_RT_NULL_FIRMWARE_REQUEST_PTR,
                                    0, 0, true);
 
             break;
         }
 
-        // Create the firmware request structure.  No data is being
-        // passed via this structure so this step may be moot.
-        // Maybe just passing size of 0 and a null pointer would be better?
-        hostInterfaces::hbrt_fw_msg l_req_fw_msg;
-        size_t l_req_fw_msg_size = sizeof(l_req_fw_msg);
+        // Default the response data size to the size of the
+        // GenericFspMboxMessage_t minus the size of the
+        // GenericFspMboxMessage_t's data.  The size of the
+        // GenericFspMboxMessage_t's data will be added later
+        uint32_t l_resp_data_size = sizeof(GenericFspMboxMessage_t) -
+                                    sizeof(GenericFspMboxMessage_t::data);
 
-        // Set the data for the request
-        l_req_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
-        l_req_fw_msg.generic_msg.initialize();
-        l_req_fw_msg.generic_msg.msgq = MBOX::FSP_TOD_MSGQ;
-        l_req_fw_msg.generic_msg.msgType = GFMM_MSG_TOD_TOPOLOGY_DATA;
-        l_req_fw_msg.generic_msg.__req = GFMM_REQUEST;
-        l_req_fw_msg.generic_msg.__onlyError = GFMM_NOT_ERROR_ONLY;
-
-        // Calculate the size of the response - the number
-        // of TodChipData items that will be returned.
+        // Get the number of TodChipData items that will be returned.
         uint32_t l_nTodChips = TodSvcUtil::getMaxProcsOnSystem();
 
-        // Calculate the size of the data that is being added to the
-        // generic struct
-        size_t l_data_size = (l_nTodChips * sizeof(TodChipData));
+        // Add to the response data size iff there is data needing to be passed
+        l_resp_data_size += (l_nTodChips * sizeof(TodChipData));
 
-        // Update the data size with the size of the generic msg struct
-        if (l_data_size < sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data))
+        // The response data size must be at a minimum the size of the
+        // FSP generic message (sizeof(GenericFspMboxMessage_t))
+        if (l_resp_data_size < sizeof(GenericFspMboxMessage_t))
         {
-            // If the current size of the data is less than the size of the
-            // data within the generic message (GenericFspMboxMessage_t.data),
-            // then default the data size to just the generic message because
-            // the size of the data to be passed in
-            // GenericFspMboxMessage_t.dataSize has be at the minimum - the
-            // size of the generic message (sizeof(GenericFspMboxMessage_t)).
-            l_data_size = sizeof(hostInterfaces::hbrt_fw_msg::generic_msg);
-        }
-        else
-        {
-            // If the current size of the data is greater than the size of the
-            // data within the generic message (GenericFspMboxMessage_t.data),
-            // then add the size of the generic message minus the size of
-            // generic message's data.
-            l_data_size += sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) -
-                         sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data);
+            l_resp_data_size = sizeof(GenericFspMboxMessage_t);
         }
 
-        // At last.  Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg
-        // which means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
-        // the previous calculated data size
-        size_t l_resp_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                                   l_data_size;
+        // Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg which
+        // means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
+        // the previous calculated response data size
+        uint64_t l_resp_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                      l_resp_data_size;
 
-        // Create the firmware response structure to return the data
+        // Create the firmware_request response struct to receive data
         l_resp_fw_msg =
                      (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
-
-        // Clear the response structure
         memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
 
-        // Send the data via a firmware request
-        size_t rc = g_hostInterfaces->firmware_request(
-                                     l_req_fw_msg_size, &l_req_fw_msg,
-                                     &l_resp_fw_msg_size, l_resp_fw_msg);
+        // Create the firmware_request request struct to send data
+        uint64_t l_req_fw_msg_size = l_resp_fw_msg_size;
+        l_req_fw_msg =
+                   (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
 
-        // Error log id
-        uint32_t l_errPlid(0);
+        // Initialize the firmware_request request struct
+        l_req_fw_msg->generic_msg.initialize();
 
-        // Create a useful structure to get to the PLID
-        // The PLID is expected to be in the first 4 bytes of the data
-        struct hbrtFspRespData_t
+        // Populate the firmware_request request struct with given data
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
+        l_req_fw_msg->generic_msg.msgq = MBOX::FSP_TOD_MSGQ;
+        l_req_fw_msg->generic_msg.msgType =
+                           GenericFspMboxMessage_t::MSG_TOD_TOPOLOGY_DATA;
+        l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
+
+        // Trace out the request structure
+        TRACFBIN(ISTEPS_TRACE::g_trac_isteps_trace,
+                 INFO_MRK"TOD::Sending firmware_request",
+                 l_req_fw_msg,
+                 l_req_fw_msg_size);
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_req_fw_msg_size,
+                                        l_req_fw_msg,
+                                        &l_resp_fw_msg_size,
+                                        l_resp_fw_msg);
+
+        if (l_err)
         {
-            uint32_t plid;
-            uint32_t otherData;
-        } PACKED ;
-
-        hbrtFspRespData_t *l_hbrtFspRespData =
-                   (hbrtFspRespData_t*)&(l_resp_fw_msg->generic_msg.data);
-
-        // Capture the error log ID if any
-        // The return code (rc) may return OK, but there still may be an issue
-        // with the HWSV code on the FSP.
-        if ((hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
-                                                  == l_resp_fw_msg->io_type) &&
-            (GFMM_ERROR_ONLY == l_resp_fw_msg->generic_msg.__onlyError) &&
-            (0 != l_hbrtFspRespData->plid) )
-        {
-            l_errPlid = l_hbrtFspRespData->plid;
-        }
-
-        // Gather up the error data and create an error log out of it
-        if (rc || l_errPlid)
-        {
-            /*@
-             * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         TOD::TOD_RT_TOPOLOGY_DATA
-             * @reasoncode       TOD::TOD_RT_TOPOLOGY_DATA_ERR
-             * @userdata1[0..31] Hypervisor return code
-             * @userdata1[32:63] HWSV error log id (if any)
-             * @userdata2[0:31]  MBOX message type
-             * @userdata2[32:63] TOD message type
-             * @devdesc          TOD read proc data failed
-             * @custdesc         An internal error occurred. This will force
-             *                   the Time of Day function to run with complete
-             *                   redundancy.
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                   ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                   TOD::TOD_RT_TOPOLOGY_DATA,
-                                   TOD::TOD_RT_TOPOLOGY_DATA_ERR,
-                                   TWO_UINT32_TO_UINT64(rc, l_errPlid),
-                                   TWO_UINT32_TO_UINT64(
-                                   l_req_fw_msg.generic_msg.msgq,
-                                   l_req_fw_msg.generic_msg.msgType),
-                                   true);
-
-            if (l_resp_fw_msg_size > 0)
-            {
-                l_err->addFFDC( ISTEP_COMP_ID,
-                                l_resp_fw_msg,
-                                l_resp_fw_msg_size,
-                                0, 0, false );
-            }
-
-            l_err->addFFDC( ISTEP_COMP_ID,
-                            &l_req_fw_msg,
-                            sizeof(l_req_fw_msg),
-                            0, 0, false );
-
-            l_err->collectTrace( "TOD", 256);
-
-            if (l_errPlid)
-            {
-                l_err->plid(l_errPlid);
-            }
-
             break;
         }
 
@@ -500,15 +385,17 @@ errlHndl_t readTodProcDataFromFile(TodChipDataContainer& o_todChipData)
     }
     while (0);
 
-    // Free the memory associated with the response
+    // Release the firmware messages
+    free(l_req_fw_msg);
     free(l_resp_fw_msg);
+    l_req_fw_msg = l_resp_fw_msg = nullptr;
 
     TOD_EXIT("readTodProcDataFromFile");
     return l_err;
 } // end readTodProcDataFromFile
 
 // This code was ported over from the FIPS code -
-//     /esw/fips910/Builds/b1005a_1742.910/
+//     fips910/Builds/b1005a_1742.910/
 //                           src/hwsv/server/services/todservice/hwsvTodSvc.C
 // It was decided that a port of the code is not needed but to hold onto
 // the code since the majority of it has been ported.

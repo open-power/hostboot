@@ -35,43 +35,6 @@
  */
 
 
-/**
-  * Values for the GenericFspMboxMessage_t::magic
-  * and GenericFspMboxMessage_t::structVer data members
-  */
-const uint32_t GFMM_MAGIC_NUMBER = 0x4746464D;  // `GFFM`
-const uint16_t GFMM_VERSION = 1;
-
-/**
-  * Values for the GenericFspMboxMessage_t::__req flag
-  */
-enum GENERIC_FSP_MBOX_MESSAGE_FLOW
-{
-    GFMM_RESPONSE = 0,
-    GFMM_REQUEST  = 1,
-};
-
-/**
-  * Values for the GenericFspMboxMessage_t::__onlyError flag
-  */
-enum GENERIC_FSP_MBOX_MESSAGE_ERROR_FLAG
-{
-    GFMM_NOT_ERROR_ONLY = 0,
-    GFMM_ERROR_ONLY     = 1,
-};
-
-/**
-  * The different message types for the GenericFspMboxMessage_t
-  */
-enum GENERIC_FSP_MBOX_MESSAGE_MSG_TYPE
-{
-    GFMM_MSG_TOD_BACKUP_RESET             = 0x0001,
-    GFMM_MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
-    GFMM_MSG_TOD_TOPOLOGY_DATA            = 0x0003,
-    GFMM_MSG_SBE_ERROR                    = 0x000000E1,
-    GFMM_MSG_SBE_RECOVERY_SUCCESS         = 0x000000E2,
-    GFMM_MSG_SBE_RECOVERY_FAILED          = 0x000000E3,
-};
 
 /**
   * This generates a sequence ID that the GenericFspMboxMessage_t
@@ -84,14 +47,74 @@ public:
   static uint16_t getCurrentSeqId();
 
 private:
-  static uint16_t GFMM_SEQ_ID;
+  static uint16_t SEQ_ID;
 };
+
+/**
+  * A useful struct to access the PLID from GenericFspMboxMessage_t.data
+  * The PLID will be in the first 4 bytes followed by some other data.
+  */
+struct HbrtFspData_t
+{
+   uint32_t plid;
+   uint32_t userData;
+} PACKED ;
 
 /**
   * This struct sends/receives an MBox message to the FSP
   */
 struct GenericFspMboxMessage_t
 {
+
+    /**
+      * Value for the GenericFspMboxMessage_t::magic
+      */
+    static constexpr uint32_t MAGIC_NUMBER = 0x4746464D;  // `GFFM`
+
+   /**
+    * GenericFspMboxMessage_t Version info
+    *
+    */
+    enum GENERIC_FSP_MBOX_MESSAGE_VERSION
+    {
+       STRUCT_VERSION_FIRST = 0x1,
+       STRUCT_VERSION_LATEST = STRUCT_VERSION_FIRST,
+    };
+
+    /**
+      * Values for the GenericFspMboxMessage_t::__req flag
+      */
+    enum GENERIC_FSP_MBOX_MESSAGE_FLOW
+    {
+        RESPONSE = 0,
+        REQUEST  = 1,
+    };
+
+    /**
+      * Values for the GenericFspMboxMessage_t::__onlyError flag
+      */
+    enum GENERIC_FSP_MBOX_MESSAGE_ERROR_FLAG
+    {
+        NOT_ERROR_ONLY = 0,
+        ERROR_ONLY     = 1,
+    };
+
+    /**
+      * The different message types for the GenericFspMboxMessage_t
+      */
+    enum GENERIC_FSP_MBOX_MESSAGE_MSG_TYPE
+    {
+        MSG_TOD_BACKUP_RESET             = 0x0001,
+        MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
+        MSG_TOD_TOPOLOGY_DATA            = 0x0003,
+        MSG_SBE_ERROR                    = 0x000000E1,
+        MSG_SBE_RECOVERY_SUCCESS         = 0x000000E2,
+        MSG_SBE_RECOVERY_FAILED          = 0x000000E3,
+    };
+
+    /**
+      * GenericFspMboxMessage_t data members
+      */
     uint32_t magic;     // ='GFMM'
     uint32_t dataSize;  // total number of bytes in the entire message,
                         // includes structure plus data buffer,
@@ -120,16 +143,16 @@ struct GenericFspMboxMessage_t
     // A method to set the local vars to a default state
     void initialize()
     {
-        magic = GFMM_MAGIC_NUMBER;
+        magic = MAGIC_NUMBER;
         dataSize = sizeof(GenericFspMboxMessage_t);
-        structVer = GFMM_VERSION;
+        structVer = STRUCT_VERSION_LATEST;
         reserved = 0;
         seqnum = SeqId_t::getNextSeqId();
         msgq = 0;
         msgType = 0;
-        __req = GFMM_RESPONSE;
+        __req = RESPONSE;
         __async = 0;
-        __onlyError = GFMM_NOT_ERROR_ONLY;
+        __onlyError = NOT_ERROR_ONLY;
         __unused = 0;
         data = 0;
     };

@@ -94,8 +94,7 @@ namespace TOD
         TOD_DRAWER_SET_MDMT                   = TOD_COMP_ID | 0x18,
         TOD_TOP_LEVEL_TARGET_NOT_FOUND        = TOD_COMP_ID | 0x19,
         TOD_RT_NULL_FIRMWARE_REQUEST_PTR      = TOD_COMP_ID | 0x1A,
-        TOD_RT_TOPOLOGY_RESET_BACKUP_ERR      = TOD_COMP_ID | 0x1B,
-        TOD_RT_TOPOLOGY_DATA_ERR              = TOD_COMP_ID | 0x1C,
+        TOD_XXX                               = TOD_COMP_ID | 0x1C,
     };
 
     enum TODUserDetailDataSubSection

@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -30,7 +31,8 @@
 #include <initservice/initserviceif.H>
 #include <devicefw/driverif.H>
 #include <i2c/eepromif.H>
-#include <runtime/interface.h>
+#include <runtime/interface.h>            // g_hostInterfaces
+#include <util/runtime/rt_fwreq_helper.H>      // firmware_request_helper
 #include <targeting/common/util.H>
 #include <util/runtime/util_rt.H>
 #include <runtime/interface.h>
@@ -40,6 +42,8 @@
 #include "mvpd.H"
 #include "cvpd.H"
 #include "spd.H"
+
+using namespace ERRORLOG;
 
 extern trace_desc_t* g_trac_vpd;
 
@@ -313,7 +317,8 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
         //--------------------------------
         if(INITSERVICE::spBaseServicesEnabled())
         {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd:writePNOR not supported with FSP, skipping");
+            TRACFCOMP(g_trac_vpd,
+                   ERR_MRK"rt_vpd:writePNOR not supported with FSP, skipping");
             break;
         }
 
@@ -378,15 +383,17 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 {
     errlHndl_t l_err = nullptr;
 
+    // Put the handle to the firmware messages out here
+    // so it is easier to free later
+    hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
+    hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+
     TRACFCOMP( g_trac_vpd, INFO_MRK
                "sendMboxWriteMsg: Send msg to FSP to write VPD type %.8X, "
                "record %d, offset 0x%X",
                i_type,
                i_record.rec_num,
                i_record.offset );
-
-    hostInterfaces::hbrt_fw_msg* l_req_fw_msg = nullptr;
-    hostInterfaces::hbrt_fw_msg* l_resp_fw_msg = nullptr;
 
     do
     {
@@ -401,153 +408,91 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         if ((nullptr == g_hostInterfaces) ||
             (nullptr == g_hostInterfaces->firmware_request))
         {
+            TRACFCOMP(g_trac_vpd, ERR_MRK"sendMboxWriteMsg: "
+                      "Hypervisor firmware_request interface not linked");
+
             /*@
              * @errortype
-             * @severity         ERRORLOG::ERRL_SEV_INFORMATIONAL
-             * @moduleid         VPD::VPD_SEND_MBOX_WRITE_MESSAGE
-             * @reasoncode       VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR
+             * @severity         ERRL_SEV_INFORMATIONAL
+             * @moduleid         VPD_SEND_MBOX_WRITE_MESSAGE
+             * @reasoncode       VPD_RT_NULL_FIRMWARE_REQUEST_PTR
              * @userdata1        HUID of target
              * @userdata2        VPD message type
              * @devdesc          MBOX send not supported in HBRT
              */
-             l_err= new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                      VPD::VPD_SEND_MBOX_WRITE_MESSAGE,
-                                      VPD::VPD_RT_NULL_FIRMWARE_REQUEST_PTR,
-                                      TARGETING::get_huid(i_target),
-                                      i_type);
+             l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                  VPD_SEND_MBOX_WRITE_MESSAGE,
+                                  VPD_RT_NULL_FIRMWARE_REQUEST_PTR,
+                                  TARGETING::get_huid(i_target),
+                                  i_type, true);
             break;
         }
 
-        // Get an accurate size of memory actually needed to transport the data
-        size_t l_generic_msg_size =
-                 sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) +
-                 i_numBytes -
-                 sizeof(hostInterfaces::hbrt_fw_msg::generic_msg.data);
-        size_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                                   l_generic_msg_size;
+        // Get an accurate size of memory needed to transport
+        // the data for the firmware_request request struct
+        uint32_t l_req_data_size = sizeof(GenericFspMboxMessage_t) +
+                               i_numBytes -
+                               sizeof(GenericFspMboxMessage_t::data);
 
-        //create the firmware_request structure to carry the vpd write msg data
-        l_req_fw_msg =
-                  (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size) ;
-        memset(l_req_fw_msg, 0, l_req_fw_msg_size);
-
-        // populate the firmware_request structure with given data
-        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
-        l_req_fw_msg->generic_msg.initialize();
-        l_req_fw_msg->generic_msg.dataSize = l_generic_msg_size;
-        l_req_fw_msg->generic_msg.msgq = MBOX::FSP_VPD_MSGQ;
-        l_req_fw_msg->generic_msg.msgType = i_type;
-        l_req_fw_msg->generic_msg.__req = GFMM_REQUEST;
-        l_req_fw_msg->generic_msg.__onlyError = GFMM_NOT_ERROR_ONLY;
-        memcpy(&l_req_fw_msg->generic_msg.data, i_data, i_numBytes);
-
-        // set up the response struct, note that for messages to the FSP
-        //  the response size must match the request size
-        l_resp_fw_msg =
-          (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
-        memset(l_resp_fw_msg, 0, l_req_fw_msg_size);
-        uint64_t l_resp_fw_msg_size = l_req_fw_msg_size;
-        // Note - no need to check for expected response size > request
-        //  size because they use the same base structure
-            
-        // make the firmware request
-        TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
-                  l_req_fw_msg,
-                  hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                  sizeof(hostInterfaces::hbrt_fw_msg::generic_msg) );
-        size_t rc = g_hostInterfaces->firmware_request(l_req_fw_msg_size,
-                                                       l_req_fw_msg,
-                                                       &l_resp_fw_msg_size,
-                                                       l_resp_fw_msg);
-        uint64_t l_userData1(0), l_userData2(0);
-
-        // Capture the err log id if any
-        // The return code (rc) may return OK, but there still may be an issue
-        // with the HWSV code on the FSP.
-        // Only checking for a PLID regardless of what the flag __onlyError is
-        // set to.  I am not expecting any extra data and not sure what to do
-        // with it if I get it.
-        if ( (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP ==
-                                                   l_resp_fw_msg->io_type) &&
-             (0 != l_resp_fw_msg->generic_msg.data >> 32) )
+        // The request data size must be at a minimum the size of the
+        // FSP generic message (sizeof(GenericFspMboxMessage_t))
+        if (l_req_data_size < sizeof(GenericFspMboxMessage_t))
         {
-            // extract the plid from the first 32 bits
-            l_userData2 = l_resp_fw_msg->generic_msg.data >> 32;
+            l_req_data_size = sizeof(GenericFspMboxMessage_t);
         }
 
-        // gather up the error data and create an err log out of it
-        if (rc || l_userData2)
+        // Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg which
+        // means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
+        // the previous calculated data size
+        uint64_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                                     l_req_data_size;
+
+        // Create the firmware_request request struct to send data
+        l_req_fw_msg =
+                  (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
+
+        // Initialize the firmware_request request struct
+        l_req_fw_msg->generic_msg.initialize();
+
+        // Populate the firmware_request request struct with given data
+        l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
+        l_req_fw_msg->generic_msg.dataSize = l_req_data_size;
+        l_req_fw_msg->generic_msg.msgq = MBOX::FSP_VPD_MSGQ;
+        l_req_fw_msg->generic_msg.msgType = i_type;
+        l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
+        memcpy(&l_req_fw_msg->generic_msg.data, i_data, i_numBytes);
+
+        // Create the firmware_request response struct to receive data
+        // NOTE: For messages to the FSP the response size must match
+        // the request size.
+        // No need to check for expected response size > request
+        // size because they use the same base structure
+        uint64_t l_resp_fw_msg_size = l_req_fw_msg_size;
+        l_resp_fw_msg =
+                   (hostInterfaces::hbrt_fw_msg *)malloc(l_resp_fw_msg_size);
+        memset(l_resp_fw_msg, 0, l_resp_fw_msg_size);
+
+        // Trace out the request structure
+        TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
+                  l_req_fw_msg,
+                  l_req_fw_msg_size);
+
+        // Make the firmware_request call
+        l_err = firmware_request_helper(l_req_fw_msg_size,
+                                        l_req_fw_msg,
+                                        &l_resp_fw_msg_size,
+                                        l_resp_fw_msg);
+
+        if (l_err)
         {
-            TRACFCOMP(g_trac_vpd,
-                      ERR_MRK"firmware request: "
-                      "firmware request for FSP VPD write message rc: 0x%X, "
-                      "HUID:0x%llX, plid:%.8X, VPD type:%.8X, "
-                      "record:%d, offset:0x%X, ",
-                       rc, get_huid(i_target), l_userData2,
-                       i_type, i_record.rec_num, i_record.offset );
-
-            /*@
-             * @errortype
-             * @moduleid         VPD::VPD_RT_FIRMWARE_REQUEST
-             * @reasoncode       VPD::VPD_RT_WRITE_MSG_ERR
-             * @userdata1[0:31]  Firmware Request return code (if any)
-             * @userdata1[32:63] HUID of target
-             * @userdata2        HWSV error log id (if any)
-             * @devdesc          Firmware Request for
-             *                   VPD Write Msg error
-             */
-
-            // Capture the return code (rc), if any
-            // this will indicate an issue with actually sending the msg
-            if (rc)
-            {
-               l_userData1 = TWO_UINT32_TO_UINT64(rc,
-                                 TARGETING::get_huid(i_target));
-            }
-            else
-            {
-               l_userData1 = TARGETING::get_huid(i_target);
-            }
-
-            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
-                                            VPD::VPD_RT_FIRMWARE_REQUEST,
-                                            VPD::VPD_RT_WRITE_MSG_ERR,
-                                            l_userData1,
-                                            l_userData2);
-
-            if (l_resp_fw_msg_size > 0)
-            {
-                l_err->addFFDC( MBOX_COMP_ID,
-                                l_resp_fw_msg,
-                                l_resp_fw_msg_size,
-                                0, 0, false );
-            }
-
-            if (l_req_fw_msg_size > 0)
-            {
-                l_err->addFFDC( MBOX_COMP_ID,
-                                l_req_fw_msg,
-                                l_req_fw_msg_size,
-                                0, 0, false );
-            }
-
-            l_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                       HWAS::SRCI_PRIORITY_HIGH);
-
-            if (l_userData2)
-            {
-                l_err->plid(l_userData2);
-            }
-
-            l_err->collectTrace( "VPD", 256);
-         }  // end  (rc || l_userData2)
-
-    }
-    while (0);
+            break;
+        }
+    } while (0);
 
     // release the memory created
     if( l_req_fw_msg ) { free(l_req_fw_msg); }
     if( l_resp_fw_msg ) { free(l_resp_fw_msg); }
+    l_req_fw_msg = l_resp_fw_msg = nullptr;
 
     if (l_err)
     {
@@ -559,6 +504,5 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
     return l_err;
 }
-
 
 }; // end namepsace VPD
