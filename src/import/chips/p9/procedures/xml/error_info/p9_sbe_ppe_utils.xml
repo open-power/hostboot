@@ -28,8 +28,12 @@
     <sbeError/>
     <rc>RC_SBE_PPE_UTILS_HALT_TIMEOUT_ERR</rc>
     <description>
-      PPE Halt timed out  
+      A HALT operation to a PPE timed out. This is indicative of hardware error.
     </description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>ADDRESS</ffdc>
   </hwpError>
+  <!-- Note: callout/deconfiguration is left to the caller as this depends  -->
+  <!-- on the scope of the PPE instance                                     -->
   <!-- ******************************************************************** -->
 </hwpErrors>
