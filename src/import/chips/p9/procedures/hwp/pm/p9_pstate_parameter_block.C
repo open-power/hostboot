@@ -987,8 +987,8 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
             WofTablesHeader_t* p_wfth;
             p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
             FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number));
-            l_vdn_size = p_wfth->vdn_size;
-            l_vdd_size = p_wfth->vdd_size;
+            l_vdn_size = revle16(p_wfth->vdn_size);
+            l_vdd_size = revle16(p_wfth->vdd_size);
 
             if (l_sys_vfrt_static_data == fapi2::ENUM_ATTR_SYS_VFRT_STATIC_DATA_ENABLE_VDN_STEP_OFF)
             {
@@ -1076,8 +1076,8 @@ p9_pstate_wof_initialization (const GlobalPstateParmBlock* i_gppb,
 
         }
 
-        l_vdn_size = p_wfth->vdn_size ? p_wfth->vdn_size : 1;
-        l_vdd_size = p_wfth->vdd_size ? p_wfth->vdd_size : 1;
+        l_vdn_size = revle16(p_wfth->vdn_size) ? revle16(p_wfth->vdn_size) : 1;
+        l_vdd_size = revle16(p_wfth->vdd_size) ? revle16(p_wfth->vdd_size) : 1;
 
         FAPI_INF("WOF: l_vdn_size %04x, l_vdd_size %04x",l_vdn_size,l_vdd_size);
 
