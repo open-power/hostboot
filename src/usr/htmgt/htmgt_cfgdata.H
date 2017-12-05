@@ -68,6 +68,10 @@ namespace HTMGT
         //PowerVM mode + single node
         OCC_CFGDATA_OPENPOWER_POWERVM = 0x01,
 
+        //Mask, report throttling only when max frequency lowered below nominal
+        OCC_REPORT_THROTTLE_BELOW_NOMINAL = 0x08,   //Bit 3
+        //else, OCC report throttling when max frequency lowered below turbo
+
         CFGDATA_CORES = 24,
 
         CFGDATA_FRU_TYPE_PROC       = 0x00,

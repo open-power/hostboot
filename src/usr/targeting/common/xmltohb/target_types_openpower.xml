@@ -101,6 +101,7 @@
     <attribute><id>PROC_SOCKET_POWER_WATTS</id></attribute>
     <attribute><id>PROC_MHZ_PER_WATT</id></attribute>
     <attribute><id>ALLOW_CALLHOME_ESELS_TO_BMC</id></attribute>
+    <attribute><id>REPORT_THROTTLE_BELOW_NOMINAL</id></attribute>
 </targetTypeExtension>
 
 <targetTypeExtension>
