@@ -483,6 +483,12 @@ void* call_host_voltage_config( void *io_pArgs )
                         continue;
                     }
 
+                    //Due to mismatched power sorts in MFG for op910 ONLY
+                    //-- ignore this check.  Note that this relies on actual
+                    //WOF tables to be the same, parts run the same, just
+                    //the VPD is messed up
+#if 0
+
                     // All of the buckets should report the same Sort Power
                     if( (l_powerModeNom != l_voltageData.SortPowerNorm) ||
                         (l_powerModeTurbo != l_voltageData.SortPowerTurbo) )
@@ -531,6 +537,7 @@ void* call_host_voltage_config( void *io_pArgs )
 
                         continue;
                     }
+#endif
 
                     // Floor frequency is the maximum of the Power Save Freqs
                     l_floorFreq =
