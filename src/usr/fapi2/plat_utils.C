@@ -1009,6 +1009,16 @@ void set_log_id( const Target<TARGET_TYPE_ALL>& i_target,
                  fapi2::ReturnCode& io_rc,
                  fapi2::errlSeverity_t i_sev )
 {
+    TARGETING::TYPE              l_type;
+    TARGETING::TargetHandleList  l_targList;
+    TARGETING::Target*  l_attrTarget = NULL;  // for setting attribute
+
+
+    // Need model for nimbus/cumulus checks
+    TARGETING::Target * l_masterProc;
+    TARGETING::targetService().masterProcChipTargetHandle(l_masterProc);
+    TARGETING::MODEL   l_model = l_masterProc->getAttr<TARGETING::ATTR_MODEL>();
+
     // Create elog for FAPI error
     createPlatLog( io_rc, i_sev );
 
@@ -1016,10 +1026,78 @@ void set_log_id( const Target<TARGET_TYPE_ALL>& i_target,
     errlHndl_t l_pError = reinterpret_cast<errlHndl_t>(io_rc.getPlatDataPtr());
     uint32_t plid = ERRL_GETPLID_SAFE(l_pError);
 
-    // Connect the PLID to PRD log
+    // get target passed in
     TARGETING::Target* l_target =
         reinterpret_cast<TARGETING::Target*>(i_target.get());
-    l_target->setAttr<TARGETING::ATTR_PRD_HWP_PLID>( plid );
+
+
+    // PRD only uses this for PROC and MCA/DMI targets
+    // so ensure we have one of those.
+    if (NULL != l_target)
+    {
+        if ( l_target->tryGetAttr<TARGETING::ATTR_TYPE>(l_type) )
+        {
+            switch (l_type)
+            {
+                case TARGETING::TYPE_PROC:
+                case TARGETING::TYPE_MCA:
+                case TARGETING::TYPE_DMI:
+                    // Supported for these targets
+                    l_attrTarget = l_target;
+                    break;  // proc/mca/dmi
+
+                case TARGETING::TYPE_DIMM:
+                    // Need parent MCA (or DMI)
+                    if ( TARGETING::MODEL_NIMBUS == l_model )
+                    {   // NIMBUS
+                        getParentAffinityTargets( l_targList, l_target,
+                                                  TARGETING::CLASS_UNIT,
+                                                  TARGETING::TYPE_MCA );
+
+                        if (1 == l_targList.size())
+                        {
+                            l_attrTarget = l_targList[0];
+                        } // one parent found
+
+                    }
+                    else if ( TARGETING::MODEL_CUMULUS == l_model )
+                    {   // CUMULUS
+                        getParentAffinityTargets( l_targList, l_target,
+                                                  TARGETING::CLASS_UNIT,
+                                                  TARGETING::TYPE_DMI );
+
+                        if (1 == l_targList.size())
+                        {
+                            l_attrTarget = l_targList[0];
+                        } // one parent found
+                    }
+                    else
+                    {
+                        // Unknown PROC type so don't do
+                        // anything till we add support
+                        FAPI_ERR("WARNING:set_log_id: UNKNOWN MODEL");
+                        Assert( TARGETING::MODEL_NIMBUS == l_model );
+                    } // end else new proc to work on
+                    break; // dimm
+
+                default:
+                    // No idea what we have,
+                    // so don't use it or it
+                    // will explode on us.
+                    break;
+
+            } // end switch on type
+
+        } // if got target type
+
+        if (NULL != l_attrTarget)
+        {
+            // Connect the PLID to PRD log
+            l_attrTarget->trySetAttr<TARGETING::ATTR_PRD_HWP_PLID>( plid );
+        } // attrTarget valid
+
+    } // if valid target
+
 
 } // end set_log_id
 
