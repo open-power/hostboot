@@ -34,6 +34,7 @@
 #include <errl/errlentry.H>
 #include <xscom/piberror.H>
 #include <plat_hwp_invoker.H>
+#include <p9_ringId.H>
 
 fapi2::ReturnCode p9_scomtest_getscom_fail(
                fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
