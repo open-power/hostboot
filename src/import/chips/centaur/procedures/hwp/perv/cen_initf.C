@@ -44,13 +44,7 @@
 #include <cen_gen_scom_addresses.H>
 #include <cen_gen_scom_addresses_fixes.H>
 #include <centaur_misc_constants.H>
-
-#ifndef __HOSTBOOT_MODULE
-    #include <centaur_mbs_scan.H>
-    #include <centaur_mba_scan.H>
-    #include <centaur_dmi_scan.H>
-    #include <centaur_thermal_scan.H>
-#endif
+#include <cen_ring_id.h>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -60,55 +54,36 @@ fapi2::ReturnCode
 cen_initf(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 {
     FAPI_DBG("Start");
-
-#ifndef __HOSTBOOT_MODULE
-    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ReturnCode l_rc;
-
-    // apply initfiles
-    ecmdChipTarget l_ecmd_target;
-    fapiTargetToEcmdTarget(i_target, l_ecmd_target);
-    ecmdEnableRingCache(l_ecmd_target);
-    FAPI_EXEC_HWP(l_rc, centaur_mbs_scan, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_mbs_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    FAPI_EXEC_HWP(l_rc, centaur_mba_scan, i_target);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_mba_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    FAPI_EXEC_HWP(l_rc, centaur_dmi_scan, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_dmi_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    FAPI_EXEC_HWP(l_rc, centaur_thermal_scan, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_thermal_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    ecmdDisableRingCache(l_ecmd_target);
+    FAPI_TRY(fapi2::putRing(i_target, tcn_mbs_func),
+             "Error from putRing (tcn_mbs_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_mbs_cmsk),
+             "Error from putRing (tcn_mbs_cmsk)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_mbi_cmsk),
+             "Error from putRing (tcn_mbi_cmsk)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_mbi_func),
+             "Error from putRing (tcn_mbi_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_mbi_gptr),
+             "Error from putRing (tcn_mbi_gptr)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_perv_func),
+             "Error from putRing (tcn_perv_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_dmi_func),
+             "Error from putRing (tcn_dmi_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_refr_func),
+             "Error from putRing (tcn_refr_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcn_refr_abst),
+             "Error from putRing (tcn_refr_abst)");
+    FAPI_TRY(fapi2::putRing(i_target, tcm_memn_cmsk),
+             "Error from putRing (tcm_memn_cmsk)");
+    FAPI_TRY(fapi2::putRing(i_target, tcm_mems_cmsk),
+             "Error from putRing (tcm_mems_cmsk)");
+    FAPI_TRY(fapi2::putRing(i_target, tcm_memn_func),
+             "Error from putRing (tcm_memn_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcm_mems_func),
+             "Error from putRing (tcm_mems_func)");
+    FAPI_TRY(fapi2::putRing(i_target, tcm_perv_func),
+             "Error from putRing (tcm_perv_func)");
 
 fapi_try_exit:
-#endif
     FAPI_DBG("End");
     return fapi2::current_err;
 }

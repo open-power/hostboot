@@ -144,10 +144,16 @@ enum RingOffset
     tp_pib_fuse   = 96,
     tp_pib_gptr   = 97,
     tp_pll_bndy   = 98,
-    tp_pib_repr   = 99,
-    tp_vitl       = 100,
-    // Instance rings
-    // ** none **
+    tp_pll_bndy_bucket_1 = 99,
+    tp_pll_bndy_bucket_2 = 100,
+    tp_pll_bndy_bucket_3 = 101,
+    tp_pll_bndy_bucket_4 = 102,
+    tp_pll_bndy_bucket_5 = 103,
+    tp_pll_bndy_bucket_6 = 104,
+    tp_pll_bndy_bucket_7 = 105,
+    tp_pll_bndy_bucket_8 = 106
+                           // Instance rings
+                           // ** none **
 };
 
 static const ChipletData_t g_chipletData =
@@ -263,8 +269,14 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { CEN::tp_pib_fuse  , "tp_pib_fuse"  , CEN_TYPE },
     { CEN::tp_pib_gptr  , "tp_pib_gptr"  , CEN_TYPE },
     { CEN::tp_pll_bndy  , "tp_pll_bndy"  , CEN_TYPE },
-    { CEN::tp_pib_repr  , "tp_pib_repr"  , CEN_TYPE },
-    { CEN::tp_vitl      , "tp_vitl"      , CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_1, "tp_pll_bndy_bucket_1", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_2, "tp_pll_bndy_bucket_2", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_3, "tp_pll_bndy_bucket_3", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_4, "tp_pll_bndy_bucket_4", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_5, "tp_pll_bndy_bucket_5", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_6, "tp_pll_bndy_bucket_6", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_7, "tp_pll_bndy_bucket_7", CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_8, "tp_pll_bndy_bucket_8", CEN_TYPE }
 };
 
 #else
@@ -372,6 +384,14 @@ static const RingProperties_t RING_PROPERTIES[NUM_RING_IDS] =
     { CEN::tp_pll_bndy  , CEN_TYPE },
     { CEN::tp_pib_repr  , CEN_TYPE },
     { CEN::tp_vitl      , CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_1, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_2, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_3, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_4, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_5, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_6, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_7, CEN_TYPE },
+    { CEN::tp_pll_bndy_bucket_8, CEN_TYPE }
 };
 
 #endif // __PPE__

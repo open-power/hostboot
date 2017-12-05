@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_TP_CHIPLET_INIT2_ERR_CLK_CNTL</rc>
     <description>
       Procedure: cen_tp_chiplet_init2

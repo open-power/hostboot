@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_CHIPLET_INIT_HEADER_MISMATCH</rc>
     <description>
       Procedure: cen_chiplet_init

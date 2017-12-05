@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_PLL_SETUP_POLL_NEST_PLL_LOCK_TIMEOUT</rc>
     <description>
       Procedure: cen_pll_setup
@@ -35,7 +34,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_PLL_SETUP_POLL_MEM_PLL_LOCK_TIMEOUT</rc>
     <description>
       Procedure: cen_pll_setup

@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_PLL_INITF_UNSUPPORTED_FREQUENCY</rc>
     <description>
       Procedure: cen_pll_initf

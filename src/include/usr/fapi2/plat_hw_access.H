@@ -42,7 +42,6 @@
 #include <target_types.H>
 #include <hw_access_def.H>
 #include <common_ringId.H>
-#include <p9_ring_id.h>
 
 #include <devicefw/userif.H>
 #include <plat_utils.H>

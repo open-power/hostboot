@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_ARRAYINIT_POLL_OPCG_DONE_TIMEOUT</rc>
     <description>
       Routine: cen_arrayinit_module
@@ -35,7 +34,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_SCAN0_POLL_OPCG_DONE_TIMEOUT</rc>
     <description>
       Routine: cen_scan0_module
@@ -45,7 +43,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_REPAIR_LOADER_TIMEOUT</rc>
     <description>
       Routine: cen_repair_loader
@@ -55,7 +52,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_ECC_TRAP_REG_ERROR</rc>
     <description>
       Routine: cen_repair_loader
@@ -65,7 +61,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_MISMATCH_IN_EXPECTED_REPAIR_LOADER_STATUS</rc>
     <description>
       Routine: cen_repair_loader
@@ -75,7 +70,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_REPAIR_LOADER_BUSY</rc>
     <description>
       Routine: cen_repair_loader
@@ -85,7 +79,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_CEN_COMMON_STARTCLOCKS_CLK_THOLDS_CHECK_ERR</rc>
     <description>
       Procedure: cen_comomn_startclocks

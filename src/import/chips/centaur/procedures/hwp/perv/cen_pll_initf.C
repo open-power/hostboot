@@ -44,12 +44,7 @@
 #include <cen_gen_scom_addresses.H>
 #include <cen_gen_scom_addresses_fixes.H>
 #include <centaur_misc_constants.H>
-
-#ifndef __HOSTBOOT_MODULE
-    #include <centaur_cleanup_pll_scan.H>
-    #include <centaur_nest_pll_scan.H>
-    #include <centaur_mem_pll_scan.H>
-#endif
+#include <cen_ringId.H>
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -59,58 +54,90 @@ fapi2::ReturnCode
 cen_pll_initf(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_target)
 {
     FAPI_DBG("Start");
-    fapi2::buffer<uint64_t> l_clk_region = 0;
-
-#ifndef __HOSTBOOT_MODULE
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    fapi2::ReturnCode l_rc;
-    // apply initfiles
-    ecmdChipTarget l_ecmd_target;
-    fapiTargetToEcmdTarget(i_target, l_ecmd_target);
-    ecmdEnableRingCache(l_ecmd_target);
-    FAPI_EXEC_HWP(l_rc, centaur_cleanup_pll_scan, i_target, FAPI_SYSTEM);
+    fapi2::ATTR_CEN_MSS_FREQ_Type l_mem_freq;
+    fapi2::ATTR_FREQ_MCA_MHZ_Type l_nest_freq;
+    RingId_t l_tp_pll_bndy_ring_id;
 
-    if (l_rc)
+    // retreive attributes definining NEST/DMI and MEM PLL frequencies
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_MCA_MHZ,
+                           FAPI_SYSTEM,
+                           l_nest_freq),
+             "Error from FAPI_ATTR_GET (ATTR_FREQ_MCA_MHZ)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CEN_MSS_FREQ,
+                           i_target,
+                           l_mem_freq),
+             "Error from FAPI_ATTR_GET (ATTR_CEN_MSS_FREQ)");
+
+    if ((l_nest_freq == 2000) && (l_mem_freq == 1066))
     {
-        FAPI_ERR("Error from centaur_cleanup_pll_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_1;
+    }
+    else if ((l_nest_freq == 2000) && (l_mem_freq == 1333))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_2;
+    }
+    else if ((l_nest_freq == 2000) && (l_mem_freq == 1600))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_3;
+    }
+    else if ((l_nest_freq == 2000) && (l_mem_freq == 1866))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_4;
+    }
+    else if ((l_nest_freq == 2400) && (l_mem_freq == 1066))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_5;
+    }
+    else if ((l_nest_freq == 2400) && (l_mem_freq == 1333))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_6;
+    }
+    else if ((l_nest_freq == 2400) && (l_mem_freq == 1600))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_7;
+    }
+    else if ((l_nest_freq == 2400) && (l_mem_freq == 1866))
+    {
+        l_tp_pll_bndy_ring_id = tp_pll_bndy_bucket_8;
+    }
+    else
+    {
+        FAPI_ASSERT(false,
+                    fapi2::CEN_PLL_INITF_UNSUPPORTED_FREQUENCY().
+                    set_TARGET(i_target).
+                    set_NEST_FREQ(l_nest_freq).
+                    set_MEM_FREQ(l_mem_freq),
+                    "Unsupported NEST/MEM frequency combination!");
     }
 
-    FAPI_EXEC_HWP(l_rc, centaur_mem_pll_scan, i_target, FAPI_SYSTEM);
+    // scan init PLL GPTR/FUNC chains
+    FAPI_TRY(fapi2::putRing(i_target, tp_pll_gptr),
+             "Error from putRing (tp_pll_gptr)");
+    FAPI_TRY(fapi2::putRing(i_target, tp_pll_func),
+             "Error from putRing (tp_pll_func)");
 
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_mem_pll_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    FAPI_EXEC_HWP(l_rc, centaur_nest_pll_scan, i_target, FAPI_SYSTEM);
-
-    if (l_rc)
-    {
-        FAPI_ERR("Error from centaur_nest_pll_scan");
-        fapi2::current_err = l_rc;
-        goto fapi_try_exit;
-    }
-
-    ecmdDisableRingCache(l_ecmd_target);
-#endif
+    // scan init PLL bndy chain
+    FAPI_TRY(fapi2::putRing(i_target, l_tp_pll_bndy_ring_id),
+             "Error from putRing (tp_pll_bndy, 0x%02X)",
+             l_tp_pll_bndy_ring_id);
 
     // issue setpulse
-    l_clk_region.setBit<0, 2>();  // CLOCK_CMD = pulse
-    l_clk_region.setBit<4>();     // CLOCK_REGION_PERV
-    l_clk_region.setBit<11>();    // CLOCK_REGION_PLL
-    l_clk_region.setBit<21>();    // SEL_THOLD_NSL
-    FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
-             "Error from putScom (CEN_CLK_REGION_PCB, setpulse)");
+    {
+        fapi2::buffer<uint64_t> l_clk_region = 0;
+        l_clk_region.setBit<0, 2>();  // CLOCK_CMD = pulse
+        l_clk_region.setBit<4>();     // CLOCK_REGION_PERV
+        l_clk_region.setBit<11>();    // CLOCK_REGION_PLL
+        l_clk_region.setBit<21>();    // SEL_THOLD_NSL
+        FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
+                 "Error from putScom (CEN_CLK_REGION_PCB, setpulse)");
 
-    FAPI_TRY(fapi2::delay(0, 10000));
+        FAPI_TRY(fapi2::delay(0, 10000));
 
-    l_clk_region.flush<0>();
-    FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
-             "Error from putScom (CEN_CLK_REGION_PCB, clear)");
+        l_clk_region.flush<0>();
+        FAPI_TRY(fapi2::putScom(i_target, CEN_CLK_REGION_PCB, l_clk_region),
+                 "Error from putScom (CEN_CLK_REGION_PCB, clear)");
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
