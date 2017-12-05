@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -82,6 +82,10 @@ const uint64_t TL_FRAMER4567_ERR_REG_OFFSET = 0x26;
 const uint64_t TL_PARSER0123_ERR_REG_OFFSET = 0x27;
 const uint64_t TL_PARSER4567_ERR_REG_OFFSET = 0x28;
 
+//  DL polling constants
+const uint32_t DL_MAX_POLL_LOOPS = 100;
+const uint32_t DL_POLL_SIM_CYCLES = 10000000;
+const uint32_t DL_POLL_HW_DELAY_NS = 1000000;
 
 //------------------------------------------------------------------------------
 // Function definitions
@@ -464,6 +468,7 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
     fapi2::ATTR_LINK_TRAIN_Type l_loc_link_train;
     bool l_dl_trained = false;
     bool l_tl_trained = false;
+    uint32_t l_poll_loops = DL_MAX_POLL_LOOPS;
 
     // obtain link endpoints for FFDC
     FAPI_TRY(p9_fab_iovalid_get_link_endpoints(i_target,
@@ -479,23 +484,35 @@ fapi2::ReturnCode p9_fab_iovalid_link_validate(
                            l_loc_link_train),
              "Error from FAPI_ATTR_GET (ATTR_LINK_TRAIN)");
 
-    // validate DL training state
-    FAPI_TRY(fapi2::getScom(i_target, i_loc_link_ctl.dl_fir_addr, l_dl_fir_reg),
-             "Error from getScom (0x%.16llX)", i_loc_link_ctl.dl_fir_addr);
+    do
+    {
+        // validate DL training state
+        FAPI_TRY(fapi2::getScom(i_target, i_loc_link_ctl.dl_fir_addr, l_dl_fir_reg),
+                 "Error from getScom (0x%.16llX)", i_loc_link_ctl.dl_fir_addr);
 
-    if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
-    {
-        l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
-                       l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
+        if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_BOTH)
+        {
+            l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>() &&
+                           l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
+        }
+        else if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
+        {
+            l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>();
+        }
+        else
+        {
+            l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
+        }
+
+        if (!l_dl_trained)
+        {
+            FAPI_TRY(fapi2::delay(DL_POLL_HW_DELAY_NS, DL_POLL_SIM_CYCLES), "fapiDelay error");
+
+        }
+
+        l_poll_loops--;
     }
-    else if (l_loc_link_train == fapi2::ENUM_ATTR_LINK_TRAIN_EVEN_ONLY)
-    {
-        l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK0_TRAINED_BIT>();
-    }
-    else
-    {
-        l_dl_trained = l_dl_fir_reg.getBit<DL_FIR_LINK1_TRAINED_BIT>();
-    }
+    while (l_poll_loops > 0 && !l_dl_trained);
 
     FAPI_ASSERT(l_dl_trained,
                 fapi2::P9_FAB_IOVALID_DL_NOT_TRAINED_ERR()
