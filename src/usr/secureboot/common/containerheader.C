@@ -171,7 +171,7 @@ void ContainerHeader::initVars()
     memset(iv_componentId,0x00,sizeof(iv_componentId));
 }
 
-void ContainerHeader::genFakeHeader(const size_t i_totalSize,
+void ContainerHeader::genFakeHeader(const size_t i_size,
                                     const char* const i_compId)
 {
     SecureHeaderInfo info {};
@@ -182,7 +182,7 @@ void ContainerHeader::genFakeHeader(const size_t i_totalSize,
      /*---- ROM_container_raw ----*/
     info.hw_hdr.magic_number = ROM_MAGIC_NUMBER;
     info.hw_hdr.version = CONTAINER_VERSION;
-    info.hw_hdr.container_size = i_totalSize;
+    info.hw_hdr.container_size = i_size + PAGE_SIZE;
     // The rom code has a placeholder for the prefix in the first struct so
     // skip it
     size_t l_size = offsetof(ROM_container_raw, prefix);
@@ -212,7 +212,7 @@ void ContainerHeader::genFakeHeader(const size_t i_totalSize,
     strncpy(info.sw_hdr.component_id, i_compId,SW_HDR_COMP_ID_SIZE_BYTES);
     info.sw_hdr.ver_alg.hash_alg = HASH_ALG_SHA512;
     info.sw_hdr.ver_alg.sig_alg = SIG_ALG_ECDSA521;
-    info.sw_hdr.payload_size = i_totalSize - PAGE_SIZE;
+    info.sw_hdr.payload_size = i_size;
 
     l_size = offsetof(ROM_sw_header_raw, ecid);
     l_size += info.hw_prefix_hdr.ecid_count * ECID_SIZE;

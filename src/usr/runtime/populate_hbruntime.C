@@ -605,21 +605,22 @@ errlHndl_t hbResvLoadSecureSection (const PNOR::SectionId i_sec,
 
         // Check if the section is expected to have a secure header regardless
         // of compile options
+#ifdef CONFIG_SECUREBOOT
         if (i_secHdrExpected)
         {
-#ifdef CONFIG_SECUREBOOT
             // If section is signed, only the protected size was loaded into memory
             l_imgSize = l_info.secureProtectedPayloadSize;
             // Include secure header
             // NOTE: we do not preserve the header in virtual memory when SB
             // is compiled out. So "-PAGESIZE" only works when SB is compiled in
             l_pnorVaddr -= PAGESIZE;
-#endif
-            // Add size for secure header.
-            // NOTE: if SB compiled out, a header will be injected later so
-            // preserve space for the header.
-            l_imgSize += PAGESIZE;
         }
+#endif
+        // Add size for secure header, as a header is REQUIRED for lid load
+        // from hostboot reserved memory to work in every scenario.
+        // NOTE: if SB compiled out or a header is never added, one will be
+        // injected later with min information. So preserve space for the header.
+        l_imgSize += PAGESIZE;
 
         // Load Pnor section into HB reserved memory
         l_elog = PreVerifiedLidMgr::loadFromPnor(i_sec, l_pnorVaddr, l_imgSize);
