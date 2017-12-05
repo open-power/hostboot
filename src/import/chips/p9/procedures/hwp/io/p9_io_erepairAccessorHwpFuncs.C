@@ -274,13 +274,14 @@ fapi2::ReturnCode erepairGetRestoreLanes(
                     .set_TARGET2(l_endp2_tgtType),
                     "ERROR:erepairGetRestoreLanes: Invalid endpoint target pair");
 
-        // Fabric eRepair has been disabled using the
-        // Manufacturing policy flags
-        FAPI_ASSERT(!(l_mnfgModeIPL && l_disableFabricERepair),
-                    fapi2::P9_EREPAIR_RESTORE_FABRIC_DISABLED()
-                    .set_VALUE1(l_mnfgModeIPL)
-                    .set_VALUE2(l_disableFabricERepair),
-                    "ERROR:erepairGetRestoreLanes: Fabric eRepair is disabled");
+        // Check for enablement of Fabric eRepair
+        if(l_mnfgModeIPL && l_disableFabricERepair)
+        {
+            // Fabric eRepair has been disabled using the
+            // Manufacturing policy flags
+            FAPI_INF("erepairGetRestoreLanes: Fabric eRepair is disabled");
+            goto fapi_try_exit;
+        }
     }
     else if(l_endp1_tgtType == fapi2::TARGET_TYPE_MCS_CHIPLET ||
             l_endp1_tgtType == fapi2::TARGET_TYPE_MEMBUF_CHIP)
@@ -294,13 +295,14 @@ fapi2::ReturnCode erepairGetRestoreLanes(
                      .set_TARGET2(l_endp2_tgtType),
                      "ERROR:erepairGetRestoreLanes: Invalid endpoint target pair");
 
-        // Memory eRepair has been disabled using the
-        // Manufacturing policy flags
-        FAPI_ASSERT(!(l_mnfgModeIPL && l_disableMemoryERepair),
-                    fapi2::P9_EREPAIR_RESTORE_MEMORY_DISABLED()
-                    .set_VALUE1(l_mnfgModeIPL)
-                    .set_VALUE2(l_disableMemoryERepair),
-                    "ERROR:erepairGetRestoreLanes: Memory eRepair is disabled");
+        // Check for enablement of Memory eRepair
+        if(l_mnfgModeIPL && l_disableMemoryERepair)
+        {
+            // Memory eRepair has been disabled using the
+            // Manufacturing policy flags
+            FAPI_INF("erepairGetRestoreLanes: Memory eRepair is disabled");
+            goto fapi_try_exit;
+        }
     }
 
     if(l_mnfgModeIPL)
