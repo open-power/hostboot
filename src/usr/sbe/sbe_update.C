@@ -5407,10 +5407,10 @@ errlHndl_t sbeDoReboot( void )
             TRACFCOMP(g_trac_sbe,
                 INFO_MRK"sbeDoReboot(): Performing Secure Boot key transition. "
                 "Calling INITSERVICE::doShutdown() with "
-                "SHUTDOWN_NOT_RECONFIG_LOOP = 0x%08X",
-                INITSERVICE::SHUTDOWN_NOT_RECONFIG_LOOP );
+                "SHUTDOWN_KEY_TRANSITION = 0x%08X",
+                INITSERVICE::SHUTDOWN_KEY_TRANSITION );
             INITSERVICE::doShutdown(INITSERVICE::
-                                    SHUTDOWN_NOT_RECONFIG_LOOP);
+                                    SHUTDOWN_KEY_TRANSITION);
         }
         else
         {
