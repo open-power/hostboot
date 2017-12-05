@@ -44,7 +44,7 @@ namespace HTMGT
 {
 
     bool G_wofSupported = true;
-    uint8_t G_opalMode = OCC_CFGDATA_OPENPOWER_OPALVM;
+    uint8_t G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
 
     // Send config format data to all OCCs
     void sendOccConfigData(const occCfgDataFormat i_requestedFormat)
@@ -775,7 +775,24 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
     o_data[index++] = OCC_CFGDATA_SYS_CONFIG_VERSION;
 
     //System Type
-    o_data[index++] = G_opalMode;
+    uint8_t l_throttle_below_nominal = 0;
+    if(!sys->tryGetAttr
+        <ATTR_REPORT_THROTTLE_BELOW_NOMINAL>(l_throttle_below_nominal))
+    {
+        l_throttle_below_nominal = 0;  // attr does not exist, disable
+    }
+    if (l_throttle_below_nominal == 1)
+    {
+        //1=OCC report throttling only when max frequency lowered below nominal
+        G_system_type |= OCC_REPORT_THROTTLE_BELOW_NOMINAL;
+    }
+    else
+    {
+        //0=OCC report throttling when max frequency lowered below turbo
+        G_system_type &= ~OCC_REPORT_THROTTLE_BELOW_NOMINAL;
+    }
+    o_data[index++] = G_system_type;
+
 
     //processor Callout Sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);
@@ -791,7 +808,7 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
 
     TMGT_INF("getSystemConfigMessageData: systemType: 0x%02X, "
              "procSensor: 0x%04X, %d cores, %d nodes",
-             G_opalMode, SensorID1, cores.size(), nodes.size());
+             G_system_type, SensorID1, cores.size(), nodes.size());
 
     for (uint64_t core=0; core<CFGDATA_CORES; core++)
     {

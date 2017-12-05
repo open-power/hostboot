@@ -1305,17 +1305,51 @@ ID for the sensor number returned with the elog. -->
     <readable/>
 </attribute>
 
+<attribute>
+    <id>REPORT_THROTTLE_BELOW_NOMINAL</id>
+    <description>
+         Indicates if OCC should wait to report DVFS due to power/thermal until
+         max frequency has been lowered below nominal.
+         Default OCC will report DVFS when max frequency is lowered below turbo.
+         DVFS is reported in poll response extended status bits and in OPAL
+         shared memory throttle status byte.
+         1 = OCC report throttling only when max freq. lowered below nominal
+         0 = OCC report throttling when max freq. lowered below turbo
+    </description>
+    <simpleType>
+        <uint8_t><default>0</default></uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
 <!-- end HTMGT attributes -->
 
 <attribute>
-  <id>MSS_UTIL_N_PER_MBA</id>
-  <description>cfg_nm_n_per_mba throttle N value that was calculated from MSS_DATABUS_UTIL_PER_MBA</description>
-  <simpleType>
-      <uint32_t></uint32_t>
-  </simpleType>
-  <persistency>volatile-zeroed</persistency>
-  <readable/>
-  <writeable/>
+    <id>MRW_SAFEMODE_MEM_THROTTLE_NUMERATOR_PER_CHIP</id>
+    <description>
+        Machine Readable Workbook safe mode throttle value for
+        numerator cfg_nm_n_per_chip
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+</attribute>
+
+<attribute>
+    <id>MSS_UTIL_N_PER_MBA</id>
+    <description>
+        cfg_nm_n_per_mba throttle N value that was calculated from
+        MSS_DATABUS_UTIL_PER_MBA
+    </description>
+    <simpleType>
+        <uint32_t></uint32_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
 </attribute>
 
 <attribute>

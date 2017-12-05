@@ -652,12 +652,12 @@ namespace HTMGT
                            //0 = disable OPAL mode (i.e. run as PowerVM)
                            if (i_cmdData[1] == 0)
                            {
-                               G_opalMode = OCC_CFGDATA_OPENPOWER_POWERVM;
+                               G_system_type = OCC_CFGDATA_OPENPOWER_POWERVM;
                            }
                            //1 = enable OPAL mode
                            else if (i_cmdData[1] == 1)
                            {
-                                G_opalMode = OCC_CFGDATA_OPENPOWER_OPALVM;
+                                G_system_type = OCC_CFGDATA_OPENPOWER_OPALVM;
                            }
                            else
                            {
@@ -669,26 +669,26 @@ namespace HTMGT
                                  * @moduleid     HTMGT_MOD_PASS_THRU
                                  * @userdata1    command data[0-7]
                                  * @userdata2    command data length
-                                 * @devdesc      Invalid pass thru command
+                                 * @devdesc      Invalid pass thru command data
                                  */
                               failingSrc = HTMGT_RC_INVALID_PARAMETER;
                            }
                             if(failingSrc == HTMGT_RC_NO_ERROR)
                             {
-                              TMGT_INF("passThruCommand: OCC State set(0x%02X)"
-                                        " RESET-OCC ", G_opalMode );
+                              TMGT_INF("passThruCommand: OPAL State(0x%02X), "
+                                        "resetting PM Complex", G_system_type);
                               err = OccManager::resetOccs(nullptr,true,true);
                               if(err)
                               {
-                                TMGT_ERR("passThruCommand: OCC MODE change "
-                                        "Reset PM Complex FAIL with rc 0x%04X",
-                                        err->reasonCode());
+                                TMGT_ERR("passThruCommand: PM Complex Reset "
+                                        "failed with rc 0x%04X after updating "
+                                        "OPAL state", err->reasonCode());
                               }
                            }
                         }
                         else
                         {
-                            TMGT_ERR("passThruCommand: invalid OCC State "
+                            TMGT_ERR("passThruCommand: invalid OPAL State "
                                      "length %d", i_cmdLength);
                             failingSrc = HTMGT_RC_INVALID_LENGTH;
                         }

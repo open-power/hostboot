@@ -113,7 +113,7 @@ namespace HTMGT
     extern uint32_t G_debug_data;
 
     // Global to set OCC into OpalVM or PowerVM mode
-    extern uint8_t G_opalMode;  //defined in htmgt_cfgdata.C
+    extern uint8_t G_system_type;  //defined in htmgt_cfgdata.C
 
 
     enum debugTraceTypes
