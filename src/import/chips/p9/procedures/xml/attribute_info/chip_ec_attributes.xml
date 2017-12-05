@@ -5472,6 +5472,30 @@
       </chip>
     </chipEcFeature>
 </attribute>
+  <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW426816</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Nimbus DD2.0-DD2.2/Cumulus DD1.0-DD1.1: CQ_SM allocation: Simultaneous free+allocate at the low water mark causes incorrect increment of reserved counter.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
  <!-- ******************************************************************** -->
  <!-- NOTE: This attribute is used in an initfile to qualify the contents
             of a GPTR ring. There is special processing in place to move the
