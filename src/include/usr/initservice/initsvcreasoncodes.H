@@ -82,6 +82,8 @@ enum    InitServiceReasonCode
     SHUTDOWN_DO_RECONFIG_LOOP    =   INITSVC_COMP_ID | 0x13,
     //termination_rc
     SHUTDOWN_MFG_TERM            =   INITSVC_COMP_ID | 0x14,
+    //termination_rc
+    SHUTDOWN_KEY_TRANSITION      =   INITSVC_COMP_ID | 0x15,
 };
 
 enum InitServiceUserDetailDataSubSection
