@@ -555,7 +555,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
     {
         TRACFCOMP(g_trac_secure,"SecureRomManagerTest::test_fakeHeader");
 
-        const size_t l_totalContainerSize = 0x10000;
+        const size_t l_payloadSize = 0x10000;
         // Purposely make a comp id larger than SW_HDR_COMP_ID_SIZE_BYTES
         // otherwise strncmp below needs a different size
         const char* l_compId = "FAKEHEADERTEST";
@@ -564,7 +564,7 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         // Simple call constructor to create fake header and make sure it
         // does not cause an error
         SECUREBOOT::ContainerHeader l_fakeHdr;
-        errlHndl_t l_errl = l_fakeHdr.setFakeHeader(l_totalContainerSize,
+        errlHndl_t l_errl = l_fakeHdr.setFakeHeader(l_payloadSize,
                                                     l_compId);
         if (l_errl)
         {
@@ -573,8 +573,14 @@ class SecureRomManagerTest : public CxxTest::TestSuite
             break;
         }
 
-        // Payload Text Size should be the total container size minus the header
-        if(l_fakeHdr.payloadTextSize() != (l_totalContainerSize - PAGE_SIZE))
+        // Total Container size should be payload size + PAGE_SIZE(header size)
+        if(l_fakeHdr.totalContainerSize() != (l_payloadSize + PAGE_SIZE))
+        {
+            TS_FAIL("SecureRomManagerTest::test_fakeHeader: total container size was not parsed correctly");
+        }
+
+        // Check that payload text size was assigned correctly.
+        if(l_fakeHdr.payloadTextSize() != (l_payloadSize))
         {
             TS_FAIL("SecureRomManagerTest::test_fakeHeader: payload text size was not parsed correctly");
             break;

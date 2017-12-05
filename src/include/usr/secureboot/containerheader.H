@@ -293,10 +293,10 @@ class ContainerHeader
          * @brief Generate fake header with minimal information and stores in
          *        instance variable
          *
-         * @param[in] i_totalSize   Total container size
+         * @param[in] i_size        Size of content to add header to
          * @param[in] i_compId      Component ID
          */
-        void genFakeHeader(const size_t i_totalSize,
+        void genFakeHeader(const size_t i_size,
                            const char* const i_compId);
 
         friend class ::SecureRomManagerTest;
