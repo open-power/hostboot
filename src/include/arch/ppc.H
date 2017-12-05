@@ -273,6 +273,14 @@ inline uint64_t getHRMOR()
 }
 
 ALWAYS_INLINE
+inline uint64_t getURMOR()
+{
+    register uint64_t urmor = 0;
+    asm volatile("mfspr %0, 505" : "=r" (urmor));
+    return urmor;
+}
+
+ALWAYS_INLINE
 inline uint64_t getPTCR()
 {
     register uint64_t ptcr = 0;

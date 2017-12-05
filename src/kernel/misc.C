@@ -42,10 +42,11 @@
 #include <kernel/timemgr.H>
 #include <util/singleton.H>
 #include <kernel/doorbell.H>
+#include <arch/pvrformat.H>
 
 extern "C"
     void kernel_shutdown(size_t, uint64_t, uint64_t, uint64_t,
-                         uint64_t, uint64_t) NO_RETURN;
+                         uint64_t, uint64_t, uint64_t) NO_RETURN;
 
 extern HB_Descriptor kernel_hbDescriptor;
 
@@ -118,6 +119,14 @@ namespace KernelMisc
             }
             else
             {
+                //Determine if P9N/P9C and apply URMOR hack
+                uint64_t l_urmor_hack = 0x0;
+                PVR_t l_pvr(getPVR());
+                if((l_pvr.chipFamily == PVR_t::P9_ALL))
+                {
+                    l_urmor_hack = 1;
+                }
+
                 static Barrier* l_barrier = new Barrier(CpuManager::getCpuCount());
                 static uint64_t l_lowestPIR = 0xfffffffffffffffful;
 
@@ -216,7 +225,8 @@ namespace KernelMisc
                                 g_payload_entry,
                                 g_payload_data,
                                 local_master_pir,  //master PIR if local master
-                                start_payload_data_area_address);
+                                start_payload_data_area_address,
+                                l_urmor_hack);
             }
         }
         else
@@ -319,7 +329,7 @@ namespace KernelMisc
 
         // Create kernel save area and store ptr in bottom of kernel stack.
         task_t* saveArea = new task_t();
-        saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
+        saveArea->context.msr_mask = 0x100000000000D030; //HV,EE,ME,PR,IR,DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
         // Set register to indicate we want a 'stop 15' to occur (state loss)
@@ -420,7 +430,7 @@ namespace KernelMisc
 
         // Create kernel save area and store ptr in bottom of kernel stack.
         task_t* saveArea = new task_t();
-        saveArea->context.msr_mask = 0xD030; // EE, ME, PR, IR, DR.
+        saveArea->context.msr_mask = 0x100000000000D030; //HV,EE,ME,PR,IR,DR.
         *(reinterpret_cast<task_t**>(cpu->kernel_stack_bottom)) = saveArea;
 
         // Set register to indicate we want a 'stop 15' to ocur (state loss)

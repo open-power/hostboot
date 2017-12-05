@@ -762,6 +762,13 @@ static void adjustMemoryMap( TargetService& i_targetService )
         // Compute default xscom BAR
         ATTR_XSCOM_BASE_ADDRESS_type l_xscomBAR =
           computeMemoryMapOffset( l_xscomBase, l_groupId, l_chipId );
+
+        //If SBE Xscom addr has SMF bit on... propagate
+        if(l_curXscomBAR & IS_SMF_ADDR_BIT)
+        {
+            l_xscomBAR |= IS_SMF_ADDR_BIT;
+        }
+
         TARG_INF( " XSCOM=%.16llX", l_xscomBAR );
         l_procChip->setAttr<ATTR_XSCOM_BASE_ADDRESS>(l_xscomBAR);
 

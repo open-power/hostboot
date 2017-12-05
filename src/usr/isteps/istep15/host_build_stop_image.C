@@ -49,6 +49,9 @@
 //PNOR Resource Provider
 #include    <pnor/pnorif.H>
 
+#include    <fapi2.H>
+#include    <kernel/cpumgr.H>
+
 //Targeting Support
 #include    <targeting/common/utilFilter.H>
 #include    <fapi2/target.H>
@@ -142,7 +145,10 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
                                    void      *io_image,
                                    uint32_t  i_sizeImage )
 {
-    errlHndl_t  l_errl      =   NULL;
+    errlHndl_t  l_errl = nullptr;
+
+    do
+    {
 
     //Use TARGETING code to look up CORE target handles
     TARGETING::TargetHandleList l_coreIds;
@@ -166,6 +172,62 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
     //Register Values
     uint64_t    l_msrVal    =   cpu_spr_value(CPU_SPR_MSR);
     uint64_t    l_lpcrVal   =   cpu_spr_value(CPU_SPR_LPCR);
+
+    uint8_t l_smfEnabled = 0;
+    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_ENABLED,
+                           FAPI_SYSTEM,
+                           l_smfEnabled));
+
+    if(l_smfEnabled)
+    {
+        uint8_t l_riskLevel = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_RISK_LEVEL,
+                               FAPI_SYSTEM,
+                               l_riskLevel));
+        TARGETING::Target* l_pMasterProc = nullptr;
+        l_errl = TARGETING::targetService()
+                                .queryMasterProcChipTargetHandle(l_pMasterProc);
+        if(l_errl)
+        {
+            break;
+        }
+
+        auto l_masterProcModel =l_pMasterProc->getAttr<TARGETING::ATTR_MODEL>();
+
+        // SMF is enabled by default on Axone, so need to check the risk level
+        // only on P9C/P9N.
+        if(l_riskLevel < 4 &&
+          ((l_masterProcModel == TARGETING::MODEL_CUMULUS) ||
+           (l_masterProcModel == TARGETING::MODEL_NIMBUS)))
+        {
+            /*@
+            * @errortype
+            * @reasoncode  ISTEP::RC_RISK_LEVEL_TOO_LOW
+            * @severity    ERRORLOG::ERRL_SEV_UNRECOVERABLE
+            * @moduleid    ISTEP::MOD_APPLY_HCODE_GEN_CPU_REGS
+            * @userdata1   Current risk level of the system
+            * @devdesc     SMF is enabled on the system of incorrect risk level
+            * @custdesc    A problem occurred during the IPL of the system.
+            */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           ISTEP::MOD_APPLY_HCODE_GEN_CPU_REGS,
+                                           ISTEP::RC_RISK_LEVEL_TOO_LOW,
+                                           l_riskLevel,
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            break;
+        }
+
+        // Set the secure bit (41) on if SMF is enabled
+        l_msrVal |= MSR_SMF_MASK;
+    }
+
+    if(l_errl)
+    {
+fapi_try_exit:
+        break;
+    }
 
     // See LPCR def, PECE "reg" in Power ISA AS Version: Power8 June 27, 2012
     //  and 23.7.3.5 - 6 in Murano Book 4
@@ -347,6 +409,8 @@ errlHndl_t  applyHcodeGenCpuRegs(  TARGETING::Target *i_procChipTarg,
         l_errl->collectTrace(FAPI_IMP_TRACE_NAME,256);
         l_errl->collectTrace("ISTEPS_TRACE",256);
     }
+
+    }while(0);
 
     return  l_errl;
 }

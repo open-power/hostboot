@@ -158,6 +158,88 @@ void InterruptMsgHdlr::handleInterrupt()
     }
 }
 
+void InterruptMsgHdlr::sendMessage(msg_sys_types_t i_type, void* i_key,
+                                 void* i_data, task_t* i_task)
+{
+    // Task to switch to due to waiter being ready to handle message.
+    task_t* ready_task = nullptr;
+
+    // Save pending info for when we get the response.
+    MessageHandler_Pending* mhp = new MessageHandler_Pending();
+    mhp->key = i_key;
+    mhp->task = i_task;
+
+    // Update block status for task.
+    if (nullptr != i_task)
+    {
+        i_task->state = TASK_STATE_BLOCK_USRSPACE;
+        i_task->state_info = i_key;
+    }
+
+    // Send userspace message if one hasn't been sent for this key.
+    if (!iv_pending.find(i_key))
+    {
+        // Create message.
+        msg_t* m = new msg_t();
+        m->type = i_type;
+        m->data[0] = reinterpret_cast<uint64_t>(i_key);
+        m->data[1] = reinterpret_cast<uint64_t>(i_data);
+        m->extra_data = nullptr;
+        m->__reserved__async = 1;
+
+        // Create pending response object.
+        MessagePending* mp = new MessagePending();
+        mp->key = m;
+        mp->task = reinterpret_cast<task_t*>(this);
+
+        // Send to userspace...
+        iv_msgq->lock.lock();
+        task_t* waiter = iv_msgq->waiting.remove();
+        if (nullptr == waiter) // No waiting task, queue for msg_wait call.
+        {
+            iv_msgq->messages.insert(mp);
+        }
+        else // Waiting task, set msg as return and release.
+        {
+            TASK_SETRTN(waiter, (uint64_t) m);
+            iv_msgq->responses.insert(mp);
+            ready_task = waiter;
+        }
+        iv_msgq->lock.unlock();
+    }
+
+    // Defer task while waiting for message response.
+    if (nullptr != i_task)
+    {
+        if (i_task == TaskManager::getCurrentTask())
+        {
+            // Switch to ready waiter, or pick a new task off the scheduler.
+            if (ready_task)
+            {
+                TaskManager::setCurrentTask(ready_task);
+                ready_task = nullptr;
+            }
+            else
+            {
+                // Select next task off scheduler.
+                i_task->cpu->scheduler->setNextRunnable();
+            }
+        }
+    }
+
+    // Add ready waiter to the task queue
+    if (nullptr != ready_task)
+    {
+        task_t* current = TaskManager::getCurrentTask();
+        current->cpu->scheduler->addTask(ready_task);
+        ready_task = nullptr;
+    }
+
+    // Insert pending info into our queue until response is recv'd.
+    iv_pending.insert(mhp);
+}
+
+
 void InterruptMsgHdlr::addCpuCore(uint64_t i_pir)
 {
     task_t* t = TaskManager::getCurrentTask();

@@ -30,6 +30,46 @@
 #include <kernel/barrier.H>
 #include <kernel/idebug.H>
 
+/** Desired value for MSR after wakeup.
+ *
+ *  bit 0 - 64 bit mode.
+ *  bit 3 - Hypervisor mode.
+ *  bit 51 - Machine-check enable
+ */
+extern const uint64_t WAKEUP_MSR_VALUE;
+
+/** Desired value for LPCR after wakeup.
+ *
+ *  bit 48 - Wake-up from hyp doorbell
+ *  bit 49 - Wake-up from external interrupt.
+ *  bit 50 - Wake-up from decrementer.
+ *  bit 51 - Wake-up from machine check.
+ *  bit 60 - LPES(0) = 1 (see ISA).
+ *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
+ *  bit 62 - HVICE - Hypervisor Virt Interrupt Conditionally Enable
+ */
+extern const uint64_t WAKEUP_LPCR_VALUE;
+
+/** Desired value for RPR after wakeup.
+ *
+ *      Priority     Us    PHYP
+ *      Very Low      0      0
+ *      Low           1      1    <--- hostboot "low"
+ *      Med Low       3      3
+ *      Med          32      7    <--- hostboot "high"
+ *      Med High     33     15
+ *      High         34     31
+ *      Very High    63     63
+ */
+extern const uint64_t WAKEUP_RPR_VALUE;
+
+/** The mask to isolate SMF enabled value
+ *
+ * bit 41 - SMF (Ultravisor) enable
+ *
+ */
+extern const uint64_t MSR_SMF_MASK;
+
 class CpuManager
 {
     public:
@@ -158,39 +198,6 @@ class CpuManager
          * @param[in] i_failAddr - Address from where the assert was called
          */
         static void critAssert(uint64_t i_failAddr);
-
-        /** Desired value for MSR after wakeup.
-         *
-         *  bit 0 - 64 bit mode.
-         *  bit 3 - Hypervisor mode.
-         *  bit 51 - Machine-check enable
-         */
-        static const uint64_t WAKEUP_MSR_VALUE =    0x9000000000001000;
-
-        /** Desired value for LPCR after wakeup.
-         *
-         *  bit 48 - Wake-up from hyp doorbell
-         *  bit 49 - Wake-up from external interrupt.
-         *  bit 50 - Wake-up from decrementer.
-         *  bit 51 - Wake-up from machine check.
-         *  bit 60 - LPES(0) = 1 (see ISA).
-         *  bit 61 - LPES(1) = 0 (P8 RFC02204 forces to 0)
-         *  bit 62 - HVICE - Hypervisor Virt Interrupt Conditionally Enable
-         */
-        static const uint64_t WAKEUP_LPCR_VALUE =   0x000000000000F00A;
-
-        /** Desired value for RPR after wakeup.
-         *
-         *      Priority     Us    PHYP
-         *      Very Low      0      0
-         *      Low           1      1    <--- hostboot "low"
-         *      Med Low       3      3
-         *      Med          32      7    <--- hostboot "high"
-         *      Med High     33     15
-         *      High         34     31
-         *      Very High    63     63
-         */
-        static const uint64_t WAKEUP_RPR_VALUE =    0x0001032021223F;
 
         /** @fn startCPU
          *  Starts the requested CPU. Default of -1 implies current CPU.

@@ -233,8 +233,11 @@ namespace INTR
                 XIVE_RESET_POWERBUS_QUIESCE_ENABLE = 0x4000000000000000,
                 XIVE_RESET_POWERBUS_QUIESCE_TIMEOUT = 1000000, //1 millisecond
                 XIVE_RESET_UNIT_ENABLE = 0x8000000000000000,
-                ACK_HYPERVISOR_INT_REG_OFFSET = 0x830/sizeof(uint16_t),
-                PULL_THREAD_CONTEXT_OFFSET = 0x838/sizeof(uint8_t),
+
+                //For SMF use Hype offset as common between non SMF/SMF
+                ACK_HYPERVISOR_INT_REG_OFFSET = 0x1830/sizeof(uint16_t),
+                PULL_THREAD_CONTEXT_OFFSET = 0x1838/sizeof(uint8_t),
+
                 POWERBUS_STATE_QUIESCE = 0xC000000000000000,
                 MAX_PSU_LONG_TIMEOUT_NS  = 5000*NS_PER_MSEC, //5 seconds
 

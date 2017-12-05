@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,7 @@ constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_CONTROLLER_BASE_ADDR = 0x000603020310
 constexpr uint64_t  MMIO_GROUP0_CHIP0_XIVE_THREAD_MGMT1_BASE_ADDR = 0x0006020000000000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_PSI_HB_ESB_BASE_ADDR = 0x00060302031C0000;
 constexpr uint64_t  MMIO_GROUP0_CHIP0_INTP_BASE_ADDR = 0x0003FFFF80000000;
+constexpr uint64_t  IS_SMF_ADDR_BIT = 0x0001000000000000;
 
 
 #endif //#ifndef _MEMORYMAP_H

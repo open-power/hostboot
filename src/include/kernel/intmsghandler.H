@@ -70,7 +70,12 @@ class InterruptMsgHdlr : public MessageHandler
             P9_IP_NODEID_LSL   = (22-PIR_t::BITS_AFTER_GROUP),
             XIRR_ADDR_OFFSET   = 4,
             MFRR_ADDR_OFFSET   = 12,
-            ACK_HYPERVISOR_INT_REG_OFFSET = 0x830,
+
+            // When doing MMIO to the interrupt contsoller, we need
+            // to use Hyp page (page 1), since page 0 is reserved for
+            // Ultravisor in SMF mode. Using page 1 here for compatibility
+            // between SMF and non-SMF.
+            ACK_HYPERVISOR_INT_REG_OFFSET = 0x1830,
 
             INTP_BAR_VALUE     = 0xFFFFE000,    // upper 32 bits of IPCBAR
             INTERPROC_XISR     = 2,     //IPI XISR is 2
@@ -91,6 +96,24 @@ class InterruptMsgHdlr : public MessageHandler
          * Destructor.
          */
         virtual ~InterruptMsgHdlr() {};
+
+        /** @brief 'Send message' interface.
+         *  Used to send a message into userspace.
+         *
+         *  @param[in] i_type - Message type (from sys/msg.h).
+         *  @param[in] i_key  - Key (msg->data[0]) for the message.
+         *  @param[in] i_data - Data (msg->data[1]) for the message.
+         *  @param[in] i_task - Optional task being deferred due to this
+         *                      message.
+         *
+         *  The result of this message is that a message will be created and
+         *  inserted onto a user-space message queue, awaking the waiter if
+         *  blocked.  The task passed as a parameter, if not nullptr, will be
+         *  deferred.
+         */
+        virtual void sendMessage(msg_sys_types_t i_type, void* i_key,
+                         void* i_data, task_t* i_task);
+
 
         /**
          * Handle response to 'send message'

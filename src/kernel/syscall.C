@@ -50,14 +50,15 @@
 
 
 extern "C"
-void kernel_execute_hype_doorbell()
+void kernel_execute_hyp_doorbell()
 {
     task_t* t = TaskManager::getCurrentTask();
+    task_t* l_task_post = nullptr;
     doorbell_clear();
 
     //Execute all work items on doorbell_actions stack
     KernelWorkItem *l_work = t->cpu->doorbell_actions.pop();
-    while(l_work != NULL)
+    while(l_work != nullptr)
     {
         //Execute Work Item and then delete it
         (*l_work)();
@@ -77,13 +78,18 @@ void kernel_execute_hype_doorbell()
         InterruptMsgHdlr::sendIpcMsg(pir);
     }
 
-    if (t->cpu->idle_task == t)
-    {
-        t->cpu->scheduler->returnRunnable();
-        t->cpu->scheduler->setNextRunnable();
-    }
-
     DeferredQueue::execute();
+
+    // Mustn't switch tasks if external interrupt due to
+    // the fact external interrupts come in as HYP exceptions
+    // and all other come in as regular excpetions.  If HYP
+    // comes on top of regular... need to leave existing task
+    // as is. The custom implementation of sendMessage of InterruptMsgHdlr
+    // will take care of task switching safely.
+
+    //check to see if work switched the task
+    l_task_post = TaskManager::getCurrentTask();
+    kassert(t == l_task_post);
 }
 
 extern "C"
@@ -738,15 +744,18 @@ namespace Systemcalls
     void CpuSprValue(task_t *t)
     {
         uint64_t spr = TASK_GETARG0(t);
+        uint64_t l_smf_bit = 0x0;
 
         switch (spr)
         {
             case CPU_SPR_MSR:
-                TASK_SETRTN(t, CpuManager::WAKEUP_MSR_VALUE);
+                //Set SMF bit based on current setting (HB never turns off)
+                l_smf_bit = getMSR() & MSR_SMF_MASK;
+                TASK_SETRTN(t, WAKEUP_MSR_VALUE | l_smf_bit);
                 break;
 
             case CPU_SPR_LPCR:
-                TASK_SETRTN(t, CpuManager::WAKEUP_LPCR_VALUE);
+                TASK_SETRTN(t, WAKEUP_LPCR_VALUE);
                 break;
 
             case CPU_SPR_HRMOR:
@@ -805,9 +814,9 @@ namespace Systemcalls
         if (STOP_INSTRUCTION == (*instruction)) // Verify 'nap' instruction,
                                                 // otherwise just return.
         {
-            // Disable EE, PR, IR, DR so 'nap' can be executed.
+            // Disable HV, EE, PR, IR, DR so 'nap' can be executed.
             //     (which means to stay in HV state)
-            t->context.msr_mask = 0xC030;
+            t->context.msr_mask = 0x100000000000D030;
         }
     };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ void* TaskManager::idleTaskLoop(void* unused)
         setThreadPriorityLow();
 
         // Request privilege escalation for nap.
-        asm volatile("li 3, %0; sc" :: "K" (MISC_CPUNAP) : "r3", "cc");
+        asm volatile("li 3, %0; sc 2" :: "K" (MISC_CPUNAP) : "r3", "cc");
 
         // Execute nap.
         //@fixme-RTC:xxxxxx  nap();
