@@ -81,6 +81,8 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_EPS_READ_CYCLES_T2, TGT1, l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2));
         uint64_t l_def_MC_EPSILON_CFG_T2 = ((l_TGT1_ATTR_PROC_EPS_READ_CYCLES_T2 + literal_6) / literal_4);
         uint64_t l_def_ENABLE_MCBUSY = literal_1;
+        fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM_Type l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_MEM_EARLY_DATA_SCOM, TGT1, l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM));
         uint64_t l_def_ENABLE_MCU_TIMEOUTS = literal_1;
         uint64_t l_def_MCICFG_REPLAY_DELAY = literal_1;
         fapi2::ATTR_MC_SYNC_MODE_Type l_TGT3_ATTR_MC_SYNC_MODE;
@@ -271,6 +273,17 @@ fapi2::ReturnCode p9c_dmi_scom(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& TGT0
             if (l_def_ENABLE_PREFETCH_DROP_PROMOTE_PERFORMANCE)
             {
                 l_scom_buffer.insert<27, 4, 60, uint64_t>(literal_0 );
+            }
+
+            if ((l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_OFF))
+            {
+                constexpr auto l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON = 0x1;
+                l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_ON );
+            }
+            else if ((l_TGT1_ATTR_ENABLE_MEM_EARLY_DATA_SCOM == fapi2::ENUM_ATTR_ENABLE_MEM_EARLY_DATA_SCOM_ON))
+            {
+                constexpr auto l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_OFF = 0x0;
+                l_scom_buffer.insert<43, 1, 63, uint64_t>(l_MC01_CHAN0_ATCL_CL_CLSCOM_MCPERF3_ENABLE_CP_M_MDI0_LOCAL_ONLY_OFF );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x501082bull, l_scom_buffer));
