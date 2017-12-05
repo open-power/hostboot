@@ -171,6 +171,37 @@ finished_relocate:
         nop; \
         b kernel_dispatch_task; /* Return to task */
 
+#define HYP_INTERRUPT(name, address) \
+        .org _start + address; \
+        HYP_INTERRUPT_NOADDR(name)
+
+#define HYP_INTERRUPT_STUB(name, address) \
+        .org _start + address; \
+    intvect_stub_hyp_##name: \
+        b intvect_hyp_##name;
+
+#define HYP_INTERRUPT_NOADDR(name) \
+    intvect_hyp_##name: \
+        or 2,2,2; /* Ensure thread priority is high. */ \
+        mtsprg1 r1; /* Save GPR1 */ \
+            ;/* Retrieve processing address for interrupt. */ \
+        lis r1, intvect_hyp_##name##_finish_save@h; \
+        ori r1, r1, intvect_hyp_##name##_finish_save@l; \
+            ;/* Save interrupt address in SPRG0 */ \
+        mtsprg0 r1; \
+        mfsprg1 r1; /* Restore GPR1 */ \
+        b kernel_save_task ; /* Save current task. */ \
+    intvect_hyp_##name##_finish_save: \
+        ; /* Get TOC entry for kernel C function */ \
+        lis r2, kernel_execute_hyp_##name##@h; \
+        ori r2, r2, kernel_execute_hyp_##name##@l; \
+        ld r0, 0(r2); /* Load call address */ \
+        mtlr r0; \
+        ld r2, 8(r2); /* Load TOC base. */ \
+        blrl; /* Call kernel function */ \
+        nop; \
+        b hyp_dispatch_task; /* Return to task */
+
 STD_INTERRUPT_STUB(system_reset, 0x100)
 
 .org _start + 0x180
@@ -207,20 +238,36 @@ intvect_system_call_fast:
 STD_INTERRUPT(system_call, 0xC08)
 
 UNIMPL_INTERRUPT_STUB(trace, 0xD00)
+
+.org _start + 0xD80
+intvect_inst_trampoline:
+   mtspr HSPRG0, r2     ;// Free up a temporary register.
+
+   ;// this is now the case where we need to jump to different exception vector
+   ;// route to correct call using hrfid.  HSRR0 is already set correct,
+   ;// just need to update HSRR1 with current (escalated privlege) MSR
+   mfmsr r2
+   mtspr HSRR1, r2
+
+   ;// cleanup our register usage
+   mfspr r2, HSPRG0     ;// Restore original value of R2
+   hrfid                ;// handle the real exception
+
 UNIMPL_INTERRUPT_STUB(hype_data_storage, 0xE00)
-UNIMPL_INTERRUPT_STUB(hype_inst_storage, 0xE20)
+;// Hypervisor Instruction Storage Exception Vector
+;// SMF prevents HB userspace from running in UV/HV/PR = 0b111
+;// Thus userspace runs in 0b101 -- however that means all
+;// exceptions first jump to exception vectors with 0b100
+;// and then ALWAYS take a hype inst_storage exception.  Desired
+;// exception is always in HSSR0
+.org _start + 0xE20
+intvect_syscall_hype_inst_storage:
+   b intvect_inst_trampoline
+
 STD_INTERRUPT_STUB(hype_emu_assist, 0xE40)
 UNIMPL_INTERRUPT_STUB(hype_maint, 0xE60)
-
-;// Hypervisor Doorbell Exception Vector
-;//
-;// There isn't enough room here for a "normal" stub, so jump out to 'stub2'
-;// where there is some space.
-.org _start + 0xE80
-intvect_syscall_hype_doorbell_stub:
-    b intvect_syscall_hype_doorbell_stub2
-
-STD_INTERRUPT_STUB(hypervisor_external, 0xEA0)
+HYP_INTERRUPT_STUB(doorbell_stub, 0xE80)
+HYP_INTERRUPT_STUB(external_stub, 0xEA0)
 
 UNIMPL_INTERRUPT_STUB(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT_STUB(vector_unavail, 0xF20)
@@ -234,11 +281,11 @@ UNIMPL_INTERRUPT_STUB(fac_unavail, 0xF60)
     ;// get this exception.
 .org _start + 0xF80
 hype_fac_unavail:
-   mtspr HSPRG0, r0     ;// Free up a temporary register.
+   mtspr HSPRG1, r0     ;// Free up a temporary register.
    mfspr r0,HFSCR
    ori r0, r0, 1        ;// Set FP=1 (bit 63).
    mtspr HFSCR, r0
-   mfspr r0, HSPRG0     ;// Restore temporary
+   mfspr r0, HSPRG1     ;// Restore temporary
    hrfid
 
 ;// Softpatch Exception Vector
@@ -259,11 +306,11 @@ hype_fac_unavail:
 ;// P7 Book IV.
 .org _start + 0x1500
 softpatch_stub:
-    mtsprg1 r1          ;// Save of R1 temporarily.
+    mtspr HSPRG1, r1     ;// Free up a temporary register (R1)
     mfspr r1, HSRR0     ;// Move HSRR0 -> SRR0.
     subi r1, r1, 4      ;// Roll back SRR0 1 instruction to one taking except.
     mtsrr0 r1
-    mfsprg1 r1          ;// Restore R1 and use normal interrupt code.
+    mfspr r1, HSPRG1     ;// Restore temporary (R1)
 STD_INTERRUPT_NOADDR(softpatch)
 
 .section .text.kernelasm
@@ -483,6 +530,8 @@ kernel_dispatch_task:
     ori r2,r2, 0xC030   ;// Enable MSR[EE,PR,IR,DR].
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
+    rldicl r2,r2,3,1    ;// Clear HV bit...
+    rotldi r2,r2,61     ;//     MSR[HV]
     ld r3, TASK_MSR_MASK(r1) ;// Load MSR mask.
     xor r2, r2, r3      ;// Apply MSR mask (XOR).
     mtsrr1 r2           ;// Set task MSR (SRR1)
@@ -540,6 +589,121 @@ kernel_dispatch_task:
     ld r1, TASK_GPR_1(r1)       ;// GPR1
 
     rfid                        ;// Execute task.
+
+        ;// Load FP context.
+1:
+        ;// Set MSR[FP] and also in SRR1.
+    mfmsr r3
+    ori r3,r3,0x2000
+    mtmsrd r3
+    mfsrr1 r3
+    ori r3,r3,0x2000
+    mtsrr1 r3
+        ;// Restore FPSCR
+    lfd f0, TASK_FPSCR(r2)
+    mtfsf f0,f0,1,1
+        ;// Restore FPRs
+    lfd f0, TASK_FPR_0(r2)
+    lfd f1, TASK_FPR_1(r2)
+    lfd f2, TASK_FPR_2(r2)
+    lfd f3, TASK_FPR_3(r2)
+    lfd f4, TASK_FPR_4(r2)
+    lfd f5, TASK_FPR_5(r2)
+    lfd f6, TASK_FPR_6(r2)
+    lfd f7, TASK_FPR_7(r2)
+    lfd f8, TASK_FPR_8(r2)
+    lfd f9, TASK_FPR_9(r2)
+    lfd f10, TASK_FPR_10(r2)
+    lfd f11, TASK_FPR_11(r2)
+    lfd f12, TASK_FPR_12(r2)
+    lfd f13, TASK_FPR_13(r2)
+    lfd f14, TASK_FPR_14(r2)
+    lfd f15, TASK_FPR_15(r2)
+    lfd f16, TASK_FPR_16(r2)
+    lfd f17, TASK_FPR_17(r2)
+    lfd f18, TASK_FPR_18(r2)
+    lfd f19, TASK_FPR_19(r2)
+    lfd f20, TASK_FPR_20(r2)
+    lfd f21, TASK_FPR_21(r2)
+    lfd f22, TASK_FPR_22(r2)
+    lfd f23, TASK_FPR_23(r2)
+    lfd f24, TASK_FPR_24(r2)
+    lfd f25, TASK_FPR_25(r2)
+    lfd f26, TASK_FPR_26(r2)
+    lfd f27, TASK_FPR_27(r2)
+    lfd f28, TASK_FPR_28(r2)
+    lfd f29, TASK_FPR_29(r2)
+    lfd f30, TASK_FPR_30(r2)
+    lfd f31, TASK_FPR_31(r2)
+
+    b 2b
+
+    ;// @fn dispatch_task
+    ;// Loads context from task structure and performs rfi.
+    ;//
+    ;// Requires:
+    ;//     * SPRG3 -> Task Structure.
+    ;//     * Current contents of registers are not needed.
+hyp_dispatch_task:
+.global hyp_dispatch_task
+    mfsprg3 r1          ;// Load task structure to r1.
+
+    ldarx r0, TASK_CPUPTR, r1   ;// Clear the reservation by loading / storing
+    stdcx. r0, TASK_CPUPTR, r1  ;// the CPU pointer in the task.
+
+    ;// Check if FP enabled, load context.
+    ld r2, TASK_FP_CONTEXT(r1)
+    cmpwi cr0, r2, 0
+    bne- 1f
+2:
+    ;// Restore GPRs from context.
+    ld r0, TASK_GPR_0(r1)       ;// GPR0
+    ld r2, TASK_GPR_2(r1)       ;// GPR2
+    ld r3, TASK_GPR_3(r1)       ;// GPR3
+    ld r4, TASK_GPR_4(r1)       ;// GPR4
+    ld r5, TASK_GPR_5(r1)       ;// GPR5
+    ld r6, TASK_GPR_6(r1)       ;// GPR6
+    ld r7, TASK_GPR_7(r1)       ;// GPR7
+    ld r8, TASK_GPR_8(r1)       ;// GPR8
+    ld r9, TASK_GPR_9(r1)       ;// GPR9
+    ld r10, TASK_GPR_10(r1)     ;// GPR10
+    ld r11, TASK_GPR_11(r1)     ;// GPR11
+    ld r12, TASK_GPR_12(r1)     ;// GPR12
+    ld r13, TASK_GPR_13(r1)     ;// GPR13
+    ld r14, TASK_GPR_14(r1)     ;// GPR14
+    ld r15, TASK_GPR_15(r1)     ;// GPR15
+    ld r16, TASK_GPR_16(r1)     ;// GPR16
+    ld r17, TASK_GPR_17(r1)     ;// GPR17
+    ld r18, TASK_GPR_18(r1)     ;// GPR18
+    ld r19, TASK_GPR_19(r1)     ;// GPR19
+    ld r20, TASK_GPR_20(r1)     ;// GPR20
+    ld r21, TASK_GPR_21(r1)     ;// GPR21
+    ld r22, TASK_GPR_22(r1)     ;// GPR22
+    ld r23, TASK_GPR_23(r1)     ;// GPR23
+    ld r24, TASK_GPR_24(r1)     ;// GPR24
+    ld r25, TASK_GPR_25(r1)     ;// GPR25
+    ld r26, TASK_GPR_26(r1)     ;// GPR26
+    ld r27, TASK_GPR_27(r1)     ;// GPR27
+
+    ld r28, TASK_LR(r1)     ;// Load from context: LR, CR, CTR, XER
+    ld r29, TASK_CR(r1)
+    ld r30, TASK_CTR(r1)
+    ld r31, TASK_XER(r1)
+    mtlr  r28           ;// Restore LR
+    mtcr  r29           ;// Restore CR
+    mtctr r30           ;// Restore CTR
+    mtxer r31           ;// Restore XER
+
+    ld r28, TASK_GPR_28(r1)     ;// GPR28
+    ld r29, TASK_GPR_29(r1)     ;// GPR29
+    ld r30, TASK_GPR_30(r1)     ;// GPR30
+    ld r31, TASK_GPR_31(r1)     ;// GPR31
+    ld r1, TASK_GPR_1(r1)       ;// GPR1
+
+                                ;//On HYP exceptions we don't task
+                                ;//switch -- just jump back to where
+                                ;//we came from in HSRR0/HSRR1
+    hrfid                       ;// Execute task.
 
         ;// Load FP context.
 1:
@@ -725,14 +889,8 @@ intvect_system_reset_external:
     ;//    This function moves the hypervisor external interrupt regs
     ;//    into the external interrupt regs and then branches to the
     ;//    external interrupt handler
-intvect_hypervisor_external:
-    mtsprg1 r1          ;// Save off R1 temporarily.
-    mfspr r1, HSRR0     ;// Move HSRR0 -> SRR0.
-    mtsrr0 r1
-    mfspr r1, HSRR1     ;// Move HSRR1 -> SRR1.
-    mtsrr1 r1
-    mfsprg1 r1          ;// Restore R1 and use external interrupt handler
-    b intvect_external
+intvect_hyp_external_stub:
+HYP_INTERRUPT_NOADDR(external)
 
     ;// @fn system_call_fast_path
     ;// Handle fast path system calls.
@@ -905,14 +1063,8 @@ UNIMPL_INTERRUPT_NOADDR(hype_maint, 0xE60)
 ;// exceptions, instead of the SRR[01] registers that the normal exception
 ;// code deals with.  Copy the contents of HSSR[01] -> SRR[01] first.
 ;//
-intvect_syscall_hype_doorbell_stub2:
-    mtsprg0 r1
-    mfspr r1,HSRR0
-    mtsrr0 r1
-    mfspr r1,HSRR1
-    mtsrr1 r1
-    mfsprg0 r1
-STD_INTERRUPT_NOADDR(hype_doorbell)
+intvect_hyp_doorbell_stub:
+HYP_INTERRUPT_NOADDR(doorbell)
 
 UNIMPL_INTERRUPT_NOADDR(perf_monitor, 0xF00)
 UNIMPL_INTERRUPT_NOADDR(vector_unavail, 0xF20)

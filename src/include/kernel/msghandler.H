@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -140,7 +142,7 @@ class MessageHandler
          *  blocked.  The task passed as a parameter, if not NULL, will be
          *  deferred.
          */
-        void sendMessage(msg_sys_types_t i_type, void* i_key,
+        virtual void sendMessage(msg_sys_types_t i_type, void* i_key,
                          void* i_data, task_t* i_task);
 
         /** @brief 'Handle response' interface.
@@ -180,7 +182,7 @@ class MessageHandler
          */
         int recvMessage(msg_t* i_msg);
 
-    private:
+    protected:
             /** Pointer to the subsystem lock. */
         Spinlock* const iv_lock;
             /** Message queue to relay messages to. */

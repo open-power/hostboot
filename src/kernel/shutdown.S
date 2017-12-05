@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -23,6 +23,9 @@
 #
 # IBM_PROLOG_END_TAG
 .include "kernel/ppcconsts.S"
+
+.set P9_URMOR_OPAL_HACK,   0x7c997ba6
+
 
 #define KERNEL_BARRIER(addr, count, temp) \
         /*     Increment thread count. */ \
@@ -56,7 +59,7 @@
     ;//     <sync barrier 1>
     ;//     All nodes have reported cpu_count
     ;//     <sync barrier 2>
-    ;//     Thread0 on each core updates HRMOR.
+    ;//     Thread0 on each core updates HRMOR & URMOR
     ;//     <sync barrier 3>
     ;//     All threads execute - isync ; slbia ; isync
     ;//     <sync barrier 4>
@@ -72,6 +75,7 @@
     ;// @param[in] r6 - Payload Data
     ;// @param[in] r7 - PIR of local master cpu - only set by local master
     ;// @param[in] r8 - System address of start_payload_data_area
+    ;// @param[in] r9 - Perform URMOR Hack
     ;//
 .global kernel_shutdown
 kernel_shutdown:
@@ -81,12 +85,12 @@ kernel_shutdown:
         ;// Retrieve existing HRMOR.
     mfspr r0, HRMOR
         ;// Determine physical address of EA[0]=1 mode instruction.
-    lis r9, kernel_shutdown_ea0_1_mode@h
-    ori r9, r9, kernel_shutdown_ea0_1_mode@l
-    or r9, r9, r0       ;// Apply HRMOR.
-    or r9, r9, r10      ;// Apply EA[0] = 1.
+    lis r12, kernel_shutdown_ea0_1_mode@h
+    ori r12, r12, kernel_shutdown_ea0_1_mode@l
+    or r12, r12, r0       ;// Apply HRMOR.
+    or r12, r12, r10      ;// Apply EA[0] = 1.
         ;// Jump to enter EA[0] = 1
-    mtlr r9
+    mtlr r12
     blr
 kernel_shutdown_ea0_1_mode:
 
@@ -113,6 +117,26 @@ kernel_shutdown_ea0_1_mode:
     ;// threads update HRMOR so we don't have to know about
     ;// fused/normal core differences
     mtspr HRMOR, r4
+
+    ;// Check to see if SMF bit is off... if so skip
+    ;// URMOR set as don't have permissions
+    mfmsr r10
+    andis. r10, r10, 64  ;// Check if 41 (SMF) is on
+    beq skip_urmor       ;// if result of AND = zero then CR[EQ] bit set
+
+    ;// See if we need to do the URMOR hack
+    ;// Due to bug in P9, need to subtract op-code
+
+    cmpwi cr0, r9, 0x1   ;// Hack requested == 0x1
+    bne cr0, skip_urmor_hack
+
+    lis r10, P9_URMOR_OPAL_HACK@h
+    ori r10, r10, P9_URMOR_OPAL_HACK@l
+    sub r4,r4,r10
+skip_urmor_hack:
+    mtspr URMOR, r4
+skip_urmor:
+
 1:
         ;// Perform barrier - 3
     addi r8, r8, 8

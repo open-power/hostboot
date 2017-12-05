@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2015
+# Contributors Listed Below - COPYRIGHT 2010,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -167,6 +167,11 @@
                 .set PTCR,464
                 .set HID0,1008
                 .set PIR, 1023
+                .set URMOR,505
+                .set USRR0,506
+                .set USRR1,507
+                .set USPRG0,496
+                .set USPRG1,497
 
 #*--------------------------------------------------------------------*#
 #*  Task offset Constants                                             *#

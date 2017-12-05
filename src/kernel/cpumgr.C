@@ -55,6 +55,11 @@ size_t CpuManager::cv_cpuSeq = 0;
 uint8_t CpuManager::cv_forcedMemPeriodic = 0;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
+const uint64_t WAKEUP_MSR_VALUE  = 0x9000000000001000;
+const uint64_t WAKEUP_LPCR_VALUE = 0x000000000000F00A;
+const uint64_t WAKEUP_RPR_VALUE  = 0x0001032021223F;
+const uint64_t MSR_SMF_MASK      = 0x0000000000400000;
+
 CpuManager::CpuManager() : iv_lastStartTimebase(0)
 {
     for (int i = 0; i < KERNEL_MAX_SUPPORTED_NODES; i++)
@@ -331,6 +336,8 @@ void CpuManager::activateCPU(cpu_t * i_cpu)
     uint64_t msr = getMSR();
     msr |= 0x1000; // MSR[ME] is not saved on initial wakeup, but we set on
                    // entering userspace, so ignore this bit in assert.
+    msr &= ~MSR_SMF_MASK; //Don't check SMF as it is variable
+                          //ie keep HB code agnostic
     kassert(WAKEUP_MSR_VALUE == msr);
     setLPCR(WAKEUP_LPCR_VALUE);
     setRPR(WAKEUP_RPR_VALUE);

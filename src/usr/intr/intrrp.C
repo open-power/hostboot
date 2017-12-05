@@ -3140,9 +3140,11 @@ errlHndl_t IntrRp::setXiveIvpeTmBAR1(TARGETING::Target * i_target,
         //Map Memory Internally for HB and store in member variable
         void *l_xiveTmBar1Address =
                 reinterpret_cast<void *>(l_baseBarValue);
+        // SMF doesn't allow the user space to touch Ultravisor page (page 0),
+        // so we have to use page 1. Map 2 page sizes to be able to access page1
         iv_xiveTmBar1Address =
                reinterpret_cast<uint64_t *>
-               (mmio_dev_map(l_xiveTmBar1Address, PAGE_SIZE));
+               (mmio_dev_map(l_xiveTmBar1Address, PAGE_SIZE*2));
 
     } while(0);
 

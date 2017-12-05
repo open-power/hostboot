@@ -44,7 +44,8 @@
 #include <bootloader/hbblreasoncodes.H>
 
 extern "C" void task_end_stub();
-extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset);
+extern "C" void enterHBB(uint64_t i_hbb_hrmor, uint64_t i_hbb_offset,
+                         uint64_t i_urmor_hack_req);
 
 #define printk(format...)
 
@@ -136,6 +137,19 @@ namespace Bootloader{
         register uint64_t hrmor = 0;
         asm volatile("mfspr %0, 313" : "=r" (hrmor));
         return hrmor;
+    }
+
+    /**
+     * @brief Get the current PVR of the chip
+     *
+     * Used to perform SMF workarounds for p9 chips
+     */
+    ALWAYS_INLINE
+      inline uint64_t getPVR()
+    {
+        register uint64_t pvr = 0;
+        asm volatile("mfspr %0, 287" : "=r" (pvr));
+        return pvr;
     }
 
 

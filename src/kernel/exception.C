@@ -38,6 +38,8 @@
 #include <kernel/hbterminatetypes.H>
 #include <kernel/kernel_reasoncodes.H>
 #include <kernel/misc.H>
+#include <kernel/cpumgr.H>
+#include <kernel/scheduler.H>
 
 
 namespace ExceptionHandles
@@ -405,6 +407,25 @@ void kernel_execute_external()
     // would have attempted to execute next
     // SRR1 [33:36,42:47] set to zero
     //      all others copied from MSR
+    InterruptMsgHdlr::handleInterrupt();
+}
+
+extern "C"
+void kernel_execute_hyp_external()
+{
+    // SRR0 set to the effective addr the thread
+    // would have attempted to execute next
+    // SRR1 [33:36,42:47] set to zero
+    //      all others copied from MSR
+
+    // Mustn't switch tasks if external interrupt due to
+    // the fact external interrupts come in as HYP exceptions
+    // and all other come in as regular exceptions.  If HYP
+    // comes on top of regular... need to leave existing task
+    // as is. The task switching is performed as part of the
+    // custom sendMessage in InterruptMsgHdlr.
+
+    //Do work
     InterruptMsgHdlr::handleInterrupt();
 }
 

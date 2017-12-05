@@ -35,6 +35,8 @@
 #include <lpc_const.H>
 #include <pnor_utils.H>
 #include <arch/memorymap.H>
+#include <arch/pvrformat.H>
+
 
 #include <ecc.H>
 
@@ -530,8 +532,16 @@ namespace Bootloader{
                 writeScratchReg(MMIO_SCRATCH_HOSTBOOT_ACTIVE,
                                 hostboot_string);
 
+                //Determine if P9N or P9C and apply URMOR hack
+                uint64_t l_urmor_hack_required = 0x0;
+                PVR_t l_pvr(getPVR());
+                if((l_pvr.chipFamily == PVR_t::P9_ALL))
+                {
+                    l_urmor_hack_required = 1;
+                }
+
                 // Start executing HBB
-                enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET);
+                enterHBB(HBB_HRMOR, HBB_RUNNING_OFFSET, l_urmor_hack_required);
             }
             else
             {

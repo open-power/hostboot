@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -39,12 +41,12 @@ class MiscTest : public CxxTest::TestSuite
         /** Tests for cpu_spr_value() */
         void testCpuSprValue()
         {
-            if (CpuManager::WAKEUP_MSR_VALUE != cpu_spr_value(CPU_SPR_MSR))
+            if (WAKEUP_MSR_VALUE != cpu_spr_value(CPU_SPR_MSR))
             {
                 TS_FAIL("MSR value is not as expected.");
             }
 
-            if (CpuManager::WAKEUP_LPCR_VALUE != cpu_spr_value(CPU_SPR_LPCR))
+            if (WAKEUP_LPCR_VALUE != cpu_spr_value(CPU_SPR_LPCR))
             {
                 TS_FAIL("LPCR value is not as expected.");
             }

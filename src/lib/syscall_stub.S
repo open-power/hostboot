@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2010,2014
+# Contributors Listed Below - COPYRIGHT 2010,2018
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +41,7 @@ _syscall4:
 _syscall5:
 _syscall6:
 _syscall7:
-    sc
+    sc 2
     blr
 
 .global _syscall0_nr
@@ -59,6 +61,6 @@ _syscall4_nr:
 _syscall5_nr:
 _syscall6_nr:
 _syscall7_nr:
-    sc
+    sc 2
 1:
     b 1b
