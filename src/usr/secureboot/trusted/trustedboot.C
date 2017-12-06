@@ -1156,6 +1156,8 @@ void tpmVerifyFunctionalTpmExists()
                                          HWAS::SRCI_PRIORITY_LOW);
                 err->collectTrace( SECURE_COMP_NAME );
                 err->collectTrace(TRBOOT_COMP_NAME);
+                err->collectTrace( I2C_COMP_NAME );
+                err->collectTrace( TPMDD_COMP_NAME );
                 uint32_t errPlid = err->plid();
 
                 // HW callout TPMs

@@ -549,7 +549,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
                                             size_t& o_dataSize)
 {
     errlHndl_t errhdl = NULL;
-    TRACFCOMP( g_trac_runtime, "RUNTIME::getHostDataSection( i_section=%d, i_instance=%d )", i_section, i_instance );
+    TRACFCOMP( g_trac_runtime, ENTER_MRK"getHostDataSection> i_section=%d, i_instance=%d", i_section, i_instance );
 
     do
     {
@@ -921,7 +921,7 @@ errlHndl_t hdatService::getHostDataSection( SectionId i_section,
         }
     } while(0);
 
-    TRACFCOMP( g_trac_runtime, "getHostDataSection> o_dataAddr=0x%X, o_dataSize=%d", o_dataAddr, o_dataSize );
+    TRACFCOMP( g_trac_runtime, EXIT_MRK"getHostDataSection> o_dataAddr=0x%X, o_dataSize=%d", o_dataAddr, o_dataSize );
 
     return errhdl;
 }

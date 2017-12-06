@@ -206,7 +206,7 @@ enum BlockPriority
  *  Need to add (ATTR_HB_HRMOR_NODAL_BASE * hbinstance_num) to this
  *  address to get the physical address
  */
-#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (96 * MEGABYTE)
+#define VMM_INTERNODE_PRESERVED_MEMORY_ADDR (120 * MEGABYTE)
 
 /**
  * Test Constants
@@ -222,6 +222,31 @@ enum BlockPriority
  * Physical Memory Constants
  */
 
+/** Layout
+ * 0MB-4MB: reserved/open
+ * 4MB-87MB:    MCL_ADDR, MCL_TMP_ADDR, HDAT_TMP_ADDR
+ * 88MB-120MB:  TCE Table (needs to be 4-byte aligned)
+ * 120MB:       VMM_INTERNODE_PRESERVED_MEMORY_ADDR (see above)
+ * 128MB-256MB: See HB_HRMOR info above (with HOMERs, OCC, etc)
+ */
+
+/** Two memory locations for MCL processing **/
+// Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
+// Location for the MCL itself to sit in.
+#define MCL_ADDR (4*MEGABYTE)
+#define MCL_SIZE (16*KILOBYTE)
+// Location for PHYP to be loaded into and reused for all Master Container Lids
+// Verification is done in a temporary, non-secure area of mainstore memory,
+// then relocated to its final, secure location in mainstore.
+#define MCL_TMP_ADDR (MCL_ADDR + MCL_SIZE)
+#define MCL_TMP_SIZE ( (64 * MEGABYTE) + PAGESIZE )
+
+// Location for HDAT to be loaded into via TCEs by FSP
+// Verification is done in a temporary, non-secure area of mainstore memory,
+// then relocated to its final, secure location in mainstore.
+#define HDAT_TMP_ADDR (MCL_TMP_ADDR + MCL_TMP_SIZE)
+#define HDAT_TMP_SIZE (16 * MEGABYTE)
+
 /** Physical memory location of the TCE Table */
 /** - needs to be aligned on 4MB boundary     */
 #define TCE_TABLE_ADDR  (88*MEGABYTE)
@@ -235,15 +260,6 @@ enum BlockPriority
 
 #define UNSECURE_MEM_REGION_SIZE_TEST (1*KILOBYTE)
 
-/** Two memory locations for MCL processing **/
-// Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
-// Location for the MCL itself to sit in.
-#define MCL_ADDR (20*MEGABYTE)
-#define MCL_SIZE (16*KILOBYTE)
-// Location for PHYP to be loaded into and reused for all Master Container Lids
-// Verification is done in the temp space and then loaded into mainstore memory
-#define MCL_TMP_ADDR (MCL_ADDR + MCL_SIZE)
-#define MCL_TMP_SIZE ( (64 * MEGABYTE) + PAGESIZE )
 
 /** PreVerifiedLidMgr test space */
 #define PREVERLIDMGR_TEST_ADDR  (512*MEGABYTE)

@@ -120,8 +120,12 @@ class UtilTceMgr
     /** size of the Tce Table */
     size_t iv_tceTableSize;
 
+    /** Tokens for PAYLOAD and HDAT entries in the TCE Table */
+    uint32_t iv_payloadToken;
+    uint32_t iv_hdatToken;
+
     /* Cache of starting addresses of allocated TCEs and their
-     *  tokens (starting entry in the TCE Table) and size
+     *  tokens ((starting entry in the TCE Table) * PAGESIZE) and size
      * Indexed by token - the position of the first entry of the TCE Table
      * Returns the starting address and size of the memory allocated by the
      *  entries in the TCE Table
@@ -144,6 +148,12 @@ class UtilTceMgr
     {
         TAR_TCE_ENTRIES_512K = 0b100,  // TAR bits 61:63=0b100 for 512K entries
         PHBSECURE_TCE_ENABLE = 0x2000000000000000,
+    };
+
+    /** Values related to tokens */
+    enum tokenValues : uint32_t
+    {
+        INVALID_TOKEN_VALUE = 0xFFFFFFFF,
     };
 
     /**
@@ -240,9 +250,11 @@ class UtilTceMgr
      *                     Size must be less than (512K * PAGESIZE) or will fail
      *                     Assert if not greater than zero
      * @param[out] o_startingToken - Starting Entry into the table.
-     *                               (This is an offset into the array based on
-     *                                the TCE index * PAGESIZE.  Each TCE entry
-     *                                maps to a  pagesize of memory)
+     * @param[out] o_startingToken - Key to the Starting Entry into the table.
+     *                               This is an offset into the array based on the
+     *                                 TCE Index * PAGESIZE.
+     *                               FSP uses the token as a DMA Address.
+     *                               Each TCE entry maps to a pagesize of memory.
      *
      * Note:  First time this is called will cause TCE table to be created and
      *        the Processors to be setup to point at the TCE table
@@ -286,6 +298,42 @@ class UtilTceMgr
      *
      */
     errlHndl_t initTceInHdw();
+
+
+    /** Values related to tokens */
+    enum tokenLabels
+    {
+        PAYLOAD_TOKEN = 0x0,
+        HDAT_TOKEN    = 0x1,
+    };
+
+    /**
+     * @brief Returns one of two internally stored tokens
+     *
+     * @param[in] i_tokenLabel - Specifies which token to return
+     *                           Assert if neither PAYLOAD_TOKEN nor
+     *                           HDAT_TOKEN
+     *
+     * @return uint32_t - Return specified token
+     *
+     */
+    uint32_t getToken(tokenLabels i_tokenLabel);
+
+    /**
+     * @brief Sets one of two internally stored tokens
+     *
+     * @param[in] i_tokenLabel - Specifies which token to set
+     *                           Assert if neither PAYLOAD_TOKEN nor
+     *                           HDAT_TOKEN
+     *
+     * @param[in] i_tokenValue - Value to be set
+     *
+     * @return uint32_t - Set specified token
+     *
+     */
+    void setToken(tokenLabels i_tokenLabel,
+                  uint32_t i_tokenValue);
+
 
 }; // class UtilTceMgr
 

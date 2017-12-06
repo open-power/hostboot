@@ -63,6 +63,7 @@ namespace ISTEP
         MOD_SBE_GET_FFDC_HANDLER                          = 0x1C,
         MOD_SET_IPL_PARMS                                 = 0x1D,
         MOD_OCC_XSTOP_HANDLER                             = 0x1E,
+        MOD_VERIFY_AND_MOVE_PAYLOAD                       = 0x1F,
     };
 
     /**

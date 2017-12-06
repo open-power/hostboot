@@ -328,7 +328,6 @@ void MasterContainerLidMgr::printCompInfoCache()
 errlHndl_t MasterContainerLidMgr::processComponents()
 {
     errlHndl_t l_errl = nullptr;
-
     for (auto & compInfoPair : iv_compInfoCache)
     {
         // Skip the MCL itself as it's already been processed
@@ -377,7 +376,11 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
         {
             // Skip loading, but still process POWERVM (PHYP) component
             l_skipLoad = true;
-            UTIL_FT("MasterContainerLidMgr::processComponent skip load but processing POWERVM component");
+
+            // @TODO RTC 168745 - Handle POWERVM Correctly
+            // UTIL_FT("MasterContainerLidMgr::processComponent skip load but processing POWERVM component");
+            UTIL_FT("MasterContainerLidMgr::processComponent - skip loading and processing of POWERVM component");
+            break;
         }
         else
         {

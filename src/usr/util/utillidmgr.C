@@ -35,6 +35,7 @@
 #include "utilbase.H"
 #include <initservice/initserviceif.H>
 #include <sys/mm.h>
+#include <util/align.H>
 
 #include <config.h>
 #ifdef CONFIG_SECUREBOOT
@@ -112,7 +113,6 @@ errlHndl_t UtilLidMgr::getLidSize(size_t& o_lidSize)
         //ask the FSP for it.
 
         //Send message to FSP asking for info on the current LID.
-
         // allocate message buffer
         // buffer will be initialized to zero by msg_allocate()
         if (iv_spBaseServicesEnabled)
@@ -353,8 +353,12 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     uint8_t* dataPtr = nullptr;
     void* copyOffset = nullptr;
     bool img_in_pnor = false;
+    bool use_tces = 0;
     bool tces_allocated = false;
     uint32_t tceToken = 0;
+    uint32_t dmaAddr = 0;
+    void* tceStartAddr = nullptr;
+    uint64_t tceSize = 0;
 
     do{
         //////////////////////////////////////////////////
@@ -371,12 +375,34 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
         //Image not in PNOR, request from FSP.
         if(iv_spBaseServicesEnabled)
         {
+            use_tces = TCE::utilUseTcesForDmas();
+
             // If using TCEs, setup TCE Table for FSP to use
-            if (TCE::utilUseTcesForDmas())
+            if (use_tces)
             {
-                // Use Preverification Location and Size
-                errl = TCE::utilAllocateTces(MCL_TMP_ADDR,
-                                             MCL_TMP_SIZE,
+                // Assume caller passed in Virtual Address that was already
+                // backed to Physical Memory
+                UTIL_FT("getLid: requesting TCEs for i_dest=0x%.16llX, i_destSize=0x%X (lidId=0x%X)", i_dest, i_destSize, iv_lidId);
+
+                // Need to Allocate TCEs on Page-Aligned Memory
+                size_t i_dest_remainder = reinterpret_cast<uint64_t>(i_dest)
+                                          % PAGESIZE;
+
+                if (i_dest_remainder != 0)
+                {
+                    tceStartAddr = reinterpret_cast<void*>(
+                                     ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(i_dest)));
+                    tceSize = i_destSize + i_dest_remainder;
+                    UTIL_DT("getLid: requesting non-page-aligned i_dest (%p): adjusted TCE tceStartAddr = %p, tceSize=0x%X", i_dest, tceStartAddr, tceSize);
+                }
+                else
+                {
+                    tceStartAddr = i_dest;
+                    tceSize = i_destSize;
+                }
+
+                errl = TCE::utilAllocateTces(mm_virt_to_phys(tceStartAddr),
+                                             tceSize,
                                              tceToken);
                 if(errl)
                 {
@@ -384,6 +410,10 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                     break;
                 }
                 tces_allocated = true;
+
+                // Update dmaAddr that FSP needs to use, if necessary
+                dmaAddr = tceToken + i_dest_remainder;
+                UTIL_DT("getLid: got back tceToken=0x%.16llX. DMA_Addr=0x%.16llX", tceToken, dmaAddr);
             }
 
             errl = createMsgQueue();
@@ -402,7 +432,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
 
             UTILLID_ADD_LID_ID( iv_lidId, l_pMsg->data[0] );
             UTILLID_ADD_HEADER_FLAG( 0 , l_pMsg->data[0] );
-            UTILLID_ADD_TCE_TOKEN( tceToken ,  l_pMsg->data[1] );
+            UTILLID_ADD_TCE_TOKEN( dmaAddr ,  l_pMsg->data[1] );
 
             errl = sendMboxMessage( SYNCHRONOUS, l_pMsg );
             if(errl)
@@ -444,6 +474,13 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                 break;
             }
 
+            // In TCE Mode FSP DMAs the entire LID before returning synchronus
+            // message above with the SEND_TO_HB message type
+            if (use_tces && (l_pMsg->type == UTILLID::SEND_TO_HB))
+            {
+                UTIL_DT("getLid: Using TCEs and got back UTILLID::SEND_TO_HB: transfer complete");
+                break;
+            }
 
             //Now wait for FSP to send the LID page-by-page.
             do{
@@ -563,7 +600,6 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
                 }
 
             }while(transferred_data < iv_lidSize);
-
         }
         if(errl)
         {
@@ -576,7 +612,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
     {
         // Use Preverification Location and Size
         auto tce_errl = TCE::utilDeallocateTces(tceToken,
-                                                MCL_TMP_SIZE);
+                                                tceSize);
 
         if(tce_errl)
         {
@@ -592,6 +628,7 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize)
             {
                 // Set errl to tce_errl
                 errl = tce_errl;
+                tce_errl = nullptr;
             }
         }
     }
