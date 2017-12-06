@@ -54,6 +54,7 @@
 #include <arch/pvrformat.H>
 #include <config.h>
 #include <p9_misc_scom_addresses.H>
+#include <p9n2_misc_scom_addresses_fld.H>
 #include <util/utilmbox_scratch.H>
 
 #define INTR_TRACE_NAME INTR_COMP_NAME
@@ -204,9 +205,46 @@ errlHndl_t IntrRp::resetIntpForMpipl()
     return err;
 }
 
+
+errlHndl_t setHbModeOnP3PCReg()
+{
+    errlHndl_t l_err = nullptr;
+    do{
+        TARGETING::TargetHandleList l_funcProcs;
+        getAllChips(l_funcProcs, TYPE_PROC);
+        uint64_t  HOSTBOOT_MODE_MASK = 0x8000000000000000ull >> P9N2_PU_INT_PC_GLOBAL_CFG_HOSTBOOT_MODE;
+        uint64_t scom_data = 0;
+        size_t    DATA_SIZE          = sizeof(scom_data);
+        //Need to set this bit on all functional processors
+        for(const auto & l_procChip : l_funcProcs)
+        {
+            l_err = deviceRead(l_procChip,
+                                &scom_data,
+                                DATA_SIZE,
+                                DEVICE_SCOM_ADDRESS(PU_INT_PC_GLOBAL_CFG));
+            if( l_err)
+            {
+                break;
+            }
+
+            scom_data |= HOSTBOOT_MODE_MASK;
+            l_err = deviceWrite(l_procChip,
+                                &scom_data,
+                                DATA_SIZE,
+                                DEVICE_SCOM_ADDRESS(PU_INT_PC_GLOBAL_CFG));
+            if( l_err)
+            {
+                break;
+            }
+        }
+    }while(0);
+
+    return l_err;
+}
+
 errlHndl_t IntrRp::_init()
 {
-    errlHndl_t l_err = NULL;
+    errlHndl_t l_err = nullptr;
 
     // get the PIR
     // Which ever cpu core this is running on is the MASTER cpu
@@ -259,6 +297,15 @@ errlHndl_t IntrRp::_init()
         {
             TRACFCOMP(g_trac_intr,
               "IntrRp::_init() Error setting Common Proc Interrupt BARs.");
+            break;
+        }
+
+        l_err = setHbModeOnP3PCReg();
+
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_intr,
+                      "IntrRp::_init() Error setting Hostboot Mode bit on in P3PC registers");
             break;
         }
 
