@@ -392,6 +392,45 @@
     <id>CENTAUR_ECID_FRU_ID</id>
   </attribute>
   <attribute>
+    <id>MSS_VOLT_VDD_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_AVDD_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_VCS_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_VPP_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_VDDR_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_VDD_OFFSET_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_AVDD_OFFSET_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>MSS_VOLT_VCS_OFFSET_MILLIVOLTS</id>
+  </attribute>
+  <attribute>
+    <id>VDD_ID</id>
+  </attribute>
+  <attribute>
+    <id>AVDD_ID</id>
+  </attribute>
+  <attribute>
+    <id>VCS_ID</id>
+  </attribute>
+  <attribute>
+    <id>VPP_ID</id>
+  </attribute>
+  <attribute>
+    <id>VDDR_ID</id>
+  </attribute>
+  <attribute>
     <id>VPD_REC_NUM</id>
   </attribute>
   <attribute>
