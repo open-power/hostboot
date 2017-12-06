@@ -3039,6 +3039,25 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
         }
 #endif
 
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
+
+        // If no error and a key transition in progress, recursively call this
+        // function for the other SEEPROM
+        if ( ( err == nullptr ) &&
+             ( io_sbeState.seeprom_side_to_update == EEPROM::SBE_PRIMARY ) &&
+             ( g_do_hw_keys_hash_transition) )
+        {
+            io_sbeState.seeprom_side_to_update = EEPROM::SBE_BACKUP;
+            TRACFCOMP( g_trac_sbe,
+                       "updateSeepromSide(): Recursively calling itself: "
+                       "HUID=0x%.8X, side=%d",
+                       TARGETING::get_huid(io_sbeState.target),
+                       io_sbeState.seeprom_side_to_update);
+
+            err = updateSeepromSide(io_sbeState);
+        }
+#endif
+
 #ifdef CONFIG_SBE_UPDATE_INDEPENDENT
         //If MFG flag is set to indicate update both side of SBE
         //Update both sides of SBE - even in indepent mode
@@ -3500,236 +3519,155 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                                                i_system_situation);
 
 #elif CONFIG_SBE_UPDATE_SEQUENTIAL
-            // Updating the SEEPROMs 1-at-a-time
-            switch ( i_system_situation )
+
+            // On a secure boot key transition, force both sides to update
+            if (g_do_hw_keys_hash_transition)
             {
+                decisionTreeForUpdatesSimultaneous(l_actions,
+                                                   io_sbeState,
+                                                   i_system_situation);
+            }
+            else
+            {
+                // Updating the SEEPROMs 1-at-a-time
+                switch ( i_system_situation )
+                {
 
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_TEMP  |
-                       SITUATION_CUR_IS_DIRTY |
-                       SITUATION_ALT_IS_DIRTY  ) :
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_TEMP  |
+                           SITUATION_CUR_IS_DIRTY |
+                           SITUATION_ALT_IS_DIRTY  ) :
 
-                    // 0xE0: cur=temp, cur=dirty, alt=dirty
-                    // Treat like 0xC0
-                    // not sure why we booted off of temp
+                        // 0xE0: cur=temp, cur=dirty, alt=dirty
+                        // Treat like 0xC0
+                        // not sure why we booted off of temp
 
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_TEMP  |
-                       SITUATION_CUR_IS_DIRTY |
-                       SITUATION_ALT_IS_CLEAN  ) :
-
-
-                    // 0xC0: cur=temp, cur=dirty, alt=clean
-                    // Bad path: we shouldn't be booting to dirty side
-                    // Update Alt and re-IPL to it
-                    // Update MVPD flag: make cur=perm (because we know it
-                    //  works a bit)
-
-                    l_actions |= IPL_RESTART;
-                    l_actions |= DO_UPDATE;
-                    l_actions |= UPDATE_MVPD;
-                    l_actions |= UPDATE_SBE;
-
-                    // Set Update side to alt
-                    io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side ==
-                                              SBE_SEEPROM0 )
-                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
-
-                    // Update MVPD PERMANENT flag: make cur=perm
-                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
-                         // clear bit 0
-                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
-                         : //set bit 0
-                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
-
-                    // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
-                         // clear bit 1
-                         io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
-                         : //set bit 1
-                         io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_TEMP  |
+                           SITUATION_CUR_IS_DIRTY |
+                           SITUATION_ALT_IS_CLEAN  ) :
 
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "cur=temp/dirty(%d). Update alt. Re-IPL. "
-                               "Update MVPD flag "
-                               "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions,
-                               io_sbeState.mvpdSbKeyword.flags);
+                        // 0xC0: cur=temp, cur=dirty, alt=clean
+                        // Bad path: we shouldn't be booting to dirty side
+                        // Update Alt and re-IPL to it
+                        // Update MVPD flag: make cur=perm (because we know it
+                        //  works a bit)
 
+                        l_actions |= IPL_RESTART;
+                        l_actions |= DO_UPDATE;
+                        l_actions |= UPDATE_MVPD;
+                        l_actions |= UPDATE_SBE;
 
-                    break;
+                        // Set Update side to alt
+                        io_sbeState.seeprom_side_to_update =
+                                    ( io_sbeState.alt_seeprom_side ==
+                                                  SBE_SEEPROM0 )
+                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_TEMP  |
-                       SITUATION_CUR_IS_CLEAN |
-                       SITUATION_ALT_IS_DIRTY  ) :
+                        // Update MVPD PERMANENT flag: make cur=perm
+                        ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                             // clear bit 0
+                             io_sbeState.mvpdSbKeyword.flags &=
+                                 ~PERMANENT_FLAG_MASK
+                             : //set bit 0
+                             io_sbeState.mvpdSbKeyword.flags |=
+                                 PERMANENT_FLAG_MASK;
 
-                    // 0xA0: cur=temp, cur=clean, alt=dirty
-                    // Common 2nd step of Code Update path
-                    // Update Alt and Continue IPL
-                    // Update MVPD flag: make cur=perm
+                        // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                        ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                             // clear bit 1
+                             io_sbeState.mvpdSbKeyword.flags &=
+                                 ~REIPL_SEEPROM_MASK
+                             : //set bit 1
+                             io_sbeState.mvpdSbKeyword.flags |=
+                                 REIPL_SEEPROM_MASK;
 
-                    l_actions |= DO_UPDATE;
-                    l_actions |= UPDATE_MVPD;
-                    l_actions |= UPDATE_SBE;
-
-                    // Set Update side to alt
-                    io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side ==
-                                              SBE_SEEPROM0 )
-                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
-
-
-                    // MVPD flag Update
-                    // Update MVPD flag make cur=perm
-                    ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
-                         // clear bit 0
-                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
-                         : // set bit 0
-                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
-
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "cur=temp/clean(%d), alt=dirty. "
-                               "Update alt. Continue IPL. Update MVPD flag."
-                               "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions,
-                               io_sbeState.mvpdSbKeyword.flags);
-
-                    break;
-
-
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_TEMP  |
-                       SITUATION_CUR_IS_CLEAN |
-                       SITUATION_ALT_IS_CLEAN  ) :
-
-                    // 0x80: cur=temp, cur=clean, alt=clean
-                    // Both sides are clean,
-                    // Not sure why cur=temp, but do nothing
-
-                    l_actions = CLEAR_ACTIONS;
-
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "Both sides clean-no updates. cur was temp(%d). "
-                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions);
-
-                    break;
-
-
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_PERM  |
-                       SITUATION_CUR_IS_DIRTY |
-                       SITUATION_ALT_IS_DIRTY  ) :
-
-                    // 0x60: cur=perm, cur=dirty, alt=dirty
-                    // Common situation: likely first step of code update
-                    // Update alt and re-ipl
-                    l_actions |= IPL_RESTART;
-                    l_actions |= DO_UPDATE;
-                    l_actions |= UPDATE_MVPD;
-                    l_actions |= UPDATE_SBE;
-
-                    // Set Update side to alt
-                    io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side ==
-                                              SBE_SEEPROM0 )
-                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
-
-                    // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
-                    ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
-                         // clear bit 1
-                         io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
-                         : // set bit 1
-                         io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
-
-                    // If istep mode, re-IPL bit won't be checked, so also
-                    // change perm flag to boot off of alt on next IPL
-                    if ( g_istep_mode )
-                    {
-                        // Update MVPD PERMANENT flag: make alt=perm
-                        (io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
-                         // clear bit 0
-                         io_sbeState.mvpdSbKeyword.flags &= ~PERMANENT_FLAG_MASK
-                         : //set bit 0
-                         io_sbeState.mvpdSbKeyword.flags |= PERMANENT_FLAG_MASK;
 
                         TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                                   "istep mode: update alt to perm, (sit="
-                                   "0x%.2X)",
+                                   "cur=temp/dirty(%d). Update alt. Re-IPL. "
+                                   "Update MVPD flag "
+                                   "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
                                    TARGETING::get_huid(io_sbeState.target),
-                                   i_system_situation);
-                    }
-
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "cur=perm/dirty(%d), alt=dirty. Update alt. re-"
-                               "IPL. (sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions,
-                               io_sbeState.mvpdSbKeyword.flags);
-
-                    break;
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions,
+                                   io_sbeState.mvpdSbKeyword.flags);
 
 
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_PERM  |
-                       SITUATION_CUR_IS_DIRTY |
-                       SITUATION_ALT_IS_CLEAN  ) :
-
-                    // 0x40: cur=perm, cur=dirty, alt=clean
-                    // Ask FSP if we just re-IPLed due to our request.
-                    // If Yes: Working PERM side is out-of-sync, so callout
-                    //         SBE code, but continue IPL on dirty image
-                    // If Not: Update alt and re-IPL
-
-                    if ( isIplFromReIplRequest() )
-                    {
-                        l_actions = CLEAR_ACTIONS;
-                        TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                                  "cur=perm/dirty(%d), alt=clean. On our Re-"
-                                  "IPL. Call-out SBE code but Continue IPL. "
-                                  "(sit=0x%.2X, act=0x%.8X)",
-                                  TARGETING::get_huid(io_sbeState.target),
-                                  io_sbeState.cur_seeprom_side,
-                                  i_system_situation, l_actions);
-
-                        /*@
-                         * @errortype
-                         * @moduleid     SBE_DECISION_TREE
-                         * @reasoncode   SBE_PERM_SIDE_DIRTY_BAD_PATH
-                         * @userdata1    System Situation
-                         * @userdata2    Update Actions
-                         * @devdesc      Bad Path in decisionUpdateTree:
-                         *               cur=PERM/DIRTY
-                         * @custdesc     A problem occurred while updating
-                         *               processor boot code.
-                         */
-                        err = new ErrlEntry(ERRL_SEV_RECOVERED,
-                                            SBE_DECISION_TREE,
-                                            SBE_PERM_SIDE_DIRTY_BAD_PATH,
-                                            TO_UINT64(i_system_situation),
-                                            TO_UINT64(l_actions));
-                        // Target isn't directly related to fail, but could be
-                        // useful to see how far we got before failing.
-                        ErrlUserDetailsTarget(io_sbeState.target
-                                              ).addToLog(err);
-                        err->collectTrace(SBE_COMP_NAME);
-                        err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
-                                                  HWAS::SRCI_PRIORITY_HIGH );
                         break;
 
-                    }
-                    else
-                    {
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_TEMP  |
+                           SITUATION_CUR_IS_CLEAN |
+                           SITUATION_ALT_IS_DIRTY  ) :
+
+                        // 0xA0: cur=temp, cur=clean, alt=dirty
+                        // Common 2nd step of Code Update path
+                        // Update Alt and Continue IPL
+                        // Update MVPD flag: make cur=perm
+
+                        l_actions |= DO_UPDATE;
+                        l_actions |= UPDATE_MVPD;
+                        l_actions |= UPDATE_SBE;
+
+                        // Set Update side to alt
+                        io_sbeState.seeprom_side_to_update =
+                                    ( io_sbeState.alt_seeprom_side ==
+                                                  SBE_SEEPROM0 )
+                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+
+
+                        // MVPD flag Update
+                        // Update MVPD flag make cur=perm
+                        ( io_sbeState.cur_seeprom_side == SBE_SEEPROM0 ) ?
+                             // clear bit 0
+                             io_sbeState.mvpdSbKeyword.flags &=
+                                 ~PERMANENT_FLAG_MASK
+                             : // set bit 0
+                             io_sbeState.mvpdSbKeyword.flags |=
+                                 PERMANENT_FLAG_MASK;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "cur=temp/clean(%d), alt=dirty. "
+                                   "Update alt. Continue IPL. Update MVPD flag."
+                                   "(sit=0x%.2X, act=0x%.8X flags=0x%.2X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions,
+                                   io_sbeState.mvpdSbKeyword.flags);
+
+                        break;
+
+
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_TEMP  |
+                           SITUATION_CUR_IS_CLEAN |
+                           SITUATION_ALT_IS_CLEAN  ) :
+
+                        // 0x80: cur=temp, cur=clean, alt=clean
+                        // Both sides are clean,
+                        // Not sure why cur=temp, but do nothing
+
+                        l_actions = CLEAR_ACTIONS;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "Both sides clean-no updates. cur was temp "
+                                   "(%d). Continue IPL. (sit=0x%.2X, "
+                                   "act=0x%.8X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions);
+
+                        break;
+
+
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_PERM  |
+                           SITUATION_CUR_IS_DIRTY |
+                           SITUATION_ALT_IS_DIRTY  ) :
+
+                        // 0x60: cur=perm, cur=dirty, alt=dirty
+                        // Common situation: likely first step of code update
                         // Update alt and re-ipl
                         l_actions |= IPL_RESTART;
                         l_actions |= DO_UPDATE;
@@ -3738,94 +3676,203 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
 
                         // Set Update side to alt
                         io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side ==
-                                              SBE_SEEPROM0 )
-                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+                                    ( io_sbeState.alt_seeprom_side ==
+                                                  SBE_SEEPROM0 )
+                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
                         // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
                         ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
-                          // clear bit 1
-                          io_sbeState.mvpdSbKeyword.flags &= ~REIPL_SEEPROM_MASK
-                          : // set bit 1
-                          io_sbeState.mvpdSbKeyword.flags |= REIPL_SEEPROM_MASK;
+                             // clear bit 1
+                             io_sbeState.mvpdSbKeyword.flags &=
+                                 ~REIPL_SEEPROM_MASK
+                             : // set bit 1
+                             io_sbeState.mvpdSbKeyword.flags |=
+                                 REIPL_SEEPROM_MASK;
 
-                        TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                                  "cur=perm/dirty(%d), alt=clean. Not our Re-"
-                                  "IPL. Update alt and MVPD. re-IPL. "
-                                  "(sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
-                                  TARGETING::get_huid(io_sbeState.target),
-                                  io_sbeState.cur_seeprom_side,
-                                  i_system_situation, l_actions,
-                                  io_sbeState.mvpdSbKeyword.flags);
+                        // If istep mode, re-IPL bit won't be checked, so also
+                        // change perm flag to boot off of alt on next IPL
+                        if ( g_istep_mode )
+                        {
+                            // Update MVPD PERMANENT flag: make alt=perm
+                            (io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                             // clear bit 0
+                             io_sbeState.mvpdSbKeyword.flags &=
+                                 ~PERMANENT_FLAG_MASK
+                             : //set bit 0
+                             io_sbeState.mvpdSbKeyword.flags |=
+                                 PERMANENT_FLAG_MASK;
+
+                            TRACFCOMP(g_trac_sbe,INFO_MRK"SBE Update tgt=0x%X: "
+                                      "istep mode: update alt to perm, (sit="
+                                      "0x%.2X)",
+                                      TARGETING::get_huid(io_sbeState.target),
+                                      i_system_situation);
+                        }
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "cur=perm/dirty(%d), alt=dirty. Update alt. "
+                                   "re-IPL. (sit=0x%.2X, act=0x%.8X, "
+                                   "flags=0x%.2X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions,
+                                   io_sbeState.mvpdSbKeyword.flags);
 
                         break;
-                    }
-
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_PERM  |
-                       SITUATION_CUR_IS_CLEAN |
-                       SITUATION_ALT_IS_DIRTY  ) :
-
-                    // 0x20: cur=perm, cur=clean, alt=dirty
-                    // Not sure why alt is dirty, but update alt and
-                    // continue IPL
-
-                    l_actions |= DO_UPDATE;
-                    l_actions |= UPDATE_SBE;
-
-                    // Set Update side to alt
-                    io_sbeState.seeprom_side_to_update =
-                                ( io_sbeState.alt_seeprom_side ==
-                                              SBE_SEEPROM0 )
-                                  ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
-
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "cur=perm/clean(%d), alt=dirty. "
-                               "Update alt. Continue IPL. "
-                               "(sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions);
-
-                    break;
 
 
-            ///////////////////////////////////////////////////////////////////
-                case ( SITUATION_CUR_IS_PERM  |
-                       SITUATION_CUR_IS_CLEAN |
-                       SITUATION_ALT_IS_CLEAN  ) :
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_PERM  |
+                           SITUATION_CUR_IS_DIRTY |
+                           SITUATION_ALT_IS_CLEAN  ) :
 
-                    // 0x0: cur=perm, cur=clean, alt=clean
-                    // Both sides are clean - no updates
-                    // Continue IPL
-                    l_actions = CLEAR_ACTIONS;
+                        // 0x40: cur=perm, cur=dirty, alt=clean
+                        // Ask FSP if we just re-IPLed due to our request.
+                        // If Yes: Working PERM side is out-of-sync, so callout
+                        //         SBE code, but continue IPL on dirty image
+                        // If Not: Update alt and re-IPL
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "Both sides clean-no updates. cur was perm(%d). "
-                               "Continue IPL. (sit=0x%.2X, act=0x%.8X)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               io_sbeState.cur_seeprom_side,
-                               i_system_situation, l_actions);
+                        if ( isIplFromReIplRequest() )
+                        {
+                            l_actions = CLEAR_ACTIONS;
+                            TRACFCOMP(g_trac_sbe, INFO_MRK"SBE Update "
+                                      "tgt=0x%X: cur=perm/dirty(%d), "
+                                      "alt=clean. On our Re-"
+                                      "IPL. Call-out SBE code but Continue "
+                                      "IPL. (sit=0x%.2X, act=0x%.8X)",
+                                      TARGETING::get_huid(io_sbeState.target),
+                                      io_sbeState.cur_seeprom_side,
+                                      i_system_situation, l_actions);
 
-                    break;
+                            /*@
+                             * @errortype
+                             * @moduleid     SBE_DECISION_TREE
+                             * @reasoncode   SBE_PERM_SIDE_DIRTY_BAD_PATH
+                             * @userdata1    System Situation
+                             * @userdata2    Update Actions
+                             * @devdesc      Bad Path in decisionUpdateTree:
+                             *               cur=PERM/DIRTY
+                             * @custdesc     A problem occurred while updating
+                             *               processor boot code.
+                             */
+                            err = new ErrlEntry(ERRL_SEV_RECOVERED,
+                                                SBE_DECISION_TREE,
+                                                SBE_PERM_SIDE_DIRTY_BAD_PATH,
+                                                TO_UINT64(i_system_situation),
+                                                TO_UINT64(l_actions));
+                            // Target isn't directly related to fail, but could
+                            // be useful to see how far we got before failing.
+                            ErrlUserDetailsTarget(io_sbeState.target
+                                                  ).addToLog(err);
+                            err->collectTrace(SBE_COMP_NAME);
+                            err->addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
+                                                      HWAS::SRCI_PRIORITY_HIGH);
+                            break;
 
-            ///////////////////////////////////////////////////////////////////
-                default:
+                        }
+                        else
+                        {
+                            // Update alt and re-ipl
+                            l_actions |= IPL_RESTART;
+                            l_actions |= DO_UPDATE;
+                            l_actions |= UPDATE_MVPD;
+                            l_actions |= UPDATE_SBE;
 
-                    l_actions = UNSUPPORTED_SITUATION;
+                            // Set Update side to alt
+                            io_sbeState.seeprom_side_to_update =
+                                    ( io_sbeState.alt_seeprom_side ==
+                                                  SBE_SEEPROM0 )
+                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
 
-                    TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
-                               "Unsupported Scenario.  Just Continue IPL. "
-                               "(sit=0x%.2X, act=0x%.8X, cur=%d)",
-                               TARGETING::get_huid(io_sbeState.target),
-                               i_system_situation, l_actions,
-                               io_sbeState.cur_seeprom_side);
+                            // Update MVPD RE-IPL SEEPROM flag: re-IPL on ALT:
+                            ( io_sbeState.alt_seeprom_side == SBE_SEEPROM0 ) ?
+                              // clear bit 1
+                              io_sbeState.mvpdSbKeyword.flags &=
+                                  ~REIPL_SEEPROM_MASK
+                              : // set bit 1
+                              io_sbeState.mvpdSbKeyword.flags |=
+                                  REIPL_SEEPROM_MASK;
 
-                    break;
+                            TRACFCOMP(g_trac_sbe,INFO_MRK"SBE Update tgt=0x%X: "
+                                      "cur=perm/dirty(%d), alt=clean. Not our "
+                                      "Re-IPL. Update alt and MVPD. re-IPL. "
+                                      "(sit=0x%.2X, act=0x%.8X, flags=0x%.2X)",
+                                      TARGETING::get_huid(io_sbeState.target),
+                                      io_sbeState.cur_seeprom_side,
+                                      i_system_situation, l_actions,
+                                      io_sbeState.mvpdSbKeyword.flags);
+
+                            break;
+                        }
+
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_PERM  |
+                           SITUATION_CUR_IS_CLEAN |
+                           SITUATION_ALT_IS_DIRTY  ) :
+
+                        // 0x20: cur=perm, cur=clean, alt=dirty
+                        // Not sure why alt is dirty, but update alt and
+                        // continue IPL
+
+                        l_actions |= DO_UPDATE;
+                        l_actions |= UPDATE_SBE;
+
+                        // Set Update side to alt
+                        io_sbeState.seeprom_side_to_update =
+                                    ( io_sbeState.alt_seeprom_side ==
+                                                  SBE_SEEPROM0 )
+                                    ? EEPROM::SBE_PRIMARY : EEPROM::SBE_BACKUP ;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "cur=perm/clean(%d), alt=dirty. "
+                                   "Update alt. Continue IPL. "
+                                   "(sit=0x%.2X, act=0x%.8X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions);
+
+                        break;
+
+
+                ////////////////////////////////////////////////////////////////
+                    case ( SITUATION_CUR_IS_PERM  |
+                           SITUATION_CUR_IS_CLEAN |
+                           SITUATION_ALT_IS_CLEAN  ) :
+
+                        // 0x0: cur=perm, cur=clean, alt=clean
+                        // Both sides are clean - no updates
+                        // Continue IPL
+                        l_actions = CLEAR_ACTIONS;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "Both sides clean-no updates. cur was "
+                                   "perm(%d). Continue IPL. (sit=0x%.2X, "
+                                   "act=0x%.8X)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   io_sbeState.cur_seeprom_side,
+                                   i_system_situation, l_actions);
+
+                        break;
+
+                ////////////////////////////////////////////////////////////////
+                    default:
+
+                        l_actions = UNSUPPORTED_SITUATION;
+
+                        TRACFCOMP( g_trac_sbe, INFO_MRK"SBE Update tgt=0x%X: "
+                                   "Unsupported Scenario.  Just Continue IPL. "
+                                   "(sit=0x%.2X, act=0x%.8X, cur=%d)",
+                                   TARGETING::get_huid(io_sbeState.target),
+                                   i_system_situation, l_actions,
+                                   io_sbeState.cur_seeprom_side);
+
+                        break;
+                }
+                ////////////////////////////////////////////////////////////////
+                //  End of i_system_situation switch statement
+                ////////////////////////////////////////////////////////////////
+
             }
-            ///////////////////////////////////////////////////////////////////
-            //  End of i_system_situation switch statement
-            ///////////////////////////////////////////////////////////////////
 
 #elif CONFIG_SBE_UPDATE_CONSECUTIVE
             // Updating the SEEPROMs 1-at-a-time (OP systems)
@@ -4111,6 +4158,15 @@ errlHndl_t getSeepromSideVersionViaChipOp(TARGETING::Target* i_target,
                     io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
                 }
 #endif
+
+#ifdef CONFIG_SBE_UPDATE_SEQUENTIAL
+                if (g_do_hw_keys_hash_transition)
+                {
+                    TRACFCOMP( g_trac_sbe, "UPDATE_BOTH_SIDES_OF_SBE Key transition, will update both sides" );
+                    io_sbeState.seeprom_side_to_update = EEPROM::SBE_PRIMARY;
+                }
+#endif
+
                 err = updateSeepromSide(io_sbeState);
                 if(err)
                 {
