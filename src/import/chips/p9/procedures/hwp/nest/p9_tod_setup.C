@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,10 +43,80 @@
 #include <p9_tod_setup.H>
 
 
-/// @brief Clear any previous topology that may have been set
+/// @brief MPIPL specific steps to clear the previous topology, this should be
+//  called only during MPIPL
 /// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
 /// @param[in] i_tod_sel Specifies the topology to clear
-/// @param[in] i_is_mpipl Indicates if this IPL is an MPIPL
+/// @return FAPI_RC_SUCCESS if TOD topology is successfully cleared, else error
+fapi2::ReturnCode mpipl_clear_tod_node(
+    tod_topology_node* i_tod_node,
+    const p9_tod_setup_tod_sel i_tod_sel)
+{
+    uint32_t l_port_ctrl_check_reg = 0;
+    char l_targetStr[fapi2::MAX_ECMD_STRING_LEN];
+
+    fapi2::toString(*(i_tod_node->i_target),
+                    l_targetStr,
+                    fapi2::MAX_ECMD_STRING_LEN);
+
+    FAPI_INF("MPIPL-Clearing previous %s topology from %s",
+             (i_tod_sel == TOD_PRIMARY) ? "Primary" : "Secondary", l_targetStr);
+
+
+    fapi2::buffer<uint64_t> l_rx_ttype_ctrl_reg = 0;
+    fapi2::buffer<uint64_t> l_tx_ttype5_reg = 0;
+    fapi2::buffer<uint64_t> l_tod_load_reg = 0;
+
+    FAPI_INF("MPIPL: stop step checkers");
+    //Stop step checkers
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_PSS_MSS_CTRL_REG,
+                            0x0ULL),
+             "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
+
+    FAPI_INF("MPIPL: switch TOD to 'Not Set' state");
+    // Generate TType#5 (formats defined in section "TType Fabric Interface"
+    // in the TOD workbook)
+    l_rx_ttype_ctrl_reg.setBit<5>().setBit<56>();
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_RX_TTYPE_CTRL_REG,
+                            l_rx_ttype_ctrl_reg),
+             "Error from putScom (PERV_TOD_RX_TTYPE_CTRL_REG)");
+
+    FAPI_INF("MPIPL: switch all other TODs to 'Not Set' state");
+    l_tx_ttype5_reg.setBit<PERV_TOD_TX_TTYPE_5_REG_TRIGGER>();
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_TX_TTYPE_5_REG,
+                            l_tx_ttype5_reg),
+             "Error from putScom (PERV_TOD_TX_TTYPE_5_REG)");
+
+    //PUT TOD in stop state
+    FAPI_INF("MPIPL: put TOD to stop state");
+    l_tod_load_reg.setBit<63>();
+    FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
+                            PERV_TOD_LOAD_TOD_REG,
+                            l_tod_load_reg),
+             "Error from putScom (PERV_TOD_TX_TTYPE_5_REG)");
+
+    for(auto l_child = (i_tod_node->i_children).begin();
+        l_child != (i_tod_node->i_children).end();
+        ++l_child)
+    {
+        FAPI_INF("Going to sleep for 1 second ");
+        FAPI_TRY(mpipl_clear_tod_node(*l_child,
+                                      i_tod_sel),
+                 "Failure clearing downstream TOD node!");
+    }
+
+fapi_try_exit:
+    FAPI_INF("Exiting...");
+    return fapi2::current_err;
+}
+
+
+/// @brief Specific steps to clear the previous topology.
+/// @param[in] i_tod_node Reference to TOD topology (including FAPI targets)
+/// @param[in] i_tod_sel Specifies the topology to clear
 /// @return FAPI_RC_SUCCESS if TOD topology is successfully cleared, else error
 fapi2::ReturnCode clear_tod_node(
     tod_topology_node* i_tod_node,
@@ -86,31 +156,6 @@ fapi2::ReturnCode clear_tod_node(
                             0x0ULL),
              "Error from putScom (0x%08X)!", l_port_ctrl_check_reg);
 
-    if (i_is_mpipl)
-    {
-        fapi2::buffer<uint64_t> l_rx_ttype_ctrl_reg = 0;
-        fapi2::buffer<uint64_t> l_tx_ttype5_reg = 0;
-        FAPI_INF("MPIPL: switch TOD to 'Not Set' state");
-
-        // Generate TType#5 (formats defined in section "TType Fabric Interface"
-        // in the TOD workbook)
-        l_rx_ttype_ctrl_reg.setBit<5>().setBit<56>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_RX_TTYPE_CTRL_REG,
-                                l_rx_ttype_ctrl_reg),
-                 "Error from putScom (PERV_TOD_RX_TTYPE_CTRL_REG)");
-
-        FAPI_INF("MPIPL: switch all other TODs to 'Not Set' state");
-        l_tx_ttype5_reg.setBit<PERV_TOD_TX_TTYPE_5_REG_TRIGGER>();
-        FAPI_TRY(fapi2::putScom(*(i_tod_node->i_target),
-                                PERV_TOD_TX_TTYPE_5_REG,
-                                l_tx_ttype5_reg),
-                 "Error from putScom (PERV_TOD_TX_TTYPE_5_REG)");
-    }
-    else
-    {
-        FAPI_INF("Normal IPL: Bypass TTYPE#5");
-    }
 
     // TOD is cleared for this node; if it has children, start clearing
     // their registers
@@ -1454,15 +1499,28 @@ fapi2::ReturnCode p9_tod_setup(
               i_osc_sel == TOD_OSC_0_AND_1_SEL_0 ||
               i_osc_sel == TOD_OSC_0_AND_1_SEL_1) ? "connected" : "not connected");
 
-    FAPI_TRY(calculate_node_delays(i_tod_node),
-             "Error from calculate_node_delays!");
-
-    display_tod_nodes(i_tod_node, 0);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_MPIPL,
                            fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_is_mpipl),
              "Error from FAPI_ATTR_GET (ATTR_IS_MPIPL)!");
+
+    if ( l_is_mpipl && ( i_tod_sel == TOD_PRIMARY))
+    {
+        // Put the TOD in reset state, and clear the register
+        // PERV_TOD_PSS_MSS_CTRL_REG, we do it before the primary
+        // topology is configured and not repeat it to prevent overwriting
+        // the configuration.
+        FAPI_TRY(mpipl_clear_tod_node(i_tod_node, i_tod_sel),
+                 "Error from clear_tod_node!");
+    }
+
+    // Start configuring each node
+    // configure_tod_node will recurse on each child
+    FAPI_TRY(calculate_node_delays(i_tod_node),
+             "Error from calculate_node_delays!");
+
+    display_tod_nodes(i_tod_node, 0);
 
     // If there is a previous topology, it needs to be cleared
     FAPI_TRY(clear_tod_node(i_tod_node, i_tod_sel, l_is_mpipl),
