@@ -38,7 +38,10 @@
 #include <targeting/common/util.H>
 #include <vpd/vpd_if.H>
 #include <util/utiltce.H>
+#include <map>
 
+#include <secureboot/service.H>
+#include <sys/mm.h>
 //SBE interfacing
 #include    <sbeio/sbeioif.H>
 #include    <sys/misc.h>
@@ -53,9 +56,307 @@
 using   namespace   ERRORLOG;
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
+using   namespace   TARGETING;
 
 namespace ISTEP_21
 {
+
+// Verify PAYLOAD and Move PAYLOAD+HDAT from Temporary TCE-related
+// memory region to the proper location
+errlHndl_t verifyAndMovePayload(void)
+{
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               ENTER_MRK"verifyAndMovePayload()" );
+
+    errlHndl_t l_err = nullptr;
+    void * payload_tmp_virt_addr = nullptr;
+    void * payloadBase_virt_addr = nullptr;
+    void * hdat_tmp_virt_addr = nullptr;
+    void * hdat_final_virt_addr = nullptr;
+
+    enum Map_FailLocs_t {
+        NO_MAP_FAIL             = 0x0,
+        PAYLOAD_TMP_MAP_FAIL    = 0x1, // payload_tmp_virt_addr
+        PAYLOAD_BASE_MAP_FAIL   = 0x2, // payloadBase_virt_addr
+        HDAT_TMP_MAP_FAIL       = 0x3, // hdat_tmp_virt_addr
+        HDAT_FINAL_MAP_FAIL     = 0x4, // hdat_final_virt_addr
+
+        PAYLOAD_TMP_UNMAP_FAIL  = 0x5, // payload_tmp_virt_addr
+        PAYLOAD_BASE_UNMAP_FAIL = 0x6, // payloadBase_virt_addr
+        HDAT_TMP_UNMAP_FAIL     = 0x7, // hdat_tmp_virt_addr
+        HDAT_FINAL_UNMAP_FAIL   = 0x8, // hdat_final_virt_addr
+    };
+
+    Map_FailLocs_t blockMapFail = NO_MAP_FAIL;
+
+    // Make sure these constants are page-aligned, as they are used below for
+    // mm_block_map:
+    static_assert((MCL_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_ADDR isn't page-aligned");
+    static_assert((MCL_TMP_SIZE % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_SIZE isn't page-aligned");
+    static_assert((HDAT_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() HDAT_TMP_ADDR isn't page-aligned");
+
+    do{
+
+    if (!TCE::utilUseTcesForDmas())
+    {
+        // If TCEs were not enabled, no need to verify and move
+        break;
+    }
+
+    TARGETING::ATTR_PAYLOAD_KIND_type payload_kind =
+      TARGETING::PAYLOAD_KIND_NONE;
+    bool is_phyp = TARGETING::is_phyp_load(&payload_kind);
+
+    // Only Supporting PHYP/POWERVM and SAPPHIRE/OPAL at this time
+    // @TODO RTC 183831 in case we ever need to support Payload AVPS
+    if( !(TARGETING::PAYLOAD_KIND_PHYP == payload_kind ) &&
+        !(TARGETING::PAYLOAD_KIND_SAPPHIRE == payload_kind ) )
+    {
+        break;
+    }
+
+    // Get Temporary Virtual Address To Payload
+    uint64_t payload_tmp_phys_addr = MCL_TMP_ADDR;
+    uint64_t payload_size          = MCL_TMP_SIZE;
+
+    payload_tmp_virt_addr = mm_block_map(
+                             reinterpret_cast<void*>(payload_tmp_phys_addr),
+                             payload_size);
+
+    // Check for nullptr being returned
+    if (payload_tmp_virt_addr == nullptr)
+    {
+        blockMapFail = PAYLOAD_TMP_MAP_FAIL;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "payload_tmp_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        break;
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"verifyAndMovePayload() "
+               "Processing PAYLOAD_KIND = %d (is_phyp=%d): "
+               "physAddr=0x%.16llX, virtAddr=0x%.16llX",
+               payload_kind, is_phyp, payload_tmp_phys_addr, payload_tmp_virt_addr );
+
+    // If in Secure Mode Verify PHYP at Temporary TCE-related Memory Location
+    if (SECUREBOOT::enabled())
+    {
+        TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,"verifyAndMovePayload() "
+                   "Verifying PAYLOAD: physAddr=0x%.16llX, virtAddr=0x%.16llX",
+                   payload_tmp_phys_addr, payload_tmp_virt_addr );
+
+        l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
+        if (l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "verifyAndMovePayload(): failed verifyContainer");
+            l_err->collectTrace("ISTEPS_TRACE",256);
+            SECUREBOOT::handleSecurebootFailure(l_err);
+            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+        }
+    }
+
+    // @TODO RTC 168745 - Verify Component ID with ASCII
+    // @TODO RTC 168745 - Extend PAYLOAD
+
+    // Move PHYP to Final Location
+    // Get Target Service, and the system target.
+    TargetService& tS = targetService();
+    TARGETING::Target* sys = nullptr;
+    (void) tS.getTopLevelTarget( sys );
+    assert(sys != nullptr, "verifyAndMovePayload() sys target is NULL");
+    uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+
+    payloadBase = (payloadBase * MEGABYTE)
+                  - PAGESIZE; // Put header before PAYLOAD_BASE
+
+    // @TODO RTC 168745 - Use ContainerHeader to get accurate payload size
+    payloadBase_virt_addr = mm_block_map(
+                               reinterpret_cast<void*>(payloadBase),
+                               payload_size);
+
+    // Check for nullptr being returned
+    if (payloadBase_virt_addr == nullptr)
+    {
+        blockMapFail = PAYLOAD_BASE_MAP_FAIL;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "payloadBase_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        break;
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "verifyAndMovePayload(): Copy PAYLOAD from 0x%.16llX (va="
+                "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=%llX), size=0x%llX",
+                payload_tmp_phys_addr, payload_tmp_virt_addr, payloadBase,
+                payloadBase_virt_addr, payload_size);
+
+    memcpy (payloadBase_virt_addr,
+            payload_tmp_virt_addr,
+            payload_size);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "verifyAndMovePayload(): after PAYLOAD memcpy");
+
+    // Move HDAT temporarily put into HDAT_TMP_ADDR (HDAT_TMP_SIZE) into
+    // its proper place
+    // @TODO RTC 168745 - Update hdatservices calls to return Spira-S offset
+    // Currently just using this known offset 80MB=0x5000000 used in current
+    // PHYP images and then adding 1 PAGESIZE since our virtual address starts
+    // at the secure header of PAYLOAD before PAYLOAD_BASE
+    size_t hdat_cpy_offset = 0x5001000;
+
+    hdat_tmp_virt_addr = mm_block_map(
+                            reinterpret_cast<void*>(HDAT_TMP_ADDR),
+                            HDAT_TMP_SIZE);
+
+    // Check for nullptr being returned
+    if (hdat_tmp_virt_addr == nullptr)
+    {
+        blockMapFail = HDAT_TMP_MAP_FAIL;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "hdat_tmp_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        break;
+    }
+
+    hdat_final_virt_addr = mm_block_map(
+                              reinterpret_cast<void*>(payloadBase +
+                                                      hdat_cpy_offset),
+                              HDAT_TMP_SIZE);
+
+    // Check for nullptr being returned
+    if (hdat_final_virt_addr == nullptr)
+    {
+        blockMapFail = HDAT_FINAL_MAP_FAIL;
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                   ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
+                   "hdat_final_virt_addr (loc=0x%X)",
+                   blockMapFail);
+        break;
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "verifyAndMovePayload(): Copy HDAT from 0x%.16llX (va="
+                "0x%llX) to HDAT_FINAL = 0x%.16llX (va=0x%llX), size=0x%llX",
+                HDAT_TMP_ADDR, hdat_tmp_virt_addr, payloadBase+hdat_cpy_offset,
+                hdat_final_virt_addr,
+                HDAT_TMP_SIZE);
+
+    memcpy(hdat_final_virt_addr,
+           hdat_tmp_virt_addr,
+           HDAT_TMP_SIZE);
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               "verifyAndMovePayload(): after HDAT memcpy");
+
+    } while(0);
+
+    // Handle Possible mm_block_map fails here
+    if (blockMapFail != NO_MAP_FAIL)
+    {
+        // Trace done above. Just create error log here.
+
+        /*@
+         * @errortype
+         * @reasoncode       RC_MM_MAP_ERR
+         * @severity         ERRL_SEV_UNRECOVERABLE
+         * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+         * @userdata1        Map Fail Location
+         * @userdata2        <UNUSED>
+         * @devdesc          mm_block_map failed and returned nullptr
+         * @custdesc         A problem occurred during the IPL
+         *                   of the system.
+         */
+        errlHndl_t map_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                           MOD_VERIFY_AND_MOVE_PAYLOAD,
+                                           RC_MM_MAP_ERR,
+                                           blockMapFail,
+                                           0x0,
+                                           true /*Add HB SW Callout*/);
+        map_err->collectTrace("ISTEPS_TRACE",256);
+
+        // if l_err already exists just commit this log; otherwise set to l_err
+        if (l_err == nullptr)
+        {
+            l_err = map_err;
+            map_err = nullptr;
+        }
+        else
+        {
+            errlCommit(map_err, ISTEP_COMP_ID);
+        }
+    }
+
+    // Cleanup/Unmap Memory Blocks
+    std::map<void*,Map_FailLocs_t> ptrs_to_unmap =
+    {
+        { payload_tmp_virt_addr, PAYLOAD_TMP_UNMAP_FAIL },
+        { payloadBase_virt_addr, PAYLOAD_BASE_UNMAP_FAIL },
+        { hdat_tmp_virt_addr,    HDAT_TMP_UNMAP_FAIL },
+        { hdat_final_virt_addr,  HDAT_FINAL_UNMAP_FAIL },
+    };
+
+    for ( auto ptr : ptrs_to_unmap )
+    {
+        if (ptr.first == nullptr)
+        {
+            continue;
+        }
+
+        int rc = mm_block_unmap(ptr.first);
+
+        if (rc != 0)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       ERR_MRK"verifyAndMovePayload(): Failed to unmap "
+                       "0x%.16llX (loc=0x%X)",
+                       ptr.first, ptr.second);
+
+            /*@
+             * @errortype
+             * @reasoncode       RC_MM_UNMAP_ERR
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
+             * @userdata1        Map Fail Location
+             * @userdata2        <UNUSED>
+             * @devdesc          mm_block_unmap failed and returned nullptr
+             * @custdesc         A problem occurred during the IPL
+             *                   of the system.
+             */
+            errlHndl_t unmap_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                                 MOD_VERIFY_AND_MOVE_PAYLOAD,
+                                                 RC_MM_UNMAP_ERR,
+                                                 blockMapFail,
+                                                 0x0,
+                                                 true /*Add HB SW Callout*/);
+            unmap_err->collectTrace("ISTEPS_TRACE",256);
+
+            // if l_err already exists just commit this log;
+            // otherwise set to l_err
+            if (l_err == nullptr)
+            {
+                l_err = unmap_err;
+                unmap_err = nullptr;
+            }
+            else
+            {
+                errlCommit(unmap_err, ISTEP_COMP_ID);
+            }
+        }
+    }
+
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+               EXIT_MRK"verifyAndMovePayload(): l_err rc = 0x%X",
+               ERRL_GETRC_SAFE(l_err) );
+
+    return l_err;
+}
+
+
 void* call_host_runtime_setup (void *io_pArgs)
 {
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -71,7 +372,6 @@ void* call_host_runtime_setup (void *io_pArgs)
     do
     {
         // Close PAYLOAD TCEs
-        // @TODO RTC 168745 - also close HDAT TCEs
         if (TCE::utilUseTcesForDmas())
         {
 
@@ -80,16 +380,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                            "Failed TCE::utilClosePayloadTces" );
-                // break from do loop if error occurred
-                break;
-            }
-
-            // Disable all TCEs
-            l_err = TCE::utilDisableTces();
-            if ( l_err )
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                           "Failed TCE::utilDisableTces" );
                 // break from do loop if error occurred
                 break;
             }
@@ -152,6 +442,7 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 
         // Tell SBE to Close All Unsecure Memory Regions
+        // @TODO RTC 168745 - Move to istep 21.3 (closer to shutdown)
         l_err = SBEIO::closeAllUnsecureMemRegions();
         if ( l_err )
         {
@@ -180,6 +471,14 @@ void* call_host_runtime_setup (void *io_pArgs)
         // Configure the ATTR_HBRT_HYP_ID attributes so that runtime code and
         // whichever hypervisor is loaded can reference equivalent targets
         l_err = RUNTIME::configureHbrtHypIds(TARGETING::is_phyp_load());
+        if(l_err)
+        {
+            break;
+        }
+
+        // Verify PAYLOAD and Move PAYLOAD+HDAT from Temporary TCE-related
+        // memory region to the proper location
+        l_err = verifyAndMovePayload();
         if(l_err)
         {
             break;
@@ -365,6 +664,19 @@ void* call_host_runtime_setup (void *io_pArgs)
         }
 #endif
 
+        if (TCE::utilUseTcesForDmas())
+        {
+            // Disable all TCEs
+            l_err = TCE::utilDisableTces();
+            if ( l_err )
+            {
+                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                           "Failed TCE::utilDisableTces" );
+                // break from do loop if error occurred
+                break;
+            }
+        }
+
     } while(0);
 
     if( l_err )
@@ -380,7 +692,7 @@ void* call_host_runtime_setup (void *io_pArgs)
 
     }
 
-    TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_host_runtime_setup exit" );
 
     return l_StepError.getErrorHandle();

@@ -50,10 +50,11 @@ namespace TCE
  *                     Size must be less than (512K * PAGESIZE) or will fail.
  *                     Assert if not greater than zero.
  *
- * @param[out] o_startingToken - Starting Entry into the table.
- *                               (This is an offset into the array based on the
- *                                TCE index * PAGESIZE.  Each TCE entry maps to
- *                                a pagesize of memory)
+ * @param[out] o_startingToken - Key to the Starting Entry into the table.
+ *                               This is an offset into the array based on the
+ *                               TCE Index * PAGESIZE.
+ *                               FSP uses the token as a DMA Address.
+ *                               Each TCE entry maps to a pagesize of memory.
  *
  * Note:  First time this is called will cause TCE Table to be created and
  *        the Processors to be setup to point at the TCE Table
@@ -97,7 +98,7 @@ errlHndl_t utilDisableTces(void);
 /******************************************************/
 
 /**
- * @brief Responsible for Setting up TCEs for PAYLOAD
+ * @brief Responsible for Setting up TCEs for PAYLOAD, including HDAT
  *
  * @return errlHndl_t - Return Error Handle if failed
  *
@@ -105,7 +106,7 @@ errlHndl_t utilDisableTces(void);
 errlHndl_t utilSetupPayloadTces(void);
 
 /**
- * @brief Responsible for closing the TCEs for PAYLOAD
+ * @brief Responsible for closing the TCEs for PAYLOAD, including HDAT
  *
  * @return errlHndl_t - Return Error Handle if failed
  *

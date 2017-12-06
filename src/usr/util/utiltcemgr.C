@@ -54,6 +54,7 @@ TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
 
 // ------------------------
 // Macros for unit testing - leave extra trace enabled for now
+// @TODO RTC 168745 - Disable TRACUCOMP as the default
 #define TRACUCOMP(args...)  TRACFCOMP(args)
 //#define TRACUCOMP(args...)
 
@@ -64,12 +65,9 @@ namespace TCE
 /************************************************************************/
 // Defines
 /************************************************************************/
-// @TODO RTC 168745 Currently hardcoded to 128MB when the original plan was
-// to use PNOR payloadInfo.size, but that only was 19MB
-#define TCE_PAYLOAD_SIZE (128*MEGABYTE)
-
 // TCE Table Address must be 4MB Aligned
 #define TCE_TABLE_ADDRESS_ALIGNMENT (4*MEGABYTE)
+
 
 /************************************************************************/
 //  External Interface:
@@ -123,22 +121,6 @@ UtilTceMgr&  getTceManager(void)
    return Singleton<UtilTceMgr>::instance();
 };
 
-/***********************************************************************************/
-/* Local function to get PAYLOAD base address and size                             */
-/***********************************************************************************/
-errlHndl_t getPayloadAddrAndSize(uint64_t& o_addr, size_t& o_size)
-{
-    errlHndl_t errl = nullptr;
-
-    // Move PAYLOAD to Preverification Location
-    o_addr = MCL_TMP_ADDR;
-    o_size = MCL_TMP_SIZE;
-
-    TRACFCOMP( g_trac_tce,EXIT_MRK"getPayloadAddrAndSize(): o_addr=0x%.16llX, o_size=0x%.16llX", o_addr, o_size);
-
-    return errl;
-}
-
 errlHndl_t utilSetupPayloadTces(void)
 {
     errlHndl_t errl = nullptr;
@@ -149,24 +131,24 @@ errlHndl_t utilSetupPayloadTces(void)
 
     do{
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces(): get Address and Size");
+    TRACFCOMP(g_trac_tce,ENTER_MRK"utilSetupPayloadTces()");
 
-    errl = getPayloadAddrAndSize(addr, size);
-    if (errl)
-    {
-        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from getPayloadAddrAndSize()");
-        break;
-    }
-
+    // Allocate TCEs for PAYLOAD to Temporary Space
+    addr = MCL_TMP_ADDR;
+    size = MCL_TMP_SIZE;
     errl = utilAllocateTces(addr, size, token);
     if (errl)
     {
-        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() using addr=0x%.16llX, size=0x%llX", addr, size);
+        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() for PAYLOAD using addr=0x%.16llX, size=0x%llX", addr, size);
         break;
     }
+    else
+    {
+        TRACUCOMP(g_trac_tce,"utilSetupPayloadTces(): utilAllocateTces() for PAYLOAD: addr=0x%.16llX, size=0x%llX, token=0x%X", addr, size, token);
+    }
 
-    // Set attribute to tell FSP that Payload has been setup at the start of the TCE Table
-    // Get Target Service and the system target to set TCE_START_TOKEN_FOR_PAYLOAD
+    // Set attribute to tell FSP what the PAYLOAD token is
+    // Get Target Service and the system target to set attributes
     TARGETING::TargetService& tS = TARGETING::targetService();
     TARGETING::Target* sys = nullptr;
     (void) tS.getTopLevelTarget( sys );
@@ -174,9 +156,34 @@ errlHndl_t utilSetupPayloadTces(void)
 
     sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>(token);
 
+    // Save for internal use since we can't trust FSP won't change the attribute
+    Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::PAYLOAD_TOKEN,
+                                               token);
+
+    // Allocate TCEs for HDAT
+    addr = HDAT_TMP_ADDR;
+    size = HDAT_TMP_SIZE;
+    errl = utilAllocateTces(addr, size, token);
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from utilAllocateTces() for HDAT using addr=0x%.16llX, size=0x%llX", HDAT_TMP_ADDR, HDAT_TMP_SIZE);
+        break;
+    }
+    else
+    {
+        TRACUCOMP(g_trac_tce,"utilSetupPayloadTces(): utilAllocateTces() for HDAT: addr=0x%.16llX, size=0x%llX, token=0x%X", addr, size, token);
+    }
+
+    // Set attribute to tell FSP what the HDAT token is
+    sys->setAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_HDAT>(token);
+
+    // Save for internal use since we can't trust FSP won't change the attribute
+    Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::HDAT_TOKEN,
+                                               token);
+
     } while(0);
 
-    TRACFCOMP(g_trac_tce,EXIT_MRK"utilSetupPayloadTces(): Address=0x%.16llX, size=0x%X, token=0x%.8X, errl_rc=0x%X", addr, size, token, ERRL_GETRC_SAFE(errl));
+    TRACFCOMP(g_trac_tce,EXIT_MRK"utilSetupPayloadTces(): errl_rc=0x%X", ERRL_GETRC_SAFE(errl));
 
     return errl;
 }
@@ -185,31 +192,16 @@ errlHndl_t utilClosePayloadTces(void)
 {
     errlHndl_t errl = nullptr;
 
-    uint64_t addr=0x0;
     size_t   size=0x0;
     uint32_t token=0x0;
 
     do{
 
-    TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces(): get Address and Size");
+    TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces()");
 
-    // Get Payload Address and Size
-    errl = getPayloadAddrAndSize(addr, size);
-    if (errl)
-    {
-        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from getPayloadAddrAndSize()");
-        break;
-    }
-
-    // Get Starting Payload Token
-    // Get Target Service and the system target to set TCE_START_TOKEN_FOR_PAYLOAD
-    TARGETING::TargetService& tS = TARGETING::targetService();
-    TARGETING::Target* sys = nullptr;
-    (void) tS.getTopLevelTarget( sys );
-    assert(sys, "utilSetupPayloadTces() system target is NULL");
-
-    token = sys->getAttr<TARGETING::ATTR_TCE_START_TOKEN_FOR_PAYLOAD>();
-
+    // size is a constant for PAYLOAD
+    size = MCL_TMP_SIZE;
+    token = Singleton<UtilTceMgr>::instance().getToken(UtilTceMgr::PAYLOAD_TOKEN);
     errl = utilDeallocateTces(token, size);
     if (errl)
     {
@@ -217,9 +209,20 @@ errlHndl_t utilClosePayloadTces(void)
         break;
     }
 
+    // size is a constant for HDAT
+    size = HDAT_TMP_SIZE;
+    token = Singleton<UtilTceMgr>::instance().getToken(UtilTceMgr::HDAT_TOKEN);
+    errl = utilDeallocateTces(token, size);
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from utilDeallocateTces() using token=0x%.8X, size=0x%llX", token, size);
+        break;
+    }
+
+
     } while(0);
 
-    TRACFCOMP(g_trac_tce,EXIT_MRK"utilClosePayloadTces(): token=0x%.8X, size=0x%X, errl_rc=0x%X", token, size, ERRL_GETRC_SAFE(errl));
+    TRACFCOMP(g_trac_tce,EXIT_MRK"utilClosePayloadTces(): errl_rc=0x%X", ERRL_GETRC_SAFE(errl));
 
     return errl;
 }
@@ -238,6 +241,8 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
   ,iv_tceTablePhysAddr(i_tableAddr)
   ,iv_tceEntryCount(0)
   ,iv_tceTableSize(i_tableSize)
+  ,iv_payloadToken(INVALID_TOKEN_VALUE)
+  ,iv_hdatToken(INVALID_TOKEN_VALUE)
 {
     // Table Address must be 4MB Aligned and default input is TCE_TABLE_ADDR
     static_assert( TCE_TABLE_ADDR % TCE_TABLE_ADDRESS_ALIGNMENT == 0,"TCE Table must align on 4 MB boundary");
@@ -767,9 +772,12 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
                 TRACDCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::allocateTces: TCE Entry/Token[%d] (hex) = %llX", index, tablePtr[index]);
             }
 
-            iv_allocatedAddrs[startingIndex].start_addr = i_startingAddress;
-            iv_allocatedAddrs[startingIndex].size = i_size;
-            o_startingToken = startingIndex;
+            // Save And Return Information about Allocated TCEs
+            // Key to this map is the token, which is a DMA address that =
+            // (Starting Index in TCE Table) * PAGESIZE
+            o_startingToken = startingIndex*PAGESIZE;
+            iv_allocatedAddrs[o_startingToken].start_addr = i_startingAddress;
+            iv_allocatedAddrs[o_startingToken].size = i_size;
 
             TRACFCOMP(g_trac_tce,"UtilTceMgr::allocateTces: SUCCESSFUL: addr = 0x%.16llX, size = 0x%llX, starting entry=0x%X",i_startingAddress, i_size, startingIndex);
         }
@@ -802,7 +810,7 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
         }
     }while(0);
 
-    TRACFCOMP(g_trac_tce, EXIT_MRK"UtilTceMgr::allocateTces: END: addr = 0x%.16llX and size = 0x%X, numTcesNeeded=0x%X", i_startingAddress, i_size, numTcesNeeded);
+    TRACFCOMP(g_trac_tce, EXIT_MRK"UtilTceMgr::allocateTces: END: addr = 0x%.16llX and size = 0x%X, numTcesNeeded=0x%X. returning o_startingToken=0x%.8X", i_startingAddress, i_size, numTcesNeeded, o_startingToken);
     printIvMap(); //Debug
 
     return errl;
@@ -830,6 +838,9 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint32_t i_startingToken,
 
     do
     {
+         // Assert if i_startingToken is not aligned on PAGESIZE
+         assert((i_startingToken % PAGESIZE) == 0, "UtilTceMgr::deallocateTces: i_startingToken (0x%.8X) is not page aligned", i_startingToken);
+
         // Assert if i_size is not greater than zero
         assert(i_size > 0, "UtilTceMgr::deallocateTces: i_size = %d, not greater than zero", i_size);
 
@@ -847,7 +858,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint32_t i_startingToken,
         }
         else
         {
-            startingIndex = map_itr->first;
+            startingIndex = (map_itr->first) / PAGESIZE;
             startingAddress = map_itr->second.start_addr;
         }
         TRACUCOMP(g_trac_tce,"UtilTceMgr::deallocateTces: numTcesNeeded=0x%X, startingAddress = 0x%X", numTcesNeeded, startingAddress);
@@ -1258,6 +1269,45 @@ errlHndl_t UtilTceMgr::unmapPsiHostBridge(void *& io_psihb_ptr) const
     return errl;
 }
 
+/**************************************************************************/
+//
+// NAME: getToken:
+//       Returns one of two internally stored tokens
+//
+/**************************************************************************/
+
+uint32_t UtilTceMgr::getToken(const tokenLabels i_tokenLabel)
+{
+    assert((i_tokenLabel==UtilTceMgr::PAYLOAD_TOKEN)||(i_tokenLabel==UtilTceMgr::HDAT_TOKEN),"UtilTceMgr::getToken bad input parm: 0x%X", i_tokenLabel);
+
+    return (i_tokenLabel==UtilTceMgr::PAYLOAD_TOKEN)
+            ? iv_payloadToken : iv_hdatToken;
+
+}
+
+/**************************************************************************/
+//
+// NAME: setToken:
+//       Sets one of two internally stored tokens
+//
+/**************************************************************************/
+void UtilTceMgr::setToken(const tokenLabels i_tokenLabel,
+                          const uint32_t i_tokenValue)
+{
+    assert((i_tokenLabel==UtilTceMgr::PAYLOAD_TOKEN)||(i_tokenLabel==UtilTceMgr::HDAT_TOKEN),"UtilTceMgr::setToken bad input parm: 0x%X", i_tokenLabel);
+
+    if (i_tokenLabel==UtilTceMgr::PAYLOAD_TOKEN)
+    {
+        iv_payloadToken = i_tokenValue;
+    }
+    else
+    {
+        iv_hdatToken = i_tokenValue;
+    }
+
+    return;
+}
+
 
 /******************************************************/
 /* Miscellaneous Functions                            */
@@ -1290,6 +1340,7 @@ errlHndl_t utilEnableTcesWithoutTceTable(void)
 {
     errlHndl_t errl = nullptr;
 
+    // @TODO RTC 168745 - Update to use Singleton UtilTceMgr
     // Create local UtilTceMgr with default TCE table address but with a size
     // of zero so that all entries are invalid
     // NOTE: memory at TCE Table Address is initialized to 0 as part of IPL and
