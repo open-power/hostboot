@@ -182,23 +182,23 @@ template<
     const ATTRIBUTE_ID VOLTAGE_ATTR_DYNAMIC,
     const ATTRIBUTE_ID VOLTAGE_DOMAIN_ID_ATTR >
 void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
-    const TARGETING::Target* const     i_pMcbist,
+    const TARGETING::Target* const     i_pTarget,
           HBToHwsvVoltageMsg::RequestContainer& io_domains) const
 {
     assert(
-        (i_pMcbist != nullptr),
+        (i_pTarget != nullptr),
         "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code bug!  Caller passed NULL "
-        "MCBIST target handle.");
+        "target handle.");
 
     assert(
-        (    (   i_pMcbist->getAttr<TARGETING::ATTR_CLASS>()
-              == TARGETING::CLASS_UNIT)
-          && (   i_pMcbist->getAttr<TARGETING::ATTR_TYPE>()
-              == TARGETING::TYPE_MCBIST)),
+           ( ( i_pTarget->getAttr<TARGETING::ATTR_TYPE>()
+              == TARGETING::TYPE_MCBIST) ||
+             (   i_pTarget->getAttr<TARGETING::ATTR_TYPE>()
+              == TARGETING::TYPE_MEMBUF)),
         "HBToHwsvVoltageMsg::addMemoryVoltageDomains: Code bug!  Caller passed non-"
-        "MCBIST target handle of class = 0x%08X and type of 0x%08X.",
-        i_pMcbist->getAttr<TARGETING::ATTR_CLASS>(),
-        i_pMcbist->getAttr<TARGETING::ATTR_TYPE>());
+        "MCBIST or MEMBUF target handle of class = 0x%08X and type of 0x%08X.",
+        i_pTarget->getAttr<TARGETING::ATTR_CLASS>(),
+        i_pTarget->getAttr<TARGETING::ATTR_TYPE>());
 
     TARGETING::Target* pSysTarget = nullptr;
     TARGETING::targetService().getTopLevelTarget(pSysTarget);
@@ -243,7 +243,7 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
 
     // There is no reasonable check to validate if a voltage ID we're reading
     // is valid so it has to be assumed good
-    entry.domainId = i_pMcbist->getAttr< VOLTAGE_DOMAIN_ID_ATTR >();
+    entry.domainId = i_pTarget->getAttr< VOLTAGE_DOMAIN_ID_ATTR >();
 
     // There is no reasonable check to validate if a voltage we're
     // reading is valid so it has to be assumed good for the cases below
@@ -252,7 +252,7 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
         typename
         TARGETING::AttributeTraits< VOLTAGE_ATTR_STATIC >::Type
             voltageMillivolts
-                = i_pMcbist->getAttr< VOLTAGE_ATTR_STATIC >();
+                = i_pTarget->getAttr< VOLTAGE_ATTR_STATIC >();
 
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
         io_domains.push_back(entry);
@@ -262,7 +262,7 @@ void HBToHwsvVoltageMsg::addMemoryVoltageDomains(
         typename
         TARGETING::AttributeTraits< VOLTAGE_ATTR_DYNAMIC >::Type
             voltageMillivolts
-                = i_pMcbist->getAttr< VOLTAGE_ATTR_DYNAMIC >();
+                = i_pTarget->getAttr< VOLTAGE_ATTR_DYNAMIC >();
 
         entry.voltageMillivolts = static_cast<uint32_t>(voltageMillivolts);
         io_domains.push_back(entry);
@@ -301,43 +301,43 @@ void HBToHwsvVoltageMsg::createVddrData(
             if(i_requestType == HB_VOLT_ENABLE)
             {
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_VDD_PROGRAM,
-                    TARGETING::ATTR_MSS_VOLT_VDD_MILLIVOLTS,
-                    TARGETING::ATTR_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_VDD_ID>(
+                  TARGETING::ATTR_MSS_VDD_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VDD_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VDD_ID>(
                         pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_AVDD_PROGRAM,
-                    TARGETING::ATTR_MSS_VOLT_AVDD_MILLIVOLTS,
-                    TARGETING::ATTR_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_AVDD_ID>(
+                  TARGETING::ATTR_MSS_AVDD_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_AVDD_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_AVDD_ID>(
                         pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_VCS_PROGRAM,
-                    TARGETING::ATTR_MSS_VOLT_VCS_MILLIVOLTS,
-                    TARGETING::ATTR_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_VCS_ID>(
+                  TARGETING::ATTR_MSS_VCS_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VCS_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VCS_ID>(
                         pMcbist,
                         io_request);
 
                 (void)addMemoryVoltageDomains<
-                    TARGETING::ATTR_MSS_VPP_PROGRAM,
-                    TARGETING::ATTR_MSS_VOLT_VPP_MILLIVOLTS,
-                    TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_MILLIVOLTS,
-                    TARGETING::ATTR_VPP_ID>(
+                  TARGETING::ATTR_MSS_VPP_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VPP_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VPP_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VPP_ID>(
                         pMcbist,
                         io_request);
             }
 
             (void)addMemoryVoltageDomains<
-                TARGETING::ATTR_MSS_VDDR_PROGRAM,
-                TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS,
-                TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS,
-                TARGETING::ATTR_VDDR_ID>(
+              TARGETING::ATTR_MSS_VDDR_PROGRAM,
+            TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS,
+            TARGETING::ATTR_MSS_VOLT_VDDR_OFFSET_MILLIVOLTS,
+            TARGETING::ATTR_VDDR_ID>(
                     pMcbist,
                     io_request);
         }
@@ -347,6 +347,70 @@ void HBToHwsvVoltageMsg::createVddrData(
                              i_requestType,
                              l_mcbistTargetList.size());
 
+        TARGETING::TargetHandleList l_membufTargetList;
+        if(i_requestType == HB_VOLT_DISABLE)
+        {
+            //When request is a disable command, disable all present Centaurs
+            // in case we go through a reconfigure loop
+            getAllChips(l_membufTargetList, TYPE_MEMBUF, false);
+        }
+        else
+        {
+            //When the request is an enable command, enable only functional
+            // centaurs.
+            getAllChips(l_membufTargetList, TYPE_MEMBUF);
+        }
+
+        for (const auto & pMembuf: l_membufTargetList)
+        {
+            if(i_requestType == HB_VOLT_ENABLE)
+            {
+                (void)addMemoryVoltageDomains<
+                  TARGETING::ATTR_MSS_VDD_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VDD_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VDD_ID>(
+                                        pMembuf,
+                                        io_request);
+
+                (void)addMemoryVoltageDomains<
+                  TARGETING::ATTR_MSS_AVDD_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_AVDD_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_AVDD_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_AVDD_ID>(
+                                         pMembuf,
+                                         io_request);
+
+                (void)addMemoryVoltageDomains<
+                  TARGETING::ATTR_MSS_VCS_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VCS_MILLIVOLTS,
+                TARGETING::ATTR_MSS_VOLT_VCS_OFFSET_MILLIVOLTS,
+                TARGETING::ATTR_VCS_ID>(
+                                        pMembuf,
+                                        io_request);
+
+                (void)addMemoryVoltageDomains<
+                  TARGETING::ATTR_MSS_VPP_PROGRAM,
+                TARGETING::ATTR_MSS_VOLT_VPP_MILLIVOLTS,
+                TARGETING::ATTR_CEN_MSS_VOLT_VPP,
+                TARGETING::ATTR_VPP_ID>(
+                                        pMembuf,
+                                        io_request);
+            }
+
+            (void)addMemoryVoltageDomains<
+              TARGETING::ATTR_MSS_VDDR_PROGRAM,
+            TARGETING::ATTR_MSS_VOLT_VDDR_MILLIVOLTS,
+            TARGETING::ATTR_CEN_MSS_VOLT,
+            TARGETING::ATTR_VDDR_ID>(
+                                     pMembuf,
+                                     io_request);
+        }
+
+        // Remove duplicate records and requests containing invalid voltages
+        removeExtraRequests( io_request,
+                             i_requestType,
+                             l_membufTargetList.size());
     } while(0);
 
     TRACFCOMP( g_trac_volt, EXIT_MRK "HBToHwsvVoltageMsg::createVddrData" );
