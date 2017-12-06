@@ -2770,6 +2770,9 @@ fapi2::ReturnCode grouping_calcRegions(
         bool l_map_mirror = i_cfgMirror &&
                             (io_groupData.iv_data[pos][PORTS_IN_GROUP] > 1);
 
+        FAPI_DBG("pos: %d, l_map_mirror: %d",
+                 pos, l_map_mirror);
+
         // first group goes in first region
         if (pos == 0)
         {
@@ -2809,6 +2812,8 @@ fapi2::ReturnCode grouping_calcRegions(
             // assign mirrored base address
             if (l_map_mirror)
             {
+                FAPI_DBG("Assigning mirrored base address (=%016lX) for pos: %d in first group",
+                         l_cur_m_base_addr, pos + MIRR_OFFSET);
                 io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
                     l_cur_m_base_addr >> 30;
             }
@@ -2840,6 +2845,8 @@ fapi2::ReturnCode grouping_calcRegions(
                                 "Unable to map mirrored group!");
                     io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
                         l_cur_m_base_addr >> 30;
+                    FAPI_DBG("Assigning mirrored base address (=%016lX) for pos: %d in curr region",
+                             l_cur_m_base_addr, pos + MIRR_OFFSET);
                 }
             }
             else
@@ -2884,6 +2891,8 @@ fapi2::ReturnCode grouping_calcRegions(
 
                 // reset mirror base address
                 l_cur_m_base_addr = i_procAttrs.iv_mirrorBaseAddr[l_cur_m_region_idx];
+                FAPI_DBG("Resetting mirror base address: %016lX",
+                         l_cur_m_base_addr);
 
                 // assign non mirrored base address
                 io_groupData.iv_data[pos][BASE_ADDR] =
@@ -2894,6 +2903,8 @@ fapi2::ReturnCode grouping_calcRegions(
                 {
                     io_groupData.iv_data[pos + MIRR_OFFSET][BASE_ADDR] =
                         l_cur_m_base_addr >> 30;
+                    FAPI_DBG("Assigning mirrored base address (=%016lX) for pos: %d in new region",
+                             l_cur_m_base_addr, pos + MIRR_OFFSET);
                 }
             }
         }
@@ -2901,10 +2912,14 @@ fapi2::ReturnCode grouping_calcRegions(
         // update remaining size in region
         l_nm_region_size_left -= io_groupData.iv_data[pos][GROUP_SIZE];
         l_m_region_size_left -= (io_groupData.iv_data[pos][GROUP_SIZE] / 2);
+        FAPI_DBG("l_nm_region_size_left: %016lX, l_m_region_size_left: %016lX",
+                 l_nm_region_size_left, l_m_region_size_left);
 
         // increment mirrored address (regardless of whether mapped
         // for this group)
-        l_cur_m_base_addr += io_groupData.iv_data[pos][GROUP_SIZE] / 2;
+        l_cur_m_base_addr += (((uint64_t) io_groupData.iv_data[pos][GROUP_SIZE] << 30) / 2);
+        FAPI_DBG("l_cur_m_base_addr: %016lX",
+                 l_cur_m_base_addr);
 
         // set alt region information directly based on base region mapping
         for (uint8_t ii = 0; ii < NUM_OF_ALT_MEM_REGIONS; ii++)
