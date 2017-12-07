@@ -105,6 +105,7 @@ enum PM_CME_FLAGS_DEFS
     CME_FLAGS_STOP_BLOCK_ENTRY_C0           = 10,
     CME_FLAGS_STOP_BLOCK_ENTRY_C1           = 11,
     CME_FLAGS_CORE_QUIESCE_ACTIVE           = 12,
+    CME_FLAGS_WAIT_ON_PSTATE_START          = 14,
     CME_FLAGS_PSTATES_ENABLED               = 24,
     CME_FLAGS_FREQ_UPDT_DISABLE             = 25,
     CME_FLAGS_EX_ID                         = 26,
