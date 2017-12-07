@@ -53,11 +53,14 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
     uint32_t l_tempVpdSize = 0;
     uint32_t l_vpdSize = 0;
     uint8_t l_eqChipUnitPos = 0;
-    uint8_t l_bucketId;
+    uint8_t l_bucketId = 0xFF;
     uint8_t l_bucketSize = 0;
     uint32_t l_sysNestFreq = 0;
+    uint32_t l_fallbackNestFreq = 0;
     fapi2::voltageBucketData_t* l_currentBucket = NULL;
+    fapi2::voltageBucketData_t* l_fallbackBucket = NULL;
     uint8_t l_numMatches = 0;
+    uint8_t l_numMatchesFallback = 0;
     uint16_t l_pbFreq = 0;
 
     fapi2::MvpdRecord lrpRecord = fapi2::MVPD_RECORD_LAST;
@@ -191,6 +194,13 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                                                     <fapi2::voltageBucketData_t*>
                                                     (l_fullVpdData + POUNDV_BUCKET_OFFSET);
 
+            //see if we have a fall-back frequency to use if we don't
+            // get a match
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK,
+                                   l_sysParent,
+                                   l_fallbackNestFreq));
+
+
             for(int i = 0; i < NUM_BUCKETS; i++)
             {
 #ifndef _BIG_ENDIAN
@@ -219,6 +229,26 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                         l_currentBucket = &l_buckets[i];
                     }
                 }
+                else if(l_pbFreq == l_fallbackNestFreq)
+                {
+                    l_numMatchesFallback++;
+
+                    if(l_numMatchesFallback > 1)
+                    {
+                        FAPI_ERR("p9_pm_get_poundv_bucket_attr::"
+                                 " Multiple buckets (%d) reporting the same nest frequency"
+                                 " Fallback Nest = %d Bucket ID = %d, First Bucket = %d",
+                                 l_numMatchesFallback,
+                                 l_fallbackNestFreq,
+                                 (i + 1),
+                                 l_fallbackBucket);
+
+                    }
+                    else
+                    {
+                        l_fallbackBucket = &l_buckets[i];
+                    }
+                }
 
                 //save FFDC in case we fail
                 l_bucketNestFreqs[i] = l_pbFreq;
@@ -227,6 +257,14 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
             if(l_numMatches == 1)
             {
                 l_bucketId = l_currentBucket->bucketId;
+            }
+            else if(l_numMatchesFallback == 1)
+            {
+                FAPI_ERR("p9_pm_get_poundv_bucket_attr::Invalid number of matching "
+                         "nest freqs found for PBFreq=%d. Matches found = %d. But "
+                         "did find a fallback match for Freq=%d",
+                         l_sysNestFreq, l_numMatches, l_fallbackNestFreq );
+                l_bucketId = l_fallbackBucket->bucketId;
             }
             else
             {
