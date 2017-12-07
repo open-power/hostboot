@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,6 +69,8 @@ const uint32_t MCI_CFG_MANUAL_FRTL_END_BIT = 12;
 const uint32_t MCI_CFG_MANUAL_FRTL_DONE_BIT = 5;
 const uint32_t MCI_CFG_CHANNEL_INIT_TIMEOUT_START_BIT = 2;
 const uint32_t MCI_CFG_CHANNEL_INIT_TIMEOUT_END_BIT   = 3;
+const uint32_t MCI_CFG_MCICFGQ_SPEC_MODE = 44;
+const uint32_t MCI_CFG_MCICFGQ_HOST_MODE = 45;
 
 const uint8_t MCI_CFG_MANUAL_FRTL_FIELD_MASK = 0x7F;
 const uint32_t MCI_CFG_CHANNEL_INIT_TIMEOUT_FIELD_MASK = 0x3;
@@ -84,18 +86,56 @@ const uint32_t MCI_STAT_CHANNEL_INTERLOCK_PASS_BIT = 11;
 const uint32_t MCI_STAT_CHANNEL_INTERLOCK_FAIL_BIT = 12;
 
 // P9 MCI FIR Register field/bit definitions
-const uint32_t DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT = 4;
-const uint32_t DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT = 5;
-const uint32_t DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT = 62;
-const uint32_t DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT = 15;
-const uint32_t DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT = 6;
-const uint32_t DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT = 16;
-const uint32_t DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT = 19;
-const uint32_t DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT = 20;
-const uint32_t DATAPATH_FIR_CENTAUR_MAINT_COMPLETE_BIT = 21;
-const uint32_t DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT = 7;
-const uint32_t DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT = 1;
-const uint32_t DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT = 4;
+const uint32_t DATAPATH_FIR_SCOM_WR_PERR_BIT                   =  0;
+const uint32_t DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT           =  1;
+const uint32_t DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT       =  2;
+const uint32_t DATAPATH_FIR_DSRC_PERF_DEGRAD_BIT               =  3;
+const uint32_t DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT               =  4;
+const uint32_t DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT           =  5;
+const uint32_t DATAPATH_FIR_CHANNEL_INTERLOCK_FAIL_BIT         =  6;
+const uint32_t DATAPATH_FIR_FRTL_COUNTER_OVERFLOW_BIT          =  7;
+const uint32_t DATAPATH_FIR_CRC_ERR_BIT                        =  8;
+const uint32_t DATAPATH_FIR_FIR_NOACK_ERR_BIT                  =  9;
+const uint32_t DATAPATH_FIR_SEQID_OUT_OF_ORDER_BIT             = 10;
+const uint32_t DATAPATH_FIR_REPLAY_BUFFER_CE_BIT               = 11;
+const uint32_t DATAPATH_FIR_REPLAY_BUFFER_UE_BIT               = 12;
+const uint32_t DATAPATH_FIR_MULTIPLE_REPLAY_BIT                = 13;
+const uint32_t DATAPATH_FIR_REPLAY_BUFFER_OVERRUN_BIT          = 14;
+const uint32_t DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT         = 15;
+const uint32_t DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT         = 16;
+const uint32_t DATAPATH_FIR_CEN_TRACESTOP_BIT                  = 17;
+const uint32_t DATAPATH_FIR_EN_FPGA_INT_BIT                    = 18;
+const uint32_t DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT       = 19;
+const uint32_t DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT      = 20;
+const uint32_t DATAPATH_FIR_CENTAUR_MAINT_COMPLETE_BIT         = 21;
+const uint32_t DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT        = 31;
+const uint32_t DATAPATH_FIR_DSFF_TAG_OVERRUN_BIT               = 32;
+const uint32_t DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT     = 33;
+const uint32_t DATAPATH_FIR_RDATA_PERR_BIT                     = 36;
+const uint32_t DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT   = 40;
+const uint32_t DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT = 41;
+const uint32_t DATAPATH_FIR_DSFF_SEQ_ERROR_BIT                 = 42;
+const uint32_t DATAPATH_FIR_RECOVERABLE_PERR_EICR_BIT          = 43;
+const uint32_t DATAPATH_FIR_FATAL_PERR_RECR_BIT                = 44;
+const uint32_t DATAPATH_FIR_WRT_RMW_BUFFER_CE_BIT              = 45;
+const uint32_t DATAPATH_FIR_WRT_RMW_BUFFER_UE_BIT              = 46;
+const uint32_t DATAPATH_FIR_WRT_RMW_BUFFER_SUE_BIT             = 47;
+const uint32_t DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0               = 48;
+const uint32_t DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1               = 49;
+const uint32_t DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT               = 50;
+const uint32_t DATAPATH_FIR_WDF_SM_ERR_BIT                     = 51;
+const uint32_t DATAPATH_FIR_WDF_REG_PERR_BIT                   = 52;
+const uint32_t DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT               = 53;
+const uint32_t DATAPATH_FIR_WRT_REG_PERR_BIT                   = 54;
+const uint32_t DATAPATH_FIR_USFD_ATTN_VALID_BIT                = 55;
+const uint32_t DATAPATH_FIR_READ_BUF_OVERRUN_BIT               = 56;
+const uint32_t DATAPATH_FIR_WDF_ASYNC_ERR_BIT                  = 57;
+const uint32_t DATAPATH_FIR_READ_MCA_PERR_BIT                  = 58;
+const uint32_t DATAPATH_FIR_READ_MCA_SEQ_ERR_BIT               = 59;
+const uint32_t DATAPATH_FIR_DBGWAT_PERR_BIT                    = 60;
+const uint32_t DATAPATH_FIR_DSFF_TIMEOUT_BIT                   = 61;
+const uint32_t DATAPATH_FIR_INTERNAL_CONTROL_PARITY_ERROR_BIT  = 62;
+const uint32_t DATAPATH_FIR_INTERNAL_PARITY_ERROR_COPY_BIT     = 63;
 
 // Centaur MBI Configuration Register field/bit defintions
 const uint32_t MBI_CFG_FORCE_CHANNEL_FAIL_BIT = 0;
@@ -388,6 +428,8 @@ fapi2::ReturnCode p9_cen_framelock_set_pu_datapath_firmask_reg(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& i_mask)
 {
+    FAPI_DBG("p9_cen_framelock_set_pu_datapath_firmask_reg: Data 0x%.16llX, Mask 0x%.16llX",
+             i_data, i_mask);
     FAPI_TRY(fapi2::putScomUnderMask(i_pu_target, DMI_DATAPATHFIRMASK_0x07010903, i_data, i_mask),
              "PutScomUnderMask error (DMI_DATAPATHFIRMASK_0x07010903)");
 
@@ -408,6 +450,8 @@ fapi2::ReturnCode p9_cen_framelock_set_pu_datapath_firact0_reg(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& i_mask)
 {
+    FAPI_DBG("p9_cen_framelock_set_pu_datapath_firact0_reg: Data 0x%.16llX, Mask 0x%.16llX",
+             i_data, i_mask);
     FAPI_TRY(fapi2::putScomUnderMask(i_pu_target, DMI_DATAPATHFIRACT0_0x07010906, i_data, i_mask),
              "PutScomUnderMask error (DMI_DATAPATHFIRACT0_0x07010906)");
 
@@ -428,6 +472,8 @@ fapi2::ReturnCode p9_cen_framelock_set_pu_datapath_firact1_reg(
     fapi2::buffer<uint64_t>& i_data,
     fapi2::buffer<uint64_t>& i_mask)
 {
+    FAPI_DBG("p9_cen_framelock_set_pu_datapath_firact1_reg: Data 0x%.16llX, Mask 0x%.16llX",
+             i_data, i_mask);
     FAPI_TRY(fapi2::putScomUnderMask(i_pu_target, DMI_DATAPATHFIRACT1_0x07010907, i_data, i_mask),
              "PutScomUnderMask error (DMI_DATAPATHFIRACT1_0x07010907)");
 
@@ -538,8 +584,7 @@ fapi2::ReturnCode p9_cen_framelock_run_framelock(
 
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
+                      datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>()),
                     fapi2::PROC_CEN_FRAMELOCK_FL_P9_FIR_ERR_MEMBUF()
                     .set_MCI_STAT(mci_stat)
                     .set_DATAPATH_FIR(datapath_fir)
@@ -687,8 +732,7 @@ fapi2::ReturnCode p9_cen_framelock_run_frtl(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      l_frtl_overflow ||
-                      datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
+                      l_frtl_overflow),
                     fapi2::PROC_CEN_FRAMELOCK_FRTL_P9_FIR_ERR_MEMBUF()
                     .set_MCI_STAT(mci_stat)
                     .set_DATAPATH_FIR(datapath_fir)
@@ -907,8 +951,7 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_framelock(
         // Fail if P9 DATAPATH FIR bits are set
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
+                      datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>()),
                     fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FL_P9_FIR_ERR_MEMBUF()
                     .set_MCI_STAT(mci_stat)
                     .set_DATAPATH_FIR(datapath_fir)
@@ -1111,8 +1154,7 @@ fapi2::ReturnCode p9_cen_framelock_run_errstate_frtl(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      l_frtl_overflow ||
-                      datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
+                      l_frtl_overflow),
                     fapi2::PROC_CEN_FRAMELOCK_ERRSTATE_FRTL_P9_FIR_ERR_MEMBUF()
                     .set_MCI_STAT(mci_stat)
                     .set_DATAPATH_FIR(datapath_fir)
@@ -1389,8 +1431,7 @@ fapi2::ReturnCode p9_cen_framelock_run_manual_frtl(
         FAPI_ASSERT(!(datapath_fir.getBit<DATAPATH_FIR_DMI_CHANNEL_FAIL_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CHANNEL_INIT_TIMEOUT_BIT>() ||
                       datapath_fir.getBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>() ||
-                      l_frtl_overflow ||
-                      datapath_fir.getBit<DATAPATH_FIR_CHANNEL_FAIL_ACTIVE_BIT>()),
+                      l_frtl_overflow),
                     fapi2::PROC_CEN_FRAMELOCK_MANUAL_FRTL_P9_FIR_ERR_MEMBUF()
                     .set_MCI_STAT(mci_stat)
                     .set_DATAPATH_FIR(datapath_fir)
@@ -1479,18 +1520,19 @@ fapi_try_exit:
 //              and MBI fir action and mask registers according to PRD requirements.
 /// @param[in]  i_pu_target  => P9 DMI chip unit target
 /// @param[in]  i_mem_target => Centaur chip target
-/// @param[in]  mci_data     => fapi2 buffer for scom register
-/// @param[in]  mbi_data     => fapi2 buffer for scom register
-/// @param[in]  mci_mask     => fapi2 buffer for scom register
-/// @param[in]  mbi_mask     => fapi2 buffer for scom register
 /// @return     FAPI2_RC_SUCCESS if exit procedure sequence completes successfully,
 ///------------------------------------------------------------------------------
 fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TARGET_TYPE_DMI>& i_pu_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_mem_target,
-        fapi2::buffer<uint64_t>& mci_data, fapi2::buffer<uint64_t>& mbi_data,
-        fapi2::buffer<uint64_t>& mci_mask, fapi2::buffer<uint64_t>& mbi_mask,
-        const p9_cen_framelock_args& i_args)
+        const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP>& i_mem_target)
 {
+    fapi2::buffer<uint64_t> mbi_data;
+    fapi2::buffer<uint64_t> mbi_mask;
+    fapi2::buffer<uint64_t> l_action0_data;
+    fapi2::buffer<uint64_t> l_action1_data;
+    fapi2::buffer<uint64_t> l_dataPathFirMask;
+    fapi2::buffer<uint64_t> l_mci_data;
+    fapi2::buffer<uint64_t> l_writeMask;
+
     // (Action0, Action1, Mask)
     // ------------------------
     // (0,0,0) = Checkstop Error
@@ -1508,37 +1550,103 @@ fapi2::ReturnCode p9_cen_framelock_exit_procedure(const fapi2::Target<fapi2::TAR
     FAPI_TRY(p9_cen_framelock_clear_cen_mbi_fir_reg(i_mem_target),
              "p9_cen_framelock: Error clearing Centaur MBI FIR regs");
 
-    // Set P9 DATAPATH FIR ACT0
-    //     Set action regs to recoverable interrupt (action0=1, action1=0) for DATAPATHFIR's 16,19,20 and 21
+    // ----------------------------------
+    // Set DATAPATH FIR ACTION0 & ACTION1
+    // ----------------------------------
 
-    mci_data.flush<0>();
-    mci_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();    //Centaur Checkstop
-    mci_data.setBit<DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT>();  //Centaur Recoverable Attention
-    mci_data.setBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>(); //Centaur Special Attention
-    mci_data.setBit<DATAPATH_FIR_CENTAUR_MAINT_COMPLETE_BIT>();    //Centaur Maintenance Complete
-    mci_mask = mci_data;
+    // UNIT_CS if a checkstop was received from Centaur (Bit 16)
+    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();
+    l_action1_data.setBit<DATAPATH_FIR_CENTAUR_CHECKSTOP_FAIL_BIT>();
 
-    FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact0_reg(i_pu_target, mci_data, mci_mask),
+    // HOST_ATTN if special attention was received from Centaur (Bit 20)
+    l_action0_data.setBit<DATAPATH_FIR_CENTAUR_SPECIAL_ATTN_FAIL_BIT>();
+
+    // Recoverable errors
+    l_action1_data.setBit<DATAPATH_FIR_SCOM_WR_PERR_BIT>()                     // Bit 0
+    .setBit<DATAPATH_FIR_MCICFGQ_PARITY_ERROR_BIT>()             // Bit 1
+    .setBit<DATAPATH_FIR_DSRC_NO_FORWARD_PROGRESS_BIT>()         // Bit 2
+    .setBit<DATAPATH_FIR_DSRC_PERF_DEGRAD_BIT>()                 // Bit 3
+    .setBit<DATAPATH_FIR_CRC_ERR_BIT>()                          // Bit 8
+    .setBit<DATAPATH_FIR_REPLAY_BUFFER_CE_BIT>()                 // Bit 11
+    .setBit<DATAPATH_FIR_REPLAY_BUFFER_UE_BIT>()                 // Bit 12
+    .setBit<DATAPATH_FIR_DATA_FLOW_PARITY_ERROR_BIT>()           // Bit 15
+    .setBit<DATAPATH_FIR_CENTAUR_RECOVERABLE_FAIL_BIT>()         // Bit 19
+    .setBit<DATAPATH_FIR_USFD_CHANFAIL_SEQ_ERROR_BIT>()          // Bit 31
+    .setBit<DATAPATH_FIR_SFF_DS_DATA_ERROR_DETECTED_BIT>()       // Bit 33
+    .setBit<DATAPATH_FIR_RDATA_PERR_BIT>()                       // Bit 36
+    .setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_PERR_BIT>()     // Bit 40
+    .setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>()   // Bit 41
+    .setBit<DATAPATH_FIR_DSFF_SEQ_ERROR_BIT>()                   // Bit 42
+    .setBit<DATAPATH_FIR_RECOVERABLE_PERR_EICR_BIT>()            // Bit 43
+    .setBit<DATAPATH_FIR_FATAL_PERR_RECR_BIT>()                  // Bit 44
+    .setBit<DATAPATH_FIR_WRT_RMW_BUFFER_CE_BIT>()                // Bit 45
+    .setBit<DATAPATH_FIR_WRT_RMW_BUFFER_UE_BIT>()                // Bit 46
+    .setBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT0>()                 // Bit 48
+    .setBit<DATAPATH_FIR_WDF_OVERRUN_ERR_BIT1>()                 // Bit 49
+    .setBit<DATAPATH_FIR_WDF_SCOM_SEQ_ERR_BIT>()                 // Bit 50
+    .setBit<DATAPATH_FIR_WDF_SM_ERR_BIT>()                       // Bit 51
+    .setBit<DATAPATH_FIR_WDF_REG_PERR_BIT>()                     // Bit 52
+    .setBit<DATAPATH_FIR_WRT_SCOM_SEQ_ERR_BIT>()                 // Bit 53
+    .setBit<DATAPATH_FIR_WRT_REG_PERR_BIT>()                     // Bit 54
+    .setBit<DATAPATH_FIR_READ_BUF_OVERRUN_BIT>()                 // Bit 56
+    .setBit<DATAPATH_FIR_WDF_ASYNC_ERR_BIT>()                    // Bit 57
+    .setBit<DATAPATH_FIR_READ_MCA_PERR_BIT>()                    // Bit 58
+    .setBit<DATAPATH_FIR_READ_MCA_SEQ_ERR_BIT>()                 // Bit 59
+    .setBit<DATAPATH_FIR_DBGWAT_PERR_BIT>()                      // Bit 60
+    .setBit<DATAPATH_FIR_DSFF_TIMEOUT_BIT>();                    // Bit 61
+
+    // ----------------------------------
+    // Set P9 DATAPATH FIR Mask
+    // ----------------------------------
+
+    // Any bit that is set in ACTION0 or ACTION1 reg means we want
+    // recoverable/attention/unit_cs, so need to clear its mask.
+    // This should clear the mask bits for these scenarios:
+    // (0,1,0) = Recoverable Error
+    // (1,0,0) = Attention
+    // (1,1,0) = UNIT_CS
+    l_dataPathFirMask = ~(l_action0_data | l_action1_data);
+
+    //TODO: To be removed, see SW413273
+    l_dataPathFirMask.setBit<DATAPATH_FIR_SFF_MCA_ASYNC_CMD_ERROR_SEQERR_BIT>();
+
+    // Any bit that is clear in both ACTION0 & ACTION1 reg, but
+    // we want to have a checkstop, we need to explicitly clear
+    // the mask bit.
+    // (0,0,0) = Checkstop Error
+
+    // None for now
+
+    // Write to ACTION0 reg
+    l_writeMask = l_action0_data;
+    FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact0_reg(i_pu_target, l_action0_data, l_writeMask),
              "p9_cen_framelock: Error writing P9 DATAPATH FIR Action0 Register");
 
-    // Set P9 DATAPATH FIR ACT1
-    //     Set action regs to recoverable error (action0=0, action1=1) for the following DATAPATHFIR's
-    mci_data.flush<0>();      //Error Type                                  p9c_bit     p8_bit
-    mci_data.setBit<1>();    //Scom Register parity error                   1           20
-    mci_data.setBit<10>();     //Seqid Out Of Order                         10          4
-    mci_data.setBit<11>();     //Replay Buffer CE                           11          5
-    mci_data.setBit<12>();     //Replay Buffer UE                           12          6
-    mci_data.setBit<15>();     //MCI Data Flow Parity Error                 15          9
-    mci_data.setBit<16>();    //Performance Degradation                     3           10
-    mci_data.setBit<45>();    //PowerBus Write Data Buffer CE               45          35
-    mci_data.setBit<46>();    //PowerBus Write Data Buffer UE               46          36
+    // Write to ACTION1 reg
+    l_writeMask = l_action1_data;
+    FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact1_reg(i_pu_target, l_action1_data, l_writeMask),
+             "p9_cen_framelock: Error writing P9 DATAPATH FIR Action0 Register");
 
-    mci_mask = mci_data;
+    // Write to DATAPATH FIR MASK reg
+    l_writeMask = (l_action0_data | l_action1_data);
+    FAPI_TRY(p9_cen_framelock_set_pu_datapath_firmask_reg(i_pu_target, l_dataPathFirMask, l_writeMask),
+             "p9_cen_framelock: Error writing P9 DATAPATH FIR Mask Register");
 
-    FAPI_TRY(p9_cen_framelock_set_pu_datapath_firact1_reg(i_pu_target, mci_data, mci_mask),
-             "p9_cen_framelock: Error writing P9 DATAPATH FIR Action1 Register");
+    // ------------------------------------------------
+    // Config attn to be host for CHI's FIRs
+    // (In HB only, Cronus host machine doesn't have
+    // code to handle attn)
+    // -----------------------------------------------
+#ifdef __HOSTBOOT_MODULE
+    l_mci_data.flush<0>().setBit<MCI_CFG_MCICFGQ_SPEC_MODE>()
+    .setBit<MCI_CFG_MCICFGQ_HOST_MODE>();
+    l_writeMask = l_mci_data;
+    l_mci_data.clearBit<MCI_CFG_MCICFGQ_SPEC_MODE>();
+    FAPI_TRY(p9_cen_framelock_set_pu_mci_cfg_reg(i_pu_target, l_mci_data, l_writeMask),
+             "p9_cen_framelock: Error writing P9 MCI Configuration register to set CHI's FIRs mode.");
+#endif
 
-    // Set P9 DATAPATH FIR Mask
+    // Set Centaur DATAPATH FIR Mask
     mbi_data.flush<0>();
     mbi_data.setBit<0>();     //Replay Timeout
     mbi_data.setBit<5>();     //Replay Buffer CE
@@ -1740,7 +1848,7 @@ fapi2::ReturnCode p9_cen_framelock_cloned(const fapi2::Target<fapi2::TARGET_TYPE
     {
         // EXIT Procedure
         // by setting the MCI and MBI fir action and mask registers according to PRD requirements.
-        FAPI_TRY(p9_cen_framelock_exit_procedure(i_pu_target, i_mem_target, mci_data, mbi_data, mci_mask, mbi_mask, i_args));
+        FAPI_TRY(p9_cen_framelock_exit_procedure(i_pu_target, i_mem_target));
     }
 
     // mark HWP exit
