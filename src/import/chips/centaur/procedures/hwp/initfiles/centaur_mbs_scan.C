@@ -106,6 +106,18 @@ fapi2::ReturnCode centaur_mbs_scan(const fapi2::Target<fapi2::TARGET_TYPE_MEMBUF
         fapi2::variable_buffer l_MBU_MBS_CFG_WHAP_WR_START_RECNT(3);
         l_MBU_MBS_CFG_WHAP_WR_START_RECNT.insertFromRight<uint64_t>(literal_0b011, 0, 3);
         FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBS.CFG_WHAP_WR_START_RECNT", l_MBU_MBS_CFG_WHAP_WR_START_RECNT));
+        fapi2::variable_buffer l_MBU_MBS_CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE(1);
+        constexpr auto l_MBU_MBS_CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE_ON = 0x1;
+        l_MBU_MBS_CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE.insertFromRight<uint64_t>
+        (l_MBU_MBS_CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE_ON, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBS.CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE",
+                               l_MBU_MBS_CFG_UNALIGNED_US_DTAG_TRANSFER_DISABLE));
+        fapi2::variable_buffer l_MBU_MBS_CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE(1);
+        constexpr auto l_MBU_MBS_CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE_ON = 0x1;
+        l_MBU_MBS_CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE.insertFromRight<uint64_t>
+        (l_MBU_MBS_CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE_ON, 0, 1);
+        FAPI_TRY(fapi2::putSpy(TGT0, "MBU.MBS.CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE",
+                               l_MBU_MBS_CFG_UNALIGNED_NONBYP_US_DTAG_TRANSFER_DISABLE));
 
     };
 fapi_try_exit:
