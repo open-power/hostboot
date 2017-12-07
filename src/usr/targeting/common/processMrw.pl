@@ -399,6 +399,23 @@ sub processSystem
     {
         $num_voltage_rails_per_proc = 2;
     }
+
+    # TODO RTC:182764 -- right now there is no support for CDIMMs. So,
+    # we don't know what to base these attributes off of. But, once
+    # we get CDIMM support in processMrw, then we should base these
+    # attributes on the type of DIMMs
+    if ($system_name =~ /ZEPPELIN/i)
+    {
+        #Zeppelin has ISDIMM with 10K VPD
+        $targetObj->setAttribute($target, "CVPD_SIZE", 0x2800);
+        $targetObj->setAttribute($target, "CVPD_MAX_SECTIONS", 25);
+    }
+    elsif ($system_name =~ /FLEETWOOD/i)
+    {
+        #Fleetwood has CDIMM with 4K VPD
+        $targetObj->setAttribute($target, "CVPD_SIZE", 0x1000);
+        $targetObj->setAttribute($target, "CVPD_MAX_SECTIONS", 64);
+    }
 }
 
 sub processIpmiSensors {
