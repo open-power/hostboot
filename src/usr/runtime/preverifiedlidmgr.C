@@ -310,7 +310,6 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
     if (i_isPhypComp)
     {
         cv_pResvMemInfo = &cv_phypResvMemInfo;
-        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromMCL - Loading Special Component PHYP");
     }
 
     do {
@@ -345,12 +344,23 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(const uint32_t i_lidId,
             break;
         }
 
-        // Load image into HB reserved memory
-        l_errl = loadImage(i_addr, i_size);
-        if(l_errl)
+        // Phyp component has already been loaded and verified before MCL mgr
+        // Simply update HB reserved prev size in Phyp component case
+        if (i_isPhypComp)
         {
-            TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
-            break;
+            // align previous size to page size to ensure starting addresses are
+            // page aligned.
+            cv_pResvMemInfo->prevSize = ALIGN_PAGE(i_size);
+        }
+        else
+        {
+            // Load image into HB reserved memory
+            l_errl = loadImage(i_addr, i_size);
+            if(l_errl)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
+                break;
+            }
         }
 
         // Indicate the lid has been loaded
