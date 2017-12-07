@@ -56,9 +56,6 @@ namespace TCE
  *                               FSP uses the token as a DMA Address.
  *                               Each TCE entry maps to a pagesize of memory.
  *
- * Note:  First time this is called will cause TCE Table to be created and
- *        the Processors to be setup to point at the TCE Table
- *
  * @return errlHndl_t - Return Error Handle if failed
  *
  */
@@ -129,6 +126,10 @@ bool utilUseTcesForDmas(void);
  * @brief Enables the System to use TCEs without setting up a TCE Table.
  *        This prevents the FSP from using unsecure DMAs during the IPL until
  *        Hostboot sets up the TCE Table with proper TCEs.
+ *
+ * @note  This API only works once and only when called before any other TCE
+ *        Setup/Allocate functions as its logic only works the first time the
+ *        UtilTceMgr Singleton class is created.
  *
  * @return errlHndl_t - Return Error Handle if failed
  *

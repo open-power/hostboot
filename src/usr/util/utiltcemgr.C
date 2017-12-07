@@ -258,6 +258,19 @@ UtilTceMgr::UtilTceMgr(const uint64_t i_tableAddr, const size_t i_tableSize)
 
     TRACUCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr: iv_tceTableVaAddr=0x%.16llX, iv_tceTablePhysAddr=0x%.16llX, iv_tceTableSize=0x%llX, iv_tceEntryCount=0x%X, iv_allocatedAddrs,size=%d", iv_tceTableVaAddr, iv_tceTablePhysAddr, iv_tceTableSize, iv_tceEntryCount, iv_allocatedAddrs.size());
 
+    // Initialize HW without Initializing Table so that FSP cannot DMA
+    // to memory without Hostboot control
+    auto errl = UtilTceMgr::initTceInHdw();
+    if (errl)
+    {
+        uint32_t errl_plid = errl->plid();
+        TRACFCOMP(g_trac_tce,"UtilTceMgr::UtilTceMgr initTceInHdw() failed with rc=0x%X, plid=0x%X. Shutting down",ERRL_GETRC_SAFE(errl), errl_plid);
+        errl->setSev(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM);
+        errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
+        errlCommit( errl, UTIL_COMP_ID );
+        INITSERVICE::doShutdown(errl_plid, true);
+    }
+
 };
 
 /**************************************************************************/
@@ -769,7 +782,7 @@ errlHndl_t UtilTceMgr::allocateTces(const uint64_t i_startingAddress,
                 tablePtr[index].writeAccess = 1;
                 tablePtr[index].readAccess = 1;
 
-                TRACDCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::allocateTces: TCE Entry/Token[%d] (hex) = %llX", index, tablePtr[index]);
+                TRACDCOMP(g_trac_tce,INFO_MRK"UtilTceMgr::allocateTces: TCE Entry/Token[%d] (hex) = 0x%llX", index, tablePtr[index]);
             }
 
             // Save And Return Information about Allocated TCEs
@@ -929,7 +942,7 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint32_t i_startingToken,
         }
 
         // Remove the entry from iv_allocatedAddrs even if 'isContiguous' issue
-        iv_allocatedAddrs.erase(startingIndex);
+        iv_allocatedAddrs.erase(i_startingToken);
 
         if (!isContiguous)
         {
@@ -1128,6 +1141,7 @@ UtilTceMgr::~UtilTceMgr()
     if (errl)
     {
         TRACFCOMP(g_trac_tce,"UtilTceMgr::~UtilTceMgr: disableTces Failed rc=0x%X. Committing plid=0x%X", ERRL_GETRC_SAFE(errl), ERRL_GETPLID_SAFE(errl));
+        errl->collectTrace(UTILTCE_TRACE_NAME,KILOBYTE);
         errlCommit( errl, UTIL_COMP_ID );
     }
 
@@ -1340,21 +1354,9 @@ errlHndl_t utilEnableTcesWithoutTceTable(void)
 {
     errlHndl_t errl = nullptr;
 
-    // @TODO RTC 168745 - Update to use Singleton UtilTceMgr
-    // Create local UtilTceMgr with default TCE table address but with a size
-    // of zero so that all entries are invalid
-    // NOTE: memory at TCE Table Address is initialized to 0 as part of IPL and
-    //       all zero creates an invalid TCE entry
-    UtilTceMgr tceMgr(TCE_TABLE_ADDR, 0);
-
-    // Call initTceInHdw
-    errl = tceMgr.initTceInHdw();
-
-    if (errl)
-    {
-        TRACFCOMP(g_trac_tce,"utilEnableTcesWithoutTceTable(): initTceInHdw() "
-                  "failed with rc=0x%X", ERRL_GETRC_SAFE(errl));
-    }
+    // This will call the constructor, which in turn will initialize the
+    // HW to point at a TCE Table with invalid entries
+    Singleton<UtilTceMgr>::instance();
 
     return errl;
 
