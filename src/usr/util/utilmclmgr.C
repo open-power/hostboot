@@ -362,37 +362,12 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
             iv_curCompIdStr);
 
     errlHndl_t l_errl = nullptr;
-    bool l_skipLoad = false;
-
     do {
 
     // Check if Component is POWERVM (aka PHYP)
     bool isPhypComp = (i_compId == g_PowervmCompId) ? true : false;
 
-    // Check if Component is POWERVM (PHYP) and still skip if (!isTCEmode)
-    if ( isPhypComp )
-    {
-        if (TCE::utilUseTcesForDmas())
-        {
-            // Skip loading, but still process POWERVM (PHYP) component
-            l_skipLoad = true;
-
-            // @TODO RTC 168745 - Handle POWERVM Correctly
-            // UTIL_FT("MasterContainerLidMgr::processComponent skip load but processing POWERVM component");
-            UTIL_FT("MasterContainerLidMgr::processComponent - skip loading and processing of POWERVM component");
-            break;
-        }
-        else
-        {
-            // Skip Lid loading and processing of POWERVM (PHYP) component
-            // if NOT in TCEmode
-            l_skipLoad = true;
-            UTIL_FT("MasterContainerLidMgr::processComponent skipping POWERVM component completely");
-            break;  // break from do-while to skip processing
-        }
-    }
-
-    // Only process compoenents if they are marked PRE_VERIFY
+    // Only process components if they are marked PRE_VERIFY
     if( (io_compInfo.flags & CompFlags::PRE_VERIFY) !=
          CompFlags::PRE_VERIFY)
     {
@@ -402,24 +377,26 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
 
     // Total size of all Lids in component reoprted by the FSP
     size_t l_reportedSize = 0;
-    if (!l_skipLoad)
+    // Load lids into temp mainstore memory
+    l_errl = loadLids(io_compInfo, l_reportedSize, isPhypComp);
+    if (l_errl)
     {
-        // Load lids into temp mainstore memory
-        l_errl = loadLids(io_compInfo, l_reportedSize);
-        if (l_errl)
-        {
-            break;
-        }
+        break;
     }
+
     // Set total size of component.
     // Note: It will be reassigned later if a secure header is present
     io_compInfo.totalSize = l_reportedSize;
 
-    // Verify component's lids
-    l_errl = verifyExtend(i_compId, io_compInfo);
-    if (l_errl)
+    // Phyp component has already been loaded and verified before MCL mgr
+    if (!isPhypComp)
     {
-        break;
+        // Verify component's lids
+        l_errl = verifyExtend(i_compId, io_compInfo);
+        if (l_errl)
+        {
+            break;
+        }
     }
 
     // Ensure the total size of all lids fit in the mainstore memory region
@@ -453,7 +430,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
     // Ensure what was read by the FSP matches the total size found in the
     // Secure Header. If there is no secure header, this path should not be hit.
     // *NOTE: Skip check if lid loading was skipped
-    if ( !l_skipLoad && (io_compInfo.totalSize != l_reportedSize))
+    if (io_compInfo.totalSize != l_reportedSize)
     {
         UTIL_FT(ERR_MRK"MasterContainerLidMgr::processComponent - Size Mismatch. Component total size=0x%X, size read by FSP=0x%X",
                 io_compInfo.totalSize, l_reportedSize);
@@ -481,7 +458,8 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
     }
 
     // Clear unused memory
-    if (io_compInfo.totalSize < iv_maxSize)
+    // Note: Phyp component has already been loaded and verified before MCL mgr
+    if ( !isPhypComp && (io_compInfo.totalSize < iv_maxSize) )
     {
         // Get pointer to end of used space
         uint8_t* l_pUnused = reinterpret_cast<uint8_t*>(iv_pVaddr) +
@@ -533,7 +511,8 @@ errlHndl_t MasterContainerLidMgr::processComponent(const ComponentID& i_compId,
 }
 
 errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
-                                           size_t& o_totalSize)
+                                           size_t& o_totalSize,
+                                           const bool i_isPhypComp)
 {
     UTIL_DT(ENTER_MRK"MasterContainerLidMgr::loadLids");
     errlHndl_t l_errl = nullptr;
@@ -563,28 +542,32 @@ errlHndl_t MasterContainerLidMgr::loadLids(CompInfo& io_compInfo,
         // Update lid size
         lidInfo.size = l_lidSize;
 
-        // Load lid into vaddr location. API will check if remaining size is
-        // enough; throwing an error if not.
-        l_errl = l_lidMgr.getLid(reinterpret_cast<void*>(l_pLidVaddr),
-                                 l_remainSize);
-        if(l_errl)
+        // Phyp component has already been loaded and verified before MCL mgr
+        if (!i_isPhypComp)
         {
-            UTIL_FT(ERR_MRK"MasterContainerLidMgr::loadLids - Error getting lidId=0x%.8x",
-                    lidInfo.id);
-            break;
-        }
+            // Load lid into vaddr location. API will check if remaining size is
+            // enough; throwing an error if not.
+            l_errl = l_lidMgr.getLid(reinterpret_cast<void*>(l_pLidVaddr),
+                                     l_remainSize);
+            if(l_errl)
+            {
+                UTIL_FT(ERR_MRK"MasterContainerLidMgr::loadLids - Error getting lidId=0x%.8x",
+                        lidInfo.id);
+                break;
+            }
 
-        // Increment vaddr pointer
-        l_pLidVaddr += l_lidSize;
+            // Increment vaddr pointer
+            l_pLidVaddr += l_lidSize;
 
-        // Decrement size remaining in mainstore memory temp space
-        if (l_lidSize >= l_remainSize)
-        {
-            l_remainSize = 0;
-        }
-        else
-        {
-            l_remainSize -= l_lidSize;
+            // Decrement size remaining in mainstore memory temp space
+            if (l_lidSize >= l_remainSize)
+            {
+                l_remainSize = 0;
+            }
+            else
+            {
+                l_remainSize -= l_lidSize;
+            }
         }
 
         // Increment total size

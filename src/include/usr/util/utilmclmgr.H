@@ -198,25 +198,8 @@ struct CompInfo
     void print() const;
 };
 
-// Comparator to ensure PHYP is always the first component to be processed
-struct CompOrderCompare {
-    bool operator() (const ComponentID& lhs, const ComponentID& rhs) const
-    {
-        if((lhs == g_PowervmCompId))
-        {
-            return true;
-        }
-        else if ((rhs == g_PowervmCompId))
-        {
-            return false;
-        }
-
-        return lhs<rhs;
-    }
-};
-
 // Structure for Comp Info cache
-typedef std::map<ComponentID, CompInfo, CompOrderCompare> CompInfoMap;
+typedef std::map<ComponentID, CompInfo> CompInfoMap;
 
 /**
  * @brief Convert Component ID to a char*
@@ -346,10 +329,12 @@ class MasterContainerLidMgr
      *
      * @param[in] io_compInfo - Component info of component to verify
      * @param[out] o_totalSize - Size of all lids reported by the FSP
+     * @param[in] i_isPhypComp - Indicates if PHYP lids
      *
      * @return Error handle if error
      */
-    errlHndl_t loadLids(CompInfo& io_compInfo, size_t& o_totalSize);
+    errlHndl_t loadLids(CompInfo& io_compInfo, size_t& o_totalSize,
+                        bool i_isPhypComp);
 
     /**
      * @brief Verify and Extend Component
