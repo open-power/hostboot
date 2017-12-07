@@ -2191,4 +2191,26 @@
     <overrideOnly/>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_FREQ_PB_MHZ_POUNDV_FALLBACK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      The powerbus frequency that should be used to locate a valid #V bucket
+      in the processor Module VPD if the actual ATTR_FREQ_PB_MHZ value isn't
+      present.
+    </description>
+    <valueType>uint32</valueType>
+    <enum>
+      NO_FALLBACK = 0,
+      1600 = 1600,
+      1866 = 1866,
+      2000 = 2000,
+      2133 = 2133,
+      2400 = 2400
+    </enum>
+    <writeable/>
+    <platInit/>
+    <default>NO_FALLBACK</default>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
