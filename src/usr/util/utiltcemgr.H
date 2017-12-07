@@ -165,6 +165,14 @@ class UtilTceMgr
      */
     errlHndl_t createTceTable();
 
+    /**
+     * @brief Responsible for setting up the Processors to point to the TCE
+     *         Table
+     *
+     * @return errlHndl_t - Return error log if unsuccessful
+     *
+     */
+    errlHndl_t initTceInHdw();
 
     /**
      * @brief Helper function to Memory Map PSI Host Bridge
@@ -243,23 +251,7 @@ class UtilTceMgr
     /**
      * @brief Responsible for allocating TCEs
      *
-     * @param[in] i_startingAddress - Starting address that the allocated TCEs
-     *                                will map to
-     *                                Needs to be page-aligned or will fail
-     * @param[in] i_size - Size of the address space that TCEs map to
-     *                     Size must be less than (512K * PAGESIZE) or will fail
-     *                     Assert if not greater than zero
-     * @param[out] o_startingToken - Starting Entry into the table.
-     * @param[out] o_startingToken - Key to the Starting Entry into the table.
-     *                               This is an offset into the array based on the
-     *                                 TCE Index * PAGESIZE.
-     *                               FSP uses the token as a DMA Address.
-     *                               Each TCE entry maps to a pagesize of memory.
-     *
-     * Note:  First time this is called will cause TCE table to be created and
-     *        the Processors to be setup to point at the TCE table
-     *
-     * @return errl - Return Error Handle if failed.
+     * - see utiltce.H for details
      *
      */
     errlHndl_t allocateTces(uint64_t  i_startingAddress,
@@ -269,13 +261,7 @@ class UtilTceMgr
     /**
      * @brief Responsible for deallocating TCEs
      *
-     * @param[in] i_startingToken  Token indicating the starting entry of the
-     *                             TCE Table to remove
-     * @param[in] i_size - Size of memory space to remove associated TCE entries
-     *                     Size must be less than (512K * PAGESIZE) or will fail
-     *                     Assert if not greater than zero
-     *
-     * @return errl - Return Error Handle if fatal failure occurred.
+     * - see utiltce.H for details
      *
      */
     errlHndl_t deallocateTces(uint32_t i_startingToken,
@@ -285,20 +271,10 @@ class UtilTceMgr
      * @brief Responsible for disabling TCEs on the system, including
      *        clearing the TCE table and disabling Processor settings
      *
-     * @return errl - Return Error Handle if fatal failure occurred.
+     * - see utiltce.H for details
      *
      */
     errlHndl_t disableTces(void);
-
-    /**
-     * @brief Responsible for setting up the Processors to point to the TCE
-     *         Table
-     *
-     * @return errlHndl_t - Return error log if unsuccessful
-     *
-     */
-    errlHndl_t initTceInHdw();
-
 
     /** Values related to tokens */
     enum tokenLabels

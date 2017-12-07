@@ -189,7 +189,7 @@ errlHndl_t verifyAndMovePayload(void)
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                 "verifyAndMovePayload(): Copy PAYLOAD from 0x%.16llX (va="
-                "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=%llX), size=0x%llX",
+                "0x%llX) to PAYLOAD_BASE = 0x%.16llX (va=0x%llX), size=0x%llX",
                 payload_tmp_phys_addr, payload_tmp_virt_addr, payloadBase,
                 payloadBase_virt_addr, payload_size);
 
