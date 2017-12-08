@@ -337,6 +337,17 @@ def register_hb_debug_framework_tools():
                     doc = usage)
         print "Hostboot Debug Framework: Registered tool:", "hb-" + tool
 
+    # Do a quick file write test to make sure we can write files and set a
+    # simics variable to let us know if we need to avoid file writes.
+    SIM_run_command("$fileSystemOk=1")
+    try:
+        f = open('hbTracTEST', 'w')
+        f.write("\n")
+        f.close()
+        os.system("rm -rf hbTracTEST")
+    except:
+        SIM_run_command("$fileSystemOk=0")
+
 
 # Return a number/address built from the input list elements. Each element
 # in the input is a string representation of a byte-sized hex number, for
@@ -688,7 +699,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
         saveCommand = "%s; %s; %s"%(cmd1,cmd2,cmd3)
         #print "Command=%s" % (saveCommand)
 
-        SIM_run_alone(run_command, saveCommand )
+        if (simenv.fileSystemOk == 1):
+            SIM_run_alone(run_command, saveCommand )
+        else:
+            print "Unable to write traces. Continuing..."
 
         #file = open("hb_trace_debug.dat", "a")
         #file.write("%s\n" % (saveCommand))
