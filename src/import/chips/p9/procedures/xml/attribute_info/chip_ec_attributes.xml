@@ -6030,6 +6030,23 @@
         </ec>
       </chip>
     </chipEcFeature>
+   </attribute>
+ <!-- ******************************************************************** -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW419021</id>>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Disable read data delay for Cumulus DD1.0
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
   </attribute>
   <!-- ******************************************************************** -->
 </attributes>
