@@ -928,12 +928,13 @@ ReturnCode platModifyRing(const Target<TARGET_TYPE_ALL>& i_target,
     return l_rc;
 }
 
-/// @brief passing a 'Put Ring from Image' message to SBE with RingId_t
-ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
+/// @brief 'Put Ring from Image' to centaur - overloaded template function for
+// TARGET_TYPE_MEMBUF_CHIP targets
+ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
         const RingId_t i_ringID,
-        const RingMode i_ringMode = RING_MODE_HEADER_CHECK)
+        const RingMode i_ringMode)
 {
-    FAPI_DBG("Entering: platPutRing() with RingId_t");
+    FAPI_DBG("Entering: platPutRing() with RingId_t for TARGET_TYPE_MEMBUF_CHIP");
     ReturnCode l_rc  = FAPI2_RC_SUCCESS;
     errlHndl_t l_err = NULL;
 
@@ -941,45 +942,74 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
     //       trace in common fapi2_hw_access.H
     bool l_traceit = platIsScanTraceEnabled();
 
-    //convert const RingId_t to RingId_t
-    RingId_t l_ringID = reinterpret_cast<RingId_t>(i_ringID);
+    unsigned char * l_ringData = nullptr;
+    size_t   l_ringLength = 0;
+    uint64_t l_ringAddress = 0;
 
-    // Extract the component pointer
-    TARGETING::Target* l_target =
-            reinterpret_cast<TARGETING::Target*>(i_target.get());
+    // grab the ring data from the cen.hw_image
+    l_rc = get_ring(i_target, i_ringID, l_ringData,
+            l_ringLength, l_ringAddress);
 
-    // Grab the name of the target
-    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
-    fapi2::toString(i_target, l_targName, sizeof(l_targName));
-
-    uint64_t l_flag = platGetDDScanMode(i_ringMode);
-    size_t l_size   = (size_t) 0;
-
-    FAPI_DBG("platPutRing  l_target : %.16llX i_targetType %.16llX",
-            l_target,
-            l_target->getAttr<TARGETING::ATTR_TYPE>());
-
-    FAPI_DBG("platPutRing  l_RingID :"
-            " %.16llX i_ringMode %.16llX l_flag %.16llX",
-            static_cast<uint64_t>(l_ringID), i_ringMode, l_flag );
-
-    l_err = deviceWrite(l_target,
-            nullptr,
-            l_size,
-            DEVICE_SCAN_SBE_ADDRESS(l_ringID,i_ringMode,l_flag));
-
-    if(l_err)
+    if( l_rc == fapi2::FAPI2_RC_SUCCESS )
     {
-        FAPI_ERR("platPutRing: deviceWrite returns error!");
-        // Add the error log pointer as data to the ReturnCode
-        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+        if( l_ringLength != 0 )
+        {
+            // Extract the component pointer
+            TARGETING::Target* l_target =
+                reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+            // Grab the name of the target
+            TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+            fapi2::toString(i_target, l_targName, sizeof(l_targName));
+
+            uint64_t l_flag = platGetDDScanMode(i_ringMode);
+
+            FAPI_DBG("platPutRing  l_target : %.16llX i_targetType %.16llX",
+                    l_target,
+                    l_target->getAttr<TARGETING::ATTR_TYPE>());
+
+            FAPI_DBG("platPutRing  i_RingID :"
+                    " %.16llX i_ringMode %.16llX l_flag %.16llX l_ringLength %.16llX",
+                    static_cast<uint64_t>(i_ringID), i_ringMode,
+                    l_flag,static_cast<uint64_t>(l_ringLength));
+
+            // calculate the buffer size based on the number of bits
+            // in the ring,
+            size_t l_bufferSize = ((l_ringLength + 7) >> 3);
+
+            l_err = deviceWrite(l_target,
+                    l_ringData,
+                    l_bufferSize,
+                    DEVICE_SCAN_ADDRESS(l_ringAddress,l_ringLength,l_flag));
+
+            if(l_err)
+            {
+                FAPI_ERR("platPutRing: deviceWrite returns error!");
+                // Add the error log pointer as data to the ReturnCode
+                l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+            }
+
+            if (l_traceit)
+            {
+                FAPI_SCAN("TRACE : PUTRING w RingId_t    :  %s : %.16llX",
+                        l_targName,
+                        static_cast<uint64_t>(i_ringID));
+            }
+        }
+        else
+        {
+            // $TODO RTC:171739 - add error case, current procedure calls
+            // with ring ids for rings which currently do not have any known
+            // content but were scanned in p8 - Joe confirmed these rings do
+            // not currently have content - we will need to decide if procedure
+            // should be updated to remove the calls or we continue to ignore
+            FAPI_INF("platPutRing: called with unsupported ring ID %d!", i_ringID);
+        }
     }
-
-    if (l_traceit)
+    else
     {
-         FAPI_SCAN("TRACE : PUTRING w RingId_t    :  %s : %.16llX",
-                l_targName,
-                static_cast<uint64_t>(l_ringID));
+        // get_ring() call failed
+        FAPI_ERR("get_ring() returned error");
     }
 
     FAPI_DBG(EXIT_MRK "platPutRing() with RingId_t");
@@ -994,20 +1024,20 @@ uint64_t platGetDDScanMode(const uint32_t i_ringMode)
     uint32_t l_scanMode = 0;
 
     if ( ((i_ringMode & fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND) ==
-         fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND) ||
-         ((i_ringMode & fapi2::RING_MODE_SET_PULSE_NSL) ==
-         fapi2::RING_MODE_SET_PULSE_NSL) ||
-         ((i_ringMode & fapi2::RING_MODE_SET_PULSE_SL) ==
-         fapi2::RING_MODE_SET_PULSE_SL) ||
-         ((i_ringMode & fapi2::RING_MODE_SET_PULSE_ALL) ==
-         fapi2::RING_MODE_SET_PULSE_ALL) )
+                fapi2::RING_MODE_SET_PULSE_NO_OPCG_COND) ||
+            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_NSL) ==
+             fapi2::RING_MODE_SET_PULSE_NSL) ||
+            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_SL) ==
+             fapi2::RING_MODE_SET_PULSE_SL) ||
+            ((i_ringMode & fapi2::RING_MODE_SET_PULSE_ALL) ==
+             fapi2::RING_MODE_SET_PULSE_ALL) )
     {
         l_scanMode |= SCAN::SET_PULSE;
     }
 
     // Header Check
     if ((i_ringMode & fapi2::RING_MODE_NO_HEADER_CHECK) ==
-         fapi2::RING_MODE_NO_HEADER_CHECK )
+            fapi2::RING_MODE_NO_HEADER_CHECK )
     {
         l_scanMode |= SCAN::NO_HEADER_CHECK;
     }
@@ -1023,8 +1053,8 @@ void platSetOpMode(const OpModes i_mode)
 {
     FAPI_INF("Setting fapi2::opMode to be 0x%x", i_mode);
     opMode = static_cast<OpModes>(
-                static_cast<uint8_t>(opMode) | static_cast<uint8_t>(i_mode)
-                );
+            static_cast<uint8_t>(opMode) | static_cast<uint8_t>(i_mode)
+            );
     return;
 }
 
@@ -1056,11 +1086,11 @@ uint8_t platGetPIBErrorMask(void)
 // --------------------------------------------------------------------------
 
 /**
-* @brief Determine if a given target is on the master proc chip
-* @param[in]  i_Target   TARGETING::Target which op is being called on
-* @param[out] i_isMaster True if on master proc chip, false if not
-* @return errlHndl_t
-*/
+ * @brief Determine if a given target is on the master proc chip
+ * @param[in]  i_Target   TARGETING::Target which op is being called on
+ * @param[out] i_isMaster True if on master proc chip, false if not
+ * @return errlHndl_t
+ */
 errlHndl_t isOnMasterProc(TARGETING::Target * i_target, bool & o_isMaster)
 {
     errlHndl_t l_errl = nullptr;

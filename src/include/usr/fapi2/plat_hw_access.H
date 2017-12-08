@@ -44,12 +44,30 @@
 #include <common_ringId.H>
 #include <p9_ring_id.h>
 
+#include <devicefw/userif.H>
+#include <plat_utils.H>
+
+
 namespace fapi2
 {
 
 //------------------------------------------------------------------------------
 // HW Communication Functions to be implemented at the platform layer.
 //------------------------------------------------------------------------------
+//
+
+
+///
+/// @brief Helper function to calculate the scanMode based on the
+///        ring scan mode.
+///        The bits which may be set in the returned scanMode are:
+///          SCAN:SET_PULSE
+///          SCAN::NO_HEADER_CHECK
+/// @param[in]  scan mode from put ring call
+/// @return scanMode
+///
+uint64_t platGetDDScanMode(const uint32_t i_ringMode);
+
 
 ///
 /// @brief Platform-level implementation called by getScom()
@@ -142,6 +160,7 @@ ReturnCode platGetRing(const Target<TARGET_TYPE_ALL>& i_target,
                               variable_buffer& o_data,
                               const RingMode i_ringMode);
 
+
 /// @brief Read-modify-write a ring on a chip.
 /// @param[in] i_target     Target to operate on.
 /// @param[in] i_address    Ring address to modify.
@@ -170,14 +189,85 @@ ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
                        variable_buffer& i_data,
                        const RingMode i_ringMode);
 
-/// @brief Writes a ring to a chip.
+
+/// @brief Writes a ring to a chip, the ring id will be passed to the SBE
+///        the op will be executed
+///
 /// @param[in] i_target   Target to operate on.
-/// @param[in] i_ringID   Ring ID that will identify the Ring in the image.
+/// @param[in] i_ringID   Ring ID that will identify the Ring to be scanned
 /// @param[in] i_ringMode Ring operation mode.
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-ReturnCode platPutRing(const Target<TARGET_TYPE_ALL>& i_target,
+template<TargetType T>
+ReturnCode platPutRing(const Target<T>& i_target,
+                       const RingId_t i_ringID,
+                       const RingMode i_ringMode)
+{
+    FAPI_DBG("Entering: platPutRing() with RingId_t");
+    ReturnCode l_rc  = FAPI2_RC_SUCCESS;
+    errlHndl_t l_err = NULL;
+
+    // Note: Trace is placed here in plat code because PPE doesn't support
+    //       trace in common fapi2_hw_access.H
+    bool l_traceit = platIsScanTraceEnabled();
+
+    //convert const RingId_t to RingId_t
+    RingId_t l_ringID = reinterpret_cast<RingId_t>(i_ringID);
+
+    // Extract the component pointer
+    TARGETING::Target* l_target =
+        reinterpret_cast<TARGETING::Target*>(i_target.get());
+
+    // Grab the name of the target
+    TARGETING::ATTR_FAPI_NAME_type l_targName = {0};
+    fapi2::toString(i_target, l_targName, sizeof(l_targName));
+
+    uint64_t l_flag = platGetDDScanMode(i_ringMode);
+    size_t l_size   = (size_t) 0;
+
+    FAPI_DBG("platPutRing  l_target : %.16llX i_targetType %.16llX",
+            l_target,
+            l_target->getAttr<TARGETING::ATTR_TYPE>());
+
+    FAPI_DBG("platPutRing  l_RingID :"
+            " %.16llX i_ringMode %.16llX l_flag %.16llX",
+            static_cast<uint64_t>(l_ringID), i_ringMode, l_flag );
+
+    l_err = deviceWrite(l_target,
+            nullptr,
+            l_size,
+            DEVICE_SCAN_SBE_ADDRESS(l_ringID,i_ringMode,l_flag));
+
+    if(l_err)
+    {
+        FAPI_ERR("platPutRing: deviceWrite returns error!");
+        // Add the error log pointer as data to the ReturnCode
+        l_rc.setPlatDataPtr(reinterpret_cast<void *> (l_err));
+    }
+
+    if (l_traceit)
+    {
+        FAPI_SCAN("TRACE : PUTRING w RingId_t    :  %s : %.16llX",
+                l_targName,
+                static_cast<uint64_t>(l_ringID));
+    }
+
+    FAPI_DBG(EXIT_MRK "platPutRing() with RingId_t");
+    return l_rc;
+
+}
+
+
+/// @brief Writes a ring to a chip. For MEMBUF targets the ring data will
+///        be extracted from the centaur hw image using the ring id.
+///
+/// @param[in] i_target   Target to operate on.
+/// @param[in] i_ringID   Ring ID that will identify the Ring to be scanned
+/// @param[in] i_ringMode Ring operation mode.
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+ReturnCode platPutRing(const Target<TARGET_TYPE_MEMBUF_CHIP>& i_target,
                        const RingId_t i_ringID,
                        const RingMode i_ringMode);
+
 
 //--------------------------------------------------------------------------
 // Operational Mode Error Functions
