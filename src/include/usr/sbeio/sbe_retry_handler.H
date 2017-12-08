@@ -46,17 +46,25 @@ class SbeRetryHandler
             PROC_DECONFIG       = 3, // Deconfig done on Proc with SBE
         };
 
-        /**
-         * @brief Get the instance of this class
-         *
-         * @return the instance of SbeRetryHandler
-         */
-        NEVER_INLINE static SbeRetryHandler& getInstance();
+        enum SBE_MODE_OF_OPERATION
+        {
+            INFORMATIONAL_ONLY = 0, // Get error logs from the SBE HWP's
+                    // This will not attempt a SBE restart, and it will only
+                    // run the steps to get the p9_extract_sbe_rc return value.
+            ATTEMPT_REBOOT     = 1, // Full SBE run, attempt to restart
+                    // This will run all the steps and HWP's to attempt
+                    // an SBE restart on both sides.
+            SBE_ACTION_SET     = 2, // Full SBE run, but with a set action
+                    // This will run all the steps and HWP's to attempt
+                    // an SBE restart, however in this case we are specifying
+                    // which SBE RETURN_ACTION we are attempting instead of
+                    // the action the SBE thinks we should attempt.
+        };
 
         /**
          * @brief Constructor
          */
-        SbeRetryHandler();
+        SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode);
 
         /**
          * @brief Destructor
@@ -72,11 +80,6 @@ class SbeRetryHandler
         inline uint8_t getSbeSide()
         {
             return this->iv_sbeSide;
-        }
-
-        inline bool getErrorLogged()
-        {
-            return this->iv_sbeErrorLogged;
         }
 
         inline uint32_t getPLID()
@@ -104,17 +107,24 @@ class SbeRetryHandler
             return this->iv_currentSBEState;
         }
 
+        inline SBE_MODE_OF_OPERATION getSBEMode()
+        {
+            return this->iv_sbeMode;
+        }
+
+        inline void setSBEMode(SBE_MODE_OF_OPERATION i_sbeMode)
+        {
+            this->iv_sbeMode = i_sbeMode;
+        }
+
         /**
          * @brief  This function is the main entry point for all of the
          *         SBE handler functions.
          *
          * @param[in]  i_target    - current proc target
-         * @param[in]  i_actionSet - There are a few instances where we have
-         *                  to recall the main function.  This variable is
-         *                  set so that we don't override the new action.
          */
 
-        void main_sbe_handler( TARGETING::Target * i_target, bool i_actionSet);
+        void main_sbe_handler( TARGETING::Target * i_target);
 
     private:
 
@@ -146,7 +156,6 @@ class SbeRetryHandler
          * @brief  This function handles the SBE failed to boot error.
          *
          * @param[in]     i_target        - current proc target
-         * @param[out]    o_regReturn     - sbe reg return
          *
          * @return - bool: true if we need to retry
          */
@@ -203,12 +212,7 @@ class SbeRetryHandler
         uint8_t iv_sbeSide;
 
         /*
-         * @brief True if we logged an error during the SBE restart process
-         */
-        bool iv_sbeErrorLogged;
-
-        /*
-         * @brief PLID of the unrecoverable error logged. NULL if no error
+         * @brief PLID of the error logged. NULL if no error
          *        was logged.
          */
         uint32_t iv_errorLogPLID;
@@ -240,6 +244,12 @@ class SbeRetryHandler
          */
         bool iv_retriggeredMain;
 
+        /*
+         * @brief The mode of operation that needs to be run through the
+         *        SbeRetryHandler.  The different modes are specified in the
+         *        SBE_MODE_OF_OPERATION enum
+         */
+        SBE_MODE_OF_OPERATION iv_sbeMode;
 }; // End of class SbeRetryHandler
 
 }  // End of namespace SBEIO

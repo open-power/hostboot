@@ -180,6 +180,7 @@ enum sbePrimResponse
     SBE_PRI_USER_ERROR                  = 0x03,
     SBE_PRI_INTERNAL_ERROR              = 0x04,
     SBE_PRI_UNSECURE_ACCESS_DENIED      = 0x05,
+    SBE_PRI_FFDC_ERROR                  = 0x40, /* FFDC Package Present */
     SBE_PRI_GENERIC_EXECUTION_FAILURE   = 0xFE,
 };
 

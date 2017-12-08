@@ -129,9 +129,10 @@ void* call_proc_check_slave_sbe_seeprom_complete( void *io_pArgs )
                    " on processor target %.8X",
                    TARGETING::get_huid(l_cpu_target));
 
-        SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler();
+        SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler(
+                SBEIO::SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
-        l_SBEobj.main_sbe_handler(l_cpu_target,false);
+        l_SBEobj.main_sbe_handler(l_cpu_target);
 
         // No error and still functional
         if(l_cpu_target->getAttr<ATTR_HWAS_STATE>().functional)

@@ -78,59 +78,13 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 // we are just looking at Slave SBE's
                 continue;
             }
-            SbeRetryHandler l_SBEobj = SbeRetryHandler();
+            SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target, false);
+            l_SBEobj.main_sbe_handler(l_cpu_target);
 
             SBE_TRACF_RHT("testSBEReturns: returned from main_sbe_handler "
                            "SUCCESS");
-        }
-    }
-
-    /**
-     * @brief Call into sbe handler retry on the slave SBE, and ensure that
-     *        the error class element matches the PLID returned
-     *
-     *        This will not run fully without a slave SBE
-     */
-    void testErrorMatch(void)
-    {
-        SBE_TRACF_RHT(ENTER_MRK"testErrorMatch: Testing that the Error "
-                      "Logged class element matches the PLID class element");
-
-        // Get master proc target
-        TARGETING::Target* l_pMasterProcTarget = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(
-                        l_pMasterProcTarget);
-
-        // Get a list of all procs
-        TARGETING::TargetHandleList l_cpuTargetList;
-        getAllChips(l_cpuTargetList, TARGETING::TYPE_PROC);
-
-        // Loop through CPU's
-        for( const auto & l_cpu_target: l_cpuTargetList)
-        {
-
-            if(l_cpu_target == l_pMasterProcTarget)
-            {
-                // we are just looking at Slave SBE's
-                continue;
-            }
-            SbeRetryHandler l_SBEobj = SbeRetryHandler();
-
-            l_SBEobj.main_sbe_handler(l_cpu_target, false);
-
-            SBE_TRACF_RHT("testErrorMatch: If we get positive on an error "
-                          "check, there should also be a plid set");
-            if( l_SBEobj.getErrorLogged() && (l_SBEobj.getPLID()==NULL) )
-            {
-                TS_FAIL("testErrorMatch: If an error is logged, we also "
-                        "need a PLID logged");
-            }else if( !(l_SBEobj.getErrorLogged()) && l_SBEobj.getPLID()!=NULL)
-            {
-                TS_FAIL("testErrorMatch: If an error isn't logged, we "
-                        "need PLID to be null");
-            }
         }
     }
 
@@ -163,9 +117,10 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 // we are just looking at Slave SBE's
                 continue;
             }
-            SbeRetryHandler l_SBEobj = SbeRetryHandler();
+            SbeRetryHandler l_SBEobj = SbeRetryHandler(
+                    SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
 
-            l_SBEobj.main_sbe_handler(l_cpu_target, false);
+            l_SBEobj.main_sbe_handler(l_cpu_target);
 
             uint32_t l_sbeStarted = l_cpu_target->getAttr<
                                     TARGETING::ATTR_SBE_IS_STARTED>();
@@ -180,56 +135,6 @@ class SbeRetryHandlerTest : public CxxTest::TestSuite
                 TS_FAIL("testSBEStarted: If the class element "
                        "that the SBE started is false, then the SBE attribute "
                        "also needs to be false");
-            }
-        }
-    }
-
-    /**
-     * @brief Call into sbe handler retry on the slave SBE, and ensure that
-     *        the sbe class action matches the error returned
-     *
-     *        This will not run fully without a slave SBE
-     */
-    void testActionErrorMatch(void)
-    {
-        SBE_TRACF_RHT(ENTER_MRK"testActionErrorMatch: Test that the current "
-                      "action matches if there was an error returned or not");
-
-        // Get master proc target
-        TARGETING::Target* l_pMasterProcTarget = NULL;
-        TARGETING::targetService().masterProcChipTargetHandle(
-                        l_pMasterProcTarget);
-
-        // Get a list of all procs
-        TARGETING::TargetHandleList l_cpuTargetList;
-        getAllChips(l_cpuTargetList, TARGETING::TYPE_PROC);
-
-        // Loop through CPU's
-        for( const auto & l_cpu_target: l_cpuTargetList)
-        {
-
-            if(l_cpu_target == l_pMasterProcTarget)
-            {
-                // we are just looking at Slave SBE's
-                continue;
-            }
-            SbeRetryHandler l_SBEobj = SbeRetryHandler();
-
-            l_SBEobj.main_sbe_handler(l_cpu_target, false);
-
-            if(l_SBEobj.getErrorLogged() && (l_SBEobj.getCurrentAction()!=
-               P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION))
-            {
-                TS_FAIL("testActionErrorMatch: "
-                       "If we have an error returned, the current action "
-                       "should be NO_RECOVERY_ACTION");
-            }else if(!(l_SBEobj.getErrorLogged()) &&
-                       (l_SBEobj.getCurrentAction() ==
-                                P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION))
-            {
-                TS_FAIL("testActionErrorMatch: "
-                       "If we do not have an error returned, the current "
-                       "action should be anything but NO_RECOVERY_ACTION");
             }
         }
     }
