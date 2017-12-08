@@ -134,14 +134,13 @@ enum TorMagicNum
 
 
 //
-// Chip types and List to represent p9n, p9c, p9a, cen (centaur)
+// Chip types and List to represent p9n, p9c, cen (centaur)
 // NB! There's a matching CHIP_TYPE_LIST definition in common_ringId.C
 //
 enum ChipType
 {
     CT_P9N,  // ==P9 for now
     CT_P9C,  // ==P9 for now
-    CT_P9A,
     CT_CEN,
     NUM_CHIP_TYPES
 };
@@ -156,7 +155,6 @@ static const ChipTypeList_t CHIP_TYPE_LIST[] =
 {
     {"p9n", CT_P9N},
     {"p9c", CT_P9C},
-    {"p9a", CT_P9A},
     {"cen", CT_CEN},
 };
 
