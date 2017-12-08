@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,27 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
 ///
 ReturnCode platSpecialWakeup( const Target<TARGET_TYPE_ALL>& i_target,
                               bool i_enable );
+
+///
+/// @brief return uncompressed ring data from the hardware image for a
+///        given ring ID.
+///
+/// @param[in] i_target -
+///              TARGET_TYPE_MEMB_CHIP: uses centaur hw image data
+/// @param[in] i_ringId      - which ring to get data for
+/// @param[in] o_ringData    - ring data
+/// @param[in] o_ringAddress - scan address
+///
+/// @return ReturnCode. FAPI2_RC_SUCCESS on success, else platform
+///                     specified error.
+///
+/// NODE: Currenlty only supported for centaur membuf targets
+///
+template<fapi2::TargetType T>
+ReturnCode get_ring(fapi2::Target<T> i_target,
+        const uint16_t i_ringId, unsigned char *&o_ringData,
+        uint64_t &o_ringLength,
+        uint64_t &o_ringAddress);
 
 } // End namespace fapi2
 

@@ -460,9 +460,9 @@ errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
         //   where the ring you want to scan is located. All other chiplet rings
         //   eg. 0203xxxx 0303xxxx stays the same. This is only special with
         //   0003xxxx"
-        if ((l_isCentaur) && ((l_scanTypeAddr & 0x01000000) == 0x0))
+        if ((l_isCentaur) && ((l_scanTypeAddr & 0x03000000) == 0x0))
         {
-            l_scanTypeAddr |= 0x01000000;
+           l_scanTypeAddr |= 0x01000000;
         }
 
         // bits 16-31 select the scan type select register
@@ -896,6 +896,8 @@ errlHndl_t scanDoPibScan(  DeviceFW::OperationType i_opType,
 
         }
     }while(0);
+
+    TRACFCOMP( g_trac_scandd,"SCAN::scanDoPibScan> End:::");
 
     mutex_unlock(l_mutex);
 

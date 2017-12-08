@@ -43,6 +43,10 @@
 #include <hwpf_fapi2_reasoncodes.H>
 #include <attributeenums.H>
 
+// $TODO RTC:171739 - get the ring from cen.hw_ref_image in pnor
+// remove when get_ring is using the hw image
+#include <ring_data.H>
+
 #if __HOSTBOOT_RUNTIME
   #include "handleSpecialWakeup.H"
 #endif
@@ -73,6 +77,35 @@ namespace fapi2
 //thread_local ReturnCode current_err;
 ReturnCode current_err;
 
+// $TODO RTC:171739 - get the ring from cen.hw_ref_image in pnor
+// This temp verion of the function will return hardcoded
+// ring data for the ring ids required for step 11 BUP
+template<>
+ReturnCode  get_ring(Target<TARGET_TYPE_MEMBUF_CHIP>i_target,
+        const uint16_t ringId,
+        unsigned char *&o_ringData,
+        size_t  &o_ringLength,
+        uint64_t &o_ringAddress)
+{
+
+    o_ringLength = 0;
+    o_ringData = nullptr;
+    o_ringAddress = 0;
+
+    RING_MAP::iterator it;
+    // search for the ring id in the map
+    it = ringMap.find(ringId);
+    if (it != ringMap.end())
+    {
+        // found it
+        o_ringAddress = it->second.ringAddress;
+        o_ringLength  = it->second.ringLength;
+        o_ringData    = it->second.ringData;
+    }
+
+    return ReturnCode();
+}
+
 ///
 /// @brief Translates a FAPI callout priority to an HWAS callout priority
 ///
@@ -81,16 +114,16 @@ ReturnCode current_err;
 /// @return HWAS callout priority
 ///
 HWAS::callOutPriority xlateCalloutPriority(
-    const fapi2::CalloutPriorities::CalloutPriority i_fapiPri)
+        const fapi2::CalloutPriorities::CalloutPriority i_fapiPri)
 {
     // Use the CalloutPriority enum value as an index
     HWAS::callOutPriority l_priority = HWAS::SRCI_PRIORITY_HIGH;
     size_t l_index = i_fapiPri;
 
     const HWAS::callOutPriority HWAS_PRI[] = {HWAS::SRCI_PRIORITY_LOW,
-                                              HWAS::SRCI_PRIORITY_MED,
-                                              HWAS::SRCI_PRIORITY_HIGH,
-                                              HWAS::SRCI_PRIORITY_NONE};
+        HWAS::SRCI_PRIORITY_MED,
+        HWAS::SRCI_PRIORITY_HIGH,
+        HWAS::SRCI_PRIORITY_NONE};
 
     if (l_index < (sizeof(HWAS_PRI)/sizeof(HWAS::callOutPriority)))
     {
@@ -99,7 +132,7 @@ HWAS::callOutPriority xlateCalloutPriority(
     else
     {
         FAPI_ERR("fapi2::xlateCalloutPriority: Unknown priority 0x%x, assuming HIGH",
-            i_fapiPri);
+                i_fapiPri);
     }
 
     return l_priority;
@@ -113,7 +146,7 @@ HWAS::callOutPriority xlateCalloutPriority(
 /// * @return HWAS Clock HW callout
 ///
 HWAS::clockTypeEnum xlateClockHwCallout(
-    const fapi2::HwCallouts::HwCallout i_fapiClock)
+        const fapi2::HwCallouts::HwCallout i_fapiClock)
 {
     // Use the HwCallout enum value as an index
     HWAS::clockTypeEnum l_clock = HWAS::TODCLK_TYPE;
@@ -132,7 +165,7 @@ HWAS::clockTypeEnum xlateClockHwCallout(
     else
     {
         FAPI_ERR("fapi::xlateClockHwCallout: Unknown clock 0x%x, assuming TOD",
-            i_fapiClock);
+                i_fapiClock);
     }
 
     return l_clock;
@@ -146,7 +179,7 @@ HWAS::clockTypeEnum xlateClockHwCallout(
 /// * @return HWAS part HW callout
 ///
 HWAS::partTypeEnum xlatePartHwCallout(
-    const fapi2::HwCallouts::HwCallout i_fapiPart)
+        const fapi2::HwCallouts::HwCallout i_fapiPart)
 {
     // Use the HwCallout enum value as an index
     HWAS::partTypeEnum l_part = HWAS::NO_PART_TYPE;
@@ -156,39 +189,39 @@ HWAS::partTypeEnum xlatePartHwCallout(
 
     switch (i_fapiPart)
     {
-         case HwCallouts::FLASH_CONTROLLER_PART:
-               l_part = HWAS::FLASH_CONTROLLER_PART_TYPE;
-               break;
-         case HwCallouts::PNOR_PART:
-               l_part = HWAS::PNOR_PART_TYPE;
-               break;
-         case HwCallouts::SBE_SEEPROM_PART:
-               l_part = HWAS::SBE_SEEPROM_PART_TYPE;
-               break;
-         case HwCallouts::VPD_PART:
-               l_part = HWAS::VPD_PART_TYPE;
-               break;
-         case HwCallouts::LPC_SLAVE_PART:
-               l_part = HWAS::LPC_SLAVE_PART_TYPE;
-               break;
-         case HwCallouts::GPIO_EXPANDER_PART:
-               l_part = HWAS::GPIO_EXPANDER_PART_TYPE;
-               break;
-         case HwCallouts::SPIVID_SLAVE_PART:
-               l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
-               break;
-         case HwCallouts::TOD_CLOCK:
-               l_part = HWAS::TOD_CLOCK;
-               break;
-         case HwCallouts::MEM_REF_CLOCK:
-              l_part = HWAS::MEM_REF_CLOCK;
-              break;
-         case HwCallouts::PROC_REF_CLOCK:
-              l_part = HWAS::PROC_REF_CLOCK;
-              break;
-         case HwCallouts::PCI_REF_CLOCK:
-              l_part = HWAS::PCI_REF_CLOCK;
-              break;
+        case HwCallouts::FLASH_CONTROLLER_PART:
+            l_part = HWAS::FLASH_CONTROLLER_PART_TYPE;
+            break;
+        case HwCallouts::PNOR_PART:
+            l_part = HWAS::PNOR_PART_TYPE;
+            break;
+        case HwCallouts::SBE_SEEPROM_PART:
+            l_part = HWAS::SBE_SEEPROM_PART_TYPE;
+            break;
+        case HwCallouts::VPD_PART:
+            l_part = HWAS::VPD_PART_TYPE;
+            break;
+        case HwCallouts::LPC_SLAVE_PART:
+            l_part = HWAS::LPC_SLAVE_PART_TYPE;
+            break;
+        case HwCallouts::GPIO_EXPANDER_PART:
+            l_part = HWAS::GPIO_EXPANDER_PART_TYPE;
+            break;
+        case HwCallouts::SPIVID_SLAVE_PART:
+            l_part = HWAS::SPIVID_SLAVE_PART_TYPE;
+            break;
+        case HwCallouts::TOD_CLOCK:
+            l_part = HWAS::TOD_CLOCK;
+            break;
+        case HwCallouts::MEM_REF_CLOCK:
+            l_part = HWAS::MEM_REF_CLOCK;
+            break;
+        case HwCallouts::PROC_REF_CLOCK:
+            l_part = HWAS::PROC_REF_CLOCK;
+            break;
+        case HwCallouts::PCI_REF_CLOCK:
+            l_part = HWAS::PCI_REF_CLOCK;
+            break;
 
     }
 
@@ -203,7 +236,7 @@ HWAS::partTypeEnum xlatePartHwCallout(
 /// * @return HWAS procedure callout
 ///
 HWAS::epubProcedureID xlateProcedureCallout(
-    const fapi2::ProcedureCallouts::ProcedureCallout i_fapiProc)
+        const fapi2::ProcedureCallouts::ProcedureCallout i_fapiProc)
 {
     // Use the ProcedureCallout enum value as an index
     HWAS::epubProcedureID l_proc = HWAS::EPUB_PRC_HB_CODE;
@@ -223,7 +256,7 @@ HWAS::epubProcedureID xlateProcedureCallout(
     else
     {
         FAPI_ERR("fapi2::xlateProcedureCallout: Unknown proc 0x%x, assuming CODE",
-            i_fapiProc);
+                i_fapiProc);
     }
 
     return l_proc;
@@ -237,96 +270,96 @@ HWAS::epubProcedureID xlateProcedureCallout(
 /// * @param[o] o_type       Targeting type
 ///
 void xlateTargetType(const fapi2::TargetType i_targetType,
-                     TARGETING::CLASS & o_class,
-                     TARGETING::TYPE & o_type)
+        TARGETING::CLASS & o_class,
+        TARGETING::TYPE & o_type)
 {
     switch (i_targetType)
     {
-    case fapi2::TARGET_TYPE_SYSTEM:
-        o_class = TARGETING::CLASS_SYS;
-        o_type = TARGETING::TYPE_SYS;
-        break;
-    case fapi2::TARGET_TYPE_DIMM:
-        o_class = TARGETING::CLASS_LOGICAL_CARD;
-        o_type = TARGETING::TYPE_DIMM;
-        break;
-    case fapi2::TARGET_TYPE_PROC_CHIP:
-        o_class = TARGETING::CLASS_CHIP;
-        o_type = TARGETING::TYPE_PROC;
-        break;
-    case fapi2::TARGET_TYPE_MEMBUF_CHIP:
-        o_class = TARGETING::CLASS_CHIP;
-        o_type = TARGETING::TYPE_MEMBUF;
-        break;
-    case fapi2::TARGET_TYPE_EX:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_EX;
-        break;
-    case fapi2::TARGET_TYPE_MBA:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MBA;
-        break;
-    case fapi2::TARGET_TYPE_MCS:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MCS;
-        break;
-    case fapi2::TARGET_TYPE_XBUS:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_XBUS;
-        break;
-    case fapi2::TARGET_TYPE_L4:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_L4;
-        break;
-    case fapi2::TARGET_TYPE_CORE:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_CORE;
-        break;
-    case fapi2::TARGET_TYPE_EQ:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_EQ;
-        break;
-    case fapi2::TARGET_TYPE_MCA:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MCA;
-        break;
-    case fapi2::TARGET_TYPE_MCBIST:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MCBIST;
-        break;
-    case fapi2::TARGET_TYPE_MI:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_MI;
-        break;
-    case fapi2::TARGET_TYPE_CAPP:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_CAPP;
-        break;
-    case fapi2::TARGET_TYPE_DMI:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_DMI;
-        break;
-    case fapi2::TARGET_TYPE_OBUS:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_OBUS;
-        break;
-    case fapi2::TARGET_TYPE_OBUS_BRICK:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_OBUS_BRICK;
-        break;
-    case fapi2::TARGET_TYPE_SBE:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_SBE;
-        break;
-    case fapi2::TARGET_TYPE_PPE:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_PPE;
-        break;
-    case fapi2::TARGET_TYPE_PERV:
-        o_class = TARGETING::CLASS_UNIT;
-        o_type = TARGETING::TYPE_PERV;
-        break;
-    case fapi2::TARGET_TYPE_PEC:
+        case fapi2::TARGET_TYPE_SYSTEM:
+            o_class = TARGETING::CLASS_SYS;
+            o_type = TARGETING::TYPE_SYS;
+            break;
+        case fapi2::TARGET_TYPE_DIMM:
+            o_class = TARGETING::CLASS_LOGICAL_CARD;
+            o_type = TARGETING::TYPE_DIMM;
+            break;
+        case fapi2::TARGET_TYPE_PROC_CHIP:
+            o_class = TARGETING::CLASS_CHIP;
+            o_type = TARGETING::TYPE_PROC;
+            break;
+        case fapi2::TARGET_TYPE_MEMBUF_CHIP:
+            o_class = TARGETING::CLASS_CHIP;
+            o_type = TARGETING::TYPE_MEMBUF;
+            break;
+        case fapi2::TARGET_TYPE_EX:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_EX;
+            break;
+        case fapi2::TARGET_TYPE_MBA:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MBA;
+            break;
+        case fapi2::TARGET_TYPE_MCS:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MCS;
+            break;
+        case fapi2::TARGET_TYPE_XBUS:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_XBUS;
+            break;
+        case fapi2::TARGET_TYPE_L4:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_L4;
+            break;
+        case fapi2::TARGET_TYPE_CORE:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_CORE;
+            break;
+        case fapi2::TARGET_TYPE_EQ:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_EQ;
+            break;
+        case fapi2::TARGET_TYPE_MCA:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MCA;
+            break;
+        case fapi2::TARGET_TYPE_MCBIST:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MCBIST;
+            break;
+        case fapi2::TARGET_TYPE_MI:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_MI;
+            break;
+        case fapi2::TARGET_TYPE_CAPP:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_CAPP;
+            break;
+        case fapi2::TARGET_TYPE_DMI:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_DMI;
+            break;
+        case fapi2::TARGET_TYPE_OBUS:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_OBUS;
+            break;
+        case fapi2::TARGET_TYPE_OBUS_BRICK:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_OBUS_BRICK;
+            break;
+        case fapi2::TARGET_TYPE_SBE:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_SBE;
+            break;
+        case fapi2::TARGET_TYPE_PPE:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_PPE;
+            break;
+        case fapi2::TARGET_TYPE_PERV:
+            o_class = TARGETING::CLASS_UNIT;
+            o_type = TARGETING::TYPE_PERV;
+            break;
+        case fapi2::TARGET_TYPE_PEC:
         o_class = TARGETING::CLASS_UNIT;
         o_type = TARGETING::TYPE_PEC;
         break;
