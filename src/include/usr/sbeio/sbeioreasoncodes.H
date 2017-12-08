@@ -71,6 +71,7 @@ enum sbeioReasonCode
     SBEIO_PSU_RESPONSE_TIMEOUT         = SBEIO_COMP_ID | 0x01,
     SBEIO_PSU_RESPONSE_ERROR           = SBEIO_COMP_ID | 0x02,
     SBEIO_PSU_NOT_READY                = SBEIO_COMP_ID | 0x03,
+    SBEIO_PSU_FFDC_MISSING             = SBEIO_COMP_ID | 0x04,
 
     // SBE FIFO error codes
     SBEIO_FIFO_UPSTREAM_TIMEOUT        = SBEIO_COMP_ID | 0x10,

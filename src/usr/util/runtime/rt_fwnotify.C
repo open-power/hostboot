@@ -151,10 +151,11 @@ void sbeAttemptRecovery(uint64_t i_data)
 
         // Make the call to SbeExtractDD to attempt SBE recovery
         // Get the SBE Retry Handler
-        SbeRetryHandler l_SBEobj = SbeRetryHandler();
+        SbeRetryHandler l_SBEobj = SbeRetryHandler(SbeRetryHandler::
+                        SBE_MODE_OF_OPERATION::INFORMATIONAL_ONLY);
 
         // Retry the recovery of the SBE
-        l_SBEobj.main_sbe_handler(l_target, false);
+        l_SBEobj.main_sbe_handler(l_target);
 
         // Get the recovery results
         bool l_recoverySuccessful = l_SBEobj.getSbeRestart();

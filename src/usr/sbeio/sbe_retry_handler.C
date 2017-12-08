@@ -79,23 +79,16 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
-/**
- * @brief Static instance function
- */
-SbeRetryHandler& SbeRetryHandler::getInstance()
-{
-    return Singleton<SbeRetryHandler>::instance();
-}
-
-SbeRetryHandler::SbeRetryHandler()
+SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode)
 : iv_sbeRestarted(false)
 , iv_sbeSide(0)
-, iv_sbeErrorLogged(false)
 , iv_switchSidesCount(0)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_FAILED_TO_BOOT)
 , iv_retriggeredMain(false)
 {
     SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
+
+    this->iv_sbeMode = i_sbeMode;
 
     SBE_TRACF(EXIT_MRK "SbeRetryHandler::SbeRetryHandler()");
 }
@@ -105,8 +98,7 @@ SbeRetryHandler::~SbeRetryHandler()
 
 }
 
-void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target,
-                                        bool i_actionSet)
+void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
 {
     SBE_TRACF(ENTER_MRK "main_sbe_handler()");
 
@@ -119,123 +111,138 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target,
 
         bool l_retry = false;
 
-        // Check the sbe register
-        this->get_sbe_reg(i_target);
-
-        if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
-           !(i_actionSet))
+        if(this->iv_sbeMode != INFORMATIONAL_ONLY)
         {
-            // return, false if no boot is needed, true if boot is needed.
-            l_retry = this->sbe_boot_fail_handler(i_target);
-        }
-        else if(i_actionSet)
-        {
-            l_retry = true;
-        }
-
-        while((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) && l_retry)
-        {
-
-            SBE_TRACF("main_sbe_handler(): current SBE state is %d, retry is %d "
-                      "current SBE action is %d",
-                      this->iv_sbeRegister.currState,
-                      l_retry, this->iv_currentAction);
-
-            /*@
-             * @errortype
-             * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
-             * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-             * @reasoncode SBEIO_EXTRACT_RC_ERROR
-             * @userdata1  HUID of proc that had the SBE timeout
-             * @userdata2  SBE failing code
-             *
-             * @devdesc SBE did not start, this function is looking at
-             *          the error to determine next course of action
-             *
-             * @custdesc The SBE did not start, we will attempt a reboot
-             *           if possible
-             */
-            l_errl = new ERRORLOG::ErrlEntry(
-                    ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    SBEIO_EXTRACT_RC_HANDLER,
-                    SBEIO_EXTRACT_RC_ERROR,
-                    TARGETING::get_huid(i_target),
-                    this->iv_currentAction);
-
-            l_errl->collectTrace("ISTEPS_TRACE",256);
-
-            // Commit error and continue
-            errlCommit(l_errl, ISTEP_COMP_ID);
-
-            // if no recovery action, fail out.
-            if(this->iv_currentAction == P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
-            {
-                // There is no action possible. Gard and Callout the proc
-                /*@
-                 * @errortype  ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   SBEIO_EXTRACT_RC_HANDLER
-                 * @reasoncode SBEIO_NO_RECOVERY_ACTION
-                 * @userdata1  SBE current error
-                 * @userdata2  HUID of proc
-                 * @devdesc    There is no recovery action on the SBE.
-                 *             We're garding this proc
-                 */
-                l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            SBEIO_EXTRACT_RC_HANDLER,
-                            SBEIO_NO_RECOVERY_ACTION,
-                            P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
-                            TARGETING::get_huid(i_target));
-                l_errl->collectTrace( "ISTEPS_TRACE", 256);
-                l_errl->addHwCallout( i_target,
-                                      HWAS::SRCI_PRIORITY_HIGH,
-                                      HWAS::DECONFIG,
-                                      HWAS::GARD_NULL );
-                errlCommit(l_errl, ISTEP_COMP_ID);
-
-                SBE_TRACF("main_sbe_handler(): updating return value "
-                          "to indicate that we have deconfigured the proc");
-                this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
-                this->iv_sbeErrorLogged = true;
-                this->iv_errorLogPLID = l_errl->plid();
-
-                break;
-            }
-
-            // if the bkp_seeprom or upd_seeprom, attempt to switch sides.
-            // This is also dependent on the iv_switchSideCount.
-            if(this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
-               this->iv_currentAction == P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)
-            {
-                l_errl = this->switch_sbe_sides(i_target);
-                if(l_errl)
-                {
-                    errlCommit(l_errl, ISTEP_COMP_ID);
-                    break;
-                }
-            }
-
-            SBE_TRACF("Invoking p9_start_cbs HWP");
-            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                  l_fapi2_proc_target (i_target);
-
-            FAPI_INVOKE_HWP(l_errl, p9_start_cbs, l_fapi2_proc_target, true);
-            if(l_errl)
-            {
-                SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x", l_errl->plid() );
-                l_errl->collectTrace( "ISTEPS_TRACE", 256 );
-
-                errlCommit( l_errl, ISTEP_COMP_ID);
-            }
-
-            // Get the sbe register
             this->get_sbe_reg(i_target);
 
-            if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME))
+            if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
+               !(this->iv_sbeMode == SBE_ACTION_SET))
             {
                 // return, false if no boot is needed, true if boot is needed.
                 l_retry = this->sbe_boot_fail_handler(i_target);
             }
+            else if(this->iv_sbeMode == SBE_ACTION_SET)
+            {
+                l_retry = true;
+            }
+
+            while((this->iv_sbeRegister.currState != SBE_STATE_RUNTIME) &&
+                   l_retry)
+            {
+
+                SBE_TRACF("main_sbe_handler(): current SBE state is %d, retry "
+                          "is %d current SBE action is %d",
+                          this->iv_sbeRegister.currState,
+                          l_retry, this->iv_currentAction);
+
+                /*@
+                 * @errortype
+                 * @severity   ERRORLOG::ERRL_SEV_INFORMATIONAL
+                 * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                 * @reasoncode SBEIO_EXTRACT_RC_ERROR
+                 * @userdata1  HUID of proc that had the SBE timeout
+                 * @userdata2  SBE failing code
+                 *
+                 * @devdesc SBE did not start, this function is looking at
+                 *          the error to determine next course of action
+                 *
+                 * @custdesc The SBE did not start, we will attempt a reboot
+                 *           if possible
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                        SBEIO_EXTRACT_RC_HANDLER,
+                        SBEIO_EXTRACT_RC_ERROR,
+                        TARGETING::get_huid(i_target),
+                        this->iv_currentAction);
+
+                l_errl->collectTrace("ISTEPS_TRACE",256);
+
+                // Commit error and continue
+                errlCommit(l_errl, ISTEP_COMP_ID);
+
+                // if no recovery action, fail out.
+                if(this->iv_currentAction ==
+                                P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION)
+                {
+                    // There is no action possible. Gard and Callout the proc
+                    /*@
+                     * @errortype  ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   SBEIO_EXTRACT_RC_HANDLER
+                     * @reasoncode SBEIO_NO_RECOVERY_ACTION
+                     * @userdata1  SBE current error
+                     * @userdata2  HUID of proc
+                     * @devdesc    There is no recovery action on the SBE.
+                     *             We're garding this proc
+                     */
+                    l_errl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                SBEIO_EXTRACT_RC_HANDLER,
+                                SBEIO_NO_RECOVERY_ACTION,
+                                P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION,
+                                TARGETING::get_huid(i_target));
+                    l_errl->collectTrace( "ISTEPS_TRACE", 256);
+                    l_errl->addHwCallout( i_target,
+                                          HWAS::SRCI_PRIORITY_HIGH,
+                                          HWAS::DECONFIG,
+                                          HWAS::GARD_NULL );
+                    errlCommit(l_errl, ISTEP_COMP_ID);
+
+                    SBE_TRACF("main_sbe_handler(): updating return value "
+                          "to indicate that we have deconfigured the proc");
+                    this->iv_currentSBEState = SBE_REG_RETURN::PROC_DECONFIG;
+                    this->iv_errorLogPLID = l_errl->plid();
+
+                    break;
+                }
+
+                // if the bkp_seeprom or upd_seeprom, attempt to switch sides.
+                // This is also dependent on the iv_switchSideCount.
+                if(this->iv_currentAction ==
+                                P9_EXTRACT_SBE_RC::REIPL_BKP_SEEPROM ||
+                   this->iv_currentAction ==
+                                P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM)
+                {
+                    l_errl = this->switch_sbe_sides(i_target);
+                    if(l_errl)
+                    {
+                        errlCommit(l_errl, ISTEP_COMP_ID);
+                        break;
+                    }
+                }
+
+                SBE_TRACF("Invoking p9_start_cbs HWP");
+                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                      l_fapi2_proc_target (i_target);
+
+                FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
+                                l_fapi2_proc_target, true);
+                if(l_errl)
+                {
+                    SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x",
+                               l_errl->plid() );
+                    l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+
+                    errlCommit( l_errl, ISTEP_COMP_ID);
+                }
+
+                // Get the sbe register
+                this->get_sbe_reg(i_target);
+
+                if( (this->iv_sbeRegister.currState != SBE_STATE_RUNTIME))
+                {
+                    // return, false if no boot is needed.
+                    l_retry = this->sbe_boot_fail_handler(i_target);
+                }
+            }
+        }
+        else
+        {
+            // In the informational only mode, we just need enough information
+            // to get the SBE RC returned from the HWP.  We are running with
+            // the knowledge that the SBE has failed already.
+            this->sbe_boot_fail_handler(i_target);
+            this->iv_currentSBEState = SBE_FAILED_TO_BOOT;
         }
 
         this->handle_sbe_reg_value(i_target);
@@ -372,7 +379,8 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
                 // to start with a new seeprom before hitting the threshold
                 this->iv_currentAction =
                       P9_EXTRACT_SBE_RC::RETURN_ACTION::REIPL_BKP_SEEPROM;
-                main_sbe_handler(i_target, true);
+                this->iv_sbeMode = SBE_MODE_OF_OPERATION::SBE_ACTION_SET;
+                main_sbe_handler(i_target);
                 break;
             }
 
@@ -395,6 +403,7 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
 
                 // capture the target data in the elog
                 ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+                this->iv_errorLogPLID = l_errl->plid();
 
                 // Commit error log
                 errlCommit( l_errl, HWPF_COMP_ID );
@@ -408,7 +417,7 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
             // error out, unexpected enum value returned.
             //return P9_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
             /*@
-             * @errortype   ERRL_SEV_INFORMATIONAL
+             * @errortype   ERRL_SEV_PREDICTIVE
              * @moduleid    SBEIO_HANDLE_SBE_REG_VALUE
              * @reasoncode  SBEIO_INCORRECT_FCN_CALL
              * @userdata1   HUID of target
@@ -417,7 +426,7 @@ void SbeRetryHandler::handle_sbe_reg_value(TARGETING::Target * i_target)
              *              there is a new enum that is not handled yet.
              */
             l_errl = new ERRORLOG::ErrlEntry(
-                            ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                            ERRORLOG::ERRL_SEV_PREDICTIVE,
                             SBEIO_HANDLE_SBE_REG_VALUE,
                             SBEIO_INCORRECT_FCN_CALL,
                             get_huid(i_target),this->iv_currentSBEState);
@@ -668,7 +677,8 @@ bool SbeRetryHandler::sbe_get_ffdc_handler(TARGETING::Target * i_target)
             // Handle that action
             this->iv_currentAction = l_action;
             this->iv_retriggeredMain = true;
-            main_sbe_handler(i_target, true);
+            this->iv_sbeMode = SBE_MODE_OF_OPERATION::SBE_ACTION_SET;
+            main_sbe_handler(i_target);
         }
 
         // If there are FFDC packages, commit the log
