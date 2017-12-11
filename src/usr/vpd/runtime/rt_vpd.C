@@ -271,33 +271,6 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
 
     do
     {
-        if(INITSERVICE::spBaseServicesEnabled())
-        {
-            TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd:writePNOR not supported with FSP");
-
-            /*@
-             * @errortype
-             * @reasoncode       VPD::VPD_RT_WRITE_NOT_SUPPORTED
-             * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
-             * @moduleid         VPD::VPD_RT_WRITE_PNOR
-             * @userdata1        Target
-             * @userdata2        0
-             * @devdesc          MBOX send not supported in HBRT
-             */
-            err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                          VPD::VPD_RT_WRITE_PNOR,
-                                          VPD::VPD_RT_WRITE_NOT_SUPPORTED,
-                                          TARGETING::get_huid(i_target),
-                                          0);
-
-            err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                     HWAS::SRCI_PRIORITY_HIGH);
-
-            err->collectTrace( "VPD", 256);
-
-            break;
-        }
-
         //----------------------------
         // Write memory version of VPD
         //----------------------------
@@ -338,6 +311,11 @@ errlHndl_t writePNOR ( uint64_t i_byteAddr,
         //--------------------------------
         // Write PNOR cache version of VPD
         //--------------------------------
+        if(INITSERVICE::spBaseServicesEnabled())
+        {
+            TRACFCOMP(g_trac_vpd,ERR_MRK"rt_vpd:writePNOR not supported with FSP, skipping");
+            break;
+        }
 
         // Check if the VPD PNOR cache is loaded for this target
         TARGETING::ATTR_VPD_SWITCHES_type vpdSwitches =
