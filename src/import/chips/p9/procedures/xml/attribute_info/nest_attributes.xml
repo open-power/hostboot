@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -425,10 +425,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
