@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace p9hcd
 //Enum form of OCC FLAGs.
 enum PM_GPE_OCCFLG_DEFS
 {
-    PGPE_START_NOT_STOP                     = 0,
+    PGPE_PSTATE_PROTOCOL_STOP               = 0,
     PGPE_PSTATE_PROTOCOL_AUTO_ACTIVATE      = 1,
     PGPE_PSTATE_PROTOCOL_ACTIVATE           = 1,  // @todo PGPE Hcode dependencies
     PGPE_SAFE_MODE                          = 2,
