@@ -79,10 +79,7 @@ use constant LOCAL_SIGNING_FLAG => " -flag ";
 use constant OP_SIGNING_FLAG => " --flags ";
 # Security bits HW flag strings
 use constant OP_BUILD_FLAG => 0x80000000;
-# TODO 1633655 For now, as a workaround FIPS_BUILD_FLAG will be the same as
-# OP_BUILD_FLAG until the larger team is ready to take on the new value.
-use constant FIPS_BUILD_FLAG => 0x80000000;
-# use constant FIPS_BUILD_FLAG => 0x40000000;
+use constant FIPS_BUILD_FLAG => 0x40000000;
 # Applies to SBE image only
 use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
