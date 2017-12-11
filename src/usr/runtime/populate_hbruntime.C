@@ -1084,6 +1084,14 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId)
         // Handle all Pre verified PNOR sections
         for (const auto & secIdPair : preVerifiedPnorSections)
         {
+            // Skip RINGOVD section in POWERVM mode
+            if (secIdPair.first == PNOR::RINGOVD &&
+                INITSERVICE::spBaseServicesEnabled() &&
+                TARGETING::is_phyp_load())
+            {
+                continue;
+            }
+
             l_elog = hbResvLoadSecureSection(secIdPair.first, secIdPair.second);
             if (l_elog)
             {
