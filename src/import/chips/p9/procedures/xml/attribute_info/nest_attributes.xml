@@ -425,10 +425,6 @@
   </description>
   <valueType>uint8</valueType>
   <platInit/>
-  <!-- TODO: Story 155081
-       Not supposed to be writeable, PPE needs to resolve this issue in
-       p9_sbe_attr_setup.C -->
-  <writeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
