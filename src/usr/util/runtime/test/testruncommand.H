@@ -129,4 +129,32 @@ class RunCommandTest : public CxxTest::TestSuite
         if( outstr ) delete[] outstr;
 
     }
+
+
+    /**
+     *  @brief Test read HBRT version operation
+     */
+    void testRunCommandReadHbrtVersion(void)
+    {
+        int rc = 0;
+        char* outstr = NULL;
+
+        char arg0[20]; memcpy( arg0, "readHBRTversion", 16 );
+        const char* argv[] = { arg0 };
+
+        // do a read
+        rc = (getRuntimeInterfaces()->run_command)( 1, argv, &outstr );
+        if( rc )
+        {
+            TS_FAIL( "testRunCommandReadHbrtVersion> rc=%d", rc );
+        }
+        if( outstr == NULL )
+        {
+            TS_FAIL( "testRunCommandReadHbrtVersion> outstr is NULL" );
+        }
+        TRACFCOMP( Util::g_util_trace,
+                   "testRunCommandReadHbrtVersion> rc=%d :: %s",
+                   rc, outstr == NULL ? "null" : outstr );
+        if( outstr ) delete[] outstr;
+    }
 };

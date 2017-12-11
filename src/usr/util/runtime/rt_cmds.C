@@ -44,6 +44,8 @@
 #include <p9_hcd_memmap_base.H>  // for reload_pm_complex
 #include <p9_stop_data_struct.H> // for reload_pm_complex
 
+extern char hbi_ImageId;
+
 // need this here so compile works, linker will later find this
 namespace RTPM
 {
@@ -931,6 +933,26 @@ int cmd_reload_pm_complex( char*& o_output, uint64_t stopAt )
     return rc;
 }
 
+
+/**
+ * @brief Read version of HBRT
+ * @param[out] o_output  Output display buffer, memory allocated here
+ */
+void cmd_readHBRTversion( char*& o_output )
+{
+    UTIL_FT( "cmd_readHBRTversion");
+
+    const char * const l_title = "Hostboot Build ID: ";
+    o_output = new char[strlen(l_title) + strlen(&hbi_ImageId) + 1];
+    // Set beginning of output string
+    strcpy(o_output, l_title);
+    // Concatenate the Hostboot Image ID
+    strcat(o_output, &hbi_ImageId);
+
+    UTIL_FT( "%s", o_output);
+}
+
+
 /**
  * @brief  Execute an arbitrary command inside Hostboot Runtime
  * @param[in]   Number of arguments (standard C args)
@@ -1149,6 +1171,20 @@ int hbrtCommand( int argc,
         }
         rc = cmd_reload_pm_complex(*l_output, breakPoint);
     }
+    else if( !strcmp( argv[0], "readHBRTversion" ) )
+    {
+        // readHBRTversion
+        if( argc == 1 )
+        {
+            cmd_readHBRTversion( *l_output );
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf( *l_output,
+                     "ERROR: readHBRTversion\n" );
+        }
+    }
     else
     {
         *l_output = new char[50+100*10];
@@ -1173,6 +1209,8 @@ int hbrtCommand( int argc,
         sprintf( l_tmpstr, "writevpd <huid> <keyword> [<record>] <data>\n" );
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "reload_pm_complex [<breakPoint>]\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "readHBRTversion\n");
         strcat( *l_output, l_tmpstr );
     }
 
