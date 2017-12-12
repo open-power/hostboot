@@ -54,7 +54,7 @@ namespace HDAT
 /* Typedefs                                                                   */
 /*----------------------------------------------------------------------------*/
 
-const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x70; // First P9 version
+const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x71; // Second P9 version
 const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
 
 
@@ -64,16 +64,17 @@ const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
  */
 enum hdatIplDataPtrs
 {
-  HDAT_IPL_SYS        = 0,
-  HDAT_IPL_PARMS      = 1,
-  HDAT_IPL_TIME       = 2,
-  HDAT_IPL_PVT        = 3,
-  HDAT_IPL_DUMP       = 4,
-  HDAT_IPL_HMC        = 5,
-  HDAT_IPL_CUOD       = 6,
-  HDAT_IPL_MANF       = 7,
-  HDAT_IPL_PORT_CODES = 8,
-  HDAT_IPL_LAST       = 9
+  HDAT_IPL_SYS   = 0,
+  HDAT_IPL_PARMS,
+  HDAT_IPL_TIME, 
+  HDAT_IPL_PVT, 
+  HDAT_IPL_DUMP, 
+  HDAT_IPL_HMC,
+  HDAT_IPL_CUOD,
+  HDAT_IPL_MANF,
+  HDAT_IPL_PORT_CODES,
+  HDAT_IPL_FEATURE_FLAGS,
+  HDAT_IPL_LAST
 };
 
 /** @brief Structure definition for system model and feature code
@@ -263,6 +264,62 @@ struct hdatPortCodes_t
              hdatReserved1 : 15;// Reserved for future use
 } __attribute__ ((packed));
 
+#define MAX_FEATURE_FLAGS 64     // Maximum number of feature flags
+
+enum HDAT_FEATURE_FLAG_VERSION : uint32_t
+{
+    V1 = 0x00000001
+};
+struct hdatIplpFeatureFlagSetting_t
+{
+    char     hdatIplpFeatureFlagString[64]; // Feature flag null terminated string
+    uint64_t hdatIplpFeatureFlagSetting;    // bit0 indicates IPL time setting.
+}__attribute__ ((packed));
+
+// Agreed strings and settings of different feature flags
+const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_20[]=
+{
+{"tm-suspend-mode-enabled",                     0x8000000000000000},
+{"inst-thread-reconfig-control-trig0-1",        0x8000000000000000},
+{"inst-l1d-flush-trig2",                        0x8000000000000000},
+{"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
+{"inst-spec-barrier-ori31,31,0",                0x8000000000000000},
+{"needs-l1d-flush-msr-hv-1-to-0",               0x8000000000000000},
+{"needs-l1d-flush-msr-pr-0-to-1",               0x8000000000000000},
+{"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
+{"fw-l1d-thread-split",                         0x8000000000000000},
+{"fw-bcctrl-serialized",                        0x0000000000000000},
+{"speculation-policy-favor-security",           0x8000000000000000}};
+
+const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_21[]=
+{
+{"tm-suspend-mode-enabled",                     0x0000000000000000},
+{"inst-thread-reconfig-control-trig0-1",        0x8000000000000000},
+{"inst-l1d-flush-trig2",                        0x8000000000000000},
+{"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
+{"inst-spec-barrier-ori31,31,0",                0x8000000000000000},
+{"needs-l1d-flush-msr-hv-1-to-0",               0x8000000000000000},
+{"needs-l1d-flush-msr-pr-0-to-1",               0x8000000000000000},
+{"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
+{"fw-l1d-thread-split",                         0x8000000000000000},
+{"fw-bcctrl-serialized",                        0x0000000000000000},
+{"speculation-policy-favor-security",           0x8000000000000000}};
+
+const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_22[]=
+{
+{"tm-suspend-mode-enabled",                     0x8000000000000000},
+{"inst-thread-reconfig-control-trig0-1",        0x0000000000000000},
+{"inst-l1d-flush-trig2",                        0x8000000000000000},
+{"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
+{"inst-spec-barrier-ori31,31,0",                0x8000000000000000},
+{"needs-l1d-flush-msr-hv-1-to-0",               0x8000000000000000},
+{"needs-l1d-flush-msr-pr-0-to-1",               0x8000000000000000},
+{"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
+{"fw-l1d-thread-split",                         0x8000000000000000},
+{"fw-bcctrl-serialized",                        0x8000000000000000},
+{"speculation-policy-favor-security",           0x8000000000000000}};
+
+
 
 #define HDAT_CHIP_TYPE_MURANO                      "MURANO"
 #define HDAT_CHIP_TYPE_VENICE                      "VENICE"
@@ -328,8 +385,9 @@ enum hdatIPLParamsDataPtrs
   HDAT_IPL_PARAMS_CUOD_DATA     = 6,
   HDAT_IPL_PARAMS_MFG_DATA      = 7,
   HDAT_IPL_PARAMS_SERIAL_PORTS  = 8,
-  HDAT_IPL_PARAMS_DA_CNT        = 9,
-  HDAT_IPL_PARAMS_DA_LAST       = 10
+  HDAT_IPL_PARAMS_FEATURE_FLAGS = 9,
+  HDAT_IPL_PARAMS_DA_CNT        = 10,
+  HDAT_IPL_PARAMS_DA_LAST       = 11
 };
 
 struct hdatIPLParameters_t{
@@ -358,6 +416,8 @@ struct hdatIPLParameters_t{
         hdatManf_t             iv_manf;
         hdatHDIFDataArray_t    iv_portArrayHdr;
         hdatPortCodes_t        iv_ports[hdatMaxPorts];
+        hdatHDIFVersionedDataArray_t    iv_featureFlagArrayHdr;
+        hdatIplpFeatureFlagSetting_t    iv_featureFlagSettings[MAX_FEATURE_FLAGS];
 };
 
 /*----------------------------------------------------------------------------*/

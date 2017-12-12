@@ -62,8 +62,6 @@ const char HDAT_PCRD_STRUCT_NAME[7] = "SPPCRD";
 #define HDAT_PCRD_MAX_I2C_DEV  128
 #define HDAT_PCRD_MAX_SMP_LINK 12
 
-//Max number of EQ per proc
-#define MAX_EQ_PER_PROC 6
 /** @enum hdatDataPtrs
  * Enumeration which defines the data sections of the PCRD
  */
@@ -79,9 +77,8 @@ enum hdatPcrdDataPtrs
     HDAT_PCRD_DA_PNOR           = 6,
     HDAT_PCRD_DA_SMP            = 7,
     HDAT_PCRD_CHIP_EC_LVL       = 8,
-    HDAT_PCRD_DA_FEATURE_FLAGS  = 9,
-    HDAT_PCRD_DA_CNT            = 10,
-    HDAT_PCRD_DA_LAST           = 11,
+    HDAT_PCRD_DA_CNT            = 9,
+    HDAT_PCRD_DA_LAST           = 10,
 };
 
 /*----------------------------------------------------------------------------*/
@@ -168,29 +165,6 @@ struct hdatSpPcrd_t
     hdatPcrdPnor_t     hdatPnorData;
     //add in padding here. uint32_t whatever it is.
 } __attribute__ ((packed));
-
-
-struct hdatPcrdFeatureFlagString
-{
-    char hdatPcrdffString[64][32];
-}__attribute__ ((packed));
-
-struct hdatPcrdFeatureFlagSetting
-{
-    uint64_t hdatPcrdFFCurrentSetting;
-    uint64_t hdatPcrdFFDynChgCapability;
-    uint32_t hdatPcrdEqOrdId;
-}__attribute__ ((packed));
-
-const char FFSTRING [64][32] = {"TM Suspend Mode Enabled",
-   "","","","","","","","","",
-   "","","","","","","","","","",
-   "","","","","","","","","","",
-   "","","","","","","","","","",
-   "","","","","","","","","","",
-   "","","","","","","","","","",
-   "","","","" };
-
 
 /*----------------------------------------------------------------------------*/
 /* C++ class definition                                                       */

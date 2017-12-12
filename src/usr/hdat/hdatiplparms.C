@@ -522,6 +522,81 @@ static errlHndl_t hdatGetPortInfo(HDAT::hdatHDIFDataArray_t &o_portArrayHdr,
     return l_errlHndl;
 }
 
+/**
+ * @brief This routine gets the feature flag array based on processor type/DD
+ *        level
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param o_featureFlagArr - output parameter - array of feature flags
+ *
+ */
+static void hdatGetFeatureFlagArray(const hdatIplpFeatureFlagSetting_t * o_featureFlagArr[],
+                                    uint32_t & o_size)
+{
+    //Default to Nimbus DD2.2 settings (DD1.0 doesn't matter) and these are current
+    //settings for cumulus
+    *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_22;
+    o_size = sizeof(hdatIplpFeatureFlagSettingsArray_22);
+
+    //Modify for Nimubs DD2.0 and DD2.1
+    PVR_t l_pvr( mmio_pvr_read() & 0xFFFFFFFF );
+    if(l_pvr.chipType == PVR_t::NIMBUS_CHIP)
+    {
+        if(l_pvr.getDDLevel() == 0x20)
+        {
+            *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_20;
+            o_size = sizeof(hdatIplpFeatureFlagSettingsArray_20);
+
+        }
+        else if (l_pvr.getDDLevel() == 0x21)
+        {
+            *o_featureFlagArr = hdatIplpFeatureFlagSettingsArray_21;
+            o_size = sizeof(hdatIplpFeatureFlagSettingsArray_21);
+
+        }
+    }
+}
+
+
+/**
+ * @brief This routine gets the information on feature flags
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param o_featureFlagArrayHdr - output parameter - Array header
+ * @param o_featureFlagSettings - output parameter - The structure to update with 
+ *                                            Feature flag  information
+ *
+ * @return A null error log handle if successful, else the return code pointed
+ *         to by errlHndl_t contains one of:
+ *
+ * @retval HDAT_OTHER_COMP_ERROR
+ */
+static errlHndl_t hdatGetFeatureFlagInfo(HDAT::hdatHDIFVersionedDataArray_t &o_featureFlagArrayHdr,
+                                  hdatIplpFeatureFlagSetting_t o_featureFlagSettings[])
+{
+    errlHndl_t l_errlHndl = NULL;
+    const hdatIplpFeatureFlagSetting_t * l_arr = NULL;
+    uint32_t l_arrSize = 0; 
+    hdatGetFeatureFlagArray(&l_arr, l_arrSize);
+
+    o_featureFlagArrayHdr.hdatOffset    = sizeof(HDAT::hdatHDIFVersionedDataArray_t);
+    o_featureFlagArrayHdr.hdatAllocSize = sizeof(hdatIplpFeatureFlagSetting_t);
+    o_featureFlagArrayHdr.hdatActSize   = sizeof(hdatIplpFeatureFlagSetting_t);
+    o_featureFlagArrayHdr.hdatArrayCnt  = 
+        l_arrSize/sizeof(hdatIplpFeatureFlagSetting_t);
+    o_featureFlagArrayHdr.hdatVersion   = HDAT_FEATURE_FLAG_VERSION::V1;
+   
+    memcpy(o_featureFlagSettings , l_arr, 
+                    l_arrSize);
+    return l_errlHndl;
+}
+
 
 /**
  * @brief This routine gets the information for System Parameters
@@ -911,6 +986,9 @@ static void hdatSetIPLParamsHdrs(hdatIPLParameters_t *o_iplparams)
     o_iplparams->hdatHdr.hdatDataPtrCnt     = HDAT_IPL_PARAMS_DA_CNT;
     o_iplparams->hdatHdr.hdatChildStrCnt    = 0;
     o_iplparams->hdatHdr.hdatChildStrOffset = 0;
+    const hdatIplpFeatureFlagSetting_t * l_arr = NULL;
+    uint32_t l_arrSize = 0;
+    hdatGetFeatureFlagArray(&l_arr, l_arrSize);
 
     memcpy(o_iplparams->hdatHdr.hdatStructName, HDAT_IPLP_STRUCT_NAME,
             sizeof(o_iplparams->hdatHdr.hdatStructName));
@@ -968,6 +1046,13 @@ static void hdatSetIPLParamsHdrs(hdatIPLParameters_t *o_iplparams)
 
     o_iplparams->hdatIPLParamsIntData[HDAT_IPL_PARAMS_SERIAL_PORTS].hdatSize =
         sizeof(hdatHDIFDataArray_t) + sizeof(hdatPortCodes_t);
+
+    o_iplparams->hdatIPLParamsIntData[HDAT_IPL_PARAMS_FEATURE_FLAGS].hdatOffset =
+        offsetof(hdatIPLParameters_t, iv_featureFlagArrayHdr);
+
+    o_iplparams->hdatIPLParamsIntData[HDAT_IPL_PARAMS_FEATURE_FLAGS].hdatSize =
+        sizeof(hdatHDIFVersionedDataArray_t) + l_arrSize;
+
 
 }
 
@@ -1077,6 +1162,13 @@ errlHndl_t HdatIplParms::hdatLoadIplParams(uint32_t &o_size, uint32_t &o_count)
     memset(this->iv_hdatIPLParams->iv_ports, 0x00, sizeof(hdatPortCodes_t) * 2);
     hdatGetPortInfo(this->iv_hdatIPLParams->iv_portArrayHdr,
                                          this->iv_hdatIPLParams->iv_ports);
+    // Get the feature flag information
+    memset(&this->iv_hdatIPLParams->iv_featureFlagArrayHdr, 0x00,
+                                sizeof(HDAT::hdatHDIFVersionedDataArray_t));
+    memset(&this->iv_hdatIPLParams->iv_featureFlagSettings, 0x00, 
+                  sizeof(hdatIplpFeatureFlagSetting_t) * MAX_FEATURE_FLAGS);
+    hdatGetFeatureFlagInfo(this->iv_hdatIPLParams->iv_featureFlagArrayHdr,
+                        this->iv_hdatIPLParams->iv_featureFlagSettings);
 
     HDAT_DBG("HDAT:: IPL Parameters Loaded :: Size : 0x%X",
                                       sizeof(hdatIPLParameters_t));
