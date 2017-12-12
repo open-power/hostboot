@@ -727,6 +727,36 @@ namespace HTMGT
                         }
                         break;
 
+                    case PASSTHRU_OCC_CFG_DATA:
+                        if (i_cmdLength == 3)
+                        {
+                            const uint8_t occInstance = i_cmdData[1];
+                            const uint8_t format = i_cmdData[2];
+                            Occ *occPtr = OccManager::getOcc(occInstance);
+                            if (occPtr)
+                            {
+                                TMGT_INF("passThruCommand: OCC%d config format "
+                                         "0x%02X",
+                                         occInstance, format);
+                                readConfigData(occPtr, format,
+                                               o_rspLength, o_rspData);
+                            }
+                            else
+                            {
+                                TMGT_ERR("passThruCommand: Unable to find "
+                                         "OCC%d", occInstance);
+                                failingSrc = HTMGT_RC_OCC_UNAVAILABLE;
+                            }
+                        }
+                        else
+                        {
+                            TMGT_ERR("passThruCommand: invalid data length %d",
+                                     i_cmdLength);
+                            failingSrc = HTMGT_RC_INVALID_LENGTH;
+                        }
+                        break;
+
+
                     default:
                         TMGT_ERR("passThruCommand: Invalid command 0x%08X "
                               "(%d bytes)", UINT32_GET(i_cmdData), i_cmdLength);
