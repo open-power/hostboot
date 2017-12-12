@@ -243,14 +243,16 @@ errlHndl_t memPowerThrottleRedPower(
         power = (power * i_efficiency) / 100;
     }
 
-    //Find the Watt target for each MCS
-    if (i_fapi_target_list.size())
+    //Find the Watt target for each present DIMM
+    TargetHandleList dimm_list;
+    getAllLogicalCards(dimm_list, TYPE_DIMM, false);
+    if (dimm_list.size())
     {
-        wattTarget = power / i_fapi_target_list.size();
+        wattTarget = power / dimm_list.size();
     }
 
-    TMGT_INF("memPowerThrottleRedPower: N+1 power: %dW / %dcW per MCS",
-             power/100, wattTarget);
+    TMGT_INF("memPowerThrottleRedPower: N+1 power: %dW / %dcW per DIMM "
+             "(%d DIMMs)", power/100, wattTarget, dimm_list.size());
 
     //Calculate the throttles
     err = call_bulk_pwr_throttles(i_fapi_target_list,
@@ -258,7 +260,7 @@ errlHndl_t memPowerThrottleRedPower(
                                   i_utilization);
     if (NULL == err)
     {
-        G_mem_power_min_throttles = 0;
+        uint32_t tot_mem_power_cw = 0;
         for(auto & mcs_fapi_target : i_fapi_target_list)
         {
             // Read HWP output parms:
@@ -271,8 +273,8 @@ errlHndl_t memPowerThrottleRedPower(
                           mcs_fapi_target, l_port);
             FAPI_ATTR_GET(fapi2::ATTR_MSS_PORT_MAXPOWER,
                           mcs_fapi_target, l_power);
-            // Calculate memory power at min throttles (in Watts)
-            G_mem_power_min_throttles += (l_power[0] + l_power[1])/100;
+            // Calculate memory power at min throttles
+            tot_mem_power_cw += l_power[0] + l_power[1];
 
             // Update MCS data (to be sent to OCC)
             TARGETING::Target * mcs_target =
@@ -292,6 +294,8 @@ errlHndl_t memPowerThrottleRedPower(
                      occ_instance, mcs_unit, l_slot[0], l_slot[1],
                      l_port[0], l_port[1], l_power[0], l_power[1]);
         }
+        // Convert memory power to Watts
+        G_mem_power_min_throttles = tot_mem_power_cw / 100;
         TMGT_INF("memPowerThrottleRedPower: Total Redundant Memory Power: %dW",
                  G_mem_power_min_throttles);
     }
@@ -330,7 +334,7 @@ errlHndl_t memPowerThrottlePowercap(
     }
     if (NULL == err)
     {
-        G_mem_power_max_throttles = 0;
+        uint32_t tot_mem_power_cw = 0;
         for(auto & mcs_fapi_target : i_fapi_target_list)
         {
             TARGETING::Target * mcs_target =
@@ -383,8 +387,8 @@ errlHndl_t memPowerThrottlePowercap(
             mcs_target->setAttr<ATTR_POWERCAP_N_PER_MBA>(l_slot);
             mcs_target->setAttr<ATTR_POWERCAP_N_PER_CHIP>(l_port);
             mcs_target->setAttr<ATTR_POWERCAP_MEM_POWER>(l_power);
-            // Calculate memory power at max throttles (in Watts)
-            G_mem_power_max_throttles += (l_power[0] + l_power[1]) / 100;
+            // Calculate memory power at max throttles
+            tot_mem_power_cw += l_power[0] + l_power[1];
 
             // Trace Results
             TMGT_INF("memPowerThrottlePowercap: PCAP: OCC%d/MCS%d - "
@@ -392,6 +396,8 @@ errlHndl_t memPowerThrottlePowercap(
                      occ_instance, mcs_unit, l_slot[0], l_slot[1],
                      l_port[0], l_port[1], l_power[0], l_power[1]);
         }
+        // Convert memory power to Watts
+        G_mem_power_max_throttles = tot_mem_power_cw / 100;
         TMGT_INF("memPowerThrottlePowercap: Total PowerCap Memory"
                  " Power: %dW (@max throttles)", G_mem_power_max_throttles);
     }
@@ -529,7 +535,7 @@ errlHndl_t calcMemThrottles()
         assert(proc_target != nullptr);
         occ_instance = proc_target->getAttr<TARGETING::ATTR_POSITION>();
         TMGT_INF("calcMemThrottles: OCC%d, MCS%d HUID:0x%08X has %d"
-                 " functional MCSs",
+                 " functional MCAs",
                  occ_instance, mcs_unit, mcs_huid, mca_list.size());
 
         // Convert to FAPI target and add to list

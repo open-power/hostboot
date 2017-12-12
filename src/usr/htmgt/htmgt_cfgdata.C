@@ -475,7 +475,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
     //Get all functional MCSs
     TargetHandleList mcs_list;
     getAllChiplets(mcs_list, TYPE_MCS, true);
-    TMGT_INF("calcMemThrottles: found %d MCSs", mcs_list.size());
+    TMGT_INF("getMemThrottleMessageData: found %d MCSs", mcs_list.size());
 
     o_data[index++] = OCC_CFGDATA_MEM_THROTTLE;
     o_data[index++] = 0x20; // version;
@@ -508,8 +508,8 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
         {
             uint32_t mcs_huid = 0xFFFFFFFF;
             mcs_target->tryGetAttr<TARGETING::ATTR_HUID>(mcs_huid);
-            TMGT_ERR("calcMemThrottles: Unable to determine MCS unit for HUID"
-                     " 0x%04X", mcs_huid);
+            TMGT_ERR("getMemThrottleMessageData: Unable to determine MCS unit"
+                     " for HUID 0x%04X", mcs_huid);
             continue;
         }
         ConstTargetHandle_t proc_target = getParentChip(mcs_target);
@@ -550,7 +550,7 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                     (npm_redun[mca_rel_pos] == 0) ||
                     (npm_pcap[mca_rel_pos] == 0))
                 {
-                    TMGT_ERR("calcMemThrottles: MCS%d/MCA%d [%d]"
+                    TMGT_ERR("getMemThrottleMessageData: MCS%d/MCA%d [%d]"
                              " - Ignored due to null throttle",
                              mcs_unit, mca_unit, mca_rel_pos);
                     TMGT_ERR("N/slot: Min=%d, Turbo=%d, Pcap=%d",
@@ -560,13 +560,13 @@ void getMemThrottleMessageData(const TargetHandle_t i_occ,
                 }
                 if (mca_rel_pos >= TMGT_MAX_MCA_PER_MCS)
                 {
-                    TMGT_ERR("calcMemThrottles: OCC%d / MCS%d / MCA%d"
+                    TMGT_ERR("getMemThrottleMessageData: OCC%d / MCS%d / MCA%d"
                              " - Ignored due invalid MCA position: %d",
                              i_occ_instance, mcs_unit, mca_unit, mca_rel_pos);
                     continue;
                 }
-                TMGT_INF("calcMemThrottles: OCC%d / MCS%d / MCA%d [%d]",
-                         i_occ_instance, mcs_unit, mca_unit, mca_rel_pos);
+                TMGT_INF("getMemThrottleMessageData: OCC%d / MCS%d / MCA%d [%d]"
+                         , i_occ_instance, mcs_unit, mca_unit, mca_rel_pos);
                 // OCC expects phyMC=0 for (MCS0-1) and 1 for (MCS2-3)
                 //  MCS   MCA  MCA    OCC   OCC
                 // unit  unit relPos phyMC phyPort
@@ -1424,6 +1424,81 @@ bool check_wof_support(uint16_t & o_turbo, uint16_t & o_ultra)
 
     return G_wofSupported;
 } // end check_wof_support()
+
+
+// Debug function to return config format data
+void readConfigData(Occ * i_occ,
+                    const uint8_t i_format,
+                    uint16_t & o_cfgDataLength,
+                    uint8_t *o_cfgDataPtr)
+{
+    uint64_t cfgDataLength = 0;
+    switch(i_format)
+    {
+        case OCC_CFGDATA_FREQ_POINT:
+            getFrequencyPointMessageData(o_cfgDataPtr,
+                                         cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_OCC_ROLE:
+            getOCCRoleMessageData(OCC_ROLE_MASTER ==
+                                  i_occ->getRole(),
+                                  OCC_ROLE_FIR_MASTER ==
+                                  i_occ->getRole(),
+                                  o_cfgDataPtr, cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_APSS_CONFIG:
+            getApssMessageData(o_cfgDataPtr, cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_MEM_CONFIG:
+            getMemConfigMessageData(i_occ->getTarget(),
+                                    o_cfgDataPtr, cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_PCAP_CONFIG:
+            getPowerCapMessageData(o_cfgDataPtr, cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_SYS_CONFIG:
+            getSystemConfigMessageData(i_occ->getTarget(),
+                                       o_cfgDataPtr, cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_MEM_THROTTLE:
+            {
+                const uint8_t occInstance = i_occ->getInstance();
+                getMemThrottleMessageData(i_occ->getTarget(),
+                                          occInstance, o_cfgDataPtr,
+                                          cfgDataLength);
+            }
+            break;
+
+        case OCC_CFGDATA_TCT_CONFIG:
+            getThermalControlMessageData(o_cfgDataPtr,
+                                         cfgDataLength);
+            break;
+
+        case OCC_CFGDATA_AVSBUS_CONFIG:
+            getAVSBusConfigMessageData(i_occ->getTarget(),
+                                       o_cfgDataPtr,
+                                       cfgDataLength );
+            break;
+
+        case OCC_CFGDATA_GPU_CONFIG:
+            getGPUConfigMessageData(i_occ->getTarget(),
+                                    o_cfgDataPtr,
+                                    cfgDataLength);
+            break;
+
+        default:
+            TMGT_ERR("readConfigData: Unsupported i_format type 0x%02X",
+                     i_format);
+    }
+    o_cfgDataLength = cfgDataLength;
+
+} // end readConfigData()
 
 
 }

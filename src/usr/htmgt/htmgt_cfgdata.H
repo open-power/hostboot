@@ -279,5 +279,17 @@ namespace HTMGT
      * @param[out] ultra   Ultra Turbo frequency in MHz (0 = no support)
      */
     bool check_wof_support(uint16_t & turbo, uint16_t & ultra);
+
+    /**
+     * Fill specified buffer with requested config format data
+     * @param[in]  i_occ     OCC object that data is requested
+     * @param[in]  i_format  config format being requested
+     * @param[out] o_cfgDataLength   Length of data being returned
+     * @param[in/out] o_cfgDataPtr   Buffer containing config data
+     */
+    void readConfigData(Occ * i_occ,
+                        const uint8_t i_format,
+                        uint16_t & o_cfgDataLength,
+                        uint8_t *o_cfgDataPtr);
 };
 #endif
