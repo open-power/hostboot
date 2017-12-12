@@ -636,10 +636,10 @@ void getOCCRoleMessageData(bool i_master, bool i_firMaster,
 }
 
 
-uint16_t getMaxPowerCap(Target *i_sys)
+uint16_t getMaxPowerCap(Target *i_sys, bool & o_is_redundant)
 {
     uint16_t o_maxPcap = 0;
-    bool useDefaultLimit = true;
+    o_is_redundant = true;
 
 #ifdef CONFIG_BMC_IPMI
     // Check if HPC limit was found
@@ -663,7 +663,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
                     // non-redundant policy allows higher bulk power limit
                     // with the potential impact of OCC not being able to
                     // lower power fast enough
-                    useDefaultLimit = false;
+                    o_is_redundant = false;
                     TMGT_INF("getMaxPowerCap: maximum power cap = %dW"
                              " (HPC/non-redundant PS bulk power limit)",
                              hpc_pcap);
@@ -685,7 +685,7 @@ uint16_t getMaxPowerCap(Target *i_sys)
     // else HPC limit not found, use default
 #endif
 
-    if (useDefaultLimit)
+    if (o_is_redundant)
     {
         // Read the default N+1 bulk power limit (redundant PS policy)
         o_maxPcap = i_sys->
@@ -732,7 +732,8 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     index += 2;
 
     // System Maximum Power Cap
-    const uint16_t max_pcap = getMaxPowerCap(sys);
+    bool is_redundant;
+    const uint16_t max_pcap = getMaxPowerCap(sys, is_redundant);
     UINT16_PUT(&o_data[index], max_pcap);
     index += 2;
 
@@ -791,8 +792,19 @@ void getSystemConfigMessageData(const TargetHandle_t i_occ, uint8_t* o_data,
         //0=OCC report throttling when max frequency lowered below turbo
         G_system_type &= ~OCC_REPORT_THROTTLE_BELOW_NOMINAL;
     }
+    bool is_redundant;
+    getMaxPowerCap(sys, is_redundant);
+    if (is_redundant == false)
+    {
+        // Power supply policy is non-redundant
+        G_system_type |= OCC_CFGDATA_NON_REDUNDANT_PS;
+    }
+    else
+    {
+        // Power supply policy is redundant
+        G_system_type &= ~OCC_CFGDATA_NON_REDUNDANT_PS;
+    }
     o_data[index++] = G_system_type;
-
 
     //processor Callout Sensor ID
     ConstTargetHandle_t proc = getParentChip(i_occ);

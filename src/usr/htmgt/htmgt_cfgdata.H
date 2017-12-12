@@ -66,6 +66,7 @@ namespace HTMGT
         //KVM or OPAL mode + single node
         OCC_CFGDATA_OPENPOWER_OPALVM  = 0x81,
         //PowerVM mode + single node
+        OCC_CFGDATA_NON_REDUNDANT_PS  = 0x02,
         OCC_CFGDATA_OPENPOWER_POWERVM = 0x01,
 
         //Mask, report throttling only when max frequency lowered below nominal
@@ -193,10 +194,11 @@ namespace HTMGT
      * Value is read from the MRW based on the Current Power Supply
      * Redundancy Policy sensor in the BMC
      *
-     * @param[in] i_sys - pointer to system target
+     * @param[in]  i_sys - pointer to system target
+     * @param[out] o_is_redundant - true if power supplies should be redundant
      * @returns  maximum power cap in watts
      */
-    uint16_t getMaxPowerCap(TARGETING::Target * i_sys);
+    uint16_t getMaxPowerCap(TARGETING::Target *i_sys, bool & o_is_redundant);
 
 
     /**
