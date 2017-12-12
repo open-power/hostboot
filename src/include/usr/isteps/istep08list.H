@@ -53,6 +53,8 @@
  *           : Apply scom inits to Xbus
  *    08.11    proc_xbus_enable_ridi
  *           : Enable RI/DI for xbus
+ *    08.12    host_set_voltages
+ *           : Set correct chip voltages
  *  Please see the note in initsvcstructs.H for description of
  *      the ISTEPNAME macro.
  *
@@ -174,6 +176,16 @@ void*    call_proc_xbus_scominit( void    *io_pArgs );
  */
 void*    call_proc_xbus_enable_ridi( void    *io_pArgs );
 
+/**
+ *  @brief host_set_voltages
+ *
+ *  param[in,out]   -  pointer to any arguments, usually NULL
+ *
+ *  return  any error logs to istep
+ *
+ */
+void*    call_host_set_voltages( void   *io_pArgs );
+
 
 };   // end namespace
 
@@ -242,6 +254,12 @@ namespace   INITSERVICE
                 ISTEP_08::call_proc_xbus_enable_ridi,
                 { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
         },
+        {
+                ISTEPNAME(08,12,"host_set_voltages"),
+                ISTEP_08::call_host_set_voltages,
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, false }
+        },
+
 
 };
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,6 @@
 #include    <pnor/pnorif.H>
 #include    <i2c/i2cif.H>
 
-
 using   namespace   ISTEP_ERROR;
 using   namespace   ISTEP;
 using   namespace   TARGETING;
@@ -45,6 +44,7 @@ using   namespace   ERRORLOG;
 
 namespace ISTEP_10
 {
+
 void* call_host_slave_sbe_update (void *io_pArgs)
 {
     errlHndl_t  l_errl  =   NULL;
@@ -54,7 +54,6 @@ void* call_host_slave_sbe_update (void *io_pArgs)
                "call_host_slave_sbe_update entry" );
     do
     {
-
         // Slave processors should now use Host I2C Access Method
         I2C::i2cSetAccessMode( I2C::I2C_SET_ACCESS_MODE_PROC_HOST );
 

@@ -45,7 +45,6 @@ EXTRAINCDIR += ${PERV_HWP_PATH}
 
 OBJS += call_proc_build_smp.o
 OBJS += call_host_slave_sbe_update.o
-OBJS += call_host_set_voltages.o
 OBJS += call_proc_cen_ref_clk_enable.o
 OBJS += call_proc_enable_osclite.o
 OBJS += call_proc_chiplet_scominit.o
@@ -116,20 +115,10 @@ include ${PROCEDURES_PATH}/hwp/perv/p9_chiplet_enable_ridi.mk
 # HWP not ready - p9_trigger_rng_bist.mk
 include ${PROCEDURES_PATH}/hwp/nest/p9_rng_init_phase1.mk
 
-#add objects from p9_setup_evid.mk directly to avoid duplicates
-OBJS+=p9_avsbus_lib.o
-OBJS+=p9_pstate_parameter_block.o
-OBJS+=p9_setup_evid.o
-include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
-
 #p9_cen_ref_clk_enable : Centaur Ref Clock Enable
 include $(PERV_HWP_PATH)/p9_cen_ref_clk_enable.mk
 
 # p9_avsbus_lib.mk sets MODULE, reset here to istep10
 MODULE = istep10
-
-# TODO RTC: 164237
-# Take another look at PM lib
-include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 
 include ${ROOTPATH}/config.mk
