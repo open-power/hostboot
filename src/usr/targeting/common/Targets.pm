@@ -251,6 +251,17 @@ sub printTarget
             print $fh "\t<type>"."unit-mfclk-master"."</type>\n";
         }
     }
+    elsif($self->getTargetType($target) eq 'enc-node-power9')
+    {
+        if($target_TYPE eq 'CONTROL_NODE')
+        {
+            print $fh "\t<type>"."enc-controlnode-power9"."</type>\n";
+        }
+        else
+        {
+            print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
+        }
+    }
     else
     {
         print $fh "\t<type>" . $self->getTargetType($target) . "</type>\n";
