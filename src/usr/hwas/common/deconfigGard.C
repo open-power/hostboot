@@ -1389,39 +1389,6 @@ errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(
     return l_pErr;
 }
 
-//******************************************************************************
-void DeconfigGard::enforceMagicMcaDeconfig(
-        Target & i_target,
-        const uint32_t i_errlEid,
-        const DeconfigureFlags i_deconfigRule)
-{
-    // Check if "magic" port is the target
-    if ((i_target.getAttr<ATTR_TYPE>() == TYPE_MCA) &&
-        ((i_target.getAttr<ATTR_CHIP_UNIT>() % 4) == 0))
-    {
-        HWAS_INF("enforceMagicMcaDeconfig for MCA%d %.8X (i_deconfigRule %d)",
-            i_target.getAttr<ATTR_CHIP_UNIT>(), get_huid(&i_target),
-            i_deconfigRule);
-
-        // magic port found and need to deconfigure its MCBIST parent on down
-
-        // get parent MCBIST
-        TargetHandleList pParentMcbistList;
-        getParentAffinityTargetsByState(pParentMcbistList, &i_target,
-                            CLASS_UNIT, TYPE_MCBIST, UTIL_FILTER_PRESENT);
-
-        HWAS_ASSERT((pParentMcbistList.size() == 1),
-            "HWAS enforceMagicMcaDeconfig: pParentMcbistList != 1");
-
-        Target *l_parentMcbist = pParentMcbistList[0];
-
-        HWAS_INF("enforceMagicMcaDeconfig rollup deconfig to "
-            "MCBIST parent (%.8X)", get_huid(l_parentMcbist));
-
-        _deconfigureTarget(*l_parentMcbist, i_errlEid, NULL, i_deconfigRule);
-        _deconfigureByAssoc(*l_parentMcbist, i_errlEid, i_deconfigRule);
-    }
-}
 
 //******************************************************************************
 void DeconfigGard::_deconfigureByAssoc(
@@ -1609,10 +1576,6 @@ void DeconfigGard::_deconfigureByAssoc(
                     _deconfigureByAssoc(*l_parentMcs,
                                         i_errlEid,i_deconfigRule);
                 }
-
-                // Checks if MCA is the "magic" port, if so,
-                // then deconfig from its MCBIST parent on down
-                enforceMagicMcaDeconfig(i_target, i_errlEid, i_deconfigRule);
 
                 // and we're done, so break;
                 break;

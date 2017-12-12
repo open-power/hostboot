@@ -156,10 +156,10 @@ public:
 
         // set by presentByAssoc() when a MBA has no DIMMs
         DECONFIGURED_BY_NO_CHILD_DIMM,          // BASE | 0x0A
-        
+
         // set by presentByAssoc() when a MEMBUF has no MCS
         DECONFIGURED_BY_NO_PARENT_DMI,   // BASE | 0x0B
-        DECONFIGURED_BY_NO_PARENT_MCS =         
+        DECONFIGURED_BY_NO_PARENT_MCS =
             DECONFIGURED_BY_NO_PARENT_DMI,
         // set by presentByAssoc() when a MEMBUF has no MBAs
         DECONFIGURED_BY_NO_CHILD_MBA,           // BASE | 0x0C
@@ -180,7 +180,7 @@ public:
         DECONFIGURED_BY_NO_CHILD_MCS,           // BASE | 0x14
         DECONFIGURED_BY_NO_PARENT_MCBIST,       // BASE | 0x15
         DECONFIGURED_BY_DISABLED_PORT,          // BASE | 0x16
-        
+
         DECONFIGURED_BY_NO_CHILD_MI,            // BASE | 0x17
         DECONFIGURED_BY_NO_CHILD_DMI,           // BASE | 0x18
         DECONFIGURED_BY_NO_PARENT_MC,           // BASE | 0x19
@@ -507,19 +507,6 @@ private:
                              const DeconfigureFlags i_deconfigRule =
                                     NOT_AT_RUNTIME);
 
-    /**
-     * @brief   Enforce deconfiguring entire MCBIST unit if magic
-     *          MCA port is the target
-     *
-     * Called by _deconfigureByAssoc().
-     *
-     * @param[in] i_target   Reference to base Target.
-     * @param[in] i_errlEid Error log EID to store in Deconfigure Record.
-     * @param[in] i_deconfigRule Deconfigure Runtime options
-     */
-    void enforceMagicMcaDeconfig(TARGETING::Target & i_target,
-                                 const uint32_t i_errlEid,
-                                 const DeconfigureFlags i_deconfigRule);
     /**
      * @brief Deconfigures a Target.
      *
