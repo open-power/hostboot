@@ -87,6 +87,7 @@ void HdatMsVpd::hdatInit(hdatMsAddr_t &i_maxMsAddr,
     iv_maxAddr.hdatMstSigAffntyDom = i_MostSigAffinityDomain;
     memcpy(&iv_maxAddr.hdatMirrMemStartAddr, &i_MirrMemStartAddr,
             sizeof(hdatMsAddr_t));
+    memset(&iv_maxAddr.hdatHRMORstashLoc,0x00,sizeof(hdatMsAddr_t));
     iv_maxSize.hdatReserved1 = 0;
     iv_maxSize.hdatTotSize = i_msSize;
     memset(&iv_mover, 0x00, sizeof(hdatMsVpdPageMover_t));
@@ -905,6 +906,8 @@ void HdatMsVpd::prt()
     HDAT_INF("    hdatMaxCcmAddr = 0X %08X %08X ", iv_maxAddr.hdatMaxCcmAddr.hi,
              iv_maxAddr.hdatMaxCcmAddr.lo);
     HDAT_INF(" hdatMstSigAffntyDom = 0X %08X ", iv_maxAddr.hdatMstSigAffntyDom);
+    HDAT_INF("      HRMOR stash loc = 0X %08X %08X \n",
+      iv_maxAddr.hdatHRMORstashLoc.hi, iv_maxAddr.hdatHRMORstashLoc.lo);
 
     HDAT_INF("  **hdatMsVpdSize_t**");
     HDAT_INF("      hdatReserved1 = %u", iv_maxSize.hdatReserved1);

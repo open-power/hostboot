@@ -129,6 +129,7 @@ struct hdatMsVpdAddr_t
     uint32_t  hdatMstSigAffntyDom; // 0x0010 The affinity domain considered
                                  //most important when making affinity decisions
     hdatMsAddr_t hdatMirrMemStartAddr;//0x0014 Mirrorable MemoryStarting Address
+    hdatMsAddr_t hdatHRMORstashLoc;   //0x001C address to HRMOR stash location in HB reserved memory
 }  __attribute__ ((packed));
 
 
