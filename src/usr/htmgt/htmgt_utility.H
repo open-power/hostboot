@@ -173,6 +173,7 @@ namespace HTMGT
         //HOLD for future need.  PASSTHRU_QUERY_MODE_FUNCTION    = 0x07,
         PASSTHRU_ENA_DIS_OPAL_STATE     = 0x08,
         PASSTHRU_SET_OCC_STATE          = 0x09,
+        PASSTHRU_OCC_CFG_DATA           = 0x0C,
     };
 
     enum htmgtAttrName
