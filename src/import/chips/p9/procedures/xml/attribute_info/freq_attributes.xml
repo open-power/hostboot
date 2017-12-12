@@ -35,6 +35,7 @@
     </description>
     <valueType>uint32</valueType>
     <platInit/>
+    <default>133333</default>
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
