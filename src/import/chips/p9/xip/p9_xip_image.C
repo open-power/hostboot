@@ -869,7 +869,7 @@ xipLinearSearch(void* i_image, const char* i_id, P9XipToc** o_entry)
         else
         {
             *o_entry = 0;
-            rc = TRACE_ERROR(P9_XIP_ITEM_NOT_FOUND);
+            rc = P9_XIP_ITEM_NOT_FOUND;
         }
     }
 
@@ -930,7 +930,7 @@ xipBinarySearch(void* i_image, const char* i_id, P9XipToc** o_entry)
 
         if (*o_entry == 0)
         {
-            rc = TRACE_ERROR(P9_XIP_ITEM_NOT_FOUND);
+            rc = P9_XIP_ITEM_NOT_FOUND;
             break;
         }
     }
