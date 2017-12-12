@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,11 +30,12 @@
 using namespace fapi2;
 
 constexpr uint64_t literal_7 = 7;
+constexpr uint64_t literal_1 = 1;
+constexpr uint64_t literal_15 = 15;
+constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_8 = 8;
-constexpr uint64_t literal_1 = 1;
 constexpr uint64_t literal_0x19 = 0x19;
-constexpr uint64_t literal_0 = 0;
 constexpr uint64_t literal_1167 = 1167;
 constexpr uint64_t literal_1000 = 1000;
 constexpr uint64_t literal_1273 = 1273;
@@ -54,6 +55,10 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
         fapi2::ATTR_NAME_Type l_chip_id;
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, TGT2, l_chip_id));
         FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC, TGT2, l_chip_ec));
+        fapi2::ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE_Type
+        l_TGT2_ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE, TGT2,
+                               l_TGT2_ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE));
         uint64_t l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC = literal_1;
         fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW413362_P9UDD11_ASYNC, TGT2,
@@ -77,7 +82,16 @@ fapi2::ReturnCode p9c_mi_scom(const fapi2::Target<fapi2::TARGET_TYPE_MI>& TGT0,
             FAPI_TRY(fapi2::getScom( TGT0, 0x5010810ull, l_scom_buffer ));
 
             l_scom_buffer.insert<46, 4, 60, uint64_t>(literal_7 );
-            l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_16 );
+
+            if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE == literal_1))
+            {
+                l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_15 );
+            }
+            else if ((l_TGT2_ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE == literal_0))
+            {
+                l_scom_buffer.insert<50, 5, 59, uint64_t>(literal_16 );
+            }
+
             l_scom_buffer.insert<55, 6, 58, uint64_t>(literal_8 );
 
             if ((l_def_ENABLE_PREFETCH_DROP_PROMOTE_BASIC == literal_1))

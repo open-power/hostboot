@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -5277,6 +5277,24 @@
         <ec>
           <value>0x11</value>
           <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW430546_P9UDD10_WARLIKE_PARASITE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      Reduce available channel tags for shadow machine usage to
+      prevent tag overrun due to pathalogical bug.
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
