@@ -99,12 +99,19 @@ fapi2::ReturnCode p9_pm_get_poundw_bucket_attr(
     //VDM Data for bucket 5: varies by version
     //#V Bucket ID #6:       0x1 byte
     //VDM Data for bucket 6: varies by version
+
+    // Note on bucket versions
+    // Version 1 - orignal format
+    // Version 2-F - will all use version 2 format
+    // Version 0x10 - next major revision
+
     if( *l_fullVpdData == POUNDW_VERSION_1)
     {
         //Set the size of the bucket
         l_bucketSize = POUNDW_BUCKETID_SIZE + PW_VER_1_VDMDATA_SIZE;
     }
-    else if( *l_fullVpdData == POUNDW_VERSION_2)
+    else if( (*l_fullVpdData >= POUNDW_VERSION_2)  &&
+             (*l_fullVpdData <= POUNDW_VERSION_F) )
     {
         //Set the size of the bucket
         l_bucketSize = POUNDW_BUCKETID_SIZE + PW_VER_2_VDMDATA_SIZE;
