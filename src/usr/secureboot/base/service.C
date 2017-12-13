@@ -379,6 +379,9 @@ void handleSecurebootFailure(errlHndl_t &io_err, const bool i_waitForShutdown,
 
     assert(io_err != NULL, "Secureboot Failure has a NULL error log")
 
+    // Secure Boot failure is a critical error
+    io_err->setSev(ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM);
+
     // Grab errlog reason code before committing.
     uint16_t l_rc = io_err->reasonCode();
 

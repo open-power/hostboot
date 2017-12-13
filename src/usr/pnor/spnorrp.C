@@ -303,8 +303,10 @@ void SPnorRP::initDaemon()
  */
 uint64_t SPnorRP::verifySections(SectionId i_id,
                                  bool i_loadedPreviously,
-                                 LoadRecord* io_rec)
+                                 LoadRecord* io_rec,
+                                 uint32_t& o_plid)
 {
+    o_plid=0;
     SectionInfo_t l_info;
     errlHndl_t l_errhdl = NULL;
     bool failedVerify = false;
@@ -616,6 +618,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             errlCommit(l_errhdl,PNOR_COMP_ID);
             INITSERVICE::doShutdown(l_errPlid, true);
         }
+        o_plid=l_errPlid;
     }
 
     return l_rc;
@@ -648,6 +651,8 @@ void SPnorRP::waitForMessage()
         message = msg_wait( iv_msgQ );
         if( message )
         {
+            uint32_t plid=0;
+
             // data[0] = virtual address requested
             // data[1] = address to place contents
             eff_addr = reinterpret_cast<uint8_t*>(message->data[0]);
@@ -771,9 +776,11 @@ void SPnorRP::waitForMessage()
                             TRACDCOMP(g_trac_pnor, "SPnorRP::waitForMessage> MSG_LOAD_SECTION refCount is %i",l_record->refCount);
                             if (l_record->refCount == 0)
                             {
+                                uint32_t loadPlid=0;
                                 l_rc = verifySections(l_id,
                                                       l_loadedPreviously,
-                                                      l_record);
+                                                      l_record,
+                                                      loadPlid);
                                 if (l_rc)
                                 {
                                     if(!l_loadedPreviously)
@@ -782,6 +789,11 @@ void SPnorRP::waitForMessage()
                                         l_record = nullptr;
                                     }
                                     status_rc = -l_rc;
+
+                                    // Tunnel the PLID of the verify error to
+                                    // the caller
+                                    plid=loadPlid;
+
                                     break;
                                 }
                             }
@@ -1036,7 +1048,7 @@ void SPnorRP::waitForMessage()
              *      extra_data = Specific reason code.
              */
             message->data[1] = status_rc;
-            message->extra_data = 0;
+            message->extra_data = reinterpret_cast<void*>(plid);
             rc = msg_respond( iv_msgQ, message );
             if( rc )
             {
@@ -1094,16 +1106,17 @@ errlHndl_t loadUnloadSecureSection(const SectionId i_section,
 
         TRACFCOMP(g_trac_pnor,ERR_MRK"PNOR::loadUnloadSecureSection> Error from msg_sendrecv or msg->data[1] rc=%d",
                   l_rc );
-        /* @errorlog
+        /*@
+         * @errortype
          * @severity          ERRL_SEV_CRITICAL_SYS_TERM
          * @moduleid          MOD_PNORRP_LOADUNLOADSECURESECTION
          * @reasoncode        RC_EXTERNAL_ERROR
          * @userdata1         returncode from msg_sendrecv() or msg->data[1]
          * @userdata2[0:31]   SPNOR message type [LOAD | UNLOAD]
          * @userdata2[32:63]  Section ID
-         * @devdesc           Could not load/unload section.
-         * @custdesc          Security failure: unable to securely load
-         *                    requested firmware.
+         * @devdesc           Secure Boot: Failed to securely load or unload
+         *                    signed boot firmware.
+         * @custdesc          Failure in security subsystem
          */
         err = new ERRORLOG::ErrlEntry(
                          ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
@@ -1113,6 +1126,20 @@ errlHndl_t loadUnloadSecureSection(const SectionId i_section,
                          TWO_UINT32_TO_UINT64(i_loadUnload,
                                               i_section),
                          true /* Add HB Software Callout */);
+
+        // On a failure of load secure section, link the load error to this
+        // error by PLID, if available
+        if(   (i_loadUnload == PNOR::MSG_LOAD_SECTION)
+           && (rc==0)
+           && (msg->data[1]!=0)
+           && (msg->extra_data != nullptr))
+        {
+            // extra_data is 64 bits, PLID occupies lower 32 bits, so slice off
+            // the upper bits
+            const uint32_t plid=reinterpret_cast<uint64_t>(msg->extra_data);
+            err->plid(plid);
+        }
+
         err->collectTrace(PNOR_COMP_NAME);
         err->collectTrace(SECURE_COMP_NAME);
     }

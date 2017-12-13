@@ -145,11 +145,18 @@ class SPnorRP
      * @param[in/out] io_rec - Load record to store section information in
      *                io_rec->payloadTextHash is used for comparision if
      *                i_loadedPreviusly is true.
-     * @return  uint64_t - Return code to pass back to message handler
+     * @param[out]    o_plid - On function failure (return code is non-zero),
+     *                PLID of the related error that was committed internally,
+     *                otherwise 0.
+     * @return  uint64_t - Return code to pass back to message handler.  If a
+     *                     non-0 return code is returned, that implies the
+     *                     function also committed an error and returned a non-0
+     *                     PLID in o_plid
      */
     uint64_t verifySections(PNOR::SectionId i_id,
                             bool i_loadedPreviously,
-                            LoadRecord* io_rec);
+                            LoadRecord* io_rec,
+                            uint32_t& o_plid);
 
     /**
      * @brief  Message receiver for secure space
