@@ -229,13 +229,14 @@ fapi2::ReturnCode p9_pm_get_poundv_bucket_attr(
                         l_currentBucket = &l_buckets[i];
                     }
                 }
-                else if(l_pbFreq == l_fallbackNestFreq)
+                else if( (l_pbFreq == l_fallbackNestFreq)
+                         && (l_pbFreq != 0) )
                 {
                     l_numMatchesFallback++;
 
                     if(l_numMatchesFallback > 1)
                     {
-                        FAPI_ERR("p9_pm_get_poundv_bucket_attr::"
+                        FAPI_INF("p9_pm_get_poundv_bucket_attr::"
                                  " Multiple buckets (%d) reporting the same nest frequency"
                                  " Fallback Nest = %d Bucket ID = %d, First Bucket = %d",
                                  l_numMatchesFallback,
