@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,9 +35,9 @@ constexpr uint64_t literal_0b0000 = 0b0000;
 constexpr uint64_t literal_0b0110 = 0b0110;
 constexpr uint64_t literal_0b00000 = 0b00000;
 constexpr uint64_t literal_0b01111 = 0b01111;
-constexpr uint64_t literal_0b01100 = 0b01100;
 constexpr uint64_t literal_0b0111 = 0b0111;
 constexpr uint64_t literal_0b1011 = 0b1011;
+constexpr uint64_t literal_0b01100 = 0b01100;
 constexpr uint64_t literal_0b0000000 = 0b0000000;
 constexpr uint64_t literal_0b0000011 = 0b0000011;
 constexpr uint64_t literal_0b000000 = 0b000000;
@@ -46,6 +46,10 @@ constexpr uint64_t literal_0b000001 = 0b000001;
 constexpr uint64_t literal_0b1010 = 0b1010;
 constexpr uint64_t literal_0b01 = 0b01;
 constexpr uint64_t literal_0b11 = 0b11;
+constexpr uint64_t literal_0b01011100 = 0b01011100;
+constexpr uint64_t literal_0b01100110 = 0b01100110;
+constexpr uint64_t literal_0b00111101 = 0b00111101;
+constexpr uint64_t literal_0b01000100 = 0b01000100;
 constexpr uint64_t literal_0b0010000 = 0b0010000;
 constexpr uint64_t literal_0b00001 = 0b00001;
 constexpr uint64_t literal_0b0001 = 0b0001;
@@ -73,6 +77,8 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, TGT1, l_TGT1_ATTR_IS_SIMULATION));
         uint64_t l_def_IS_HW = (l_TGT1_ATTR_IS_SIMULATION == literal_0);
         uint64_t l_def_IS_SIM = (l_TGT1_ATTR_IS_SIMULATION == literal_1);
+        fapi2::ATTR_IO_XBUS_CHAN_EQ_Type l_TGT0_ATTR_IO_XBUS_CHAN_EQ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_XBUS_CHAN_EQ, TGT0, l_TGT0_ATTR_IO_XBUS_CHAN_EQ));
         fapi2::ATTR_CHIP_EC_FEATURE_HW393297_Type l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW393297, TGT2, l_TGT2_ATTR_CHIP_EC_FEATURE_HW393297));
         fapi2::ATTR_IO_XBUS_MASTER_MODE_Type l_TGT0_ATTR_IO_XBUS_MASTER_MODE;
@@ -1234,15 +1240,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302006010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302006010c3full, l_scom_buffer));
@@ -1250,15 +1267,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302106010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302106010c3full, l_scom_buffer));
@@ -1266,15 +1294,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302206010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302206010c3full, l_scom_buffer));
@@ -1282,15 +1321,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302306010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302306010c3full, l_scom_buffer));
@@ -1298,15 +1348,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302406010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302406010c3full, l_scom_buffer));
@@ -1314,15 +1375,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302506010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302506010c3full, l_scom_buffer));
@@ -1330,15 +1402,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302606010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302606010c3full, l_scom_buffer));
@@ -1346,15 +1429,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302706010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302706010c3full, l_scom_buffer));
@@ -1362,15 +1456,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302806010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302806010c3full, l_scom_buffer));
@@ -1378,15 +1483,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302906010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302906010c3full, l_scom_buffer));
@@ -1394,15 +1510,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302a06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302a06010c3full, l_scom_buffer));
@@ -1410,15 +1537,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302b06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302b06010c3full, l_scom_buffer));
@@ -1426,15 +1564,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302c06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302c06010c3full, l_scom_buffer));
@@ -1442,15 +1591,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302d06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302d06010c3full, l_scom_buffer));
@@ -1458,15 +1618,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302e06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302e06010c3full, l_scom_buffer));
@@ -1474,15 +1645,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000302f06010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000302f06010c3full, l_scom_buffer));
@@ -1490,15 +1672,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000303006010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000303006010c3full, l_scom_buffer));
@@ -1506,15 +1699,26 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8000303106010c3full, l_scom_buffer ));
 
-            l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
-
-            if (l_def_IS_HW)
+            if ((l_def_IS_HW && (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS)))
+            {
+                l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0000 );
+            }
+            else if ((l_def_IS_HW && ( ! (l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))))
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b0111 );
             }
             else if (l_def_IS_SIM)
             {
                 l_scom_buffer.insert<53, 4, 60, uint64_t>(literal_0b1011 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_GAIN_PEAK_INITS))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b00000 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 5, 59, uint64_t>(literal_0b01100 );
             }
 
             FAPI_TRY(fapi2::putScom(TGT0, 0x8000303106010c3full, l_scom_buffer));
@@ -3013,14 +3217,47 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
             l_scom_buffer.insert<48, 2, 62, uint64_t>(literal_0b01 );
             constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF = 0x0;
             l_scom_buffer.insert<55, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_PEAK_TUNE_OFF );
-            constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_ON = 0x1;
-            l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_ON );
             l_scom_buffer.insert<57, 2, 62, uint64_t>(literal_0b11 );
             constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON = 0x1;
             l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFEHISPD_EN_ON );
             constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON = 0x1;
             l_scom_buffer.insert<60, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_DFE12_EN_ON );
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_DIS_RX_LTE))
+            {
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF = 0x0;
+                l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_OFF );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_ON = 0x1;
+                l_scom_buffer.insert<56, 1, 63, uint64_t>(l_IOF1_RX_RX1_RXCTL_CTL_REGS_RX_CTL_REGS_RX_LTE_EN_ON );
+            }
+
             FAPI_TRY(fapi2::putScom(TGT0, 0x8008c02006010c3full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x8008d02006010c3full, l_scom_buffer ));
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_VGA_GAIN_TARGET))
+            {
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01011100 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01100110 );
+            }
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_LOWER_VGA_GAIN_TARGET))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b00111101 );
+            }
+            else if (( true ))
+            {
+                l_scom_buffer.insert<56, 8, 56, uint64_t>(literal_0b01000100 );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x8008d02006010c3full, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8009702006010c3full, l_scom_buffer ));
@@ -3216,6 +3453,22 @@ fapi2::ReturnCode p9_xbus_g1_scom(const fapi2::Target<fapi2::TARGET_TYPE_XBUS>& 
 
             l_scom_buffer.insert<48, 8, 56, uint64_t>(literal_0b01111111 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x800cf42006010c3full, l_scom_buffer));
+        }
+        {
+            FAPI_TRY(fapi2::getScom( TGT0, 0x800d2c0006010c3full, l_scom_buffer ));
+
+            if ((l_TGT0_ATTR_IO_XBUS_CHAN_EQ & ENUM_ATTR_IO_XBUS_CHAN_EQ_DIS_TX_AC_BOOST))
+            {
+                constexpr auto l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF = 0x0;
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_OFF );
+            }
+            else if (( true ))
+            {
+                constexpr auto l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON = 0x1;
+                l_scom_buffer.insert<59, 1, 63, uint64_t>(l_IOF1_TX_WRAP_TX0_TXCTL_TX_CTL_SM_REGS_TX_FFE_BOOST_EN_ON );
+            }
+
+            FAPI_TRY(fapi2::putScom(TGT0, 0x800d2c0006010c3full, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x800f1c0006010c3full, l_scom_buffer ));

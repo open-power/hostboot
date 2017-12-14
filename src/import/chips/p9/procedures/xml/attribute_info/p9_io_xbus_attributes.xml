@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -118,4 +118,27 @@
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IO_XBUS_CHAN_EQ</id>
+  <targetType>TARGET_TYPE_XBUS</targetType>
+  <description>
+    Alternate settings for short Xbus channels
+    bit 0 -- Disable RX LTE
+    bit 1 -- Disable AC BOOST
+    bit 2 -- Low Gain/Peaking Init Settings
+    bit 3 -- Lower VGA Gain Target -10%
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    DIS_RX_LTE            = 0x01,
+    DIS_TX_AC_BOOST       = 0x02,
+    LOWER_GAIN_PEAK_INITS = 0x04,
+    LOWER_VGA_GAIN_TARGET = 0x08
+  </enum>
+  <initToZero/>
+  <platInit/>
+</attribute> 
+<!-- ********************************************************************** -->
+
+
 </attributes>

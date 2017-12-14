@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2017                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -358,7 +358,10 @@
         <id>ATTR_EX_INSIDE_SPECIAL_WAKEUP</id>
         <default>0x00</default>
     </attribute>
-
+    <attribute>
+        <id>ATTR_IO_XBUS_CHAN_EQ</id>
+        <default>0x0</default>
+    </attribute> 
 
 <!-- =====================================================================
      End of temporary definitions
