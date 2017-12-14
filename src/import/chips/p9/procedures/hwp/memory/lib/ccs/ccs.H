@@ -300,6 +300,17 @@ class instruction_t
                                      TT::ARR0_DDR_CSN_2_3_LEN>(CS_N[l_effective_rank].first);
             }
         }
+
+        ///
+        /// @brief Equals comparison operator
+        /// @param[in] i_rhs - the instruction to compare to
+        /// @return True if both instructions are equal
+        ///
+        inline bool operator==( const instruction_t<T>& i_rhs ) const
+        {
+            return arr0 == i_rhs.arr0 &&
+                   arr1 == i_rhs.arr1;
+        }
 };
 
 ///
