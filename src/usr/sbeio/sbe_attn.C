@@ -35,6 +35,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <p9_extract_sbe_rc.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <sbeio/sbe_retry_handler.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -57,7 +58,16 @@ namespace SBEIO
                    l_sbePlid);
 
         // @todo - RTC:180242 - Restart SBE
-        // @todo - RTC:180243 - Advanced error handling
+
+        SbeRetryHandler l_sbeObj = SbeRetryHandler(
+                      SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT);
+        // @todo - RTC:180242. Once the hreset method is finalized,
+        //      we can call the sbe handler with that method
+        //l_sbeObj.setSbeRestartMethod(SbeRetryHandler::
+        //                              SBE_RESTART_METHOD::HRESET);
+
+        l_sbeObj.main_sbe_handler(i_procTarg);
+
         // @todo - RTC:180244 - Disable the OCC
         // @todo - RTC:180245 - Inform OPAL
 
