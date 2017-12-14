@@ -227,7 +227,6 @@ sub printTarget
     $target_id =~ s/\///g;
     $target_id =~ s/\-//g;
 
-
     print $fh "\t<id>" . $target_id . "</id>\n";
     if($self->getTargetType($target) eq 'unit-clk-slave')
     {
@@ -591,7 +590,7 @@ sub prune
 ##  - AFFINITY_PATH
 ##  - ORDINAL_ID
 ##  - HUID
-
+my $multiNode = 0;
 sub buildAffinity
 {
     my $self = shift;
@@ -605,6 +604,8 @@ sub buildAffinity
     my $sys_pos         = 0; # There is always a single system target
     my $mcbist          = -1;
     my $num_mc = 0 ;
+
+    $multiNode = 0;
 
     $self->{membuf_inst_num}=0;
 
@@ -648,6 +649,17 @@ sub buildAffinity
             $proc                    = -1;
             $self->{membuf_inst_num} = 0;
             $node++;
+
+            if($pos > 0)
+            {
+                $multiNode = 1;
+                #reset the dimm index number across nodes
+                $self->{dimm_tpos} = 0;
+            }
+            else
+            {
+                $multiNode = 0;
+            }
 
             $node_phys = "physical:".$sys_phys."/node-$node";
             $node_aff  = "affinity:".$sys_phys."/node-$node";
@@ -799,7 +811,7 @@ sub buildAffinity
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
 
             $self->processMc($target, $sys_pos, $node, $proc, $parent_affinity,
-                             $parent_physical, $node_phys );
+                             $parent_physical, $node_phys);
         }
     }
 }
@@ -1225,7 +1237,6 @@ sub processDimms
 
             $self->setAttribute($dimm, "PHYS_PATH",
                 $node_phys . "/dimm-" . $dimm_pos);
-
             my $type       = $self->getType($dimm);
 
             $self->setAttribute($dimm, "ORDINAL_ID",$dimm_pos);
@@ -1510,7 +1521,6 @@ sub processMc
                                         $self->setAttribute($dimm, "VPD_REC_NUM", $aff_pos);
 
                                         $self->setHuid($dimm, $sys, $node);
-
                                         $self->{targeting}
                                           ->{SYS}[0]{NODES}[$node]{PROCS}[$proc] {MC}[$mc]{MI}[$mi]{DMI}[$dmi]
                                           {MEMBUFS}[$membufnum]{MBAS}[$mba] {DIMMS}[$dimmPos]{KEY} =
