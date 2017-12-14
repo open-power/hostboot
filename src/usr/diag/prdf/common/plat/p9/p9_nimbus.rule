@@ -6592,12 +6592,12 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[52:54]
      *  INT_CQ_FIR_PC_RECOV_ERROR_0_2:
      */
-    (rINTCQFIR, bit(52|53|54)) ? self_th_1;
+    (rINTCQFIR, bit(52|53|54)) ? level2_M_self_L_th_1;
 
     /** INTCQFIR[55:57]
      *  INT_CQ_FIR_PC_INFO_ERROR_0_2:
      */
-    (rINTCQFIR, bit(55|56|57)) ? self_th_1;
+    (rINTCQFIR, bit(55|56|57)) ? level2_M_self_L_th_1; # NIMBUS_10
 
     /** INTCQFIR[58:59]
      *  INT_CQ_FIR_VC_FATAL_ERROR_0_1:
@@ -6607,12 +6607,12 @@ group gINTCQFIR filter singlebit, cs_root_cause
     /** INTCQFIR[60:61]
      *  INT_CQ_FIR_VC_RECOV_ERROR_0_1:
      */
-    (rINTCQFIR, bit(60|61)) ? self_th_1;
+    (rINTCQFIR, bit(60|61)) ? level2_M_self_L_th_1;
 
     /** INTCQFIR[62:63]
      *  INT_CQ_FIR_VC_INFO_ERROR_0_1:
      */
-    (rINTCQFIR, bit(62|63)) ? self_th_1;
+    (rINTCQFIR, bit(62|63)) ? level2_M_self_L_th_1; # NIMBUS_10
 
 };
 
@@ -6726,32 +6726,32 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(19)) ? defaultMaskedError;
 
     /** PBIOEFIR[20]
-     *  framer00 attn - X0 even link
+     *  X0 even link framer or outbnd switch err
      */
     (rPBIOEFIR, bit(20)) ? self_th_1;
 
     /** PBIOEFIR[21]
-     *  framer00 attn - X0 odd link
+     *  X0 odd internal framer err
      */
     (rPBIOEFIR, bit(21)) ? self_th_1;
 
     /** PBIOEFIR[22]
-     *  framer00 attn - X1 even link
+     *  X1 even link framer or outbnd switch err
      */
     (rPBIOEFIR, bit(22)) ? self_th_1;
 
     /** PBIOEFIR[23]
-     *  framer00 attn - X1 odd link
+     *  X1 odd internal framer err
      */
     (rPBIOEFIR, bit(23)) ? self_th_1;
 
     /** PBIOEFIR[24]
-     *  framer00 attn - X2 even link
+     *  X2 even link framer or outbnd switch err
      */
     (rPBIOEFIR, bit(24)) ? self_th_1;
 
     /** PBIOEFIR[25]
-     *  framer00 attn - X2 odd link
+     *  X2 odd internal framer err
      */
     (rPBIOEFIR, bit(25)) ? self_th_1;
 
@@ -6761,32 +6761,32 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(26|27)) ? defaultMaskedError;
 
     /** PBIOEFIR[28]
-     *  parser00 attn
+     *  parser00 attn or X0evn link down
      */
     (rPBIOEFIR, bit(28)) ? self_th_1;
 
     /** PBIOEFIR[29]
-     *  parser01 attn
+     *  parser01 attn or X0odd link down
      */
     (rPBIOEFIR, bit(29)) ? self_th_1;
 
     /** PBIOEFIR[30]
-     *  parser02 attn
+     *  parser02 attn or X1evn link down
      */
     (rPBIOEFIR, bit(30)) ? self_th_1;
 
     /** PBIOEFIR[31]
-     *  parser03 attn
+     *  parser03 attn or X1odd link down
      */
     (rPBIOEFIR, bit(31)) ? self_th_1;
 
     /** PBIOEFIR[32]
-     *  parser04 attn
+     *  parser04 attn or X2evn link down
      */
     (rPBIOEFIR, bit(32)) ? self_th_1;
 
     /** PBIOEFIR[33]
-     *  parser05 attn
+     *  parser05 attn or X2odd link down
      */
     (rPBIOEFIR, bit(33)) ? self_th_1;
 
@@ -6796,7 +6796,7 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(34|35)) ? defaultMaskedError;
 
     /** PBIOEFIR[36]
-     *  mb0 spattn
+     *  mb00 spattn
      */
     (rPBIOEFIR, bit(36)) ? defaultMaskedError;
 
@@ -6806,7 +6806,7 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(37)) ? defaultMaskedError;
 
     /** PBIOEFIR[38]
-     *  mb0 spattn
+     *  mb10 spattn
      */
     (rPBIOEFIR, bit(38)) ? defaultMaskedError;
 
@@ -6861,17 +6861,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(48|49|50|51)) ? defaultMaskedError;
 
     /** PBIOEFIR[52]
-     *  links 01 data outbound switch int. err
+     *  data outbnd switch int. err-links 01
      */
     (rPBIOEFIR, bit(52)) ? defaultMaskedError;
 
     /** PBIOEFIR[53]
-     *  links 23 data outbound switch int. err
+     *  data outbnd switch int. err-links 23
      */
     (rPBIOEFIR, bit(53)) ? defaultMaskedError;
 
     /** PBIOEFIR[54]
-     *  links 45 data outbound switch int. err
+     *  data outbnd switch int. err-links 45
      */
     (rPBIOEFIR, bit(54)) ? defaultMaskedError;
 
@@ -6881,17 +6881,17 @@ group gPBIOEFIR filter singlebit, cs_root_cause( 8, 11, 14 )
     (rPBIOEFIR, bit(55)) ? defaultMaskedError;
 
     /** PBIOEFIR[56]
-     *  links 01 data inbound switch int. err
+     *  data inbnd switch int. err-links 01
      */
     (rPBIOEFIR, bit(56)) ? defaultMaskedError;
 
     /** PBIOEFIR[57]
-     *  links 23 data inbound switch int. err
+     *  data inbnd switch int. err-links 23
      */
     (rPBIOEFIR, bit(57)) ? defaultMaskedError;
 
     /** PBIOEFIR[58]
-     *  links 45 data inbound switch int. err
+     *  data inbnd switch int. err-links 45
      */
     (rPBIOEFIR, bit(58)) ? defaultMaskedError;
 
