@@ -301,10 +301,15 @@ class wr_lvl : public phy_step
     public:
         ///
         /// @brief Base constructor
+        /// @param[in] i_sim - true if in simulation mode
         ///
-        wr_lvl() :
-            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(), "WR_LVL")
+        wr_lvl(const bool i_sim) :
+            phy_step( fapi2::buffer<uint64_t>().setBit<MCA_DDRPHY_PC_INIT_CAL_CONFIG0_P0_ENA_WR_LEVEL>(), "WR_LVL"),
+            iv_sim(i_sim)
         {}
+
+        // Delete the default constructor
+        wr_lvl() = delete;
 
         ///
         /// @brief Default destructor
@@ -339,6 +344,9 @@ class wr_lvl : public phy_step
         /// @return l_cycles - the number of cycles a given calibration step wil take
         ///
         uint64_t calculate_cycles( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target ) const;
+
+    private:
+        bool iv_sim;
 };
 
 ///

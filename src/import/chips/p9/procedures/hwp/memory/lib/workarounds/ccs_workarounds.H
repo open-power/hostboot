@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/ccs/ccs.H>
+#include <lib/dimm/ddr4/mrs_load_ddr4.H>
 
 namespace mss
 {
@@ -75,6 +76,82 @@ fapi2::ReturnCode exit( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 ///
 fapi2::ReturnCode enable_pda_shadow_reg( const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
         const uint64_t i_rank );
+
+namespace wr_lvl
+{
+
+///
+/// @brief Updates an MRS to have the desired Qoff value
+/// @param[in,out] io_mrs - the MRS to update
+/// @param[in] i_state - the state for the qoff in the MRS
+///
+void update_mrs(mss::ddr4::mrs01_data& io_mrs, const mss::states i_state);
+
+///
+/// @brief Adds in an MRS on a per-rank basis based upon qoff
+/// @param[in] i_target - the target on which to operate
+/// @param[in] i_rank - the rank on which to operate
+/// @param[in] i_state - the state of qoff
+/// @param[in,out] io_inst the instruction to fixup
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+fapi2::ReturnCode add_mrs(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                          const uint64_t i_rank,
+                          const mss::states& i_state,
+                          std::vector<ccs::instruction_t<fapi2::TARGET_TYPE_MCBIST>>& io_inst);
+
+///
+/// @brief Gets a vector of ranks that are not going to be calibrated in the given rank pair
+/// @param[in] i_target - the MCA target on which to oparate
+/// @param[in] i_rp - the rank pair that is currently being calibrated
+/// @param[out] o_ranks - the vector of ranks that are not being calibrated
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+fapi2::ReturnCode get_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        std::vector<uint64_t>& o_ranks);
+
+///
+/// @brief Adds the non-primary ranks from a rank pair to a ranks vector
+/// @param[in] i_target - the MCA target on which to oparate
+/// @param[in] i_rp - the rank pair that is currently being calibrated
+/// @param[in,out] io_ranks - the vector of ranks that are not being calibrated
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+fapi2::ReturnCode add_non_primary_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                        const uint64_t i_rp,
+                                        std::vector<uint64_t>& io_ranks);
+
+///
+/// @brief Adds all ranks from a rank pair to a ranks vector
+/// @param[in] i_target - the MCA target on which to oparate
+/// @param[in] i_rp - the rank pair that is currently being calibrated
+/// @param[in,out] io_ranks - the vector of ranks that are not being calibrated
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+fapi2::ReturnCode add_ranks_from_pair(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+                                      const uint64_t i_rp,
+                                      std::vector<uint64_t>& io_ranks);
+
+///
+/// @brief Adds a rank to the ranks vector if it is valid
+/// @param[in] i_rank - the rank to add to the vector
+/// @param[in,out] io_ranks - the vector of ranks that are not being calibrated
+///
+void add_rank_to_vector(const uint64_t i_rank, std::vector<uint64_t>& io_ranks);
+
+///
+/// @brief Enables or disables the DQ outputs on all non-calibrating ranks
+/// @param[in] i_target - the MCA target on which to oparate
+/// @param[in] i_rp - the rank pair that is currently being calibrated
+/// @param[in] i_state - the state of qoff
+/// @return FAPI2_RC_SUCCESS iff OK
+///
+fapi2::ReturnCode configure_non_calibrating_ranks(const fapi2::Target<fapi2::TARGET_TYPE_MCA>& i_target,
+        const uint64_t i_rp,
+        const mss::states& i_state);
+
+} // ns wr_lvl
 
 } // ns workarounds
 
