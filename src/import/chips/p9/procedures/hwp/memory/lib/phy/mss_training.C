@@ -48,6 +48,7 @@
 #include <lib/dimm/ddr4/latch_wr_vref.H>
 #include <lib/workarounds/seq_workarounds.H>
 #include <lib/workarounds/dqs_align_workarounds.H>
+#include <lib/workarounds/ccs_workarounds.H>
 
 #include <generic/memory/lib/utils/scom.H>
 #include <lib/utils/count_dimm.H>
@@ -201,6 +202,13 @@ fapi2::ReturnCode wr_lvl::pre_workaround( const fapi2::Target<fapi2::TARGET_TYPE
         l_program.iv_instructions.clear();
     }
 
+    FAPI_INF("%s RP%lu %s WR_LVL workaround setup", mss::c_str(i_target), i_rp, iv_sim ? "skipping" : "running");
+
+    if(!iv_sim)
+    {
+        FAPI_TRY( mss::ccs::workarounds::wr_lvl::configure_non_calibrating_ranks(i_target, i_rp, mss::states::OFF_N) );
+    }
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -254,6 +262,13 @@ fapi2::ReturnCode wr_lvl::post_workaround( const fapi2::Target<fapi2::TARGET_TYP
                                          l_rtt_inst.begin(),
                                          l_rtt_inst.end() );
         FAPI_TRY( mss::ccs::execute(l_mcbist, l_program, i_target) );
+    }
+
+    FAPI_INF("%s RP%lu %s WR_LVL workaround cleanup", mss::c_str(i_target), i_rp, iv_sim ? "skipping" : "running");
+
+    if(!iv_sim)
+    {
+        FAPI_TRY( mss::ccs::workarounds::wr_lvl::configure_non_calibrating_ranks(i_target, i_rp, mss::states::ON_N) );
     }
 
 fapi_try_exit:
@@ -893,7 +908,7 @@ std::vector<std::shared_ptr<step>> steps_factory(const fapi2::buffer<uint32_t>& 
     if(i_cal_steps.getBit<mss::cal_steps::WR_LEVEL>())
     {
         FAPI_INF("Write leveling is enabled");
-        l_steps.push_back(std::make_shared<wr_lvl>());
+        l_steps.push_back(std::make_shared<wr_lvl>(i_sim));
     }
 
     // INITIAL_PAT_WR
