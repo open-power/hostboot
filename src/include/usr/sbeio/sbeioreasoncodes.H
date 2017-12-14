@@ -55,6 +55,7 @@ enum sbeioModuleId
     SBEIO_EXTRACT_RC_HANDLER            = 0x0A,
     SBEIO_HANDLE_SBE_REG_VALUE          = 0x0B,
     SBEIO_GET_FFDC_HANDLER              = 0x0C,
+    SBEIO_GET_SBE_RC                    = 0x0D,
 };
 
 /**
@@ -119,6 +120,9 @@ enum sbeioReasonCode
     SBEIO_INCORRECT_FCN_CALL           = SBEIO_COMP_ID | 0x56,
     SBEIO_RETURNED_FFDC                = SBEIO_COMP_ID | 0x57,
     SBEIO_SLAVE_TIMEOUT                = SBEIO_COMP_ID | 0x58,
+
+    // SBE Vital Attention error codes
+    SBEIO_SBE_RC_VALUE_INFO            = SBEIO_COMP_ID | 0x60,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
