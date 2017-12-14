@@ -521,6 +521,10 @@
         <value>0x0C20</value>
     </enumerator>
     <enumerator>
+        <name>HB_VOLATILE</name>
+        <value>0x0C21</value>
+    </enumerator>
+    <enumerator>
         <name>MEMBUF_STATE</name>
         <value>0x0CD1</value>
     </enumerator>

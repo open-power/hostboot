@@ -48,7 +48,9 @@
 
 #include    <util/utilsemipersist.H>
 #include    <hwas/common/deconfigGard.H>
-
+#ifdef CONFIG_BMC_IPMI
+#include    <ipmi/ipmisensor.H>
+#endif
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEP;
@@ -88,6 +90,23 @@ void* call_host_ipl_complete (void *io_pArgs)
             errlCommit( l_err, ISTEP_COMP_ID );
         }
 
+#ifdef CONFIG_BMC_IPMI
+        // Alert BMC to clear HB volatile memory
+        SENSOR::HbVolatileSensor l_hbVolatileCtl;
+        l_err = l_hbVolatileCtl.setHbVolatile(
+                            SENSOR::HbVolatileSensor::ENABLE_VOLATILE );
+        if(l_err)
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "Failure in notifying BMC to clear hostboot volatile section,"
+                " RC=%X", ERRL_GETRC_SAFE(l_err) );
+
+            // This error could come from OpenPower system without
+            // updated OpenBMC code so just delete the error
+            delete l_err;
+            l_err = nullptr;
+        }
+#endif
 
         // Setup the TCEs needed for the FSP to DMA the PAYLOAD
         if (TCE::utilUseTcesForDmas())

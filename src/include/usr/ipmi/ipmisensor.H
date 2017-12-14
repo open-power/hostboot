@@ -908,6 +908,74 @@ namespace SENSOR
             GpuSensor();
     };
 
+
+    /**
+     *  @class HbVolatileSensor
+     *
+     *  @brief Specialized class for the hostboot volatile memory setup
+     *
+     *  @par Detailed Description:
+     *      Provides the functionality needed by OpenBMC to set hostboot
+     *      section as volatile or not
+     *
+     *   Usage:
+     *      HbVolatileSensor l_hbVolatileCtl;
+     *      l_hbVolatileCtl.setHbVolatile( HbVolatileSensor::ENABLE_VOLATILE );
+     *      l_hbVolatileCtl.setHbVolatile( HbVolatileSensor::DISABLE_VOLATILE );
+     *
+     */
+    class HbVolatileSensor : public SensorBase
+    {
+
+        public:
+
+            /**
+             * @enum hbVolatileSetting
+             *      enum to define the contr
+             */
+            enum hbVolatileSetting
+            {
+                DISABLE_VOLATILE = 0x00, // (default)
+                ENABLE_VOLATILE  = 0x01, // allow volatile memory to be cleared
+            };
+
+            /**
+             *  @brief Constructor for the HbVolatileSensor
+             *
+             *  The system target holds the IPMI sensor number for this sensor.
+             *
+             */
+            HbVolatileSensor();
+
+            /**
+             *  @brief Destructor for the HbVolatileSensor
+             *
+             */
+            ~HbVolatileSensor();
+
+            /**
+             * @brief Set hostboot volatile section to volatile or not
+             *
+             * @param[in] i_setting - enable/disable volatility of section
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t setHbVolatile( hbVolatileSetting i_setting );
+
+            /**
+             * @brief get the value of the hostboot volatile
+             *        section from the BMC.
+             *
+             * @param[o] i_setting - value = volatile or not
+             *
+             * @return Errorlog handle
+             *
+             */
+            errlHndl_t getHbVolatile( hbVolatileSetting & o_setting );
+
+    };
+
     /**
      *  @brief Updates initial state of Hostboot relevant fault sensors on the
      *      BMC
