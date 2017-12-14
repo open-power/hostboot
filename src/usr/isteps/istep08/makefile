@@ -53,6 +53,7 @@ OBJS += call_proc_chiplet_fabric_scominit.o
 OBJS += call_proc_xbus_scominit.o
 OBJS += call_proc_xbus_enable_ridi.o
 OBJS += call_host_attnlisten_proc.o
+OBJS += call_host_set_voltages.o
 
 VPATH += ${PROCEDURES_PATH}/hwp/perv/ ${PROCEDURES_PATH}/hwp/nest/
 VPATH += ${PROCEDURES_PATH}/hwp/io/ ${PROCEDURES_PATH}/hwp/initfiles/
@@ -98,5 +99,18 @@ include ${PROCEDURES_PATH}/hwp/initfiles/p9_xbus_g1_scom.mk
 
 # proc_xbus_enable_ridi : Apply RI/DI for xbus
 include ${PROCEDURES_PATH}/hwp/perv/p9_xbus_enable_ridi.mk
+
+#add objects from p9_setup_evid.mk directly to avoid duplicates
+OBJS += p9_setup_evid.o
+OBJS += p9_avsbus_lib.o
+OBJS += p9_pstate_parameter_block.o
+include ${PROCEDURES_PATH}/hwp/lib/p9_avsbus_lib.mk
+
+# p9_avsbus_lib.mk sets MODULE, reset here to istep08
+MODULE = istep08
+
+# TODO RTC: 164237
+# Take another look at PM lib
+include $(PROCEDURES_PATH)/hwp/pm/p9_pm_utils.mk
 
 include ${ROOTPATH}/config.mk
