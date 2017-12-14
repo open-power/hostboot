@@ -550,9 +550,7 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
                      (l_element.type == TYPE_ABUS) ||
                      (l_element.type == TYPE_EQ) ||
                      (l_element.type == TYPE_MCBIST) ||
-                     (l_element.type == TYPE_MI) ||
                      (l_element.type == TYPE_CAPP) ||
-                     (l_element.type == TYPE_DMI) ||
                      (l_element.type == TYPE_OBUS) ||
                      (l_element.type == TYPE_OBUS_BRICK) ||
                      (l_element.type == TYPE_SBE) ||
@@ -584,7 +582,9 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
             else if ((l_element.type == TYPE_EX) ||
                      (l_element.type == TYPE_CORE) ||
                      (l_element.type == TYPE_MCS) ||
-                     (l_element.type == TYPE_MCA))
+                     (l_element.type == TYPE_MCA) ||
+                     (l_element.type == TYPE_MI)  ||
+                     (l_element.type == TYPE_DMI))
             {
                 //previous o_unitPos was MCBIST/MCS or EQ/EX.
                 // Multiply by 2 and add in instance number

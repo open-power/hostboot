@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -1467,6 +1467,7 @@ sub processMc
                                         my $dimm=$dimms->{DEST_PARENT};
                                         $self->setAttribute($dimm,"MBA_PORT",$port_num);
                                         $self->setAttribute($dimm,"MBA_DIMM",$dimm_num);
+                                        $self->setAttribute($dimm,"CLASS","LOGICAL_CARD");
 
                                         #Centaur/Membufs use CEN_MBA_PORT and not MBA_PORT
                                         #For now, support both.
