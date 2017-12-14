@@ -533,11 +533,12 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                         = sys->getAttr<TARGETING::ATTR_PAYLOAD_KIND>();
 
                     hbHypCommArea_t l_hbCommArea;
+                    static_assert((sizeof(hbHypCommArea_t) % 8) == 0,
+                                  "hbHypCommArea_t's size must be 8 byte aligned");
                     uint64_t l_hdatPtrToHrmorStashAddr = 0;
                     size_t   l_hdatPtrHrmorStashSize   = 0;
-                    //TODO RTC 180959 enable this when HDAT has added in HRMOR ptr space in MS Addr Config section of HDAT
-//                    uint64_t * l_pHdatPtrToHrmorStashAddr;
-//                    memcpy a copy of the hbHypCommArea struct to the end of the hbData section
+                    uint64_t * l_pHdatPtrToHrmorStashAddr;
+                    // memcpy a copy of the hbHypCommArea struct into the reserved mem area
                     memcpy( reinterpret_cast<void*>(l_prevDataAddr),
                             reinterpret_cast<void*>(&l_hbCommArea),
                             sizeof(hbHypCommArea_t));
@@ -564,12 +565,11 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                                sizeof(uint64_t), l_hdatPtrHrmorStashSize);
 
                         //Cast the value returned from get_host_data_section to a uint64_t pointer
-    //                     l_pHdatPtrToHrmorStashAddr = reinterpret_cast<uint64_t *>(l_hdatPtrToHrmorStashAddr);
+                        l_pHdatPtrToHrmorStashAddr = reinterpret_cast<uint64_t *>(l_hdatPtrToHrmorStashAddr);
 
-                        //TODO RTC 180959 enable this when HDAT has added in HRMOR ptr space in MS Addr Config section of HDAT
                         //Set the value of the pointer to be the physical address
                         //of the hrmor stash in the hb-hyp communication area
-    //                     *l_pHdatPtrToHrmorStashAddr = io_start_address + l_hbTOC.entry[i].offset + HYPCOMM_STRUCT_HRMOR_OFFSET;
+                        *l_pHdatPtrToHrmorStashAddr = io_start_address + l_hbTOC.entry[i].offset + HYPCOMM_STRUCT_HRMOR_OFFSET;
 
                         TRACFCOMP( g_trac_runtime,
                                   "fill_RsvMem_hbData> HYPCOMM v address 0x%.16llX, size: %lld done",
