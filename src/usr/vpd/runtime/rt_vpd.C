@@ -385,6 +385,9 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                i_record.rec_num,
                i_record.offset );
 
+    hostInterfaces::hbrt_fw_msg* l_req_fw_msg = nullptr;
+    hostInterfaces::hbrt_fw_msg* l_resp_fw_msg = nullptr;
+
     do
     {
         if(!INITSERVICE::spBaseServicesEnabled())
@@ -421,7 +424,7 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
                  i_numBytes;
 
         //create the firmware_request structure to carry the vpd write msg data
-        hostInterfaces::hbrt_fw_msg *l_req_fw_msg =
+        l_req_fw_msg =
                   (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size) ;
         memset(l_req_fw_msg, 0, l_req_fw_msg_size);
 
@@ -431,27 +434,36 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
         l_req_fw_msg->generic_message.msgType = i_type;
         memcpy(&l_req_fw_msg->generic_message.data, i_data, i_numBytes);
 
-        // set up the response struct
-        hostInterfaces::hbrt_fw_msg l_resp_fw_msg;
-        uint64_t l_resp_fw_msg_size = sizeof(l_resp_fw_msg);
-
+        // set up the response struct, note that for messages to the FSP
+        //  the response size must match the request size
+        l_resp_fw_msg =
+          (hostInterfaces::hbrt_fw_msg *)malloc(l_req_fw_msg_size);
+        memset(l_resp_fw_msg, 0, l_req_fw_msg_size);
+        uint64_t l_resp_fw_msg_size = l_req_fw_msg_size;
+        // Note - no need to check for expected response size > request
+        //  size because they use the same base structure
+            
         // make the firmware request
+        TRACFBIN( g_trac_vpd, INFO_MRK"Sending firmware_request",
+                  l_req_fw_msg,
+                  hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
+                  sizeof(hostInterfaces::hbrt_fw_msg::generic_message) );
         size_t rc = g_hostInterfaces->firmware_request(l_req_fw_msg_size,
                                                        l_req_fw_msg,
                                                        &l_resp_fw_msg_size,
-                                                       &l_resp_fw_msg);
+                                                       l_resp_fw_msg);
         uint64_t l_userData1(0), l_userData2(0);
 
         // Capture the err log id if any
         // The return code (rc) may return OK, but there still may be an issue
         // with the HWSV code on the FSP.
         if ((l_resp_fw_msg_size >= (hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                              sizeof(l_resp_fw_msg.generic_message_resp)))  &&
+                              sizeof(l_resp_fw_msg->generic_message_resp)))  &&
            (hostInterfaces::HBRT_FW_MSG_HBRT_FSP_RESP
-                                                  == l_resp_fw_msg.io_type) &&
-           (0 != l_resp_fw_msg.generic_message_resp.errPlid) )
+                                                  == l_resp_fw_msg->io_type) &&
+           (0 != l_resp_fw_msg->generic_message_resp.errPlid) )
         {
-            l_userData2 = l_resp_fw_msg.generic_message_resp.errPlid;
+            l_userData2 = l_resp_fw_msg->generic_message_resp.errPlid;
         }
 
         // gather up the error data and create an err log out of it
@@ -496,16 +508,16 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             if (l_resp_fw_msg_size > 0)
             {
                 l_err->addFFDC( MBOX_COMP_ID,
-                                &l_resp_fw_msg,
+                                l_resp_fw_msg,
                                 l_resp_fw_msg_size,
                                 0, 0, false );
             }
 
-            if (sizeof(l_req_fw_msg) > 0)
+            if (l_req_fw_msg_size > 0)
             {
                 l_err->addFFDC( MBOX_COMP_ID,
-                                &l_req_fw_msg,
-                                sizeof(l_req_fw_msg),
+                                l_req_fw_msg,
+                                l_req_fw_msg_size,
                                 0, 0, false );
             }
 
@@ -520,10 +532,12 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
             l_err->collectTrace( "VPD", 256);
          }  // end  (rc || l_userData2)
 
-        // release the memory created
-        free(l_req_fw_msg);
     }
     while (0);
+
+    // release the memory created
+    if( l_req_fw_msg ) { free(l_req_fw_msg); }
+    if( l_resp_fw_msg ) { free(l_resp_fw_msg); }
 
     if (l_err)
     {
