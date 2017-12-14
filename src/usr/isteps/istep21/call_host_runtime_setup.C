@@ -197,18 +197,6 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
-        // Fill in Hostboot runtime data for all nodes
-        // (adjunct partition)
-        // Write the HB runtime data into mainstore
-        l_err = RUNTIME::populate_hbRuntimeData();
-        if ( l_err )
-        {
-            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                       "Failed hbRuntimeData setup" );
-            // break from do loop if error occurred
-            break;
-        }
-
 
 #ifdef CONFIG_START_OCC_DURING_BOOT
         bool l_activatePM = TARGETING::is_sapphire_load();
@@ -365,6 +353,18 @@ void* call_host_runtime_setup (void *io_pArgs)
  *           break;
  *       }
  */
+
+        // Fill in Hostboot runtime data for all nodes
+        // (adjunct partition)
+        // Write the HB runtime data into mainstore
+        l_err = RUNTIME::populate_hbRuntimeData();
+        if ( l_err )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                       "Failed hbRuntimeData setup" );
+            // break from do loop if error occurred
+            break;
+        }
 
     } while(0);
 
