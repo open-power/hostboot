@@ -43,6 +43,7 @@ namespace IPMI
         MOD_IPMISENSOR_ENTITY_ID    = 0x09, // IPMI::getSensorEntityId
         MOD_IPMISENSOR_NAME         = 0x0A, // IPMI::getSensorName
         MOD_IPMISENSOR_REBOOTCNTRL  = 0x0B, // IPMI::SENSOR getRebootControl
+        MOD_IPMISENSOR_HBVOLATILE   = 0x0C, // IPMI::SENSOR getHbVolatile
     };
 
     enum IPMIReasonCode

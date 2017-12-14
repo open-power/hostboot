@@ -1679,4 +1679,83 @@ namespace SENSOR
             } // end of GPU loop
         } // end of if check for non-default values
     } // end of updateGpuSensorStatus()
+
+
+    //
+    // HbVolatileSensor constructor - uses system target
+    //
+    HbVolatileSensor::HbVolatileSensor()
+        :SensorBase(TARGETING::SENSOR_NAME_HB_VOLATILE, NULL)
+    {
+        // message buffer created and initialized in base object.
+    }
+
+    //
+    // HbVolatileSensor destructor
+    //
+    HbVolatileSensor::~HbVolatileSensor(){};
+
+    //
+    // setHbVolatile - tell BMC to make hostboot volatile memory
+    //                 (volatile(1) or not(0))
+    //
+    errlHndl_t HbVolatileSensor::setHbVolatile( hbVolatileSetting i_setting )
+    {
+        // adjust the operation to overwrite the sensor reading
+        // to the value we send.
+        iv_msg->iv_operation = SET_SENSOR_VALUE_OPERATION;
+
+        // the HB_VOLATILE Sensor is defined as a discrete sensor
+        // but the assertion bytes are being used to transfer the state
+        iv_msg->iv_assertion_mask = le16toh(i_setting);
+
+        TRACFCOMP(g_trac_ipmi,"HbVolatileSensor::setHbVolatile(%d)",
+                    i_setting);
+
+        return writeSensorData();
+    }
+
+    //
+    // getHbVolatile - get the HB volatile memory setting from the BMC
+    //
+    errlHndl_t HbVolatileSensor::getHbVolatile( hbVolatileSetting &o_setting )
+    {
+        // the HB_VOLATILE sensor is defined as a discrete sensor
+        getSensorReadingData l_data;
+
+        errlHndl_t l_err = readSensorData( l_data );
+
+        if( l_err == nullptr )
+        {
+            // check if in valid range of hbVolatileSetting enums
+            if (l_data.event_status <= ENABLE_VOLATILE)
+            {
+                o_setting = static_cast<hbVolatileSetting>(l_data.event_status);
+            }
+            else
+            {
+                TRACFCOMP(g_trac_ipmi,"Unknown hb volatile setting: %d",
+                    l_data.event_status);
+
+                /*@
+                 * @errortype    ERRL_SEV_UNRECOVERABLE
+                 * @moduleid     IPMI::MOD_IPMISENSOR_HBVOLATILE
+                 * @reasoncode   IPMI::RC_INVALID_SENSOR_SETTING
+                 * @userdata1    Invalid hb volatile control setting
+                 * @userdata2    <unused>
+                 * @devdesc      The sensor returned an invalid setting
+                 * @custdesc     Unable to find a valid sensor setting.
+                 */
+                l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            IPMI::MOD_IPMISENSOR_HBVOLATILE,
+                                            IPMI::RC_INVALID_SENSOR_SETTING,
+                                            l_data.event_status,
+                                            0,
+                                            false);
+            }
+        }
+        return l_err;
+    }
+
 }; // end name space
