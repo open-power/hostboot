@@ -519,7 +519,6 @@
     EVEN_ONLY = 0x1,
     ODD_ONLY = 0x2
   </enum>
-  <writeable/>
   <initToZero/>
   <platInit/>
 </attribute>
