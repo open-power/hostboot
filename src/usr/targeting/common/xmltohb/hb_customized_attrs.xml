@@ -644,6 +644,16 @@
         <id>ATTR_MSS_MRW_MEMDIAGS_BCMODE</id>
         <no_export/>
     </attribute>
+
+    <attribute>
+        <id>ATTR_DMI_INBAND_BAR_ENABLE</id>
+        <no_export/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_DMI_INBAND_BAR_BASE_ADDR_OFFSET</id>
+        <no_export/>
+    </attribute>
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
