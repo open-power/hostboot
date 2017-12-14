@@ -386,11 +386,11 @@ namespace HTMGT
             SENSOR::StatusSensor::NOT_PRESENT
         };
         if (iv_gpuCfg & GPUCFG_GPU0_PRESENT)
-            gpu_status[0] = SENSOR::StatusSensor::PRESENT;
+            gpu_status[0] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
         if (iv_gpuCfg & GPUCFG_GPU1_PRESENT)
-            gpu_status[1] = SENSOR::StatusSensor::PRESENT;
+            gpu_status[1] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
         if (iv_gpuCfg & GPUCFG_GPU2_PRESENT)
-            gpu_status[2] = SENSOR::StatusSensor::PRESENT;
+            gpu_status[2] = SENSOR::StatusSensor::PRESENT_FUNCTIONAL;
 
         TMGT_INF("updateGpuPresence: OCC%d - GPU0:%d, GPU1:%d, GPU2:%d",
                  iv_instance, gpu_status[0], gpu_status[1], gpu_status[2]);
