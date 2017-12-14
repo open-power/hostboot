@@ -626,6 +626,7 @@
     <valueType>uint8</valueType>
     <platInit/>
     <initToZero/>
+    <overrideOnly/>
     <enum> ENABLE = 0, DISABLE = 1 </enum>
     <mssAccessorName>mrw_memdiags_bcmode</mssAccessorName>
   </attribute>
