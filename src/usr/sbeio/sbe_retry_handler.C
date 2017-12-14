@@ -85,6 +85,7 @@ SbeRetryHandler::SbeRetryHandler(SBE_MODE_OF_OPERATION i_sbeMode)
 , iv_switchSidesCount(0)
 , iv_currentSBEState(SBE_REG_RETURN::SBE_FAILED_TO_BOOT)
 , iv_retriggeredMain(false)
+, iv_sbeRestartMethod(SBE_RESTART_METHOD::START_CBS)
 {
     SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler()");
 
@@ -211,19 +212,26 @@ void SbeRetryHandler::main_sbe_handler( TARGETING::Target * i_target )
                     }
                 }
 
-                SBE_TRACF("Invoking p9_start_cbs HWP");
-                const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                      l_fapi2_proc_target (i_target);
-
-                FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
-                                l_fapi2_proc_target, true);
-                if(l_errl)
+                // Attempt SBE restart
+                if(this->iv_sbeRestartMethod == SBE_RESTART_METHOD::START_CBS)
                 {
-                    SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x",
-                               l_errl->plid() );
-                    l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+                    SBE_TRACF("Invoking p9_start_cbs HWP");
+                    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+                          l_fapi2_proc_target (i_target);
 
-                    errlCommit( l_errl, ISTEP_COMP_ID);
+                    FAPI_INVOKE_HWP(l_errl, p9_start_cbs,
+                                    l_fapi2_proc_target, true);
+                    if(l_errl)
+                    {
+                        SBE_TRACF("ERROR: call p9_start_cbs, PLID=0x%x",
+                                   l_errl->plid() );
+                        l_errl->collectTrace( "ISTEPS_TRACE", 256 );
+
+                        errlCommit( l_errl, ISTEP_COMP_ID);
+                    }
+                }else
+                {
+                    //@todo - RTC:180242 - Restart SBE
                 }
 
                 // Get the sbe register

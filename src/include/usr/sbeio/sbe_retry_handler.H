@@ -61,6 +61,11 @@ class SbeRetryHandler
                     // the action the SBE thinks we should attempt.
         };
 
+        enum SBE_RESTART_METHOD
+        {
+            START_CBS = 0,  // Use p9_start_cbs to restart the SBE
+            HRESET    = 1,  // Use Hreset to restart the SBE
+        };
         /**
          * @brief Constructor
          */
@@ -105,6 +110,14 @@ class SbeRetryHandler
         inline SBE_REG_RETURN getCurrentSBEState()
         {
             return this->iv_currentSBEState;
+        }
+        inline SBE_RESTART_METHOD getSbeRestartMethod()
+        {
+            return this->iv_sbeRestartMethod;
+        }
+        inline void setSbeRestartMethod(SBE_RESTART_METHOD i_method)
+        {
+            this->iv_sbeRestartMethod = i_method;
         }
 
         inline SBE_MODE_OF_OPERATION getSBEMode()
@@ -250,6 +263,15 @@ class SbeRetryHandler
          *        SBE_MODE_OF_OPERATION enum
          */
         SBE_MODE_OF_OPERATION iv_sbeMode;
+
+        /*
+         * @brief If true, use the HWP p9_start_cbs to restart the SBE. This
+         *        HWP kills the proc we're on, so there are some situations
+         *        where we want to use hreset instead. Each choice is noted
+         *        in the SBE_RESTART_METHOD enum
+         */
+        SBE_RESTART_METHOD iv_sbeRestartMethod;
+
 }; // End of class SbeRetryHandler
 
 }  // End of namespace SBEIO
