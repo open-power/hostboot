@@ -834,37 +834,37 @@ group gCMEFIR filter singlebit, cs_root_cause
     /** CMEFIR[13]
      *  Dropout detected on Core0 Chiplet iVRM
      */
-    (rCMEFIR, bit(13)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(13)) ? defaultMaskedError;
 
     /** CMEFIR[14]
      *  Dropout detected on Core1 Chiplet iVRM
      */
-    (rCMEFIR, bit(14)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(14)) ? defaultMaskedError;
 
     /** CMEFIR[15]
      *  CME Dropout Cache Chiplet iVRM.
      */
-    (rCMEFIR, bit(15)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(15)) ? defaultMaskedError;
 
     /** CMEFIR[16]
      *  CME Extreme Droop over time exceeded
      */
-    (rCMEFIR, bit(16)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(16)) ? defaultMaskedError;
 
     /** CMEFIR[17]
      *  CME Large Droop exceeded
      */
-    (rCMEFIR, bit(17)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(17)) ? defaultMaskedError;
 
     /** CMEFIR[18]
      *  CME Small Droop exceeded
      */
-    (rCMEFIR, bit(18)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(18)) ? defaultMaskedError;
 
     /** CMEFIR[19]
      *  Detected non-thermometer code
      */
-    (rCMEFIR, bit(19)) ? threshold_and_mask_self;
+    (rCMEFIR, bit(19)) ? defaultMaskedError;
 
     /** CMEFIR[20]
      *  scom error
