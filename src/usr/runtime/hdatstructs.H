@@ -394,14 +394,24 @@ const uint64_t HYPECOMM_MAGIC_NUM = 0x48595045434f4d4d;
 // (offset to start of data in hbHypCommArea_t struct)
 const uint8_t  HYPCOMM_STRUCT_HRMOR_OFFSET = 24;
 
+
+//Note when adding data to this make sure to add at the bottom
+//and keep this struct 8 byte aligned
+// We never want to change the format of the first 24 bytes of this struct
 struct hbHypCommArea_t
 {
     uint64_t magicNum;          // 8 bytes 0x48595045434f4d4d = HYPECOMM
     size_t   size;              // 8 bytes
-    uint32_t version;           // 4 bytes
+    uint32_t version;           // 4 bytes keep track of version so we can set the size correctly
     uint8_t padding[4];         // 4 bytes put padding in so hrmor is 8 byte aligned
     //Start Data                // 0x18 or 24 byte offset to data
+    //
+    //The space allocated for HRMOR address can be written to by the hypervisor
+    //in the event that the hypervisor changes its hrmor. This will allow
+    //hostboot to know where to load the payload on MPIPL.
     uint64_t hrmorAddress;      // 8 bytes
+
+    //Total = 32 bytes
     hbHypCommArea_t(): magicNum(HYPECOMM_MAGIC_NUM), size(HB_HYP_COMM_STRUCT_SIZES[STRUCT_VERSION_LATEST]),
                        version(STRUCT_VERSION_LATEST), padding{0,0,0,0}, hrmorAddress(0)
     {
