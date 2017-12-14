@@ -28,6 +28,13 @@
 */
 
 #include <errl/errlentry.H>
+#include <errl/errlmanager.H>
+#include <errl/errludtarget.H>
+#include <sbeio/sbe_attn.H>
+#include <fapi2/target.H>
+#include <fapi2/plat_hwp_invoker.H>
+#include <p9_extract_sbe_rc.H>
+#include <sbeio/sbeioreasoncodes.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -44,8 +51,11 @@ namespace SBEIO
                    TARGETING::get_huid(i_procTarg) );
         errlHndl_t l_errhdl = nullptr;
 
-        TRACFCOMP( g_trac_sbeio, "NOOP for now" );
-        // @todo - RTC:180241 - Implement basic error handling
+        uint32_t l_sbePlid = getSbeRC(i_procTarg);
+
+        TRACFCOMP( g_trac_sbeio, "handleVitalAttn> Returned SBE PLID=0x%x",
+                   l_sbePlid);
+
         // @todo - RTC:180242 - Restart SBE
         // @todo - RTC:180243 - Advanced error handling
         // @todo - RTC:180244 - Disable the OCC
@@ -54,6 +64,33 @@ namespace SBEIO
         TRACFCOMP( g_trac_sbeio,
                    EXIT_MRK "handleVitalAttn> ");
         return l_errhdl;
+    }
+
+    uint32_t getSbeRC(TARGETING::Target* i_target)
+    {
+        TRACFCOMP( g_trac_sbeio, ENTER_MRK "getSbeRC()");
+
+        errlHndl_t l_errl = nullptr;
+
+        uint32_t l_errlPlid = NULL;
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
+                        const_cast<TARGETING::Target*> (i_target));
+
+        P9_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+                        P9_EXTRACT_SBE_RC::REIPL_UPD_SEEPROM;
+        FAPI_INVOKE_HWP(l_errl, p9_extract_sbe_rc,
+                        l_fapi2ProcTarget, l_ret);
+
+        if(l_errl)
+        {
+            TRACFCOMP(g_trac_sbeio, "ERROR: p9_extract_sbe_rc HWP returning "
+                       "errorlog PLID: 0x%x", l_errl->plid());
+
+            ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
+            l_errlPlid = l_errl->plid();
+        }
+
+        return l_errlPlid;
     }
 
 };
