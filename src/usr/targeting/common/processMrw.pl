@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2017
+# Contributors Listed Below - COPYRIGHT 2015,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -937,6 +937,7 @@ sub processProcessor
             "1");
         $targetObj->setAttributeField($target, "SCOM_SWITCHES", "useFsiScom",
             "0");
+        $targetObj->setAttributeField($target, "FSI_OPTION_FLAGS", "flipPort", "1");
     }
     else
     {
@@ -1399,9 +1400,45 @@ sub processFsi
         my $fsi_link = $targetObj->getAttribute($target, "FSI_LINK");
         my $fsi_port = $targetObj->getAttribute($target, "FSI_PORT");
         my $cmfsi = $targetObj->getAttribute($target, "CMFSI");
-        my $flip_port         = 0;
         my $proc_path = $targetObj->getAttribute($parentTarget,"PHYS_PATH");
         my $fsi_child_target = $targetObj->getTargetParent($fsi_child_conn);
+        my $flip_port         = 0;
+
+        # If this is a proc that can be a master, then we need to set flip_port
+        # attribute in FSI_OPTIONS. $flip_port tells us which FSI port to expect
+        # to recieve instructions on. The default setting ( with flip_port not set)
+        # is to recieve instructions on port A. In High End systems there are 2 master
+        # capable procs per node, If a processor is master capable then it will expect
+        # to recieve instructions from FSI port B instaed of A. The master processor
+        # will recieve from FSP A on the master proc's fsi port B. The alt-master will
+        # recieve from the master proc on the alt-master's port B.
+        # Note: On all systems we expect the master to have flip_port set.
+
+        #   |--------|        |--------|
+        #   | FSP A  |        | FSP B  |
+        #   |--------|        |--------|
+        #       |                 |
+        #   |--------|        |--------|
+        #   |  (b)   |        |   (a)  |
+        #   | Master |        |Alt Mast|
+        #   |     (a)|------->|(b)     |
+        #   |--------|\       |--------|
+        #          |   \        |
+        #          |    \       |
+        #   |--------|    \   |---------|
+        #   |     (b)|     \->|(b)      |
+        #   | Slave  |        |  Slave  |
+        #   |        |        |         |
+        #   |--------|        |---------|
+        my $fsi_child_type = $targetObj->getType($fsi_child_target);
+        if ( $fsi_child_type eq "PROC" )
+        {
+            my $proc_type = $targetObj->getAttribute($fsi_child_target, "PROC_MASTER_TYPE");
+            if ($proc_type eq "ACTING_MASTER" || $proc_type eq "MASTER_CANDIDATE" )
+            {
+                $flip_port = 1;
+            }
+        }
         $targetObj->setFsiAttributes($fsi_child_target,
                     $type,$cmfsi,$proc_path,$fsi_link,$flip_port);
     }

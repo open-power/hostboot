@@ -534,6 +534,11 @@
 </targetType>
 
 <targetType>
+  <id>chip-fcdimm-ddr4</id>
+  <parent>lcard-dimm-cdimm</parent>
+</targetType>
+
+<targetType>
   <id>occ</id>
   <parent>unit</parent>
   <attribute>
