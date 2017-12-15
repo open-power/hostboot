@@ -1360,11 +1360,14 @@ errlHndl_t restrictECunits(
         //  determine if it has an EC pair or a single EC and if the remaining
         //  count indicates the given EC from that list is to stay functional.
 
-        // Cycle through the procs
-        for (uint32_t i = 0; i < procs; i++)
+        // Cycle through the first EX of each proc, then the second EX of each
+        // proc and so on as we decrement remaining ECs. We put procs as the
+        // inner loop and EXs as the outer to distribute the functional ECs
+        // evenly between procs. After we run out of ECs, we deconfigure the
+        // remaining ones.
+        for (uint32_t j = 0; j < NUM_EX_PER_CHIP; j++)
         {
-            // Cycle through the EXs for this proc
-            for (uint32_t j = 0; j < NUM_EX_PER_CHIP; j++)
+            for (uint32_t i = 0; i < procs; i++)
             {
                 // Walk through the EC list from this EX
                 while (pEC_it[i][j] != pECList[i][j].end())
@@ -1401,8 +1404,8 @@ errlHndl_t restrictECunits(
 
                     (pEC_it[i][j])++; // next ec in this ex's list
                 } // while pEC_it[i][j] != pECList[i][j].end()
-            } // for j < NUM_EX_PER_CHIP
-        } // for i < procs
+            } // for i < procs
+        } // for j < NUM_EX_PER_CHIP
     } // for procIdx < l_ProcCount
 
     if (errl)
