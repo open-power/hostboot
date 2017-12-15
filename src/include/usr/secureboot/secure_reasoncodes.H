@@ -44,6 +44,9 @@ namespace SECUREBOOT
         MOD_SECURE_CONT_HDR_PARSE       = 0x0A,
         MOD_SECURE_CONT_HDR_CPY_INC     = 0x0B,
         MOD_SECURE_CONT_VALIDATE        = 0x0C,
+        MOD_SECURE_SET_SBE_SECURE_MODE  = 0x0D,
+        MOD_SECURE_GET_ALL_SEC_REGS     = 0x0E,
+        MOD_SECURE_LOAD_HEADER          = 0x0F,
    };
 
     enum SECUREReasonCode
@@ -61,6 +64,11 @@ namespace SECUREBOOT
         RC_SECROM_INVALID               = SECURE_COMP_ID | 0x0B,
         RC_CONT_HDR_NO_SPACE            = SECURE_COMP_ID | 0x0C,
         RC_CONT_HDR_INVALID             = SECURE_COMP_ID | 0x0D,
+        RC_SBE_INVALID_SEC_MODE         = SECURE_COMP_ID | 0x0E,
+        RC_DEVICE_WRITE_ERR             = SECURE_COMP_ID | 0x0F,
+        RC_PROC_NOT_SCOMABLE            = SECURE_COMP_ID | 0x10,
+        RC_DEVICE_READ_ERR              = SECURE_COMP_ID | 0x11,
+        RC_INVALID_BASE_HEADER          = SECURE_COMP_ID | 0x12,
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

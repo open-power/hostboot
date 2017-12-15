@@ -41,8 +41,17 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId) :
     iv_isLidInPnor(false), iv_lidBuffer(nullptr), iv_lidSize(0),
     iv_isLidInVFS(false), iv_isLidInHbResvMem(false)
 {
+    errlHndl_t l_err = nullptr;
     iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
-    updateLid(i_lidId);
+    l_err = updateLid(i_lidId);
+    if (l_err)
+    {
+        UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() cstor failed to update Lid (0x%X)",
+                i_lidId);
+        errlCommit(l_err,UTIL_COMP_ID);
+        // Set to invalid lid id and allow to continue
+        iv_lidId = Util::INVALID_LIDID;
+    }
 }
 
 UtilLidMgr::~UtilLidMgr()
@@ -61,10 +70,20 @@ errlHndl_t UtilLidMgr::setLidId(uint32_t i_lidId)
 {
     errlHndl_t l_err = nullptr;
 
+    do {
     //must call cleanup before updateLid
     l_err = cleanup();
+    if (l_err)
+    {
+        break;
+    }
 
-    updateLid(i_lidId);
+    l_err = updateLid(i_lidId);
+    if (l_err)
+    {
+        break;
+    }
+    } while(0);
 
     return l_err;
 }
@@ -280,17 +299,19 @@ errlHndl_t UtilLidMgr::cleanup()
     return l_err;
 }
 
-void UtilLidMgr::updateLid(uint32_t i_lidId)
+errlHndl_t UtilLidMgr::updateLid(uint32_t i_lidId)
 {
     UTIL_FT("UtilLidMgr::updateLid - i_lidId=0x%.8X", i_lidId);
     iv_lidId = i_lidId;
+    errlHndl_t l_err = nullptr;
+
+    do {
 
     // First check if lid is already in hostboot reserved memory
     // In securemode the lid is pre-verified
     if (TARGETING::is_sapphire_load() && lidInHbResvMem(iv_lidId))
     {
         UTIL_FT("UtilLidMgr::updateLid - lid in Hb Resv Mem");
-        getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
         iv_isLidInHbResvMem = true;
     }
     // Check if PNOR is access is supported
@@ -304,10 +325,18 @@ void UtilLidMgr::updateLid(uint32_t i_lidId)
         UTIL_FT("UtilLidMgr::updateLid - lid in PNOR");
         // If it's in PNOR it's not technically a lid
         // so use a slightly different extension
-        iv_isLidInPnor = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
+        l_err = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo, iv_isLidInPnor);
+        if (l_err)
+        {
+            break;
+        }
     }
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
     iv_isLidInVFS  = VFS::module_exists(iv_lidFileName);
+
+    } while (0);
+
+    return l_err;
 }
 
 const uint32_t * UtilLidMgr::getLidList(size_t * o_num)

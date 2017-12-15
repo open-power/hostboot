@@ -528,7 +528,33 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                     break;
                 }
                 payloadTextSize = l_conHdr.payloadTextSize();
-                assert(payloadTextSize > 0,"Non-zero payload text size expected.");
+                if ( payloadTextSize <= 0)
+                {
+                    TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: non-zero protected payload text size expected for section %s",
+                              o_info.name);
+
+                    /*@
+                     * @errortype
+                     * @moduleid         PNOR::MOD_PNORRP_GETSECTIONINFO
+                     * @reasoncode       PNOR::RC_SECTION_SIZE_IS_ZERO
+                     * @userdata1        PNOR section
+                     * @userdata2        Section's secure flag
+                     * @devdesc          Protected Payload Size is 0
+                     * @custdesc         Platform security problem detected
+                     */
+                    l_errhdl = new ERRORLOG::ErrlEntry(
+                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                        PNOR::MOD_PNORRP_GETSECTIONINFO,
+                                        PNOR::RC_SECTION_SIZE_IS_ZERO,
+                                        i_section,
+                                        o_info.secure,
+                                        true /*Add HB SW Callout*/);
+                    l_errhdl->collectTrace(PNOR_COMP_NAME);
+                    l_errhdl->collectTrace(SECURE_COMP_NAME);
+                    // set the return section to our invalid data
+                    id = PNOR::INVALID_SECTION;
+                    break;
+                }
 
                 // skip secure header for secure sections at this point in time
                 o_info.vaddr += PAGESIZE;

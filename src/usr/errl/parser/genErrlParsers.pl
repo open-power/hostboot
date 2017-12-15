@@ -472,6 +472,7 @@ foreach my $file (@filesToParse)
     #     * @userdata1      i_opType
     #     * @userdata2      addr
     #     * @devdesc        Invalid Operation type.
+    #     * @custdec        Firmware Error
     #     */
     # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     while (my $line = <PARSE_FILE>)

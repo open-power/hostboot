@@ -56,19 +56,48 @@ UtilLidMgr::UtilLidMgr(uint32_t i_lidId)
 ,iv_lidImageSize(0)
 ,iv_lidSize(0)
 {
+    errlHndl_t l_err = nullptr;
     iv_spBaseServicesEnabled = INITSERVICE::spBaseServicesEnabled();
-    updateLid(i_lidId);
+    l_err = updateLid(i_lidId);
+    if (l_err)
+    {
+        uint64_t l_reasonCode = l_err->reasonCode();
+        UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Failed to update Lid (0x%X) shutting down rc=0x%08X",
+                i_lidId, l_reasonCode);
+        errlCommit(l_err,UTIL_COMP_ID);
+        INITSERVICE::doShutdown(l_reasonCode);
+    }
 
-#ifdef CONFIG_SECUREBOOT
-    // In SECUREBOOT mode ensure that OpenPower systems only get LIDs from
-    // either PNOR or VFS where we can trust the security
-    assert( !(( iv_spBaseServicesEnabled == false  ) &&
-              ( iv_isLidInPnor           == false ) &&
-              ( iv_isLidInVFS            == false )
-             ), "UtilLidMgr::UtilLidMgr: Secureboot: OpenPower requesting LID "
-                "that is not in PNOR or VFS"
-          );
-#endif
+    // On non-FSP based systems only get LIDs from either PNOR or VFS
+    if ( (iv_spBaseServicesEnabled == false) &&
+         (iv_isLidInPnor == false) &&
+         (iv_isLidInVFS == false)
+       )
+    {
+        UTIL_FT(ERR_MRK"UtilLidMgr::UtilLidMgr() Requested lid 0x%X not in PNOR or VFS which is required on non-FSP based systems",
+                i_lidId);
+
+        /*@
+         *   @errortype
+         *   @moduleid      Util::UTIL_LIDMGR_CSTOR
+         *   @reasoncode    Util::UTIL_LIDMGR_INVAL_LID_REQUEST
+         *   @userdata1     LID ID
+         *   @userdata2     0
+         *   @devdesc       Lid not in PNOR or VFS for non-FSP systems
+         *   @custdesc      Firmware encountered an internal error.
+         */
+        l_err = new ErrlEntry(
+                        ERRL_SEV_UNRECOVERABLE,
+                        Util::UTIL_LIDMGR_CSTOR,
+                        Util::UTIL_LIDMGR_INVAL_LID_REQUEST,
+                        i_lidId,
+                        0,
+                        true /*Add HB Software Callout*/);
+        l_err->collectTrace(UTIL_COMP_NAME);
+        errlCommit(l_err,UTIL_COMP_ID);
+        INITSERVICE::doShutdown(Util::UTIL_LIDMGR_INVAL_LID_REQUEST);
+    }
+
 }
 
 ///////////////////////////////////////////////////////////
@@ -892,28 +921,47 @@ errlHndl_t UtilLidMgr::setLidId(uint32_t i_lidId)
 {
     errlHndl_t l_err = nullptr;
 
+    do {
     //must call cleanup before updateLid
     l_err = cleanup();
+    if (l_err)
+    {
+        break;
+    }
 
-    updateLid(i_lidId);
+    l_err = updateLid(i_lidId);
+    if (l_err)
+    {
+        break;
+    }
+    } while(0);
 
     return l_err;
 }
 
 ///////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////
-void UtilLidMgr::updateLid(uint32_t i_lidId)
+errlHndl_t UtilLidMgr::updateLid(uint32_t i_lidId)
 {
     iv_lidId = i_lidId;
+    errlHndl_t l_err = nullptr;
+
+    do {
 
     //if it's in PNOR, it's not technically lid, so use a slightly
     //different extension.
     sprintf(iv_lidFileName, "%x.lidbin", iv_lidId);
-    iv_isLidInPnor = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo);
+    l_err = getLidPnorSectionInfo(iv_lidId, iv_lidPnorInfo, iv_isLidInPnor);
+    if (l_err)
+    {
+        UTIL_FT("UtilLidMgr::updateLid - getLidPnorSectionInfo failed");
+        break;
+    }
     UTIL_DT(INFO_MRK "UtilLidMgr: LID 0x%.8X in pnor: %d",
               iv_lidId ,iv_isLidInPnor);
     iv_isLidInVFS = VFS::module_exists(iv_lidFileName);
+    } while(0);
 
-    return;
+    return l_err;
 }
 

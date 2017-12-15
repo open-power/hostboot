@@ -182,6 +182,11 @@ namespace PNOR
         RC_NOT_A_LOADED_SECTION      = PNOR_COMP_ID | 0x35,
         RC_NOT_A_SUPPORTED_SECTION   = PNOR_COMP_ID | 0x36,
         RC_SECURE_UNLOAD_DISALLOWED  = PNOR_COMP_ID | 0x37,
+        RC_SECURE_TOTAL_SIZE_INVAL   = PNOR_COMP_ID | 0x38,
+        RC_SECURE_VADDR_MISMATCH     = PNOR_COMP_ID | 0x39,
+        RC_SECURE_SIZE_MISMATCH      = PNOR_COMP_ID | 0x3A,
+        RC_NOT_PAGE_ALIGNED          = PNOR_COMP_ID | 0x3B,
+        RC_SECURE_PRO_SIZE_MISMATCH  = PNOR_COMP_ID | 0x3C,
 
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc

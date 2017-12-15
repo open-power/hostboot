@@ -284,9 +284,31 @@ namespace SECUREBOOT
             break;
         }
 
-        assert(actSize == expSize,
-            "writeSecurityRegister: BUG! size returned from device write (%d) "
-            "is not the expected size of %d",actSize,expSize);
+        if(actSize != expSize)
+        {
+            SB_ERR("writeSecurityRegister: size returned from device write (%d) is not the expected size of %d",
+                   actSize, expSize);
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        SECUREBOOT::MOD_SECURE_WRITE_REG
+             * @reasoncode      SECUREBOOT::RC_DEVICE_WRITE_ERR
+             * @userdata1       Actual size written
+             * @userdata2       Expected size written
+             * @devdesc         Device write did not return expected size
+             * @custdesc        Firmware Error
+             */
+            pError = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SECUREBOOT::MOD_SECURE_WRITE_REG,
+                            SECUREBOOT::RC_DEVICE_WRITE_ERR,
+                            actSize,
+                            expSize,
+                            true);
+            pError->collectTrace(SECURE_COMP_NAME);
+            addSecureUserDetailsToErrlog(pError);
+            break;
+        }
 
         } while(0);
 
@@ -341,10 +363,30 @@ namespace SECUREBOOT
         }
 
         // Make sure the processor is SCOMable
-        if (i_pProc != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL)
+        if (i_pProc != MASTER_PROCESSOR_CHIP_TARGET_SENTINEL &&
+            !i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom)
         {
-            assert(i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom,
-                "Bug! Processor security register read too early.");
+            SB_ERR("readSecurityRegister: Processor security register read too early");
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        SECUREBOOT::MOD_SECURE_READ_REG
+             * @reasoncode      SECUREBOOT::RC_PROC_NOT_SCOMABLE
+             * @userdata1       Use XSCOM bool
+             * @userdata2       Target's HUID
+             * @devdesc         Processor security register read too early
+             * @custdesc        Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SECUREBOOT::MOD_SECURE_READ_REG,
+                            SECUREBOOT::RC_PROC_NOT_SCOMABLE,
+                            i_pProc->getAttr<ATTR_SCOM_SWITCHES>().useXscom,
+                            TO_UINT64(get_huid(i_pProc)),
+                            true);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            addSecureUserDetailsToErrlog(l_errl);
+            break;
         }
 
         // Read security switch setting from processor.
@@ -356,9 +398,32 @@ namespace SECUREBOOT
         {
             break;
         }
-        assert(size == sizeof(o_regValue),
-            "size returned from device read is not the expected size of %i",
-                                                           sizeof(o_regValue));
+
+        if (size != sizeof(o_regValue))
+        {
+            SB_ERR("readSecurityRegister: size returned from device read (%d) is not the expected size of %d",
+                   size, sizeof(o_regValue));
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        SECUREBOOT::MOD_SECURE_READ_REG
+             * @reasoncode      SECUREBOOT::RC_DEVICE_READ_ERR
+             * @userdata1       Actual size read
+             * @userdata2       Expected size read
+             * @devdesc         Processor security register read too early
+             * @custdesc        Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SECUREBOOT::MOD_SECURE_READ_REG,
+                            SECUREBOOT::RC_DEVICE_READ_ERR,
+                            size,
+                            sizeof(o_regValue),
+                            true);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            addSecureUserDetailsToErrlog(l_errl);
+            break;
+        }
 
         } while(0);
 

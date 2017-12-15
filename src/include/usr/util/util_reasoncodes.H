@@ -51,6 +51,7 @@ namespace Util
         UTIL_MCL_REL_MEM        = 0x11,       // MasterContainerLidMgr::releaseMem
         UTIL_MCL_PROCESS_COMP   = 0x12,       // MasterContainerLidMgr::processComponent
         UTIL_MOD_GET_OBUS_PLL_BUCKET = 0x14,  // UtilCommonAttr::getObusPllBucket
+        UTIL_LIDMGR_CSTOR       = 0x15,       // UtilLidMgr::UtilLidMgr
     };
 
     enum ReasonCode
@@ -81,6 +82,7 @@ namespace Util
         UTIL_MCL_SIZE_MISMATCH           = UTIL_COMP_ID | 0x18,
         UTIL_ERC_NO_FREQ_LIST            = UTIL_COMP_ID | 0x1A,
         UTIL_ERC_NO_MATCHING_FREQ        = UTIL_COMP_ID | 0x1B,
+        UTIL_LIDMGR_INVAL_LID_REQUEST    = UTIL_COMP_ID | 0x1C,
     };
 };
 

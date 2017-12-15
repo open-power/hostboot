@@ -234,8 +234,6 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
                                   DEVICE_FSI_ADDRESS(op_addr) );
             }
 
-            assert(op_actual_size == op_expected_size,"getAllSecurityRegisters: BUG! size returned from device write (%d) is not the expected size of %d", op_actual_size, op_expected_size);
-
             if( err )
             {
                 // Something failed on the read.  Commit the error
@@ -249,6 +247,33 @@ errlHndl_t getAllSecurityRegisters(std::vector<SecureRegisterValues> & o_regs,
                 errlCommit( err, SECURE_COMP_ID );
                 continue;
             }
+
+            if (op_actual_size != op_expected_size)
+            {
+                SB_ERR("getAllSecurityRegisters: size returned from device write (%d) is not the expected size of %d",
+                       op_actual_size, op_expected_size);
+                /*@
+                 * @errortype
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        SECUREBOOT::MOD_SECURE_GET_ALL_SEC_REGS
+                 * @reasoncode      SECUREBOOT::RC_DEVICE_WRITE_ERR
+                 * @userdata1       Actual size written
+                 * @userdata2       Expected size written
+                 * @devdesc         Device write did not return expected size
+                 * @custdesc        Firmware Error
+                 */
+                err = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                SECUREBOOT::MOD_SECURE_GET_ALL_SEC_REGS,
+                                SECUREBOOT::RC_DEVICE_WRITE_ERR,
+                                op_actual_size,
+                                op_expected_size,
+                                true);
+                addSecureUserDetailsToErrlog(err);
+                err->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+
             // push back result
             l_secRegValues.tgt=procTgt;
             l_secRegValues.addr=op_addr;
@@ -316,7 +341,11 @@ void* initializeBase(void* unused)
 #endif
 
         // Load original header.
-        Singleton<Header>::instance().loadHeader();
+        l_errl = Singleton<Header>::instance().loadHeader();
+        if (l_errl)
+        {
+            break;
+        }
     } while(0);
 
     return l_errl;
@@ -613,11 +642,43 @@ uint8_t getSbeSecurityMode()
     return g_sbeSecurityMode;
 }
 
-void setSbeSecurityMode(uint8_t i_sbeSecurityMode)
+errlHndl_t setSbeSecurityMode(uint8_t i_sbeSecurityMode)
 {
-    assert(i_sbeSecurityMode == 0 || i_sbeSecurityMode == 1,
-        "SBE Security Mode can only be set to 0 or 1");
+    errlHndl_t l_errl = nullptr;
+
+    do {
+    // Ensure a valid mode
+    if (i_sbeSecurityMode != 0 && i_sbeSecurityMode != 1)
+    {
+        SB_ERR("SBE Security Mode can only be set to 0 or 1");
+
+        /*@
+         * @errortype
+         * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+         * @moduleid        SECUREBOOT::MOD_SECURE_SET_SBE_SECURE_MODE
+         * @reasoncode      SECUREBOOT::RC_SBE_INVALID_SEC_MODE
+         * @userdata1       Security mode to set
+         * @userdata2       0
+         * @devdesc         Invalid SBE security mode
+         * @custdesc        Platform security problem detected
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        SECUREBOOT::MOD_SECURE_SET_SBE_SECURE_MODE,
+                        SECUREBOOT::RC_SBE_INVALID_SEC_MODE,
+                        i_sbeSecurityMode,
+                        0,
+                        true);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        addSecureUserDetailsToErrlog(l_errl);
+        break;
+    }
+
     g_sbeSecurityMode = i_sbeSecurityMode;
+
+    } while(0);
+
+    return l_errl;
 }
 
 } //namespace SECUREBOOT

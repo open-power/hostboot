@@ -45,6 +45,8 @@ namespace RUNTIME
         MOD_HDATSERVICE_MAPREGION       = 0x0B, /**< hdatservice.C */
         MOD_HDATSERVICE_GETINSTANCECOUNT = 0x0C, /**< hdatservice.C */
         MOD_HDATSERVICE_GETANDCHECKTUPLE = 0x0D, /**< hdatservice.C */
+        MOD_PREVERLIDMGR_LOAD_FROM_PNOR = 0x0E, /** preverifiedlidmgr.C **/
+        MOD_PREVERLIDMGR_LOAD_IMAGE = 0x0F, /** preverifiedlidmgr.C **/
 
         // customize_attrs_for_payload.C
         MOD_CUST_COMP_NON_PHYP_RT_TARGET = 0x12,
@@ -104,6 +106,14 @@ namespace RUNTIME
         RC_EXCEEDED_MEMORY             = RUNTIME_COMP_ID | 0x27,
         RC_UNABLE_TO_PIN_ATTR_MEM      = RUNTIME_COMP_ID | 0x28,
         RC_UNABLE_TO_UNPIN_ATTR_MEM    = RUNTIME_COMP_ID | 0x29,
+        RC_TPM_HDAT_OUT_OF_SPACE       = RUNTIME_COMP_ID | 0x2A,
+        RC_TPM_HDAT_ID_MISMATCH        = RUNTIME_COMP_ID | 0x2B,
+        RC_TPM_HDAT_EYE_CATCH_MISMATCH = RUNTIME_COMP_ID | 0x2C,
+        RC_TPM_MISSING_PROC            = RUNTIME_COMP_ID | 0x2D,
+        RC_TPM_HDAT_BAD_VERSION        = RUNTIME_COMP_ID | 0x2E,
+        RC_TPM_HDAT_BAD_NUM_I2C        = RUNTIME_COMP_ID | 0x2F,
+        RC_INVALID_LID                 = RUNTIME_COMP_ID | 0x30,
+        RC_PREVER_INVALID_SIZE         = RUNTIME_COMP_ID | 0x31,
     };
 
     enum UserDetailsTypes

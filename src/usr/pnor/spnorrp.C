@@ -363,8 +363,33 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         l_info.size += PAGESIZE; // add a page to size to account for the header
 
         // it's a coding error if l_info.vaddr is not in secure space
-        assert(l_info.vaddr >= SBASE_VADDR, "Virtual address for section %s is"
-            " not in secure space. Bad ptr=0x%X", l_info.name, l_info.vaddr);
+        if (l_info.vaddr < SBASE_VADDR)
+        {
+            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections Virtual address for section %s is not in secure space. Virtual address=0x%llX",
+                      l_info.name, l_info.vaddr);
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        PNOR::MOD_SPNORRP_VERIFYSECTIONS
+             * @reasoncode      PNOR::RC_SECURE_VADDR_MISMATCH
+             * @userdata1       PNOR section
+             * @userdata2       PNOR section virtual address
+             * @devdesc         Virtual address of PNOR section is not in Secure Space
+             * @custdesc        Platform Security Error
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                            PNOR::RC_SECURE_VADDR_MISMATCH,
+                            TO_UINT64(i_id),
+                            l_info.vaddr,
+                            true);
+            SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            l_errhdl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+
 
         // Note: A pointer to virtual memory in one PNOR space can be converted
         // to a pointer to any of the other two PNOR spaces and visa versa.
@@ -433,20 +458,65 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections "
                 "Total container size = 0x%.16llX", l_totalContainerSize);
 
-        assert(l_totalContainerSize >= PAGESIZE +
-               + l_info.secureProtectedPayloadSize,
-               "For section %s, total container size (%d) was less than header "
-               "size (4096) + payload text size (%d)",
-               l_info.name,
-               l_totalContainerSize,
-               l_info.secureProtectedPayloadSize);
+        if (l_totalContainerSize <
+            (PAGESIZE + l_info.secureProtectedPayloadSize))
+        {
+            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections For section %s, total container size (%d) was less than header "
+                      "size (4096) + payload text size (%d)",
+                      l_info.name,
+                      l_totalContainerSize,
+                      l_info.secureProtectedPayloadSize)
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        PNOR::MOD_SPNORRP_VERIFYSECTIONS
+             * @reasoncode      PNOR::RC_SECURE_TOTAL_SIZE_INVAL
+             * @userdata1       PNOR section
+             * @userdata2       Protected Payload Size plus Header Size
+             * @devdesc         Total Container Size smaller than Protected Payload and Header size
+             * @custdesc        Failure in security subsystem
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                            PNOR::RC_SECURE_TOTAL_SIZE_INVAL,
+                            TO_UINT64(i_id),
+                            PAGESIZE + l_info.secureProtectedPayloadSize,
+                            true);
+            SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            l_errhdl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
 
-        assert(l_info.size >= l_totalContainerSize,
-               "For section %s, logical section size (%d) was less than total "
-               "container size (%d)",
-               l_info.name,
-               l_info.size,
-               l_totalContainerSize);
+        if (l_info.size < l_totalContainerSize)
+        {
+            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections For section %s, logical section size (%d) was less than total container size (%d)",
+                      l_info.name,
+                      l_info.size,
+                      l_totalContainerSize);
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        PNOR::MOD_SPNORRP_VERIFYSECTIONS
+             * @reasoncode      PNOR::RC_SECURE_SIZE_MISMATCH
+             * @userdata1       PNOR section
+             * @userdata2       Total Container Size
+             * @devdesc         PNOR section size smaller than total container size
+             * @custdesc        Failure in security subsystem
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                            PNOR::RC_SECURE_SIZE_MISMATCH,
+                            TO_UINT64(i_id),
+                            l_totalContainerSize,
+                            true);
+            SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            l_errhdl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
 
         TRACDCOMP(g_trac_pnor,"SPnorRP::verifySections did memcpy");
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections temp mem now: ",
@@ -505,7 +575,35 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // store the payload text size in the section load record
         // Note: the text size we get back is now trusted
         io_rec->textSize = l_conHdr.payloadTextSize();
-        assert(io_rec->textSize == l_info.secureProtectedPayloadSize);
+        if (io_rec->textSize != l_info.secureProtectedPayloadSize)
+        {
+            TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections For section %s, verified protected size (%d) does not equal unverified size parsed by pnorrp (%d)",
+                      l_info.name,
+                      io_rec->textSize ,
+                      l_info.secureProtectedPayloadSize);
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        PNOR::MOD_SPNORRP_VERIFYSECTIONS
+             * @reasoncode      PNOR::RC_SECURE_PRO_SIZE_MISMATCH
+             * @userdata1       PNOR section
+             * @userdata2       Protected Payload Size
+             * @devdesc         Verified Protected Payload size does not match what was parsed by PnorRp
+             * @custdesc        Failure in security subsystem
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                            PNOR::RC_SECURE_PRO_SIZE_MISMATCH,
+                            TO_UINT64(i_id),
+                            l_info.secureProtectedPayloadSize,
+                            true);
+            SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
+            l_errhdl->collectTrace(PNOR_COMP_NAME);
+            l_errhdl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+
         // Size of data loaded into Secure PnorRP vaddr space (Includes Header)
         size_t l_protectedSizeWithHdr = PAGESIZE + io_rec->textSize;
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections Total Protected size with Header = 0x%.16llX",
@@ -562,13 +660,33 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 unprotectedPayloadSize,
                 l_info.name);
 
-            // Split the mod math out of the assert as the trace would not
-            // display otherwise.
-            bool l_onPageBoundary = !(io_rec->textSize % PAGESIZE);
-            assert( l_onPageBoundary, "For section %s, payloadTextSize does "
-                    "not fall on a page boundary and there is an unprotected "
-                    "payload",
-                    l_info.name);
+            if ((io_rec->textSize % PAGESIZE))
+            {
+                TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections For section %s, payloadTextSize does not fall on a page boundary and there is an unprotected payload",
+                          l_info.name);
+                /*@
+                 * @errortype
+                 * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                 * @moduleid        PNOR::MOD_SPNORRP_VERIFYSECTIONS
+                 * @reasoncode      PNOR::RC_NOT_PAGE_ALIGNED
+                 * @userdata1       PNOR section
+                 * @userdata2       Protected Payload Size
+                 * @devdesc         Protected Payload Size not Page aligned
+                 * @custdesc        Failure in security subsystem
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(
+                                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                PNOR::MOD_SPNORRP_VERIFYSECTIONS,
+                                PNOR::RC_NOT_PAGE_ALIGNED,
+                                TO_UINT64(i_id),
+                                io_rec->textSize,
+                                true);
+                SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
+                l_errhdl->collectTrace(PNOR_COMP_NAME);
+                l_errhdl->collectTrace(SECURE_COMP_NAME);
+                break;
+            }
+
 
             l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
                                        unprotectedPayloadSize,
@@ -1144,16 +1262,28 @@ errlHndl_t PNOR::unloadSecureSection(const SectionId i_section)
     return loadUnloadSecureSection(i_section, PNOR::MSG_UNLOAD_SECTION);
 }
 
-void SPnorRP::processLabOverride(
+errlHndl_t SPnorRP::processLabOverride(
     const sb_flags_t& i_flags) const
 {
+    errlHndl_t l_errl = nullptr;
+
+    do{
     // Secure boot sbe security mode values are inverted with respect to the
     // lab override flag for the same logical meaning
     uint8_t securityMode =
         !(i_flags.hw_lab_override);
-    SECUREBOOT::setSbeSecurityMode(securityMode);
+    l_errl = SECUREBOOT::setSbeSecurityMode(securityMode);
+    if(l_errl)
+    {
+        TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::processLabOverride - lab security override policy failed");
+        break;
+    }
+
     TRACFCOMP(g_trac_pnor,INFO_MRK "Set lab security override policy to %s.",
         securityMode ? "*NO* override" : "override if requested");
+    } while(0);
+
+    return l_errl;
 }
 
 errlHndl_t SPnorRP::processFwKeyIndicators(
@@ -1162,11 +1292,17 @@ errlHndl_t SPnorRP::processFwKeyIndicators(
 {
     errlHndl_t pError = nullptr;
 
+    do {
     if(i_sectionId == PNOR::SBE_IPL)
     {
         auto const * const headerFlags = i_header.sb_flags();
-        processLabOverride(*headerFlags);
+        pError = processLabOverride(*headerFlags);
+        if (pError)
+        {
+            break;
+        }
     }
+    } while(0);
 
     return pError;
 }
