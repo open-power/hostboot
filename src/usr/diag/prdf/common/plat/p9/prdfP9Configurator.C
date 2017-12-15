@@ -346,9 +346,11 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
                     break;
 
                 case TYPE_MEMBUF:
-                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
-                                        chip, trgt, TYPE_MEMBUF,
-                                        scanFac, resFac );
+// TODO: RTC 155673 - Add MemBuf chips to PLL domain after Cen PLL plugins
+//                    have been defined
+//                    addChipToPllDomain( CLOCK_DOMAIN_MEMBUF, pllDmnMap,
+//                                        chip, trgt, TYPE_MEMBUF,
+//                                        scanFac, resFac );
                     break;
 
                 default: ;
