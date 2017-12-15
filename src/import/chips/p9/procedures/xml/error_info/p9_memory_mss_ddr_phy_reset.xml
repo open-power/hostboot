@@ -304,6 +304,7 @@
   <description>
     ZCAL failed to complete
   </description>
+  <ffdc>MCBIST_TARGET</ffdc>
   <collectRegisterFfdc>
     <id>REG_FFDC_ZCNTL_REGS</id>
     <target>MCA_IN_ERROR</target>
@@ -314,10 +315,10 @@
     <priority>HIGH</priority>
   </callout>
   <deconfigure>
-    <target>MCA_IN_ERROR</target>
+    <target>MCBIST_TARGET</target>
   </deconfigure>
   <gard>
-    <target>MCA_IN_ERROR</target>
+    <target>MCBIST_TARGET</target>
   </gard>
 </hwpError>
 
