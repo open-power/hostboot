@@ -93,6 +93,9 @@ enum vpdModuleId
     VPD_BLD_RT_IMAGE                        = 0x82,
     VPD_SEND_MBOX_WRITE_MESSAGE             = 0x83,
     VPD_MOD_XXX                             = 0x84,
+    VPD_SEND_I2C_LOCK_MSG                   = 0x85,
+    VPD_FILL_I2C_LOCK_MSG                   = 0x86,
+
 };
 
 /**
@@ -141,6 +144,9 @@ enum vpdReasonCode
     VPD_INVALID_LENGTH                  = VPD_COMP_ID | 0x36,
     VPD_RT_NULL_FIRMWARE_REQUEST_PTR    = VPD_COMP_ID | 0x37,
     VPD_RC_XXX                          = VPD_COMP_ID | 0x38,
+    VPD_TARGET_CHIP_NOT_FOUND           = VPD_COMP_ID | 0x39,
+    VPD_EEPROM_VPD_PRIMARY_INFO_MISSING = VPD_COMP_ID | 0x3a,
+
 };
 
 
