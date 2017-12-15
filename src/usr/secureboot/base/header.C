@@ -28,6 +28,9 @@
 #include <kernel/console.H>
 #include <errno.h>
 #include <kernel/bltohbdatamgr.H>
+#include "../common/securetrace.H"
+#include "../common/errlud_secure.H"
+#include <secureboot/secure_reasoncodes.H>
 
 namespace SECUREBOOT
 {
@@ -36,15 +39,44 @@ namespace SECUREBOOT
         return Singleton<Header>::instance();
     }
 
-    void Header::loadHeader()
+    errlHndl_t Header::loadHeader()
     {
+        errlHndl_t l_errl = nullptr;
+
+        do {
+
         const void* const pHeader = g_BlToHbDataManager.getHbbHeader();
 
         // Fatal code bug if called with nullptr pointer
-        assert(pHeader != nullptr,
-            "BUG! In Header::loadHeader(), expected valid address for base "
-            "image header, but got nullptr.");
+        if (pHeader == nullptr)
+        {
+            SB_ERR("Header::loadHeader(), expected valid address for base image header, but got nullptr.");
+            /*@
+             * @errortype
+             * @severity        ERRORLOG::ERRL_SEV_UNRECOVERABLE
+             * @moduleid        SECUREBOOT::MOD_SECURE_LOAD_HEADER
+             * @reasoncode      SECUREBOOT::RC_INVALID_BASE_HEADER
+             * @userdata1       0
+             * @userdata2       0
+             * @devdesc         Hostboot Base Image Header not valid
+             * @custdesc        Firmware Error
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                            SECUREBOOT::MOD_SECURE_LOAD_HEADER,
+                            SECUREBOOT::RC_INVALID_BASE_HEADER,
+                            0,
+                            0,
+                            true);
+            addSecureUserDetailsToErrlog(l_errl);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+
         _set(pHeader);
+        } while(0);
+
+        return l_errl;
     }
 
     void Header::_set(

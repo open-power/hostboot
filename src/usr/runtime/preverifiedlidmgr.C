@@ -38,6 +38,7 @@
 #include <targeting/common/attributes.H>
 #include <secureboot/containerheader.H>
 #include <runtime/common/runtime_utils.H>
+#include <runtime/runtime_reasoncodes.H>
 
 extern trace_desc_t *g_trac_runtime;
 
@@ -189,7 +190,31 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     auto l_lids = Util::getPnorSecLidIds(i_sec);
     TRACDCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromPnor - getPnorSecLidIds lid = 0x%X, containerLid = 0x%X",
                l_lids.lid, l_lids.containerLid);
-    assert(l_lids.lid != Util::INVALID_LIDID,"Pnor Section = %s not associated with any Lids", PNOR::SectionIdToString(i_sec));
+    if(l_lids.lid == Util::INVALID_LIDID)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "PreVerifiedLidMgr::_loadFromPnor - Pnor Section = %s not associated with any Lids",
+                   PNOR::SectionIdToString(i_sec));
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR
+         * @reasoncode    RUNTIME::RC_INVALID_LID
+         * @userdata1     PNOR section
+         * @userdata2     Lid id mapped from PNOR section
+         * @devdesc       Trying to load invalid lid
+         * @custdesc      Platform security problem detected
+         */
+        l_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR,
+            RUNTIME::RC_INVALID_LID,
+            i_sec,
+            l_lids.lid,
+            true);
+        l_errl->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
     // Only load if not previously done.
     if( isLidLoaded(l_lids.containerLid) && isLidLoaded(l_lids.lid) )
@@ -229,9 +254,36 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
         if ( (l_lids.lid != Util::INVALID_LIDID) &&
              !isLidLoaded(l_lids.lid))
         {
+            // Ensure there is content besides the header and that the size is
+            // valid
+            if(i_size <= PAGE_SIZE)
+            {
+                TRACFCOMP( g_trac_runtime, ERR_MRK "PreVerifiedLidMgr::_loadFromPnor - PNOR Section %s size 0x%X is not greater than the header size 0x%X, thus missing actual content to pre-verify",
+                           PNOR::SectionIdToString(i_sec), i_size, PAGE_SIZE);
+
+                /*@
+                 * @errortype
+                 * @severity      ERRL_SEV_UNRECOVERABLE
+                 * @moduleid      RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR
+                 * @reasoncode    RUNTIME::RC_PREVER_INVALID_SIZE
+                 * @userdata1     PNOR section
+                 * @userdata2     Size of section including header
+                 * @devdesc       No content after Section header or size was parsed from secure header incorrectly.
+                 * @custdesc      Platform security problem detected
+                 */
+                l_errl = new ERRORLOG::ErrlEntry(
+                    ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                    RUNTIME::MOD_PREVERLIDMGR_LOAD_FROM_PNOR,
+                    RUNTIME::RC_PREVER_INVALID_SIZE,
+                    i_sec,
+                    i_size,
+                    true);
+                l_errl->collectTrace(RUNTIME_COMP_NAME);
+                break;
+            }
+
             char l_lidStr[Util::lidIdStrLength] {};
             snprintf (l_lidStr, Util::lidIdStrLength, "%08X",l_lids.lid);
-            assert(i_size > PAGE_SIZE, "PreVerifiedLidMgr::_loadFromPnor - caller did not include size of header for total size");
             l_errl = RUNTIME::setNextHbRsvMemEntry(HDAT::RHB_TYPE_VERIFIED_LIDS,
                                                    cv_pResvMemInfo->rangeId,
                                                    cv_pResvMemInfo->curAddr+PAGE_SIZE,
@@ -443,7 +495,7 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
     // out.
     if(cv_addFakeHdrs)
     {
-        TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage fake header load");
+        TRACFCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage inject fake header before image without one");
         SECUREBOOT::ContainerHeader l_fakeHdr;
         l_errl = l_fakeHdr.setFakeHeader(i_imgSize,
                                       PNOR::SectionIdToString(cv_curPnorSecId));
@@ -455,9 +507,34 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
         memcpy(reinterpret_cast<void*>(l_tmpVaddr),
                l_fakeHdr.fakeHeader(),
                PAGE_SIZE);
+
+        if(i_imgSize <= PAGE_SIZE)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "PreVerifiedLidMgr::loadImage - Image size 0x%X is not greater than the header size 0x%X, thus no space to inject fake header",
+                       i_imgSize, PAGE_SIZE);
+
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_PREVERLIDMGR_LOAD_IMAGE
+             * @reasoncode    RUNTIME::RC_PREVER_INVALID_SIZE
+             * @userdata1     Size of section including space for header
+             * @userdata2     Size of header
+             * @devdesc       No space left for fake header injection
+             * @custdesc      Platform security problem detected
+             */
+            l_errl = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_PREVERLIDMGR_LOAD_IMAGE,
+                RUNTIME::RC_PREVER_INVALID_SIZE,
+                i_imgSize,
+                PAGE_SIZE,
+                true);
+            l_errl->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
         // Include rest of image after header
         // NOTE: Do not use aligned size for memcpy
-        assert(i_imgSize > PAGE_SIZE, "PreVerifiedLidMgr::loadImage - caller did not include size of header for total size");
         memcpy(reinterpret_cast<void*>(l_tmpVaddr+PAGE_SIZE),
                reinterpret_cast<void*>(i_imgAddr),
                i_imgSize-PAGE_SIZE);

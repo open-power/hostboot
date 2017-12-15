@@ -175,6 +175,7 @@ errlHndl_t mapPhysAddr(uint64_t i_addr,
                             i_addr,
                             i_size,
                             true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
     }
 
     return l_elog;
@@ -196,7 +197,7 @@ errlHndl_t unmapVirtAddr(uint64_t i_addr)
          * @moduleid        RUNTIME::MOD_UNMAP_VIRT_ADDR
          * @reasoncode      RUNTIME::RC_UNMAP_FAIL
          * @userdata1       Virtual address we are trying to unmap
-         *
+         * @userdata2       0
          * @devdesc         Error unmapping a virtual memory map
          * @custdesc        Kernel failed to unmap memory
          */
@@ -205,7 +206,9 @@ errlHndl_t unmapVirtAddr(uint64_t i_addr)
                             RUNTIME::MOD_UNMAP_VIRT_ADDR,
                             RUNTIME::RC_UNMAP_FAIL,
                             i_addr,
+                            0,
                             true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
     }
 
     return l_elog;
@@ -433,6 +436,7 @@ errlHndl_t fill_RsvMem_hbData(uint64_t & io_start_address,
                                 l_totalSizeAligned,
                                 io_size,
                                 true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
             break;
         }
 
@@ -1332,18 +1336,97 @@ errlHndl_t populate_TpmInfoByNode()
 
     // make sure we have enough room
     auto const l_tpmDataCalculatedMax = HDAT::hdatTpmDataCalcMaxSize();
-    assert(l_dataSizeMax >= l_tpmDataCalculatedMax,
-        "Bug! The TPM data hdat section doesn't have enough space");
+    if(l_dataSizeMax < l_tpmDataCalculatedMax)
+    {
+
+       TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat section doesn't have enough space");
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE
+         * @userdata1     Size of hdat data struct
+         * @userdata2     Max size of hdat data struct
+         * @devdesc       The TPM data hdat section doesn't have enough space
+         * @custdesc      Platform security problem detected
+         */
+        l_elog = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                        RUNTIME::RC_TPM_HDAT_OUT_OF_SPACE,
+                        l_dataSizeMax,
+                        l_tpmDataCalculatedMax,
+                        true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
     // check that hdat structure format and eye catch were filled out
-    assert(l_hdatTpmData->hdatHdr.hdatStructId == HDAT::HDAT_HDIF_STRUCT_ID,
-        "Bug! The TPM data hdat struct format value doesn't match");
+    if(l_hdatTpmData->hdatHdr.hdatStructId != HDAT::HDAT_HDIF_STRUCT_ID)
+    {
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct format value doesn't match");
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_ID_MISMATCH
+         * @userdata1     hdat struct format value
+         * @userdata2     Expected hdat struct format value
+         * @devdesc       TPM data hdat struct format value doesn't match
+         * @custdesc      Platform security problem detected
+         */
+        l_elog = new ERRORLOG::ErrlEntry(
+                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                        RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                        RUNTIME::RC_TPM_HDAT_ID_MISMATCH,
+                        l_hdatTpmData->hdatHdr.hdatStructId,
+                        HDAT::HDAT_HDIF_STRUCT_ID,
+                        true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
     auto l_eyeCatchLen = strlen(HDAT::g_hdatTpmDataEyeCatch);
-    assert(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
-                  HDAT::g_hdatTpmDataEyeCatch,
-                  l_eyeCatchLen)==0,
-        "Bug! The TPM data hdat struct name eye catcher doesn't match");
+    if(memcmp(l_hdatTpmData->hdatHdr.hdatStructName,
+              HDAT::g_hdatTpmDataEyeCatch,
+              l_eyeCatchLen) != 0)
+    {
+
+        // Convert char strings to uin64_t for errorlogs
+        uint64_t l_eyeCatch = 0;
+        memcpy(&l_eyeCatch,
+               l_hdatTpmData->hdatHdr.hdatStructName,
+               strnlen(l_hdatTpmData->hdatHdr.hdatStructName,sizeof(uint64_t)));
+        uint64_t l_expectedEyeCatch = 0;
+        memcpy(&l_expectedEyeCatch,
+               HDAT::g_hdatTpmDataEyeCatch,
+               strnlen(HDAT::g_hdatTpmDataEyeCatch, sizeof(uint64_t)));
+
+        TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: The TPM data hdat struct name eye catcher (0x%X) doesn't match expected value (0x%X",
+                  l_eyeCatch, l_expectedEyeCatch);
+
+        /*@
+         * @errortype
+         * @severity      ERRL_SEV_UNRECOVERABLE
+         * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+         * @reasoncode    RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH
+         * @userdata1     hdat struct name eye catcher
+         * @userdata2     Expected hdat eye catch
+         * @devdesc       TPM data hdat struct name eye catcher doesn't match
+         * @custdesc      Platform security problem detected
+         */
+        l_elog = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+            RUNTIME::RC_TPM_HDAT_EYE_CATCH_MISMATCH,
+            l_eyeCatch,
+            l_expectedEyeCatch,
+            true);
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        break;
+    }
 
     l_hdatTpmData->hdatHdr.hdatInstance = HDAT::TpmDataInstance;
     l_hdatTpmData->hdatHdr.hdatVersion = HDAT::TpmDataVersion;
@@ -1414,7 +1497,31 @@ errlHndl_t populate_TpmInfoByNode()
             return hasSameI2cMaster(t);
         });
 
-        assert(itr != l_procList.end(), "Bug! TPM must have a processor.");
+        if(itr == l_procList.end())
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: TPM does not have a processor.");
+
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_MISSING_PROC
+             * @userdata1     Number of processors
+             * @userdata2     0
+             * @devdesc       TPM does not have a processor
+             * @custdesc      Platform security problem detected
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_MISSING_PROC,
+                l_procList.size(),
+                0,
+                true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
+
         auto l_proc = *itr;
 
         l_tpmInstInfo->hdatChipId = l_proc->getAttr<
@@ -1498,6 +1605,10 @@ errlHndl_t populate_TpmInfoByNode()
         // Note: We don't advance the current offset, because the size of the
         // DRTM event log is zero
     }
+    if (l_elog)
+    {
+        break;
+    }
 
     // populate second part of pointer pair for secure boot TPM info
     l_hdatTpmData->hdatSbTpmInfo.hdatSize = l_currOffset - l_sbTpmInfoStart;
@@ -1578,9 +1689,32 @@ errlHndl_t populate_TpmInfoByNode()
         auto l_pcrd = reinterpret_cast<const HDAT::hdatSpPcrd_t*>(l_pcrdAddr);
 
         // Check the version of the PCRD section header
-        assert(l_pcrd->hdatHdr.hdatVersion >= HDAT::TpmDataMinRqrdPcrdVersion,
-            "Bad PCRD section version 0x%X - must be 0x1 or greater",
-            l_pcrd->hdatHdr.hdatVersion);
+        if(l_pcrd->hdatHdr.hdatVersion < HDAT::TpmDataMinRqrdPcrdVersion)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: Bad PCRD section version 0x%X - must be 0x%X or greater",
+                      l_pcrd->hdatHdr.hdatVersion,
+                       HDAT::TpmDataMinRqrdPcrdVersion);
+
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_HDAT_BAD_VERSION
+             * @userdata1     hdat version
+             * @userdata2     Expected support version
+             * @devdesc       Bad PCRD section version
+             * @custdesc      Platform security problem detected
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_HDAT_BAD_VERSION,
+                l_pcrd->hdatHdr.hdatVersion,
+                HDAT::TpmDataMinRqrdPcrdVersion,
+                true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
 
         // Get offset for the i2c array header
         auto i2cAryOff =
@@ -1598,9 +1732,31 @@ errlHndl_t populate_TpmInfoByNode()
            reinterpret_cast<HDAT::hdatHDIFDataArray_t*>(l_pcrdAddr + i2cAryOff);
 
         // make sure the array count is within reasonable limits
-        assert(l_hostI2cPcrdHdrPtr->hdatArrayCnt <= HDAT_PCRD_MAX_I2C_DEV,
-            "HDAT PCRD reported more than the max number of i2c devices! Count:%d",
-            l_hostI2cPcrdHdrPtr->hdatArrayCnt);
+        if(l_hostI2cPcrdHdrPtr->hdatArrayCnt > HDAT_PCRD_MAX_I2C_DEV)
+        {
+            TRACFCOMP( g_trac_runtime, ERR_MRK "populate_TpmInfoByNode: HDAT PCRD reported more than the max number of i2c devices! Count:%d",
+                       l_hostI2cPcrdHdrPtr->hdatArrayCnt);
+
+            /*@
+             * @errortype
+             * @severity      ERRL_SEV_UNRECOVERABLE
+             * @moduleid      RUNTIME::MOD_POPULATE_TPMINFOBYNODE
+             * @reasoncode    RUNTIME::RC_TPM_HDAT_BAD_NUM_I2C
+             * @userdata1     hdat array count
+             * @userdata2     max number of i2c devices
+             * @devdesc       HDAT PCRD reported more than the max number of i2c devices
+             * @custdesc      Platform security problem detected
+             */
+            l_elog = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                RUNTIME::MOD_POPULATE_TPMINFOBYNODE,
+                RUNTIME::RC_TPM_HDAT_BAD_NUM_I2C,
+                l_hostI2cPcrdHdrPtr->hdatArrayCnt,
+                HDAT_PCRD_MAX_I2C_DEV,
+                true);
+            l_elog->collectTrace(RUNTIME_COMP_NAME);
+            break;
+        }
 
         // Get the pointer to the first element in the i2c array
         // This is the address of the header plus the offset given in the header
@@ -1649,7 +1805,7 @@ errlHndl_t populate_TpmInfoByNode()
                     l_linkId,
                     0,
                     true);
-
+                err->collectTrace(RUNTIME_COMP_NAME);
                 SECUREBOOT::handleSecurebootFailure(err);
 
                 assert(false,"Bug! handleSecurebootFailure shouldn't return!");
@@ -1728,6 +1884,7 @@ errlHndl_t populate_TpmInfoByNode()
                     l_i2cDev->hdatI2cLinkId,
                     0,
                     true);
+                err->collectTrace(RUNTIME_COMP_NAME);
                 ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
             }
             else
@@ -1757,6 +1914,7 @@ errlHndl_t populate_TpmInfoByNode()
                         l_i2cDev->hdatI2cLinkId,
                         0,
                         true);
+                    err->collectTrace(RUNTIME_COMP_NAME);
                     ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
                 }
                 else // found a match
@@ -1769,6 +1927,10 @@ errlHndl_t populate_TpmInfoByNode()
         } // for each link ID in the current PCRD instance
 
     } // for each instance
+    if (l_elog)
+    {
+        break;
+    }
 
     if (!l_i2cTargetList.empty())
     {
@@ -1816,6 +1978,7 @@ errlHndl_t populate_TpmInfoByNode()
                 ),
                 TARGETING::get_huid(i2cDevItr->masterChip),
                 true);
+            err->collectTrace(RUNTIME_COMP_NAME);
             ERRORLOG::errlCommit(err, RUNTIME_COMP_ID);
         }
     }
@@ -2116,6 +2279,7 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
                         l_rc,
                         rc,
                         true /* Add HB Software Callout */);
+        l_err->collectTrace(RUNTIME_COMP_NAME);
     }
     else
     {
@@ -2156,6 +2320,7 @@ errlHndl_t persistent_rwAttrRuntimeCheck( void )
                         l_rc,
                         rc,
                         true /* Add HB Software Callout */);
+            l_err->collectTrace(RUNTIME_COMP_NAME);
         }
     }
 

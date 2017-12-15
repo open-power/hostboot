@@ -97,11 +97,12 @@ PNOR::SectionId getLidPnorSection(const LidId i_lid)
 
 } // end Util namespace
 
-bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
-                                       PNOR::SectionInfo_t &o_lidPnorInfo)
+errlHndl_t UtilLidMgr::getLidPnorSectionInfo(const uint32_t i_lidId,
+                                             PNOR::SectionInfo_t &o_lidPnorInfo,
+                                             bool &o_isLidInPnor)
 {
     errlHndl_t l_err = nullptr;
-    bool l_lidInPnor = false;
+    o_isLidInPnor = false;
 
     // Search if a lid id maps to pnor section
     auto l_secId = Util::getLidPnorSection(static_cast<Util::LidId>(i_lidId));
@@ -141,20 +142,19 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
             o_lidPnorInfo.id = PNOR::INVALID_SECTION;
             delete l_err;
             l_err = nullptr;
-            UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X ignore getSectionInfo error",
+            UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X ignore getSectionInfo INVALID_SECTION error",
                     i_lidId);
             break;
         }
         else if (l_err)
         {
-            UTIL_FT(ERR_MRK"UtilLidMgr::getLidPnorSectionInfo Lid 0x%X getSectionInfo error shutting down rc=0x%08X",
+            UTIL_FT(ERR_MRK"UtilLidMgr::getLidPnorSectionInfo Lid 0x%X getSectionInfo failed rc=0x%08X",
                     l_err->reasonCode());
-            errlCommit(l_err, UTIL_COMP_ID);
             break;
         }
         else
         {
-            l_lidInPnor = true;
+            o_isLidInPnor = true;
             UTIL_FT("UtilLidMgr::getLidPnorSectionInfo Lid 0x%X in PNOR", i_lidId);
 #ifdef CONFIG_SECUREBOOT
 #ifndef __HOSTBOOT_RUNTIME
@@ -165,14 +165,11 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
 
                 // Load the secure section
                 l_err = loadSecureSection(l_secId);
-
-                // If secure section fails to load log the error and assert
                 if (l_err)
                 {
-                    errlCommit(l_err, UTIL_COMP_ID);
-                    assert(false,"UtilLidMgr::getLidPnorSectionInfo: attempt to "
-                                 "load Secure Section %d failed",
-                                 l_secId);
+                     UTIL_FT("UtilLidMgr::getLidPnorSectionInfo loadSecureSection failed for Section %d",
+                             l_secId);
+                     break;
                 }
 
                 // In Secureboot, rather than using the whole partition size,
@@ -189,5 +186,5 @@ bool UtilLidMgr::getLidPnorSectionInfo(uint32_t i_lidId,
     }
     } while(0);
 
-    return l_lidInPnor;
+    return l_err;
 }

@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <pnor/pnorif.H>
 #include <util/singleton.H>
+#include <errl/errlentry.H>
+#include <errl/errlmanager.H>
 
 /** @file header.H
  *
@@ -64,9 +66,9 @@ namespace SECUREBOOT
              *      area preserved across the bootloader to HBB handoff to
              *      support extending HBB measurements to TPM
              *
-             *  @warning Asserts if header is already cached (code bug)
+             * @return Error handle if error; otherwise nullptr
              */
-            void loadHeader();
+            errlHndl_t loadHeader();
 
             /**
              *  @brief Return pointer to base image (HBB) header.

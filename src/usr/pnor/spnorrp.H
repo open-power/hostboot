@@ -242,8 +242,11 @@ class SPnorRP
      *      the security settings.
      *
      *  @param[in] i_flags Various flags read from the secure header
+     *
+     *  @return errlHndl_t Error log handle; nullptr if success, pointer to
+     *      valid error log otherwise.
      */
-    void processLabOverride(
+    errlHndl_t processLabOverride(
         const sb_flags_t& i_flags) const;
 
     /**

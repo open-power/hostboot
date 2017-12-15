@@ -347,8 +347,11 @@ namespace SECUREBOOT
      *                     a value of 0 if SBE should check for security disable
      *                     requests and 1 if not. All other values are not
      *                     allowed and will be rejected via an assert.
+     *
+     *  @return errlHndl_t Error log handle; nullptr if success, pointer to
+     *      valid error log otherwise.
      */
-    void setSbeSecurityMode(uint8_t i_sbeSecurityMode);
+    errlHndl_t setSbeSecurityMode(uint8_t i_sbeSecurityMode);
 
 }
 

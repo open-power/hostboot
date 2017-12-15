@@ -83,6 +83,7 @@ class UtilLidMgr
      *  @par Detailed Description
      *      Ensures member variables are initialized to sane values.
      *      Sets the initial LID ID.
+     *      Note will shutdown if error occurs during updateLid and not Runtime
      *
      *  @param[in] i_lidId
      *                LID ID.
@@ -111,8 +112,8 @@ class UtilLidMgr
      *                   LID ID.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t setLidId(uint32_t i_lidId);
 
@@ -127,8 +128,8 @@ class UtilLidMgr
      *                   Size of the LID in bytes.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t getLidSize(size_t& o_lidSize);
 
@@ -150,8 +151,8 @@ class UtilLidMgr
      *          for LID.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t getLid(void* i_dest, size_t i_destSize);
 
@@ -173,8 +174,8 @@ class UtilLidMgr
      *
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t getStoredLidImage(void*& o_pLidImage,
                                  size_t& o_lidImageSize);
@@ -187,8 +188,8 @@ class UtilLidMgr
      *          Clears variables associated with storing the image.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t releaseLidImage(void);
 
@@ -202,7 +203,7 @@ class UtilLidMgr
      */
     inline const void* getLidVirtAddr() const
     {
-        const void* l_addr = NULL;
+        const void* l_addr = nullptr;
         // Get pointer to PNOR vaddr
         if (iv_isLidInPnor)
         {
@@ -239,8 +240,11 @@ class UtilLidMgr
      *
      *  @param[in] i_lidId
      *                   LID ID.
+     *  @return     errlHndl_t
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
-    void updateLid(uint32_t i_lidId);
+    errlHndl_t updateLid(uint32_t i_lidId);
 
    /**
     *  @brief performs object cleanup when a new lidId is set
@@ -272,8 +276,8 @@ class UtilLidMgr
      *                   Indicates image was found in PNOR
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t getLidSizePnor(size_t& o_lidSize, bool& o_imgInPnor);
 
@@ -302,8 +306,8 @@ class UtilLidMgr
      *                   Indicates image was found in PNOR
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t getLidPnor(void* i_dest,
                           size_t i_destSize,
@@ -335,8 +339,8 @@ class UtilLidMgr
      *            the mutex.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t createMsgQueue();
 
@@ -370,8 +374,8 @@ class UtilLidMgr
      *                    the fsp.
      *
      *  @return     errlHndl_t
-     *                  return errl ==  NULL  -> success
-     *                  return errl !=  NULL  -> failure
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
      */
     errlHndl_t  sendMboxMessage( MBOX_MSG_TYPE i_type, msg_t * i_msg  );
 
@@ -437,11 +441,15 @@ class UtilLidMgr
      *  @param[in] i_lidId          - lid id to search for
      *  @param[out] o_lidPnorInfo   - pnor section info associated with the lid
      *                                if it exists in pnor
+     *  @param[out] o_isLidInPnor   - True if lid is in a section, false otherwise
      *
-     *  @return bool - True if lid is in a section, false otherwise
+     *  @return     errlHndl_t
+     *                  return errl ==  nullptr  -> success
+     *                  return errl !=  nullptr  -> failure
     */
-    bool getLidPnorSectionInfo(uint32_t i_lidId,
-                               PNOR::SectionInfo_t &o_lidPnorInfo);
+    errlHndl_t getLidPnorSectionInfo(uint32_t i_lidId,
+                                     PNOR::SectionInfo_t &o_lidPnorInfo,
+                                     bool &o_isLidInPnor);
     /**
      * @brief LID fileName
      */
