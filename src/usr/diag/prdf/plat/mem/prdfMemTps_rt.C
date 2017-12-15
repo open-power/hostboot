@@ -375,6 +375,9 @@ uint32_t TpsEvent<T>::analyzeTpsPhase1_rt( STEP_CODE_DATA_STRUCT & io_sc,
         // It doesn't matter what we set the value to, we just need to
         // make sure the rank exists in the map.
         getMcaDataBundle(iv_chip)->iv_tpsBans[iv_rank] = true;
+
+        // Permanently mask mainline NCEs and TCEs.
+        getMcaDataBundle(iv_chip)->iv_maskMainlineNceTce = true;
     }
 
     return o_rc;
