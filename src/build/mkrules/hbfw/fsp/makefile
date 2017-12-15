@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2015
+# Contributors Listed Below - COPYRIGHT 2012,2017
 # [+] International Business Machines Corp.
 #
 #
@@ -32,7 +32,7 @@
 
 # Process the targeting subtree
 
-.if(${CONTEXT:R} == "ppc")
+.if (${CONTEXT:R} == "ppc")
 
 SETUP_SUBDIRS    += targeting
 EXPINC_SUBDIRS   += targeting hwas pnor plugins
@@ -47,7 +47,7 @@ INCLUDES = hbdescriptor.H \
            hbotcompid.H \
            hbfw_term_rc.H
 
-.elseif(${CONTEXT} == "x86.nfp")
+.elseif (${CONTEXT} == "x86.nfp")
 
 # this file is in src/hbfw/fsp in cmvc
 .include "makefile.nfp"
