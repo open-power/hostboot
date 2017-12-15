@@ -31,7 +31,7 @@
 
 # Process the fsp subtree
 
-.if(${CONTEXT:R} == "ppc")
+.if (${CONTEXT:R} == "ppc")
 
 SETUP_SUBDIRS    += fsp simics
 EXPINC_SUBDIRS   += fsp
@@ -41,7 +41,7 @@ EXPSHLIB_SUBDIRS += fsp
 STANDARD_SUBDIRS += fsp img simics
 RUNBVT_SUBDIRS   +=
 
-.elseif(${CONTEXT} == "x86.nfp")
+.elseif (${CONTEXT} == "x86.nfp")
 
 SETUP_SUBDIRS    += fsp simics
 EXPINC_SUBDIRS   += fsp

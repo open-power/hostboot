@@ -37,7 +37,7 @@
 # is 100% verified
 .NOTPARALLEL:
 
-.if($(CONTEXT:R) == "ppc")
+.if ($(CONTEXT:R) == "ppc")
 
 VPATH += ../fsp
 
@@ -45,7 +45,7 @@ DEFAULT_PATH = ${.PATH}
 SRCPATH = ${DEFAULT_PATH:M*src*}
 
 # Modify the dependency list when building a CFM test image
-.if(${CFM_TEST_IMAGE} != "")
+.if (${CFM_TEST_IMAGE} != "")
     BUILD_ALL_DEPS = cp_hbfiles gen_default_images update_image_id
     GEN_DEFAULT_IMAGES_DEPS = cp_hbfiles update_image_id dump-secureboot-config
 .else
@@ -184,7 +184,7 @@ Secure Boot Signing Config:\n\
 # Default to using FSP layout for common file purposes and use existing hb
 # techniques to enable default layout when appropriate.
 PNOR_LAYOUT = ${pnorLayoutFSP.xml:P}
-.if(${DEFAULT_PNOR} == 1)
+.if (${DEFAULT_PNOR} == 1)
     PNOR_LAYOUT = ${defaultPnorLayout.xml:P}
 .endif
 
@@ -195,14 +195,14 @@ BUILD_TYPE_PARAMS = --build-type fspbuild
 # Here we check to see if a key transition mode was set in the environment.
 # This can be either 'imprint' or 'production'. The genPnorImages.pl will catch
 # cases when it is set incorrectly and report an error.
-.if(${SECUREBOOT_KEY_TRANSITION_MODE} != "") # genPnorImages handles bad parm
+.if (${SECUREBOOT_KEY_TRANSITION_MODE} != "") # genPnorImages handles bad parm
     KEY_TRANSITION_MODE_PARAMS = --key-transition ${SECUREBOOT_KEY_TRANSITION_MODE}
 .endif
 
 # Decide which PNOR to build
-.if(${FAKEPNOR} == "")
+.if (${FAKEPNOR} == "")
     # Parameters passed into GEN_PNOR_IMAGE_SCRIPT.
-    .if(${DEFAULT_PNOR} == 1)
+    .if (${DEFAULT_PNOR} == 1)
         GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},TEST=EMPTY,TESTRO=EMPTY,TESTLOAD=EMPTY,HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,PAYLOAD=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,FIRDATA=EMPTY,MEMD=EMPTY
     .else
         GEN_DEFAULT_BIN_FILES = HBBL=${HBBL_IMG},HBB=${HBB_IMG},HBI=${HBI_IMG},HBRT=${HBRT_IMG},HBEL=EMPTY,GUARD=EMPTY,GLOBAL=EMPTY,CVPD=EMPTY,MVPD=EMPTY,DJVPD=EMPTY,RINGOVD=EMPTY,SBKT=EMPTY,MEMD=EMPTY
@@ -385,9 +385,9 @@ ZZ2U_HBD_FINAL_IMG = ZZ-2U.HBD.bin
 
 
 # Decide which PNOR to build
-.if(${FAKEPNOR} == "")
+.if (${FAKEPNOR} == "")
     # Paramemters passed into GEN_PNOR_IMAGE_SCRIPT.
-    .if(${DEFAULT_PNOR} == 1)
+    .if (${DEFAULT_PNOR} == 1)
         GEN_NIMBUS_BIN_FILES = NIMBUS:SBE=${${NIMBUS_SBE_IMG}:P},HCODE=${${NIMBUS_HCODE_IMG}:P},OCC=${${NIMBUS_OCC_IMG}:P},HBD=${${NIMBUS_HBD_IMG}:P},CENHWIMG=${NIMBUS_CENHWIMG_IMG}
         GEN_CUMULUS_BIN_FILES = CUMULUS:SBE=${${CUMULUS_SBE_IMG}:P},HCODE=${${CUMULUS_HCODE_IMG}:P},OCC=${${CUMULUS_OCC_IMG}:P},HBD=${${CUMULUS_HBD_IMG}:P},CENHWIMG=${${CUMULUS_CENHWIMG_IMG}:P}
     .else
@@ -422,7 +422,7 @@ gen_system_specific_images_bypass_cache : dump-secureboot-config
 	export LD_PRELOAD=${SIGNING_LIBS} && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
 
 	#for NIMBUS fake pnor skip version header
-	.if(${FAKEPNOR} != "")
+	.if (${FAKEPNOR} != "")
 	dd if=${${NIMBUS_VPO_HBD_IMG}:P} of=${NIMBUS_HBD_FINAL_IMG} ibs=4k skip=1 conv=sync
 	.endif
 
@@ -433,7 +433,7 @@ gen_system_specific_images_bypass_cache : dump-secureboot-config
 gen_system_specific_images: build_sbe_partitions .PMAKE
 	@${MAKE:T:R} gen_system_specific_images_bypass_cache
 
-.if(${DEFAULT_PNOR} == 1)
+.if (${DEFAULT_PNOR} == 1)
     HOSTBOOT_DEFAULT_SECTIONS = HBBL=${HBBL_FINAL_IMG},HBB=${HBB_FINAL_IMG},HBI=${HBI_FINAL_IMG},HBRT=${HBRT_FINAL_IMG},TEST=${TEST_FINAL_IMG},TESTRO=${TESTRO_FINAL_IMG},TESTLOAD=${TESTLOAD_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},GUARD=${GUARD_FINAL_IMG},GLOBAL=${GLOBAL_FINAL_IMG},PAYLOAD=${PAYLOAD_FINAL_IMG},CVPD=${CVPD_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},RINGOVD=${RINGOVD_FINAL_IMG},SBKT=${SBKT_FINAL_IMG},FIRDATA=${FIRDATA_FINAL_IMG},MEMD=${MEMD_FINAL_IMG}
     NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},SBE=${NIMBUS_SBE_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG},OCC=${NIMBUS_OCC_FINAL_IMG},WOFDATA=${ZZ_WOFDATA_FINAL_IMG},CENHWIMG=${NIMBUS_CENHWIMG_FINAL_IMG}
     CUMULUS_SECT = HBD=${CUMULUS_HBD_FINAL_IMG},SBE=${CUMULUS_SBE_FINAL_IMG},HCODE=${CUMULUS_HCODE_FINAL_IMG},OCC=${CUMULUS_OCC_FINAL_IMG},WOFDATA=${ZEPPELIN_WOFDATA_FINAL_IMG},CENHWIMG=${CUMULUS_CENHWIMG_FINAL_IMG}
@@ -453,7 +453,7 @@ PNOR_IMG_INFO = \
 #    ie, 'export FAKEPNOR='
 # Note: If FAKEPNOR defined, ONLY a FAKEPNOR will be generated, this is due to
 #    some limitations of GEN_PNOR_IMAGE_SCRIPT at the time of porting to p9
-.if(${FAKEPNOR} != "")
+.if (${FAKEPNOR} != "")
     HOSTBOOT_DEFAULT_SECTIONS = HBI=${HBI_FINAL_IMG},HBEL=${HBEL_FINAL_IMG},MVPD=${MVPD_FINAL_IMG},DJVPD=${DJVPD_FINAL_IMG},CVPD=${VPO_FAKE_DVPD},FIRDATA=${FIRDATA_FINAL_IMG}
     NIMBUS_SECT = HBD=${NIMBUS_HBD_FINAL_IMG},HCODE=${NIMBUS_HCODE_FINAL_IMG},CENHWIMG=${NIMBUS_CENHWIMG_FINAL_IMG}
     CUMULUS_SECT = HBD=${CUMULUS_HBD_FINAL_IMG},HCODE=${CUMULUS_HCODE_FINAL_IMG},CENHWIMG=${CUMULUS_CENHWIMG_FINAL_IMG}
@@ -464,7 +464,7 @@ PNOR_IMG_INFO = \
 
 # Added a different dependency chain for hostboot builds so we can compile
 # faster and call one rule in dist.targets.mk 'update_images_for_sandbox'
-.if( ${HB_STANDALONE} == 1 )
+.if ( ${HB_STANDALONE} == 1 )
 __IMAGE_BUILD/% : .SPECTARG .PMAKE gen_default_images gen_system_specific_images
 # In FSP this is run at install_all phase, so it's assumed all build_all rules
 # have completed. If build_all rule dependencies are added they will run again.
@@ -489,7 +489,7 @@ BUILD_SPECIFIC_IMAGE: .SPECTARG ${IMAGE_TARGET}
 	#@echo BIN_OPTION ${IMAGE_BIN_OPTION}
 
 ${IMAGE_TARGET}: ${IMAGE_LAYOUT} ${IMAGE_BINS} ${PNOR_BUILD_SCRIPT}
-	.if(${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "" || \
+	.if (${PNOR} == ${IMAGE_TARGET} || ${PNOR} == "" || \
 			${FAKEPNOR} == ${IMAGE_TARGET})
 		${PNOR_BUILD_SCRIPT} --pnorOutBin ${IMAGE_TARGET} \
 			${TARGET_TEST:b--test} --pnorLayout ${IMAGE_LAYOUT} \
@@ -514,7 +514,7 @@ update_images_for_sandbox:  gen_default_images gen_system_specific_images build_
 	#Copy hostboot base image and bootloader image to flash dir
 	${FLASH_IMG:@image@${baseimg:!cd ${FLASH_DEST}; cp -f ${.PATH:F${image}} ${image};!e}@}
 	#Truncate fake pnor image down to 6MB and copy to flash dir
-	.if(${FAKEPNOR} != "")
+	.if (${FAKEPNOR} != "")
 		${FAKE_PNOR_IMG_INFO:@image@${pnorimg:!dd if=${image:s/:/ /g:xs/ .*//} of=${FAKE_PNOR} bs=6M count=1; \
 			cp -f ${FAKE_PNOR} ${FLASH_DEST}/${FAKE_PNOR};!e}@}
 	.endif
