@@ -172,6 +172,24 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                  }
             break; // END case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
 
+            case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
+                {
+                    TRACFCOMP(g_trac_runtime,
+                              ERR_MRK"FSP is doing a reset/reload, "
+                                     "sending lock msg to FSP failed. "
+                                     "retry:%d/%d, rc:%d",
+                              i,
+                              HBRT_FW_REQUEST_RETRIES,
+                              rc);
+
+                    l_userData1 = TWO_UINT32_TO_UINT64( rc,
+                                    TWO_UINT8_TO_UINT16(
+                                    l_req_fw_msg->req_i2c_lock.i_i2cMaster,
+                                    l_req_fw_msg->req_i2c_lock.i_operation) );
+                    l_userData2 = l_req_fw_msg->req_i2c_lock.i_chipId;
+                }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
+
             default:
             break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -185,9 +203,11 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
              * @reasoncode       RC_FW_REQUEST_RESET_RELOAD_ERR
              * @userdata1[0:31]  Hypervisor return code
              * @userdata1[32:63] Firmware Request type (HCODE Update) ||
-                                 sequence number (FSP MSG)
+                                 sequence number (FSP MSG) ||
+                                 i2cMaster & lock operation
              * @userdata2[0:31]  SCOM address (HCODE Update) ||
-                                 MBOX message type (FSP MSG)
+                                 MBOX message type (FSP MSG) ||
+                                 chipID
              * @userdata2[32:63] SCOM data (HCODE Update) ||
                                  Message Type (FSP MSG)
              * @devdesc          The Firmware Request call failed
@@ -313,6 +333,23 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
                  }
             break; // END case hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ:
 
+            case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
+                {
+                    TRACFCOMP(g_trac_runtime, ERR_MRK"Failed sending FSP i2c "
+                             "lock message rc 0x%X; i_chipId: 0x%llX, "
+                             "i_i2cMaster: %d, i_operation: %d",
+                             rc,
+                             l_req_fw_msg->req_i2c_lock.i_chipId,
+                             l_req_fw_msg->req_i2c_lock.i_i2cMaster,
+                             l_req_fw_msg->req_i2c_lock.i_operation );
+
+                    l_userData1 = TWO_UINT32_TO_UINT64( rc,
+                            TWO_UINT8_TO_UINT16(
+                                l_req_fw_msg->req_i2c_lock.i_i2cMaster,
+                                l_req_fw_msg->req_i2c_lock.i_operation) );
+                    l_userData2 = l_req_fw_msg->req_i2c_lock.i_chipId;
+                }
+            break; // END case hostInterfaces::HBRT_FW_MSG_TYPE_I2C_LOCK:
             default:
                break;
          }  // END switch (l_req_fw_msg->io_type)
@@ -326,9 +363,11 @@ errlHndl_t firmware_request_helper(uint64_t i_reqLen,   void *i_req,
              * @reasoncode       RC_FW_REQUEST_ERR
              * @userdata1[0:31]  Hypervisor return code
              * @userdata1[32:63] Firmware Request type (HCODE Update) ||
-                                 sequence number (FSP MSG)
+                                 sequence number (FSP MSG) ||
+                                 i2cMaster & lock operation
              * @userdata2[0:31]  SCOM address (HCODE Update) ||
-                                 MBOX message type (FSP MSG)
+                                 MBOX message type (FSP MSG) ||
+                                 chipId
              * @userdata2[32:63] SCOM data (HCODE Update) ||
                                  Message Type (FSP MSG)
              * @devdesc          The Firmware Request call failed

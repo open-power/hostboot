@@ -74,6 +74,7 @@ enum MemoryError_t
     MEMORY_ERROR_PREDICTIVE = 2,
 };
 
+
 /**
  * I2C Master Description: chip, engine and port packed into
  * a single 64-bit argument
@@ -504,7 +505,6 @@ typedef struct hostInterfaces
     /**
      *  @brief Structure to be sent and received in the
      *         firmware_request call
-     *
      */
     enum
     {
@@ -515,6 +515,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_HBRT_FSP_REQ = 4,
        HBRT_FW_MSG_TYPE_ERROR_LOG = 5,
        HBRT_FW_MSG_HBRT_FSP_RESP = 6,
+       HBRT_FW_MSG_TYPE_I2C_LOCK = 7,
     };
 
     struct hbrt_fw_msg   // define struct hbrt_fw_msg
@@ -557,6 +558,19 @@ typedef struct hostInterfaces
                                   // uint8_t *myData =
                                   // (uint8_t*)&l_req_fw_msg->error_log.i_data;
           } __attribute__ ((packed)) error_log;
+
+
+          // This struct is sent from HBRT with
+          // io_type set to HBRT_FW_MSG_TYPE_I2C_LOCK
+          struct
+          {
+             uint64_t i_chipId;     // processor chip ID plus ID type,
+                                    // always proc (0x0)
+             uint8_t i_i2cMaster;   // i2c master
+                                    // B=0, C=1, D=2, E=3
+             uint8_t i_operation;   // type of operation to perform
+                                    // 1 = lock, 2 = unlock
+          } __attribute__ ((packed)) req_i2c_lock;
 
           // This struct is sent from HBRT with
           // io_type set to HBRT_FW_MSG_HBRT_FSP_REQ or
