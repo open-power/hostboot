@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -79,11 +79,14 @@ extern"C"
             // Type of ADU operations
             enum OperationType_t
             {
-                CACHE_INHIBIT = 0, //cache-inhibited 1, 2, 4, or 8 byte read/write
-                DMA_PARTIAL   = 1, //partial cache line direct memory access - always 8 byte read/write
-                PB_DIS_OPER   = 2,
-                PMISC_OPER    = 3,
-                PB_INIT_OPER  = 4
+                CACHE_INHIBIT = 0, // cache-inhibited 1, 2, 4, or 8 byte read/write
+                DMA_PARTIAL   = 1, // partial cache line direct memory access - always 8 byte read/write
+                PB_DIS_OPER   = 2, // pbop.disable_all
+                PMISC_OPER    = 3, // pmisc switch
+                PB_INIT_OPER  = 4, // pbop.enable_all
+                PRE_SWITCH_CD = 5, // do not issue PB command, pre-set for switch CD operation
+                PRE_SWITCH_AB = 6, // do not issue PB command, pre-set for switch AB operation
+                POST_SWITCH   = 7  // do not issue PB command, clear switch CD/AB flags
             };
 
             // Transaction size -- only checked if not DMA
@@ -102,6 +105,21 @@ extern"C"
                   iv_itag(false), iv_ecc(false), iv_eccItagOverwrite(false),
                   iv_transSize(TSIZE_1)
             {
+            }
+
+            ///
+            /// @brief Determine if ADU operation type is address only
+            /// or will require data transfer
+            ///
+            /// @param[in] i_type     ADU operation type
+            ///
+            /// @return bool.
+            ///
+            inline bool isAddressOnly(void)
+            {
+                return ((iv_operType == PB_DIS_OPER) ||
+                        (iv_operType == PMISC_OPER) ||
+                        (iv_operType == PB_INIT_OPER));
             }
 
             ///
@@ -562,6 +580,20 @@ extern"C"
     fapi2::ReturnCode p9_adu_coherent_utils_get_num_granules(
         const uint64_t i_address,
         uint32_t& o_numGranules);
+
+///
+/// @brief Set action which will occur on fabric pmisc switch command
+///
+/// @param[in] i_target        Processor chip target
+/// @param[in] i_switch_ab     Perform switch AB operation?
+/// @param[in] i_switch_cd     Perform switch CD operation?
+///
+/// @return fapi2:ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+///
+    fapi2::ReturnCode p9_adu_coherent_utils_set_switch_action(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_switch_ab,
+        const bool i_switch_cd);
 
 /// @brief does the setup for the ADU to set up the initial registers for a read/write
 /// @param[in] i_target  => P9 chip target

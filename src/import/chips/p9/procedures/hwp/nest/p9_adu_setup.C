@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ extern "C"
         p9_ADU_oper_flag l_myAduFlag;
         l_myAduFlag.getFlag(i_flags);
 
-        //If autoinc is set and this is not a DMA operation unset autoinc before passing the flags through
+        // permit/pass autoinc only if performing a DMA operation
         if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::DMA_PARTIAL)
         {
             l_myAduFlag.setAutoIncrement(false);
@@ -77,13 +77,30 @@ extern "C"
 
         uint32_t l_flags = l_myAduFlag.setFlag();
 
+        // don't generate fabric command, just pre-condition ADU for upcoming switch
+        if ((l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_AB) ||
+            (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_CD) ||
+            (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::POST_SWITCH))
+        {
+            FAPI_TRY(p9_adu_coherent_utils_set_switch_action(
+                         i_target,
+                         (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_AB),
+                         (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_CD)),
+                     "Error from p9_adu_coherent_utils_set_switch_action");
+            o_numGranules = 1;
+            goto fapi_try_exit;
+        }
+
         //check arguments
         FAPI_TRY(p9_adu_coherent_utils_check_args(i_target, i_address, l_flags),
                  "Error from p9_adu_coherent_utils_check_args");
 
-        //ensure fabric is running
-        FAPI_TRY(p9_adu_coherent_utils_check_fbc_state(i_target),
-                 "Error from p9_adu_coherent_utils_check_fbc_status");
+        //ensure fabric is running, unless we're trying to initialize it
+        if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::PB_INIT_OPER)
+        {
+            FAPI_TRY(p9_adu_coherent_utils_check_fbc_state(i_target),
+                     "Error from p9_adu_coherent_utils_check_fbc_status");
+        }
 
         //acquire ADU lock to guarantee exclusive use of the ADU resources
         //ADU state machine will be reset/cleared by this routine

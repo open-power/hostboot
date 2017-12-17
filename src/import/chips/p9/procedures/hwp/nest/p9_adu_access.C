@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,11 @@
 #include <p9_adu_access.H>
 #include <p9_adu_coherent_utils.H>
 
+// ADU operation delay times for HW/sim
+const uint32_t P9_ADU_ACCESS_ADU_OPER_HW_NS_DELAY = 10000;
+const uint32_t P9_ADU_ACCESS_ADU_OPER_SIM_CYCLE_DELAY = 50000;
+
+
 extern "C" {
 
 //--------------------------------------------------------------------------
@@ -74,23 +79,40 @@ extern "C" {
             l_myAduFlag.setAutoIncrement(false);
         }
 
+        // don't generate fabric command
+        if ((l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_AB) ||
+            (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::PRE_SWITCH_CD) ||
+            (l_myAduFlag.getOperationType() == p9_ADU_oper_flag::POST_SWITCH))
+        {
+            goto fapi_try_exit;
+        }
+
         //If we were using autoinc and this is the last granule we need to clear autoinc before the last read/write
         if( i_lastGranule && l_myAduFlag.getAutoIncrement() )
         {
             FAPI_TRY(p9_adu_coherent_clear_autoinc(i_target), "Error from p9_adu_coherent_clear_autoinc");
         }
 
-        //If we are doing a read operation read the data
-        if (i_rnw)
+        if (l_myAduFlag.isAddressOnly())
         {
-            FAPI_TRY(p9_adu_coherent_adu_read(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
-                     "Error from p9_adu_coherent_adu_read");
+            FAPI_TRY(fapi2::delay(P9_ADU_ACCESS_ADU_OPER_HW_NS_DELAY,
+                                  P9_ADU_ACCESS_ADU_OPER_SIM_CYCLE_DELAY),
+                     "fapiDelay error");
         }
-        //Otherwise this is a write and write the data
         else
         {
-            FAPI_TRY(p9_adu_coherent_adu_write(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
-                     "Error from p9_adu_coherent_adu_write");
+            //If we are doing a read operation read the data
+            if (i_rnw)
+            {
+                FAPI_TRY(p9_adu_coherent_adu_read(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
+                         "Error from p9_adu_coherent_adu_read");
+            }
+            //Otherwise this is a write and write the data
+            else
+            {
+                FAPI_TRY(p9_adu_coherent_adu_write(i_target, i_firstGranule, i_address, l_myAduFlag, io_data),
+                         "Error from p9_adu_coherent_adu_write");
+            }
         }
 
         //If we are not in fastmode or this is the last granule, we want to check the status
@@ -110,7 +132,7 @@ extern "C" {
             //We only want to do the status check if this is not a ci operation
             if (l_myAduFlag.getOperationType() != p9_ADU_oper_flag::CACHE_INHIBIT)
             {
-                FAPI_TRY(p9_adu_coherent_status_check(i_target, l_busyHandling, false,
+                FAPI_TRY(p9_adu_coherent_status_check(i_target, l_busyHandling, l_myAduFlag.isAddressOnly(),
                                                       l_busyBitStatus),
                          "Error from p9_adu_coherent_status_check");
             }

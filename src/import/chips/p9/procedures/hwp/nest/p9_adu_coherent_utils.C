@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -245,6 +245,38 @@ extern "C"
 
     fapi_try_exit:
         FAPI_DBG("Exiting...");
+        return fapi2::current_err;
+    }
+
+    //---------------------------------------------------------------------------------
+    // NOTE: description in header
+    //---------------------------------------------------------------------------------
+    fapi2::ReturnCode p9_adu_coherent_utils_set_switch_action(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        const bool i_switch_ab,
+        const bool i_switch_cd)
+    {
+        FAPI_DBG("Start");
+        fapi2::buffer<uint64_t> pmisc_data;
+        fapi2::buffer<uint64_t> pmisc_mask;
+
+        // Build ADU pMisc Mode register content
+        FAPI_DBG("writing ADU pMisc Mode register: switch_ab=%s, switch_cd=%s",
+                 i_switch_ab ? "true" : "false", i_switch_cd ? "true" : "false");
+
+        // Switch AB bit
+        pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>(i_switch_ab);
+        pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_AB>();
+
+        // Switch CD bit
+        pmisc_data.writeBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>(i_switch_cd);
+        pmisc_mask.setBit<PU_SND_MODE_REG_ENABLE_PB_SWITCH_CD>();
+
+        FAPI_TRY(fapi2::putScomUnderMask(i_target, PU_SND_MODE_REG, pmisc_data, pmisc_mask),
+                 "Error from putScomUnderMask (PU_SND_MODE_REG)");
+
+    fapi_try_exit:
+        FAPI_DBG("End");
         return fapi2::current_err;
     }
 
