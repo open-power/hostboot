@@ -81,7 +81,7 @@ namespace TRACE
              *  @param[in] i_maxPages - Maximum number of pages to consume
              *                          before 'claimEntry' blocks.
              */
-            Buffer(TRACEDAEMON::Daemon * i_daemon, size_t i_maxPages = 4);
+            Buffer(TRACEDAEMON::Daemon * i_daemon, size_t i_maxPages = 16);
 #endif
             /** @brief Claim an entry from the buffer to write data to.
              *
