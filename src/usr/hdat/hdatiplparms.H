@@ -279,7 +279,7 @@ struct hdatIplpFeatureFlagSetting_t
 // Agreed strings and settings of different feature flags
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_20[]=
 {
-{"tm-suspend-mode-enabled",                     0x8000000000000000},
+{"tm-suspend-mode",                             0x8000000000000000},
 {"inst-thread-reconfig-control-trig0-1",        0x8000000000000000},
 {"inst-l1d-flush-trig2",                        0x8000000000000000},
 {"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
@@ -293,7 +293,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_20[]=
 
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_21[]=
 {
-{"tm-suspend-mode-enabled",                     0x0000000000000000},
+{"tm-suspend-mode",                             0x0000000000000000},
 {"inst-thread-reconfig-control-trig0-1",        0x8000000000000000},
 {"inst-l1d-flush-trig2",                        0x8000000000000000},
 {"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
@@ -307,7 +307,7 @@ const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_21[]=
 
 const hdatIplpFeatureFlagSetting_t hdatIplpFeatureFlagSettingsArray_22[]=
 {
-{"tm-suspend-mode-enabled",                     0x8000000000000000},
+{"tm-suspend-mode",                             0x8000000000000000},
 {"inst-thread-reconfig-control-trig0-1",        0x0000000000000000},
 {"inst-l1d-flush-trig2",                        0x8000000000000000},
 {"inst-l1d-flush-ori30,30,0",                   0x0000000000000000},
