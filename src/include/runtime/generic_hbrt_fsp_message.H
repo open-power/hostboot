@@ -158,4 +158,8 @@ struct GenericFspMboxMessage_t
     };
 } PACKED ;
 
+// Handy macro that computes the size of the message minus the data portion
+#define GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE \
+   (sizeof(GenericFspMboxMessage_t)-sizeof(GenericFspMboxMessage_t::data))
+
 #endif // __RUNTIME__GENERIC_HBRT_FSP_MESSAGE_H
