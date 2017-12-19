@@ -430,22 +430,25 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
         // Get an accurate size of memory needed to transport
         // the data for the firmware_request request struct
-        uint32_t l_req_data_size = sizeof(GenericFspMboxMessage_t) +
-                               i_numBytes -
-                               sizeof(GenericFspMboxMessage_t::data);
+        uint32_t l_fsp_req_size = GENERIC_FSP_MBOX_MESSAGE_BASE_SIZE;
+        // add on the 2 header words that are used in the IPL-time
+        //  version of the VPD write message (see vpd.H)
+        l_fsp_req_size += sizeof(VpdWriteMsg_t) + sizeof(uint64_t);
+        // add on the extra_data portion of the message
+        l_fsp_req_size += i_numBytes;
 
         // The request data size must be at a minimum the size of the
         // FSP generic message (sizeof(GenericFspMboxMessage_t))
-        if (l_req_data_size < sizeof(GenericFspMboxMessage_t))
+        if (l_fsp_req_size < sizeof(GenericFspMboxMessage_t))
         {
-            l_req_data_size = sizeof(GenericFspMboxMessage_t);
+            l_fsp_req_size = sizeof(GenericFspMboxMessage_t);
         }
 
         // Calculate the TOTAL size of hostInterfaces::hbrt_fw_msg which
         // means only adding hostInterfaces::HBRT_FW_MSG_BASE_SIZE to
         // the previous calculated data size
         uint64_t l_req_fw_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE +
-                                     l_req_data_size;
+                                     l_fsp_req_size;
 
         // Create the firmware_request request struct to send data
         l_req_fw_msg =
@@ -456,11 +459,23 @@ errlHndl_t sendMboxWriteMsg ( size_t i_numBytes,
 
         // Populate the firmware_request request struct with given data
         l_req_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_HBRT_FSP_REQ;
-        l_req_fw_msg->generic_msg.dataSize = l_req_data_size;
+        l_req_fw_msg->generic_msg.dataSize = l_fsp_req_size;
         l_req_fw_msg->generic_msg.msgq = MBOX::FSP_VPD_MSGQ;
         l_req_fw_msg->generic_msg.msgType = i_type;
         l_req_fw_msg->generic_msg.__req = GenericFspMboxMessage_t::REQUEST;
-        memcpy(&l_req_fw_msg->generic_msg.data, i_data, i_numBytes);
+
+        // the full message looks like this
+        struct VpdWriteMsgHBRT_t
+        {
+            VpdWriteMsg_t vpdInfo;
+            uint64_t vpdBytes;
+            uint8_t vpdData; //of vpdBytes size
+        };
+        VpdWriteMsgHBRT_t* l_msg = reinterpret_cast<VpdWriteMsgHBRT_t*>
+          (&(l_req_fw_msg->generic_msg.data));
+        l_msg->vpdInfo = i_record;
+        l_msg->vpdBytes = i_numBytes;
+        memcpy( &(l_msg->vpdData), i_data, i_numBytes );
 
         // Create the firmware_request response struct to receive data
         // NOTE: For messages to the FSP the response size must match
