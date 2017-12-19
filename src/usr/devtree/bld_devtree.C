@@ -61,6 +61,7 @@
 #include <vpd/spdenums.H>
 #include <config.h>
 
+
 trace_desc_t *g_trac_devtree = NULL;
 TRAC_INIT(&g_trac_devtree, "DEVTREE", 4096);
 
@@ -98,6 +99,7 @@ enum BuildConstants
     L3_HDR              = (0x30 << 24),
     CEN_ID_SHIFT        = 4,
     CEN_ID_TAG          = 0x80000000,
+    INIT_FLAG_ENABLED   = 0x8000000000000000,
 };
 
 void str_chomp(char* i_str)
@@ -2697,6 +2699,60 @@ errlHndl_t bld_fdt_bmc(devTree * i_dt, bool i_smallTree)
 }
 #endif
 
+struct initFlags_t
+{
+    char     name[64]; // Feature flag null terminated string
+    uint64_t settings;    // bit0 indicates IPL time setting enabled
+}__attribute__ ((packed));
+
+
+const initFlags_t initFlagArray[]=
+{
+{"tm-suspend-mode",                             0x8000000000000000},
+{"inst-thread-reconfig-control-trig0-1",        0x0000000000000000},
+{"inst-l1d-flush-trig2",                        0x0000000000000000},
+{"inst-l1d-flush-ori30,30,0",                   0x8000000000000000},
+{"inst-spec-barrier-ori31,31,0",                0x8000000000000000},
+{"needs-l1d-flush-msr-hv-1-to-0",               0x8000000000000000},
+{"needs-l1d-flush-msr-pr-0-to-1",               0x8000000000000000},
+{"needs-spec-barrier-for-bound-checks",         0x8000000000000000},
+{"fw-l1d-thread-split",                         0x8000000000000000},
+{"fw-bcctrl-serialized",                        0x0000000000000000},
+{"speculation-policy-favor-security",           0x8000000000000000}};
+
+errlHndl_t bld_fdt_initflags(devTree * i_dt, bool i_smallTree)
+{
+    // Nothing to do for small trees currently.
+    if (i_smallTree) { return NULL; }
+
+    errlHndl_t errhdl = NULL;
+
+    /* Find the / node and add a opal node under it. */
+    dtOffset_t rootNode = i_dt->findNode("/");
+    dtOffset_t opalNode = i_dt->addNode(rootNode, "ibm,opal");
+    dtOffset_t featureNode = i_dt->addNode(opalNode, "fw-features");
+    dtOffset_t initNode;
+
+    for (uint8_t l_elem = 0;
+         l_elem <  sizeof(initFlagArray)/sizeof(initFlags_t);
+         l_elem++)
+    {
+        initNode= i_dt->addNode(featureNode,
+                                initFlagArray[l_elem].name);
+        if( initFlagArray[l_elem].settings & INIT_FLAG_ENABLED)
+        {
+            i_dt->addProperty(initNode, "enabled");
+        }
+        else
+        {
+            i_dt->addProperty(initNode, "disabled");
+        }
+    }
+
+    return errhdl;
+}
+
+
 errlHndl_t bld_fdt_vpd(devTree * i_dt, bool i_smallTree)
 {
     // Nothing to do for small trees currently.
@@ -3094,6 +3150,7 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
         }
 
         TRACFCOMP( g_trac_devtree, "---devtree init---" );
+
         dt->initialize(i_dtAddr, i_dtSize, devTreeVirtual);
         errhdl = bld_fdt_system(dt, i_smallTree);
         if (errhdl)
@@ -3153,6 +3210,9 @@ errlHndl_t build_flatdevtree( uint64_t i_dtAddr, size_t i_dtSize,
 
         TRACFCOMP( g_trac_devtree, "---devtree secureboot ---" );
         errhdl = bld_fdt_secureboot(dt, i_smallTree);
+
+        TRACFCOMP( g_trac_devtree, "---devtree initflags ---" );
+        errhdl = bld_fdt_initflags(dt, i_smallTree);
 
 
     }while(0);
