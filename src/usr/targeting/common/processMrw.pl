@@ -1316,10 +1316,10 @@ sub processXbus
         $targetObj->setAttribute($target, "PEER_TARGET",
         $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
 
-        $targetObj->setAttribute($xbus_child_conn, "PEER_TARGET",
-        $targetObj->getAttribute($target, "PHYS_PATH"));
-        $targetObj->setAttribute($target, "PEER_TARGET",
-        $targetObj->getAttribute($xbus_child_conn, "PHYS_PATH"));
+        $targetObj->setAttribute($xbus_child_conn, "PEER_HUID",
+        $targetObj->getAttribute($target, "HUID"));
+        $targetObj->setAttribute($target, "PEER_HUID",
+        $targetObj->getAttribute($xbus_child_conn, "HUID"));
 
         $found_xbus = 1;
     }
@@ -1362,6 +1362,11 @@ sub processAbus
             $targetObj->getAttribute($target, "PHYS_PATH"));
         $targetObj->setAttribute($target, "PEER_PATH",
             $targetObj->getAttribute($abus_child_conn, "PHYS_PATH"));
+
+        $targetObj->setAttribute($abus_child_conn, "PEER_HUID",
+            $targetObj->getAttribute($target, "HUID"));
+        $targetObj->setAttribute($target, "PEER_HUID",
+            $targetObj->getAttribute($abus_child_conn, "HUID"));
 
         # copy Abus attributes to proc
         my $abus = $targetObj->getFirstConnectionBus($target);
