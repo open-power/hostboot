@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,8 @@ namespace HWAS
         RC_BAD_CHIPID                       = HWAS_COMP_ID | 0x83,
         RC_BAD_LX                           = HWAS_COMP_ID | 0x84,
         RC_BAD_MCA                          = HWAS_COMP_ID | 0x85,
+        RC_RT_NULL_FIRMWARE_REQUEST_PTR     = HWAS_COMP_ID | 0x86,
+        RC_RT_NULL_FIRMWARE_MSG_PTR         = HWAS_COMP_ID | 0x87,
     };
 };
 

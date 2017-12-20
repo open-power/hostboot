@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -45,6 +45,16 @@
 #include <initservice/istepdispatcherif.H>
 
 #include <pnor/pnorif.H>
+
+#ifdef __HOSTBOOT_RUNTIME
+#include <runtime/interface.h>             // g_hostInterfaces
+#include <runtime/hbrt_utilities.H>        // createGenericFspMsg
+#include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
+#endif
+
+#ifdef CONFIG_TPMDD
+#include <../usr/secureboot/trusted/trustedbootUtils.H>
+#endif
 
 namespace HWAS
 {
@@ -541,6 +551,164 @@ errlHndl_t getGardSectionInfo(PNOR::SectionInfo_t& o_sectionInfo)
     } while(0);
 
     return l_errl;
+}
+
+/**
+ * @brief This will perform any post-deconfig operations,
+ *        such as syncing state with other subsystems
+ */
+void DeconfigGard::platPostDeconfigureTarget(
+                                   TARGETING::Target * i_pTarget)
+{
+#ifndef __HOSTBOOT_RUNTIME
+#ifdef CONFIG_TPMDD
+    if(   i_pTarget->getAttr<TARGETING::ATTR_TYPE>()
+       == TARGETING::TYPE_TPM)
+    {
+        HWAS_INF("platPostDeconfigureTarget: Deconfiguring TPM 0x%08X",
+            get_huid(i_pTarget));
+        (void)TRUSTEDBOOT::tpmMarkFailed(i_pTarget);
+    }
+#endif  // CONFIG_TPMDD
+#endif  // #ifndef __HOSTBOOT_RUNTIME
+
+#ifdef __HOSTBOOT_RUNTIME
+   // As part of keeping things in sync when a target is
+   // deconfiged, HBRT will send a message down to FSP to
+   // inform FSP that a target has been deconfiged
+   errlHndl_t l_err = nullptr;
+
+   // Handles to the firmware messages
+   hostInterfaces::hbrt_fw_msg *l_req_fw_msg = nullptr;
+   hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+
+   do
+   {
+      if ((nullptr == g_hostInterfaces) ||
+          (nullptr == g_hostInterfaces->firmware_request))
+      {
+         HWAS_ERR("Hypervisor firmware_request interface not linked");
+
+         /*@
+          * @errortype
+          * @severity         ERRL_SEV_INFORMATIONAL
+          * @moduleid         HWAS::MOD_PLAT_DECONFIG_GARD
+          * @reasoncode       HWAS::RC_RT_NULL_FIRMWARE_REQUEST_PTR
+          * @userdata1        HUID of target
+          * @userdata2        none
+          * @devdesc          Post de-configuration of target failed
+          */
+         l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              HWAS::MOD_PLAT_DECONFIG_GARD,
+                              HWAS::RC_RT_NULL_FIRMWARE_REQUEST_PTR,
+                              get_huid(i_pTarget),
+                              0,
+                              true);
+         break;
+      }
+
+      // Create and initialize to zero a few needed variables
+      uint32_t l_fsp_data_size(0);
+      uint64_t l_req_fw_msg_size(0), l_resp_fw_msg_size(0);
+
+      // Create the dynamic firmware messages
+      createGenericFspMsg(sizeof(TargetDeconfigHbrtFspData_t),
+                          l_fsp_data_size,
+                          l_req_fw_msg_size,
+                          l_req_fw_msg,
+                          l_resp_fw_msg_size,
+                          l_resp_fw_msg);
+
+      // If there was an issue with creating the messages,
+      // Create an Error Log entry and exit
+      if (!l_req_fw_msg || !l_resp_fw_msg)
+      {
+         HWAS_ERR("Unable to allocate firmware request messages");
+
+         /*@
+          * @errortype
+          * @severity         ERRL_SEV_INFORMATIONAL
+          * @moduleid         HWAS::MOD_PLAT_DECONFIG_GARD
+          * @reasoncode       HWAS::RC_RT_NULL_FIRMWARE_MSG_PTR
+          * @userdata1        HUID of target
+          * @userdata2        none
+          * @devdesc          Post de-configuration of target failed
+          */
+         l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                              HWAS::MOD_PLAT_DECONFIG_GARD,
+                              HWAS::RC_RT_NULL_FIRMWARE_MSG_PTR,
+                              get_huid(i_pTarget),
+                              0,
+                              true);
+         break;
+      }
+
+      // Populate the request message with given data
+      l_req_fw_msg->generic_msg.msgq = MBOX::FSP_TARG_DECONFIG_MSGQ;
+      l_req_fw_msg->generic_msg.msgType =
+                            GenericFspMboxMessage_t::MSG_DECONFIG_TARGET;
+
+      // Create a useful struct to populate the generic_msg::data field
+      // Setting the HUID in the 1st 4 bytes (32bits) followed by the
+      // HWAS state.
+      TargetDeconfigHbrtFspData_t* l_fspData =
+                  reinterpret_cast<TargetDeconfigHbrtFspData_t*>
+                                 (&(l_req_fw_msg->generic_msg.data));
+      l_fspData->huid = get_huid(i_pTarget);
+      l_fspData->hwasState = i_pTarget->getAttr<ATTR_HWAS_STATE>();
+
+      // Binary trace the request message
+      HWAS_INF_BIN("Sending firmware_request",
+                   l_req_fw_msg,
+                   l_req_fw_msg_size);
+
+      // Make the firmware_request call
+      // Inform the FSP that this target has been deconfiged
+      l_err = firmware_request_helper(l_req_fw_msg_size,
+                                      l_req_fw_msg,
+                                      &l_resp_fw_msg_size,
+                                      l_resp_fw_msg);
+   } while(0);
+
+   if (l_err)
+   {
+      errlCommit(l_err, HWAS_COMP_ID);
+   }
+
+   // Release the firmware messages and set to NULL
+   delete []l_req_fw_msg;
+   delete []l_resp_fw_msg;
+   l_req_fw_msg = l_resp_fw_msg = nullptr;
+#endif  // __HOSTBOOT_RUNTIME
+}
+
+//*****************************************************************************
+bool platSystemIsAtRuntime()
+{
+#ifndef __HOSTBOOT_RUNTIME
+    HWAS_INF("HostBoot is running so system is NOT at runtime.");
+    return false;
+#else
+    HWAS_INF("HostBoot is NOT running so system is at runtime.");
+    return true;
+#endif
+}
+
+//*****************************************************************************
+errlHndl_t hwasError(const uint8_t i_sev,
+              const uint8_t i_modId,
+              const uint16_t i_reasonCode,
+              const uint64_t i_user1,
+              const uint64_t i_user2)
+{
+    errlHndl_t l_pErr;
+
+    l_pErr = new ERRORLOG::ErrlEntry(
+                    (ERRORLOG::errlSeverity_t)i_sev, i_modId,
+                    i_reasonCode,
+                    i_user1, i_user2);
+    l_pErr->collectTrace("HWAS_I");
+    return l_pErr;
 }
 
 } // namespace HWAS

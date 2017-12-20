@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ namespace MBOX
         FSP_PRD_SYNC_MSGQ_ID    = 0x8000000D,
         FSP_TOD_MSGQ            = 0x8000000E,
         FSP_SBE_SYNC_MSGQ_ID    = 0x8000000F,
+        FSP_TARG_DECONFIG_MSGQ  = 0x80000010,
         FSP_LID_MSGQ            = FSP_ATTR_SYNC_MSGQ,
 
 
