@@ -73,7 +73,7 @@ namespace TRACE
              *  @param[in] i_maxPages - Maximum number of pages to consume
              *                          before 'claimEntry' blocks.
              */
-            Buffer(DaemonIf* i_daemon, size_t i_maxPages = 4);
+            Buffer(DaemonIf* i_daemon, size_t i_maxPages = 16);
 #else
             /** Constructor.
              *
