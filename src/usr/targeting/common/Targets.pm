@@ -787,11 +787,13 @@ sub buildAffinity
                 $self->log ($target, "Setting $target as ACTING_MASTER");
                 $self->setAttribute($target, "PROC_MASTER_TYPE",
                                   "ACTING_MASTER");
+                $self->setAttribute($target, "PROC_SBE_MASTER_CHIP", "TRUE");
             }
             else
             {
                $self->setAttribute($target, "PROC_MASTER_TYPE",
                                "NOT_MASTER");
+               $self->setAttribute($target, "PROC_SBE_MASTER_CHIP", "FALSE");
             }
 
             $self->iterateOverChiplets($target, $sys_pos, $node, $proc);
