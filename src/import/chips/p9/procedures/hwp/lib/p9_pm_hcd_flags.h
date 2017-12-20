@@ -51,6 +51,7 @@ enum PM_GPE_OCCFLG_DEFS
     PGPE_PSTATE_PROTOCOL_ACTIVATE           = 1,  // @todo PGPE Hcode dependencies
     PGPE_SAFE_MODE                          = 2,
     PM_COMPLEX_SUSPEND                      = 3,
+    PGPE_PROLONGED_DROOP_WORKAROUND_ACTIVE  = 7,
     SGPE_ACTIVE                             = 8,
     SGPE_IGNORE_STOP_CONTROL                = 9,
     SGPE_IGNORE_STOP_ACTION                 = 10,
@@ -64,6 +65,9 @@ enum PM_GPE_OCCFLG_DEFS
     PIB_I2C_MASTER_ENGINE_2_LOCK_BIT1       = 19, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_3_LOCK_BIT0       = 20, //BIT0 ored BIT1 gives the field
     PIB_I2C_MASTER_ENGINE_3_LOCK_BIT1       = 21, //BIT0 ored BIT1 gives the field
+    PGPE_PM_RESET_SUPPRESS                  = 27,
+    WOF_HCODE_MODE_BIT0                     = 28,
+    WOF_HCODE_MODE_BIT1                     = 29,
     REQUESTED_ACTIVE_QUAD_UPDATE            = 30,
     REQUEST_OCC_SAFE_STATE                  = 31
 };
@@ -89,6 +93,7 @@ enum PM_GPE_OCC_SCRATCH2_DEFS
     L3_CONTAINED_MODE                       = 11,
     PGPE_SAFE_MODE_ERROR                    = 12,
     PM_DEBUG_HALT_ENABLE                    = 15,
+    CORE_THROTTLE_CONTINUOUS_CHANGE_ENABLE  = 16,
     PGPE_OP_TRACE_DISABLE                   = 24,
     PGPE_OP_TRACE_MEM_MODE                  = 25
 };
@@ -133,6 +138,16 @@ enum PM_CME_SCRATCH_DEFS
     CME_SCRATCH_LOCAL_PSTATE_IDX_LENGTH     = 6
 };
 
+
+//
+//Enum form of CPPM_CSAR
+//
+enum PM_CPPM_CSAR_DEFS
+{
+    CPPM_CSAR_DISABLE_CME_NACK_ON_PROLONGED_DROOP   = 29,
+    CPPM_CSAR_PSTATE_HCODE_ERROR_INJECT             = 30,
+    CPPM_CSAR_STOP_HCODE_ERROR_INJECT               = 31
+};
 
 //
 //Enum for of PPM Register Bits for FW Usage
