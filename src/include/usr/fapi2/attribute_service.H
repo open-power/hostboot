@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -437,6 +437,18 @@ ReturnCode platGetMBvpdAttr(
 ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
                         uint8_t &o_bucket_val,
                         const uint8_t i_index);
+
+/// @brief This function is called by the FAPI_ATTR_GET macro when getting
+//  the CEN_CDIMM_VPD_* attributes. It should not be called directly.
+//
+//  @param[in] i_fapiTarget  The target for the attribute operation.
+//  @param[in] i_attr        Which ATTR extracting from VPD
+//  @param[out] o_val        The retrieved attribute value.
+//  @return ReturnCode       Zero on success, else platform specified error.
+ReturnCode platGetMBvpdSlopeInterceptData(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                   const uint32_t i_attr,
+                                   uint32_t& o_val);
 
 // -----------------------------------------------------------------------------
 // End TODO: End to be supported functions
@@ -1454,6 +1466,87 @@ fapiToTargeting::ID, sizeof(VAL), &(VAL))
     ? fapi2::ReturnCode() : \
     fapi2::platAttrSvc::\
     platGetMBvpdAttr<fapi2::ATTR_CEN_VPD_MT_DATA_CONTROL_BYTE_Type>(ID, TARGET, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT access to
+// the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE access to
+// the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_SLOPE access to the correct
+// HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_SLOPE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT access to
+// the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
+//----------------------------------------------------------------------------
+// MACRO to route ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE access to
+// the correct HB function
+//----------------------------------------------------------------------------
+#define ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE_GETMACRO(ID, TARGET, VAL) \
+    AttrOverrideSync::getAttrOverrideFunc(ID, TARGET, &VAL)\
+    ? fapi2::ReturnCode() : \
+    fapi2::platAttrSvc::\
+    platGetMBvpdSlopeInterceptData(TARGET, ID, VAL)
+
 
 
 #endif // ATTRIBUTESERVICE_H_

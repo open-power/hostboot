@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,6 +73,7 @@
 #include<vpd_accessors/getMBvpdDram2NModeEnabled.H>
 #include<vpd_accessors/getMBvpdMemoryDataVersion.H>
 #include<vpd_accessors/getMBvpdSPDXRecordVersion.H>
+#include<vpd_accessors/getMBvpdSlopeInterceptData.H>
 #include<vpd_accessors/getMBvpdSensorMap.H>
 #include<vpd_accessors/getMBvpdSpareDramData.H>
 #include<vpd_accessors/getMBvpdVersion.H>
@@ -1821,6 +1822,70 @@ ReturnCode getPllBucket(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
     }
     return l_rc;
 }
+
+//-----------------------------------------------------------------------------
+ReturnCode platGetMBvpdSlopeInterceptData(
+                                   const Target<TARGET_TYPE_ALL>& i_fapiTarget,
+                                   const uint32_t i_attr,
+                                   uint32_t& o_val)
+{
+    ReturnCode rc;
+
+    // Don't need to check the type here, the FAPI_ATTR_GET macro clause
+    // "fapi2::Target<ID##_TargetType>(TARGET)" does it for us.  However,
+    // to enable a streamlined dump of the attributes, all plat code must use
+    // the generic TARGET_TYPE_ALL -- so convert back to the correct type
+    // manually
+    TARGETING::Target * l_pTarget = NULL;
+    errlHndl_t l_errl = getTargetingTarget(i_fapiTarget, l_pTarget);
+
+    if (l_errl)
+    {
+        FAPI_ERR("platGetMBvpdSPDXRecordVersion: "
+                                              "Error from getTargetingTarget");
+        rc.setPlatDataPtr(reinterpret_cast<void *> (l_errl));
+    }
+    else
+    {
+        MBvpdSlopeIntercept l_val;
+
+        switch (i_attr)
+        {
+            case ATTR_CEN_CDIMM_VPD_MASTER_POWER_INTERCEPT:
+                l_val = MASTER_POWER_INTERCEPT;
+                break;
+            case ATTR_CEN_CDIMM_VPD_MASTER_POWER_SLOPE:
+                l_val = MASTER_POWER_SLOPE;
+                break;
+            case ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_INTERCEPT:
+                l_val = MASTER_TOTAL_POWER_INTERCEPT;
+                break;
+            case ATTR_CEN_CDIMM_VPD_MASTER_TOTAL_POWER_SLOPE:
+                l_val = MASTER_TOTAL_POWER_INTERCEPT;
+                break;
+            case ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_INTERCEPT:
+                l_val = SUPPLIER_POWER_INTERCEPT;
+                break;
+            case ATTR_CEN_CDIMM_VPD_SUPPLIER_POWER_SLOPE:
+                l_val = SUPPLIER_POWER_SLOPE;
+                break;
+            case ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_INTERCEPT:
+                l_val = SUPPLIER_TOTAL_POWER_INTERCEPT;
+                break;
+            case ATTR_CEN_CDIMM_VPD_SUPPLIER_TOTAL_POWER_SLOPE:
+                l_val = SUPPLIER_TOTAL_POWER_SLOPE;
+                break;
+            default:
+                l_val = MASTER_POWER_INTERCEPT;
+        }
+
+        fapi2::Target<fapi2::TARGET_TYPE_MEMBUF_CHIP> l_fapiTarget(l_pTarget);
+        rc = getMBvpdSlopeInterceptData(l_fapiTarget, l_val, o_val);
+    }
+
+    return rc;
+}
+
 
 } // End platAttrSvc namespace
 
