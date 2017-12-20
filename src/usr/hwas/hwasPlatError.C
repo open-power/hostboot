@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,22 +34,6 @@
 
 namespace HWAS
 {
-
-errlHndl_t hwasError(const uint8_t i_sev,
-              const uint8_t i_modId,
-              const uint16_t i_reasonCode,
-              const uint64_t i_user1,
-              const uint64_t i_user2)
-{
-    errlHndl_t l_pErr;
-
-    l_pErr = new ERRORLOG::ErrlEntry(
-                    (ERRORLOG::errlSeverity_t)i_sev, i_modId,
-                    i_reasonCode,
-                    i_user1, i_user2);
-    l_pErr->collectTrace("HWAS_I");
-    return l_pErr;
-}
 
 void hwasErrorAddProcedureCallout(errlHndl_t                & io_errl,
                                   const HWAS::epubProcedureID i_procedure,

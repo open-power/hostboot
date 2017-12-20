@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,7 +25,7 @@
 #ifndef __RUNTIME__GENERIC_HBRT_FSP_MESSAGE_H
 #define __RUNTIME__GENERIC_HBRT_FSP_MESSAGE_H
 
-#include <builtins.h>
+#include <targeting/common/attributes.H>   // TARGETING::HwasState
 
 /** @file generic_hbrt_fsp_message.H
  *  @brief A generic structure for passing data
@@ -33,8 +33,6 @@
  *  This file has a generic struct to be used by the
  *  FSP/HWSV team to send and receive data.
  */
-
-
 
 /**
   * This generates a sequence ID that the GenericFspMboxMessage_t
@@ -49,6 +47,19 @@ public:
 private:
   static uint16_t SEQ_ID;
 };
+
+
+/**
+  * A useful struct to pack/access the HUID and HWAS state
+  * from the GenericFspMboxMessage_t.data.
+  * The HUID will be in the first 4 bytes followed by the HWAS state.
+  */
+struct TargetDeconfigHbrtFspData_t
+{
+   uint32_t huid;
+   TARGETING::HwasState hwasState;
+} PACKED ;
+
 
 /**
   * A useful struct to access the PLID from GenericFspMboxMessage_t.data
@@ -107,6 +118,7 @@ struct GenericFspMboxMessage_t
         MSG_TOD_BACKUP_RESET             = 0x0001,
         MSG_TOD_BACKUP_RESET_INFORM_PHYP = 0x0002,
         MSG_TOD_TOPOLOGY_DATA            = 0x0003,
+        MSG_DECONFIG_TARGET              = 0x0004,
         MSG_SBE_ERROR                    = 0x000000E1,
         MSG_SBE_RECOVERY_SUCCESS         = 0x000000E2,
         MSG_SBE_RECOVERY_FAILED          = 0x000000E3,

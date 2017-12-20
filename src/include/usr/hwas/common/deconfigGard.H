@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -438,10 +438,14 @@ public:
     errlHndl_t platGetGardRecords(const TARGETING::Target * const i_pTarget,
                               GardRecords_t & o_records);
 
-
-
-
-
+    /**
+     * @brief Platform specific function that
+     *         Will perform any post-deconfig operations,
+     *         such as syncing state with other subsystems
+     *
+     * @param[in]  i_pTarget  Pointer to target
+     */
+    void platPostDeconfigureTarget(TARGETING::Target * i_pTarget);
 
 protected:
 

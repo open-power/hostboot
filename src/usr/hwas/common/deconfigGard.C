@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,7 +114,7 @@ errlHndl_t clearGardByType(const GARD_ErrorType i_type)
     return theDeconfigGard().clearGardRecordsByType(i_type);
 }
 
-#endif
+#endif //__HOSTBOOT_RUNTIME
 
 //******************************************************************************
 DeconfigGard & theDeconfigGard()
@@ -911,6 +911,7 @@ errlHndl_t DeconfigGard::getGardRecords(
     errlHndl_t l_pErr = platGetGardRecords(i_pTarget, o_records);
     return l_pErr;
 }
+#endif //__HOSTBOOT_RUNTIME
 
 //******************************************************************************
 errlHndl_t DeconfigGard::deconfigureTarget(
@@ -1004,6 +1005,7 @@ errlHndl_t DeconfigGard::deconfigureTarget(
     return l_pErr;
 } // deconfigureTarget
 
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 void DeconfigGard::registerDeferredDeconfigure(
         const Target & i_target,
@@ -1066,7 +1068,7 @@ errlHndl_t DeconfigGard::_getDeconfigureRecords(
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return NULL;
 }
-
+#endif //__HOSTBOOT_RUNTIME
 
 //******************************************************************************
 /**
@@ -2041,26 +2043,24 @@ void DeconfigGard::_deconfigureTarget(
                 // Set flag indicating x/a/o bus endpoint deconfiguration
                 iv_XAOBusEndpointDeconfigured = true;
             }
+
+            // The target has been successfully de-configured,
+            // perform any other post-deconfig operations,
+            // e.g. syncing state with other subsystems
+            // TODO RTC:184521: Allow function platPostDeconfigureTarget
+            // to run once FSP supports it
+            // Remove the #ifdef ... #endif, once FSP is ready for code
+            #ifdef __HOSTBOOT_MODULE
+                platPostDeconfigureTarget(&i_target);
+            #endif
         }
     }
-
-    //HWAS_DBG("Deconfiguring Target %.8X exiting", get_huid(&i_target));
 } // _deconfigureTarget
 
 //******************************************************************************
 void DeconfigGard::_doDeconfigureActions(Target & i_target)
 {
  // Placeholder for any necessary deconfigure actions
-
-#ifdef CONFIG_TPMDD
-    if(   i_target.getAttr<TARGETING::ATTR_TYPE>()
-       == TARGETING::TYPE_TPM)
-    {
-        HWAS_INF("_doDeconfigureActions: Deconfiguring TPM 0x%08X",
-            get_huid(&i_target));
-        (void)TRUSTEDBOOT::tpmMarkFailed(&i_target);
-    }
-#endif
 
 #ifdef CONFIG_BMC_IPMI
     // set the BMC status for this target
@@ -2081,6 +2081,7 @@ void DeconfigGard::_doDeconfigureActions(Target & i_target)
 
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 void DeconfigGard::_createDeconfigureRecord(
     const Target & i_target,
@@ -2178,6 +2179,8 @@ void DeconfigGard::processDeferredDeconfig()
 
     HWAS_DBG("<processDeferredDeconfig");
 } // processDeferredDeconfig
+#endif // __HOSTBOOT_RUNTIME
+
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_deconfigureAssocProc(ProcInfoVector &io_procInfo)
@@ -2718,6 +2721,7 @@ errlHndl_t DeconfigGard::_symmetryValidation(ProcInfoVector &io_procInfo)
     return l_errlHdl;
 }
 
+#ifndef __HOSTBOOT_RUNTIME
 //******************************************************************************
 
 void DeconfigGard::setXAOBusEndpointDeconfigured(bool deconfig)
@@ -2755,6 +2759,7 @@ void DeconfigGard::_clearFCODeconfigure(ConstTargetHandle_t i_nodeTarget)
     }
 }
 //******************************************************************************
+#endif // __HOSTBOOT_RUNTIME
 
 //Note this will not find child DIMMs because they are
 //affinity children, not physical
@@ -2788,7 +2793,5 @@ bool DeconfigGard::anyChildFunctional(Target & i_parent)
     return retVal;
 } //anyChildFunctional
 
-
-#endif
-} // namespce HWAS
+} // namespace HWAS
 

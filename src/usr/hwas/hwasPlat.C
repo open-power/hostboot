@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -180,17 +180,6 @@ errlHndl_t platReadIDEC(const TargetHandle_t &i_target)
 
     return errl;
 } // platReadIDEC
-
-//******************************************************************************
-// platSystemIsAtRuntime function
-// Description: This function will return false always because when Hostboot
-// is running then System cannot be at runtime
-//******************************************************************************
-bool platSystemIsAtRuntime()
-{
-    HWAS_INF("HostBoot is running so system is not at runtime.");
-    return false;
-}
 
 //******************************************************************************
 // platIsMinHwCheckingAllowed function

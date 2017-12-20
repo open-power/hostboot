@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,6 +46,8 @@
 #include <stdint.h>
 #include <time.h>
 #include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 #include "generic_hbrt_fsp_message.H"
 
 /** Memory error types defined for memory_error() interface. */
