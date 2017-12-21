@@ -131,6 +131,7 @@ errlHndl_t verifyAndMovePayload(void)
                    ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
                    "payload_tmp_virt_addr (loc=0x%X)",
                    blockMapFail);
+        // Error log created outside of do-while loop
         break;
     }
 
@@ -168,8 +169,22 @@ errlHndl_t verifyAndMovePayload(void)
     assert(sys != nullptr, "verifyAndMovePayload() sys target is NULL");
     uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
 
-    payloadBase = (payloadBase * MEGABYTE)
-                  - PAGESIZE; // Put header before PAYLOAD_BASE
+    payloadBase = payloadBase * MEGABYTE;
+
+    if (is_phyp)
+    {
+        // Put header before PAYLOAD_BASE for PHYP/POWERVM
+        payloadBase -= PAGESIZE;
+    }
+    else
+    {
+        // Move virtual address past OPAL header for memcpy below
+        payload_tmp_virt_addr = reinterpret_cast<void*>(
+                                  reinterpret_cast<uint64_t>(
+                                    payload_tmp_virt_addr) +
+                                    PAGESIZE);
+        payload_size -= PAGESIZE;
+    }
 
     // @TODO RTC 168745 - Use ContainerHeader to get accurate payload size
     payloadBase_virt_addr = mm_block_map(
@@ -184,6 +199,7 @@ errlHndl_t verifyAndMovePayload(void)
                    ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
                    "payloadBase_virt_addr (loc=0x%X)",
                    blockMapFail);
+        // Error log created outside of do-while loop
         break;
     }
 
@@ -207,6 +223,10 @@ errlHndl_t verifyAndMovePayload(void)
     // PHYP images and then adding 1 PAGESIZE since our virtual address starts
     // at the secure header of PAYLOAD before PAYLOAD_BASE
     size_t hdat_cpy_offset = 0x5001000;
+    if (!is_phyp)
+    {
+        hdat_cpy_offset = 0x31200000;
+    }
 
     hdat_tmp_virt_addr = mm_block_map(
                             reinterpret_cast<void*>(HDAT_TMP_ADDR),
@@ -220,6 +240,7 @@ errlHndl_t verifyAndMovePayload(void)
                    ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
                    "hdat_tmp_virt_addr (loc=0x%X)",
                    blockMapFail);
+        // Error log created outside of do-while loop
         break;
     }
 
@@ -236,6 +257,7 @@ errlHndl_t verifyAndMovePayload(void)
                    ERR_MRK"verifyAndMovePayload(): Fail to mm_block_map "
                    "hdat_final_virt_addr (loc=0x%X)",
                    blockMapFail);
+        // Error log created outside of do-while loop
         break;
     }
 
@@ -322,7 +344,7 @@ errlHndl_t verifyAndMovePayload(void)
              * @severity         ERRL_SEV_UNRECOVERABLE
              * @moduleid         MOD_VERIFY_AND_MOVE_PAYLOAD
              * @userdata1        Map Fail Location
-             * @userdata2        <UNUSED>
+             * @userdata2        Return code from mm_block_unmap
              * @devdesc          mm_block_unmap failed and returned nullptr
              * @custdesc         A problem occurred during the IPL
              *                   of the system.
@@ -330,8 +352,8 @@ errlHndl_t verifyAndMovePayload(void)
             errlHndl_t unmap_err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                                  MOD_VERIFY_AND_MOVE_PAYLOAD,
                                                  RC_MM_UNMAP_ERR,
-                                                 blockMapFail,
-                                                 0x0,
+                                                 ptr.second,
+                                                 rc,
                                                  true /*Add HB SW Callout*/);
             unmap_err->collectTrace("ISTEPS_TRACE",256);
 
