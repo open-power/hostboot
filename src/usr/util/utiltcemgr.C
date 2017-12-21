@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -883,8 +883,8 @@ errlHndl_t UtilTceMgr::deallocateTces(const uint32_t i_startingToken,
 
     do
     {
-         // Assert if i_startingToken is not aligned on PAGESIZE
-         assert((i_startingToken % PAGESIZE) == 0, "UtilTceMgr::deallocateTces: i_startingToken (0x%.8X) is not page aligned", i_startingToken);
+        // Assert if i_startingToken is not aligned on PAGESIZE
+        assert((i_startingToken % PAGESIZE) == 0, "UtilTceMgr::deallocateTces: i_startingToken (0x%.8X) is not page aligned", i_startingToken);
 
         // Assert if i_size is not greater than zero
         assert(i_size > 0, "UtilTceMgr::deallocateTces: i_size = %d, not greater than zero", i_size);
