@@ -7568,6 +7568,23 @@ Selects which voltage level to place the Core and ECO domain PFETs upon Winkle e
 </attribute>
 
 <attribute>
+  <id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id>
+  <description>
+      Specifies the starting memory address that corresponds to the TCE Token
+      used by the FSP to transfer the PAYLOAD into system memory.
+      If 0xFFFFFFFFFFFFFFFF, then invalid; otherwise, valid.
+  </description>
+  <simpleType>
+      <uint64_t>
+        <default>0xFFFFFFFFFFFFFFFF</default>
+      </uint64_t>
+  </simpleType>
+  <persistency>volatile</persistency>
+  <readable/>
+  <writeable/>
+</attribute>
+
+<attribute>
   <id>TCE_START_TOKEN_FOR_HDAT</id>
   <description>
       Specifies which TCE Token the FSP should start with to transfer the

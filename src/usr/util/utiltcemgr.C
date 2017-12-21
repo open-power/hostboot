@@ -48,6 +48,7 @@
 #include <targeting/common/targetservice.H>
 #include <devicefw/userif.H>
 #include <initservice/initserviceif.H>
+#include <sbeio/sbeioif.H>
 
 trace_desc_t* g_trac_tce = nullptr;
 TRAC_INIT(&g_trac_tce, UTILTCE_TRACE_NAME, 4*KILOBYTE);
@@ -160,6 +161,24 @@ errlHndl_t utilSetupPayloadTces(void)
     Singleton<UtilTceMgr>::instance().setToken(UtilTceMgr::PAYLOAD_TOKEN,
                                                token);
 
+    // For PSI Diagnostics Test the FSP writes and reads back patterns to the
+    // PAYLOAD section via PSI and FSI so it needs to know the starting memory
+    // address of this section and have an unsecure read-write memory region
+    // opened for it
+    sys->setAttr<TARGETING::ATTR_START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN>(addr);
+
+    // Open Read-Write Unsecure Memory Region
+    errl = SBEIO::openUnsecureMemRegion(addr,
+                                        size,
+                                        true,     //Read-Write
+                                        nullptr); //Master Processor
+
+    if (errl)
+    {
+        TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): ERROR back from SBEIO::openUnsecureMemRegion() for PAYLOAD using addr=0x%.16llX, size=0x%llX", addr, size);
+        break;
+    }
+
     // Allocate TCEs for HDAT
     addr = HDAT_TMP_ADDR;
     size = HDAT_TMP_SIZE;
@@ -199,7 +218,8 @@ errlHndl_t utilClosePayloadTces(void)
 
     TRACFCOMP(g_trac_tce,ENTER_MRK"utilClosePayloadTces()");
 
-    // size is a constant for PAYLOAD
+    // Close PAYLOAD TCEs
+    // -- size is a constant for PAYLOAD
     size = MCL_TMP_SIZE;
     token = Singleton<UtilTceMgr>::instance().getToken(UtilTceMgr::PAYLOAD_TOKEN);
     errl = utilDeallocateTces(token, size);
@@ -209,7 +229,19 @@ errlHndl_t utilClosePayloadTces(void)
         break;
     }
 
-    // size is a constant for HDAT
+    // Close the Unsecure Memory Region that was opened for the FSP to run
+    // PSI Diagnostics Test using the PAYLOAD section
+    // -- addr is a constant for PAYLOAD
+    errl = SBEIO::closeUnsecureMemRegion(MCL_TMP_ADDR,
+                                         nullptr); //Master Processor
+    if(errl)
+    {
+        TRACFCOMP(g_trac_tce,"utilClosePayloadTces(): ERROR back from closeUnsecureMemRegion() using start address=0x%016llX",MCL_TMP_ADDR);
+        break;
+    }
+
+    // Close HDAT TCEs
+    // --size is a constant for HDAT
     size = HDAT_TMP_SIZE;
     token = Singleton<UtilTceMgr>::instance().getToken(UtilTceMgr::HDAT_TOKEN);
     errl = utilDeallocateTces(token, size);

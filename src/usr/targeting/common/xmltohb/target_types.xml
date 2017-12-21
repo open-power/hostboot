@@ -948,6 +948,7 @@
   <attribute><id>PIB_I2C_REFCLOCK</id></attribute>
   <attribute><id>USE_TCES_FOR_DMAS</id></attribute>
   <attribute><id>TCE_START_TOKEN_FOR_PAYLOAD</id></attribute>
+  <attribute><id>START_MEM_ADDRESS_FOR_PAYLOAD_TCE_TOKEN</id></attribute>
   <attribute><id>TCE_START_TOKEN_FOR_HDAT</id></attribute>
   <!--fsp requirement-->
   <attribute>
