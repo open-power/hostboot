@@ -46,9 +46,9 @@ use constant
     PERVASIVE_PARENT_MI_OFFSET => 7,
     PERVASIVE_PARENT_DMI_OFFSET => 7,
     NUM_PROCS_PER_GROUP => 4,
-    DIMMS_PER_PROC => 32, # 2 memory riser cards per proc x 16 IS DIMMs (4 Centaurs x 4 DDR ports)
-    DIMMS_PER_DMI => 4, # 1 Centaur x 4 dimms per DDR port
-    DIMMS_PER_MBAPORT => 2, # MAX Dimms Per MBA PORT is 2
+    DIMMS_PER_PROC => 64,  # Cumulus
+    DIMMS_PER_DMI => 8,    # Cumulus
+    DIMMS_PER_MBAPORT => 4,# Cumulus
     MAX_MCS_PER_PROC => 4, # 4 MCS per Nimbus
     MBA_PER_MEMBUF => 2,
 
@@ -1487,18 +1487,18 @@ sub processMc
                                         my $aff_pos = DIMMS_PER_PROC*$proc+
                                                       DIMMS_PER_DMI*$dmi_num+
                                                       DIMMS_PER_MBAPORT*$mba+
-                                                      $port_num;
+                                                      $port_num + 2*$dimm_num;
                                         my $fapi_pos =
                                          (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
                                           DIMMS_PER_DMI*$dmi_num+
                                           DIMMS_PER_MBAPORT*$mba+
-                                          $port_num;
+                                          $port_num  + 2*$dimm_num;
 
                                         #unique offset per system
                                         my $dimm_ordinal_id = (($node * $maxInstance{"PROC"}) + $proc ) * DIMMS_PER_PROC +
                                                       DIMMS_PER_DMI*$dmi_num+
                                                       DIMMS_PER_MBAPORT*$mba+
-                                                      $port_num;
+                                                      $port_num  + 2*$dimm_num;
 
                                         $self->setAttribute($dimm, "AFFINITY_PATH",
                                                   $membuf_aff . "/mba-$mba/dimm-$dimmPos" );
@@ -1519,7 +1519,7 @@ sub processMc
 
                                         $self->setAttribute($dimm, "REL_POS", $aff_pos);
 
-                                        $self->setAttribute($dimm, "VPD_REC_NUM", $aff_pos);
+                                        $self->setAttribute($dimm, "VPD_REC_NUM", $self->{dimm_tpos});
 
                                         $self->setHuid($dimm, $sys, $node);
                                         $self->{targeting}
