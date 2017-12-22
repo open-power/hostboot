@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2018                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2901,7 +2901,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2912,7 +2911,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2923,7 +2921,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -2934,7 +2931,6 @@ Comes from the VPD MW Keyword</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -3091,7 +3087,6 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -3102,7 +3097,6 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -3113,7 +3107,6 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 <attribute>
@@ -3124,7 +3117,6 @@ firmware notes: none</description>
     <platInit/>
     <odmVisable/>
     <persistRuntime/>
-    <writeable/>
 </attribute>
 
 </attributes>
