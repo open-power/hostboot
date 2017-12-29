@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,6 +263,7 @@ fapi_try_exit:
 // Parameter list:
 // const fapi2::Target &i_target:    Processor chip target.
 // void*     i_overlaysSection:  Pointer to extracted DD section in hw image
+// uint8_t   i_ddLevel:          DD level (to be used for TOR API level verif)
 // RingId_t  i_ringId:           GPTR ring id
 // void*     io_ringBuf2:        Work buffer which contains RS4 overlay ring on return.
 // void*     io_ringBuf3:        Work buffer which contains data+care raw overlay ring on return.
@@ -275,6 +276,7 @@ fapi2::ReturnCode get_overlays_ring(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
     void*     i_overlaysSection,
+    uint8_t   i_ddLevel,
     RingId_t  i_ringId,
     void**    io_ringBuf2,
     void**    io_ringBuf3,
@@ -289,7 +291,6 @@ fapi2::ReturnCode get_overlays_ring(
     // As we'll be using tor_get_single_ring() with P9_XIP_MAGIC_SEEPROM
     // to identify TOR layout for overlays/overrides sections we have to define
     // following variables (though unused in this context) to support the API.
-    uint16_t l_ddLevel = 0;    // Unused param (dd level)
     uint8_t  l_instanceId = 0; // Unused param (instance id)
     uint32_t l_ringBlockSize = 0xFFFFFFFF;  // Unused param (ringBlockSize)
 
@@ -298,7 +299,7 @@ fapi2::ReturnCode get_overlays_ring(
     // Get Gptr overlay ring from overlays section into ringBuf2
     l_rc = tor_get_single_ring(
                i_overlaysSection,
-               l_ddLevel,
+               i_ddLevel,
                i_ringId,
                PT_SBE,
                OVERLAY,
@@ -535,6 +536,7 @@ fapi_try_exit:
 // Parameter list:
 // const fapi2::Target &i_target: Processor chip target.
 // void*      i_overlaysSection:  Pointer to extracted DD section in hw image
+// uint8_t    i_ddLevel:          DD level (to be used by TOR API level verif)
 // void*      io_vpdRing:         Has Mvpd RS4 ring on input and final Vpd RS4 ring on output
 // void*      io_ringBuf2:        Ring work buffer(used for RS4 overlay ring)
 // void*      io_ringBuf3:        Ring work buffer(used for raw data+care overlay ring)
@@ -545,10 +547,11 @@ int process_gptr_rings(
 fapi2::ReturnCode process_gptr_rings(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    void* i_overlaysSection,
-    void* io_vpdRing,
-    void* io_ringBuf2,
-    void* io_ringBuf3)
+    void*   i_overlaysSection,
+    uint8_t i_ddLevel,
+    void*   io_vpdRing,
+    void*   io_ringBuf2,
+    void*   io_ringBuf3)
 {
     ReturnCode l_fapiRc = fapi2::FAPI2_RC_SUCCESS;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -566,6 +569,7 @@ fapi2::ReturnCode process_gptr_rings(
     FAPI_TRY( get_overlays_ring(
                   i_procTarget,
                   i_overlaysSection,
+                  i_ddLevel,
                   l_vpdRingId,
                   &l_ovlyRs4Ring, // Has RS4 ring on return
                   &l_ovlyRawRing, // Has raw data+care ring on return
@@ -643,6 +647,7 @@ fapi_try_exit:
 //  uint32_t&  io_ringSectionSize:   Running ring section size
 //  uint32_t   i_maxRingSectionSize: Max ring section size
 //  void*      i_overlaysSection:    Overlays ring section
+//  uint8_t    i_ddLevel:            DD level (to be used for TOR API level verif)
 //  uint8_t    i_sysPhase:           ={HB_SBE, RT_CME, RT_SGPE}
 //  void*      i_vpdRing:            VPD ring buffer.
 //  uint32_t   i_vpdRingSize:        Size of VPD ring buffer.
@@ -668,6 +673,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
     uint32_t&       io_ringSectionSize,
     uint32_t        i_maxRingSectionSize,
     void*           i_overlaysSection,
+    uint8_t         i_ddLevel,
     uint8_t         i_sysPhase,
     void*           i_vpdRing,
     uint32_t        i_vpdRingSize,
@@ -779,6 +785,7 @@ fapi2::ReturnCode _fetch_and_insert_vpd_rings(
             FAPI_TRY( process_gptr_rings(
                           i_procTarget,
                           i_overlaysSection,
+                          i_ddLevel,
                           i_vpdRing,
                           i_ringBuf2,
                           i_ringBuf3),
@@ -979,6 +986,7 @@ fapi_try_exit:
 //  const fapi::Target &i_target:    Processor chip target.
 //  void*      i_hwImage:            Ptr to ring section.
 //  void**     o_overlaysSection:    Ptr to extracted DD section in hwImage.
+//  uint8_t&   o_ddLevel:            DD level extracted from host services.
 //  bool&      o_bGptrMvpdSupport:   Boolean art indicating whether Gptr support or not.
 #ifdef WIN32
 int resolve_gptr_overlays(
@@ -987,9 +995,10 @@ int resolve_gptr_overlays(
 fapi2::ReturnCode resolve_gptr_overlays(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_procTarget,
 #endif
-    void*   i_hwImage,
-    void**  o_overlaysSection,
-    bool&   o_bGptrMvpdSupport )
+    void*    i_hwImage,
+    void**   o_overlaysSection,
+    uint8_t& o_ddLevel,
+    bool&    o_bGptrMvpdSupport )
 {
 
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -1041,16 +1050,14 @@ fapi2::ReturnCode resolve_gptr_overlays(
     }
     else
     {
-        uint8_t l_ddLevel;
-
         // Get the Overlays dd level
         FAPI_TRY( FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_EC,
                                            i_procTarget,
-                                           l_ddLevel),
+                                           o_ddLevel),
                   "Error: Attribute ATTR_EC failed w/rc=0x%08x",
                   (uint64_t)current_err );
 
-        l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &l_xipSection, l_ddLevel);
+        l_rc = p9_xip_get_section(i_hwImage, P9_XIP_SECTION_HW_OVERLAYS, &l_xipSection, o_ddLevel);
 
         FAPI_ASSERT( l_rc == 0,
                      fapi2::XIPC_XIP_API_MISC_ERROR().
@@ -1064,7 +1071,7 @@ fapi2::ReturnCode resolve_gptr_overlays(
         o_bGptrMvpdSupport = true;
         FAPI_DBG("GPTR support available in overlays for ddLevel=0x%x "
                  "located at addr=0x%08x (hwImage=0x%08x)",
-                 l_ddLevel, *(uint32_t*)o_overlaysSection, *(uint32_t*)i_hwImage);
+                 o_ddLevel, *(uint32_t*)o_overlaysSection, *(uint32_t*)i_hwImage);
     }
 
 fapi_try_exit:
@@ -1125,6 +1132,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     uint32_t l_activeCoreMask  = 0x0;
     uint32_t l_bootCoreMaskMin = 0x0;
     void*    l_overlaysSection;
+    uint8_t  l_ddLevel = UNDEFINED_DD_LEVEL;
     bool     bGptrMvpdSupport = false;
 
 
@@ -1133,6 +1141,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
     FAPI_TRY( resolve_gptr_overlays( i_procTarget,
                                      i_hwImage,
                                      &l_overlaysSection,
+                                     l_ddLevel,
                                      bGptrMvpdSupport ),
               "resolve_gptr_overlays() failed w/rc=0x%08x",
               (uint32_t)current_err );
@@ -1209,6 +1218,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                        io_ringSectionSize,
                                        i_maxRingSectionSize,
                                        l_overlaysSection,
+                                       l_ddLevel,
                                        i_sysPhase,
                                        i_vpdRing,
                                        i_vpdRingSize,
@@ -1315,6 +1325,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                        io_ringSectionSize,
                                        i_maxRingSectionSize,
                                        l_overlaysSection,
+                                       l_ddLevel,
                                        i_sysPhase,
                                        i_vpdRing,
                                        i_vpdRingSize,
@@ -1423,6 +1434,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                                io_ringSectionSize,
                                                i_maxRingSectionSize,
                                                l_overlaysSection,
+                                               l_ddLevel,
                                                i_sysPhase,
                                                i_vpdRing,
                                                i_vpdRingSize,
@@ -1507,6 +1519,7 @@ fapi2::ReturnCode fetch_and_insert_vpd_rings(
                                                io_ringSectionSize,
                                                i_maxRingSectionSize,
                                                l_overlaysSection,
+                                               l_ddLevel,
                                                i_sysPhase,
                                                i_vpdRing,
                                                i_vpdRingSize,

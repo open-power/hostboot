@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,7 +127,7 @@ typedef enum RingBlockType
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_access_ring( void*           i_ringSection,    // Ring section ptr
                      RingId_t        i_ringId,         // Unique ring ID
-                     uint16_t        i_ddLevel,        // DD level info
+                     uint8_t         i_ddLevel,        // DD level info
                      PpeType_t       i_PpeType,        // PPE type : SBE, CME, etc
                      RingVariant_t   i_RingVariant,    // Base, Cache etc
                      uint8_t&        io_instanceId,    // chiplet instance ID
@@ -176,7 +176,7 @@ int tor_access_ring( void*           i_ringSection,    // Ring section ptr
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_single_ring ( void*          i_ringSection,
-                          uint16_t       i_ddLevel,
+                          uint8_t        i_ddLevel,
                           RingId_t       i_ringId,
                           PpeType_t      i_PpeType,
                           RingVariant_t  i_RingVariant,
@@ -220,7 +220,7 @@ int tor_get_single_ring ( void*          i_ringSection,
 ///
 /// \retval non-0 See \ref TOR API RETURN errors
 int tor_get_block_of_rings ( void*          i_ringSection,
-                             uint16_t       i_ddLevel,
+                             uint8_t        i_ddLevel,
                              PpeType_t      i_PpeType,
                              RingVariant_t  i_RingVariant,
                              void**         io_ringBlockPtr,

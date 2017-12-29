@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -284,7 +284,7 @@ int get_ring_from_ring_section( void*           i_ringSection,     // Ring secti
 //////////////////////////////////////////////////////////////////////////////////////////
 int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
                       RingId_t        i_ringId,          // Ring ID
-                      uint16_t        i_ddLevel,         // DD level
+                      uint8_t         i_ddLevel,         // DD level
                       PpeType_t       i_ppeType,         // SBE, CME, SGPE
                       RingVariant_t   i_ringVariant,     // Base,CC,RL (SBE,CME,SGPE only)
                       uint8_t&        io_instanceId,     // Instance ID
@@ -371,6 +371,16 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
             return TOR_DD_LEVEL_NOT_FOUND;
         }
 
+    }
+    else
+    {
+        if ( i_ddLevel != torHeader->ddLevel &&
+             i_ddLevel != UNDEFINED_DD_LEVEL )
+        {
+            MY_ERR("Requested DD level (=0x%x) doesn't match TOR header DD level (=0x%x) nor UNDEFINED_DD_LEVEL\n",
+                   i_ddLevel, torHeader->ddLevel);
+            return TOR_DD_LEVEL_NOT_FOUND;
+        }
     }
 
     if ( ( i_ringBlockType == GET_SINGLE_RING ) ||   // All Magics supported for GET
@@ -491,7 +501,7 @@ int tor_access_ring(  void*           i_ringSection,     // Ring section ptr
 //
 /////////////////////////////////////////////////////////////////////////////////////
 int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
-                          uint16_t      i_ddLevel,         // DD level
+                          uint8_t       i_ddLevel,         // DD level
                           RingId_t      i_ringId,          // Ring ID
                           PpeType_t     i_ppeType,         // SBE, CME, SGPE
                           RingVariant_t i_ringVariant,     // Base,CC,RL (SBE/CME/SGPE only)
@@ -537,7 +547,7 @@ int tor_get_single_ring ( void*         i_ringSection,     // Ring section ptr
 //
 ///////////////////////////////////////////////////////////////////////////////////////
 int tor_get_block_of_rings ( void*           i_ringSection,     // Ring section ptr
-                             uint16_t        i_ddLevel,         // DD level
+                             uint8_t         i_ddLevel,         // DD level
                              PpeType_t       i_ppeType,         // SBE,CME,SGPE
                              RingVariant_t   i_ringVariant,     // Base,CC,RL
                              void**          io_ringBlockPtr,   // Output ring buffer
@@ -643,7 +653,7 @@ int tor_append_ring(  void*           i_ringSection,      // Ring section ptr
 
     rc = tor_access_ring( i_ringSection,
                           i_ringId,
-                          0x00,
+                          UNDEFINED_DD_LEVEL,
                           i_ppeType,
                           i_ringVariant,
                           i_instanceId,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2061,7 +2061,7 @@ p9_xip_get_section(const void* i_image,
         xipTranslateSection(o_hostSection, imageSection);
     }
 
-    if (i_ddLevel == P9_XIP_UNDEFINED_DDLEVEL)
+    if (i_ddLevel == UNDEFINED_DD_LEVEL)
     {
         //Here we always return the entire XIP section. Nothing more to do.
     }

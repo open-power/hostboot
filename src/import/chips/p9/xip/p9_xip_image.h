@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -248,9 +248,6 @@ typedef enum {
 /// gaurantee that the something will be able to complete any 8-byte load/store.
 #define P9_XIP_FINAL_ALIGNMENT 8
 
-/// Local undefined DD level value.
-#define P9_XIP_UNDEFINED_DDLEVEL (uint8_t)0xff
-
 
 ////////////////////////////////////////////////////////////////////////////
 // C Definitions
@@ -263,6 +260,7 @@ typedef enum {
 #include <stdint.h>
 #endif
 #include <stddef.h>
+#include <common_ringId.H>
 
 #ifdef __cplusplus
 extern "C" {
@@ -713,7 +711,7 @@ p9_xip_get_section(const void* i_image,
                    P9XipSection* o_hostSection);
 #else
                    P9XipSection* o_hostSection,
-                   uint8_t i_ddLevel=P9_XIP_UNDEFINED_DDLEVEL);
+                   uint8_t i_ddLevel=UNDEFINED_DD_LEVEL);
 #endif
 
 
