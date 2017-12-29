@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2017
+# Contributors Listed Below - COPYRIGHT 2012,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -48,5 +48,6 @@ SUBDIRS += runtime.d
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p9/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 
 include ${ROOTPATH}/config.mk
