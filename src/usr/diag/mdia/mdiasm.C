@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -918,7 +918,7 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                     {
                         MDIA_SLOW( "sm: restoreDramRepairs(0x%08x)",
                                    get_huid(mca) );
-                        rc = PRDF::restoreDramRepairs<TYPE_MCA>( mca );
+                        rc |= PRDF::restoreDramRepairs<TYPE_MCA>( mca );
                     }
                 }
 
