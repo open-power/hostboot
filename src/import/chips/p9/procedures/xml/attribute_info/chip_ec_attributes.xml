@@ -218,6 +218,30 @@
   </attribute>
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_HW430944</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      HW430944 Quaint Gate
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x20</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x10</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_CHIP_EC_FEATURE_HW417233</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -4125,21 +4149,22 @@
     <id>ATTR_CHIP_EC_FEATURE_HW417829</id>
     <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
     <description>
-      HW417829 / HW423787 - Bad rfscv branch
+      HW417829 / HW423787 - Bad rfscv branch, NDD1.0,2.0,2.1, CDD1.0
+      HW432070 Angry Reindeer - NDD2.2, CDD1.1
     </description>
     <chipEcFeature>
       <chip>
         <name>ENUM_ATTR_NAME_NIMBUS</name>
         <ec>
-          <value>0x21</value>
+          <value>0x22</value>
           <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
       <chip>
         <name>ENUM_ATTR_NAME_CUMULUS</name>
         <ec>
-          <value>0x10</value>
-          <test>EQUAL</test>
+          <value>0x11</value>
+          <test>LESS_THAN_OR_EQUAL</test>
         </ec>
       </chip>
     </chipEcFeature>
