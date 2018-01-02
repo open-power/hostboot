@@ -181,6 +181,7 @@ inline fapi2::ReturnCode set_fwms( const fapi2::Target<T>& i_target,
         mss::ecc::fwms::set_type(l_buffer, i_type);
         mss::ecc::fwms::set_region(l_buffer, i_region);
         mss::ecc::fwms::set_address(l_buffer, i_address);
+        mss::ecc::fwms::set_exit_1(l_buffer, mss::YES);
     }
 
     FAPI_TRY( mss::ecc::fwms::write(i_target, i_rank, l_buffer) );
