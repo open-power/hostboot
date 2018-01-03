@@ -4639,6 +4639,34 @@
     </chipEcFeature>
   </attribute>
 
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_CHIP_EC_FEATURE_BLOCK_REG_WAKEUP_DISABLE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+       Nimbus DD2.2 / Cumulus DD1.1 - There is better fencing on the block wakeup signal
+       from the core ppm, so the CME logic thinks it needs to block interrupts to PC.
+       This sets an override to ignore the fenced off signal
+    </description>
+    <chipEcFeature>
+      <chip>
+        <name>ENUM_ATTR_NAME_NIMBUS</name>
+        <ec>
+          <value>0x22</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+      <chip>
+        <name>ENUM_ATTR_NAME_CUMULUS</name>
+        <ec>
+          <value>0x11</value>
+          <test>GREATER_THAN_OR_EQUAL</test>
+        </ec>
+      </chip>
+    </chipEcFeature>
+  </attribute>
+
+
   <attribute>
     <id>ATTR_CHIP_EC_FEATURE_CXA_P9NDD1_SPY_NAMES</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
