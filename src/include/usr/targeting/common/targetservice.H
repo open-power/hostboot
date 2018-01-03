@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,6 @@ namespace TARGETING
      *  sectionId - Section Id
      *  nodeId  - Node Id
      *  pageNumber - PageNumber for the section.
-     *  padBytes - PadBytes to fill in 2 extra bytes
      *  dataPtr - Data Ptr
      *  pNodeTarget - Node Targeting Ptr
      *
@@ -117,8 +116,7 @@ namespace TARGETING
 
         uint8_t  sectionId;
         uint8_t  nodeId;
-        uint8_t  pageNumber;
-        uint8_t  padBytes;
+        uint16_t  pageNumber;
         uint8_t* dataPtr;
         Target*  pNodeTarget;
     };
