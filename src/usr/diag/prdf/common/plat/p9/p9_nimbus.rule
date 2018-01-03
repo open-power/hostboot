@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2017
+# Contributors Listed Below - COPYRIGHT 2016,2018
 # [+] International Business Machines Corp.
 #
 #
@@ -1598,8 +1598,8 @@ chip p9_nimbus
         capture     group PciChipletFir2;
     };
 
-# Include registers not defined by the xml
-.include "p9_nimbus_regs.rule";
+# Include registers common to all P9 proc chips, not defined by the XML
+.include "p9_proc_common_regs.rule";
 
 };
 
