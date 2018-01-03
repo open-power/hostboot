@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,37 @@ namespace PRDF
 {
 
 using namespace PlatServices;
+
+//------------------------------------------------------------------------------
+
+template<TARGETING::TYPE T>
+TdRankListEntry __getStopRank( ExtensibleChip * i_chip, const MemAddr & i_addr )
+{
+    MemRank stopRank = i_addr.getRank();
+
+    // ############################ SIMICs only ############################
+    // We have found it to be increasingly difficult to simulate the MCBMCAT
+    // register in SIMICs. We tried copying the address in the MCBEA
+    // registers, but the HWP code will input the last possible address to
+    // the MCBEA registers, but it is likely that this address is not a
+    // configured address. MCBIST commands are tolerant of this, where MBA
+    // maintenance commands are not. Also, there are multiple possible
+    // subtests for MCBIST commands. So it is difficult to determine which
+    // subtest will be the last configured address. To maintain sanity, we
+    // will simply short-circuit the code and ensure we always get the last
+    // configured rank.
+    if ( ::Util::isSimicsRunning() )
+    {
+        std::vector<MemRank> list;
+        getSlaveRanks<T>( i_chip->getTrgt(), list );
+        PRDF_ASSERT( !list.empty() ); // func target with no config ranks
+
+        stopRank = list.back(); // Get the last configured rank.
+    }
+    // #####################################################################
+
+    return TdRankListEntry( i_chip, stopRank );
+}
 
 //------------------------------------------------------------------------------
 
@@ -110,6 +141,36 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // commit the error log. This is done to avoid useless
             // informational error logs.
             if ( !errorsFound ) io_sc.service_data->setDontCommitErrl();
+        }
+        else
+        {
+            // Make sure iv_stoppedRank still gets updated.
+            std::vector<ExtensibleChip *> portList;
+            o_rc = getMcbistMaintPort( iv_chip, portList );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMcbistMaintPort(0x%08x) failed",
+                        iv_chip->getHuid() );
+                break;
+            }
+
+            // In broadcast mode, the rank configuration for all ports will be
+            // the same. In non-broadcast mode, there will only be one MCA in
+            // the list. Therefore, we can simply use the first MCA in the list
+            // for all configs.
+            ExtensibleChip * stopChip = portList.front();
+
+            // Get the address in which the command stopped.
+            MemAddr addr;
+            o_rc = getMemMaintAddr<T>( iv_chip, addr );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            iv_stoppedRank = __getStopRank<TYPE_MCA>( stopChip, addr );
         }
 
         // Move onto the next step in the state machine.
@@ -181,37 +242,6 @@ template<TARGETING::TYPE T, typename D>
 uint32_t __checkEcc( ExtensibleChip * i_chip, TdQueue & io_queue,
                      const MemAddr & i_addr, bool & o_errorsFound,
                      STEP_CODE_DATA_STRUCT & io_sc );
-
-//------------------------------------------------------------------------------
-
-template<TARGETING::TYPE T>
-TdRankListEntry __getStopRank( ExtensibleChip * i_chip, const MemAddr & i_addr )
-{
-    MemRank stopRank = i_addr.getRank();
-
-    // ############################ SIMICs only ############################
-    // We have found it to be increasingly difficult to simulate the MCBMCAT
-    // register in SIMICs. We tried copying the address in the MCBEA
-    // registers, but the HWP code will input the last possible address to
-    // the MCBEA registers, but it is likely that this address is not a
-    // configured address. MCBIST commands are tolerant of this, where MBA
-    // maintenance commands are not. Also, there are multiple possible
-    // subtests for MCBIST commands. So it is difficult to determine which
-    // subtest will be the last configured address. To maintain sanity, we
-    // will simply short-circuit the code and ensure we always get the last
-    // configured rank.
-    if ( ::Util::isSimicsRunning() )
-    {
-        std::vector<MemRank> list;
-        getSlaveRanks<T>( i_chip->getTrgt(), list );
-        PRDF_ASSERT( !list.empty() ); // func target with no config ranks
-
-        stopRank = list.back(); // Get the last configured rank.
-    }
-    // #####################################################################
-
-    return TdRankListEntry( i_chip, stopRank );
-}
 
 //------------------------------------------------------------------------------
 
