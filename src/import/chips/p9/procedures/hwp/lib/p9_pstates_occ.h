@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -184,12 +184,12 @@ typedef struct
     WOFElements wof;
 
     // Frequency Limits
-    uint32_t frequency_min_khz;    // Comes from PowerSave #V point after biases
+    uint32_t frequency_min_khz;    // Comes from Safe Mode computation
     uint32_t frequency_max_khz;    // Comes from UltraTurbo #V point after biases
     uint32_t frequency_step_khz;   // Comes from refclk/dpll_divider attributes.
 
     // Minimum Pstate;  Maximum is always 0.
-    uint32_t pstate_min;    // Comes from PowerSave #V point after biases
+    uint32_t pstate_min;           // Pstate reflecting frequency_min_khz
 
     /// Nest frequency in Mhz. This is used by FIT interrupt
     uint32_t nest_frequency_mhz;
