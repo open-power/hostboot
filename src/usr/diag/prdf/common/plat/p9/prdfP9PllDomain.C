@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -195,6 +195,26 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT & serviceData,
         {
             systemPtr->RemoveStoppedChips( i->getTrgt() );
         }
+    }
+
+    // TODO: RTC 184513 - It is possible to have a PLL unlock, a UE RE, and an
+    //       SUE CS. Isolation should be to the PLL error and then the
+    //       additional FFDC should show there was an SUE CS were the root is
+    //       the UE RE. However, PRD does not know how to handle three
+    //       attentions at the same time. For now this will remain a limitation
+    //       due to time contraits, but there is a proposal in RTC 184513 that
+    //       will be solved later. In the meantime, there is a hole in our
+    //       analysis that needs to be fixed. If the is a SUE CS and no UE RE,
+    //       PRD assumes the UE RE was already predictively called out in a
+    //       previous error log. Therefore, nothing will be garded in this error
+    //       log. In the example stated above, the current PRD code will not see
+    //       the UE RE because of the higher priority PLL unlock. So even though
+    //       there is a UE RE present, nothing gets garded. To circumvent this,
+    //       we will set the UERE flag here even though the PLL error is not the
+    //       true SUE source.
+    if ( CHECK_STOP == serviceData.service_data->getPrimaryAttnType() )
+    {
+        serviceData.service_data->SetUERE();
     }
 
     // TODO: RTC 155673 - use attributes to callout active clock sources
