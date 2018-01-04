@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,8 @@ class AttrRP
 
 #ifdef __HOSTBOOT_RUNTIME
     friend int RT_TARG::saveRestoreAttrs(void *,
-                                         void *);
+                                         void *,
+                                         uint64_t&);
 #endif
 
     public:
@@ -237,7 +238,7 @@ class AttrRP
         /**
          *  @brief Initialize the attribute resource provider
          *
-         *  @par Detailed Description"
+         *  @par Detailed Description:
          *      Ensures member variables are initialized to sane values.
          */
         AttrRP()
@@ -255,7 +256,7 @@ class AttrRP
         /**
          *  @brief Initialize temporary attribute resource provider
          *
-         *  @par Detailed Description"
+         *  @par Detailed Description:
          *      Ensures member variables are initialized to sane values.
          */
         AttrRP(TargetingHeader* i_header)

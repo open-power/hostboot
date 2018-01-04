@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1433,8 +1433,8 @@ TargetRangeFilter TargetService::getTargetRangeFilter(void *i_attrData,
         reinterpret_cast<uint32_t*>(reinterpret_cast<char*>(l_header) +
                                     l_header->headerSize);
 
-    (void)TargetService::_configureTargetPool(l_nodeSpecificInfo,
-                                              i_attrRP);
+    TargetService::_configureTargetPool(l_nodeSpecificInfo,
+                                        i_attrRP);
 
     l_nodeSpecificInfo.initialized = true;
 

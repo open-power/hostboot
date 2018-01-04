@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,47 +81,6 @@ namespace TARGETING
                           iv_sections[i].vmmAddress,
                           iv_sections[i].pnorAddress,
                           iv_sections[i].size);
-            }
-
-            for (size_t i = 0; i < iv_sectionCount; ++i)
-            {
-                // get section data from current AttrRP
-                std::vector <TARGETING::sectionRefData>l_pages;
-                l_pages =
-                    l_attributeSync.syncSectionFromAttrRP(iv_sections[i].type);
-
-                // write section data to new AttrRP
-                uint8_t * l_dataPtr = nullptr; // ptr to Attribute address space
-                bool      l_rc = true;         // true if write is successful
-
-                // for each page
-                for(std::vector<TARGETING::sectionRefData>::const_iterator
-                        pageIter = l_pages.begin();
-                    (pageIter != l_pages.end()) && (true == l_rc);
-                    ++pageIter)
-                {
-                    // check that page number is within range
-                    uint64_t l_pageOffset = (*pageIter).pageNumber * PAGESIZE;
-                    if ( iv_sections[i].size < (l_pageOffset + PAGESIZE) )
-                    {
-                        TARG_ERR("page offset 0x%lx is greater than "
-                                 "size 0x%lx of section %u",
-                                 l_pageOffset,
-                                 iv_sections[i].size,
-                                 iv_sections[i].type);
-
-                        l_rc = false;
-                        break;
-                    }
-
-                    // adjust the pointer out by page size * page number
-                    l_dataPtr =
-                        reinterpret_cast<uint8_t *>(iv_sections[i].pnorAddress)
-                        + l_pageOffset;
-
-                    memcpy( l_dataPtr, (*pageIter).dataPtr, PAGESIZE );
-
-                }
             }
         } while(false);
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,8 @@ namespace RT_TARG
 {
     void adjustTargeting4Runtime();
     int saveRestoreAttrs(void *i_rsvdMemPtr,
-                         void *io_lidStructPtr);
+                         void *io_lidStructPtr,
+                         uint64_t& o_userdata2);
 }
 #endif
 
@@ -661,7 +662,8 @@ class Target
 #ifdef __HOSTBOOT_RUNTIME
         friend void RT_TARG::adjustTargeting4Runtime();
         friend int RT_TARG::saveRestoreAttrs(void *,
-                                             void *);
+                                             void *,
+                                             uint64_t&);
 #endif
 
 

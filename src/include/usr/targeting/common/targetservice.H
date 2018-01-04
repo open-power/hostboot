@@ -724,7 +724,7 @@ class TargetService
          *
          *  @param[out] o_maxTargets maximum targets in the range
          *
-         *  @param[in] i_nodeId, node ID for the target. Defaults to 0.
+         *  @param[in] i_nodeId, node ID for the target.
          *
          *  @pre TargetService must be initialized.
          *
@@ -736,7 +736,7 @@ class TargetService
         TargetRangeFilter getTargetRangeFilter(void *i_attrData,
                                                AttrRP *i_attrRP,
                                                uint32_t &o_maxTargets,
-                                               NODE_ID i_nodeId = 0);
+                                               NODE_ID i_nodeId);
 
         /**
          *  @brief Returns Target Attribute information.

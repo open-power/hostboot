@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2018                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -179,17 +179,22 @@ errlHndl_t getHbTarget(
 /**
  * @brief Validate LID Structure against Reserved Memory.  Check that the
  * TargetingHeader eyecatchers are valid, that the TargetingHeader number of
- * sections match, and that the types and sizes of each TargetingSection match.
+ * sections match, and that the types and sizes of each TargetingSection
+ * match.
  * @param[in] Pointer to new LID Structure targeting binary data
  * @param[in] Pointer to current Reserved Memory targeting binary data
+ * @param[out] Error log userdata2 value associated with non-zero rtn code
  * @return 0 on success, else return code
  */
 int validateData(void *i_lidStructPtr,
-                 void *i_rsvdMemPtr)
+                 void *i_rsvdMemPtr,
+                 uint64_t& o_userdata2)
 {
-    TRACFCOMP(g_trac_targeting,ENTER_MRK"validateData");
+    TRACFCOMP(g_trac_targeting, ENTER_MRK"validateData: %p %p",
+              i_lidStructPtr, i_rsvdMemPtr);
 
     int rc = 0;
+    o_userdata2 = 0;
 
     do
     {
@@ -220,7 +225,8 @@ int validateData(void *i_lidStructPtr,
                       "LID Structure TargetingHeader",
                       l_headerLid->eyeCatcher);
 
-            rc = 1;
+            rc = 0x11;
+            o_userdata2 = l_headerLid->eyeCatcher;
 
             break;
         }
@@ -233,7 +239,8 @@ int validateData(void *i_lidStructPtr,
                       "Reserved Memory TargetingHeader",
                       l_headerRsvd->eyeCatcher);
 
-            rc = 1;
+            rc = 0x12;
+            o_userdata2 = l_headerRsvd->eyeCatcher;
 
             break;
         }
@@ -243,12 +250,14 @@ int validateData(void *i_lidStructPtr,
         {
             TRACFCOMP(g_trac_targeting,
                       "validateData: TargetingHeader number of sections "
-                      "miscompare, %d LID Structure sections,%d Reserved "
+                      "miscompare, %d LID Structure sections, %d Reserved "
                       "Memory sections",
                       l_headerLid->numSections,
                       l_headerRsvd->numSections);
 
-            rc = 1;
+            rc = 0x013;
+            o_userdata2 = TWO_UINT32_TO_UINT64(l_headerLid->numSections,
+                                               l_headerRsvd->numSections);
 
             break;
         }
@@ -266,11 +275,13 @@ int validateData(void *i_lidStructPtr,
             {
                 TRACFCOMP(g_trac_targeting,
                           "validateData: TargetingSection types miscompare, "
-                          "LID Struct type 0x%0.4x, Rsvd Memory type 0x%0.4x",
+                          "LID Struct type 0x%0.2x, Rsvd Memory type 0x%0.2x",
                           l_sectionLid->sectionType,
                           l_sectionRsvd->sectionType);
 
-                rc = 1;
+                rc = 0x14;
+                o_userdata2 = TWO_UINT32_TO_UINT64(l_sectionLid->sectionType,
+                                                   l_sectionRsvd->sectionType);
 
                 break;
             }
@@ -300,26 +311,30 @@ int validateData(void *i_lidStructPtr,
  * into new LID Structure data
  * @param[in] Pointer to current Reserved Memory targeting binary data
  * @param[in/out] Pointer to new LID Structure targeting binary data
+ * @param[out] Error log userdata2 value associated with non-zero rtn code
  * @return 0 on success, else return code
  */
 int saveRestoreAttrs(void *i_rsvdMemPtr,
-                     void *io_lidStructPtr)
+                     void *io_lidStructPtr,
+                     uint64_t& o_userdata2)
 {
     TRACFCOMP( g_trac_targeting,
                ENTER_MRK"saveRestoreAttrs: %p %p",
                i_rsvdMemPtr, io_lidStructPtr);
 
     int rc = 0;
+    o_userdata2 = 0;
     AttrRP *l_attrRPLid = nullptr;
 
     do
     {
         // Node ID
-        NODE_ID l_nodeId = 0;
+        NODE_ID l_nodeId = NODE0;
 
         // Locate current Reserved Memory data via TargetService
-        TARGETING::TargetService l_targSrv;
-        (void)l_targSrv.init();
+        TARGETING::TargetService& l_targSrv = TARGETING::targetService();
+
+        // Get singleton AttrRP instance for current Reserved Memory data
         AttrRP *l_attrRPRsvd = &TARG_GET_SINGLETON(TARGETING::theAttrRP);
 
         // Create temporary AttrRP instance for new LID Structure targeting data
@@ -349,6 +364,10 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
             (l_targetNum <= l_maxTargetsLid) && (rc == 0);
             ++l_allTargetsLid, ++l_targetNum)
         {
+            // Counts of how many new attribute values were kept
+            uint32_t l_kept_for_added_attr = 0;
+            uint32_t l_kept_for_unknown_size = 0;
+
             // Get attribute information for a target in LID Structure (new)
             l_attrCountLid = l_targSrv.getTargetAttributes(*l_allTargetsLid,
                                                            l_attrRPLid,
@@ -363,32 +382,17 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
             }
 
             l_huidLid = l_allTargetsLid->getAttr<ATTR_HUID>();
-            if(l_huidLid != 0)
-            {
-                TRACFCOMP( g_trac_targeting,
-                           "saveRestoreAttrs: target %3d has %3d attrs, "
-                           "class %0.8x, type %0.8x, ordinal ID %0.8x, HUID "
-                           "0x%0.8x",
-                           l_targetNum,
-                           l_attrCountLid,
-                           l_allTargetsLid->getAttr<ATTR_CLASS>(),
-                           l_allTargetsLid->getAttr<ATTR_TYPE>(),
-                           l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>(),
-                           l_huidLid);
-            }
-            else
-            {
-                l_physPathLid = l_allTargetsLid->getAttr<ATTR_PHYS_PATH>();
-                TRACFCOMP( g_trac_targeting,
-                           "saveRestoreAttrs: target %3d has %3d attrs, "
-                           "class %0.8x, type %0.8x, ordinal ID %0.8x, %s",
-                           l_targetNum,
-                           l_attrCountLid,
-                           l_allTargetsLid->getAttr<ATTR_CLASS>(),
-                           l_allTargetsLid->getAttr<ATTR_TYPE>(),
-                           l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>(),
-                           l_physPathLid.toString());
-            }
+            l_physPathLid = l_allTargetsLid->getAttr<ATTR_PHYS_PATH>();
+            TRACFCOMP( g_trac_targeting,
+                       "Target %3d has %3d attrs, class %0.8x, type %0.8x, "
+                       "ord ID %0.8x, HUID 0x%0.8x, %s",
+                       l_targetNum,
+                       l_attrCountLid,
+                       l_allTargetsLid->getAttr<ATTR_CLASS>(),
+                       l_allTargetsLid->getAttr<ATTR_TYPE>(),
+                       l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>(),
+                       l_huidLid,
+                       l_physPathLid.toString());
 
             // Create bool used while checking if target exists in current data
             bool targetMatched = false;
@@ -403,29 +407,14 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                 l_allTargetsRsvd;
                 ++l_allTargetsRsvd)
             {
-                if((l_huidLid != 0) &&
-                   (l_allTargetsLid->getAttr<ATTR_CLASS>() ==
+                if((l_allTargetsLid->getAttr<ATTR_CLASS>() ==
                     l_allTargetsRsvd->getAttr<ATTR_CLASS>()) &&
                    (l_allTargetsLid->getAttr<ATTR_TYPE>() ==
                     l_allTargetsRsvd->getAttr<ATTR_TYPE>()) &&
                    (l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>() ==
                     l_allTargetsRsvd->getAttr<ATTR_ORDINAL_ID>()) &&
-                   (l_huidLid == l_allTargetsRsvd->getAttr<ATTR_HUID>()))
-                {
-                    // Flag the match
-                    targetMatched = true;
-
-                    break;
-                }
-                else if((l_huidLid == 0) &&
-                        (l_allTargetsLid->getAttr<ATTR_CLASS>() ==
-                         l_allTargetsRsvd->getAttr<ATTR_CLASS>()) &&
-                        (l_allTargetsLid->getAttr<ATTR_TYPE>() ==
-                         l_allTargetsRsvd->getAttr<ATTR_TYPE>()) &&
-                        (l_allTargetsLid->getAttr<ATTR_ORDINAL_ID>() ==
-                         l_allTargetsRsvd->getAttr<ATTR_ORDINAL_ID>()) &&
-                        (l_physPathLid ==
-                         l_allTargetsRsvd->getAttr<ATTR_PHYS_PATH>()))
+                   (l_physPathLid ==
+                    l_allTargetsRsvd->getAttr<ATTR_PHYS_PATH>()))
                 {
                     // Flag the match
                     targetMatched = true;
@@ -437,22 +426,12 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
             // Check if target was matched up
             if(!targetMatched)
             {
-                if(l_huidLid != 0)
-                {
-                    TRACFCOMP( g_trac_targeting,
-                               "saveRestoreAttrs: Did not find target "
-                               "HUID 0x%0.8x in Reserved Memory, "
-                               "Keeping targeting data from LID Structure",
-                               l_huidLid);
-                }
-                else
-                {
-                    TRACFCOMP( g_trac_targeting,
-                               "saveRestoreAttrs: Did not find target "
-                               "%s in Reserved Memory, "
-                               "Keeping targeting data from LID Structure",
-                               l_physPathLid.toString());
-                }
+                TRACFCOMP( g_trac_targeting,
+                           "saveRestoreAttrs: Did not find target "
+                           "HUID 0x%0.8x, %s in Reserved Memory, "
+                           "Keeping targeting data from LID Structure",
+                           l_huidLid,
+                           l_physPathLid.toString());
 
                 // rc should not be changed
 
@@ -481,9 +460,9 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
             {
                 // Trace when the attribute counts differ
                 TRACFCOMP( g_trac_targeting,
-                           "saveRestoreAttrs: Attribute counts for target with "
-                           "huid 0x%0.8x differ, LID Structure count %d, "
-                           "Reserved Memory count %d",
+                           "Attribute counts for target with HUID 0x%0.8x "
+                           "differ, LID Structure count %d, Reserved Memory "
+                           "count %d",
                            l_huidLid,
                            l_attrCountLid,
                            l_attrCountRsvd);
@@ -516,40 +495,63 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                                                  l_ppAttrAddrLid,
                                                  l_pAttrLid);
 
+                    // Check if attribute is in LID Structure data
+                    if(l_pAttrLid == nullptr)
+                    {
+                        TRACFCOMP( g_trac_targeting,
+                                   ERR_MRK"saveRestoreAttrs: UNEXPECTEDLY Did "
+                                   "not find value pointer for attribute ID "
+                                   "0x%.8x, target HUID 0x%0.8x in LID "
+                                   "Structure",
+                                   *l_pAttrId,
+                                   l_huidLid);
+
+                        rc = 0x21;
+                        o_userdata2 = TWO_UINT32_TO_UINT64(l_huidLid,
+                                                           *l_pAttrId);
+
+                        break;
+                    }
+
                     // Look up the size of the attribute
                     uint32_t l_attrSize = attrSizeLookup(*l_pAttrId);
 
-                    // Check that attribute has a valid size
+                    // Check that a valid size was returned for the attribute
                     if(l_attrSize == 0)
                     {
-                        TRACFCOMP( g_trac_targeting,
-                               "saveRestoreAttrs: Did not find size of "
-                               "attribute for attribute ID 0x%.8x, target "
-                               "huid 0x%0.8x in Reserved Memory",
-                               *l_pAttrId,
-                               l_allTargetsRsvd->getAttr<ATTR_HUID>());
+                        TRACDCOMP( g_trac_targeting,
+                                   "UNEXPECTEDLY Did not find size for "
+                                   "attribute ID 0x%.8x, target HUID 0x%0.8x "
+                                   "in Reserved Memory, Keeping value from "
+                                   "LID Structure",
+                                   *l_pAttrId,
+                                   l_allTargetsRsvd->getAttr<ATTR_HUID>());
 
-                        rc = 1;
+                        // Increment for keeping value because size was unknown
+                        ++l_kept_for_unknown_size;
 
-                        break;
+                        // rc should not be changed
+
+                        // Continue with this target's next attribute
+                        continue;
                     }
 
                     // Check if new attribute value differs from current value
                     if(memcmp(l_pAttrRsvd, l_pAttrLid, l_attrSize) != 0)
                     {
-                        TRACFCOMP( g_trac_targeting,
-                                   "saveRestoreAttrs: Found differing values "
-                                   "for attribute ID 0x%.8x, huid 0x%0.8x",
+                        TRACDCOMP( g_trac_targeting,
+                                   "Found differing values for attribute ID "
+                                   "0x%.8x, HUID 0x%0.8x",
                                    *l_pAttrId,
                                    l_huidLid);
 
-                        TRACFBIN( g_trac_targeting,
-                                  "saveRestoreAttrs: Reserved Memory value",
+                        TRACDBIN( g_trac_targeting,
+                                  "Reserved Memory value",
                                   l_pAttrRsvd,
                                   l_attrSize);
 
-                        TRACFBIN( g_trac_targeting,
-                                  "saveRestoreAttrs: LID Structure value",
+                        TRACDBIN( g_trac_targeting,
+                                  "LID Structure value",
                                   l_pAttrLid,
                                   l_attrSize);
 
@@ -560,16 +562,31 @@ int saveRestoreAttrs(void *i_rsvdMemPtr,
                 }
                 else
                 {
-                    TRACFCOMP( g_trac_targeting,
-                               "saveRestoreAttrs: Did not find attribute ID "
-                               "0x%.8x, target huid 0x%0.8x in Reserved "
-                               "Memory, Keeping value from LID Structure",
+                    TRACDCOMP( g_trac_targeting,
+                               "Did not find attribute ID 0x%.8x, target HUID "
+                               "0x%0.8x in Reserved Memory, Keeping value from "
+                               "LID Structure",
                                *l_pAttrId,
                                l_huidLid);
 
+                    // Increment for keeping value because attribute was added
+                    ++l_kept_for_added_attr;
+
                     // rc should not be changed
+
+                    // Continue with this target's next attribute
+                    continue;
                 }
             } // for attributes
+
+            if((l_kept_for_added_attr != 0) || (l_kept_for_unknown_size != 0))
+            {
+                TRACFCOMP( g_trac_targeting,
+                           "Kept LID Structure value for %d added attribute(s) "
+                           "and for %d attribute(s) with unknown size",
+                           l_kept_for_added_attr,
+                           l_kept_for_unknown_size);
+            }
         } // for targets
     } while(false);
 
@@ -585,10 +602,9 @@ int hbrt_update_prep(void)
 {
     int rc = 0;
     errlHndl_t pError = nullptr;
+    uint64_t l_userdata2 = 0;
     UtilLidMgr l_lidMgr(Util::TARGETING_BINARY_LIDID);
     void *l_lidStructPtr = nullptr;
-
-    bool l_usingRealLID = false;
 
     do
     {
@@ -606,16 +622,12 @@ int hbrt_update_prep(void)
         if(pError)
         {
             pError->collectTrace(TARG_COMP_NAME);
-            errlCommit(pError,TARG_COMP_ID);
 
-            rc = 1;
+            rc = 0x01;
 
-            // break; @TODO RTC: 181285 uncomment
-            l_lidSize = l_attr_size; // @TODO RTC: 181285 remove
+            break;
         }
 
-        if(!rc) // @TODO RTC: 181285 remove
-        { // @TODO RTC: 181285 remove
         if(l_lidSize > l_attr_size)
         {
             TRACFCOMP( g_trac_targeting,
@@ -625,7 +637,9 @@ int hbrt_update_prep(void)
                        l_lidSize,
                        l_attr_size);
 
-            rc = 1;
+            rc = 0x02;
+            l_userdata2 = TWO_UINT32_TO_UINT64(l_lidSize,
+                                               l_attr_size);
 
             break;
         }
@@ -635,31 +649,16 @@ int hbrt_update_prep(void)
         if(pError)
         {
             pError->collectTrace(TARG_COMP_NAME);
-            errlCommit(pError,TARG_COMP_ID);
 
-            rc = 1;
+            rc = 0x03;
 
-            // break; @TODO RTC: 181285 uncomment
+            break;
         }
-        } // @TODO RTC: 181285 remove
-
-        if(rc) // @TODO RTC: 181285 remove if(rc){...}else{...} start
-        {
-            l_lidStructPtr = malloc(l_attr_size);
-            memcpy(l_lidStructPtr,
-                   l_rsvdMemPtr,
-                   l_attr_size);
-
-            rc = 0;
-        }
-        else
-        {
-            l_usingRealLID = true;
-        } // @TODO RTC: 181285 remove if(rc){...}else{...} end
 
         // Validate LID Structure against Reserved Memory
         rc = validateData(l_lidStructPtr,
-                          l_rsvdMemPtr);
+                          l_rsvdMemPtr,
+                          l_userdata2);
         if(rc)
         {
             break;
@@ -668,7 +667,8 @@ int hbrt_update_prep(void)
         // Save/Restore attribute values from current Reserved Memory data into
         // new LID Structure data
         rc = saveRestoreAttrs(l_rsvdMemPtr,
-                              l_lidStructPtr);
+                              l_lidStructPtr,
+                              l_userdata2);
         if(rc)
         {
             break;
@@ -682,31 +682,61 @@ int hbrt_update_prep(void)
         memcpy(l_rsvdMemPtr,
                l_lidStructPtr,
                l_copySize);
-        TRACFCOMP( g_trac_targeting,
-                   "hbrt_update_prep: Set 0x%0.8x bytes to 0",
-                   l_attr_size - l_copySize);
-        memset(reinterpret_cast<void*>(
-                   reinterpret_cast<uint64_t>(l_rsvdMemPtr) + l_copySize),
-               0,
-               l_attr_size - l_copySize);
+
+        // Set any remaining bytes to zero
+        size_t l_setSize = l_attr_size - l_copySize;
+        if(l_setSize)
+        {
+            TRACFCOMP( g_trac_targeting,
+                       "hbrt_update_prep: Set 0x%0.8x bytes to 0",
+                       l_setSize);
+            memset(reinterpret_cast<void*>(
+                       reinterpret_cast<uint64_t>(l_rsvdMemPtr) + l_copySize),
+                   0,
+                   l_setSize);
+        }
     } while(false);
 
-    if(l_usingRealLID) // @TODO RTC: 181285 remove
-    { // @TODO RTC: 181285 remove
+    // Release the LID with new targeting structure
     pError = l_lidMgr.releaseLidImage();
     if(pError)
     {
         pError->collectTrace(TARG_COMP_NAME);
-        errlCommit(pError,TARG_COMP_ID);
 
-        rc = 1;
+        rc = 0x04;
     }
-    } // @TODO RTC: 181285 remove
-    else // @TODO RTC: 181285 remove
-    { // @TODO RTC: 181285 remove
-        free(l_lidStructPtr); // @TODO RTC: 181285 remove
-        l_lidStructPtr = nullptr; // @TODO RTC: 181285 remove
-    } // @TODO RTC: 181285 remove
+
+    // Check for failing return code
+    if(rc)
+    {
+        // Determine if an error log has not been created yet
+        if(pError == nullptr)
+        {
+            /*@
+             *   @errortype   ERRORLOG::ERRL_SEV_PREDICTIVE
+             *   @moduleid    TARG_RT_HBRT_UPDATE_PREP
+             *   @reasoncode  TARG_RC_CONCURRENT_CODE_UPDATE_FAIL
+             *   @userdata1   HBRT Concurrent Code Update RC
+             *   @userdata2   Variable depending on RC
+             *
+             *   @devdesc   HBRT Concurrent Code Update failure
+             *
+             *   @custdesc  Internal firmware error preparing
+             *              for concurrent code update
+             */
+            pError =
+                new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                        TARG_RT_HBRT_UPDATE_PREP,
+                                        TARG_RC_CONCURRENT_CODE_UPDATE_FAIL,
+                                        rc,
+                                        l_userdata2,
+                                        true /*SW Error */);
+
+            pError->collectTrace(TARG_COMP_NAME);
+        }
+
+        errlCommit(pError,TARG_COMP_ID);
+    }
 
     return rc;
 }
@@ -717,10 +747,9 @@ int hbrt_update_prep(void)
     {
         registerRtTarg()
         {
-/*          Do not register interface until HB is ready for Host to call it
-            @TODO RTC: 181285 to enable the interface
+            // Register interface for Host to call
             runtimeInterfaces_t * rt_intf = getRuntimeInterfaces();
-            rt_intf->prepare_hbrt_update = &hbrt_update_prep; */
+            rt_intf->prepare_hbrt_update = &hbrt_update_prep;
         }
     };
 
